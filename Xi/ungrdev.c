@@ -79,14 +79,16 @@ ProcXUngrabDevice(ClientPtr client)
     int rc;
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     grab = dev->deviceGrab.grab;
 
     time = ClientTimeToServerTime(stuff->time);
     if ((CompareTimeStamps(time, currentTime) != LATER) &&
         (CompareTimeStamps(time, dev->deviceGrab.grabTime) != EARLIER) &&
-        (grab) && SameClient(grab, client) && grab->grabtype == XI)
-        (*dev->deviceGrab.DeactivateGrab) (dev);
+        (grab) && SameClient(grab, client) && grab->grabtype == XI) {
+      (*dev->deviceGrab.DeactivateGrab)(dev);
+    }
     return Success;
 }

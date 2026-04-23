@@ -77,16 +77,18 @@ xf86VGAarbiterInit(void)
 void
 xf86VGAarbiterFini(void)
 {
-    if (vga_no_arb)
-        return;
+  if (vga_no_arb) {
+    return;
+  }
     pci_device_vgaarb_fini();
 }
 
 void
 xf86VGAarbiterLock(ScrnInfoPtr pScrn)
 {
-    if (vga_no_arb)
-        return;
+  if (vga_no_arb) {
+    return;
+  }
     pci_device_vgaarb_set_target(pScrn->vgaDev);
     pci_device_vgaarb_lock();
 }
@@ -94,8 +96,9 @@ xf86VGAarbiterLock(ScrnInfoPtr pScrn)
 void
 xf86VGAarbiterUnlock(ScrnInfoPtr pScrn)
 {
-    if (vga_no_arb)
-        return;
+  if (vga_no_arb) {
+    return;
+  }
     pci_device_vgaarb_unlock();
 }
 
@@ -106,8 +109,9 @@ xf86VGAarbiterAllowDRI(ScreenPtr pScreen)
     int rsrc_decodes = 0;
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 
-    if (vga_no_arb)
-        return TRUE;
+    if (vga_no_arb) {
+      return TRUE;
+    }
 
     pci_device_vgaarb_get_info(pScrn->vgaDev, &vga_count, &rsrc_decodes);
     if (vga_count > 1) {
@@ -124,12 +128,14 @@ xf86VGAarbiterScrnInit(ScrnInfoPtr pScrn)
     struct pci_device *dev;
     EntityPtr pEnt;
 
-    if (vga_no_arb)
-        return;
+    if (vga_no_arb) {
+      return;
+    }
 
     pEnt = xf86Entities[pScrn->entityList[0]];
-    if (pEnt->bus.type != BUS_PCI)
-        return;
+    if (pEnt->bus.type != BUS_PCI) {
+      return;
+    }
 
     dev = pEnt->bus.id.pci;
     pScrn->vgaDev = dev;
@@ -145,16 +151,18 @@ xf86VGAarbiterWrapFunctions(void)
     ScreenPtr pScreen;
     int vga_count, i;
 
-    if (vga_no_arb)
-        return FALSE;
+    if (vga_no_arb) {
+      return FALSE;
+    }
 
     /*
      * we need to wrap the arbiter if we have more than
      * one VGA card - hotplug cries.
      */
     pci_device_vgaarb_get_info(NULL, &vga_count, NULL);
-    if (vga_count < 2 || !xf86Screens)
-        return FALSE;
+    if (vga_count < 2 || !xf86Screens) {
+      return FALSE;
+    }
 
     LogMessageVerb(X_INFO, 1,
                    "Found %d VGA devices: arbiter wrapping enabled\n",
@@ -166,15 +174,19 @@ xf86VGAarbiterWrapFunctions(void)
         pScrn = xf86ScreenToScrn(pScreen);
         PointPriv = dixLookupPrivate(&pScreen->devPrivates, miPointerScreenKey);
 
-        if (!dixRegisterPrivateKey
-            (&VGAarbiterGCKeyRec, PRIVATE_GC, sizeof(VGAarbiterGCRec)))
-            return FALSE;
+        if (!dixRegisterPrivateKey(&VGAarbiterGCKeyRec, PRIVATE_GC,
+                                   sizeof(VGAarbiterGCRec))) {
+          return FALSE;
+        }
 
-        if (!dixRegisterPrivateKey(&VGAarbiterScreenKeyRec, PRIVATE_SCREEN, 0))
-            return FALSE;
+        if (!dixRegisterPrivateKey(&VGAarbiterScreenKeyRec, PRIVATE_SCREEN,
+                                   0)) {
+          return FALSE;
+        }
 
-        if (!(pScreenPriv = calloc(1, sizeof(VGAarbiterScreenRec))))
-            return FALSE;
+        if (!(pScreenPriv = calloc(1, sizeof(VGAarbiterScreenRec)))) {
+          return FALSE;
+        }
 
         dixSetPrivate(&pScreen->devPrivates, &VGAarbiterScreenKeyRec, pScreenPriv);
 

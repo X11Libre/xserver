@@ -41,8 +41,9 @@ free_device(DeviceIntPtr dev)
 {
     free(dev->name);
     free(dev->last.scroll); /* sigh, allocated but not freed by the valuator functions */
-    for (int i = 0; i < dev->last.num_touches; i++)
-         valuator_mask_free(&dev->last.touches[i].valuators);
+    for (int i = 0; i < dev->last.num_touches; i++) {
+      valuator_mask_free(&dev->last.touches[i].valuators);
+    }
 
     free(dev->last.touches); /* sigh, allocated but not freed by the valuator functions */
     FreeDeviceClass(XIValuatorClass, (void**)&dev->valuator);
@@ -167,8 +168,9 @@ touch_find_ddxid(void)
     assert(ti->ddx_id == 20);
 
     /* set all to active */
-    for (i = 0; i < size; i++)
-        dev.last.touches[i].active = TRUE;
+    for (i = 0; i < size; i++) {
+      dev.last.touches[i].active = TRUE;
+    }
 
     /* Try to create more, succeed */
     ti = TouchFindByDDXID(&dev, 30, TRUE);

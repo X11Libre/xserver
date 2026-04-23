@@ -73,8 +73,9 @@ __glXMakeBitmapFromGlyph(FontPtr font, CharInfoPtr pci)
     }
     else {
         p = calloc(1, allocBytes);
-        if (!p)
-            return BadAlloc;
+        if (!p) {
+          return BadAlloc;
+        }
         allocbuf = p;
     }
 
@@ -174,8 +175,9 @@ __glXDisp_UseXFont(__GLXclientState * cl, GLbyte * pc)
      */
 
     error = dixLookupFontable(&pFont, req->font, client, DixReadAccess);
-    if (error != Success)
-        return error;
+    if (error != Success) {
+      return error;
+    }
 
     return MakeBitmapsFromFont(pFont, req->first, req->count, req->listBase);
 }

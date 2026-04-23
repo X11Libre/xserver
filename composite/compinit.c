@@ -95,9 +95,11 @@ compInstallColormap(ColormapPtr pColormap)
     ScreenPtr pScreen = pColormap->pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
 
-    for (int a = 0; a < cs->numAlternateVisuals; a++)
-        if (pVisual->vid == cs->alternateVisuals[a])
-            return;
+    for (int a = 0; a < cs->numAlternateVisuals; a++) {
+      if (pVisual->vid == cs->alternateVisuals[a]) {
+        return;
+      }
+    }
     pScreen->InstallColormap = cs->InstallColormap;
     (*pScreen->InstallColormap) (pColormap);
     cs->InstallColormap = pScreen->InstallColormap;
@@ -128,8 +130,9 @@ compChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
     ret = pScreen->ChangeWindowAttributes(pWin, mask);
 
     if (ret && (mask & CWBackingStore) &&
-        pScreen->backingStoreSupport != NotUseful)
-        compCheckBackingStore(pWin);
+        pScreen->backingStoreSupport != NotUseful) {
+      compCheckBackingStore(pWin);
+    }
 
     pScreen->ChangeWindowAttributes = compChangeWindowAttributes;
 
@@ -145,8 +148,10 @@ compSourceValidate(DrawablePtr pDrawable,
     CompScreenPtr cs = GetCompScreen(pScreen);
 
     pScreen->SourceValidate = cs->SourceValidate;
-    if (pDrawable->type == DRAWABLE_WINDOW && subWindowMode == IncludeInferiors)
-        compPaintChildrenToWindow((WindowPtr) pDrawable);
+    if (pDrawable->type == DRAWABLE_WINDOW &&
+        subWindowMode == IncludeInferiors) {
+      compPaintChildrenToWindow((WindowPtr)pDrawable);
+    }
     (*pScreen->SourceValidate) (pDrawable, x, y, width, height,
                                 subWindowMode);
     cs->SourceValidate = pScreen->SourceValidate;
@@ -167,8 +172,9 @@ compFindVisuallessDepth(ScreenPtr pScreen, int d)
             /*
              * Make sure it doesn't have visuals already
              */
-            if (depth->numVids)
-                return 0;
+            if (depth->numVids) {
+              return 0;
+            }
             /*
              * looks fine
              */
@@ -192,8 +198,9 @@ compRegisterAlternateVisuals(CompScreenPtr cs, VisualID * vids, int nVisuals)
 
     p = reallocarray(cs->alternateVisuals,
                      cs->numAlternateVisuals + nVisuals, sizeof(VisualID));
-    if (p == NULL)
-        return FALSE;
+    if (p == NULL) {
+      return FALSE;
+    }
 
     memcpy(&p[cs->numAlternateVisuals], vids, sizeof(VisualID) * nVisuals);
 
@@ -238,17 +245,20 @@ compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
      * are only provided if their depth is less than the root window depth.
      * There's no deep reason for this.
      */
-    if (alt->depth >= pScreen->rootDepth && alt->depth != 32)
-        return FALSE;
+    if (alt->depth >= pScreen->rootDepth && alt->depth != 32) {
+      return FALSE;
+    }
 
     depth = compFindVisuallessDepth(pScreen, alt->depth);
-    if (!depth)
-        /* alt->depth doesn't exist or already has alternate visuals. */
-        return TRUE;
+    if (!depth) {
+      /* alt->depth doesn't exist or already has alternate visuals. */
+      return TRUE;
+    }
 
     pPictFormat = PictureMatchFormat(pScreen, alt->depth, alt->format);
-    if (!pPictFormat)
-        return FALSE;
+    if (!pPictFormat) {
+      return FALSE;
+    }
 
     if (ResizeVisualArray(pScreen, 1, depth) == FALSE) {
         return FALSE;
@@ -299,8 +309,9 @@ compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
 {
     int ret = 0;
 
-    for (int alt = 0; alt < ARRAY_SIZE(altVisuals); alt++)
-        ret |= compAddAlternateVisual(pScreen, cs, altVisuals + alt);
+    for (int alt = 0; alt < ARRAY_SIZE(altVisuals); alt++) {
+      ret |= compAddAlternateVisual(pScreen, cs, altVisuals + alt);
+    }
 
     return ret;
 }
@@ -308,18 +319,23 @@ compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
 Bool
 compScreenInit(ScreenPtr pScreen)
 {
-    if (!dixRegisterPrivateKey(&CompScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
-    if (!dixRegisterPrivateKey(&CompWindowPrivateKeyRec, PRIVATE_WINDOW, 0))
-        return FALSE;
-    if (!dixRegisterPrivateKey(&CompSubwindowsPrivateKeyRec, PRIVATE_WINDOW, 0))
-        return FALSE;
+  if (!dixRegisterPrivateKey(&CompScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+    return FALSE;
+  }
+  if (!dixRegisterPrivateKey(&CompWindowPrivateKeyRec, PRIVATE_WINDOW, 0)) {
+    return FALSE;
+  }
+  if (!dixRegisterPrivateKey(&CompSubwindowsPrivateKeyRec, PRIVATE_WINDOW, 0)) {
+    return FALSE;
+  }
 
-    if (GetCompScreen(pScreen))
-        return TRUE;
+  if (GetCompScreen(pScreen)) {
+    return TRUE;
+  }
     CompScreenPtr cs = calloc(1, sizeof(CompScreenRec));
-    if (!cs)
-        return FALSE;
+    if (!cs) {
+      return FALSE;
+    }
 
     cs->overlayWid = dixAllocServerXID();
     cs->pOverlayWin = NULL;
@@ -337,8 +353,9 @@ compScreenInit(ScreenPtr pScreen)
         return FALSE;
     }
 
-    if (!disableBackingStore)
-        pScreen->backingStoreSupport = WhenMapped;
+    if (!disableBackingStore) {
+      pScreen->backingStoreSupport = WhenMapped;
+    }
 
     dixScreenHookClose(pScreen, compCloseScreen);
     dixScreenHookWindowDestroy(pScreen, compWindowDestroy);

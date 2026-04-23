@@ -46,8 +46,9 @@ miColorRects(PicturePtr pDst,
     miRenderColorToPixel(pDst->pFormat, color, &pixel);
 
     pGC = GetScratchGC(pDst->pDrawable->depth, pDst->pDrawable->pScreen);
-    if (!pGC)
-        return;
+    if (!pGC) {
+      return;
+    }
     tmpval[0].val = GXcopy;
     tmpval[1].val = pixel;
     tmpval[2].val = pDst->subWindowMode;
@@ -90,18 +91,20 @@ miCompositeRects(CARD8 op,
                  xRenderColor * color, int nRect, xRectangle *rects)
 {
     if (color->alpha == 0xffff) {
-        if (op == PictOpOver)
-            op = PictOpSrc;
+      if (op == PictOpOver) {
+        op = PictOpSrc;
+      }
     }
-    if (op == PictOpClear)
-        color->red = color->green = color->blue = color->alpha = 0;
+    if (op == PictOpClear) {
+      color->red = color->green = color->blue = color->alpha = 0;
+    }
 
     if (op == PictOpSrc || op == PictOpClear) {
         miColorRects(pDst, pDst, color, nRect, rects, 0, 0);
-        if (pDst->alphaMap)
-            miColorRects(pDst->alphaMap, pDst,
-                         color, nRect, rects,
-                         pDst->alphaOrigin.x, pDst->alphaOrigin.y);
+        if (pDst->alphaMap) {
+          miColorRects(pDst->alphaMap, pDst, color, nRect, rects,
+                       pDst->alphaOrigin.x, pDst->alphaOrigin.y);
+        }
     }
     else {
         int error;

@@ -61,15 +61,17 @@ glamor_poly_fill_rect_gl(DrawablePtr drawable,
     BoxRec bounds = glamor_no_rendering_bounds();
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
     glamor_make_current(glamor_priv);
 
     if (nrect < 100) {
         bounds = glamor_start_rendering_bounds();
-        for (int i = 0; i < nrect; i++)
-            glamor_bounds_union_rect(&bounds, &prect[i]);
+        for (int i = 0; i < nrect; i++) {
+          glamor_bounds_union_rect(&bounds, &prect[i]);
+        }
     }
 
     if (glamor_glsl_has_ints(glamor_priv)) {
@@ -77,8 +79,9 @@ glamor_poly_fill_rect_gl(DrawablePtr drawable,
                                        &glamor_priv->poly_fill_rect_program,
                                        &glamor_facet_polyfillrect_130);
 
-        if (!prog)
-            goto bail;
+        if (!prog) {
+          goto bail;
+        }
 
         /* Set up the vertex buffers for the points */
 
@@ -104,8 +107,9 @@ glamor_poly_fill_rect_gl(DrawablePtr drawable,
                                        &glamor_priv->poly_fill_rect_program,
                                        &glamor_facet_polyfillrect_120);
 
-        if (!prog)
-            goto bail;
+        if (!prog) {
+          goto bail;
+        }
 
         /* Set up the vertex buffers for the points */
 
@@ -136,8 +140,10 @@ glamor_poly_fill_rect_gl(DrawablePtr drawable,
         BoxPtr box = RegionRects(gc->pCompositeClip);
 
         if (!glamor_set_destination_drawable(drawable, box_index, TRUE, FALSE,
-                                             prog->matrix_uniform, &off_x, &off_y))
-            goto bail;
+                                             prog->matrix_uniform, &off_x,
+                                             &off_y)) {
+          goto bail;
+        }
 
         while (nbox--) {
             BoxRec scissor = {
@@ -149,17 +155,18 @@ glamor_poly_fill_rect_gl(DrawablePtr drawable,
 
             box++;
 
-            if (scissor.x1 >= scissor.x2 || scissor.y1 >= scissor.y2)
-                continue;
+            if (scissor.x1 >= scissor.x2 || scissor.y1 >= scissor.y2) {
+              continue;
+            }
 
             glScissor(scissor.x1 + off_x,
                       scissor.y1 + off_y,
                       scissor.x2 - scissor.x1,
                       scissor.y2 - scissor.y1);
-            if (glamor_glsl_has_ints(glamor_priv))
-                glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, nrect);
-            else {
-                glamor_glDrawArrays_GL_QUADS(glamor_priv, nrect);
+            if (glamor_glsl_has_ints(glamor_priv)) {
+              glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, nrect);
+            } else {
+              glamor_glDrawArrays_GL_QUADS(glamor_priv, nrect);
             }
         }
     }
@@ -196,7 +203,8 @@ void
 glamor_poly_fill_rect(DrawablePtr drawable,
                       GCPtr gc, int nrect, xRectangle *prect)
 {
-    if (glamor_poly_fill_rect_gl(drawable, gc, nrect, prect))
-        return;
+  if (glamor_poly_fill_rect_gl(drawable, gc, nrect, prect)) {
+    return;
+  }
     glamor_poly_fill_rect_bail(drawable, gc, nrect, prect);
 }

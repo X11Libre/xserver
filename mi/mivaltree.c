@@ -123,31 +123,39 @@ miShapedWindowIn(RegionPtr universe, RegionPtr bounding,
     x2 = rect->x2;
     y2 = rect->y2;
     while (nbox--) {
-        if ((t = boundBox->x1 + x) < x1)
-            t = x1;
+      if ((t = boundBox->x1 + x) < x1) {
+        t = x1;
+      }
         box.x1 = t;
-        if ((t = boundBox->y1 + y) < y1)
-            t = y1;
+        if ((t = boundBox->y1 + y) < y1) {
+          t = y1;
+        }
         box.y1 = t;
-        if ((t = boundBox->x2 + x) > x2)
-            t = x2;
+        if ((t = boundBox->x2 + x) > x2) {
+          t = x2;
+        }
         box.x2 = t;
-        if ((t = boundBox->y2 + y) > y2)
-            t = y2;
+        if ((t = boundBox->y2 + y) > y2) {
+          t = y2;
+        }
         box.y2 = t;
-        if (box.x1 > box.x2)
-            box.x2 = box.x1;
-        if (box.y1 > box.y2)
-            box.y2 = box.y1;
+        if (box.x1 > box.x2) {
+          box.x2 = box.x1;
+        }
+        if (box.y1 > box.y2) {
+          box.y2 = box.y1;
+        }
         switch (RegionContainsRect(universe, &box)) {
         case rgnIN:
-            if (someOut)
-                return rgnPART;
+          if (someOut) {
+            return rgnPART;
+          }
             someIn = TRUE;
             break;
         case rgnOUT:
-            if (someIn)
-                return rgnPART;
+          if (someIn) {
+            return rgnPART;
+          }
             someOut = TRUE;
             break;
         default:
@@ -155,8 +163,9 @@ miShapedWindowIn(RegionPtr universe, RegionPtr bounding,
         }
         boundBox++;
     }
-    if (someIn)
-        return rgnIN;
+    if (someIn) {
+      return rgnIN;
+    }
     return rgnOUT;
 }
 
@@ -213,21 +222,24 @@ miComputeClips(WindowPtr pParent,
     borderSize.y1 = pParent->drawable.y - wBorderWidth(pParent);
     dx = (int) pParent->drawable.x + (int) pParent->drawable.width +
         wBorderWidth(pParent);
-    if (dx > 32767)
-        dx = 32767;
+    if (dx > 32767) {
+      dx = 32767;
+    }
     borderSize.x2 = dx;
     dy = (int) pParent->drawable.y + (int) pParent->drawable.height +
         wBorderWidth(pParent);
-    if (dy > 32767)
-        dy = 32767;
+    if (dy > 32767) {
+      dy = 32767;
+    }
     borderSize.y2 = dy;
 
     /*
      * In redirected drawing case, reset universe to borderSize
      */
     if (pParent->redirectDraw != RedirectDrawNone) {
-        if (TreatAsTransparent(pParent))
-            RegionEmpty(universe);
+      if (TreatAsTransparent(pParent)) {
+        RegionEmpty(universe);
+      }
         compSetRedirectBorderClip (pParent, universe);
         RegionCopy(universe, &pParent->borderSize);
     }
@@ -262,10 +274,10 @@ miComputeClips(WindowPtr pParent,
         break;
     }
     pParent->visibility = newVis;
-    if (oldVis != newVis &&
-        ((pParent->
-          eventMask | wOtherEventMasks(pParent)) & VisibilityChangeMask))
-        SendVisibilityNotify(pParent);
+    if (oldVis != newVis && ((pParent->eventMask | wOtherEventMasks(pParent)) &
+                             VisibilityChangeMask)) {
+      SendVisibilityNotify(pParent);
+    }
 
     dx = pParent->drawable.x - pParent->valdata->before.oldAbsCorner.x;
     dy = pParent->drawable.y - pParent->valdata->before.oldAbsCorner.y;
@@ -290,9 +302,9 @@ miComputeClips(WindowPtr pParent,
                         RegionTranslate(&pChild->borderClip, dx, dy);
                         RegionTranslate(&pChild->clipList, dx, dy);
                         pChild->drawable.serialNumber = NEXT_SERIAL_NUMBER;
-                        if (pScreen->ClipNotify)
-                            (*pScreen->ClipNotify) (pChild, dx, dy);
-
+                        if (pScreen->ClipNotify) {
+                          (*pScreen->ClipNotify)(pChild, dx, dy);
+                        }
                     }
                     if (pChild->valdata) {
                         RegionNull(&pChild->valdata->after.borderExposed);
@@ -308,10 +320,12 @@ miComputeClips(WindowPtr pParent,
                         continue;
                     }
                 }
-                while (!pChild->nextSib && (pChild != pParent))
-                    pChild = pChild->parent;
-                if (pChild == pParent)
-                    break;
+                while (!pChild->nextSib && (pChild != pParent)) {
+                  pChild = pChild->parent;
+                }
+                if (pChild == pParent) {
+                  break;
+                }
                 pChild = pChild->nextSib;
             }
             return;
@@ -364,12 +378,13 @@ miComputeClips(WindowPtr pParent,
         else {
             RegionSubtract(exposed, universe, &pParent->borderClip);
         }
-        if (HasParentRelativeBorder(pParent) && (dx || dy))
-            RegionSubtract(&pParent->valdata->after.borderExposed,
-                           universe, &pParent->winSize);
-        else
-            RegionSubtract(&pParent->valdata->after.borderExposed,
-                           exposed, &pParent->winSize);
+        if (HasParentRelativeBorder(pParent) && (dx || dy)) {
+          RegionSubtract(&pParent->valdata->after.borderExposed, universe,
+                         &pParent->winSize);
+        } else {
+          RegionSubtract(&pParent->valdata->after.borderExposed, exposed,
+                         &pParent->winSize);
+        }
 
         RegionCopy(&pParent->borderClip, universe);
 
@@ -380,9 +395,9 @@ miComputeClips(WindowPtr pParent,
          */
 
         RegionIntersect(universe, universe, &pParent->winSize);
+    } else {
+      RegionCopy(&pParent->borderClip, universe);
     }
-    else
-        RegionCopy(&pParent->borderClip, universe);
 
     if ((pChild = pParent->firstChild) && pParent->mapped) {
         RegionNull(&childUniverse);
@@ -391,14 +406,16 @@ miComputeClips(WindowPtr pParent,
             ((pChild->drawable.y == pParent->lastChild->drawable.y) &&
              (pChild->drawable.x < pParent->lastChild->drawable.x))) {
             for (; pChild; pChild = pChild->nextSib) {
-                if (pChild->viewable && !TreatAsTransparent(pChild))
-                    RegionAppend(&childUnion, &pChild->borderSize);
+              if (pChild->viewable && !TreatAsTransparent(pChild)) {
+                RegionAppend(&childUnion, &pChild->borderSize);
+              }
             }
         }
         else {
             for (pChild = pParent->lastChild; pChild; pChild = pChild->prevSib) {
-                if (pChild->viewable && !TreatAsTransparent(pChild))
-                    RegionAppend(&childUnion, &pChild->borderSize);
+              if (pChild->viewable && !TreatAsTransparent(pChild)) {
+                RegionAppend(&childUnion, &pChild->borderSize);
+              }
             }
         }
         RegionValidate(&childUnion, &overlap);
@@ -425,12 +442,14 @@ miComputeClips(WindowPtr pParent,
                  * from the current universe, thus denying its space to any
                  * other sibling.
                  */
-                if (overlap && !TreatAsTransparent(pChild))
-                    RegionSubtract(universe, universe, &pChild->borderSize);
+                if (overlap && !TreatAsTransparent(pChild)) {
+                  RegionSubtract(universe, universe, &pChild->borderSize);
+                }
             }
         }
-        if (!overlap)
-            RegionSubtract(universe, universe, &childUnion);
+        if (!overlap) {
+          RegionSubtract(universe, universe, &childUnion);
+        }
         RegionUninit(&childUnion);
         RegionUninit(&childUniverse);
     }                           /* if any children */
@@ -466,8 +485,9 @@ miComputeClips(WindowPtr pParent,
 
     pParent->drawable.serialNumber = NEXT_SERIAL_NUMBER;
 
-    if (pScreen->ClipNotify)
-        (*pScreen->ClipNotify) (pParent, dx, dy);
+    if (pScreen->ClipNotify) {
+      (*pScreen->ClipNotify)(pParent, dx, dy);
+    }
 }
 
 static void
@@ -481,18 +501,21 @@ miTreeObscured(WindowPtr pParent)
         if (pChild->viewable) {
             oldVis = pChild->visibility;
             if (oldVis != (pChild->visibility = VisibilityFullyObscured) &&
-                ((pChild->
-                  eventMask | wOtherEventMasks(pChild)) & VisibilityChangeMask))
-                SendVisibilityNotify(pChild);
+                ((pChild->eventMask | wOtherEventMasks(pChild)) &
+                 VisibilityChangeMask)) {
+              SendVisibilityNotify(pChild);
+            }
             if (pChild->firstChild) {
                 pChild = pChild->firstChild;
                 continue;
             }
         }
-        while (!pChild->nextSib && (pChild != pParent))
-            pChild = pChild->parent;
-        if (pChild == pParent)
-            break;
+        while (!pChild->nextSib && (pChild != pParent)) {
+          pChild = pChild->parent;
+        }
+        if (pChild == pParent) {
+          break;
+        }
         pChild = pChild->nextSib;
     }
 }
@@ -500,10 +523,11 @@ miTreeObscured(WindowPtr pParent)
 static RegionPtr
 getBorderClip(WindowPtr pWin)
 {
-    if (pWin->redirectDraw != RedirectDrawNone)
-        return compGetRedirectBorderClip(pWin);
-    else
-        return &pWin->borderClip;
+  if (pWin->redirectDraw != RedirectDrawNone) {
+    return compGetRedirectBorderClip(pWin);
+  } else {
+    return &pWin->borderClip;
+  }
 }
 
 /*
@@ -558,8 +582,9 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
     Bool forward;
 
     pScreen = pParent->drawable.pScreen;
-    if (pChild == NullWindow)
-        pChild = pParent->firstChild;
+    if (pChild == NullWindow) {
+      pChild = pParent->firstChild;
+    }
 
     RegionNull(&childClip);
     RegionNull(&exposed);
@@ -583,12 +608,15 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
         RegionIntersect(&totalClip, &totalClip, &pParent->winSize);
 
         for (pWin = pParent->firstChild; pWin != pChild; pWin = pWin->nextSib) {
-            if (pWin->viewable && !TreatAsTransparent(pWin))
-                RegionSubtract(&totalClip, &totalClip, &pWin->borderSize);
+          if (pWin->viewable && !TreatAsTransparent(pWin)) {
+            RegionSubtract(&totalClip, &totalClip, &pWin->borderSize);
+          }
         }
-        for (pWin = pChild; pWin; pWin = pWin->nextSib)
-            if (pWin->valdata && pWin->viewable)
-                viewvals++;
+        for (pWin = pChild; pWin; pWin = pWin->nextSib) {
+          if (pWin->valdata && pWin->viewable) {
+            viewvals++;
+          }
+        }
 
         RegionEmpty(&pParent->clipList);
     }
@@ -600,8 +628,9 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
             for (pWin = pChild; pWin; pWin = pWin->nextSib) {
                 if (pWin->valdata) {
                     RegionAppend(&totalClip, getBorderClip(pWin));
-                    if (pWin->viewable)
-                        viewvals++;
+                    if (pWin->viewable) {
+                      viewvals++;
+                    }
                 }
             }
         }
@@ -611,11 +640,13 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
             while (1) {
                 if (pWin->valdata) {
                     RegionAppend(&totalClip, getBorderClip(pWin));
-                    if (pWin->viewable)
-                        viewvals++;
+                    if (pWin->viewable) {
+                      viewvals++;
+                    }
                 }
-                if (pWin == pChild)
-                    break;
+                if (pWin == pChild) {
+                  break;
+                }
                 pWin = pWin->prevSib;
             }
         }
@@ -642,25 +673,30 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
              */
             RegionNull(&childUnion);
             if (forward) {
-                for (pWin = pChild; pWin; pWin = pWin->nextSib)
-                    if (pWin->valdata && pWin->viewable &&
-                        !TreatAsTransparent(pWin))
-                        RegionAppend(&childUnion, &pWin->borderSize);
+              for (pWin = pChild; pWin; pWin = pWin->nextSib) {
+                if (pWin->valdata && pWin->viewable &&
+                    !TreatAsTransparent(pWin)) {
+                  RegionAppend(&childUnion, &pWin->borderSize);
+                }
+              }
             }
             else {
                 pWin = pParent->lastChild;
                 while (1) {
-                    if (pWin->valdata && pWin->viewable &&
-                        !TreatAsTransparent(pWin))
-                        RegionAppend(&childUnion, &pWin->borderSize);
-                    if (pWin == pChild)
-                        break;
+                  if (pWin->valdata && pWin->viewable &&
+                      !TreatAsTransparent(pWin)) {
+                    RegionAppend(&childUnion, &pWin->borderSize);
+                  }
+                  if (pWin == pChild) {
+                    break;
+                  }
                     pWin = pWin->prevSib;
                 }
             }
             RegionValidate(&childUnion, &overlap);
-            if (overlap)
-                RegionUninit(&childUnion);
+            if (overlap) {
+              RegionUninit(&childUnion);
+            }
         }
     }
 
@@ -680,8 +716,9 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
         else {
             if (pWin->valdata) {
                 RegionEmpty(&pWin->clipList);
-                if (pScreen->ClipNotify)
-                    (*pScreen->ClipNotify) (pWin, 0, 0);
+                if (pScreen->ClipNotify) {
+                  (*pScreen->ClipNotify)(pWin, 0, 0);
+                }
                 RegionEmpty(&pWin->borderClip);
                 pWin->valdata = NULL;
             }
@@ -722,7 +759,8 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
 
     RegionUninit(&totalClip);
     RegionUninit(&exposed);
-    if (pScreen->ClipNotify)
-        (*pScreen->ClipNotify) (pParent, 0, 0);
+    if (pScreen->ClipNotify) {
+      (*pScreen->ClipNotify)(pParent, 0, 0);
+    }
     return 1;
 }

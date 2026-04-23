@@ -104,8 +104,9 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
             swizzle[2] = GL_ALPHA;
             swizzle[3] = GL_RED;
 
-            if (!is_little_endian)
-                byte_swap_swizzle(swizzle);
+            if (!is_little_endian) {
+              byte_swap_swizzle(swizzle);
+            }
         }
         break;
 
@@ -118,8 +119,9 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
             *tex_format = GL_BGRA;
             *tex_type = GL_UNSIGNED_BYTE;
 
-            if (!is_little_endian)
-                byte_swap_swizzle(swizzle);
+            if (!is_little_endian) {
+              byte_swap_swizzle(swizzle);
+            }
             break;
         }
         break;
@@ -133,8 +135,9 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
             *tex_format = GL_RGBA;
             *tex_type = GL_UNSIGNED_BYTE;
 
-            if (!is_little_endian)
-                byte_swap_swizzle(swizzle);
+            if (!is_little_endian) {
+              byte_swap_swizzle(swizzle);
+            }
         }
         break;
 
@@ -226,8 +229,9 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         return FALSE;
     }
 
-    if (!PIXMAN_FORMAT_A(format))
-        swizzle[3] = GL_ONE;
+    if (!PIXMAN_FORMAT_A(format)) {
+      swizzle[3] = GL_ONE;
+    }
 
     return TRUE;
 }
@@ -329,17 +333,19 @@ glamor_upload_picture_to_texture(PicturePtr picture)
                                                      bits, stride,
                                                      pixmap->drawable.width,
                                                      pixmap->drawable.height);
-        if (!converted_image)
-            return FALSE;
+        if (!converted_image) {
+          return FALSE;
+        }
 
         bits = pixman_image_get_data(converted_image);
         stride = pixman_image_get_stride(converted_image);
     }
 
-    if (!glamor_priv->is_gles)
-        iformat = f->internalformat;
-    else
-        iformat = format;
+    if (!glamor_priv->is_gles) {
+      iformat = f->internalformat;
+    } else {
+      iformat = format;
+    }
 
     if (!glamor_pixmap_ensure_fbo(pixmap, GLAMOR_CREATE_FBO_NO_FBO)) {
         ret = FALSE;
@@ -371,8 +377,9 @@ glamor_upload_picture_to_texture(PicturePtr picture)
     }
 
 fail:
-    if (converted_image)
-        pixman_image_unref(converted_image);
+  if (converted_image) {
+    pixman_image_unref(converted_image);
+  }
 
     return ret;
 }

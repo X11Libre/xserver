@@ -55,16 +55,20 @@ void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace
 void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name);
 
 static inline struct XnamespaceClientPriv *XnsClientPriv(ClientPtr client) {
-    if (client == NULL) return NULL;
+  if (client == NULL) {
+    return NULL;
+  }
     return dixLookupPrivate(&client->devPrivates, &namespaceClientPrivKeyRec);
 }
 
 static inline Bool XnsClientSameNS(struct XnamespaceClientPriv *p1, struct XnamespaceClientPriv *p2)
 {
-    if (!p1 && !p2)
-        return TRUE;
-    if (!p1 || !p2)
-        return FALSE;
+  if (!p1 && !p2) {
+    return TRUE;
+  }
+  if (!p1 || !p2) {
+    return FALSE;
+  }
     return (p1->ns == p2->ns);
 }
 
@@ -72,10 +76,12 @@ static inline Bool XnsClientSameNS(struct XnamespaceClientPriv *p1, struct Xname
 
 static inline Bool streq(const char *a, const char *b)
 {
-    if (!a && !b)
-        return TRUE;
-    if (!a || !b)
-        return FALSE;
+  if (!a && !b) {
+    return TRUE;
+  }
+  if (!a || !b) {
+    return FALSE;
+  }
     return (strcmp(a,b) == 0);
 }
 

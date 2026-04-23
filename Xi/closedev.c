@@ -80,16 +80,20 @@ DeleteDeviceEvents(DeviceIntPtr dev, WindowPtr pWin, ClientPtr client)
     OtherInputMasks *pOthers;
     GrabPtr grab, next;
 
-    if ((pOthers = wOtherInputMasks(pWin)) != 0)
-        for (others = pOthers->inputClients; others; others = others->next)
-            if (SameClient(others, client))
-                others->mask[dev->id] = NoEventMask;
+    if ((pOthers = wOtherInputMasks(pWin)) != 0) {
+      for (others = pOthers->inputClients; others; others = others->next) {
+        if (SameClient(others, client)) {
+          others->mask[dev->id] = NoEventMask;
+        }
+      }
+    }
 
     for (grab = wPassiveGrabs(pWin); grab; grab = next) {
         next = grab->next;
         if ((grab->device == dev) &&
-            (client->clientAsMask == CLIENT_BITS(grab->resource)))
-            FreeResource(grab->resource, X11_RESTYPE_NONE);
+            (client->clientAsMask == CLIENT_BITS(grab->resource))) {
+          FreeResource(grab->resource, X11_RESTYPE_NONE);
+        }
     }
 }
 
@@ -128,11 +132,13 @@ ProcXCloseDevice(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xCloseDeviceReq);
 
     rc = dixLookupDevice(&d, stuff->deviceid, client, DixUseAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
-    if (d->deviceGrab.grab && SameClient(d->deviceGrab.grab, client))
-        (*d->deviceGrab.DeactivateGrab) (d);    /* release active grab */
+    if (d->deviceGrab.grab && SameClient(d->deviceGrab.grab, client)) {
+      (*d->deviceGrab.DeactivateGrab)(d); /* release active grab */
+    }
 
     /* Remove event selections from all windows for events from this device
      * and selected by this client.

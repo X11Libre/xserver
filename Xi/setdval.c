@@ -83,31 +83,38 @@ ProcXSetDeviceValuators(ClientPtr client)
         .status = Success
     };
 
-    if (client->req_len != bytes_to_int32(sizeof(xSetDeviceValuatorsReq)) +
-        stuff->num_valuators)
-        return BadLength;
+    if (client->req_len !=
+        bytes_to_int32(sizeof(xSetDeviceValuatorsReq)) + stuff->num_valuators) {
+      return BadLength;
+    }
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
-    if (dev->valuator == NULL)
-        return BadMatch;
+    if (rc != Success) {
+      return rc;
+    }
+    if (dev->valuator == NULL) {
+      return BadMatch;
+    }
 
-    if (IsXTestDevice(dev, NULL))
-        return BadMatch;
+    if (IsXTestDevice(dev, NULL)) {
+      return BadMatch;
+    }
 
-    if (stuff->first_valuator + stuff->num_valuators > dev->valuator->numAxes)
-        return BadValue;
+    if (stuff->first_valuator + stuff->num_valuators > dev->valuator->numAxes) {
+      return BadValue;
+    }
 
-    if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client))
-        reply.status = AlreadyGrabbed;
-    else
-        reply.status = SetDeviceValuators(client, dev, (int *) &stuff[1],
-                                        stuff->first_valuator,
-                                        stuff->num_valuators);
+    if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client)) {
+      reply.status = AlreadyGrabbed;
+    } else {
+      reply.status =
+          SetDeviceValuators(client, dev, (int *)&stuff[1],
+                             stuff->first_valuator, stuff->num_valuators);
+    }
 
-    if (reply.status != Success && reply.status != AlreadyGrabbed)
-        return reply.status;
+    if (reply.status != Success && reply.status != AlreadyGrabbed) {
+      return reply.status;
+    }
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }

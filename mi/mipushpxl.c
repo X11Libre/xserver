@@ -105,20 +105,22 @@ miPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr pDrawable,
     MiBits startmask;
 
     if (screenInfo.bitmapBitOrder == IMAGE_BYTE_ORDER) {
-        if (screenInfo.bitmapBitOrder == LSBFirst)
-            startmask = (MiBits) (-1) ^ LONG2CHARSSAMEORDER((MiBits) (-1) << 1);
-        else
-            startmask = (MiBits) (-1) ^ LONG2CHARSSAMEORDER((MiBits) (-1) >> 1);
+      if (screenInfo.bitmapBitOrder == LSBFirst) {
+        startmask = (MiBits)(-1) ^ LONG2CHARSSAMEORDER((MiBits)(-1) << 1);
+      } else {
+        startmask = (MiBits)(-1) ^ LONG2CHARSSAMEORDER((MiBits)(-1) >> 1);
+      }
+    } else if (screenInfo.bitmapBitOrder == LSBFirst) {
+      startmask = (MiBits)(-1) ^ LONG2CHARSDIFFORDER((MiBits)(-1) << 1);
+    } else {
+      startmask = (MiBits)(-1) ^ LONG2CHARSDIFFORDER((MiBits)(-1) >> 1);
     }
-    else if (screenInfo.bitmapBitOrder == LSBFirst)
-        startmask = (MiBits) (-1) ^ LONG2CHARSDIFFORDER((MiBits) (-1) << 1);
-    else
-        startmask = (MiBits) (-1) ^ LONG2CHARSDIFFORDER((MiBits) (-1) >> 1);
 #endif
 
     MiBits *pwLineStart = calloc(1, BitmapBytePad(dx));
-    if (!pwLineStart)
-        return;
+    if (!pwLineStart) {
+      return;
+    }
     ipt = 0;
     dxDivPPW = dx / PPW;
 
@@ -165,17 +167,16 @@ miPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr pDrawable,
 #if 1
                 /* This is not quite right, but it'll do for now */
                 if (screenInfo.bitmapBitOrder == IMAGE_BYTE_ORDER) {
-                    if (screenInfo.bitmapBitOrder == LSBFirst)
-                        msk =
-                            LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) << 1);
-                    else
-                        msk =
-                            LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) >> 1);
+                  if (screenInfo.bitmapBitOrder == LSBFirst) {
+                    msk = LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) << 1);
+                  } else {
+                    msk = LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) >> 1);
+                  }
+                } else if (screenInfo.bitmapBitOrder == LSBFirst) {
+                  msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) << 1);
+                } else {
+                  msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) >> 1);
                 }
-                else if (screenInfo.bitmapBitOrder == LSBFirst)
-                    msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) << 1);
-                else
-                    msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) >> 1);
 #else
                 msk = SCRRIGHT(msk, 1);
 #endif
@@ -216,17 +217,16 @@ miPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr pDrawable,
 #if 1
                 /* This is not quite right, but it'll do for now */
                 if (screenInfo.bitmapBitOrder == IMAGE_BYTE_ORDER) {
-                    if (screenInfo.bitmapBitOrder == LSBFirst)
-                        msk =
-                            LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) << 1);
-                    else
-                        msk =
-                            LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) >> 1);
+                  if (screenInfo.bitmapBitOrder == LSBFirst) {
+                    msk = LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) << 1);
+                  } else {
+                    msk = LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) >> 1);
+                  }
+                } else if (screenInfo.bitmapBitOrder == LSBFirst) {
+                  msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) << 1);
+                } else {
+                  msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) >> 1);
                 }
-                else if (screenInfo.bitmapBitOrder == LSBFirst)
-                    msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) << 1);
-                else
-                    msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) >> 1);
 #else
                 msk = SCRRIGHT(msk, 1);
 #endif

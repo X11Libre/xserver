@@ -146,12 +146,13 @@ ospoll_find(struct ospoll *ospoll, int fd)
         int t = ospoll->fds[m].fd;
 #endif
 
-        if (t < fd)
-            lo = m + 1;
-        else if (t > fd)
-            hi = m - 1;
-        else
-            return m;
+        if (t < fd) {
+          lo = m + 1;
+        } else if (t > fd) {
+          hi = m - 1;
+        } else {
+          return m;
+        }
     }
     return -(lo + 1);
 }
@@ -229,8 +230,9 @@ ospoll_create(void)
 #endif
 #if EPOLL
     struct ospoll *ospoll = calloc(1, sizeof (struct ospoll));
-    if (ospoll == NULL)
-        return NULL;
+    if (ospoll == NULL) {
+      return NULL;
+    }
     ospoll->epoll_fd = epoll_create1(EPOLL_CLOEXEC);
     if (ospoll->epoll_fd < 0) {
         free (ospoll);
@@ -348,8 +350,9 @@ ospoll_add(struct ospoll *ospoll, int fd,
         struct epoll_event ev;
 
         osfd = calloc(1, sizeof (struct ospollfd));
-        if (!osfd)
-            return false;
+        if (!osfd) {
+          return false;
+        }
 
         if (ospoll->num >= ospoll->size) {
             struct ospollfd **new_fds;
@@ -366,8 +369,9 @@ ospoll_add(struct ospoll *ospoll, int fd,
 
         ev.events = 0;
         ev.data.ptr = osfd;
-        if (trigger == ospoll_trigger_edge)
-            ev.events |= EPOLLET;
+        if (trigger == ospoll_trigger_edge) {
+          ev.events |= EPOLLET;
+        }
         if (epoll_ctl(ospoll->epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
             free(osfd);
             return false;
@@ -487,12 +491,15 @@ epoll_mod(struct ospoll *ospoll, struct ospollfd *osfd)
 {
     struct epoll_event ev;
     ev.events = 0;
-    if (osfd->xevents & X_NOTIFY_READ)
-        ev.events |= EPOLLIN;
-    if (osfd->xevents & X_NOTIFY_WRITE)
-        ev.events |= EPOLLOUT;
-    if (osfd->trigger == ospoll_trigger_edge)
-        ev.events |= EPOLLET;
+    if (osfd->xevents & X_NOTIFY_READ) {
+      ev.events |= EPOLLIN;
+    }
+    if (osfd->xevents & X_NOTIFY_WRITE) {
+      ev.events |= EPOLLOUT;
+    }
+    if (osfd->trigger == ospoll_trigger_edge) {
+      ev.events |= EPOLLET;
+    }
     ev.data.ptr = osfd;
     (void) epoll_ctl(ospoll->epoll_fd, EPOLL_CTL_MOD, osfd->fd, &ev);
 }
@@ -652,15 +659,19 @@ ospoll_wait(struct ospoll *ospoll, int timeout)
         uint32_t revents = ev->events;
         int xevents = 0;
 
-        if (revents & EPOLLIN)
-            xevents |= X_NOTIFY_READ;
-        if (revents & EPOLLOUT)
-            xevents |= X_NOTIFY_WRITE;
-        if (revents & (~(EPOLLIN|EPOLLOUT)))
-            xevents |= X_NOTIFY_ERROR;
+        if (revents & EPOLLIN) {
+          xevents |= X_NOTIFY_READ;
+        }
+        if (revents & EPOLLOUT) {
+          xevents |= X_NOTIFY_WRITE;
+        }
+        if (revents & (~(EPOLLIN | EPOLLOUT))) {
+          xevents |= X_NOTIFY_ERROR;
+        }
 
-        if (osfd->callback)
-            osfd->callback(osfd->fd, xevents, osfd->data);
+        if (osfd->callback) {
+          osfd->callback(osfd->fd, xevents, osfd->data);
+        }
     }
     ospoll_clean_deleted(ospoll);
 #endif
@@ -733,8 +744,9 @@ ospoll_data(struct ospoll *ospoll, int fd)
 {
     int pos = ospoll_find(ospoll, fd);
 
-    if (pos < 0)
-        return NULL;
+    if (pos < 0) {
+      return NULL;
+    }
 #if POLLSET
     return ospoll->fds[pos].data;
 #endif

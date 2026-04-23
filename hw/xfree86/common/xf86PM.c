@@ -97,8 +97,9 @@ suspend(pmEvent event, Bool undo)
     InputInfoPtr pInfo;
 
     for (i = 0; i < xf86NumScreens; i++) {
-        if (xf86Screens[i]->EnableDisableFBAccess)
-            (*xf86Screens[i]->EnableDisableFBAccess) (xf86Screens[i], FALSE);
+      if (xf86Screens[i]->EnableDisableFBAccess) {
+        (*xf86Screens[i]->EnableDisableFBAccess)(xf86Screens[i], FALSE);
+      }
     }
     pInfo = xf86InputDevs;
     while (pInfo) {
@@ -107,12 +108,12 @@ suspend(pmEvent event, Bool undo)
     }
     input_lock();
     for (i = 0; i < xf86NumScreens; i++) {
-        if (xf86Screens[i]->PMEvent)
-            xf86Screens[i]->PMEvent(xf86Screens[i], event, undo);
-        else {
-            xf86Screens[i]->LeaveVT(xf86Screens[i]);
-            xf86Screens[i]->vtSema = FALSE;
-        }
+      if (xf86Screens[i]->PMEvent) {
+        xf86Screens[i]->PMEvent(xf86Screens[i], event, undo);
+      } else {
+        xf86Screens[i]->LeaveVT(xf86Screens[i]);
+        xf86Screens[i]->vtSema = FALSE;
+      }
     }
 }
 
@@ -123,17 +124,18 @@ resume(pmEvent event, Bool undo)
     InputInfoPtr pInfo;
 
     for (i = 0; i < xf86NumScreens; i++) {
-        if (xf86Screens[i]->PMEvent)
-            xf86Screens[i]->PMEvent(xf86Screens[i], event, undo);
-        else {
-            xf86Screens[i]->vtSema = TRUE;
-            xf86Screens[i]->EnterVT(xf86Screens[i]);
-        }
+      if (xf86Screens[i]->PMEvent) {
+        xf86Screens[i]->PMEvent(xf86Screens[i], event, undo);
+      } else {
+        xf86Screens[i]->vtSema = TRUE;
+        xf86Screens[i]->EnterVT(xf86Screens[i]);
+      }
     }
     input_unlock();
     for (i = 0; i < xf86NumScreens; i++) {
-        if (xf86Screens[i]->EnableDisableFBAccess)
-            (*xf86Screens[i]->EnableDisableFBAccess) (xf86Screens[i], TRUE);
+      if (xf86Screens[i]->EnableDisableFBAccess) {
+        (*xf86Screens[i]->EnableDisableFBAccess)(xf86Screens[i], TRUE);
+      }
     }
     dixSaveScreens(serverClient, SCREEN_SAVER_FORCER, ScreenSaverReset);
     pInfo = xf86InputDevs;
@@ -197,8 +199,9 @@ xf86HandlePMEvents(int fd, void *data)
     int i, n;
     Bool wait = FALSE;
 
-    if (!xf86PMGetEventFromOs)
-        return;
+    if (!xf86PMGetEventFromOs) {
+      return;
+    }
 
     if ((n = xf86PMGetEventFromOs(fd, events, MAX_NO_EVENTS))) {
         do {
@@ -223,10 +226,11 @@ xf86HandlePMEvents(int fd, void *data)
                     break;
                 }
             }
-            if (wait)
-                n = xf86PMGetEventFromOs(fd, events, MAX_NO_EVENTS);
-            else
-                break;
+            if (wait) {
+              n = xf86PMGetEventFromOs(fd, events, MAX_NO_EVENTS);
+            } else {
+              break;
+            }
         } while (1);
     }
 }

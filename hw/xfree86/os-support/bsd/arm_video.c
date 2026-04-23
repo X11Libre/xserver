@@ -88,8 +88,9 @@ checkDevMem(Bool warn)
     int fd;
     void *base;
 
-    if (devMemChecked)
-        return;
+    if (devMemChecked) {
+      return;
+    }
     devMemChecked = TRUE;
 
     if ((fd = open(DEV_MEM, O_RDWR)) >= 0) {

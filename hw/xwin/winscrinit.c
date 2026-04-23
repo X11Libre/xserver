@@ -181,10 +181,11 @@ winScreenInit(ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
     }
 
-    if (!g_fSoftwareCursor)
-        winInitCursor(pScreen);
-    else
-        winErrorFVerb(2, "winScreenInit - Using software cursor\n");
+    if (!g_fSoftwareCursor) {
+      winInitCursor(pScreen);
+    } else {
+      winErrorFVerb(2, "winScreenInit - Using software cursor\n");
+    }
 
     if (!noPanoramiXExtension) {
         /*
@@ -245,12 +246,13 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
      * Calculate the number of bits that are used to represent color in each pixel,
      * the color depth for the screen
      */
-    if (pScreenInfo->dwBPP == 8)
-        pScreenInfo->dwDepth = 8;
-    else
-        pScreenInfo->dwDepth = winCountBits(pScreenPriv->dwRedMask)
-            + winCountBits(pScreenPriv->dwGreenMask)
-            + winCountBits(pScreenPriv->dwBlueMask);
+    if (pScreenInfo->dwBPP == 8) {
+      pScreenInfo->dwDepth = 8;
+    } else {
+      pScreenInfo->dwDepth = winCountBits(pScreenPriv->dwRedMask) +
+                             winCountBits(pScreenPriv->dwGreenMask) +
+                             winCountBits(pScreenPriv->dwBlueMask);
+    }
 
     winErrorFVerb(2, "winFinishScreenInitFB - Masks: %08x %08x %08x\n",
                   (unsigned int) pScreenPriv->dwRedMask,
@@ -312,8 +314,10 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
     }
 
     /* Save a pointer to the root visual */
-    for (pVisual = pScreen->visuals;
-         pVisual->vid != pScreen->rootVisual; pVisual++);
+    for (pVisual = pScreen->visuals; pVisual->vid != pScreen->rootVisual;
+         pVisual++) {
+      ;
+    }
     pScreenPriv->pRootVisual = pVisual;
 
     /*

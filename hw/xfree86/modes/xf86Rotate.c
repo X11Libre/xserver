@@ -53,30 +53,35 @@ xf86RotateCrtcRedisplay(xf86CrtcPtr crtc, PixmapPtr dst_pixmap,
     BoxPtr b = RegionRects(region);
     XID include_inferiors = IncludeInferiors;
 
-    if (crtc->driverIsPerformingTransform & XF86DriverTransformOutput)
-        return;
+    if (crtc->driverIsPerformingTransform & XF86DriverTransformOutput) {
+      return;
+    }
 
     src = CreatePicture(None,
                         src_drawable,
                         format,
                         CPSubwindowMode,
                         &include_inferiors, serverClient, &error);
-    if (!src)
-        return;
+    if (!src) {
+      return;
+    }
 
     dst = CreatePicture(None,
                         &dst_pixmap->drawable,
                         format, 0L, NULL, serverClient, &error);
-    if (!dst)
-        return;
+    if (!dst) {
+      return;
+    }
 
     if (transform_src) {
         error = SetPictureTransform(src, &crtc->crtc_to_framebuffer);
-        if (error)
-            return;
+        if (error) {
+          return;
+        }
     }
-    if (crtc->transform_in_use && crtc->filter)
-        SetPicturePictFilter(src, crtc->filter, crtc->params, crtc->nparams);
+    if (crtc->transform_in_use && crtc->filter) {
+      SetPicturePictFilter(src, crtc->filter, crtc->params, crtc->nparams);
+    }
 
     if (crtc->shadowClear) {
         CompositePicture(PictOpSrc,
@@ -125,14 +130,18 @@ xf86CrtcDamageShadow(xf86CrtcPtr crtc)
         damage_box.x2 = pScreen->width;
         damage_box.y2 = pScreen->height;
     }
-    if (damage_box.x1 < 0)
-        damage_box.x1 = 0;
-    if (damage_box.y1 < 0)
-        damage_box.y1 = 0;
-    if (damage_box.x2 > pScreen->width)
-        damage_box.x2 = pScreen->width;
-    if (damage_box.y2 > pScreen->height)
-        damage_box.y2 = pScreen->height;
+    if (damage_box.x1 < 0) {
+      damage_box.x1 = 0;
+    }
+    if (damage_box.y1 < 0) {
+      damage_box.y1 = 0;
+    }
+    if (damage_box.x2 > pScreen->width) {
+      damage_box.x2 = pScreen->width;
+    }
+    if (damage_box.y2 > pScreen->height) {
+      damage_box.y2 = pScreen->height;
+    }
     RegionInit(&damage_region, &damage_box, 1);
     DamageDamageRegion(&(*pScreen->GetScreenPixmap) (pScreen)->drawable,
                        &damage_region);
@@ -178,8 +187,9 @@ xf86RotateRedisplay(ScreenPtr pScreen)
     DamagePtr damage = xf86_config->rotation_damage;
     RegionPtr region;
 
-    if (!damage || !pScreen->root)
-        return FALSE;
+    if (!damage || !pScreen->root) {
+      return FALSE;
+    }
     xf86RotatePrepare(pScreen);
     region = DamageRegion(damage);
     if (RegionNotEmpty(region)) {
@@ -206,10 +216,11 @@ xf86RotateRedisplay(ScreenPtr pScreen)
                 RegionIntersect(&crtc_damage, &crtc_damage, region);
 
                 /* update damaged region */
-                if (RegionNotEmpty(&crtc_damage))
-                    xf86RotateCrtcRedisplay(crtc, crtc->rotatedPixmap,
-                                            &pScreen->root->drawable,
-                                            &crtc_damage, TRUE);
+                if (RegionNotEmpty(&crtc_damage)) {
+                  xf86RotateCrtcRedisplay(crtc, crtc->rotatedPixmap,
+                                          &pScreen->root->drawable,
+                                          &crtc_damage, TRUE);
+                }
 
                 RegionUninit(&crtc_damage);
             }
@@ -240,8 +251,9 @@ xf86RotateBlockHandler(ScreenPtr pScreen, void *pTimeout)
     if (xf86_config->rotation_damage != NULL) {
         xf86_config->BlockHandler = pScreen->BlockHandler;
         pScreen->BlockHandler = xf86RotateBlockHandler;
-    } else
-        xf86_config->BlockHandler = NULL;
+    } else {
+      xf86_config->BlockHandler = NULL;
+    }
 }
 
 void
@@ -259,9 +271,11 @@ xf86RotateDestroy(xf86CrtcPtr crtc)
         crtc->rotatedData = NULL;
     }
 
-    for (c = 0; c < xf86_config->num_crtc; c++)
-        if (xf86_config->crtc[c]->rotatedData)
-            return;
+    for (c = 0; c < xf86_config->num_crtc; c++) {
+      if (xf86_config->crtc[c]->rotatedData) {
+        return;
+      }
+    }
 
     /*
      * Clean up damage structures when no crtcs are rotated
@@ -304,8 +318,9 @@ xf86RotateCloseScreen(ScreenPtr screen)
 
     /* This has already been destroyed when the root window was destroyed */
     xf86_config->rotation_damage = NULL;
-    for (c = 0; c < xf86_config->num_crtc; c++)
-        xf86RotateDestroy(xf86_config->crtc[c]);
+    for (c = 0; c < xf86_config->num_crtc; c++) {
+      xf86RotateDestroy(xf86_config->crtc[c]);
+    }
 }
 
 static Bool
@@ -319,24 +334,26 @@ xf86CrtcFitsScreen(xf86CrtcPtr crtc, struct pixman_f_transform *crtc_to_fb)
      */
     if (pScrn->is_gpu) {
 	ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
-	if (pScreen->current_primary)
-	    pScrn = xf86ScreenToScrn(pScreen->current_primary);
+        if (pScreen->current_primary) {
+          pScrn = xf86ScreenToScrn(pScreen->current_primary);
+        }
     }
 
-    if (pScrn->virtualX == 0 || pScrn->virtualY == 0)
-        return TRUE;
+    if (pScrn->virtualX == 0 || pScrn->virtualY == 0) {
+      return TRUE;
+    }
 
     b.x1 = 0;
     b.y1 = 0;
     b.x2 = crtc->mode.HDisplay;
     b.y2 = crtc->mode.VDisplay;
-    if (crtc_to_fb)
-        pixman_f_transform_bounds(crtc_to_fb, &b);
-    else {
-        b.x1 += crtc->x;
-        b.y1 += crtc->y;
-        b.x2 += crtc->x;
-        b.y2 += crtc->y;
+    if (crtc_to_fb) {
+      pixman_f_transform_bounds(crtc_to_fb, &b);
+    } else {
+      b.x1 += crtc->x;
+      b.y1 += crtc->y;
+      b.x2 += crtc->x;
+      b.y2 += crtc->y;
     }
 
     return (0 <= b.x1 && b.x2 <= pScrn->virtualX &&
@@ -359,10 +376,12 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
     RRTransformPtr transform = NULL;
     Bool damage = FALSE;
 
-    if (pScreen->isGPU)
-        return TRUE;
-    if (crtc->transformPresent)
-        transform = &crtc->transform;
+    if (pScreen->isGPU) {
+      return TRUE;
+    }
+    if (crtc->transformPresent) {
+      transform = &crtc->transform;
+    }
 
     if (!RRTransformCompute(crtc->x, crtc->y,
                             crtc->mode.HDisplay, crtc->mode.VDisplay,
@@ -410,8 +429,9 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
                     crtc->rotatedData = NULL;
                 }
                 shadowData = crtc->funcs->shadow_allocate(crtc, width, height);
-                if (!shadowData)
-                    goto bail1;
+                if (!shadowData) {
+                  goto bail1;
+                }
                 crtc->rotatedData = shadowData;
                 /* shadow will be damaged in xf86RotatePrepare */
             }
@@ -426,8 +446,9 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
                                                             DamageReportNone,
                                                             TRUE, pScreen,
                                                             pScreen);
-                if (!xf86_config->rotation_damage)
-                    goto bail2;
+                if (!xf86_config->rotation_damage) {
+                  goto bail2;
+                }
 
                 /* Wrap block handler */
                 if (!xf86_config->BlockHandler) {
@@ -444,10 +465,10 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
                     crtc->rotatedData = NULL;
                 }
  bail1:
-                if (old_width && old_height)
-                    crtc->rotatedPixmap =
-                        crtc->funcs->shadow_create(crtc, NULL, old_width,
-                                                   old_height);
+   if (old_width && old_height) {
+     crtc->rotatedPixmap =
+         crtc->funcs->shadow_create(crtc, NULL, old_width, old_height);
+   }
                 return FALSE;
             }
         }
@@ -461,9 +482,9 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
                     new_nparams = transform->nparams;
                     new_filter = transform->filter;
                 }
+            } else {
+              new_filter = transform->filter;
             }
-            else
-                new_filter = transform->filter;
             if (new_filter) {
                 new_width = new_filter->width;
                 new_height = new_filter->height;
@@ -487,11 +508,12 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
     crtc->bounds.y2 = crtc->mode.VDisplay;
     pixman_f_transform_bounds(&f_crtc_to_fb, &crtc->bounds);
 
-    if (damage)
-        xf86CrtcDamageShadow(crtc);
-    else if (crtc->rotatedData && !crtc->rotatedPixmap)
-        /* Make sure the new rotate buffer has valid transformed contents */
-        xf86RotateRedisplay(pScreen);
+    if (damage) {
+      xf86CrtcDamageShadow(crtc);
+    } else if (crtc->rotatedData && !crtc->rotatedPixmap) {
+      /* Make sure the new rotate buffer has valid transformed contents */
+      xf86RotateRedisplay(pScreen);
+    }
 
     /* All done */
     return TRUE;

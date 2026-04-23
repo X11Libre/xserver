@@ -51,20 +51,25 @@ fbPolyFillRect(DrawablePtr pDrawable, GCPtr pGC, int nrect, xRectangle *prect)
         fullY2 = fullY1 + (int) prect->height;
         prect++;
 
-        if (fullX1 < extentX1)
-            fullX1 = extentX1;
+        if (fullX1 < extentX1) {
+          fullX1 = extentX1;
+        }
 
-        if (fullY1 < extentY1)
-            fullY1 = extentY1;
+        if (fullY1 < extentY1) {
+          fullY1 = extentY1;
+        }
 
-        if (fullX2 > extentX2)
-            fullX2 = extentX2;
+        if (fullX2 > extentX2) {
+          fullX2 = extentX2;
+        }
 
-        if (fullY2 > extentY2)
-            fullY2 = extentY2;
+        if (fullY2 > extentY2) {
+          fullY2 = extentY2;
+        }
 
-        if ((fullX1 >= fullX2) || (fullY1 >= fullY2))
-            continue;
+        if ((fullX1 >= fullX2) || (fullY1 >= fullY2)) {
+          continue;
+        }
         n = RegionNumRects(pClip);
         if (n == 1) {
             fbFill(pDrawable,
@@ -78,23 +83,28 @@ fbPolyFillRect(DrawablePtr pDrawable, GCPtr pGC, int nrect, xRectangle *prect)
              */
             while (n--) {
                 partX1 = pbox->x1;
-                if (partX1 < fullX1)
-                    partX1 = fullX1;
+                if (partX1 < fullX1) {
+                  partX1 = fullX1;
+                }
                 partY1 = pbox->y1;
-                if (partY1 < fullY1)
-                    partY1 = fullY1;
+                if (partY1 < fullY1) {
+                  partY1 = fullY1;
+                }
                 partX2 = pbox->x2;
-                if (partX2 > fullX2)
-                    partX2 = fullX2;
+                if (partX2 > fullX2) {
+                  partX2 = fullX2;
+                }
                 partY2 = pbox->y2;
-                if (partY2 > fullY2)
-                    partY2 = fullY2;
+                if (partY2 > fullY2) {
+                  partY2 = fullY2;
+                }
 
                 pbox++;
 
-                if (partX1 < partX2 && partY1 < partY2)
-                    fbFill(pDrawable, pGC,
-                           partX1, partY1, partX2 - partX1, partY2 - partY1);
+                if (partX1 < partX2 && partY1 < partY2) {
+                  fbFill(pDrawable, pGC, partX1, partY1, partX2 - partX1,
+                         partY2 - partY1);
+                }
             }
         }
     }

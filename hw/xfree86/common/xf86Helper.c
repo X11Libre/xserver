@@ -77,11 +77,13 @@ void
 xf86AddDriver(DriverPtr driver, void *module, int flags)
 {
     /* Don't add null entries */
-    if (!driver)
-        return;
+    if (!driver) {
+      return;
+    }
 
-    if (xf86DriverList == NULL)
-        xf86NumDrivers = 0;
+    if (xf86DriverList == NULL) {
+      xf86NumDrivers = 0;
+    }
 
     xf86NumDrivers++;
     xf86DriverList = XNFreallocarray(xf86DriverList,
@@ -97,8 +99,9 @@ xf86DeleteDriver(int drvIndex)
 {
     if (xf86DriverList[drvIndex]
         && (!xf86DriverHasEntities(xf86DriverList[drvIndex]))) {
-        if (xf86DriverList[drvIndex]->module)
-            UnloadModule(xf86DriverList[drvIndex]->module);
+      if (xf86DriverList[drvIndex]->module) {
+        UnloadModule(xf86DriverList[drvIndex]->module);
+      }
         free(xf86DriverList[drvIndex]);
         xf86DriverList[drvIndex] = NULL;
     }
@@ -110,11 +113,13 @@ void
 xf86AddInputDriver(InputDriverPtr driver, void *module, int flags)
 {
     /* Don't add null entries */
-    if (!driver)
-        return;
+    if (!driver) {
+      return;
+    }
 
-    if (xf86InputDriverList == NULL)
-        xf86NumInputDrivers = 0;
+    if (xf86InputDriverList == NULL) {
+      xf86NumInputDrivers = 0;
+    }
 
     xf86NumInputDrivers++;
     xf86InputDriverList = XNFreallocarray(xf86InputDriverList,
@@ -132,9 +137,10 @@ xf86LookupInputDriver(const char *name)
     int i;
 
     for (i = 0; i < xf86NumInputDrivers; i++) {
-        if (xf86InputDriverList[i] && xf86InputDriverList[i]->driverName &&
-            xf86NameCmp(name, xf86InputDriverList[i]->driverName) == 0)
-            return xf86InputDriverList[i];
+      if (xf86InputDriverList[i] && xf86InputDriverList[i]->driverName &&
+          xf86NameCmp(name, xf86InputDriverList[i]->driverName) == 0) {
+        return xf86InputDriverList[i];
+      }
     }
     return NULL;
 }
@@ -145,8 +151,9 @@ xf86LookupInput(const char *name)
     InputInfoPtr p;
 
     for (p = xf86InputDevs; p != NULL; p = p->next) {
-        if (strcmp(name, p->name) == 0)
-            return p;
+      if (strcmp(name, p->name) == 0) {
+        return p;
+      }
     }
 
     return NULL;
@@ -161,8 +168,9 @@ xf86AllocateScreen(DriverPtr drv, int flags)
     ScrnInfoPtr pScrn;
 
     if (flags & XF86_ALLOCATE_GPU_SCREEN) {
-        if (xf86GPUScreens == NULL)
-            xf86NumGPUScreens = 0;
+      if (xf86GPUScreens == NULL) {
+        xf86NumGPUScreens = 0;
+      }
         i = xf86NumGPUScreens++;
         xf86GPUScreens = XNFreallocarray(xf86GPUScreens, xf86NumGPUScreens,
                                          sizeof(ScrnInfoPtr));
@@ -171,8 +179,9 @@ xf86AllocateScreen(DriverPtr drv, int flags)
         pScrn->scrnIndex = i + GPU_SCREEN_OFFSET;      /* Changes when a screen is removed */
         pScrn->is_gpu = TRUE;
     } else {
-        if (xf86Screens == NULL)
-            xf86NumScreens = 0;
+      if (xf86Screens == NULL) {
+        xf86NumScreens = 0;
+      }
 
         i = xf86NumScreens++;
         xf86Screens = XNFreallocarray(xf86Screens, xf86NumScreens,
@@ -211,38 +220,46 @@ xf86DeleteScreen(ScrnInfoPtr pScrn)
     int scrnIndex;
     Bool is_gpu = FALSE;
 
-    if (!pScrn)
-        return;
+    if (!pScrn) {
+      return;
+    }
 
     if (pScrn->is_gpu) {
         /* First check if the screen is valid */
-        if (xf86NumGPUScreens == 0 || xf86GPUScreens == NULL)
-            return;
+        if (xf86NumGPUScreens == 0 || xf86GPUScreens == NULL) {
+          return;
+        }
         is_gpu = TRUE;
     } else {
         /* First check if the screen is valid */
-        if (xf86NumScreens == 0 || xf86Screens == NULL)
-            return;
+        if (xf86NumScreens == 0 || xf86Screens == NULL) {
+          return;
+        }
     }
 
     scrnIndex = pScrn->scrnIndex;
     /* If a FreeScreen function is defined, call it here */
-    if (pScrn->FreeScreen != NULL)
-        pScrn->FreeScreen(pScrn);
+    if (pScrn->FreeScreen != NULL) {
+      pScrn->FreeScreen(pScrn);
+    }
 
-    while (pScrn->modes)
-        xf86DeleteMode(&pScrn->modes, pScrn->modes);
+    while (pScrn->modes) {
+      xf86DeleteMode(&pScrn->modes, pScrn->modes);
+    }
 
-    while (pScrn->modePool)
-        xf86DeleteMode(&pScrn->modePool, pScrn->modePool);
+    while (pScrn->modePool) {
+      xf86DeleteMode(&pScrn->modePool, pScrn->modePool);
+    }
 
     xf86OptionListFree(pScrn->options);
 
-    if (pScrn->module)
-        UnloadModule(pScrn->module);
+    if (pScrn->module) {
+      UnloadModule(pScrn->module);
+    }
 
-    if (pScrn->drv)
-        pScrn->drv->refCount--;
+    if (pScrn->drv) {
+      pScrn->drv->refCount--;
+    }
 
     free(pScrn->privates);
 
@@ -308,23 +325,26 @@ xf86AddPixFormat(ScrnInfoPtr pScrn, int depth, int bpp, int pad)
 {
     int i;
 
-    if (pScrn->numFormats >= MAXFORMATS)
-        return FALSE;
+    if (pScrn->numFormats >= MAXFORMATS) {
+      return FALSE;
+    }
 
     if (bpp <= 0) {
-        if (depth == 1)
-            bpp = 1;
-        else if (depth <= 8)
-            bpp = 8;
-        else if (depth <= 16)
-            bpp = 16;
-        else if (depth <= 32)
-            bpp = 32;
-        else
-            return FALSE;
+      if (depth == 1) {
+        bpp = 1;
+      } else if (depth <= 8) {
+        bpp = 8;
+      } else if (depth <= 16) {
+        bpp = 16;
+      } else if (depth <= 32) {
+        bpp = 32;
+      } else {
+        return FALSE;
+      }
     }
-    if (pad <= 0)
-        pad = BITMAP_SCANLINE_PAD;
+    if (pad <= 0) {
+      pad = BITMAP_SCANLINE_PAD;
+    }
 
     i = pScrn->numFormats++;
     pScrn->formats[i].depth = depth;
@@ -369,8 +389,9 @@ xf86SetDepthBpp(ScrnInfoPtr scrp, int depth, int dummy, int fbbpp,
     scrp->depthFrom = X_DEFAULT;
 
     if (xf86FbBpp > 0) {
-        if (xf86FbBpp == 24) /* lol no */
-            xf86FbBpp = 32;
+      if (xf86FbBpp == 24) { /* lol no */
+        xf86FbBpp = 32;
+      }
         scrp->bitsPerPixel = xf86FbBpp;
         scrp->bitsPerPixelFrom = X_CMDLINE;
     }
@@ -417,8 +438,9 @@ xf86SetDepthBpp(ScrnInfoPtr scrp, int depth, int dummy, int fbbpp,
                         found = TRUE;
                     }
                 }
-                if (found)
-                    break;
+                if (found) {
+                  break;
+                }
             }
         }
     }
@@ -426,10 +448,12 @@ xf86SetDepthBpp(ScrnInfoPtr scrp, int depth, int dummy, int fbbpp,
     /* If none of these is set, pick a default */
     if (scrp->bitsPerPixel < 0 && scrp->depth < 0) {
         if (fbbpp > 0 || depth > 0) {
-            if (fbbpp > 0)
-                scrp->bitsPerPixel = fbbpp;
-            if (depth > 0)
-                scrp->depth = depth;
+          if (fbbpp > 0) {
+            scrp->bitsPerPixel = fbbpp;
+          }
+          if (depth > 0) {
+            scrp->depth = depth;
+          }
         }
         else {
             scrp->depth = GLOBAL_DEFAULT_DEPTH;
@@ -441,24 +465,23 @@ xf86SetDepthBpp(ScrnInfoPtr scrp, int depth, int dummy, int fbbpp,
     if (scrp->bitsPerPixel < 0) {
         /* The depth must be set */
         if (scrp->depth > -1) {
-            if (scrp->depth == 1)
-                scrp->bitsPerPixel = 1;
-            else if (scrp->depth <= 4)
-                scrp->bitsPerPixel = 4;
-            else if (scrp->depth <= 8)
-                scrp->bitsPerPixel = 8;
-            else if (scrp->depth <= 16)
-                scrp->bitsPerPixel = 16;
-            else if (scrp->depth <= 24 && DO_PIX32(depth24flags)) {
-                scrp->bitsPerPixel = 32;
-            }
-            else if (scrp->depth <= 32)
-                scrp->bitsPerPixel = 32;
-            else {
-                xf86DrvMsg(scrp->scrnIndex, X_ERROR,
-                           "No bpp for depth (%d)\n", scrp->depth);
-                return FALSE;
-            }
+          if (scrp->depth == 1) {
+            scrp->bitsPerPixel = 1;
+          } else if (scrp->depth <= 4) {
+            scrp->bitsPerPixel = 4;
+          } else if (scrp->depth <= 8) {
+            scrp->bitsPerPixel = 8;
+          } else if (scrp->depth <= 16) {
+            scrp->bitsPerPixel = 16;
+          } else if (scrp->depth <= 24 && DO_PIX32(depth24flags)) {
+            scrp->bitsPerPixel = 32;
+          } else if (scrp->depth <= 32) {
+            scrp->bitsPerPixel = 32;
+          } else {
+            xf86DrvMsg(scrp->scrnIndex, X_ERROR, "No bpp for depth (%d)\n",
+                       scrp->depth);
+            return FALSE;
+          }
         }
         else {
             xf86DrvMsg(scrp->scrnIndex, X_ERROR,
@@ -467,13 +490,14 @@ xf86SetDepthBpp(ScrnInfoPtr scrp, int depth, int dummy, int fbbpp,
             return FALSE;
         }
         if (scrp->bitsPerPixel < 0) {
-            if ((depth24flags & (Support24bppFb | Support32bppFb)) ==
-                     NoDepth24Support)
-                xf86DrvMsg(scrp->scrnIndex, X_ERROR,
-                           "Driver can't support depth 24\n");
-            else
-                xf86DrvMsg(scrp->scrnIndex, X_ERROR,
-                           "Can't find fbbpp for depth 24\n");
+          if ((depth24flags & (Support24bppFb | Support32bppFb)) ==
+              NoDepth24Support) {
+            xf86DrvMsg(scrp->scrnIndex, X_ERROR,
+                       "Driver can't support depth 24\n");
+          } else {
+            xf86DrvMsg(scrp->scrnIndex, X_ERROR,
+                       "Can't find fbbpp for depth 24\n");
+          }
             return FALSE;
         }
         scrp->bitsPerPixelFrom = X_PROBED;
@@ -684,10 +708,11 @@ xf86SetWeight(ScrnInfoPtr scrp, rgb weight, rgb mask)
         }
     }
 
-    if (scrp->weight.red)
-        xf86DrvMsg(scrp->scrnIndex, weightFrom, "RGB weight %d%d%d\n",
-                   (int) scrp->weight.red, (int) scrp->weight.green,
-                   (int) scrp->weight.blue);
+    if (scrp->weight.red) {
+      xf86DrvMsg(scrp->scrnIndex, weightFrom, "RGB weight %d%d%d\n",
+                 (int)scrp->weight.red, (int)scrp->weight.green,
+                 (int)scrp->weight.blue);
+    }
 
     if (scrp->depth > MAX_PSEUDO_DEPTH &&
         (scrp->depth != scrp->weight.red + scrp->weight.green +
@@ -706,10 +731,12 @@ xf86SetWeight(ScrnInfoPtr scrp, rgb weight, rgb mask)
          * matches the behaviour of 3.x versions of XFree86.
          */
         scrp->rgbBits = scrp->weight.red;
-        if (scrp->weight.green > scrp->rgbBits)
-            scrp->rgbBits = scrp->weight.green;
-        if (scrp->weight.blue > scrp->rgbBits)
-            scrp->rgbBits = scrp->weight.blue;
+        if (scrp->weight.green > scrp->rgbBits) {
+          scrp->rgbBits = scrp->weight.green;
+        }
+        if (scrp->weight.blue > scrp->rgbBits) {
+          scrp->rgbBits = scrp->weight.blue;
+        }
     }
 
     /* Set the mask and offsets */
@@ -752,14 +779,15 @@ xf86SetDefaultVisual(ScrnInfoPtr scrp, int visual)
         scrp->defaultVisual = visual;
     }
     else {
-        if (scrp->depth == 1)
-            scrp->defaultVisual = StaticGray;
-        else if (scrp->depth == 4)
-            scrp->defaultVisual = StaticColor;
-        else if (scrp->depth <= MAX_PSEUDO_DEPTH)
-            scrp->defaultVisual = PseudoColor;
-        else
-            scrp->defaultVisual = TrueColor;
+      if (scrp->depth == 1) {
+        scrp->defaultVisual = StaticGray;
+      } else if (scrp->depth == 4) {
+        scrp->defaultVisual = StaticColor;
+      } else if (scrp->depth <= MAX_PSEUDO_DEPTH) {
+        scrp->defaultVisual = PseudoColor;
+      } else {
+        scrp->defaultVisual = TrueColor;
+      }
     }
     switch (scrp->defaultVisual) {
     case StaticGray:
@@ -882,10 +910,12 @@ xf86SetDpi(ScrnInfoPtr pScrn, int x, int y)
             pScrn->yDpi =
                 (int) ((double) pScrn->virtualY * MMPERINCH / pScrn->heightmm);
         }
-        if (pScrn->xDpi > 0 && pScrn->yDpi <= 0)
-            pScrn->yDpi = pScrn->xDpi;
-        if (pScrn->yDpi > 0 && pScrn->xDpi <= 0)
-            pScrn->xDpi = pScrn->yDpi;
+        if (pScrn->xDpi > 0 && pScrn->yDpi <= 0) {
+          pScrn->yDpi = pScrn->xDpi;
+        }
+        if (pScrn->yDpi > 0 && pScrn->xDpi <= 0) {
+          pScrn->xDpi = pScrn->yDpi;
+        }
         xf86DrvMsg(pScrn->scrnIndex, from, "Display dimensions: (%d, %d) mm\n",
                    pScrn->widthmm, pScrn->heightmm);
 
@@ -926,20 +956,24 @@ xf86SetDpi(ScrnInfoPtr pScrn, int x, int y)
             pScrn->yDpi =
                 (int) ((double) pScrn->virtualY * MMPERINCH / pScrn->heightmm);
         }
-        if (pScrn->xDpi > 0 && pScrn->yDpi <= 0)
-            pScrn->yDpi = pScrn->xDpi;
-        if (pScrn->yDpi > 0 && pScrn->xDpi <= 0)
-            pScrn->xDpi = pScrn->yDpi;
+        if (pScrn->xDpi > 0 && pScrn->yDpi <= 0) {
+          pScrn->yDpi = pScrn->xDpi;
+        }
+        if (pScrn->yDpi > 0 && pScrn->xDpi <= 0) {
+          pScrn->xDpi = pScrn->yDpi;
+        }
     }
     else {
-        if (x > 0)
-            pScrn->xDpi = x;
-        else
-            pScrn->xDpi = DEFAULT_DPI;
-        if (y > 0)
-            pScrn->yDpi = y;
-        else
-            pScrn->yDpi = DEFAULT_DPI;
+      if (x > 0) {
+        pScrn->xDpi = x;
+      } else {
+        pScrn->xDpi = DEFAULT_DPI;
+      }
+      if (y > 0) {
+        pScrn->yDpi = y;
+      } else {
+        pScrn->yDpi = DEFAULT_DPI;
+      }
     }
     xf86DrvMsg(pScrn->scrnIndex, from, "DPI set to (%d, %d)\n",
                pScrn->xDpi, pScrn->yDpi);
@@ -988,8 +1022,9 @@ xf86EnableDisableFBAccess(ScrnInfoPtr pScrnInfo, Bool enable)
         /*
          * Restore all of the clip lists on the screen
          */
-        if (!xf86Resetting)
-            SetRootClip(pScreen, ROOT_CLIP_FULL);
+        if (!xf86Resetting) {
+          SetRootClip(pScreen, ROOT_CLIP_FULL);
+        }
 
     }
     else {
@@ -1008,16 +1043,18 @@ xf86VDrvMsgVerb(int scrnIndex, MessageType type, int verb, const char *format,
 {
     /* Prefix the scrnIndex name to the format string. */
     if (scrnIndex >= 0 && scrnIndex < xf86NumScreens &&
-        xf86Screens[scrnIndex]->name)
-        LogHdrMessageVerb(type, verb, format, args, "%s(%d): ",
-                          xf86Screens[scrnIndex]->name, scrnIndex);
-    else if (scrnIndex >= GPU_SCREEN_OFFSET &&
-             scrnIndex < GPU_SCREEN_OFFSET + xf86NumGPUScreens &&
-             xf86GPUScreens[scrnIndex - GPU_SCREEN_OFFSET]->name)
-        LogHdrMessageVerb(type, verb, format, args, "%s(G%d): ",
-                          xf86GPUScreens[scrnIndex - GPU_SCREEN_OFFSET]->name, scrnIndex - GPU_SCREEN_OFFSET);
-    else
-        LogVMessageVerb(type, verb, format, args);
+        xf86Screens[scrnIndex]->name) {
+      LogHdrMessageVerb(type, verb, format, args,
+                        "%s(%d): ", xf86Screens[scrnIndex]->name, scrnIndex);
+    } else if (scrnIndex >= GPU_SCREEN_OFFSET &&
+               scrnIndex < GPU_SCREEN_OFFSET + xf86NumGPUScreens &&
+               xf86GPUScreens[scrnIndex - GPU_SCREEN_OFFSET]->name) {
+      LogHdrMessageVerb(type, verb, format, args, "%s(G%d): ",
+                        xf86GPUScreens[scrnIndex - GPU_SCREEN_OFFSET]->name,
+                        scrnIndex - GPU_SCREEN_OFFSET);
+    } else {
+      LogVMessageVerb(type, verb, format, args);
+    }
 }
 
 /* Print driver messages, with verbose level specified directly */
@@ -1060,8 +1097,9 @@ xf86VIDrvMsgVerb(InputInfoPtr dev, MessageType type, int verb,
     /* Prefix driver and device names to formatted message. */
     if (dev) {
         deviceName = dev->name;
-        if (dev->drv)
-            driverName = dev->drv->driverName;
+        if (dev->drv) {
+          driverName = dev->drv->driverName;
+        }
     }
 
     LogHdrMessageVerb(type, verb, format, args, "%s: %s: ", driverName,
@@ -1098,8 +1136,9 @@ xf86ErrorFVerb(int verb, const char *format, ...)
     va_list ap;
 
     va_start(ap, format);
-    if (xf86Verbose >= verb || xf86LogVerbose >= verb)
-        LogVMessageVerb(X_NONE, verb, format, ap);
+    if (xf86Verbose >= verb || xf86LogVerbose >= verb) {
+      LogVMessageVerb(X_NONE, verb, format, ap);
+    }
     va_end(ap);
 }
 
@@ -1110,8 +1149,9 @@ xf86ErrorF(const char *format, ...)
     va_list ap;
 
     va_start(ap, format);
-    if (xf86Verbose >= 1 || xf86LogVerbose >= 1)
-        LogVMessageVerb(X_NONE, 1, format, ap);
+    if (xf86Verbose >= 1 || xf86LogVerbose >= 1) {
+      LogVMessageVerb(X_NONE, 1, format, ap);
+    }
     va_end(ap);
 }
 
@@ -1141,12 +1181,13 @@ xf86LogInit(void)
     if (xf86LogFileFrom == X_DEFAULT) {
         /* When not running as root, we won't be able to write to /var/log */
         if (geteuid() != 0) {
-            if ((env = getenv("XDG_STATE_HOME")))
-                snprintf(buf, sizeof(buf), "%s/%s", env,
-                         DEFAULT_XDG_STATE_HOME_LOGDIR);
-            else if ((env = getenv("HOME")))
-                snprintf(buf, sizeof(buf), "%s/%s/%s", env,
-                         DEFAULT_XDG_STATE_HOME, DEFAULT_XDG_STATE_HOME_LOGDIR);
+          if ((env = getenv("XDG_STATE_HOME"))) {
+            snprintf(buf, sizeof(buf), "%s/%s", env,
+                     DEFAULT_XDG_STATE_HOME_LOGDIR);
+          } else if ((env = getenv("HOME"))) {
+            snprintf(buf, sizeof(buf), "%s/%s/%s", env, DEFAULT_XDG_STATE_HOME,
+                     DEFAULT_XDG_STATE_HOME_LOGDIR);
+          }
 
             if (env) {
                 xf86_mkdir_p(buf);
@@ -1155,8 +1196,9 @@ xf86LogInit(void)
             }
         }
         /* Append the display number and ".log" */
-        if (asprintf(&lf, "%s%%s" LOGSUFFIX, xf86LogFile) == -1)
-            FatalError("Cannot allocate space for the log file name\n");
+        if (asprintf(&lf, "%s%%s" LOGSUFFIX, xf86LogFile) == -1) {
+          FatalError("Cannot allocate space for the log file name\n");
+        }
         xf86LogFile = lf;
     }
 
@@ -1187,12 +1229,15 @@ xf86TokenToString(SymTabPtr table, int token)
 {
     int i;
 
-    for (i = 0; table[i].token >= 0 && table[i].token != token; i++);
+    for (i = 0; table[i].token >= 0 && table[i].token != token; i++) {
+      ;
+    }
 
-    if (table[i].token < 0)
-        return NULL;
-    else
-        return table[i].name;
+    if (table[i].token < 0) {
+      return NULL;
+    } else {
+      return table[i].name;
+    }
 }
 
 int
@@ -1200,10 +1245,14 @@ xf86StringToToken(SymTabPtr table, const char *string)
 {
     int i;
 
-    if (string == NULL)
-        return -1;
+    if (string == NULL) {
+      return -1;
+    }
 
-    for (i = 0; table[i].token >= 0 && xf86NameCmp(string, table[i].name); i++);
+    for (i = 0; table[i].token >= 0 && xf86NameCmp(string, table[i].name);
+         i++) {
+      ;
+    }
 
     return table[i].token;
 }
@@ -1267,15 +1316,17 @@ xf86MatchDevice(const char *drivername, GDevPtr ** sectlist)
     confScreenPtr screensecptr;
     int i, j, k;
 
-    if (sectlist)
-        *sectlist = NULL;
+    if (sectlist) {
+      *sectlist = NULL;
+    }
 
     /*
      * This can happen when running Xorg -showopts and a module like ati
      * or vmware tries to load its submodules when xf86ConfigLayout is empty
      */
-    if (!xf86ConfigLayout.screens)
-        return 0;
+    if (!xf86ConfigLayout.screens) {
+      return 0;
+    }
 
     /*
      * This is a very important function that matches the device sections
@@ -1339,21 +1390,24 @@ xf86MatchDevice(const char *drivername, GDevPtr ** sectlist)
     /*
      * make the array NULL terminated and return its address
      */
-    if (i)
-        pgdp[i] = NULL;
+    if (i) {
+      pgdp[i] = NULL;
+    }
 
-    if (sectlist)
-        *sectlist = pgdp;
-    else
-        free(pgdp);
+    if (sectlist) {
+      *sectlist = pgdp;
+    } else {
+      free(pgdp);
+    }
     return i;
 }
 
 const char *
 xf86GetVisualName(int visual)
 {
-    if (visual < 0 || visual > DirectColor)
-        return NULL;
+  if (visual < 0 || visual > DirectColor) {
+    return NULL;
+  }
 
     return xf86VisualNames[visual];
 }
@@ -1402,8 +1456,9 @@ xf86LoadDrvSubModule(DriverPtr drv, const char *name)
 
     ret = LoadSubModule(drv->module, name, NULL, NULL, NULL, NULL,
                         &errmaj, &errmin);
-    if (!ret)
-        LoaderErrorMsg(NULL, name, errmaj, errmin);
+    if (!ret) {
+      LoaderErrorMsg(NULL, name, errmaj, errmin);
+    }
     return ret;
 }
 
@@ -1415,8 +1470,9 @@ xf86LoadSubModule(ScrnInfoPtr pScrn, const char *name)
 
     ret = LoadSubModule(pScrn->module, name, NULL, NULL, NULL, NULL,
                         &errmaj, &errmin);
-    if (!ret)
-        LoaderErrorMsg(pScrn->name, name, errmaj, errmin);
+    if (!ret) {
+      LoaderErrorMsg(pScrn->name, name, errmaj, errmin);
+    }
     return ret;
 }
 
@@ -1430,23 +1486,26 @@ xf86LoadOneModule(const char *name, void *opt)
     char *Name;
     void *mod;
 
-    if (!name)
-        return NULL;
+    if (!name) {
+      return NULL;
+    }
 
     /* Normalise the module name */
     Name = xf86NormalizeName(name);
 
     /* Skip empty names */
-    if (Name == NULL)
-        return NULL;
+    if (Name == NULL) {
+      return NULL;
+    }
     if (*Name == '\0') {
         free(Name);
         return NULL;
     }
 
     mod = LoadModule(Name, opt, NULL, &errmaj);
-    if (!mod)
-        LoaderErrorMsg(NULL, Name, errmaj, 0);
+    if (!mod) {
+      LoaderErrorMsg(NULL, Name, errmaj, 0);
+    }
     free(Name);
     return mod;
 }
@@ -1494,19 +1553,22 @@ xf86SetBackingStore(ScreenPtr pScreen)
         useBS = FALSE;
     }
     else {
-        if (xf86GetOptValBool(options, OPTION_BACKING_STORE, &useBS))
-            from = X_CONFIG;
+      if (xf86GetOptValBool(options, OPTION_BACKING_STORE, &useBS)) {
+        from = X_CONFIG;
+      }
 #ifdef COMPOSITE
-        if (from != X_CONFIG)
-            useBS = xf86ReturnOptValBool(options, OPTION_BACKING_STORE,
-                                         !noCompositeExtension);
+      if (from != X_CONFIG) {
+        useBS = xf86ReturnOptValBool(options, OPTION_BACKING_STORE,
+                                     !noCompositeExtension);
+      }
 #endif
     }
     free(options);
     pScreen->backingStoreSupport = useBS ? WhenMapped : NotUseful;
-    if (serverGeneration == 1)
-        xf86DrvMsg(pScreen->myNum, from, "Backing store %s\n",
-                   useBS ? "enabled" : "disabled");
+    if (serverGeneration == 1) {
+      xf86DrvMsg(pScreen->myNum, from, "Backing store %s\n",
+                 useBS ? "enabled" : "disabled");
+    }
 }
 
 typedef enum {
@@ -1538,17 +1600,19 @@ xf86SetSilkenMouse(ScreenPtr pScreen)
         useSM = FALSE;
     }
     else {
-        if (xf86GetOptValBool(options, OPTION_SILKEN_MOUSE, &useSM))
-            from = X_CONFIG;
+      if (xf86GetOptValBool(options, OPTION_SILKEN_MOUSE, &useSM)) {
+        from = X_CONFIG;
+      }
     }
     free(options);
     /*
      * Use silken mouse if requested and if we have threaded input
      */
     pScrn->silkenMouse = useSM && InputThreadEnable;
-    if (serverGeneration == 1)
-        xf86DrvMsg(pScreen->myNum, from, "Silken mouse %s\n",
-                   pScrn->silkenMouse ? "enabled" : "disabled");
+    if (serverGeneration == 1) {
+      xf86DrvMsg(pScreen->myNum, from, "Silken mouse %s\n",
+                 pScrn->silkenMouse ? "enabled" : "disabled");
+    }
 }
 
 static void
@@ -1557,8 +1621,9 @@ xf86ConfigFbEntityInactive(EntityInfoPtr pEnt, EntityProc init,
 {
     ScrnInfoPtr pScrn;
 
-    if ((pScrn = xf86FindScreenForEntity(pEnt->index)))
-        xf86RemoveEntityFromScreen(pScrn, pEnt->index);
+    if ((pScrn = xf86FindScreenForEntity(pEnt->index))) {
+      xf86RemoveEntityFromScreen(pScrn, pEnt->index);
+    }
 }
 
 ScrnInfoPtr
@@ -1568,11 +1633,13 @@ xf86ConfigFbEntity(ScrnInfoPtr pScrn, int scrnFlag, int entityIndex,
 {
     EntityInfoPtr pEnt = xf86GetEntityInfo(entityIndex);
 
-    if (init || enter || leave)
-        FatalError("Legacy entity access functions are unsupported\n");
+    if (init || enter || leave) {
+      FatalError("Legacy entity access functions are unsupported\n");
+    }
 
-    if (!pEnt)
-        return pScrn;
+    if (!pEnt) {
+      return pScrn;
+    }
 
     if (!(pEnt->location.type == BUS_NONE)) {
         free(pEnt);
@@ -1585,8 +1652,9 @@ xf86ConfigFbEntity(ScrnInfoPtr pScrn, int scrnFlag, int entityIndex,
         return pScrn;
     }
 
-    if (!pScrn)
-        pScrn = xf86AllocateScreen(pEnt->driver, scrnFlag);
+    if (!pScrn) {
+      pScrn = xf86AllocateScreen(pEnt->driver, scrnFlag);
+    }
     xf86AddEntityToScreen(pScrn, entityIndex);
 
     free(pEnt);

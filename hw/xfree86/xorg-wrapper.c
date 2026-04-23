@@ -67,8 +67,9 @@ static char *strip(char *s)
     int i;
 
     /* Strip leading whitespace */
-    while (s[0] && is_space(s[0]))
-        s++;
+    while (s[0] && is_space(s[0])) {
+      s++;
+    }
 
     /* Strip trailing whitespace */
     i = strlen(s) - 1;
@@ -88,16 +89,18 @@ static void parse_config(int *allowed, int *needs_root_rights)
     int line = 0;
 
     f = fopen(CONFIG_FILE, "r");
-    if (!f)
-        return;
+    if (!f) {
+      return;
+    }
 
     while (fgets(buf, sizeof(buf), f)) {
         line++;
 
         /* Skip comments and empty lines */
         stripped = strip(buf);
-        if (stripped[0] == '#' || stripped[0] == 0)
-            continue;
+        if (stripped[0] == '#' || stripped[0] == 0) {
+          continue;
+        }
 
         /* Split in a key + value pair */
         equals = strchr(stripped, '=');
@@ -122,32 +125,34 @@ static void parse_config(int *allowed, int *needs_root_rights)
 
         /* And finally process */
         if (strcmp(key, "allowed_users") == 0) {
-            if (strcmp(value, "rootonly") == 0)
-                *allowed = ROOT_ONLY;
-            else if (strcmp(value, "console") == 0)
-                *allowed = CONSOLE_ONLY;
-            else if (strcmp(value, "anybody") == 0)
-                *allowed = ANYBODY;
-            else {
-                fprintf(stderr,
-                    "%s: Invalid value '%s' for 'allowed_users' at %s line %d\n",
-                    progname, value, CONFIG_FILE, line);
-                exit(1);
-            }
+          if (strcmp(value, "rootonly") == 0) {
+            *allowed = ROOT_ONLY;
+          } else if (strcmp(value, "console") == 0) {
+            *allowed = CONSOLE_ONLY;
+          } else if (strcmp(value, "anybody") == 0) {
+            *allowed = ANYBODY;
+          } else {
+            fprintf(
+                stderr,
+                "%s: Invalid value '%s' for 'allowed_users' at %s line %d\n",
+                progname, value, CONFIG_FILE, line);
+            exit(1);
+          }
         }
         else if (strcmp(key, "needs_root_rights") == 0) {
-            if (strcmp(value, "yes") == 0)
-                *needs_root_rights = 1;
-            else if (strcmp(value, "no") == 0)
-                *needs_root_rights = 0;
-            else if (strcmp(value, "auto") == 0)
-                *needs_root_rights = -1;
-            else {
-                fprintf(stderr,
-                    "%s: Invalid value '%s' for 'needs_root_rights' at %s line %d\n",
+          if (strcmp(value, "yes") == 0) {
+            *needs_root_rights = 1;
+          } else if (strcmp(value, "no") == 0) {
+            *needs_root_rights = 0;
+          } else if (strcmp(value, "auto") == 0) {
+            *needs_root_rights = -1;
+          } else {
+            fprintf(stderr,
+                    "%s: Invalid value '%s' for 'needs_root_rights' at %s line "
+                    "%d\n",
                     progname, value, CONFIG_FILE, line);
-                exit(1);
-            }
+            exit(1);
+          }
         }
         else if (strcmp(key, "nice_value") == 0) {
             /* Backward compatibility with older Debian Xwrapper, ignore */
@@ -168,8 +173,9 @@ static int on_console(int fd)
     int r;
 
     r = fstat(fd, &st);
-    if (r == 0 && S_ISCHR(st.st_mode) && major(st.st_rdev) == 4)
+    if (r == 0 && S_ISCHR(st.st_mode) && major(st.st_rdev) == 4) {
       return 1;
+    }
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
     int idx;
 
@@ -217,8 +223,9 @@ int main(int argc, char *argv[])
         case CONSOLE_ONLY:
             /* Some of stdin / stdout / stderr maybe redirected to a file */
             for (i = STDIN_FILENO; i <= STDERR_FILENO; i++) {
-                if (on_console(i))
-                    break;
+              if (on_console(i)) {
+                break;
+              }
             }
             if (i > STDERR_FILENO) {
                 fprintf(stderr, "%s: Only console users are allowed to run the X server\n", argv[0]);
@@ -236,15 +243,17 @@ int main(int argc, char *argv[])
         for (i = 0; i < 16; i++) {
             snprintf(buf, sizeof(buf), DRM_DEV_NAME, DRM_DIR_NAME, i);
             fd = open(buf, O_RDWR);
-            if (fd == -1)
-                continue;
+            if (fd == -1) {
+              continue;
+            }
 
             total_cards++;
 
             memset(&res, 0, sizeof(struct drm_mode_card_res));
             r = ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
-            if (r == 0)
-                kms_cards++;
+            if (r == 0) {
+              kms_cards++;
+            }
 
             close(fd);
         }
@@ -278,10 +287,11 @@ int main(int argc, char *argv[])
     }
 
     argv[0] = buf;
-    if (getuid() == geteuid())
-        (void) execv(argv[0], argv);
-    else
-        (void) execve(argv[0], argv, empty_envp);
+    if (getuid() == geteuid()) {
+      (void)execv(argv[0], argv);
+    } else {
+      (void)execve(argv[0], argv, empty_envp);
+    }
     fprintf(stderr, "%s: Failed to execute %s: %s\n",
         progname, buf, strerror(errno));
     exit(1);

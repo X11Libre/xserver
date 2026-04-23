@@ -14,8 +14,9 @@ void hookServerAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(ServerAccessCallbackParam);
 
-    if (subj->ns->superPower)
-        goto pass;
+    if (subj->ns->superPower) {
+      goto pass;
+    }
 
     switch (client->majorOp) {
         case X_ListFonts:

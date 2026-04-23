@@ -146,14 +146,16 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
 
         xcb_keycode_t *mod_keycodes = xcb_get_modifier_mapping_keycodes(mod_reply);
         CARD8 modmap[MAP_LENGTH] = { 0 };
-        for (j = 0; j < 8; j++)
-            for (i = 0; i < mod_reply->keycodes_per_modifier; i++) {
-                CARD8 keycode;
+        for (j = 0; j < 8; j++) {
+          for (i = 0; i < mod_reply->keycodes_per_modifier; i++) {
+            CARD8 keycode;
 
-                if ((keycode =
-                     mod_keycodes[j * mod_reply->keycodes_per_modifier + i]))
-                    modmap[keycode] |= 1 << j;
+            if ((keycode =
+                     mod_keycodes[j * mod_reply->keycodes_per_modifier + i])) {
+              modmap[keycode] |= 1 << j;
             }
+          }
+        }
 
         InitKeyboardDeviceStruct(pDev, NULL,
                                  xnestBell, xnestChangeKeyboardControl);
@@ -223,19 +225,19 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
     }
     case DEVICE_ON:
         xnestEventMask |= XNEST_KEYBOARD_EVENT_MASK;
-        for (i = 0; i < xnestNumScreens; i++)
-            xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[i],
-                                         XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+        for (i = 0; i < xnestNumScreens; i++) {
+          xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                       xnestDefaultWindows[i],
+                                       XCB_CW_EVENT_MASK, &xnestEventMask);
+        }
         break;
     case DEVICE_OFF:
         xnestEventMask &= ~XNEST_KEYBOARD_EVENT_MASK;
-        for (i = 0; i < xnestNumScreens; i++)
-            xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[i],
-                                         XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+        for (i = 0; i < xnestNumScreens; i++) {
+          xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                       xnestDefaultWindows[i],
+                                       XCB_CW_EVENT_MASK, &xnestEventMask);
+        }
         break;
     case DEVICE_CLOSE:
         break;
@@ -277,14 +279,16 @@ xnestUpdateModifierState(unsigned int state)
     CARD8 mask;
     int xkb_state;
 
-    if (!pDev)
-        return;
+    if (!pDev) {
+      return;
+    }
 
     xkb_state = XkbStateFieldFromRec(&pDev->key->xkbInfo->state);
     state = state & 0xff;
 
-    if (xkb_state == state)
-        return;
+    if (xkb_state == state) {
+      return;
+    }
 
     for (i = 0, mask = 1; i < 8; i++, mask <<= 1) {
         int key;
@@ -293,28 +297,33 @@ xnestUpdateModifierState(unsigned int state)
         if ((xkb_state & mask) && !(state & mask)) {
             int count = keyc->modifierKeyCount[i];
 
-            for (key = 0; key < MAP_LENGTH; key++)
-                if (keyc->xkbInfo->desc->map->modmap[key] & mask) {
-                    if (mask == LockMask) {
-                        xnestQueueKeyEvent(KeyPress, key);
-                        xnestQueueKeyEvent(KeyRelease, key);
-                    }
-                    else if (key_is_down(pDev, key, KEY_PROCESSED))
-                        xnestQueueKeyEvent(KeyRelease, key);
-
-                    if (--count == 0)
-                        break;
+            for (key = 0; key < MAP_LENGTH; key++) {
+              if (keyc->xkbInfo->desc->map->modmap[key] & mask) {
+                if (mask == LockMask) {
+                  xnestQueueKeyEvent(KeyPress, key);
+                  xnestQueueKeyEvent(KeyRelease, key);
+                } else if (key_is_down(pDev, key, KEY_PROCESSED)) {
+                  xnestQueueKeyEvent(KeyRelease, key);
                 }
+
+                if (--count == 0) {
+                  break;
+                }
+              }
+            }
         }
 
         /* Modifier should be down, but isn't */
-        if (!(xkb_state & mask) && (state & mask))
-            for (key = 0; key < MAP_LENGTH; key++)
-                if (keyc->xkbInfo->desc->map->modmap[key] & mask) {
-                    xnestQueueKeyEvent(KeyPress, key);
-                    if (mask == LockMask)
-                        xnestQueueKeyEvent(KeyRelease, key);
-                    break;
-                }
+        if (!(xkb_state & mask) && (state & mask)) {
+          for (key = 0; key < MAP_LENGTH; key++) {
+            if (keyc->xkbInfo->desc->map->modmap[key] & mask) {
+              xnestQueueKeyEvent(KeyPress, key);
+              if (mask == LockMask) {
+                xnestQueueKeyEvent(KeyRelease, key);
+              }
+              break;
+            }
+          }
+        }
     }
 }

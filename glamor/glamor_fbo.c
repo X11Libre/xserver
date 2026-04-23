@@ -39,10 +39,12 @@ glamor_destroy_fbo(glamor_screen_private *glamor_priv,
 {
     glamor_make_current(glamor_priv);
 
-    if (fbo->fb)
-        glDeleteFramebuffers(1, &fbo->fb);
-    if (fbo->tex)
-        glDeleteTextures(1, &fbo->tex);
+    if (fbo->fb) {
+      glDeleteFramebuffers(1, &fbo->fb);
+    }
+    if (fbo->tex) {
+      glDeleteTextures(1, &fbo->tex);
+    }
 
     free(fbo);
 }
@@ -55,8 +57,9 @@ glamor_pixmap_ensure_fb(glamor_screen_private *glamor_priv,
 
     glamor_make_current(glamor_priv);
 
-    if (fbo->fb == 0)
-        glGenFramebuffers(1, &fbo->fb);
+    if (fbo->fb == 0) {
+      glGenFramebuffers(1, &fbo->fb);
+    }
     assert(fbo->tex != 0);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->fb);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -104,8 +107,9 @@ glamor_create_fbo_from_tex(glamor_screen_private *glamor_priv,
     glamor_pixmap_fbo *fbo;
 
     fbo = calloc(1, sizeof(*fbo));
-    if (fbo == NULL)
-        return NULL;
+    if (fbo == NULL) {
+      return NULL;
+    }
 
     fbo->tex = tex;
     fbo->width = w;
@@ -134,8 +138,9 @@ _glamor_create_tex(glamor_screen_private *glamor_priv,
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    if (f->format == GL_RED)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    if (f->format == GL_RED) {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    }
     glamor_priv->suppress_gl_out_of_memory_logging = true;
     glTexImage2D(GL_TEXTURE_2D, 0, f->internalformat, w, h, 0,
                  f->format, f->type, NULL);
@@ -162,8 +167,9 @@ glamor_create_fbo(glamor_screen_private *glamor_priv,
 {
     GLint tex = _glamor_create_tex(glamor_priv, pixmap, w, h);
 
-    if (!tex) /* Texture creation failed due to GL_OUT_OF_MEMORY */
-        return NULL;
+    if (!tex) { /* Texture creation failed due to GL_OUT_OF_MEMORY */
+      return NULL;
+    }
 
     return glamor_create_fbo_from_tex(glamor_priv, pixmap, w, h,
                                       tex, flag);
@@ -194,8 +200,9 @@ glamor_create_fbo_array(glamor_screen_private *glamor_priv,
     block_hcnt = (h + block_h - 1) / block_h;
 
     box_array = calloc(block_wcnt * block_hcnt, sizeof(box_array[0]));
-    if (box_array == NULL)
-        return NULL;
+    if (box_array == NULL) {
+      return NULL;
+    }
 
     fbo_array = calloc(block_wcnt * block_hcnt, sizeof(glamor_pixmap_fbo *));
     if (fbo_array == NULL) {
@@ -223,8 +230,9 @@ glamor_create_fbo_array(glamor_screen_private *glamor_priv,
                                                               pixmap,
                                                               fbo_w, fbo_h,
                                                               GLAMOR_CREATE_PIXMAP_FIXUP);
-            if (fbo_array[i * block_wcnt + j] == NULL)
-                goto cleanup;
+            if (fbo_array[i * block_wcnt + j] == NULL) {
+              goto cleanup;
+            }
         }
     }
 
@@ -236,9 +244,11 @@ glamor_create_fbo_array(glamor_screen_private *glamor_priv,
     return fbo_array[0];
 
  cleanup:
-    for (i = 0; i < block_wcnt * block_hcnt; i++)
-        if (fbo_array[i])
-            glamor_destroy_fbo(glamor_priv, fbo_array[i]);
+   for (i = 0; i < block_wcnt * block_hcnt; i++) {
+     if (fbo_array[i]) {
+       glamor_destroy_fbo(glamor_priv, fbo_array[i]);
+     }
+   }
     free(box_array);
     free(fbo_array);
     return NULL;
@@ -268,12 +278,14 @@ glamor_pixmap_detach_fbo(glamor_pixmap_private *pixmap_priv)
 {
     glamor_pixmap_fbo *fbo;
 
-    if (pixmap_priv == NULL)
-        return NULL;
+    if (pixmap_priv == NULL) {
+      return NULL;
+    }
 
     fbo = pixmap_priv->fbo;
-    if (fbo == NULL)
-        return NULL;
+    if (fbo == NULL) {
+      return NULL;
+    }
 
     pixmap_priv->fbo = NULL;
     return fbo;
@@ -288,8 +300,9 @@ glamor_pixmap_attach_fbo(PixmapPtr pixmap, glamor_pixmap_fbo *fbo)
     pixmap_priv = glamor_get_pixmap_private(pixmap);
     BUG_RETURN(!pixmap_priv);
 
-    if (pixmap_priv->fbo)
-        return;
+    if (pixmap_priv->fbo) {
+      return;
+    }
 
     pixmap_priv->fbo = fbo;
 
@@ -315,15 +328,17 @@ glamor_pixmap_destroy_fbo(PixmapPtr pixmap)
         int i;
         BUG_RETURN(!priv);
 
-        for (i = 0; i < priv->block_wcnt * priv->block_hcnt; i++)
-            glamor_destroy_fbo(glamor_priv, priv->fbo_array[i]);
+        for (i = 0; i < priv->block_wcnt * priv->block_hcnt; i++) {
+          glamor_destroy_fbo(glamor_priv, priv->fbo_array[i]);
+        }
         free(priv->fbo_array);
         priv->fbo_array = NULL;
     }
     else {
         fbo = glamor_pixmap_detach_fbo(priv);
-        if (fbo)
-            glamor_destroy_fbo(glamor_priv, fbo);
+        if (fbo) {
+          glamor_destroy_fbo(glamor_priv, fbo);
+        }
     }
 }
 
@@ -343,21 +358,25 @@ glamor_pixmap_ensure_fbo(PixmapPtr pixmap, int flag)
 
         fbo = glamor_create_fbo(glamor_priv, pixmap, pixmap->drawable.width,
                                 pixmap->drawable.height, flag);
-        if (fbo == NULL)
-            return FALSE;
+        if (fbo == NULL) {
+          return FALSE;
+        }
 
         glamor_pixmap_attach_fbo(pixmap, fbo);
     }
     else {
         /* We do have a fbo, but it may lack of fb or tex. */
-        if (!pixmap_priv->fbo->tex)
-            pixmap_priv->fbo->tex =
-                _glamor_create_tex(glamor_priv, pixmap, pixmap->drawable.width,
-                                   pixmap->drawable.height);
+        if (!pixmap_priv->fbo->tex) {
+          pixmap_priv->fbo->tex =
+              _glamor_create_tex(glamor_priv, pixmap, pixmap->drawable.width,
+                                 pixmap->drawable.height);
+        }
 
-        if (flag != GLAMOR_CREATE_FBO_NO_FBO && pixmap_priv->fbo->fb == 0)
-            if (glamor_pixmap_ensure_fb(glamor_priv, pixmap_priv->fbo) != 0)
-                return FALSE;
+        if (flag != GLAMOR_CREATE_FBO_NO_FBO && pixmap_priv->fbo->fb == 0) {
+          if (glamor_pixmap_ensure_fb(glamor_priv, pixmap_priv->fbo) != 0) {
+            return FALSE;
+          }
+        }
     }
 
     return TRUE;

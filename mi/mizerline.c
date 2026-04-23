@@ -136,10 +136,12 @@ miZeroLine(DrawablePtr pDraw, GCPtr pGC, int mode,      /* Origin or Previous */
      * FillSpans simply cannot take starting coordinates outside of the
      * range of a xPoint component.
      */
-    if (xright > MAX_COORDINATE)
-        xright = MAX_COORDINATE;
-    if (ybottom > MAX_COORDINATE)
-        ybottom = MAX_COORDINATE;
+    if (xright > MAX_COORDINATE) {
+      xright = MAX_COORDINATE;
+    }
+    if (ybottom > MAX_COORDINATE) {
+      ybottom = MAX_COORDINATE;
+    }
 
     /* since we're clipping to the drawable's boundaries & coordinate
      * space boundaries, we're guaranteed that the larger of width/height
@@ -227,16 +229,18 @@ miZeroLine(DrawablePtr pDraw, GCPtr pGC, int mode,      /* Origin or Previous */
                                         adx, ady,
                                         &pt1_clipped, &pt2_clipped,
                                         octant, bias, oc1, oc2);
-                if (result == -1)
-                    continue;
+                if (result == -1) {
+                  continue;
+                }
 
                 length = abs(new_x2 - new_x1);
 
                 /* if we've clipped the endpoint, always draw the full length
                  * of the segment, because then the capstyle doesn't matter
                  */
-                if (pt2_clipped)
-                    length++;
+                if (pt2_clipped) {
+                  length++;
+                }
 
                 if (pt1_clipped) {
                     /* must calculate new error terms */
@@ -287,16 +291,18 @@ miZeroLine(DrawablePtr pDraw, GCPtr pGC, int mode,      /* Origin or Previous */
                                         adx, ady,
                                         &pt1_clipped, &pt2_clipped,
                                         octant, bias, oc1, oc2);
-                if (result == -1)
-                    continue;
+                if (result == -1) {
+                  continue;
+                }
 
                 length = abs(new_y2 - new_y1);
 
                 /* if we've clipped the endpoint, always draw the full length
                  * of the segment, because then the capstyle doesn't matter
                  */
-                if (pt2_clipped)
-                    length++;
+                if (pt2_clipped) {
+                  length++;
+                }
 
                 if (pt1_clipped) {
                     /* must calculate new error terms */
@@ -336,9 +342,9 @@ miZeroLine(DrawablePtr pDraw, GCPtr pGC, int mode,      /* Origin or Previous */
         MI_OUTPUT_POINT(x, y);
     }
 
-    if (Nspans > 0)
-        (*pGC->ops->FillSpans) (pDraw, pGC, Nspans, pspanInit,
-                                pwidthInit, FALSE);
+    if (Nspans > 0) {
+      (*pGC->ops->FillSpans)(pDraw, pGC, Nspans, pspanInit, pwidthInit, FALSE);
+    }
 
     free(pwidthInit);
     free(pspanInit);

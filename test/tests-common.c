@@ -21,8 +21,9 @@ run_test_in_child(const testfunc_t* (*suite)(void), const char *funcname)
         cpid = fork();
         if (cpid) {
             waitpid(cpid, &csts, 0);
-            if (!WIFEXITED(csts))
-                goto child_failed;
+            if (!WIFEXITED(csts)) {
+              goto child_failed;
+            }
             exit_code = WEXITSTATUS(csts);
             if (exit_code != 0) {
     child_failed:

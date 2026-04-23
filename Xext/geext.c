@@ -135,8 +135,9 @@ SGEGenericEvent(xEvent *from, xEvent *to)
         return;
     }
 
-    if (GEExtensions[EXT_MASK(gefrom->extension)].evswap)
-        GEExtensions[EXT_MASK(gefrom->extension)].evswap(gefrom, geto);
+    if (GEExtensions[EXT_MASK(gefrom->extension)].evswap) {
+      GEExtensions[EXT_MASK(gefrom->extension)].evswap(gefrom, geto);
+    }
 }
 
 /* Init extension, register at server.
@@ -146,13 +147,15 @@ SGEGenericEvent(xEvent *from, xEvent *to)
 void
 GEExtensionInit(void)
 {
-    if (!dixRegisterPrivateKey
-        (&GEClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(GEClientInfoRec)))
-        FatalError("GEExtensionInit: GE private request failed.\n");
+  if (!dixRegisterPrivateKey(&GEClientPrivateKeyRec, PRIVATE_CLIENT,
+                             sizeof(GEClientInfoRec))) {
+    FatalError("GEExtensionInit: GE private request failed.\n");
+  }
 
-    if (!AddExtension(GE_NAME, 0, GENumberErrors, ProcGEDispatch, ProcGEDispatch,
-                      GEResetProc, StandardMinorOpcode))
-        FatalError("GEInit: AddExtensions failed.\n");
+  if (!AddExtension(GE_NAME, 0, GENumberErrors, ProcGEDispatch, ProcGEDispatch,
+                    GEResetProc, StandardMinorOpcode)) {
+    FatalError("GEInit: AddExtensions failed.\n");
+  }
 
     memset(GEExtensions, 0, sizeof(GEExtensions));
     EventSwapVector[GenericEvent] = (EventSwapPtr) SGEGenericEvent;
@@ -173,8 +176,9 @@ void
 GERegisterExtension(int extension,
                     void (*ev_swap) (xGenericEvent *from, xGenericEvent *to))
 {
-    if (EXT_MASK(extension) >= MAXEXTENSIONS)
-        FatalError("GE: extension > MAXEXTENSIONS. This should not happen.\n");
+  if (EXT_MASK(extension) >= MAXEXTENSIONS) {
+    FatalError("GE: extension > MAXEXTENSIONS. This should not happen.\n");
+  }
 
     /* extension opcodes are > 128, might as well save some space here */
     GEExtensions[EXT_MASK(extension)].evswap = ev_swap;

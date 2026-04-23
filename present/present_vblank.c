@@ -30,29 +30,34 @@ present_vblank_notify(present_vblank_ptr vblank, CARD8 kind, CARD8 mode, uint64_
 {
     int n;
 
-    if (vblank->window)
-        present_send_complete_notify(vblank->window, kind, mode, vblank->serial, ust, crtc_msc - vblank->msc_offset);
+    if (vblank->window) {
+      present_send_complete_notify(vblank->window, kind, mode, vblank->serial,
+                                   ust, crtc_msc - vblank->msc_offset);
+    }
     for (n = 0; n < vblank->num_notifies; n++) {
         WindowPtr   window = vblank->notifies[n].window;
         CARD32      serial = vblank->notifies[n].serial;
 
-        if (window)
-            present_send_complete_notify(window, kind, mode, serial, ust, crtc_msc - vblank->msc_offset);
+        if (window) {
+          present_send_complete_notify(window, kind, mode, serial, ust,
+                                       crtc_msc - vblank->msc_offset);
+        }
     }
 }
 
 static Bool
 present_want_async_flip(uint32_t options, uint32_t capabilities)
 {
-	if (options & PresentOptionAsync &&
-	    capabilities & PresentCapabilityAsync)
-		return TRUE;
+  if (options & PresentOptionAsync && capabilities & PresentCapabilityAsync) {
+    return TRUE;
+  }
 
-	if (options & PresentOptionAsyncMayTear &&
-	    capabilities & PresentCapabilityAsyncMayTear)
-		return TRUE;
+  if (options & PresentOptionAsyncMayTear &&
+      capabilities & PresentCapabilityAsyncMayTear) {
+    return TRUE;
+  }
 
-	return FALSE;
+        return FALSE;
 }
 
 /* The memory vblank points to must be 0-initialized before calling this function.
@@ -104,20 +109,23 @@ present_vblank_init(present_vblank_ptr vblank,
     if (pixmap) {
         vblank->kind = PresentCompleteKindPixmap;
         pixmap->refcnt++;
-    } else
-        vblank->kind = PresentCompleteKindNotifyMSC;
+    } else {
+      vblank->kind = PresentCompleteKindNotifyMSC;
+    }
 
     vblank->serial = serial;
 
     if (valid) {
         vblank->valid = RegionDuplicate(valid);
-        if (!vblank->valid)
-            goto no_mem;
+        if (!vblank->valid) {
+          goto no_mem;
+        }
     }
     if (update) {
         vblank->update = RegionDuplicate(update);
-        if (!vblank->update)
-            goto no_mem;
+        if (!vblank->update) {
+          goto no_mem;
+        }
     }
 
     vblank->x_off = x_off;
@@ -147,14 +155,16 @@ present_vblank_init(present_vblank_ptr vblank,
 
     if (wait_fence) {
         vblank->wait_fence = present_fence_create(wait_fence);
-        if (!vblank->wait_fence)
-            goto no_mem;
+        if (!vblank->wait_fence) {
+          goto no_mem;
+        }
     }
 
     if (idle_fence) {
         vblank->idle_fence = present_fence_create(idle_fence);
-        if (!vblank->idle_fence)
-            goto no_mem;
+        if (!vblank->idle_fence) {
+          goto no_mem;
+        }
     }
 
 #ifdef DRI3
@@ -173,11 +183,14 @@ present_vblank_init(present_vblank_ptr vblank,
     }
 #endif /* DRI3 */
 
-    if (pixmap)
-        DebugPresent(("q %" PRIu64 " %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 " (crtc %p) flip %d vsync %d serial %d\n",
-                      vblank->event_id, vblank, target_msc,
-                      vblank->pixmap->drawable.id, vblank->window->drawable.id,
-                      target_crtc, vblank->flip, vblank->sync_flip, vblank->serial));
+    if (pixmap) {
+      DebugPresent(("q %" PRIu64 " %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32
+                    " (crtc %p) flip %d vsync %d serial %d\n",
+                    vblank->event_id, vblank, target_msc,
+                    vblank->pixmap->drawable.id, vblank->window->drawable.id,
+                    target_crtc, vblank->flip, vblank->sync_flip,
+                    vblank->serial));
+    }
     return TRUE;
 
 no_mem:
@@ -211,18 +224,20 @@ present_vblank_create(WindowPtr window,
 {
     present_vblank_ptr vblank = calloc(1, sizeof(present_vblank_rec));
 
-    if (!vblank)
-        return NULL;
+    if (!vblank) {
+      return NULL;
+    }
 
     if (present_vblank_init(vblank, window, pixmap, serial, valid, update,
                             x_off, y_off, target_crtc, wait_fence, idle_fence,
 #ifdef DRI3
-                            acquire_syncobj, release_syncobj,
-                            acquire_point, release_point,
+                            acquire_syncobj, release_syncobj, acquire_point,
+                            release_point,
 #endif /* DRI3 */
                             options, capabilities, notifies, num_notifies,
-                            target_msc, crtc_msc))
-        return vblank;
+                            target_msc, crtc_msc)) {
+      return vblank;
+    }
 
     present_vblank_destroy(vblank);
     return NULL;
@@ -237,12 +252,14 @@ present_vblank_scrap(present_vblank_ptr vblank)
                   vblank->crtc));
 
 #ifdef DRI3
-    if (vblank->release_syncobj)
-        vblank->release_syncobj->signal(vblank->release_syncobj,
-                                        vblank->release_point);
-    else
+    if (vblank->release_syncobj) {
+      vblank->release_syncobj->signal(vblank->release_syncobj,
+                                      vblank->release_point);
+    } else {
 #endif /* DRI3 */
-        present_pixmap_idle(vblank->pixmap, vblank->window, vblank->serial, vblank->idle_fence);
+      present_pixmap_idle(vblank->pixmap, vblank->window, vblank->serial,
+                          vblank->idle_fence);
+    }
 
     present_fence_destroy(vblank->idle_fence);
     dixDestroyPixmap(vblank->pixmap, vblank->pixmap->drawable.id);
@@ -266,23 +283,29 @@ present_vblank_destroy(present_vblank_ptr vblank)
                   vblank->window ? vblank->window->drawable.id : 0));
 
     /* Drop pixmap reference */
-    if (vblank->pixmap)
-        dixDestroyPixmap(vblank->pixmap, vblank->pixmap->drawable.id);
+    if (vblank->pixmap) {
+      dixDestroyPixmap(vblank->pixmap, vblank->pixmap->drawable.id);
+    }
 
     /* Free regions */
-    if (vblank->valid)
-        RegionDestroy(vblank->valid);
-    if (vblank->update)
-        RegionDestroy(vblank->update);
+    if (vblank->valid) {
+      RegionDestroy(vblank->valid);
+    }
+    if (vblank->update) {
+      RegionDestroy(vblank->update);
+    }
 
-    if (vblank->wait_fence)
-        present_fence_destroy(vblank->wait_fence);
+    if (vblank->wait_fence) {
+      present_fence_destroy(vblank->wait_fence);
+    }
 
-    if (vblank->idle_fence)
-        present_fence_destroy(vblank->idle_fence);
+    if (vblank->idle_fence) {
+      present_fence_destroy(vblank->idle_fence);
+    }
 
-    if (vblank->notifies)
-        present_destroy_notifies(vblank->notifies, vblank->num_notifies);
+    if (vblank->notifies) {
+      present_destroy_notifies(vblank->notifies, vblank->num_notifies);
+    }
 
 #ifdef DRI3
     if (vblank->efd >= 0) {
@@ -290,13 +313,13 @@ present_vblank_destroy(present_vblank_ptr vblank)
         close(vblank->efd);
     }
 
-    if (vblank->acquire_syncobj &&
-        --vblank->acquire_syncobj->refcount == 0)
-        vblank->acquire_syncobj->free(vblank->acquire_syncobj);
+    if (vblank->acquire_syncobj && --vblank->acquire_syncobj->refcount == 0) {
+      vblank->acquire_syncobj->free(vblank->acquire_syncobj);
+    }
 
-    if (vblank->release_syncobj &&
-        --vblank->release_syncobj->refcount == 0)
-        vblank->release_syncobj->free(vblank->release_syncobj);
+    if (vblank->release_syncobj && --vblank->release_syncobj->refcount == 0) {
+      vblank->release_syncobj->free(vblank->release_syncobj);
+    }
 #endif /* DRI3 */
 
     free(vblank);

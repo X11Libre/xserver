@@ -222,13 +222,13 @@ resourceTypeAtom(int i)
     CARD32 ret;
 
     const char *name = LookupResourceName(i);
-    if (strcmp(name, XREGISTRY_UNKNOWN))
-        ret = dixAddAtom(name);
-    else {
-        char buf[40];
+    if (strcmp(name, XREGISTRY_UNKNOWN)) {
+      ret = dixAddAtom(name);
+    } else {
+      char buf[40];
 
-        snprintf(buf, sizeof(buf), "Unregistered resource %i", i + 1);
-        ret = dixAddAtom(buf);
+      snprintf(buf, sizeof(buf), "Unregistered resource %i", i + 1);
+      ret = dixAddAtom(buf);
     }
 
     return ret;
@@ -250,8 +250,9 @@ ProcXResQueryClientResources(ClientPtr client)
     }
 
     int *counts = calloc(lastResourceType + 1, sizeof(int));
-    if (!counts)
-        return BadAlloc;
+    if (!counts) {
+      return BadAlloc;
+    }
 
     FindAllClientResources(resClient, ResFindAllRes, counts);
 
@@ -260,8 +261,9 @@ ProcXResQueryClientResources(ClientPtr client)
     int num_types = 0;
     for (int i = 0; i <= lastResourceType; i++) {
         /* dont report currently unused resource types */
-        if (!(counts[i]))
-            continue;
+        if (!(counts[i])) {
+          continue;
+        }
 
         /* write xXResType */
         x_rpcbuf_write_CARD32(&rpcbuf, resourceTypeAtom(i + 1));
@@ -389,8 +391,9 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
     if (WillConstructMask(client, mask, ctx, X_XResLocalClientPIDMask)) {
         pid_t pid = GetClientPid(client);
 
-        if (pid == -1)
-            return TRUE;
+        if (pid == -1) {
+          return TRUE;
+        }
 
         xXResClientIdValue reply = {
             .spec.client = client->clientAsMask,
@@ -835,8 +838,9 @@ ProcXResQueryResourceBytes (ClientPtr client)
 
     if (client->swapped) {
         xXResResourceIdSpec *specs = (void*) ((char*) stuff + sizeof(*stuff));
-        for (int c = 0; c < stuff->numSpecs; ++c)
-            SwapXResResourceIdSpec(specs + c);
+        for (int c = 0; c < stuff->numSpecs; ++c) {
+          SwapXResResourceIdSpec(specs + c);
+        }
     }
 
     ConstructResourceBytesCtx ctx;
@@ -866,9 +870,12 @@ ProcXResQueryResourceBytes (ClientPtr client)
             x_rpcbuf_write_CARD8s(&rpcbuf, FRAGMENT_DATA(it), it->bytes);
         }
 
-        if (rpcbuf.wpos != ctx.resultBytes)
-            LogMessage(X_WARNING, "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
-                       (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
+        if (rpcbuf.wpos != ctx.resultBytes) {
+          LogMessage(
+              X_WARNING,
+              "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
+              (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
+        }
 
         rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }

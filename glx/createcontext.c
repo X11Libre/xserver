@@ -38,23 +38,27 @@
 static Bool
 validate_GL_version(int major_version, int minor_version)
 {
-    if (major_version <= 0 || minor_version < 0)
-        return FALSE;
+  if (major_version <= 0 || minor_version < 0) {
+    return FALSE;
+  }
 
     switch (major_version) {
     case 1:
-        if (minor_version > 5)
-            return FALSE;
+      if (minor_version > 5) {
+        return FALSE;
+      }
         break;
 
     case 2:
-        if (minor_version > 1)
-            return FALSE;
+      if (minor_version > 1) {
+        return FALSE;
+      }
         break;
 
     case 3:
-        if (minor_version > 3)
-            return FALSE;
+      if (minor_version > 3) {
+        return FALSE;
+      }
         break;
 
     default:
@@ -118,8 +122,9 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
     const unsigned expected_size = (sizeof(xGLXCreateContextAttribsARBReq)
                                     + (req->numAttribs * 8)) / 4;
 
-    if (req->length != expected_size)
-        return BadLength;
+    if (req->length != expected_size) {
+      return BadLength;
+    }
 
     /* The GLX_ARB_create_context spec says:
      *
@@ -144,9 +149,10 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
     /* Validate the context with which the new context should share resources.
      */
     if (req->shareList != None) {
-        if (!validGlxContext(client, req->shareList, DixReadAccess,
-                             &shareCtx, &err))
-            return err;
+      if (!validGlxContext(client, req->shareList, DixReadAccess, &shareCtx,
+                           &err)) {
+        return err;
+      }
 
         /* The crazy condition is because C doesn't have a logical XOR
          * operator.  Comparing directly for equality may fail if one is 1 and
@@ -189,8 +195,9 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
 
             case GLX_RENDER_TYPE:
                 /* Not valid for GLX_EXT_no_config_context */
-                if (!req->fbconfig)
-                    return BadValue;
+                if (!req->fbconfig) {
+                  return BadValue;
+                }
                 render_type = attribs[2 * i + 1];
                 break;
 
@@ -200,25 +207,29 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
 
             case GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB:
                 reset = attribs[2 * i + 1];
-                if (reset != GLX_NO_RESET_NOTIFICATION_ARB
-                    && reset != GLX_LOSE_CONTEXT_ON_RESET_ARB)
-                    return BadValue;
+                if (reset != GLX_NO_RESET_NOTIFICATION_ARB &&
+                    reset != GLX_LOSE_CONTEXT_ON_RESET_ARB) {
+                  return BadValue;
+                }
                 break;
 
             case GLX_CONTEXT_RELEASE_BEHAVIOR_ARB:
                 flush = attribs[2 * i + 1];
-                if (flush != GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB
-                    && flush != GLX_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB)
-                    return BadValue;
+                if (flush != GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB &&
+                    flush != GLX_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB) {
+                  return BadValue;
+                }
                 break;
 
             case GLX_SCREEN:
                 /* Only valid for GLX_EXT_no_config_context */
-                if (req->fbconfig)
-                    return BadValue;
+                if (req->fbconfig) {
+                  return BadValue;
+                }
                 /* Must match the value in the request header */
-                if (attribs[2 * i + 1] != req->screen)
-                    return BadValue;
+                if (attribs[2 * i + 1] != req->screen) {
+                  return BadValue;
+                }
                 break;
 
             case GLX_CONTEXT_OPENGL_NO_ERROR_ARB:
@@ -226,8 +237,9 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
                 break;
 
             default:
-                if (!req->isDirect)
-                    return BadValue;
+              if (!req->isDirect) {
+                return BadValue;
+              }
                 break;
             }
         }
@@ -253,21 +265,26 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
      *       - Forward-compatible flag set and major version < 3
      *       - Color index rendering and major version >= 3"
      */
-    if (!validate_GL_version(major_version, minor_version))
-        return BadMatch;
+    if (!validate_GL_version(major_version, minor_version)) {
+      return BadMatch;
+    }
 
-    if (major_version < 3
-        && ((flags & GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB) != 0))
-        return BadMatch;
+    if (major_version < 3 &&
+        ((flags & GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB) != 0)) {
+      return BadMatch;
+    }
 
-    if (major_version >= 3 && render_type == GLX_COLOR_INDEX_TYPE)
-        return BadMatch;
+    if (major_version >= 3 && render_type == GLX_COLOR_INDEX_TYPE) {
+      return BadMatch;
+    }
 
-    if (!validate_render_type(render_type))
-        return BadValue;
+    if (!validate_render_type(render_type)) {
+      return BadValue;
+    }
 
-    if ((flags & ~ALL_VALID_FLAGS) != 0)
-        return BadValue;
+    if ((flags & ~ALL_VALID_FLAGS) != 0) {
+      return BadValue;
+    }
 
     /* The GLX_ARB_create_context_profile spec says:
      *
@@ -297,8 +314,9 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
      *     "* If the reset notification behavior of <share_context> and the
      *        newly created context are different, BadMatch is generated."
      */
-    if (shareCtx != NULL && shareCtx->resetNotificationStrategy != reset)
-        return BadMatch;
+    if (shareCtx != NULL && shareCtx->resetNotificationStrategy != reset) {
+      return BadMatch;
+    }
 
     /* There is no GLX protocol for desktop OpenGL versions after 1.4.  There
      * is no GLX protocol for any version of OpenGL ES.  If the application is
@@ -341,8 +359,9 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
                                        &err);
     }
 
-    if (ctx == NULL)
-        return err;
+    if (ctx == NULL) {
+      return err;
+    }
 
     ctx->pGlxScreen = glxScreen;
     ctx->config = config;

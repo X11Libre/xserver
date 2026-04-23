@@ -85,8 +85,9 @@ winCheckScreenAiglxIsSupported(ScreenPtr pScreen)
     winPrivScreenPtr pWinScreen = winGetScreenPriv(pScreen);
     winScreenInfoPtr pScreenInfo = pWinScreen->pScreenInfo;
 
-    if (pScreenInfo->fMultiWindow)
-        return TRUE;
+    if (pScreenInfo->fMultiWindow) {
+      return TRUE;
+    }
 
     return FALSE;
 }

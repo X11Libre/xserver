@@ -58,8 +58,9 @@ shadowRedisplay(ScreenPtr pScreen)
     shadowBuf(pScreen);
     RegionPtr pRegion;
 
-    if (!pBuf || !pBuf->pDamage || !pBuf->update)
-        return;
+    if (!pBuf || !pBuf->pDamage || !pBuf->update) {
+      return;
+    }
     pRegion = DamageRegion(pBuf->pDamage);
     if (RegionNotEmpty(pRegion)) {
         (*pBuf->update) (pScreen, pBuf);
@@ -88,8 +89,9 @@ shadowGetImage(DrawablePtr pDrawable, int sx, int sy, int w, int h,
     shadowBuf(pScreen);
 
     /* Many apps use GetImage to sync with the visible frame buffer */
-    if (pDrawable->type == DRAWABLE_WINDOW)
-        shadowRedisplay(pScreen);
+    if (pDrawable->type == DRAWABLE_WINDOW) {
+      shadowRedisplay(pScreen);
+    }
     unwrap(pBuf, pScreen, GetImage);
     pScreen->GetImage(pDrawable, sx, sy, w, h, format, planeMask, pdstLine);
     wrap(pBuf, pScreen, GetImage);
@@ -112,15 +114,18 @@ Bool
 shadowSetup(ScreenPtr pScreen)
 {
 
-    if (!dixRegisterPrivateKey(&shadowScrPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+  if (!dixRegisterPrivateKey(&shadowScrPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+    return FALSE;
+  }
 
-    if (!DamageSetup(pScreen))
-        return FALSE;
+  if (!DamageSetup(pScreen)) {
+    return FALSE;
+  }
 
     shadowBufPtr pBuf = calloc(1, sizeof(shadowBufRec));
-    if (!pBuf)
-        return FALSE;
+    if (!pBuf) {
+      return FALSE;
+    }
     pBuf->pDamage = DamageCreate((DamageReportFunc) NULL,
                                  (DamageDestroyFunc) NULL,
                                  DamageReportNone, TRUE, pScreen, pScreen);

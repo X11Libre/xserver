@@ -85,22 +85,26 @@ load_extension_config(void)
     XF86LoadPtr modp;
 
     /* Only the best. */
-    if (!mod_con)
-        return;
+    if (!mod_con) {
+      return;
+    }
 
     nt_list_for_each_entry(modp, mod_con->mod_load_lst, list.next) {
         InputOption *opt;
 
-        if (strcasecmp(modp->load_name, "extmod") != 0)
-            continue;
+        if (strcasecmp(modp->load_name, "extmod") != 0) {
+          continue;
+        }
 
         /* extmod options are of the form "omit <extension-name>" */
         nt_list_for_each_entry(opt, modp->load_opt, list.next) {
             const char *key = input_option_get_key(opt);
-            if (strncasecmp(key, "omit", 4) != 0 || strlen(key) < 5)
-                continue;
-            if (EnableDisableExtension(key + 4, FALSE))
-                xf86MarkOptionUsed(opt);
+            if (strncasecmp(key, "omit", 4) != 0 || strlen(key) < 5) {
+              continue;
+            }
+            if (EnableDisableExtension(key + 4, FALSE)) {
+              xf86MarkOptionUsed(opt);
+            }
         }
 
 #ifdef XSELINUX

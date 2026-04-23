@@ -79,14 +79,15 @@ enable_seat(struct libseat *seat, void *userdata)
 
     xf86VTEnter();
     /* Reactivate all input devices */
-    for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next)
-        if (pInfo->flags & XI86_SERVER_FD){
-            if (xf86CheckIntOption(pInfo->options, "libseat_id", -1) > 0){
-                int fd = -1, paused = FALSE;
-                seatd_libseat_open_device(pInfo, &fd, &paused);
-                xf86EnableInputDeviceForVTSwitch(pInfo);
-            }
+    for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next) {
+      if (pInfo->flags & XI86_SERVER_FD) {
+        if (xf86CheckIntOption(pInfo->options, "libseat_id", -1) > 0) {
+          int fd = -1, paused = FALSE;
+          seatd_libseat_open_device(pInfo, &fd, &paused);
+          xf86EnableInputDeviceForVTSwitch(pInfo);
         }
+      }
+    }
     xf86InputEnableVTProbe(); /* Add any paused input devices */
     #ifdef XSERVER_PLATFORM_BUS
     xf86platformVTProbe(); /* Probe for outputs */
@@ -147,8 +148,9 @@ libseat_handle_events(int timeout)
 {
     int ret;
 
-    while ((ret = libseat_dispatch(seat_info.client, timeout)) > 0)
-        LogMessage(X_INFO, "seatd_libseat handled %i events\n", ret);
+    while ((ret = libseat_dispatch(seat_info.client, timeout)) > 0) {
+      LogMessage(X_INFO, "seatd_libseat handled %i events\n", ret);
+    }
     if (ret == -1) {
         LogMessage(X_ERROR, "libseat_dispatch() failed: %s\n", strerror(errno));
         return -1;
@@ -174,8 +176,9 @@ log_libseat(enum libseat_log_level level, const char *fmt, va_list args)
     char *xfmt;
 
     xfmt = malloc(xfmt_size);
-    if (xfmt == NULL)
-        return;
+    if (xfmt == NULL) {
+      return;
+    }
     snprintf(xfmt, xfmt_size, "%s\n", fmt);
 
     switch (level) {
@@ -354,8 +357,9 @@ seatd_libseat_close_device(InputInfoPtr p)
     int fd = xf86CheckIntOption(p->options, "fd", -1);
     int id = xf86CheckIntOption(p->options, "libseat_id", -1);
 
-    if (!libseat_active())
-        return;
+    if (!libseat_active()) {
+      return;
+    }
     LogMessage(X_INFO, "seatd_libseat try close %s (%d:%d)\n", path, id, fd);
     if (fd < 0) {
         LogMessage(X_ERROR, "seatd_libseat device not open (%s)\n", path);

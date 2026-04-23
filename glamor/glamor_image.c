@@ -44,20 +44,25 @@ glamor_put_image_gl(DrawablePtr drawable, GCPtr gc, int depth, int x, int y,
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
 
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        return FALSE;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      return FALSE;
+    }
 
-    if (gc->alu != GXcopy)
-        goto bail;
+    if (gc->alu != GXcopy) {
+      goto bail;
+    }
 
-    if (!glamor_pm_is_solid(gc->depth, gc->planemask))
-        goto bail;
+    if (!glamor_pm_is_solid(gc->depth, gc->planemask)) {
+      goto bail;
+    }
 
-    if (format == XYPixmap && drawable->depth == 1 && leftPad == 0)
-        format = ZPixmap;
+    if (format == XYPixmap && drawable->depth == 1 && leftPad == 0) {
+      format = ZPixmap;
+    }
 
-    if (format != ZPixmap)
-        goto bail;
+    if (format != ZPixmap) {
+      goto bail;
+    }
 
     x += drawable->x;
     y += drawable->y;
@@ -89,8 +94,9 @@ static void
 glamor_put_image_bail(DrawablePtr drawable, GCPtr gc, int depth, int x, int y,
                       int w, int h, int leftPad, int format, char *bits)
 {
-    if (glamor_prepare_access_box(drawable, GLAMOR_ACCESS_RW, x, y, w, h))
-        fbPutImage(drawable, gc, depth, x, y, w, h, leftPad, format, bits);
+  if (glamor_prepare_access_box(drawable, GLAMOR_ACCESS_RW, x, y, w, h)) {
+    fbPutImage(drawable, gc, depth, x, y, w, h, leftPad, format, bits);
+  }
     glamor_finish_access(drawable);
 }
 
@@ -98,8 +104,10 @@ void
 glamor_put_image(DrawablePtr drawable, GCPtr gc, int depth, int x, int y,
                  int w, int h, int leftPad, int format, char *bits)
 {
-    if (glamor_put_image_gl(drawable, gc, depth, x, y, w, h, leftPad, format, bits))
-        return;
+  if (glamor_put_image_gl(drawable, gc, depth, x, y, w, h, leftPad, format,
+                          bits)) {
+    return;
+  }
     glamor_put_image_bail(drawable, gc, depth, x, y, w, h, leftPad, format, bits);
 }
 
@@ -114,11 +122,13 @@ glamor_get_image_gl(DrawablePtr drawable, int x, int y, int w, int h,
     int         off_x, off_y;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
-    if (format != ZPixmap)
-        goto bail;
+    if (format != ZPixmap) {
+      goto bail;
+    }
 
     glamor_get_drawable_deltas(drawable, pixmap, &off_x, &off_y);
     box.x1 = x;
@@ -135,8 +145,9 @@ glamor_get_image_gl(DrawablePtr drawable, int x, int y, int w, int h,
         FbStip *dst = (void *)d;
         uint32_t dstStride = byte_stride / sizeof(FbStip);
 
-        for (int i = 0; i < dstStride * h; i++)
-            dst[i] &= pm;
+        for (int i = 0; i < dstStride * h; i++) {
+          dst[i] &= pm;
+        }
     }
 
     return TRUE;
@@ -148,8 +159,9 @@ static void
 glamor_get_image_bail(DrawablePtr drawable, int x, int y, int w, int h,
                       unsigned int format, unsigned long plane_mask, char *d)
 {
-    if (glamor_prepare_access_box(drawable, GLAMOR_ACCESS_RO, x, y, w, h))
-        fbGetImage(drawable, x, y, w, h, format, plane_mask, d);
+  if (glamor_prepare_access_box(drawable, GLAMOR_ACCESS_RO, x, y, w, h)) {
+    fbGetImage(drawable, x, y, w, h, format, plane_mask, d);
+  }
     glamor_finish_access(drawable);
 }
 
@@ -157,7 +169,8 @@ void
 glamor_get_image(DrawablePtr drawable, int x, int y, int w, int h,
                  unsigned int format, unsigned long plane_mask, char *d)
 {
-    if (glamor_get_image_gl(drawable, x, y, w, h, format, plane_mask, d))
-        return;
+  if (glamor_get_image_gl(drawable, x, y, w, h, format, plane_mask, d)) {
+    return;
+  }
     glamor_get_image_bail(drawable, x, y, w, h, format, plane_mask, d);
 }

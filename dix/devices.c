@@ -127,9 +127,11 @@ DeviceSetTransform(DeviceIntPtr dev, float *transform_data)
     scale.m[1][2] = dev->valuator->axes[1].min_value;
 
     /* transform */
-    for (int y = 0; y < 3; y++)
-        for (int x = 0; x < 3; x++)
-            transform.m[y][x] = *transform_data++;
+    for (int y = 0; y < 3; y++) {
+      for (int x = 0; x < 3; x++) {
+        transform.m[y][x] = *transform_data++;
+      }
+    }
 
     pixman_f_transform_multiply(&dev->scale_and_transform, &scale, &transform);
 
@@ -154,39 +156,46 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
                   BOOL checkonly)
 {
     if (property == XIGetKnownProperty(XI_PROP_ENABLED)) {
-        if (prop->format != 8 || prop->type != XA_INTEGER || prop->size != 1)
-            return BadValue;
+      if (prop->format != 8 || prop->type != XA_INTEGER || prop->size != 1) {
+        return BadValue;
+      }
 
         /* Don't allow disabling of VCP/VCK or XTest devices */
-        if ((dev == inputInfo.pointer ||
-             dev == inputInfo.keyboard ||
-             IsXTestDevice(dev, NULL))
-            &&!(*(CARD8 *) prop->data))
-            return BadAccess;
+        if ((dev == inputInfo.pointer || dev == inputInfo.keyboard ||
+             IsXTestDevice(dev, NULL)) &&
+            !(*(CARD8 *)prop->data)) {
+          return BadAccess;
+        }
 
         if (!checkonly) {
-            if ((*((CARD8 *) prop->data)) && !dev->enabled)
-                EnableDevice(dev, TRUE);
-            else if (!(*((CARD8 *) prop->data)) && dev->enabled)
-                DisableDevice(dev, TRUE);
+          if ((*((CARD8 *)prop->data)) && !dev->enabled) {
+            EnableDevice(dev, TRUE);
+          } else if (!(*((CARD8 *)prop->data)) && dev->enabled) {
+            DisableDevice(dev, TRUE);
+          }
         }
     }
     else if (property == XIGetKnownProperty(XI_PROP_TRANSFORM)) {
         float *f = (float *) prop->data;
 
         if (prop->format != 32 || prop->size != 9 ||
-            prop->type != XIGetKnownProperty(XATOM_FLOAT))
+            prop->type != XIGetKnownProperty(XATOM_FLOAT)) {
+          return BadValue;
+        }
+
+        for (int i = 0; i < 9; i++) {
+          if (!isfinite(f[i])) {
             return BadValue;
+          }
+        }
 
-        for (int i = 0; i < 9; i++)
-            if (!isfinite(f[i]))
-                return BadValue;
+        if (!dev->valuator) {
+          return BadMatch;
+        }
 
-        if (!dev->valuator)
-            return BadMatch;
-
-        if (!checkonly)
-            DeviceSetTransform(dev, f);
+        if (!checkonly) {
+          DeviceSetTransform(dev, f);
+        }
     }
 
     return Success;
@@ -198,15 +207,18 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
 static int
 PairDevices(DeviceIntPtr ptr, DeviceIntPtr kbd)
 {
-    if (!ptr)
-        return BadDevice;
+  if (!ptr) {
+    return BadDevice;
+  }
 
     /* Don't allow pairing for slave devices */
-    if (!InputDevIsMaster(ptr) || !InputDevIsMaster(kbd))
-        return BadDevice;
+    if (!InputDevIsMaster(ptr) || !InputDevIsMaster(kbd)) {
+      return BadDevice;
+    }
 
-    if (ptr->spriteInfo->paired)
-        return BadDevice;
+    if (ptr->spriteInfo->paired) {
+      return BadDevice;
+    }
 
     if (kbd->spriteInfo->spriteOwner) {
         free(kbd->spriteInfo->sprite);
@@ -226,10 +238,12 @@ PairDevices(DeviceIntPtr ptr, DeviceIntPtr kbd)
 static DeviceIntPtr
 NextFreePointerDevice(void)
 {
-    for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next)
-        if (InputDevIsMaster(dev) &&
-            dev->spriteInfo->spriteOwner && !dev->spriteInfo->paired)
-            return dev;
+  for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
+    if (InputDevIsMaster(dev) && dev->spriteInfo->spriteOwner &&
+        !dev->spriteInfo->paired) {
+      return dev;
+    }
+  }
     return NULL;
 }
 
@@ -251,19 +265,27 @@ AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
 
     /* Find next available id, 0 and 1 are reserved */
     memset(devind, 0, sizeof(char) * MAXDEVICES);
-    for (DeviceIntPtr devtmp = inputInfo.devices; devtmp; devtmp = devtmp->next)
-        devind[devtmp->id]++;
-    for (DeviceIntPtr devtmp = inputInfo.off_devices; devtmp; devtmp = devtmp->next)
-        devind[devtmp->id]++;
-    for (devid = 2; devid < MAXDEVICES && devind[devid]; devid++);
+    for (DeviceIntPtr devtmp = inputInfo.devices; devtmp;
+         devtmp = devtmp->next) {
+      devind[devtmp->id]++;
+    }
+    for (DeviceIntPtr devtmp = inputInfo.off_devices; devtmp;
+         devtmp = devtmp->next) {
+      devind[devtmp->id]++;
+    }
+    for (devid = 2; devid < MAXDEVICES && devind[devid]; devid++) {
+      ;
+    }
 
-    if (devid >= MAXDEVICES)
-        return (DeviceIntPtr) NULL;
+    if (devid >= MAXDEVICES) {
+      return (DeviceIntPtr)NULL;
+    }
     dev = calloc(1,
                  sizeof(DeviceIntRec) +
                  sizeof(SpriteInfoRec));
-    if (!dev)
-        return (DeviceIntPtr) NULL;
+    if (!dev) {
+      return (DeviceIntPtr)NULL;
+    }
 
     if (!dixAllocatePrivates(&dev->devPrivates, PRIVATE_DEVICE)) {
         free(dev);
@@ -308,7 +330,9 @@ AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
 
     inputInfo.numDevices++;
 
-    for (prev = &inputInfo.off_devices; *prev; prev = &(*prev)->next);
+    for (prev = &inputInfo.off_devices; *prev; prev = &(*prev)->next) {
+      ;
+    }
     *prev = dev;
     dev->next = NULL;
 
@@ -375,8 +399,10 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
     BOOL enabled;
     int flags[MAXDEVICES] = { 0 };
 
-    for (prev = &inputInfo.off_devices;
-         *prev && (*prev != dev); prev = &(*prev)->next);
+    for (prev = &inputInfo.off_devices; *prev && (*prev != dev);
+         prev = &(*prev)->next) {
+      ;
+    }
 
     if (!dev->spriteInfo->sprite) {
         if (InputDevIsMaster(dev)) {
@@ -395,11 +421,12 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
             }
         }
         else {
-            if (dev->coreEvents)
-                other = (IsPointerDevice(dev)) ? inputInfo.pointer:
-                    inputInfo.keyboard;
-            else
-                other = NULL;   /* auto-float non-core devices */
+          if (dev->coreEvents) {
+            other =
+                (IsPointerDevice(dev)) ? inputInfo.pointer : inputInfo.keyboard;
+          } else {
+            other = NULL; /* auto-float non-core devices */
+          }
             AttachDevice(NULL, dev, other);
         }
     }
@@ -414,7 +441,9 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
     dev->enabled = TRUE;
     *prev = dev->next;
 
-    for (prev = &inputInfo.devices; *prev; prev = &(*prev)->next);
+    for (prev = &inputInfo.devices; *prev; prev = &(*prev)->next) {
+      ;
+    }
     *prev = dev;
     dev->next = NULL;
     input_unlock();
@@ -429,8 +458,9 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
         XISendDeviceHierarchyEvent(flags);
     }
 
-    if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev))
-        XkbPushLockedStateToSlaves(GetMaster(dev, MASTER_KEYBOARD), 0, 0);
+    if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev)) {
+      XkbPushLockedStateToSlaves(GetMaster(dev, MASTER_KEYBOARD), 0, 0);
+    }
 
     /* Now make sure our LEDs are in sync with the locked state */
     XkbForceUpdateDeviceLEDs(dev);
@@ -463,8 +493,9 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
     BOOL dev_in_devices_list = FALSE;
     int flags[MAXDEVICES] = { 0 };
 
-    if (!dev->enabled)
-        return TRUE;
+    if (!dev->enabled) {
+      return TRUE;
+    }
 
     for (DeviceIntPtr other = inputInfo.devices; other; other = other->next) {
         if (other == dev) {
@@ -473,8 +504,9 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
         }
     }
 
-    if (!dev_in_devices_list)
-        return FALSE;
+    if (!dev_in_devices_list) {
+      return FALSE;
+    }
 
     TouchEndPhysicallyActiveTouches(dev);
     GestureEndActiveGestures(dev);
@@ -500,19 +532,24 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
     }
     else {
         for (DeviceIntPtr other = inputInfo.devices; other; other = other->next) {
-            if (InputDevIsMaster(other) && other->lastSlave == dev)
-                other->lastSlave = NULL;
+          if (InputDevIsMaster(other) && other->lastSlave == dev) {
+            other->lastSlave = NULL;
+          }
         }
     }
 
     if (InputDevIsMaster(dev) && dev->spriteInfo->sprite) {
-        for (DeviceIntPtr other = inputInfo.devices; other; other = other->next)
-            if (other->spriteInfo->paired == dev && !other->spriteInfo->spriteOwner)
-                DisableDevice(other, sendevent);
+      for (DeviceIntPtr other = inputInfo.devices; other; other = other->next) {
+        if (other->spriteInfo->paired == dev &&
+            !other->spriteInfo->spriteOwner) {
+          DisableDevice(other, sendevent);
+        }
+      }
     }
 
-    if (dev->spriteInfo->paired)
-        dev->spriteInfo->paired = NULL;
+    if (dev->spriteInfo->paired) {
+      dev->spriteInfo->paired = NULL;
+    }
 
     input_lock();
     (void) (*dev->deviceProc) (dev, DEVICE_OFF);
@@ -521,8 +558,9 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
     /* now that the device is disabled, we can reset the event reader's
      * last.slave */
     for (DeviceIntPtr other = inputInfo.devices; other; other = other->next) {
-        if (other->last.slave == dev)
-            other->last.slave = NULL;
+      if (other->last.slave == dev) {
+        other->last.slave = NULL;
+      }
     }
     input_unlock();
 
@@ -531,8 +569,10 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
     LeaveWindow(dev);
     SetFocusOut(dev);
 
-    for (prev = &inputInfo.devices;
-         *prev && (*prev != dev); prev = &(*prev)->next);
+    for (prev = &inputInfo.devices; *prev && (*prev != dev);
+         prev = &(*prev)->next) {
+      ;
+    }
 
     *prev = dev->next;
     dev->next = inputInfo.off_devices;
@@ -561,22 +601,26 @@ DisableAllDevices(void)
 
     /* Disable slave devices first, excluding XTest devices */
     nt_list_for_each_entry_safe(dev, tmp, inputInfo.devices, next) {
-        if (!IsXTestDevice(dev, NULL) && !InputDevIsMaster(dev))
-            DisableDevice(dev, FALSE);
+      if (!IsXTestDevice(dev, NULL) && !InputDevIsMaster(dev)) {
+        DisableDevice(dev, FALSE);
+      }
     }
     /* Disable XTest devices */
     nt_list_for_each_entry_safe(dev, tmp, inputInfo.devices, next) {
-        if (!InputDevIsMaster(dev))
-            DisableDevice(dev, FALSE);
+      if (!InputDevIsMaster(dev)) {
+        DisableDevice(dev, FALSE);
+      }
     }
     /* master keyboards need to be disabled first */
     nt_list_for_each_entry_safe(dev, tmp, inputInfo.devices, next) {
-        if (dev->enabled && InputDevIsMaster(dev) && IsKeyboardDevice(dev))
-            DisableDevice(dev, FALSE);
+      if (dev->enabled && InputDevIsMaster(dev) && IsKeyboardDevice(dev)) {
+        DisableDevice(dev, FALSE);
+      }
     }
     nt_list_for_each_entry_safe(dev, tmp, inputInfo.devices, next) {
-        if (dev->enabled)
-            DisableDevice(dev, FALSE);
+      if (dev->enabled) {
+        DisableDevice(dev, FALSE);
+      }
     }
 }
 
@@ -596,20 +640,24 @@ ActivateDevice(DeviceIntPtr dev, BOOL sendevent)
     int ret = Success;
     ScreenPtr masterScreen = dixGetMasterScreen();
 
-    if (!dev || !dev->deviceProc)
-        return BadImplementation;
+    if (!dev || !dev->deviceProc) {
+      return BadImplementation;
+    }
 
     input_lock();
     ret = (*dev->deviceProc) (dev, DEVICE_INIT);
     input_unlock();
     dev->inited = (ret == Success);
-    if (!dev->inited)
-        return ret;
+    if (!dev->inited) {
+      return ret;
+    }
 
     /* Initialize memory for sprites. */
-    if (InputDevIsMaster(dev) && dev->spriteInfo->spriteOwner)
-        if (!masterScreen->DeviceCursorInitialize(dev, masterScreen))
-            ret = BadAlloc;
+    if (InputDevIsMaster(dev) && dev->spriteInfo->spriteOwner) {
+      if (!masterScreen->DeviceCursorInitialize(dev, masterScreen)) {
+        ret = BadAlloc;
+      }
+    }
 
     SendDevicePresenceEvent(dev->id, DeviceAdded);
     if (sendevent) {
@@ -681,8 +729,9 @@ CorePointerProc(DeviceIntPtr pDev, int what)
 
     switch (what) {
     case DEVICE_INIT:
-        for (int i = 1; i <= NBUTTONS; i++)
-            map[i] = i;
+      for (int i = 1; i <= NBUTTONS; i++) {
+        map[i] = i;
+      }
 
         btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
         btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
@@ -782,16 +831,18 @@ InitAndStartDevices(void)
 {
     for (DeviceIntPtr dev = inputInfo.off_devices; dev; dev = dev->next) {
         DebugF("(dix) initialising device %d\n", dev->id);
-        if (!dev->inited)
-            ActivateDevice(dev, TRUE);
+        if (!dev->inited) {
+          ActivateDevice(dev, TRUE);
+        }
     }
 
     /* enable real devices */
     for (DeviceIntPtr dev = inputInfo.off_devices, next; dev; dev = next) {
         DebugF("(dix) enabling device %d\n", dev->id);
         next = dev->next;
-        if (dev->inited && dev->startup)
-            EnableDevice(dev, TRUE);
+        if (dev->inited && dev->startup) {
+          EnableDevice(dev, TRUE);
+        }
     }
 
     return Success;
@@ -803,8 +854,9 @@ InitAndStartDevices(void)
 void
 FreeDeviceClass(int type, void **class)
 {
-    if (!(*class))
-        return;
+  if (!(*class)) {
+    return;
+  }
 
     switch (type) {
     case KeyClass:
@@ -878,16 +930,18 @@ FreeDeviceClass(int type, void **class)
 static void
 FreeFeedbackClass(int type, void **class)
 {
-    if (!(*class))
-        return;
+  if (!(*class)) {
+    return;
+  }
 
     switch (type) {
     case KbdFeedbackClass:
     {
         for (KbdFeedbackPtr k = *(KbdFeedbackPtr *)class, knext; k; k = knext) {
             knext = k->next;
-            if (k->xkb_sli)
-                XkbFreeSrvLedInfo(k->xkb_sli);
+            if (k->xkb_sli) {
+              XkbFreeSrvLedInfo(k->xkb_sli);
+            }
             free(k);
         }
         break;
@@ -930,8 +984,9 @@ FreeFeedbackClass(int type, void **class)
     {
         for (LedFeedbackPtr l = *(LedFeedbackPtr *)class, lnext; l; l = lnext) {
             lnext = l->next;
-            if (l->xkb_sli)
-                XkbFreeSrvLedInfo(l->xkb_sli);
+            if (l->xkb_sli) {
+              XkbFreeSrvLedInfo(l->xkb_sli);
+            }
             free(l);
         }
         break;
@@ -943,8 +998,9 @@ FreeFeedbackClass(int type, void **class)
 static void
 FreeAllDeviceClasses(ClassesPtr classes)
 {
-    if (!classes)
-        return;
+  if (!classes) {
+    return;
+  }
 
     FreeDeviceClass(KeyClass, (void *) &classes->key);
     FreeDeviceClass(ValuatorClass, (void *) &classes->valuator);
@@ -968,8 +1024,9 @@ FreePendingFrozenDeviceEvents(DeviceIntPtr dev)
 {
     QdEventPtr qe, tmp;
 
-    if (!dev->deviceGrab.sync.frozen)
-        return;
+    if (!dev->deviceGrab.sync.frozen) {
+      return;
+    }
 
     /* Dequeue any frozen pending events */
     xorg_list_for_each_entry_safe(qe, tmp, &syncEvents.pending, next) {
@@ -995,25 +1052,30 @@ CloseDevice(DeviceIntPtr dev)
     ScreenPtr masterScreen = dixGetMasterScreen();
     ClassesPtr classes;
 
-    if (!dev)
-        return;
+    if (!dev) {
+      return;
+    }
 
     XIDeleteAllDeviceProperties(dev);
 
-    if (dev->inited)
-        (void) (*dev->deviceProc) (dev, DEVICE_CLOSE);
+    if (dev->inited) {
+      (void)(*dev->deviceProc)(dev, DEVICE_CLOSE);
+    }
 
     FreeSprite(dev);
 
-    if (InputDevIsMaster(dev))
-        masterScreen->DeviceCursorCleanup(dev, masterScreen);
+    if (InputDevIsMaster(dev)) {
+      masterScreen->DeviceCursorCleanup(dev, masterScreen);
+    }
 
     /* free acceleration info */
-    if (dev->valuator && dev->valuator->accelScheme.AccelCleanupProc)
-        dev->valuator->accelScheme.AccelCleanupProc(dev);
+    if (dev->valuator && dev->valuator->accelScheme.AccelCleanupProc) {
+      dev->valuator->accelScheme.AccelCleanupProc(dev);
+    }
 
-    while (dev->xkb_interest)
-        XkbRemoveResourceClient((DevicePtr) dev, dev->xkb_interest->resource);
+    while (dev->xkb_interest) {
+      XkbRemoveResourceClient((DevicePtr)dev, dev->xkb_interest->resource);
+    }
 
     free(dev->name);
 
@@ -1038,8 +1100,9 @@ CloseDevice(DeviceIntPtr dev)
     free(dev->deviceGrab.sync.event);
     free(dev->config_info);     /* Allocated in xf86ActivateDevice. */
     free(dev->last.scroll);
-    for (int j = 0; j < dev->last.num_touches; j++)
-        valuator_mask_free(&dev->last.touches[j].valuators);
+    for (int j = 0; j < dev->last.num_touches; j++) {
+      valuator_mask_free(&dev->last.touches[j].valuators);
+    }
     free(dev->last.touches);
     dev->config_info = NULL;
     FreePendingFrozenDeviceEvents(dev);
@@ -1057,11 +1120,13 @@ CloseDeviceList(DeviceIntPtr *listHead)
     Bool freedIds[MAXDEVICES];
     DeviceIntPtr dev;
 
-    if (listHead == NULL)
-        return;
+    if (listHead == NULL) {
+      return;
+    }
 
-    for (int i = 0; i < MAXDEVICES; i++)
-        freedIds[i] = FALSE;
+    for (int i = 0; i < MAXDEVICES; i++) {
+      freedIds[i] = FALSE;
+    }
 
     dev = *listHead;
     while (dev != NULL) {
@@ -1069,8 +1134,9 @@ CloseDeviceList(DeviceIntPtr *listHead)
         DeleteInputDeviceRequest(dev);
 
         dev = *listHead;
-        while (dev != NULL && freedIds[dev->id])
-            dev = dev->next;
+        while (dev != NULL && freedIds[dev->id]) {
+          dev = dev->next;
+        }
     }
 }
 
@@ -1089,13 +1155,15 @@ CloseDownDevices(void)
      * to NULL and pretend nothing happened.
      */
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-        if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev))
-            dev->master = NULL;
+      if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev)) {
+        dev->master = NULL;
+      }
     }
 
     for (DeviceIntPtr dev = inputInfo.off_devices; dev; dev = dev->next) {
-        if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev))
-            dev->master = NULL;
+      if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev)) {
+        dev->master = NULL;
+      }
     }
 
     CloseDeviceList(&inputInfo.devices);
@@ -1130,13 +1198,15 @@ AbortDevices(void)
      * cause a dead-lock.
      */
     nt_list_for_each_entry(dev, inputInfo.devices, next) {
-        if (!InputDevIsMaster(dev))
-            (*dev->deviceProc) (dev, DEVICE_ABORT);
+      if (!InputDevIsMaster(dev)) {
+        (*dev->deviceProc)(dev, DEVICE_ABORT);
+      }
     }
 
     nt_list_for_each_entry(dev, inputInfo.off_devices, next) {
-        if (!InputDevIsMaster(dev))
-            (*dev->deviceProc) (dev, DEVICE_ABORT);
+      if (!InputDevIsMaster(dev)) {
+        (*dev->deviceProc)(dev, DEVICE_ABORT);
+      }
     }
 }
 
@@ -1149,8 +1219,9 @@ UndisplayDevices(void)
 {
     ScreenPtr masterScreen = dixGetMasterScreen();
 
-    for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next)
-        masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
+    for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
+      masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
+    }
 }
 
 static int
@@ -1160,10 +1231,11 @@ CloseOneDevice(const DeviceIntPtr dev, DeviceIntPtr *listHead)
         tmp; (prev = tmp), (tmp = next)) {
         next = tmp->next;
         if (tmp == dev) {
-            if (prev == NULL)
-                *listHead = next;
-            else
-                prev->next = next;
+          if (prev == NULL) {
+            *listHead = next;
+          } else {
+            prev->next = next;
+          }
 
             CloseDevice(tmp);
             return Success;
@@ -1197,15 +1269,17 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
 
     DebugF("(dix) removing device %d\n", dev->id);
 
-    if (!dev || dev == inputInfo.keyboard || dev == inputInfo.pointer)
-        return BadImplementation;
+    if (!dev || dev == inputInfo.keyboard || dev == inputInfo.pointer) {
+      return BadImplementation;
+    }
 
     initialized = dev->inited;
     deviceid = dev->id;
 
     if (initialized) {
-        if (DevHasCursor(dev))
-            masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
+      if (DevHasCursor(dev)) {
+        masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
+      }
 
         DisableDevice(dev, sendevent);
         flags[dev->id] = XIDeviceDisabled;
@@ -1216,16 +1290,18 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
     input_lock();
 
     if ((ret = CloseOneDevice(dev, &inputInfo.devices)) == Success ||
-        (ret = CloseOneDevice(dev, &inputInfo.off_devices)) == Success)
-        flags[deviceid] = flag;
+        (ret = CloseOneDevice(dev, &inputInfo.off_devices)) == Success) {
+      flags[deviceid] = flag;
+    }
 
     input_unlock();
 
     if (ret == Success && initialized) {
         inputInfo.numDevices--;
         SendDevicePresenceEvent(deviceid, DeviceRemoved);
-        if (sendevent)
-            XISendDeviceHierarchyEvent(flags);
+        if (sendevent) {
+          XISendDeviceHierarchyEvent(flags);
+        }
     }
 
     return ret;
@@ -1248,19 +1324,22 @@ dixLookupDevice(DeviceIntPtr *pDev, int id, ClientPtr client, Mask access_mode)
     *pDev = NULL;
 
     for (dev = inputInfo.devices; dev; dev = dev->next) {
-        if (dev->id == id)
-            goto found;
+      if (dev->id == id) {
+        goto found;
+      }
     }
     for (dev = inputInfo.off_devices; dev; dev = dev->next) {
-        if (dev->id == id)
-            goto found;
+      if (dev->id == id) {
+        goto found;
+      }
     }
     return BadDevice;
 
  found:
     rc = dixCallDeviceAccessCallback(client, dev, access_mode);
-    if (rc == Success)
-        *pDev = dev;
+    if (rc == Success) {
+      *pDev = dev;
+    }
     return rc;
 }
 
@@ -1284,14 +1363,17 @@ InitButtonClassDeviceStruct(DeviceIntPtr dev, int numButtons, Atom *labels,
     BUG_RETURN_VAL(numButtons >= MAX_BUTTONS, FALSE);
 
     butc = calloc(1, sizeof(ButtonClassRec));
-    if (!butc)
-        return FALSE;
+    if (!butc) {
+      return FALSE;
+    }
     butc->numButtons = numButtons;
     butc->sourceid = dev->id;
-    for (int i = 1; i <= numButtons; i++)
-        butc->map[i] = map[i];
-    for (int i = numButtons + 1; i < MAP_LENGTH; i++)
-        butc->map[i] = i;
+    for (int i = 1; i <= numButtons; i++) {
+      butc->map[i] = map[i];
+    }
+    for (int i = numButtons + 1; i < MAP_LENGTH; i++) {
+      butc->map[i] = i;
+    }
     memcpy(butc->labels, labels, numButtons * sizeof(Atom));
     dev->button = butc;
     return TRUE;
@@ -1322,11 +1404,13 @@ AllocValuatorClass(ValuatorClassPtr src, int numAxes)
         sizeof(union align_u) + numAxes * (sizeof(double) + sizeof(AxisInfo));
     align = (union align_u *) realloc(src, size);
 
-    if (!align)
-        return NULL;
+    if (!align) {
+      return NULL;
+    }
 
-    if (!src)
-        memset(align, 0, size);
+    if (!src) {
+      memset(align, 0, size);
+    }
 
     v = &align->valc;
     v->numAxes = numAxes;
@@ -1353,8 +1437,9 @@ InitValuatorClassDeviceStruct(DeviceIntPtr dev, int numAxes, Atom *labels,
     }
 
     valc = AllocValuatorClass(NULL, numAxes);
-    if (!valc)
-        return FALSE;
+    if (!valc) {
+      return FALSE;
+    }
 
     dev->last.scroll = valuator_mask_new(numAxes);
     if (!dev->last.scroll) {
@@ -1372,8 +1457,9 @@ InitValuatorClassDeviceStruct(DeviceIntPtr dev, int numAxes, Atom *labels,
     valc->numMotionEvents = numMotionEvents;
     valc->motionHintWindow = NullWindow;
 
-    if ((mode & OutOfProximity) && !dev->proximity)
-        InitProximityClassDeviceStruct(dev);
+    if ((mode & OutOfProximity) && !dev->proximity) {
+      InitProximityClassDeviceStruct(dev);
+    }
 
     dev->valuator = valc;
 
@@ -1387,11 +1473,12 @@ InitValuatorClassDeviceStruct(DeviceIntPtr dev, int numAxes, Atom *labels,
 
     dev->last.numValuators = numAxes;
 
-    if (InputDevIsMaster(dev) ||        /* do not accelerate master or xtest devices */
-        IsXTestDevice(dev, NULL))
-        InitPointerAccelerationScheme(dev, PtrAccelNoOp);
-    else
-        InitPointerAccelerationScheme(dev, PtrAccelDefault);
+    if (InputDevIsMaster(dev) || /* do not accelerate master or xtest devices */
+        IsXTestDevice(dev, NULL)) {
+      InitPointerAccelerationScheme(dev, PtrAccelNoOp);
+    } else {
+      InitPointerAccelerationScheme(dev, PtrAccelDefault);
+    }
     return TRUE;
 }
 
@@ -1416,11 +1503,13 @@ InitPointerAccelerationScheme(DeviceIntPtr dev, int scheme)
 
     val = dev->valuator;
 
-    if (!val)
-        return FALSE;
+    if (!val) {
+      return FALSE;
+    }
 
-    if (InputDevIsMaster(dev) && scheme != PtrAccelNoOp)
-        return FALSE;
+    if (InputDevIsMaster(dev) && scheme != PtrAccelNoOp) {
+      return FALSE;
+    }
 
     for (int x = 0; pointerAccelerationScheme[x].number >= 0; x++) {
         if (pointerAccelerationScheme[x].number == scheme) {
@@ -1429,11 +1518,13 @@ InitPointerAccelerationScheme(DeviceIntPtr dev, int scheme)
         }
     }
 
-    if (-1 == i)
-        return FALSE;
+    if (-1 == i) {
+      return FALSE;
+    }
 
-    if (val->accelScheme.AccelCleanupProc)
-        val->accelScheme.AccelCleanupProc(dev);
+    if (val->accelScheme.AccelCleanupProc) {
+      val->accelScheme.AccelCleanupProc(dev);
+    }
 
     if (pointerAccelerationScheme[i].AccelInitProc) {
         if (!pointerAccelerationScheme[i].AccelInitProc(dev,
@@ -1454,8 +1545,9 @@ InitFocusClassDeviceStruct(DeviceIntPtr dev)
     BUG_RETURN_VAL(dev->focus != NULL, FALSE);
 
     FocusClassPtr focc = calloc(1, sizeof(FocusClassRec));
-    if (!focc)
-        return FALSE;
+    if (!focc) {
+      return FALSE;
+    }
     UpdateCurrentTimeIf();
     focc->win = PointerRootWin;
     focc->revert = None;
@@ -1474,13 +1566,15 @@ InitPtrFeedbackClassDeviceStruct(DeviceIntPtr dev, PtrCtrlProcPtr controlProc)
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
     PtrFeedbackPtr feedc = calloc(1, sizeof(PtrFeedbackClassRec));
-    if (!feedc)
-        return FALSE;
+    if (!feedc) {
+      return FALSE;
+    }
     feedc->CtrlProc = controlProc;
     feedc->ctrl = defaultPointerControl;
     feedc->ctrl.id = 0;
-    if ((feedc->next = dev->ptrfeed))
-        feedc->ctrl.id = dev->ptrfeed->ctrl.id + 1;
+    if ((feedc->next = dev->ptrfeed)) {
+      feedc->ctrl.id = dev->ptrfeed->ctrl.id + 1;
+    }
     dev->ptrfeed = feedc;
     (*controlProc) (dev, &feedc->ctrl);
     return TRUE;
@@ -1514,8 +1608,9 @@ InitStringFeedbackClassDeviceStruct(DeviceIntPtr dev,
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
     StringFeedbackPtr feedc = calloc(1, sizeof(StringFeedbackClassRec));
-    if (!feedc)
-        return FALSE;
+    if (!feedc) {
+      return FALSE;
+    }
     feedc->CtrlProc = controlProc;
     feedc->ctrl.num_symbols_supported = num_symbols_supported;
     feedc->ctrl.num_symbols_displayed = 0;
@@ -1529,13 +1624,16 @@ InitStringFeedbackClassDeviceStruct(DeviceIntPtr dev,
         free(feedc);
         return FALSE;
     }
-    for (int i = 0; i < num_symbols_supported; i++)
-        *(feedc->ctrl.symbols_supported + i) = *symbols++;
-    for (int i = 0; i < max_symbols; i++)
-        *(feedc->ctrl.symbols_displayed + i) = (KeySym) 0;
+    for (int i = 0; i < num_symbols_supported; i++) {
+      *(feedc->ctrl.symbols_supported + i) = *symbols++;
+    }
+    for (int i = 0; i < max_symbols; i++) {
+      *(feedc->ctrl.symbols_displayed + i) = (KeySym)0;
+    }
     feedc->ctrl.id = 0;
-    if ((feedc->next = dev->stringfeed))
-        feedc->ctrl.id = dev->stringfeed->ctrl.id + 1;
+    if ((feedc->next = dev->stringfeed)) {
+      feedc->ctrl.id = dev->stringfeed->ctrl.id + 1;
+    }
     dev->stringfeed = feedc;
     (*controlProc) (dev, &feedc->ctrl);
     return TRUE;
@@ -1548,14 +1646,16 @@ InitBellFeedbackClassDeviceStruct(DeviceIntPtr dev, BellProcPtr bellProc,
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
     BellFeedbackPtr feedc = calloc(1, sizeof(BellFeedbackClassRec));
-    if (!feedc)
-        return FALSE;
+    if (!feedc) {
+      return FALSE;
+    }
     feedc->CtrlProc = controlProc;
     feedc->BellProc = bellProc;
     feedc->ctrl = defaultBellControl;
     feedc->ctrl.id = 0;
-    if ((feedc->next = dev->bell))
-        feedc->ctrl.id = dev->bell->ctrl.id + 1;
+    if ((feedc->next = dev->bell)) {
+      feedc->ctrl.id = dev->bell->ctrl.id + 1;
+    }
     dev->bell = feedc;
     (*controlProc) (dev, &feedc->ctrl);
     return TRUE;
@@ -1567,13 +1667,15 @@ InitLedFeedbackClassDeviceStruct(DeviceIntPtr dev, LedCtrlProcPtr controlProc)
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
     LedFeedbackPtr feedc = calloc(1, sizeof(LedFeedbackClassRec));
-    if (!feedc)
-        return FALSE;
+    if (!feedc) {
+      return FALSE;
+    }
     feedc->CtrlProc = controlProc;
     feedc->ctrl = defaultLedControl;
     feedc->ctrl.id = 0;
-    if ((feedc->next = dev->leds))
-        feedc->ctrl.id = dev->leds->ctrl.id + 1;
+    if ((feedc->next = dev->leds)) {
+      feedc->ctrl.id = dev->leds->ctrl.id + 1;
+    }
     feedc->xkb_sli = NULL;
     dev->leds = feedc;
     (*controlProc) (dev, &feedc->ctrl);
@@ -1587,13 +1689,15 @@ InitIntegerFeedbackClassDeviceStruct(DeviceIntPtr dev,
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
     IntegerFeedbackPtr feedc = calloc(1, sizeof(IntegerFeedbackClassRec));
-    if (!feedc)
-        return FALSE;
+    if (!feedc) {
+      return FALSE;
+    }
     feedc->CtrlProc = controlProc;
     feedc->ctrl = defaultIntegerControl;
     feedc->ctrl.id = 0;
-    if ((feedc->next = dev->intfeed))
-        feedc->ctrl.id = dev->intfeed->ctrl.id + 1;
+    if ((feedc->next = dev->intfeed)) {
+      feedc->ctrl.id = dev->intfeed->ctrl.id + 1;
+    }
     dev->intfeed = feedc;
     (*controlProc) (dev, &feedc->ctrl);
     return TRUE;
@@ -1646,34 +1750,42 @@ InitTouchClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches,
     }
 
     touch = calloc(1, sizeof(*touch));
-    if (!touch)
-        return FALSE;
+    if (!touch) {
+      return FALSE;
+    }
 
     touch->max_touches = max_touches;
-    if (max_touches == 0)
-        max_touches = 5;        /* arbitrary number plucked out of the air */
+    if (max_touches == 0) {
+      max_touches = 5; /* arbitrary number plucked out of the air */
+    }
     touch->touches = calloc(max_touches, sizeof(*touch->touches));
-    if (!touch->touches)
-        goto err;
+    if (!touch->touches) {
+      goto err;
+    }
     touch->num_touches = max_touches;
-    for (int i = 0; i < max_touches; i++)
-        TouchInitTouchPoint(touch, device->valuator, i);
+    for (int i = 0; i < max_touches; i++) {
+      TouchInitTouchPoint(touch, device->valuator, i);
+    }
 
     touch->mode = mode;
     touch->sourceid = device->id;
 
     device->touch = touch;
-    if (!(device->last.touches = calloc(max_touches, sizeof(*device->last.touches))))
-        goto err;
+    if (!(device->last.touches =
+              calloc(max_touches, sizeof(*device->last.touches)))) {
+      goto err;
+    }
     device->last.num_touches = touch->num_touches;
-    for (int i = 0; i < touch->num_touches; i++)
-        TouchInitDDXTouchPoint(device, &device->last.touches[i]);
+    for (int i = 0; i < touch->num_touches; i++) {
+      TouchInitDDXTouchPoint(device, &device->last.touches[i]);
+    }
 
     return TRUE;
 
  err:
-    for (int i = 0; i < touch->num_touches; i++)
-        TouchFreeTouchPoint(device, i);
+   for (int i = 0; i < touch->num_touches; i++) {
+     TouchFreeTouchPoint(device, i);
+   }
 
     free(touch->touches);
     free(touch);
@@ -1695,8 +1807,9 @@ InitGestureClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches)
     BUG_RETURN_VAL(device->gesture != NULL, FALSE);
 
     g = calloc(1, sizeof(*g));
-    if (!g)
-        return FALSE;
+    if (!g) {
+      return FALSE;
+    }
 
     g->sourceid = device->id;
     g->max_touches = max_touches;
@@ -1716,13 +1829,14 @@ InitGestureClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches)
 Bool
 BadDeviceMap(BYTE * buff, int length, unsigned low, unsigned high, XID *errval)
 {
-    for (int i = 0; i < length; i++)
-        if (buff[i]) {          /* only check non-zero elements */
-            if ((low > buff[i]) || (high < buff[i])) {
-                *errval = buff[i];
-                return TRUE;
-            }
-        }
+  for (int i = 0; i < length; i++) {
+    if (buff[i]) { /* only check non-zero elements */
+      if ((low > buff[i]) || (high < buff[i])) {
+        *errval = buff[i];
+        return TRUE;
+      }
+    }
+  }
     return FALSE;
 }
 
@@ -1735,16 +1849,18 @@ ProcSetModifierMapping(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xSetModifierMappingReq);
 
     if (client->req_len != ((stuff->numKeyPerModifier << 1) +
-                            bytes_to_int32(sizeof(xSetModifierMappingReq))))
-        return BadLength;
-
+                            bytes_to_int32(sizeof(xSetModifierMappingReq)))) {
+      return BadLength;
+    }
 
     rc = change_modmap(client, PickKeyboard(client), (KeyCode *) &stuff[1],
                        stuff->numKeyPerModifier);
-    if (rc == MappingFailed)
-        return BadValue;
-    if (rc != MappingSuccess && rc != MappingFailed && rc != MappingBusy)
-        return rc;
+    if (rc == MappingFailed) {
+      return BadValue;
+    }
+    if (rc != MappingSuccess && rc != MappingFailed && rc != MappingBusy) {
+      return rc;
+    }
 
     xSetModifierMappingReply reply = {
         .success = rc,
@@ -1788,8 +1904,9 @@ ProcChangeKeyboardMapping(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xChangeKeyboardMappingReq);
 
     len = client->req_len - bytes_to_int32(sizeof(xChangeKeyboardMappingReq));
-    if (len != (stuff->keyCodes * stuff->keySymsPerKeyCode))
-        return BadLength;
+    if (len != (stuff->keyCodes * stuff->keySymsPerKeyCode)) {
+      return BadLength;
+    }
 
     pDev = PickKeyboard(client);
 
@@ -1812,21 +1929,25 @@ ProcChangeKeyboardMapping(ClientPtr client)
     keysyms.map = (KeySym *) &stuff[1];
 
     rc = dixCallDeviceAccessCallback(client, pDev, DixManageAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     XkbApplyMappingChange(pDev, &keysyms, stuff->firstKeyCode,
                           stuff->keyCodes, NULL, client);
 
     for (DeviceIntPtr tmp = inputInfo.devices; tmp; tmp = tmp->next) {
-        if (InputDevIsMaster(tmp) || GetMaster(tmp, MASTER_KEYBOARD) != pDev)
-            continue;
-        if (!tmp->key)
-            continue;
+      if (InputDevIsMaster(tmp) || GetMaster(tmp, MASTER_KEYBOARD) != pDev) {
+        continue;
+      }
+      if (!tmp->key) {
+        continue;
+      }
 
         rc = dixCallDeviceAccessCallback(client, pDev, DixManageAccess);
-        if (rc != Success)
-            continue;
+        if (rc != Success) {
+          continue;
+        }
 
         XkbApplyMappingChange(tmp, &keysyms, stuff->firstKeyCode,
                               stuff->keyCodes, NULL, client);
@@ -1846,8 +1967,9 @@ ProcSetPointerMapping(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xSetPointerMappingReq);
 
     if (client->req_len !=
-        bytes_to_int32(sizeof(xSetPointerMappingReq) + stuff->nElts))
-        return BadLength;
+        bytes_to_int32(sizeof(xSetPointerMappingReq) + stuff->nElts)) {
+      return BadLength;
+    }
 
     map = (BYTE *) &stuff[1];
 
@@ -1875,10 +1997,12 @@ ProcSetPointerMapping(ClientPtr client)
 
     ret = ApplyPointerMapping(ptr, map, stuff->nElts, client);
 
-    if (ret == -1)
-        return BadValue;
-    if (ret != Success && ret != MappingBusy)
-        return ret;
+    if (ret == -1) {
+      return BadValue;
+    }
+    if (ret != Success && ret != MappingBusy) {
+      return ret;
+    }
 
     xSetPointerMappingReply reply = {
         .success = (ret == MappingBusy) ? MappingBusy : MappingSuccess,
@@ -1899,8 +2023,9 @@ ProcGetKeyboardMapping(ClientPtr client)
     REQUEST_SIZE_MATCH(xGetKeyboardMappingReq);
 
     rc = dixCallDeviceAccessCallback(client, kbd, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xkb = kbd->key->xkbInfo->desc;
 
@@ -1915,8 +2040,9 @@ ProcGetKeyboardMapping(ClientPtr client)
     }
 
     syms = XkbGetCoreMap(kbd);
-    if (!syms)
-        return BadAlloc;
+    if (!syms) {
+      return BadAlloc;
+    }
 
     const int count = syms->mapWidth * stuff->count;
 
@@ -1950,8 +2076,9 @@ ProcGetPointerMapping(ClientPtr client)
     REQUEST_SIZE_MATCH(xReq);
 
     rc = dixCallDeviceAccessCallback(client, ptr, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     nElts = (butc) ? butc->numButtons : 0;
 
@@ -1970,10 +2097,11 @@ NoteLedState(DeviceIntPtr keybd, int led, Bool on)
 {
     KeybdCtrl *ctrl = &keybd->kbdfeed->ctrl;
 
-    if (on)
-        ctrl->leds |= ((Leds) 1 << (led - 1));
-    else
-        ctrl->leds &= ~((Leds) 1 << (led - 1));
+    if (on) {
+      ctrl->leds |= ((Leds)1 << (led - 1));
+    } else {
+      ctrl->leds &= ~((Leds)1 << (led - 1));
+    }
 }
 
 static int
@@ -2033,11 +2161,11 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
         case KBBellDuration:
             t = (INT16) *vlist;
             vlist++;
-            if (t == -1)
-                t = defaultKeyboardControl.bell_duration;
-            else if (t < 0) {
-                client->errorValue = t;
-                return BadValue;
+            if (t == -1) {
+              t = defaultKeyboardControl.bell_duration;
+            } else if (t < 0) {
+              client->errorValue = t;
+              return BadValue;
             }
             ctrl.bell_duration = t;
             break;
@@ -2048,23 +2176,26 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
                 client->errorValue = led;
                 return BadValue;
             }
-            if (!(mask & KBLedMode))
-                return BadMatch;
+            if (!(mask & KBLedMode)) {
+              return BadMatch;
+            }
             break;
         case KBLedMode:
             t = (CARD8) *vlist;
             vlist++;
             if (t == LedModeOff) {
-                if (led == DO_ALL)
-                    ctrl.leds = 0x0;
-                else
-                    ctrl.leds &= ~(((Leds) (1)) << (led - 1));
+              if (led == DO_ALL) {
+                ctrl.leds = 0x0;
+              } else {
+                ctrl.leds &= ~(((Leds)(1)) << (led - 1));
+              }
             }
             else if (t == LedModeOn) {
-                if (led == DO_ALL)
-                    ctrl.leds = ~0L;
-                else
-                    ctrl.leds |= (((Leds) (1)) << (led - 1));
+              if (led == DO_ALL) {
+                ctrl.leds = ~0L;
+              } else {
+                ctrl.leds |= (((Leds)(1)) << (led - 1));
+              }
             }
             else {
                 client->errorValue = t;
@@ -2085,35 +2216,40 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
                 client->errorValue = key;
                 return BadValue;
             }
-            if (!(mask & KBAutoRepeatMode))
-                return BadMatch;
+            if (!(mask & KBAutoRepeatMode)) {
+              return BadMatch;
+            }
             break;
         case KBAutoRepeatMode:
             i = (key >> 3);
             mask = (1 << (key & 7));
             t = (CARD8) *vlist;
             vlist++;
-            if (key != DO_ALL)
-                XkbDisableComputedAutoRepeats(keybd, key);
+            if (key != DO_ALL) {
+              XkbDisableComputedAutoRepeats(keybd, key);
+            }
             if (t == AutoRepeatModeOff) {
-                if (key == DO_ALL)
-                    ctrl.autoRepeat = FALSE;
-                else
-                    ctrl.autoRepeats[i] &= ~mask;
+              if (key == DO_ALL) {
+                ctrl.autoRepeat = FALSE;
+              } else {
+                ctrl.autoRepeats[i] &= ~mask;
+              }
             }
             else if (t == AutoRepeatModeOn) {
-                if (key == DO_ALL)
-                    ctrl.autoRepeat = TRUE;
-                else
-                    ctrl.autoRepeats[i] |= mask;
+              if (key == DO_ALL) {
+                ctrl.autoRepeat = TRUE;
+              } else {
+                ctrl.autoRepeats[i] |= mask;
+              }
             }
             else if (t == AutoRepeatModeDefault) {
-                if (key == DO_ALL)
-                    ctrl.autoRepeat = defaultKeyboardControl.autoRepeat;
-                else
-                    ctrl.autoRepeats[i] =
-                        (ctrl.autoRepeats[i] & ~mask) |
-                        (defaultKeyboardControl.autoRepeats[i] & mask);
+              if (key == DO_ALL) {
+                ctrl.autoRepeat = defaultKeyboardControl.autoRepeat;
+              } else {
+                ctrl.autoRepeats[i] =
+                    (ctrl.autoRepeats[i] & ~mask) |
+                    (defaultKeyboardControl.autoRepeats[i] & mask);
+              }
             }
             else {
                 client->errorValue = t;
@@ -2155,8 +2291,9 @@ ProcChangeKeyboardControl(ClientPtr client)
     vlist = (XID *) &stuff[1];
 
     if (client->req_len !=
-        (sizeof(xChangeKeyboardControlReq) >> 2) + Ones(vmask))
-        return BadLength;
+        (sizeof(xChangeKeyboardControlReq) >> 2) + Ones(vmask)) {
+      return BadLength;
+    }
 
     keyboard = PickKeyboard(client);
 
@@ -2165,8 +2302,9 @@ ProcChangeKeyboardControl(ClientPtr client)
              (!InputDevIsMaster(pDev) && GetMaster(pDev, MASTER_KEYBOARD) == keyboard))
             && pDev->kbdfeed && pDev->kbdfeed->CtrlProc) {
             ret = dixCallDeviceAccessCallback(client, pDev, DixManageAccess);
-            if (ret != Success)
-                return ret;
+            if (ret != Success) {
+              return ret;
+            }
         }
     }
 
@@ -2175,8 +2313,9 @@ ProcChangeKeyboardControl(ClientPtr client)
              (!InputDevIsMaster(pDev) && GetMaster(pDev, MASTER_KEYBOARD) == keyboard))
             && pDev->kbdfeed && pDev->kbdfeed->CtrlProc) {
             ret = DoChangeKeyboardControl(client, pDev, vlist, vmask);
-            if (ret != Success)
-                error = ret;
+            if (ret != Success) {
+              error = ret;
+            }
         }
     }
 
@@ -2192,8 +2331,9 @@ ProcGetKeyboardControl(ClientPtr client)
     REQUEST_SIZE_MATCH(xReq);
 
     int rc = dixCallDeviceAccessCallback(client, kbd, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xGetKeyboardControlReply reply = {
         .globalAutoRepeat = ctrl->autoRepeat,
@@ -2203,8 +2343,9 @@ ProcGetKeyboardControl(ClientPtr client)
         .bellPitch = ctrl->bell_pitch,
         .bellDuration = ctrl->bell_duration
     };
-    for (int i = 0; i < 32; i++)
-        reply.map[i] = ctrl->autoRepeats[i];
+    for (int i = 0; i < 32; i++) {
+      reply.map[i] = ctrl->autoRepeats[i];
+    }
 
     if (client->swapped) {
         swapl(&reply.ledMask);
@@ -2232,10 +2373,11 @@ ProcBell(ClientPtr client)
     }
 
     newpercent = (base * stuff->percent) / 100;
-    if (stuff->percent < 0)
-        newpercent = base + newpercent;
-    else
-        newpercent = base - newpercent + stuff->percent;
+    if (stuff->percent < 0) {
+      newpercent = base + newpercent;
+    } else {
+      newpercent = base - newpercent + stuff->percent;
+    }
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
         if ((dev == keybd ||
@@ -2243,8 +2385,9 @@ ProcBell(ClientPtr client)
             ((dev->kbdfeed && dev->kbdfeed->BellProc) || dev->xkb_interest)) {
 
             rc = dixCallDeviceAccessCallback(client, dev, DixBellAccess);
-            if (rc != Success)
-                return rc;
+            if (rc != Success) {
+              return rc;
+            }
             XkbHandleBell(FALSE, FALSE, dev, newpercent,
                           &dev->kbdfeed->ctrl, 0, None, NULL, client);
         }
@@ -2316,8 +2459,9 @@ ProcChangePointerControl(ClientPtr client)
              (!InputDevIsMaster(dev) && GetMaster(dev, MASTER_POINTER) == mouse)) &&
             dev->ptrfeed) {
             rc = dixCallDeviceAccessCallback(client, dev, DixManageAccess);
-            if (rc != Success)
-                return rc;
+            if (rc != Success) {
+              return rc;
+            }
         }
     }
 
@@ -2339,16 +2483,18 @@ ProcGetPointerControl(ClientPtr client)
     PtrCtrl *ctrl;
     int rc;
 
-    if (ptr->ptrfeed)
-        ctrl = &ptr->ptrfeed->ctrl;
-    else
-        ctrl = &defaultPointerControl;
+    if (ptr->ptrfeed) {
+      ctrl = &ptr->ptrfeed->ctrl;
+    } else {
+      ctrl = &defaultPointerControl;
+    }
 
     REQUEST_SIZE_MATCH(xReq);
 
     rc = dixCallDeviceAccessCallback(client, ptr, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xGetPointerControlReply reply = {
         .accelNumerator = ctrl->num,
@@ -2375,10 +2521,10 @@ MaybeStopHint(DeviceIntPtr dev, ClientPtr client)
           (grab->ownerEvents &&
            (EventMaskForClient(dev->valuator->motionHintWindow, client) &
             PointerMotionHintMask)))) ||
-        (!grab &&
-         (EventMaskForClient(dev->valuator->motionHintWindow, client) &
-          PointerMotionHintMask)))
-        dev->valuator->motionHintWindow = NullWindow;
+        (!grab && (EventMaskForClient(dev->valuator->motionHintWindow, client) &
+                   PointerMotionHintMask))) {
+      dev->valuator->motionHintWindow = NullWindow;
+    }
 }
 
 int
@@ -2394,15 +2540,18 @@ ProcGetMotionEvents(ClientPtr client)
     REQUEST_SIZE_MATCH(xGetMotionEventsReq);
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     rc = dixCallDeviceAccessCallback(client, mouse, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     UpdateCurrentTimeIf();
-    if (mouse->valuator->motionHintWindow)
-        MaybeStopHint(mouse, client);
+    if (mouse->valuator->motionHintWindow) {
+      MaybeStopHint(mouse, client);
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -2412,8 +2561,9 @@ ProcGetMotionEvents(ClientPtr client)
     if ((CompareTimeStamps(start, stop) != LATER) &&
         (CompareTimeStamps(start, currentTime) != LATER) &&
         mouse->valuator->numMotionEvents) {
-        if (CompareTimeStamps(stop, currentTime) == LATER)
-            stop = currentTime;
+      if (CompareTimeStamps(stop, currentTime) == LATER) {
+        stop = currentTime;
+      }
 
         xTimecoord *coords = NULL;
 
@@ -2426,16 +2576,17 @@ ProcGetMotionEvents(ClientPtr client)
         ymin = pWin->drawable.y - wBorderWidth(pWin);
         ymax = pWin->drawable.y + (int) pWin->drawable.height +
             wBorderWidth(pWin);
-        for (int i = 0; i < count; i++)
-            if ((xmin <= coords[i].x) && (coords[i].x < xmax) &&
-                (ymin <= coords[i].y) && (coords[i].y < ymax)) {
-                nEvents++;
+        for (int i = 0; i < count; i++) {
+          if ((xmin <= coords[i].x) && (coords[i].x < xmax) &&
+              (ymin <= coords[i].y) && (coords[i].y < ymax)) {
+            nEvents++;
 
-                /* write xTimecoord */
-                x_rpcbuf_write_CARD32(&rpcbuf, coords[i].time);
-                x_rpcbuf_write_INT16(&rpcbuf, coords[i].x - pWin->drawable.x);
-                x_rpcbuf_write_INT16(&rpcbuf, coords[i].y - pWin->drawable.y);
-            }
+            /* write xTimecoord */
+            x_rpcbuf_write_CARD32(&rpcbuf, coords[i].time);
+            x_rpcbuf_write_INT16(&rpcbuf, coords[i].x - pWin->drawable.x);
+            x_rpcbuf_write_INT16(&rpcbuf, coords[i].y - pWin->drawable.y);
+          }
+        }
 
         free(coords);
     }
@@ -2467,11 +2618,12 @@ ProcQueryKeymap(ClientPtr client)
      * If it's BadAccess, we leave it empty & lie to the client.
      */
     if (rc == Success) {
-        for (int i = 0; i < 32; i++)
-            reply.map[i] = down[i];
+      for (int i = 0; i < 32; i++) {
+        reply.map[i] = down[i];
+      }
+    } else if (rc != BadAccess) {
+      return rc;
     }
-    else if (rc != BadAccess)
-        return rc;
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -2487,17 +2639,20 @@ RecalculateMasterButtons(DeviceIntPtr slave)
     DeviceIntPtr master;
     int maxbuttons = 0;
 
-    if (!slave->button || InputDevIsMaster(slave))
-        return;
+    if (!slave->button || InputDevIsMaster(slave)) {
+      return;
+    }
 
     master = GetMaster(slave, MASTER_POINTER);
-    if (!master)
-        return;
+    if (!master) {
+      return;
+    }
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-        if (InputDevIsMaster(dev) ||
-            GetMaster(dev, MASTER_ATTACHED) != master || !dev->button)
-            continue;
+      if (InputDevIsMaster(dev) || GetMaster(dev, MASTER_ATTACHED) != master ||
+          !dev->button) {
+        continue;
+      }
 
         maxbuttons = max(maxbuttons, dev->button->numButtons);
     }
@@ -2560,16 +2715,18 @@ ReleaseButtonsAndKeys(DeviceIntPtr dev)
     KeyClassPtr k = dev->key;
     int nevents;
 
-    if (!eventlist)             /* no release events for you */
-        return;
+    if (!eventlist) { /* no release events for you */
+      return;
+    }
 
     /* Release all buttons */
     for (int i = 0; b && i < b->numButtons; i++) {
         if (BitIsOn(b->down, i)) {
             nevents =
                 GetPointerEvents(eventlist, dev, ButtonRelease, i, 0, NULL);
-            for (int j = 0; j < nevents; j++)
-                mieqProcessDeviceEvent(dev, &eventlist[j], NULL);
+            for (int j = 0; j < nevents; j++) {
+              mieqProcessDeviceEvent(dev, &eventlist[j], NULL);
+            }
         }
     }
 
@@ -2577,8 +2734,9 @@ ReleaseButtonsAndKeys(DeviceIntPtr dev)
     for (int i = 0; k && i < MAP_LENGTH; i++) {
         if (BitIsOn(k->down, i)) {
             nevents = GetKeyboardEvents(eventlist, dev, KeyRelease, i);
-            for (int j = 0; j < nevents; j++)
-                mieqProcessDeviceEvent(dev, &eventlist[j], NULL);
+            for (int j = 0; j < nevents; j++) {
+              mieqProcessDeviceEvent(dev, &eventlist[j], NULL);
+            }
         }
     }
 
@@ -2598,15 +2756,18 @@ ReleaseButtonsAndKeys(DeviceIntPtr dev)
 int
 AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
 {
-    if (!dev || InputDevIsMaster(dev))
-        return BadDevice;
+  if (!dev || InputDevIsMaster(dev)) {
+    return BadDevice;
+  }
 
-    if (master && !InputDevIsMaster(master))    /* can't attach to slaves */
-        return BadDevice;
+  if (master && !InputDevIsMaster(master)) { /* can't attach to slaves */
+    return BadDevice;
+  }
 
     /* set from floating to floating? */
-    if (InputDevIsFloating(dev) && !master && dev->enabled)
-        return Success;
+    if (InputDevIsFloating(dev) && !master && dev->enabled) {
+      return Success;
+    }
 
     input_lock();
 
@@ -2629,10 +2790,11 @@ AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
     if (!master) {
         WindowPtr currentRoot;
 
-        if (dev->spriteInfo->sprite)
-            currentRoot = InputDevCurrentRootWindow(dev);
-        else                    /* new device auto-set to floating */
-            currentRoot = dixGetMasterScreen()->root;
+        if (dev->spriteInfo->sprite) {
+          currentRoot = InputDevCurrentRootWindow(dev);
+        } else { /* new device auto-set to floating */
+          currentRoot = dixGetMasterScreen()->root;
+        }
 
         /* we need to init a fake sprite */
         ScreenPtr pScreen = currentRoot->drawable.pScreen;
@@ -2649,8 +2811,9 @@ AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
         dev->spriteInfo->paired = master;
         dev->spriteInfo->spriteOwner = FALSE;
 
-        if (keyboard)
-            XkbPushLockedStateToSlaves(keyboard, 0, 0);
+        if (keyboard) {
+          XkbPushLockedStateToSlaves(keyboard, 0, 0);
+        }
         RecalculateMasterButtons(master);
     }
 
@@ -2672,8 +2835,9 @@ AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
 DeviceIntPtr
 GetPairedDevice(DeviceIntPtr dev)
 {
-    if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev))
-        dev = GetMaster(dev, MASTER_ATTACHED);
+  if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev)) {
+    dev = GetMaster(dev, MASTER_ATTACHED);
+  }
 
     return (dev && dev->spriteInfo) ? dev->spriteInfo->paired: NULL;
 }
@@ -2701,28 +2865,33 @@ GetMaster(DeviceIntPtr dev, int which)
 {
     DeviceIntPtr master;
 
-    if (InputDevIsMaster(dev))
-        master = dev;
-    else {
-        master = dev->master;
-        if (!master &&
-            (which == POINTER_OR_FLOAT || which == KEYBOARD_OR_FLOAT))
-            return dev;
+    if (InputDevIsMaster(dev)) {
+      master = dev;
+    } else {
+      master = dev->master;
+      if (!master &&
+          (which == POINTER_OR_FLOAT || which == KEYBOARD_OR_FLOAT)) {
+        return dev;
+      }
     }
 
-    if (!master)
-        return NULL;
+    if (!master) {
+      return NULL;
+    }
 
-    if (which == MASTER_ATTACHED)
-        return master;
+    if (which == MASTER_ATTACHED) {
+      return master;
+    }
 
     if (which == MASTER_KEYBOARD || which == KEYBOARD_OR_FLOAT) {
-        if (master->type != MASTER_KEYBOARD)
-            return GetPairedDevice(master);
+      if (master->type != MASTER_KEYBOARD) {
+        return GetPairedDevice(master);
+      }
     }
     else {
-        if (master->type != MASTER_POINTER)
-            return GetPairedDevice(master);
+      if (master->type != MASTER_POINTER) {
+        return GetPairedDevice(master);
+      }
     }
 
     return master;
@@ -2751,8 +2920,9 @@ AllocDevicePair(ClientPtr client, const char *name,
 
     pointer = AddInputDevice(client, ptr_proc, TRUE);
 
-    if (!pointer)
-        return BadAlloc;
+    if (!pointer) {
+      return BadAlloc;
+    }
 
     if (asprintf(&dev_name, "%s pointer", name) == -1) {
         RemoveDevice(pointer, FALSE);
@@ -2834,12 +3004,13 @@ valuator_get_mode(DeviceIntPtr dev, int axis)
 void
 valuator_set_mode(DeviceIntPtr dev, int axis, int mode)
 {
-    if (axis != VALUATOR_MODE_ALL_AXES)
-        dev->valuator->axes[axis].mode = mode;
-    else {
-        for (int i = 0; i < dev->valuator->numAxes; i++)
-            dev->valuator->axes[i].mode = mode;
+  if (axis != VALUATOR_MODE_ALL_AXES) {
+    dev->valuator->axes[axis].mode = mode;
+  } else {
+    for (int i = 0; i < dev->valuator->numAxes; i++) {
+      dev->valuator->axes[i].mode = mode;
     }
+  }
 }
 
 void
@@ -2851,8 +3022,9 @@ DeliverDeviceClassesChangedEvent(int sourceid, Time time)
 
     dixLookupDevice(&dev, sourceid, serverClient, DixWriteAccess);
 
-    if (!dev)
-        return;
+    if (!dev) {
+      return;
+    }
 
     /* UpdateFromMaster generates at most one event */
     UpdateFromMaster(&dcce, dev, DEVCHANGE_POINTER_EVENT, &num_events);

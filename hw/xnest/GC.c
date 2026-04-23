@@ -103,72 +103,93 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
 {
     xcb_params_gc_t values;
 
-    if (mask & GCFunction)
-        values.function = pGC->alu;
-
-    if (mask & GCPlaneMask)
-        values.plane_mask = pGC->planemask;
-
-    if (mask & GCForeground)
-        values.foreground = xnestPixel(pGC->fgPixel);
-
-    if (mask & GCBackground)
-        values.background = xnestPixel(pGC->bgPixel);
-
-    if (mask & GCLineWidth)
-        values.line_width = pGC->lineWidth;
-
-    if (mask & GCLineStyle)
-        values.line_style = pGC->lineStyle;
-
-    if (mask & GCCapStyle)
-        values.cap_style = pGC->capStyle;
-
-    if (mask & GCJoinStyle)
-        values.join_style = pGC->joinStyle;
-
-    if (mask & GCFillStyle)
-        values.fill_style = pGC->fillStyle;
-
-    if (mask & GCFillRule)
-        values.fill_rule = pGC->fillRule;
-
-    if (mask & GCTile) {
-        if (pGC->tileIsPixel)
-            mask &= ~GCTile;
-        else
-            values.tile = xnestPixmap(pGC->tile.pixmap);
+    if (mask & GCFunction) {
+      values.function = pGC->alu;
     }
 
-    if (mask & GCStipple)
-        values.stipple = xnestPixmap(pGC->stipple);
+    if (mask & GCPlaneMask) {
+      values.plane_mask = pGC->planemask;
+    }
 
-    if (mask & GCTileStipXOrigin)
-        values.tile_stipple_origin_x = pGC->patOrg.x;
+    if (mask & GCForeground) {
+      values.foreground = xnestPixel(pGC->fgPixel);
+    }
 
-    if (mask & GCTileStipYOrigin)
-        values.tile_stipple_origin_y = pGC->patOrg.y;
+    if (mask & GCBackground) {
+      values.background = xnestPixel(pGC->bgPixel);
+    }
 
-    if (mask & GCFont)
-        values.font = xnestFontPriv(pGC->font)->font_id;
+    if (mask & GCLineWidth) {
+      values.line_width = pGC->lineWidth;
+    }
 
-    if (mask & GCSubwindowMode)
-        values.subwindow_mode = pGC->subWindowMode;
+    if (mask & GCLineStyle) {
+      values.line_style = pGC->lineStyle;
+    }
 
-    if (mask & GCGraphicsExposures)
-        values.graphics_exposures = pGC->graphicsExposures;
+    if (mask & GCCapStyle) {
+      values.cap_style = pGC->capStyle;
+    }
 
-    if (mask & GCClipXOrigin)
-        values.clip_originX = pGC->clipOrg.x;
+    if (mask & GCJoinStyle) {
+      values.join_style = pGC->joinStyle;
+    }
 
-    if (mask & GCClipYOrigin)
-        values.clip_originY = pGC->clipOrg.y;
+    if (mask & GCFillStyle) {
+      values.fill_style = pGC->fillStyle;
+    }
 
-    if (mask & GCClipMask)      /* this is handled in change clip */
-        mask &= ~GCClipMask;
+    if (mask & GCFillRule) {
+      values.fill_rule = pGC->fillRule;
+    }
 
-    if (mask & GCDashOffset)
-        values.dash_offset = pGC->dashOffset;
+    if (mask & GCTile) {
+      if (pGC->tileIsPixel) {
+        mask &= ~GCTile;
+      } else {
+        values.tile = xnestPixmap(pGC->tile.pixmap);
+      }
+    }
+
+    if (mask & GCStipple) {
+      values.stipple = xnestPixmap(pGC->stipple);
+    }
+
+    if (mask & GCTileStipXOrigin) {
+      values.tile_stipple_origin_x = pGC->patOrg.x;
+    }
+
+    if (mask & GCTileStipYOrigin) {
+      values.tile_stipple_origin_y = pGC->patOrg.y;
+    }
+
+    if (mask & GCFont) {
+      values.font = xnestFontPriv(pGC->font)->font_id;
+    }
+
+    if (mask & GCSubwindowMode) {
+      values.subwindow_mode = pGC->subWindowMode;
+    }
+
+    if (mask & GCGraphicsExposures) {
+      values.graphics_exposures = pGC->graphicsExposures;
+    }
+
+    if (mask & GCClipXOrigin) {
+      values.clip_originX = pGC->clipOrg.x;
+    }
+
+    if (mask & GCClipYOrigin) {
+      values.clip_originY = pGC->clipOrg.y;
+    }
+
+    if (mask & GCClipMask) { /* this is handled in change clip */
+      mask &= ~GCClipMask;
+    }
+
+    if (mask & GCDashOffset) {
+      values.dash_offset = pGC->dashOffset;
+    }
 
     if (mask & GCDashList) {
         mask &= ~GCDashList;
@@ -179,14 +200,14 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
                        (uint8_t*) pGC->dash);
     }
 
-    if (mask & GCArcMode)
-        values.arc_mode = pGC->arcMode;
+    if (mask & GCArcMode) {
+      values.arc_mode = pGC->arcMode;
+    }
 
-    if (mask)
-        xcb_aux_change_gc(xnestUpstreamInfo.conn,
-                          xnest_upstream_gc(pGC),
-                          mask,
-                          &values);
+    if (mask) {
+      xcb_aux_change_gc(xnestUpstreamInfo.conn, xnest_upstream_gc(pGC), mask,
+                        &values);
+    }
 }
 
 void
@@ -230,13 +251,14 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
                 return;
             }
             BoxPtr pBox = RegionRects((RegionPtr) pValue);
-            for (int i = nRects; i-- > 0;)
-                rects[i] = (xcb_rectangle_t) {
-                    .x = pBox[i].x1,
-                    .y = pBox[i].y1,
-                    .width = pBox[i].x2 - pBox[i].x1,
-                    .height = pBox[i].y2 - pBox[i].y1,
-                };
+            for (int i = nRects; i-- > 0;) {
+              rects[i] = (xcb_rectangle_t){
+                  .x = pBox[i].x1,
+                  .y = pBox[i].y1,
+                  .width = pBox[i].x2 - pBox[i].x1,
+                  .height = pBox[i].y2 - pBox[i].y1,
+              };
+            }
             xcb_set_clip_rectangles(
                 xnestUpstreamInfo.conn,
                 XCB_CLIP_ORDERING_UNSORTED,

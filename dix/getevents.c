@@ -87,19 +87,21 @@ GetMotionHistorySize(void)
 void
 set_button_down(DeviceIntPtr pDev, int button, int type)
 {
-    if (type == BUTTON_PROCESSED)
-        SetBit(pDev->button->down, button);
-    else
-        SetBit(pDev->button->postdown, button);
+  if (type == BUTTON_PROCESSED) {
+    SetBit(pDev->button->down, button);
+  } else {
+    SetBit(pDev->button->postdown, button);
+  }
 }
 
 void
 set_button_up(DeviceIntPtr pDev, int button, int type)
 {
-    if (type == BUTTON_PROCESSED)
-        ClearBit(pDev->button->down, button);
-    else
-        ClearBit(pDev->button->postdown, button);
+  if (type == BUTTON_PROCESSED) {
+    ClearBit(pDev->button->down, button);
+  } else {
+    ClearBit(pDev->button->postdown, button);
+  }
 }
 
 Bool
@@ -107,10 +109,12 @@ button_is_down(DeviceIntPtr pDev, int button, int type)
 {
     Bool ret = FALSE;
 
-    if (type & BUTTON_PROCESSED)
-        ret = ret || BitIsOn(pDev->button->down, button);
-    if (type & BUTTON_POSTED)
-        ret = ret || BitIsOn(pDev->button->postdown, button);
+    if (type & BUTTON_PROCESSED) {
+      ret = ret || BitIsOn(pDev->button->down, button);
+    }
+    if (type & BUTTON_POSTED) {
+      ret = ret || BitIsOn(pDev->button->postdown, button);
+    }
 
     return ret;
 }
@@ -118,19 +122,21 @@ button_is_down(DeviceIntPtr pDev, int button, int type)
 void
 set_key_down(DeviceIntPtr pDev, int key_code, int type)
 {
-    if (type == KEY_PROCESSED)
-        SetBit(pDev->key->down, key_code);
-    else
-        SetBit(pDev->key->postdown, key_code);
+  if (type == KEY_PROCESSED) {
+    SetBit(pDev->key->down, key_code);
+  } else {
+    SetBit(pDev->key->postdown, key_code);
+  }
 }
 
 void
 set_key_up(DeviceIntPtr pDev, int key_code, int type)
 {
-    if (type == KEY_PROCESSED)
-        ClearBit(pDev->key->down, key_code);
-    else
-        ClearBit(pDev->key->postdown, key_code);
+  if (type == KEY_PROCESSED) {
+    ClearBit(pDev->key->down, key_code);
+  } else {
+    ClearBit(pDev->key->postdown, key_code);
+  }
 }
 
 Bool
@@ -138,10 +144,12 @@ key_is_down(DeviceIntPtr pDev, int key_code, int type)
 {
     Bool ret = FALSE;
 
-    if (type & KEY_PROCESSED)
-        ret = ret || BitIsOn(pDev->key->down, key_code);
-    if (type & KEY_POSTED)
-        ret = ret || BitIsOn(pDev->key->postdown, key_code);
+    if (type & KEY_PROCESSED) {
+      ret = ret || BitIsOn(pDev->key->down, key_code);
+    }
+    if (type & KEY_POSTED) {
+      ret = ret || BitIsOn(pDev->key->postdown, key_code);
+    }
 
     return ret;
 }
@@ -214,10 +222,11 @@ set_raw_valuators(RawDeviceEvent *event, ValuatorMask *mask,
 
             SetBit(event->valuators.mask, i);
 
-            if (use_unaccel)
-                v = valuator_mask_get_unaccelerated(mask, i);
-            else
-                v = valuator_mask_get_double(mask, i);
+            if (use_unaccel) {
+              v = valuator_mask_get_unaccelerated(mask, i);
+            } else {
+              v = valuator_mask_get_double(mask, i);
+            }
 
             data[i] = v;
         }
@@ -232,12 +241,13 @@ set_valuators(DeviceIntPtr dev, DeviceEvent *event, ValuatorMask *mask)
     for (int i = 0; i < valuator_mask_size(mask); i++) {
         if (valuator_mask_isset(mask, i)) {
             SetBit(event->valuators.mask, i);
-            if (valuator_get_mode(dev, i) == Absolute)
-                SetBit(event->valuators.mode, i);
+            if (valuator_get_mode(dev, i) == Absolute) {
+              SetBit(event->valuators.mode, i);
+            }
             event->valuators.data[i] = valuator_mask_get_double(mask, i);
+        } else {
+          event->valuators.data[i] = dev->valuator->axisVal[i];
         }
-        else
-            event->valuators.data[i] = dev->valuator->axisVal[i];
     }
 }
 
@@ -261,8 +271,9 @@ CreateClassesChangedEvent(InternalEvent *event,
 
     if (slave->button) {
         dce->buttons.num_buttons = slave->button->numButtons;
-        for (int i = 0; i < dce->buttons.num_buttons; i++)
-            dce->buttons.names[i] = slave->button->labels[i];
+        for (int i = 0; i < dce->buttons.num_buttons; i++) {
+          dce->buttons.names[i] = slave->button->labels[i];
+        }
     }
     if (slave->valuator) {
         dce->num_valuators = slave->valuator->numAxes;
@@ -301,11 +312,13 @@ rescaleValuatorAxis(double coord, AxisInfoPtr from, AxisInfoPtr to,
         tmax = to->max_value + 1;
     }
 
-    if (fmin == tmin && fmax == tmax)
-        return coord;
+    if (fmin == tmin && fmax == tmax) {
+      return coord;
+    }
 
-    if (fmax == fmin)           /* avoid division by 0 */
-        return 0.0;
+    if (fmax == fmin) { /* avoid division by 0 */
+      return 0.0;
+    }
 
     return (coord - fmin) * (tmax - tmin) / (fmax - fmin) + tmin;
 }
@@ -326,8 +339,9 @@ updateSlaveDeviceCoords(DeviceIntPtr master, DeviceIntPtr pDev)
     pDev->last.valuators[0] = master->last.valuators[0];
     pDev->last.valuators[1] = master->last.valuators[1];
 
-    if (!pDev->valuator)
-        return;
+    if (!pDev->valuator) {
+      return;
+    }
 
     /* scale back to device coordinates */
     if (pDev->valuator->numAxes > 0) {
@@ -358,24 +372,27 @@ AllocateMotionHistory(DeviceIntPtr pDev)
 
     free(pDev->valuator->motion);
 
-    if (pDev->valuator->numMotionEvents < 1)
-        return;
+    if (pDev->valuator->numMotionEvents < 1) {
+      return;
+    }
 
     /* An MD must have a motion history size large enough to keep all
      * potential valuators, plus the respective range of the valuators.
      * 3 * INT32 for (min_val, max_val, curr_val))
      */
-    if (InputDevIsMaster(pDev))
-        size = sizeof(INT32) * 3 * MAX_VALUATORS;
-    else {
-        ValuatorClassPtr v = pDev->valuator;
-        int numAxes;
+    if (InputDevIsMaster(pDev)) {
+      size = sizeof(INT32) * 3 * MAX_VALUATORS;
+    } else {
+      ValuatorClassPtr v = pDev->valuator;
+      int numAxes;
 
-        /* XI1 doesn't understand mixed mode devices */
-        for (numAxes = 0; numAxes < v->numAxes; numAxes++)
-            if (valuator_get_mode(pDev, numAxes) != valuator_get_mode(pDev, 0))
-                break;
-        size = sizeof(INT32) * numAxes;
+      /* XI1 doesn't understand mixed mode devices */
+      for (numAxes = 0; numAxes < v->numAxes; numAxes++) {
+        if (valuator_get_mode(pDev, numAxes) != valuator_get_mode(pDev, 0)) {
+          break;
+        }
+      }
+      size = sizeof(INT32) * numAxes;
     }
 
     size += sizeof(Time);
@@ -383,9 +400,10 @@ AllocateMotionHistory(DeviceIntPtr pDev)
     pDev->valuator->motion = calloc(pDev->valuator->numMotionEvents, size);
     pDev->valuator->first_motion = 0;
     pDev->valuator->last_motion = 0;
-    if (!pDev->valuator->motion)
-        ErrorF("[dix] %s: Failed to alloc motion history (%d bytes).\n",
-               pDev->name, size * pDev->valuator->numMotionEvents);
+    if (!pDev->valuator->motion) {
+      ErrorF("[dix] %s: Failed to alloc motion history (%d bytes).\n",
+             pDev->name, size * pDev->valuator->numMotionEvents);
+    }
 }
 
 /**
@@ -411,20 +429,24 @@ GetMotionHistory(DeviceIntPtr pDev, xTimecoord ** buff, unsigned long start,
     INT16 *corebuf;
     AxisInfo core_axis = { 0 };
 
-    if (!pDev->valuator || !pDev->valuator->numMotionEvents)
-        return 0;
+    if (!pDev->valuator || !pDev->valuator->numMotionEvents) {
+      return 0;
+    }
 
-    if (core && !pScreen)
-        return 0;
+    if (core && !pScreen) {
+      return 0;
+    }
 
-    if (InputDevIsMaster(pDev))
-        size = (sizeof(INT32) * 3 * MAX_VALUATORS) + sizeof(Time);
-    else
-        size = (sizeof(INT32) * pDev->valuator->numAxes) + sizeof(Time);
+    if (InputDevIsMaster(pDev)) {
+      size = (sizeof(INT32) * 3 * MAX_VALUATORS) + sizeof(Time);
+    } else {
+      size = (sizeof(INT32) * pDev->valuator->numAxes) + sizeof(Time);
+    }
 
     *buff = calloc(size, pDev->valuator->numMotionEvents);
-    if (!(*buff))
-        return 0;
+    if (!(*buff)) {
+      return 0;
+    }
     obuff = (char *) *buff;
 
     for (int i = pDev->valuator->first_motion;
@@ -477,8 +499,9 @@ GetMotionHistory(DeviceIntPtr pDev, xTimecoord ** buff, unsigned long start,
                 ocbuf = (INT32 *) (obuff + sizeof(Time));
                 icbuf = (INT32 *) (ibuff + sizeof(Time));
                 for (int j = 0; j < MAX_VALUATORS; j++) {
-                    if (j >= pDev->valuator->numAxes)
-                        break;
+                  if (j >= pDev->valuator->numAxes) {
+                    break;
+                  }
 
                     /* fetch min/max/coordinate */
                     memcpy(&from.min_value, icbuf++, sizeof(INT32));
@@ -490,27 +513,28 @@ GetMotionHistory(DeviceIntPtr pDev, xTimecoord ** buff, unsigned long start,
                         axes[j] : NULL;
 
                     /* x/y scaled to screen if no range is present */
-                    if (j == 0 && (from.max_value < from.min_value))
-                        from.max_value = pScreen->width;
-                    else if (j == 1 && (from.max_value < from.min_value))
-                        from.max_value = pScreen->height;
+                    if (j == 0 && (from.max_value < from.min_value)) {
+                      from.max_value = pScreen->width;
+                    } else if (j == 1 && (from.max_value < from.min_value)) {
+                      from.max_value = pScreen->height;
+                    }
 
                     /* scale from stored range into current range */
                     coord = rescaleValuatorAxis(coord, &from, to, 0, 0);
                     memcpy(ocbuf, &coord, sizeof(INT32));
                     ocbuf++;
                 }
+            } else {
+              memcpy(obuff, ibuff, size);
             }
-            else
-                memcpy(obuff, ibuff, size);
 
             /* don't advance by size here. size may be different to the
              * actually written size if the MD has less valuators than MAX */
-            if (core)
-                obuff += sizeof(INT32) + sizeof(Time);
-            else
-                obuff +=
-                    (sizeof(INT32) * pDev->valuator->numAxes) + sizeof(Time);
+            if (core) {
+              obuff += sizeof(INT32) + sizeof(Time);
+            } else {
+              obuff += (sizeof(INT32) * pDev->valuator->numAxes) + sizeof(Time);
+            }
             ret++;
         }
     }
@@ -536,8 +560,9 @@ updateMotionHistory(DeviceIntPtr pDev, CARD32 ms, ValuatorMask *mask,
     char *buff = (char *) pDev->valuator->motion;
     ValuatorClassPtr v;
 
-    if (!pDev->valuator->numMotionEvents)
-        return;
+    if (!pDev->valuator->numMotionEvents) {
+      return;
+    }
 
     v = pDev->valuator;
     if (InputDevIsMaster(pDev)) {
@@ -553,8 +578,9 @@ updateMotionHistory(DeviceIntPtr pDev, CARD32 ms, ValuatorMask *mask,
             int val;
 
             /* XI1 doesn't support mixed mode devices */
-            if (valuator_get_mode(pDev, i) != valuator_get_mode(pDev, 0))
-                break;
+            if (valuator_get_mode(pDev, i) != valuator_get_mode(pDev, 0)) {
+              break;
+            }
             if (valuator_mask_size(mask) <= i || !valuator_mask_isset(mask, i)) {
                 buff += 3 * sizeof(INT32);
                 continue;
@@ -594,9 +620,10 @@ updateMotionHistory(DeviceIntPtr pDev, CARD32 ms, ValuatorMask *mask,
     pDev->valuator->last_motion = (pDev->valuator->last_motion + 1) %
         pDev->valuator->numMotionEvents;
     /* If we're wrapping around, just keep the circular buffer going. */
-    if (pDev->valuator->first_motion == pDev->valuator->last_motion)
-        pDev->valuator->first_motion = (pDev->valuator->first_motion + 1) %
-            pDev->valuator->numMotionEvents;
+    if (pDev->valuator->first_motion == pDev->valuator->last_motion) {
+      pDev->valuator->first_motion =
+          (pDev->valuator->first_motion + 1) % pDev->valuator->numMotionEvents;
+    }
 
     return;
 }
@@ -628,19 +655,23 @@ clipAxis(DeviceIntPtr pDev, int axisNum, double *val)
 {
     AxisInfoPtr axis;
 
-    if (axisNum >= pDev->valuator->numAxes)
-        return;
+    if (axisNum >= pDev->valuator->numAxes) {
+      return;
+    }
 
     axis = pDev->valuator->axes + axisNum;
 
     /* If a value range is defined, clip. If not, do nothing */
-    if (axis->max_value <= axis->min_value)
-        return;
+    if (axis->max_value <= axis->min_value) {
+      return;
+    }
 
-    if (*val < axis->min_value)
-        *val = axis->min_value;
-    if (*val > axis->max_value)
-        *val = axis->max_value;
+    if (*val < axis->min_value) {
+      *val = axis->min_value;
+    }
+    if (*val > axis->max_value) {
+      *val = axis->max_value;
+    }
 }
 
 /**
@@ -649,13 +680,14 @@ clipAxis(DeviceIntPtr pDev, int axisNum, double *val)
 static void
 clipValuators(DeviceIntPtr pDev, ValuatorMask *mask)
 {
-    for (int i = 0; i < valuator_mask_size(mask); i++)
-        if (valuator_mask_isset(mask, i)) {
-            double val = valuator_mask_get_double(mask, i);
+  for (int i = 0; i < valuator_mask_size(mask); i++) {
+    if (valuator_mask_isset(mask, i)) {
+      double val = valuator_mask_get_double(mask, i);
 
-            clipAxis(pDev, i, &val);
-            valuator_mask_set_double(mask, i, val);
-        }
+      clipAxis(pDev, i, &val);
+      valuator_mask_set_double(mask, i, val);
+    }
+  }
 }
 
 /**
@@ -707,8 +739,9 @@ clipAbsolute(DeviceIntPtr dev, ValuatorMask *mask)
     for (int i = 0; i < valuator_mask_size(mask); i++) {
         double val;
 
-        if (!valuator_mask_isset(mask, i))
-            continue;
+        if (!valuator_mask_isset(mask, i)) {
+          continue;
+        }
         val = valuator_mask_get_double(mask, i);
         clipAxis(dev, i, &val);
         valuator_mask_set_double(mask, i, val);
@@ -720,8 +753,9 @@ add_to_scroll_valuator(DeviceIntPtr dev, ValuatorMask *mask, int valuator, doubl
 {
     double v;
 
-    if (!valuator_mask_fetch_double(mask, valuator, &v))
-        return;
+    if (!valuator_mask_fetch_double(mask, valuator, &v)) {
+      return;
+    }
 
     /* protect against scrolling overflow. INT_MAX for double, because
      * we'll eventually write this as 32.32 fixed point */
@@ -730,9 +764,9 @@ add_to_scroll_valuator(DeviceIntPtr dev, ValuatorMask *mask, int valuator, doubl
 
         /* reset last.scroll to avoid a button storm */
         valuator_mask_set_double(dev->last.scroll, valuator, 0);
+    } else {
+      v += value;
     }
-    else
-        v += value;
 
     valuator_mask_set_double(mask, valuator, v);
 }
@@ -751,11 +785,13 @@ scale_for_device_resolution(DeviceIntPtr dev, ValuatorMask *mask)
     double resolution_ratio = 1.0;
     double ratio;
 
-    if (!valuator_mask_fetch_double(mask, 1, &y))
-        return;
+    if (!valuator_mask_fetch_double(mask, 1, &y)) {
+      return;
+    }
 
-    if (v->axes[0].resolution != 0 && v->axes[1].resolution != 0)
-        resolution_ratio = 1.0 * v->axes[0].resolution/v->axes[1].resolution;
+    if (v->axes[0].resolution != 0 && v->axes[1].resolution != 0) {
+      resolution_ratio = 1.0 * v->axes[0].resolution / v->axes[1].resolution;
+    }
 
     ratio = device_ratio/resolution_ratio/screen_ratio;
     valuator_mask_set_double(mask, 1, y / ratio);
@@ -785,8 +821,9 @@ moveRelative(DeviceIntPtr dev, int flags, ValuatorMask *mask)
     for (int i = 0; i < valuator_mask_size(mask); i++) {
         double val = dev->last.valuators[i];
 
-        if (!valuator_mask_isset(mask, i))
-            continue;
+        if (!valuator_mask_isset(mask, i)) {
+          continue;
+        }
 
         add_to_scroll_valuator(dev, mask, i, val);
 
@@ -811,8 +848,9 @@ moveRelative(DeviceIntPtr dev, int flags, ValuatorMask *mask)
 static void
 accelPointer(DeviceIntPtr dev, ValuatorMask *valuators, CARD32 ms)
 {
-    if (dev->valuator->accelScheme.AccelSchemeProc)
-        dev->valuator->accelScheme.AccelSchemeProc(dev, valuators, ms);
+  if (dev->valuator->accelScheme.AccelSchemeProc) {
+    dev->valuator->accelScheme.AccelSchemeProc(dev, valuators, ms);
+  }
 }
 
 /**
@@ -833,8 +871,9 @@ scale_from_screen(DeviceIntPtr dev, ValuatorMask *mask, int flags)
 
     if (valuator_mask_isset(mask, 0)) {
         scaled = valuator_mask_get_double(mask, 0);
-        if (flags & POINTER_SCREEN)
-            scaled += scr->x;
+        if (flags & POINTER_SCREEN) {
+          scaled += scr->x;
+        }
         scaled = rescaleValuatorAxis(scaled,
                                      NULL, dev->valuator->axes + 0,
                                      screenInfo.x, screenInfo.width);
@@ -842,8 +881,9 @@ scale_from_screen(DeviceIntPtr dev, ValuatorMask *mask, int flags)
     }
     if (valuator_mask_isset(mask, 1)) {
         scaled = valuator_mask_get_double(mask, 1);
-        if (flags & POINTER_SCREEN)
-            scaled += scr->y;
+        if (flags & POINTER_SCREEN) {
+          scaled += scr->y;
+        }
         scaled = rescaleValuatorAxis(scaled,
                                      NULL, dev->valuator->axes + 1,
                                      screenInfo.y, screenInfo.height);
@@ -880,14 +920,16 @@ scale_to_desktop(DeviceIntPtr dev, ValuatorMask *mask,
         return scr;
     }
 
-    if (valuator_mask_isset(mask, 0))
-        x = valuator_mask_get_double(mask, 0);
-    else
-        x = dev->last.valuators[0];
-    if (valuator_mask_isset(mask, 1))
-        y = valuator_mask_get_double(mask, 1);
-    else
-        y = dev->last.valuators[1];
+    if (valuator_mask_isset(mask, 0)) {
+      x = valuator_mask_get_double(mask, 0);
+    } else {
+      x = dev->last.valuators[0];
+    }
+    if (valuator_mask_isset(mask, 1)) {
+      y = valuator_mask_get_double(mask, 1);
+    } else {
+      y = dev->last.valuators[1];
+    }
 
     /* scale x&y to desktop coordinates */
     *screenx = rescaleValuatorAxis(x, dev->valuator->axes + 0, NULL,
@@ -933,8 +975,9 @@ positionSprite(DeviceIntPtr dev, int mode, ValuatorMask *mask,
     ScreenPtr scr = miPointerGetScreen(dev);
     double tmpx, tmpy;
 
-    if (!dev->valuator || dev->valuator->numAxes < 2)
-        return scr;
+    if (!dev->valuator || dev->valuator->numAxes < 2) {
+      return scr;
+    }
 
     tmpx = *screenx;
     tmpy = *screeny;
@@ -948,13 +991,15 @@ positionSprite(DeviceIntPtr dev, int mode, ValuatorMask *mask,
      * the device valuators reflect the correct position. For screen
      * crossing this doesn't matter much, the coords would be 0 or max.
      */
-    if (tmpx != *screenx)
-        *devx = rescaleValuatorAxis(*screenx, NULL, dev->valuator->axes + 0,
-                                    screenInfo.x, screenInfo.width);
+    if (tmpx != *screenx) {
+      *devx = rescaleValuatorAxis(*screenx, NULL, dev->valuator->axes + 0,
+                                  screenInfo.x, screenInfo.width);
+    }
 
-    if (tmpy != *screeny)
-        *devy = rescaleValuatorAxis(*screeny, NULL, dev->valuator->axes + 1,
-                                    screenInfo.y, screenInfo.height);
+    if (tmpy != *screeny) {
+      *devy = rescaleValuatorAxis(*screeny, NULL, dev->valuator->axes + 1,
+                                  screenInfo.y, screenInfo.height);
+    }
 
     /* Recalculate the per-screen device coordinates */
     if (valuator_mask_isset(mask, 0)) {
@@ -986,8 +1031,9 @@ positionSprite(DeviceIntPtr dev, int mode, ValuatorMask *mask,
 static void
 updateHistory(DeviceIntPtr dev, ValuatorMask *mask, CARD32 ms)
 {
-    if (!dev->valuator)
-        return;
+  if (!dev->valuator) {
+    return;
+  }
 
     updateMotionHistory(dev, ms, mask, dev->last.valuators);
     if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev)) {
@@ -1000,8 +1046,9 @@ updateHistory(DeviceIntPtr dev, ValuatorMask *mask, CARD32 ms)
 static void
 queueEventList(DeviceIntPtr device, InternalEvent *events, int nevents)
 {
-    for (int i = 0; i < nevents; i++)
-        mieqEnqueue(device, &events[i]);
+  for (int i = 0; i < nevents; i++) {
+    mieqEnqueue(device, &events[i]);
+  }
 }
 
 static void
@@ -1069,13 +1116,15 @@ GetKeyboardEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
     }
 
     /* refuse events from disabled devices */
-    if (!pDev->enabled)
-        return 0;
+    if (!pDev->enabled) {
+      return 0;
+    }
 
     if (!events || !pDev->key || !pDev->focus || !pDev->kbdfeed ||
         (type != KeyPress && type != KeyRelease) ||
-        (key_code < 8 || key_code > 255))
-        return 0;
+        (key_code < 8 || key_code > 255)) {
+      return 0;
+    }
 
     num_events = 1;
 
@@ -1088,8 +1137,9 @@ GetKeyboardEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
          * or we have a modifier, don't generate a repeat event. */
         if (!pDev->kbdfeed->ctrl.autoRepeat ||
             !key_autorepeats(pDev, key_code) ||
-            pDev->key->xkbInfo->desc->map->modmap[key_code])
-            return 0;
+            pDev->key->xkbInfo->desc->map->modmap[key_code]) {
+          return 0;
+        }
     }
 
     ms = GetTimeInMillis();
@@ -1168,15 +1218,17 @@ transformRelative(DeviceIntPtr dev, ValuatorMask *mask)
 
     transform(&dev->relative_transform, &x, &y);
 
-    if (x)
-        valuator_mask_set_double(mask, 0, x);
-    else
-        valuator_mask_unset(mask, 0);
+    if (x) {
+      valuator_mask_set_double(mask, 0, x);
+    } else {
+      valuator_mask_unset(mask, 0);
+    }
 
-    if (y)
-        valuator_mask_set_double(mask, 1, y);
-    else
-        valuator_mask_unset(mask, 1);
+    if (y) {
+      valuator_mask_set_double(mask, 1, y);
+    } else {
+      valuator_mask_unset(mask, 1);
+    }
 }
 
 /**
@@ -1196,8 +1248,9 @@ transformAbsolute(DeviceIntPtr dev, ValuatorMask *mask)
     has_x = valuator_mask_isset(mask, 0);
     has_y = valuator_mask_isset(mask, 1);
 
-    if (!has_x && !has_y)
-        return;
+    if (!has_x && !has_y) {
+      return;
+    }
 
     if (!has_x || !has_y) {
         struct pixman_f_transform invert;
@@ -1210,39 +1263,47 @@ transformAbsolute(DeviceIntPtr dev, ValuatorMask *mask)
         transform(&invert, &ox, &oy);
     }
 
-    if (has_x)
-        ox = valuator_mask_get_double(mask, 0);
+    if (has_x) {
+      ox = valuator_mask_get_double(mask, 0);
+    }
 
-    if (has_y)
-        oy = valuator_mask_get_double(mask, 1);
+    if (has_y) {
+      oy = valuator_mask_get_double(mask, 1);
+    }
 
     x = ox;
     y = oy;
 
     transform(&dev->scale_and_transform, &x, &y);
 
-    if (has_x || ox != x)
-        valuator_mask_set_double(mask, 0, x);
+    if (has_x || ox != x) {
+      valuator_mask_set_double(mask, 0, x);
+    }
 
-    if (has_y || oy != y)
-        valuator_mask_set_double(mask, 1, y);
+    if (has_y || oy != y) {
+      valuator_mask_set_double(mask, 1, y);
+    }
 }
 
 static void
 storeLastValuators(DeviceIntPtr dev, ValuatorMask *mask, double devx, double devy)
 {
     /* store desktop-wide in last.valuators */
-    if (valuator_mask_isset(mask, 0))
-        dev->last.valuators[0] = devx;
-    if (valuator_mask_isset(mask, 1))
-        dev->last.valuators[1] = devy;
+    if (valuator_mask_isset(mask, 0)) {
+      dev->last.valuators[0] = devx;
+    }
+    if (valuator_mask_isset(mask, 1)) {
+      dev->last.valuators[1] = devy;
+    }
 
     for (int i = 0; i < valuator_mask_size(mask); i++) {
-        if (i == 0 || i == 1)
-            continue;
+      if (i == 0 || i == 1) {
+        continue;
+      }
 
-        if (valuator_mask_isset(mask, i))
-            dev->last.valuators[i] = valuator_mask_get_double(mask, i);
+      if (valuator_mask_isset(mask, i)) {
+        dev->last.valuators[i] = valuator_mask_get_double(mask, i);
+      }
     }
 
 }
@@ -1339,13 +1400,15 @@ fill_pointer_events(InternalEvent *events, DeviceIntPtr pDev, int type,
                    pDev->id);
             return 0;
         }
-        if (!mask_in || valuator_mask_num_valuators(mask_in) <= 0)
-            return 0;
+        if (!mask_in || valuator_mask_num_valuators(mask_in) <= 0) {
+          return 0;
+        }
         break;
     case ButtonPress:
     case ButtonRelease:
-        if (!pDev->button || !buttons)
-            return 0;
+      if (!pDev->button || !buttons) {
+        return 0;
+      }
         if (mask_in && valuator_mask_size(mask_in) > 0 && !pDev->valuator) {
             ErrorF
                 ("[dix] button event with valuator from device %d without valuators\n",
@@ -1366,8 +1429,9 @@ fill_pointer_events(InternalEvent *events, DeviceIntPtr pDev, int type,
 
         init_raw(pDev, raw, ms, type, buttons);
 
-        if (flags & POINTER_EMULATED)
-            raw->flags = XIPointerEmulated;
+        if (flags & POINTER_EMULATED) {
+          raw->flags = XIPointerEmulated;
+        }
 
         set_raw_valuators(raw, &mask, TRUE, raw->valuators.data_raw);
     }
@@ -1385,16 +1449,19 @@ fill_pointer_events(InternalEvent *events, DeviceIntPtr pDev, int type,
 
         transformAbsolute(pDev, &mask);
         clipAbsolute(pDev, &mask);
-        if ((flags & POINTER_NORAW) == 0 && raw)
-            set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
+        if ((flags & POINTER_NORAW) == 0 && raw) {
+          set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
+        }
     }
     else {
         transformRelative(pDev, &mask);
 
-        if (flags & POINTER_ACCELERATE)
-            accelPointer(pDev, &mask, ms);
-        if ((flags & POINTER_NORAW) == 0 && raw)
-            set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
+        if (flags & POINTER_ACCELERATE) {
+          accelPointer(pDev, &mask, ms);
+        }
+        if ((flags & POINTER_NORAW) == 0 && raw) {
+          set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
+        }
 
         moveRelative(pDev, flags, &mask);
     }
@@ -1462,8 +1529,9 @@ fill_pointer_events(InternalEvent *events, DeviceIntPtr pDev, int type,
         /* root_x and root_y must be in per-screen coordinates */
         event_set_root_coordinates(event, screenx - scr->x, screeny - scr->y);
 
-        if (flags & POINTER_EMULATED)
-            event->flags = XIPointerEmulated;
+        if (flags & POINTER_EMULATED) {
+          event->flags = XIPointerEmulated;
+        }
 
         set_valuators(pDev, event, &mask);
     }
@@ -1507,24 +1575,29 @@ emulate_scroll_button_events(InternalEvent *events,
            current_val, /* abs axis value for this event */
            last_scroll_val; /* abs axis value we sent out the last scroll button for */
 
-    if (dev->valuator->axes[axis].scroll.type == SCROLL_TYPE_NONE)
-        return 0;
+    if (dev->valuator->axes[axis].scroll.type == SCROLL_TYPE_NONE) {
+      return 0;
+    }
 
-    if (!valuator_mask_isset(mask, axis))
-        return 0;
+    if (!valuator_mask_isset(mask, axis)) {
+      return 0;
+    }
 
     ax = &dev->valuator->axes[axis];
     incr = ax->scroll.increment;
 
     BUG_WARN_MSG(incr == 0, "for device %s\n", dev->name);
-    if (incr == 0)
-        return 0;
+    if (incr == 0) {
+      return 0;
+    }
 
-    if (type != ButtonPress && type != ButtonRelease)
-        flags |= POINTER_EMULATED;
+    if (type != ButtonPress && type != ButtonRelease) {
+      flags |= POINTER_EMULATED;
+    }
 
-    if (!valuator_mask_isset(lastScroll, axis))
-        valuator_mask_set_double(lastScroll, axis, 0);
+    if (!valuator_mask_isset(lastScroll, axis)) {
+      valuator_mask_set_double(lastScroll, axis, 0);
+    }
 
     /* The delta between the last value we sent a scroll button event for
      * and the current event value (which has been applied already in
@@ -1533,8 +1606,9 @@ emulate_scroll_button_events(InternalEvent *events,
     direction = delta * incr > 0 ? 1 : -1;
 
     b = (ax->scroll.type == SCROLL_TYPE_VERTICAL) ? 5 : 7;
-    if (direction < 0)
-        b--;                    /* we're scrolling up or left → button 4 or 6 */
+    if (direction < 0) {
+      b--; /* we're scrolling up or left → button 4 or 6 */
+    }
 
     /* Note: we emulate scroll on multiples of the increment, regardless of the
      * current delta, mostly for the benefit of Xwayland which doesn't (cannot)
@@ -1587,9 +1661,12 @@ emulate_scroll_button_events(InternalEvent *events,
         /* The next value we want to send out a button event for */
         double next_val = last_scroll_val + direction * incr;
 
-        if ((((direction > 0 && incr > 0) || (direction < 0 && incr < 0)) && (next_val > current_val)) ||
-            (((direction > 0 && incr < 0) || (direction < 0 && incr > 0)) && (next_val < current_val)))
-            break;
+        if ((((direction > 0 && incr > 0) || (direction < 0 && incr < 0)) &&
+             (next_val > current_val)) ||
+            (((direction > 0 && incr < 0) || (direction < 0 && incr > 0)) &&
+             (next_val < current_val))) {
+          break;
+        }
 
         /* fill_pointer_events() generates four events: one normal and one raw
          * event for button press and button release.
@@ -1663,11 +1740,13 @@ GetPointerEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
     BUG_RETURN_VAL(buttons >= MAX_BUTTONS, 0);
 
     /* refuse events from disabled devices */
-    if (!pDev->enabled)
-        return 0;
+    if (!pDev->enabled) {
+      return 0;
+    }
 
-    if (!miPointerGetScreen(pDev))
-        return 0;
+    if (!miPointerGetScreen(pDev)) {
+      return 0;
+    }
 
     events = UpdateFromMaster(events, pDev, DEVCHANGE_POINTER_EVENT,
                               &num_events);
@@ -1677,8 +1756,9 @@ GetPointerEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
     /* Back up the current value of last.valuators. fill_pointer_events()
      * overwrites those but we need them for scroll button emulation */
     valuator_mask_zero(&last_valuators);
-    for (size_t idx = 0; idx < pDev->last.numValuators; idx++)
-        valuator_mask_set_double(&last_valuators, idx, pDev->last.valuators[idx]);
+    for (size_t idx = 0; idx < pDev->last.numValuators; idx++) {
+      valuator_mask_set_double(&last_valuators, idx, pDev->last.valuators[idx]);
+    }
 
     /* Turn a scroll button press into a smooth-scrolling event if
      * necessary. This only needs to cater for the XIScrollFlagPreferred
@@ -1720,8 +1800,9 @@ GetPointerEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
 
         if (adj != 0.0 && axis != -1) {
             adj *= pDev->valuator->axes[axis].scroll.increment;
-            if (!valuator_mask_isset(&mask, axis))
-                valuator_mask_set(&mask, axis, 0);
+            if (!valuator_mask_isset(&mask, axis)) {
+              valuator_mask_set(&mask, axis, 0);
+            }
             add_to_scroll_valuator(pDev, &mask, axis, adj);
             type = MotionNotify;
             buttons = 0;
@@ -1740,11 +1821,13 @@ GetPointerEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
     /* Now turn the smooth-scrolling axes back into emulated button presses
      * for legacy clients, based on the integer delta between before and now */
     for (int i = 0; i < valuator_mask_size(&mask); i++) {
-        if ( !pDev->valuator || (i >= pDev->valuator->numAxes))
-            break;
+      if (!pDev->valuator || (i >= pDev->valuator->numAxes)) {
+        break;
+      }
 
-        if (!valuator_mask_isset(&mask, i))
-            continue;
+      if (!valuator_mask_isset(&mask, i)) {
+        continue;
+      }
 
         valuator_mask_set_double(&scroll, i, pDev->last.valuators[i]);
 
@@ -1807,22 +1890,26 @@ GetProximityEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
 #endif
 
     /* refuse events from disabled devices */
-    if (!pDev->enabled)
-        return 0;
+    if (!pDev->enabled) {
+      return 0;
+    }
 
     /* Sanity checks. */
-    if ((type != ProximityIn && type != ProximityOut) || !mask_in)
-        return 0;
-    if (!pDev->valuator || !pDev->proximity)
-        return 0;
+    if ((type != ProximityIn && type != ProximityOut) || !mask_in) {
+      return 0;
+    }
+    if (!pDev->valuator || !pDev->proximity) {
+      return 0;
+    }
 
     valuator_mask_copy(&mask, mask_in);
 
     /* ignore relative axes for proximity. */
     for (int i = 0; i < valuator_mask_size(&mask); i++) {
-        if (valuator_mask_isset(&mask, i) &&
-            valuator_get_mode(pDev, i) == Relative)
-            valuator_mask_unset(&mask, i);
+      if (valuator_mask_isset(&mask, i) &&
+          valuator_get_mode(pDev, i) == Relative) {
+        valuator_mask_unset(&mask, i);
+      }
     }
 
     /* FIXME: posting proximity events with relative valuators only results
@@ -1852,8 +1939,9 @@ GetTouchOwnershipEvents(InternalEvent *events, DeviceIntPtr pDev,
     TouchOwnershipEvent *event;
     CARD32 ms = GetTimeInMillis();
 
-    if (!pDev->enabled || !t || !ti)
-        return 0;
+    if (!pDev->enabled || !t || !ti) {
+      return 0;
+    }
 
     event = &events->touch_ownership_event;
     init_touch_ownership(pDev, event, ms);
@@ -1935,8 +2023,9 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
     }
 #endif
 
-    if (!dev->enabled || !t || !v)
-        return 0;
+    if (!dev->enabled || !t || !v) {
+      return 0;
+    }
 
     /* Find and/or create the DDX touch info */
 
@@ -1950,9 +2039,10 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
 
     emulate_pointer = ti->emulate_pointer;
 
-    if (!InputDevIsMaster(dev))
-        events =
-            UpdateFromMaster(events, dev, DEVCHANGE_POINTER_EVENT, &num_events);
+    if (!InputDevIsMaster(dev)) {
+      events =
+          UpdateFromMaster(events, dev, DEVCHANGE_POINTER_EVENT, &num_events);
+    }
 
     valuator_mask_copy(&mask, mask_in);
 
@@ -2003,14 +2093,15 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
         for (int i = 0; i < max(valuator_mask_size(&mask), 2); i++) {
             double val;
 
-            if (valuator_mask_fetch_double(&mask, i, &val))
-                valuator_mask_set_double(ti->valuators, i, val);
-            /* If the device doesn't post new X and Y axis values,
-             * use the last values posted.
-             */
-            else if (i < 2 &&
-                valuator_mask_fetch_double(ti->valuators, i, &val))
-                valuator_mask_set_double(&mask, i, val);
+            if (valuator_mask_fetch_double(&mask, i, &val)) {
+              valuator_mask_set_double(ti->valuators, i, val);
+              /* If the device doesn't post new X and Y axis values,
+               * use the last values posted.
+               */
+            } else if (i < 2 &&
+                       valuator_mask_fetch_double(ti->valuators, i, &val)) {
+              valuator_mask_set_double(&mask, i, val);
+            }
         }
 
         transformAbsolute(dev, &mask);
@@ -2020,8 +2111,9 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
         screenx = dev->spriteInfo->sprite->hotPhys.x;
         screeny = dev->spriteInfo->sprite->hotPhys.y;
     }
-    if (need_rawevent)
-        set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
+    if (need_rawevent) {
+      set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
+    }
 
     scr = dev->spriteInfo->sprite->hotPhys.pScreen;
 
@@ -2029,20 +2121,24 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
      * They are merely informational, and are provided in device coordinates.
      * The device sprite is used for positioning instead, and it is already
      * scaled. */
-    if (t->mode == XIDirectTouch)
-        scr = scale_to_desktop(dev, &mask, &devx, &devy, &screenx, &screeny);
-    if (emulate_pointer)
-        scr = positionSprite(dev, Absolute, &mask,
-                             &devx, &devy, &screenx, &screeny, NULL, NULL);
+    if (t->mode == XIDirectTouch) {
+      scr = scale_to_desktop(dev, &mask, &devx, &devy, &screenx, &screeny);
+    }
+    if (emulate_pointer) {
+      scr = positionSprite(dev, Absolute, &mask, &devx, &devy, &screenx,
+                           &screeny, NULL, NULL);
+    }
 
     /* see fill_pointer_events for coordinate systems */
-    if (emulate_pointer)
-        updateHistory(dev, &mask, ms);
+    if (emulate_pointer) {
+      updateHistory(dev, &mask, ms);
+    }
 
     clipValuators(dev, &mask);
 
-    if (emulate_pointer)
-        storeLastValuators(dev, &mask, devx, devy);
+    if (emulate_pointer) {
+      storeLastValuators(dev, &mask, devx, devy);
+    }
 
     /* Update the MD's coordinates, which are always in desktop space. */
     if (emulate_pointer && !InputDevIsMaster(dev) && !InputDevIsFloating(dev)) {
@@ -2065,8 +2161,9 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
 
     set_valuators(dev, event, &mask);
     for (int i = 0; i < v->numAxes; i++) {
-        if (valuator_mask_isset(&mask, i))
-            v->axisVal[i] = valuator_mask_get(&mask, i);
+      if (valuator_mask_isset(&mask, i)) {
+        v->axisVal[i] = valuator_mask_get(&mask, i);
+      }
     }
 
     return num_events;
@@ -2200,12 +2297,14 @@ GetGestureEvents(InternalEvent *events, DeviceIntPtr dev,
     int num_events = 0;
     uint32_t evflags = 0;
 
-    if (!dev->enabled || !g)
-        return 0;
+    if (!dev->enabled || !g) {
+      return 0;
+    }
 
-    if (!InputDevIsMaster(dev))
-        events = UpdateFromMaster(events, dev, DEVCHANGE_POINTER_EVENT,
-                                  &num_events);
+    if (!InputDevIsMaster(dev)) {
+      events =
+          UpdateFromMaster(events, dev, DEVCHANGE_POINTER_EVENT, &num_events);
+    }
 
     switch (type) {
     case XI_GesturePinchBegin:
@@ -2216,8 +2315,9 @@ GetGestureEvents(InternalEvent *events, DeviceIntPtr dev,
         break;
     case XI_GesturePinchEnd:
         evtype = ET_GesturePinchEnd;
-        if (flags & XIGesturePinchEventCancelled)
-            evflags |= GESTURE_CANCELLED;
+        if (flags & XIGesturePinchEventCancelled) {
+          evflags |= GESTURE_CANCELLED;
+        }
         break;
     case XI_GestureSwipeBegin:
         evtype = ET_GestureSwipeBegin;
@@ -2227,8 +2327,9 @@ GetGestureEvents(InternalEvent *events, DeviceIntPtr dev,
         break;
     case XI_GestureSwipeEnd:
         evtype = ET_GestureSwipeEnd;
-        if (flags & XIGestureSwipeEventCancelled)
-            evflags |= GESTURE_CANCELLED;
+        if (flags & XIGestureSwipeEventCancelled) {
+          evflags |= GESTURE_CANCELLED;
+        }
         break;
     default:
         return 0;

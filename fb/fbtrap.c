@@ -37,8 +37,9 @@ fbAddTraps(PicturePtr pPicture,
     pixman_image_t *image;
     int dst_xoff, dst_yoff;
 
-    if (!(image = image_from_pict(pPicture, FALSE, &dst_xoff, &dst_yoff)))
-        return;
+    if (!(image = image_from_pict(pPicture, FALSE, &dst_xoff, &dst_yoff))) {
+      return;
+    }
 
     pixman_add_traps(image, x_off + dst_xoff, y_off + dst_yoff,
                      ntrap, (pixman_trap_t *) traps);
@@ -53,8 +54,9 @@ fbRasterizeTrapezoid(PicturePtr pPicture,
     pixman_image_t *image;
     int dst_xoff, dst_yoff;
 
-    if (!(image = image_from_pict(pPicture, FALSE, &dst_xoff, &dst_yoff)))
-        return;
+    if (!(image = image_from_pict(pPicture, FALSE, &dst_xoff, &dst_yoff))) {
+      return;
+    }
 
     pixman_rasterize_trapezoid(image, (pixman_trapezoid_t *) trap,
                                x_off + dst_xoff, y_off + dst_yoff);
@@ -69,8 +71,9 @@ fbAddTriangles(PicturePtr pPicture,
     pixman_image_t *image;
     int dst_xoff, dst_yoff;
 
-    if (!(image = image_from_pict(pPicture, FALSE, &dst_xoff, &dst_yoff)))
-        return;
+    if (!(image = image_from_pict(pPicture, FALSE, &dst_xoff, &dst_yoff))) {
+      return;
+    }
 
     pixman_add_triangles(image,
                          dst_xoff + x_off, dst_yoff + y_off,
@@ -113,10 +116,11 @@ fbShapes(CompositeShapesFunc composite,
         if (!maskFormat) {
             int i;
 
-            if (pDst->polyEdge == PolyEdgeSharp)
-                format = PIXMAN_a1;
-            else
-                format = PIXMAN_a8;
+            if (pDst->polyEdge == PolyEdgeSharp) {
+              format = PIXMAN_a1;
+            } else {
+              format = PIXMAN_a8;
+            }
 
             for (i = 0; i < nshapes; ++i) {
                 composite(op, src, dst, format,

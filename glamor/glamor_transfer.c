@@ -46,15 +46,18 @@ glamor_upload_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
     int                         bytes_per_pixel = PIXMAN_FORMAT_BPP(f->render_format) >> 3;
     char *tmp_bits = NULL;
 
-    if (glamor_drawable_effective_depth(drawable) == 24 && pixmap->drawable.depth == 32)
-        tmp_bits = XNFalloc(byte_stride * pixmap->drawable.height);
+    if (glamor_drawable_effective_depth(drawable) == 24 &&
+        pixmap->drawable.depth == 32) {
+      tmp_bits = XNFalloc(byte_stride * pixmap->drawable.height);
+    }
 
     glamor_make_current(glamor_priv);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-    if (glamor_priv->has_unpack_subimage)
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, byte_stride / bytes_per_pixel);
+    if (glamor_priv->has_unpack_subimage) {
+      glPixelStorei(GL_UNPACK_ROW_LENGTH, byte_stride / bytes_per_pixel);
+    }
 
     BUG_RETURN(!priv);
 
@@ -80,8 +83,9 @@ glamor_upload_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
 
             boxes++;
 
-            if (x2 <= x1 || y2 <= y1)
-                continue;
+            if (x2 <= x1 || y2 <= y1) {
+              continue;
+            }
 
             src_line = (uint32_t *)(bits + ofs);
 
@@ -92,8 +96,9 @@ glamor_upload_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
                 /* Make sure any sampling of the alpha channel will return 1.0 */
                 for (y = y1; y < y2;
                      y++, src_line += byte_stride / 4, tmp_line += byte_stride / 4) {
-                    for (x = 0; x < x2 - x1; x++)
-                        tmp_line[x] = src_line[x] | 0xff000000;
+                  for (x = 0; x < x2 - x1; x++) {
+                    tmp_line[x] = src_line[x] | 0xff000000;
+                  }
                 }
 
                 src_line = (uint32_t *)(tmp_bits + ofs);
@@ -107,20 +112,19 @@ glamor_upload_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
                                 f->format, f->type,
                                 src_line);
             } else {
-                for (; y1 < y2; y1++, src_line += byte_stride / bytes_per_pixel)
-                    glTexSubImage2D(GL_TEXTURE_2D, 0,
-                                    x1 - box->x1, y1 - box->y1,
-                                    x2 - x1, 1,
-                                    f->format, f->type,
-                                    src_line);
+              for (; y1 < y2; y1++, src_line += byte_stride / bytes_per_pixel) {
+                glTexSubImage2D(GL_TEXTURE_2D, 0, x1 - box->x1, y1 - box->y1,
+                                x2 - x1, 1, f->format, f->type, src_line);
+              }
             }
         }
     }
 
     free(tmp_bits);
 
-    if (glamor_priv->has_unpack_subimage)
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    if (glamor_priv->has_unpack_subimage) {
+      glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    }
 }
 
 /*
@@ -158,8 +162,9 @@ glamor_download_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
     glamor_make_current(glamor_priv);
 
     glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    if (glamor_priv->has_pack_subimage)
-        glPixelStorei(GL_PACK_ROW_LENGTH, byte_stride / bytes_per_pixel);
+    if (glamor_priv->has_pack_subimage) {
+      glPixelStorei(GL_PACK_ROW_LENGTH, byte_stride / bytes_per_pixel);
+    }
 
     BUG_RETURN(!priv);
 
@@ -185,18 +190,22 @@ glamor_download_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
 
             boxes++;
 
-            if (x2 <= x1 || y2 <= y1)
-                continue;
+            if (x2 <= x1 || y2 <= y1) {
+              continue;
+            }
 
             if (glamor_priv->has_pack_subimage ||
                 x2 - x1 == byte_stride / bytes_per_pixel) {
                 glReadPixels(x1 - box->x1, y1 - box->y1, x2 - x1, y2 - y1, f->format, f->type, bits + ofs);
             } else {
-                for (; y1 < y2; y1++, ofs += byte_stride)
-                    glReadPixels(x1 - box->x1, y1 - box->y1, x2 - x1, 1, f->format, f->type, bits + ofs);
+              for (; y1 < y2; y1++, ofs += byte_stride) {
+                glReadPixels(x1 - box->x1, y1 - box->y1, x2 - x1, 1, f->format,
+                             f->type, bits + ofs);
+              }
             }
         }
     }
-    if (glamor_priv->has_pack_subimage)
-        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+    if (glamor_priv->has_pack_subimage) {
+      glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+    }
 }

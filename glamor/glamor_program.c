@@ -74,8 +74,9 @@ static const glamor_facet glamor_fill_stipple = {
 static Bool
 use_opaque_stipple(DrawablePtr drawable, GCPtr gc, glamor_program *prog, void *arg)
 {
-    if (!use_stipple(drawable, gc, prog, arg))
-        return FALSE;
+  if (!use_stipple(drawable, gc, prog, arg)) {
+    return FALSE;
+  }
     glamor_set_color(drawable, gc->bgPixel, prog->bg_uniform);
     return TRUE;
 }
@@ -153,8 +154,9 @@ add_var(char *cur, const char *add)
 {
     char *new;
 
-    if (!add)
-        return cur;
+    if (!add) {
+      return cur;
+    }
 
     new = realloc(cur, strlen(cur) + strlen(add) + 1);
     if (!new) {
@@ -171,9 +173,11 @@ vs_location_vars(glamor_program_location locations)
     int l;
     char *vars = strdup("");
 
-    for (l = 0; vars && l < ARRAY_SIZE(location_vars); l++)
-        if (locations & location_vars[l].location)
-            vars = add_var(vars, location_vars[l].vs_vars);
+    for (l = 0; vars && l < ARRAY_SIZE(location_vars); l++) {
+      if (locations & location_vars[l].location) {
+        vars = add_var(vars, location_vars[l].vs_vars);
+      }
+    }
     return vars;
 }
 
@@ -183,9 +187,11 @@ fs_location_vars(glamor_program_location locations)
     int l;
     char *vars = strdup("");
 
-    for (l = 0; vars && l < ARRAY_SIZE(location_vars); l++)
-        if (locations & location_vars[l].location)
-            vars = add_var(vars, location_vars[l].fs_vars);
+    for (l = 0; vars && l < ARRAY_SIZE(location_vars); l++) {
+      if (locations & location_vars[l].location) {
+        vars = add_var(vars, location_vars[l].fs_vars);
+      }
+    }
     return vars;
 }
 
@@ -223,8 +229,9 @@ static const char fs_template[] =
 static const char *
 str(const char *s)
 {
-    if (!s)
-        return "";
+  if (!s) {
+    return "";
+  }
     return s;
 }
 
@@ -240,8 +247,9 @@ glamor_get_uniform(glamor_program               *prog,
                    const char                   *name)
 {
     GLint uniform;
-    if (location && (prog->locations & location) == 0)
-        return -2;
+    if (location && (prog->locations & location) == 0) {
+      return -2;
+    }
     uniform = glGetUniformLocation(prog->prog, name);
 #if DBG
     ErrorF("%s uniform %d\n", name, uniform);
@@ -274,76 +282,75 @@ glamor_build_program(ScreenPtr          screen,
     GLint                       fs_prog, vs_prog;
     Bool                        gpu_shader4 = FALSE;
 
-    if (!fill)
-        fill = &facet_null_fill;
+    if (!fill) {
+      fill = &facet_null_fill;
+    }
 
     locations |= fill->locations;
     flags |= fill->flags;
     version = MAX(version, fill->version);
 
     if (version > glamor_priv->glsl_version) {
-        if (version == 130 && !glamor_priv->use_gpu_shader4)
-            goto fail;
-        else {
-            version = 120;
-            gpu_shader4 = TRUE;
-        }
+      if (version == 130 && !glamor_priv->use_gpu_shader4) {
+        goto fail;
+      } else {
+        version = 120;
+        gpu_shader4 = TRUE;
+      }
     }
 
-    if (version == 130 && glamor_priv->is_gles && glamor_priv->glsl_version > 110)
-        version = 300;
-    else if (glamor_priv->is_gles)
-        version = 100;
-    else if (!version)
-        version = 120;
+    if (version == 130 && glamor_priv->is_gles &&
+        glamor_priv->glsl_version > 110) {
+      version = 300;
+    } else if (glamor_priv->is_gles) {
+      version = 100;
+    } else if (!version) {
+      version = 120;
+    }
 
     vs_vars = vs_location_vars(locations);
     fs_vars = fs_location_vars(locations);
 
-    if (!vs_vars)
-        goto fail;
-    if (!fs_vars)
-        goto fail;
-
-    if (version) {
-        if (asprintf(&version_string, "#version %d %s\n", version,
-                     glamor_priv->is_gles && version > 100 ? "es" : "") < 0)
-            version_string = NULL;
-        if (!version_string)
-            goto fail;
+    if (!vs_vars) {
+      goto fail;
+    }
+    if (!fs_vars) {
+      goto fail;
     }
 
-    if (asprintf(&vs_prog_string,
-                 vs_template,
-                 str(version_string),
-                 gpu_shader4 ? "#extension GL_EXT_gpu_shader4 : require\n" : "",
-                 version < 130 ? GLAMOR_COMPAT_DEFINES_VS : "",
-                 str(defines),
-                 str(prim->vs_vars),
-                 str(fill->vs_vars),
-                 vs_vars,
-                 str(prim->vs_exec),
-                 str(fill->vs_exec)) < 0)
-        vs_prog_string = NULL;
-
-    if (asprintf(&fs_prog_string,
-                 fs_template,
-                 str(version_string),
-                 str(prim->fs_extensions),
-                 str(fill->fs_extensions),
-                 gpu_shader4 ? "#extension GL_EXT_gpu_shader4 : require\n#define texelFetch texelFetch2D\n#define uint unsigned int\n" : "",
-                 GLAMOR_COMPAT_DEFINES_FS,
-                 str(defines),
-                 str(prim->fs_vars),
-                 str(fill->fs_vars),
-                 fs_vars,
-                 str(prim->fs_exec),
-                 str(fill->fs_exec),
-                 str(combine)) < 0)
-        fs_prog_string = NULL;
-
-    if (!vs_prog_string || !fs_prog_string)
+    if (version) {
+      if (asprintf(&version_string, "#version %d %s\n", version,
+                   glamor_priv->is_gles && version > 100 ? "es" : "") < 0) {
+        version_string = NULL;
+      }
+      if (!version_string) {
         goto fail;
+      }
+    }
+
+    if (asprintf(&vs_prog_string, vs_template, str(version_string),
+                 gpu_shader4 ? "#extension GL_EXT_gpu_shader4 : require\n" : "",
+                 version < 130 ? GLAMOR_COMPAT_DEFINES_VS : "", str(defines),
+                 str(prim->vs_vars), str(fill->vs_vars), vs_vars,
+                 str(prim->vs_exec), str(fill->vs_exec)) < 0) {
+      vs_prog_string = NULL;
+    }
+
+    if (asprintf(&fs_prog_string, fs_template, str(version_string),
+                 str(prim->fs_extensions), str(fill->fs_extensions),
+                 gpu_shader4
+                     ? "#extension GL_EXT_gpu_shader4 : require\n#define "
+                       "texelFetch texelFetch2D\n#define uint unsigned int\n"
+                     : "",
+                 GLAMOR_COMPAT_DEFINES_FS, str(defines), str(prim->fs_vars),
+                 str(fill->fs_vars), fs_vars, str(prim->fs_exec),
+                 str(fill->fs_exec), str(combine)) < 0) {
+      fs_prog_string = NULL;
+    }
+
+    if (!vs_prog_string || !fs_prog_string) {
+      goto fail;
+    }
 
     prog->prog = glCreateProgram();
 #if DBG
@@ -377,8 +384,10 @@ glamor_build_program(ScreenPtr          screen,
         glBindFragDataLocationIndexed(prog->prog, 0, 1, "color1");
     }
 
-    if (!glamor_link_glsl_prog(screen, prog->prog, "%s_%s", prim->name, fill->name))
-        goto fail;
+    if (!glamor_link_glsl_prog(screen, prog->prog, "%s_%s", prim->name,
+                               fill->name)) {
+      goto fail;
+    }
 
     prog->matrix_uniform = glamor_get_uniform(prog, glamor_program_location_none, "v_matrix");
     prog->fg_uniform = glamor_get_uniform(prog, glamor_program_location_fg, "fg");
@@ -420,11 +429,13 @@ glamor_use_program(DrawablePtr          drawable,
 {
     glUseProgram(prog->prog);
 
-    if (prog->prim_use && !prog->prim_use(drawable, gc, prog, arg))
-        return FALSE;
+    if (prog->prim_use && !prog->prim_use(drawable, gc, prog, arg)) {
+      return FALSE;
+    }
 
-    if (prog->fill_use && !prog->fill_use(drawable, gc, prog, arg))
-        return FALSE;
+    if (prog->fill_use && !prog->fill_use(drawable, gc, prog, arg)) {
+      return FALSE;
+    }
 
     return TRUE;
 }
@@ -441,20 +452,24 @@ glamor_use_program_fill(DrawablePtr             drawable,
     int                         fill_style = gc->fillStyle;
     const glamor_facet          *fill;
 
-    if (prog->failed)
-        return FALSE;
+    if (prog->failed) {
+      return FALSE;
+    }
 
     if (!prog->prog) {
         fill = glamor_facet_fill[fill_style];
-        if (!fill)
-            return NULL;
+        if (!fill) {
+          return NULL;
+        }
 
-        if (!glamor_build_program(screen, prog, prim, fill, NULL, NULL))
-            return NULL;
+        if (!glamor_build_program(screen, prog, prim, fill, NULL, NULL)) {
+          return NULL;
+        }
     }
 
-    if (!glamor_use_program(drawable, gc, prog, NULL))
-        return NULL;
+    if (!glamor_use_program(drawable, gc, prog, NULL)) {
+      return NULL;
+    }
 
     return prog;
 }
@@ -493,11 +508,13 @@ glamor_set_blend(CARD8 op, glamor_program_alpha alpha, PicturePtr dst)
         break;
     }
 
-    if (!glamor_priv->is_gles)
-        glDisable(GL_COLOR_LOGIC_OP);
+    if (!glamor_priv->is_gles) {
+      glDisable(GL_COLOR_LOGIC_OP);
+    }
 
-    if (op == PictOpSrc)
-        return;
+    if (op == PictOpSrc) {
+      return;
+    }
 
     op_info = &composite_op_info[op];
 
@@ -508,10 +525,11 @@ glamor_set_blend(CARD8 op, glamor_program_alpha alpha, PicturePtr dst)
      * it as always 1.
      */
     if (PIXMAN_FORMAT_A(dst->format) == 0 && op_info->dest_alpha) {
-        if (src_blend == GL_DST_ALPHA)
-            src_blend = GL_ONE;
-        else if (src_blend == GL_ONE_MINUS_DST_ALPHA)
-            src_blend = GL_ZERO;
+      if (src_blend == GL_DST_ALPHA) {
+        src_blend = GL_ONE;
+      } else if (src_blend == GL_ONE_MINUS_DST_ALPHA) {
+        src_blend = GL_ZERO;
+      }
     }
 
     /* Set up the source alpha value for blending in component alpha mode. */
@@ -620,18 +638,22 @@ glamor_setup_one_program_render(ScreenPtr               screen,
                                 const glamor_facet      *prim,
                                 const char              *defines)
 {
-    if (prog->failed)
-        return FALSE;
+  if (prog->failed) {
+    return FALSE;
+  }
 
     if (!prog->prog) {
         const glamor_facet      *fill = glamor_facet_source[source_type];
 
-        if (!fill)
-            return FALSE;
+        if (!fill) {
+          return FALSE;
+        }
 
         prog->alpha = alpha;
-        if (!glamor_build_program(screen, prog, prim, fill, glamor_combine[alpha], defines))
-            return FALSE;
+        if (!glamor_build_program(screen, prog, prim, fill,
+                                  glamor_combine[alpha], defines)) {
+          return FALSE;
+        }
     }
 
     return TRUE;
@@ -652,8 +674,9 @@ glamor_setup_program_render(CARD8                 op,
     glamor_program_source       source_type;
     glamor_program              *prog;
 
-    if (op > ARRAY_SIZE(composite_op_info))
-        return NULL;
+    if (op > ARRAY_SIZE(composite_op_info)) {
+      return NULL;
+    }
 
     if (glamor_is_component_alpha(mask)) {
         if (glamor_priv->has_dual_blend) {
@@ -662,28 +685,35 @@ glamor_setup_program_render(CARD8                 op,
                     glamor_program_alpha_dual_blend_gles2;
         } else {
             /* This only works for PictOpOver */
-            if (op != PictOpOver)
-                return NULL;
+            if (op != PictOpOver) {
+              return NULL;
+            }
 
             alpha = glamor_program_alpha_ca_first;
         }
-    } else
-        alpha = glamor_program_alpha_normal;
+    } else {
+      alpha = glamor_program_alpha_normal;
+    }
 
     if (src->pDrawable) {
 
         /* Can't do transforms, alphamaps or sourcing from non-pixmaps yet */
-        if (src->transform || src->alphaMap || src->pDrawable->type != DRAWABLE_PIXMAP)
-            return NULL;
+        if (src->transform || src->alphaMap ||
+            src->pDrawable->type != DRAWABLE_PIXMAP) {
+          return NULL;
+        }
 
-        if (src->pDrawable->width == 1 && src->pDrawable->height == 1 && src->repeat)
-            source_type = glamor_program_source_1x1_picture;
-        else
-            source_type = glamor_program_source_picture;
+        if (src->pDrawable->width == 1 && src->pDrawable->height == 1 &&
+            src->repeat) {
+          source_type = glamor_program_source_1x1_picture;
+        } else {
+          source_type = glamor_program_source_picture;
+        }
     } else {
         SourcePictPtr   sp = src->pSourcePict;
-        if (!sp)
-            return NULL;
+        if (!sp) {
+          return NULL;
+        }
         switch (sp->type) {
         case SourcePictTypeSolidFill:
             source_type = glamor_program_source_solid;
@@ -694,19 +724,23 @@ glamor_setup_program_render(CARD8                 op,
     }
 
     prog = &program_render->progs[source_type][alpha];
-    if (!glamor_setup_one_program_render(screen, prog, source_type, alpha, prim, defines))
-        return NULL;
+    if (!glamor_setup_one_program_render(screen, prog, source_type, alpha, prim,
+                                         defines)) {
+      return NULL;
+    }
 
     if (alpha == glamor_program_alpha_ca_first) {
 
 	  /* Make sure we can also build the second program before
 	   * deciding to use this path.
 	   */
-	  if (!glamor_setup_one_program_render(screen,
-					       &program_render->progs[source_type][glamor_program_alpha_ca_second],
-					       source_type, glamor_program_alpha_ca_second, prim,
-					       defines))
-	      return NULL;
+          if (!glamor_setup_one_program_render(
+                  screen,
+                  &program_render
+                       ->progs[source_type][glamor_program_alpha_ca_second],
+                  source_type, glamor_program_alpha_ca_second, prim, defines)) {
+            return NULL;
+          }
     }
     return prog;
 }
@@ -719,10 +753,12 @@ glamor_use_program_render(glamor_program        *prog,
 {
     glUseProgram(prog->prog);
 
-    if (prog->prim_use_render && !prog->prim_use_render(op, src, dst, prog))
-        return FALSE;
+    if (prog->prim_use_render && !prog->prim_use_render(op, src, dst, prog)) {
+      return FALSE;
+    }
 
-    if (prog->fill_use_render && !prog->fill_use_render(op, src, dst, prog))
-        return FALSE;
+    if (prog->fill_use_render && !prog->fill_use_render(op, src, dst, prog)) {
+      return FALSE;
+    }
     return TRUE;
 }

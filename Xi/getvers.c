@@ -76,9 +76,10 @@ ProcXGetExtensionVersion(ClientPtr client)
     X_REQUEST_HEAD_AT_LEAST(xGetExtensionVersionReq);
     X_REQUEST_FIELD_CARD16(nbytes);
 
-    if (client->req_len != bytes_to_int32(sizeof(xGetExtensionVersionReq) +
-                                        stuff->nbytes))
-        return BadLength;
+    if (client->req_len !=
+        bytes_to_int32(sizeof(xGetExtensionVersionReq) + stuff->nbytes)) {
+      return BadLength;
+    }
 
     xGetExtensionVersionReply reply = {
         .RepType = X_GetExtensionVersion,

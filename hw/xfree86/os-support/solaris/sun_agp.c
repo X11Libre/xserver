@@ -78,13 +78,15 @@ xf86GARTCloseScreen(int screenNum)
 static Bool
 GARTInit(int screenNum)
 {
-    if (initDone)
-        return gartFd != -1;
+  if (initDone) {
+    return gartFd != -1;
+  }
 
-    if (gartFd == -1)
-        gartFd = open(AGP_DEVICE, O_RDWR);
-    else
-        return FALSE;
+  if (gartFd == -1) {
+    gartFd = open(AGP_DEVICE, O_RDWR);
+  } else {
+    return FALSE;
+  }
 
     if (gartFd == -1) {
         xf86DrvMsg(screenNum, X_ERROR,
@@ -113,8 +115,9 @@ xf86GetAGPInfo(int screenNum)
     agp_info_t agpinf;
     AgpInfoPtr info;
 
-    if (!GARTInit(screenNum))
-        return NULL;
+    if (!GARTInit(screenNum)) {
+      return NULL;
+    }
 
     if (ioctl(gartFd, AGPIOC_INFO, &agpinf) != 0) {
         xf86DrvMsg(screenNum, X_ERROR,
@@ -144,8 +147,9 @@ Bool
 xf86AcquireGART(int screenNum)
 {
 
-    if (!GARTInit(screenNum))
-        return FALSE;
+  if (!GARTInit(screenNum)) {
+    return FALSE;
+  }
 
     if (acquiredScreen != screenNum) {
         if (ioctl(gartFd, AGPIOC_ACQUIRE, 0) != 0) {
@@ -165,8 +169,9 @@ Bool
 xf86ReleaseGART(int screenNum)
 {
 
-    if (!GARTInit(screenNum))
-        return FALSE;
+  if (!GARTInit(screenNum)) {
+    return FALSE;
+  }
 
     if (acquiredScreen == screenNum) {
         /*
@@ -205,12 +210,14 @@ xf86AllocateGARTMemory(int screenNum, unsigned long size, int type,
      * return error.
      */
 
-    if (!GARTInit(screenNum) || (acquiredScreen != screenNum))
-        return -1;
+    if (!GARTInit(screenNum) || (acquiredScreen != screenNum)) {
+      return -1;
+    }
 
     pages = (size / AGP_PAGE_SIZE);
-    if (size % AGP_PAGE_SIZE != 0)
-        pages++;
+    if (size % AGP_PAGE_SIZE != 0) {
+      pages++;
+    }
 
     alloc.agpa_pgcount = pages;
     alloc.agpa_type = type;
@@ -231,8 +238,9 @@ xf86AllocateGARTMemory(int screenNum, unsigned long size, int type,
 Bool
 xf86DeallocateGARTMemory(int screenNum, int key)
 {
-    if (!GARTInit(screenNum) || (acquiredScreen != screenNum))
-        return FALSE;
+  if (!GARTInit(screenNum) || (acquiredScreen != screenNum)) {
+    return FALSE;
+  }
 
     if (ioctl(gartFd, AGPIOC_DEALLOCATE, (int *) (uintptr_t) key) != 0) {
         xf86DrvMsg(screenNum, X_WARNING, "xf86DeAllocateGARTMemory: "
@@ -251,8 +259,9 @@ xf86BindGARTMemory(int screenNum, int key, unsigned long offset)
     agp_bind_t bind;
     int pageOffset;
 
-    if (!GARTInit(screenNum) || (acquiredScreen != screenNum))
-        return FALSE;
+    if (!GARTInit(screenNum) || (acquiredScreen != screenNum)) {
+      return FALSE;
+    }
 
     if (offset % AGP_PAGE_SIZE != 0) {
         xf86DrvMsg(screenNum, X_WARNING, "xf86BindGARTMemory: "
@@ -286,8 +295,9 @@ xf86UnbindGARTMemory(int screenNum, int key)
 {
     agp_unbind_t unbind;
 
-    if (!GARTInit(screenNum) || (acquiredScreen != screenNum))
-        return FALSE;
+    if (!GARTInit(screenNum) || (acquiredScreen != screenNum)) {
+      return FALSE;
+    }
 
     unbind.agpu_pri = 0;
     unbind.agpu_key = key;

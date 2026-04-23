@@ -43,16 +43,22 @@ fbAllocatePrivates(ScreenPtr pScreen)
 {
     FbScreenPrivPtr     pScrPriv;
 
-    if (!dixRegisterPrivateKey
-        (&fbScreenPrivateKeyRec, PRIVATE_SCREEN, sizeof(FbScreenPrivRec)))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&fbScreenPrivateKeyRec, PRIVATE_SCREEN,
+                               sizeof(FbScreenPrivRec))) {
+      return FALSE;
+    }
 
     pScrPriv = fbGetScreenPrivate(pScreen);
 
-    if (!dixRegisterScreenSpecificPrivateKey (pScreen, &pScrPriv->gcPrivateKeyRec, PRIVATE_GC, sizeof(FbGCPrivRec)))
-        return FALSE;
-    if (!dixRegisterScreenSpecificPrivateKey (pScreen, &pScrPriv->winPrivateKeyRec, PRIVATE_WINDOW, 0))
-        return FALSE;
+    if (!dixRegisterScreenSpecificPrivateKey(pScreen,
+                                             &pScrPriv->gcPrivateKeyRec,
+                                             PRIVATE_GC, sizeof(FbGCPrivRec))) {
+      return FALSE;
+    }
+    if (!dixRegisterScreenSpecificPrivateKey(
+            pScreen, &pScrPriv->winPrivateKeyRec, PRIVATE_WINDOW, 0)) {
+      return FALSE;
+    }
 
     return TRUE;
 }

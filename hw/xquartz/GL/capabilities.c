@@ -60,56 +60,73 @@ handleStencilModes(struct glCapabilitiesConfig *c, GLint smodes)
 {
     int offset = 0;
 
-    if (kCGL0Bit & smodes)
-        c->stencil_bit_depths[offset++] = 0;
+    if (kCGL0Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 0;
+    }
 
-    if (kCGL1Bit & smodes)
-        c->stencil_bit_depths[offset++] = 1;
+    if (kCGL1Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 1;
+    }
 
-    if (kCGL2Bit & smodes)
-        c->stencil_bit_depths[offset++] = 2;
+    if (kCGL2Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 2;
+    }
 
-    if (kCGL3Bit & smodes)
-        c->stencil_bit_depths[offset++] = 3;
+    if (kCGL3Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 3;
+    }
 
-    if (kCGL4Bit & smodes)
-        c->stencil_bit_depths[offset++] = 4;
+    if (kCGL4Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 4;
+    }
 
-    if (kCGL5Bit & smodes)
-        c->stencil_bit_depths[offset++] = 5;
+    if (kCGL5Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 5;
+    }
 
-    if (kCGL6Bit & smodes)
-        c->stencil_bit_depths[offset++] = 6;
+    if (kCGL6Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 6;
+    }
 
-    if (kCGL8Bit & smodes)
-        c->stencil_bit_depths[offset++] = 8;
+    if (kCGL8Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 8;
+    }
 
-    if (kCGL10Bit & smodes)
-        c->stencil_bit_depths[offset++] = 10;
+    if (kCGL10Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 10;
+    }
 
-    if (kCGL12Bit & smodes)
-        c->stencil_bit_depths[offset++] = 12;
+    if (kCGL12Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 12;
+    }
 
-    if (kCGL16Bit & smodes)
-        c->stencil_bit_depths[offset++] = 16;
+    if (kCGL16Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 16;
+    }
 
-    if (kCGL24Bit & smodes)
-        c->stencil_bit_depths[offset++] = 24;
+    if (kCGL24Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 24;
+    }
 
-    if (kCGL32Bit & smodes)
-        c->stencil_bit_depths[offset++] = 32;
+    if (kCGL32Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 32;
+    }
 
-    if (kCGL48Bit & smodes)
-        c->stencil_bit_depths[offset++] = 48;
+    if (kCGL48Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 48;
+    }
 
-    if (kCGL64Bit & smodes)
-        c->stencil_bit_depths[offset++] = 64;
+    if (kCGL64Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 64;
+    }
 
-    if (kCGL96Bit & smodes)
-        c->stencil_bit_depths[offset++] = 96;
+    if (kCGL96Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 96;
+    }
 
-    if (kCGL128Bit & smodes)
-        c->stencil_bit_depths[offset++] = 128;
+    if (kCGL128Bit & smodes) {
+      c->stencil_bit_depths[offset++] = 128;
+    }
 
     assert(offset < GLCAPS_STENCIL_BIT_DEPTH_BUFFERS);
 

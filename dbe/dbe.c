@@ -155,8 +155,9 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
     /* The window must be valid. */
     WindowPtr pWin;
     int status = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
     /* The window must be InputOutput. */
     if (pWin->drawable.class != InputOutput) {
@@ -178,8 +179,9 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
      * GetVisualInfo.
      */
     DbeScreenPrivPtr pDbeScreenPriv = DBE_SCREEN_PRIV_FROM_WINDOW(pWin);
-    if (!pDbeScreenPriv->GetVisualInfo)
-        return BadMatch;        /* screen doesn't support double buffering */
+    if (!pDbeScreenPriv->GetVisualInfo) {
+      return BadMatch; /* screen doesn't support double buffering */
+    }
 
     XdbeScreenVisualInfo scrVisInfo;
     if (!(*pDbeScreenPriv->GetVisualInfo) (pWin->drawable.pScreen, &scrVisInfo)) {
@@ -212,8 +214,9 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
          */
 
         pDbeWindowPriv = calloc(1, sizeof(DbeWindowPrivRec));
-        if (!pDbeWindowPriv)
-            return BadAlloc;
+        if (!pDbeWindowPriv) {
+          return BadAlloc;
+        }
 
         /* Fill out window priv information. */
         pDbeWindowPriv->pWindow = pWin;
@@ -230,8 +233,9 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
         pDbeWindowPriv->maxAvailableIDs = DBE_INIT_MAX_IDS;
         pDbeWindowPriv->IDs[0] = stuff->buffer;
 
-        for (int i = 0; i < DBE_INIT_MAX_IDS; i++)
-            pDbeWindowPriv->IDs[i] = DBE_FREE_ID_ELEMENT;
+        for (int i = 0; i < DBE_INIT_MAX_IDS; i++) {
+          pDbeWindowPriv->IDs[i] = DBE_FREE_ID_ELEMENT;
+        }
 
         /* Actually connect the window priv to the window. */
         dixSetPrivate(&pWin->devPrivates, &dbeWindowPrivKeyRec, pDbeWindowPriv);
@@ -360,14 +364,16 @@ ProcDbeDeallocateBackBufferName(ClientPtr client)
     int rc = dixLookupResourceByType((void **) &pDbeWindowPriv, stuff->buffer,
                                  dbeWindowPrivResType, client,
                                  DixDestroyAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     void *val;
     rc = dixLookupResourceByType(&val, stuff->buffer, dbeDrawableResType,
                                  client, DixDestroyAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     /* Make sure that the id is valid for the window.
      * This is paranoid code since we already looked up the ID by type
@@ -422,11 +428,13 @@ ProcDbeSwapBuffers(ClientPtr client)
     X_REQUEST_HEAD_AT_LEAST(xDbeSwapBuffersReq);
     X_REQUEST_FIELD_CARD32(n);
 
-    if (stuff->n == 0)
-        return Success;
+    if (stuff->n == 0) {
+      return Success;
+    }
 
-    if (stuff->n > UINT32_MAX / sizeof(DbeSwapInfoRec))
-        return BadLength;
+    if (stuff->n > UINT32_MAX / sizeof(DbeSwapInfoRec)) {
+      return BadLength;
+    }
     REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
 
     if (client->swapped) {
@@ -438,8 +446,9 @@ ProcDbeSwapBuffers(ClientPtr client)
              * followed by a 1 byte swap action and then 3 pad bytes.  We only need
              * to swap the window information.
              */
-            for (int i = 0; i < stuff->n; i++, pSwapInfo++)
-                swapl(&pSwapInfo->window);
+            for (int i = 0; i < stuff->n; i++, pSwapInfo++) {
+              swapl(&pSwapInfo->window);
+            }
         }
     }
 
@@ -554,12 +563,14 @@ ProcDbeGetVisualInfo(ClientPtr client)
     register int rc;
     register int count;         /* number of visual infos in reply */
 
-    if (stuff->n > UINT32_MAX / sizeof(CARD32))
-        return BadLength;
+    if (stuff->n > UINT32_MAX / sizeof(CARD32)) {
+      return BadLength;
+    }
     REQUEST_FIXED_SIZE(xDbeGetVisualInfoReq, stuff->n * sizeof(CARD32));
 
-    if (stuff->n > UINT32_MAX / sizeof(DrawablePtr))
-        return BadAlloc;
+    if (stuff->n > UINT32_MAX / sizeof(DrawablePtr)) {
+      return BadAlloc;
+    }
     /* Make sure any specified drawables are valid. */
     if (stuff->n != 0) {
         if (!(pDrawables = calloc(stuff->n, sizeof(DrawablePtr)))) {
@@ -587,8 +598,9 @@ ProcDbeGetVisualInfo(ClientPtr client)
         pDbeScreenPriv = DBE_SCREEN_PRIV(pScreen);
 
         rc = dixCallScreenAccessCallback(client, pScreen, DixGetAttrAccess);
-        if (rc != Success)
-            goto clearRpcBuf;
+        if (rc != Success) {
+          goto clearRpcBuf;
+        }
 
         XdbeScreenVisualInfo visualInfo = { 0 };
         if (!(pDbeScreenPriv->GetVisualInfo(pScreen, &visualInfo))) {
@@ -979,27 +991,32 @@ DbeExtensionInit(void)
     Bool ddxInitSuccess;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return;
+    if (!noPanoramiXExtension) {
+      return;
+    }
 #endif /* XINERAMA */
 
     /* Create the resource types. */
     dbeDrawableResType =
         CreateNewResourceType(DbeDrawableDelete, "dbeDrawable");
-    if (!dbeDrawableResType)
-        return;
+    if (!dbeDrawableResType) {
+      return;
+    }
     dbeDrawableResType |= RC_DRAWABLE;
 
     dbeWindowPrivResType =
         CreateNewResourceType(DbeWindowPrivDelete, "dbeWindow");
-    if (!dbeWindowPrivResType)
-        return;
+    if (!dbeWindowPrivResType) {
+      return;
+    }
 
-    if (!dixRegisterPrivateKey(&dbeScreenPrivKeyRec, PRIVATE_SCREEN, 0))
-        return;
+    if (!dixRegisterPrivateKey(&dbeScreenPrivKeyRec, PRIVATE_SCREEN, 0)) {
+      return;
+    }
 
-    if (!dixRegisterPrivateKey(&dbeWindowPrivKeyRec, PRIVATE_WINDOW, 0))
-        return;
+    if (!dixRegisterPrivateKey(&dbeWindowPrivKeyRec, PRIVATE_WINDOW, 0)) {
+      return;
+    }
 
     DIX_FOR_EACH_SCREEN({
         /* For each screen, set up DBE screen privates and init DIX

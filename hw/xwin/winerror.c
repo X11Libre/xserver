@@ -50,8 +50,9 @@ OsVendorFatalError(const char *f, va_list args)
     char errormsg[1024] = "";
 
     /* Don't give duplicate warning if UseMsg was called */
-    if (g_fSilentFatalError)
-        return;
+    if (g_fSilentFatalError) {
+      return;
+    }
 
     if (!g_fLogInited) {
         g_fLogInited = TRUE;

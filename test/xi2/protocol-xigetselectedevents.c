@@ -215,8 +215,9 @@ test_XIGetSelectedEvents(void)
     dbg("Testing removing all masks\n");
     /* Unset all masks one-by-one */
     for (j = MAXDEVICES - 1; j >= 0; j--) {
-        if (j < devices.num_devices + 2)
-            test_data.num_masks_expected--;
+      if (j < devices.num_devices + 2) {
+        test_data.num_masks_expected--;
+      }
 
         mask = test_data.mask[j];
         memset(mask, 0, XI2LASTEVENT);

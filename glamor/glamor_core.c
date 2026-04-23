@@ -46,10 +46,11 @@ glamor_get_drawable_location(const DrawablePtr drawable)
 
     BUG_RETURN_VAL(!pixmap_priv, FALSE);
 
-    if (pixmap_priv->gl_fbo == GLAMOR_FBO_UNATTACHED)
-        return 'm';
-    else
-        return 'f';
+    if (pixmap_priv->gl_fbo == GLAMOR_FBO_UNATTACHED) {
+      return 'm';
+    } else {
+      return 'f';
+    }
 }
 
 GLint
@@ -73,9 +74,9 @@ glamor_compile_glsl_prog(GLenum type, const char *source)
                    type == GL_FRAGMENT_SHADER ? "FS" : "VS", info);
             ErrorF("Program source:\n%s", source);
             free(info);
+        } else {
+          ErrorF("Failed to get shader compilation info.\n");
         }
-        else
-            ErrorF("Failed to get shader compilation info.\n");
         FatalError("GLSL compile failure\n");
     }
 
@@ -152,8 +153,9 @@ glamor_invalidate_stipple(GCPtr gc)
     glamor_gc_private *gc_priv = glamor_get_gc_private(gc);
 
     if (gc_priv->stipple) {
-        if (gc_priv->stipple_damage)
-            DamageUnregister(gc_priv->stipple_damage);
+      if (gc_priv->stipple_damage) {
+        DamageUnregister(gc_priv->stipple_damage);
+      }
         glamor_destroy_pixmap(gc_priv->stipple);
         gc_priv->stipple = NULL;
     }
@@ -184,13 +186,14 @@ glamor_track_stipple(GCPtr gc)
     if (gc->stipple) {
         glamor_gc_private *gc_priv = glamor_get_gc_private(gc);
 
-        if (!gc_priv->stipple_damage)
-            gc_priv->stipple_damage = DamageCreate(glamor_stipple_damage_report,
-                                                   glamor_stipple_damage_destroy,
-                                                   DamageReportNonEmpty,
-                                                   TRUE, gc->pScreen, gc);
-        if (gc_priv->stipple_damage)
-            DamageRegister(&gc->stipple->drawable, gc_priv->stipple_damage);
+        if (!gc_priv->stipple_damage) {
+          gc_priv->stipple_damage = DamageCreate(
+              glamor_stipple_damage_report, glamor_stipple_damage_destroy,
+              DamageReportNonEmpty, TRUE, gc->pScreen, gc);
+        }
+        if (gc_priv->stipple_damage) {
+          DamageRegister(&gc->stipple->drawable, gc_priv->stipple_damage);
+        }
     }
 }
 
@@ -229,8 +232,9 @@ glamor_validate_gc(GCPtr gc, unsigned long changes, DrawablePtr drawable)
         changes &= ~GCTile;
     }
 
-    if (changes & GCStipple)
-        glamor_invalidate_stipple(gc);
+    if (changes & GCStipple) {
+      glamor_invalidate_stipple(gc);
+    }
 
     if (changes & GCStipple && gc->stipple) {
         /* We can't inline stipple handling like we do for GCTile because
@@ -267,8 +271,9 @@ glamor_destroy_gc(GCPtr gc)
         gc_priv->dash = NULL;
     }
     glamor_invalidate_stipple(gc);
-    if (gc_priv->stipple_damage)
-        DamageDestroy(gc_priv->stipple_damage);
+    if (gc_priv->stipple_damage) {
+      DamageDestroy(gc_priv->stipple_damage);
+    }
     miDestroyGC(gc);
 }
 
@@ -293,8 +298,9 @@ glamor_create_gc(GCPtr gc)
 
     gc_priv->dash = NULL;
     gc_priv->stipple = NULL;
-    if (!fbCreateGC(gc))
-        return FALSE;
+    if (!fbCreateGC(gc)) {
+      return FALSE;
+    }
 
     gc->funcs = &glamor_gc_funcs;
 
@@ -307,8 +313,9 @@ glamor_bitmap_to_region(PixmapPtr pixmap)
     RegionPtr ret;
 
     glamor_fallback("pixmap %p \n", pixmap);
-    if (!glamor_prepare_access(&pixmap->drawable, GLAMOR_ACCESS_RO))
-        return NULL;
+    if (!glamor_prepare_access(&pixmap->drawable, GLAMOR_ACCESS_RO)) {
+      return NULL;
+    }
     ret = fbPixmapToRegion(pixmap);
     glamor_finish_access(&pixmap->drawable);
     return ret;

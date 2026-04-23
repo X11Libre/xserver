@@ -51,11 +51,13 @@ present_free_events(WindowPtr window)
     present_window_priv_ptr window_priv = present_window_priv(window);
     present_event_ptr event;
 
-    if (!window_priv)
-        return;
+    if (!window_priv) {
+      return;
+    }
 
-    while ((event = window_priv->events))
-        FreeResource(event->id, X11_RESTYPE_NONE);
+    while ((event = window_priv->events)) {
+      FreeResource(event->id, X11_RESTYPE_NONE);
+    }
 }
 
 static void
@@ -175,8 +177,9 @@ present_send_complete_notify(WindowPtr window, CARD8 kind, CARD8 mode, CARD32 se
             }
         }
     }
-    if (complete_notify)
-        (*complete_notify)(window, kind, mode, serial, ust, msc);
+    if (complete_notify) {
+      (*complete_notify)(window, kind, mode, serial, ust, msc);
+    }
 }
 
 void
@@ -221,30 +224,36 @@ present_select_input(ClientPtr client, XID eid, WindowPtr window, CARD32 mask)
         /* Match error for the wrong window; also don't modify some other
          * client's event selection
          */
-        if (event->window != window || event->client != client)
-            return BadMatch;
+        if (event->window != window || event->client != client) {
+          return BadMatch;
+        }
 
-        if (mask)
-            event->mask = mask;
-        else
-            FreeResource(eid, X11_RESTYPE_NONE);
+        if (mask) {
+          event->mask = mask;
+        } else {
+          FreeResource(eid, X11_RESTYPE_NONE);
+        }
         return Success;
     }
-    if (ret != BadValue)
-        return ret;
+    if (ret != BadValue) {
+      return ret;
+    }
 
-    if (mask == 0)
-        return Success;
+    if (mask == 0) {
+      return Success;
+    }
 
     LEGAL_NEW_RESOURCE(eid, client);
 
     window_priv = present_get_window_priv(window, TRUE);
-    if (!window_priv)
-        return BadAlloc;
+    if (!window_priv) {
+      return BadAlloc;
+    }
 
     event = calloc (1, sizeof (present_event_rec));
-    if (!event)
-        return BadAlloc;
+    if (!event) {
+      return BadAlloc;
+    }
 
     event->client = client;
     event->window = window;
@@ -254,8 +263,9 @@ present_select_input(ClientPtr client, XID eid, WindowPtr window, CARD32 mask)
     event->next = window_priv->events;
     window_priv->events = event;
 
-    if (!AddResource(event->id, present_event_type, (void *) event))
-        return BadAlloc;
+    if (!AddResource(event->id, present_event_type, (void *)event)) {
+      return BadAlloc;
+    }
 
     return Success;
 }
@@ -264,8 +274,9 @@ Bool
 present_event_init(void)
 {
     present_event_type = CreateNewResourceType(present_free_event, "PresentEvent");
-    if (!present_event_type)
-        return FALSE;
+    if (!present_event_type) {
+      return FALSE;
+    }
 
     GERegisterExtension(present_request, present_event_swap);
     return TRUE;

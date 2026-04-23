@@ -61,19 +61,23 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
     static const char sep_or[2]  = { LOG_OR,  '\0' };
     static const char sep_and[2] = { LOG_AND, '\0' };
 
-    if (!str)
-        return NULL;
+    if (!str) {
+      return NULL;
+    }
 
     group = malloc(sizeof(*group));
-    if (!group) return NULL;
+    if (!group) {
+      return NULL;
+    }
     xorg_list_init(&group->patterns);
     xorg_list_init(&group->entry);
     group->is_negated = negated;
 
   again:
     /* start new pattern */
-    if ((pattern = malloc(sizeof(*pattern))) == NULL)
-        goto fail;
+    if ((pattern = malloc(sizeof(*pattern))) == NULL) {
+      goto fail;
+    }
 
     xorg_list_add(&pattern->entry, &group->patterns);
 
@@ -81,9 +85,9 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
     if (*str == NEG_FLAG) {
         pattern->is_negated = TRUE;
         str++;
+    } else {
+      pattern->is_negated = FALSE;
     }
-    else
-        pattern->is_negated = FALSE;
 
     pattern->str = NULL;
     pattern->regex = NULL;
@@ -95,16 +99,20 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
         if (*str) {
             char *last;
             last = strchr(str+1, *str);
-            if (last)
-                n = last-str-1;
-            else
-                n = strlen(str+1);
+            if (last) {
+              n = last - str - 1;
+            } else {
+              n = strlen(str + 1);
+            }
             pattern->str = strndup(str+1, n);
-            if (pattern->str == NULL)
-                goto fail;
+            if (pattern->str == NULL) {
+              goto fail;
+            }
             *(pattern->str+n) = '\0';
             str += n+1;
-            if (*str) str++;
+            if (*str) {
+              str++;
+            }
         }
         else {
         /* no regex, notning to match against */
@@ -137,7 +145,9 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
                     *(d++) = *(s++);
                     n++;
                 }
-                while ((*s) == LOG_AND) s++;
+                while ((*s) == LOG_AND) {
+                  s++;
+                }
                 if (*s) {
                     n = -1;
                     goto next_chunk;
@@ -150,25 +160,28 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
                         pattern->str, arg);
                 }
                 *(++d) = '\0';
-            }
-            else
+              } else {
                 goto fail;
+              }
         }
         else {
             pattern->mode = pref_mode;
             pattern->str = strndup(str, n);
-            if (pattern->str == NULL)
-                goto fail;
+            if (pattern->str == NULL) {
+              goto fail;
+            }
             *(pattern->str+n) = '\0'; /* should already be, but to be sure */
             str += n;
         }
     }
 
-    while (*str == LOG_OR)
-        str++;
+    while (*str == LOG_OR) {
+      str++;
+    }
 
-    if (*str)
-        goto again;
+    if (*str) {
+      goto again;
+    }
 
     return group;
 
@@ -180,31 +193,34 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
 void
 xf86printMatchPattern(FILE * cf, const xf86MatchPattern *pattern, Bool not_first)
 {
-    if (!pattern) return;
-    if (not_first)
-        fprintf(cf, "%c", LOG_OR);
-    if (pattern->is_negated)
-        fprintf(cf, "%c", NEG_FLAG);
-    if (pattern->mode == MATCH_IS_INVALID)
-        fprintf(cf, "invalid:%s",
-            pattern->str ? pattern->str : "(none)");
-    else if (pattern->mode == MATCH_REGEX)
+  if (!pattern) {
+    return;
+  }
+  if (not_first) {
+    fprintf(cf, "%c", LOG_OR);
+  }
+  if (pattern->is_negated) {
+    fprintf(cf, "%c", NEG_FLAG);
+  }
+  if (pattern->mode == MATCH_IS_INVALID) {
+    fprintf(cf, "invalid:%s", pattern->str ? pattern->str : "(none)");
+  } else if (pattern->mode == MATCH_REGEX) {
     /* FIXME: Hope there is no '~' in the pattern */
         fprintf(cf, "%c%s%c", REGEX_FLAG,
             pattern->str ? pattern->str : "(none)", REGEX_FLAG);
-    else if (pattern->mode == MATCH_SUBSTRINGS_SEQUENCE) {
-        Bool after = FALSE;
-        char *str = pattern->str;
-        while (*str) {
-            if (after)
-                fprintf(cf, "%c", LOG_AND);
-            fprintf(cf, "%s", str);
-            str += strlen(str);
-            str++;
-            after = TRUE;
-        }
+  } else if (pattern->mode == MATCH_SUBSTRINGS_SEQUENCE) {
+    Bool after = FALSE;
+    char *str = pattern->str;
+    while (*str) {
+      if (after) {
+        fprintf(cf, "%c", LOG_AND);
+      }
+      fprintf(cf, "%s", str);
+      str += strlen(str);
+      str++;
+      after = TRUE;
     }
-    else
-        fprintf(cf, "%s",
-            pattern->str ? pattern->str : "(none)");
+  } else {
+    fprintf(cf, "%s", pattern->str ? pattern->str : "(none)");
+  }
 }

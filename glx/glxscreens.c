@@ -200,11 +200,13 @@ AddScreenVisuals(ScreenPtr pScreen, int count, int d)
             break;
         }
     }
-    if (depth == NULL)
-        return NULL;
+    if (depth == NULL) {
+      return NULL;
+    }
 
-    if (ResizeVisualArray(pScreen, count, depth) == FALSE)
-        return NULL;
+    if (ResizeVisualArray(pScreen, count, depth) == FALSE) {
+      return NULL;
+    }
 
     /* Return a pointer to the first of the added visuals. */
     return pScreen->visuals + pScreen->numVisuals - count;
@@ -215,9 +217,11 @@ findFirstSet(unsigned int v)
 {
     int i;
 
-    for (i = 0; i < 32; i++)
-        if (v & (1 << i))
-            return i;
+    for (i = 0; i < 32; i++) {
+      if (v & (1 << i)) {
+        return i;
+      }
+    }
 
     return -1;
 }
@@ -254,49 +258,63 @@ pickFBConfig(__GLXscreen * pGlxScreen, VisualPtr visual)
 
         if (config->redMask != visual->redMask ||
             config->greenMask != visual->greenMask ||
-            config->blueMask != visual->blueMask)
-            continue;
-        if (config->visualRating != GLX_NONE)
-            continue;
+            config->blueMask != visual->blueMask) {
+          continue;
+        }
+        if (config->visualRating != GLX_NONE) {
+          continue;
+        }
         /* Ignore multisampled configs */
-        if (config->sampleBuffers)
-            continue;
-        if (glxConvertToXVisualType(config->visualType) != visual->class)
-            continue;
+        if (config->sampleBuffers) {
+          continue;
+        }
+        if (glxConvertToXVisualType(config->visualType) != visual->class) {
+          continue;
+        }
         /* If it's the 32-bit RGBA visual, demand a 32-bit fbconfig. */
-        if (visual->nplanes == 32 && config->rgbBits != 32)
-            continue;
+        if (visual->nplanes == 32 && config->rgbBits != 32) {
+          continue;
+        }
         /* If it's the 32-bit RGBA visual, do not pick sRGB capable config.
          * This can cause issues with compositors that are not sRGB aware.
          */
-        if (visual->nplanes == 32 && config->sRGBCapable == GL_TRUE)
-            continue;
+        if (visual->nplanes == 32 && config->sRGBCapable == GL_TRUE) {
+          continue;
+        }
         /* Can't use the same FBconfig for multiple X visuals.  I think. */
-        if (config->visualID != 0)
-            continue;
+        if (config->visualID != 0) {
+          continue;
+        }
         if (!noCompositeExtension) {
             /* Use only duplicated configs for compIsAlternateVisuals */
             if (!!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
-                !!config->duplicatedForComp)
-                continue;
+                !!config->duplicatedForComp) {
+              continue;
+            }
         }
         /*
          * If possible, use the same swapmethod for all built-in visual
          * fbconfigs, to avoid getting the 32-bit composite visual when
          * requesting, for example, a SWAP_COPY fbconfig.
          */
-        if (config->swapMethod == GLX_SWAP_UNDEFINED_OML)
-            score += 32;
-        if (config->swapMethod == GLX_SWAP_EXCHANGE_OML)
-            score += 16;
-        if (config->doubleBufferMode > 0)
-            score += 8;
-        if (config->depthBits > 0)
-            score += 4;
-        if (config->stencilBits > 0)
-            score += 2;
-        if (config->alphaBits > 0)
-            score++;
+        if (config->swapMethod == GLX_SWAP_UNDEFINED_OML) {
+          score += 32;
+        }
+        if (config->swapMethod == GLX_SWAP_EXCHANGE_OML) {
+          score += 16;
+        }
+        if (config->doubleBufferMode > 0) {
+          score += 8;
+        }
+        if (config->depthBits > 0) {
+          score += 4;
+        }
+        if (config->stencilBits > 0) {
+          score += 2;
+        }
+        if (config->alphaBits > 0) {
+          score++;
+        }
 
         if (score > best_score) {
             best = config;
@@ -314,8 +332,9 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
     __GLXconfig *config;
     int i;
 
-    if (!dixRegisterPrivateKey(&glxScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return;
+    if (!dixRegisterPrivateKey(&glxScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+      return;
+    }
 
     pGlxScreen->pScreen = pScreen;
     pGlxScreen->GLextensions = strdup(GLServerExtensions);
@@ -347,8 +366,9 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
             pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
             config->visualID = visual->vid;
             if (!noCompositeExtension) {
-                if (compIsAlternateVisual(pScreen, visual->vid))
-                    config->visualSelectGroup++;
+              if (compIsAlternateVisual(pScreen, visual->vid)) {
+                config->visualSelectGroup++;
+              }
             }
         }
     }
@@ -361,8 +381,9 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
 
         VisualPtr visual;
 
-        if (config->visualID != 0)
-            continue;
+        if (config->visualID != 0) {
+          continue;
+        }
 
         /* Only count RGB bits and not alpha, as we're not trying to create
          * visuals for compositing (that's what the 32-bit composite visual
@@ -379,12 +400,14 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
          * (corresponds to an existing visual).
          */
         for (i = 0; i < pScreen->numVisuals; i++) {
-            if (depth == pScreen->visuals[i].nplanes)
-                break;
+          if (depth == pScreen->visuals[i].nplanes) {
+            break;
+          }
         }
         /* if it can't, fix up the fbconfig to not advertise window support */
-        if (i == pScreen->numVisuals)
-            config->drawableType &= ~(GLX_WINDOW_BIT);
+        if (i == pScreen->numVisuals) {
+          config->drawableType &= ~(GLX_WINDOW_BIT);
+        }
 
         /* fbconfig must support window drawables */
         if (!(config->drawableType & GLX_WINDOW_BIT)) {
@@ -394,12 +417,14 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
 
         /* Create a new X visual for our FBconfig. */
         visual = AddScreenVisuals(pScreen, 1, depth);
-        if (visual == NULL)
-            continue;
+        if (visual == NULL) {
+          continue;
+        }
 
         if (!noCompositeExtension) {
-            if (config->duplicatedForComp)
-                (void) CompositeRegisterAlternateVisuals(pScreen, &visual->vid, 1);
+          if (config->duplicatedForComp) {
+            (void)CompositeRegisterAlternateVisuals(pScreen, &visual->vid, 1);
+          }
         }
         pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
         initGlxVisual(visual, config);
@@ -407,8 +432,9 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
 
     dixSetPrivate(&pScreen->devPrivates, glxScreenPrivateKey, pGlxScreen);
 
-    if (pGlxScreen->glvnd)
-        __glXEnableExtension(pGlxScreen->glx_enable_bits, "GLX_EXT_libglvnd");
+    if (pGlxScreen->glvnd) {
+      __glXEnableExtension(pGlxScreen->glx_enable_bits, "GLX_EXT_libglvnd");
+    }
 
     i = __glXGetExtensionString(pGlxScreen->glx_enable_bits, NULL);
     if (i > 0) {

@@ -68,8 +68,10 @@ handle_sigchld(int sig)
 {
     /* nasty trick to silence compiler warning on unused result.
        we really have no practical use for it here */
-    if (write(server_displayfd, server_dead, strlen(server_dead)) == -1)
-        fprintf(stderr, "writing to server_displayfd failed: %s\n", strerror(errno));
+    if (write(server_displayfd, server_dead, strlen(server_dead)) == -1) {
+      fprintf(stderr, "writing to server_displayfd failed: %s\n",
+              strerror(errno));
+    }
 }
 
 /* Starts the X server, returning its pid. */
@@ -162,8 +164,9 @@ start_client(char *const *client_args, int display)
             return 1;
         }
 
-        if (!WIFEXITED(wstatus))
-            return 1;
+        if (!WIFEXITED(wstatus)) {
+          return 1;
+        }
 
         return WEXITSTATUS(wstatus);
     } else {
@@ -194,14 +197,16 @@ parse_args(int argc, char **argv,
     int i, ret;
     char *displayfd_string;
 
-    if (!args_storage)
-        exit(1);
+    if (!args_storage) {
+      exit(1);
+    }
 
     client_args = args_storage;
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--") == 0) {
-            if (!parsing_client)
-                usage(argc, argv);
+          if (!parsing_client) {
+            usage(argc, argv);
+          }
 
             /* Cap the client list */
             *next_arg = NULL;
@@ -216,15 +221,17 @@ parse_args(int argc, char **argv,
         /* A sort of escaped "--" argument so we can nest server
          * invocations for testing.
          */
-        if (strcmp(argv[i], "----") == 0)
-            *next_arg = (char *)"--";
-        else
-            *next_arg = argv[i];
+        if (strcmp(argv[i], "----") == 0) {
+          *next_arg = (char *)"--";
+        } else {
+          *next_arg = argv[i];
+        }
         next_arg++;
     }
 
-    if (client_args[0] == NULL || !server_args || server_args[0] == NULL)
-        usage(argc, argv);
+    if (client_args[0] == NULL || !server_args || server_args[0] == NULL) {
+      usage(argc, argv);
+    }
 
     /* Give the server -displayfd X */
     *next_arg = (char *)"-displayfd";

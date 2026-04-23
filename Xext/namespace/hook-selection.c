@@ -11,11 +11,13 @@
 #include "hooks.h"
 
 static inline const char *stripNS(const char* name) {
-    if ((!name) || (name[0] != '<'))
-        return name; // can this ever happen ?
+  if ((!name) || (name[0] != '<')) {
+    return name; // can this ever happen ?
+  }
     const char *got = strchr(name, '>');
-    if (!got)
-        return name;
+    if (!got) {
+      return name;
+    }
     return ++got;
 }
 
@@ -34,8 +36,9 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
     XNS_HOOK_HEAD(SelectionFilterParamRec);
 
     /* no rewrite if client is in root namespace */
-    if (subj->ns->superPower)
-        return;
+    if (subj->ns->superPower) {
+      return;
+    }
 
     const char *origSelectionName = NameForAtom(param->selection);
 

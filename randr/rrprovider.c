@@ -58,8 +58,9 @@ ProcRRGetProviders (ClientPtr client)
     REQUEST(xRRGetProvidersReq);
     REQUEST_SIZE_MATCH(xRRGetProvidersReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr pWin;
     ScreenPtr pScreen;
@@ -68,8 +69,9 @@ ProcRRGetProviders (ClientPtr client)
     ScreenPtr iter;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     pScreen = pWin->drawable.pScreen;
 
@@ -79,8 +81,9 @@ ProcRRGetProviders (ClientPtr client)
         xRRGetProvidersReply reply = {
             .timestamp = currentTime.milliseconds,
         };
-        if (client->swapped)
-            swapl(&reply.timestamp);
+        if (client->swapped) {
+          swapl(&reply.timestamp);
+        }
         return X_SEND_REPLY_SIMPLE(client, reply);
     }
 
@@ -143,14 +146,17 @@ ProcRRGetProviderInfo (ClientPtr client)
     };
 
     /* count associated providers */
-    if (provider->offload_sink)
-        reply.nAssociatedProviders++;
+    if (provider->offload_sink) {
+      reply.nAssociatedProviders++;
+    }
     if (provider->output_source &&
-            provider->output_source != provider->offload_sink)
-        reply.nAssociatedProviders++;
+        provider->output_source != provider->offload_sink) {
+      reply.nAssociatedProviders++;
+    }
     xorg_list_for_each_entry(provscreen, &pScreen->secondary_list, secondary_head) {
-        if (provscreen->is_output_secondary || provscreen->is_offload_secondary)
-            reply.nAssociatedProviders++;
+      if (provscreen->is_output_secondary || provscreen->is_offload_secondary) {
+        reply.nAssociatedProviders++;
+      }
     }
 
     reply.length = (pScrPriv->numCrtcs + pScrPriv->numOutputs +
@@ -161,11 +167,12 @@ ProcRRGetProviderInfo (ClientPtr client)
     extraLen = reply.length << 2;
     if (extraLen) {
         extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
-        if (!extra)
-            return BadAlloc;
+        if (!extra) {
+          return BadAlloc;
+        }
+    } else {
+      extra = NULL;
     }
-    else
-        extra = NULL;
 
     crtcs = (RRCrtc *)extra;
     outputs = (RROutput *)(crtcs + reply.nCrtcs);
@@ -175,24 +182,28 @@ ProcRRGetProviderInfo (ClientPtr client)
 
     for (i = 0; i < pScrPriv->numCrtcs; i++) {
         crtcs[i] = pScrPriv->crtcs[i]->id;
-        if (client->swapped)
-            swapl(&crtcs[i]);
+        if (client->swapped) {
+          swapl(&crtcs[i]);
+        }
     }
 
     for (i = 0; i < pScrPriv->numOutputs; i++) {
         outputs[i] = pScrPriv->outputs[i]->id;
-        if (client->swapped)
-            swapl(&outputs[i]);
+        if (client->swapped) {
+          swapl(&outputs[i]);
+        }
     }
 
     i = 0;
     if (provider->offload_sink) {
         providers[i] = provider->offload_sink->id;
-        if (client->swapped)
-            swapl(&providers[i]);
+        if (client->swapped) {
+          swapl(&providers[i]);
+        }
         prov_cap[i] = RR_Capability_SinkOffload;
-        if (client->swapped)
-            swapl(&prov_cap[i]);
+        if (client->swapped) {
+          swapl(&prov_cap[i]);
+        }
         i++;
     }
     if (provider->output_source) {
@@ -205,19 +216,25 @@ ProcRRGetProviderInfo (ClientPtr client)
         i++;
     }
     xorg_list_for_each_entry(provscreen, &pScreen->secondary_list, secondary_head) {
-        if (!provscreen->is_output_secondary && !provscreen->is_offload_secondary)
-            continue;
+      if (!provscreen->is_output_secondary &&
+          !provscreen->is_offload_secondary) {
+        continue;
+      }
         pScrProvPriv = rrGetScrPriv(provscreen);
         providers[i] = pScrProvPriv->provider->id;
-        if (client->swapped)
-            swapl(&providers[i]);
+        if (client->swapped) {
+          swapl(&providers[i]);
+        }
         prov_cap[i] = 0;
-        if (provscreen->is_output_secondary)
-            prov_cap[i] |= RR_Capability_SinkOutput;
-        if (provscreen->is_offload_secondary)
-            prov_cap[i] |= RR_Capability_SourceOffload;
-        if (client->swapped)
-            swapl(&prov_cap[i]);
+        if (provscreen->is_output_secondary) {
+          prov_cap[i] |= RR_Capability_SinkOutput;
+        }
+        if (provscreen->is_offload_secondary) {
+          prov_cap[i] |= RR_Capability_SourceOffload;
+        }
+        if (client->swapped) {
+          swapl(&prov_cap[i]);
+        }
         i++;
     }
 
@@ -276,8 +293,9 @@ RRFiniPrimeSyncProps(ScreenPtr pScreen)
 
     const char *syncStr = PRIME_SYNC_PROP;
     Atom syncProp = dixGetAtomID(syncStr);
-    if (syncProp == None)
-        return;
+    if (syncProp == None) {
+      return;
+    }
 
     for (i = 0; i < pScrPriv->numOutputs; i++) {
         RRDeleteOutputProperty(pScrPriv->outputs[i], syncProp);
@@ -302,21 +320,24 @@ ProcRRSetProviderOutputSource(ClientPtr client)
 
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
-    if (!(provider->capabilities & RR_Capability_SinkOutput))
-        return BadValue;
+    if (!(provider->capabilities & RR_Capability_SinkOutput)) {
+      return BadValue;
+    }
 
     if (stuff->source_provider) {
         VERIFY_RR_PROVIDER(stuff->source_provider, source_provider, DixReadAccess);
 
-        if (!(source_provider->capabilities & RR_Capability_SourceOutput))
-            return BadValue;
+        if (!(source_provider->capabilities & RR_Capability_SourceOutput)) {
+          return BadValue;
+        }
     }
 
     pScreen = provider->pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
 
-    if (!pScreen->isGPU)
-        return BadValue;
+    if (!pScreen->isGPU) {
+      return BadValue;
+    }
 
     pScrPriv->rrProviderSetOutputSource(pScreen, provider, source_provider);
 
@@ -347,15 +368,18 @@ ProcRRSetProviderOffloadSink(ClientPtr client)
     ScreenPtr pScreen;
 
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
-    if (!(provider->capabilities & RR_Capability_SourceOffload))
-        return BadValue;
-    if (!provider->pScreen->isGPU)
-        return BadValue;
+    if (!(provider->capabilities & RR_Capability_SourceOffload)) {
+      return BadValue;
+    }
+    if (!provider->pScreen->isGPU) {
+      return BadValue;
+    }
 
     if (stuff->sink_provider) {
         VERIFY_RR_PROVIDER(stuff->sink_provider, sink_provider, DixReadAccess);
-        if (!(sink_provider->capabilities & RR_Capability_SinkOffload))
-            return BadValue;
+        if (!(sink_provider->capabilities & RR_Capability_SinkOffload)) {
+          return BadValue;
+        }
     }
     pScreen = provider->pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
@@ -380,8 +404,9 @@ RRProviderCreate(ScreenPtr pScreen, const char *name,
     pScrPriv = rrGetScrPriv(pScreen);
 
     provider = calloc(1, sizeof(RRProviderRec) + nameLength + 1);
-    if (!provider)
-        return NULL;
+    if (!provider) {
+      return NULL;
+    }
 
     provider->id = dixAllocServerXID();
     provider->pScreen = pScreen;
@@ -391,8 +416,9 @@ RRProviderCreate(ScreenPtr pScreen, const char *name,
     provider->name[nameLength] = '\0';
     provider->changed = FALSE;
 
-    if (!AddResource (provider->id, RRProviderType, (void *) provider))
-        return NULL;
+    if (!AddResource(provider->id, RRProviderType, (void *)provider)) {
+      return NULL;
+    }
     pScrPriv->provider = provider;
     return provider;
 }
@@ -423,8 +449,9 @@ RRProviderDestroyResource (void *value, XID pid)
     {
         rrScrPriv(pScreen);
 
-        if (pScrPriv->rrProviderDestroy)
-            (*pScrPriv->rrProviderDestroy)(pScreen, provider);
+        if (pScrPriv->rrProviderDestroy) {
+          (*pScrPriv->rrProviderDestroy)(pScreen, provider);
+        }
         pScrPriv->provider = NULL;
     }
     free(provider);
@@ -435,8 +462,9 @@ Bool
 RRProviderInit(void)
 {
     RRProviderType = CreateNewResourceType(RRProviderDestroyResource, "Provider");
-    if (!RRProviderType)
-        return FALSE;
+    if (!RRProviderType) {
+      return FALSE;
+    }
 
     return TRUE;
 }
@@ -468,8 +496,9 @@ RRProviderAutoConfigGpuScreen(ScreenPtr pScreen, ScreenPtr primaryScreen)
     RRProviderPtr primary_provider;
 
     /* Bail out if RandR wasn't initialized. */
-    if (!dixPrivateKeyRegistered(rrPrivKey))
-        return;
+    if (!dixPrivateKeyRegistered(rrPrivKey)) {
+      return;
+    }
 
     pScrPriv = rrGetScrPriv(pScreen);
     primaryPriv = rrGetScrPriv(primaryScreen);
@@ -477,8 +506,9 @@ RRProviderAutoConfigGpuScreen(ScreenPtr pScreen, ScreenPtr primaryScreen)
     provider = pScrPriv->provider;
     primary_provider = primaryPriv->provider;
 
-    if (!provider || !primary_provider)
-        return;
+    if (!provider || !primary_provider) {
+      return;
+    }
 
     if ((provider->capabilities & RR_Capability_SinkOutput) &&
         (primary_provider->capabilities & RR_Capability_SourceOutput)) {
@@ -490,6 +520,7 @@ RRProviderAutoConfigGpuScreen(ScreenPtr pScreen, ScreenPtr primaryScreen)
     }
 
     if ((provider->capabilities & RR_Capability_SourceOffload) &&
-        (primary_provider->capabilities & RR_Capability_SinkOffload))
-        pScrPriv->rrProviderSetOffloadSink(pScreen, provider, primary_provider);
+        (primary_provider->capabilities & RR_Capability_SinkOffload)) {
+      pScrPriv->rrProviderSetOffloadSink(pScreen, provider, primary_provider);
+    }
 }

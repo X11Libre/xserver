@@ -31,13 +31,15 @@ present_query_capabilities(RRCrtcPtr crtc)
 {
     present_screen_priv_ptr screen_priv;
 
-    if (!crtc)
-        return 0;
+    if (!crtc) {
+      return 0;
+    }
 
     screen_priv = present_screen_priv(crtc->pScreen);
 
-    if (!screen_priv)
-        return 0;
+    if (!screen_priv) {
+      return 0;
+    }
 
     return screen_priv->query_capabilities(screen_priv);
 }
@@ -49,8 +51,9 @@ present_get_crtc(WindowPtr window)
     present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
     RRCrtcPtr                   crtc = NULL;
 
-    if (!screen_priv)
-        return NULL;
+    if (!screen_priv) {
+      return NULL;
+    }
 
     crtc = screen_priv->get_crtc(screen_priv, window);
     if (crtc && !present_screen_priv(crtc->pScreen)) {
@@ -93,16 +96,18 @@ present_copy_region(DrawablePtr drawable,
                          0, 0,
                          pixmap->drawable.width, pixmap->drawable.height,
                          x_off, y_off);
-    if (update)
-        (*gc->funcs->ChangeClip)(gc, CT_NONE, NULL, 0);
+    if (update) {
+      (*gc->funcs->ChangeClip)(gc, CT_NONE, NULL, 0);
+    }
     FreeScratchGC(gc);
 }
 
 void
 present_pixmap_idle(PixmapPtr pixmap, WindowPtr window, CARD32 serial, struct present_fence *present_fence)
 {
-    if (present_fence)
-        present_fence_set_triggered(present_fence);
+  if (present_fence) {
+    present_fence_set_triggered(present_fence);
+  }
     if (window) {
         DebugPresent(("\ti %08" PRIx32 "\n", pixmap ? pixmap->drawable.id : 0));
         present_send_idle_notify(window, serial, pixmap, present_fence);
@@ -120,8 +125,9 @@ present_set_tree_pixmap_visit(WindowPtr window, void *data)
     struct pixmap_visit *visit = data;
     ScreenPtr           screen = window->drawable.pScreen;
 
-    if ((*screen->GetWindowPixmap)(window) == visit->old)
-        (*screen->SetWindowPixmap)(window, visit->new);
+    if ((*screen->GetWindowPixmap)(window) == visit->old) {
+      (*screen->SetWindowPixmap)(window, visit->new);
+    }
 
     /*
      * Walk the entire tree in case windows using the
@@ -140,12 +146,14 @@ present_set_tree_pixmap(WindowPtr window,
     ScreenPtr           screen = window->drawable.pScreen;
 
     visit.old = (*screen->GetWindowPixmap)(window);
-    if (expected && visit.old != expected)
-        return;
+    if (expected && visit.old != expected) {
+      return;
+    }
 
     visit.new = pixmap;
-    if (visit.old == visit.new)
-        return;
+    if (visit.old == visit.new) {
+      return;
+    }
     TraverseTree(window, present_set_tree_pixmap_visit, &visit);
 }
 
@@ -171,8 +179,9 @@ present_get_target_msc(uint64_t target_msc_arg,
     /* If the specified target-msc lies in the future, then this
      * defines the target-msc according to Present protocol.
      */
-    if (msc_is_after(target_msc_arg, crtc_msc))
-        return target_msc_arg;
+    if (msc_is_after(target_msc_arg, crtc_msc)) {
+      return target_msc_arg;
+    }
 
     /* If no divisor is specified, the modulo is undefined
      * and we do present instead asap.
@@ -185,8 +194,9 @@ present_get_target_msc(uint64_t target_msc_arg,
          * the current crtc-msc, which already has begun, but must aim
          * for the upcoming one.
          */
-        if (synced_flip)
-            target_msc++;
+        if (synced_flip) {
+          target_msc++;
+        }
 
         return target_msc;
     }
@@ -208,8 +218,9 @@ present_get_target_msc(uint64_t target_msc_arg,
     target_msc = crtc_msc - (crtc_msc % divisor) + remainder;
 
     /* Here we already found the correct field-msc. */
-    if (msc_is_after(target_msc, crtc_msc))
-        return target_msc;
+    if (msc_is_after(target_msc, crtc_msc)) {
+      return target_msc;
+    }
     /*
      * Here either:
      * a) target_msc == crtc_msc, i.e. crtc_msc actually solved
@@ -222,8 +233,9 @@ present_get_target_msc(uint64_t target_msc_arg,
      *
      * => This means in any case we want to present at target_msc + divisor.
      */
-    if (synced_flip || msc_is_after(crtc_msc, target_msc))
-        target_msc += divisor;
+    if (synced_flip || msc_is_after(crtc_msc, target_msc)) {
+      target_msc += divisor;
+    }
     return target_msc;
 }
 

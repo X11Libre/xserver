@@ -240,9 +240,10 @@ socket_handoff(socket_handoff_t *handoff_data)
         }
 
         launchd_fd = accept_fd_handoff(connected_fd);
-        if (launchd_fd == -1)
-            ErrorF(
-                "X11.app: Error receiving $DISPLAY file descriptor, no descriptor received?  Waiting for another connection.\n");
+        if (launchd_fd == -1) {
+          ErrorF("X11.app: Error receiving $DISPLAY file descriptor, no "
+                 "descriptor received?  Waiting for another connection.\n");
+        }
 
         close(connected_fd);
     }
@@ -415,7 +416,9 @@ startup_trigger(int argc, char **argv, char **envp)
 
         /* We need to count envp */
         int envpc;
-        for (envpc = 0; envp[envpc]; envpc++) ;
+        for (envpc = 0; envp[envpc]; envpc++) {
+          ;
+        }
 
         /* We have fixed-size string lengths due to limitations in IPC,
          * so we need to copy our argv and envp.
@@ -510,8 +513,9 @@ setup_console_redirect(const char *bundle_id)
 
     asl_facility = strdup(bundle_id);
     assert(asl_facility);
-    if (strcmp(asl_facility + strlen(asl_facility) - 4, ".X11") == 0)
-        asl_facility[strlen(asl_facility) - 4] = '\0';
+    if (strcmp(asl_facility + strlen(asl_facility) - 4, ".X11") == 0) {
+      asl_facility[strlen(asl_facility) - 4] = '\0';
+    }
 
     assert(aslc = asl_open(asl_sender, asl_facility, ASL_OPT_NO_DELAY));
     free(asl_sender);
@@ -568,8 +572,9 @@ setup_env(void)
         /* s = basename(disp) */
         const char *d, *s;
         for (s = NULL, d = disp; *d; d++) {
-            if (*d == '/')
-                s = d + 1;
+          if (*d == '/') {
+            s = d + 1;
+          }
         }
 
         if (s && *s) {
@@ -611,8 +616,9 @@ setup_env(void)
 
     /* cd $HOME */
     char *temp = getenv("HOME");
-    if (temp != NULL && temp[0] != '\0')
-        chdir(temp);
+    if (temp != NULL && temp[0] != '\0') {
+      chdir(temp);
+    }
 }
 
 /*** Main ***/
@@ -690,8 +696,9 @@ main(int argc, char **argv, char **envp)
             case 0:                                     /* child2 */
                 /* close all open files except for standard streams */
                 max_files = sysconf(_SC_OPEN_MAX);
-                for (i = 3; i < max_files; i++)
-                    close(i);
+                for (i = 3; i < max_files; i++) {
+                  close(i);
+                }
 
                 /* ensure stdin is on /dev/null */
                 close(0);
@@ -753,13 +760,15 @@ command_from_prefs(const char *key, const char *default_value)
     CFStringRef cfKey;
     CFPropertyListRef PlistRef;
 
-    if (!key)
-        return NULL;
+    if (!key) {
+      return NULL;
+    }
 
     cfKey = CFStringCreateWithCString(NULL, key, kCFStringEncodingASCII);
 
-    if (!cfKey)
-        return NULL;
+    if (!cfKey) {
+      return NULL;
+    }
 
     PlistRef = CFPreferencesCopyAppValue(cfKey,
                                          kCFPreferencesCurrentApplication);
@@ -770,8 +779,9 @@ command_from_prefs(const char *key, const char *default_value)
             NULL, default_value, kCFStringEncodingASCII);
         int len = strlen(default_value) + 1;
 
-        if (!cfDefaultValue)
-            goto command_from_prefs_out;
+        if (!cfDefaultValue) {
+          goto command_from_prefs_out;
+        }
 
         CFPreferencesSetAppValue(cfKey, cfDefaultValue,
                                  kCFPreferencesCurrentApplication);
@@ -779,15 +789,17 @@ command_from_prefs(const char *key, const char *default_value)
         CFRelease(cfDefaultValue);
 
         command = calloc(len, sizeof(char));
-        if (!command)
-            goto command_from_prefs_out;
+        if (!command) {
+          goto command_from_prefs_out;
+        }
         strcpy(command, default_value);
     }
     else {
         int len = CFStringGetLength((CFStringRef)PlistRef) + 1;
         command = calloc(len, sizeof(char));
-        if (!command)
-            goto command_from_prefs_out;
+        if (!command) {
+          goto command_from_prefs_out;
+        }
         CFStringGetCString((CFStringRef)PlistRef, command, len,
                            kCFStringEncodingASCII);
     }

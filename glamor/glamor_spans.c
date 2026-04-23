@@ -60,8 +60,9 @@ glamor_fill_spans_gl(DrawablePtr drawable,
     Bool ret = FALSE;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
     glamor_make_current(glamor_priv);
 
@@ -69,8 +70,9 @@ glamor_fill_spans_gl(DrawablePtr drawable,
         prog = glamor_use_program_fill(drawable, gc, &glamor_priv->fill_spans_program,
                                        &glamor_facet_fillspans_130);
 
-        if (!prog)
-            goto bail;
+        if (!prog) {
+          goto bail;
+        }
 
         /* Set up the vertex buffers for the points */
 
@@ -94,8 +96,9 @@ glamor_fill_spans_gl(DrawablePtr drawable,
         prog = glamor_use_program_fill(drawable, gc, &glamor_priv->fill_spans_program,
                                        &glamor_facet_fillspans_120);
 
-        if (!prog)
-            goto bail;
+        if (!prog) {
+          goto bail;
+        }
 
         /* Set up the vertex buffers for the points */
 
@@ -126,8 +129,10 @@ glamor_fill_spans_gl(DrawablePtr drawable,
         BoxPtr box = RegionRects(gc->pCompositeClip);
 
         if (!glamor_set_destination_drawable(drawable, box_index, FALSE, FALSE,
-                                             prog->matrix_uniform, &off_x, &off_y))
-            goto bail;
+                                             prog->matrix_uniform, &off_x,
+                                             &off_y)) {
+          goto bail;
+        }
 
         while (nbox--) {
             glScissor(box->x1 + off_x,
@@ -135,10 +140,10 @@ glamor_fill_spans_gl(DrawablePtr drawable,
                       box->x2 - box->x1,
                       box->y2 - box->y1);
             box++;
-            if (glamor_glsl_has_ints(glamor_priv))
-                glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, n);
-            else {
-                glamor_glDrawArrays_GL_QUADS(glamor_priv, n);
+            if (glamor_glsl_has_ints(glamor_priv)) {
+              glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, n);
+            } else {
+              glamor_glDrawArrays_GL_QUADS(glamor_priv, n);
             }
         }
     }
@@ -147,8 +152,9 @@ glamor_fill_spans_gl(DrawablePtr drawable,
 
 bail:
     glDisable(GL_SCISSOR_TEST);
-    if (glamor_glsl_has_ints(glamor_priv))
-        glVertexAttribDivisor(GLAMOR_VERTEX_POS, 0);
+    if (glamor_glsl_has_ints(glamor_priv)) {
+      glVertexAttribDivisor(GLAMOR_VERTEX_POS, 0);
+    }
     glDisableVertexAttribArray(GLAMOR_VERTEX_POS);
 
     return ret;
@@ -172,8 +178,9 @@ glamor_fill_spans(DrawablePtr drawable,
                   GCPtr gc,
                   int n, DDXPointPtr points, int *widths, int sorted)
 {
-    if (glamor_fill_spans_gl(drawable, gc, n, points, widths, sorted))
-        return;
+  if (glamor_fill_spans_gl(drawable, gc, n, points, widths, sorted)) {
+    return;
+  }
     glamor_fill_spans_bail(drawable, gc, n, points, widths, sorted);
 }
 
@@ -192,8 +199,9 @@ glamor_get_spans_gl(DrawablePtr drawable, int wmax,
     const struct glamor_format *f = glamor_format_for_pixmap(pixmap);
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
     glamor_get_drawable_deltas(drawable, pixmap, &off_x, &off_y);
 
@@ -222,15 +230,19 @@ glamor_get_spans_gl(DrawablePtr drawable, int wmax,
                 l += (box->x1 - x1) * (drawable->bitsPerPixel >> 3);
                 x1 = box->x1;
             }
-            if (x2 > box->x2)
-                x2 = box->x2;
+            if (x2 > box->x2) {
+              x2 = box->x2;
+            }
 
-            if (x1 >= x2)
-                continue;
-            if (y < box->y1)
-                continue;
-            if (y >= box->y2)
-                continue;
+            if (x1 >= x2) {
+              continue;
+            }
+            if (y < box->y1) {
+              continue;
+            }
+            if (y >= box->y2) {
+              continue;
+            }
 
             glReadPixels(x1 - box->x1, y - box->y1, x2 - x1, 1,
                          f->format, f->type, l);
@@ -246,8 +258,9 @@ static void
 glamor_get_spans_bail(DrawablePtr drawable, int wmax,
                  DDXPointPtr points, int *widths, int count, char *dst)
 {
-    if (glamor_prepare_access(drawable, GLAMOR_ACCESS_RO))
-        fbGetSpans(drawable, wmax, points, widths, count, dst);
+  if (glamor_prepare_access(drawable, GLAMOR_ACCESS_RO)) {
+    fbGetSpans(drawable, wmax, points, widths, count, dst);
+  }
     glamor_finish_access(drawable);
 }
 
@@ -255,8 +268,9 @@ void
 glamor_get_spans(DrawablePtr drawable, int wmax,
                  DDXPointPtr points, int *widths, int count, char *dst)
 {
-    if (glamor_get_spans_gl(drawable, wmax, points, widths, count, dst))
-        return;
+  if (glamor_get_spans_gl(drawable, wmax, points, widths, count, dst)) {
+    return;
+  }
     glamor_get_spans_bail(drawable, wmax, points, widths, count, dst);
 }
 
@@ -275,14 +289,17 @@ glamor_set_spans_gl(DrawablePtr drawable, GCPtr gc, char *src,
     int off_x, off_y;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
-    if (gc->alu != GXcopy)
-        goto bail;
+    if (gc->alu != GXcopy) {
+      goto bail;
+    }
 
-    if (!glamor_pm_is_solid(gc->depth, gc->planemask))
-        goto bail;
+    if (!glamor_pm_is_solid(gc->depth, gc->planemask)) {
+      goto bail;
+    }
 
     glamor_get_drawable_deltas(drawable, pixmap, &off_x, &off_y);
 
@@ -316,13 +333,16 @@ glamor_set_spans_gl(DrawablePtr drawable, GCPtr gc, char *src,
                     l += (clip_box->x1 - x1) * (drawable->bitsPerPixel >> 3);
                     x1 = clip_box->x1;
                 }
-                if (x2 > clip_box->x2)
-                    x2 = clip_box->x2;
+                if (x2 > clip_box->x2) {
+                  x2 = clip_box->x2;
+                }
 
-                if (y < clip_box->y1)
-                    continue;
-                if (y >= clip_box->y2)
-                    continue;
+                if (y < clip_box->y1) {
+                  continue;
+                }
+                if (y >= clip_box->y2) {
+                  continue;
+                }
 
                 /* adjust to pixmap coordinates */
                 x1 += off_x;
@@ -333,15 +353,19 @@ glamor_set_spans_gl(DrawablePtr drawable, GCPtr gc, char *src,
                     l += (box->x1 - x1) * (drawable->bitsPerPixel >> 3);
                     x1 = box->x1;
                 }
-                if (x2 > box->x2)
-                    x2 = box->x2;
+                if (x2 > box->x2) {
+                  x2 = box->x2;
+                }
 
-                if (x1 >= x2)
-                    continue;
-                if (y1 < box->y1)
-                    continue;
-                if (y1 >= box->y2)
-                    continue;
+                if (x1 >= x2) {
+                  continue;
+                }
+                if (y1 < box->y1) {
+                  continue;
+                }
+                if (y1 >= box->y2) {
+                  continue;
+                }
 
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
                                 x1 - box->x1, y1 - box->y1, x2 - x1, 1,
@@ -362,8 +386,10 @@ static void
 glamor_set_spans_bail(DrawablePtr drawable, GCPtr gc, char *src,
                       DDXPointPtr points, int *widths, int numPoints, int sorted)
 {
-    if (glamor_prepare_access(drawable, GLAMOR_ACCESS_RW) && glamor_prepare_access_gc(gc))
-        fbSetSpans(drawable, gc, src, points, widths, numPoints, sorted);
+  if (glamor_prepare_access(drawable, GLAMOR_ACCESS_RW) &&
+      glamor_prepare_access_gc(gc)) {
+    fbSetSpans(drawable, gc, src, points, widths, numPoints, sorted);
+  }
     glamor_finish_access_gc(gc);
     glamor_finish_access(drawable);
 }
@@ -372,7 +398,9 @@ void
 glamor_set_spans(DrawablePtr drawable, GCPtr gc, char *src,
                  DDXPointPtr points, int *widths, int numPoints, int sorted)
 {
-    if (glamor_set_spans_gl(drawable, gc, src, points, widths, numPoints, sorted))
-        return;
+  if (glamor_set_spans_gl(drawable, gc, src, points, widths, numPoints,
+                          sorted)) {
+    return;
+  }
     glamor_set_spans_bail(drawable, gc, src, points, widths, numPoints, sorted);
 }

@@ -109,10 +109,11 @@ fbPolyLine(DrawablePtr pDrawable, GCPtr pGC, int mode, int npt, DDXPointPtr ppt)
         }
     }
     else {
-        if (pGC->lineStyle != LineSolid)
-            line = miWideDash;
-        else
-            line = miWideLine;
+      if (pGC->lineStyle != LineSolid) {
+        line = miWideDash;
+      } else {
+        line = miWideLine;
+      }
     }
     (*line) (pDrawable, pGC, mode, npt, ppt);
 }

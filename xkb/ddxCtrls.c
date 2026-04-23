@@ -44,10 +44,12 @@ XkbDDXKeybdCtrlProc(DeviceIntPtr dev, KeybdCtrl * ctrl)
     int realRepeat;
 
     realRepeat = ctrl->autoRepeat;
-    if ((dev->kbdfeed) && (XkbDDXUsesSoftRepeat(dev)))
-        ctrl->autoRepeat = 0;
-    if (dev->key && dev->key->xkbInfo && dev->key->xkbInfo->kbdProc)
-        (*dev->key->xkbInfo->kbdProc) (dev, ctrl);
+    if ((dev->kbdfeed) && (XkbDDXUsesSoftRepeat(dev))) {
+      ctrl->autoRepeat = 0;
+    }
+    if (dev->key && dev->key->xkbInfo && dev->key->xkbInfo->kbdProc) {
+      (*dev->key->xkbInfo->kbdProc)(dev, ctrl);
+    }
     ctrl->autoRepeat = realRepeat;
     return;
 }
@@ -76,8 +78,9 @@ XkbDDXChangeControls(DeviceIntPtr dev, XkbControlsPtr old, XkbControlsPtr new)
     }
 
     if (changed & XkbPerKeyRepeatMask) {
-        if (dev->kbdfeed->CtrlProc)
-            (*dev->kbdfeed->CtrlProc) (dev, &dev->kbdfeed->ctrl);
+      if (dev->kbdfeed->CtrlProc) {
+        (*dev->kbdfeed->CtrlProc)(dev, &dev->kbdfeed->ctrl);
+      }
     }
     return;
 }

@@ -98,8 +98,9 @@ present_fake_queue_vblank(ScreenPtr     screen,
     }
 
     fake_vblank = calloc (1, sizeof (present_fake_vblank_rec));
-    if (!fake_vblank)
-        return BadAlloc;
+    if (!fake_vblank) {
+      return BadAlloc;
+    }
 
     fake_vblank->screen = screen;
     fake_vblank->event_id = event_id;
@@ -122,19 +123,20 @@ present_fake_screen_init(ScreenPtr screen)
     uint32_t                fake_fps;
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
 
-    if (FakeScreenFps)
-        fake_fps = FakeScreenFps;
-    else {
-        /* For screens with hardware vblank support, the fake code
-        * will be used for off-screen windows and while screens are blanked,
-        * in which case we want a large interval here: 1Hz
-        *
-        * Otherwise, pretend that the screen runs at 60Hz
-        */
-        if (screen_priv->info && screen_priv->info->get_crtc)
-            fake_fps = 1;
-        else
-            fake_fps = 60;
+    if (FakeScreenFps) {
+      fake_fps = FakeScreenFps;
+    } else {
+      /* For screens with hardware vblank support, the fake code
+       * will be used for off-screen windows and while screens are blanked,
+       * in which case we want a large interval here: 1Hz
+       *
+       * Otherwise, pretend that the screen runs at 60Hz
+       */
+      if (screen_priv->info && screen_priv->info->get_crtc) {
+        fake_fps = 1;
+      } else {
+        fake_fps = 60;
+      }
     }
     screen_priv->fake_interval = 1000000 / fake_fps;
 }

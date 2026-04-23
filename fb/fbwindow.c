@@ -114,8 +114,9 @@ fbCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 
     RegionIntersect(&rgnDst, &pWin->borderClip, prgnSrc);
 
-    if (pPixmap->screen_x || pPixmap->screen_y)
-        RegionTranslate(&rgnDst, -pPixmap->screen_x, -pPixmap->screen_y);
+    if (pPixmap->screen_x || pPixmap->screen_y) {
+      RegionTranslate(&rgnDst, -pPixmap->screen_x, -pPixmap->screen_y);
+    }
 
     miCopyRegion(pDrawable, pDrawable,
                  0, &rgnDst, dx, dy, fbCopyWindowProc, 0, 0);
@@ -129,20 +130,23 @@ fbFixupWindowPixmap(DrawablePtr pDrawable, PixmapPtr *ppPixmap)
 {
     PixmapPtr pPixmap = *ppPixmap;
 
-    if (FbEvenTile(pPixmap->drawable.width * pPixmap->drawable.bitsPerPixel))
-        fbPadPixmap(pPixmap);
+    if (FbEvenTile(pPixmap->drawable.width * pPixmap->drawable.bitsPerPixel)) {
+      fbPadPixmap(pPixmap);
+    }
 }
 
 Bool
 fbChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 {
     if (mask & CWBackPixmap) {
-        if (pWin->backgroundState == BackgroundPixmap)
-            fbFixupWindowPixmap(&pWin->drawable, &pWin->background.pixmap);
+      if (pWin->backgroundState == BackgroundPixmap) {
+        fbFixupWindowPixmap(&pWin->drawable, &pWin->background.pixmap);
+      }
     }
     if (mask & CWBorderPixmap) {
-        if (pWin->borderIsPixel == FALSE)
-            fbFixupWindowPixmap(&pWin->drawable, &pWin->border.pixmap);
+      if (pWin->borderIsPixel == FALSE) {
+        fbFixupWindowPixmap(&pWin->drawable, &pWin->border.pixmap);
+      }
     }
     return TRUE;
 }
@@ -161,8 +165,9 @@ fbFillRegionSolid(DrawablePtr pDrawable,
 #ifndef FB_ACCESS_WRAPPER
     int try_mmx = 0;
 
-    if (!and)
-        try_mmx = 1;
+    if (!and) {
+      try_mmx = 1;
+    }
 #endif
 
     fbGetDrawable(pDrawable, dst, dstStride, dstBpp, dstXoff, dstYoff);

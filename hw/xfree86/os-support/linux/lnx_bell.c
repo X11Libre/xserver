@@ -33,8 +33,9 @@
 void
 xf86OSRingBell(int loudness, int pitch, int duration)
 {
-    if (xf86Info.consoleFd == -1 || !pitch || !loudness)
-        return;
+  if (xf86Info.consoleFd == -1 || !pitch || !loudness) {
+    return;
+  }
 
     ioctl(xf86Info.consoleFd, KDMKTONE,
           ((1193190 / pitch) & 0xffff) |

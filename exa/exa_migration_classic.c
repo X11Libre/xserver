@@ -70,11 +70,15 @@ exaPixmapIsDirty(PixmapPtr pPix)
 {
     ExaPixmapPriv(pPix);
 
-    if (pExaPixmap == NULL)
-        EXA_FatalErrorDebugWithRet(("EXA bug: exaPixmapIsDirty was called on a non-exa pixmap.\n"), TRUE);
+    if (pExaPixmap == NULL) {
+      EXA_FatalErrorDebugWithRet(
+          ("EXA bug: exaPixmapIsDirty was called on a non-exa pixmap.\n"),
+          TRUE);
+    }
 
-    if (!pExaPixmap->pDamage)
-        return FALSE;
+    if (!pExaPixmap->pDamage) {
+      return FALSE;
+    }
 
     return RegionNotEmpty(DamageRegion(pExaPixmap->pDamage)) ||
         !RegionEqual(&pExaPixmap->validSys, &pExaPixmap->validFB);
@@ -92,8 +96,9 @@ exaPixmapShouldBeInFB(PixmapPtr pPix)
 {
     ExaPixmapPriv(pPix);
 
-    if (exaPixmapIsPinned(pPix))
-        return TRUE;
+    if (exaPixmapIsPinned(pPix)) {
+      return TRUE;
+    }
 
     return pExaPixmap->score >= 0;
 }
@@ -178,24 +183,26 @@ exaCopyDirty(ExaMigrationPtr migrate, RegionPtr pValidDst, RegionPtr pValidSrc,
 
                 RegionInit(&closure, &box, 0);
                 RegionIntersect(&CopyReg, &CopyReg, &closure);
+            } else {
+              RegionIntersect(&CopyReg, &CopyReg, pending_damage);
             }
-            else
-                RegionIntersect(&CopyReg, &CopyReg, pending_damage);
         }
 
         /* The caller may provide a region to be subtracted from the calculated
          * dirty region. This is to avoid migration of bits that don't
          * contribute to the result of the operation.
          */
-        if (migrate->pReg)
-            RegionSubtract(&CopyReg, &CopyReg, migrate->pReg);
+        if (migrate->pReg) {
+          RegionSubtract(&CopyReg, &CopyReg, migrate->pReg);
+        }
     }
     else {
         /* The caller may restrict the region to be migrated for source pixmaps
          * to what's relevant for the operation.
          */
-        if (migrate->pReg)
-            RegionIntersect(&CopyReg, &CopyReg, migrate->pReg);
+        if (migrate->pReg) {
+          RegionIntersect(&CopyReg, &CopyReg, migrate->pReg);
+        }
     }
 
     pBox = RegionRects(&CopyReg);
@@ -212,8 +219,9 @@ exaCopyDirty(ExaMigrationPtr migrate, RegionPtr pValidDst, RegionPtr pValidSrc,
         pBox->x2 = min(pBox->x2, pPixmap->drawable.width);
         pBox->y2 = min(pBox->y2, pPixmap->drawable.height);
 
-        if (pBox->x1 >= pBox->x2 || pBox->y1 >= pBox->y2)
-            continue;
+        if (pBox->x1 >= pBox->x2 || pBox->y1 >= pBox->y2) {
+          continue;
+        }
 
         if (!transfer || !transfer(pPixmap,
                                    pBox->x1, pBox->y1,
@@ -239,9 +247,9 @@ exaCopyDirty(ExaMigrationPtr migrate, RegionPtr pValidDst, RegionPtr pValidSrc,
                              pPixmap->devPrivate.ptr, pPixmap->devKind,
                              pExaPixmap->sys_ptr, pExaPixmap->sys_pitch);
             }
+        } else {
+          need_sync = TRUE;
         }
-        else
-            need_sync = TRUE;
 
         pBox++;
     }
@@ -253,18 +261,20 @@ exaCopyDirty(ExaMigrationPtr migrate, RegionPtr pValidDst, RegionPtr pValidSrc,
      * removing parts of it which are also in the destination valid region.
      * Removing anything beyond that would lead to data loss.
      */
-    if (RegionNumRects(pValidSrc) > 20)
-        RegionSubtract(pValidSrc, pValidSrc, pValidDst);
+    if (RegionNumRects(pValidSrc) > 20) {
+      RegionSubtract(pValidSrc, pValidSrc, pValidDst);
+    }
 
     /* The copied bits are now valid in destination */
     RegionUnion(pValidDst, pValidDst, &CopyReg);
 
     RegionUninit(&CopyReg);
 
-    if (access_prepared)
-        exaFinishAccess(&pPixmap->drawable, fallback_index);
-    else if (need_sync && sync)
-        sync(pPixmap->drawable.pScreen);
+    if (access_prepared) {
+      exaFinishAccess(&pPixmap->drawable, fallback_index);
+    } else if (need_sync && sync) {
+      sync(pPixmap->drawable.pScreen);
+    }
 }
 
 /**
@@ -327,30 +337,35 @@ exaDoMoveInPixmap(ExaMigrationPtr migrate)
     ExaPixmapPriv(pPixmap);
 
     /* If we're VT-switched away, no touching card memory allowed. */
-    if (pExaScr->swappedOut)
-        return;
+    if (pExaScr->swappedOut) {
+      return;
+    }
 
     /* If we're not allowed to move, then fail. */
-    if (exaPixmapIsPinned(pPixmap))
-        return;
+    if (exaPixmapIsPinned(pPixmap)) {
+      return;
+    }
 
     /* Don't migrate in pixmaps which are less than 8bpp.  This avoids a lot of
      * fragility in EXA, and <8bpp is probably not used enough any more to care
      * (at least, not in acceleratd paths).
      */
-    if (pPixmap->drawable.bitsPerPixel < 8)
-        return;
+    if (pPixmap->drawable.bitsPerPixel < 8) {
+      return;
+    }
 
-    if (pExaPixmap->accel_blocked)
-        return;
+    if (pExaPixmap->accel_blocked) {
+      return;
+    }
 
     if (pExaPixmap->area == NULL) {
         pExaPixmap->area =
             exaOffscreenAlloc(pScreen, pExaPixmap->fb_size,
                               pExaScr->info->pixmapOffsetAlign, FALSE,
                               exaPixmapSave, (void *) pPixmap);
-        if (pExaPixmap->area == NULL)
-            return;
+        if (pExaPixmap->area == NULL) {
+          return;
+        }
 
         pExaPixmap->fb_ptr = (CARD8 *) pExaScr->info->memoryBase +
             pExaPixmap->area->offset;
@@ -358,8 +373,9 @@ exaDoMoveInPixmap(ExaMigrationPtr migrate)
 
     exaCopyDirtyToFb(migrate);
 
-    if (exaPixmapHasGpuCopy(pPixmap))
-        return;
+    if (exaPixmapHasGpuCopy(pPixmap)) {
+      return;
+    }
 
     DBG_MIGRATE(("-> %p (0x%x) (%dx%d) (%c)\n", pPixmap,
                  (ExaGetPixmapPriv(pPixmap)->area ?
@@ -396,8 +412,9 @@ exaDoMoveOutPixmap(ExaMigrationPtr migrate)
 
     ExaPixmapPriv(pPixmap);
 
-    if (!pExaPixmap->area || exaPixmapIsPinned(pPixmap))
-        return;
+    if (!pExaPixmap->area || exaPixmapIsPinned(pPixmap)) {
+      return;
+    }
 
     exaCopyDirtyToSys(migrate);
 
@@ -475,8 +492,9 @@ exaMigrateTowardFb(ExaMigrationPtr migrate)
         pExaPixmap->score = 0;
     }
 
-    if (pExaPixmap->score < EXA_PIXMAP_SCORE_MAX)
-        pExaPixmap->score++;
+    if (pExaPixmap->score < EXA_PIXMAP_SCORE_MAX) {
+      pExaPixmap->score++;
+    }
 
     if (pExaPixmap->score >= EXA_PIXMAP_SCORE_MOVE_IN &&
         !exaPixmapHasGpuCopy(pPixmap)) {
@@ -486,9 +504,9 @@ exaMigrateTowardFb(ExaMigrationPtr migrate)
     if (exaPixmapHasGpuCopy(pPixmap)) {
         exaCopyDirtyToFb(migrate);
         ExaOffscreenMarkUsed(pPixmap);
+    } else {
+      exaCopyDirtyToSys(migrate);
     }
-    else
-        exaCopyDirtyToSys(migrate);
 }
 
 /**
@@ -505,24 +523,28 @@ exaMigrateTowardSys(ExaMigrationPtr migrate)
     DBG_MIGRATE(("UseMem: %p score %d\n", (void *) pPixmap,
                  pExaPixmap->score));
 
-    if (pExaPixmap->score == EXA_PIXMAP_SCORE_PINNED)
-        return;
+    if (pExaPixmap->score == EXA_PIXMAP_SCORE_PINNED) {
+      return;
+    }
 
-    if (pExaPixmap->score == EXA_PIXMAP_SCORE_INIT)
-        pExaPixmap->score = 0;
+    if (pExaPixmap->score == EXA_PIXMAP_SCORE_INIT) {
+      pExaPixmap->score = 0;
+    }
 
-    if (pExaPixmap->score > EXA_PIXMAP_SCORE_MIN)
-        pExaPixmap->score--;
+    if (pExaPixmap->score > EXA_PIXMAP_SCORE_MIN) {
+      pExaPixmap->score--;
+    }
 
-    if (pExaPixmap->score <= EXA_PIXMAP_SCORE_MOVE_OUT && pExaPixmap->area)
-        exaDoMoveOutPixmap(migrate);
+    if (pExaPixmap->score <= EXA_PIXMAP_SCORE_MOVE_OUT && pExaPixmap->area) {
+      exaDoMoveOutPixmap(migrate);
+    }
 
     if (exaPixmapHasGpuCopy(pPixmap)) {
         exaCopyDirtyToFb(migrate);
         ExaOffscreenMarkUsed(pPixmap);
+    } else {
+      exaCopyDirtyToSys(migrate);
     }
-    else
-        exaCopyDirtyToSys(migrate);
 }
 
 /**
@@ -539,15 +561,17 @@ exaAssertNotDirty(PixmapPtr pPixmap)
     BoxPtr pBox;
     Bool ret = TRUE, save_use_gpu_copy;
 
-    if (exaPixmapIsPinned(pPixmap) || pExaPixmap->area == NULL)
-        return ret;
+    if (exaPixmapIsPinned(pPixmap) || pExaPixmap->area == NULL) {
+      return ret;
+    }
 
     RegionNull(&ValidReg);
     RegionIntersect(&ValidReg, &pExaPixmap->validFB, &pExaPixmap->validSys);
     nbox = RegionNumRects(&ValidReg);
 
-    if (!nbox)
-        goto out;
+    if (!nbox) {
+      goto out;
+    }
 
     pBox = RegionRects(&ValidReg);
 
@@ -560,8 +584,9 @@ exaAssertNotDirty(PixmapPtr pPixmap)
     pExaPixmap->use_gpu_copy = TRUE;
     pPixmap->devKind = pExaPixmap->fb_pitch;
 
-    if (!ExaDoPrepareAccess(pPixmap, EXA_PREPARE_SRC))
-        goto skip;
+    if (!ExaDoPrepareAccess(pPixmap, EXA_PREPARE_SRC)) {
+      goto skip;
+    }
 
     while (nbox--) {
         int rowbytes;
@@ -571,8 +596,9 @@ exaAssertNotDirty(PixmapPtr pPixmap)
         pBox->x2 = min(pBox->x2, pPixmap->drawable.width);
         pBox->y2 = min(pBox->y2, pPixmap->drawable.height);
 
-        if (pBox->x1 >= pBox->x2 || pBox->y1 >= pBox->y2)
-            continue;
+        if (pBox->x1 >= pBox->x2 || pBox->y1 >= pBox->y2) {
+          continue;
+        }
 
         rowbytes = (pBox->x2 - pBox->x1) * cpp;
         src =
@@ -623,10 +649,11 @@ exaDoMigration_classic(ExaMigrationPtr pixmaps, int npixmaps, Bool can_accel)
      */
     if (pExaScr->checkDirtyCorrectness) {
         for (i = 0; i < npixmaps; i++) {
-            if (!exaPixmapIsDirty(pixmaps[i].pPix) &&
-                !exaAssertNotDirty(pixmaps[i].pPix))
-                ErrorF("%s: Pixmap %d dirty but not marked as such!\n",
-                       __func__, i);
+          if (!exaPixmapIsDirty(pixmaps[i].pPix) &&
+              !exaAssertNotDirty(pixmaps[i].pPix)) {
+            ErrorF("%s: Pixmap %d dirty but not marked as such!\n", __func__,
+                   i);
+          }
         }
     }
     /* If anything is pinned in system memory, we won't be able to
@@ -651,8 +678,9 @@ exaDoMigration_classic(ExaMigrationPtr pixmaps, int npixmaps, Bool can_accel)
             if (pixmaps[i].as_dst && !exaPixmapShouldBeInFB(pixmaps[i].pPix) &&
                 !exaPixmapIsDirty(pixmaps[i].pPix)) {
                 for (i = 0; i < npixmaps; i++) {
-                    if (!exaPixmapIsDirty(pixmaps[i].pPix))
-                        exaDoMoveOutPixmap(pixmaps + i);
+                  if (!exaPixmapIsDirty(pixmaps[i].pPix)) {
+                    exaDoMoveOutPixmap(pixmaps + i);
+                  }
                 }
                 return;
             }
@@ -664,8 +692,9 @@ exaDoMigration_classic(ExaMigrationPtr pixmaps, int npixmaps, Bool can_accel)
         if (!can_accel) {
             for (i = 0; i < npixmaps; i++) {
                 exaMigrateTowardSys(pixmaps + i);
-                if (!exaPixmapIsDirty(pixmaps[i].pPix))
-                    exaDoMoveOutPixmap(pixmaps + i);
+                if (!exaPixmapIsDirty(pixmaps[i].pPix)) {
+                  exaDoMoveOutPixmap(pixmaps + i);
+                }
             }
             return;
         }
@@ -689,23 +718,26 @@ exaDoMigration_classic(ExaMigrationPtr pixmaps, int npixmaps, Bool can_accel)
          * happen.
          */
         if (!can_accel) {
-            for (i = 0; i < npixmaps; i++)
-                exaMigrateTowardSys(pixmaps + i);
+          for (i = 0; i < npixmaps; i++) {
+            exaMigrateTowardSys(pixmaps + i);
+          }
             return;
         }
 
         for (i = 0; i < npixmaps; i++) {
             if (exaPixmapHasGpuCopy(pixmaps[i].pPix)) {
                 /* Found one in FB, so move all to FB. */
-                for (j = 0; j < npixmaps; j++)
-                    exaMigrateTowardFb(pixmaps + i);
+                for (j = 0; j < npixmaps; j++) {
+                  exaMigrateTowardFb(pixmaps + i);
+                }
                 return;
             }
         }
 
         /* Nobody's in FB, so move all away from FB. */
-        for (i = 0; i < npixmaps; i++)
-            exaMigrateTowardSys(pixmaps + i);
+        for (i = 0; i < npixmaps; i++) {
+          exaMigrateTowardSys(pixmaps + i);
+        }
     }
     else if (pExaScr->migration == ExaMigrationAlways) {
         /* Always move the pixmaps out if we can't accelerate.  If we can
@@ -713,8 +745,9 @@ exaDoMigration_classic(ExaMigrationPtr pixmaps, int npixmaps, Bool can_accel)
          * back out.
          */
         if (!can_accel) {
-            for (i = 0; i < npixmaps; i++)
-                exaDoMoveOutPixmap(pixmaps + i);
+          for (i = 0; i < npixmaps; i++) {
+            exaDoMoveOutPixmap(pixmaps + i);
+          }
             return;
         }
 

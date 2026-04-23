@@ -155,12 +155,14 @@ OsSignal(int sig, OsSigHandlerPtr handler)
     struct sigaction act, oact;
 
     sigemptyset(&act.sa_mask);
-    if (handler != SIG_IGN)
-        sigaddset(&act.sa_mask, sig);
+    if (handler != SIG_IGN) {
+      sigaddset(&act.sa_mask, sig);
+    }
     act.sa_flags = 0;
     act.sa_handler = handler;
-    if (sigaction(sig, &act, &oact))
-        perror("sigaction");
+    if (sigaction(sig, &act, &oact)) {
+      perror("sigaction");
+    }
     return oact.sa_handler;
 #endif
 }
@@ -217,19 +219,21 @@ GetTimeInMillis(void)
 
     if (!clockid) {
 #ifdef CLOCK_MONOTONIC_COARSE
-        if (clock_getres(CLOCK_MONOTONIC_COARSE, &tp) == 0 &&
-            (tp.tv_nsec / 1000) <= 1000 &&
-            clock_gettime(CLOCK_MONOTONIC_COARSE, &tp) == 0)
-            clockid = CLOCK_MONOTONIC_COARSE;
-        else
+      if (clock_getres(CLOCK_MONOTONIC_COARSE, &tp) == 0 &&
+          (tp.tv_nsec / 1000) <= 1000 &&
+          clock_gettime(CLOCK_MONOTONIC_COARSE, &tp) == 0) {
+        clockid = CLOCK_MONOTONIC_COARSE;
+      } else
 #endif
-        if (clock_gettime(CLOCK_MONOTONIC, &tp) == 0)
+          if (clock_gettime(CLOCK_MONOTONIC, &tp) == 0) {
             clockid = CLOCK_MONOTONIC;
-        else
-            clockid = ~0L;
+      } else {
+        clockid = ~0L;
+      }
     }
-    if (clockid != ~0L && clock_gettime(clockid, &tp) == 0)
-        return (tp.tv_sec * 1000) + (tp.tv_nsec / 1000000L);
+    if (clockid != ~0L && clock_gettime(clockid, &tp) == 0) {
+      return (tp.tv_sec * 1000) + (tp.tv_nsec / 1000000L);
+    }
 #endif
 
     X_GETTIMEOFDAY(&tv);
@@ -245,13 +249,15 @@ GetTimeInMicros(void)
     static clockid_t uclockid;
 
     if (!uclockid) {
-        if (clock_gettime(CLOCK_MONOTONIC, &tp) == 0)
-            uclockid = CLOCK_MONOTONIC;
-        else
-            uclockid = ~0L;
+      if (clock_gettime(CLOCK_MONOTONIC, &tp) == 0) {
+        uclockid = CLOCK_MONOTONIC;
+      } else {
+        uclockid = ~0L;
+      }
     }
-    if (uclockid != ~0L && clock_gettime(uclockid, &tp) == 0)
-        return (CARD64) tp.tv_sec * (CARD64)1000000 + tp.tv_nsec / 1000;
+    if (uclockid != ~0L && clock_gettime(uclockid, &tp) == 0) {
+      return (CARD64)tp.tv_sec * (CARD64)1000000 + tp.tv_nsec / 1000;
+    }
 #endif
 
     X_GETTIMEOFDAY(&tv);
@@ -347,38 +353,48 @@ VerifyDisplayName(const char *d)
     int period_found = FALSE;
     int after_period = 0;
 
-    if (d == (char *) 0)
-        return 0;               /*  null  */
-    if (*d == '\0')
-        return 0;               /*  empty  */
-    if (*d == '-')
-        return 0;               /*  could be confused for an option  */
-    if (*d == '.')
-        return 0;               /*  must not equal "." or ".."  */
-    if (strchr(d, '/') != (char *) 0)
-        return 0;               /*  very important!!!  */
+    if (d == (char *)0) {
+      return 0; /*  null  */
+    }
+    if (*d == '\0') {
+      return 0; /*  empty  */
+    }
+    if (*d == '-') {
+      return 0; /*  could be confused for an option  */
+    }
+    if (*d == '.') {
+      return 0; /*  must not equal "." or ".."  */
+    }
+    if (strchr(d, '/') != (char *)0) {
+      return 0; /*  very important!!!  */
+    }
 
     /* Since we run atoi() on the display later, only allow
        for digits, or exception of :0.0 and similar (two decimal points max)
        */
     for (i = 0; i < strlen(d); i++) {
         if (!isdigit((unsigned char)d[i])) {
-            if (d[i] != '.' || period_found)
-                return 0;
-            period_found = TRUE;
-        } else if (period_found)
-            after_period++;
-
-        if (after_period > 2)
+          if (d[i] != '.' || period_found) {
             return 0;
+          }
+            period_found = TRUE;
+        } else if (period_found) {
+          after_period++;
+        }
+
+        if (after_period > 2) {
+          return 0;
+        }
     }
 
     /* don't allow for :0. */
-    if (period_found && after_period == 0)
-        return 0;
+    if (period_found && after_period == 0) {
+      return 0;
+    }
 
-    if (atol(d) > INT_MAX)
-        return 0;
+    if (atol(d) > INT_MAX) {
+      return 0;
+    }
 
     return 1;
 }
@@ -412,16 +428,18 @@ ProcessCommandLine(int argc, char *argv[])
     PartialNetwork = TRUE;
 
     for (i = 0; defaultNoListenList[i] != NULL; i++) {
-        if (_XSERVTransNoListen(defaultNoListenList[i]))
-                    ErrorF("Failed to disable listen for %s transport",
-                           defaultNoListenList[i]);
+      if (_XSERVTransNoListen(defaultNoListenList[i])) {
+        ErrorF("Failed to disable listen for %s transport",
+               defaultNoListenList[i]);
+      }
     }
     dixSettingSeatId = getenv("XDG_SEAT");
 
 #ifdef CONFIG_SYSLOG
     xorgSyslogIdent = getenv("SYSLOG_IDENT");
-    if (!xorgSyslogIdent)
-        xorgSyslogIdent = strdup(basename(argv[0]));
+    if (!xorgSyslogIdent) {
+      xorgSyslogIdent = strdup(basename(argv[0]));
+    }
 #endif
 
     for (i = 1; i < argc; i++) {
@@ -441,52 +459,54 @@ ProcessCommandLine(int argc, char *argv[])
             }
         }
         else if (strcmp(argv[i], "-a") == 0) {
-            if (++i < argc)
-                defaultPointerControl.num = atoi(argv[i]);
-            else
-                UseMsg();
+          if (++i < argc) {
+            defaultPointerControl.num = atoi(argv[i]);
+          } else {
+            UseMsg();
+          }
         }
         else if (strcmp(argv[i], "-ac") == 0) {
             defeatAccessControl = TRUE;
         }
         else if (strcmp(argv[i], "-audit") == 0) {
-            if (++i < argc)
-                auditTrailLevel = atoi(argv[i]);
-            else
-                UseMsg();
+          if (++i < argc) {
+            auditTrailLevel = atoi(argv[i]);
+          } else {
+            UseMsg();
+          }
         }
         else if (strcmp(argv[i], "-auth") == 0) {
-            if (++i < argc)
-                InitAuthorization(argv[i]);
-            else
-                UseMsg();
+          if (++i < argc) {
+            InitAuthorization(argv[i]);
+          } else {
+            UseMsg();
+          }
         }
         else if (strcmp(argv[i], "-byteswappedclients") == 0) {
             dixSettingAllowByteSwappedClients = FALSE;
         } else if (strcmp(argv[i], "+byteswappedclients") == 0) {
             dixSettingAllowByteSwappedClients = TRUE;
-        }
-        else if (strcmp(argv[i], "-br") == 0);  /* default */
-        else if (strcmp(argv[i], "+bs") == 0)
-            enableBackingStore = TRUE;
-        else if (strcmp(argv[i], "-bs") == 0)
-            disableBackingStore = TRUE;
-        else if (strcmp(argv[i], "c") == 0) {
-            if (++i < argc)
-                defaultKeyboardControl.click = atoi(argv[i]);
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-c") == 0) {
-            defaultKeyboardControl.click = 0;
-        }
-        else if (strcmp(argv[i], "-cc") == 0) {
-            if (++i < argc)
-                defaultColorVisualClass = atoi(argv[i]);
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-core") == 0) {
+        } else if (strcmp(argv[i], "-br") == 0) {
+          ; /* default */
+        } else if (strcmp(argv[i], "+bs") == 0) {
+          enableBackingStore = TRUE;
+        } else if (strcmp(argv[i], "-bs") == 0) {
+          disableBackingStore = TRUE;
+        } else if (strcmp(argv[i], "c") == 0) {
+          if (++i < argc) {
+            defaultKeyboardControl.click = atoi(argv[i]);
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-c") == 0) {
+          defaultKeyboardControl.click = 0;
+        } else if (strcmp(argv[i], "-cc") == 0) {
+          if (++i < argc) {
+            defaultColorVisualClass = atoi(argv[i]);
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-core") == 0) {
 #if !defined(WIN32) || !defined(__MINGW32__)
             struct rlimit core_limit;
 
@@ -495,83 +515,79 @@ ProcessCommandLine(int argc, char *argv[])
             setrlimit(RLIMIT_CORE, &core_limit);
 #endif
             CoreDump = TRUE;
-        }
-        else if (strcmp(argv[i], "-nocursor") == 0) {
-            EnableCursor = FALSE;
-        }
-        else if (strcmp(argv[i], "-dpi") == 0) {
-            if (++i < argc)
-                monitorResolution = atoi(argv[i]);
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-displayfd") == 0) {
-            if (++i < argc) {
-                displayfd = atoi(argv[i]);
-                DisableServerLock();
-            }
-            else
-                UseMsg();
+        } else if (strcmp(argv[i], "-nocursor") == 0) {
+          EnableCursor = FALSE;
+        } else if (strcmp(argv[i], "-dpi") == 0) {
+          if (++i < argc) {
+            monitorResolution = atoi(argv[i]);
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-displayfd") == 0) {
+          if (++i < argc) {
+            displayfd = atoi(argv[i]);
+            DisableServerLock();
+          } else {
+            UseMsg();
+          }
         }
 #ifdef DPMSExtension
-        else if (strcmp(argv[i], "dpms") == 0)
+        else if (strcmp(argv[i], "dpms") == 0) {
             /* ignored for compatibility */ ;
-        else if (strcmp(argv[i], "-dpms") == 0)
-            DPMSDisabledSwitch = TRUE;
+        } else if (strcmp(argv[i], "-dpms") == 0) {
+          DPMSDisabledSwitch = TRUE;
 #endif
-        else if (strcmp(argv[i], "-deferglyphs") == 0) {
-            if (++i >= argc || !xfont2_parse_glyph_caching_mode(argv[i]))
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-f") == 0) {
-            if (++i < argc)
-                defaultKeyboardControl.bell = atoi(argv[i]);
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-fakescreenfps") == 0) {
-            if (++i < argc) {
-                FakeScreenFps = (uint32_t) atoi(argv[i]);
-                if (FakeScreenFps < 1 || FakeScreenFps > 600)
-                    FatalError("fakescreenfps must be an integer in [1;600] range\n");
-            }
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-fp") == 0) {
-            if (++i < argc) {
-                defaultFontPath = argv[i];
-            }
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-help") == 0) {
+        } else if (strcmp(argv[i], "-deferglyphs") == 0) {
+          if (++i >= argc || !xfont2_parse_glyph_caching_mode(argv[i])) {
             UseMsg();
-            exit(0);
-        }
-        else if (strcmp(argv[i], "+iglx") == 0)
-            enableIndirectGLX = TRUE;
-        else if (strcmp(argv[i], "-iglx") == 0)
-            enableIndirectGLX = FALSE;
-        else if ((skip = XkbProcessArguments(argc, argv, i)) != 0) {
-            if (skip > 0)
-                i += skip - 1;
-            else
-                UseMsg();
+          }
+        } else if (strcmp(argv[i], "-f") == 0) {
+          if (++i < argc) {
+            defaultKeyboardControl.bell = atoi(argv[i]);
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-fakescreenfps") == 0) {
+          if (++i < argc) {
+            FakeScreenFps = (uint32_t)atoi(argv[i]);
+            if (FakeScreenFps < 1 || FakeScreenFps > 600) {
+              FatalError("fakescreenfps must be an integer in [1;600] range\n");
+            }
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-fp") == 0) {
+          if (++i < argc) {
+            defaultFontPath = argv[i];
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-help") == 0) {
+          UseMsg();
+          exit(0);
+        } else if (strcmp(argv[i], "+iglx") == 0) {
+          enableIndirectGLX = TRUE;
+        } else if (strcmp(argv[i], "-iglx") == 0) {
+          enableIndirectGLX = FALSE;
+        } else if ((skip = XkbProcessArguments(argc, argv, i)) != 0) {
+          if (skip > 0) {
+            i += skip - 1;
+          } else {
+            UseMsg();
+          }
         }
 #ifdef LOCK_SERVER
         else if (strcmp(argv[i], "-nolock") == 0) {
 #if !defined(WIN32) && !defined(__CYGWIN__)
-            if (getuid() != 0)
-                ErrorF
-                    ("Warning: the -nolock option can only be used by root\n");
-            else
+          if (getuid() != 0) {
+            ErrorF("Warning: the -nolock option can only be used by root\n");
+          } else {
 #endif
-                DisableServerLock();
+            DisableServerLock();
+          }
         }
 #endif
-        else if ( strcmp( argv[i], "-maxclients") == 0)
-        {
+        else if (strcmp(argv[i], "-maxclients") == 0) {
             if (++i < argc) {
                 LimitClients = atoi(argv[i]);
                 if (LimitClients != 64 &&
@@ -582,154 +598,143 @@ ProcessCommandLine(int argc, char *argv[])
                     LimitClients != 2048) {
                     FatalError("maxclients must be one of 64, 128, 256, 512, 1024 or 2048\n");
                 }
-            } else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-nolisten") == 0) {
-            if (++i < argc) {
-                if (_XSERVTransNoListen(argv[i]))
-                    ErrorF("Failed to disable listen for %s transport",
-                           argv[i]);
+            } else {
+              UseMsg();
             }
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-listen") == 0) {
-            if (++i < argc) {
-                if (_XSERVTransListen(argv[i]))
-                    ErrorF("Failed to enable listen for %s transport",
-                           argv[i]);
+        } else if (strcmp(argv[i], "-nolisten") == 0) {
+          if (++i < argc) {
+            if (_XSERVTransNoListen(argv[i])) {
+              ErrorF("Failed to disable listen for %s transport", argv[i]);
             }
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i],"-noreset") == 0){
-            ErrorF("Argument -noreset is removed in XLibre (for more context: https://github.com/orgs/X11Libre/discussions/424 )\n");
-        }
-        else if(strcmp(argv[i],"-reset") == 0){
-            ErrorF("Argument -reset is removed in XLibre (for more context: https://github.com/orgs/X11Libre/discussions/424 )\n");
-        }
-        else if (strcmp(argv[i], "-p") == 0) {
-            if (++i < argc)
-                defaultScreenSaverInterval = ((CARD32) atoi(argv[i])) *
-                    MILLI_PER_MIN;
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-pogo") == 0) {
-            dispatchException = DE_TERMINATE;
-        }
-        else if (strcmp(argv[i], "-pn") == 0)
-            PartialNetwork = TRUE;
-        else if (strcmp(argv[i], "-nopn") == 0)
-            PartialNetwork = FALSE;
-        else if (strcmp(argv[i], "r") == 0)
-            defaultKeyboardControl.autoRepeat = TRUE;
-        else if (strcmp(argv[i], "-r") == 0)
-            defaultKeyboardControl.autoRepeat = FALSE;
-        else if (strcmp(argv[i], "-retro") == 0)
-            party_like_its_1989 = TRUE;
-        else if (strcmp(argv[i], "-s") == 0) {
-            if (++i < argc)
-                defaultScreenSaverTime = ((CARD32) atoi(argv[i])) *
-                    MILLI_PER_MIN;
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-seat") == 0) {
-            if (++i < argc)
-                dixSettingSeatId = argv[i];
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-t") == 0) {
-            if (++i < argc)
-                defaultPointerControl.threshold = atoi(argv[i]);
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-terminate") == 0) {
-            dispatchExceptionAtReset = DE_TERMINATE;
-            terminateDelay = -1;
-            if ((i + 1 < argc) && (isdigit((unsigned char)*argv[i + 1])))
-               terminateDelay = atoi(argv[++i]);
-            terminateDelay = max(0, terminateDelay);
-        }
-        else if (strcmp(argv[i], "-tst") == 0) {
-            noTestExtensions = TRUE;
-        }
-        else if (strcmp(argv[i], "v") == 0)
-            defaultScreenSaverBlanking = PreferBlanking;
-        else if (strcmp(argv[i], "-v") == 0)
-            defaultScreenSaverBlanking = DontPreferBlanking;
-        else if (strcmp(argv[i], "-verbose") == 0) {
-            int n = i + 1; /* next argument */
-            verbosity++;
-            if (n < argc && argv[n] && argv[n][0] != '-') {
-                char *end;
-                long val;
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-listen") == 0) {
+          if (++i < argc) {
+            if (_XSERVTransListen(argv[i])) {
+              ErrorF("Failed to enable listen for %s transport", argv[i]);
+            }
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-noreset") == 0) {
+          ErrorF("Argument -noreset is removed in XLibre (for more context: "
+                 "https://github.com/orgs/X11Libre/discussions/424 )\n");
+        } else if (strcmp(argv[i], "-reset") == 0) {
+          ErrorF("Argument -reset is removed in XLibre (for more context: "
+                 "https://github.com/orgs/X11Libre/discussions/424 )\n");
+        } else if (strcmp(argv[i], "-p") == 0) {
+          if (++i < argc) {
+            defaultScreenSaverInterval =
+                ((CARD32)atoi(argv[i])) * MILLI_PER_MIN;
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-pogo") == 0) {
+          dispatchException = DE_TERMINATE;
+        } else if (strcmp(argv[i], "-pn") == 0) {
+          PartialNetwork = TRUE;
+        } else if (strcmp(argv[i], "-nopn") == 0) {
+          PartialNetwork = FALSE;
+        } else if (strcmp(argv[i], "r") == 0) {
+          defaultKeyboardControl.autoRepeat = TRUE;
+        } else if (strcmp(argv[i], "-r") == 0) {
+          defaultKeyboardControl.autoRepeat = FALSE;
+        } else if (strcmp(argv[i], "-retro") == 0) {
+          party_like_its_1989 = TRUE;
+        } else if (strcmp(argv[i], "-s") == 0) {
+          if (++i < argc) {
+            defaultScreenSaverTime = ((CARD32)atoi(argv[i])) * MILLI_PER_MIN;
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-seat") == 0) {
+          if (++i < argc) {
+            dixSettingSeatId = argv[i];
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-t") == 0) {
+          if (++i < argc) {
+            defaultPointerControl.threshold = atoi(argv[i]);
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-terminate") == 0) {
+          dispatchExceptionAtReset = DE_TERMINATE;
+          terminateDelay = -1;
+          if ((i + 1 < argc) && (isdigit((unsigned char)*argv[i + 1]))) {
+            terminateDelay = atoi(argv[++i]);
+          }
+          terminateDelay = max(0, terminateDelay);
+        } else if (strcmp(argv[i], "-tst") == 0) {
+          noTestExtensions = TRUE;
+        } else if (strcmp(argv[i], "v") == 0) {
+          defaultScreenSaverBlanking = PreferBlanking;
+        } else if (strcmp(argv[i], "-v") == 0) {
+          defaultScreenSaverBlanking = DontPreferBlanking;
+        } else if (strcmp(argv[i], "-verbose") == 0) {
+          int n = i + 1; /* next argument */
+          verbosity++;
+          if (n < argc && argv[n] && argv[n][0] != '-') {
+            char *end;
+            long val;
 
-                val = strtol(argv[n], &end, 0);
-                if (*end == '\0') {
-                    verbosity = val;
-                    i = n;
-                }
+            val = strtol(argv[n], &end, 0);
+            if (*end == '\0') {
+              verbosity = val;
+              i = n;
             }
-            xorgLogVerbosity = verbosity;
-        }
-        else if (strcmp(argv[i], "-wr") == 0)
-            whiteRoot = TRUE;
-        else if (strcmp(argv[i], "-background") == 0) {
-            if (++i < argc) {
-                if (!strcmp(argv[i], "none"))
-                    bgNoneRoot = TRUE;
-                else
-                    UseMsg();
+          }
+          xorgLogVerbosity = verbosity;
+        } else if (strcmp(argv[i], "-wr") == 0) {
+          whiteRoot = TRUE;
+        } else if (strcmp(argv[i], "-background") == 0) {
+          if (++i < argc) {
+            if (!strcmp(argv[i], "none")) {
+              bgNoneRoot = TRUE;
+            } else {
+              UseMsg();
             }
-        }
-        else if (strcmp(argv[i], "-maxbigreqsize") == 0) {
-            if (++i < argc) {
-                long reqSizeArg = atol(argv[i]);
+          }
+        } else if (strcmp(argv[i], "-maxbigreqsize") == 0) {
+          if (++i < argc) {
+            long reqSizeArg = atol(argv[i]);
 
-                /* Request size > 128MB does not make much sense... */
-                if (reqSizeArg > 0L && reqSizeArg < 128L) {
-                    maxBigRequestSize = (reqSizeArg * 1048576L) - 1L;
-                }
-                else {
-                    UseMsg();
-                }
+            /* Request size > 128MB does not make much sense... */
+            if (reqSizeArg > 0L && reqSizeArg < 128L) {
+              maxBigRequestSize = (reqSizeArg * 1048576L) - 1L;
+            } else {
+              UseMsg();
             }
-            else {
-                UseMsg();
-            }
+          } else {
+            UseMsg();
+          }
         }
 #ifdef CONFIG_NAMESPACE
         else if (strcmp(argv[i], "-namespace") == 0) {
             if (++i < argc) {
                 namespaceConfigFile = argv[i];
                 noNamespaceExtension = FALSE;
+            } else {
+              UseMsg();
             }
-            else
-                UseMsg();
         }
 #endif
 #ifdef XINERAMA
         else if (strcmp(argv[i], "+xinerama") == 0) {
             noPanoramiXExtension = FALSE;
-        }
-        else if (strcmp(argv[i], "-xinerama") == 0) {
-            noPanoramiXExtension = TRUE;
-        }
-        else if (strcmp(argv[i], "-disablexineramaextension") == 0) {
-            PanoramiXExtensionDisabledHack = TRUE;
+        } else if (strcmp(argv[i], "-xinerama") == 0) {
+          noPanoramiXExtension = TRUE;
+        } else if (strcmp(argv[i], "-disablexineramaextension") == 0) {
+          PanoramiXExtensionDisabledHack = TRUE;
         }
 #endif /* XINERAMA */
         else if (strcmp(argv[i], "-I") == 0) {
             /* ignore all remaining arguments */
             break;
-        }
-        else if (strncmp(argv[i], "tty", 3) == 0) {
-            /* init supplies us with this useless information */
+        } else if (strncmp(argv[i], "tty", 3) == 0) {
+          /* init supplies us with this useless information */
         }
 #ifdef XDMCP
         else if ((skip = XdmcpOptions(argc, argv, i)) != i) {
@@ -741,57 +746,57 @@ ProcessCommandLine(int argc, char *argv[])
 #ifdef HAVE_SETITIMER
             SmartScheduleSignalEnable = FALSE;
 #endif
-        }
-        else if (strcmp(argv[i], "-schedInterval") == 0) {
-            if (++i < argc) {
-                SmartScheduleInterval = atoi(argv[i]);
-                SmartScheduleSlice = SmartScheduleInterval;
-            }
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-schedMax") == 0) {
-            if (++i < argc) {
-                SmartScheduleMaxSlice = atoi(argv[i]);
-            }
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-render") == 0) {
-            if (++i < argc) {
-                int policy = PictureParseCmapPolicy(argv[i]);
+        } else if (strcmp(argv[i], "-schedInterval") == 0) {
+          if (++i < argc) {
+            SmartScheduleInterval = atoi(argv[i]);
+            SmartScheduleSlice = SmartScheduleInterval;
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-schedMax") == 0) {
+          if (++i < argc) {
+            SmartScheduleMaxSlice = atoi(argv[i]);
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-render") == 0) {
+          if (++i < argc) {
+            int policy = PictureParseCmapPolicy(argv[i]);
 
-                if (policy != PictureCmapPolicyInvalid)
-                    PictureCmapPolicy = policy;
-                else
-                    UseMsg();
+            if (policy != PictureCmapPolicyInvalid) {
+              PictureCmapPolicy = policy;
+            } else {
+              UseMsg();
             }
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "+extension") == 0) {
-            if (++i < argc) {
-                if (!EnableDisableExtension(argv[i], TRUE))
-                    EnableDisableExtensionError(argv[i], TRUE);
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "+extension") == 0) {
+          if (++i < argc) {
+            if (!EnableDisableExtension(argv[i], TRUE)) {
+              EnableDisableExtensionError(argv[i], TRUE);
             }
-            else
-                UseMsg();
-        }
-        else if (strcmp(argv[i], "-extension") == 0) {
-            if (++i < argc) {
-                if (!EnableDisableExtension(argv[i], FALSE))
-                    EnableDisableExtensionError(argv[i], FALSE);
+          } else {
+            UseMsg();
+          }
+        } else if (strcmp(argv[i], "-extension") == 0) {
+          if (++i < argc) {
+            if (!EnableDisableExtension(argv[i], FALSE)) {
+              EnableDisableExtensionError(argv[i], FALSE);
             }
-            else
-                UseMsg();
+          } else {
+            UseMsg();
+          }
         }
 #ifdef CONFIG_SYSLOG
-        else if (ProcessCmdLineMultiInt(argc, argv, &i, "-syslogverbose", &xorgSyslogVerbosity));
+        else if (ProcessCmdLineMultiInt(argc, argv, &i, "-syslogverbose",
+                                        &xorgSyslogVerbosity)) {
+          ;
 #endif
-        else {
-            ErrorF("Unrecognized option: %s\n", argv[i]);
-            UseMsg();
-            FatalError("Unrecognized option: %s\n", argv[i]);
+        } else {
+          ErrorF("Unrecognized option: %s\n", argv[i]);
+          UseMsg();
+          FatalError("Unrecognized option: %s\n", argv[i]);
         }
     }
 }
@@ -877,8 +882,9 @@ SmartScheduleStopTimer(void)
 #ifdef HAVE_SETITIMER
     struct itimerval timer;
 
-    if (!SmartScheduleSignalEnable)
-        return;
+    if (!SmartScheduleSignalEnable) {
+      return;
+    }
     timer.it_interval.tv_sec = 0;
     timer.it_interval.tv_usec = 0;
     timer.it_value.tv_sec = 0;
@@ -893,8 +899,9 @@ SmartScheduleStartTimer(void)
 #ifdef HAVE_SETITIMER
     struct itimerval timer;
 
-    if (!SmartScheduleSignalEnable)
-        return;
+    if (!SmartScheduleSignalEnable) {
+      return;
+    }
     timer.it_interval.tv_sec = 0;
     timer.it_interval.tv_usec = SmartScheduleInterval * 1000;
     timer.it_value.tv_sec = 0;
@@ -916,8 +923,9 @@ SmartScheduleEnable(void)
     int ret = 0;
     struct sigaction act;
 
-    if (!SmartScheduleSignalEnable)
-        return 0;
+    if (!SmartScheduleSignalEnable) {
+      return 0;
+    }
 
     memset((char *) &act, 0, sizeof(struct sigaction));
 
@@ -936,8 +944,9 @@ SmartSchedulePause(void)
     int ret = 0;
     struct sigaction act;
 
-    if (!SmartScheduleSignalEnable)
-        return 0;
+    if (!SmartScheduleSignalEnable) {
+      return 0;
+    }
 
     memset((char *) &act, 0, sizeof(struct sigaction));
 
@@ -1000,8 +1009,9 @@ void
 OsResetSignals(void)
 {
 #ifdef HAVE_SIGPROCMASK
-    while (BlockedSignalCount > 0)
-        OsReleaseSignals();
+  while (BlockedSignalCount > 0) {
+    OsReleaseSignals();
+  }
     input_force_unlock();
 #endif
 }
@@ -1050,14 +1060,17 @@ Popen(const char *command, const char *type)
     FILE *iop;
     int pdes[2], pid;
 
-    if (command == NULL || type == NULL)
-        return NULL;
+    if (command == NULL || type == NULL) {
+      return NULL;
+    }
 
-    if ((*type != 'r' && *type != 'w') || type[1])
-        return NULL;
+    if ((*type != 'r' && *type != 'w') || type[1]) {
+      return NULL;
+    }
 
-    if ((cur = calloc(1, sizeof(struct pid))) == NULL)
-        return NULL;
+    if ((cur = calloc(1, sizeof(struct pid))) == NULL) {
+      return NULL;
+    }
 
     if (pipe(pdes) < 0) {
         free(cur);
@@ -1081,15 +1094,18 @@ Popen(const char *command, const char *type)
         close(pdes[1]);
         free(cur);
 #ifdef HAVE_SETITIMER
-        if (SmartScheduleEnable() < 0)
-            perror("signal");
+        if (SmartScheduleEnable() < 0) {
+          perror("signal");
+        }
 #endif
         return NULL;
     case 0:                    /* child */
-        if (setgid(getgid()) == -1)
-            _exit(127);
-        if (setuid(getuid()) == -1)
-            _exit(127);
+      if (setgid(getgid()) == -1) {
+        _exit(127);
+      }
+      if (setuid(getuid()) == -1) {
+        _exit(127);
+      }
         if (*type == 'r') {
             if (pdes[1] != 1) {
                 /* stdout */
@@ -1167,20 +1183,24 @@ Pclose(void *iop)
     DebugF("Pclose: fp = %p\n", iop);
     fclose(iop);
 
-    for (last = NULL, cur = pidlist; cur; last = cur, cur = cur->next)
-        if (cur->fp == iop)
-            break;
-    if (cur == NULL)
-        return -1;
+    for (last = NULL, cur = pidlist; cur; last = cur, cur = cur->next) {
+      if (cur->fp == iop) {
+        break;
+      }
+    }
+    if (cur == NULL) {
+      return -1;
+    }
 
     do {
         pid = waitpid(cur->pid, &pstat, 0);
     } while (pid == -1 && errno == EINTR);
 
-    if (last == NULL)
-        pidlist = cur->next;
-    else
-        last->next = cur->next;
+    if (last == NULL) {
+      pidlist = cur->next;
+    } else {
+      last->next = cur->next;
+    }
     free(cur);
 
     /* allow EINTR again */
@@ -1340,8 +1360,9 @@ CheckUserParameters(int argc, char **argv, char **envp)
         for (i = 1; i < argc; i++) {
             if (strcmp(argv[i], "-fp") == 0) {
                 i++;            /* continue with next argument. skip the length check */
-                if (i >= argc)
-                    break;
+                if (i >= argc) {
+                  break;
+                }
             }
             else {
                 if (strlen(argv[i]) > MAX_ARG_LENGTH) {
@@ -1357,8 +1378,9 @@ CheckUserParameters(int argc, char **argv, char **envp)
                 }
                 a++;
             }
-            if (bad)
-                break;
+            if (bad) {
+              break;
+            }
         }
         if (!bad) {
             /* Check each envp[] */
@@ -1473,8 +1495,9 @@ os_move_fd(int fd)
 #else
     newfd = fcntl(fd, F_DUPFD, MAXCLIENTS);
 #endif
-    if (newfd < 0)
-        return fd;
+    if (newfd < 0) {
+      return fd;
+    }
 #ifndef F_DUPFD_CLOEXEC
     fcntl(newfd, F_SETFD, FD_CLOEXEC);
 #endif
@@ -1494,7 +1517,8 @@ AbortServer(void)
     AbortDevices();
     ddxGiveUp(EXIT_ERR_ABORT);
     fflush(stderr);
-    if (CoreDump)
-        OsAbort();
+    if (CoreDump) {
+      OsAbort();
+    }
     exit(1);
 }

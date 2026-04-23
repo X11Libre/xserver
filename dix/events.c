@@ -299,16 +299,17 @@ XItoCoreType(int xitype)
 {
     int coretype = 0;
 
-    if (xitype == DeviceMotionNotify)
-        coretype = MotionNotify;
-    else if (xitype == DeviceButtonPress)
-        coretype = ButtonPress;
-    else if (xitype == DeviceButtonRelease)
-        coretype = ButtonRelease;
-    else if (xitype == DeviceKeyPress)
-        coretype = KeyPress;
-    else if (xitype == DeviceKeyRelease)
-        coretype = KeyRelease;
+    if (xitype == DeviceMotionNotify) {
+      coretype = MotionNotify;
+    } else if (xitype == DeviceButtonPress) {
+      coretype = ButtonPress;
+    } else if (xitype == DeviceButtonRelease) {
+      coretype = ButtonRelease;
+    } else if (xitype == DeviceKeyPress) {
+      coretype = KeyPress;
+    } else if (xitype == DeviceKeyRelease) {
+      coretype = KeyRelease;
+    }
 
     return coretype;
 }
@@ -439,10 +440,11 @@ GetEventFilter(DeviceIntPtr dev, xEvent *event)
 {
     int evtype = 0;
 
-    if (event->u.u.type != GenericEvent)
-        return event_get_filter_from_type(dev, event->u.u.type);
-    else if ((evtype = xi2_get_type(event)))
-        return event_get_filter_from_xi2type(evtype);
+    if (event->u.u.type != GenericEvent) {
+      return event_get_filter_from_type(dev, event->u.u.type);
+    } else if ((evtype = xi2_get_type(event))) {
+      return event_get_filter_from_xi2type(evtype);
+    }
     ErrorF("[dix] Unknown event type %d. No filter\n", event->u.u.type);
     return 0;
 }
@@ -457,10 +459,11 @@ GetXI2MaskByte(XI2Mask *mask, DeviceIntPtr dev, int event_type)
     /* we just return the matching filter because that's the only use
      * for this mask anyway.
      */
-    if (xi2mask_isset(mask, dev, event_type))
-        return event_get_filter_from_xi2type(event_type);
-    else
-        return 0;
+    if (xi2mask_isset(mask, dev, event_type)) {
+      return event_get_filter_from_xi2type(event_type);
+    } else {
+      return 0;
+    }
 }
 
 /**
@@ -473,8 +476,9 @@ WindowXI2MaskIsset(DeviceIntPtr dev, WindowPtr win, xEvent *ev)
     OtherInputMasks *inputMasks = wOtherInputMasks(win);
     int evtype;
 
-    if (!inputMasks || xi2_get_type(ev) == 0)
-        return 0;
+    if (!inputMasks || xi2_get_type(ev) == 0) {
+      return 0;
+    }
 
     evtype = ((xGenericEvent *) ev)->evtype;
 
@@ -503,11 +507,11 @@ GetEventMask(DeviceIntPtr dev, xEvent *event, InputClients * other)
     /* XI2 filters are only ever 8 bit, so let's return a 8 bit mask */
     if ((evtype = xi2_get_type(event))) {
         return GetXI2MaskByte(other->xi2mask, dev, evtype);
+    } else if (core_get_type(event) != 0) {
+      return other->mask[XIAllDevices];
+    } else {
+      return other->mask[dev->id];
     }
-    else if (core_get_type(event) != 0)
-        return other->mask[XIAllDevices];
-    else
-        return other->mask[dev->id];
 }
 
 static CARD8 criticalEvents[32] = {
@@ -520,8 +524,9 @@ SyntheticMotion(DeviceIntPtr dev, int x, int y)
     int screenno = 0;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        screenno = dev->spriteInfo->sprite->screen->myNum;
+    if (!noPanoramiXExtension) {
+      screenno = dev->spriteInfo->sprite->screen->myNum;
+    }
 #endif /* XINERAMA */
     PostSyntheticMotion(dev, x, y, screenno,
                         (syncEvents.playingEvents) ? syncEvents.time.
@@ -563,8 +568,9 @@ XineramaSetCursorPosition(DeviceIntPtr pDev, int x, int y, Bool generateEvent)
     x -= pScreen->x;
     y -= pScreen->y;
 
-    if (pScreen->SetCursorPosition)
-        return pScreen->SetCursorPosition(pDev, pScreen, x, y, generateEvent);
+    if (pScreen->SetCursorPosition) {
+      return pScreen->SetCursorPosition(pDev, pScreen, x, y, generateEvent);
+    }
     return TRUE;
 }
 
@@ -603,8 +609,9 @@ XineramaSetWindowPntrs(DeviceIntPtr pDev, WindowPtr pWin)
 
         rc = dixLookupResourceByType((void **) &win, pWin->drawable.id,
                                      XRT_WINDOW, serverClient, DixReadAccess);
-        if (rc != Success)
-            return FALSE;
+        if (rc != Success) {
+          return FALSE;
+        }
 
         XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             rc = dixLookupWindow(pSprite->windows + walkScreenIdx,
@@ -627,8 +634,9 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
 
     assert(!noPanoramiXExtension);
 
-    if (!XineramaSetWindowPntrs(pDev, pWin))
-        return;
+    if (!XineramaSetWindowPntrs(pDev, pWin)) {
+      return;
+    }
 
     unsigned int walkScreenIdx = PanoramiXNumScreens - 1;
 
@@ -644,8 +652,9 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
         x = off_x - walkScreen->x;
         y = off_y - walkScreen->y;
 
-        if (x || y)
-            RegionTranslate(&pSprite->Reg1, x, y);
+        if (x || y) {
+          RegionTranslate(&pSprite->Reg1, x, y);
+        }
 
         RegionUnion(&pSprite->Reg1, &pSprite->Reg1,
                     &pSprite->windows[walkScreenIdx]->borderSize);
@@ -656,10 +665,11 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
 
     pSprite->hotLimits = *RegionExtents(&pSprite->Reg1);
 
-    if (RegionNumRects(&pSprite->Reg1) > 1)
-        pSprite->hotShape = &pSprite->Reg1;
-    else
-        pSprite->hotShape = NullRegion;
+    if (RegionNumRects(&pSprite->Reg1) > 1) {
+      pSprite->hotShape = &pSprite->Reg1;
+    } else {
+      pSprite->hotShape = NullRegion;
+    }
 
     pSprite->confined = FALSE;
     pSprite->confineWin =
@@ -687,16 +697,18 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
 void
 SetMaskForEvent(int deviceid, Mask mask, int event)
 {
-    if (deviceid < 0 || deviceid >= MAXDEVICES)
-        FatalError("SetMaskForEvent: bogus device id");
+  if (deviceid < 0 || deviceid >= MAXDEVICES) {
+    FatalError("SetMaskForEvent: bogus device id");
+  }
     event_filters[deviceid][event] = mask;
 }
 
 void
 SetCriticalEvent(int event)
 {
-    if (event >= MAXEVENTS)
-        FatalError("SetCriticalEvent: bogus event number");
+  if (event >= MAXEVENTS) {
+    FatalError("SetCriticalEvent: bogus event number");
+  }
     criticalEvents[event >> 3] |= 1 << (event & 7);
 }
 
@@ -707,8 +719,9 @@ ConfineToShape(RegionPtr shape, int *px, int *py)
     int x = *px, y = *py;
     int incx = 1, incy = 1;
 
-    if (RegionContainsPoint(shape, x, y, &box))
-        return;
+    if (RegionContainsPoint(shape, x, y, &box)) {
+      return;
+    }
     box = *RegionExtents(shape);
     /* this is rather crude */
     do {
@@ -724,9 +737,9 @@ ConfineToShape(RegionPtr shape, int *px, int *py)
             if (y >= box.y2) {
                 incy = -1;
                 y = *py - 1;
+            } else if (y < box.y1) {
+              return; /* should never get here! */
             }
-            else if (y < box.y1)
-                return;         /* should never get here! */
         }
     } while (!RegionContainsPoint(shape, x, y, &box));
     *px = x;
@@ -741,20 +754,22 @@ CheckPhysLimits(DeviceIntPtr pDev, CursorPtr cursor, Bool generateEvents,
     HotSpot new;
     SpritePtr pSprite = pDev->spriteInfo->sprite;
 
-    if (!cursor)
-        return;
+    if (!cursor) {
+      return;
+    }
     new = pSprite->hotPhys;
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        /* I don't care what the DDX has to say about it */
-        pSprite->physLimits = pSprite->hotLimits;
-    else
+    if (!noPanoramiXExtension) {
+      /* I don't care what the DDX has to say about it */
+      pSprite->physLimits = pSprite->hotLimits;
+    } else
 #endif /* XINERAMA */
     {
-        if (pScreen)
-            new.pScreen = pScreen;
-        else
-            pScreen = new.pScreen;
+      if (pScreen) {
+        new.pScreen = pScreen;
+      } else {
+        pScreen = new.pScreen;
+      }
         (*pScreen->CursorLimits) (pDev, pScreen, cursor, &pSprite->hotLimits,
                                   &pSprite->physLimits);
         pSprite->confined = confineToScreen;
@@ -762,16 +777,19 @@ CheckPhysLimits(DeviceIntPtr pDev, CursorPtr cursor, Bool generateEvents,
     }
 
     /* constrain the pointer to those limits */
-    if (new.x < pSprite->physLimits.x1)
-        new.x = pSprite->physLimits.x1;
-    else if (new.x >= pSprite->physLimits.x2)
-        new.x = pSprite->physLimits.x2 - 1;
-    if (new.y < pSprite->physLimits.y1)
-        new.y = pSprite->physLimits.y1;
-    else if (new.y >= pSprite->physLimits.y2)
-        new.y = pSprite->physLimits.y2 - 1;
-    if (pSprite->hotShape)
-        ConfineToShape(pSprite->hotShape, &new.x, &new.y);
+    if (new.x < pSprite->physLimits.x1) {
+      new.x = pSprite->physLimits.x1;
+    } else if (new.x >= pSprite->physLimits.x2) {
+      new.x = pSprite->physLimits.x2 - 1;
+    }
+    if (new.y < pSprite->physLimits.y1) {
+      new.y = pSprite->physLimits.y1;
+    } else if (new.y >= pSprite->physLimits.y2) {
+      new.y = pSprite->physLimits.y2 - 1;
+    }
+    if (pSprite->hotShape) {
+      ConfineToShape(pSprite->hotShape, &new.x, &new.y);
+    }
     if ((
 #ifdef XINERAMA
             noPanoramiXExtension &&
@@ -779,24 +797,29 @@ CheckPhysLimits(DeviceIntPtr pDev, CursorPtr cursor, Bool generateEvents,
             (pScreen != pSprite->hotPhys.pScreen)) ||
         (new.x != pSprite->hotPhys.x) || (new.y != pSprite->hotPhys.y)) {
 #ifdef XINERAMA
-        if (!noPanoramiXExtension)
-            XineramaSetCursorPosition(pDev, new.x, new.y, generateEvents);
-        else
+      if (!noPanoramiXExtension) {
+        XineramaSetCursorPosition(pDev, new.x, new.y, generateEvents);
+      } else
 #endif /* XINERAMA */
-        {
-            if (pScreen != pSprite->hotPhys.pScreen)
-                pSprite->hotPhys = new;
-            if (pScreen && pScreen->SetCursorPosition)
-                pScreen->SetCursorPosition(pDev, pScreen, new.x, new.y, generateEvents);
+      {
+        if (pScreen != pSprite->hotPhys.pScreen) {
+          pSprite->hotPhys = new;
         }
-        if (!generateEvents)
-            SyntheticMotion(pDev, new.x, new.y);
+        if (pScreen && pScreen->SetCursorPosition) {
+          pScreen->SetCursorPosition(pDev, pScreen, new.x, new.y,
+                                     generateEvents);
+        }
+      }
+      if (!generateEvents) {
+        SyntheticMotion(pDev, new.x, new.y);
+      }
     }
 
 #ifdef XINERAMA
     /* Tell DDX what the limits are */
-    if (!noPanoramiXExtension)
-        XineramaConstrainCursor(pDev);
+    if (!noPanoramiXExtension) {
+      XineramaConstrainCursor(pDev);
+    }
 #endif /* XINERAMA */
 }
 
@@ -835,8 +858,9 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
         if (!noPanoramiXExtension) {
             int x, y, off_x, off_y;
 
-            if (!XineramaSetWindowPntrs(pDev, pWin))
-                return;
+            if (!XineramaSetWindowPntrs(pDev, pWin)) {
+              return;
+            }
 
             unsigned int walkScreenIdx = PanoramiXNumScreens - 1;
 
@@ -850,8 +874,9 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
                 x = off_x - walkScreen->x;
                 y = off_y - walkScreen->y;
 
-                if (x || y)
-                    RegionTranslate(&pSprite->Reg2, x, y);
+                if (x || y) {
+                  RegionTranslate(&pSprite->Reg2, x, y);
+                }
 
                 RegionUnion(&pSprite->Reg2, &pSprite->Reg2,
                             &pSprite->windows[walkScreenIdx]->borderSize);
@@ -870,30 +895,35 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
         }
 
         lims = *RegionExtents(&pWin->borderSize);
-        if (pSprite->hot.x < lims.x1)
-            pSprite->hot.x = lims.x1;
-        else if (pSprite->hot.x >= lims.x2)
-            pSprite->hot.x = lims.x2 - 1;
-        if (pSprite->hot.y < lims.y1)
-            pSprite->hot.y = lims.y1;
-        else if (pSprite->hot.y >= lims.y2)
-            pSprite->hot.y = lims.y2 - 1;
+        if (pSprite->hot.x < lims.x1) {
+          pSprite->hot.x = lims.x1;
+        } else if (pSprite->hot.x >= lims.x2) {
+          pSprite->hot.x = lims.x2 - 1;
+        }
+        if (pSprite->hot.y < lims.y1) {
+          pSprite->hot.y = lims.y1;
+        } else if (pSprite->hot.y >= lims.y2) {
+          pSprite->hot.y = lims.y2 - 1;
+        }
 
 #ifdef XINERAMA
         if (!noPanoramiXExtension) {
-            if (RegionNumRects(&pSprite->Reg2) > 1)
-                reg = &pSprite->Reg2;
+          if (RegionNumRects(&pSprite->Reg2) > 1) {
+            reg = &pSprite->Reg2;
+          }
 
         }
         else
 #endif /* XINERAMA */
         {
-            if (wBoundingShape(pWin))
-                reg = &pWin->borderSize;
+          if (wBoundingShape(pWin)) {
+            reg = &pWin->borderSize;
+          }
         }
 
-        if (reg)
-            ConfineToShape(reg, &pSprite->hot.x, &pSprite->hot.y);
+        if (reg) {
+          ConfineToShape(reg, &pSprite->hot.x, &pSprite->hot.y);
+        }
 
         if (qe && ev) {
             qe->pScreen = pSprite->hot.pScreen;
@@ -902,9 +932,10 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
         }
     }
 #ifdef XINERAMA
-    if (noPanoramiXExtension)   /* No typo. Only set the root win if disabled */
+    if (noPanoramiXExtension) { /* No typo. Only set the root win if disabled */
 #endif /* XINERAMA */
-        RootWindow(pDev->spriteInfo->sprite) = pSprite->hot.pScreen->root;
+      RootWindow(pDev->spriteInfo->sprite) = pSprite->hot.pScreen->root;
+    }
 }
 
 static void
@@ -932,8 +963,9 @@ ConfineCursorToWindow(DeviceIntPtr pDev, WindowPtr pWin, Bool generateEvents,
         CheckPhysLimits(pDev, pSprite->current, generateEvents,
                         confineToScreen, pWin->drawable.pScreen);
 
-        if (*pScreen->CursorConfinedTo)
-            (*pScreen->CursorConfinedTo) (pDev, pScreen, pWin);
+        if (*pScreen->CursorConfinedTo) {
+          (*pScreen->CursorConfinedTo)(pDev, pScreen, pWin);
+        }
     }
 }
 
@@ -957,17 +989,19 @@ ChangeToCursor(DeviceIntPtr pDev, CursorPtr cursor)
     ScreenPtr pScreen;
 
     if (cursor != pSprite->current) {
-        if ((pSprite->current->bits->xhot != cursor->bits->xhot) ||
-            (pSprite->current->bits->yhot != cursor->bits->yhot))
-            CheckPhysLimits(pDev, cursor, FALSE, pSprite->confined,
-                            (ScreenPtr) NULL);
+      if ((pSprite->current->bits->xhot != cursor->bits->xhot) ||
+          (pSprite->current->bits->yhot != cursor->bits->yhot)) {
+        CheckPhysLimits(pDev, cursor, FALSE, pSprite->confined,
+                        (ScreenPtr)NULL);
+      }
 #ifdef XINERAMA
         /* XXX: is this really necessary?? (whot) */
-        if (!noPanoramiXExtension)
-            pScreen = pSprite->screen;
-        else
+        if (!noPanoramiXExtension) {
+          pScreen = pSprite->screen;
+        } else {
 #endif /* XINERAMA */
-            pScreen = pSprite->hotPhys.pScreen;
+          pScreen = pSprite->hotPhys.pScreen;
+        }
 
         (*pScreen->DisplayCursor) (pDev, pScreen, cursor);
         FreeCursor(pSprite->current, (Cursor) 0);
@@ -981,9 +1015,11 @@ ChangeToCursor(DeviceIntPtr pDev, CursorPtr cursor)
 Bool
 WindowIsParent(WindowPtr a, WindowPtr b)
 {
-    for (b = b->parent; b; b = b->parent)
-        if (b == a)
-            return TRUE;
+  for (b = b->parent; b; b = b->parent) {
+    if (b == a) {
+      return TRUE;
+    }
+  }
     return FALSE;
 }
 
@@ -1000,25 +1036,28 @@ PostNewCursor(DeviceIntPtr pDev)
     SpritePtr pSprite = pDev->spriteInfo->sprite;
     CursorPtr pCursor;
 
-    if (syncEvents.playingEvents)
-        return;
+    if (syncEvents.playingEvents) {
+      return;
+    }
     if (grab) {
         if (grab->cursor) {
             ChangeToCursor(pDev, grab->cursor);
             return;
         }
-        if (WindowIsParent(grab->window, pSprite->win))
-            win = pSprite->win;
-        else
-            win = grab->window;
+        if (WindowIsParent(grab->window, pSprite->win)) {
+          win = pSprite->win;
+        } else {
+          win = grab->window;
+        }
+    } else {
+      win = pSprite->win;
     }
-    else
-        win = pSprite->win;
     for (; win; win = win->parent) {
         if (win->optional) {
             pCursor = WindowGetDeviceCursor(win, pDev);
-            if (!pCursor && win->optional->cursor != NullCursor)
-                pCursor = win->optional->cursor;
+            if (!pCursor && win->optional->cursor != NullCursor) {
+              pCursor = win->optional->cursor;
+            }
             if (pCursor) {
                 ChangeToCursor(pDev, pCursor);
                 return;
@@ -1076,10 +1115,11 @@ MonthChangedOrBadTime(CARD32 *ms)
      * different sources in sorted order, then it's possible for time to go
      * backwards when it should not.  Here we ensure a decent time.
      */
-    if ((currentTime.milliseconds - *ms) > TIMESLOP)
-        currentTime.months++;
-    else
-        *ms = currentTime.milliseconds;
+    if ((currentTime.milliseconds - *ms) > TIMESLOP) {
+      currentTime.months++;
+    } else {
+      *ms = currentTime.milliseconds;
+    }
 }
 
 void
@@ -1097,8 +1137,9 @@ static void
 NoticeTimeMillis(const DeviceIntPtr dev, CARD32 *ms)
 {
     TimeStamp time;
-    if (*ms < currentTime.milliseconds)
-        MonthChangedOrBadTime(ms);
+    if (*ms < currentTime.milliseconds) {
+      MonthChangedOrBadTime(ms);
+    }
     time.months = currentTime.months;
     time.milliseconds = *ms;
     NoticeTime(dev, time);
@@ -1107,8 +1148,9 @@ NoticeTimeMillis(const DeviceIntPtr dev, CARD32 *ms)
 void
 NoticeEventTime(InternalEvent *ev, DeviceIntPtr dev)
 {
-    if (!syncEvents.playingEvents)
-        NoticeTimeMillis(dev, &ev->any.time);
+  if (!syncEvents.playingEvents) {
+    NoticeTimeMillis(dev, &ev->any.time);
+  }
 }
 
 TimeStamp
@@ -1157,15 +1199,17 @@ EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
     int eventlen;
     DeviceEvent *event = &ev->device_event;
 
-    if (!xorg_list_is_empty(&syncEvents.pending))
-        tail = xorg_list_last_entry(&syncEvents.pending, QdEventRec, next);
+    if (!xorg_list_is_empty(&syncEvents.pending)) {
+      tail = xorg_list_last_entry(&syncEvents.pending, QdEventRec, next);
+    }
 
     NoticeTimeMillis(device, &ev->any.time);
 
     /* Fix for key repeating bug. */
     if (device->key != NULL && device->key->xkbInfo != NULL &&
-        event->type == ET_KeyRelease)
-        AccessXCancelRepeatKey(device->key->xkbInfo, event->detail.key);
+        event->type == ET_KeyRelease) {
+      AccessXCancelRepeatKey(device->key->xkbInfo, event->detail.key);
+    }
 
     if (DeviceEventCallback) {
         DeviceEventInfoRec eventinfo;
@@ -1179,8 +1223,9 @@ EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
          *  the data that InputDevCurrentRootWindow relies on hasn't been
          *  updated yet.
          */
-        if (ev->any.type == ET_Motion)
-            ev->device_event.root = pSprite->hotPhys.pScreen->root->drawable.id;
+        if (ev->any.type == ET_Motion) {
+          ev->device_event.root = pSprite->hotPhys.pScreen->root->drawable.id;
+        }
 
         eventinfo.event = ev;
         eventinfo.device = device;
@@ -1215,8 +1260,9 @@ EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
     eventlen = sizeof(InternalEvent);
 
     QdEventPtr qe = calloc(1, sizeof(QdEventRec) + eventlen);
-    if (!qe)
-        return;
+    if (!qe) {
+      return;
+    }
     xorg_list_init(&qe->next);
     qe->device = device;
     qe->pScreen = pSprite->hotPhys.pScreen;
@@ -1251,8 +1297,9 @@ PlayReleasedEvents(void)
         if (!qe->device->deviceGrab.sync.frozen) {
             xorg_list_del(&qe->next);
             pDev = qe->device;
-            if (qe->event->any.type == ET_Motion)
-                CheckVirtualMotion(pDev, qe, NullWindow);
+            if (qe->event->any.type == ET_Motion) {
+              CheckVirtualMotion(pDev, qe, NullWindow);
+            }
             syncEvents.time.months = qe->months;
             syncEvents.time.milliseconds = qe->event->any.time;
 #ifdef XINERAMA
@@ -1287,9 +1334,12 @@ PlayReleasedEvents(void)
             (*qe->device->public.processInputProc) (qe->event, qe->device);
             free(qe);
             for (dev = inputInfo.devices; dev && dev->deviceGrab.sync.frozen;
-                 dev = dev->next);
-            if (!dev)
-                break;
+                 dev = dev->next) {
+              ;
+            }
+            if (!dev) {
+              break;
+            }
 
             /* Playing the event may have unfrozen another device. */
             /* So to play it safe, restart at the head of the queue */
@@ -1310,10 +1360,11 @@ static void
 FreezeThaw(DeviceIntPtr dev, Bool frozen)
 {
     dev->deviceGrab.sync.frozen = frozen;
-    if (frozen)
-        dev->public.processInputProc = dev->public.enqueueInputProc;
-    else
-        dev->public.processInputProc = dev->public.realInputProc;
+    if (frozen) {
+      dev->public.processInputProc = dev->public.enqueueInputProc;
+    } else {
+      dev->public.processInputProc = dev->public.realInputProc;
+    }
 }
 
 /**
@@ -1330,12 +1381,14 @@ ComputeFreezes(void)
     DeviceIntPtr replayDev = syncEvents.replayDev;
     GrabPtr grab;
 
-    for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next)
-        FreezeThaw(dev, dev->deviceGrab.sync.other ||
-                   (dev->deviceGrab.sync.state >= GRAB_STATE_FROZEN));
+    for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
+      FreezeThaw(dev, dev->deviceGrab.sync.other ||
+                          (dev->deviceGrab.sync.state >= GRAB_STATE_FROZEN));
+    }
     if (syncEvents.playingEvents ||
-        (!replayDev && xorg_list_is_empty(&syncEvents.pending)))
-        return;
+        (!replayDev && xorg_list_is_empty(&syncEvents.pending))) {
+      return;
+    }
     syncEvents.playingEvents = TRUE;
     if (replayDev) {
         InternalEvent *event = replayDev->deviceGrab.sync.event;
@@ -1364,11 +1417,12 @@ ComputeFreezes(void)
                 WindowPtr w = XYToWindow(replayDev->spriteInfo->sprite,
                                          event->device_event.root_x,
                                          event->device_event.root_y);
-                if (replayDev->focus && !IsPointerEvent(event))
-                    DeliverFocusedEvent(replayDev, event, w);
-                else
-                    DeliverDeviceEvents(w, event, NullGrab,
-                                        NullWindow, replayDev);
+                if (replayDev->focus && !IsPointerEvent(event)) {
+                  DeliverFocusedEvent(replayDev, event, w);
+                } else {
+                  DeliverDeviceEvents(w, event, NullGrab, NullWindow,
+                                      replayDev);
+                }
             }
         }
     }
@@ -1384,16 +1438,17 @@ ComputeFreezes(void)
             /* the following may have been skipped during replay,
                so do it now */
             if ((grab = dev->deviceGrab.grab) && grab->confineTo) {
-                if (grab->confineTo->drawable.pScreen !=
-                    dev->spriteInfo->sprite->hotPhys.pScreen)
-                    dev->spriteInfo->sprite->hotPhys.x =
-                        dev->spriteInfo->sprite->hotPhys.y = 0;
+              if (grab->confineTo->drawable.pScreen !=
+                  dev->spriteInfo->sprite->hotPhys.pScreen) {
+                dev->spriteInfo->sprite->hotPhys.x =
+                    dev->spriteInfo->sprite->hotPhys.y = 0;
+              }
                 ConfineCursorToWindow(dev, grab->confineTo, TRUE, TRUE);
+            } else {
+              ConfineCursorToWindow(
+                  dev, dev->spriteInfo->sprite->hotPhys.pScreen->root, TRUE,
+                  FALSE);
             }
-            else
-                ConfineCursorToWindow(dev,
-                                      dev->spriteInfo->sprite->hotPhys.pScreen->
-                                      root, TRUE, FALSE);
             PostNewCursor(dev);
         }
     }
@@ -1406,22 +1461,24 @@ ScreenRestructured(ScreenPtr pScreen)
     GrabPtr grab;
 
     for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next) {
-        if (!InputDevIsFloating(pDev) && !DevHasCursor(pDev))
-            continue;
+      if (!InputDevIsFloating(pDev) && !DevHasCursor(pDev)) {
+        continue;
+      }
 
         /* GrabDevice doesn't have a confineTo field, so we don't need to
          * worry about it. */
         if ((grab = pDev->deviceGrab.grab) && grab->confineTo) {
-            if (grab->confineTo->drawable.pScreen
-                != pDev->spriteInfo->sprite->hotPhys.pScreen)
-                pDev->spriteInfo->sprite->hotPhys.x =
-                    pDev->spriteInfo->sprite->hotPhys.y = 0;
+          if (grab->confineTo->drawable.pScreen !=
+              pDev->spriteInfo->sprite->hotPhys.pScreen) {
+            pDev->spriteInfo->sprite->hotPhys.x =
+                pDev->spriteInfo->sprite->hotPhys.y = 0;
+          }
             ConfineCursorToWindow(pDev, grab->confineTo, TRUE, TRUE);
+        } else {
+          ConfineCursorToWindow(pDev,
+                                pDev->spriteInfo->sprite->hotPhys.pScreen->root,
+                                TRUE, FALSE);
         }
-        else
-            ConfineCursorToWindow(pDev,
-                                  pDev->spriteInfo->sprite->hotPhys.pScreen->
-                                  root, TRUE, FALSE);
     }
 }
 #endif
@@ -1432,25 +1489,27 @@ CheckGrabForSyncs(DeviceIntPtr thisDev, Bool thisMode, Bool otherMode)
     GrabPtr grab = thisDev->deviceGrab.grab;
     DeviceIntPtr dev;
 
-    if (thisMode == GrabModeSync)
-        thisDev->deviceGrab.sync.state = GRAB_STATE_FROZEN_NO_EVENT;
-    else {                      /* free both if same client owns both */
-        thisDev->deviceGrab.sync.state = GRAB_STATE_THAWED;
-        if (thisDev->deviceGrab.sync.other &&
-            (dixClientIdForXID(thisDev->deviceGrab.sync.other->resource) ==
-             dixClientIdForXID(grab->resource)))
-            thisDev->deviceGrab.sync.other = NullGrab;
+    if (thisMode == GrabModeSync) {
+      thisDev->deviceGrab.sync.state = GRAB_STATE_FROZEN_NO_EVENT;
+    } else { /* free both if same client owns both */
+      thisDev->deviceGrab.sync.state = GRAB_STATE_THAWED;
+      if (thisDev->deviceGrab.sync.other &&
+          (dixClientIdForXID(thisDev->deviceGrab.sync.other->resource) ==
+           dixClientIdForXID(grab->resource))) {
+        thisDev->deviceGrab.sync.other = NullGrab;
+      }
     }
 
     if (InputDevIsMaster(thisDev)) {
         dev = GetPairedDevice(thisDev);
-        if (otherMode == GrabModeSync)
-            dev->deviceGrab.sync.other = grab;
-        else {                  /* free both if same client owns both */
-            if (dev->deviceGrab.sync.other &&
-                (dixClientIdForXID(dev->deviceGrab.sync.other->resource) ==
-                 dixClientIdForXID(grab->resource)))
-                dev->deviceGrab.sync.other = NullGrab;
+        if (otherMode == GrabModeSync) {
+          dev->deviceGrab.sync.other = grab;
+        } else { /* free both if same client owns both */
+          if (dev->deviceGrab.sync.other &&
+              (dixClientIdForXID(dev->deviceGrab.sync.other->resource) ==
+               dixClientIdForXID(grab->resource))) {
+            dev->deviceGrab.sync.other = NullGrab;
+          }
         }
     }
     ComputeFreezes();
@@ -1468,8 +1527,9 @@ CheckGrabForSyncs(DeviceIntPtr thisDev, Bool thisMode, Bool otherMode)
 static void
 DetachFromMaster(DeviceIntPtr dev)
 {
-    if (InputDevIsFloating(dev))
-        return;
+  if (InputDevIsFloating(dev)) {
+    return;
+  }
 
     dev->saved_master_id = GetMaster(dev, MASTER_ATTACHED)->id;
 
@@ -1481,8 +1541,9 @@ ReattachToOldMaster(DeviceIntPtr dev)
 {
     DeviceIntPtr master = NULL;
 
-    if (InputDevIsMaster(dev))
-        return;
+    if (InputDevIsMaster(dev)) {
+      return;
+    }
 
     dixLookupDevice(&master, dev->saved_master_id, serverClient, DixUseAccess);
 
@@ -1501,13 +1562,15 @@ CurrentOrOldMasterKeyboard(DeviceIntPtr dev)
 {
     DeviceIntPtr kbd = GetMaster(dev, MASTER_KEYBOARD);
 
-    if (kbd)
-        return kbd;
+    if (kbd) {
+      return kbd;
+    }
 
     if (dev->saved_master_id) {
         dixLookupDevice(&kbd, dev->saved_master_id, serverClient, DixUseAccess);
-        if (!kbd)
-            return NULL;
+        if (!kbd) {
+          return NULL;
+        }
         /* if dev is a pointer the saved master is a master pointer,
          * we want the keyboard */
         return GetMaster(kbd, MASTER_KEYBOARD);
@@ -1523,8 +1586,9 @@ CurrentOrOldMasterKeyboard(DeviceIntPtr dev)
 static void
 UpdateTouchesForGrab(DeviceIntPtr mouse)
 {
-    if (!mouse->touch || mouse->deviceGrab.fromPassiveGrab)
-        return;
+  if (!mouse->touch || mouse->deviceGrab.fromPassiveGrab) {
+    return;
+  }
 
     for (int i = 0; i < mouse->touch->num_touches; i++) {
         TouchPointInfoPtr ti = mouse->touch->touches + i;
@@ -1566,8 +1630,9 @@ UpdateTouchesForGrab(DeviceIntPtr mouse)
 static void
 UpdateGesturesForGrab(DeviceIntPtr mouse)
 {
-    if (!mouse->gesture || mouse->deviceGrab.fromPassiveGrab)
-        return;
+  if (!mouse->gesture || mouse->deviceGrab.fromPassiveGrab) {
+    return;
+  }
 
     GestureInfoPtr gi = &mouse->gesture->gesture;
     GestureListener *listener = &gi->listener;
@@ -1623,25 +1688,29 @@ ActivatePointerGrab(DeviceIntPtr mouse, GrabPtr grab,
     Bool isPassive = autoGrab & ~ImplicitGrabMask;
 
     /* slave devices need to float for the duration of the grab. */
-    if (grab->grabtype == XI2 &&
-        !(autoGrab & ImplicitGrabMask) && !InputDevIsMaster(mouse))
-        DetachFromMaster(mouse);
+    if (grab->grabtype == XI2 && !(autoGrab & ImplicitGrabMask) &&
+        !InputDevIsMaster(mouse)) {
+      DetachFromMaster(mouse);
+    }
 
     if (grab->confineTo) {
-        if (grab->confineTo->drawable.pScreen
-            != mouse->spriteInfo->sprite->hotPhys.pScreen)
-            mouse->spriteInfo->sprite->hotPhys.x =
-                mouse->spriteInfo->sprite->hotPhys.y = 0;
+      if (grab->confineTo->drawable.pScreen !=
+          mouse->spriteInfo->sprite->hotPhys.pScreen) {
+        mouse->spriteInfo->sprite->hotPhys.x =
+            mouse->spriteInfo->sprite->hotPhys.y = 0;
+      }
         ConfineCursorToWindow(mouse, grab->confineTo, FALSE, TRUE);
     }
-    if (! (grabinfo->grab && oldWin == grabinfo->grab->window
-			  && oldWin == grab->window))
-        DoEnterLeaveEvents(mouse, mouse->id, oldWin, grab->window, NotifyGrab);
+    if (!(grabinfo->grab && oldWin == grabinfo->grab->window &&
+          oldWin == grab->window)) {
+      DoEnterLeaveEvents(mouse, mouse->id, oldWin, grab->window, NotifyGrab);
+    }
     mouse->valuator->motionHintWindow = NullWindow;
-    if (syncEvents.playingEvents)
-        grabinfo->grabTime = syncEvents.time;
-    else
-        grabinfo->grabTime = time;
+    if (syncEvents.playingEvents) {
+      grabinfo->grabTime = syncEvents.time;
+    } else {
+      grabinfo->grabTime = time;
+    }
     grabinfo->grab = AllocGrab(grab);
     grabinfo->fromPassiveGrab = isPassive;
     grabinfo->implicitGrab = autoGrab & ImplicitGrabMask;
@@ -1697,8 +1766,9 @@ DeactivatePointerGrab(DeviceIntPtr mouse)
     mouse->deviceGrab.fromPassiveGrab = FALSE;
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-        if (dev->deviceGrab.sync.other == grab)
-            dev->deviceGrab.sync.other = NullGrab;
+      if (dev->deviceGrab.sync.other == grab) {
+        dev->deviceGrab.sync.other = NullGrab;
+      }
     }
 
     /* in case of explicit gesture grab, send end event to the grab client */
@@ -1712,12 +1782,15 @@ DeactivatePointerGrab(DeviceIntPtr mouse)
 
     DoEnterLeaveEvents(mouse, mouse->id, grab->window,
                        mouse->spriteInfo->sprite->win, NotifyUngrab);
-    if (grab->confineTo)
-        ConfineCursorToWindow(mouse, InputDevCurrentRootWindow(mouse), FALSE, FALSE);
+    if (grab->confineTo) {
+      ConfineCursorToWindow(mouse, InputDevCurrentRootWindow(mouse), FALSE,
+                            FALSE);
+    }
     PostNewCursor(mouse);
 
-    if (!wasImplicit && grab->grabtype == XI2)
-        ReattachToOldMaster(mouse);
+    if (!wasImplicit && grab->grabtype == XI2) {
+      ReattachToOldMaster(mouse);
+    }
 
     ComputeFreezes();
 
@@ -1738,34 +1811,40 @@ ActivateKeyboardGrab(DeviceIntPtr keybd, GrabPtr grab, TimeStamp time,
     WindowPtr oldWin;
     DeviceIntPtr master_keyboard = CurrentOrOldMasterKeyboard(keybd);
 
-    if (!master_keyboard)
-        master_keyboard = inputInfo.keyboard;
+    if (!master_keyboard) {
+      master_keyboard = inputInfo.keyboard;
+    }
 
     /* slave devices need to float for the duration of the grab. */
     if (grab->grabtype == XI2 && keybd->enabled &&
-        !(passive & ImplicitGrabMask) && !InputDevIsMaster(keybd))
-        DetachFromMaster(keybd);
+        !(passive & ImplicitGrabMask) && !InputDevIsMaster(keybd)) {
+      DetachFromMaster(keybd);
+    }
 
-    if (!keybd->enabled)
-        oldWin = NULL;
-    else if (grabinfo->grab)
-        oldWin = grabinfo->grab->window;
-    else if (keybd->focus)
-        oldWin = keybd->focus->win;
-    else
-        oldWin = keybd->spriteInfo->sprite->win;
-    if (oldWin == FollowKeyboardWin)
-        oldWin = master_keyboard->focus->win;
-    if (keybd->valuator)
-        keybd->valuator->motionHintWindow = NullWindow;
-    if (oldWin &&
-	! (grabinfo->grab && oldWin == grabinfo->grab->window
-			  && oldWin == grab->window))
-        DoFocusEvents(keybd, oldWin, grab->window, NotifyGrab);
-    if (syncEvents.playingEvents)
-        grabinfo->grabTime = syncEvents.time;
-    else
-        grabinfo->grabTime = time;
+    if (!keybd->enabled) {
+      oldWin = NULL;
+    } else if (grabinfo->grab) {
+      oldWin = grabinfo->grab->window;
+    } else if (keybd->focus) {
+      oldWin = keybd->focus->win;
+    } else {
+      oldWin = keybd->spriteInfo->sprite->win;
+    }
+    if (oldWin == FollowKeyboardWin) {
+      oldWin = master_keyboard->focus->win;
+    }
+    if (keybd->valuator) {
+      keybd->valuator->motionHintWindow = NullWindow;
+    }
+    if (oldWin && !(grabinfo->grab && oldWin == grabinfo->grab->window &&
+                    oldWin == grab->window)) {
+      DoFocusEvents(keybd, oldWin, grab->window, NotifyGrab);
+    }
+    if (syncEvents.playingEvents) {
+      grabinfo->grabTime = syncEvents.time;
+    } else {
+      grabinfo->grabTime = time;
+    }
     grabinfo->grab = AllocGrab(grab);
     grabinfo->fromPassiveGrab = passive;
     grabinfo->implicitGrab = passive & ImplicitGrabMask;
@@ -1786,34 +1865,40 @@ DeactivateKeyboardGrab(DeviceIntPtr keybd)
                         keybd->deviceGrab.implicitGrab);
     DeviceIntPtr master_keyboard = CurrentOrOldMasterKeyboard(keybd);
 
-    if (!master_keyboard)
-        master_keyboard = inputInfo.keyboard;
+    if (!master_keyboard) {
+      master_keyboard = inputInfo.keyboard;
+    }
 
-    if (keybd->valuator)
-        keybd->valuator->motionHintWindow = NullWindow;
+    if (keybd->valuator) {
+      keybd->valuator->motionHintWindow = NullWindow;
+    }
     keybd->deviceGrab.grab = NullGrab;
     keybd->deviceGrab.sync.state = GRAB_STATE_NOT_GRABBED;
     keybd->deviceGrab.fromPassiveGrab = FALSE;
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-        if (dev->deviceGrab.sync.other == grab)
-            dev->deviceGrab.sync.other = NullGrab;
+      if (dev->deviceGrab.sync.other == grab) {
+        dev->deviceGrab.sync.other = NullGrab;
+      }
     }
 
-    if (keybd->focus)
-        focusWin = keybd->focus->win;
-    else if (keybd->spriteInfo->sprite)
-        focusWin = keybd->spriteInfo->sprite->win;
-    else
-        focusWin = NullWindow;
+    if (keybd->focus) {
+      focusWin = keybd->focus->win;
+    } else if (keybd->spriteInfo->sprite) {
+      focusWin = keybd->spriteInfo->sprite->win;
+    } else {
+      focusWin = NullWindow;
+    }
 
-    if (focusWin == FollowKeyboardWin)
-        focusWin = master_keyboard->focus->win;
+    if (focusWin == FollowKeyboardWin) {
+      focusWin = master_keyboard->focus->win;
+    }
 
     DoFocusEvents(keybd, grab->window, focusWin, NotifyUngrab);
 
-    if (!wasImplicit && grab->grabtype == XI2)
-        ReattachToOldMaster(keybd);
+    if (!wasImplicit && grab->grabtype == XI2) {
+      ReattachToOldMaster(keybd);
+    }
 
     ComputeFreezes();
 
@@ -1835,37 +1920,47 @@ AllowSome(ClientPtr client, TimeStamp time, DeviceIntPtr thisDev, int newState)
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
         devgrabinfo = &dev->deviceGrab;
 
-        if (dev == thisDev)
-            continue;
+        if (dev == thisDev) {
+          continue;
+        }
         if (devgrabinfo->grab && SameClient(devgrabinfo->grab, client)) {
-            if (!(thisGrabbed || otherGrabbed) ||
-                (CompareTimeStamps(devgrabinfo->grabTime, grabTime) == LATER))
-                grabTime = devgrabinfo->grabTime;
+          if (!(thisGrabbed || otherGrabbed) ||
+              (CompareTimeStamps(devgrabinfo->grabTime, grabTime) == LATER)) {
+            grabTime = devgrabinfo->grabTime;
+          }
             otherGrabbed = TRUE;
-            if (grabinfo->sync.other == devgrabinfo->grab)
-                thisSynced = TRUE;
-            if (devgrabinfo->sync.state >= GRAB_STATE_FROZEN)
-                othersFrozen = TRUE;
+            if (grabinfo->sync.other == devgrabinfo->grab) {
+              thisSynced = TRUE;
+            }
+            if (devgrabinfo->sync.state >= GRAB_STATE_FROZEN) {
+              othersFrozen = TRUE;
+            }
         }
     }
-    if (!((thisGrabbed && grabinfo->sync.state >= GRAB_STATE_FROZEN) || thisSynced))
-        return;
+    if (!((thisGrabbed && grabinfo->sync.state >= GRAB_STATE_FROZEN) ||
+          thisSynced)) {
+      return;
+    }
     if ((CompareTimeStamps(time, currentTime) == LATER) ||
-        (CompareTimeStamps(time, grabTime) == EARLIER))
-        return;
+        (CompareTimeStamps(time, grabTime) == EARLIER)) {
+      return;
+    }
     switch (newState) {
     case GRAB_STATE_THAWED:               /* Async */
-        if (thisGrabbed)
-            grabinfo->sync.state = GRAB_STATE_THAWED;
-        if (thisSynced)
-            grabinfo->sync.other = NullGrab;
+      if (thisGrabbed) {
+        grabinfo->sync.state = GRAB_STATE_THAWED;
+      }
+      if (thisSynced) {
+        grabinfo->sync.other = NullGrab;
+      }
         ComputeFreezes();
         break;
     case GRAB_STATE_FREEZE_NEXT_EVENT:    /* Sync */
         if (thisGrabbed) {
             grabinfo->sync.state = GRAB_STATE_FREEZE_NEXT_EVENT;
-            if (thisSynced)
-                grabinfo->sync.other = NullGrab;
+            if (thisSynced) {
+              grabinfo->sync.other = NullGrab;
+            }
             ComputeFreezes();
         }
         break;
@@ -1873,11 +1968,14 @@ AllowSome(ClientPtr client, TimeStamp time, DeviceIntPtr thisDev, int newState)
         if (othersFrozen) {
             for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
                 devgrabinfo = &dev->deviceGrab;
-                if (devgrabinfo->grab && SameClient(devgrabinfo->grab, client))
-                    devgrabinfo->sync.state = GRAB_STATE_THAWED;
+                if (devgrabinfo->grab &&
+                    SameClient(devgrabinfo->grab, client)) {
+                  devgrabinfo->sync.state = GRAB_STATE_THAWED;
+                }
                 if (devgrabinfo->sync.other &&
-                    SameClient(devgrabinfo->sync.other, client))
-                    devgrabinfo->sync.other = NullGrab;
+                    SameClient(devgrabinfo->sync.other, client)) {
+                  devgrabinfo->sync.other = NullGrab;
+                }
             }
             ComputeFreezes();
         }
@@ -1886,19 +1984,23 @@ AllowSome(ClientPtr client, TimeStamp time, DeviceIntPtr thisDev, int newState)
         if (othersFrozen) {
             for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
                 devgrabinfo = &dev->deviceGrab;
-                if (devgrabinfo->grab && SameClient(devgrabinfo->grab, client))
-                    devgrabinfo->sync.state = GRAB_STATE_FREEZE_BOTH_NEXT_EVENT;
-                if (devgrabinfo->sync.other
-                    && SameClient(devgrabinfo->sync.other, client))
-                    devgrabinfo->sync.other = NullGrab;
+                if (devgrabinfo->grab &&
+                    SameClient(devgrabinfo->grab, client)) {
+                  devgrabinfo->sync.state = GRAB_STATE_FREEZE_BOTH_NEXT_EVENT;
+                }
+                if (devgrabinfo->sync.other &&
+                    SameClient(devgrabinfo->sync.other, client)) {
+                  devgrabinfo->sync.other = NullGrab;
+                }
             }
             ComputeFreezes();
         }
         break;
     case GRAB_STATE_NOT_GRABBED:          /* Replay */
         if (thisGrabbed && grabinfo->sync.state == GRAB_STATE_FROZEN_WITH_EVENT) {
-            if (thisSynced)
-                grabinfo->sync.other = NullGrab;
+          if (thisSynced) {
+            grabinfo->sync.other = NullGrab;
+          }
             syncEvents.replayDev = thisDev;
             syncEvents.replayWin = grabinfo->grab->window;
             (*grabinfo->DeactivateGrab) (thisDev);
@@ -1908,14 +2010,18 @@ AllowSome(ClientPtr client, TimeStamp time, DeviceIntPtr thisDev, int newState)
     case GRAB_STATE_THAW_OTHERS:          /* AsyncOthers */
         if (othersFrozen) {
             for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-                if (dev == thisDev)
-                    continue;
+              if (dev == thisDev) {
+                continue;
+              }
                 devgrabinfo = &dev->deviceGrab;
-                if (devgrabinfo->grab && SameClient(devgrabinfo->grab, client))
-                    devgrabinfo->sync.state = GRAB_STATE_THAWED;
-                if (devgrabinfo->sync.other
-                    && SameClient(devgrabinfo->sync.other, client))
-                    devgrabinfo->sync.other = NullGrab;
+                if (devgrabinfo->grab &&
+                    SameClient(devgrabinfo->grab, client)) {
+                  devgrabinfo->sync.state = GRAB_STATE_THAWED;
+                }
+                if (devgrabinfo->sync.other &&
+                    SameClient(devgrabinfo->sync.other, client)) {
+                  devgrabinfo->sync.other = NullGrab;
+                }
             }
             ComputeFreezes();
         }
@@ -1948,8 +2054,9 @@ ProcAllowEvents(ClientPtr client)
     REQUEST(xAllowEventsReq);
     REQUEST_SIZE_MATCH(xAllowEventsReq);
 
-    if (client->swapped)
-        swapl(&stuff->time);
+    if (client->swapped) {
+      swapl(&stuff->time);
+    }
 
     UpdateCurrentTime();
     time = ClientTimeToServerTime(stuff->time);
@@ -2093,9 +2200,10 @@ TryClientEvents(ClientPtr client, DeviceIntPtr dev, xEvent *pEvents,
         }
     }
     else if (type == DeviceMotionNotify) {
-        if (MaybeSendDeviceMotionNotifyHint((deviceKeyButtonPointer *) pEvents,
-                                            mask) != 0)
-            return 1;
+      if (MaybeSendDeviceMotionNotifyHint((deviceKeyButtonPointer *)pEvents,
+                                          mask) != 0) {
+        return 1;
+      }
     }
     else if (type == KeyPress) {
         if (EventIsKeyRepeat(pEvents)) {
@@ -2136,8 +2244,9 @@ TryClientEvents(ClientPtr client, DeviceIntPtr dev, xEvent *pEvents,
     }
 
     if (BitIsOn(criticalEvents, type)) {
-        if (client->smart_priority < SMART_MAX_PRIORITY)
-            client->smart_priority++;
+      if (client->smart_priority < SMART_MAX_PRIORITY) {
+        client->smart_priority++;
+      }
         SetCriticalOutputPending();
     }
 
@@ -2157,18 +2266,20 @@ ActivateImplicitGrab(DeviceIntPtr dev, ClientPtr client, WindowPtr win,
     CARD8 type = event->u.u.type;
     enum InputLevel grabtype;
 
-    if (type == ButtonPress)
-        grabtype = CORE;
-    else if (type == DeviceButtonPress)
-        grabtype = XI;
-    else if ((type = xi2_get_type(event)) == XI_ButtonPress)
-        grabtype = XI2;
-    else
-        return FALSE;
+    if (type == ButtonPress) {
+      grabtype = CORE;
+    } else if (type == DeviceButtonPress) {
+      grabtype = XI;
+    } else if ((type = xi2_get_type(event)) == XI_ButtonPress) {
+      grabtype = XI2;
+    } else {
+      return FALSE;
+    }
 
     tempGrab = AllocGrab(NULL);
-    if (!tempGrab)
-        return FALSE;
+    if (!tempGrab) {
+      return FALSE;
+    }
     tempGrab->next = NULL;
     tempGrab->device = dev;
     tempGrab->resource = client->clientAsMask;
@@ -2186,8 +2297,9 @@ ActivateImplicitGrab(DeviceIntPtr dev, ClientPtr client, WindowPtr win,
     inputMasks = wOtherInputMasks(win);
     tempGrab->deviceMask = (inputMasks) ? inputMasks->inputEvents[dev->id] : 0;
 
-    if (inputMasks)
-        xi2mask_merge(tempGrab->xi2mask, inputMasks->xi2mask);
+    if (inputMasks) {
+      xi2mask_merge(tempGrab->xi2mask, inputMasks->xi2mask);
+    }
 
     (*dev->deviceGrab.ActivateGrab) (dev, tempGrab,
                                      currentTime, TRUE | ImplicitGrabMask);
@@ -2204,21 +2316,25 @@ DeliverToWindowOwner(DeviceIntPtr dev, WindowPtr win,
 {
     /* if nobody ever wants to see this event, skip some work */
     if (filter != CantBeFiltered &&
-        !((wOtherEventMasks(win) | win->eventMask) & filter))
-        return EVENT_SKIP;
+        !((wOtherEventMasks(win) | win->eventMask) & filter)) {
+      return EVENT_SKIP;
+    }
 
-    if (IsInterferingGrab(dixClientForWindow(win), dev, events))
-        return EVENT_SKIP;
+    if (IsInterferingGrab(dixClientForWindow(win), dev, events)) {
+      return EVENT_SKIP;
+    }
 
     if (!XaceHookReceiveAccess(dixClientForWindow(win), win, events, count)) {
         int attempt = TryClientEvents(dixClientForWindow(win), dev, events,
                                       count, win->eventMask,
                                       filter, grab);
 
-        if (attempt > 0)
-            return EVENT_DELIVERED;
-        if (attempt < 0)
-            return EVENT_REJECTED;
+        if (attempt > 0) {
+          return EVENT_DELIVERED;
+        }
+        if (attempt < 0) {
+          return EVENT_REJECTED;
+        }
     }
 
     return EVENT_NOT_DELIVERED;
@@ -2237,24 +2353,25 @@ GetClientsForDelivery(DeviceIntPtr dev, WindowPtr win,
 {
     int rc = 0;
 
-    if (core_get_type(events) != 0)
-        *iclients = (InputClients *) wOtherClients(win);
-    else if (xi2_get_type(events) != 0) {
-        OtherInputMasks *inputMasks = wOtherInputMasks(win);
+    if (core_get_type(events) != 0) {
+      *iclients = (InputClients *)wOtherClients(win);
+    } else if (xi2_get_type(events) != 0) {
+      OtherInputMasks *inputMasks = wOtherInputMasks(win);
 
-        /* Has any client selected for the event? */
-        if (!WindowXI2MaskIsset(dev, win, events))
-            goto out;
-        *iclients = inputMasks->inputClients;
-    }
-    else {
-        OtherInputMasks *inputMasks = wOtherInputMasks(win);
+      /* Has any client selected for the event? */
+      if (!WindowXI2MaskIsset(dev, win, events)) {
+        goto out;
+      }
+      *iclients = inputMasks->inputClients;
+    } else {
+      OtherInputMasks *inputMasks = wOtherInputMasks(win);
 
-        /* Has any client selected for the event? */
-        if (!inputMasks || !(inputMasks->inputEvents[dev->id] & filter))
-            goto out;
+      /* Has any client selected for the event? */
+      if (!inputMasks || !(inputMasks->inputEvents[dev->id] & filter)) {
+        goto out;
+      }
 
-        *iclients = inputMasks->inputClients;
+      *iclients = inputMasks->inputClients;
     }
 
     rc = 1;
@@ -2280,36 +2397,39 @@ DeliverEventToInputClients(DeviceIntPtr dev, InputClients * inputclients,
         Mask mask;
         ClientPtr client = dixClientForInputClients(inputclients);
 
-        if (IsInterferingGrab(client, dev, events))
-            continue;
+        if (IsInterferingGrab(client, dev, events)) {
+          continue;
+        }
 
-        if (IsWrongPointerBarrierClient(client, dev, events))
-            continue;
+        if (IsWrongPointerBarrierClient(client, dev, events)) {
+          continue;
+        }
 
         mask = GetEventMask(dev, events, inputclients);
 
-        if (XaceHookReceiveAccess(client, win, events, count))
-            /* do nothing */ ;
-        else if ((attempt = TryClientEvents(client, dev,
-                                            events, count,
-                                            mask, filter, grab))) {
-            if (attempt > 0) {
-                /*
-                 * The order of clients is arbitrary therefore if one
-                 * client belongs to DeviceButtonGrabClass make sure to
-                 * catch it.
-                 */
-                if (!have_device_button_grab_class_client) {
-                    rc = EVENT_DELIVERED;
-                    *client_return = client;
-                    *mask_return = mask;
-                    /* Success overrides non-success, so if we've been
-                     * successful on one client, return that */
-                    if (mask & DeviceButtonGrabMask)
-                        have_device_button_grab_class_client = TRUE;
-                }
-            } else if (rc == EVENT_NOT_DELIVERED)
-                rc = EVENT_REJECTED;
+        if (XaceHookReceiveAccess(client, win, events, count)) {
+          /* do nothing */;
+        } else if ((attempt = TryClientEvents(client, dev, events, count, mask,
+                                              filter, grab))) {
+          if (attempt > 0) {
+            /*
+             * The order of clients is arbitrary therefore if one
+             * client belongs to DeviceButtonGrabClass make sure to
+             * catch it.
+             */
+            if (!have_device_button_grab_class_client) {
+              rc = EVENT_DELIVERED;
+              *client_return = client;
+              *mask_return = mask;
+              /* Success overrides non-success, so if we've been
+               * successful on one client, return that */
+              if (mask & DeviceButtonGrabMask) {
+                have_device_button_grab_class_client = TRUE;
+              }
+            }
+          } else if (rc == EVENT_NOT_DELIVERED) {
+            rc = EVENT_REJECTED;
+          }
         }
     }
 
@@ -2330,8 +2450,9 @@ DeliverEventToWindowMask(DeviceIntPtr dev, WindowPtr win, xEvent *events,
 {
     InputClients *iclients;
 
-    if (!GetClientsForDelivery(dev, win, events, filter, &iclients))
-        return EVENT_SKIP;
+    if (!GetClientsForDelivery(dev, win, events, filter, &iclients)) {
+      return EVENT_SKIP;
+    }
 
     return DeliverEventToInputClients(dev, iclients, win, events, count, filter,
                                       grab, client_return, mask_return);
@@ -2420,14 +2541,15 @@ DeliverEventsToWindow(DeviceIntPtr pDev, WindowPtr pWin, xEvent
          * be activated on a core grab, stopping the XI events.
          */
         if (!grab &&
-            ActivateImplicitGrab(pDev, client, pWin, pEvents, deliveryMask))
-            /* grab activated */ ;
-        else if (type == MotionNotify)
-            pDev->valuator->motionHintWindow = pWin;
-        else if (type == DeviceMotionNotify || type == DeviceButtonPress)
-            CheckDeviceGrabAndHintWindow(pWin, type,
-                                         (deviceKeyButtonPointer *) pEvents,
-                                         grab, client, deliveryMask);
+            ActivateImplicitGrab(pDev, client, pWin, pEvents, deliveryMask)) {
+          /* grab activated */;
+        } else if (type == MotionNotify) {
+          pDev->valuator->motionHintWindow = pWin;
+        } else if (type == DeviceMotionNotify || type == DeviceButtonPress) {
+          CheckDeviceGrabAndHintWindow(pWin, type,
+                                       (deviceKeyButtonPointer *)pEvents, grab,
+                                       client, deliveryMask);
+        }
         return deliveries;
     }
     return nondeliveries;
@@ -2447,8 +2569,9 @@ FilterRawEvents(const ClientPtr client, const GrabPtr grab, WindowPtr root)
     int cmp;
 
     /* device not grabbed -> don't filter */
-    if (!grab)
-        return FALSE;
+    if (!grab) {
+      return FALSE;
+    }
 
     XIClientPtr client_xi_version = XIClientPriv(client);
 
@@ -2456,8 +2579,9 @@ FilterRawEvents(const ClientPtr client, const GrabPtr grab, WindowPtr root)
                           client_xi_version->minor_version, 2, 0);
     /* XI 2.0: if device is grabbed, skip
        XI 2.1: if device is grabbed by us, skip, we've already delivered */
-    if (cmp == 0)
-        return TRUE;
+    if (cmp == 0) {
+      return TRUE;
+    }
 
     return (grab->window != root) ? FALSE : SameClient(grab, client);
 }
@@ -2486,8 +2610,9 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
         return;
     }
 
-    if (grab)
-        DeliverGrabbedEvent((InternalEvent *) ev, device, FALSE);
+    if (grab) {
+      DeliverGrabbedEvent((InternalEvent *)ev, device, FALSE);
+    }
 
     filter = GetEventFilter(device, xi);
 
@@ -2532,10 +2657,11 @@ XineramaTryClientEventsResult(ClientPtr client,
 {
     if ((client) && (client != serverClient) && (!client->clientGone) &&
         ((filter == CantBeFiltered) || (mask & filter))) {
-        if (grab && !SameClient(grab, client))
-            return FALSE;
-        else
-            return TRUE;
+      if (grab && !SameClient(grab, client)) {
+        return FALSE;
+      } else {
+        return TRUE;
+      }
     }
     return FALSE;
 }
@@ -2554,29 +2680,36 @@ Bool MaybeDeliverEventToClient(WindowPtr pWin, xEvent *pEvents,
                                Mask filter, ClientPtr dontClient)
 {
     if (pWin->eventMask & filter) {
-        if (dixClientForWindow(pWin) == dontClient)
-            return FALSE;
+      if (dixClientForWindow(pWin) == dontClient) {
+        return FALSE;
+      }
 #ifdef XINERAMA
-        if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
-            return XineramaTryClientEventsResult(dixClientForWindow(pWin), NullGrab,
-                                                 pWin->eventMask, filter);
+      if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum) {
+        return XineramaTryClientEventsResult(dixClientForWindow(pWin), NullGrab,
+                                             pWin->eventMask, filter);
+      }
 #endif /* XINERAMA */
-        if (XaceHookReceiveAccess(dixClientForWindow(pWin), pWin, pEvents, 1))
-            return TRUE;           /* don't send, but pretend we did */
+      if (XaceHookReceiveAccess(dixClientForWindow(pWin), pWin, pEvents, 1)) {
+        return TRUE; /* don't send, but pretend we did */
+      }
         return TryClientEvents(dixClientForWindow(pWin), NULL, pEvents, 1,
                                pWin->eventMask, filter, NullGrab) == 1;
     }
     for (OtherClients *other = wOtherClients(pWin); other; other = other->next) {
         if (other->mask & filter) {
-            if (SameClient(other, dontClient))
-                return FALSE;
+          if (SameClient(other, dontClient)) {
+            return FALSE;
+          }
 #ifdef XINERAMA
-            if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
-                return XineramaTryClientEventsResult(dixClientForOtherClients(other), NullGrab,
-                                                     other->mask, filter);
+          if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum) {
+            return XineramaTryClientEventsResult(
+                dixClientForOtherClients(other), NullGrab, other->mask, filter);
+          }
 #endif /* XINERAMA */
-            if (XaceHookReceiveAccess(dixClientForOtherClients(other), pWin, pEvents, 1))
-                return TRUE;       /* don't send, but pretend we did */
+          if (XaceHookReceiveAccess(dixClientForOtherClients(other), pWin,
+                                    pEvents, 1)) {
+            return TRUE; /* don't send, but pretend we did */
+          }
             return TryClientEvents(dixClientForOtherClients(other), NULL, pEvents, 1,
                                    other->mask, filter, NullGrab) == 1;
         }
@@ -2636,9 +2769,10 @@ FixUpXI2DeviceEventFromWindow(SpritePtr pSprite, int evtype,
     }
 
     if (event->evtype == XI_Enter || event->evtype == XI_Leave ||
-        event->evtype == XI_FocusIn || event->evtype == XI_FocusOut)
-        ((xXIEnterEvent *) event)->same_screen =
-            (pSprite->hot.pScreen == pWin->drawable.pScreen);
+        event->evtype == XI_FocusIn || event->evtype == XI_FocusOut) {
+      ((xXIEnterEvent *)event)->same_screen =
+          (pSprite->hot.pScreen == pWin->drawable.pScreen);
+    }
 }
 
 static void
@@ -2693,8 +2827,9 @@ FixUpEventFromWindow(SpritePtr pSprite,
 {
     int evtype;
 
-    if (calcChild)
-        child = FindChildForEvent(pSprite, pWin);
+    if (calcChild) {
+      child = FindChildForEvent(pSprite, pWin);
+    }
 
     if ((evtype = xi2_get_type(xE))) {
        if(XILevel >= XI) {
@@ -2772,23 +2907,24 @@ EventIsDeliverable(DeviceIntPtr dev, int evtype, WindowPtr win)
     OtherInputMasks *inputMasks = wOtherInputMasks(win);
 
     if ((type = GetXI2Type(evtype)) != 0) {
-        if (inputMasks && xi2mask_isset(inputMasks->xi2mask, dev, type))
-            rc |= EVENT_XI2_MASK;
+      if (inputMasks && xi2mask_isset(inputMasks->xi2mask, dev, type)) {
+        rc |= EVENT_XI2_MASK;
+      }
     }
 
     if ((type = GetXIType(evtype)) != 0) {
         filter = event_get_filter_from_type(dev, type);
 
         /* Check for XI mask */
-        if (inputMasks &&
-            (inputMasks->deliverableEvents[dev->id] & filter) &&
-            (inputMasks->inputEvents[dev->id] & filter))
-            rc |= EVENT_XI1_MASK;
+        if (inputMasks && (inputMasks->deliverableEvents[dev->id] & filter) &&
+            (inputMasks->inputEvents[dev->id] & filter)) {
+          rc |= EVENT_XI1_MASK;
+        }
 
         /* Check for XI DontPropagate mask */
-        if (inputMasks && (inputMasks->dontPropagateMask[dev->id] & filter))
-            rc |= EVENT_DONT_PROPAGATE_MASK;
-
+        if (inputMasks && (inputMasks->dontPropagateMask[dev->id] & filter)) {
+          rc |= EVENT_DONT_PROPAGATE_MASK;
+        }
     }
 
     if ((type = GetCoreType(evtype)) != 0) {
@@ -2796,12 +2932,14 @@ EventIsDeliverable(DeviceIntPtr dev, int evtype, WindowPtr win)
 
         /* Check for core mask */
         if ((win->deliverableEvents & filter) &&
-            ((wOtherEventMasks(win) | win->eventMask) & filter))
-            rc |= EVENT_CORE_MASK;
+            ((wOtherEventMasks(win) | win->eventMask) & filter)) {
+          rc |= EVENT_CORE_MASK;
+        }
 
         /* Check for core DontPropagate mask */
-        if (filter & wDontPropagateMask(win))
-            rc |= EVENT_DONT_PROPAGATE_MASK;
+        if (filter & wDontPropagateMask(win)) {
+          rc |= EVENT_DONT_PROPAGATE_MASK;
+        }
     }
 
     return rc;
@@ -2852,11 +2990,11 @@ DeliverOneEvent(InternalEvent *event, DeviceIntPtr dev, enum InputLevel level,
     if (rc == Success) {
         deliveries = DeliverEvent(dev, xE, count, win, child, grab, level);
         free(xE);
+    } else {
+      BUG_WARN_MSG(rc != BadMatch,
+                   "%s: conversion to level %d failed with rc %d\n", dev->name,
+                   level, rc);
     }
-    else
-        BUG_WARN_MSG(rc != BadMatch,
-                     "%s: conversion to level %d failed with rc %d\n",
-                     dev->name, level, rc);
     return deliveries;
 }
 
@@ -2899,23 +3037,26 @@ DeliverDeviceEvents(WindowPtr pWin, InternalEvent *event, GrabPtr grab,
             if (mask & EVENT_XI2_MASK) {
                 deliveries =
                     DeliverOneEvent(event, dev, XI2, pWin, child, grab);
-                if (deliveries > 0)
-                    break;
+                if (deliveries > 0) {
+                  break;
+                }
             }
 
             /* XI events */
             if (mask & EVENT_XI1_MASK) {
                 deliveries = DeliverOneEvent(event, dev, XI, pWin, child, grab);
-                if (deliveries > 0)
-                    break;
+                if (deliveries > 0) {
+                  break;
+                }
             }
 
             /* Core event */
             if ((mask & EVENT_CORE_MASK) && InputDevIsMaster(dev) && dev->coreEvents) {
                 deliveries =
                     DeliverOneEvent(event, dev, CORE, pWin, child, grab);
-                if (deliveries > 0)
-                    break;
+                if (deliveries > 0) {
+                  break;
+                }
             }
         }
 
@@ -2953,12 +3094,14 @@ DeliverEvents(WindowPtr pWin, xEvent *xE, size_t count, WindowPtr otherParent)
     int deliveries;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
-        return count;
+    if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum) {
+      return count;
+    }
 #endif /* XINERAMA */
 
-    if (!count)
-        return 0;
+    if (!count) {
+      return 0;
+    }
 
     dummy.id = XIAllDevices;
 
@@ -3017,8 +3160,9 @@ PointInBorderSize(WindowPtr pWin, int x, int y)
 {
     BoxRec box;
 
-    if (RegionContainsPoint(&pWin->borderSize, x, y, &box))
-        return TRUE;
+    if (RegionContainsPoint(&pWin->borderSize, x, y, &box)) {
+      return TRUE;
+    }
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension &&
@@ -3072,17 +3216,19 @@ ActivateFocusInGrab(DeviceIntPtr dev, WindowPtr old, WindowPtr win)
     InternalEvent event;
 
     if (dev->deviceGrab.grab) {
-        if (!dev->deviceGrab.fromPassiveGrab ||
-            dev->deviceGrab.grab->type != XI_FocusIn ||
-            dev->deviceGrab.grab->window == win ||
-            WindowIsParent(dev->deviceGrab.grab->window, win))
-            return FALSE;
+      if (!dev->deviceGrab.fromPassiveGrab ||
+          dev->deviceGrab.grab->type != XI_FocusIn ||
+          dev->deviceGrab.grab->window == win ||
+          WindowIsParent(dev->deviceGrab.grab->window, win)) {
+        return FALSE;
+      }
         DoEnterLeaveEvents(dev, dev->id, old, win, XINotifyPassiveUngrab);
         (*dev->deviceGrab.DeactivateGrab) (dev);
     }
 
-    if (win == NoneWin || win == PointerRootWin)
-        return FALSE;
+    if (win == NoneWin || win == PointerRootWin) {
+      return FALSE;
+    }
 
     event = (InternalEvent) {
         .device_event.header = ET_Internal,
@@ -3095,8 +3241,9 @@ ActivateFocusInGrab(DeviceIntPtr dev, WindowPtr old, WindowPtr win)
     };
     rc = (CheckPassiveGrabsOnWindow(win, dev, &event, FALSE,
                                     TRUE) != NULL);
-    if (rc)
-        DoEnterLeaveEvents(dev, dev->id, old, win, XINotifyPassiveGrab);
+    if (rc) {
+      DoEnterLeaveEvents(dev, dev->id, old, win, XINotifyPassiveGrab);
+    }
     return rc;
 }
 
@@ -3113,11 +3260,12 @@ ActivateEnterGrab(DeviceIntPtr dev, WindowPtr old, WindowPtr win)
     InternalEvent event;
 
     if (dev->deviceGrab.grab) {
-        if (!dev->deviceGrab.fromPassiveGrab ||
-            dev->deviceGrab.grab->type != XI_Enter ||
-            dev->deviceGrab.grab->window == win ||
-            WindowIsParent(dev->deviceGrab.grab->window, win))
-            return FALSE;
+      if (!dev->deviceGrab.fromPassiveGrab ||
+          dev->deviceGrab.grab->type != XI_Enter ||
+          dev->deviceGrab.grab->window == win ||
+          WindowIsParent(dev->deviceGrab.grab->window, win)) {
+        return FALSE;
+      }
         DoEnterLeaveEvents(dev, dev->id, old, win, XINotifyPassiveUngrab);
         (*dev->deviceGrab.DeactivateGrab) (dev);
     }
@@ -3133,8 +3281,9 @@ ActivateEnterGrab(DeviceIntPtr dev, WindowPtr old, WindowPtr win)
     };
     rc = (CheckPassiveGrabsOnWindow(win, dev, &event, FALSE,
                                     TRUE) != NULL);
-    if (rc)
-        DoEnterLeaveEvents(dev, dev->id, old, win, XINotifyPassiveGrab);
+    if (rc) {
+      DoEnterLeaveEvents(dev, dev->id, old, win, XINotifyPassiveGrab);
+    }
     return rc;
 }
 
@@ -3196,17 +3345,19 @@ CheckMotion(DeviceEvent *ev, DeviceIntPtr pDev)
 
         pSprite->hot.x = ev->root_x;
         pSprite->hot.y = ev->root_y;
-        if (pSprite->hot.x < pSprite->physLimits.x1)
-            pSprite->hot.x = pSprite->physLimits.x1;
-        else if (pSprite->hot.x >= pSprite->physLimits.x2)
-            pSprite->hot.x = pSprite->physLimits.x2 - 1;
-        if (pSprite->hot.y < pSprite->physLimits.y1)
-            pSprite->hot.y = pSprite->physLimits.y1;
-        else if (pSprite->hot.y >= pSprite->physLimits.y2)
-            pSprite->hot.y = pSprite->physLimits.y2 - 1;
-        if (pSprite->hotShape)
-            ConfineToShape(pSprite->hotShape, &pSprite->hot.x,
-                           &pSprite->hot.y);
+        if (pSprite->hot.x < pSprite->physLimits.x1) {
+          pSprite->hot.x = pSprite->physLimits.x1;
+        } else if (pSprite->hot.x >= pSprite->physLimits.x2) {
+          pSprite->hot.x = pSprite->physLimits.x2 - 1;
+        }
+        if (pSprite->hot.y < pSprite->physLimits.y1) {
+          pSprite->hot.y = pSprite->physLimits.y1;
+        } else if (pSprite->hot.y >= pSprite->physLimits.y2) {
+          pSprite->hot.y = pSprite->physLimits.y2 - 1;
+        }
+        if (pSprite->hotShape) {
+          ConfineToShape(pSprite->hotShape, &pSprite->hot.x, &pSprite->hot.y);
+        }
         pSprite->hotPhys = pSprite->hot;
 
         if ((pSprite->hotPhys.x != ev->root_x) ||
@@ -3242,14 +3393,15 @@ CheckMotion(DeviceEvent *ev, DeviceIntPtr pDev)
         if (!ev) {
             UpdateCurrentTimeIf();
             sourceid = pDev->id;        /* when from WindowsRestructured */
+        } else {
+          sourceid = ev->sourceid;
         }
-        else
-            sourceid = ev->sourceid;
 
         if (prevSpriteWin != NullWindow) {
-            if (!ActivateEnterGrab(pDev, prevSpriteWin, newSpriteWin))
-                DoEnterLeaveEvents(pDev, sourceid, prevSpriteWin,
-                                   newSpriteWin, NotifyNormal);
+          if (!ActivateEnterGrab(pDev, prevSpriteWin, newSpriteWin)) {
+            DoEnterLeaveEvents(pDev, sourceid, prevSpriteWin, newSpriteWin,
+                               NotifyNormal);
+          }
         }
         /* set pSprite->win after ActivateEnterGrab, otherwise
            sprite window == grab_window and no enter/leave events are
@@ -3271,8 +3423,9 @@ WindowsRestructured(void)
     DeviceIntPtr pDev = inputInfo.devices;
 
     while (pDev) {
-        if (InputDevIsMaster(pDev) || InputDevIsFloating(pDev))
-            CheckMotion(NULL, pDev);
+      if (InputDevIsMaster(pDev) || InputDevIsFloating(pDev)) {
+        CheckMotion(NULL, pDev);
+      }
         pDev = pDev->next;
     }
 }
@@ -3301,8 +3454,9 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
 
     if (!pDev->spriteInfo->sprite) {
         pDev->spriteInfo->sprite = (SpritePtr) calloc(1, sizeof(SpriteRec));
-        if (!pDev->spriteInfo->sprite)
-            FatalError("InitializeSprite: failed to allocate sprite struct");
+        if (!pDev->spriteInfo->sprite) {
+          FatalError("InitializeSprite: failed to allocate sprite struct");
+        }
 
         /* We may have paired another device with this device before our
          * device had a actual sprite. We need to check for this and reset the
@@ -3311,11 +3465,13 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
          * The VCK is always paired with the VCP before the VCP has a sprite.
          */
         for (DeviceIntPtr it = inputInfo.devices; it; it = it->next) {
-            if (it->spriteInfo->paired == pDev)
-                it->spriteInfo->sprite = pDev->spriteInfo->sprite;
+          if (it->spriteInfo->paired == pDev) {
+            it->spriteInfo->sprite = pDev->spriteInfo->sprite;
+          }
         }
-        if (inputInfo.keyboard->spriteInfo->paired == pDev)
-            inputInfo.keyboard->spriteInfo->sprite = pDev->spriteInfo->sprite;
+        if (inputInfo.keyboard->spriteInfo->paired == pDev) {
+          inputInfo.keyboard->spriteInfo->sprite = pDev->spriteInfo->sprite;
+        }
     }
 
     pSprite = pDev->spriteInfo->sprite;
@@ -3337,8 +3493,9 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
     if (pWin) {
         pCursor = wCursor(pWin);
         pSprite->spriteTrace = (WindowPtr *) calloc(1, 32 * sizeof(WindowPtr));
-        if (!pSprite->spriteTrace)
-            FatalError("Failed to allocate spriteTrace");
+        if (!pSprite->spriteTrace) {
+          FatalError("Failed to allocate spriteTrace");
+        }
         pSprite->spriteTraceSize = 32;
 
         RootWindow(pDev->spriteInfo->sprite) = pWin;
@@ -3357,8 +3514,9 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
         pSprite->pDequeueScreen = pSprite->pEnqueueScreen;
     }
     pCursor = RefCursor(pCursor);
-    if (pSprite->current)
-        FreeCursor(pSprite->current, None);
+    if (pSprite->current) {
+      FreeCursor(pSprite->current, None);
+    }
     pSprite->current = pCursor;
 
     if (pScreen) {
@@ -3393,8 +3551,9 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
 void FreeSprite(DeviceIntPtr dev)
 {
     if (DevHasCursor(dev) && dev->spriteInfo->sprite) {
-        if (dev->spriteInfo->sprite->current)
-            FreeCursor(dev->spriteInfo->sprite->current, None);
+      if (dev->spriteInfo->sprite->current) {
+        FreeCursor(dev->spriteInfo->sprite->current, None);
+      }
         free(dev->spriteInfo->sprite->spriteTrace);
         free(dev->spriteInfo->sprite);
     }
@@ -3424,11 +3583,13 @@ UpdateSpriteForScreen(DeviceIntPtr pDev, ScreenPtr pScreen)
     WindowPtr win = NULL;
     CursorPtr pCursor;
 
-    if (!pScreen)
-        return;
+    if (!pScreen) {
+      return;
+    }
 
-    if (!pDev->spriteInfo->sprite)
-        return;
+    if (!pDev->spriteInfo->sprite) {
+      return;
+    }
 
     pSprite = pDev->spriteInfo->sprite;
 
@@ -3440,8 +3601,9 @@ UpdateSpriteForScreen(DeviceIntPtr pDev, ScreenPtr pScreen)
     pSprite->hotLimits.y2 = pScreen->height;
     pSprite->win = win;
     pCursor = RefCursor(wCursor(win));
-    if (pSprite->current)
-        FreeCursor(pSprite->current, 0);
+    if (pSprite->current) {
+      FreeCursor(pSprite->current, 0);
+    }
     pSprite->current = pCursor;
     pSprite->spriteTraceGood = 1;
     pSprite->spriteTrace[0] = win;
@@ -3476,9 +3638,11 @@ UpdateSpriteForScreen(DeviceIntPtr pDev, ScreenPtr pScreen)
 void
 WindowHasNewCursor(WindowPtr pWin)
 {
-    for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next)
-        if (DevHasCursor(pDev))
-            PostNewCursor(pDev);
+  for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next) {
+    if (DevHasCursor(pDev)) {
+      PostNewCursor(pDev);
+    }
+  }
 }
 
 void
@@ -3502,28 +3666,27 @@ NewCurrentScreen(DeviceIntPtr pDev, ScreenPtr newScreen, int x, int y)
         if (newScreen != pSprite->screen) {
             pSprite->screen = newScreen;
             /* Make sure we tell the DDX to update its copy of the screen */
-            if (pSprite->confineWin)
-                XineramaConfineCursorToWindow(ptr, pSprite->confineWin, TRUE);
-            else
-                XineramaConfineCursorToWindow(ptr, masterScreen->root, TRUE);
+            if (pSprite->confineWin) {
+              XineramaConfineCursorToWindow(ptr, pSprite->confineWin, TRUE);
+            } else {
+              XineramaConfineCursorToWindow(ptr, masterScreen->root, TRUE);
+            }
             /* if the pointer wasn't confined, the DDX won't get
                told of the pointer warp so we reposition it here */
-            if (!syncEvents.playingEvents)
-                (*pSprite->screen->SetCursorPosition) (ptr,
-                                                       pSprite->screen,
-                                                       pSprite->hotPhys.x +
-                                                       masterScreen->
-                                                       x - pSprite->screen->x,
-                                                       pSprite->hotPhys.y +
-                                                       masterScreen->
-                                                       y - pSprite->screen->y,
-                                                       FALSE);
+            if (!syncEvents.playingEvents) {
+              (*pSprite->screen->SetCursorPosition)(
+                  ptr, pSprite->screen,
+                  pSprite->hotPhys.x + masterScreen->x - pSprite->screen->x,
+                  pSprite->hotPhys.y + masterScreen->y - pSprite->screen->y,
+                  FALSE);
+            }
         }
     }
     else
 #endif /* XINERAMA */
-    if (newScreen != pSprite->hotPhys.pScreen)
+      if (newScreen != pSprite->hotPhys.pScreen) {
         ConfineCursorToWindow(ptr, newScreen->root, TRUE, FALSE);
+      }
 }
 
 #ifdef XINERAMA
@@ -3534,14 +3697,17 @@ XineramaPointInWindowIsVisible(WindowPtr pWin, int x, int y)
     BoxRec box;
     int xoff, yoff;
 
-    if (!pWin->realized)
-        return FALSE;
+    if (!pWin->realized) {
+      return FALSE;
+    }
 
-    if (RegionContainsPoint(&pWin->borderClip, x, y, &box))
-        return TRUE;
+    if (RegionContainsPoint(&pWin->borderClip, x, y, &box)) {
+      return TRUE;
+    }
 
-    if (!XineramaSetWindowPntrs(inputInfo.pointer, pWin))
-         return FALSE;
+    if (!XineramaSetWindowPntrs(inputInfo.pointer, pWin)) {
+      return FALSE;
+    }
 
     ScreenPtr masterScreen = dixGetMasterScreen();
 
@@ -3576,8 +3742,9 @@ XineramaWarpPointer(ClientPtr client)
 
     if (stuff->dstWid != None) {
         rc = dixLookupWindow(&dest, stuff->dstWid, client, DixReadAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
     }
     x = pSprite->hotPhys.x;
     y = pSprite->hotPhys.y;
@@ -3590,8 +3757,9 @@ XineramaWarpPointer(ClientPtr client)
         WindowPtr source;
 
         rc = dixLookupWindow(&source, winID, client, DixReadAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
 
         winX = source->drawable.x;
         winY = source->drawable.y;
@@ -3599,14 +3767,14 @@ XineramaWarpPointer(ClientPtr client)
             winX -= masterScreen->x;
             winY -= masterScreen->y;
         }
-        if (x < winX + stuff->srcX ||
-            y < winY + stuff->srcY ||
+        if (x < winX + stuff->srcX || y < winY + stuff->srcY ||
             (stuff->srcWidth != 0 &&
-             winX + stuff->srcX + (int) stuff->srcWidth < x) ||
+             winX + stuff->srcX + (int)stuff->srcWidth < x) ||
             (stuff->srcHeight != 0 &&
-             winY + stuff->srcY + (int) stuff->srcHeight < y) ||
-            !XineramaPointInWindowIsVisible(source, x, y))
-            return Success;
+             winY + stuff->srcY + (int)stuff->srcHeight < y) ||
+            !XineramaPointInWindowIsVisible(source, x, y)) {
+          return Success;
+        }
     }
     if (dest) {
         x = dest->drawable.x;
@@ -3620,16 +3788,19 @@ XineramaWarpPointer(ClientPtr client)
     x += stuff->dstX;
     y += stuff->dstY;
 
-    if (x < pSprite->physLimits.x1)
-        x = pSprite->physLimits.x1;
-    else if (x >= pSprite->physLimits.x2)
-        x = pSprite->physLimits.x2 - 1;
-    if (y < pSprite->physLimits.y1)
-        y = pSprite->physLimits.y1;
-    else if (y >= pSprite->physLimits.y2)
-        y = pSprite->physLimits.y2 - 1;
-    if (pSprite->hotShape)
-        ConfineToShape(pSprite->hotShape, &x, &y);
+    if (x < pSprite->physLimits.x1) {
+      x = pSprite->physLimits.x1;
+    } else if (x >= pSprite->physLimits.x2) {
+      x = pSprite->physLimits.x2 - 1;
+    }
+    if (y < pSprite->physLimits.y1) {
+      y = pSprite->physLimits.y1;
+    } else if (y >= pSprite->physLimits.y2) {
+      y = pSprite->physLimits.y2 - 1;
+    }
+    if (pSprite->hotShape) {
+      ConfineToShape(pSprite->hotShape, &x, &y);
+    }
 
     XineramaSetCursorPosition(PickPointer(client), x, y, TRUE);
 
@@ -3659,24 +3830,28 @@ ProcWarpPointer(ClientPtr client)
     for (DeviceIntPtr tmp = inputInfo.devices; tmp; tmp = tmp->next) {
         if (GetMaster(tmp, MASTER_ATTACHED) == dev) {
             rc = dixCallDeviceAccessCallback(client, dev, DixWriteAccess);
-            if (rc != Success)
-                return rc;
+            if (rc != Success) {
+              return rc;
+            }
         }
     }
 
-    if (dev->lastSlave)
-        dev = dev->lastSlave;
+    if (dev->lastSlave) {
+      dev = dev->lastSlave;
+    }
     pSprite = dev->spriteInfo->sprite;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return XineramaWarpPointer(client);
+    if (!noPanoramiXExtension) {
+      return XineramaWarpPointer(client);
+    }
 #endif /* XINERAMA */
 
     if (stuff->dstWid != None) {
         rc = dixLookupWindow(&dest, stuff->dstWid, client, DixGetAttrAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
     }
     x = pSprite->hotPhys.x;
     y = pSprite->hotPhys.y;
@@ -3687,68 +3862,75 @@ ProcWarpPointer(ClientPtr client)
         WindowPtr source;
 
         rc = dixLookupWindow(&source, winID, client, DixGetAttrAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
 
         winX = source->drawable.x;
         winY = source->drawable.y;
         if (source->drawable.pScreen != pSprite->hotPhys.pScreen ||
-            x < winX + stuff->srcX ||
-            y < winY + stuff->srcY ||
+            x < winX + stuff->srcX || y < winY + stuff->srcY ||
             (stuff->srcWidth != 0 &&
-             winX + stuff->srcX + (int) stuff->srcWidth < x) ||
+             winX + stuff->srcX + (int)stuff->srcWidth < x) ||
             (stuff->srcHeight != 0 &&
-             winY + stuff->srcY + (int) stuff->srcHeight < y) ||
-            (source->parent && !PointInWindowIsVisible(source, x, y)))
-            return Success;
+             winY + stuff->srcY + (int)stuff->srcHeight < y) ||
+            (source->parent && !PointInWindowIsVisible(source, x, y))) {
+          return Success;
+        }
     }
     if (dest) {
         x = dest->drawable.x;
         y = dest->drawable.y;
         newScreen = dest->drawable.pScreen;
+    } else {
+      newScreen = pSprite->hotPhys.pScreen;
     }
-    else
-        newScreen = pSprite->hotPhys.pScreen;
 
     x += stuff->dstX;
     y += stuff->dstY;
 
-    if (x < 0)
-        x = 0;
-    else if (x >= newScreen->width)
-        x = newScreen->width - 1;
-    if (y < 0)
-        y = 0;
-    else if (y >= newScreen->height)
-        y = newScreen->height - 1;
+    if (x < 0) {
+      x = 0;
+    } else if (x >= newScreen->width) {
+      x = newScreen->width - 1;
+    }
+    if (y < 0) {
+      y = 0;
+    } else if (y >= newScreen->height) {
+      y = newScreen->height - 1;
+    }
 
     if (newScreen == pSprite->hotPhys.pScreen) {
-        if (x < pSprite->physLimits.x1)
-            x = pSprite->physLimits.x1;
-        else if (x >= pSprite->physLimits.x2)
-            x = pSprite->physLimits.x2 - 1;
-        if (y < pSprite->physLimits.y1)
-            y = pSprite->physLimits.y1;
-        else if (y >= pSprite->physLimits.y2)
-            y = pSprite->physLimits.y2 - 1;
-        if (pSprite->hotShape)
-            ConfineToShape(pSprite->hotShape, &x, &y);
+      if (x < pSprite->physLimits.x1) {
+        x = pSprite->physLimits.x1;
+      } else if (x >= pSprite->physLimits.x2) {
+        x = pSprite->physLimits.x2 - 1;
+      }
+      if (y < pSprite->physLimits.y1) {
+        y = pSprite->physLimits.y1;
+      } else if (y >= pSprite->physLimits.y2) {
+        y = pSprite->physLimits.y2 - 1;
+      }
+      if (pSprite->hotShape) {
+        ConfineToShape(pSprite->hotShape, &x, &y);
+      }
         (*newScreen->SetCursorPosition) (dev, newScreen, x, y, TRUE);
     }
     else if (!PointerConfinedToScreen(dev)) {
         NewCurrentScreen(dev, newScreen, x, y);
     }
-    if (*newScreen->CursorWarpedTo)
-        (*newScreen->CursorWarpedTo) (dev, newScreen, client,
-                                      dest, pSprite, x, y);
+    if (*newScreen->CursorWarpedTo) {
+      (*newScreen->CursorWarpedTo)(dev, newScreen, client, dest, pSprite, x, y);
+    }
     return Success;
 }
 
 static Bool
 BorderSizeNotEmpty(DeviceIntPtr pDev, WindowPtr pWin)
 {
-    if (RegionNotEmpty(&pWin->borderSize))
-        return TRUE;
+  if (RegionNotEmpty(&pWin->borderSize)) {
+    return TRUE;
+  }
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension && XineramaSetWindowPntrs(pDev, pWin)) {
@@ -3790,14 +3972,16 @@ ActivatePassiveGrab(DeviceIntPtr device, GrabPtr grab, InternalEvent *event,
 
         event->device_event.corestate &= 0x1f00;
 
-        if (grab->grabtype == CORE)
-            gdev = GetMaster(device, KEYBOARD_OR_FLOAT);
-        else
-            gdev = grab->modifierDevice;
+        if (grab->grabtype == CORE) {
+          gdev = GetMaster(device, KEYBOARD_OR_FLOAT);
+        } else {
+          gdev = grab->modifierDevice;
+        }
 
-        if (gdev && gdev->key && gdev->key->xkbInfo)
-            event->device_event.corestate |=
-                gdev->key->xkbInfo->state.grab_mods & (~0x1f00);
+        if (gdev && gdev->key && gdev->key->xkbInfo) {
+          event->device_event.corestate |=
+              gdev->key->xkbInfo->state.grab_mods & (~0x1f00);
+        }
     }
 
     if (grab->grabtype == CORE) {
@@ -3811,9 +3995,12 @@ ActivatePassiveGrab(DeviceIntPtr device, GrabPtr grab, InternalEvent *event,
     else if (grab->grabtype == XI2) {
         rc = EventToXI2(event, &xE);
         if (rc != Success) {
-            if (rc != BadMatch)
-                BUG_WARN_MSG(rc != BadMatch, "[dix] %s: XI2 conversion failed"
-                             "(%d, %d).\n", device->name, event->any.type, rc);
+          if (rc != BadMatch) {
+            BUG_WARN_MSG(rc != BadMatch,
+                         "[dix] %s: XI2 conversion failed"
+                         "(%d, %d).\n",
+                         device->name, event->any.type, rc);
+          }
             return FALSE;
         }
         count = 1;
@@ -3821,9 +4008,12 @@ ActivatePassiveGrab(DeviceIntPtr device, GrabPtr grab, InternalEvent *event,
     else {
         rc = EventToXI(event, &xE, &count);
         if (rc != Success) {
-            if (rc != BadMatch)
-                BUG_WARN_MSG(rc != BadMatch, "[dix] %s: XI conversion failed"
-                             "(%d, %d).\n", device->name, event->any.type, rc);
+          if (rc != BadMatch) {
+            BUG_WARN_MSG(rc != BadMatch,
+                         "[dix] %s: XI conversion failed"
+                         "(%d, %d).\n",
+                         device->name, event->any.type, rc);
+          }
             return FALSE;
         }
     }
@@ -3859,8 +4049,9 @@ void ActivateGrabNoDelivery(DeviceIntPtr dev, GrabPtr grab,
     (*grabinfo->ActivateGrab) (dev, grab,
                                ClientTimeToServerTime(event->any.time), TRUE);
 
-    if (grabinfo->sync.state == GRAB_STATE_FROZEN_NO_EVENT)
-        grabinfo->sync.state = GRAB_STATE_FROZEN_WITH_EVENT;
+    if (grabinfo->sync.state == GRAB_STATE_FROZEN_NO_EVENT) {
+      grabinfo->sync.state = GRAB_STATE_FROZEN_WITH_EVENT;
+    }
     CopyPartialInternalEvent(grabinfo->sync.event, real_event);
 }
 
@@ -3938,8 +4129,9 @@ MatchForType(const GrabPtr grab, GrabPtr tmp, enum InputLevel level,
     tmp->grabtype = grabtype;
     tmp->type = evtype;
 
-    if (tmp->type && GrabMatchesSecond(tmp, grab, ignore_device))
-        return match;
+    if (tmp->type && GrabMatchesSecond(tmp, grab, ignore_device)) {
+      return match;
+    }
 
     return NO_MATCH;
 }
@@ -3975,12 +4167,14 @@ CheckPassiveGrab(DeviceIntPtr device, GrabPtr grab, InternalEvent *event,
          * attached master keyboard. Since the slave may have been
          * reattached after the grab, the modifier device may not be the
          * same. */
-        if (!InputDevIsMaster(grab->device) && !InputDevIsFloating(device))
-            gdev = GetMaster(device, MASTER_KEYBOARD);
+        if (!InputDevIsMaster(grab->device) && !InputDevIsFloating(device)) {
+          gdev = GetMaster(device, MASTER_KEYBOARD);
+        }
     }
 
-    if (gdev && gdev->key)
-        xkbi = gdev->key->xkbInfo;
+    if (gdev && gdev->key) {
+      xkbi = gdev->key->xkbInfo;
+    }
     tempGrab->modifierDevice = grab->modifierDevice;
     tempGrab->modifiersDetail.exact = xkbi ? xkbi->state.grab_mods : 0;
 
@@ -3993,22 +4187,26 @@ CheckPassiveGrab(DeviceIntPtr device, GrabPtr grab, InternalEvent *event,
         match = MatchForType(grab, tempGrab, XI2, emulated_type);
     }
 
-    if (!match)
-        match = MatchForType(grab, tempGrab, XI, event->any.type);
+    if (!match) {
+      match = MatchForType(grab, tempGrab, XI, event->any.type);
+    }
 
-    if (!match && emulated_type)
-        match = MatchForType(grab, tempGrab, XI, emulated_type);
+    if (!match && emulated_type) {
+      match = MatchForType(grab, tempGrab, XI, emulated_type);
+    }
 
     if (!match && checkCore) {
         match = MatchForType(grab, tempGrab, CORE, event->any.type);
-        if (!match && emulated_type)
-            match = MatchForType(grab, tempGrab, CORE, emulated_type);
+        if (!match && emulated_type) {
+          match = MatchForType(grab, tempGrab, CORE, emulated_type);
+        }
     }
 
-    if (!match || (grab->confineTo &&
-                   (!grab->confineTo->realized ||
-                    !BorderSizeNotEmpty(device, grab->confineTo))))
-        return FALSE;
+    if (!match ||
+        (grab->confineTo && (!grab->confineTo->realized ||
+                             !BorderSizeNotEmpty(device, grab->confineTo)))) {
+      return FALSE;
+    }
 
     /* In some cases a passive core grab may exist, but the client
      * already has a core grab on some other device. In this case we
@@ -4029,8 +4227,9 @@ CheckPassiveGrab(DeviceIntPtr device, GrabPtr grab, InternalEvent *event,
             grab->modifierDevice = GetMaster(device, MASTER_KEYBOARD);
         }
 
-        if (CoreGrabInterferes(device, grab))
-            return FALSE;
+        if (CoreGrabInterferes(device, grab)) {
+          return FALSE;
+        }
     }
 
     return TRUE;
@@ -4057,12 +4256,14 @@ CheckPassiveGrabsOnWindow(WindowPtr pWin,
     GrabPtr grab = wPassiveGrabs(pWin);
     GrabPtr tempGrab;
 
-    if (!grab)
-        return NULL;
+    if (!grab) {
+      return NULL;
+    }
 
     tempGrab = AllocGrab(NULL);
-    if (tempGrab == NULL)
-        return NULL;
+    if (tempGrab == NULL) {
+      return NULL;
+    }
 
     /* Fill out the grab details, but leave the type for later before
      * comparing */
@@ -4088,11 +4289,13 @@ CheckPassiveGrabsOnWindow(WindowPtr pWin,
     tempGrab->next = NULL;
 
     for (; grab; grab = grab->next) {
-        if (!CheckPassiveGrab(device, grab, event, checkCore, tempGrab))
-            continue;
+      if (!CheckPassiveGrab(device, grab, event, checkCore, tempGrab)) {
+        continue;
+      }
 
-        if (activate && !ActivatePassiveGrab(device, grab, event, event))
-            continue;
+      if (activate && !ActivatePassiveGrab(device, grab, event, event)) {
+        continue;
+      }
 
         break;
     }
@@ -4138,22 +4341,28 @@ CheckDeviceGrabs(DeviceIntPtr device, InternalEvent *ievent, WindowPtr ancestor)
     Bool ret = FALSE;
     DeviceEvent *event = &ievent->device_event;
 
-    if (event->type != ET_ButtonPress && event->type != ET_KeyPress)
-        return FALSE;
+    if (event->type != ET_ButtonPress && event->type != ET_KeyPress) {
+      return FALSE;
+    }
 
-    if (event->type == ET_ButtonPress && (device->button->buttonsDown != 1))
-        return FALSE;
+    if (event->type == ET_ButtonPress && (device->button->buttonsDown != 1)) {
+      return FALSE;
+    }
 
-    if (device->deviceGrab.grab)
-        return FALSE;
+    if (device->deviceGrab.grab) {
+      return FALSE;
+    }
 
     i = 0;
     if (ancestor) {
-        while (i < device->spriteInfo->sprite->spriteTraceGood)
-            if (device->spriteInfo->sprite->spriteTrace[i++] == ancestor)
-                break;
-        if (i == device->spriteInfo->sprite->spriteTraceGood)
-            goto out;
+      while (i < device->spriteInfo->sprite->spriteTraceGood) {
+        if (device->spriteInfo->sprite->spriteTrace[i++] == ancestor) {
+          break;
+        }
+      }
+      if (i == device->spriteInfo->sprite->spriteTraceGood) {
+        goto out;
+      }
     }
 
     if (focus) {
@@ -4168,8 +4377,9 @@ CheckDeviceGrabs(DeviceIntPtr device, InternalEvent *ievent, WindowPtr ancestor)
 
         if ((focus->win == NoneWin) ||
             (i >= device->spriteInfo->sprite->spriteTraceGood) ||
-            (pWin && pWin != device->spriteInfo->sprite->spriteTrace[i - 1]))
-            goto out;
+            (pWin && pWin != device->spriteInfo->sprite->spriteTrace[i - 1])) {
+          goto out;
+        }
     }
 
     for (; i < device->spriteInfo->sprite->spriteTraceGood; i++) {
@@ -4182,8 +4392,9 @@ CheckDeviceGrabs(DeviceIntPtr device, InternalEvent *ievent, WindowPtr ancestor)
     }
 
  out:
-    if (ret == TRUE && event->type == ET_KeyPress)
-        device->deviceGrab.activatingKey = event->detail.key;
+   if (ret == TRUE && event->type == ET_KeyPress) {
+     device->deviceGrab.activatingKey = event->detail.key;
+   }
     return ret;
 }
 
@@ -4208,17 +4419,20 @@ DeliverFocusedEvent(DeviceIntPtr keybd, InternalEvent *event, WindowPtr window)
     int count, rc;
     int deliveries = 0;
 
-    if (focus == FollowKeyboardWin)
-        focus = inputInfo.keyboard->focus->win;
-    if (!focus)
-        return;
+    if (focus == FollowKeyboardWin) {
+      focus = inputInfo.keyboard->focus->win;
+    }
+    if (!focus) {
+      return;
+    }
     if (focus == PointerRootWin) {
         DeliverDeviceEvents(window, event, NullGrab, NullWindow, keybd);
         return;
     }
     if ((focus == window) || WindowIsParent(focus, window)) {
-        if (DeliverDeviceEvents(window, event, NullGrab, focus, keybd))
-            return;
+      if (DeliverDeviceEvents(window, event, NullGrab, focus, keybd)) {
+        return;
+      }
     }
 
     /* just deliver it to the focus window */
@@ -4232,13 +4446,14 @@ DeliverFocusedEvent(DeviceIntPtr keybd, InternalEvent *event, WindowPtr window)
         FixUpEventFromWindow(ptr->spriteInfo->sprite, xi2, focus, None, FALSE, XI2);
         deliveries = DeliverEventsToWindow(keybd, focus, xi2, 1,
                                            filter, NullGrab);
-        if (deliveries > 0)
-            goto unwind;
-    }
-    else if (rc != BadMatch)
-        ErrorF
-            ("[dix] %s: XI2 conversion failed in DFE (%d, %d). Skipping delivery.\n",
+        if (deliveries > 0) {
+          goto unwind;
+        }
+    } else if (rc != BadMatch) {
+      ErrorF("[dix] %s: XI2 conversion failed in DFE (%d, %d). Skipping "
+             "delivery.\n",
              keybd->name, event->any.type, rc);
+    }
 
     rc = EventToXI(event, &xE, &count);
     if (rc == Success &&
@@ -4247,13 +4462,14 @@ DeliverFocusedEvent(DeviceIntPtr keybd, InternalEvent *event, WindowPtr window)
         deliveries = DeliverEventsToWindow(keybd, focus, xE, count,
                                            GetEventFilter(keybd, xE), NullGrab);
 
-        if (deliveries > 0)
-            goto unwind;
-    }
-    else if (rc != BadMatch)
-        ErrorF
-            ("[dix] %s: XI conversion failed in DFE (%d, %d). Skipping delivery.\n",
+        if (deliveries > 0) {
+          goto unwind;
+        }
+    } else if (rc != BadMatch) {
+      ErrorF("[dix] %s: XI conversion failed in DFE (%d, %d). Skipping "
+             "delivery.\n",
              keybd->name, event->any.type, rc);
+    }
 
     if (sendCore) {
         rc = EventToCore(event, &core, &count);
@@ -4266,11 +4482,11 @@ DeliverFocusedEvent(DeviceIntPtr keybd, InternalEvent *event, WindowPtr window)
                                           GetEventFilter(keybd, core),
                                           NullGrab);
             }
-        }
-        else if (rc != BadMatch)
-            ErrorF
-                ("[dix] %s: core conversion failed DFE (%d, %d). Skipping delivery.\n",
+        } else if (rc != BadMatch) {
+          ErrorF("[dix] %s: core conversion failed DFE (%d, %d). Skipping "
+                 "delivery.\n",
                  keybd->name, event->any.type, rc);
+        }
     }
 
  unwind:
@@ -4294,8 +4510,9 @@ DeliverOneGrabbedEvent(InternalEvent *event, DeviceIntPtr dev,
     GrabPtr grab = grabinfo->grab;
     Mask filter;
 
-    if (grab->grabtype != level)
-        return 0;
+    if (grab->grabtype != level) {
+      return 0;
+    }
 
     switch (level) {
     case XI2:
@@ -4308,19 +4525,22 @@ DeliverOneGrabbedEvent(InternalEvent *event, DeviceIntPtr dev,
         }
         break;
     case XI:
-        if (grabinfo->fromPassiveGrab && grabinfo->implicitGrab)
-            mask = grab->deviceMask;
-        else
-            mask = grab->eventMask;
+      if (grabinfo->fromPassiveGrab && grabinfo->implicitGrab) {
+        mask = grab->deviceMask;
+      } else {
+        mask = grab->eventMask;
+      }
         rc = EventToXI(event, &xE, &count);
-        if (rc == Success)
-            filter = GetEventFilter(dev, xE);
+        if (rc == Success) {
+          filter = GetEventFilter(dev, xE);
+        }
         break;
     case CORE:
         rc = EventToCore(event, &xE, &count);
         mask = grab->eventMask;
-        if (rc == Success)
-            filter = GetEventFilter(dev, xE);
+        if (rc == Success) {
+          filter = GetEventFilter(dev, xE);
+        }
         break;
     default:
         BUG_WARN_MSG(1, "Invalid input level %d\n", level);
@@ -4330,17 +4550,19 @@ DeliverOneGrabbedEvent(InternalEvent *event, DeviceIntPtr dev,
     if (rc == Success) {
         FixUpEventFromWindow(pSprite, xE, grab->window, None, TRUE, level);
         if (XaceHookSendAccess(NULL, dev, grab->window, xE, count) ||
-            XaceHookReceiveAccess(dixClientForGrab(grab), grab->window, xE, count))
-            deliveries = 1;     /* don't send, but pretend we did */
-        else if (level != CORE || !IsInterferingGrab(dixClientForGrab(grab), dev, xE)) {
-            deliveries = TryClientEvents(dixClientForGrab(grab), dev,
-                                         xE, count, mask, filter, grab);
+            XaceHookReceiveAccess(dixClientForGrab(grab), grab->window, xE,
+                                  count)) {
+          deliveries = 1; /* don't send, but pretend we did */
+        } else if (level != CORE ||
+                   !IsInterferingGrab(dixClientForGrab(grab), dev, xE)) {
+          deliveries = TryClientEvents(dixClientForGrab(grab), dev, xE, count,
+                                       mask, filter, grab);
         }
+    } else {
+      BUG_WARN_MSG(rc != BadMatch,
+                   "%s: conversion to mode %d failed on %d with %d\n",
+                   dev->name, level, event->any.type, rc);
     }
-    else
-        BUG_WARN_MSG(rc != BadMatch,
-                     "%s: conversion to mode %d failed on %d with %d\n",
-                     dev->name, level, event->any.type, rc);
 
     free(xE);
     return deliveries;
@@ -4375,34 +4597,37 @@ DeliverGrabbedEvent(InternalEvent *event, DeviceIntPtr thisDev,
          * for the type of event, to see if we really want to deliver it to
          * the focus window. For pointer events, the answer is no.
          */
-        if (IsPointerEvent(event))
-            focus = PointerRootWin;
-        else if (thisDev->focus) {
-            focus = thisDev->focus->win;
-            if (focus == FollowKeyboardWin)
-                focus = inputInfo.keyboard->focus->win;
+        if (IsPointerEvent(event)) {
+          focus = PointerRootWin;
+        } else if (thisDev->focus) {
+          focus = thisDev->focus->win;
+          if (focus == FollowKeyboardWin) {
+            focus = inputInfo.keyboard->focus->win;
+          }
+        } else {
+          focus = PointerRootWin;
         }
-        else
-            focus = PointerRootWin;
-        if (focus == PointerRootWin)
-            deliveries = DeliverDeviceEvents(pSprite->win, event, grab,
-                                             NullWindow, thisDev);
-        else if (focus && (focus == pSprite->win ||
-                           WindowIsParent(focus, pSprite->win)))
-            deliveries = DeliverDeviceEvents(pSprite->win, event, grab, focus,
-                                             thisDev);
-        else if (focus)
-            deliveries = DeliverDeviceEvents(focus, event, grab, focus,
-                                             thisDev);
+        if (focus == PointerRootWin) {
+          deliveries = DeliverDeviceEvents(pSprite->win, event, grab,
+                                           NullWindow, thisDev);
+        } else if (focus && (focus == pSprite->win ||
+                             WindowIsParent(focus, pSprite->win))) {
+          deliveries =
+              DeliverDeviceEvents(pSprite->win, event, grab, focus, thisDev);
+        } else if (focus) {
+          deliveries = DeliverDeviceEvents(focus, event, grab, focus, thisDev);
+        }
     }
     if (!deliveries) {
         sendCore = (InputDevIsMaster(thisDev) && thisDev->coreEvents);
         /* try core event */
-        if ((sendCore && grab->grabtype == CORE) || grab->grabtype != CORE)
-            deliveries = DeliverOneGrabbedEvent(event, thisDev, grab->grabtype);
+        if ((sendCore && grab->grabtype == CORE) || grab->grabtype != CORE) {
+          deliveries = DeliverOneGrabbedEvent(event, thisDev, grab->grabtype);
+        }
 
-        if (deliveries && (event->any.type == ET_Motion))
-            thisDev->valuator->motionHintWindow = grab->window;
+        if (deliveries && (event->any.type == ET_Motion)) {
+          thisDev->valuator->motionHintWindow = grab->window;
+        }
     }
     if (deliveries && !deactivateGrab &&
         (event->any.type == ET_KeyPress ||
@@ -4427,12 +4652,14 @@ FreezeThisEventIfNeededForSyncGrab(DeviceIntPtr thisDev, InternalEvent *event)
         dev = GetPairedDevice(thisDev);
         if (dev) {
             FreezeThaw(dev, TRUE);
-            if ((dev->deviceGrab.sync.state == GRAB_STATE_FREEZE_BOTH_NEXT_EVENT) &&
+            if ((dev->deviceGrab.sync.state ==
+                 GRAB_STATE_FREEZE_BOTH_NEXT_EVENT) &&
                 (dixClientIdForXID(grab->resource) ==
-                 dixClientIdForXID(dev->deviceGrab.grab->resource)))
-                dev->deviceGrab.sync.state = GRAB_STATE_FROZEN_NO_EVENT;
-            else
-                dev->deviceGrab.sync.other = grab;
+                 dixClientIdForXID(dev->deviceGrab.grab->resource))) {
+              dev->deviceGrab.sync.state = GRAB_STATE_FROZEN_NO_EVENT;
+            } else {
+              dev->deviceGrab.sync.other = grab;
+            }
         }
         /* fall through */
     case GRAB_STATE_FREEZE_NEXT_EVENT:
@@ -4457,12 +4684,13 @@ FixKeyState(DeviceEvent *event, DeviceIntPtr keybd)
                ((event->type == ET_KeyPress) ? "down" : "up"));
     }
 
-    if (event->type == ET_KeyPress)
-        set_key_down(keybd, key, KEY_PROCESSED);
-    else if (event->type == ET_KeyRelease)
-        set_key_up(keybd, key, KEY_PROCESSED);
-    else
-        FatalError("Impossible keyboard event");
+    if (event->type == ET_KeyPress) {
+      set_key_down(keybd, key, KEY_PROCESSED);
+    } else if (event->type == ET_KeyRelease) {
+      set_key_up(keybd, key, KEY_PROCESSED);
+    } else {
+      FatalError("Impossible keyboard event");
+    }
 }
 
 #define AtMostOneClient \
@@ -4497,18 +4725,21 @@ RecalculateDeliverableEvents(WindowPtr pWin)
         }
         pChild->deliverableEvents = pChild->eventMask |
             wOtherEventMasks(pChild);
-        if (pChild->parent)
-            pChild->deliverableEvents |=
-                (pChild->parent->deliverableEvents &
-                 ~wDontPropagateMask(pChild) & PropagateMask);
+        if (pChild->parent) {
+          pChild->deliverableEvents |=
+              (pChild->parent->deliverableEvents & ~wDontPropagateMask(pChild) &
+               PropagateMask);
+        }
         if (pChild->firstChild) {
             pChild = pChild->firstChild;
             continue;
         }
-        while (!pChild->nextSib && (pChild != pWin))
-            pChild = pChild->parent;
-        if (pChild == pWin)
-            break;
+        while (!pChild->nextSib && (pChild != pWin)) {
+          pChild = pChild->parent;
+        }
+        if (pChild == pWin) {
+          break;
+        }
         pChild = pChild->nextSib;
     }
 }
@@ -4524,12 +4755,13 @@ OtherClientGone(void *value, XID id)
 
     for (OtherClientsPtr other = wOtherClients(pWin), prev = 0; other; other = other->next) {
         if (other->resource == id) {
-            if (prev)
-                prev->next = other->next;
-            else {
-                if (!(pWin->optional->otherClients = other->next))
-                    CheckWindowOptionalNeed(pWin);
+          if (prev) {
+            prev->next = other->next;
+          } else {
+            if (!(pWin->optional->otherClients = other->next)) {
+              CheckWindowOptionalNeed(pWin);
             }
+          }
             free(other);
             RecalculateDeliverableEvents(pWin);
             return Success;
@@ -4552,19 +4784,22 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
     if (check) {
         rc = XaceHookResourceAccess(client, pWin->drawable.id,
                       X11_RESTYPE_WINDOW, pWin, X11_RESTYPE_NONE, NULL, DixManageAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
     }
     check = (mask & AtMostOneClient);
     if (check & (pWin->eventMask | wOtherEventMasks(pWin))) {
         /* It is illegal for two different clients to select on any of the
            events for AtMostOneClient. However, it is OK, for some client to
            continue selecting on one of those events.  */
-        if ((dixClientForWindow(pWin) != client) && (check & pWin->eventMask))
-            return BadAccess;
+        if ((dixClientForWindow(pWin) != client) && (check & pWin->eventMask)) {
+          return BadAccess;
+        }
         for (OtherClients *others = wOtherClients(pWin); others; others = others->next) {
-            if (!SameClient(others, client) && (check & others->mask))
-                return BadAccess;
+          if (!SameClient(others, client) && (check & others->mask)) {
+            return BadAccess;
+          }
         }
     }
     if (dixClientForWindow(pWin) == client) {
@@ -4578,30 +4813,35 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
                 if (mask == 0) {
                     FreeResource(others->resource, X11_RESTYPE_NONE);
                     return Success;
+                } else {
+                  others->mask = mask;
                 }
-                else
-                    others->mask = mask;
                 goto maskSet;
             }
         }
         check = 0;
-        if (!MakeWindowOptional(pWin))
-            return BadAlloc;
+        if (!MakeWindowOptional(pWin)) {
+          return BadAlloc;
+        }
         OtherClients* others = calloc(1, sizeof(OtherClients));
-        if (!others)
-            return BadAlloc;
+        if (!others) {
+          return BadAlloc;
+        }
         others->mask = mask;
         others->resource = FakeClientID(client->index);
         others->next = pWin->optional->otherClients;
         pWin->optional->otherClients = others;
-        if (!AddResource(others->resource, X11_RESTYPE_OTHERCLIENT, (void *) pWin))
-            return BadAlloc;
+        if (!AddResource(others->resource, X11_RESTYPE_OTHERCLIENT,
+                         (void *)pWin)) {
+          return BadAlloc;
+        }
     }
  maskSet:
     if ((mask & PointerMotionHintMask) && !(check & PointerMotionHintMask)) {
         for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-            if (dev->valuator && dev->valuator->motionHintWindow == pWin)
-                dev->valuator->motionHintWindow = NullWindow;
+          if (dev->valuator && dev->valuator->motionHintWindow == pWin) {
+            dev->valuator->motionHintWindow = NullWindow;
+          }
         }
     }
     RecalculateDeliverableEvents(pWin);
@@ -4618,26 +4858,29 @@ EventSuppressForWindow(WindowPtr pWin, ClientPtr client,
         client->errorValue = mask;
         return BadValue;
     }
-    if (pWin->dontPropagate)
-        DontPropagateRefCnts[pWin->dontPropagate]--;
-    if (!mask)
-        i = 0;
-    else {
-        for (i = DNPMCOUNT, freed = 0; --i > 0;) {
-            if (!DontPropagateRefCnts[i])
-                freed = i;
-            else if (mask == DontPropagateMasks[i])
-                break;
+    if (pWin->dontPropagate) {
+      DontPropagateRefCnts[pWin->dontPropagate]--;
+    }
+    if (!mask) {
+      i = 0;
+    } else {
+      for (i = DNPMCOUNT, freed = 0; --i > 0;) {
+        if (!DontPropagateRefCnts[i]) {
+          freed = i;
+        } else if (mask == DontPropagateMasks[i]) {
+          break;
         }
-        if (!i && freed) {
-            i = freed;
-            DontPropagateMasks[i] = mask;
-        }
+      }
+      if (!i && freed) {
+        i = freed;
+        DontPropagateMasks[i] = mask;
+      }
     }
     if (i || !mask) {
         pWin->dontPropagate = i;
-        if (i)
-            DontPropagateRefCnts[i]++;
+        if (i) {
+          DontPropagateRefCnts[i]++;
+        }
         if (pWin->optional) {
             pWin->optional->dontPropagateMask = mask;
             *checkOptional = TRUE;
@@ -4645,8 +4888,9 @@ EventSuppressForWindow(WindowPtr pWin, ClientPtr client,
     }
     else {
         if (!MakeWindowOptional(pWin)) {
-            if (pWin->dontPropagate)
-                DontPropagateRefCnts[pWin->dontPropagate]++;
+          if (pWin->dontPropagate) {
+            DontPropagateRefCnts[pWin->dontPropagate]++;
+          }
             return BadAlloc;
         }
         pWin->dontPropagate = 0;
@@ -4677,12 +4921,14 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
     keybd = GetMaster(mouse, KEYBOARD_OR_FLOAT);
 
     if ((pWin == mouse->valuator->motionHintWindow) &&
-        (detail != NotifyInferior))
-        mouse->valuator->motionHintWindow = NullWindow;
+        (detail != NotifyInferior)) {
+      mouse->valuator->motionHintWindow = NullWindow;
+    }
     if (grab) {
         mask = (pWin == grab->window) ? grab->eventMask : 0;
-        if (grab->ownerEvents)
-            mask |= EventMaskForClient(pWin, dixClientForGrab(grab));
+        if (grab->ownerEvents) {
+          mask |= EventMaskForClient(pWin, dixClientForGrab(grab));
+        }
     }
     else {
         mask = pWin->eventMask | wOtherEventMasks(pWin);
@@ -4699,22 +4945,25 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
         ELFlagSameScreen : 0;
     event.u.enterLeave.state =
         mouse->button ? (mouse->button->state & 0x1f00) : 0;
-    if (keybd)
-        event.u.enterLeave.state |=
-            XkbGrabStateFromRec(&keybd->key->xkbInfo->state);
+    if (keybd) {
+      event.u.enterLeave.state |=
+          XkbGrabStateFromRec(&keybd->key->xkbInfo->state);
+    }
     event.u.enterLeave.mode = mode;
     focus = (keybd) ? keybd->focus->win : None;
-    if ((focus != NoneWin) &&
-        ((pWin == focus) || (focus == PointerRootWin) || WindowIsParent(focus, pWin)))
-        event.u.enterLeave.flags |= ELFlagFocus;
+    if ((focus != NoneWin) && ((pWin == focus) || (focus == PointerRootWin) ||
+                               WindowIsParent(focus, pWin))) {
+      event.u.enterLeave.flags |= ELFlagFocus;
+    }
 
     if ((mask & GetEventFilter(mouse, &event))) {
-        if (grab)
-            TryClientEvents(dixClientForGrab(grab), mouse, &event, 1, mask,
-                            GetEventFilter(mouse, &event), grab);
-        else
-            DeliverEventsToWindow(mouse, pWin, &event, 1,
-                                  GetEventFilter(mouse, &event), NullGrab);
+      if (grab) {
+        TryClientEvents(dixClientForGrab(grab), mouse, &event, 1, mask,
+                        GetEventFilter(mouse, &event), grab);
+      } else {
+        DeliverEventsToWindow(mouse, pWin, &event, 1,
+                              GetEventFilter(mouse, &event), NullGrab);
+      }
     }
 
     if ((type == EnterNotify) && (mask & KeymapStateMask)) {
@@ -4725,15 +4974,17 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
         int rc;
 
         rc = dixCallDeviceAccessCallback(client, keybd, DixReadAccess);
-        if (rc == Success)
-            memcpy((char *) &ke.map[0], (char *) &keybd->key->down[1], 31);
+        if (rc == Success) {
+          memcpy((char *)&ke.map[0], (char *)&keybd->key->down[1], 31);
+        }
 
-        if (grab)
-            TryClientEvents(dixClientForGrab(grab), keybd, (xEvent *) &ke, 1,
-                            mask, KeymapStateMask, grab);
-        else
-            DeliverEventsToWindow(mouse, pWin, (xEvent *) &ke, 1,
-                                  KeymapStateMask, NullGrab);
+        if (grab) {
+          TryClientEvents(dixClientForGrab(grab), keybd, (xEvent *)&ke, 1, mask,
+                          KeymapStateMask, grab);
+        } else {
+          DeliverEventsToWindow(mouse, pWin, (xEvent *)&ke, 1, KeymapStateMask,
+                                NullGrab);
+        }
     }
 }
 
@@ -4750,16 +5001,18 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
     DeviceIntPtr kbd;
 
     if ((mode == XINotifyPassiveGrab && type == XI_Leave) ||
-        (mode == XINotifyPassiveUngrab && type == XI_Enter))
-        return;
+        (mode == XINotifyPassiveUngrab && type == XI_Enter)) {
+      return;
+    }
 
     btlen = (mouse->button) ? bits_to_bytes(mouse->button->numButtons) : 0;
     btlen = bytes_to_int32(btlen);
     len = sizeof(xXIEnterEvent) + btlen * 4;
 
     xXIEnterEvent *event = calloc(1, len);
-    if (!event)
-        return;
+    if (!event) {
+      return;
+    }
 
     event->type = GenericEvent;
     event->extension = EXTENSION_MAJOR_XINPUT;
@@ -4774,9 +5027,12 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
     event->root_x = double_to_fp1616(mouse->spriteInfo->sprite->hot.x);
     event->root_y = double_to_fp1616(mouse->spriteInfo->sprite->hot.y);
 
-    for (int i = 0; mouse && mouse->button && i < mouse->button->numButtons; i++)
-        if (BitIsOn(mouse->button->down, i))
-            SetBit(&event[1], i);
+    for (int i = 0; mouse && mouse->button && i < mouse->button->numButtons;
+         i++) {
+      if (BitIsOn(mouse->button->down, i)) {
+        SetBit(&event[1], i);
+      }
+    }
 
     kbd = GetMaster(mouse, MASTER_KEYBOARD);
     if (kbd && kbd->key) {
@@ -4790,9 +5046,10 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
     }
 
     focus = (kbd) ? kbd->focus->win : None;
-    if ((focus != NoneWin) &&
-        ((pWin == focus) || (focus == PointerRootWin) || WindowIsParent(focus, pWin)))
-        event->focus = TRUE;
+    if ((focus != NoneWin) && ((pWin == focus) || (focus == PointerRootWin) ||
+                               WindowIsParent(focus, pWin))) {
+      event->focus = TRUE;
+    }
 
     FixUpEventFromWindow(mouse->spriteInfo->sprite, (xEvent *) event, pWin, None, FALSE, XI);
 
@@ -4806,8 +5063,9 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
                         grab);
     }
     else {
-        if (!WindowXI2MaskIsset(mouse, pWin, (xEvent *) event))
-            goto out;
+      if (!WindowXI2MaskIsset(mouse, pWin, (xEvent *)event)) {
+        goto out;
+      }
         DeliverEventsToWindow(mouse, pWin, (xEvent *) event, 1, filter,
                               NullGrab);
     }
@@ -4837,8 +5095,9 @@ CoreFocusEvent(DeviceIntPtr dev, int type, int mode, int detail, WindowPtr pWin)
         int rc;
 
         rc = dixCallDeviceAccessCallback(client, dev, DixReadAccess);
-        if (rc == Success)
-            memcpy((char *) &ke.map[0], (char *) &dev->key->down[1], 31);
+        if (rc == Success) {
+          memcpy((char *)&ke.map[0], (char *)&dev->key->down[1], 31);
+        }
 
         DeliverEventsToWindow(dev, pWin, (xEvent *) &ke, 1,
                               KeymapStateMask, NullGrab);
@@ -4885,59 +5144,67 @@ SetInputFocus(ClientPtr client,
 
     keybd = GetMaster(dev, KEYBOARD_OR_FLOAT);
 
-    if ((focusID == None) || (focusID == PointerRoot))
-        focusWin = (WindowPtr) (long) focusID;
-    else if ((focusID == FollowKeyboard) && followOK) {
-        focusWin = keybd->focus->win;
-    }
-    else {
-        rc = dixLookupWindow(&focusWin, focusID, client, DixSetAttrAccess);
-        if (rc != Success)
-            return rc;
-        /* It is a match error to try to set the input focus to an
-           unviewable window. */
-        if (!focusWin->realized)
-            return BadMatch;
+    if ((focusID == None) || (focusID == PointerRoot)) {
+      focusWin = (WindowPtr)(long)focusID;
+    } else if ((focusID == FollowKeyboard) && followOK) {
+      focusWin = keybd->focus->win;
+    } else {
+      rc = dixLookupWindow(&focusWin, focusID, client, DixSetAttrAccess);
+      if (rc != Success) {
+        return rc;
+      }
+      /* It is a match error to try to set the input focus to an
+         unviewable window. */
+      if (!focusWin->realized) {
+        return BadMatch;
+      }
     }
     rc = dixCallDeviceAccessCallback(client, dev, DixSetFocusAccess);
-    if (rc != Success)
-        return Success;
+    if (rc != Success) {
+      return Success;
+    }
 
     focus = dev->focus;
     if ((CompareTimeStamps(time, currentTime) == LATER) ||
-        (CompareTimeStamps(time, focus->time) == EARLIER))
-        return Success;
+        (CompareTimeStamps(time, focus->time) == EARLIER)) {
+      return Success;
+    }
     mode = (dev->deviceGrab.grab) ? NotifyWhileGrabbed : NotifyNormal;
     if (focus->win == FollowKeyboardWin) {
-        if (!ActivateFocusInGrab(dev, keybd->focus->win, focusWin))
-            DoFocusEvents(dev, keybd->focus->win, focusWin, mode);
+      if (!ActivateFocusInGrab(dev, keybd->focus->win, focusWin)) {
+        DoFocusEvents(dev, keybd->focus->win, focusWin, mode);
+      }
     }
     else {
-        if (!ActivateFocusInGrab(dev, focus->win, focusWin))
-            DoFocusEvents(dev, focus->win, focusWin, mode);
+      if (!ActivateFocusInGrab(dev, focus->win, focusWin)) {
+        DoFocusEvents(dev, focus->win, focusWin, mode);
+      }
     }
     focus->time = time;
     focus->revert = revertTo;
-    if (focusID == FollowKeyboard)
-        focus->win = FollowKeyboardWin;
-    else
-        focus->win = focusWin;
-    if ((focusWin == NoneWin) || (focusWin == PointerRootWin))
-        focus->traceGood = 0;
-    else {
-        int depth = 0;
+    if (focusID == FollowKeyboard) {
+      focus->win = FollowKeyboardWin;
+    } else {
+      focus->win = focusWin;
+    }
+    if ((focusWin == NoneWin) || (focusWin == PointerRootWin)) {
+      focus->traceGood = 0;
+    } else {
+      int depth = 0;
 
-        for (WindowPtr pWin = focusWin; pWin; pWin = pWin->parent)
-            depth++;
-        if (depth > focus->traceSize) {
-            focus->traceSize = depth + 1;
-            focus->trace = reallocarray(focus->trace, focus->traceSize,
-                                        sizeof(WindowPtr));
-        }
-        focus->traceGood = depth;
-        depth--;
-        for (WindowPtr pWin = focusWin; pWin; pWin = pWin->parent, depth--)
-            focus->trace[depth] = pWin;
+      for (WindowPtr pWin = focusWin; pWin; pWin = pWin->parent) {
+        depth++;
+      }
+      if (depth > focus->traceSize) {
+        focus->traceSize = depth + 1;
+        focus->trace =
+            reallocarray(focus->trace, focus->traceSize, sizeof(WindowPtr));
+      }
+      focus->traceGood = depth;
+      depth--;
+      for (WindowPtr pWin = focusWin; pWin; pWin = pWin->parent, depth--) {
+        focus->trace[depth] = pWin;
+      }
     }
     return Success;
 }
@@ -4977,19 +5244,21 @@ ProcGetInputFocus(ClientPtr client)
     REQUEST_SIZE_MATCH(xReq);
 
     rc = dixCallDeviceAccessCallback(client, kbd, DixGetFocusAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xGetInputFocusReply reply = {
         .revertTo = focus->revert
     };
 
-    if (focus->win == NoneWin)
-        reply.focus = None;
-    else if (focus->win == PointerRootWin)
-        reply.focus = PointerRoot;
-    else
-        reply.focus = focus->win->drawable.id;
+    if (focus->win == NoneWin) {
+      reply.focus = None;
+    } else if (focus->win == PointerRootWin) {
+      reply.focus = PointerRoot;
+    } else {
+      reply.focus = focus->win->drawable.id;
+    }
 
     if (client->swapped) {
         swapl(&reply.focus);
@@ -5032,27 +5301,31 @@ ProcGrabPointer(ClientPtr client)
         return BadValue;
     }
 
-    if (stuff->confineTo == None)
-        confineTo = NullWindow;
-    else {
-        rc = dixLookupWindow(&confineTo, stuff->confineTo, client,
-                             DixSetAttrAccess);
-        if (rc != Success)
-            return rc;
+    if (stuff->confineTo == None) {
+      confineTo = NullWindow;
+    } else {
+      rc = dixLookupWindow(&confineTo, stuff->confineTo, client,
+                           DixSetAttrAccess);
+      if (rc != Success) {
+        return rc;
+      }
     }
 
     grab = device->deviceGrab.grab;
 
-    if (grab && grab->confineTo && !confineTo)
-        ConfineCursorToWindow(device, InputDevCurrentRootWindow(device), FALSE, FALSE);
+    if (grab && grab->confineTo && !confineTo) {
+      ConfineCursorToWindow(device, InputDevCurrentRootWindow(device), FALSE,
+                            FALSE);
+    }
 
     mask.core = stuff->eventMask;
 
     rc = GrabDevice(client, device, stuff->pointerMode, stuff->keyboardMode,
                     stuff->grabWindow, stuff->ownerEvents, stuff->time,
                     &mask, CORE, stuff->cursor, stuff->confineTo, &status);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xGrabPointerReply reply = {
         .status = status,
@@ -5082,35 +5355,40 @@ ProcChangeActivePointerGrab(ClientPtr client)
         client->errorValue = stuff->eventMask;
         return BadValue;
     }
-    if (stuff->cursor == None)
-        newCursor = NullCursor;
-    else {
-        int rc = dixLookupResourceByType((void **) &newCursor, stuff->cursor,
-                                         X11_RESTYPE_CURSOR, client, DixUseAccess);
+    if (stuff->cursor == None) {
+      newCursor = NullCursor;
+    } else {
+      int rc =
+          dixLookupResourceByType((void **)&newCursor, stuff->cursor,
+                                  X11_RESTYPE_CURSOR, client, DixUseAccess);
 
-        if (rc != Success) {
-            client->errorValue = stuff->cursor;
-            return rc;
-        }
+      if (rc != Success) {
+        client->errorValue = stuff->cursor;
+        return rc;
+      }
     }
 
     device = PickPointer(client);
     grab = device->deviceGrab.grab;
 
-    if (!grab)
-        return Success;
-    if (!SameClient(grab, client))
-        return Success;
+    if (!grab) {
+      return Success;
+    }
+    if (!SameClient(grab, client)) {
+      return Success;
+    }
     UpdateCurrentTime();
     time = ClientTimeToServerTime(stuff->time);
     if ((CompareTimeStamps(time, currentTime) == LATER) ||
-        (CompareTimeStamps(time, device->deviceGrab.grabTime) == EARLIER))
-        return Success;
+        (CompareTimeStamps(time, device->deviceGrab.grabTime) == EARLIER)) {
+      return Success;
+    }
     oldCursor = grab->cursor;
     grab->cursor = RefCursor(newCursor);
     PostNewCursor(device);
-    if (oldCursor)
-        FreeCursor(oldCursor, (Cursor) 0);
+    if (oldCursor) {
+      FreeCursor(oldCursor, (Cursor)0);
+    }
     grab->eventMask = stuff->eventMask;
     return Success;
 }
@@ -5130,8 +5408,9 @@ ProcUngrabPointer(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
-    if (client->swapped)
-        swapl(&stuff->id);
+    if (client->swapped) {
+      swapl(&stuff->id);
+    }
 
     UpdateCurrentTime();
     grab = device->deviceGrab.grab;
@@ -5139,8 +5418,9 @@ ProcUngrabPointer(ClientPtr client)
     time = ClientTimeToServerTime(stuff->id);
     if ((CompareTimeStamps(time, currentTime) != LATER) &&
         (CompareTimeStamps(time, device->deviceGrab.grabTime) != EARLIER) &&
-        (grab) && SameClient(grab, client))
-        (*device->deviceGrab.DeactivateGrab) (device);
+        (grab) && SameClient(grab, client)) {
+      (*device->deviceGrab.DeactivateGrab)(device);
+    }
     return Success;
 }
 
@@ -5191,79 +5471,84 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
     }
 
     rc = dixLookupWindow(&pWin, grabWindow, client, DixSetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
+      return rc;
+    }
+
+    if (confineToWin == None) {
+      confineTo = NullWindow;
+    } else {
+      rc = dixLookupWindow(&confineTo, confineToWin, client, DixSetAttrAccess);
+      if (rc != Success) {
         return rc;
-
-    if (confineToWin == None)
-        confineTo = NullWindow;
-    else {
-        rc = dixLookupWindow(&confineTo, confineToWin, client,
-                             DixSetAttrAccess);
-        if (rc != Success)
-            return rc;
+      }
     }
 
-    if (curs == None)
-        cursor = NullCursor;
-    else {
-        rc = dixLookupResourceByType((void **) &cursor, curs, X11_RESTYPE_CURSOR,
-                                     client, DixUseAccess);
-        if (rc != Success) {
-            client->errorValue = curs;
-            return rc;
-        }
-        access_mode |= DixForceAccess;
+    if (curs == None) {
+      cursor = NullCursor;
+    } else {
+      rc = dixLookupResourceByType((void **)&cursor, curs, X11_RESTYPE_CURSOR,
+                                   client, DixUseAccess);
+      if (rc != Success) {
+        client->errorValue = curs;
+        return rc;
+      }
+      access_mode |= DixForceAccess;
     }
 
-    if (keyboard_mode == GrabModeSync || pointer_mode == GrabModeSync)
-        access_mode |= DixFreezeAccess;
+    if (keyboard_mode == GrabModeSync || pointer_mode == GrabModeSync) {
+      access_mode |= DixFreezeAccess;
+    }
     rc = dixCallDeviceAccessCallback(client, dev, access_mode);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     time = ClientTimeToServerTime(ctime);
     grab = grabInfo->grab;
-    if (grab && grab->grabtype != grabtype)
-        *status = AlreadyGrabbed;
-    else if (grab && !SameClient(grab, client))
-        *status = AlreadyGrabbed;
-    else if ((!pWin->realized) ||
-             (confineTo &&
-              !(confineTo->realized && BorderSizeNotEmpty(dev, confineTo))))
-        *status = GrabNotViewable;
-    else if ((CompareTimeStamps(time, currentTime) == LATER) ||
-             (CompareTimeStamps(time, grabInfo->grabTime) == EARLIER))
-        *status = GrabInvalidTime;
-    else if (grabInfo->sync.frozen &&
-             grabInfo->sync.other && !SameClient(grabInfo->sync.other, client))
-        *status = GrabFrozen;
-    else {
-        GrabPtr tempGrab;
+    if (grab && grab->grabtype != grabtype) {
+      *status = AlreadyGrabbed;
+    } else if (grab && !SameClient(grab, client)) {
+      *status = AlreadyGrabbed;
+    } else if ((!pWin->realized) ||
+               (confineTo &&
+                !(confineTo->realized && BorderSizeNotEmpty(dev, confineTo)))) {
+      *status = GrabNotViewable;
+    } else if ((CompareTimeStamps(time, currentTime) == LATER) ||
+               (CompareTimeStamps(time, grabInfo->grabTime) == EARLIER)) {
+      *status = GrabInvalidTime;
+    } else if (grabInfo->sync.frozen && grabInfo->sync.other &&
+               !SameClient(grabInfo->sync.other, client)) {
+      *status = GrabFrozen;
+    } else {
+      GrabPtr tempGrab;
 
-        tempGrab = AllocGrab(NULL);
-        if (tempGrab == NULL)
-            return BadAlloc;
+      tempGrab = AllocGrab(NULL);
+      if (tempGrab == NULL) {
+        return BadAlloc;
+      }
 
-        tempGrab->next = NULL;
-        tempGrab->window = pWin;
-        tempGrab->resource = client->clientAsMask;
-        tempGrab->ownerEvents = ownerEvents;
-        tempGrab->keyboardMode = keyboard_mode;
-        tempGrab->pointerMode = pointer_mode;
-        if (grabtype == CORE)
-            tempGrab->eventMask = mask->core;
-        else if (grabtype == XI)
-            tempGrab->eventMask = mask->xi;
-        else
-            xi2mask_merge(tempGrab->xi2mask, mask->xi2mask);
-        tempGrab->device = dev;
-        tempGrab->cursor = RefCursor(cursor);
-        tempGrab->confineTo = confineTo;
-        tempGrab->grabtype = grabtype;
-        (*grabInfo->ActivateGrab) (dev, tempGrab, time, FALSE);
-        *status = GrabSuccess;
+      tempGrab->next = NULL;
+      tempGrab->window = pWin;
+      tempGrab->resource = client->clientAsMask;
+      tempGrab->ownerEvents = ownerEvents;
+      tempGrab->keyboardMode = keyboard_mode;
+      tempGrab->pointerMode = pointer_mode;
+      if (grabtype == CORE) {
+        tempGrab->eventMask = mask->core;
+      } else if (grabtype == XI) {
+        tempGrab->eventMask = mask->xi;
+      } else {
+        xi2mask_merge(tempGrab->xi2mask, mask->xi2mask);
+      }
+      tempGrab->device = dev;
+      tempGrab->cursor = RefCursor(cursor);
+      tempGrab->confineTo = confineTo;
+      tempGrab->grabtype = grabtype;
+      (*grabInfo->ActivateGrab)(dev, tempGrab, time, FALSE);
+      *status = GrabSuccess;
 
-        FreeGrab(tempGrab);
+      FreeGrab(tempGrab);
     }
     return Success;
 }
@@ -5293,8 +5578,9 @@ ProcGrabKeyboard(ClientPtr client)
                         stuff->ownerEvents, stuff->time, &mask, CORE, None,
                         None, &status);
 
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     xGrabKeyboardReply reply = {
         .status = status,
@@ -5318,8 +5604,9 @@ ProcUngrabKeyboard(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
-    if (client->swapped)
-        swapl(&stuff->id);
+    if (client->swapped) {
+      swapl(&stuff->id);
+    }
 
     UpdateCurrentTime();
 
@@ -5328,8 +5615,9 @@ ProcUngrabKeyboard(ClientPtr client)
     time = ClientTimeToServerTime(stuff->id);
     if ((CompareTimeStamps(time, currentTime) != LATER) &&
         (CompareTimeStamps(time, device->deviceGrab.grabTime) != EARLIER) &&
-        (grab) && SameClient(grab, client) && grab->grabtype == CORE)
-        (*device->deviceGrab.DeactivateGrab) (device);
+        (grab) && SameClient(grab, client) && grab->grabtype == CORE) {
+      (*device->deviceGrab.DeactivateGrab)(device);
+    }
     return Success;
 }
 
@@ -5351,21 +5639,25 @@ ProcQueryPointer(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
-    if (client->swapped)
-        swapl(&stuff->id);
+    if (client->swapped) {
+      swapl(&stuff->id);
+    }
 
     rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     rc = dixCallDeviceAccessCallback(client, mouse, DixReadAccess);
-    if (rc != Success && rc != BadAccess)
-        return rc;
+    if (rc != Success && rc != BadAccess) {
+      return rc;
+    }
 
     keyboard = GetMaster(mouse, MASTER_KEYBOARD);
 
     pSprite = mouse->spriteInfo->sprite;
-    if (mouse->valuator->motionHintWindow)
-        MaybeStopHint(mouse, client);
+    if (mouse->valuator->motionHintWindow) {
+      MaybeStopHint(mouse, client);
+    }
 
     xQueryPointerReply reply = {
         .mask = event_get_corestate(mouse, keyboard),
@@ -5378,11 +5670,12 @@ ProcQueryPointer(ClientPtr client)
         reply.sameScreen = xTrue;
         reply.winX = pSprite->hot.x - pWin->drawable.x;
         reply.winY = pSprite->hot.y - pWin->drawable.y;
-        for (WindowPtr t = pSprite->win; t; t = t->parent)
-            if (t->parent == pWin) {
-                reply.child = t->drawable.id;
-                break;
-            }
+        for (WindowPtr t = pSprite->win; t; t = t->parent) {
+          if (t->parent == pWin) {
+            reply.child = t->drawable.id;
+            break;
+          }
+        }
     }
     else {
         reply.sameScreen = xFalse;
@@ -5448,9 +5741,10 @@ InitEvents(void)
 
     syncEvents.replayDev = (DeviceIntPtr) NULL;
     syncEvents.replayWin = NullWindow;
-    if (syncEvents.pending.next)
-        xorg_list_for_each_entry_safe(qe, tmp, &syncEvents.pending, next)
-            free(qe);
+    if (syncEvents.pending.next) {
+      xorg_list_for_each_entry_safe(qe, tmp, &syncEvents.pending, next)
+          free(qe);
+    }
     xorg_list_init(&syncEvents.pending);
     syncEvents.playingEvents = FALSE;
     syncEvents.time.months = 0;
@@ -5463,8 +5757,9 @@ InitEvents(void)
     }
 
     InputEventList = InitEventList(GetMaximumEventsNum());
-    if (!InputEventList)
-        FatalError("[dix] Failed to allocate input event list.\n");
+    if (!InputEventList) {
+      FatalError("[dix] Failed to allocate input event list.\n");
+    }
 }
 
 void
@@ -5531,31 +5826,34 @@ ProcSendEvent(ClientPtr client)
         return BadValue;
     }
 
-    if (stuff->destination == PointerWindow)
+    if (stuff->destination == PointerWindow) {
+      pWin = pSprite->win;
+    } else if (stuff->destination == InputFocus) {
+      WindowPtr inputFocus = (keybd) ? keybd->focus->win : NoneWin;
+
+      if (inputFocus == NoneWin) {
+        return Success;
+      }
+
+      /* If the input focus is PointerRootWin, send the event to where
+         the pointer is if possible, then perhaps propagate up to root. */
+      if (inputFocus == PointerRootWin) {
+        inputFocus = InputDevCurrentRootWindow(dev);
+      }
+
+      if (WindowIsParent(inputFocus, pSprite->win)) {
+        effectiveFocus = inputFocus;
         pWin = pSprite->win;
-    else if (stuff->destination == InputFocus) {
-        WindowPtr inputFocus = (keybd) ? keybd->focus->win : NoneWin;
-
-        if (inputFocus == NoneWin)
-            return Success;
-
-        /* If the input focus is PointerRootWin, send the event to where
-           the pointer is if possible, then perhaps propagate up to root. */
-        if (inputFocus == PointerRootWin)
-            inputFocus = InputDevCurrentRootWindow(dev);
-
-        if (WindowIsParent(inputFocus, pSprite->win)) {
-            effectiveFocus = inputFocus;
-            pWin = pSprite->win;
-        }
-        else
-            effectiveFocus = pWin = inputFocus;
+      } else {
+        effectiveFocus = pWin = inputFocus;
+      }
+    } else {
+      dixLookupWindow(&pWin, stuff->destination, client, DixSendAccess);
     }
-    else
-        dixLookupWindow(&pWin, stuff->destination, client, DixSendAccess);
 
-    if (!pWin)
-        return BadWindow;
+    if (!pWin) {
+      return BadWindow;
+    }
     if ((stuff->propagate != xFalse) && (stuff->propagate != xTrue)) {
         client->errorValue = stuff->propagate;
         return BadValue;
@@ -5563,22 +5861,25 @@ ProcSendEvent(ClientPtr client)
     stuff->event.u.u.type |= SEND_EVENT_BIT;
     if (stuff->propagate) {
         for (; pWin; pWin = pWin->parent) {
-            if (XaceHookSendAccess(client, NULL, pWin, &stuff->event, 1))
-                return Success;
-            if (DeliverEventsToWindow(dev, pWin,
-                                      &stuff->event, 1, stuff->eventMask,
-                                      NullGrab))
-                return Success;
-            if (pWin == effectiveFocus)
-                return Success;
+          if (XaceHookSendAccess(client, NULL, pWin, &stuff->event, 1)) {
+            return Success;
+          }
+          if (DeliverEventsToWindow(dev, pWin, &stuff->event, 1,
+                                    stuff->eventMask, NullGrab)) {
+            return Success;
+          }
+          if (pWin == effectiveFocus) {
+            return Success;
+          }
             stuff->eventMask &= ~wDontPropagateMask(pWin);
-            if (!stuff->eventMask)
-                break;
+            if (!stuff->eventMask) {
+              break;
+            }
         }
+    } else if (!XaceHookSendAccess(client, NULL, pWin, &stuff->event, 1)) {
+      DeliverEventsToWindow(dev, pWin, &stuff->event, 1, stuff->eventMask,
+                            NullGrab);
     }
-    else if (!XaceHookSendAccess(client, NULL, pWin, &stuff->event, 1))
-        DeliverEventsToWindow(dev, pWin, &stuff->event,
-                              1, stuff->eventMask, NullGrab);
     return Success;
 }
 
@@ -5599,8 +5900,9 @@ ProcUngrabKey(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xUngrabKeyReq);
     rc = dixLookupWindow(&pWin, stuff->grabWindow, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (((stuff->key > keybd->key->xkbInfo->desc->max_key_code) ||
          (stuff->key < keybd->key->xkbInfo->desc->min_key_code))
@@ -5614,8 +5916,9 @@ ProcUngrabKey(ClientPtr client)
         return BadValue;
     }
     tempGrab = AllocGrab(NULL);
-    if (!tempGrab)
-        return BadAlloc;
+    if (!tempGrab) {
+      return BadAlloc;
+    }
     tempGrab->resource = client->clientAsMask;
     tempGrab->device = keybd;
     tempGrab->window = pWin;
@@ -5628,8 +5931,9 @@ ProcUngrabKey(ClientPtr client)
     tempGrab->detail.pMask = NULL;
     tempGrab->next = NULL;
 
-    if (!DeletePassiveGrabFromList(tempGrab))
-        rc = BadAlloc;
+    if (!DeletePassiveGrabFromList(tempGrab)) {
+      rc = BadAlloc;
+    }
 
     FreeGrab(tempGrab);
 
@@ -5665,8 +5969,9 @@ ProcGrabKey(ClientPtr client)
     };
 
     rc = CheckGrabValues(client, &param);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (((stuff->key > keybd->key->xkbInfo->desc->max_key_code) ||
          (stuff->key < keybd->key->xkbInfo->desc->min_key_code))
@@ -5675,15 +5980,17 @@ ProcGrabKey(ClientPtr client)
         return BadValue;
     }
     rc = dixLookupWindow(&pWin, stuff->grabWindow, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     mask.core = (KeyPressMask | KeyReleaseMask);
 
     grab = CreateGrab(client, keybd, keybd, pWin, CORE, &mask,
                       &param, KeyPress, stuff->key, NullWindow, NullCursor);
-    if (!grab)
-        return BadAlloc;
+    if (!grab) {
+      return BadAlloc;
+    }
     return AddPassiveGrabToList(client, grab);
 }
 
@@ -5741,36 +6048,40 @@ ProcGrabButton(ClientPtr client)
         return BadValue;
     }
     rc = dixLookupWindow(&pWin, stuff->grabWindow, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
-    if (stuff->confineTo == None)
-        confineTo = NullWindow;
-    else {
-        rc = dixLookupWindow(&confineTo, stuff->confineTo, client,
-                             DixSetAttrAccess);
-        if (rc != Success)
-            return rc;
+    if (rc != Success) {
+      return rc;
     }
-    if (stuff->cursor == None)
-        cursor = NullCursor;
-    else {
-        rc = dixLookupResourceByType((void **) &cursor, stuff->cursor,
-                                     X11_RESTYPE_CURSOR, client, DixUseAccess);
-        if (rc != Success) {
-            client->errorValue = stuff->cursor;
-            return rc;
-        }
-        access_mode |= DixForceAccess;
+    if (stuff->confineTo == None) {
+      confineTo = NullWindow;
+    } else {
+      rc = dixLookupWindow(&confineTo, stuff->confineTo, client,
+                           DixSetAttrAccess);
+      if (rc != Success) {
+        return rc;
+      }
+    }
+    if (stuff->cursor == None) {
+      cursor = NullCursor;
+    } else {
+      rc = dixLookupResourceByType((void **)&cursor, stuff->cursor,
+                                   X11_RESTYPE_CURSOR, client, DixUseAccess);
+      if (rc != Success) {
+        client->errorValue = stuff->cursor;
+        return rc;
+      }
+      access_mode |= DixForceAccess;
     }
 
     ptr = PickPointer(client);
     modifierDevice = GetMaster(ptr, MASTER_KEYBOARD);
     if (stuff->pointerMode == GrabModeSync ||
-        stuff->keyboardMode == GrabModeSync)
-        access_mode |= DixFreezeAccess;
+        stuff->keyboardMode == GrabModeSync) {
+      access_mode |= DixFreezeAccess;
+    }
     rc = dixCallDeviceAccessCallback(client, ptr, access_mode);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     param = (GrabParameters) {
         .grabtype = CORE,
@@ -5785,8 +6096,9 @@ ProcGrabButton(ClientPtr client)
     grab = CreateGrab(client, ptr, modifierDevice, pWin,
                       CORE, &mask, &param, ButtonPress,
                       stuff->button, confineTo, cursor);
-    if (!grab)
-        return BadAlloc;
+    if (!grab) {
+      return BadAlloc;
+    }
     return AddPassiveGrabToList(client, grab);
 }
 
@@ -5812,14 +6124,16 @@ ProcUngrabButton(ClientPtr client)
         return BadValue;
     }
     rc = dixLookupWindow(&pWin, stuff->grabWindow, client, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     ptr = PickPointer(client);
 
     tempGrab = AllocGrab(NULL);
-    if (!tempGrab)
-        return BadAlloc;
+    if (!tempGrab) {
+      return BadAlloc;
+    }
     tempGrab->resource = client->clientAsMask;
     tempGrab->device = ptr;
     tempGrab->window = pWin;
@@ -5832,8 +6146,9 @@ ProcUngrabButton(ClientPtr client)
     tempGrab->detail.pMask = NULL;
     tempGrab->next = NULL;
 
-    if (!DeletePassiveGrabFromList(tempGrab))
-        rc = BadAlloc;
+    if (!DeletePassiveGrabFromList(tempGrab)) {
+      rc = BadAlloc;
+    }
 
     FreeGrab(tempGrab);
     return rc;
@@ -5864,19 +6179,22 @@ DeleteWindowFromAnyEvents(WindowPtr pWin, Bool freeResources)
     /* Deactivate any grabs performed on this window, before making any
        input focus changes. */
     grab = mouse->deviceGrab.grab;
-    if (grab && ((grab->window == pWin) || (grab->confineTo == pWin)))
-        (*mouse->deviceGrab.DeactivateGrab) (mouse);
+    if (grab && ((grab->window == pWin) || (grab->confineTo == pWin))) {
+      (*mouse->deviceGrab.DeactivateGrab)(mouse);
+    }
 
     /* Deactivating a keyboard grab should cause focus events. */
     grab = keybd->deviceGrab.grab;
-    if (grab && (grab->window == pWin))
-        (*keybd->deviceGrab.DeactivateGrab) (keybd);
+    if (grab && (grab->window == pWin)) {
+      (*keybd->deviceGrab.DeactivateGrab)(keybd);
+    }
 
     /* And now the real devices */
     for (mouse = inputInfo.devices; mouse; mouse = mouse->next) {
         grab = mouse->deviceGrab.grab;
-        if (grab && ((grab->window == pWin) || (grab->confineTo == pWin)))
-            (*mouse->deviceGrab.DeactivateGrab) (mouse);
+        if (grab && ((grab->window == pWin) || (grab->confineTo == pWin))) {
+          (*mouse->deviceGrab.DeactivateGrab)(mouse);
+        }
     }
 
     for (keybd = inputInfo.devices; keybd; keybd = keybd->next) {
@@ -5891,8 +6209,9 @@ DeleteWindowFromAnyEvents(WindowPtr pWin, Bool freeResources)
 
                 /* If a grab is in progress, then alter the mode of focus events. */
 
-                if (keybd->deviceGrab.grab)
-                    focusEventMode = NotifyWhileGrabbed;
+                if (keybd->deviceGrab.grab) {
+                  focusEventMode = NotifyWhileGrabbed;
+                }
 
                 switch (focus->revert) {
                 case RevertToNone:
@@ -5916,15 +6235,16 @@ DeleteWindowFromAnyEvents(WindowPtr pWin, Bool freeResources)
                              || dixClientForWindow(parent)->clientGone
 #endif
                         );
-                    if (!ActivateFocusInGrab(keybd, pWin, parent))
-                        DoFocusEvents(keybd, pWin, parent, focusEventMode);
+                    if (!ActivateFocusInGrab(keybd, pWin, parent)) {
+                      DoFocusEvents(keybd, pWin, parent, focusEventMode);
+                    }
                     focus->win = parent;
                     focus->revert = RevertToNone;
                     break;
                 case RevertToPointerRoot:
-                    if (!ActivateFocusInGrab(keybd, pWin, PointerRootWin))
-                        DoFocusEvents(keybd, pWin, PointerRootWin,
-                                      focusEventMode);
+                  if (!ActivateFocusInGrab(keybd, pWin, PointerRootWin)) {
+                    DoFocusEvents(keybd, pWin, PointerRootWin, focusEventMode);
+                  }
                     focus->win = PointerRootWin;
                     focus->traceGood = 0;
                     break;
@@ -5933,18 +6253,22 @@ DeleteWindowFromAnyEvents(WindowPtr pWin, Bool freeResources)
         }
 
         if (IsPointerDevice(keybd)) {
-            if (keybd->valuator->motionHintWindow == pWin)
-                keybd->valuator->motionHintWindow = NullWindow;
+          if (keybd->valuator->motionHintWindow == pWin) {
+            keybd->valuator->motionHintWindow = NullWindow;
+          }
         }
     }
 
     if (freeResources) {
-        if (pWin->dontPropagate)
-            DontPropagateRefCnts[pWin->dontPropagate]--;
-        while ((oc = wOtherClients(pWin)))
-            FreeResource(oc->resource, X11_RESTYPE_NONE);
-        while ((passive = wPassiveGrabs(pWin)))
-            FreeResource(passive->resource, X11_RESTYPE_NONE);
+      if (pWin->dontPropagate) {
+        DontPropagateRefCnts[pWin->dontPropagate]--;
+      }
+      while ((oc = wOtherClients(pWin))) {
+        FreeResource(oc->resource, X11_RESTYPE_NONE);
+      }
+      while ((passive = wPassiveGrabs(pWin))) {
+        FreeResource(passive->resource, X11_RESTYPE_NONE);
+      }
     }
 
     DeleteWindowFromAnyExtEvents(pWin, freeResources);
@@ -5962,18 +6286,21 @@ CheckCursorConfinement(WindowPtr pWin)
     WindowPtr confineTo;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
-        return;
+    if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum) {
+      return;
+    }
 #endif /* XINERMA */
 
     for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next) {
         if (DevHasCursor(pDev)) {
             grab = pDev->deviceGrab.grab;
             if (grab && (confineTo = grab->confineTo)) {
-                if (!BorderSizeNotEmpty(pDev, confineTo))
-                    (*pDev->deviceGrab.DeactivateGrab) (pDev);
-                else if ((pWin == confineTo) || WindowIsParent(pWin, confineTo))
-                    ConfineCursorToWindow(pDev, confineTo, TRUE, TRUE);
+              if (!BorderSizeNotEmpty(pDev, confineTo)) {
+                (*pDev->deviceGrab.DeactivateGrab)(pDev);
+              } else if ((pWin == confineTo) ||
+                         WindowIsParent(pWin, confineTo)) {
+                ConfineCursorToWindow(pDev, confineTo, TRUE, TRUE);
+              }
             }
         }
     }
@@ -5982,11 +6309,13 @@ CheckCursorConfinement(WindowPtr pWin)
 Mask
 EventMaskForClient(WindowPtr pWin, ClientPtr client)
 {
-    if (dixClientForWindow(pWin) == client)
-        return pWin->eventMask;
+  if (dixClientForWindow(pWin) == client) {
+    return pWin->eventMask;
+  }
     for (OtherClientsPtr other = wOtherClients(pWin); other; other = other->next) {
-        if (SameClient(other, client))
-            return other->mask;
+      if (SameClient(other, client)) {
+        return other->mask;
+      }
     }
     return 0;
 }
@@ -6056,12 +6385,15 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
     xEvent *eventTo, *eventFrom;
     int eventlength = sizeof(xEvent);
 
-    if (!pClient || pClient == serverClient || pClient->clientGone)
-        return;
+    if (!pClient || pClient == serverClient || pClient->clientGone) {
+      return;
+    }
 
-    for (int i = 0; i < count; i++)
-        if ((events[i].u.u.type & 0x7f) != KeymapNotify)
-            events[i].u.u.sequenceNumber = pClient->sequence;
+    for (int i = 0; i < count; i++) {
+      if ((events[i].u.u.type & 0x7f) != KeymapNotify) {
+        events[i].u.u.sequenceNumber = pClient->sequence;
+      }
+    }
 
     /* Let XKB rewrite the state, as it depends on client preferences. */
     XkbFilterEvents(pClient, count, events);
@@ -6170,8 +6502,9 @@ int
 SetClientPointer(ClientPtr client, DeviceIntPtr device)
 {
     int rc = dixCallDeviceAccessCallback(client, device, DixUseAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (!InputDevIsMaster(device)) {
         ErrorF("[dix] Need master device for ClientPointer. This is a bug.\n");
@@ -6264,16 +6597,18 @@ IsInterferingGrab(ClientPtr client, DeviceIntPtr dev, xEvent *event)
         return FALSE;
     }
 
-    if (dev->deviceGrab.grab && SameClient(dev->deviceGrab.grab, client))
-        return FALSE;
+    if (dev->deviceGrab.grab && SameClient(dev->deviceGrab.grab, client)) {
+      return FALSE;
+    }
 
     while (it) {
         if (it != dev) {
             if (it->deviceGrab.grab && SameClient(it->deviceGrab.grab, client)
                 && !it->deviceGrab.fromPassiveGrab) {
-                if ((IsPointerDevice(it) && IsPointerDevice(dev)) ||
-                    (IsKeyboardDevice(it) && IsKeyboardDevice(dev)))
-                    return TRUE;
+              if ((IsPointerDevice(it) && IsPointerDevice(dev)) ||
+                  (IsKeyboardDevice(it) && IsKeyboardDevice(dev))) {
+                return TRUE;
+              }
             }
         }
         it = it->next;
@@ -6289,11 +6624,13 @@ IsWrongPointerBarrierClient(ClientPtr client, DeviceIntPtr dev, xEvent *event)
 {
     xXIBarrierEvent *ev = (xXIBarrierEvent*)event;
 
-    if (ev->type != GenericEvent || ev->extension != EXTENSION_MAJOR_XINPUT)
-        return FALSE;
+    if (ev->type != GenericEvent || ev->extension != EXTENSION_MAJOR_XINPUT) {
+      return FALSE;
+    }
 
-    if (ev->evtype != XI_BarrierHit && ev->evtype != XI_BarrierLeave)
-        return FALSE;
+    if (ev->evtype != XI_BarrierHit && ev->evtype != XI_BarrierLeave) {
+      return FALSE;
+    }
 
     return client->index != dixClientIdForXID(ev->barrier);
 }

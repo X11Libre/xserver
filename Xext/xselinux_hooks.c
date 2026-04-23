@@ -96,18 +96,21 @@ SELinuxDoCheck(SELinuxSubjectRec * subj, SELinuxObjectRec * obj,
                security_class_t class, Mask mode, SELinuxAuditRec * auditdata)
 {
     /* serverClient requests OK */
-    if (subj->privileged)
-        return Success;
+    if (subj->privileged) {
+      return Success;
+    }
 
     auditdata->command = subj->command;
     errno = 0;
 
     if (avc_has_perm(subj->sid, obj->sid, class, mode, &subj->aeref,
                      auditdata) < 0) {
-        if (mode == DixUnknownAccess)
-            return Success;     /* DixUnknownAccess requests OK ... for now */
-        if (errno == EACCES)
-            return BadAccess;
+      if (mode == DixUnknownAccess) {
+        return Success; /* DixUnknownAccess requests OK ... for now */
+      }
+      if (errno == EACCES) {
+        return BadAccess;
+      }
         ErrorF("SELinux: avc_has_perm: unexpected error %d\n", errno);
         return BadValue;
     }
@@ -146,24 +149,28 @@ SELinuxLabelClient(ClientPtr client)
         if (!cmdname) {
             pid_t pid = DetermineClientPid(client);
 
-            if (pid != -1)
-                DetermineClientCmd(pid, &cmdname, NULL);
+            if (pid != -1) {
+              DetermineClientCmd(pid, &cmdname, NULL);
+            }
         }
 
-        if (!cmdname)
-            goto finish;
+        if (!cmdname) {
+          goto finish;
+        }
 
         strncpy(subj->command, cmdname, COMMAND_LEN - 1);
 
-        if (!cached)
-            free((void *) cmdname);     /* const char * */
+        if (!cached) {
+          free((void *)cmdname); /* const char * */
+        }
     }
 
  finish:
     /* Get a SID from the context */
-    if (avc_context_to_sid_raw(ctx, &subj->sid) < 0)
-        FatalError("SELinux: client %d: context_to_sid_raw(%s) failed\n",
-                   client->index, ctx);
+    if (avc_context_to_sid_raw(ctx, &subj->sid) < 0) {
+      FatalError("SELinux: client %d: context_to_sid_raw(%s) failed\n",
+                 client->index, ctx);
+    }
 
     obj->sid = subj->sid;
     freecon(ctx);
@@ -187,12 +194,14 @@ SELinuxLabelInitial(void)
     subj->privileged = 1;
 
     /* Use the context of the X server process for the serverClient */
-    if (getcon_raw(&ctx) < 0)
-        FatalError("SELinux: couldn't get context of X server process\n");
+    if (getcon_raw(&ctx) < 0) {
+      FatalError("SELinux: couldn't get context of X server process\n");
+    }
 
     /* Get a SID from the context */
-    if (avc_context_to_sid_raw(ctx, &subj->sid) < 0)
-        FatalError("SELinux: serverClient: context_to_sid(%s) failed\n", ctx);
+    if (avc_context_to_sid_raw(ctx, &subj->sid) < 0) {
+      FatalError("SELinux: serverClient: context_to_sid(%s) failed\n", ctx);
+    }
 
     obj->sid = subj->sid;
     freecon(ctx);
@@ -228,8 +237,9 @@ SELinuxLabelResource(XaceResourceAccessRec * rec, SELinuxSubjectRec * subj,
         return Success;
     }
 
-    if (rec->parent)
-        offset = dixLookupPrivateOffset(rec->ptype);
+    if (rec->parent) {
+      offset = dixLookupPrivateOffset(rec->ptype);
+    }
 
     if (rec->parent && offset >= 0) {
         /* Use the SID of the parent object in the labeling operation */
@@ -273,8 +283,9 @@ SELinuxAudit(void *auditdata,
             minor = client->minorOp;
         }
     }
-    if (audit->id)
-        snprintf(idNum, 16, "%x", audit->id);
+    if (audit->id) {
+      snprintf(idNum, 16, "%x", audit->id);
+    }
 
     propertyName = audit->property ? NameForAtom(audit->property) : NULL;
     selectionName = audit->selection ? NameForAtom(audit->selection) : NULL;
@@ -329,8 +340,9 @@ SELinuxLog(int type, const char *fmt, ...)
     vsnprintf(buf, MAX_AUDIT_MESSAGE_LENGTH, fmt, ap);
     va_end(ap);
 
-    if (aut != -1)
-        (void) audit_log_user_avc_message(audit_fd, aut, buf, NULL, NULL, NULL, 0);
+    if (aut != -1) {
+      (void)audit_log_user_avc_message(audit_fd, aut, buf, NULL, NULL, NULL, 0);
+    }
     LogMessageVerb(X_WARNING, 0, "%s", buf);
     return 0;
 }
@@ -341,10 +353,11 @@ SELinuxPolicyLoad(int seqno)
     LogMessage(X_INFO, "SELinux: PolicyLoad (%d) detected, remapping security classes\n", seqno);
 
     if (selinux_set_mapping(map) < 0) {
-        if (errno == EINVAL)
-            ErrorF("SELinux: Invalid object class mapping\n");
-        else
-            ErrorF("SELinux: Failed to set up security class mapping\n");
+      if (errno == EINVAL) {
+        ErrorF("SELinux: Invalid object class mapping\n");
+      } else {
+        ErrorF("SELinux: Failed to set up security class mapping\n");
+      }
     }
 
     return 0;
@@ -387,8 +400,9 @@ SELinuxDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     cls = IsPointerDevice(rec->dev) ? SECCLASS_X_POINTER : SECCLASS_X_KEYBOARD;
     rc = SELinuxDoCheck(subj, obj, cls, rec->access_mode, &auditdata);
-    if (rc != Success)
-        rec->status = rc;
+    if (rc != Success) {
+      rec->status = rc;
+    }
 }
 
 static void
@@ -401,18 +415,20 @@ SELinuxSend(CallbackListPtr *pcbl, void *unused, void *calldata)
     security_class_t class;
     int rc, i, type;
 
-    if (rec->dev)
-        subj = dixLookupPrivate(&rec->dev->devPrivates, subjectKey);
-    else
-        subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
+    if (rec->dev) {
+      subj = dixLookupPrivate(&rec->dev->devPrivates, subjectKey);
+    } else {
+      subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
+    }
 
     obj = dixLookupPrivate(&rec->pWin->devPrivates, objectKey);
 
     /* Check send permission on window */
     rc = SELinuxDoCheck(subj, obj, SECCLASS_X_DRAWABLE, DixSendAccess,
                         &auditdata);
-    if (rc != Success)
-        goto err;
+    if (rc != Success) {
+      goto err;
+    }
 
     /* Check send permission on specific event types */
     for (i = 0; i < rec->count; i++) {
@@ -420,13 +436,15 @@ SELinuxSend(CallbackListPtr *pcbl, void *unused, void *calldata)
         class = (type & 128) ? SECCLASS_X_FAKEEVENT : SECCLASS_X_EVENT;
 
         rc = SELinuxEventToSID(type, obj->sid, &ev_sid);
-        if (rc != Success)
-            goto err;
+        if (rc != Success) {
+          goto err;
+        }
 
         auditdata.event = type;
         rc = SELinuxDoCheck(subj, &ev_sid, class, DixSendAccess, &auditdata);
-        if (rc != Success)
-            goto err;
+        if (rc != Success) {
+          goto err;
+        }
     }
     return;
  err:
@@ -449,8 +467,9 @@ SELinuxReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
     /* Check receive permission on window */
     rc = SELinuxDoCheck(subj, obj, SECCLASS_X_DRAWABLE, DixReceiveAccess,
                         &auditdata);
-    if (rc != Success)
-        goto err;
+    if (rc != Success) {
+      goto err;
+    }
 
     /* Check receive permission on specific event types */
     for (i = 0; i < rec->count; i++) {
@@ -458,13 +477,15 @@ SELinuxReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
         class = (type & 128) ? SECCLASS_X_FAKEEVENT : SECCLASS_X_EVENT;
 
         rc = SELinuxEventToSID(type, obj->sid, &ev_sid);
-        if (rc != Success)
-            goto err;
+        if (rc != Success) {
+          goto err;
+        }
 
         auditdata.event = type;
         rc = SELinuxDoCheck(subj, &ev_sid, class, DixReceiveAccess, &auditdata);
-        if (rc != Success)
-            goto err;
+        if (rc != Success) {
+          goto err;
+        }
     }
     return;
  err:
@@ -508,8 +529,9 @@ SELinuxExtension(CallbackListPtr *pcbl, void *unused, void *calldata)
     auditdata.extension = (char *) rec->ext->name;
     rc = SELinuxDoCheck(subj, obj, SECCLASS_X_EXTENSION, rec->access_mode,
                         &auditdata);
-    if (rc != Success)
-        rec->status = rc;
+    if (rc != Success) {
+      rec->status = rc;
+    }
 }
 
 static void
@@ -531,8 +553,9 @@ SELinuxSelection(CallbackListPtr *pcbl, void *unused, void *calldata)
     /* If this is a new object that needs labeling, do it now */
     if (access_mode & DixCreateAccess) {
         rc = SELinuxSelectionToSID(name, subj, &obj->sid, &obj->poly);
-        if (rc != Success)
-            obj->sid = unlabeled_sid;
+        if (rc != Success) {
+          obj->sid = unlabeled_sid;
+        }
         access_mode = DixSetAttrAccess;
     }
     /* If this is a polyinstantiated object, find the right instance */
@@ -543,32 +566,35 @@ SELinuxSelection(CallbackListPtr *pcbl, void *unused, void *calldata)
             return;
         }
         while (pSel->selection != name || obj->sid != tsid) {
-            if ((pSel = pSel->next) == NULL)
-                break;
+          if ((pSel = pSel->next) == NULL) {
+            break;
+          }
             obj = dixLookupPrivate(&pSel->devPrivates, objectKey);
         }
 
-        if (pSel)
-            *rec->ppSel = pSel;
-        else {
-            rec->status = BadMatch;
-            return;
+        if (pSel) {
+          *rec->ppSel = pSel;
+        } else {
+          rec->status = BadMatch;
+          return;
         }
     }
 
     /* Perform the security check */
     rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SELECTION, access_mode,
                         &auditdata);
-    if (rc != Success)
-        rec->status = rc;
+    if (rc != Success) {
+      rec->status = rc;
+    }
 
     /* Label the content (advisory only) */
     if (access_mode & DixSetAttrAccess) {
         data = dixLookupPrivate(&pSel->devPrivates, dataKey);
-        if (subj->sel_create_sid)
-            data->sid = subj->sel_create_sid;
-        else
-            data->sid = obj->sid;
+        if (subj->sel_create_sid) {
+          data->sid = subj->sel_create_sid;
+        } else {
+          data->sid = obj->sid;
+        }
     }
 }
 
@@ -585,8 +611,9 @@ SELinuxProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
     int rc;
 
     /* Don't care about the new content check */
-    if (rec->access_mode & DixPostAccess)
-        return;
+    if (rec->access_mode & DixPostAccess) {
+      return;
+    }
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
     obj = dixLookupPrivate(&pProp->devPrivates, objectKey);
@@ -607,32 +634,35 @@ SELinuxProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
             return;
         }
         while (pProp->propertyName != name || obj->sid != tsid) {
-            if ((pProp = pProp->next) == NULL)
-                break;
+          if ((pProp = pProp->next) == NULL) {
+            break;
+          }
             obj = dixLookupPrivate(&pProp->devPrivates, objectKey);
         }
 
-        if (pProp)
-            *rec->ppProp = pProp;
-        else {
-            rec->status = BadMatch;
-            return;
+        if (pProp) {
+          *rec->ppProp = pProp;
+        } else {
+          rec->status = BadMatch;
+          return;
         }
     }
 
     /* Perform the security check */
     rc = SELinuxDoCheck(subj, obj, SECCLASS_X_PROPERTY, rec->access_mode,
                         &auditdata);
-    if (rc != Success)
-        rec->status = rc;
+    if (rc != Success) {
+      rec->status = rc;
+    }
 
     /* Label the content (advisory only) */
     if (rec->access_mode & DixWriteAccess) {
         data = dixLookupPrivate(&pProp->devPrivates, dataKey);
-        if (subj->prp_create_sid)
-            data->sid = subj->prp_create_sid;
-        else
-            data->sid = obj->sid;
+        if (subj->prp_create_sid) {
+          data->sid = subj->prp_create_sid;
+        } else {
+          data->sid = obj->sid;
+        }
     }
 }
 
@@ -656,8 +686,9 @@ SELinuxResource(CallbackListPtr *pcbl, void *unused, void *calldata)
         /* No: use the SID of the owning client */
         class = SECCLASS_X_RESOURCE;
         ClientPtr owner = dixClientForXID(rec->id);
-        if (!owner)
-            return;
+        if (!owner) {
+          return;
+        }
         privatePtr = &owner->devPrivates;
         obj = dixLookupPrivate(privatePtr, objectKey);
     }
@@ -687,14 +718,16 @@ SELinuxResource(CallbackListPtr *pcbl, void *unused, void *calldata)
     auditdata.restype = rec->rtype;
     auditdata.id = rec->id;
     rc = SELinuxDoCheck(subj, obj, class, access_mode, &auditdata);
-    if (rc != Success)
-        rec->status = rc;
+    if (rc != Success) {
+      rec->status = rc;
+    }
 
     /* Perform the background none check on windows */
     if (access_mode & DixCreateAccess && rec->rtype == X11_RESTYPE_WINDOW) {
         rc = SELinuxDoCheck(subj, obj, class, DixBlendAccess, &auditdata);
-        if (rc != Success)
-            ((WindowPtr) rec->res)->forcedBG = TRUE;
+        if (rc != Success) {
+          ((WindowPtr)rec->res)->forcedBG = TRUE;
+        }
     }
 }
 
@@ -722,12 +755,14 @@ SELinuxScreen(CallbackListPtr *pcbl, void *is_saver, void *calldata)
         }
     }
 
-    if (is_saver)
-        access_mode <<= 2;
+    if (is_saver) {
+      access_mode <<= 2;
+    }
 
     rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SCREEN, access_mode, &auditdata);
-    if (rc != Success)
-        rec->status = rc;
+    if (rc != Success) {
+      rec->status = rc;
+    }
 }
 
 static void
@@ -744,8 +779,9 @@ SELinuxClient(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     rc = SELinuxDoCheck(subj, obj, SECCLASS_X_CLIENT, rec->access_mode,
                         &auditdata);
-    if (rc != Success)
-        rec->status = rc;
+    if (rc != Success) {
+      rec->status = rc;
+    }
 }
 
 static void
@@ -762,8 +798,9 @@ SELinuxServer(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SERVER, rec->access_mode,
                         &auditdata);
-    if (rc != Success)
-        rec->status = rc;
+    if (rc != Success) {
+      rec->status = rc;
+    }
 }
 
 /*
@@ -793,10 +830,12 @@ SELinuxResourceState(CallbackListPtr *pcbl, void *unused, void *calldata)
     SELinuxObjectRec *obj;
     WindowPtr pWin;
 
-    if (rec->type != X11_RESTYPE_WINDOW)
-        return;
-    if (rec->state != ResourceStateAdding)
-        return;
+    if (rec->type != X11_RESTYPE_WINDOW) {
+      return;
+    }
+    if (rec->state != ResourceStateAdding) {
+      return;
+    }
 
     pWin = (WindowPtr) rec->value;
     subj = dixLookupPrivate(&dixClientForWindow(pWin)->devPrivates, subjectKey);
@@ -805,17 +844,19 @@ SELinuxResourceState(CallbackListPtr *pcbl, void *unused, void *calldata)
         char *ctx;
         int rc = avc_sid_to_context_raw(subj->sid, &ctx);
 
-        if (rc < 0)
-            FatalError("SELinux: Failed to get security context!\n");
+        if (rc < 0) {
+          FatalError("SELinux: Failed to get security context!\n");
+        }
         rc = dixChangeWindowProperty(serverClient,
                                      pWin, atom_client_ctx, XA_STRING, 8,
                                      PropModeReplace, strlen(ctx), ctx, FALSE);
-        if (rc != Success)
-            FatalError("SELinux: Failed to set label property on window!\n");
+        if (rc != Success) {
+          FatalError("SELinux: Failed to set label property on window!\n");
+        }
         freecon(ctx);
+    } else {
+      FatalError("SELinux: Unexpected unlabeled client found\n");
     }
-    else
-        FatalError("SELinux: Unexpected unlabeled client found\n");
 
     obj = dixLookupPrivate(&pWin->devPrivates, objectKey);
 
@@ -823,17 +864,19 @@ SELinuxResourceState(CallbackListPtr *pcbl, void *unused, void *calldata)
         char *ctx;
         int rc = avc_sid_to_context_raw(obj->sid, &ctx);
 
-        if (rc < 0)
-            FatalError("SELinux: Failed to get security context!\n");
+        if (rc < 0) {
+          FatalError("SELinux: Failed to get security context!\n");
+        }
         rc = dixChangeWindowProperty(serverClient,
                                      pWin, atom_ctx, XA_STRING, 8,
                                      PropModeReplace, strlen(ctx), ctx, FALSE);
-        if (rc != Success)
-            FatalError("SELinux: Failed to set label property on window!\n");
+        if (rc != Success) {
+          FatalError("SELinux: Failed to set label property on window!\n");
+        }
         freecon(ctx);
+    } else {
+      FatalError("SELinux: Unexpected unlabeled window found\n");
     }
-    else
-        FatalError("SELinux: Unexpected unlabeled window found\n");
 }
 
 static int netlink_fd;
@@ -907,36 +950,43 @@ SELinuxFlaskInit(void)
         FatalError("SELinux: Failed to set up security class mapping\n");
     }
 
-    if (avc_open(&avc_option, 1) < 0)
-        FatalError("SELinux: Couldn't initialize SELinux userspace AVC\n");
+    if (avc_open(&avc_option, 1) < 0) {
+      FatalError("SELinux: Couldn't initialize SELinux userspace AVC\n");
+    }
 
-    if (security_get_initial_context_raw("unlabeled", &ctx) < 0)
-        FatalError("SELinux: Failed to look up unlabeled context\n");
-    if (avc_context_to_sid_raw(ctx, &unlabeled_sid) < 0)
-        FatalError("SELinux: a context_to_SID call failed!\n");
+    if (security_get_initial_context_raw("unlabeled", &ctx) < 0) {
+      FatalError("SELinux: Failed to look up unlabeled context\n");
+    }
+    if (avc_context_to_sid_raw(ctx, &unlabeled_sid) < 0) {
+      FatalError("SELinux: a context_to_SID call failed!\n");
+    }
     freecon(ctx);
 
     /* Prepare for auditing */
     audit_fd = audit_open();
-    if (audit_fd < 0)
-        FatalError("SELinux: Failed to open the system audit log\n");
+    if (audit_fd < 0) {
+      FatalError("SELinux: Failed to open the system audit log\n");
+    }
 
     /* Allocate private storage */
-    if (!dixRegisterPrivateKey
-        (subjectKey, PRIVATE_XSELINUX, sizeof(SELinuxSubjectRec)) ||
+    if (!dixRegisterPrivateKey(subjectKey, PRIVATE_XSELINUX,
+                               sizeof(SELinuxSubjectRec)) ||
         !dixRegisterPrivateKey(objectKey, PRIVATE_XSELINUX,
                                sizeof(SELinuxObjectRec)) ||
         !dixRegisterPrivateKey(dataKey, PRIVATE_XSELINUX,
-                               sizeof(SELinuxObjectRec)))
-        FatalError("SELinux: Failed to allocate private storage.\n");
+                               sizeof(SELinuxObjectRec))) {
+      FatalError("SELinux: Failed to allocate private storage.\n");
+    }
 
     /* Create atoms for doing window labeling */
     atom_ctx = dixAddAtom("_SELINUX_CONTEXT");
-    if (atom_ctx == BAD_RESOURCE)
-        FatalError("SELinux: Failed to create atom\n");
+    if (atom_ctx == BAD_RESOURCE) {
+      FatalError("SELinux: Failed to create atom\n");
+    }
     atom_client_ctx = dixAddAtom("_SELINUX_CLIENT_CONTEXT");
-    if (atom_client_ctx == BAD_RESOURCE)
-        FatalError("SELinux: Failed to create atom\n");
+    if (atom_client_ctx == BAD_RESOURCE) {
+      FatalError("SELinux: Failed to create atom\n");
+    }
 
     netlink_fd = avc_netlink_acquire_fd();
     SetNotifyFd(netlink_fd, SELinuxNetlinkNotify, X_NOTIFY_READ, NULL);
@@ -957,8 +1007,9 @@ SELinuxFlaskInit(void)
     ret &= XaceRegisterCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     ret &= XaceRegisterCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
-    if (!ret)
-        FatalError("SELinux: Failed to register one or more callbacks\n");
+    if (!ret) {
+      FatalError("SELinux: Failed to register one or more callbacks\n");
+    }
 
     /* Label objects that were created before we could register ourself */
     SELinuxLabelInitial();

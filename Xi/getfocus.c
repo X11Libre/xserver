@@ -79,10 +79,12 @@ ProcXGetDeviceFocus(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xGetDeviceFocusReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetFocusAccess);
-    if (rc != Success)
-        return rc;
-    if (!dev->focus)
-        return BadDevice;
+    if (rc != Success) {
+      return rc;
+    }
+    if (!dev->focus) {
+      return BadDevice;
+    }
 
     focus = dev->focus;
 
@@ -92,14 +94,15 @@ ProcXGetDeviceFocus(ClientPtr client)
         .revertTo = focus->revert,
     };
 
-    if (focus->win == NoneWin)
-        reply.focus = None;
-    else if (focus->win == PointerRootWin)
-        reply.focus = PointerRoot;
-    else if (focus->win == FollowKeyboardWin)
-        reply.focus = FollowKeyboard;
-    else
-        reply.focus = focus->win->drawable.id;
+    if (focus->win == NoneWin) {
+      reply.focus = None;
+    } else if (focus->win == PointerRootWin) {
+      reply.focus = PointerRoot;
+    } else if (focus->win == FollowKeyboardWin) {
+      reply.focus = FollowKeyboard;
+    } else {
+      reply.focus = focus->win->drawable.id;
+    }
 
     if (client->swapped) {
         swapl(&reply.focus);

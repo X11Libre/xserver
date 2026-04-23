@@ -76,12 +76,13 @@ ProcXISetClientPointer(ClientPtr client)
         rc = dixLookupResourceOwner(&targetClient, stuff->win, client,
                              DixManageAccess);
 
-        if (rc != Success)
-            return BadWindow;
+        if (rc != Success) {
+          return BadWindow;
+        }
 
+    } else {
+      targetClient = client;
     }
-    else
-        targetClient = client;
 
     rc = SetClientPointer(targetClient, pDev);
     if (rc != Success) {

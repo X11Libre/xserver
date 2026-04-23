@@ -53,8 +53,9 @@ winProcEstablishConnection(ClientPtr client)
     static int s_iCallCount = 0;
     static x_server_generation_t s_ulServerGeneration = 0;
 
-    if (s_iCallCount == 0)
-        winDebug("winProcEstablishConnection - Hello\n");
+    if (s_iCallCount == 0) {
+      winDebug("winProcEstablishConnection - Hello\n");
+    }
 
     /* Do nothing if clipboard is not enabled */
     if (!g_fClipboard) {

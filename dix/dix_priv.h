@@ -709,8 +709,9 @@ void InitBlockAndWakeupHandlers(void);
 static inline ClientPtr dixLookupXIDOwner(XID xid)
 {
     int clientId = dixClientIdForXID(xid);
-    if (clientId < currentMaxClients)
-        return clients[clientId];
+    if (clientId < currentMaxClients) {
+      return clients[clientId];
+    }
     return NULL;
 }
 
@@ -753,8 +754,9 @@ static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
 {
     ev.u.u.sequenceNumber = (CARD16)pClient->sequence; /* shouldn't go above 64k */
 
-    if (pClient->swapped)
-        swaps(&ev.u.u.sequenceNumber);
+    if (pClient->swapped) {
+      swaps(&ev.u.u.sequenceNumber);
+    }
 
     return WriteToClient(pClient, sizeof(xEvent), &ev);
 }

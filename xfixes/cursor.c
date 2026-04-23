@@ -137,8 +137,9 @@ static CursorPtr
 CursorForDevice(DeviceIntPtr pDev)
 {
     if (pDev && pDev->spriteInfo && pDev->spriteInfo->sprite) {
-        if (pDev->spriteInfo->anim.pCursor)
-            return pDev->spriteInfo->anim.pCursor;
+      if (pDev->spriteInfo->anim.pCursor) {
+        return pDev->spriteInfo->anim.pCursor;
+      }
         return pDev->spriteInfo->sprite->current;
     }
 
@@ -226,8 +227,9 @@ XFixesSelectCursorInput(ClientPtr pClient, WindowPtr pWindow, CARD32 eventMask)
     }
     if (!e) {
         e = calloc(1, sizeof(CursorEventRec));
-        if (!e)
-            return BadAlloc;
+        if (!e) {
+          return BadAlloc;
+        }
 
         e->pClient = pClient;
         e->pWindow = pWindow;
@@ -240,15 +242,17 @@ XFixesSelectCursorInput(ClientPtr pClient, WindowPtr pWindow, CARD32 eventMask)
         rc = dixLookupResourceByType(&val, pWindow->drawable.id,
                                      CursorWindowType, serverClient,
                                      DixGetAttrAccess);
-        if (rc != Success)
-            if (!AddResource(pWindow->drawable.id, CursorWindowType,
-                             (void *) pWindow)) {
-                free(e);
-                return BadAlloc;
-            }
-
-        if (!AddResource(e->clientResource, CursorClientType, (void *) e))
+        if (rc != Success) {
+          if (!AddResource(pWindow->drawable.id, CursorWindowType,
+                           (void *)pWindow)) {
+            free(e);
             return BadAlloc;
+          }
+        }
+
+        if (!AddResource(e->clientResource, CursorClientType, (void *)e)) {
+          return BadAlloc;
+        }
 
         *prev = e;
     }
@@ -267,8 +271,9 @@ ProcXFixesSelectCursorInput(ClientPtr client)
     int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     if (stuff->eventMask & ~CursorAllEvents) {
         client->errorValue = stuff->eventMask;
         return BadValue;
@@ -281,14 +286,16 @@ GetBit(unsigned char *line, int x)
 {
     unsigned char mask;
 
-    if (screenInfo.bitmapBitOrder == LSBFirst)
-        mask = (1 << (x & 7));
-    else
-        mask = (0x80 >> (x & 7));
+    if (screenInfo.bitmapBitOrder == LSBFirst) {
+      mask = (1 << (x & 7));
+    } else {
+      mask = (0x80 >> (x & 7));
+    }
     /* XXX assumes byte order is host byte order */
     line += (x >> 3);
-    if (*line & mask)
-        return 1;
+    if (*line & mask) {
+      return 1;
+    }
     return 0;
 }
 
@@ -311,36 +318,34 @@ CopyCursorToImage(CursorPtr pCursor, CARD32 *image)
     int height = pCursor->bits->height;
     int npixels = width * height;
 
-    if (pCursor->bits->argb)
-        memcpy(image, pCursor->bits->argb, npixels * sizeof(CARD32));
-    else
-    {
-        unsigned char *srcLine = pCursor->bits->source;
-        unsigned char *mskLine = pCursor->bits->mask;
-        int stride = BitmapBytePad(width);
-        int x, y;
-        CARD32 fg, bg;
+    if (pCursor->bits->argb) {
+      memcpy(image, pCursor->bits->argb, npixels * sizeof(CARD32));
+    } else {
+      unsigned char *srcLine = pCursor->bits->source;
+      unsigned char *mskLine = pCursor->bits->mask;
+      int stride = BitmapBytePad(width);
+      int x, y;
+      CARD32 fg, bg;
 
-        fg = (0xff000000 |
-              ((pCursor->foreRed & 0xff00) << 8) |
-              (pCursor->foreGreen & 0xff00) | (pCursor->foreBlue >> 8));
-        bg = (0xff000000 |
-              ((pCursor->backRed & 0xff00) << 8) |
-              (pCursor->backGreen & 0xff00) | (pCursor->backBlue >> 8));
-        for (y = 0; y < height; y++) {
-            for (x = 0; x < width; x++) {
-                if (GetBit(mskLine, x)) {
-                    if (GetBit(srcLine, x))
-                        *image++ = fg;
-                    else
-                        *image++ = bg;
-                }
-                else
-                    *image++ = 0;
+      fg = (0xff000000 | ((pCursor->foreRed & 0xff00) << 8) |
+            (pCursor->foreGreen & 0xff00) | (pCursor->foreBlue >> 8));
+      bg = (0xff000000 | ((pCursor->backRed & 0xff00) << 8) |
+            (pCursor->backGreen & 0xff00) | (pCursor->backBlue >> 8));
+      for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+          if (GetBit(mskLine, x)) {
+            if (GetBit(srcLine, x)) {
+              *image++ = fg;
+            } else {
+              *image++ = bg;
             }
-            srcLine += stride;
-            mskLine += stride;
+          } else {
+            *image++ = 0;
+          }
         }
+        srcLine += stride;
+        mskLine += stride;
+      }
     }
 }
 
@@ -353,12 +358,14 @@ ProcXFixesGetCursorImage(ClientPtr client)
     int npixels, width, height, rc, x, y;
 
     pCursor = CursorForClient(client);
-    if (!pCursor)
-        return BadCursor;
+    if (!pCursor) {
+      return BadCursor;
+    }
     rc = XaceHookResourceAccess(client, pCursor->id, X11_RESTYPE_CURSOR,
                   pCursor, X11_RESTYPE_NONE, NULL, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     GetSpritePosition(PickPointer(client), &x, &y);
     width = pCursor->bits->width;
     height = pCursor->bits->height;
@@ -367,12 +374,14 @@ ProcXFixesGetCursorImage(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     CARD32 *image = x_rpcbuf_reserve(&rpcbuf, npixels * sizeof(CARD32));
-    if (!image)
-        return BadAlloc;
+    if (!image) {
+      return BadAlloc;
+    }
 
     CopyCursorToImage(pCursor, image);
-    if (client->swapped)
-        SwapLongs(image, npixels);
+    if (client->swapped) {
+      SwapLongs(image, npixels);
+    }
 
     xXFixesGetCursorImageReply reply = {
         .width = width,
@@ -412,8 +421,9 @@ ProcXFixesSetCursorName(ClientPtr client)
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixSetAttrAccess);
     tchar = (char *) &stuff[1];
     atom = MakeAtom(tchar, stuff->nbytes, TRUE);
-    if (atom == BAD_RESOURCE)
-        return BadAlloc;
+    if (atom == BAD_RESOURCE) {
+      return BadAlloc;
+    }
 
     pCursor->name = atom;
     return Success;
@@ -429,10 +439,11 @@ ProcXFixesGetCursorName(ClientPtr client)
     const char *str;
 
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixGetAttrAccess);
-    if (pCursor->name)
-        str = NameForAtom(pCursor->name);
-    else
-        str = "";
+    if (pCursor->name) {
+      str = NameForAtom(pCursor->name);
+    } else {
+      str = "";
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_string_pad(&rpcbuf, str);
@@ -461,12 +472,14 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     int rc, x, y;
 
     pCursor = CursorForClient(client);
-    if (!pCursor)
-        return BadCursor;
+    if (!pCursor) {
+      return BadCursor;
+    }
     rc = XaceHookResourceAccess(client, pCursor->id, X11_RESTYPE_CURSOR,
                   pCursor, X11_RESTYPE_NONE, NULL, DixReadAccess | DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     GetSpritePosition(PickPointer(client), &x, &y);
     width = pCursor->bits->width;
     height = pCursor->bits->height;
@@ -476,17 +489,20 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     CARD32 *image = x_rpcbuf_reserve(&rpcbuf, npixels * sizeof(CARD32));
-    if (!image)
-        return BadAlloc;
+    if (!image) {
+      return BadAlloc;
+    }
 
     CopyCursorToImage(pCursor, image);
-    if (client->swapped)
-        SwapLongs(image, npixels);
+    if (client->swapped) {
+      SwapLongs(image, npixels);
+    }
 
     x_rpcbuf_write_string_pad(&rpcbuf, name);
 
-    if (rpcbuf.error)
-        return BadAlloc;
+    if (rpcbuf.error) {
+      return BadAlloc;
+    }
 
     xXFixesGetCursorImageAndNameReply reply = {
         .width = width,
@@ -567,10 +583,11 @@ ReplaceCursorLookup(void *value, XID id, void *closure)
         if ((*rcl->testCursor) (pCursor, rcl->closure)) {
             CursorPtr curs = RefCursor(rcl->pNew);
             /* either redirect reference or update resource database */
-            if (pCursorRef)
-                *pCursorRef = curs;
-            else
-                ChangeResourceValue(id, X11_RESTYPE_CURSOR, curs);
+            if (pCursorRef) {
+              *pCursorRef = curs;
+            } else {
+              ChangeResourceValue(id, X11_RESTYPE_CURSOR, curs);
+            }
             FreeCursor(pCursor, cursor);
         }
     }
@@ -595,8 +612,9 @@ ReplaceCursor(CursorPtr pCursor, TestCursorFunc testCursor, void *closure)
 
     /* for each client */
     for (clientIndex = 0; clientIndex < currentMaxClients; clientIndex++) {
-        if (!clients[clientIndex])
-            continue;
+      if (!clients[clientIndex]) {
+        continue;
+      }
         for (resIndex = 0; resIndex < ARRAY_SIZE(CursorRestypes); resIndex++) {
             rcl.type = CursorRestypes[resIndex];
             /*
@@ -659,8 +677,9 @@ ProcXFixesChangeCursorByName(ClientPtr client)
                   DixReadAccess | DixGetAttrAccess);
     tchar = (char *) &stuff[1];
     name = MakeAtom(tchar, stuff->nbytes, FALSE);
-    if (name)
-        ReplaceCursor(pSource, TestForCursorName, &name);
+    if (name) {
+      ReplaceCursor(pSource, TestForCursorName, &name);
+    }
     return Success;
 }
 
@@ -705,8 +724,9 @@ createCursorHideCount(ClientPtr pClient, ScreenPtr pScreen)
      * Create a resource for this element so it can be deleted
      * when the client goes away.
      */
-    if (!AddResource(pChc->resource, CursorHideCountType, (void *) pChc))
-        return BadAlloc;
+    if (!AddResource(pChc->resource, CursorHideCountType, (void *)pChc)) {
+      return BadAlloc;
+    }
 
     return Success;
 }
@@ -790,8 +810,9 @@ ProcXFixesHideCursor(ClientPtr client)
      * for this screen.
      */
     ret = dixCallScreenAccessCallback(client, pWin->drawable.pScreen, DixHideAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     ret = createCursorHideCount(client, pWin->drawable.pScreen);
 
@@ -799,9 +820,10 @@ ProcXFixesHideCursor(ClientPtr client)
         DeviceIntPtr dev;
 
         for (dev = inputInfo.devices; dev; dev = dev->next) {
-            if (InputDevIsMaster(dev) && IsPointerDevice(dev))
-                CursorDisplayCursor(dev, pWin->drawable.pScreen,
-                                    CursorForDevice(dev));
+          if (InputDevIsMaster(dev) && IsPointerDevice(dev)) {
+            CursorDisplayCursor(dev, pWin->drawable.pScreen,
+                                CursorForDevice(dev));
+          }
         }
     }
 
@@ -835,8 +857,9 @@ ProcXFixesShowCursor(ClientPtr client)
     }
 
     rc = dixCallScreenAccessCallback(client, pWin->drawable.pScreen, DixShowAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     pChc->hideCount--;
     if (pChc->hideCount <= 0) {
@@ -871,8 +894,9 @@ CursorFreeHideCount(void *data, XID id)
 
     deleteCursorHideCount(pChc, pChc->pScreen);
     for (dev = inputInfo.devices; dev; dev = dev->next) {
-        if (InputDevIsMaster(dev) && IsPointerDevice(dev))
-            CursorDisplayCursor(dev, pScreen, CursorForDevice(dev));
+      if (InputDevIsMaster(dev) && IsPointerDevice(dev)) {
+        CursorDisplayCursor(dev, pScreen, CursorForDevice(dev));
+      }
     }
 
     return 1;
@@ -924,13 +948,16 @@ ProcXFixesDestroyPointerBarrier(ClientPtr client)
 Bool
 XFixesCursorInit(void)
 {
-    if (party_like_its_1989)
-        CursorVisible = EnableCursor;
-    else
-        CursorVisible = FALSE;
+  if (party_like_its_1989) {
+    CursorVisible = EnableCursor;
+  } else {
+    CursorVisible = FALSE;
+  }
 
-    if (!dixRegisterPrivateKey(&CursorScreenPrivateKeyRec, PRIVATE_SCREEN, sizeof(CursorScreenRec)))
-        return FALSE;
+  if (!dixRegisterPrivateKey(&CursorScreenPrivateKeyRec, PRIVATE_SCREEN,
+                             sizeof(CursorScreenRec))) {
+    return FALSE;
+  }
 
     DIX_FOR_EACH_SCREEN({
         CursorScreenPtr cs = GetCursorScreen(walkScreen);

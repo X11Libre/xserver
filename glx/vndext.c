@@ -215,10 +215,12 @@ GlxExtensionInit(void)
     GlxExtensionEntry = NULL;
 
     // Init private keys, per-screen data
-    if (!dixRegisterPrivateKey(&glvXGLVScreenPrivKey, PRIVATE_SCREEN, 0))
-        return;
-    if (!dixRegisterPrivateKey(&glvXGLVClientPrivKey, PRIVATE_CLIENT, 0))
-        return;
+    if (!dixRegisterPrivateKey(&glvXGLVScreenPrivKey, PRIVATE_SCREEN, 0)) {
+      return;
+    }
+    if (!dixRegisterPrivateKey(&glvXGLVClientPrivKey, PRIVATE_CLIENT, 0)) {
+      return;
+    }
 
     if (!GlxMappingInit()) {
         return;

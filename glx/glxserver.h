@@ -65,7 +65,7 @@ typedef struct __GLXcontext __GLXcontext;
 #include "glxcontext.h"
 #include "glx_extinit.h"
 
-extern __GLXscreen *glxGetScreen(ScreenPtr pScreen);
+extern struct __GLXscreen *glxGetScreen(ScreenPtr pScreen);
 extern __GLXclientState *glxGetClient(ClientPtr pClient);
 
 /************************************************************************/
@@ -158,11 +158,13 @@ extern RESTYPE __glXDrawableRes;
 static _X_INLINE int
 safe_add(int a, int b)
 {
-    if (a < 0 || b < 0)
-        return -1;
+  if (a < 0 || b < 0) {
+    return -1;
+  }
 
-    if (INT_MAX - a < b)
-        return -1;
+  if (INT_MAX - a < b) {
+    return -1;
+  }
 
     return a + b;
 }
@@ -170,14 +172,17 @@ safe_add(int a, int b)
 static _X_INLINE int
 safe_mul(int a, int b)
 {
-    if (a < 0 || b < 0)
-        return -1;
+  if (a < 0 || b < 0) {
+    return -1;
+  }
 
-    if (a == 0 || b == 0)
-        return 0;
+  if (a == 0 || b == 0) {
+    return 0;
+  }
 
-    if (a > INT_MAX / b)
-        return -1;
+  if (a > INT_MAX / b) {
+    return -1;
+  }
 
     return a * b;
 }
@@ -187,11 +192,13 @@ safe_pad(int a)
 {
     int ret;
 
-    if (a < 0)
-        return -1;
+    if (a < 0) {
+      return -1;
+    }
 
-    if ((ret = safe_add(a, 3)) < 0)
-        return -1;
+    if ((ret = safe_add(a, 3)) < 0) {
+      return -1;
+    }
 
     return ret & (GLuint)~3;
 }

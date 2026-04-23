@@ -83,8 +83,9 @@ static Bool validate_version(int scrnIndex, struct edid_version *);
 static void
 find_ranges_section(struct detailed_monitor_section *det, void *ranges)
 {
-    if (det->type == DS_RANGES && det->section.ranges.max_clock)
-        *(struct monitor_ranges **) ranges = &det->section.ranges;
+  if (det->type == DS_RANGES && det->section.ranges.max_clock) {
+    *(struct monitor_ranges **)ranges = &det->section.ranges;
+  }
 }
 
 static void
@@ -138,8 +139,9 @@ handle_detailed_hvsize(struct detailed_monitor_section *det_mon, void *data)
 
         timing = &det_mon->section.d_timings;
 
-        if (!timing->v_size)
-            return;
+        if (!timing->v_size) {
+          return;
+        }
 
         timing_aspect = (float) timing->h_size / timing->v_size;
         if (fabs(1 - (timing_aspect / p->target_aspect)) < 0.05) {
@@ -192,8 +194,9 @@ encode_aspect_ratio(xf86MonPtr m)
 static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool copy)
 {
     xf86MonPtr m = calloc(1, sizeof(xf86Monitor) + (copy ? size : 0));
-    if (!m)
-        return NULL;
+    if (!m) {
+      return NULL;
+    }
 
     /* make a copy of the EDID block for later reference */
     if (copy) {
@@ -206,8 +209,9 @@ static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool cop
 
     get_vendor_section(SECTION(VENDOR_SECTION, block), &m->vendor);
     get_version_section(SECTION(VERSION_SECTION, block), &m->ver);
-    if (!validate_version(scrnIndex, &m->ver))
-        goto error;
+    if (!validate_version(scrnIndex, &m->ver)) {
+      goto error;
+    }
     get_display_section(SECTION(DISPLAY_SECTION, block), &m->features, &m->ver);
     get_established_timing_section(SECTION(ESTABLISHED_TIMING_SECTION, block),
                                    &m->timings1);
@@ -219,8 +223,9 @@ static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool cop
     handle_edid_quirks(m);
     encode_aspect_ratio(m);
 
-    if (size > 128)
-        m->flags |= EDID_COMPLETE_RAWDATA;
+    if (size > 128) {
+      m->flags |= EDID_COMPLETE_RAWDATA;
+    }
 
     /* possibly add more extended parsing here, eg. HDR information */
 
@@ -234,8 +239,9 @@ static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool cop
 /* new entry point, should be used whenever possible */
 xf86MonPtr xf86ParseEDID(ScrnInfoPtr pScrn, uint8_t *block, size_t size)
 {
-    if (!pScrn || !block || !size)
-        return NULL;
+  if (!pScrn || !block || !size) {
+    return NULL;
+  }
 
     return parseEDID(pScrn->scrnIndex, block, size, true);
 }
@@ -243,8 +249,9 @@ xf86MonPtr xf86ParseEDID(ScrnInfoPtr pScrn, uint8_t *block, size_t size)
 /* old entry point, deprecated but still needed for backwards compat */
 xf86MonPtr xf86InterpretEDID(int scrnIndex, uint8_t *block)
 {
-    if (!block)
-        return NULL;
+  if (!block) {
+    return NULL;
+  }
 
     return parseEDID(scrnIndex, block, EDID1_LEN, false);
 }
@@ -258,8 +265,9 @@ get_cea_detail_timing(uint8_t * blk, xf86MonPtr mon,
 
     dt_num = 0;
 
-    if (dt_offset < CEA_EXT_MIN_DATA_OFFSET)
-        return dt_num;
+    if (dt_offset < CEA_EXT_MIN_DATA_OFFSET) {
+      return dt_num;
+    }
 
     for (; dt_offset < (CEA_EXT_MAX_DATA_OFFSET - DET_TIMING_INFO_LEN) &&
          dt_num < CEA_EXT_DET_TIMING_NUM; _NEXT_DT_MD_SECTION(dt_offset)) {
@@ -281,8 +289,9 @@ handle_cea_detail_block(uint8_t * ext, xf86MonPtr mon,
 
     det_mon_num = get_cea_detail_timing(ext, mon, det_mon);
 
-    for (i = 0; i < det_mon_num; i++)
-        fn(det_mon + i, data);
+    for (i = 0; i < det_mon_num; i++) {
+      fn(det_mon + i, data);
+    }
 }
 
 void
@@ -291,11 +300,13 @@ xf86ForEachDetailedBlock(xf86MonPtr mon, handle_detailed_fn fn, void *data)
     int i;
     uint8_t *ext;
 
-    if (mon == NULL)
-        return;
+    if (mon == NULL) {
+      return;
+    }
 
-    for (i = 0; i < DET_TIMINGS; i++)
-        fn(mon->det_mon + i, data);
+    for (i = 0; i < DET_TIMINGS; i++) {
+      fn(mon->det_mon + i, data);
+    }
 
     for (i = 0; i < mon->no_sections; i++) {
         ext = mon->rawData + EDID1_LEN * (i + 1);
@@ -321,8 +332,9 @@ extract_cea_data_block(uint8_t * ext, int data_type)
 
     cea = (struct cea_ext_body *) ext;
 
-    if (cea->dt_offset <= CEA_EXT_MIN_DATA_OFFSET)
-        return NULL;
+    if (cea->dt_offset <= CEA_EXT_MIN_DATA_OFFSET) {
+      return NULL;
+    }
 
     data_collection = &cea->data_collection;
     data_end = (struct cea_data_block *) (cea->dt_offset + ext);
@@ -347,8 +359,9 @@ handle_cea_video_block(uint8_t * ext, handle_video_fn fn, void *data)
     struct cea_data_block *data_collection;
 
     data_collection = extract_cea_data_block(ext, CEA_VIDEO_BLK);
-    if (data_collection == NULL)
-        return;
+    if (data_collection == NULL) {
+      return;
+    }
 
     video = &data_collection->u.video;
     video_end = (struct cea_video_block *)
@@ -365,8 +378,9 @@ xf86ForEachVideoBlock(xf86MonPtr mon, handle_video_fn fn, void *data)
     int i;
     uint8_t *ext;
 
-    if (mon == NULL)
-        return;
+    if (mon == NULL) {
+      return;
+    }
 
     for (i = 0; i < mon->no_sections; i++) {
         ext = mon->rawData + EDID1_LEN * (i + 1);
@@ -389,10 +403,12 @@ cea_db_offsets(uint8_t *cea, int *start, int *end)
     /* Data block offset in CEA extension block */
     *start = CEA_EXT_MIN_DATA_OFFSET;
     *end = cea[2];
-    if (*end == 0)
-        *end = CEA_EXT_MAX_DATA_OFFSET;
-    if (*end < CEA_EXT_MIN_DATA_OFFSET || *end > CEA_EXT_MAX_DATA_OFFSET)
-        return FALSE;
+    if (*end == 0) {
+      *end = CEA_EXT_MAX_DATA_OFFSET;
+    }
+    if (*end < CEA_EXT_MIN_DATA_OFFSET || *end > CEA_EXT_MAX_DATA_OFFSET) {
+      return FALSE;
+    }
     return TRUE;
 }
 
@@ -415,33 +431,40 @@ cea_for_each_db(xf86MonPtr mon, handle_cea_db_fn fn, void *data)
 {
     int i;
 
-    if (!mon)
-        return;
+    if (!mon) {
+      return;
+    }
 
-    if (!(mon->flags & EDID_COMPLETE_RAWDATA))
-        return;
+    if (!(mon->flags & EDID_COMPLETE_RAWDATA)) {
+      return;
+    }
 
-    if (!mon->no_sections)
-        return;
+    if (!mon->no_sections) {
+      return;
+    }
 
-    if (!mon->rawData)
-        return;
+    if (!mon->rawData) {
+      return;
+    }
 
     for (i = 0; i < mon->no_sections; i++) {
         int start, end, offset;
         uint8_t *ext;
 
         ext = mon->rawData + EDID1_LEN * (i + 1);
-        if (ext[EXT_TAG] != CEA_EXT)
-            continue;
+        if (ext[EXT_TAG] != CEA_EXT) {
+          continue;
+        }
 
-        if (!cea_db_offsets(ext, &start, &end))
-            continue;
+        if (!cea_db_offsets(ext, &start, &end)) {
+          continue;
+        }
 
         for (offset = start;
              offset < end && offset + cea_db_len(&ext[offset]) < end;
-             offset += cea_db_len(&ext[offset]) + 1)
-                fn(&ext[offset], data);
+             offset += cea_db_len(&ext[offset]) + 1) {
+          fn(&ext[offset], data);
+        }
     }
 }
 
@@ -454,15 +477,18 @@ static void find_hdmi_block(uint8_t *db, void *data)
     struct find_hdmi_block_data *result = data;
     int oui;
 
-    if (cea_db_tag(db) != CEA_VENDOR_BLK)
-        return;
+    if (cea_db_tag(db) != CEA_VENDOR_BLK) {
+      return;
+    }
 
-    if (cea_db_len(db) < 5)
-        return;
+    if (cea_db_len(db) < 5) {
+      return;
+    }
 
     oui = (db[3] << 16) | (db[2] << 8) | db[1];
-    if (oui == IEEE_ID_HDMI)
-        result->hdmi = (struct cea_data_block *)db;
+    if (oui == IEEE_ID_HDMI) {
+      result->hdmi = (struct cea_data_block *)db;
+    }
 }
 
 struct cea_data_block *xf86MonitorFindHDMIBlock(xf86MonPtr mon)
@@ -683,11 +709,13 @@ copy_string(uint8_t * c, uint8_t * s)
     int i;
 
     c = c + 5;
-    for (i = 0; (i < 13 && *c != 0x0A); i++)
-        *(s++) = *(c++);
+    for (i = 0; (i < 13 && *c != 0x0A); i++) {
+      *(s++) = *(c++);
+    }
     *s = 0;
-    while (i-- && (*--s == 0x20))
-        *s = 0;
+    while (i-- && (*--s == 0x20)) {
+      *s = 0;
+    }
 }
 
 static void
@@ -713,8 +741,9 @@ get_monitor_ranges(uint8_t * c, struct monitor_ranges *r)
     r->min_h = MIN_H;
     r->max_h = MAX_H;
     r->max_clock = 0;
-    if (MAX_CLOCK != 0xff)      /* is specified? */
-        r->max_clock = MAX_CLOCK * 10 + 5;
+    if (MAX_CLOCK != 0xff) { /* is specified? */
+      r->max_clock = MAX_CLOCK * 10 + 5;
+    }
 
     r->display_range_timing_flags = c[10];
 
@@ -789,10 +818,11 @@ validate_version(int scrnIndex, struct edid_version *r)
         return FALSE;
     }
 
-    if (r->revision > MAX_EDID_MINOR)
-        xf86DrvMsg(scrnIndex, X_WARNING,
-                   "Assuming version 1.%d is compatible with 1.%d\n",
-                   r->revision, MAX_EDID_MINOR);
+    if (r->revision > MAX_EDID_MINOR) {
+      xf86DrvMsg(scrnIndex, X_WARNING,
+                 "Assuming version 1.%d is compatible with 1.%d\n", r->revision,
+                 MAX_EDID_MINOR);
+    }
 
     return TRUE;
 }
@@ -802,19 +832,25 @@ gtf_supported(xf86MonPtr mon)
 {
     int i;
 
-    if (!mon)
-        return FALSE;
+    if (!mon) {
+      return FALSE;
+    }
 
     if ((mon->ver.version == 1) && (mon->ver.revision < 4)) {
-        if (mon->features.msc & 0x1)
-            return TRUE;
+      if (mon->features.msc & 0x1) {
+        return TRUE;
+      }
     } else {
         for (i = 0; i < DET_TIMINGS; i++) {
             struct detailed_monitor_section *det_timing_des = &(mon->det_mon[i]);
-            if (det_timing_des && (det_timing_des->type == DS_RANGES) && (mon->features.msc & 0x1) &&
-                (det_timing_des->section.ranges.display_range_timing_flags == DR_DEFAULT_GTF
-                || det_timing_des->section.ranges.display_range_timing_flags == DR_SECONDARY_GTF))
-                    return TRUE;
+            if (det_timing_des && (det_timing_des->type == DS_RANGES) &&
+                (mon->features.msc & 0x1) &&
+                (det_timing_des->section.ranges.display_range_timing_flags ==
+                     DR_DEFAULT_GTF ||
+                 det_timing_des->section.ranges.display_range_timing_flags ==
+                     DR_SECONDARY_GTF)) {
+              return TRUE;
+            }
         }
     }
 
@@ -823,8 +859,9 @@ gtf_supported(xf86MonPtr mon)
 
 bool xf86Monitor_gtf_supported(xf86MonPtr monitor)
 {
-    if (!monitor)
-        return false;
+  if (!monitor) {
+    return false;
+  }
 
     return GTF_SUPPORTED(monitor->features.msc);
 }

@@ -42,13 +42,15 @@ RROutputChanged(RROutputPtr output, Bool configChanged)
     rrScrPrivPtr primarysp;
 
     output->changed = TRUE;
-    if (!pScreen)
-        return;
+    if (!pScreen) {
+      return;
+    }
 
     if (pScreen->isGPU) {
         ScreenPtr primary = pScreen->current_primary;
-        if (!primary)
-            return;
+        if (!primary) {
+          return;
+        }
         primarysp = rrGetScrPriv(primary);
     }
     else {
@@ -56,8 +58,9 @@ RROutputChanged(RROutputPtr output, Bool configChanged)
     }
 
     RRSetChanged(pScreen);
-    if (configChanged)
-        primarysp->configChanged = TRUE;
+    if (configChanged) {
+      primarysp->configChanged = TRUE;
+    }
 }
 
 /*
@@ -73,21 +76,24 @@ RROutputCreate(ScreenPtr pScreen,
     rrScrPrivPtr pScrPriv;
     Atom DPIAtom;
 
-    if (!RRInit())
-        return NULL;
+    if (!RRInit()) {
+      return NULL;
+    }
 
     pScrPriv = rrGetScrPriv(pScreen);
 
     outputs = reallocarray(pScrPriv->outputs,
                            pScrPriv->numOutputs + 1, sizeof(RROutputPtr));
-    if (!outputs)
-        return NULL;
+    if (!outputs) {
+      return NULL;
+    }
 
     pScrPriv->outputs = outputs;
 
     output = calloc(1, sizeof(RROutputRec) + nameLength + 1);
-    if (!output)
-        return NULL;
+    if (!output) {
+      return NULL;
+    }
     output->id = dixAllocServerXID();
     output->pScreen = pScreen;
     output->name = (char *) (output + 1);
@@ -98,8 +104,9 @@ RROutputCreate(ScreenPtr pScreen,
     output->subpixelOrder = SubPixelUnknown;
     output->devPrivate = devPrivate;
 
-    if (!AddResource(output->id, RROutputType, (void *) output))
-        return NULL;
+    if (!AddResource(output->id, RROutputType, (void *)output)) {
+      return NULL;
+    }
 
     pScrPriv->outputs[pScrPriv->numOutputs++] = output;
 
@@ -136,18 +143,22 @@ RROutputSetClones(RROutputPtr output, RROutputPtr * clones, int numClones)
     int i;
 
     if (numClones == output->numClones) {
-        for (i = 0; i < numClones; i++)
-            if (output->clones[i] != clones[i])
-                break;
-        if (i == numClones)
-            return TRUE;
+      for (i = 0; i < numClones; i++) {
+        if (output->clones[i] != clones[i]) {
+          break;
+        }
+      }
+      if (i == numClones) {
+        return TRUE;
+      }
     }
 
     RROutputPtr *newClones = NULL;
     if (numClones) {
         newClones = calloc(numClones, sizeof(RROutputPtr));
-        if (!newClones)
-            return FALSE;
+        if (!newClones) {
+          return FALSE;
+        }
         memcpy(newClones, clones, numClones * sizeof(RROutputPtr));
     }
 
@@ -165,12 +176,15 @@ RROutputSetModes(RROutputPtr output,
     int i;
 
     if (numModes == output->numModes && numPreferred == output->numPreferred) {
-        for (i = 0; i < numModes; i++)
-            if (output->modes[i] != modes[i])
-                break;
+      for (i = 0; i < numModes; i++) {
+        if (output->modes[i] != modes[i]) {
+          break;
+        }
+      }
         if (i == numModes) {
-            for (i = 0; i < numModes; i++)
-                RRModeDestroy(modes[i]);
+          for (i = 0; i < numModes; i++) {
+            RRModeDestroy(modes[i]);
+          }
             return TRUE;
         }
     }
@@ -178,14 +192,16 @@ RROutputSetModes(RROutputPtr output,
     RRModePtr *newModes = NULL;
     if (numModes) {
         newModes = calloc(numModes, sizeof(RRModePtr));
-        if (!newModes)
-            return FALSE;
+        if (!newModes) {
+          return FALSE;
+        }
         memcpy(newModes, modes, numModes * sizeof(RRModePtr));
     }
 
     if (output->modes) {
-        for (i = 0; i < output->numModes; i++)
-            RRModeDestroy(output->modes[i]);
+      for (i = 0; i < output->numModes; i++) {
+        RRModeDestroy(output->modes[i]);
+      }
         free(output->modes);
     }
     output->modes = newModes;
@@ -209,22 +225,27 @@ RROutputAddUserMode(RROutputPtr output, RRModePtr mode)
         RRModePtr e = (m < output->numModes ?
                        output->modes[m] :
                        output->userModes[m - output->numModes]);
-        if (mode == e)
-            return Success;
+        if (mode == e) {
+          return Success;
+        }
     }
 
     /* Check with the DDX to see if this mode is OK */
-    if (pScrPriv->rrOutputValidateMode)
-        if (!pScrPriv->rrOutputValidateMode(pScreen, output, mode))
-            return BadMatch;
+    if (pScrPriv->rrOutputValidateMode) {
+      if (!pScrPriv->rrOutputValidateMode(pScreen, output, mode)) {
+        return BadMatch;
+      }
+    }
 
-    if (output->userModes)
-        newModes = reallocarray(output->userModes,
-                                output->numUserModes + 1, sizeof(RRModePtr));
-    else
-        newModes = calloc(1, sizeof(RRModePtr));
-    if (!newModes)
-        return BadAlloc;
+    if (output->userModes) {
+      newModes = reallocarray(output->userModes, output->numUserModes + 1,
+                              sizeof(RRModePtr));
+    } else {
+      newModes = calloc(1, sizeof(RRModePtr));
+    }
+    if (!newModes) {
+      return BadAlloc;
+    }
 
     output->userModes = newModes;
     output->userModes[output->numUserModes++] = mode;
@@ -243,16 +264,19 @@ RROutputDeleteUserMode(RROutputPtr output, RRModePtr mode)
     for (m = 0; m < output->numUserModes; m++) {
         RRModePtr e = output->userModes[m];
 
-        if (mode == e)
-            break;
+        if (mode == e) {
+          break;
+        }
     }
     /* Not there, access error */
-    if (m == output->numUserModes)
-        return BadAccess;
+    if (m == output->numUserModes) {
+      return BadAccess;
+    }
 
     /* make sure the mode isn't active for this output */
-    if (output->crtc && output->crtc->mode == mode)
-        return BadMatch;
+    if (output->crtc && output->crtc->mode == mode) {
+      return BadMatch;
+    }
 
     memmove(output->userModes + m, output->userModes + m + 1,
             (output->numUserModes - m - 1) * sizeof(RRModePtr));
@@ -267,18 +291,22 @@ RROutputSetCrtcs(RROutputPtr output, RRCrtcPtr * crtcs, int numCrtcs)
     int i;
 
     if (numCrtcs == output->numCrtcs) {
-        for (i = 0; i < numCrtcs; i++)
-            if (output->crtcs[i] != crtcs[i])
-                break;
-        if (i == numCrtcs)
-            return TRUE;
+      for (i = 0; i < numCrtcs; i++) {
+        if (output->crtcs[i] != crtcs[i]) {
+          break;
+        }
+      }
+      if (i == numCrtcs) {
+        return TRUE;
+      }
     }
 
     RRCrtcPtr *newCrtcs = NULL;
     if (numCrtcs) {
         newCrtcs = calloc(numCrtcs, sizeof(RRCrtcPtr));
-        if (!newCrtcs)
-            return FALSE;
+        if (!newCrtcs) {
+          return FALSE;
+        }
         memcpy(newCrtcs, crtcs, numCrtcs * sizeof(RRCrtcPtr));
     }
 
@@ -292,8 +320,9 @@ RROutputSetCrtcs(RROutputPtr output, RRCrtcPtr * crtcs, int numCrtcs)
 Bool
 RROutputSetConnection(RROutputPtr output, CARD8 connection)
 {
-    if (output->connection == connection)
-        return TRUE;
+  if (output->connection == connection) {
+    return TRUE;
+  }
     output->connection = connection;
     RROutputChanged(output, TRUE);
     return TRUE;
@@ -301,8 +330,9 @@ RROutputSetConnection(RROutputPtr output, CARD8 connection)
 
 void RROutputSetSubpixelOrder(RROutputPtr output, int subpixelOrder)
 {
-    if (output->subpixelOrder == subpixelOrder)
-        return;
+  if (output->subpixelOrder == subpixelOrder) {
+    return;
+  }
 
     output->subpixelOrder = subpixelOrder;
     RROutputChanged(output, FALSE);
@@ -311,8 +341,9 @@ void RROutputSetSubpixelOrder(RROutputPtr output, int subpixelOrder)
 Bool
 RROutputSetPhysicalSize(RROutputPtr output, int mmWidth, int mmHeight)
 {
-    if (output->mmWidth == mmWidth && output->mmHeight == mmHeight)
-        return TRUE;
+  if (output->mmWidth == mmWidth && output->mmHeight == mmHeight) {
+    return TRUE;
+  }
     output->mmWidth = mmWidth;
     output->mmHeight = mmHeight;
     RROutputChanged(output, FALSE);
@@ -326,8 +357,9 @@ RROutputSetNonDesktop(RROutputPtr output, Bool nonDesktop)
     Atom nonDesktopProp = dixAddAtom(nonDesktopStr);
     uint32_t value = nonDesktop ? 1 : 0;
 
-    if (nonDesktopProp == None || nonDesktopProp == BAD_RESOURCE)
-        return FALSE;
+    if (nonDesktopProp == None || nonDesktopProp == BAD_RESOURCE) {
+      return FALSE;
+    }
 
     return RRChangeOutputProperty(output, nonDesktopProp, XA_INTEGER, 32,
                                   PropModeReplace, 1, &value, TRUE, FALSE) == Success;
@@ -391,15 +423,17 @@ RROutputDestroyResource(void *value, XID pid)
             }
         }
 
-        if (pScrPriv->primaryOutput == output)
-            pScrPriv->primaryOutput = NULL;
+        if (pScrPriv->primaryOutput == output) {
+          pScrPriv->primaryOutput = NULL;
+        }
 
         if (pScreen->isGPU) {
             primary = pScreen->current_primary;
             if (primary) {
                 primarysp = rrGetScrPriv(primary);
-                if (primarysp->primaryOutput == output)
-                    primarysp->primaryOutput = NULL;
+                if (primarysp->primaryOutput == output) {
+                  primarysp->primaryOutput = NULL;
+                }
             }
         }
 
@@ -415,13 +449,15 @@ RROutputDestroyResource(void *value, XID pid)
         RRResourcesChanged(pScreen);
     }
     if (output->modes) {
-        for (m = 0; m < output->numModes; m++)
-            RRModeDestroy(output->modes[m]);
+      for (m = 0; m < output->numModes; m++) {
+        RRModeDestroy(output->modes[m]);
+      }
         free(output->modes);
     }
 
-    for (m = 0; m < output->numUserModes; m++)
-        RRModeDestroy(output->userModes[m]);
+    for (m = 0; m < output->numUserModes; m++) {
+      RRModeDestroy(output->userModes[m]);
+    }
     free(output->userModes);
 
     free(output->crtcs);
@@ -438,8 +474,9 @@ Bool
 RROutputInit(void)
 {
     RROutputType = CreateNewResourceType(RROutputDestroyResource, "OUTPUT");
-    if (!RROutputType)
-        return FALSE;
+    if (!RROutputType) {
+      return FALSE;
+    }
 
     return TRUE;
 }
@@ -499,18 +536,22 @@ ProcRRGetOutputInfo(ClientPtr client)
         reply.nPreferred = output->numPreferred;
         reply.nClones = output->numClones;
 
-        for (i = 0; i < output->numCrtcs; i++)
-            x_rpcbuf_write_CARD32(&rpcbuf, output->crtcs[i]->id);
-
-        for (i = 0; i < output->numModes + output->numUserModes; i++) {
-            if (i < output->numModes)
-                x_rpcbuf_write_CARD32(&rpcbuf, output->modes[i]->mode.id);
-            else
-                x_rpcbuf_write_CARD32(&rpcbuf, output->userModes[i - output->numModes]->mode.id);
+        for (i = 0; i < output->numCrtcs; i++) {
+          x_rpcbuf_write_CARD32(&rpcbuf, output->crtcs[i]->id);
         }
 
-        for (i = 0; i < output->numClones; i++)
-            x_rpcbuf_write_CARD32(&rpcbuf, output->clones[i]->id);
+        for (i = 0; i < output->numModes + output->numUserModes; i++) {
+          if (i < output->numModes) {
+            x_rpcbuf_write_CARD32(&rpcbuf, output->modes[i]->mode.id);
+          } else {
+            x_rpcbuf_write_CARD32(
+                &rpcbuf, output->userModes[i - output->numModes]->mode.id);
+          }
+        }
+
+        for (i = 0; i < output->numClones; i++) {
+          x_rpcbuf_write_CARD32(&rpcbuf, output->clones[i]->id);
+        }
     }
 
     x_rpcbuf_write_string_pad(&rpcbuf, output->name); /* indeed 0-terminated */
@@ -533,8 +574,9 @@ ProcRRGetOutputInfo(ClientPtr client)
 static void
 RRSetPrimaryOutput(ScreenPtr pScreen, rrScrPrivPtr pScrPriv, RROutputPtr output)
 {
-    if (pScrPriv->primaryOutput == output)
-        return;
+  if (pScrPriv->primaryOutput == output) {
+    return;
+  }
 
     /* clear the old primary */
     if (pScrPriv->primaryOutput) {
@@ -571,14 +613,16 @@ ProcRRSetOutputPrimary(ClientPtr client)
     ScreenPtr secondary;
 
     ret = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     if (stuff->output) {
         VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
-        if (RROutputIsLeased(output))
-            return BadAccess;
+        if (RROutputIsLeased(output)) {
+          return BadAccess;
+        }
 
         if (!output->pScreen->isGPU && output->pScreen != pWin->drawable.pScreen) {
             client->errorValue = stuff->window;
@@ -598,8 +642,9 @@ ProcRRSetOutputPrimary(ClientPtr client)
         xorg_list_for_each_entry(secondary,
                                  &pWin->drawable.pScreen->secondary_list,
                                  secondary_head) {
-            if (secondary->is_output_secondary)
-                RRSetPrimaryOutput(secondary, rrGetScrPriv(secondary), output);
+          if (secondary->is_output_secondary) {
+            RRSetPrimaryOutput(secondary, rrGetScrPriv(secondary), output);
+          }
         }
     }
 
@@ -612,8 +657,9 @@ ProcRRGetOutputPrimary(ClientPtr client)
     REQUEST(xRRGetOutputPrimaryReq);
     REQUEST_SIZE_MATCH(xRRGetOutputPrimaryReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr pWin;
     rrScrPrivPtr pScrPriv;
@@ -621,12 +667,14 @@ ProcRRGetOutputPrimary(ClientPtr client)
     int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     pScrPriv = rrGetScrPriv(pWin->drawable.pScreen);
-    if (pScrPriv)
-        primary = pScrPriv->primaryOutput;
+    if (pScrPriv) {
+      primary = pScrPriv->primaryOutput;
+    }
 
     xRRGetOutputPrimaryReply reply = {
         .output = primary ? primary->id : None

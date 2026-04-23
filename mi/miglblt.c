@@ -113,8 +113,9 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
     pPixmap = (*pDrawable->pScreen->CreatePixmap) (pDrawable->pScreen,
                                                    width, height, 1,
                                                    CREATE_PIXMAP_USAGE_SCRATCH);
-    if (!pPixmap)
-        return;
+    if (!pPixmap) {
+      return;
+    }
 
     pGCtmp = GetScratchGC(1, pDrawable->pScreen);
     if (!pGCtmp) {
@@ -152,15 +153,18 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
                 pb = pglyph;
             }
             else {
-                for (i = 0, pb = pbits; i < gHeight;
-                     i++, pb = pbits + (i * nbyPadGlyph))
-                    for (j = 0; j < nbyGlyphWidth; j++)
-                        *pb++ = *pglyph++;
+              for (i = 0, pb = pbits; i < gHeight;
+                   i++, pb = pbits + (i * nbyPadGlyph)) {
+                for (j = 0; j < nbyGlyphWidth; j++) {
+                  *pb++ = *pglyph++;
+                }
+              }
                 pb = pbits;
             }
 
-            if ((pGCtmp->serialNumber) != (pPixmap->drawable.serialNumber))
-                ValidateGC((DrawablePtr) pPixmap, pGCtmp);
+            if ((pGCtmp->serialNumber) != (pPixmap->drawable.serialNumber)) {
+              ValidateGC((DrawablePtr)pPixmap, pGCtmp);
+            }
             (*pGCtmp->ops->PutImage) ((DrawablePtr) pPixmap, pGCtmp,
                                       pPixmap->drawable.depth,
                                       0, 0, gWidth, gHeight,

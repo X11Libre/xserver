@@ -54,12 +54,13 @@ static DevPrivateKey xf86RandRKey;
 static int
 xf86RandRModeRefresh(DisplayModePtr mode)
 {
-    if (mode->VRefresh)
-        return (int) (mode->VRefresh + 0.5);
-    else if (mode->Clock == 0)
-        return 0;
-    else
-        return (int) (mode->Clock * 1000.0 / mode->HTotal / mode->VTotal + 0.5);
+  if (mode->VRefresh) {
+    return (int)(mode->VRefresh + 0.5);
+  } else if (mode->Clock == 0) {
+    return 0;
+  } else {
+    return (int)(mode->Clock * 1000.0 / mode->HTotal / mode->VTotal + 0.5);
+  }
 }
 
 static Bool
@@ -77,8 +78,9 @@ xf86RandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     for (mode = scrp->modes; mode != NULL; mode = mode->next) {
         int refresh = xf86RandRModeRefresh(mode);
 
-        if (mode == scrp->modes)
-            refresh0 = refresh;
+        if (mode == scrp->modes) {
+          refresh0 = refresh;
+        }
 
         RRModeMM.mode = mode;
         RRModeMM.virtX = randrp->virtualX;
@@ -93,15 +95,17 @@ xf86RandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
         pSize = RRRegisterSize(pScreen,
                                mode->HDisplay, mode->VDisplay,
                                RRModeMM.mmWidth, RRModeMM.mmHeight);
-        if (!pSize)
-            return FALSE;
+        if (!pSize) {
+          return FALSE;
+        }
         RRRegisterRate(pScreen, pSize, refresh);
-        if (mode == scrp->currentMode &&
-            mode->HDisplay == scrp->virtualX &&
-            mode->VDisplay == scrp->virtualY)
-            RRSetCurrentConfig(pScreen, randrp->rotation, refresh, pSize);
-        if (mode->next == scrp->modes)
-            break;
+        if (mode == scrp->currentMode && mode->HDisplay == scrp->virtualX &&
+            mode->VDisplay == scrp->virtualY) {
+          RRSetCurrentConfig(pScreen, randrp->rotation, refresh, pSize);
+        }
+        if (mode->next == scrp->modes) {
+          break;
+        }
     }
     if (scrp->currentMode->HDisplay != randrp->virtualX ||
         scrp->currentMode->VDisplay != randrp->virtualY) {
@@ -120,8 +124,9 @@ xf86RandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
         pSize = RRRegisterSize(pScreen,
                                randrp->virtualX, randrp->virtualY,
                                RRModeMM.mmWidth, RRModeMM.mmHeight);
-        if (!pSize)
-            return FALSE;
+        if (!pSize) {
+          return FALSE;
+        }
         RRRegisterRate(pScreen, pSize, refresh0);
         if (scrp->virtualX == randrp->virtualX &&
             scrp->virtualY == randrp->virtualY) {
@@ -134,8 +139,9 @@ xf86RandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
         xorgRRRotation RRRotation;
 
         RRRotation.RRRotations = *rotations;
-        if (!(*scrp->DriverFunc) (scrp, RR_GET_INFO, &RRRotation))
-            return TRUE;
+        if (!(*scrp->DriverFunc)(scrp, RR_GET_INFO, &RRRotation)) {
+          return TRUE;
+        }
         *rotations = RRRotation.RRRotations;
     }
 
@@ -158,8 +164,9 @@ xf86RandRSetMode(ScreenPtr pScreen,
     WindowPtr pRoot = pScreen->root;
     Bool ret = TRUE;
 
-    if (pRoot && scrp->vtSema)
-        (*scrp->EnableDisableFBAccess) (scrp, FALSE);
+    if (pRoot && scrp->vtSema) {
+      (*scrp->EnableDisableFBAccess)(scrp, FALSE);
+    }
     if (useVirtual) {
         scrp->virtualX = randrp->virtualX;
         scrp->virtualY = randrp->virtualY;
@@ -220,8 +227,9 @@ xf86RandRSetMode(ScreenPtr pScreen,
          */
         xf86SetViewport (pScreen, pScreen->width, pScreen->height);
         xf86SetViewport (pScreen, 0, 0);
-        if (pRoot)
-            (*scrp->EnableDisableFBAccess) (scrp, TRUE);
+        if (pRoot) {
+          (*scrp->EnableDisableFBAccess)(scrp, TRUE);
+        }
     }
     return ret;
 }
@@ -240,17 +248,18 @@ xf86RandRSetConfig(ScreenPtr pScreen,
     Bool view_adjusted = FALSE;
 
     for (dev = inputInfo.devices; dev; dev = dev->next) {
-        if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev))
-            continue;
+      if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev)) {
+        continue;
+      }
 
         miPointerGetPosition(dev, &pos[dev->id][0], &pos[dev->id][1]);
     }
 
     for (mode = scrp->modes;; mode = mode->next) {
-        if (mode->HDisplay == pSize->width &&
-            mode->VDisplay == pSize->height &&
-            (rate == 0 || xf86RandRModeRefresh(mode) == rate))
-            break;
+      if (mode->HDisplay == pSize->width && mode->VDisplay == pSize->height &&
+          (rate == 0 || xf86RandRModeRefresh(mode) == rate)) {
+        break;
+      }
         if (mode->next == scrp->modes) {
             if (pSize->width == randrp->virtualX &&
                 pSize->height == randrp->virtualY) {
@@ -276,11 +285,12 @@ xf86RandRSetConfig(ScreenPtr pScreen,
             /*
              * Currently we need to rely on HW support for rotation.
              */
-            if (!(*scrp->DriverFunc) (scrp, RR_SET_CONFIG, &RRRotation))
-                return FALSE;
+            if (!(*scrp->DriverFunc)(scrp, RR_SET_CONFIG, &RRRotation)) {
+              return FALSE;
+            }
+        } else {
+          return FALSE;
         }
-        else
-            return FALSE;
 
         randrp->rotation = rotation;
     }
@@ -312,8 +322,9 @@ xf86RandRSetConfig(ScreenPtr pScreen,
      * FIXME: duplicated code, see modes/xf86RandR12.c
      */
     for (dev = inputInfo.devices; dev; dev = dev->next) {
-        if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev))
-            continue;
+      if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev)) {
+        continue;
+      }
 
         if (pScreen == miPointerGetScreen(dev)) {
             int px = pos[dev->id][0];
@@ -328,8 +339,9 @@ xf86RandRSetConfig(ScreenPtr pScreen,
                 view_adjusted = TRUE;
             }
 
-            if (pScreen->SetCursorPosition)
-                pScreen->SetCursorPosition(dev, pScreen, px, py, FALSE);
+            if (pScreen->SetCursorPosition) {
+              pScreen->SetCursorPosition(dev, pScreen, px, py, FALSE);
+            }
         }
     }
 
@@ -343,8 +355,9 @@ static void xf86RandRCloseScreen(CallbackListPtr *pcbl,
                                  ScreenPtr pScreen, void *unused)
 {
     ScrnInfoPtr scrp = xf86ScreenToScrn(pScreen);
-    if (!scrp)
-        return;
+    if (!scrp) {
+      return;
+    }
 
     XF86RandRInfoPtr randrp = XF86RANDRINFO(pScreen);
 
@@ -365,18 +378,21 @@ xf86RandRInit(ScreenPtr pScreen)
 
 #ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
-    if (!noPanoramiXExtension)
-        return TRUE;
+    if (!noPanoramiXExtension) {
+      return TRUE;
+    }
 #endif /* XINERAMA */
 
     xf86RandRKey = &xf86RandRKeyRec;
 
-    if (!dixRegisterPrivateKey(&xf86RandRKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&xf86RandRKeyRec, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
 
     XF86RandRInfoPtr randrp = calloc(1, sizeof(XF86RandRInfoRec));
-    if (!randrp)
-        return FALSE;
+    if (!randrp) {
+      return FALSE;
+    }
 
     if (!RRScreenInit(pScreen)) {
         free(randrp);

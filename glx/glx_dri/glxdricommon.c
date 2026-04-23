@@ -94,11 +94,12 @@ setScalar(__GLXconfig * config, unsigned int attrib, unsigned int value)
 {
     int i;
 
-    for (i = 0; i < ARRAY_SIZE(attribMap); i++)
-        if (attribMap[i].attrib == attrib) {
-            *(unsigned int *) ((char *) config + attribMap[i].offset) = value;
-            return;
-        }
+    for (i = 0; i < ARRAY_SIZE(attribMap); i++) {
+      if (attribMap[i].attrib == attrib) {
+        *(unsigned int *)((char *)config + attribMap[i].offset) = value;
+        return;
+      }
+    }
 }
 
 static Bool
@@ -119,9 +120,11 @@ static int
 server_has_depth(int depth)
 {
     int i;
-    for (i = 0; i < screenInfo.numPixmapFormats; i++)
-        if (screenInfo.formats[i].depth == depth)
-            return 1;
+    for (i = 0; i < screenInfo.numPixmapFormats; i++) {
+      if (screenInfo.formats[i].depth == depth) {
+        return 1;
+      }
+    }
     return 0;
 }
 
@@ -138,8 +141,9 @@ createModeFromConfig(const __DRIcoreExtension * core,
 
 
     config = calloc(1, sizeof *config);
-    if (!config)
-        return NULL;
+    if (!config) {
+      return NULL;
+    }
 
     config->driConfig = driConfig;
 
@@ -147,39 +151,47 @@ createModeFromConfig(const __DRIcoreExtension * core,
     while (core->indexConfigAttrib(driConfig, i++, &attrib, &value)) {
         switch (attrib) {
         case __DRI_ATTRIB_RENDER_TYPE:
-            if (value & __DRI_ATTRIB_RGBA_BIT)
-                renderType |= GLX_RGBA_BIT;
-            if (value & __DRI_ATTRIB_COLOR_INDEX_BIT)
-                renderType |= GLX_COLOR_INDEX_BIT;
-            if (value & __DRI_ATTRIB_FLOAT_BIT)
-                renderType |= GLX_RGBA_FLOAT_BIT_ARB;
-            if (value & __DRI_ATTRIB_UNSIGNED_FLOAT_BIT)
-                renderType |= GLX_RGBA_UNSIGNED_FLOAT_BIT_EXT;
+          if (value & __DRI_ATTRIB_RGBA_BIT) {
+            renderType |= GLX_RGBA_BIT;
+          }
+          if (value & __DRI_ATTRIB_COLOR_INDEX_BIT) {
+            renderType |= GLX_COLOR_INDEX_BIT;
+          }
+          if (value & __DRI_ATTRIB_FLOAT_BIT) {
+            renderType |= GLX_RGBA_FLOAT_BIT_ARB;
+          }
+          if (value & __DRI_ATTRIB_UNSIGNED_FLOAT_BIT) {
+            renderType |= GLX_RGBA_UNSIGNED_FLOAT_BIT_EXT;
+          }
             break;
         case __DRI_ATTRIB_CONFIG_CAVEAT:
-            if (value & __DRI_ATTRIB_NON_CONFORMANT_CONFIG)
-                config->config.visualRating = GLX_NON_CONFORMANT_CONFIG;
-            else if (value & __DRI_ATTRIB_SLOW_BIT)
-                config->config.visualRating = GLX_SLOW_CONFIG;
-            else
-                config->config.visualRating = GLX_NONE;
+          if (value & __DRI_ATTRIB_NON_CONFORMANT_CONFIG) {
+            config->config.visualRating = GLX_NON_CONFORMANT_CONFIG;
+          } else if (value & __DRI_ATTRIB_SLOW_BIT) {
+            config->config.visualRating = GLX_SLOW_CONFIG;
+          } else {
+            config->config.visualRating = GLX_NONE;
+          }
             break;
         case __DRI_ATTRIB_BIND_TO_TEXTURE_TARGETS:
             config->config.bindToTextureTargets = 0;
-            if (value & __DRI_ATTRIB_TEXTURE_1D_BIT)
-                config->config.bindToTextureTargets |= GLX_TEXTURE_1D_BIT_EXT;
-            if (value & __DRI_ATTRIB_TEXTURE_2D_BIT)
-                config->config.bindToTextureTargets |= GLX_TEXTURE_2D_BIT_EXT;
-            if (value & __DRI_ATTRIB_TEXTURE_RECTANGLE_BIT)
-                config->config.bindToTextureTargets |=
-                    GLX_TEXTURE_RECTANGLE_BIT_EXT;
+            if (value & __DRI_ATTRIB_TEXTURE_1D_BIT) {
+              config->config.bindToTextureTargets |= GLX_TEXTURE_1D_BIT_EXT;
+            }
+            if (value & __DRI_ATTRIB_TEXTURE_2D_BIT) {
+              config->config.bindToTextureTargets |= GLX_TEXTURE_2D_BIT_EXT;
+            }
+            if (value & __DRI_ATTRIB_TEXTURE_RECTANGLE_BIT) {
+              config->config.bindToTextureTargets |=
+                  GLX_TEXTURE_RECTANGLE_BIT_EXT;
+            }
             break;
         case __DRI_ATTRIB_SWAP_METHOD:
             /* Workaround for broken dri drivers */
-            if (value != GLX_SWAP_UNDEFINED_OML &&
-                value != GLX_SWAP_COPY_OML &&
-                value != GLX_SWAP_EXCHANGE_OML)
-                value = GLX_SWAP_UNDEFINED_OML;
+            if (value != GLX_SWAP_UNDEFINED_OML && value != GLX_SWAP_COPY_OML &&
+                value != GLX_SWAP_EXCHANGE_OML) {
+              value = GLX_SWAP_UNDEFINED_OML;
+            }
             /* Fall through. */
         default:
             setScalar(&config->config, attrib, value);
@@ -187,8 +199,9 @@ createModeFromConfig(const __DRIcoreExtension * core,
         }
     }
 
-    if (!render_type_is_pbuffer_only(renderType))
-        drawableType |= GLX_WINDOW_BIT | GLX_PIXMAP_BIT;
+    if (!render_type_is_pbuffer_only(renderType)) {
+      drawableType |= GLX_WINDOW_BIT | GLX_PIXMAP_BIT;
+    }
 
     /* Make sure we don't advertise things the server isn't configured for */
     if ((drawableType & (GLX_PBUFFER_BIT | GLX_PIXMAP_BIT)) &&
@@ -247,16 +260,18 @@ glxConvertConfigs(const __DRIcoreExtension * core,
     for (i = 0; configs[i]; i++) {
         tail->next = createModeFromConfig(core, configs[i], GLX_TRUE_COLOR,
                                           GL_FALSE);
-        if (tail->next == NULL)
-            break;
+        if (tail->next == NULL) {
+          break;
+        }
         tail = tail->next;
     }
 
     for (i = 0; configs[i]; i++) {
         tail->next = createModeFromConfig(core, configs[i], GLX_DIRECT_COLOR,
                                           GL_FALSE);
-        if (tail->next == NULL)
-            break;
+        if (tail->next == NULL) {
+          break;
+        }
 
         tail = tail->next;
     }
@@ -266,8 +281,9 @@ glxConvertConfigs(const __DRIcoreExtension * core,
         for (i = 0; configs[i]; i++) {
             tail->next = createModeFromConfig(core, configs[i], GLX_TRUE_COLOR,
                                             GL_TRUE);
-            if (tail->next == NULL)
-                continue;
+            if (tail->next == NULL) {
+              continue;
+            }
 
             tail = tail->next;
         }
@@ -298,11 +314,13 @@ glxProbeDriver(const char *driverName,
     const char *path = NULL;
 
     /* Search in LIBGL_DRIVERS_PATH if we're not setuid. */
-    if (!PrivsElevated())
-        path = getenv("LIBGL_DRIVERS_PATH");
+    if (!PrivsElevated()) {
+      path = getenv("LIBGL_DRIVERS_PATH");
+    }
 
-    if (!path)
-        path = dri_driver_path;
+    if (!path) {
+      path = dri_driver_path;
+    }
 
     do {
         const char *next;
@@ -321,8 +339,9 @@ glxProbeDriver(const char *driverName,
                  driverName);
 
         driver = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
-        if (driver != NULL)
-            break;
+        if (driver != NULL) {
+          break;
+        }
 
         LogMessage(X_ERROR, "AIGLX error: dlopen of %s failed (%s)\n",
                    filename, dlerror());
@@ -345,18 +364,21 @@ glxProbeDriver(const char *driverName,
              * since they are not allowed in C symbol names. That fixes up
              * symbol name for drivers with '-drm' suffix
              */
-            if (!isalnum((unsigned char)get_extensions_name[i]))
-                get_extensions_name[i] = '_';
+            if (!isalnum((unsigned char)get_extensions_name[i])) {
+              get_extensions_name[i] = '_';
+            }
         }
 
         get_extensions = dlsym(driver, get_extensions_name);
-        if (get_extensions)
-            extensions = get_extensions();
+        if (get_extensions) {
+          extensions = get_extensions();
+        }
         free(get_extensions_name);
     }
 
-    if (!extensions)
-        extensions = dlsym(driver, __DRI_DRIVER_EXTENSIONS);
+    if (!extensions) {
+      extensions = dlsym(driver, __DRI_DRIVER_EXTENSIONS);
+    }
     if (extensions == NULL) {
         LogMessage(X_ERROR, "AIGLX error: %s exports no extensions (%s)\n",
                    driverName, dlerror());
@@ -384,8 +406,9 @@ glxProbeDriver(const char *driverName,
     return driver;
 
  cleanup_failure:
-    if (driver)
-        dlclose(driver);
+   if (driver) {
+     dlclose(driver);
+   }
     *coreExt = *renderExt = NULL;
     return NULL;
 }

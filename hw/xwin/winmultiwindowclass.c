@@ -64,7 +64,9 @@ winMultiWindowGetClassHint(WindowPtr pWin, char **res_name, char **res_class)
               must handle the cases when one or both is absent or not null terminated
             */
             len_name = strlen((char *) prop->data);
-            if (len_name > prop->size) len_name = prop->size;
+            if (len_name > prop->size) {
+              len_name = prop->size;
+            }
 
             (*res_name) = calloc(1, len_name + 1);
 
@@ -79,7 +81,9 @@ winMultiWindowGetClassHint(WindowPtr pWin, char **res_name, char **res_class)
 
             /* Compute length of class name, it could be that it is absent or not null terminated */
             len_class = (len_name >= prop->size) ? 0 : (strlen(((char *) prop->data) + 1 + len_name));
-            if (len_class > prop->size - 1 - len_name) len_class = prop->size - 1 - len_name;
+            if (len_class > prop->size - 1 - len_name) {
+              len_class = prop->size - 1 - len_name;
+            }
 
             (*res_class) = calloc(1, len_class + 1);
 
@@ -96,9 +100,9 @@ winMultiWindowGetClassHint(WindowPtr pWin, char **res_name, char **res_class)
             (*res_class)[len_class] = '\0';
 
             return 1;
+        } else {
+          prop = prop->next;
         }
-        else
-            prop = prop->next;
     }
 
     return 0;
@@ -120,9 +124,9 @@ winMultiWindowGetWMHints(WindowPtr pWin, WinXWMHints * hints)
         if (prop->propertyName == XA_WM_HINTS && prop->data) {
             memcpy(hints, prop->data, sizeof(WinXWMHints));
             return 1;
+        } else {
+          prop = prop->next;
         }
-        else
-            prop = prop->next;
     }
 
     return 0;
@@ -133,8 +137,9 @@ winMultiWindowGetWindowRole(WindowPtr pWin, char **res_role)
 {
     int len_role;
 
-    if (!pWin || !res_role)
-        return 0;
+    if (!pWin || !res_role) {
+      return 0;
+    }
 
     PropertyPtr prop = pWin->properties;
 
@@ -155,9 +160,9 @@ winMultiWindowGetWindowRole(WindowPtr pWin, char **res_role)
             (*res_role)[len_role] = 0;
 
             return 1;
+        } else {
+          prop = prop->next;
         }
-        else
-            prop = prop->next;
     }
 
     return 0;
@@ -179,9 +184,9 @@ winMultiWindowGetWMNormalHints(WindowPtr pWin, WinXSizeHints * hints)
         if (prop->propertyName == XA_WM_NORMAL_HINTS && prop->data) {
             memcpy(hints, prop->data, sizeof(WinXSizeHints));
             return 1;
+        } else {
+          prop = prop->next;
         }
-        else
-            prop = prop->next;
     }
 
     return 0;
@@ -197,17 +202,19 @@ winMultiWindowGetTransientFor(WindowPtr pWin, Window *pDaddyId)
 
     PropertyPtr prop = pWin->properties;
 
-    if (pDaddyId)
-        *pDaddyId = 0;
+    if (pDaddyId) {
+      *pDaddyId = 0;
+    }
 
     while (prop) {
         if (prop->propertyName == XA_WM_TRANSIENT_FOR) {
-            if (pDaddyId)
-                memcpy(pDaddyId, prop->data, sizeof(Window));
+          if (pDaddyId) {
+            memcpy(pDaddyId, prop->data, sizeof(Window));
+          }
             return 1;
+        } else {
+          prop = prop->next;
         }
-        else
-            prop = prop->next;
     }
 
     return 0;
@@ -244,9 +251,9 @@ winMultiWindowGetWMName(WindowPtr pWin, char **wmName)
             (*wmName)[len_name] = 0;
 
             return 1;
+        } else {
+          prop = prop->next;
         }
-        else
-            prop = prop->next;
     }
 
     return 0;

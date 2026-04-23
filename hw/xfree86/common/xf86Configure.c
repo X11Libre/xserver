@@ -89,8 +89,9 @@ xf86AddBusDeviceToConfigure(const char *driver, BusType bus, void *busData,
     int ret, i, j;
     char *lower_driver;
 
-    if (!xf86DoConfigure || !xf86DoConfigurePass1)
-        return NULL;
+    if (!xf86DoConfigure || !xf86DoConfigurePass1) {
+      return NULL;
+    }
 
     /* Check for duplicates */
     for (i = 0; i < nDevToConfig; i++) {
@@ -108,8 +109,9 @@ xf86AddBusDeviceToConfigure(const char *driver, BusType bus, void *busData,
         default:
             return NULL;
         }
-        if (ret == 0)
-            goto out;
+        if (ret == 0) {
+          goto out;
+        }
     }
 
     /* Allocate new structure occurrence */
@@ -125,7 +127,9 @@ xf86AddBusDeviceToConfigure(const char *driver, BusType bus, void *busData,
 
     /* Fill in what we know, converting the driver name to lower case */
     lower_driver = XNFalloc(strlen(driver) + 1);
-    for (j = 0; (lower_driver[j] = tolower((unsigned char)driver[j])); j++);
+    for (j = 0; (lower_driver[j] = tolower((unsigned char)driver[j])); j++) {
+      ;
+    }
     DevToConfig[i].GDev.driver = lower_driver;
 
     switch (bus) {
@@ -148,9 +152,11 @@ xf86AddBusDeviceToConfigure(const char *driver, BusType bus, void *busData,
     }
 
     /* Get driver's available options */
-    if (xf86DriverList[CurrentDriver]->AvailableOptions)
-        DevToConfig[i].GDev.options = (OptionInfoPtr)
-            (*xf86DriverList[CurrentDriver]->AvailableOptions) (chipset, bus);
+    if (xf86DriverList[CurrentDriver]->AvailableOptions) {
+      DevToConfig[i].GDev.options =
+          (OptionInfoPtr)(*xf86DriverList[CurrentDriver]->AvailableOptions)(
+              chipset, bus);
+    }
 
     return &DevToConfig[i].GDev;
 
@@ -180,8 +186,9 @@ configureInputSection(void)
         }
     }
 
-    if (!(mouse = calloc(1, sizeof(XF86ConfInputRec))))
-        return NULL;
+    if (!(mouse = calloc(1, sizeof(XF86ConfInputRec)))) {
+      return NULL;
+    }
 
     mouse->inp_identifier = XNFstrdup("Mouse0");
     mouse->inp_driver = XNFstrdup("mouse");
@@ -215,8 +222,9 @@ configureScreenSection(int screennum)
 
     for (i = 0; i < ARRAY_SIZE(depths); i++) {
         XF86ConfDisplayPtr conf_display = calloc(1, sizeof(XF86ConfDisplayRec));
-        if (!conf_display)
-            continue;
+        if (!conf_display) {
+          continue;
+        }
         conf_display->disp_depth = depths[i];
         conf_display->disp_black.red = conf_display->disp_white.red = -1;
         conf_display->disp_black.green = conf_display->disp_white.green = -1;
@@ -265,22 +273,25 @@ configureDeviceSection(int screennum)
     parsePrologue(XF86ConfDevicePtr, XF86ConfDeviceRec);
 
     /* Move device info to parser structure */
-   if (asprintf(&identifier, "Card%d", screennum) == -1)
-        identifier = NULL;
+    if (asprintf(&identifier, "Card%d", screennum) == -1) {
+      identifier = NULL;
+    }
     ptr->dev_identifier = identifier;
     ptr->dev_chipset = DevToConfig[screennum].GDev.chipset;
     ptr->dev_busid = DevToConfig[screennum].GDev.busID;
     ptr->dev_driver = DevToConfig[screennum].GDev.driver;
     ptr->dev_ramdac = DevToConfig[screennum].GDev.ramdac;
-    for (i = 0; i < MAXDACSPEEDS; i++)
-        ptr->dev_dacSpeeds[i] = DevToConfig[screennum].GDev.dacSpeeds[i];
+    for (i = 0; i < MAXDACSPEEDS; i++) {
+      ptr->dev_dacSpeeds[i] = DevToConfig[screennum].GDev.dacSpeeds[i];
+    }
     ptr->dev_videoram = DevToConfig[screennum].GDev.videoRam;
     ptr->dev_mem_base = DevToConfig[screennum].GDev.MemBase;
     ptr->dev_io_base = DevToConfig[screennum].GDev.IOBase;
     ptr->dev_clockchip = DevToConfig[screennum].GDev.clockchip;
     for (i = 0; (i < MAXCLOCKS) && (i < DevToConfig[screennum].GDev.numclocks);
-         i++)
-        ptr->dev_clock[i] = DevToConfig[screennum].GDev.clock[i];
+         i++) {
+      ptr->dev_clock[i] = DevToConfig[screennum].GDev.clock[i];
+    }
     ptr->dev_clocks = i;
     ptr->dev_chipid = DevToConfig[screennum].GDev.chipID;
     ptr->dev_chiprev = DevToConfig[screennum].GDev.chipRev;
@@ -308,8 +319,9 @@ configureDeviceSection(int screennum)
                 int len = strlen(ptr->dev_comment) + strlen(prefix) +
                     strlen(middle) + strlen(suffix) + 1;
 
-                if (asprintf(&optname, "\"%s\"", p->name) == -1)
-                    break;
+                if (asprintf(&optname, "\"%s\"", p->name) == -1) {
+                  break;
+                }
 
                 len += max(20, strlen(optname));
                 len += strlen(opttype);
@@ -412,8 +424,9 @@ configureModuleSection(void)
     if (elist) {
         for (el = elist; *el; el++) {
             XF86LoadPtr module = calloc(1, sizeof(XF86LoadRec));
-            if (!module)
-                return ptr;
+            if (!module) {
+              return ptr;
+            }
             module->load_name = *el;
             ptr->mod_load_lst = (XF86LoadPtr) xf86addListItem((glp) ptr->
                                                               mod_load_lst,
@@ -430,10 +443,12 @@ configureFilesSection(void)
 {
     parsePrologue(XF86ConfFilesPtr, XF86ConfFilesRec);
 
-    if (xf86ModulePath)
-        ptr->file_modulepath = XNFstrdup(xf86ModulePath);
-    if (defaultFontPath)
-        ptr->file_fontpath = XNFstrdup(defaultFontPath);
+    if (xf86ModulePath) {
+      ptr->file_modulepath = XNFstrdup(xf86ModulePath);
+    }
+    if (defaultFontPath) {
+      ptr->file_fontpath = XNFstrdup(defaultFontPath);
+    }
 
     return ptr;
 }
@@ -543,9 +558,11 @@ is_fallback(const char *s)
     const char *fallback[5] = { "modesetting", "fbdev", "vesa",  "wsfb", NULL };
     int i;
 
-    for (i = 0; fallback[i]; i++)
-	if (strstr(s, fallback[i]))
-	    return i;
+    for (i = 0; fallback[i]; i++) {
+      if (strstr(s, fallback[i])) {
+        return i;
+      }
+    }
 
     return -1;
 }
@@ -559,16 +576,19 @@ driver_sort(const void *_l, const void *_r)
     int right = is_fallback(r);
 
     /* neither is a fallback, asciibetize */
-    if (left == -1 && right == -1)
-	return strcmp(l, r);
+    if (left == -1 && right == -1) {
+      return strcmp(l, r);
+    }
 
     /* left is a fallback, right is not */
-    if (left >= 0 && right == -1)
-	return 1;
+    if (left >= 0 && right == -1) {
+      return 1;
+    }
 
     /* right is a fallback, left is not */
-    if (right >= 0 && left == -1)
-	return -1;
+    if (right >= 0 && left == -1) {
+      return -1;
+    }
 
     /* both are fallbacks, decide which is worse */
     return left - right;
@@ -580,7 +600,9 @@ fixup_video_driver_list(const char **drivers)
     const char **end;
 
     /* walk to the end of the list */
-    for (end = drivers; *end && **end; end++);
+    for (end = drivers; *end && **end; end++) {
+      ;
+    }
 
     qsort(drivers, end - drivers, sizeof(const char *), driver_sort);
 }
@@ -593,8 +615,9 @@ GenerateDriverList(void)
     ret = LoaderListDir("drivers", patlist);
 
     /* fix up the probe order for video drivers */
-    if (ret != NULL)
-        fixup_video_driver_list(ret);
+    if (ret != NULL) {
+      fixup_video_driver_list(ret);
+    }
 
     return ret;
 }
@@ -618,8 +641,9 @@ DoConfigure(void)
     }
 
     ErrorF("List of video drivers:\n");
-    for (vl = vlist; *vl; vl++)
-        ErrorF("\t%s\n", *vl);
+    for (vl = vlist; *vl; vl++) {
+      ErrorF("\t%s\n", *vl);
+    }
 
     /* Load all the drivers that were found. */
     xf86LoadModules(vlist, NULL);
@@ -721,8 +745,9 @@ DoConfigure(void)
 
             i = DevToConfig[screennum].iDriver;
 
-            if (driverProbed[i])
-                continue;
+            if (driverProbed[i]) {
+              continue;
+            }
             driverProbed[i] = TRUE;
 
             oldNumScreens = xf86NumScreens;
@@ -742,8 +767,9 @@ DoConfigure(void)
                         break;
                     }
                 }
-                if (primary)
-                    continue;
+                if (primary) {
+                  continue;
+                }
                 /* not primary: assign it to next device of same driver */
                 /*
                  * NOTE: we assume that devices in DevToConfig

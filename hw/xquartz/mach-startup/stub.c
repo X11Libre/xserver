@@ -171,8 +171,9 @@ __attribute__((__noreturn__))
 static void
 signal_handler(int sig)
 {
-    if (x11app_pid)
-        kill(x11app_pid, sig);
+  if (x11app_pid) {
+    kill(x11app_pid, sig);
+  }
     _exit(0);
 }
 
@@ -192,16 +193,18 @@ main(int argc, char **argv, char **envp)
     char *asl_facility;
     char *server_bootstrap_name = kX11AppBundleId;
 
-    if (getenv("X11_PREFS_DOMAIN"))
-        server_bootstrap_name = getenv("X11_PREFS_DOMAIN");
+    if (getenv("X11_PREFS_DOMAIN")) {
+      server_bootstrap_name = getenv("X11_PREFS_DOMAIN");
+    }
 
     asprintf(&asl_sender, "%s.stub", server_bootstrap_name);
     assert(asl_sender);
 
     asl_facility = strdup(server_bootstrap_name);
     assert(asl_facility);
-    if (strcmp(asl_facility + strlen(asl_facility) - 4, ".X11") == 0)
-        asl_facility[strlen(asl_facility) - 4] = '\0';
+    if (strcmp(asl_facility + strlen(asl_facility) - 4, ".X11") == 0) {
+      asl_facility[strlen(asl_facility) - 4] = '\0';
+    }
 
     assert(aslc = asl_open(asl_sender, asl_facility, ASL_OPT_NO_DELAY));
     free(asl_sender);
@@ -212,8 +215,9 @@ main(int argc, char **argv, char **envp)
      * time out waiting for it and will just poll for the server.
      */
     handler = signal(SIGUSR1, SIG_IGN);
-    if (handler == SIG_IGN)
-        kill(getppid(), SIGUSR1);
+    if (handler == SIG_IGN) {
+      kill(getppid(), SIGUSR1);
+    }
     signal(SIGUSR1, handler);
 
     /* Pass on SIGs to X11.app */
@@ -255,8 +259,9 @@ main(int argc, char **argv, char **envp)
         for (i = 0; i < 80; i++) {
             usleep(250000);
             kr = bootstrap_look_up(bootstrap_port, server_bootstrap_name, &mp);
-            if (kr == KERN_SUCCESS)
-                break;
+            if (kr == KERN_SUCCESS) {
+              break;
+            }
         }
 
         if (kr != KERN_SUCCESS) {
@@ -300,7 +305,9 @@ main(int argc, char **argv, char **envp)
     }
 
     /* Count envp */
-    for (envpc = 0; envp[envpc]; envpc++) ;
+    for (envpc = 0; envp[envpc]; envpc++) {
+      ;
+    }
 
     /* We have fixed-size string lengths due to limitations in IPC,
      * so we need to copy our argv and envp.

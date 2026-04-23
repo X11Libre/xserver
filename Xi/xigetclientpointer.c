@@ -58,11 +58,12 @@ ProcXIGetClientPointer(ClientPtr client)
     if (stuff->win != None) {
         rc = dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess);
 
-        if (rc != Success)
-            return BadWindow;
+        if (rc != Success) {
+          return BadWindow;
+        }
+    } else {
+      winclient = client;
     }
-    else
-        winclient = client;
 
     xXIGetClientPointerReply reply = {
         .RepType = X_XIGetClientPointer,

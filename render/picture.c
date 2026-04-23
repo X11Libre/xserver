@@ -70,8 +70,9 @@ picture_window_destructor(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pW
 
     while ((pPicture = GetPictureWindow(pWindow))) {
         SetPictureWindow(pWindow, pPicture->pNext);
-        if (pPicture->id)
-            FreeResource(pPicture->id, PictureType);
+        if (pPicture->id) {
+          FreeResource(pPicture->id, PictureType);
+        }
         FreePicture((void *) pPicture, pPicture->id);
     }
 }
@@ -82,9 +83,11 @@ static void PictureScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *u
     int n;
 
     PictureResetFilters(pScreen);
-    for (n = 0; n < ps->nformats; n++)
-        if (ps->formats[n].type == PictTypeIndexed)
-            (*ps->CloseIndexed) (pScreen, &ps->formats[n]);
+    for (n = 0; n < ps->nformats; n++) {
+      if (ps->formats[n].type == PictTypeIndexed) {
+        (*ps->CloseIndexed)(pScreen, &ps->formats[n]);
+      }
+    }
     GlyphUninit(pScreen);
     SetPictureScreen(pScreen, 0);
     free(ps->formats);
@@ -126,9 +129,11 @@ visualDepth(ScreenPtr pScreen, VisualPtr pVisual)
 
     for (d = 0; d < pScreen->numDepths; d++) {
         pDepth = &pScreen->allowedDepths[d];
-        for (v = 0; v < pDepth->numVids; v++)
-            if (pDepth->vids[v] == pVisual->vid)
-                return pDepth->depth;
+        for (v = 0; v < pDepth->numVids; v++) {
+          if (pDepth->vids[v] == pVisual->vid) {
+            return pDepth->depth;
+          }
+        }
     }
     return 0;
 }
@@ -143,9 +148,11 @@ addFormat(FormatInitRec formats[256], int *nformat, CARD32 format, CARD8 depth)
 {
     int n;
 
-    for (n = 0; n < *nformat; n++)
-        if (formats[n].format == format && formats[n].depth == depth)
-            return;
+    for (n = 0; n < *nformat; n++) {
+      if (formats[n].format == format && formats[n].depth == depth) {
+        return;
+      }
+    }
     formats[*nformat].format = format;
     formats[*nformat].depth = depth;
     ++*nformat;
@@ -195,8 +202,9 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
     for (v = 0; v < pScreen->numVisuals; v++) {
         pVisual = &pScreen->visuals[v];
         depth = visualDepth(pScreen, pVisual);
-        if (!depth)
-            continue;
+        if (!depth) {
+          continue;
+        }
         bpp = BitsPerPixel(depth);
         switch (pVisual->class) {
         case DirectColor:
@@ -285,8 +293,9 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
     }
 
     pFormats = calloc(nformats, sizeof(PictFormatRec));
-    if (!pFormats)
-        return 0;
+    if (!pFormats) {
+      return 0;
+    }
     for (f = 0; f < nformats; f++) {
         pFormats[f].id = dixAllocServerXID();
         pFormats[f].depth = formats[f].depth;
@@ -298,10 +307,11 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
 
             pFormats[f].direct.alphaMask = Mask (PIXMAN_FORMAT_A(format));
 
-            if (pFormats[f].direct.alphaMask)
-                pFormats[f].direct.alpha = (PIXMAN_FORMAT_R(format) +
-                                            PIXMAN_FORMAT_G(format) +
-                                            PIXMAN_FORMAT_B(format));
+            if (pFormats[f].direct.alphaMask) {
+              pFormats[f].direct.alpha =
+                  (PIXMAN_FORMAT_R(format) + PIXMAN_FORMAT_G(format) +
+                   PIXMAN_FORMAT_B(format));
+            }
 
             pFormats[f].direct.redMask = Mask (PIXMAN_FORMAT_R(format));
 
@@ -322,10 +332,11 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
 
             pFormats[f].direct.alphaMask = Mask (PIXMAN_FORMAT_A(format));
 
-            if (pFormats[f].direct.alphaMask)
-                pFormats[f].direct.alpha = (PIXMAN_FORMAT_B(format) +
-                                            PIXMAN_FORMAT_G(format) +
-                                            PIXMAN_FORMAT_R(format));
+            if (pFormats[f].direct.alphaMask) {
+              pFormats[f].direct.alpha =
+                  (PIXMAN_FORMAT_B(format) + PIXMAN_FORMAT_G(format) +
+                   PIXMAN_FORMAT_R(format));
+            }
 
             pFormats[f].direct.blueMask = Mask (PIXMAN_FORMAT_B(format));
 
@@ -395,8 +406,9 @@ PictureFindVisual(ScreenPtr pScreen, VisualID visual)
 
     for (i = 0, pVisual = pScreen->visuals;
          i < pScreen->numVisuals; i++, pVisual++) {
-        if (pVisual->vid == visual)
-            return pVisual;
+      if (pVisual->vid == visual) {
+        return pVisual;
+      }
     }
     return 0;
 }
@@ -406,8 +418,9 @@ PictureInitIndexedFormat(ScreenPtr pScreen, PictFormatPtr format)
 {
     PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
 
-    if (format->type != PictTypeIndexed || format->index.pColormap)
-        return TRUE;
+    if (format->type != PictTypeIndexed || format->index.pColormap) {
+      return TRUE;
+    }
 
     if (format->index.vid == pScreen->rootVisual) {
         dixLookupResourceByType((void **) &format->index.pColormap,
@@ -417,16 +430,19 @@ PictureInitIndexedFormat(ScreenPtr pScreen, PictFormatPtr format)
     else {
         VisualPtr pVisual = PictureFindVisual(pScreen, format->index.vid);
 
-        if (pVisual == NULL)
-            return FALSE;
+        if (pVisual == NULL) {
+          return FALSE;
+        }
 
         if (dixCreateColormap(dixAllocServerXID(), pScreen, pVisual,
-                              &format->index.pColormap, AllocNone, 0)
-            != Success)
-            return FALSE;
+                              &format->index.pColormap, AllocNone,
+                              0) != Success) {
+          return FALSE;
+        }
     }
-    if (!ps->InitIndexed(pScreen, format))
-        return FALSE;
+    if (!ps->InitIndexed(pScreen, format)) {
+      return FALSE;
+    }
     return TRUE;
 }
 
@@ -437,13 +453,16 @@ PictureInitIndexedFormats(ScreenPtr pScreen)
     PictFormatPtr format;
     int nformat;
 
-    if (!ps)
-        return FALSE;
+    if (!ps) {
+      return FALSE;
+    }
     format = ps->formats;
     nformat = ps->nformats;
-    while (nformat--)
-        if (!PictureInitIndexedFormat(pScreen, format++))
-            return FALSE;
+    while (nformat--) {
+      if (!PictureInitIndexedFormat(pScreen, format++)) {
+        return FALSE;
+      }
+    }
     return TRUE;
 }
 
@@ -452,8 +471,9 @@ PictureFinishInit(void)
 {
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (!PictureInitIndexedFormats(walkScreen))
-            return FALSE;
+        if (!PictureInitIndexedFormats(walkScreen)) {
+          return FALSE;
+        }
         (void) AnimCurInit(walkScreen);
     }
 
@@ -465,8 +485,9 @@ PictureSetSubpixelOrder(ScreenPtr pScreen, int subpixel)
 {
     PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
 
-    if (!ps)
-        return FALSE;
+    if (!ps) {
+      return FALSE;
+    }
     ps->subpixel = subpixel;
     return TRUE;
 
@@ -477,8 +498,9 @@ PictureGetSubpixelOrder(ScreenPtr pScreen)
 {
     PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
 
-    if (!ps)
-        return SubPixelUnknown;
+    if (!ps) {
+      return SubPixelUnknown;
+    }
     return ps->subpixel;
 }
 
@@ -490,8 +512,9 @@ PictureMatchVisual(ScreenPtr pScreen, int depth, VisualPtr pVisual)
     int nformat;
     int type;
 
-    if (!ps)
-        return 0;
+    if (!ps) {
+      return 0;
+    }
     format = ps->formats;
     nformat = ps->nformats;
     switch (pVisual->class) {
@@ -511,8 +534,9 @@ PictureMatchVisual(ScreenPtr pScreen, int depth, VisualPtr pVisual)
     while (nformat--) {
         if (format->depth == depth && format->type == type) {
             if (type == PictTypeIndexed) {
-                if (format->index.vid == pVisual->vid)
-                    return format;
+              if (format->index.vid == pVisual->vid) {
+                return format;
+              }
             }
             else {
                 if ((unsigned long)format->direct.redMask <<
@@ -537,13 +561,15 @@ PictureMatchFormat(ScreenPtr pScreen, int depth, CARD32 f)
     PictFormatPtr format;
     int nformat;
 
-    if (!ps)
-        return 0;
+    if (!ps) {
+      return 0;
+    }
     format = ps->formats;
     nformat = ps->nformats;
     while (nformat--) {
-        if (format->depth == depth && format->format == (f & 0xffffff))
-            return format;
+      if (format->depth == depth && format->format == (f & 0xffffff)) {
+        return format;
+      }
         format++;
     }
     return 0;
@@ -552,18 +578,19 @@ PictureMatchFormat(ScreenPtr pScreen, int depth, CARD32 f)
 int
 PictureParseCmapPolicy(const char *name)
 {
-    if (strcmp(name, "default") == 0)
-        return PictureCmapPolicyDefault;
-    else if (strcmp(name, "mono") == 0)
-        return PictureCmapPolicyMono;
-    else if (strcmp(name, "gray") == 0)
-        return PictureCmapPolicyGray;
-    else if (strcmp(name, "color") == 0)
-        return PictureCmapPolicyColor;
-    else if (strcmp(name, "all") == 0)
-        return PictureCmapPolicyAll;
-    else
-        return PictureCmapPolicyInvalid;
+  if (strcmp(name, "default") == 0) {
+    return PictureCmapPolicyDefault;
+  } else if (strcmp(name, "mono") == 0) {
+    return PictureCmapPolicyMono;
+  } else if (strcmp(name, "gray") == 0) {
+    return PictureCmapPolicyGray;
+  } else if (strcmp(name, "color") == 0) {
+    return PictureCmapPolicyColor;
+  } else if (strcmp(name, "all") == 0) {
+    return PictureCmapPolicyAll;
+  } else {
+    return PictureCmapPolicyInvalid;
+  }
 }
 
 /** @see GetDefaultBytes */
@@ -606,56 +633,67 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     if (!picture_resources_initialized)
     {
         PictureType = CreateNewResourceType(FreePicture, "PICTURE");
-        if (!PictureType)
-            return FALSE;
+        if (!PictureType) {
+          return FALSE;
+        }
         SetResourceTypeSizeFunc(PictureType, GetPictureBytes);
         PictFormatType = CreateNewResourceType(FreePictFormat, "PICTFORMAT");
-        if (!PictFormatType)
-            return FALSE;
+        if (!PictFormatType) {
+          return FALSE;
+        }
         GlyphSetType = CreateNewResourceType(FreeGlyphSet, "GLYPHSET");
-        if (!GlyphSetType)
-            return FALSE;
+        if (!GlyphSetType) {
+          return FALSE;
+        }
         picture_resources_initialized = true;
     }
-    if (!dixRegisterPrivateKey(&PictureScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&PictureScreenPrivateKeyRec, PRIVATE_SCREEN,
+                               0)) {
+      return FALSE;
+    }
 
-    if (!dixRegisterPrivateKey(&PictureWindowPrivateKeyRec, PRIVATE_WINDOW, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&PictureWindowPrivateKeyRec, PRIVATE_WINDOW,
+                               0)) {
+      return FALSE;
+    }
 
     if (!formats) {
         formats = PictureCreateDefaultFormats(pScreen, &nformats);
-        if (!formats)
-            return FALSE;
+        if (!formats) {
+          return FALSE;
+        }
     }
     for (n = 0; n < nformats; n++) {
         if (!AddResource
             (formats[n].id, PictFormatType, (void *) (formats + n))) {
             int i;
-            for (i = 0; i < n; i++)
-                FreeResource(formats[i].id, X11_RESTYPE_NONE);
+            for (i = 0; i < n; i++) {
+              FreeResource(formats[i].id, X11_RESTYPE_NONE);
+            }
             free(formats);
             return FALSE;
         }
         if (formats[n].type == PictTypeIndexed) {
             VisualPtr pVisual =
                 PictureFindVisual(pScreen, formats[n].index.vid);
-            if ((pVisual->class | DynamicClass) == PseudoColor)
-                type = PIXMAN_TYPE_COLOR;
-            else
-                type = PIXMAN_TYPE_GRAY;
+            if ((pVisual->class | DynamicClass) == PseudoColor) {
+              type = PIXMAN_TYPE_COLOR;
+            } else {
+              type = PIXMAN_TYPE_GRAY;
+            }
             a = r = g = b = 0;
         }
         else {
-            if ((formats[n].direct.redMask |
-                 formats[n].direct.blueMask | formats[n].direct.greenMask) == 0)
-                type = PIXMAN_TYPE_A;
-            else if (formats[n].direct.red > formats[n].direct.blue)
-                type = PIXMAN_TYPE_ARGB;
-            else if (formats[n].direct.red == 0)
-                type = PIXMAN_TYPE_ABGR;
-            else
-                type = PIXMAN_TYPE_BGRA;
+          if ((formats[n].direct.redMask | formats[n].direct.blueMask |
+               formats[n].direct.greenMask) == 0) {
+            type = PIXMAN_TYPE_A;
+          } else if (formats[n].direct.red > formats[n].direct.blue) {
+            type = PIXMAN_TYPE_ARGB;
+          } else if (formats[n].direct.red == 0) {
+            type = PIXMAN_TYPE_ABGR;
+          } else {
+            type = PIXMAN_TYPE_BGRA;
+          }
             a = Ones(formats[n].direct.alphaMask);
             r = Ones(formats[n].direct.redMask);
             g = Ones(formats[n].direct.greenMask);
@@ -754,8 +792,9 @@ CreatePicture(Picture pid,
     /* security creation/labeling check */
     *error = XaceHookResourceAccess(client, pid, PictureType, pPicture,
                       X11_RESTYPE_PIXMAP, pDrawable, DixCreateAccess | DixSetAttrAccess);
-    if (*error != Success)
-        goto out;
+    if (*error != Success) {
+      goto out;
+    }
 
     if (pDrawable->type == DRAWABLE_PIXMAP) {
         ++((PixmapPtr) pDrawable)->refcnt;
@@ -768,12 +807,14 @@ CreatePicture(Picture pid,
 
     SetPictureToDefaults(pPicture);
 
-    if (vmask)
-        *error = ChangePicture(pPicture, vmask, vlist, 0, client);
-    else
-        *error = Success;
-    if (*error == Success)
-        *error = (*ps->CreatePicture) (pPicture);
+    if (vmask) {
+      *error = ChangePicture(pPicture, vmask, vlist, 0, client);
+    } else {
+      *error = Success;
+    }
+    if (*error == Success) {
+      *error = (*ps->CreatePicture)(pPicture);
+    }
  out:
     if (*error != Success) {
         FreePicture(pPicture, (XID) 0);
@@ -834,8 +875,9 @@ createSourcePicture(void)
 
     pPicture = dixAllocateScreenObjectWithPrivates(NULL, PictureRec,
                                                    PRIVATE_PICTURE);
-    if (!pPicture)
-	return 0;
+    if (!pPicture) {
+      return 0;
+    }
 
     pPicture->pDrawable = 0;
     pPicture->pFormat = 0;
@@ -1002,12 +1044,14 @@ cpAlphaMap(void **result, XID id, ScreenPtr screen, ClientPtr client, Mask mode)
         PanoramiXRes *res;
         int err = dixLookupResourceByType((void **)&res, id, XRT_PICTURE,
                                           client, mode);
-        if (err != Success)
-            return err;
-        if (screen == NULL)
-            LogMessage(X_WARNING, "cpAlphaMap() screen == NULL\n");
-        else
-            id = res->info[screen->myNum].id;
+        if (err != Success) {
+          return err;
+        }
+        if (screen == NULL) {
+          LogMessage(X_WARNING, "cpAlphaMap() screen == NULL\n");
+        } else {
+          id = res->info[screen->myNum].id;
+        }
     }
 #endif /* XINERAMA */
     return dixLookupResourceByType(result, id, PictureType, client, mode);
@@ -1021,8 +1065,9 @@ cpClipMask(void **result, XID id, ScreenPtr screen, ClientPtr client, Mask mode)
         PanoramiXRes *res;
         int err = dixLookupResourceByType((void **)&res, id, XRT_PIXMAP,
                                           client, mode);
-        if (err != Success)
-            return err;
+        if (err != Success) {
+          return err;
+        }
         id = res->info[screen->myNum].id;
     }
 #endif /* XINERAMA */
@@ -1072,30 +1117,32 @@ ChangePicture(PicturePtr pPicture,
             if (vlist) {
                 Picture pid = NEXT_VAL(Picture);
 
-                if (pid == None)
-                    pAlpha = 0;
-                else {
-                    error = cpAlphaMap((void **) &pAlpha, pid, pScreen,
-                                       client, DixReadAccess);
-                    if (error != Success) {
-                        client->errorValue = pid;
-                        break;
-                    }
-                    if (pAlpha->pDrawable == NULL ||
-                        pAlpha->pDrawable->type != DRAWABLE_PIXMAP) {
-                        client->errorValue = pid;
-                        error = BadMatch;
-                        break;
-                    }
+                if (pid == None) {
+                  pAlpha = 0;
+                } else {
+                  error = cpAlphaMap((void **)&pAlpha, pid, pScreen, client,
+                                     DixReadAccess);
+                  if (error != Success) {
+                    client->errorValue = pid;
+                    break;
+                  }
+                  if (pAlpha->pDrawable == NULL ||
+                      pAlpha->pDrawable->type != DRAWABLE_PIXMAP) {
+                    client->errorValue = pid;
+                    error = BadMatch;
+                    break;
+                  }
                 }
+            } else {
+              pAlpha = NEXT_PTR(PicturePtr);
             }
-            else
-                pAlpha = NEXT_PTR(PicturePtr);
             if (!error) {
-                if (pAlpha && pAlpha->pDrawable->type == DRAWABLE_PIXMAP)
-                    pAlpha->refcnt++;
-                if (pPicture->alphaMap)
-                    FreePicture((void *) pPicture->alphaMap, (XID) 0);
+              if (pAlpha && pAlpha->pDrawable->type == DRAWABLE_PIXMAP) {
+                pAlpha->refcnt++;
+              }
+              if (pPicture->alphaMap) {
+                FreePicture((void *)pPicture->alphaMap, (XID)0);
+              }
                 pPicture->alphaMap = pAlpha;
             }
         }
@@ -1122,8 +1169,9 @@ ChangePicture(PicturePtr pPicture,
             PixmapPtr pPixmap;
             int clipType;
 
-            if (!pScreen)
-                return BadDrawable;
+            if (!pScreen) {
+              return BadDrawable;
+            }
 
             if (vlist) {
                 pid = NEXT_VAL(Pixmap);
@@ -1144,10 +1192,11 @@ ChangePicture(PicturePtr pPicture,
             else {
                 pPixmap = NEXT_PTR(PixmapPtr);
 
-                if (pPixmap)
-                    clipType = CT_PIXMAP;
-                else
-                    clipType = CT_NONE;
+                if (pPixmap) {
+                  clipType = CT_PIXMAP;
+                } else {
+                  clipType = CT_NONE;
+                }
             }
 
             if (pPixmap) {
@@ -1170,11 +1219,11 @@ ChangePicture(PicturePtr pPicture,
             unsigned int newe;
             newe = NEXT_VAL(unsigned int);
 
-            if (newe <= xTrue)
-                pPicture->graphicsExposures = newe;
-            else {
-                client->errorValue = newe;
-                error = BadValue;
+            if (newe <= xTrue) {
+              pPicture->graphicsExposures = newe;
+            } else {
+              client->errorValue = newe;
+              error = BadValue;
             }
         }
             break;
@@ -1183,11 +1232,11 @@ ChangePicture(PicturePtr pPicture,
             unsigned int news;
             news = NEXT_VAL(unsigned int);
 
-            if (news == ClipByChildren || news == IncludeInferiors)
-                pPicture->subWindowMode = news;
-            else {
-                client->errorValue = news;
-                error = BadValue;
+            if (news == ClipByChildren || news == IncludeInferiors) {
+              pPicture->subWindowMode = news;
+            } else {
+              client->errorValue = news;
+              error = BadValue;
             }
         }
             break;
@@ -1196,11 +1245,11 @@ ChangePicture(PicturePtr pPicture,
             unsigned int newe;
             newe = NEXT_VAL(unsigned int);
 
-            if (newe == PolyEdgeSharp || newe == PolyEdgeSmooth)
-                pPicture->polyEdge = newe;
-            else {
-                client->errorValue = newe;
-                error = BadValue;
+            if (newe == PolyEdgeSharp || newe == PolyEdgeSmooth) {
+              pPicture->polyEdge = newe;
+            } else {
+              client->errorValue = newe;
+              error = BadValue;
             }
         }
             break;
@@ -1209,11 +1258,11 @@ ChangePicture(PicturePtr pPicture,
             unsigned int newm;
             newm = NEXT_VAL(unsigned int);
 
-            if (newm == PolyModePrecise || newm == PolyModeImprecise)
-                pPicture->polyMode = newm;
-            else {
-                client->errorValue = newm;
-                error = BadValue;
+            if (newm == PolyModePrecise || newm == PolyModeImprecise) {
+              pPicture->polyMode = newm;
+            } else {
+              client->errorValue = newm;
+              error = BadValue;
             }
         }
             break;
@@ -1227,11 +1276,11 @@ ChangePicture(PicturePtr pPicture,
 
             newca = NEXT_VAL(unsigned int);
 
-            if (newca <= xTrue)
-                pPicture->componentAlpha = newca;
-            else {
-                client->errorValue = newca;
-                error = BadValue;
+            if (newca <= xTrue) {
+              pPicture->componentAlpha = newca;
+            } else {
+              client->errorValue = newca;
+              error = BadValue;
             }
         }
             break;
@@ -1241,8 +1290,9 @@ ChangePicture(PicturePtr pPicture,
             break;
         }
     }
-    if (ps)
-        (*ps->ChangePicture) (pPicture, maskQ);
+    if (ps) {
+      (*ps->ChangePicture)(pPicture, maskQ);
+    }
     return error;
 }
 
@@ -1256,8 +1306,9 @@ SetPictureClipRects(PicturePtr pPicture,
     int result;
 
     clientClip = RegionFromRects(nRect, rects, CT_UNSORTED);
-    if (!clientClip)
-        return BadAlloc;
+    if (!clientClip) {
+      return BadAlloc;
+    }
     result = (*ps->ChangePictureClip) (pPicture, CT_REGION,
                                        (void *) clientClip, 0);
     if (result == Success) {
@@ -1283,8 +1334,9 @@ SetPictureClipRegion(PicturePtr pPicture,
         type = CT_REGION;
         clientClip = RegionCreate(RegionExtents(pRegion),
                                   RegionNumRects(pRegion));
-        if (!clientClip)
-            return BadAlloc;
+        if (!clientClip) {
+          return BadAlloc;
+        }
         if (!RegionCopy(clientClip, pRegion)) {
             RegionDestroy(clientClip);
             return BadAlloc;
@@ -1321,14 +1373,16 @@ transformIsIdentity(PictTransform * t)
 int
 SetPictureTransform(PicturePtr pPicture, PictTransform * transform)
 {
-    if (transform && transformIsIdentity(transform))
-        transform = 0;
+  if (transform && transformIsIdentity(transform)) {
+    transform = 0;
+  }
 
     if (transform) {
         if (!pPicture->transform) {
             pPicture->transform = calloc(1, sizeof(PictTransform));
-            if (!pPicture->transform)
-                return BadAlloc;
+            if (!pPicture->transform) {
+              return BadAlloc;
+            }
         }
         *pPicture->transform = *transform;
     }
@@ -1367,8 +1421,9 @@ void
 ValidatePicture(PicturePtr pPicture)
 {
     ValidateOnePicture(pPicture);
-    if (pPicture->alphaMap)
-        ValidateOnePicture(pPicture->alphaMap);
+    if (pPicture->alphaMap) {
+      ValidateOnePicture(pPicture->alphaMap);
+    }
 }
 
 int
@@ -1381,8 +1436,9 @@ FreePicture(void *value, XID pid)
         free(pPicture->filter_params);
 
         if (pPicture->pSourcePict) {
-            if (pPicture->pSourcePict->type != SourcePictTypeSolidFill)
-                free(pPicture->pSourcePict->linear.stops);
+          if (pPicture->pSourcePict->type != SourcePictTypeSolidFill) {
+            free(pPicture->pSourcePict->linear.stops);
+          }
 
             free(pPicture->pSourcePict);
         }
@@ -1391,8 +1447,9 @@ FreePicture(void *value, XID pid)
             ScreenPtr pScreen = pPicture->pDrawable->pScreen;
             PictureScreenPtr ps = GetPictureScreen(pScreen);
 
-            if (pPicture->alphaMap)
-                FreePicture((void *) pPicture->alphaMap, (XID) 0);
+            if (pPicture->alphaMap) {
+              FreePicture((void *)pPicture->alphaMap, (XID)0);
+            }
             (*ps->DestroyPicture) (pPicture);
             (*ps->DestroyPictureClip) (pPicture);
             if (pPicture->pDrawable->type == DRAWABLE_WINDOW) {
@@ -1532,13 +1589,15 @@ CompositePicture(CARD8 op,
     PictureScreenPtr ps = GetPictureScreen(pDst->pDrawable->pScreen);
 
     ValidatePicture(pSrc);
-    if (pMask)
-        ValidatePicture(pMask);
+    if (pMask) {
+      ValidatePicture(pMask);
+    }
     ValidatePicture(pDst);
 
     op = ReduceCompositeOp(op, pSrc, pMask, pDst, xSrc, ySrc, width, height);
-    if (op == PictOpDst)
-        return;
+    if (op == PictOpDst) {
+      return;
+    }
 
     (*ps->Composite) (op,
                       pSrc,
@@ -1597,8 +1656,9 @@ CompositeTriStrip(CARD8 op,
 {
     PictureScreenPtr ps = GetPictureScreen(pDst->pDrawable->pScreen);
 
-    if (npoints < 3)
-        return;
+    if (npoints < 3) {
+      return;
+    }
 
     ValidatePicture(pSrc);
     ValidatePicture(pDst);
@@ -1614,8 +1674,9 @@ CompositeTriFan(CARD8 op,
 {
     PictureScreenPtr ps = GetPictureScreen(pDst->pDrawable->pScreen);
 
-    if (npoints < 3)
-        return;
+    if (npoints < 3) {
+      return;
+    }
 
     ValidatePicture(pSrc);
     ValidatePicture(pDst);

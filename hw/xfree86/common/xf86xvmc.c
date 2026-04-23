@@ -134,8 +134,9 @@ static void xf86XvMCCloseScreen(CallbackListPtr *pcbl,
     dixScreenUnhookClose(pScreen, xf86XvMCCloseScreen);
 
     xf86XvMCScreenPtr pScreenPriv = XF86XVMC_GET_PRIVATE(pScreen);
-    if (!pScreenPriv)
-        return;
+    if (!pScreenPriv) {
+      return;
+    }
 
     free(pScreenPriv->dixinfo);
     free(pScreenPriv);
@@ -151,11 +152,13 @@ xf86XvMCScreenInit(ScreenPtr pScreen,
     XvScreenPtr pxvs = dixLookupPrivate(&pScreen->devPrivates, XvGetScreenKey());
     int i, j;
 
-    if (noXvExtension)
-        return FALSE;
+    if (noXvExtension) {
+      return FALSE;
+    }
 
-    if (!(pAdapt = calloc(num_adaptors, sizeof(XvMCAdaptorRec))))
-        return FALSE;
+    if (!(pAdapt = calloc(num_adaptors, sizeof(XvMCAdaptorRec)))) {
+      return FALSE;
+    }
 
     if (!dixRegisterPrivateKey(&XF86XvMCScreenKeyRec, PRIVATE_SCREEN, 0)) {
         free(pAdapt);
@@ -201,8 +204,9 @@ xf86XvMCScreenInit(ScreenPtr pScreen,
         adaptors++;
     }
 
-    if (Success != XvMCScreenInit(pScreen, num_adaptors, pAdapt))
-        return FALSE;
+    if (Success != XvMCScreenInit(pScreen, num_adaptors, pAdapt)) {
+      return FALSE;
+    }
 
     return TRUE;
 }

@@ -51,8 +51,9 @@ miSyncShmFenceSetTriggered(SyncFence * pFence)
 {
     SyncShmFencePrivatePtr      pPriv = SYNC_FENCE_PRIV(pFence);
 
-    if (pPriv->fence)
-        xshmfence_trigger(pPriv->fence);
+    if (pPriv->fence) {
+      xshmfence_trigger(pPriv->fence);
+    }
     miSyncFenceSetTriggered(pFence);
 }
 
@@ -61,8 +62,9 @@ miSyncShmFenceReset(SyncFence * pFence)
 {
     SyncShmFencePrivatePtr      pPriv = SYNC_FENCE_PRIV(pFence);
 
-    if (pPriv->fence)
-        xshmfence_reset(pPriv->fence);
+    if (pPriv->fence) {
+      xshmfence_reset(pPriv->fence);
+    }
     miSyncFenceReset(pFence);
 }
 
@@ -71,10 +73,11 @@ miSyncShmFenceCheckTriggered(SyncFence * pFence)
 {
     SyncShmFencePrivatePtr      pPriv = SYNC_FENCE_PRIV(pFence);
 
-    if (pPriv->fence)
-        return xshmfence_query(pPriv->fence);
-    else
-        return miSyncFenceCheckTriggered(pFence);
+    if (pPriv->fence) {
+      return xshmfence_query(pPriv->fence);
+    } else {
+      return miSyncFenceCheckTriggered(pFence);
+    }
 }
 
 static void
@@ -133,9 +136,9 @@ miSyncShmCreateFenceFromFd(ScreenPtr pScreen, SyncFence *pFence, int fd, Bool in
     if (pPriv->fence) {
         pPriv->fd = fd;
         return Success;
+    } else {
+      close(fd);
     }
-    else
-        close(fd);
     return BadValue;
 }
 
@@ -146,8 +149,9 @@ miSyncShmGetFenceFd(ScreenPtr pScreen, SyncFence *pFence)
 
     if (!pPriv->fence) {
         pPriv->fd = xshmfence_alloc_shm();
-        if (pPriv->fd < 0)
-            return -1;
+        if (pPriv->fd < 0) {
+          return -1;
+        }
         pPriv->fd = os_move_fd(pPriv->fd);
         pPriv->fence = xshmfence_map_shm(pPriv->fd);
         if (!pPriv->fence) {
@@ -168,13 +172,15 @@ Bool miSyncShmScreenInit(ScreenPtr pScreen)
 {
     SyncScreenFuncsPtr  funcs;
 
-    if (!miSyncFdScreenInit(pScreen, &miSyncShmScreenFuncs))
-        return FALSE;
+    if (!miSyncFdScreenInit(pScreen, &miSyncShmScreenFuncs)) {
+      return FALSE;
+    }
 
     if (!dixPrivateKeyRegistered(&syncShmFencePrivateKey)) {
-        if (!dixRegisterPrivateKey(&syncShmFencePrivateKey, PRIVATE_SYNC_FENCE,
-                                   sizeof(SyncShmFencePrivateRec)))
-            return FALSE;
+      if (!dixRegisterPrivateKey(&syncShmFencePrivateKey, PRIVATE_SYNC_FENCE,
+                                 sizeof(SyncShmFencePrivateRec))) {
+        return FALSE;
+      }
     }
 
     funcs = miSyncGetScreenFuncs(pScreen);

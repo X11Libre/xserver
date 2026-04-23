@@ -87,34 +87,40 @@ ProcXChangeDeviceDontPropagateList(ClientPtr client)
     OtherInputMasks *others;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (stuff->mode != AddToList && stuff->mode != DeleteFromList) {
         client->errorValue = stuff->window;
         return BadMode;
     }
 
-    if ((rc = CreateMaskFromList(client, (XEventClass *) &stuff[1],
-                                 stuff->count, tmp, NULL,
-                                 X_ChangeDeviceDontPropagateList)) != Success)
-        return rc;
+    if ((rc = CreateMaskFromList(client, (XEventClass *)&stuff[1], stuff->count,
+                                 tmp, NULL, X_ChangeDeviceDontPropagateList)) !=
+        Success) {
+      return rc;
+    }
 
     others = wOtherInputMasks(pWin);
-    if (!others && stuff->mode == DeleteFromList)
-        return Success;
+    if (!others && stuff->mode == DeleteFromList) {
+      return Success;
+    }
     for (i = 0; i < EMASKSIZE; i++) {
-        if (tmp[i].mask == 0)
-            continue;
+      if (tmp[i].mask == 0) {
+        continue;
+      }
 
-        if (stuff->mode == DeleteFromList)
-            tmp[i].mask = (others->dontPropagateMask[i] & ~tmp[i].mask);
-        else if (others)
-            tmp[i].mask |= others->dontPropagateMask[i];
+      if (stuff->mode == DeleteFromList) {
+        tmp[i].mask = (others->dontPropagateMask[i] & ~tmp[i].mask);
+      } else if (others) {
+        tmp[i].mask |= others->dontPropagateMask[i];
+      }
 
-        if (DeviceEventSuppressForWindow(pWin, client, tmp[i].mask, i) !=
-            Success)
-            return BadClass;
+      if (DeviceEventSuppressForWindow(pWin, client, tmp[i].mask, i) !=
+          Success) {
+        return BadClass;
+      }
     }
 
     return Success;

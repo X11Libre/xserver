@@ -75,13 +75,15 @@ ClientSleepUntil(ClientPtr client,
 
     SertafiedResType = CreateNewResourceType(SertafiedDelete,
                                              "ClientSleep");
-    if (!SertafiedResType)
-        return FALSE;
+    if (!SertafiedResType) {
+      return FALSE;
+    }
     BlockHandlerRegistered = FALSE;
 
     SertafiedPtr pRequest = calloc(1, sizeof(SertafiedRec));
-    if (!pRequest)
-        return FALSE;
+    if (!pRequest) {
+      return FALSE;
+    }
     pRequest->pClient = client;
     pRequest->revive = *revive;
     pRequest->id = FakeClientID(client->index);
@@ -96,22 +98,26 @@ ClientSleepUntil(ClientPtr client,
         BlockHandlerRegistered = TRUE;
     }
     pRequest->notifyFunc = 0;
-    if (!AddResource(pRequest->id, SertafiedResType, (void *) pRequest))
-        return FALSE;
-    if (!notifyFunc)
-        notifyFunc = ClientAwaken;
+    if (!AddResource(pRequest->id, SertafiedResType, (void *)pRequest)) {
+      return FALSE;
+    }
+    if (!notifyFunc) {
+      notifyFunc = ClientAwaken;
+    }
     pRequest->notifyFunc = notifyFunc;
     /* Insert into time-ordered queue, with earliest activation time coming first. */
     pPrev = 0;
     for (pReq = pPending; pReq; pReq = pReq->next) {
-        if (CompareTimeStamps(pReq->revive, *revive) == LATER)
-            break;
+      if (CompareTimeStamps(pReq->revive, *revive) == LATER) {
+        break;
+      }
         pPrev = pReq;
     }
-    if (pPrev)
-        pPrev->next = pRequest;
-    else
-        pPending = pRequest;
+    if (pPrev) {
+      pPrev->next = pRequest;
+    } else {
+      pPending = pRequest;
+    }
     pRequest->next = pReq;
     IgnoreClient(client);
     return TRUE;
@@ -130,16 +136,19 @@ SertafiedDelete(void *value, XID id)
     SertafiedPtr pReq, pPrev;
 
     pPrev = 0;
-    for (pReq = pPending; pReq; pPrev = pReq, pReq = pReq->next)
-        if (pReq == pRequest) {
-            if (pPrev)
-                pPrev->next = pReq->next;
-            else
-                pPending = pReq->next;
-            break;
+    for (pReq = pPending; pReq; pPrev = pReq, pReq = pReq->next) {
+      if (pReq == pRequest) {
+        if (pPrev) {
+          pPrev->next = pReq->next;
+        } else {
+          pPending = pReq->next;
         }
-    if (pRequest->notifyFunc)
-        (*pRequest->notifyFunc) (pRequest->pClient, pRequest->closure);
+        break;
+      }
+    }
+    if (pRequest->notifyFunc) {
+      (*pRequest->notifyFunc)(pRequest->pClient, pRequest->closure);
+    }
     free(pRequest);
     return TRUE;
 }
@@ -151,16 +160,19 @@ SertafiedBlockHandler(void *data, void *wt)
     unsigned long delay;
     TimeStamp now;
 
-    if (!pPending)
-        return;
+    if (!pPending) {
+      return;
+    }
     now.milliseconds = GetTimeInMillis();
     now.months = currentTime.months;
-    if ((int) (now.milliseconds - currentTime.milliseconds) < 0)
-        now.months++;
+    if ((int)(now.milliseconds - currentTime.milliseconds) < 0) {
+      now.months++;
+    }
     for (pReq = pPending; pReq; pReq = pNext) {
         pNext = pReq->next;
-        if (CompareTimeStamps(pReq->revive, now) == LATER)
-            break;
+        if (CompareTimeStamps(pReq->revive, now) == LATER) {
+          break;
+        }
         FreeResource(pReq->id, X11_RESTYPE_NONE);
 
         /* AttendClient() may have been called via the resource delete
@@ -170,8 +182,9 @@ SertafiedBlockHandler(void *data, void *wt)
         AdjustWaitForDelay(wt, 0);
     }
     pReq = pPending;
-    if (!pReq)
-        return;
+    if (!pReq) {
+      return;
+    }
     delay = pReq->revive.milliseconds - now.milliseconds;
     AdjustWaitForDelay(wt, delay);
 }
@@ -184,12 +197,14 @@ SertafiedWakeupHandler(void *data, int i)
 
     now.milliseconds = GetTimeInMillis();
     now.months = currentTime.months;
-    if ((int) (now.milliseconds - currentTime.milliseconds) < 0)
-        now.months++;
+    if ((int)(now.milliseconds - currentTime.milliseconds) < 0) {
+      now.months++;
+    }
     for (pReq = pPending; pReq; pReq = pNext) {
         pNext = pReq->next;
-        if (CompareTimeStamps(pReq->revive, now) == LATER)
-            break;
+        if (CompareTimeStamps(pReq->revive, now) == LATER) {
+          break;
+        }
         FreeResource(pReq->id, X11_RESTYPE_NONE);
     }
     if (!pPending) {

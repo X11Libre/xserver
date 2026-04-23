@@ -93,13 +93,16 @@ static void RRCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused
 
     xorg_list_for_each_entry_safe(lease, next, &pScrPriv->leases, list)
         RRTerminateLease(lease);
-    for (j = pScrPriv->numCrtcs - 1; j >= 0; j--)
-        RRCrtcDestroy(pScrPriv->crtcs[j]);
-    for (j = pScrPriv->numOutputs - 1; j >= 0; j--)
-        RROutputDestroy(pScrPriv->outputs[j]);
+    for (j = pScrPriv->numCrtcs - 1; j >= 0; j--) {
+      RRCrtcDestroy(pScrPriv->crtcs[j]);
+    }
+    for (j = pScrPriv->numOutputs - 1; j >= 0; j--) {
+      RROutputDestroy(pScrPriv->outputs[j]);
+    }
 
-    if (pScrPriv->provider)
-        RRProviderDestroy(pScrPriv->provider);
+    if (pScrPriv->provider) {
+      RRProviderDestroy(pScrPriv->provider);
+    }
 
     RRMonitorClose(pScreen);
 
@@ -280,22 +283,29 @@ Bool
 RRInit(void)
 {
     /* prevent double init attempts */
-    if (initialized)
-        return TRUE;
+    if (initialized) {
+      return TRUE;
+    }
 
-    if (!RRModeInit())
-        return FALSE;
-    if (!RRCrtcInit())
-        return FALSE;
-    if (!RROutputInit())
-        return FALSE;
-    if (!RRProviderInit())
-        return FALSE;
-    if (!RRLeaseInit())
-        return FALSE;
+    if (!RRModeInit()) {
+      return FALSE;
+    }
+    if (!RRCrtcInit()) {
+      return FALSE;
+    }
+    if (!RROutputInit()) {
+      return FALSE;
+    }
+    if (!RRProviderInit()) {
+      return FALSE;
+    }
+    if (!RRLeaseInit()) {
+      return FALSE;
+    }
 
-    if (!dixRegisterPrivateKey(&rrPrivKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&rrPrivKeyRec, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
 
     initialized = true;
     return TRUE;
@@ -306,12 +316,14 @@ RRScreenInit(ScreenPtr pScreen)
 {
     rrScrPrivPtr pScrPriv;
 
-    if (!RRInit())
-        return FALSE;
+    if (!RRInit()) {
+      return FALSE;
+    }
 
     pScrPriv = (rrScrPrivPtr) calloc(1, sizeof(rrScrPrivRec));
-    if (!pScrPriv)
-        return FALSE;
+    if (!pScrPriv) {
+      return FALSE;
+    }
 
     SetRRScreen(pScreen, pScrPriv);
 
@@ -364,13 +376,15 @@ RRFreeClient(void *data, XID id)
                             RREventType, serverClient, DixDestroyAccess);
     if (pHead) {
         pPrev = 0;
-        for (pCur = *pHead; pCur && pCur != pRREvent; pCur = pCur->next)
-            pPrev = pCur;
+        for (pCur = *pHead; pCur && pCur != pRREvent; pCur = pCur->next) {
+          pPrev = pCur;
+        }
         if (pCur) {
-            if (pPrev)
-                pPrev->next = pRREvent->next;
-            else
-                *pHead = pRREvent->next;
+          if (pPrev) {
+            pPrev->next = pRREvent->next;
+          } else {
+            *pHead = pRREvent->next;
+          }
         }
     }
     free((void *) pRREvent);
@@ -397,27 +411,33 @@ RRExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    if (RRNScreens == 0)
-        return;
+    if (RRNScreens == 0) {
+      return;
+    }
 
     if (!dixRegisterPrivateKey(&RRClientPrivateKeyRec, PRIVATE_CLIENT,
-                               sizeof(RRClientRec) +
-                               screenInfo.numScreens * sizeof(RRTimesRec)))
-        return;
-    if (!AddCallback(&ClientStateCallback, RRClientCallback, 0))
-        return;
+                               sizeof(RRClientRec) + screenInfo.numScreens *
+                                                         sizeof(RRTimesRec))) {
+      return;
+    }
+    if (!AddCallback(&ClientStateCallback, RRClientCallback, 0)) {
+      return;
+    }
 
     RRClientType = CreateNewResourceType(RRFreeClient, "RandRClient");
-    if (!RRClientType)
-        return;
+    if (!RRClientType) {
+      return;
+    }
     RREventType = CreateNewResourceType(RRFreeEvents, "RandREvent");
-    if (!RREventType)
-        return;
+    if (!RREventType) {
+      return;
+    }
     extEntry = AddExtension(RANDR_NAME, RRNumberEvents, RRNumberErrors,
                             ProcRRDispatch, ProcRRDispatch,
                             NULL, StandardMinorOpcode);
-    if (!extEntry)
-        return;
+    if (!extEntry) {
+      return;
+    }
     RRErrorBase = extEntry->errorBase;
     RREventBase = extEntry->eventBase;
     EventSwapVector[RREventBase + RRScreenChangeNotify] = (EventSwapPtr)
@@ -474,35 +494,41 @@ TellChanged(WindowPtr pWin, void *value)
 
     dixLookupResourceByType((void **) &pHead, pWin->drawable.id,
                             RREventType, serverClient, DixReadAccess);
-    if (!pHead)
-        return WT_WALKCHILDREN;
+    if (!pHead) {
+      return WT_WALKCHILDREN;
+    }
 
     for (pRREvent = *pHead; pRREvent; pRREvent = pRREvent->next) {
         client = pRREvent->client;
-        if (client == serverClient || client->clientGone)
-            continue;
+        if (client == serverClient || client->clientGone) {
+          continue;
+        }
 
-        if (pRREvent->mask & RRScreenChangeNotifyMask)
-            RRDeliverScreenEvent(client, pWin, pScreen);
+        if (pRREvent->mask & RRScreenChangeNotifyMask) {
+          RRDeliverScreenEvent(client, pWin, pScreen);
+        }
 
         if (pRREvent->mask & RRCrtcChangeNotifyMask) {
             for (i = 0; i < pScrPriv->numCrtcs; i++) {
                 RRCrtcPtr crtc = pScrPriv->crtcs[i];
 
-                if (crtc->changed)
-                    RRDeliverCrtcEvent(client, pWin, crtc);
+                if (crtc->changed) {
+                  RRDeliverCrtcEvent(client, pWin, crtc);
+                }
             }
 
             xorg_list_for_each_entry(iter, &pScreen->secondary_list, secondary_head) {
-                if (!iter->is_output_secondary)
-                    continue;
+              if (!iter->is_output_secondary) {
+                continue;
+              }
 
                 pSecondaryScrPriv = rrGetScrPriv(iter);
                 for (i = 0; i < pSecondaryScrPriv->numCrtcs; i++) {
                     RRCrtcPtr crtc = pSecondaryScrPriv->crtcs[i];
 
-                    if (crtc->changed)
-                        RRDeliverCrtcEvent(client, pWin, crtc);
+                    if (crtc->changed) {
+                      RRDeliverCrtcEvent(client, pWin, crtc);
+                    }
                 }
             }
         }
@@ -511,20 +537,23 @@ TellChanged(WindowPtr pWin, void *value)
             for (i = 0; i < pScrPriv->numOutputs; i++) {
                 RROutputPtr output = pScrPriv->outputs[i];
 
-                if (output->changed)
-                    RRDeliverOutputEvent(client, pWin, output);
+                if (output->changed) {
+                  RRDeliverOutputEvent(client, pWin, output);
+                }
             }
 
             xorg_list_for_each_entry(iter, &pScreen->secondary_list, secondary_head) {
-                if (!iter->is_output_secondary)
-                    continue;
+              if (!iter->is_output_secondary) {
+                continue;
+              }
 
                 pSecondaryScrPriv = rrGetScrPriv(iter);
                 for (i = 0; i < pSecondaryScrPriv->numOutputs; i++) {
                     RROutputPtr output = pSecondaryScrPriv->outputs[i];
 
-                    if (output->changed)
-                        RRDeliverOutputEvent(client, pWin, output);
+                    if (output->changed) {
+                      RRDeliverOutputEvent(client, pWin, output);
+                    }
                 }
             }
         }
@@ -532,8 +561,10 @@ TellChanged(WindowPtr pWin, void *value)
         if (pRREvent->mask & RRProviderChangeNotifyMask) {
             xorg_list_for_each_entry(iter, &pScreen->secondary_list, secondary_head) {
                 pSecondaryScrPriv = rrGetScrPriv(iter);
-                if (pSecondaryScrPriv->provider->changed)
-                    RRDeliverProviderEvent(client, pWin, pSecondaryScrPriv->provider);
+                if (pSecondaryScrPriv->provider->changed) {
+                  RRDeliverProviderEvent(client, pWin,
+                                         pSecondaryScrPriv->provider);
+                }
             }
         }
 
@@ -562,8 +593,9 @@ RRSetChanged(ScreenPtr pScreen)
 
     if (pScreen->isGPU) {
         primary = pScreen->current_primary;
-        if (!primary)
-            return;
+        if (!primary) {
+          return;
+        }
         primarysp = rrGetScrPriv(primary);
     }
     else {
@@ -589,8 +621,9 @@ RRTellChanged(ScreenPtr pScreen)
 
     if (pScreen->isGPU) {
         primary = pScreen->current_primary;
-        if (!primary)
-            return;
+        if (!primary) {
+          return;
+        }
         primarysp = rrGetScrPriv(primary);
     }
     else {
@@ -599,14 +632,16 @@ RRTellChanged(ScreenPtr pScreen)
     }
 
     /* If there's no root window yet, can't send events */
-    if (!primary->root)
-        return;
+    if (!primary->root) {
+      return;
+    }
 
     xorg_list_for_each_entry(iter, &primary->secondary_list, secondary_head) {
         pSecondaryScrPriv = rrGetScrPriv(iter);
 
-        if (!iter->is_output_secondary)
-            continue;
+        if (!iter->is_output_secondary) {
+          continue;
+        }
 
         if (CompareTimeStamps(primarysp->lastSetTime,
                               pSecondaryScrPriv->lastSetTime) == EARLIER) {
@@ -627,19 +662,23 @@ RRTellChanged(ScreenPtr pScreen)
 
         primarysp->resourcesChanged = FALSE;
 
-        for (i = 0; i < pScrPriv->numOutputs; i++)
-            pScrPriv->outputs[i]->changed = FALSE;
-        for (i = 0; i < pScrPriv->numCrtcs; i++)
-            pScrPriv->crtcs[i]->changed = FALSE;
+        for (i = 0; i < pScrPriv->numOutputs; i++) {
+          pScrPriv->outputs[i]->changed = FALSE;
+        }
+        for (i = 0; i < pScrPriv->numCrtcs; i++) {
+          pScrPriv->crtcs[i]->changed = FALSE;
+        }
 
         xorg_list_for_each_entry(iter, &primary->secondary_list, secondary_head) {
             pSecondaryScrPriv = rrGetScrPriv(iter);
             pSecondaryScrPriv->provider->changed = FALSE;
             if (iter->is_output_secondary) {
-                for (i = 0; i < pSecondaryScrPriv->numOutputs; i++)
-                    pSecondaryScrPriv->outputs[i]->changed = FALSE;
-                for (i = 0; i < pSecondaryScrPriv->numCrtcs; i++)
-                    pSecondaryScrPriv->crtcs[i]->changed = FALSE;
+              for (i = 0; i < pSecondaryScrPriv->numOutputs; i++) {
+                pSecondaryScrPriv->outputs[i]->changed = FALSE;
+              }
+              for (i = 0; i < pSecondaryScrPriv->numCrtcs; i++) {
+                pSecondaryScrPriv->crtcs[i]->changed = FALSE;
+              }
             }
         }
 
@@ -662,19 +701,22 @@ RRFirstOutput(ScreenPtr pScreen)
     RROutputPtr output;
     int i, j;
 
-    if (!pScrPriv)
-        return NULL;
+    if (!pScrPriv) {
+      return NULL;
+    }
 
-    if (pScrPriv->primaryOutput && pScrPriv->primaryOutput->crtc)
-        return pScrPriv->primaryOutput;
+    if (pScrPriv->primaryOutput && pScrPriv->primaryOutput->crtc) {
+      return pScrPriv->primaryOutput;
+    }
 
     for (i = 0; i < pScrPriv->numCrtcs; i++) {
         RRCrtcPtr crtc = pScrPriv->crtcs[i];
 
         for (j = 0; j < pScrPriv->numOutputs; j++) {
             output = pScrPriv->outputs[j];
-            if (output->crtc == crtc)
-                return output;
+            if (output->crtc == crtc) {
+              return output;
+            }
         }
     }
     return NULL;
@@ -687,20 +729,23 @@ RRFirstEnabledCrtc(ScreenPtr pScreen)
     RROutputPtr output;
     int i, j;
 
-    if (!pScrPriv)
-        return NULL;
+    if (!pScrPriv) {
+      return NULL;
+    }
 
     if (pScrPriv->primaryOutput && pScrPriv->primaryOutput->crtc &&
-        pScrPriv->primaryOutput->pScreen == pScreen)
-        return pScrPriv->primaryOutput->crtc;
+        pScrPriv->primaryOutput->pScreen == pScreen) {
+      return pScrPriv->primaryOutput->crtc;
+    }
 
     for (i = 0; i < pScrPriv->numCrtcs; i++) {
         RRCrtcPtr crtc = pScrPriv->crtcs[i];
 
         for (j = 0; j < pScrPriv->numOutputs; j++) {
             output = pScrPriv->outputs[j];
-            if (output->crtc == crtc && crtc->mode)
-                return crtc;
+            if (output->crtc == crtc && crtc->mode) {
+              return crtc;
+            }
         }
     }
     return NULL;
@@ -713,10 +758,12 @@ RRVerticalRefresh(xRRModeInfo * mode)
     CARD32 refresh;
     CARD32 dots = mode->hTotal * mode->vTotal;
 
-    if (!dots)
-        return 0;
+    if (!dots) {
+      return 0;
+    }
     refresh = (mode->dotClock + dots / 2) / dots;
-    if (refresh > 0xffff)
-        refresh = 0xffff;
+    if (refresh > 0xffff) {
+      refresh = 0xffff;
+    }
     return (CARD16) refresh;
 }

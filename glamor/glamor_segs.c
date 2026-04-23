@@ -50,12 +50,14 @@ glamor_poly_segment_solid_gl(DrawablePtr drawable, GCPtr gc,
     Bool ret = FALSE;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
     add_last = 0;
-    if (gc->capStyle != CapNotLast)
-        add_last = 1;
+    if (gc->capStyle != CapNotLast) {
+      add_last = 1;
+    }
 
     glamor_make_current(glamor_priv);
 
@@ -63,8 +65,9 @@ glamor_poly_segment_solid_gl(DrawablePtr drawable, GCPtr gc,
                                    &glamor_priv->poly_segment_program,
                                    &glamor_facet_poly_segment);
 
-    if (!prog)
-        goto bail;
+    if (!prog) {
+      goto bail;
+    }
 
     /* Set up the vertex buffers for the points */
 
@@ -86,8 +89,9 @@ glamor_poly_segment_solid_gl(DrawablePtr drawable, GCPtr gc,
             v[j].y2 = segs[i].y2;
             j++;
         }
-    } else
-        memcpy(v, segs, nseg * sizeof (xSegment));
+    } else {
+      memcpy(v, segs, nseg * sizeof(xSegment));
+    }
 
     glamor_put_vbo_space(screen);
 
@@ -98,8 +102,10 @@ glamor_poly_segment_solid_gl(DrawablePtr drawable, GCPtr gc,
         BoxPtr box = RegionRects(gc->pCompositeClip);
 
         if (!glamor_set_destination_drawable(drawable, box_index, TRUE, TRUE,
-                                             prog->matrix_uniform, &off_x, &off_y))
-            goto bail;
+                                             prog->matrix_uniform, &off_x,
+                                             &off_y)) {
+          goto bail;
+        }
 
         while (nbox--) {
             glScissor(box->x1 + off_x,
@@ -124,8 +130,9 @@ static Bool
 glamor_poly_segment_gl(DrawablePtr drawable, GCPtr gc,
                        int nseg, xSegment *segs)
 {
-    if (gc->lineWidth != 0)
-        return FALSE;
+  if (gc->lineWidth != 0) {
+    return FALSE;
+  }
 
     switch (gc->lineStyle) {
     case LineSolid:
@@ -133,10 +140,11 @@ glamor_poly_segment_gl(DrawablePtr drawable, GCPtr gc,
     case LineOnOffDash:
         return glamor_poly_segment_dash_gl(drawable, gc, nseg, segs);
     case LineDoubleDash:
-        if (gc->fillStyle == FillTiled)
-            return glamor_poly_segment_solid_gl(drawable, gc, nseg, segs);
-        else
-            return glamor_poly_segment_dash_gl(drawable, gc, nseg, segs);
+      if (gc->fillStyle == FillTiled) {
+        return glamor_poly_segment_solid_gl(drawable, gc, nseg, segs);
+      } else {
+        return glamor_poly_segment_dash_gl(drawable, gc, nseg, segs);
+      }
     default:
         return FALSE;
     }
@@ -156,16 +164,18 @@ glamor_poly_segment_bail(DrawablePtr drawable, GCPtr gc,
         }
         glamor_finish_access_gc(gc);
         glamor_finish_access(drawable);
-    } else
-        miPolySegment(drawable, gc, nseg, segs);
+    } else {
+      miPolySegment(drawable, gc, nseg, segs);
+    }
 }
 
 void
 glamor_poly_segment(DrawablePtr drawable, GCPtr gc,
                     int nseg, xSegment *segs)
 {
-    if (glamor_poly_segment_gl(drawable, gc, nseg, segs))
-        return;
+  if (glamor_poly_segment_gl(drawable, gc, nseg, segs)) {
+    return;
+  }
 
     glamor_poly_segment_bail(drawable, gc, nseg, segs);
 }

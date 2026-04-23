@@ -93,12 +93,14 @@ ProcRRSelectInput(ClientPtr client)
     int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     rc = dixLookupResourceByType((void **) &pHead, pWin->drawable.id,
                                  RREventType, client, DixWriteAccess);
-    if (rc != Success && rc != BadValue)
-        return rc;
+    if (rc != Success && rc != BadValue) {
+      return rc;
+    }
 
     if (stuff->enable & (RRScreenChangeNotifyMask |
                          RRCrtcChangeNotifyMask |
@@ -114,16 +116,19 @@ ProcRRSelectInput(ClientPtr client)
         pRREvent = NULL;
         if (pHead) {
             /* check for existing entry. */
-            for (pRREvent = *pHead; pRREvent; pRREvent = pRREvent->next)
-                if (pRREvent->client == client)
-                    break;
+            for (pRREvent = *pHead; pRREvent; pRREvent = pRREvent->next) {
+              if (pRREvent->client == client) {
+                break;
+              }
+            }
         }
 
         if (!pRREvent) {
             /* build the entry */
             pRREvent = calloc(1, sizeof(RREventRec));
-            if (!pRREvent)
-                return BadAlloc;
+            if (!pRREvent) {
+              return BadAlloc;
+            }
             pRREvent->next = 0;
             pRREvent->client = client;
             pRREvent->window = pWin;
@@ -134,8 +139,9 @@ ProcRRSelectInput(ClientPtr client)
              */
             clientResource = FakeClientID(client->index);
             pRREvent->clientResource = clientResource;
-            if (!AddResource(clientResource, RRClientType, (void *) pRREvent))
-                return BadAlloc;
+            if (!AddResource(clientResource, RRClientType, (void *)pRREvent)) {
+              return BadAlloc;
+            }
             /*
              * create a resource to contain a pointer to the list
              * of clients selecting input.  This must be indirect as
@@ -198,16 +204,18 @@ ProcRRSelectInput(ClientPtr client)
             RREventPtr pNewRREvent = 0;
 
             for (pRREvent = *pHead; pRREvent; pRREvent = pRREvent->next) {
-                if (pRREvent->client == client)
-                    break;
+              if (pRREvent->client == client) {
+                break;
+              }
                 pNewRREvent = pRREvent;
             }
             if (pRREvent) {
                 FreeResource(pRREvent->clientResource, RRClientType);
-                if (pNewRREvent)
-                    pNewRREvent->next = pRREvent->next;
-                else
-                    *pHead = pRREvent->next;
+                if (pNewRREvent) {
+                  pNewRREvent->next = pRREvent->next;
+                } else {
+                  *pHead = pRREvent->next;
+                }
                 free(pRREvent);
             }
         }

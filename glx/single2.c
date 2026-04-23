@@ -257,10 +257,12 @@ __glXcombine_strings(const char *cext_string, const char *sext_string)
     const char *s2, *end;
 
     /* safeguard to prevent potentially fatal errors in the string functions */
-    if (!cext_string)
-        cext_string = "";
-    if (!sext_string)
-        sext_string = "";
+    if (!cext_string) {
+      cext_string = "";
+    }
+    if (!sext_string) {
+      sext_string = "";
+    }
 
     /*
      ** String can't be longer than min(cstring, sstring)
@@ -272,15 +274,17 @@ __glXcombine_strings(const char *cext_string, const char *sext_string)
     if (clen > slen) {
         combo_string = (char *) calloc(1, slen + 2);
         s1 = (char *) calloc(1, slen + 2);
-        if (s1)
-            strcpy(s1, sext_string);
+        if (s1) {
+          strcpy(s1, sext_string);
+        }
         s2 = cext_string;
     }
     else {
         combo_string = (char *) calloc(1, clen + 2);
         s1 = (char *) calloc(1, clen + 2);
-        if (s1)
-            strcpy(s1, cext_string);
+        if (s1) {
+          strcpy(s1, cext_string);
+        }
         s2 = sext_string;
     }
     if (!combo_string || !s1) {
@@ -349,8 +353,9 @@ DoGetString(__GLXclientState * cl, GLbyte * pc, GLboolean need_swap)
     name = *(GLenum *) (pc + 0);
     string = (const char *) glGetString(name);
 
-    if (string == NULL)
-        string = "";
+    if (string == NULL) {
+      string = "";
+    }
 
     /*
      ** Restrict extensions to those that are supported by both the

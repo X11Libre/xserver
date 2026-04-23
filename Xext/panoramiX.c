@@ -149,13 +149,15 @@ static void XineramaCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *
     PanoramiXScreenPtr pScreenPriv = (PanoramiXScreenPtr)
         dixLookupPrivate(&pScreen->devPrivates, &PanoramiXScreenKeyRec);
 
-    if (!pScreenPriv)
-        return;
+    if (!pScreenPriv) {
+      return;
+    }
 
     pScreen->CreateGC = pScreenPriv->CreateGC;
 
-    if (pScreen->myNum == 0)
-        RegionUninit(&PanoramiXScreenRegion);
+    if (pScreen->myNum == 0) {
+      RegionUninit(&PanoramiXScreenRegion);
+    }
 
     free(pScreenPriv);
     dixSetPrivate(&pScreen->devPrivates, &PanoramiXScreenKeyRec, NULL);
@@ -255,14 +257,18 @@ XineramaChangeGC(GCPtr pGC, unsigned long mask)
 {
     Xinerama_GC_FUNC_PROLOGUE(pGC);
 
-    if (mask & GCTileStipXOrigin)
-        pGCPriv->patOrg.x = pGC->patOrg.x;
-    if (mask & GCTileStipYOrigin)
-        pGCPriv->patOrg.y = pGC->patOrg.y;
-    if (mask & GCClipXOrigin)
-        pGCPriv->clipOrg.x = pGC->clipOrg.x;
-    if (mask & GCClipYOrigin)
-        pGCPriv->clipOrg.y = pGC->clipOrg.y;
+    if (mask & GCTileStipXOrigin) {
+      pGCPriv->patOrg.x = pGC->patOrg.x;
+    }
+    if (mask & GCTileStipYOrigin) {
+      pGCPriv->patOrg.y = pGC->patOrg.y;
+    }
+    if (mask & GCClipXOrigin) {
+      pGCPriv->clipOrg.x = pGC->clipOrg.x;
+    }
+    if (mask & GCClipYOrigin) {
+      pGCPriv->clipOrg.y = pGC->clipOrg.y;
+    }
 
     (*pGC->funcs->ChangeGC) (pGC, mask);
     Xinerama_GC_FUNC_EPILOGUE(pGC);
@@ -276,14 +282,18 @@ XineramaCopyGC(GCPtr pGCSrc, unsigned long mask, GCPtr pGCDst)
 
     Xinerama_GC_FUNC_PROLOGUE(pGCDst);
 
-    if (mask & GCTileStipXOrigin)
-        pGCPriv->patOrg.x = pSrcPriv->patOrg.x;
-    if (mask & GCTileStipYOrigin)
-        pGCPriv->patOrg.y = pSrcPriv->patOrg.y;
-    if (mask & GCClipXOrigin)
-        pGCPriv->clipOrg.x = pSrcPriv->clipOrg.x;
-    if (mask & GCClipYOrigin)
-        pGCPriv->clipOrg.y = pSrcPriv->clipOrg.y;
+    if (mask & GCTileStipXOrigin) {
+      pGCPriv->patOrg.x = pSrcPriv->patOrg.x;
+    }
+    if (mask & GCTileStipYOrigin) {
+      pGCPriv->patOrg.y = pSrcPriv->patOrg.y;
+    }
+    if (mask & GCClipXOrigin) {
+      pGCPriv->clipOrg.x = pSrcPriv->clipOrg.x;
+    }
+    if (mask & GCClipYOrigin) {
+      pGCPriv->clipOrg.y = pSrcPriv->clipOrg.y;
+    }
 
     (*pGCDst->funcs->CopyGC) (pGCSrc, mask, pGCDst);
     Xinerama_GC_FUNC_EPILOGUE(pGCDst);
@@ -364,8 +374,9 @@ XineramaRegisterConnectionBlockCallback(void (*func) (void))
 {
     XineramaConnectionCallbackList *newlist;
 
-    if (!(newlist = calloc(1, sizeof(XineramaConnectionCallbackList))))
-        return FALSE;
+    if (!(newlist = calloc(1, sizeof(XineramaConnectionCallbackList)))) {
+      return FALSE;
+    }
 
     newlist->next = ConnectionCallbackList;
     newlist->func = func;
@@ -424,8 +435,9 @@ PanoramiXExtensionInit(void)
     Bool success = FALSE;
     ScreenPtr masterScreen = dixGetMasterScreen();
 
-    if (noPanoramiXExtension)
-        return;
+    if (noPanoramiXExtension) {
+      return;
+    }
 
     if (!dixRegisterPrivateKey(&PanoramiXScreenKeyRec, PRIVATE_SCREEN, 0)) {
         noPanoramiXExtension = TRUE;
@@ -451,8 +463,9 @@ PanoramiXExtensionInit(void)
         PanoramiXResetProc,
         StandardMinorOpcode);
 
-    if (!extEntry)
-        return;
+    if (!extEntry) {
+      return;
+    }
 
     /*
      *      First make sure all the basic allocations succeed.  If not,
@@ -475,20 +488,23 @@ PanoramiXExtensionInit(void)
     XRC_DRAWABLE = CreateNewResourceClass();
     XRT_WINDOW = CreateNewResourceType(XineramaDeleteResource,
                                            "XineramaWindow");
-    if (XRT_WINDOW)
-        XRT_WINDOW |= XRC_DRAWABLE;
+    if (XRT_WINDOW) {
+      XRT_WINDOW |= XRC_DRAWABLE;
+    }
 
     XRT_PIXMAP = CreateNewResourceType(XineramaDeleteResource,
                                            "XineramaPixmap");
-    if (XRT_PIXMAP)
-        XRT_PIXMAP |= XRC_DRAWABLE;
+    if (XRT_PIXMAP) {
+      XRT_PIXMAP |= XRC_DRAWABLE;
+    }
 
     XRT_GC = CreateNewResourceType(XineramaDeleteResource, "XineramaGC");
     XRT_COLORMAP = CreateNewResourceType(XineramaDeleteResource,
                                              "XineramaColormap");
 
-    if (XRT_WINDOW && XRT_PIXMAP && XRT_GC && XRT_COLORMAP)
-        success = TRUE;
+    if (XRT_WINDOW && XRT_PIXMAP && XRT_GC && XRT_COLORMAP) {
+      success = TRUE;
+    }
 
     SetResourceTypeErrorValue(XRT_WINDOW, BadWindow);
     SetResourceTypeErrorValue(XRT_PIXMAP, BadPixmap);
@@ -507,8 +523,9 @@ PanoramiXExtensionInit(void)
      *  Put our processes into the ProcVector
      */
 
-    for (i = 256; i--;)
-        SavedProcVector[i] = ProcVector[i];
+    for (i = 256; i--;) {
+      SavedProcVector[i] = ProcVector[i];
+    }
 
     ProcVector[X_CreateWindow] = PanoramiXCreateWindow;
     ProcVector[X_ChangeWindowAttributes] = PanoramiXChangeWindowAttributes;
@@ -634,8 +651,10 @@ PanoramiXCreateConnectionBlock(void)
         for (j = 0; j < depth->nVisuals; j++, visual++) {
             visual->visualID = PanoramiXDepths[walkScreenIdx].vids[j];
 
-            for (pVisual = PanoramiXVisuals;
-                 pVisual->vid != visual->visualID; pVisual++);
+            for (pVisual = PanoramiXVisuals; pVisual->vid != visual->visualID;
+                 pVisual++) {
+              ;
+            }
 
             visual->class = pVisual->class;
             visual->bitsPerRGB = pVisual->bitsPerRGBValue;
@@ -650,8 +669,10 @@ PanoramiXCreateConnectionBlock(void)
 
     connSetupPrefix.length = bytes_to_int32(length);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths; walkScreenIdx++)
-        free(PanoramiXDepths[walkScreenIdx].vids);
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths;
+         walkScreenIdx++) {
+      free(PanoramiXDepths[walkScreenIdx].vids);
+    }
     free(PanoramiXDepths);
     PanoramiXDepths = NULL;
 
@@ -719,8 +740,9 @@ PanoramiXMaybeAddDepth(DepthPtr pDepth)
         }
     });
 
-    if (!found)
-        return;
+    if (!found) {
+      return;
+    }
 
     int j = PanoramiXNumDepths;
     PanoramiXNumDepths++;
@@ -783,15 +805,18 @@ PanoramiXConsolidate(void)
     PanoramiXNumDepths = 0;
     PanoramiXNumVisuals = 0;
 
-    for (int i = 0; i < masterScreen->numDepths; i++)
-        PanoramiXMaybeAddDepth(pDepth++);
+    for (int i = 0; i < masterScreen->numDepths; i++) {
+      PanoramiXMaybeAddDepth(pDepth++);
+    }
 
-    for (int i = 0; i < masterScreen->numVisuals; i++)
-        PanoramiXMaybeAddVisual(pVisual++);
+    for (int i = 0; i < masterScreen->numVisuals; i++) {
+      PanoramiXMaybeAddVisual(pVisual++);
+    }
 
     PanoramiXRes *root = calloc(1, sizeof(PanoramiXRes));
-    if (!root)
-        return;
+    if (!root) {
+      return;
+    }
 
     root->type = XRT_WINDOW;
     PanoramiXRes *defmap = calloc(1, sizeof(PanoramiXRes));
@@ -837,19 +862,22 @@ PanoramiXTranslateVisualID(int screen, VisualID orig)
         }
     }
 
-    if (!pVisual)
-        return 0;
+    if (!pVisual) {
+      return 0;
+    }
 
     /* if screen is 0, orig is already the correct visual ID */
-    if (screen == 0)
-        return orig;
+    if (screen == 0) {
+      return orig;
+    }
 
     /* found the original, now translate it relative to the backend screen */
     for (i = 0; i < pOtherScreen->numVisuals; i++) {
         VisualPtr pOtherVisual = &pOtherScreen->visuals[i];
 
-        if ((*XineramaVisualsEqualPtr) (pVisual, pOtherScreen, pOtherVisual))
-            return pOtherVisual->vid;
+        if ((*XineramaVisualsEqualPtr)(pVisual, pOtherScreen, pOtherVisual)) {
+          return pOtherVisual->vid;
+        }
     }
 
     return 0;
@@ -870,8 +898,9 @@ PanoramiXResetProc(ExtensionEntry * extEntry)
     PanoramiXDamageReset();
     PanoramiXCompositeReset ();
     screenInfo.numScreens = PanoramiXNumScreens;
-    for (i = 256; i--;)
-        ProcVector[i] = SavedProcVector[i];
+    for (i = 256; i--;) {
+      ProcVector[i] = SavedProcVector[i];
+    }
 }
 
 int
@@ -898,15 +927,17 @@ ProcPanoramiXGetState(ClientPtr client)
     REQUEST(xPanoramiXGetStateReq);
     REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr pWin;
     int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xPanoramiXGetStateReply reply = {
         .state = !noPanoramiXExtension,
@@ -926,15 +957,17 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
     REQUEST(xPanoramiXGetScreenCountReq);
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr pWin;
     int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xPanoramiXGetScreenCountReply reply = {
         .ScreenCount = PanoramiXNumScreens,
@@ -962,12 +995,14 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     WindowPtr pWin;
     int rc;
 
-    if (stuff->screen >= PanoramiXNumScreens)
-        return BadMatch;
+    if (stuff->screen >= PanoramiXNumScreens) {
+      return BadMatch;
+    }
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
 
@@ -1115,8 +1150,9 @@ static Bool XineramaGetImageDataScr(BoxRec SrcBox,
         RegionRec ScreenRegion;
         RegionInit(&ScreenRegion, &TheBox, 1);
         int inOut = RegionContainsRect(&ScreenRegion, &SrcBox);
-        if (inOut == rgnPART)
-            RegionIntersect(GrabRegion, SrcRegion, &ScreenRegion);
+        if (inOut == rgnPART) {
+          RegionIntersect(GrabRegion, SrcRegion, &ScreenRegion);
+        }
         RegionUninit(&ScreenRegion);
 
         if (inOut == rgnIN) {
@@ -1127,13 +1163,14 @@ static Bool XineramaGetImageDataScr(BoxRec SrcBox,
                                   walkScreen->y, width, height,
                                   format, planemask, data);
             return FALSE;
+        } else if (inOut == rgnOUT) {
+          return TRUE;
         }
-        else if (inOut == rgnOUT)
-            return TRUE;
 
         int nbox = RegionNumRects(GrabRegion);
-        if (!nbox)
-            return TRUE;
+        if (!nbox) {
+          return TRUE;
+        }
 
         BoxRec *pbox = RegionRects(GrabRegion);
 
@@ -1150,11 +1187,11 @@ static Bool XineramaGetImageDataScr(BoxRec SrcBox,
                 char *tmpdata = ScratchMem;
 
                 ScratchMem = realloc(ScratchMem, sizeNeeded);
-                if (ScratchMem)
-                    size = sizeNeeded;
-                else {
-                    ScratchMem = tmpdata;
-                    break;
+                if (ScratchMem) {
+                  size = sizeNeeded;
+                } else {
+                  ScratchMem = tmpdata;
+                  break;
                 }
             }
 
@@ -1180,8 +1217,9 @@ static Bool XineramaGetImageDataScr(BoxRec SrcBox,
                 if (leftover) {
                     int mask = (1 << leftover) - 1;
 
-                    for (int j = h, k = w; j--; k += ScratchPitch)
-                        ScratchMem[k] &= mask;
+                    for (int j = h, k = w; j--; k += ScratchPitch) {
+                      ScratchMem[k] &= mask;
+                    }
                 }
 
                 for (int j = 0, index = (pitch * y) + x, index2 = 0; j < h;
@@ -1201,10 +1239,10 @@ static Bool XineramaGetImageDataScr(BoxRec SrcBox,
                     if (leftover) {
                         data[index + w] |=
                             SHIFT_L(ScratchMem[index2 + w], shift);
-                        if ((shift + leftover) > 8)
-                            data[index + w + 1] |=
-                                SHIFT_R(ScratchMem[index2 + w],
-                                        (8 - shift));
+                        if ((shift + leftover) > 8) {
+                          data[index + w + 1] |=
+                              SHIFT_R(ScratchMem[index2 + w], (8 - shift));
+                        }
                     }
                 }
             }
@@ -1225,8 +1263,9 @@ static Bool XineramaGetImageDataScr(BoxRec SrcBox,
 
         free(ScratchMem);
         RegionSubtract(SrcRegion, SrcRegion, GrabRegion);
-        if (!RegionNotEmpty(SrcRegion))
-            return FALSE;
+        if (!RegionNotEmpty(SrcRegion)) {
+          return FALSE;
+        }
 
     return TRUE;
 }

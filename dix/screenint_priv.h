@@ -40,8 +40,9 @@ static inline ScreenPtr dixGetMasterScreen(void) {
  * @return pointer to idx'th screen or NULL
  */
 static inline ScreenPtr dixGetScreenPtr(unsigned int idx) {
-    if (idx < screenInfo.numScreens)
-        return screenInfo.screens[idx];
+  if (idx < screenInfo.numScreens) {
+    return screenInfo.screens[idx];
+  }
     return NULL;
 }
 

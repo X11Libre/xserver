@@ -232,23 +232,28 @@ canAccelBlit(DrawablePtr pDraw, GCPtr pGC)
     RootlessWindowRec *winRec;
     unsigned int pm;
 
-    if (pGC->alu != GXcopy)
-        return NULL;
+    if (pGC->alu != GXcopy) {
+      return NULL;
+    }
 
-    if (pDraw->type != DRAWABLE_WINDOW)
-        return NULL;
+    if (pDraw->type != DRAWABLE_WINDOW) {
+      return NULL;
+    }
 
     pm = ~RootlessAlphaMask(pDraw->bitsPerPixel);
-    if ((pGC->planemask & pm) != pm)
-        return NULL;
+    if ((pGC->planemask & pm) != pm) {
+      return NULL;
+    }
 
     pTop = TopLevelParent((WindowPtr) pDraw);
-    if (pTop == NULL)
-        return NULL;
+    if (pTop == NULL) {
+      return NULL;
+    }
 
     winRec = WINREC(pTop);
-    if (winRec == NULL)
-        return NULL;
+    if (winRec == NULL) {
+      return NULL;
+    }
 
     return winRec;
 }
@@ -256,8 +261,9 @@ canAccelBlit(DrawablePtr pDraw, GCPtr pGC)
 static inline RootlessWindowRec *
 canAccelFill(DrawablePtr pDraw, GCPtr pGC)
 {
-    if (pGC->fillStyle != FillSolid)
-        return NULL;
+  if (pGC->fillStyle != FillSolid) {
+    return NULL;
+  }
 
     return canAccelBlit(pDraw, pGC);
 }
@@ -433,14 +439,17 @@ RootlessFillSpans(DrawablePtr dst, GCPtr pGC, int nInit,
         while (--i) {
             ppt++;
             pwidth++;
-            if (box.x1 > ppt->x)
-                box.x1 = ppt->x;
-            if (box.x2 < (ppt->x + *pwidth))
-                box.x2 = ppt->x + *pwidth;
-            if (box.y1 > ppt->y)
-                box.y1 = ppt->y;
-            else if (box.y2 < ppt->y)
-                box.y2 = ppt->y;
+            if (box.x1 > ppt->x) {
+              box.x1 = ppt->x;
+            }
+            if (box.x2 < (ppt->x + *pwidth)) {
+              box.x2 = ppt->x + *pwidth;
+            }
+            if (box.y1 > ppt->y) {
+              box.y1 = ppt->y;
+            } else if (box.y2 < ppt->y) {
+              box.y2 = ppt->y;
+            }
         }
 
         box.y2++;
@@ -454,8 +463,9 @@ RootlessFillSpans(DrawablePtr dst, GCPtr pGC, int nInit,
         pGC->ops->FillSpans(dst, pGC, nInit, pptInit, pwidthInit, sorted);
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GC_RESTORE(pGC, dst);
@@ -486,14 +496,17 @@ RootlessSetSpans(DrawablePtr dst, GCPtr pGC, char *pSrc,
         while (--i) {
             ppt++;
             pwidth++;
-            if (box.x1 > ppt->x)
-                box.x1 = ppt->x;
-            if (box.x2 < (ppt->x + *pwidth))
-                box.x2 = ppt->x + *pwidth;
-            if (box.y1 > ppt->y)
-                box.y1 = ppt->y;
-            else if (box.y2 < ppt->y)
-                box.y2 = ppt->y;
+            if (box.x1 > ppt->x) {
+              box.x1 = ppt->x;
+            }
+            if (box.x2 < (ppt->x + *pwidth)) {
+              box.x2 = ppt->x + *pwidth;
+            }
+            if (box.y1 > ppt->y) {
+              box.y1 = ppt->y;
+            } else if (box.y2 < ppt->y) {
+              box.y2 = ppt->y;
+            }
         }
 
         box.y2++;
@@ -502,8 +515,9 @@ RootlessSetSpans(DrawablePtr dst, GCPtr pGC, char *pSrc,
         pGC->ops->SetSpans(dst, pGC, pSrc, pptInit, pwidthInit, nspans, sorted);
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
     GCOP_WRAP(pGC);
     RL_DEBUG_MSG("set spans end\n");
@@ -528,8 +542,9 @@ RootlessPutImage(DrawablePtr dst, GCPtr pGC,
     box.y2 = box.y1 + h;
 
     TRIM_BOX(box, pGC);
-    if (BOX_NOT_EMPTY(box))
-        RootlessDamageBox((WindowPtr) dst, &box);
+    if (BOX_NOT_EMPTY(box)) {
+      RootlessDamageBox((WindowPtr)dst, &box);
+    }
 
     GCOP_WRAP(pGC);
     RL_DEBUG_MSG("put image end\n");
@@ -568,8 +583,9 @@ RootlessCopyArea(DrawablePtr pSrc, DrawablePtr dst, GCPtr pGC,
     box.y2 = box.y1 + h;
 
     TRIM_BOX(box, pGC);
-    if (BOX_NOT_EMPTY(box))
-        RootlessDamageBox((WindowPtr) dst, &box);
+    if (BOX_NOT_EMPTY(box)) {
+      RootlessDamageBox((WindowPtr)dst, &box);
+    }
 
     GC_RESTORE(pGC, dst);
     GCOP_WRAP(pGC);
@@ -603,8 +619,9 @@ RootlessCopyPlane(DrawablePtr pSrc, DrawablePtr dst,
     box.y2 = box.y1 + h;
 
     TRIM_BOX(box, pGC);
-    if (BOX_NOT_EMPTY(box))
-        RootlessDamageBox((WindowPtr) dst, &box);
+    if (BOX_NOT_EMPTY(box)) {
+      RootlessDamageBox((WindowPtr)dst, &box);
+    }
 
     GCOP_WRAP(pGC);
     RL_DEBUG_MSG("copy plane end\n");
@@ -656,22 +673,25 @@ RootlessPolyPoint(DrawablePtr dst, GCPtr pGC,
         box.y2 = box.y1 = pptInit->y;
         while (--npt) {
             pptInit++;
-            if (box.x1 > pptInit->x)
-                box.x1 = pptInit->x;
-            else if (box.x2 < pptInit->x)
-                box.x2 = pptInit->x;
-            if (box.y1 > pptInit->y)
-                box.y1 = pptInit->y;
-            else if (box.y2 < pptInit->y)
-                box.y2 = pptInit->y;
+            if (box.x1 > pptInit->x) {
+              box.x1 = pptInit->x;
+            } else if (box.x2 < pptInit->x) {
+              box.x2 = pptInit->x;
+            }
+            if (box.y1 > pptInit->y) {
+              box.y1 = pptInit->y;
+            } else if (box.y2 < pptInit->y) {
+              box.y2 = pptInit->y;
+            }
         }
 
         box.x2++;
         box.y2++;
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
 
 #elif ROOTLESS_CHANGED_AREA==2
         // clever(?) method: accumulate point in 20-pixel radius
@@ -735,10 +755,11 @@ RootlessPolylines(DrawablePtr dst, GCPtr pGC,
         box.y2 = box.y1 = pptInit->y;
 
         if (npt > 1) {
-            if (pGC->joinStyle == JoinMiter)
-                extra = 6 * pGC->lineWidth;
-            else if (pGC->capStyle == CapProjecting)
-                extra = pGC->lineWidth;
+          if (pGC->joinStyle == JoinMiter) {
+            extra = 6 * pGC->lineWidth;
+          } else if (pGC->capStyle == CapProjecting) {
+            extra = pGC->lineWidth;
+          }
         }
 
         if (mode == CoordModePrevious) {
@@ -749,27 +770,31 @@ RootlessPolylines(DrawablePtr dst, GCPtr pGC,
                 pptInit++;
                 x += pptInit->x;
                 y += pptInit->y;
-                if (box.x1 > x)
-                    box.x1 = x;
-                else if (box.x2 < x)
-                    box.x2 = x;
-                if (box.y1 > y)
-                    box.y1 = y;
-                else if (box.y2 < y)
-                    box.y2 = y;
+                if (box.x1 > x) {
+                  box.x1 = x;
+                } else if (box.x2 < x) {
+                  box.x2 = x;
+                }
+                if (box.y1 > y) {
+                  box.y1 = y;
+                } else if (box.y2 < y) {
+                  box.y2 = y;
+                }
             }
         }
         else {
             while (--npt) {
                 pptInit++;
-                if (box.x1 > pptInit->x)
-                    box.x1 = pptInit->x;
-                else if (box.x2 < pptInit->x)
-                    box.x2 = pptInit->x;
-                if (box.y1 > pptInit->y)
-                    box.y1 = pptInit->y;
-                else if (box.y2 < pptInit->y)
-                    box.y2 = pptInit->y;
+                if (box.x1 > pptInit->x) {
+                  box.x1 = pptInit->x;
+                } else if (box.x2 < pptInit->x) {
+                  box.x2 = pptInit->x;
+                }
+                if (box.y1 > pptInit->y) {
+                  box.y1 = pptInit->y;
+                } else if (box.y2 < pptInit->y) {
+                  box.y2 = pptInit->y;
+                }
             }
         }
 
@@ -784,8 +809,9 @@ RootlessPolylines(DrawablePtr dst, GCPtr pGC,
         }
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GCOP_WRAP(pGC);
@@ -806,8 +832,9 @@ RootlessPolySegment(DrawablePtr dst, GCPtr pGC, int nseg, xSegment * pSeg)
         BoxRec box;
         int extra = pGC->lineWidth;
 
-        if (pGC->capStyle != CapProjecting)
-            extra >>= 1;
+        if (pGC->capStyle != CapProjecting) {
+          extra >>= 1;
+        }
 
         if (pSeg->x2 > pSeg->x1) {
             box.x1 = pSeg->x1;
@@ -830,28 +857,36 @@ RootlessPolySegment(DrawablePtr dst, GCPtr pGC, int nseg, xSegment * pSeg)
         while (--nseg) {
             pSeg++;
             if (pSeg->x2 > pSeg->x1) {
-                if (pSeg->x1 < box.x1)
-                    box.x1 = pSeg->x1;
-                if (pSeg->x2 > box.x2)
-                    box.x2 = pSeg->x2;
+              if (pSeg->x1 < box.x1) {
+                box.x1 = pSeg->x1;
+              }
+              if (pSeg->x2 > box.x2) {
+                box.x2 = pSeg->x2;
+              }
             }
             else {
-                if (pSeg->x2 < box.x1)
-                    box.x1 = pSeg->x2;
-                if (pSeg->x1 > box.x2)
-                    box.x2 = pSeg->x1;
+              if (pSeg->x2 < box.x1) {
+                box.x1 = pSeg->x2;
+              }
+              if (pSeg->x1 > box.x2) {
+                box.x2 = pSeg->x1;
+              }
             }
             if (pSeg->y2 > pSeg->y1) {
-                if (pSeg->y1 < box.y1)
-                    box.y1 = pSeg->y1;
-                if (pSeg->y2 > box.y2)
-                    box.y2 = pSeg->y2;
+              if (pSeg->y1 < box.y1) {
+                box.y1 = pSeg->y1;
+              }
+              if (pSeg->y2 > box.y2) {
+                box.y2 = pSeg->y2;
+              }
             }
             else {
-                if (pSeg->y2 < box.y1)
-                    box.y1 = pSeg->y2;
-                if (pSeg->y1 > box.y2)
-                    box.y2 = pSeg->y1;
+              if (pSeg->y2 < box.y1) {
+                box.y1 = pSeg->y2;
+              }
+              if (pSeg->y1 > box.y2) {
+                box.y2 = pSeg->y1;
+              }
             }
         }
 
@@ -866,8 +901,9 @@ RootlessPolySegment(DrawablePtr dst, GCPtr pGC, int nseg, xSegment * pSeg)
         }
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GCOP_WRAP(pGC);
@@ -890,8 +926,9 @@ RootlessPolyRectangle(DrawablePtr dst, GCPtr pGC,
         int offset1, offset2, offset3;
 
         offset2 = pGC->lineWidth;
-        if (!offset2)
-            offset2 = 1;
+        if (!offset2) {
+          offset2 = 1;
+        }
         offset1 = offset2 >> 1;
         offset3 = offset2 - offset1;
 
@@ -901,32 +938,36 @@ RootlessPolyRectangle(DrawablePtr dst, GCPtr pGC,
             box.x2 = box.x1 + pRects->width + offset2;
             box.y2 = box.y1 + offset2;
             TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-            if (BOX_NOT_EMPTY(box))
-                RootlessDamageBox((WindowPtr) dst, &box);
+            if (BOX_NOT_EMPTY(box)) {
+              RootlessDamageBox((WindowPtr)dst, &box);
+            }
 
             box.x1 = pRects->x - offset1;
             box.y1 = pRects->y + offset3;
             box.x2 = box.x1 + offset2;
             box.y2 = box.y1 + pRects->height - offset2;
             TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-            if (BOX_NOT_EMPTY(box))
-                RootlessDamageBox((WindowPtr) dst, &box);
+            if (BOX_NOT_EMPTY(box)) {
+              RootlessDamageBox((WindowPtr)dst, &box);
+            }
 
             box.x1 = pRects->x + pRects->width - offset1;
             box.y1 = pRects->y + offset3;
             box.x2 = box.x1 + offset2;
             box.y2 = box.y1 + pRects->height - offset2;
             TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-            if (BOX_NOT_EMPTY(box))
-                RootlessDamageBox((WindowPtr) dst, &box);
+            if (BOX_NOT_EMPTY(box)) {
+              RootlessDamageBox((WindowPtr)dst, &box);
+            }
 
             box.x1 = pRects->x - offset1;
             box.y1 = pRects->y + pRects->height - offset1;
             box.x2 = box.x1 + pRects->width + offset2;
             box.y2 = box.y1 + offset2;
             TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-            if (BOX_NOT_EMPTY(box))
-                RootlessDamageBox((WindowPtr) dst, &box);
+            if (BOX_NOT_EMPTY(box)) {
+              RootlessDamageBox((WindowPtr)dst, &box);
+            }
 
             pRects++;
         }
@@ -959,14 +1000,18 @@ RootlessPolyArc(DrawablePtr dst, GCPtr pGC, int narcs, xArc * parcs)
 
         while (--narcs) {
             parcs++;
-            if (box.x1 > parcs->x)
-                box.x1 = parcs->x;
-            if (box.x2 < (parcs->x + parcs->width))
-                box.x2 = parcs->x + parcs->width;
-            if (box.y1 > parcs->y)
-                box.y1 = parcs->y;
-            if (box.y2 < (parcs->y + parcs->height))
-                box.y2 = parcs->y + parcs->height;
+            if (box.x1 > parcs->x) {
+              box.x1 = parcs->x;
+            }
+            if (box.x2 < (parcs->x + parcs->width)) {
+              box.x2 = parcs->x + parcs->width;
+            }
+            if (box.y1 > parcs->y) {
+              box.y1 = parcs->y;
+            }
+            if (box.y2 < (parcs->y + parcs->height)) {
+              box.y2 = parcs->y + parcs->height;
+            }
         }
 
         if (extra) {
@@ -980,8 +1025,9 @@ RootlessPolyArc(DrawablePtr dst, GCPtr pGC, int narcs, xArc * parcs)
         box.y2++;
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GCOP_WRAP(pGC);
@@ -1017,27 +1063,31 @@ RootlessFillPolygon(DrawablePtr dst, GCPtr pGC,
                 ppt++;
                 x += ppt->x;
                 y += ppt->y;
-                if (box.x1 > x)
-                    box.x1 = x;
-                else if (box.x2 < x)
-                    box.x2 = x;
-                if (box.y1 > y)
-                    box.y1 = y;
-                else if (box.y2 < y)
-                    box.y2 = y;
+                if (box.x1 > x) {
+                  box.x1 = x;
+                } else if (box.x2 < x) {
+                  box.x2 = x;
+                }
+                if (box.y1 > y) {
+                  box.y1 = y;
+                } else if (box.y2 < y) {
+                  box.y2 = y;
+                }
             }
         }
         else {
             while (--i) {
                 ppt++;
-                if (box.x1 > ppt->x)
-                    box.x1 = ppt->x;
-                else if (box.x2 < ppt->x)
-                    box.x2 = ppt->x;
-                if (box.y1 > ppt->y)
-                    box.y1 = ppt->y;
-                else if (box.y2 < ppt->y)
-                    box.y2 = ppt->y;
+                if (box.x1 > ppt->x) {
+                  box.x1 = ppt->x;
+                } else if (box.x2 < ppt->x) {
+                  box.x2 = ppt->x;
+                }
+                if (box.y1 > ppt->y) {
+                  box.y1 = ppt->y;
+                } else if (box.y2 < ppt->y) {
+                  box.y2 = ppt->y;
+                }
             }
         }
 
@@ -1053,8 +1103,9 @@ RootlessFillPolygon(DrawablePtr dst, GCPtr pGC,
         pGC->ops->FillPolygon(dst, pGC, shape, mode, count, pptInit);
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GC_RESTORE(pGC, dst);
@@ -1087,14 +1138,18 @@ RootlessPolyFillRect(DrawablePtr dst, GCPtr pGC,
 
         while (--nRects) {
             pRects++;
-            if (box.x1 > pRects->x)
-                box.x1 = pRects->x;
-            if (box.x2 < (pRects->x + pRects->width))
-                box.x2 = pRects->x + pRects->width;
-            if (box.y1 > pRects->y)
-                box.y1 = pRects->y;
-            if (box.y2 < (pRects->y + pRects->height))
-                box.y2 = pRects->y + pRects->height;
+            if (box.x1 > pRects->x) {
+              box.x1 = pRects->x;
+            }
+            if (box.x2 < (pRects->x + pRects->width)) {
+              box.x2 = pRects->x + pRects->width;
+            }
+            if (box.y1 > pRects->y) {
+              box.y1 = pRects->y;
+            }
+            if (box.y2 < (pRects->y + pRects->height)) {
+              box.y2 = pRects->y + pRects->height;
+            }
         }
 
         RootlessStartDrawing((WindowPtr) dst);
@@ -1106,8 +1161,9 @@ RootlessPolyFillRect(DrawablePtr dst, GCPtr pGC,
         pGC->ops->PolyFillRect(dst, pGC, nRectsInit, pRectsInit);
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GC_RESTORE(pGC, dst);
@@ -1137,14 +1193,18 @@ RootlessPolyFillArc(DrawablePtr dst, GCPtr pGC, int narcsInit, xArc * parcsInit)
 
         while (--narcs) {
             parcs++;
-            if (box.x1 > parcs->x)
-                box.x1 = parcs->x;
-            if (box.x2 < (parcs->x + parcs->width))
-                box.x2 = parcs->x + parcs->width;
-            if (box.y1 > parcs->y)
-                box.y1 = parcs->y;
-            if (box.y2 < (parcs->y + parcs->height))
-                box.y2 = parcs->y + parcs->height;
+            if (box.x1 > parcs->x) {
+              box.x1 = parcs->x;
+            }
+            if (box.x2 < (parcs->x + parcs->width)) {
+              box.x2 = parcs->x + parcs->width;
+            }
+            if (box.y1 > parcs->y) {
+              box.y1 = parcs->y;
+            }
+            if (box.y2 < (parcs->y + parcs->height)) {
+              box.y2 = parcs->y + parcs->height;
+            }
         }
 
         RootlessStartDrawing((WindowPtr) dst);
@@ -1156,8 +1216,9 @@ RootlessPolyFillArc(DrawablePtr dst, GCPtr pGC, int narcsInit, xArc * parcsInit)
         pGC->ops->PolyFillArc(dst, pGC, narcsInit, parcsInit);
 
         TRIM_AND_TRANSLATE_BOX(box, dst, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
     else {
         pGC->ops->PolyFillArc(dst, pGC, narcsInit, parcsInit);
@@ -1184,11 +1245,13 @@ RootlessImageText8(DrawablePtr dst, GCPtr pGC,
         bot = max(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
 
         Min = count * FONTMINBOUNDS(pGC->font, characterWidth);
-        if (Min > 0)
-            Min = 0;
+        if (Min > 0) {
+          Min = 0;
+        }
         Max = count * FONTMAXBOUNDS(pGC->font, characterWidth);
-        if (Max < 0)
-            Max = 0;
+        if (Max < 0) {
+          Max = 0;
+        }
 
         /* ugh */
         box.x1 = dst->x + x + Min + FONTMINBOUNDS(pGC->font, leftSideBearing);
@@ -1206,8 +1269,9 @@ RootlessImageText8(DrawablePtr dst, GCPtr pGC,
         pGC->ops->ImageText8(dst, pGC, x, y, count, chars);
 
         TRIM_BOX(box, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
     else {
         pGC->ops->ImageText8(dst, pGC, x, y, count, chars);
@@ -1247,8 +1311,9 @@ RootlessPolyText8(DrawablePtr dst, GCPtr pGC,
         box.y2 = dst->y + y + FONTMAXBOUNDS(pGC->font, descent);
 
         TRIM_BOX(box, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GCOP_WRAP(pGC);
@@ -1272,11 +1337,13 @@ RootlessImageText16(DrawablePtr dst, GCPtr pGC,
         bot = max(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
 
         Min = count * FONTMINBOUNDS(pGC->font, characterWidth);
-        if (Min > 0)
-            Min = 0;
+        if (Min > 0) {
+          Min = 0;
+        }
         Max = count * FONTMAXBOUNDS(pGC->font, characterWidth);
-        if (Max < 0)
-            Max = 0;
+        if (Max < 0) {
+          Max = 0;
+        }
 
         /* ugh */
         box.x1 = dst->x + x + Min + FONTMINBOUNDS(pGC->font, leftSideBearing);
@@ -1294,8 +1361,9 @@ RootlessImageText16(DrawablePtr dst, GCPtr pGC,
         pGC->ops->ImageText16(dst, pGC, x, y, count, chars);
 
         TRIM_BOX(box, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
     else {
         pGC->ops->ImageText16(dst, pGC, x, y, count, chars);
@@ -1335,8 +1403,9 @@ RootlessPolyText16(DrawablePtr dst, GCPtr pGC,
         box.y2 = dst->y + y + FONTMAXBOUNDS(pGC->font, descent);
 
         TRIM_BOX(box, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GCOP_WRAP(pGC);
@@ -1363,12 +1432,14 @@ RootlessImageGlyphBlt(DrawablePtr dst, GCPtr pGC,
         bot = max(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
 
         box.x1 = ppci[0]->metrics.leftSideBearing;
-        if (box.x1 > 0)
-            box.x1 = 0;
+        if (box.x1 > 0) {
+          box.x1 = 0;
+        }
         box.x2 = ppci[nglyph - 1]->metrics.rightSideBearing -
             ppci[nglyph - 1]->metrics.characterWidth;
-        if (box.x2 < 0)
-            box.x2 = 0;
+        if (box.x2 < 0) {
+          box.x2 = 0;
+        }
 
         box.x2 += dst->x + x;
         box.x1 += dst->x + x;
@@ -1378,10 +1449,11 @@ RootlessImageGlyphBlt(DrawablePtr dst, GCPtr pGC,
             ppci++;
         }
 
-        if (width > 0)
-            box.x2 += width;
-        else
-            box.x1 += width;
+        if (width > 0) {
+          box.x2 += width;
+        } else {
+          box.x1 += width;
+        }
 
         box.y1 = dst->y + y - top;
         box.y2 = dst->y + y + bot;
@@ -1395,8 +1467,9 @@ RootlessImageGlyphBlt(DrawablePtr dst, GCPtr pGC,
         pGC->ops->ImageGlyphBlt(dst, pGC, x, y, nglyphInit, ppciInit, unused);
 
         TRIM_BOX(box, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
     else {
         pGC->ops->ImageGlyphBlt(dst, pGC, x, y, nglyphInit, ppciInit, unused);
@@ -1433,18 +1506,20 @@ RootlessPolyGlyphBlt(DrawablePtr dst, GCPtr pGC,
                 ppci++;
             }
 
-            if (width > 0)
-                box.x2 += width;
-            else
-                box.x1 += width;
+            if (width > 0) {
+              box.x2 += width;
+            } else {
+              box.x1 += width;
+            }
         }
 
         box.y1 = dst->y + y - FONTMAXBOUNDS(pGC->font, ascent);
         box.y2 = dst->y + y + FONTMAXBOUNDS(pGC->font, descent);
 
         TRIM_BOX(box, pGC);
-        if (BOX_NOT_EMPTY(box))
-            RootlessDamageBox((WindowPtr) dst, &box);
+        if (BOX_NOT_EMPTY(box)) {
+          RootlessDamageBox((WindowPtr)dst, &box);
+        }
     }
 
     GCOP_WRAP(pGC);
@@ -1470,8 +1545,9 @@ RootlessPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr dst,
     box.y2 = box.y1 + dy;
 
     TRIM_BOX(box, pGC);
-    if (BOX_NOT_EMPTY(box))
-        RootlessDamageBox((WindowPtr) dst, &box);
+    if (BOX_NOT_EMPTY(box)) {
+      RootlessDamageBox((WindowPtr)dst, &box);
+    }
 
     GCOP_WRAP(pGC);
     RL_DEBUG_MSG("push pixels end\n");

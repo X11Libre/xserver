@@ -161,8 +161,9 @@ xf86BusConfig(Bool singleDriver)
      */
     for (i = 0; i < xf86NumDrivers; i++) {
         /* The order of the && operands below is essential! */
-        if (xf86CallDriverProbe(xf86DriverList[i], FALSE) && singleDriver)
-            break;
+        if (xf86CallDriverProbe(xf86DriverList[i], FALSE) && singleDriver) {
+          break;
+        }
     }
 
     /*
@@ -174,8 +175,9 @@ xf86BusConfig(Bool singleDriver)
         xf86ProbeIgnorePrimary = TRUE;
         for (i = 0; i < xf86NumDrivers && xf86NumScreens == 0; i++) {
             /* The order of the && operands below is essential! */
-            if (xf86CallDriverProbe(xf86DriverList[i], FALSE) && singleDriver)
-                break;
+            if (xf86CallDriverProbe(xf86DriverList[i], FALSE) && singleDriver) {
+              break;
+            }
         }
         xf86ProbeIgnorePrimary = FALSE;
     }
@@ -210,14 +212,14 @@ xf86BusConfig(Bool singleDriver)
      */
     for (i = 0; i < xf86NumScreens; i++) {
         layout = xf86BusConfigMatch(xf86Screens[i], FALSE);
-        if (layout && layout->screen)
-            xf86Screens[i]->confScreen = layout->screen;
-        else {
-            /* No match found */
-            LogMessageVerb(X_ERROR, 1,
-                           "Screen %d deleted because of no matching config section.\n",
-                           i);
-            xf86DeleteScreen(xf86Screens[i--]);
+        if (layout && layout->screen) {
+          xf86Screens[i]->confScreen = layout->screen;
+        } else {
+          /* No match found */
+          LogMessageVerb(
+              X_ERROR, 1,
+              "Screen %d deleted because of no matching config section.\n", i);
+          xf86DeleteScreen(xf86Screens[i--]);
         }
     }
 
@@ -249,8 +251,9 @@ xf86BusProbe(void)
 {
 #ifdef XSERVER_PLATFORM_BUS
     xf86platformProbe();
-    if (ServerIsNotSeat0() && xf86_num_platform_devices > 0)
-        return;
+    if (ServerIsNotSeat0() && xf86_num_platform_devices > 0) {
+      return;
+    }
 #endif
 #ifdef XSERVER_LIBPCIACCESS
     xf86PciProbe();
@@ -276,8 +279,9 @@ StringToBusType(const char *busID, const char **retID)
 
     /* If no type field, Default to PCI */
     if (isdigit((unsigned char)busID[0])) {
-        if (retID)
-            *retID = busID;
+      if (retID) {
+        *retID = busID;
+      }
         return BUS_PCI;
     }
 
@@ -287,22 +291,28 @@ StringToBusType(const char *busID, const char **retID)
         free(s);
         return BUS_NONE;
     }
-    if (!xf86NameCmp(p, "pci") || !xf86NameCmp(p, "agp"))
-        ret = BUS_PCI;
-    if (!xf86NameCmp(p, "sbus"))
-        ret = BUS_SBUS;
-    if (!xf86NameCmp(p, "platform"))
-        ret = BUS_PLATFORM;
-    if (!xf86NameCmp(p, "usb"))
-        ret = BUS_USB;
-    if (ret != BUS_NONE)
-        if (retID) {
-            size_t len = strlen(p);
-            if (busID[len] == ':')
-                *retID = busID + len + 1;
-            else
-                *retID = busID + len; /* Points to the terminating null byte */
+    if (!xf86NameCmp(p, "pci") || !xf86NameCmp(p, "agp")) {
+      ret = BUS_PCI;
+    }
+    if (!xf86NameCmp(p, "sbus")) {
+      ret = BUS_SBUS;
+    }
+    if (!xf86NameCmp(p, "platform")) {
+      ret = BUS_PLATFORM;
+    }
+    if (!xf86NameCmp(p, "usb")) {
+      ret = BUS_USB;
+    }
+    if (ret != BUS_NONE) {
+      if (retID) {
+        size_t len = strlen(p);
+        if (busID[len] == ':') {
+          *retID = busID + len + 1;
+        } else {
+          *retID = busID + len; /* Points to the terminating null byte */
         }
+      }
+    }
     free(s);
     return ret;
 }
@@ -325,13 +335,16 @@ xf86IsEntityPrimary(int entityIndex)
     EntityPtr pEnt = xf86Entities[entityIndex];
 
 #ifdef XSERVER_LIBPCIACCESS
-    if (primaryBus.type == BUS_PLATFORM && pEnt->bus.type == BUS_PCI)
-        if (primaryBus.id.plat->pdev)
-            return MATCH_PCI_DEVICES(pEnt->bus.id.pci, primaryBus.id.plat->pdev);
+    if (primaryBus.type == BUS_PLATFORM && pEnt->bus.type == BUS_PCI) {
+      if (primaryBus.id.plat->pdev) {
+        return MATCH_PCI_DEVICES(pEnt->bus.id.pci, primaryBus.id.plat->pdev);
+      }
+    }
 #endif
 
-    if (primaryBus.type != pEnt->bus.type)
-        return FALSE;
+    if (primaryBus.type != pEnt->bus.type) {
+      return FALSE;
+    }
 
     switch (pEnt->bus.type) {
     case BUS_PCI:
@@ -351,8 +364,9 @@ xf86DriverHasEntities(DriverPtr drvp)
     int i;
 
     for (i = 0; i < xf86NumEntities; i++) {
-        if (xf86Entities[i]->driver == drvp)
-            return TRUE;
+      if (xf86Entities[i]->driver == drvp) {
+        return TRUE;
+      }
     }
     return FALSE;
 }
@@ -360,8 +374,9 @@ xf86DriverHasEntities(DriverPtr drvp)
 void
 xf86AddEntityToScreen(ScrnInfoPtr pScrn, int entityIndex)
 {
-    if (entityIndex == -1)
-        return;
+  if (entityIndex == -1) {
+    return;
+  }
     if (xf86Entities[entityIndex]->inUse &&
         !(xf86Entities[entityIndex]->entityProp & IS_SHARED_ACCEL)) {
         ErrorF("Requested Entity already in use!\n");
@@ -384,8 +399,9 @@ xf86SetEntityInstanceForScreen(ScrnInfoPtr pScrn, int entityIndex, int instance)
 {
     int i;
 
-    if (entityIndex == -1 || entityIndex >= xf86NumEntities)
-        return;
+    if (entityIndex == -1 || entityIndex >= xf86NumEntities) {
+      return;
+    }
 
     for (i = 0; i < pScrn->numEntities; i++) {
         if (pScrn->entityList[i] == entityIndex) {
@@ -404,14 +420,16 @@ xf86FindScreenForEntity(int entityIndex)
 {
     int i, j;
 
-    if (entityIndex == -1)
-        return NULL;
+    if (entityIndex == -1) {
+      return NULL;
+    }
 
     if (xf86Screens) {
         for (i = 0; i < xf86NumScreens; i++) {
             for (j = 0; j < xf86Screens[i]->numEntities; j++) {
-                if (xf86Screens[i]->entityList[j] == entityIndex)
-                    return xf86Screens[i];
+              if (xf86Screens[i]->entityList[j] == entityIndex) {
+                return xf86Screens[i];
+              }
             }
         }
     }
@@ -425,8 +443,9 @@ xf86RemoveEntityFromScreen(ScrnInfoPtr pScrn, int entityIndex)
 
     for (i = 0; i < pScrn->numEntities; i++) {
         if (pScrn->entityList[i] == entityIndex) {
-            for (i++; i < pScrn->numEntities; i++)
-                pScrn->entityList[i - 1] = pScrn->entityList[i];
+          for (i++; i < pScrn->numEntities; i++) {
+            pScrn->entityList[i - 1] = pScrn->entityList[i];
+          }
             pScrn->numEntities--;
             xf86Entities[entityIndex]->inUse = FALSE;
             break;
@@ -443,8 +462,9 @@ xf86ClearEntityListForScreen(ScrnInfoPtr pScrn)
 {
     int i, entityIndex;
 
-    if (pScrn->entityList == NULL || pScrn->numEntities == 0)
-        return;
+    if (pScrn->entityList == NULL || pScrn->numEntities == 0) {
+      return;
+    }
 
     for (i = 0; i < pScrn->numEntities; i++) {
         entityIndex = pScrn->entityList[i];
@@ -466,8 +486,9 @@ xf86AddDevToEntity(int entityIndex, GDevPtr dev)
 {
     EntityPtr pEnt;
 
-    if (entityIndex >= xf86NumEntities)
-        return;
+    if (entityIndex >= xf86NumEntities) {
+      return;
+    }
 
     pEnt = xf86Entities[entityIndex];
     pEnt->numInstances++;
@@ -483,14 +504,16 @@ xf86RemoveDevFromEntity(int entityIndex, GDevPtr dev)
 {
     EntityPtr pEnt;
     int i, j;
-    if (entityIndex >= xf86NumEntities)
-        return;
+    if (entityIndex >= xf86NumEntities) {
+      return;
+    }
 
     pEnt = xf86Entities[entityIndex];
     for (i = 0; i < pEnt->numInstances; i++) {
         if (pEnt->devices[i] == dev) {
-            for (j = i; j < pEnt->numInstances - 1; j++)
-                pEnt->devices[j] = pEnt->devices[j + 1];
+          for (j = i; j < pEnt->numInstances - 1; j++) {
+            pEnt->devices[j] = pEnt->devices[j + 1];
+          }
             break;
         }
     }
@@ -508,11 +531,13 @@ xf86GetEntityInfo(int entityIndex)
     EntityInfoPtr pEnt;
     int i;
 
-    if (entityIndex == -1)
-        return NULL;
+    if (entityIndex == -1) {
+      return NULL;
+    }
 
-    if (entityIndex >= xf86NumEntities)
-        return NULL;
+    if (entityIndex >= xf86NumEntities) {
+      return NULL;
+    }
 
     pEnt = XNFcallocarray(1, sizeof(EntityInfoRec));
     pEnt->index = entityIndex;
@@ -522,13 +547,15 @@ xf86GetEntityInfo(int entityIndex)
     pEnt->driver = xf86Entities[entityIndex]->driver;
     if ((xf86Entities[entityIndex]->devices) &&
         (xf86Entities[entityIndex]->devices[0])) {
-        for (i = 0; i < xf86Entities[entityIndex]->numInstances; i++)
-            if (xf86Entities[entityIndex]->devices[i]->screen == 0)
-                break;
+      for (i = 0; i < xf86Entities[entityIndex]->numInstances; i++) {
+        if (xf86Entities[entityIndex]->devices[i]->screen == 0) {
+          break;
+        }
+      }
         pEnt->device = xf86Entities[entityIndex]->devices[i];
+    } else {
+      pEnt->device = NULL;
     }
-    else
-        pEnt->device = NULL;
 
     return pEnt;
 }
@@ -536,8 +563,9 @@ xf86GetEntityInfo(int entityIndex)
 int
 xf86GetNumEntityInstances(int entityIndex)
 {
-    if (entityIndex >= xf86NumEntities)
-        return -1;
+  if (entityIndex >= xf86NumEntities) {
+    return -1;
+  }
 
     return xf86Entities[entityIndex]->numInstances;
 }
@@ -549,16 +577,20 @@ xf86GetDevFromEntity(int entityIndex, int instance)
 
     /* We might not use AddDevtoEntity */
     if ((!xf86Entities[entityIndex]->devices) ||
-        (!xf86Entities[entityIndex]->devices[0]))
-        return NULL;
+        (!xf86Entities[entityIndex]->devices[0])) {
+      return NULL;
+    }
 
     if (entityIndex >= xf86NumEntities ||
-        instance >= xf86Entities[entityIndex]->numInstances)
-        return NULL;
+        instance >= xf86Entities[entityIndex]->numInstances) {
+      return NULL;
+    }
 
-    for (i = 0; i < xf86Entities[entityIndex]->numInstances; i++)
-        if (xf86Entities[entityIndex]->devices[i]->screen == instance)
-            return xf86Entities[entityIndex]->devices[i];
+    for (i = 0; i < xf86Entities[entityIndex]->numInstances; i++) {
+      if (xf86Entities[entityIndex]->devices[i]->screen == instance) {
+        return xf86Entities[entityIndex]->devices[i];
+      }
+    }
     return NULL;
 }
 
@@ -653,8 +685,9 @@ xf86AllocateEntityPrivateIndex(void)
 DevUnion *
 xf86GetEntityPrivate(int entityIndex, int privIndex)
 {
-    if (entityIndex >= xf86NumEntities || privIndex >= xf86EntityPrivateCount)
-        return NULL;
+  if (entityIndex >= xf86NumEntities || privIndex >= xf86EntityPrivateCount) {
+    return NULL;
+  }
 
     return &(xf86Entities[entityIndex]->entityPrivates[privIndex]);
 }
@@ -772,10 +805,10 @@ xf86CheckSlot(const void *ptr, BusType type)
                     pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func, 
                     pent->devices[0]->identifier);
                 return FALSE;
+            } else {
+              /* This is another device, skip */
+              continue;
             }
-            else
-            /* This is another device, skip */
-                continue;
         }
 
         if (pent->bus.type == BUS_PCI) {
@@ -825,12 +858,14 @@ xf86CheckSlot(const void *ptr, BusType type)
             if (!strcasecmp(pent->driver->driverName, "modesetting")) {
                 /* Examine the first device only */
                 msOther = xf86FindOptionValue(pent->devices[0]->options, "kmsdev");
-                if (msOther == NULL)
+                if (msOther == NULL) {
 #ifdef XSERVER_LIBPCIACCESS
-                    if (pci_other == NULL)
+                  if (pci_other == NULL) {
 #endif
                     /* Autoconfigured */
                     msOther = "/dev/dri/card0";
+                  }
+                }
             }
         }
 
@@ -845,14 +880,15 @@ xf86CheckSlot(const void *ptr, BusType type)
 
 #ifdef XSERVER_PLATFORM_BUS
     if (type == BUS_PLATFORM) {
-        if (pci_ptr)
-            LogMessageVerb(X_INFO, 1,
-                " Platform device \"%s\" at %u@%u:%u:%u can be claimed.\n",
-                msPath, pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func);
-        else
-            LogMessageVerb(X_INFO, 1,
-                " Platform device \"%s\" can be claimed.\n",
-                 msPath);
+      if (pci_ptr) {
+        LogMessageVerb(
+            X_INFO, 1,
+            " Platform device \"%s\" at %u@%u:%u:%u can be claimed.\n", msPath,
+            pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func);
+      } else {
+        LogMessageVerb(X_INFO, 1, " Platform device \"%s\" can be claimed.\n",
+                       msPath);
+      }
     }
     else
 #endif
@@ -865,19 +901,19 @@ xf86CheckSlot(const void *ptr, BusType type)
     else
 #endif
     if (type == BUS_NONE) {
-        if (msPath)
-            LogMessageVerb(X_INFO, 1,
-                "\"%s\" can be claimed by modesetting driver as \"%s\".\n",
-                msPath, fb_ptr->identifier);
-        else
-        if (fbPath)
-            LogMessageVerb(X_INFO, 1,
-                "\"%s\" can be claimed by fbdev driver as \"%s\".\n",
-                fbPath, fb_ptr->identifier);
-        else
-            LogMessageVerb(X_INFO, 1,
-                "\"%s\" can be claimed.\n",
-                 fb_ptr->identifier);
+      if (msPath) {
+        LogMessageVerb(
+            X_INFO, 1,
+            "\"%s\" can be claimed by modesetting driver as \"%s\".\n", msPath,
+            fb_ptr->identifier);
+      } else if (fbPath) {
+        LogMessageVerb(X_INFO, 1,
+                       "\"%s\" can be claimed by fbdev driver as \"%s\".\n",
+                       fbPath, fb_ptr->identifier);
+      } else {
+        LogMessageVerb(X_INFO, 1, "\"%s\" can be claimed.\n",
+                       fb_ptr->identifier);
+      }
     }
 
     return TRUE;

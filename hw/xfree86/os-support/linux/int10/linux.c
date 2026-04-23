@@ -58,8 +58,9 @@ readLegacy(struct pci_device *dev, unsigned char *buf, int base, int len)
 {
     void *map;
 
-    if (pci_device_map_legacy(dev, base, len, 0, &map))
-        return FALSE;
+    if (pci_device_map_legacy(dev, base, len, 0, &map)) {
+      return FALSE;
+    }
 
     memcpy(buf, map, len);
     pci_device_unmap_legacy(dev, man, len);
@@ -138,8 +139,9 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
     pInt->entityIndex = entityIndex;
     pInt->dev = xf86GetPciInfoForEntity(entityIndex);
 
-    if (!xf86Int10ExecSetup(pInt))
-        goto error0;
+    if (!xf86Int10ExecSetup(pInt)) {
+      goto error0;
+    }
     pInt->mem = &linuxMem;
     pagesize = getpagesize();
     pInt->private = (void *) XNFcallocarray(1, sizeof(linuxInt10Priv));
@@ -150,12 +152,14 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
         DebugF("Mapping high memory area\n");
         if ((high_mem = shmget(counter++, HIGH_MEM_SIZE,
                                IPC_CREAT | SHM_R | SHM_W)) == -1) {
-            if (errno == ENOSYS)
-                xf86DrvMsg(screen, X_ERROR, "shmget error\n Please reconfigure"
-                           " your kernel to include System V IPC support\n");
-            else
-                xf86DrvMsg(screen, X_ERROR,
-                           "shmget(highmem) error: %s\n", strerror(errno));
+          if (errno == ENOSYS) {
+            xf86DrvMsg(screen, X_ERROR,
+                       "shmget error\n Please reconfigure"
+                       " your kernel to include System V IPC support\n");
+          } else {
+            xf86DrvMsg(screen, X_ERROR, "shmget(highmem) error: %s\n",
+                       strerror(errno));
+          }
             goto error1;
         }
     }
@@ -172,9 +176,9 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
                 goto error1;
             }
             close(fd);
+        } else {
+          goto error1;
         }
-        else
-            goto error1;
     }
     ((linuxInt10Priv *) pInt->private)->highMem = high_mem;
 
@@ -201,12 +205,13 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
             goto error3;
         }
         ((linuxInt10Priv *) pInt->private)->base_high = base_high;
+    } else {
+      ((linuxInt10Priv *)pInt->private)->base_high = NULL;
     }
-    else
-        ((linuxInt10Priv *) pInt->private)->base_high = NULL;
 
-    if (!MapCurrentInt10(pInt))
-        goto error3;
+    if (!MapCurrentInt10(pInt)) {
+      goto error3;
+    }
 
     Int10Current = pInt;
 
@@ -225,17 +230,20 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
     if (!videoBiosMapped) {
         memset((void *) V_BIOS, 0, SYS_BIOS - V_BIOS);
         DebugF("Reading BIOS\n");
-        for (cs = V_BIOS; cs < SYS_BIOS; cs += V_BIOS_SIZE)
-            if (!readLegacy(pInt->dev, (void *)cs, cs, V_BIOS_SIZE))
-                xf86DrvMsg(screen, X_WARNING,
-                           "Unable to retrieve all of segment 0x%06lX.\n",
-                           (long) cs);
+        for (cs = V_BIOS; cs < SYS_BIOS; cs += V_BIOS_SIZE) {
+          if (!readLegacy(pInt->dev, (void *)cs, cs, V_BIOS_SIZE)) {
+            xf86DrvMsg(screen, X_WARNING,
+                       "Unable to retrieve all of segment 0x%06lX.\n",
+                       (long)cs);
+          }
+        }
         DebugF("done\n");
     }
 
     if (xf86IsEntityPrimary(entityIndex) && !(initPrimary(options))) {
-        if (!xf86int10GetBiosSegment(pInt, NULL))
-            goto error3;
+      if (!xf86int10GetBiosSegment(pInt, NULL)) {
+        goto error3;
+      }
 
         set_return_trap(pInt);
 #ifdef _PC
@@ -284,20 +292,24 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
     return pInt;
 
  error3:
-    if (base_high)
-        shmdt(base_high);
+   if (base_high) {
+     shmdt(base_high);
+   }
     shmdt(base);
     shmdt(0);
-    if (base_high)
-        shmdt((char *) HIGH_MEM);
+    if (base_high) {
+      shmdt((char *)HIGH_MEM);
+    }
     shmctl(low_mem, IPC_RMID, NULL);
     Int10Current = NULL;
  error2:
-    if (high_mem > -1)
-        shmctl(high_mem, IPC_RMID, NULL);
+   if (high_mem > -1) {
+     shmctl(high_mem, IPC_RMID, NULL);
+   }
  error1:
-    if (vMem)
-        munmap(vMem, SYS_BIOS - V_BIOS);
+   if (vMem) {
+     munmap(vMem, SYS_BIOS - V_BIOS);
+   }
     free(((linuxInt10Priv *) pInt->private)->alloc);
     free(pInt->private);
  error0:
@@ -314,10 +326,11 @@ MapCurrentInt10(xf86Int10InfoPtr pInt)
 
     if (Int10Current) {
         shmdt(0);
-        if (((linuxInt10Priv *) Int10Current->private)->highMem >= 0)
-            shmdt((char *) HIGH_MEM);
-        else
-            munmap((void *) V_BIOS, (SYS_BIOS - V_BIOS));
+        if (((linuxInt10Priv *)Int10Current->private)->highMem >= 0) {
+          shmdt((char *)HIGH_MEM);
+        } else {
+          munmap((void *)V_BIOS, (SYS_BIOS - V_BIOS));
+        }
     }
     addr =
         shmat(((linuxInt10Priv *) pInt->private)->lowMem, (char *) 1, SHM_RND);
@@ -327,9 +340,10 @@ MapCurrentInt10(xf86Int10InfoPtr pInt)
                    "shmat(low_mem) error: %s\n", strerror(errno));
         return FALSE;
     }
-    if (mprotect((void *) 0, V_RAM, PROT_READ | PROT_WRITE | PROT_EXEC) != 0)
-        xf86DrvMsg(pInt->pScrn->scrnIndex, X_ERROR,
-                   "Cannot set EXEC bit on low memory: %s\n", strerror(errno));
+    if (mprotect((void *)0, V_RAM, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+      xf86DrvMsg(pInt->pScrn->scrnIndex, X_ERROR,
+                 "Cannot set EXEC bit on low memory: %s\n", strerror(errno));
+    }
 
     if (((linuxInt10Priv *) pInt->private)->highMem >= 0) {
         addr = shmat(((linuxInt10Priv *) pInt->private)->highMem,
@@ -341,11 +355,12 @@ MapCurrentInt10(xf86Int10InfoPtr pInt)
                        "shmget error: %s\n", strerror(errno));
             return FALSE;
         }
-        if (mprotect((void *) HIGH_MEM, HIGH_MEM_SIZE,
-                     PROT_READ | PROT_WRITE | PROT_EXEC) != 0)
-            xf86DrvMsg(pInt->pScrn->scrnIndex, X_ERROR,
-                       "Cannot set EXEC bit on high memory: %s\n",
-                       strerror(errno));
+        if (mprotect((void *)HIGH_MEM, HIGH_MEM_SIZE,
+                     PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+          xf86DrvMsg(pInt->pScrn->scrnIndex, X_ERROR,
+                     "Cannot set EXEC bit on high memory: %s\n",
+                     strerror(errno));
+        }
     }
     else {
         if ((fd = open(DEV_MEM, O_RDWR, 0)) >= 0) {
@@ -371,27 +386,31 @@ MapCurrentInt10(xf86Int10InfoPtr pInt)
 void
 xf86FreeInt10(xf86Int10InfoPtr pInt)
 {
-    if (!pInt)
-        return;
+  if (!pInt) {
+    return;
+  }
 
 #ifdef _PC
     xf86Int10SaveRestoreBIOSVars(pInt, FALSE);
 #endif
     if (Int10Current == pInt) {
         shmdt(0);
-        if (((linuxInt10Priv *) pInt->private)->highMem >= 0)
-            shmdt((char *) HIGH_MEM);
-        else
-            munmap((void *) V_BIOS, (SYS_BIOS - V_BIOS));
+        if (((linuxInt10Priv *)pInt->private)->highMem >= 0) {
+          shmdt((char *)HIGH_MEM);
+        } else {
+          munmap((void *)V_BIOS, (SYS_BIOS - V_BIOS));
+        }
         Int10Current = NULL;
     }
 
-    if (((linuxInt10Priv *) pInt->private)->base_high)
-        shmdt(((linuxInt10Priv *) pInt->private)->base_high);
+    if (((linuxInt10Priv *)pInt->private)->base_high) {
+      shmdt(((linuxInt10Priv *)pInt->private)->base_high);
+    }
     shmdt(((linuxInt10Priv *) pInt->private)->base);
     shmctl(((linuxInt10Priv *) pInt->private)->lowMem, IPC_RMID, NULL);
-    if (((linuxInt10Priv *) pInt->private)->highMem >= 0)
-        shmctl(((linuxInt10Priv *) pInt->private)->highMem, IPC_RMID, NULL);
+    if (((linuxInt10Priv *)pInt->private)->highMem >= 0) {
+      shmctl(((linuxInt10Priv *)pInt->private)->highMem, IPC_RMID, NULL);
+    }
     free(((linuxInt10Priv *) pInt->private)->alloc);
     free(pInt->private);
     free(pInt);
@@ -406,20 +425,25 @@ xf86Int10AllocPages(xf86Int10InfoPtr pInt, int num, int *off)
 
     for (i = 0; i < (num_pages - num); i++) {
         if (((linuxInt10Priv *) pInt->private)->alloc[i] == 0) {
-            for (j = i; j < (num + i); j++)
-                if ((((linuxInt10Priv *) pInt->private)->alloc[j] != 0))
-                    break;
-            if (j == (num + i))
-                break;
-            else
-                i = i + num;
+          for (j = i; j < (num + i); j++) {
+            if ((((linuxInt10Priv *)pInt->private)->alloc[j] != 0)) {
+              break;
+            }
+          }
+          if (j == (num + i)) {
+            break;
+          } else {
+            i = i + num;
+          }
         }
     }
-    if (i == (num_pages - num))
-        return NULL;
+    if (i == (num_pages - num)) {
+      return NULL;
+    }
 
-    for (j = i; j < (i + num); j++)
-        ((linuxInt10Priv *) pInt->private)->alloc[j] = 1;
+    for (j = i; j < (i + num); j++) {
+      ((linuxInt10Priv *)pInt->private)->alloc[j] = 1;
+    }
 
     *off = (i + 1) * pagesize;
 
@@ -435,8 +459,9 @@ xf86Int10FreePages(xf86Int10InfoPtr pInt, void *pbase, int num)
                  / pagesize) - 1;
     int i;
 
-    for (i = first; i < (first + num); i++)
-        ((linuxInt10Priv *) pInt->private)->alloc[i] = 0;
+    for (i = first; i < (first + num); i++) {
+      ((linuxInt10Priv *)pInt->private)->alloc[i] = 0;
+    }
 }
 
 static CARD8
@@ -479,17 +504,18 @@ write_l(xf86Int10InfoPtr pInt, int addr, CARD32 val)
 void *
 xf86int10Addr(xf86Int10InfoPtr pInt, CARD32 addr)
 {
-    if (addr < V_RAM)
-        return ((linuxInt10Priv *) pInt->private)->base + addr;
-    else if (addr < V_BIOS)
-        return (void *) (memType) addr;
-    else if (addr < SYS_BIOS) {
-        if (((linuxInt10Priv *) pInt->private)->base_high)
-            return (void *) (((linuxInt10Priv *) pInt->private)->base_high
-                              - V_BIOS + addr);
-        else
-            return (void *) (memType) addr;
+  if (addr < V_RAM) {
+    return ((linuxInt10Priv *)pInt->private)->base + addr;
+  } else if (addr < V_BIOS) {
+    return (void *)(memType)addr;
+  } else if (addr < SYS_BIOS) {
+    if (((linuxInt10Priv *)pInt->private)->base_high) {
+      return (void *)(((linuxInt10Priv *)pInt->private)->base_high - V_BIOS +
+                      addr);
+    } else {
+      return (void *)(memType)addr;
     }
-    else
-        return (void *) (memType) addr;
+  } else {
+    return (void *)(memType)addr;
+  }
 }

@@ -39,8 +39,9 @@ fbGetSpans(DrawablePtr pDrawable,
      * XFree86 DDX empties the root borderClip when the VT is
      * switched away; this checks for that case
      */
-    if (!fbDrawableEnabled(pDrawable))
-        return;
+    if (!fbDrawableEnabled(pDrawable)) {
+      return;
+    }
 
     fbGetDrawable(pDrawable, src, srcStride, srcBpp, srcXoff, srcYoff);
 

@@ -88,33 +88,40 @@ ProcXUngrabDeviceButton(ClientPtr client)
     int rc;
 
     rc = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
-    if (rc != Success)
-        return rc;
-    if (dev->button == NULL)
-        return BadMatch;
+    if (rc != Success) {
+      return rc;
+    }
+    if (dev->button == NULL) {
+      return BadMatch;
+    }
 
     if (stuff->modifier_device != UseXKeyboard) {
         rc = dixLookupDevice(&mdev, stuff->modifier_device, client,
                              DixReadAccess);
-        if (rc != Success)
-            return BadDevice;
-        if (mdev->key == NULL)
-            return BadMatch;
+        if (rc != Success) {
+          return BadDevice;
+        }
+        if (mdev->key == NULL) {
+          return BadMatch;
+        }
+    } else {
+      mdev = PickKeyboard(client);
     }
-    else
-        mdev = PickKeyboard(client);
 
     rc = dixLookupWindow(&pWin, stuff->grabWindow, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if ((stuff->modifiers != AnyModifier) &&
-        (stuff->modifiers & ~AllModifiersMask))
-        return BadValue;
+        (stuff->modifiers & ~AllModifiersMask)) {
+      return BadValue;
+    }
 
     temporaryGrab = AllocGrab(NULL);
-    if (!temporaryGrab)
-        return BadAlloc;
+    if (!temporaryGrab) {
+      return BadAlloc;
+    }
 
     temporaryGrab->resource = client->clientAsMask;
     temporaryGrab->device = dev;

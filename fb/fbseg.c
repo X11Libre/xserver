@@ -58,10 +58,12 @@ fbBresSolid(DrawablePtr pDrawable,
     x1 &= FB_STIP_MASK;
     mask0 = FbStipMask(0, dstBpp);
     mask = FbStipRight(mask0, x1);
-    if (signdx < 0)
-        mask0 = FbStipRight(mask0, FB_STIP_UNIT - dstBpp);
-    if (signdy < 0)
-        dstStride = -dstStride;
+    if (signdx < 0) {
+      mask0 = FbStipRight(mask0, FB_STIP_UNIT - dstBpp);
+    }
+    if (signdy < 0) {
+      dstStride = -dstStride;
+    }
     if (axis == X_AXIS) {
         bits = 0;
         while (len--) {
@@ -83,8 +85,9 @@ fbBresSolid(DrawablePtr pDrawable,
                 e += e3;
             }
         }
-        if (bits)
-            WRITE(dst, FbDoMaskRRop(READ(dst), and, xor, bits));
+        if (bits) {
+          WRITE(dst, FbDoMaskRRop(READ(dst), and, xor, bits));
+        }
     }
     else {
         while (len--) {
@@ -139,15 +142,18 @@ fbBresDash(DrawablePtr pDrawable,
     x1 &= FB_STIP_MASK;
     mask0 = FbStipMask(0, dstBpp);
     mask = FbStipRight(mask0, x1);
-    if (signdx < 0)
-        mask0 = FbStipRight(mask0, FB_STIP_UNIT - dstBpp);
-    if (signdy < 0)
-        dstStride = -dstStride;
+    if (signdx < 0) {
+      mask0 = FbStipRight(mask0, FB_STIP_UNIT - dstBpp);
+    }
+    if (signdy < 0) {
+      dstStride = -dstStride;
+    }
     while (len--) {
-        if (even)
-            WRITE(dst, FbDoMaskRRop(READ(dst), and, xor, mask));
-        else if (doOdd)
-            WRITE(dst, FbDoMaskRRop(READ(dst), bgand, bgxor, mask));
+      if (even) {
+        WRITE(dst, FbDoMaskRRop(READ(dst), and, xor, mask));
+      } else if (doOdd) {
+        WRITE(dst, FbDoMaskRRop(READ(dst), bgand, bgxor, mask));
+      }
         if (axis == X_AXIS) {
             mask = fbBresShiftMask(mask, signdx, dstBpp);
             if (!mask) {
@@ -250,10 +256,11 @@ fbBresFillDash(DrawablePtr pDrawable,
     while (len--) {
         if (even || doOdd) {
             if (doBg) {
-                if (even)
-                    fbSetFg(pDrawable, pGC, fg);
-                else
-                    fbSetFg(pDrawable, pGC, bg);
+              if (even) {
+                fbSetFg(pDrawable, pGC, fg);
+              } else {
+                fbSetFg(pDrawable, pGC, bg);
+              }
             }
             fbFill(pDrawable, pGC, x1, y1, 1, 1);
         }
@@ -275,8 +282,9 @@ fbBresFillDash(DrawablePtr pDrawable,
         }
         FbDashStep(dashlen, even);
     }
-    if (doBg)
-        fbSetFg(pDrawable, pGC, fg);
+    if (doBg) {
+      fbSetFg(pDrawable, pGC, fg);
+    }
 }
 
 /*
@@ -392,8 +400,9 @@ fbSegment(DrawablePtr pDrawable,
        all we have to do now is clip and draw.
      */
 
-    if (drawLast)
-        len++;
+    if (drawLast) {
+      len++;
+    }
     dashoff = *dashOffset;
     *dashOffset = dashoff + len;
     while (nBox--) {
@@ -424,12 +433,14 @@ fbSegment(DrawablePtr pDrawable,
                 continue;
             }
 
-            if (axis == X_AXIS)
-                len = abs(new_x2 - new_x1);
-            else
-                len = abs(new_y2 - new_y1);
-            if (clip2 != 0 || drawLast)
-                len++;
+            if (axis == X_AXIS) {
+              len = abs(new_x2 - new_x1);
+            } else {
+              len = abs(new_y2 - new_y1);
+            }
+            if (clip2 != 0 || drawLast) {
+              len++;
+            }
             if (len) {
                 /* unwind bresenham error term to first point */
                 doff = dashoff;

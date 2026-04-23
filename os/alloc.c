@@ -15,8 +15,9 @@ XNFalloc(unsigned long amount)
 {
     void *ptr = calloc(1, amount);
 
-    if (!ptr)
-        FatalError("Out of memory");
+    if (!ptr) {
+      FatalError("Out of memory");
+    }
     return ptr;
 }
 
@@ -35,8 +36,9 @@ XNFcallocarray(size_t nmemb, size_t size)
 {
     void *ret = calloc(nmemb, size);
 
-    if (!ret)
-        FatalError("XNFcalloc: Out of memory");
+    if (!ret) {
+      FatalError("XNFcalloc: Out of memory");
+    }
     return ret;
 }
 
@@ -45,8 +47,9 @@ XNFrealloc(void *ptr, unsigned long amount)
 {
     void *ret = realloc(ptr, amount);
 
-    if (!ret)
-        FatalError("XNFrealloc: Out of memory");
+    if (!ret) {
+      FatalError("XNFrealloc: Out of memory");
+    }
     return ret;
 }
 
@@ -55,7 +58,8 @@ XNFreallocarray(void *ptr, size_t nmemb, size_t size)
 {
     void *ret = reallocarray(ptr, nmemb, size);
 
-    if (!ret)
-        FatalError("XNFreallocarray: Out of memory");
+    if (!ret) {
+      FatalError("XNFreallocarray: Out of memory");
+    }
     return ret;
 }

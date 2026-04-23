@@ -267,7 +267,9 @@ glamor_egl_create_textured_pixmap_from_gbm_bo(PixmapPtr pixmap,
         },
     };
 
-    for (plane = 0; plane < num_planes; plane++) fds[plane] = -1;
+    for (plane = 0; plane < num_planes; plane++) {
+      fds[plane] = -1;
+    }
 #endif
 
     glamor_make_current(glamor_priv);
@@ -345,8 +347,9 @@ glamor_get_name_from_bo(int gbm_fd, struct gbm_bo *bo, int *name)
     union gbm_bo_handle handle;
 
     handle = gbm_bo_get_handle(bo);
-    if (!glamor_get_flink_name(gbm_fd, handle.u32, name))
-        *name = -1;
+    if (!glamor_get_flink_name(gbm_fd, handle.u32, name)) {
+      *name = -1;
+    }
 }
 #endif
 
@@ -369,9 +372,9 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 
     BUG_RETURN_VAL(!pixmap_priv, FALSE);
 
-    if (pixmap_priv->image &&
-        (modifiers_ok || !pixmap_priv->used_modifiers))
-        return TRUE;
+    if (pixmap_priv->image && (modifiers_ok || !pixmap_priv->used_modifiers)) {
+      return TRUE;
+    }
 
     switch (pixmap->drawable.depth) {
     case 30:
@@ -430,8 +433,9 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
                                               format, modifiers, num_modifiers);
 #endif
         }
-        if (bo)
-            used_modifiers = TRUE;
+        if (bo) {
+          used_modifiers = TRUE;
+        }
         free(modifiers);
     }
 #endif
@@ -514,8 +518,9 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
 
     BUG_RETURN_VAL(!pixmap_priv, NULL);
 
-    if (!pixmap_priv->image)
-        return NULL;
+    if (!pixmap_priv->image) {
+      return NULL;
+    }
 
     return gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
                          pixmap_priv->image, GBM_BO_USE_RENDERING);
@@ -526,8 +531,9 @@ struct gbm_bo *
 glamor_gbm_bo_from_pixmap(ScreenPtr screen, PixmapPtr pixmap)
 {
 #ifdef GLAMOR_HAS_GBM
-    if (!glamor_make_pixmap_exportable(pixmap, TRUE))
-        return NULL;
+  if (!glamor_make_pixmap_exportable(pixmap, TRUE)) {
+    return NULL;
+  }
 
     return glamor_gbm_bo_from_pixmap_internal(screen, pixmap);
 #else
@@ -550,12 +556,14 @@ glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
     int i;
 #endif
 
-    if (!glamor_make_pixmap_exportable(pixmap, TRUE))
-        return 0;
+    if (!glamor_make_pixmap_exportable(pixmap, TRUE)) {
+      return 0;
+    }
 
     bo = glamor_gbm_bo_from_pixmap_internal(screen, pixmap);
-    if (!bo)
-        return 0;
+    if (!bo) {
+      return 0;
+    }
 
 #ifdef GBM_BO_WITH_MODIFIERS
     num_fds = gbm_bo_get_plane_count(bo);
@@ -579,8 +587,9 @@ glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
             fds[i] = -1;
 #endif
         if (fds[i] == -1) {
-            while (--i >= 0)
-                close(fds[i]);
+          while (--i >= 0) {
+            close(fds[i]);
+          }
             return 0;
         }
         strides[i] = gbm_bo_get_stride_for_plane(bo, i);
@@ -612,12 +621,14 @@ glamor_egl_fd_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
     struct gbm_bo *bo;
     int fd;
 
-    if (!glamor_make_pixmap_exportable(pixmap, FALSE))
-        return -1;
+    if (!glamor_make_pixmap_exportable(pixmap, FALSE)) {
+      return -1;
+    }
 
     bo = glamor_gbm_bo_from_pixmap_internal(screen, pixmap);
-    if (!bo)
-        return -1;
+    if (!bo) {
+      return -1;
+    }
 
     fd = gbm_bo_get_fd(bo);
     *stride = gbm_bo_get_stride(bo);
@@ -642,12 +653,14 @@ glamor_egl_fd_name_from_pixmap(ScreenPtr screen,
 
     glamor_egl = glamor_egl_get_screen_private(screen);
 
-    if (!glamor_make_pixmap_exportable(pixmap, FALSE))
-        goto failure;
+    if (!glamor_make_pixmap_exportable(pixmap, FALSE)) {
+      goto failure;
+    }
 
     bo = glamor_gbm_bo_from_pixmap_internal(screen, pixmap);
-    if (!bo)
-        goto failure;
+    if (!bo) {
+      goto failure;
+    }
 
     pixmap->devKind = gbm_bo_get_stride(bo);
 
@@ -706,9 +719,10 @@ glamor_back_pixmap_from_fd(PixmapPtr pixmap,
 
     glamor_egl = glamor_egl_get_screen_private(screen);
 
-    if (!gbm_format_for_depth(depth, &import_data.format) ||
-        width == 0 || height == 0)
-        return FALSE;
+    if (!gbm_format_for_depth(depth, &import_data.format) || width == 0 ||
+        height == 0) {
+      return FALSE;
+    }
 
     import_data.fd = fd;
     import_data.width = width;
@@ -716,8 +730,9 @@ glamor_back_pixmap_from_fd(PixmapPtr pixmap,
     import_data.stride = stride;
     bo = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD, &import_data,
                        GBM_BO_USE_RENDERING);
-    if (!bo)
-        return FALSE;
+    if (!bo) {
+      return FALSE;
+    }
 
     screen->ModifyPixmapHeader(pixmap, width, height, 0, 0, stride, NULL);
 
@@ -752,9 +767,10 @@ glamor_pixmap_from_fds(ScreenPtr screen,
         struct gbm_import_fd_modifier_data import_data = { 0 };
         struct gbm_bo *bo;
 
-        if (!gbm_format_for_depth(depth, &import_data.format) ||
-            width == 0 || height == 0)
-            goto error;
+        if (!gbm_format_for_depth(depth, &import_data.format) || width == 0 ||
+            height == 0) {
+          goto error;
+        }
 
         import_data.width = width;
         import_data.height = height;
@@ -832,18 +848,22 @@ glamor_get_formats_internal(glamor_egl_priv_t *glamor_egl,
     *num_formats = 0;
     *formats = NULL;
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    if (!glamor_egl->dmabuf_capable)
-        return TRUE;
+    if (!glamor_egl->dmabuf_capable) {
+      return TRUE;
+    }
 
-    if (!eglQueryDmaBufFormatsEXT(glamor_egl->display, 0, NULL, &num))
-        return FALSE;
+    if (!eglQueryDmaBufFormatsEXT(glamor_egl->display, 0, NULL, &num)) {
+      return FALSE;
+    }
 
-    if (num == 0)
-        return TRUE;
+    if (num == 0) {
+      return TRUE;
+    }
 
     *formats = calloc(num, sizeof(CARD32));
-    if (*formats == NULL)
-        return FALSE;
+    if (*formats == NULL) {
+      return FALSE;
+    }
 
     if (!eglQueryDmaBufFormatsEXT(glamor_egl->display, num,
                                   (EGLint *) *formats, &num)) {
@@ -918,19 +938,23 @@ glamor_get_modifiers_internal(glamor_egl_priv_t *glamor_egl, uint32_t format,
     *num_modifiers = 0;
     *modifiers = NULL;
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    if (!glamor_egl->dmabuf_capable)
-        return FALSE;
+    if (!glamor_egl->dmabuf_capable) {
+      return FALSE;
+    }
 
-    if (!eglQueryDmaBufModifiersEXT(glamor_egl->display, format, 0, NULL,
-                                    NULL, &num))
-        return FALSE;
+    if (!eglQueryDmaBufModifiersEXT(glamor_egl->display, format, 0, NULL, NULL,
+                                    &num)) {
+      return FALSE;
+    }
 
-    if (num == 0)
-        return TRUE;
+    if (num == 0) {
+      return TRUE;
+    }
 
     *modifiers = calloc(num, sizeof(uint64_t));
-    if (*modifiers == NULL)
-        return FALSE;
+    if (*modifiers == NULL) {
+      return FALSE;
+    }
 
     external_only = calloc(num, sizeof(EGLBoolean));
     if (!external_only) {
@@ -980,8 +1004,9 @@ glamor_egl_get_driver_name(ScreenPtr screen)
 
     glamor_egl = glamor_egl_get_screen_private(screen);
 
-    if (epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_query_driver"))
-        return eglGetDisplayDriverName(glamor_egl->display);
+    if (epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_query_driver")) {
+      return eglGetDisplayDriverName(glamor_egl->display);
+    }
 #endif
 
     return NULL;
@@ -999,8 +1024,9 @@ static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, 
 
     BUG_RETURN(!pixmap_priv);
 
-    if (pixmap_priv->image)
-        eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
+    if (pixmap_priv->image) {
+      eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
+    }
 }
 #endif
 
@@ -1068,8 +1094,9 @@ glamor_egl_post_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unus
 #ifdef GLAMOR_HAS_GBM
     glamor_egl_priv_t *glamor_egl = glamor_egl_get_screen_private(screen);
 
-    if (glamor_egl->gbm)
-        gbm_device_destroy(glamor_egl->gbm);
+    if (glamor_egl->gbm) {
+      gbm_device_destroy(glamor_egl->gbm);
+    }
 #endif
 
     dixScreenUnhookPostClose(screen, glamor_egl_post_close_screen);
@@ -1088,8 +1115,9 @@ glamor_dri3_open_client(ClientPtr client,
     drm_magic_t magic;
 
     fd = open(glamor_egl->device_path, O_RDWR|O_CLOEXEC);
-    if (fd < 0)
-        return BadAlloc;
+    if (fd < 0) {
+      return BadAlloc;
+    }
 
     /* Before FD passing in the X protocol with DRI3 (and increased
      * security of rendering with per-process address spaces on the
@@ -1225,8 +1253,9 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
              * to the same device we were handed in originally.
              */
             glamor_egl->device_path = drmGetRenderDeviceNameFromFd(glamor_egl->fd);
-            if (!glamor_egl->device_path)
-                glamor_egl->device_path = drmGetDeviceNameFromFd2(glamor_egl->fd);
+            if (!glamor_egl->device_path) {
+              glamor_egl->device_path = drmGetDeviceNameFromFd2(glamor_egl->fd);
+            }
 
             if (!dri3_screen_init(screen, &glamor_dri3_info)) {
                 LogMessage(X_ERROR,
@@ -1483,8 +1512,9 @@ void glamor_egl_cleanup(glamor_egl_priv_t *glamor_egl)
     glamor_egl_pre_close_screen_cleanup(glamor_egl);
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->gbm)
-        gbm_device_destroy(glamor_egl->gbm);
+    if (glamor_egl->gbm) {
+      gbm_device_destroy(glamor_egl->gbm);
+    }
 #endif
 }
 
@@ -1827,13 +1857,15 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
     GLAMOR_CHECK_EGL_EXTENSION(KHR_surfaceless_context);
 
     if (!glamor_egl->force_es) {
-        if(!glamor_egl_try_big_gl_api(glamor_egl))
-            goto error;
+      if (!glamor_egl_try_big_gl_api(glamor_egl)) {
+        goto error;
+      }
     }
 
     if (glamor_egl->context == EGL_NO_CONTEXT && !glamor_egl->es_disallowed) {
-        if(!glamor_egl_try_gles_api(glamor_egl))
-            goto error;
+      if (!glamor_egl_try_gles_api(glamor_egl)) {
+        goto error;
+      }
     }
 
     if (glamor_egl->context == EGL_NO_CONTEXT) {
@@ -1854,14 +1886,12 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
         goto error;
     }
     if (!strncmp("llvmpipe", (const char *)renderer, strlen("llvmpipe"))) {
-        if (glamor_egl->llvmpipe_allowed)
-            LogMessage(X_INFO,
-                       "Allowing glamor on llvmpipe for PRIME\n");
-        else {
-            LogMessage(X_INFO,
-                       "Refusing to try glamor on llvmpipe\n");
-            goto error;
-        }
+      if (glamor_egl->llvmpipe_allowed) {
+        LogMessage(X_INFO, "Allowing glamor on llvmpipe for PRIME\n");
+      } else {
+        LogMessage(X_INFO, "Refusing to try glamor on llvmpipe\n");
+        goto error;
+      }
     }
 
     /*
@@ -1885,16 +1915,17 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
         epoxy_has_egl_extension(glamor_egl->display,
                                 "EGL_EXT_image_dma_buf_import_modifiers")) {
 
-        if (strstr((const char *)renderer, "Intel"))
-            glamor_egl->dmabuf_capable = TRUE;
-        else if (strstr((const char *)renderer, "zink"))
-            glamor_egl->dmabuf_capable = TRUE;
-        else if (strstr((const char *)renderer, "NVIDIA"))
-            glamor_egl->dmabuf_capable = TRUE;
-        else if (strstr((const char *)renderer, "radeonsi"))
-            glamor_egl->dmabuf_capable = TRUE;
-        else
-            glamor_egl->dmabuf_capable = (glamor_egl->dmabuf_capable == TRUE);
+      if (strstr((const char *)renderer, "Intel")) {
+        glamor_egl->dmabuf_capable = TRUE;
+      } else if (strstr((const char *)renderer, "zink")) {
+        glamor_egl->dmabuf_capable = TRUE;
+      } else if (strstr((const char *)renderer, "NVIDIA")) {
+        glamor_egl->dmabuf_capable = TRUE;
+      } else if (strstr((const char *)renderer, "radeonsi")) {
+        glamor_egl->dmabuf_capable = TRUE;
+      } else {
+        glamor_egl->dmabuf_capable = (glamor_egl->dmabuf_capable == TRUE);
+      }
     }
 #endif
 

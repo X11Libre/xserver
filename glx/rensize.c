@@ -53,8 +53,9 @@ __glXMap1dReqSize(const GLbyte * pc, Bool swap, int reqlen)
         target = SWAPL(target);
         order = SWAPL(order);
     }
-    if (order < 1)
-        return -1;
+    if (order < 1) {
+      return -1;
+    }
     return safe_mul(8, safe_mul(__glMap1d_size(target), order));
 }
 
@@ -70,16 +71,18 @@ __glXMap1fReqSize(const GLbyte * pc, Bool swap, int reqlen)
         target = SWAPL(target);
         order = SWAPL(order);
     }
-    if (order < 1)
-        return -1;
+    if (order < 1) {
+      return -1;
+    }
     return safe_mul(4, safe_mul(__glMap1f_size(target), order));
 }
 
 static int
 Map2Size(int k, int majorOrder, int minorOrder)
 {
-    if (majorOrder < 1 || minorOrder < 1)
-        return -1;
+  if (majorOrder < 1 || minorOrder < 1) {
+    return -1;
+  }
     return safe_mul(k, safe_mul(majorOrder, minorOrder));
 }
 
@@ -165,8 +168,9 @@ __glXImageSize(GLenum format, GLenum type, GLenum target,
     GLint bytesPerElement, elementsPerGroup, groupsPerRow;
     GLint groupSize, rowSize, padding, imageSize;
 
-    if (w == 0 || h == 0 || d == 0)
-        return 0;
+    if (w == 0 || h == 0 || d == 0) {
+      return 0;
+    }
 
     if (w < 0 || h < 0 || d < 0 ||
         (type == GL_BITMAP &&
@@ -192,10 +196,12 @@ __glXImageSize(GLenum format, GLenum type, GLenum target,
     }
 
     /* real data has to have real sizes */
-    if (imageHeight < 0 || rowLength < 0 || skipImages < 0 || skipRows < 0)
-        return -1;
-    if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8)
-        return -1;
+    if (imageHeight < 0 || rowLength < 0 || skipImages < 0 || skipRows < 0) {
+      return -1;
+    }
+    if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8) {
+      return -1;
+    }
 
     if (type == GL_BITMAP) {
         if (rowLength > 0) {
@@ -205,8 +211,9 @@ __glXImageSize(GLenum format, GLenum type, GLenum target,
             groupsPerRow = w;
         }
         rowSize = bits_to_bytes(groupsPerRow);
-        if (rowSize < 0)
-            return -1;
+        if (rowSize < 0) {
+          return -1;
+        }
         padding = (rowSize % alignment);
         if (padding) {
             rowSize += alignment - padding;
@@ -314,15 +321,17 @@ __glXImageSize(GLenum format, GLenum type, GLenum target,
             groupsPerRow = w;
         }
 
-        if ((rowSize = safe_mul(groupsPerRow, groupSize)) < 0)
-            return -1;
+        if ((rowSize = safe_mul(groupsPerRow, groupSize)) < 0) {
+          return -1;
+        }
         padding = (rowSize % alignment);
         if (padding) {
             rowSize += alignment - padding;
         }
 
-        if (imageHeight > 0)
-            h = imageHeight;
+        if (imageHeight > 0) {
+          h = imageHeight;
+        }
         h = safe_add(h, skipRows);
 
         imageSize = safe_mul(h, rowSize);
@@ -378,8 +387,9 @@ __glXDrawArraysReqSize(const GLbyte * pc, Bool swap, int reqlen)
 
     size = safe_mul(sizeof(__GLXdispatchDrawArraysComponentHeader),
                     numComponents);
-    if (size < 0 || reqlen < 0 || reqlen < size)
-        return -1;
+    if (size < 0 || reqlen < 0 || reqlen < size) {
+      return -1;
+    }
 
     compHeader = (__GLXdispatchDrawArraysComponentHeader *) pc;
 
@@ -425,8 +435,9 @@ __glXDrawArraysReqSize(const GLbyte * pc, Bool swap, int reqlen)
         }
 
         x = safe_pad(safe_mul(numVals, __glXTypeSize(datatype)));
-        if ((arrayElementSize = safe_add(arrayElementSize, x)) < 0)
-            return -1;
+        if ((arrayElementSize = safe_add(arrayElementSize, x)) < 0) {
+          return -1;
+        }
 
         pc += sizeof(__GLXdispatchDrawArraysComponentHeader);
     }

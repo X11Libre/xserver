@@ -87,44 +87,44 @@ ChangeKbdFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
     kctrl = k->ctrl;
     if (mask & DvKeyClickPercent) {
         t = f->click;
-        if (t == -1)
-            t = defaultKeyboardControl.click;
-        else if (t < 0 || t > 100) {
-            client->errorValue = t;
-            return BadValue;
+        if (t == -1) {
+          t = defaultKeyboardControl.click;
+        } else if (t < 0 || t > 100) {
+          client->errorValue = t;
+          return BadValue;
         }
         kctrl.click = t;
     }
 
     if (mask & DvPercent) {
         t = f->percent;
-        if (t == -1)
-            t = defaultKeyboardControl.bell;
-        else if (t < 0 || t > 100) {
-            client->errorValue = t;
-            return BadValue;
+        if (t == -1) {
+          t = defaultKeyboardControl.bell;
+        } else if (t < 0 || t > 100) {
+          client->errorValue = t;
+          return BadValue;
         }
         kctrl.bell = t;
     }
 
     if (mask & DvPitch) {
         t = f->pitch;
-        if (t == -1)
-            t = defaultKeyboardControl.bell_pitch;
-        else if (t < 0) {
-            client->errorValue = t;
-            return BadValue;
+        if (t == -1) {
+          t = defaultKeyboardControl.bell_pitch;
+        } else if (t < 0) {
+          client->errorValue = t;
+          return BadValue;
         }
         kctrl.bell_pitch = t;
     }
 
     if (mask & DvDuration) {
         t = f->duration;
-        if (t == -1)
-            t = defaultKeyboardControl.bell_duration;
-        else if (t < 0) {
-            client->errorValue = t;
-            return BadValue;
+        if (t == -1) {
+          t = defaultKeyboardControl.bell_duration;
+        } else if (t < 0) {
+          client->errorValue = t;
+          return BadValue;
         }
         kctrl.bell_duration = t;
     }
@@ -140,8 +140,9 @@ ChangeKbdFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
             client->errorValue = key;
             return BadValue;
         }
-        if (!(mask & DvAutoRepeatMode))
-            return BadMatch;
+        if (!(mask & DvAutoRepeatMode)) {
+          return BadMatch;
+        }
     }
 
     if (mask & DvAutoRepeatMode) {
@@ -150,22 +151,25 @@ ChangeKbdFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
 
         t = (CARD8) f->auto_repeat_mode;
         if (t == AutoRepeatModeOff) {
-            if (key == DO_ALL)
-                kctrl.autoRepeat = FALSE;
-            else
-                kctrl.autoRepeats[inx] &= ~kmask;
+          if (key == DO_ALL) {
+            kctrl.autoRepeat = FALSE;
+          } else {
+            kctrl.autoRepeats[inx] &= ~kmask;
+          }
         }
         else if (t == AutoRepeatModeOn) {
-            if (key == DO_ALL)
-                kctrl.autoRepeat = TRUE;
-            else
-                kctrl.autoRepeats[inx] |= kmask;
+          if (key == DO_ALL) {
+            kctrl.autoRepeat = TRUE;
+          } else {
+            kctrl.autoRepeats[inx] |= kmask;
+          }
         }
         else if (t == AutoRepeatModeDefault) {
-            if (key == DO_ALL)
-                kctrl.autoRepeat = defaultKeyboardControl.autoRepeat;
-            else
-                kctrl.autoRepeats[inx] &= ~kmask;
+          if (key == DO_ALL) {
+            kctrl.autoRepeat = defaultKeyboardControl.autoRepeat;
+          } else {
+            kctrl.autoRepeats[inx] &= ~kmask;
+          }
             kctrl.autoRepeats[inx] =
                 (kctrl.autoRepeats[inx] & ~kmask) |
                 (defaultKeyboardControl.autoRepeats[inx] & kmask);
@@ -205,42 +209,42 @@ ChangePtrFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
         int accelNum;
 
         accelNum = f->num;
-        if (accelNum == -1)
-            pctrl.num = defaultPointerControl.num;
-        else if (accelNum < 0) {
-            client->errorValue = accelNum;
-            return BadValue;
+        if (accelNum == -1) {
+          pctrl.num = defaultPointerControl.num;
+        } else if (accelNum < 0) {
+          client->errorValue = accelNum;
+          return BadValue;
+        } else {
+          pctrl.num = accelNum;
         }
-        else
-            pctrl.num = accelNum;
     }
 
     if (mask & DvAccelDenom) {
         int accelDenom;
 
         accelDenom = f->denom;
-        if (accelDenom == -1)
-            pctrl.den = defaultPointerControl.den;
-        else if (accelDenom <= 0) {
-            client->errorValue = accelDenom;
-            return BadValue;
+        if (accelDenom == -1) {
+          pctrl.den = defaultPointerControl.den;
+        } else if (accelDenom <= 0) {
+          client->errorValue = accelDenom;
+          return BadValue;
+        } else {
+          pctrl.den = accelDenom;
         }
-        else
-            pctrl.den = accelDenom;
     }
 
     if (mask & DvThreshold) {
         int threshold;
 
         threshold = f->thresh;
-        if (threshold == -1)
-            pctrl.threshold = defaultPointerControl.threshold;
-        else if (threshold < 0) {
-            client->errorValue = threshold;
-            return BadValue;
+        if (threshold == -1) {
+          pctrl.threshold = defaultPointerControl.threshold;
+        } else if (threshold < 0) {
+          client->errorValue = threshold;
+          return BadValue;
+        } else {
+          pctrl.threshold = threshold;
         }
-        else
-            pctrl.threshold = threshold;
     }
 
     p->ctrl = pctrl;
@@ -289,21 +293,26 @@ ChangeStringFeedback(ClientPtr client, DeviceIntPtr dev,
         SwapLongs((CARD32 *) syms, f->num_keysyms);
     }
 
-    if (f->num_keysyms > s->ctrl.max_symbols)
-        return BadValue;
+    if (f->num_keysyms > s->ctrl.max_symbols) {
+      return BadValue;
+    }
 
     sup_syms = s->ctrl.symbols_supported;
     for (i = 0; i < f->num_keysyms; i++) {
-        for (j = 0; j < s->ctrl.num_symbols_supported; j++)
-            if (*(syms + i) == *(sup_syms + j))
-                break;
-        if (j == s->ctrl.num_symbols_supported)
-            return BadMatch;
+      for (j = 0; j < s->ctrl.num_symbols_supported; j++) {
+        if (*(syms + i) == *(sup_syms + j)) {
+          break;
+        }
+      }
+      if (j == s->ctrl.num_symbols_supported) {
+        return BadMatch;
+      }
     }
 
     s->ctrl.num_symbols_displayed = f->num_keysyms;
-    for (i = 0; i < f->num_keysyms; i++)
-        *(s->ctrl.symbols_displayed + i) = *(syms + i);
+    for (i = 0; i < f->num_keysyms; i++) {
+      *(s->ctrl.symbols_displayed + i) = *(syms + i);
+    }
     (*s->CtrlProc) (dev, &s->ctrl);
     return Success;
 }
@@ -331,33 +340,33 @@ ChangeBellFeedback(ClientPtr client, DeviceIntPtr dev,
     bctrl = b->ctrl;
     if (mask & DvPercent) {
         t = f->percent;
-        if (t == -1)
-            t = defaultKeyboardControl.bell;
-        else if (t < 0 || t > 100) {
-            client->errorValue = t;
-            return BadValue;
+        if (t == -1) {
+          t = defaultKeyboardControl.bell;
+        } else if (t < 0 || t > 100) {
+          client->errorValue = t;
+          return BadValue;
         }
         bctrl.percent = t;
     }
 
     if (mask & DvPitch) {
         t = f->pitch;
-        if (t == -1)
-            t = defaultKeyboardControl.bell_pitch;
-        else if (t < 0) {
-            client->errorValue = t;
-            return BadValue;
+        if (t == -1) {
+          t = defaultKeyboardControl.bell_pitch;
+        } else if (t < 0) {
+          client->errorValue = t;
+          return BadValue;
         }
         bctrl.pitch = t;
     }
 
     if (mask & DvDuration) {
         t = f->duration;
-        if (t == -1)
-            t = defaultKeyboardControl.bell_duration;
-        else if (t < 0) {
-            client->errorValue = t;
-            return BadValue;
+        if (t == -1) {
+          t = defaultKeyboardControl.bell_duration;
+        } else if (t < 0) {
+          client->errorValue = t;
+          return BadValue;
         }
         bctrl.duration = t;
     }
@@ -421,27 +430,34 @@ ProcXChangeFeedbackControl(ClientPtr client)
 
     len = client->req_len - bytes_to_int32(sizeof(xChangeFeedbackControlReq));
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     switch (stuff->feedbackid) {
     case KbdFeedbackClass:
-        if (len != bytes_to_int32(sizeof(xKbdFeedbackCtl)))
-            return BadLength;
+      if (len != bytes_to_int32(sizeof(xKbdFeedbackCtl))) {
+        return BadLength;
+      }
 
-        for (k = dev->kbdfeed; k; k = k->next)
-            if (k->ctrl.id == ((xKbdFeedbackCtl *) &stuff[1])->id)
-                return ChangeKbdFeedback(client, dev, stuff->mask, k,
-                                         (xKbdFeedbackCtl *) &stuff[1]);
+      for (k = dev->kbdfeed; k; k = k->next) {
+        if (k->ctrl.id == ((xKbdFeedbackCtl *)&stuff[1])->id) {
+          return ChangeKbdFeedback(client, dev, stuff->mask, k,
+                                   (xKbdFeedbackCtl *)&stuff[1]);
+        }
+      }
         break;
     case PtrFeedbackClass:
-        if (len != bytes_to_int32(sizeof(xPtrFeedbackCtl)))
-            return BadLength;
+      if (len != bytes_to_int32(sizeof(xPtrFeedbackCtl))) {
+        return BadLength;
+      }
 
-        for (p = dev->ptrfeed; p; p = p->next)
-            if (p->ctrl.id == ((xPtrFeedbackCtl *) &stuff[1])->id)
-                return ChangePtrFeedback(client, dev, stuff->mask, p,
-                                         (xPtrFeedbackCtl *) &stuff[1]);
+      for (p = dev->ptrfeed; p; p = p->next) {
+        if (p->ctrl.id == ((xPtrFeedbackCtl *)&stuff[1])->id) {
+          return ChangePtrFeedback(client, dev, stuff->mask, p,
+                                   (xPtrFeedbackCtl *)&stuff[1]);
+        }
+      }
         break;
     case StringFeedbackClass:
     {
@@ -451,47 +467,59 @@ ProcXChangeFeedbackControl(ClientPtr client)
                                     sizeof(xStringFeedbackCtl));
         f = ((xStringFeedbackCtl *) &stuff[1]);
         if (client->swapped) {
-            if (len < bytes_to_int32(sizeof(xStringFeedbackCtl)))
-                return BadLength;
+          if (len < bytes_to_int32(sizeof(xStringFeedbackCtl))) {
+            return BadLength;
+          }
             swaps(&f->num_keysyms);
         }
         if (len !=
-            (bytes_to_int32(sizeof(xStringFeedbackCtl)) + f->num_keysyms))
-            return BadLength;
+            (bytes_to_int32(sizeof(xStringFeedbackCtl)) + f->num_keysyms)) {
+          return BadLength;
+        }
 
-        for (s = dev->stringfeed; s; s = s->next)
-            if (s->ctrl.id == ((xStringFeedbackCtl *) &stuff[1])->id)
-                return ChangeStringFeedback(client, dev, stuff->mask, s,
-                                            (xStringFeedbackCtl *) &stuff[1]);
+        for (s = dev->stringfeed; s; s = s->next) {
+          if (s->ctrl.id == ((xStringFeedbackCtl *)&stuff[1])->id) {
+            return ChangeStringFeedback(client, dev, stuff->mask, s,
+                                        (xStringFeedbackCtl *)&stuff[1]);
+          }
+        }
         break;
     }
     case IntegerFeedbackClass:
-        if (len != bytes_to_int32(sizeof(xIntegerFeedbackCtl)))
-            return BadLength;
+      if (len != bytes_to_int32(sizeof(xIntegerFeedbackCtl))) {
+        return BadLength;
+      }
 
-        for (i = dev->intfeed; i; i = i->next)
-            if (i->ctrl.id == ((xIntegerFeedbackCtl *) &stuff[1])->id)
-                return ChangeIntegerFeedback(client, dev, stuff->mask, i,
-                                             (xIntegerFeedbackCtl *) &
-                                             stuff[1]);
+      for (i = dev->intfeed; i; i = i->next) {
+        if (i->ctrl.id == ((xIntegerFeedbackCtl *)&stuff[1])->id) {
+          return ChangeIntegerFeedback(client, dev, stuff->mask, i,
+                                       (xIntegerFeedbackCtl *)&stuff[1]);
+        }
+      }
         break;
     case LedFeedbackClass:
-        if (len != bytes_to_int32(sizeof(xLedFeedbackCtl)))
-            return BadLength;
+      if (len != bytes_to_int32(sizeof(xLedFeedbackCtl))) {
+        return BadLength;
+      }
 
-        for (l = dev->leds; l; l = l->next)
-            if (l->ctrl.id == ((xLedFeedbackCtl *) &stuff[1])->id)
-                return ChangeLedFeedback(client, dev, stuff->mask, l,
-                                         (xLedFeedbackCtl *) &stuff[1]);
+      for (l = dev->leds; l; l = l->next) {
+        if (l->ctrl.id == ((xLedFeedbackCtl *)&stuff[1])->id) {
+          return ChangeLedFeedback(client, dev, stuff->mask, l,
+                                   (xLedFeedbackCtl *)&stuff[1]);
+        }
+      }
         break;
     case BellFeedbackClass:
-        if (len != bytes_to_int32(sizeof(xBellFeedbackCtl)))
-            return BadLength;
+      if (len != bytes_to_int32(sizeof(xBellFeedbackCtl))) {
+        return BadLength;
+      }
 
-        for (b = dev->bell; b; b = b->next)
-            if (b->ctrl.id == ((xBellFeedbackCtl *) &stuff[1])->id)
-                return ChangeBellFeedback(client, dev, stuff->mask, b,
-                                          (xBellFeedbackCtl *) &stuff[1]);
+      for (b = dev->bell; b; b = b->next) {
+        if (b->ctrl.id == ((xBellFeedbackCtl *)&stuff[1])->id) {
+          return ChangeBellFeedback(client, dev, stuff->mask, b,
+                                    (xBellFeedbackCtl *)&stuff[1]);
+        }
+      }
         break;
     default:
         break;

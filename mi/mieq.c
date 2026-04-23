@@ -102,8 +102,9 @@ mieqNumEnqueued(EventQueuePtr eventQueue)
     if (eventQueue->nevents) {
         /* % is not well-defined with negative numbers... sigh */
         n_enqueued = eventQueue->tail - eventQueue->head + eventQueue->nevents;
-        if (n_enqueued >= eventQueue->nevents)
-            n_enqueued -= eventQueue->nevents;
+        if (n_enqueued >= eventQueue->nevents) {
+          n_enqueued -= eventQueue->nevents;
+        }
     }
     return n_enqueued;
 }
@@ -120,8 +121,9 @@ mieqGrowQueue(EventQueuePtr eventQueue, size_t new_nevents)
         return FALSE;
     }
 
-    if (new_nevents <= eventQueue->nevents)
-        return FALSE;
+    if (new_nevents <= eventQueue->nevents) {
+      return FALSE;
+    }
 
     new_events = calloc(new_nevents, sizeof(EventRec));
     if (new_events == NULL) {
@@ -148,8 +150,9 @@ mieqGrowQueue(EventQueuePtr eventQueue, size_t new_nevents)
         if (!evlist) {
             size_t j;
 
-            for (j = 0; j < i; j++)
-                FreeEventList(new_events[j].events, 1);
+            for (j = 0; j < i; j++) {
+              FreeEventList(new_events[j].events, 1);
+            }
             free(new_events);
             return FALSE;
         }
@@ -173,8 +176,9 @@ mieqInit(void)
     miEventQueue.lastEventTime = GetTimeInMillis();
 
     input_lock();
-    if (!mieqGrowQueue(&miEventQueue, QUEUE_INITIAL_SIZE))
-        FatalError("Could not allocate event queue.\n");
+    if (!mieqGrowQueue(&miEventQueue, QUEUE_INITIAL_SIZE)) {
+      FatalError("Could not allocate event queue.\n");
+    }
     input_unlock();
 
     SetInputCheck(&miEventQueue.head, &miEventQueue.tail);
@@ -215,8 +219,9 @@ mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e)
     n_enqueued = mieqNumEnqueued(&miEventQueue);
 
     /* avoid merging events from different devices */
-    if (e->any.type == ET_Motion)
-        isMotion = pDev->id;
+    if (e->any.type == ET_Motion) {
+      isMotion = pDev->id;
+    }
 
     if (isMotion && isMotion == miEventQueue.lastMotion &&
         oldtail != miEventQueue.head) {
@@ -261,8 +266,9 @@ mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e)
     /* Make sure that event times don't go backwards - this
      * is "unnecessary", but very useful. */
     if (time < miEventQueue.lastEventTime &&
-        miEventQueue.lastEventTime - time < 10000)
-        e->any.time = miEventQueue.lastEventTime;
+        miEventQueue.lastEventTime - time < 10000) {
+      e->any.time = miEventQueue.lastEventTime;
+    }
 
     miEventQueue.lastEventTime = evt->any.time;
     miEventQueue.events[oldtail].pScreen = pDev ? EnqueueScreen(pDev) : NULL;
@@ -291,19 +297,19 @@ void
 mieqSwitchScreen(DeviceIntPtr pDev, ScreenPtr pScreen, Bool set_dequeue_screen)
 {
     EnqueueScreen(pDev) = pScreen;
-    if (set_dequeue_screen)
-        DequeueScreen(pDev) = pScreen;
+    if (set_dequeue_screen) {
+      DequeueScreen(pDev) = pScreen;
+    }
 }
 
 void
 mieqSetHandler(int event, mieqHandler handler)
 {
-    if (handler && miEventQueue.handlers[event] != handler)
-        ErrorF("[mi] mieq: warning: overriding existing handler %p with %p for "
-               "event %d\n",
-               (void*) miEventQueue.handlers[event],
-               (void*) handler,
-               event);
+  if (handler && miEventQueue.handlers[event] != handler) {
+    ErrorF("[mi] mieq: warning: overriding existing handler %p with %p for "
+           "event %d\n",
+           (void *)miEventQueue.handlers[event], (void *)handler, event);
+  }
 
     miEventQueue.handlers[event] = handler;
 }
@@ -376,8 +382,9 @@ FixUpEventForMaster(DeviceIntPtr mdev, DeviceIntPtr sdev,
         original->any.type == ET_ButtonRelease) {
         int btn = original->device_event.detail.button;
 
-        if (!sdev->button)
-            return;             /* Should never happen */
+        if (!sdev->button) {
+          return; /* Should never happen */
+        }
 
         master->device_event.detail.button = sdev->button->map[btn];
     }
@@ -402,12 +409,14 @@ CopyGetMasterEvent(DeviceIntPtr sdev,
     verify_internal_event(original);
 
     /* ET_XQuartz has sdev == NULL */
-    if (!sdev || InputDevIsMaster(sdev) || InputDevIsFloating(sdev))
-        return NULL;
+    if (!sdev || InputDevIsMaster(sdev) || InputDevIsFloating(sdev)) {
+      return NULL;
+    }
 
 #ifdef XFreeXDGA
-    if (type == ET_DGAEvent)
-        type = original->dga_event.subtype;
+    if (type == ET_DGAEvent) {
+      type = original->dga_event.subtype;
+    }
 #endif
 
     switch (type) {
@@ -463,8 +472,9 @@ mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen)
     verify_internal_event(event);
 
     /* refuse events from disabled devices */
-    if (dev && !dev->enabled)
-        return;
+    if (dev && !dev->enabled) {
+      return;
+    }
 
     /* Custom event handler */
     handler = miEventQueue.handlers[event->any.type];
@@ -477,22 +487,25 @@ mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen)
     case ET_KeyRelease:
     case ET_ButtonPress:
     case ET_ButtonRelease:
-        if (!handler)
-            mieqMoveToNewScreen(dev, screen, &event->device_event);
+      if (!handler) {
+        mieqMoveToNewScreen(dev, screen, &event->device_event);
+      }
         break;
     case ET_TouchBegin:
     case ET_TouchUpdate:
     case ET_TouchEnd:
-        if (!handler && (event->device_event.flags & TOUCH_POINTER_EMULATED))
-            mieqMoveToNewScreen(dev, screen, &event->device_event);
+      if (!handler && (event->device_event.flags & TOUCH_POINTER_EMULATED)) {
+        mieqMoveToNewScreen(dev, screen, &event->device_event);
+      }
         break;
     default:
         break;
     }
     master = CopyGetMasterEvent(dev, event, &mevent);
 
-    if (master)
-        master->lastSlave = dev;
+    if (master) {
+      master->lastSlave = dev;
+    }
 
     /* If someone's registered a custom event handler, let them
      * steal it. */
@@ -503,8 +516,9 @@ mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen)
         handler(screenNum, event, dev);
         /* Check for the SD's master in case the device got detached
          * during event processing */
-        if (master && !InputDevIsFloating(dev))
-            handler(screenNum, &mevent, master);
+        if (master && !InputDevIsFloating(dev)) {
+          handler(screenNum, &mevent, master);
+        }
     }
     else {
         /* process slave first, then master */
@@ -512,8 +526,9 @@ mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen)
 
         /* Check for the SD's master in case the device got detached
          * during event processing */
-        if (master && !InputDevIsFloating(dev))
-            master->public.processInputProc(&mevent, master);
+        if (master && !InputDevIsFloating(dev)) {
+          master->public.processInputProc(&mevent, master);
+        }
     }
 }
 
@@ -558,25 +573,27 @@ mieqProcessInputEvents(void)
 
         master = (dev) ? GetMaster(dev, MASTER_ATTACHED) : NULL;
 
-        if (screenIsSaved == SCREEN_SAVER_ON)
-            dixSaveScreens(serverClient, SCREEN_SAVER_OFF, ScreenSaverReset);
+        if (screenIsSaved == SCREEN_SAVER_ON) {
+          dixSaveScreens(serverClient, SCREEN_SAVER_OFF, ScreenSaverReset);
 #ifdef DPMSExtension
-        else if (DPMSPowerLevel != DPMSModeOn)
-            SetScreenSaverTimer();
+        } else if (DPMSPowerLevel != DPMSModeOn) {
+          SetScreenSaverTimer();
+        }
 
-        if (DPMSPowerLevel != DPMSModeOn)
-            DPMSSet(serverClient, DPMSModeOn);
+        if (DPMSPowerLevel != DPMSModeOn) {
+          DPMSSet(serverClient, DPMSModeOn);
+        }
 #endif
 
         mieqProcessDeviceEvent(dev, &event, screen);
 
         /* Update the sprite now. Next event may be from different device. */
-        if (master &&
-            (event.any.type == ET_Motion ||
-             ((event.any.type == ET_TouchBegin ||
-               event.any.type == ET_TouchUpdate) &&
-              event.device_event.flags & TOUCH_POINTER_EMULATED)))
-            miPointerUpdateSprite(dev);
+        if (master && (event.any.type == ET_Motion ||
+                       ((event.any.type == ET_TouchBegin ||
+                         event.any.type == ET_TouchUpdate) &&
+                        event.device_event.flags & TOUCH_POINTER_EMULATED))) {
+          miPointerUpdateSprite(dev);
+        }
 
         input_lock();
     }

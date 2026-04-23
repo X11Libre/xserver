@@ -85,8 +85,9 @@ CopySwapKbdFeedback(ClientPtr client, KbdFeedbackPtr k, char **buf)
     k2->led_mask = k->ctrl.leds;
     k2->led_values = k->ctrl.leds;
     k2->global_auto_repeat = k->ctrl.autoRepeat;
-    for (i = 0; i < 32; i++)
-        k2->auto_repeats[i] = k->ctrl.autoRepeats[i];
+    for (i = 0; i < 32; i++) {
+      k2->auto_repeats[i] = k->ctrl.autoRepeats[i];
+    }
     if (client->swapped) {
         swaps(&k2->length);
         swaps(&k2->pitch);
@@ -173,8 +174,9 @@ CopySwapStringFeedback(ClientPtr client, StringFeedbackPtr s, char **buf)
     s2->num_syms_supported = s->ctrl.num_symbols_supported;
     *buf += sizeof(xStringFeedbackState);
     kptr = (KeySym *) (*buf);
-    for (i = 0; i < s->ctrl.num_symbols_supported; i++)
-        *kptr++ = *(s->ctrl.symbols_supported + i);
+    for (i = 0; i < s->ctrl.num_symbols_supported; i++) {
+      *kptr++ = *(s->ctrl.symbols_supported + i);
+    }
     if (client->swapped) {
         swaps(&s2->length);
         swaps(&s2->max_symbols);
@@ -259,8 +261,9 @@ ProcXGetFeedbackControl(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xGetFeedbackControlReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xGetFeedbackControlReply reply = {
         .RepType = X_GetFeedbackControl,
@@ -292,24 +295,31 @@ ProcXGetFeedbackControl(ClientPtr client)
         total_length += sizeof(xBellFeedbackState);
     }
 
-    if (total_length == 0)
-        return BadMatch;
+    if (total_length == 0) {
+      return BadMatch;
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
 
-    for (k = dev->kbdfeed; k; k = k->next)
-        CopySwapKbdFeedback(client, k, &buf);
-    for (p = dev->ptrfeed; p; p = p->next)
-        CopySwapPtrFeedback(client, p, &buf);
-    for (s = dev->stringfeed; s; s = s->next)
-        CopySwapStringFeedback(client, s, &buf);
-    for (i = dev->intfeed; i; i = i->next)
-        CopySwapIntegerFeedback(client, i, &buf);
-    for (l = dev->leds; l; l = l->next)
-        CopySwapLedFeedback(client, l, &buf);
-    for (b = dev->bell; b; b = b->next)
-        CopySwapBellFeedback(client, b, &buf);
+    for (k = dev->kbdfeed; k; k = k->next) {
+      CopySwapKbdFeedback(client, k, &buf);
+    }
+    for (p = dev->ptrfeed; p; p = p->next) {
+      CopySwapPtrFeedback(client, p, &buf);
+    }
+    for (s = dev->stringfeed; s; s = s->next) {
+      CopySwapStringFeedback(client, s, &buf);
+    }
+    for (i = dev->intfeed; i; i = i->next) {
+      CopySwapIntegerFeedback(client, i, &buf);
+    }
+    for (l = dev->leds; l; l = l->next) {
+      CopySwapLedFeedback(client, l, &buf);
+    }
+    for (b = dev->bell; b; b = b->next) {
+      CopySwapBellFeedback(client, b, &buf);
+    }
 
     if (client->swapped) {
         swaps(&reply.num_feedbacks);

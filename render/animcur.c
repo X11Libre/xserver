@@ -156,8 +156,9 @@ AnimCurCancelTimer(DeviceIntPtr pDev)
     CursorPtr cur = pDev->spriteInfo->sprite ?
                     pDev->spriteInfo->sprite->current : NULL;
 
-    if (IsAnimCur(cur))
-        TimerCancel(GetAnimCur(cur)->timer);
+    if (IsAnimCur(cur)) {
+      TimerCancel(GetAnimCur(cur)->timer);
+    }
 }
 
 static Bool
@@ -166,8 +167,9 @@ AnimCurDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
     Bool ret = TRUE;
 
-    if (InputDevIsFloating(pDev))
-        return FALSE;
+    if (InputDevIsFloating(pDev)) {
+      return FALSE;
+    }
 
     Unwrap(as, pScreen, DisplayCursor);
     if (IsAnimCur(pCursor)) {
@@ -221,10 +223,11 @@ AnimCurRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     Bool ret;
 
     Unwrap(as, pScreen, RealizeCursor);
-    if (IsAnimCur(pCursor))
-        ret = TRUE;
-    else
-        ret = (*pScreen->RealizeCursor) (pDev, pScreen, pCursor);
+    if (IsAnimCur(pCursor)) {
+      ret = TRUE;
+    } else {
+      ret = (*pScreen->RealizeCursor)(pDev, pScreen, pCursor);
+    }
     Wrap(as, pScreen, RealizeCursor, AnimCurRealizeCursor);
     return ret;
 }
@@ -240,13 +243,15 @@ AnimCurUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
         AnimCurPtr ac = GetAnimCur(pCursor);
         int i;
 
-        if (pScreen->myNum == 0)
-            for (i = 0; i < ac->nelt; i++)
-                FreeCursor(ac->elts[i].pCursor, 0);
+        if (pScreen->myNum == 0) {
+          for (i = 0; i < ac->nelt; i++) {
+            FreeCursor(ac->elts[i].pCursor, 0);
+          }
+        }
         ret = TRUE;
+    } else {
+      ret = (*pScreen->UnrealizeCursor)(pDev, pScreen, pCursor);
     }
-    else
-        ret = (*pScreen->UnrealizeCursor) (pDev, pScreen, pCursor);
     Wrap(as, pScreen, UnrealizeCursor, AnimCurUnrealizeCursor);
     return ret;
 }
@@ -262,13 +267,14 @@ AnimCurRecolorCursor(DeviceIntPtr pDev,
         AnimCurPtr ac = GetAnimCur(pCursor);
         int i;
 
-        for (i = 0; i < ac->nelt; i++)
-            (*pScreen->RecolorCursor) (pDev, pScreen, ac->elts[i].pCursor,
-                                       displayed &&
-                                       pDev->spriteInfo->anim.elt == i);
+        for (i = 0; i < ac->nelt; i++) {
+          (*pScreen->RecolorCursor)(pDev, pScreen, ac->elts[i].pCursor,
+                                    displayed &&
+                                        pDev->spriteInfo->anim.elt == i);
+        }
+    } else {
+      (*pScreen->RecolorCursor)(pDev, pScreen, pCursor, displayed);
     }
-    else
-        (*pScreen->RecolorCursor) (pDev, pScreen, pCursor, displayed);
     Wrap(as, pScreen, RecolorCursor, AnimCurRecolorCursor);
 }
 
@@ -278,8 +284,9 @@ AnimCurInit(ScreenPtr pScreen)
     AnimCurScreenPtr as;
 
     if (!dixRegisterPrivateKey(&AnimCurScreenPrivateKeyRec, PRIVATE_SCREEN,
-                               sizeof(AnimCurScreenRec)))
-        return FALSE;
+                               sizeof(AnimCurScreenRec))) {
+      return FALSE;
+    }
 
     as = GetAnimCurScreen(pScreen);
 
@@ -298,8 +305,9 @@ int
 AnimCursorCreate(CursorPtr *cursors, CARD32 *deltas, int ncursor,
                  CursorPtr *ppCursor, ClientPtr client, XID cid)
 {
-    if (ncursor <= 0)
-        return BadValue;
+  if (ncursor <= 0) {
+    return BadValue;
+  }
 
     CursorPtr pCursor;
     int rc = BadAlloc, i;
@@ -310,15 +318,18 @@ AnimCursorCreate(CursorPtr *cursors, CARD32 *deltas, int ncursor,
             return BadImplementation;
     });
 
-    for (i = 0; i < ncursor; i++)
-        if (IsAnimCur(cursors[i]))
-            return BadMatch;
+    for (i = 0; i < ncursor; i++) {
+      if (IsAnimCur(cursors[i])) {
+        return BadMatch;
+      }
+    }
 
     pCursor = (CursorPtr) calloc(CURSOR_REC_SIZE +
                                  sizeof(AnimCurRec) +
                                  ncursor * sizeof(AnimCurElt), 1);
-    if (!pCursor)
-        return rc;
+    if (!pCursor) {
+      return rc;
+    }
     dixInitPrivates(pCursor, pCursor + 1, PRIVATE_CURSOR);
     pCursor->bits = &animCursorBits;
     pCursor->refcnt = 1;
@@ -337,9 +348,10 @@ AnimCursorCreate(CursorPtr *cursors, CARD32 *deltas, int ncursor,
     ac->timer = TimerSet(NULL, 0, 0, AnimCurTimerNotify, NULL);
 
     /* security creation/labeling check */
-    if (ac->timer)
-        rc = XaceHookResourceAccess(client, cid, X11_RESTYPE_CURSOR, pCursor,
-                      X11_RESTYPE_NONE, NULL, DixCreateAccess);
+    if (ac->timer) {
+      rc = XaceHookResourceAccess(client, cid, X11_RESTYPE_CURSOR, pCursor,
+                                  X11_RESTYPE_NONE, NULL, DixCreateAccess);
+    }
 
     if (rc != Success) {
         TimerFree(ac->timer);

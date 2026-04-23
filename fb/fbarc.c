@@ -126,10 +126,10 @@ fbPolyArc(DrawablePtr pDrawable, GCPtr pGC, int narcs, xArc * parcs)
                 wrapped = 0;
             }
 #endif
+        } else {
+          miZeroPolyArc(pDrawable, pGC, narcs, parcs);
         }
-        else
-            miZeroPolyArc(pDrawable, pGC, narcs, parcs);
+    } else {
+      miPolyArc(pDrawable, pGC, narcs, parcs);
     }
-    else
-        miPolyArc(pDrawable, pGC, narcs, parcs);
 }

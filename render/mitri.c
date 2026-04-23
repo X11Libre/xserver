@@ -46,14 +46,16 @@ miPointFixedBounds(int npoint, xPointFixed * points, BoxPtr bounds)
         INT16 y1 = xFixedToInt(points->y);
         INT16 y2 = xFixedToInt(xFixedCeil(points->y));
 
-        if (x1 < bounds->x1)
-            bounds->x1 = x1;
-        else if (x2 > bounds->x2)
-            bounds->x2 = x2;
-        if (y1 < bounds->y1)
-            bounds->y1 = y1;
-        else if (y2 > bounds->y2)
-            bounds->y2 = y2;
+        if (x1 < bounds->x1) {
+          bounds->x1 = x1;
+        } else if (x2 > bounds->x2) {
+          bounds->x2 = x2;
+        }
+        if (y1 < bounds->y1) {
+          bounds->y1 = y1;
+        } else if (y2 > bounds->y2) {
+          bounds->y2 = y2;
+        }
         points++;
     }
 }

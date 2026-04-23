@@ -107,15 +107,18 @@ DetermineClientPid(struct _Client * client)
     LocalClientCredRec *lcc = NULL;
     pid_t pid = -1;
 
-    if (client == NULL)
-        return pid;
+    if (client == NULL) {
+      return pid;
+    }
 
-    if (client == serverClient)
-        return getpid();
+    if (client == serverClient) {
+      return getpid();
+    }
 
     if (GetLocalClientCreds(client, &lcc) != -1) {
-        if (lcc->fieldsSet & LCC_PID_SET)
-            pid = lcc->pid;
+      if (lcc->fieldsSet & LCC_PID_SET) {
+        pid = lcc->pid;
+      }
         FreeLocalClientCreds(lcc);
     }
 
@@ -152,13 +155,16 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
     int fd = 0;
 #endif
 
-    if (cmdname)
-        *cmdname = NULL;
-    if (cmdargs)
-        *cmdargs = NULL;
+    if (cmdname) {
+      *cmdname = NULL;
+    }
+    if (cmdargs) {
+      *cmdargs = NULL;
+    }
 
-    if (pid == -1)
-        return;
+    if (pid == -1) {
+      return;
+    }
 
 #if defined (__APPLE__)
     {
@@ -354,22 +360,25 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 
     /* Check if /proc/pid/cmdline exists. It's not supported on all
      * operating systems. */
-    if (snprintf(path, sizeof(path), "/proc/%d/cmdline", pid) < 0)
-        return;
+    if (snprintf(path, sizeof(path), "/proc/%d/cmdline", pid) < 0) {
+      return;
+    }
     fd = open(path, O_RDONLY);
-    if (fd < 0)
+    if (fd < 0) {
 #ifdef __sun
         goto fallback;
 #else
-        return;
+      return;
+    }
 #endif
 
     /* Read the contents of /proc/pid/cmdline. It should contain the
      * process name and arguments. */
     totsize = read(fd, path, sizeof(path));
     close(fd);
-    if (totsize <= 0)
-        return;
+    if (totsize <= 0) {
+      return;
+    }
     path[totsize - 1] = '\0';
 
     /* Construct the process name without arguments. */
@@ -383,8 +392,9 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
         int argsize = totsize - cmdsize;
         char *args = NULL;
 
-        if (argsize > 0)
-            args = calloc(1, argsize);
+        if (argsize > 0) {
+          args = calloc(1, argsize);
+        }
         if (args) {
             int i = 0;
 
@@ -451,18 +461,21 @@ void
 ReserveClientIds(struct _Client *client)
 {
 #ifdef CLIENTIDS
-    if (client == NULL)
-        return;
+  if (client == NULL) {
+    return;
+  }
 
     assert(!client->clientIds);
     client->clientIds = calloc(1, sizeof(struct _ClientId));
-    if (!client->clientIds)
-        return;
+    if (!client->clientIds) {
+      return;
+    }
 
     client->clientIds->pid = DetermineClientPid(client);
-    if (client->clientIds->pid != -1)
-        DetermineClientCmd(client->clientIds->pid, &client->clientIds->cmdname,
-                           &client->clientIds->cmdargs);
+    if (client->clientIds->pid != -1) {
+      DetermineClientCmd(client->clientIds->pid, &client->clientIds->cmdname,
+                         &client->clientIds->cmdargs);
+    }
 
     DebugF("client(%lx): Reserved pid(%d).\n",
            (unsigned long) client->clientAsMask, client->clientIds->pid);
@@ -483,11 +496,13 @@ void
 ReleaseClientIds(struct _Client *client)
 {
 #ifdef CLIENTIDS
-    if (client == NULL)
-        return;
+  if (client == NULL) {
+    return;
+  }
 
-    if (!client->clientIds)
-        return;
+  if (!client->clientIds) {
+    return;
+  }
 
     DebugF("client(%lx): Released pid(%d).\n",
            (unsigned long) client->clientAsMask, client->clientIds->pid);
@@ -518,11 +533,13 @@ ReleaseClientIds(struct _Client *client)
 pid_t
 GetClientPid(struct _Client *client)
 {
-    if (client == NULL)
-        return -1;
+  if (client == NULL) {
+    return -1;
+  }
 
-    if (!client->clientIds)
-        return -1;
+  if (!client->clientIds) {
+    return -1;
+  }
 
     return client->clientIds->pid;
 }
@@ -544,11 +561,13 @@ GetClientPid(struct _Client *client)
 const char *
 GetClientCmdName(struct _Client *client)
 {
-    if (client == NULL)
-        return NULL;
+  if (client == NULL) {
+    return NULL;
+  }
 
-    if (!client->clientIds)
-        return NULL;
+  if (!client->clientIds) {
+    return NULL;
+  }
 
     return client->clientIds->cmdname;
 }
@@ -570,11 +589,13 @@ GetClientCmdName(struct _Client *client)
 const char *
 GetClientCmdArgs(struct _Client *client)
 {
-    if (client == NULL)
-        return NULL;
+  if (client == NULL) {
+    return NULL;
+  }
 
-    if (!client->clientIds)
-        return NULL;
+  if (!client->clientIds) {
+    return NULL;
+  }
 
     return client->clientIds->cmdargs;
 }

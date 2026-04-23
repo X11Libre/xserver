@@ -53,10 +53,12 @@ ProcXISetFocus(ClientPtr client)
     int ret;
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixSetFocusAccess);
-    if (ret != Success)
-        return ret;
-    if (!dev->focus)
-        return BadDevice;
+    if (ret != Success) {
+      return ret;
+    }
+    if (!dev->focus) {
+      return BadDevice;
+    }
 
     return SetInputFocus(client, dev, stuff->focus, RevertToParent,
                          stuff->time, TRUE);
@@ -72,23 +74,26 @@ ProcXIGetFocus(ClientPtr client)
     int ret;
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetFocusAccess);
-    if (ret != Success)
-        return ret;
-    if (!dev->focus)
-        return BadDevice;
+    if (ret != Success) {
+      return ret;
+    }
+    if (!dev->focus) {
+      return BadDevice;
+    }
 
     xXIGetFocusReply reply = {
         .RepType = X_XIGetFocus,
     };
 
-    if (dev->focus->win == NoneWin)
-        reply.focus = None;
-    else if (dev->focus->win == PointerRootWin)
-        reply.focus = PointerRoot;
-    else if (dev->focus->win == FollowKeyboardWin)
-        reply.focus = FollowKeyboard;
-    else
-        reply.focus = dev->focus->win->drawable.id;
+    if (dev->focus->win == NoneWin) {
+      reply.focus = None;
+    } else if (dev->focus->win == PointerRootWin) {
+      reply.focus = PointerRoot;
+    } else if (dev->focus->win == FollowKeyboardWin) {
+      reply.focus = FollowKeyboard;
+    } else {
+      reply.focus = dev->focus->win->drawable.id;
+    }
 
     if (client->swapped) {
         swapl(&reply.focus);

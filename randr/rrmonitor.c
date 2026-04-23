@@ -48,9 +48,11 @@ RRMonitorCrtcPrimary(RRCrtcPtr crtc)
     rrScrPrivPtr pScrPriv = rrGetScrPriv(screen);
     int o;
 
-    for (o = 0; o < crtc->numOutputs; o++)
-        if (crtc->outputs[o] == pScrPriv->primaryOutput)
-            return TRUE;
+    for (o = 0; o < crtc->numOutputs; o++) {
+      if (crtc->outputs[o] == pScrPriv->primaryOutput) {
+        return TRUE;
+      }
+    }
     return FALSE;
 }
 
@@ -98,10 +100,12 @@ RRMonitorSetFromServer(RRCrtcPtr crtc, RRMonitorPtr monitor)
     monitor->pScreen = crtc->pScreen;
     monitor->numOutputs = crtc->numOutputs;
     monitor->outputs = calloc(crtc->numOutputs, sizeof(RROutput));
-    if (!monitor->outputs)
-        return FALSE;
-    for (o = 0; o < crtc->numOutputs; o++)
-        monitor->outputs[o] = crtc->outputs[o]->id;
+    if (!monitor->outputs) {
+      return FALSE;
+    }
+    for (o = 0; o < crtc->numOutputs; o++) {
+      monitor->outputs[o] = crtc->outputs[o]->id;
+    }
     monitor->primary = RRMonitorCrtcPrimary(crtc);
     monitor->automatic = TRUE;
     RRMonitorGetCrtcGeometry(crtc, &monitor->geometry);
@@ -135,15 +139,19 @@ RRMonitorGetGeometry(RRMonitorPtr monitor, RRMonitorGeometryPtr geometry)
 
             for (c = 0; !in_use && c < pScrPriv->numCrtcs; c++) {
                 crtc = pScrPriv->crtcs[c];
-                if (!crtc->mode)
-                    continue;
-                for (co = 0; !in_use && co < crtc->numOutputs; co++)
-                    if (monitor->outputs[o] == crtc->outputs[co]->id)
-                        in_use = TRUE;
+                if (!crtc->mode) {
+                  continue;
+                }
+                for (co = 0; !in_use && co < crtc->numOutputs; co++) {
+                  if (monitor->outputs[o] == crtc->outputs[co]->id) {
+                    in_use = TRUE;
+                  }
+                }
             }
 
-            if (!in_use)
-                continue;
+            if (!in_use) {
+              continue;
+            }
 
             RRMonitorGetCrtcGeometry(crtc, &this);
 
@@ -176,8 +184,9 @@ RRMonitorSetFromClient(RRMonitorPtr client_monitor, RRMonitorPtr monitor)
     monitor->pScreen = client_monitor->pScreen;
     monitor->numOutputs = client_monitor->numOutputs;
     monitor->outputs = calloc(client_monitor->numOutputs, sizeof (RROutput));
-    if (!monitor->outputs && client_monitor->numOutputs)
-        return FALSE;
+    if (!monitor->outputs && client_monitor->numOutputs) {
+      return FALSE;
+    }
     memcpy(monitor->outputs, client_monitor->outputs, client_monitor->numOutputs * sizeof (RROutput));
     monitor->primary = client_monitor->primary;
     monitor->automatic = client_monitor->automatic;
@@ -202,16 +211,18 @@ RRMonitorInitList(ScreenPtr screen, RRMonitorListPtr mon_list, Bool get_active)
     int                 numCrtcs;
     ScreenPtr           secondary;
 
-    if (!RRGetInfo(screen, FALSE))
-        return FALSE;
+    if (!RRGetInfo(screen, FALSE)) {
+      return FALSE;
+    }
 
     /* Count the number of crtcs in this and any secondary screens */
     numCrtcs = pScrPriv->numCrtcs;
     xorg_list_for_each_entry(secondary, &screen->secondary_list, secondary_head) {
         rrScrPrivPtr pSecondaryPriv;
 
-        if (!secondary->is_output_secondary)
-            continue;
+        if (!secondary->is_output_secondary) {
+          continue;
+        }
 
         pSecondaryPriv = rrGetScrPriv(secondary);
         numCrtcs += pSecondaryPriv->numCrtcs;
@@ -219,26 +230,30 @@ RRMonitorInitList(ScreenPtr screen, RRMonitorListPtr mon_list, Bool get_active)
     mon_list->num_crtcs = numCrtcs;
 
     mon_list->server_crtc = calloc(numCrtcs * 2, sizeof (RRCrtcPtr));
-    if (!mon_list->server_crtc)
-        return FALSE;
+    if (!mon_list->server_crtc) {
+      return FALSE;
+    }
 
     /* Collect pointers to all of the active crtcs */
     c = 0;
     for (sc = 0; sc < pScrPriv->numCrtcs; sc++, c++) {
-        if (pScrPriv->crtcs[sc]->mode != NULL)
-            mon_list->server_crtc[c] = pScrPriv->crtcs[sc];
+      if (pScrPriv->crtcs[sc]->mode != NULL) {
+        mon_list->server_crtc[c] = pScrPriv->crtcs[sc];
+      }
     }
 
     xorg_list_for_each_entry(secondary, &screen->secondary_list, secondary_head) {
         rrScrPrivPtr pSecondaryPriv;
 
-        if (!secondary->is_output_secondary)
-            continue;
+        if (!secondary->is_output_secondary) {
+          continue;
+        }
 
         pSecondaryPriv = rrGetScrPriv(secondary);
         for (sc = 0; sc < pSecondaryPriv->numCrtcs; sc++, c++) {
-            if (pSecondaryPriv->crtcs[sc]->mode != NULL)
-                mon_list->server_crtc[c] = pSecondaryPriv->crtcs[sc];
+          if (pSecondaryPriv->crtcs[sc]->mode != NULL) {
+            mon_list->server_crtc[c] = pSecondaryPriv->crtcs[sc];
+          }
         }
     }
 
@@ -261,18 +276,20 @@ RRMonitorInitList(ScreenPtr screen, RRMonitorListPtr mon_list, Bool get_active)
                 continue;
             }
         }
-        if (monitor->primary && mon_list->client_primary == -1)
-            mon_list->client_primary = m;
+        if (monitor->primary && mon_list->client_primary == -1) {
+          mon_list->client_primary = m;
+        }
         for (o = 0; o < monitor->numOutputs; o++) {
             for (c = 0; c < numCrtcs; c++) {
                 RRCrtcPtr       crtc = mon_list->server_crtc[c];
                 if (crtc) {
                     int             co;
-                    for (co = 0; co < crtc->numOutputs; co++)
-                        if (crtc->outputs[co]->id == monitor->outputs[o]) {
-                            mon_list->server_crtc[c] = NULL;
-                            break;
-                        }
+                    for (co = 0; co < crtc->numOutputs; co++) {
+                      if (crtc->outputs[co]->id == monitor->outputs[o]) {
+                        mon_list->server_crtc[c] = NULL;
+                        break;
+                      }
+                    }
                 }
             }
         }
@@ -288,13 +305,15 @@ RRMonitorInitList(ScreenPtr screen, RRMonitorListPtr mon_list, Bool get_active)
     for (c = 0; c < mon_list->num_crtcs; c++) {
         RRCrtcPtr       crtc = mon_list->server_crtc[c];
 
-        if (!crtc)
-            continue;
+        if (!crtc) {
+          continue;
+        }
 
         mon_list->num_server++;
 
-        if (RRMonitorCrtcPrimary(crtc) && mon_list->server_primary == -1)
-            mon_list->server_primary = c;
+        if (RRMonitorCrtcPrimary(crtc) && mon_list->server_primary == -1) {
+          mon_list->server_primary = c;
+        }
     }
     return TRUE;
 }
@@ -319,11 +338,13 @@ RRMonitorMakeList(ScreenPtr screen, Bool get_active, RRMonitorPtr *monitors_ret,
     RRMonitorPtr        mon, monitors;
     Bool                has_primary = FALSE;
 
-    if (!pScrPriv)
-        return FALSE;
+    if (!pScrPriv) {
+      return FALSE;
+    }
 
-    if (!RRMonitorInitList(screen, &list, get_active))
-        return FALSE;
+    if (!RRMonitorInitList(screen, &list, get_active)) {
+      return FALSE;
+    }
 
     monitors = calloc(list.num_client + list.num_server, sizeof (RRMonitorRec));
     if (!monitors) {
@@ -346,8 +367,9 @@ RRMonitorMakeList(ScreenPtr screen, Bool get_active, RRMonitorPtr *monitors_ret,
     /* Fill in the client-defined monitors next
      */
     for (m = 0; m < pScrPriv->numMonitors; m++) {
-        if (m == list.client_primary)
-            continue;
+      if (m == list.client_primary) {
+        continue;
+      }
         if (get_active) {
             RRMonitorGeometryRec geom;
 
@@ -358,10 +380,11 @@ RRMonitorMakeList(ScreenPtr screen, Bool get_active, RRMonitorPtr *monitors_ret,
             }
         }
         RRMonitorSetFromClient(pScrPriv->monitors[m], mon);
-        if (has_primary)
-            mon->primary = FALSE;
-        else if (mon->primary)
-            has_primary = TRUE;
+        if (has_primary) {
+          mon->primary = FALSE;
+        } else if (mon->primary) {
+          has_primary = TRUE;
+        }
         mon++;
     }
 
@@ -369,17 +392,20 @@ RRMonitorMakeList(ScreenPtr screen, Bool get_active, RRMonitorPtr *monitors_ret,
      */
     for (c = 0; c < list.num_crtcs; c++) {
         RRCrtcPtr crtc = list.server_crtc[c];
-        if (c == list.server_primary && list.client_primary < 0)
-            continue;
+        if (c == list.server_primary && list.client_primary < 0) {
+          continue;
+        }
 
-        if (!list.server_crtc[c])
-            continue;
+        if (!list.server_crtc[c]) {
+          continue;
+        }
 
         RRMonitorSetFromServer(crtc, mon);
-        if (has_primary)
-            mon->primary = FALSE;
-        else if (mon->primary)
-            has_primary = TRUE;
+        if (has_primary) {
+          mon->primary = FALSE;
+        } else if (mon->primary) {
+          has_primary = TRUE;
+        }
         mon++;
     }
 
@@ -395,8 +421,9 @@ RRMonitorCountList(ScreenPtr screen)
     RRMonitorListRec    list;
     int                 nmon;
 
-    if (!RRMonitorInitList(screen, &list, FALSE))
-        return -1;
+    if (!RRMonitorInitList(screen, &list, FALSE)) {
+      return -1;
+    }
     nmon = list.num_client + list.num_server;
     RRMonitorFiniList(&list);
     return nmon;
@@ -414,8 +441,9 @@ RRMonitorAlloc(int noutput)
     RRMonitorPtr        monitor;
 
     monitor = calloc(1, sizeof (RRMonitorRec) + noutput * sizeof (RROutput));
-    if (!monitor)
-        return NULL;
+    if (!monitor) {
+      return NULL;
+    }
     monitor->numOutputs = noutput;
     monitor->outputs = (RROutput *) (monitor + 1);
     return monitor;
@@ -458,8 +486,9 @@ RRMonitorMatchesOutputName(ScreenPtr screen, Atom name)
     for (o = 0; o < pScrPriv->numOutputs; o++) {
         RROutputPtr     output = pScrPriv->outputs[o];
 
-        if (output->nameLength == len && !memcmp(output->name, str, len))
-            return TRUE;
+        if (output->nameLength == len && !memcmp(output->name, str, len)) {
+          return TRUE;
+        }
     }
     return FALSE;
 }
@@ -472,8 +501,9 @@ RRMonitorAdd(ClientPtr client, ScreenPtr screen, RRMonitorPtr monitor)
     ScreenPtr           secondary;
     RRMonitorPtr        *monitors;
 
-    if (!pScrPriv)
-        return BadAlloc;
+    if (!pScrPriv) {
+      return BadAlloc;
+    }
 
     /* 	'name' must not match the name of any Output on the screen, or
      *	a Value error results.
@@ -485,8 +515,9 @@ RRMonitorAdd(ClientPtr client, ScreenPtr screen, RRMonitorPtr monitor)
     }
 
     xorg_list_for_each_entry(secondary, &screen->secondary_list, secondary_head) {
-        if (!secondary->is_output_secondary)
-            continue;
+      if (!secondary->is_output_secondary) {
+        continue;
+      }
 
         if (RRMonitorMatchesOutputName(secondary, monitor->name)) {
             client->errorValue = monitor->name;
@@ -498,15 +529,16 @@ RRMonitorAdd(ClientPtr client, ScreenPtr screen, RRMonitorPtr monitor)
      * removing matching monitors as it may fail, and the request
      * needs to not have any side-effects on failure
      */
-    if (pScrPriv->numMonitors)
-        monitors = reallocarray(pScrPriv->monitors,
-                                pScrPriv->numMonitors + 1,
-                                sizeof (RRMonitorPtr));
-    else
-        monitors = calloc(1, sizeof(RRMonitorPtr));
+    if (pScrPriv->numMonitors) {
+      monitors = reallocarray(pScrPriv->monitors, pScrPriv->numMonitors + 1,
+                              sizeof(RRMonitorPtr));
+    } else {
+      monitors = calloc(1, sizeof(RRMonitorPtr));
+    }
 
-    if (!monitors)
-        return BadAlloc;
+    if (!monitors) {
+      return BadAlloc;
+    }
 
     pScrPriv->monitors = monitors;
 
@@ -521,8 +553,9 @@ RRMonitorAdd(ClientPtr client, ScreenPtr screen, RRMonitorPtr monitor)
             continue;
         }
 
-        if (monitor->primary)
-            existing->primary = FALSE;
+        if (monitor->primary) {
+          existing->primary = FALSE;
+        }
     }
 
     /* Add the new one to the list
@@ -537,8 +570,9 @@ RRMonitorFreeList(RRMonitorPtr monitors, int nmon)
 {
     int m;
 
-    for (m = 0; m < nmon; m++)
-        free(monitors[m].outputs);
+    for (m = 0; m < nmon; m++) {
+      free(monitors[m].outputs);
+    }
     free(monitors);
 }
 
@@ -547,8 +581,9 @@ RRMonitorInit(ScreenPtr screen)
 {
     rrScrPrivPtr pScrPriv = rrGetScrPriv(screen);
 
-    if (!pScrPriv)
-        return;
+    if (!pScrPriv) {
+      return;
+    }
 
     pScrPriv->numMonitors = 0;
     pScrPriv->monitors = NULL;
@@ -560,11 +595,13 @@ RRMonitorClose(ScreenPtr screen)
     rrScrPrivPtr        pScrPriv = rrGetScrPriv(screen);
     int                 m;
 
-    if (!pScrPriv)
-        return;
+    if (!pScrPriv) {
+      return;
+    }
 
-    for (m = 0; m < pScrPriv->numMonitors; m++)
-        RRMonitorFree(pScrPriv->monitors[m]);
+    for (m = 0; m < pScrPriv->numMonitors; m++) {
+      RRMonitorFree(pScrPriv->monitors[m]);
+    }
     free(pScrPriv->monitors);
     pScrPriv->monitors = NULL;
     pScrPriv->numMonitors = 0;
@@ -585,8 +622,9 @@ ProcRRGetMonitors(ClientPtr client)
     REQUEST(xRRGetMonitorsReq);
     REQUEST_SIZE_MATCH(xRRGetMonitorsReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr           window;
     ScreenPtr           screen;
@@ -596,13 +634,15 @@ ProcRRGetMonitors(ClientPtr client)
     Bool                get_active;
 
     r = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
-    if (r != Success)
-        return r;
+    if (r != Success) {
+      return r;
+    }
     screen = window->drawable.pScreen;
 
     get_active = stuff->get_active;
-    if (!RRMonitorMakeList(screen, get_active, &monitors, &nmonitors))
-        return BadAlloc;
+    if (!RRMonitorMakeList(screen, get_active, &monitors, &nmonitors)) {
+      return BadAlloc;
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     size_t noutputs = 0;
@@ -678,21 +718,26 @@ ProcRRSetMonitor(ClientPtr client)
     RRMonitorPtr        monitor;
     int                 r;
 
-    if (stuff->monitor.noutput != client->req_len - (sizeof(xRRSetMonitorReq) >> 2))
-        return BadLength;
+    if (stuff->monitor.noutput !=
+        client->req_len - (sizeof(xRRSetMonitorReq) >> 2)) {
+      return BadLength;
+    }
 
     r = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
-    if (r != Success)
-        return r;
+    if (r != Success) {
+      return r;
+    }
     screen = window->drawable.pScreen;
 
-    if (!ValidAtom(stuff->monitor.name))
-        return BadAtom;
+    if (!ValidAtom(stuff->monitor.name)) {
+      return BadAtom;
+    }
 
     /* Allocate the new monitor */
     monitor = RRMonitorAlloc(stuff->monitor.noutput);
-    if (!monitor)
-        return BadAlloc;
+    if (!monitor) {
+      return BadAlloc;
+    }
 
     /* Fill in the bits from the request */
     monitor->pScreen = screen;
@@ -708,10 +753,11 @@ ProcRRSetMonitor(ClientPtr client)
     monitor->geometry.mmHeight = stuff->monitor.heightInMillimeters;
 
     r = RRMonitorAdd(client, screen, monitor);
-    if (r == Success)
-        RRSendConfigNotify(screen);
-    else
-        RRMonitorFree(monitor);
+    if (r == Success) {
+      RRSendConfigNotify(screen);
+    } else {
+      RRMonitorFree(monitor);
+    }
     return r;
 }
 
@@ -731,8 +777,9 @@ ProcRRDeleteMonitor(ClientPtr client)
     int                 r;
 
     r = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
-    if (r != Success)
-        return r;
+    if (r != Success) {
+      return r;
+    }
     screen = window->drawable.pScreen;
 
     if (!ValidAtom(stuff->name)) {
@@ -741,7 +788,8 @@ ProcRRDeleteMonitor(ClientPtr client)
     }
 
     r = RRMonitorDelete(client, screen, stuff->name);
-    if (r == Success)
-        RRSendConfigNotify(screen);
+    if (r == Success) {
+      RRSendConfigNotify(screen);
+    }
     return r;
 }

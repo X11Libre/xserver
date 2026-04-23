@@ -89,8 +89,9 @@ RRLeaseAlloc(ScreenPtr screen, RRLease lid, int numCrtcs, int numOutputs)
                    sizeof(RRLeaseRec) +
                    numCrtcs * sizeof (RRCrtcPtr) +
                    numOutputs * sizeof(RROutputPtr));
-    if (!lease)
-        return NULL;
+    if (!lease) {
+      return NULL;
+    }
     lease->screen = screen;
     xorg_list_init(&lease->list);
     lease->id = lid;
@@ -114,9 +115,11 @@ RRCrtcIsLeased(RRCrtcPtr crtc)
     int c;
 
     xorg_list_for_each_entry(lease, &scr_priv->leases, list) {
-        for (c = 0; c < lease->numCrtcs; c++)
-            if (lease->crtcs[c] == crtc)
-                return TRUE;
+      for (c = 0; c < lease->numCrtcs; c++) {
+        if (lease->crtcs[c] == crtc) {
+          return TRUE;
+        }
+      }
     }
     return FALSE;
 }
@@ -133,9 +136,11 @@ RROutputIsLeased(RROutputPtr output)
     int o;
 
     xorg_list_for_each_entry(lease, &scr_priv->leases, list) {
-        for (o = 0; o < lease->numOutputs; o++)
-            if (lease->outputs[o] == output)
-                return TRUE;
+      for (o = 0; o < lease->numOutputs; o++) {
+        if (lease->outputs[o] == output) {
+          return TRUE;
+        }
+      }
     }
     return FALSE;
 }
@@ -150,11 +155,13 @@ void
 RRLeaseTerminated(RRLeasePtr lease)
 {
     /* Notify clients with events, but only if this isn't during lease creation */
-    if (lease->state == RRLeaseRunning)
-        RRLeaseChangeState(lease, RRLeaseTerminating, RRLeaseTerminating);
+    if (lease->state == RRLeaseRunning) {
+      RRLeaseChangeState(lease, RRLeaseTerminating, RRLeaseTerminating);
+    }
 
-    if (lease->id != None)
-        FreeResource(lease->id, X11_RESTYPE_NONE);
+    if (lease->id != None) {
+      FreeResource(lease->id, X11_RESTYPE_NONE);
+    }
 
     xorg_list_del(&lease->list);
 }
@@ -206,8 +213,9 @@ Bool
 RRLeaseInit(void)
 {
     RRLeaseType = CreateNewResourceType(RRLeaseDestroyResource, "LEASE");
-    if (!RRLeaseType)
-        return FALSE;
+    if (!RRLeaseType) {
+      return FALSE;
+    }
     return TRUE;
 }
 
@@ -238,38 +246,44 @@ ProcRRCreateLease(ClientPtr client)
     LEGAL_NEW_RESOURCE(stuff->lid, client);
 
     rc = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     len = client->req_len - bytes_to_int32(sizeof(xRRCreateLeaseReq));
 
-    if (len != stuff->nCrtcs + stuff->nOutputs)
-        return BadLength;
+    if (len != stuff->nCrtcs + stuff->nOutputs) {
+      return BadLength;
+    }
 
     screen = window->drawable.pScreen;
     scr_priv = rrGetScrPriv(screen);
 
-    if (!scr_priv)
-        return BadMatch;
+    if (!scr_priv) {
+      return BadMatch;
+    }
 
-    if (!scr_priv->rrCreateLease && !scr_priv->rrRequestLease)
-        return BadMatch;
+    if (!scr_priv->rrCreateLease && !scr_priv->rrRequestLease) {
+      return BadMatch;
+    }
 
     if (scr_priv->rrGetLease) {
         scr_priv->rrGetLease(client, screen, &lease, &fd);
         if (lease) {
-            if (fd >= 0)
-                goto leaseReturned;
-            else
-                goto bail_lease;
+          if (fd >= 0) {
+            goto leaseReturned;
+          } else {
+            goto bail_lease;
+          }
         }
     }
 
     /* Allocate a structure to hold all of the lease information */
 
     lease = RRLeaseAlloc(screen, stuff->lid, stuff->nCrtcs, stuff->nOutputs);
-    if (!lease)
-        return BadAlloc;
+    if (!lease) {
+      return BadAlloc;
+    }
 
     /* Look up all of the crtcs */
     crtcIds = (RRCrtc *) (stuff + 1);
@@ -316,14 +330,16 @@ ProcRRCreateLease(ClientPtr client)
 
     if (scr_priv->rrRequestLease) {
         rc = scr_priv->rrRequestLease(client, screen, lease);
-        if (rc == Success)
-            return Success;
-        else
-            goto bail_lease;
+        if (rc == Success) {
+          return Success;
+        } else {
+          goto bail_lease;
+        }
     } else {
         rc = scr_priv->rrCreateLease(screen, lease, &fd);
-        if (rc != Success)
-            goto bail_lease;
+        if (rc != Success) {
+          goto bail_lease;
+        }
     }
 
 leaseReturned:
@@ -359,17 +375,19 @@ ProcRRFreeLease(ClientPtr client)
     REQUEST(xRRFreeLeaseReq);
     REQUEST_SIZE_MATCH(xRRFreeLeaseReq);
 
-    if (client->swapped)
-        swapl(&stuff->lid);
+    if (client->swapped) {
+      swapl(&stuff->lid);
+    }
 
     RRLeasePtr lease;
     VERIFY_RR_LEASE(stuff->lid, lease, DixDestroyAccess);
 
-    if (stuff->terminate)
-        RRTerminateLease(lease);
-    else
-        /* Get rid of the resource database entry */
-        FreeResource(stuff->lid, X11_RESTYPE_NONE);
+    if (stuff->terminate) {
+      RRTerminateLease(lease);
+    } else {
+      /* Get rid of the resource database entry */
+      FreeResource(stuff->lid, X11_RESTYPE_NONE);
+    }
 
     return Success;
 }

@@ -89,8 +89,9 @@ ProcXvQueryAdaptors(ClientPtr client)
     XvScreenPtr pxvs;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     pScreen = pWin->drawable.pScreen;
     pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
@@ -227,8 +228,9 @@ ProcXvPutVideo(ClientPtr client)
     X_REQUEST_FIELD_CARD16(drw_h);
 
 #ifdef XINERAMA
-    if (xvUseXinerama)
-        return XineramaXvPutVideo(client);
+    if (xvUseXinerama) {
+      return XineramaXvPutVideo(client);
+    }
 #endif
     return SingleXvPutVideo(client);
 }
@@ -283,8 +285,9 @@ ProcXvPutStill(ClientPtr client)
     X_REQUEST_FIELD_CARD16(drw_h);
 
 #ifdef XINERAMA
-    if (xvUseXinerama)
-        return XineramaXvPutStill(client);
+    if (xvUseXinerama) {
+      return XineramaXvPutStill(client);
+    }
 #endif
     return SingleXvPutStill(client);
 }
@@ -380,8 +383,9 @@ ProcXvSelectVideoNotify(ClientPtr client)
 
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixReceiveAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     return XvdiSelectVideoNotify(client, pDraw, stuff->onoff);
 }
@@ -447,8 +451,9 @@ SingleXvStopVideo(ClientPtr client)
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
     ret = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixWriteAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     return XvdiStopVideo(client, pPort, pDraw);
 }
@@ -465,8 +470,9 @@ ProcXvStopVideo(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drawable);
 
 #ifdef XINERAMA
-    if (xvUseXinerama)
-        return XineramaXvStopVideo(client);
+    if (xvUseXinerama) {
+      return XineramaXvStopVideo(client);
+    }
 #endif
     return SingleXvStopVideo(client);
 }
@@ -489,10 +495,11 @@ SingleXvSetPortAttribute(ClientPtr client)
     status =
         XvdiSetPortAttribute(client, pPort, stuff->attribute, stuff->value);
 
-    if (status == BadMatch)
-        client->errorValue = stuff->attribute;
-    else
-        client->errorValue = stuff->value;
+    if (status == BadMatch) {
+      client->errorValue = stuff->attribute;
+    } else {
+      client->errorValue = stuff->value;
+    }
 
     return status;
 }
@@ -510,8 +517,9 @@ ProcXvSetPortAttribute(ClientPtr client)
     X_REQUEST_FIELD_CARD32(value);
 
 #ifdef XINERAMA
-    if (xvUseXinerama)
-        return XineramaXvSetPortAttribute(client);
+    if (xvUseXinerama) {
+      return XineramaXvSetPortAttribute(client);
+    }
 #endif
     return SingleXvSetPortAttribute(client);
 }
@@ -655,8 +663,9 @@ SingleXvPutImage(ClientPtr client)
         }
     }
 
-    if (!pImage)
-        return BadMatch;
+    if (!pImage) {
+      return BadMatch;
+    }
 
     width = stuff->width;
     height = stuff->height;
@@ -665,11 +674,13 @@ SingleXvPutImage(ClientPtr client)
     size += sizeof(xvPutImageReq);
     size = bytes_to_int32(size);
 
-    if ((width < stuff->width) || (height < stuff->height))
-        return BadValue;
+    if ((width < stuff->width) || (height < stuff->height)) {
+      return BadValue;
+    }
 
-    if (client->req_len < size)
-        return BadLength;
+    if (client->req_len < size) {
+      return BadLength;
+    }
 
     return XvdiPutImage(client, pDraw, pPort, pGC, stuff->src_x, stuff->src_y,
                         stuff->src_w, stuff->src_h, stuff->drw_x, stuff->drw_y,
@@ -703,8 +714,9 @@ ProcXvPutImage(ClientPtr client)
     X_REQUEST_FIELD_CARD16(height);
 
 #ifdef XINERAMA
-    if (xvUseXinerama)
-        return XineramaXvPutImage(client);
+    if (xvUseXinerama) {
+      return XineramaXvPutImage(client);
+    }
 #endif
     return SingleXvPutImage(client);
 }
@@ -745,24 +757,28 @@ SingleXvShmPutImage(ClientPtr client)
         }
     }
 
-    if (!pImage)
-        return BadMatch;
+    if (!pImage) {
+      return BadMatch;
+    }
 
     status = dixLookupResourceByType((void **) &shmdesc, stuff->shmseg,
                                      ShmSegType, serverClient, DixReadAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
     width = stuff->width;
     height = stuff->height;
     size_needed = (*pPort->pAdaptor->ddQueryImageAttributes) (pPort, pImage,
                                                               &width, &height,
                                                               NULL, NULL);
-    if ((size_needed + stuff->offset) > shmdesc->size)
-        return BadAccess;
+    if ((size_needed + stuff->offset) > shmdesc->size) {
+      return BadAccess;
+    }
 
-    if ((width < stuff->width) || (height < stuff->height))
-        return BadValue;
+    if ((width < stuff->width) || (height < stuff->height)) {
+      return BadValue;
+    }
 
     status = XvdiPutImage(client, pDraw, pPort, pGC, stuff->src_x, stuff->src_y,
                           stuff->src_w, stuff->src_h, stuff->drw_x,
@@ -814,8 +830,9 @@ ProcXvShmPutImage(ClientPtr client)
     X_REQUEST_FIELD_CARD16(height);
 
 #ifdef XINERAMA
-    if (xvUseXinerama)
-        return XineramaXvShmPutImage(client);
+    if (xvUseXinerama) {
+      return XineramaXvShmPutImage(client);
+    }
 #endif
     return SingleXvShmPutImage(client);
 #else
@@ -849,12 +866,14 @@ ProcXvQueryImageAttributes(ClientPtr client)
     }
 
 #ifdef XvMCExtension
-    if (!pImage)
-        pImage = XvMCFindXvImage(pPort, stuff->id);
+    if (!pImage) {
+      pImage = XvMCFindXvImage(pPort, stuff->id);
+    }
 #endif
 
-    if (!pImage)
-        return BadMatch;
+    if (!pImage) {
+      return BadMatch;
+    }
 
     num_planes = pImage->num_planes;
 
@@ -863,8 +882,9 @@ ProcXvQueryImageAttributes(ClientPtr client)
     /* allocating for `offsets` as well as `pitches` in one block */
     /* both having CARD32 * num_planes (actually int32_t put into CARD32) */
     int *offsets = x_rpcbuf_reserve(&rpcbuf, 2 * num_planes * sizeof(int));
-    if (!offsets)
-        return BadAlloc;
+    if (!offsets) {
+      return BadAlloc;
+    }
     int *pitches = offsets + num_planes;
 
     width = stuff->width;
@@ -942,9 +962,13 @@ ProcXvListImageFormats(ClientPtr client)
     }
 
     /* use rpc.wpos here, in order to get how much we've really written */
-    if (rpcbuf.wpos != (pPort->pAdaptor->nImages*sz_xvImageFormatInfo))
-        LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %llu but shoud be %d\n",
-                   (long long unsigned)rpcbuf.wpos, (pPort->pAdaptor->nImages*sz_xvImageFormatInfo));
+    if (rpcbuf.wpos != (pPort->pAdaptor->nImages * sz_xvImageFormatInfo)) {
+      LogMessage(X_WARNING,
+                 "ProcXvListImageFormats() payload_len mismatch: %llu but "
+                 "shoud be %d\n",
+                 (long long unsigned)rpcbuf.wpos,
+                 (pPort->pAdaptor->nImages * sz_xvImageFormatInfo));
+    }
 
     xvListImageFormatsReply reply = {
         .num_formats = pPort->pAdaptor->nImages,
@@ -1021,13 +1045,15 @@ XineramaXvStopVideo(ClientPtr client)
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
-    if (result != Success)
-        return (result == BadValue) ? BadDrawable : result;
+    if (result != Success) {
+      return (result == BadValue) ? BadDrawable : result;
+    }
 
     result = dixLookupResourceByType((void **) &port, stuff->port,
                                      XvXRTPort, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         if (port->info[walkScreenIdx].id) {
@@ -1049,8 +1075,9 @@ XineramaXvSetPortAttribute(ClientPtr client)
 
     result = dixLookupResourceByType((void **) &port, stuff->port,
                                      XvXRTPort, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         if (port->info[walkScreenIdx].id) {
@@ -1076,18 +1103,21 @@ XineramaXvShmPutImage(ClientPtr client)
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
-    if (result != Success)
-        return (result == BadValue) ? BadDrawable : result;
+    if (result != Success) {
+      return (result == BadValue) ? BadDrawable : result;
+    }
 
     result = dixLookupResourceByType((void **) &gc, stuff->gc,
                                      XRT_GC, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     result = dixLookupResourceByType((void **) &port, stuff->port,
                                      XvXRTPort, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     isRoot = (draw->type == XRT_WINDOW) && draw->u.win.root;
 
@@ -1127,18 +1157,21 @@ XineramaXvPutImage(ClientPtr client)
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
-    if (result != Success)
-        return (result == BadValue) ? BadDrawable : result;
+    if (result != Success) {
+      return (result == BadValue) ? BadDrawable : result;
+    }
 
     result = dixLookupResourceByType((void **) &gc, stuff->gc,
                                      XRT_GC, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     result = dixLookupResourceByType((void **) &port, stuff->port,
                                      XvXRTPort, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     isRoot = (draw->type == XRT_WINDOW) && draw->u.win.root;
 
@@ -1174,18 +1207,21 @@ XineramaXvPutVideo(ClientPtr client)
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
-    if (result != Success)
-        return (result == BadValue) ? BadDrawable : result;
+    if (result != Success) {
+      return (result == BadValue) ? BadDrawable : result;
+    }
 
     result = dixLookupResourceByType((void **) &gc, stuff->gc,
                                      XRT_GC, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     result = dixLookupResourceByType((void **) &port, stuff->port,
                                      XvXRTPort, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     isRoot = (draw->type == XRT_WINDOW) && draw->u.win.root;
 
@@ -1221,18 +1257,21 @@ XineramaXvPutStill(ClientPtr client)
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
-    if (result != Success)
-        return (result == BadValue) ? BadDrawable : result;
+    if (result != Success) {
+      return (result == BadValue) ? BadDrawable : result;
+    }
 
     result = dixLookupResourceByType((void **) &gc, stuff->gc,
                                      XRT_GC, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     result = dixLookupResourceByType((void **) &port, stuff->port,
                                      XvXRTPort, client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     isRoot = (draw->type == XRT_WINDOW) && draw->u.win.root;
 
@@ -1268,9 +1307,11 @@ hasOverlay(XvAdaptorPtr pAdapt)
 {
     int i;
 
-    for (i = 0; i < pAdapt->nAttributes; i++)
-        if (!strcmp(pAdapt->pAttributes[i].name, "XV_COLORKEY"))
-            return TRUE;
+    for (i = 0; i < pAdapt->nAttributes; i++) {
+      if (!strcmp(pAdapt->pAttributes[i].name, "XV_COLORKEY")) {
+        return TRUE;
+      }
+    }
     return FALSE;
 }
 
@@ -1281,35 +1322,40 @@ matchAdaptor(ScreenPtr pScreen, XvAdaptorPtr refAdapt, Bool isOverlay)
     XvScreenPtr xvsp =
         dixLookupPrivate(&pScreen->devPrivates, XvGetScreenKey());
     /* Do not try to go on if xv is not supported on this screen */
-    if (xvsp == NULL)
-        return NULL;
+    if (xvsp == NULL) {
+      return NULL;
+    }
 
     /* if the adaptor has the same name it's a perfect match */
     for (i = 0; i < xvsp->nAdaptors; i++) {
         XvAdaptorPtr pAdapt = xvsp->pAdaptors + i;
 
-        if (!strcmp(refAdapt->name, pAdapt->name))
-            return pAdapt;
+        if (!strcmp(refAdapt->name, pAdapt->name)) {
+          return pAdapt;
+        }
     }
 
     /* otherwise we only look for XvImage adaptors */
-    if (!isImageAdaptor(refAdapt))
-        return NULL;
+    if (!isImageAdaptor(refAdapt)) {
+      return NULL;
+    }
 
     /* prefer overlay/overlay non-overlay/non-overlay pairing */
     for (i = 0; i < xvsp->nAdaptors; i++) {
         XvAdaptorPtr pAdapt = xvsp->pAdaptors + i;
 
-        if (isImageAdaptor(pAdapt) && isOverlay == hasOverlay(pAdapt))
-            return pAdapt;
+        if (isImageAdaptor(pAdapt) && isOverlay == hasOverlay(pAdapt)) {
+          return pAdapt;
+        }
     }
 
     /* but we'll take any XvImage pairing if we can get it */
     for (i = 0; i < xvsp->nAdaptors; i++) {
         XvAdaptorPtr pAdapt = xvsp->pAdaptors + i;
 
-        if (isImageAdaptor(pAdapt))
-            return pAdapt;
+        if (isImageAdaptor(pAdapt)) {
+          return pAdapt;
+        }
     }
     return NULL;
 }
@@ -1324,16 +1370,18 @@ XineramifyXv(void)
 
     XvXRTPort = CreateNewResourceType(XineramaDeleteResource, "XvXRTPort");
 
-    if (!xvsp0 || !XvXRTPort)
-        return;
+    if (!xvsp0 || !XvXRTPort) {
+      return;
+    }
     SetResourceTypeErrorValue(XvXRTPort, _XvBadPort);
 
     for (i = 0; i < xvsp0->nAdaptors; i++) {
         Bool isOverlay;
         XvAdaptorPtr refAdapt = xvsp0->pAdaptors + i;
 
-        if (!(refAdapt->type & XvInputMask))
-            continue;
+        if (!(refAdapt->type & XvInputMask)) {
+          continue;
+        }
 
         MatchingAdaptors[0] = refAdapt;
         isOverlay = hasOverlay(refAdapt);
@@ -1346,8 +1394,9 @@ XineramifyXv(void)
         for (int j = 0; j < refAdapt->nPorts; j++) {
             PanoramiXRes *port = calloc(1, sizeof(PanoramiXRes));
 
-            if (!port)
-                break;
+            if (!port) {
+              break;
+            }
 
             XINERAMA_FOR_EACH_SCREEN_BACKWARD({
                 if (MatchingAdaptors[walkScreenIdx] && (MatchingAdaptors[walkScreenIdx]->nPorts > j))

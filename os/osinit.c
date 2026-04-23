@@ -138,8 +138,9 @@ OsSigHandler(int signo)
     }
 #endif
 
-    if (signo != SIGQUIT)
-        CoreDump = TRUE;
+    if (signo != SIGQUIT) {
+      CoreDump = TRUE;
+    }
 
     FatalError("Caught signal %d (%s). Server aborting\n",
                signo, strsignal(signo));
@@ -183,8 +184,9 @@ OsInit(void)
 #endif /* !WIN32 || __CYGWIN__ */
         busfault_init();
         server_poll = ospoll_create();
-        if (!server_poll)
-            FatalError("failed to allocate poll structure");
+        if (!server_poll) {
+          FatalError("failed to allocate poll structure");
+        }
 
 #if defined(HAVE_BACKTRACE) && defined(HAVE_EXECINFO_H)
         /*
@@ -211,8 +213,9 @@ OsInit(void)
 #endif
 
 #if !defined(WIN32) || defined(__CYGWIN__)
-        if (getpgrp() == 0)
-            setpgid(0, 0);
+        if (getpgrp() == 0) {
+          setpgid(0, 0);
+        }
 #endif
         LockServer();
         been_here = TRUE;

@@ -136,12 +136,14 @@ QuartzSetupScreen(int index,
                   ScreenPtr pScreen)
 {
     // do Quartz mode specific setup
-    if (!quartzProcs->SetupScreen(index, pScreen))
-        return FALSE;
+    if (!quartzProcs->SetupScreen(index, pScreen)) {
+      return FALSE;
+    }
 
     // setup cursor support
-    if (!quartzProcs->InitCursor(pScreen))
-        return FALSE;
+    if (!quartzProcs->InitCursor(pScreen)) {
+      return FALSE;
+    }
 
 #if defined(RANDR)
     if (!QuartzRandRInit(pScreen)) {
@@ -212,8 +214,9 @@ QuartzInitOutput(int argc,
         FatalError("Could not register block and wakeup handlers.");
     }
 
-    if (!dixRegisterPrivateKey(&quartzScreenKeyRec, PRIVATE_SCREEN, 0))
-        FatalError("Failed to alloc quartz screen private.\n");
+    if (!dixRegisterPrivateKey(&quartzScreenKeyRec, PRIVATE_SCREEN, 0)) {
+      FatalError("Failed to alloc quartz screen private.\n");
+    }
 
     // Do display mode specific initialization
     quartzProcs->DisplayInit();
@@ -230,8 +233,9 @@ QuartzInitInput(int argc,
     X11ApplicationSetCanQuit(0);
     X11ApplicationServerReady();
     // Do final display mode specific initialization before handling events
-    if (quartzProcs->InitInput)
-        quartzProcs->InitInput(argc, argv);
+    if (quartzProcs->InitInput) {
+      quartzProcs->InitInput(argc, argv);
+    }
 }
 
 void
@@ -331,16 +335,18 @@ QuartzScreenSaver(int state)
     OSSpinLockLock(&pokeActivitySpinLock);
 
     if (state) {
-        if (pokeActivityTimer == NULL)
-            goto QuartzScreenSaverEnd;
+      if (pokeActivityTimer == NULL) {
+        goto QuartzScreenSaverEnd;
+      }
 
         CFRunLoopTimerInvalidate(pokeActivityTimer);
         CFRelease(pokeActivityTimer);
         pokeActivityTimer = NULL;
     }
     else {
-        if (pokeActivityTimer != NULL)
-            goto QuartzScreenSaverEnd;
+      if (pokeActivityTimer != NULL) {
+        goto QuartzScreenSaverEnd;
+      }
 
         pokeActivityTimer = CFRunLoopTimerCreate(NULL,
                                                  CFAbsoluteTimeGetCurrent(),
@@ -373,15 +379,17 @@ QuartzShowFullscreen(int state)
 
     QuartzScreenSaver(!state);
 
-    if (XQuartzFullscreenVisible == state)
-        return;
+    if (XQuartzFullscreenVisible == state) {
+      return;
+    }
 
     XQuartzFullscreenVisible = state;
 
     xp_disable_update();
 
-    if (!XQuartzFullscreenVisible)
-        RootlessHideAllWindows();
+    if (!XQuartzFullscreenVisible) {
+      RootlessHideAllWindows();
+    }
 
     RootlessUpdateRooted(XQuartzFullscreenVisible);
 
@@ -401,8 +409,9 @@ QuartzShowFullscreen(int state)
 
     xp_reenable_update();
 
-    if (XQuartzFullscreenDisableHotkeys)
-        xp_disable_hot_keys(XQuartzFullscreenVisible);
+    if (XQuartzFullscreenDisableHotkeys) {
+      xp_disable_hot_keys(XQuartzFullscreenVisible);
+    }
 }
 
 void
@@ -410,11 +419,13 @@ QuartzSetRootless(Bool state)
 {
     DEBUG_LOG("QuartzSetRootless state=%d\n", state);
 
-    if (XQuartzIsRootless == state)
-        return;
+    if (XQuartzIsRootless == state) {
+      return;
+    }
 
-    if (state)
-        QuartzShowFullscreen(FALSE);
+    if (state) {
+      QuartzShowFullscreen(FALSE);
+    }
 
     XQuartzIsRootless = state;
 
@@ -446,15 +457,17 @@ QuartzSetRootless(Bool state)
 void
 QuartzShow(void)
 {
-    if (XQuartzServerVisible)
-        return;
+  if (XQuartzServerVisible) {
+    return;
+  }
 
     XQuartzServerVisible = TRUE;
 
     DIX_FOR_EACH_SCREEN({ quartzProcs->ResumeScreen(walkScreen); });
 
-    if (!XQuartzIsRootless)
-        QuartzShowFullscreen(TRUE);
+    if (!XQuartzIsRootless) {
+      QuartzShowFullscreen(TRUE);
+    }
 }
 
 /*
@@ -472,8 +485,9 @@ QuartzHide(void)
         DIX_FOR_EACH_SCREEN({ quartzProcs->SuspendScreen(walkScreen); });
     }
 
-    if (!XQuartzIsRootless)
-        QuartzShowFullscreen(FALSE);
+    if (!XQuartzIsRootless) {
+      QuartzShowFullscreen(FALSE);
+    }
     XQuartzServerVisible = FALSE;
 }
 
@@ -484,8 +498,9 @@ QuartzHide(void)
 void
 QuartzSetRootClip(int mode)
 {
-    if (!XQuartzServerVisible)
-        return;
+  if (!XQuartzServerVisible) {
+    return;
+  }
 
     DIX_FOR_EACH_SCREEN({ SetRootClip(walkScreen, mode); });
 }
@@ -532,6 +547,7 @@ DDXRingBell(int volume,              // volume is % of max
             int pitch,               // pitch is Hz
             int duration)            // duration is milliseconds
 {
-    if (volume)
-        NSBeep();
+  if (volume) {
+    NSBeep();
+  }
 }

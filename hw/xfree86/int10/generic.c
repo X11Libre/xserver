@@ -103,8 +103,9 @@ readIntVec(struct pci_device *dev, unsigned char *buf, int len)
 {
     void *map;
 
-    if (pci_device_map_legacy(dev, 0, len, 0, &map))
-        return FALSE;
+    if (pci_device_map_legacy(dev, 0, len, 0, &map)) {
+      return FALSE;
+    }
 
     memcpy(buf, map, len);
     pci_device_unmap_legacy(dev, map, len);
@@ -134,8 +135,9 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
 
     pInt = (xf86Int10InfoPtr) XNFcallocarray(1, sizeof(xf86Int10InfoRec));
     pInt->entityIndex = entityIndex;
-    if (!xf86Int10ExecSetup(pInt))
-        goto error0;
+    if (!xf86Int10ExecSetup(pInt)) {
+      goto error0;
+    }
     pInt->mem = &genericMem;
     pInt->private = (void *) XNFcallocarray(1, sizeof(genericInt10Priv));
     INTPriv(pInt)->alloc = (void *) XNFcallocarray(1, ALLOC_ENTRIES(getpagesize()));
@@ -153,9 +155,10 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
      */
     MapVRam(pInt);
 #ifdef _PC
-    if (!sysMem)
-        pci_device_map_legacy(pInt->dev, V_BIOS, BIOS_SIZE + SYS_BIOS - V_BIOS,
-                              PCI_DEV_MAP_FLAG_WRITABLE, &sysMem);
+    if (!sysMem) {
+      pci_device_map_legacy(pInt->dev, V_BIOS, BIOS_SIZE + SYS_BIOS - V_BIOS,
+                            PCI_DEV_MAP_FLAG_WRITABLE, &sysMem);
+    }
     INTPriv(pInt)->sysMem = sysMem;
 
     if (!readIntVec(pInt->dev, base, LOW_PAGE_SIZE)) {
@@ -171,14 +174,16 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
     INTPriv(pInt)->highMemory = V_BIOS;
 
     if (xf86IsEntityPrimary(entityIndex) && !(initPrimary(options))) {
-        if (!xf86int10GetBiosSegment(pInt, (unsigned char *) sysMem - V_BIOS))
-            goto error1;
+      if (!xf86int10GetBiosSegment(pInt, (unsigned char *)sysMem - V_BIOS)) {
+        goto error1;
+      }
 
         set_return_trap(pInt);
 
         pInt->Flags = Flags & (SET_BIOS_SCRATCH | RESTORE_BIOS_SCRATCH);
-        if (!(pInt->Flags & SET_BIOS_SCRATCH))
-            pInt->Flags &= ~RESTORE_BIOS_SCRATCH;
+        if (!(pInt->Flags & SET_BIOS_SCRATCH)) {
+          pInt->Flags &= ~RESTORE_BIOS_SCRATCH;
+        }
         xf86Int10SaveRestoreBIOSVars(pInt, TRUE);
 
     }
@@ -318,13 +323,15 @@ MapCurrentInt10(xf86Int10InfoPtr pInt)
 void
 xf86FreeInt10(xf86Int10InfoPtr pInt)
 {
-    if (!pInt)
-        return;
+  if (!pInt) {
+    return;
+  }
 #if defined (_PC)
     xf86Int10SaveRestoreBIOSVars(pInt, FALSE);
 #endif
-    if (Int10Current == pInt)
-        Int10Current = NULL;
+    if (Int10Current == pInt) {
+      Int10Current = NULL;
+    }
     free(INTPriv(pInt)->base);
     UnmapVRam(pInt);
     free(INTPriv(pInt)->alloc);
@@ -341,19 +348,24 @@ xf86Int10AllocPages(xf86Int10InfoPtr pInt, int num, int *off)
 
     for (i = 0; i < (num_pages - num); i++) {
         if (INTPriv(pInt)->alloc[i] == 0) {
-            for (j = i; j < (num + i); j++)
-                if (INTPriv(pInt)->alloc[j] != 0)
-                    break;
-            if (j == (num + i))
-                break;
+          for (j = i; j < (num + i); j++) {
+            if (INTPriv(pInt)->alloc[j] != 0) {
+              break;
+            }
+          }
+          if (j == (num + i)) {
+            break;
+          }
             i += num;
         }
     }
-    if (i == (num_pages - num))
-        return NULL;
+    if (i == (num_pages - num)) {
+      return NULL;
+    }
 
-    for (j = i; j < (i + num); j++)
-        INTPriv(pInt)->alloc[j] = 1;
+    for (j = i; j < (i + num); j++) {
+      INTPriv(pInt)->alloc[j] = 1;
+    }
 
     *off = (i + 1) * pagesize;
 
@@ -368,8 +380,9 @@ xf86Int10FreePages(xf86Int10InfoPtr pInt, void *pbase, int num)
         (((char *) pbase - (char *) INTPriv(pInt)->base) / pagesize) - 1;
     int i;
 
-    for (i = first; i < (first + num); i++)
-        INTPriv(pInt)->alloc[i] = 0;
+    for (i = first; i < (first + num); i++) {
+      INTPriv(pInt)->alloc[i] = 0;
+    }
 }
 
 #define OFF(addr) ((addr) & 0xffff)
@@ -425,8 +438,9 @@ static uint16_t
 read_w(xf86Int10InfoPtr pInt, int addr)
 {
 #if X_BYTE_ORDER == X_LITTLE_ENDIAN
-    if (OFF(addr + 1) > 0)
-        return V_ADDR_RW(addr);
+  if (OFF(addr + 1) > 0) {
+    return V_ADDR_RW(addr);
+  }
 #endif
     return V_ADDR_RB(addr) | (V_ADDR_RB(addr + 1) << 8);
 }
@@ -435,8 +449,9 @@ static uint32_t
 read_l(xf86Int10InfoPtr pInt, int addr)
 {
 #if X_BYTE_ORDER == X_LITTLE_ENDIAN
-    if (OFF(addr + 3) > 2)
-        return V_ADDR_RL(addr);
+  if (OFF(addr + 3) > 2) {
+    return V_ADDR_RL(addr);
+  }
 #endif
     return V_ADDR_RB(addr) |
         (V_ADDR_RB(addr + 1) << 8) |

@@ -125,11 +125,13 @@ RegionOperate(ClientPtr client,
               RegionPtr *destRgnp,
               RegionPtr srcRgn, int op, int xoff, int yoff, CreateDftPtr create)
 {
-    if (srcRgn && (xoff || yoff))
-        RegionTranslate(srcRgn, xoff, yoff);
+  if (srcRgn && (xoff || yoff)) {
+    RegionTranslate(srcRgn, xoff, yoff);
+  }
     if (!pWin->parent) {
-        if (srcRgn)
-            RegionDestroy(srcRgn);
+      if (srcRgn) {
+        RegionDestroy(srcRgn);
+      }
         return Success;
     }
 
@@ -155,44 +157,49 @@ RegionOperate(ClientPtr client,
              */
             return Success;
         }
-    }
-    else
-        switch (op) {
-        case ShapeSet:
-            if (*destRgnp)
-                RegionDestroy(*destRgnp);
-            *destRgnp = srcRgn;
-            srcRgn = 0;
-            break;
-        case ShapeUnion:
-            if (*destRgnp)
-                RegionUnion(*destRgnp, *destRgnp, srcRgn);
-            break;
-        case ShapeIntersect:
-            if (*destRgnp)
-                RegionIntersect(*destRgnp, *destRgnp, srcRgn);
-            else {
-                *destRgnp = srcRgn;
-                srcRgn = 0;
-            }
-            break;
-        case ShapeSubtract:
-            if (!*destRgnp)
-                *destRgnp = (*create) (pWin);
-            RegionSubtract(*destRgnp, *destRgnp, srcRgn);
-            break;
-        case ShapeInvert:
-            if (!*destRgnp)
-                *destRgnp = RegionCreate((BoxPtr) 0, 0);
-            else
-                RegionSubtract(*destRgnp, srcRgn, *destRgnp);
-            break;
-        default:
-            client->errorValue = op;
-            return BadValue;
+    } else {
+      switch (op) {
+      case ShapeSet:
+        if (*destRgnp) {
+          RegionDestroy(*destRgnp);
         }
-    if (srcRgn)
-        RegionDestroy(srcRgn);
+        *destRgnp = srcRgn;
+        srcRgn = 0;
+        break;
+      case ShapeUnion:
+        if (*destRgnp) {
+          RegionUnion(*destRgnp, *destRgnp, srcRgn);
+        }
+        break;
+      case ShapeIntersect:
+        if (*destRgnp) {
+          RegionIntersect(*destRgnp, *destRgnp, srcRgn);
+        } else {
+          *destRgnp = srcRgn;
+          srcRgn = 0;
+        }
+        break;
+      case ShapeSubtract:
+        if (!*destRgnp) {
+          *destRgnp = (*create)(pWin);
+        }
+        RegionSubtract(*destRgnp, *destRgnp, srcRgn);
+        break;
+      case ShapeInvert:
+        if (!*destRgnp) {
+          *destRgnp = RegionCreate((BoxPtr)0, 0);
+        } else {
+          RegionSubtract(*destRgnp, srcRgn, *destRgnp);
+        }
+        break;
+      default:
+        client->errorValue = op;
+        return BadValue;
+      }
+    }
+    if (srcRgn) {
+      RegionDestroy(srcRgn);
+    }
     (*pWin->drawable.pScreen->SetShape) (pWin, kind);
     SendShapeNotify(pWin, kind);
     return Success;
@@ -252,8 +259,9 @@ ShapeRectangles(ClientPtr client, xShapeRectanglesReq *stuff)
 
     UpdateCurrentTime();
     rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     switch (stuff->destKind) {
     case ShapeBounding:
         createDefault = CreateBoundingShape;
@@ -274,17 +282,20 @@ ShapeRectangles(ClientPtr client, xShapeRectanglesReq *stuff)
         return BadValue;
     }
     nrects = ((client->req_len << 2) - sizeof(xShapeRectanglesReq));
-    if (nrects & 4)
-        return BadLength;
+    if (nrects & 4) {
+      return BadLength;
+    }
     nrects >>= 3;
     prects = (xRectangle *) &stuff[1];
     ctype = VerifyRectOrder(nrects, prects, (int) stuff->ordering);
-    if (ctype < 0)
-        return BadMatch;
+    if (ctype < 0) {
+      return BadMatch;
+    }
     srcRgn = RegionFromRects(nrects, prects, ctype);
 
-    if (!MakeWindowOptional(pWin))
-        return BadAlloc;
+    if (!MakeWindowOptional(pWin)) {
+      return BadAlloc;
+    }
 
     switch (stuff->destKind) {
     case ShapeBounding:
@@ -315,16 +326,18 @@ ProcShapeRectangles(ClientPtr client)
     X_REQUEST_REST_CARD16();
 
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
-        return ShapeRectangles(client, stuff);
+    if (noPanoramiXExtension) {
+      return ShapeRectangles(client, stuff);
+    }
 
     PanoramiXRes *win;
     int result;
 
     result = dixLookupResourceByType((void **) &win, stuff->dest, XRT_WINDOW,
                                      client, DixWriteAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->dest = win->info[walkScreenIdx].id;
@@ -352,8 +365,9 @@ ShapeMask(ClientPtr client, xShapeMaskReq *stuff)
 
     UpdateCurrentTime();
     rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     switch (stuff->destKind) {
     case ShapeBounding:
         createDefault = CreateBoundingShape;
@@ -369,23 +383,27 @@ ShapeMask(ClientPtr client, xShapeMaskReq *stuff)
         return BadValue;
     }
     pScreen = pWin->drawable.pScreen;
-    if (stuff->src == None)
-        srcRgn = 0;
-    else {
-        rc = dixLookupResourceByType((void **) &pPixmap, stuff->src,
-                                     X11_RESTYPE_PIXMAP, client, DixReadAccess);
-        if (rc != Success)
-            return rc;
-        if (pPixmap->drawable.pScreen != pScreen ||
-            pPixmap->drawable.depth != 1)
-            return BadMatch;
-        srcRgn = BitmapToRegion(pScreen, pPixmap);
-        if (!srcRgn)
-            return BadAlloc;
+    if (stuff->src == None) {
+      srcRgn = 0;
+    } else {
+      rc = dixLookupResourceByType((void **)&pPixmap, stuff->src,
+                                   X11_RESTYPE_PIXMAP, client, DixReadAccess);
+      if (rc != Success) {
+        return rc;
+      }
+      if (pPixmap->drawable.pScreen != pScreen ||
+          pPixmap->drawable.depth != 1) {
+        return BadMatch;
+      }
+      srcRgn = BitmapToRegion(pScreen, pPixmap);
+      if (!srcRgn) {
+        return BadAlloc;
+      }
     }
 
-    if (!MakeWindowOptional(pWin))
-        return BadAlloc;
+    if (!MakeWindowOptional(pWin)) {
+      return BadAlloc;
+    }
 
     switch (stuff->destKind) {
     case ShapeBounding:
@@ -416,25 +434,28 @@ ProcShapeMask(ClientPtr client)
     X_REQUEST_FIELD_CARD32(src);
 
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
-        return ShapeMask(client, stuff);
+    if (noPanoramiXExtension) {
+      return ShapeMask(client, stuff);
+    }
 
     PanoramiXRes *win, *pmap;
     int result;
 
     result = dixLookupResourceByType((void **) &win, stuff->dest, XRT_WINDOW,
                                      client, DixWriteAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     if (stuff->src != None) {
         result = dixLookupResourceByType((void **) &pmap, stuff->src,
                                          XRT_PIXMAP, client, DixReadAccess);
-        if (result != Success)
-            return result;
+        if (result != Success) {
+          return result;
+        }
+    } else {
+      pmap = NULL;
     }
-    else
-        pmap = NULL;
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->dest = win->info[walkScreenIdx].id;
@@ -464,10 +485,12 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
 
     UpdateCurrentTime();
     rc = dixLookupWindow(&pDestWin, stuff->dest, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
-    if (!MakeWindowOptional(pDestWin))
-        return BadAlloc;
+    if (rc != Success) {
+      return rc;
+    }
+    if (!MakeWindowOptional(pDestWin)) {
+      return BadAlloc;
+    }
 
     switch (stuff->destKind) {
     case ShapeBounding:
@@ -485,8 +508,9 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
     }
 
     rc = dixLookupWindow(&pSrcWin, stuff->src, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     switch (stuff->srcKind) {
     case ShapeBounding:
         srcRgn = wBoundingShape(pSrcWin);
@@ -512,12 +536,13 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
         tmp = RegionCreate((BoxPtr) 0, 0);
         RegionCopy(tmp, srcRgn);
         srcRgn = tmp;
+    } else {
+      srcRgn = (*createSrc)(pSrcWin);
     }
-    else
-        srcRgn = (*createSrc) (pSrcWin);
 
-    if (!MakeWindowOptional(pDestWin))
-        return BadAlloc;
+    if (!MakeWindowOptional(pDestWin)) {
+      return BadAlloc;
+    }
 
     switch (stuff->destKind) {
     case ShapeBounding:
@@ -548,21 +573,24 @@ ProcShapeCombine(ClientPtr client)
     X_REQUEST_FIELD_CARD32(src);
 
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
-        return ShapeCombine(client, stuff);
+    if (noPanoramiXExtension) {
+      return ShapeCombine(client, stuff);
+    }
 
     PanoramiXRes *win, *win2;
     int result;
 
     result = dixLookupResourceByType((void **) &win, stuff->dest, XRT_WINDOW,
                                      client, DixWriteAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     result = dixLookupResourceByType((void **) &win2, stuff->src, XRT_WINDOW,
                                      client, DixReadAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->dest = win->info[walkScreenIdx].id;
@@ -587,8 +615,9 @@ ShapeOffset(ClientPtr client, xShapeOffsetReq *stuff)
 
     UpdateCurrentTime();
     rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     switch (stuff->destKind) {
     case ShapeBounding:
         srcRgn = wBoundingShape(pWin);
@@ -623,13 +652,15 @@ ProcShapeOffset(ClientPtr client)
     PanoramiXRes *win;
     int result;
 
-    if (noPanoramiXExtension)
-        return ShapeOffset(client, stuff);
+    if (noPanoramiXExtension) {
+      return ShapeOffset(client, stuff);
+    }
 
     result = dixLookupResourceByType((void **) &win, stuff->dest, XRT_WINDOW,
                                      client, DixWriteAccess);
-    if (result != Success)
-        return result;
+    if (result != Success) {
+      return result;
+    }
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->dest = win->info[walkScreenIdx].id;
@@ -652,8 +683,9 @@ ProcShapeQueryExtents(ClientPtr client)
 
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     RegionPtr boundRegion;
     BoxRec boundBox;
@@ -722,11 +754,13 @@ ProcShapeSelectInput(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xShapeSelectInputReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
     rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
     switch (stuff->enable) {
     case xTrue:
@@ -741,8 +775,9 @@ ProcShapeSelectInput(ClientPtr client)
 
         /* Form the event */
         pNewShapeEvent = calloc(1, sizeof(ShapeEventRec));
-        if (!pNewShapeEvent)
-            return BadAlloc;
+        if (!pNewShapeEvent) {
+          return BadAlloc;
+        }
         pNewShapeEvent->next = *pHead;
         pNewShapeEvent->client = client;
         pNewShapeEvent->window = pWin;
@@ -845,8 +880,9 @@ ProcShapeInputSelected(ClientPtr client)
     int enabled, rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
     enabled = xFalse;
@@ -877,8 +913,9 @@ ProcShapeGetRectangles(ClientPtr client)
     RegionPtr region;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     switch (stuff->kind) {
     case ShapeBounding:
         region = wBoundingShape(pWin);
@@ -1020,8 +1057,9 @@ ShapeExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    if (!dixRegisterPrivateKey(&ShapeWindowPrivateKeyRec, PRIVATE_WINDOW, 0))
-        return;
+    if (!dixRegisterPrivateKey(&ShapeWindowPrivateKeyRec, PRIVATE_WINDOW, 0)) {
+      return;
+    }
 
     DIX_FOR_EACH_SCREEN({
         dixScreenHookWindowDestroy(walkScreen,ShapeWindowDestroy);

@@ -61,10 +61,12 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     const char *glvnd_vendor = NULL;
 
     glamor_egl = calloc(1, sizeof(*glamor_egl));
-    if (glamor_egl == NULL)
-        return FALSE;
-    if (xf86GlamorEGLPrivateIndex == -1)
-        xf86GlamorEGLPrivateIndex = xf86AllocateScrnInfoPrivateIndex();
+    if (glamor_egl == NULL) {
+      return FALSE;
+    }
+    if (xf86GlamorEGLPrivateIndex == -1) {
+      xf86GlamorEGLPrivateIndex = xf86AllocateScrnInfoPrivateIndex();
+    }
 
     options = XNFalloc(sizeof(GlamorEGLOptions));
     memcpy(options, GlamorEGLOptions, sizeof(GlamorEGLOptions));
@@ -79,10 +81,11 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
         }
     }
     api = xf86GetOptValString(options, GLAMOREGLOPT_RENDERING_API);
-    if (api && !strncasecmp(api, "es", 2))
-        glamor_egl->force_es = TRUE;
-    else if (api && !strncasecmp(api, "gl", 2))
-        glamor_egl->es_disallowed = TRUE;
+    if (api && !strncasecmp(api, "es", 2)) {
+      glamor_egl->force_es = TRUE;
+    } else if (api && !strncasecmp(api, "gl", 2)) {
+      glamor_egl->es_disallowed = TRUE;
+    }
     free(options);
 
     glamor_egl->GLAMOR_EGL_PRIV_PROC = glamor_xf86_egl_get_screen_private;
@@ -91,9 +94,9 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
 
     glamor_egl->fd = fd;
 
-    if (xf86Info.debug != NULL)
-        glamor_egl->dmabuf_capable = !!strstr(xf86Info.debug,
-                                              "dmabuf_capable");
+    if (xf86Info.debug != NULL) {
+      glamor_egl->dmabuf_capable = !!strstr(xf86Info.debug, "dmabuf_capable");
+    }
 
     Bool compat_ret = TRUE;
 

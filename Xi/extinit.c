@@ -473,8 +473,9 @@ SDeviceChangedEvent(xXIDeviceChangedEvent * from, xXIDeviceChangedEvent * to)
             xXIKeyInfo *ki = (xXIKeyInfo *) any;
             uint32_t *key = (uint32_t *) &ki[1];
 
-            for (j = 0; j < ki->num_keycodes; j++, key++)
-                swapl(key);
+            for (j = 0; j < ki->num_keycodes; j++, key++) {
+              swapl(key);
+            }
             swaps(&ki->num_keycodes);
         }
             break;
@@ -484,8 +485,9 @@ SDeviceChangedEvent(xXIDeviceChangedEvent * from, xXIDeviceChangedEvent * to)
             Atom *labels = (Atom *) ((char *) bi + sizeof(xXIButtonInfo) +
                                      pad_to_int32(bits_to_bytes
                                                   (bi->num_buttons)));
-            for (j = 0; j < bi->num_buttons; j++)
-                swapl(&labels[j]);
+            for (j = 0; j < bi->num_buttons; j++) {
+              swapl(&labels[j]);
+            }
             swaps(&bi->num_buttons);
         }
             break;
@@ -853,11 +855,13 @@ SetMaskForExtEvent(Mask mask, int event)
     EventInfo[ExtEventIndex].mask = mask;
     EventInfo[ExtEventIndex++].type = event;
 
-    if ((event < LASTEvent) || (event >= 128))
-        FatalError("MaskForExtensionEvent: bogus event number");
+    if ((event < LASTEvent) || (event >= 128)) {
+      FatalError("MaskForExtensionEvent: bogus event number");
+    }
 
-    for (i = 0; i < MAXDEVICES; i++)
-        SetMaskForEvent(i, mask, event);
+    for (i = 0; i < MAXDEVICES; i++) {
+      SetMaskForEvent(i, mask, event);
+    }
 }
 
 /************************************************************************
@@ -958,8 +962,9 @@ RestoreExtensionEvents(void)
 
     for (i = 0; i < ExtEventIndex - 1; i++) {
         if ((EventInfo[i].type >= LASTEvent) && (EventInfo[i].type < 128)) {
-            for (j = 0; j < MAXDEVICES; j++)
-                SetMaskForEvent(j, 0, EventInfo[i].type);
+          for (j = 0; j < MAXDEVICES; j++) {
+            SetMaskForEvent(j, 0, EventInfo[i].type);
+          }
         }
         EventInfo[i].mask = 0;
         EventInfo[i].type = 0;
@@ -1051,8 +1056,9 @@ MakeDeviceTypeAtoms(void)
 {
     int i;
 
-    for (i = 0; i < NUMTYPES; i++)
-        dev_type[i].type = dixAddAtom(dev_type[i].name);
+    for (i = 0; i < NUMTYPES; i++) {
+      dev_type[i].type = dixAddAtom(dev_type[i].name);
+    }
 }
 
 /*****************************************************************************
@@ -1068,56 +1074,49 @@ SEventIDispatch(xEvent *from, xEvent *to)
 {
     int type = from->u.u.type & 0177;
 
-    if (type == DeviceValuator)
-        DO_SWAP(SEventDeviceValuator, deviceValuator);
-    else if (type == DeviceKeyPress) {
-        SKeyButtonPtrEvent(from, to);
-        to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
-    }
-    else if (type == DeviceKeyRelease) {
-        SKeyButtonPtrEvent(from, to);
-        to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
-    }
-    else if (type == DeviceButtonPress) {
-        SKeyButtonPtrEvent(from, to);
-        to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
-    }
-    else if (type == DeviceButtonRelease) {
-        SKeyButtonPtrEvent(from, to);
-        to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
-    }
-    else if (type == DeviceMotionNotify) {
-        SKeyButtonPtrEvent(from, to);
-        to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
-    }
-    else if (type == DeviceFocusIn)
-        DO_SWAP(SEventFocus, deviceFocus);
-    else if (type == DeviceFocusOut)
-        DO_SWAP(SEventFocus, deviceFocus);
-    else if (type == ProximityIn) {
-        SKeyButtonPtrEvent(from, to);
-        to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
-    }
-    else if (type == ProximityOut) {
-        SKeyButtonPtrEvent(from, to);
-        to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
-    }
-    else if (type == DeviceStateNotify)
-        DO_SWAP(SDeviceStateNotifyEvent, deviceStateNotify);
-    else if (type == DeviceKeyStateNotify)
-        DO_SWAP(SDeviceKeyStateNotifyEvent, deviceKeyStateNotify);
-    else if (type == DeviceButtonStateNotify)
-        DO_SWAP(SDeviceButtonStateNotifyEvent, deviceButtonStateNotify);
-    else if (type == DeviceMappingNotify)
-        DO_SWAP(SDeviceMappingNotifyEvent, deviceMappingNotify);
-    else if (type == ChangeDeviceNotify)
-        DO_SWAP(SChangeDeviceNotifyEvent, changeDeviceNotify);
-    else if (type == DevicePresenceNotify)
-        DO_SWAP(SDevicePresenceNotifyEvent, devicePresenceNotify);
-    else if (type == DevicePropertyNotify)
-        DO_SWAP(SDevicePropertyNotifyEvent, devicePropertyNotify);
-    else {
-        FatalError("XInputExtension: Impossible event!\n");
+    if (type == DeviceValuator) {
+      DO_SWAP(SEventDeviceValuator, deviceValuator);
+    } else if (type == DeviceKeyPress) {
+      SKeyButtonPtrEvent(from, to);
+      to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
+    } else if (type == DeviceKeyRelease) {
+      SKeyButtonPtrEvent(from, to);
+      to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
+    } else if (type == DeviceButtonPress) {
+      SKeyButtonPtrEvent(from, to);
+      to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
+    } else if (type == DeviceButtonRelease) {
+      SKeyButtonPtrEvent(from, to);
+      to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
+    } else if (type == DeviceMotionNotify) {
+      SKeyButtonPtrEvent(from, to);
+      to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
+    } else if (type == DeviceFocusIn) {
+      DO_SWAP(SEventFocus, deviceFocus);
+    } else if (type == DeviceFocusOut) {
+      DO_SWAP(SEventFocus, deviceFocus);
+    } else if (type == ProximityIn) {
+      SKeyButtonPtrEvent(from, to);
+      to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
+    } else if (type == ProximityOut) {
+      SKeyButtonPtrEvent(from, to);
+      to->u.keyButtonPointer.pad1 = from->u.keyButtonPointer.pad1;
+    } else if (type == DeviceStateNotify) {
+      DO_SWAP(SDeviceStateNotifyEvent, deviceStateNotify);
+    } else if (type == DeviceKeyStateNotify) {
+      DO_SWAP(SDeviceKeyStateNotifyEvent, deviceKeyStateNotify);
+    } else if (type == DeviceButtonStateNotify) {
+      DO_SWAP(SDeviceButtonStateNotifyEvent, deviceButtonStateNotify);
+    } else if (type == DeviceMappingNotify) {
+      DO_SWAP(SDeviceMappingNotifyEvent, deviceMappingNotify);
+    } else if (type == ChangeDeviceNotify) {
+      DO_SWAP(SChangeDeviceNotifyEvent, changeDeviceNotify);
+    } else if (type == DevicePresenceNotify) {
+      DO_SWAP(SDevicePresenceNotifyEvent, devicePresenceNotify);
+    } else if (type == DevicePropertyNotify) {
+      DO_SWAP(SDevicePropertyNotifyEvent, devicePropertyNotify);
+    } else {
+      FatalError("XInputExtension: Impossible event!\n");
     }
 }
 
@@ -1143,12 +1142,14 @@ XInputExtensionInit(void)
         SERVER_XI_MINOR_VERSION,
     };
 
-    if (!dixRegisterPrivateKey
-        (&XIClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(XIClientRec)))
-        FatalError("Cannot request private for XI.\n");
+    if (!dixRegisterPrivateKey(&XIClientPrivateKeyRec, PRIVATE_CLIENT,
+                               sizeof(XIClientRec))) {
+      FatalError("Cannot request private for XI.\n");
+    }
 
-    if (!XIBarrierInit())
-        FatalError("Could not initialize barriers.\n");
+    if (!XIBarrierInit()) {
+      FatalError("Could not initialize barriers.\n");
+    }
 
     extEntry = AddExtension(INAME, IEVENTS, IERRORS, ProcIDispatch,
                             ProcIDispatch, IResetProc, StandardMinorOpcode);
@@ -1160,8 +1161,9 @@ XInputExtensionInit(void)
         MakeDeviceTypeAtoms();
         RT_INPUTCLIENT = CreateNewResourceType((DeleteType) InputClientGone,
                                                "INPUTCLIENT");
-        if (!RT_INPUTCLIENT)
-            FatalError("Failed to add resource type for XI.\n");
+        if (!RT_INPUTCLIENT) {
+          FatalError("Failed to add resource type for XI.\n");
+        }
         FixExtensionEvents(extEntry);
         EventSwapVector[DeviceValuator] = SEventIDispatch;
         EventSwapVector[DeviceKeyPress] = SEventIDispatch;

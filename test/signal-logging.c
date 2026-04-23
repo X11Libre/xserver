@@ -152,14 +152,17 @@ number_formatting(void)
 
     xorgLogVerbosity = -1;
 
-    for (i = 0; i < ARRAY_SIZE(unsigned_tests); i++)
-        assert(check_number_format_test(unsigned_tests[i]));
+    for (i = 0; i < ARRAY_SIZE(unsigned_tests); i++) {
+      assert(check_number_format_test(unsigned_tests[i]));
+    }
 
-    for (i = 0; i < ARRAY_SIZE(signed_tests); i++)
-        assert(check_signed_number_format_test(signed_tests[i]));
+    for (i = 0; i < ARRAY_SIZE(signed_tests); i++) {
+      assert(check_signed_number_format_test(signed_tests[i]));
+    }
 
-    for (i = 0; i < ARRAY_SIZE(float_tests); i++)
-        assert(check_float_format_test(float_tests[i]));
+    for (i = 0; i < ARRAY_SIZE(float_tests); i++) {
+      assert(check_float_format_test(float_tests[i]));
+    }
 }
 #pragma GCC diagnostic pop
 
@@ -272,10 +275,11 @@ static void logging_format(void)
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
-        if (ui == 0)
-            ui = 1;
-        else
-            ui <<= 1;
+        if (ui == 0) {
+          ui = 1;
+        } else {
+          ui <<= 1;
+        }
     } while(ui);
 
     lui = 0;
@@ -300,10 +304,11 @@ static void logging_format(void)
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
-        if (lui == 0)
-            lui = 1;
-        else
-            lui <<= 1;
+        if (lui == 0) {
+          lui = 1;
+        } else {
+          lui <<= 1;
+        }
     } while(lui);
 
     /* signed number substitution */
@@ -320,10 +325,11 @@ static void logging_format(void)
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
-        if (i == 0)
-            i = 1;
-        else
-            i <<= 1;
+        if (i == 0) {
+          i = 1;
+        } else {
+          i <<= 1;
+        }
     } while(i > INT_MIN);
 
     li = 0;
@@ -349,10 +355,11 @@ static void logging_format(void)
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
-        if (li == 0)
-            li = 1;
-        else
-            li <<= 1;
+        if (li == 0) {
+          li = 1;
+        } else {
+          li <<= 1;
+        }
     } while(li > LONG_MIN);
 
 
@@ -399,8 +406,9 @@ static void logging_format(void)
         assert(strcmp(logmsg, expected) == 0);
     }
 
-    if (f)
-        fclose(f);
+    if (f) {
+      fclose(f);
+    }
 
     LogClose(EXIT_NO_ERROR);
     unlink(log_file_path);

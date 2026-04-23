@@ -58,10 +58,12 @@ systemd_logind_find_info_ptr_by_devnum(InputInfoPtr start,
 {
     InputInfoPtr pInfo;
 
-    for (pInfo = start; pInfo; pInfo = pInfo->next)
-        if (pInfo->major == major && pInfo->minor == minor &&
-                (pInfo->flags & XI86_SERVER_FD))
-            return pInfo;
+    for (pInfo = start; pInfo; pInfo = pInfo->next) {
+      if (pInfo->major == major && pInfo->minor == minor &&
+          (pInfo->flags & XI86_SERVER_FD)) {
+        return pInfo;
+      }
+    }
 
     return NULL;
 }
@@ -76,8 +78,9 @@ systemd_logind_set_input_fd_for_all_devs(int major, int minor, int fd,
     while (pInfo) {
         pInfo->fd = fd;
         pInfo->options = xf86ReplaceIntOption(pInfo->options, "fd", fd);
-        if (enable)
-            xf86EnableInputDeviceForVTSwitch(pInfo);
+        if (enable) {
+          xf86EnableInputDeviceForVTSwitch(pInfo);
+        }
 
         pInfo = systemd_logind_find_info_ptr_by_devnum(pInfo->next, major, minor);
     }
@@ -174,8 +177,9 @@ systemd_logind_release_fd(int _major, int _minor, int fd)
     dbus_int32_t minor = _minor;
     int matches = 0;
 
-    if (!info->session || major == 0)
-        goto close;
+    if (!info->session || major == 0) {
+      goto close;
+    }
 
     /* Only release the fd if there is only 1 InputInfo left for this major
      * and minor, otherwise other InputInfo's are still referencing the fd. */
@@ -209,60 +213,60 @@ systemd_logind_release_fd(int _major, int _minor, int fd)
 
     reply = dbus_connection_send_with_reply_and_block(info->conn, msg,
                                                       DBUS_TIMEOUT_USE_DEFAULT, &error);
-    if (!reply)
-        LogMessage(X_ERROR, "systemd-logind: failed to release device: %s\n",
-                   error.message);
+    if (!reply) {
+      LogMessage(X_ERROR, "systemd-logind: failed to release device: %s\n",
+                 error.message);
+    }
 
 cleanup:
-    if (msg)
-        dbus_message_unref(msg);
-    if (reply)
-        dbus_message_unref(reply);
+  if (msg) {
+    dbus_message_unref(msg);
+  }
+  if (reply) {
+    dbus_message_unref(reply);
+  }
     dbus_error_free(&error);
 close:
-    if (fd != -1)
-        close(fd);
+  if (fd != -1) {
+    close(fd);
+  }
 }
 
-int
-systemd_logind_controls_session(void)
-{
-    return logind_info.session ? 1 : 0;
-}
+int systemd_logind_controls_session;
+(void) { return logind_info.session ? 1 : 0; }
 
-void
-systemd_logind_vtenter(void)
-{
-    struct systemd_logind_info *info = &logind_info;
-    InputInfoPtr pInfo;
-    int i;
+void systemd_logind_vtenter;
+(void) {
+  struct systemd_logind_info *info = &logind_info;
+  InputInfoPtr pInfo;
+  int i;
 
-    if (!info->session)
-        return; /* Not using systemd-logind */
+  if (!info->session)
+    return; /* Not using systemd-logind */
 
-    if (!info->active)
-        return; /* Session not active */
+  if (!info->active)
+    return; /* Session not active */
 
-    if (info->vt_active)
-        return; /* Already did vtenter */
+  if (info->vt_active)
+    return; /* Already did vtenter */
 
-    for (i = 0; i < xf86_num_platform_devices; i++) {
-        if (xf86_platform_devices[i].flags & XF86_PDEV_PAUSED)
-            break;
-    }
-    if (i != xf86_num_platform_devices)
-        return; /* Some drm nodes are still paused wait for resume */
+  for (i = 0; i < xf86_num_platform_devices; i++) {
+    if (xf86_platform_devices[i].flags & XF86_PDEV_PAUSED)
+      break;
+  }
+  if (i != xf86_num_platform_devices)
+    return; /* Some drm nodes are still paused wait for resume */
 
-    xf86VTEnter();
-    info->vt_active = TRUE;
+  xf86VTEnter();
+  info->vt_active = TRUE;
 
-    /* Activate any input devices which were resumed before the drm nodes */
-    for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next)
-        if ((pInfo->flags & XI86_SERVER_FD) && pInfo->fd != -1)
-            xf86EnableInputDeviceForVTSwitch(pInfo);
+  /* Activate any input devices which were resumed before the drm nodes */
+  for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next)
+    if ((pInfo->flags & XI86_SERVER_FD) && pInfo->fd != -1)
+      xf86EnableInputDeviceForVTSwitch(pInfo);
 
-    /* Do delayed input probing, this must be done after the above enabling */
-    xf86InputEnableVTProbe();
+  /* Do delayed input probing, this must be done after the above enabling */
+  xf86InputEnableVTProbe();
 }
 
 static void
@@ -291,15 +295,18 @@ systemd_logind_ack_pause(struct systemd_logind_info *info,
 
     reply = dbus_connection_send_with_reply_and_block(info->conn, msg,
                                                       DBUS_TIMEOUT_USE_DEFAULT, &error);
-    if (!reply)
-        LogMessage(X_ERROR, "systemd-logind: failed to ack pause: %s\n",
-                   error.message);
+    if (!reply) {
+      LogMessage(X_ERROR, "systemd-logind: failed to ack pause: %s\n",
+                 error.message);
+    }
 
 cleanup:
-    if (msg)
-        dbus_message_unref(msg);
-    if (reply)
-        dbus_message_unref(reply);
+  if (msg) {
+    dbus_message_unref(msg);
+  }
+  if (reply) {
+    dbus_message_unref(reply);
+  }
     dbus_error_free(&error);
 }
 
@@ -308,24 +315,24 @@ cleanup:
  * and ensure the drm_drop_master is done before
  * VT_RELDISP when switching VT
  */
-void systemd_logind_drop_master(void)
-{
-    struct systemd_logind_info *info = &logind_info;
-    int i;
-    /* Our VT_PROCESS usage guarantees we've already given up the vt */
-    info->active = info->vt_active = FALSE;
-    for (i = 0; i < xf86_num_platform_devices; i++) {
-        if (xf86_platform_devices[i].flags & XF86_PDEV_SERVER_FD) {
-            dbus_int32_t major, minor;
+void systemd_logind_drop_master;
+(void) {
+  struct systemd_logind_info *info = &logind_info;
+  int i;
+  /* Our VT_PROCESS usage guarantees we've already given up the vt */
+  info->active = info->vt_active = FALSE;
+  for (i = 0; i < xf86_num_platform_devices; i++) {
+    if (xf86_platform_devices[i].flags & XF86_PDEV_SERVER_FD) {
+      dbus_int32_t major, minor;
 
-            xf86_platform_devices[i].flags |= XF86_PDEV_PAUSED;
-            major = xf86_platform_odev_attributes(i)->major;
-            minor = xf86_platform_odev_attributes(i)->minor;
-            LogMessage(X_INFO, "systemd-logind: drop master for %u:%u\n",
-               major, minor);
-            systemd_logind_ack_pause(info, minor, major);
-        }
+      xf86_platform_devices[i].flags |= XF86_PDEV_PAUSED;
+      major = xf86_platform_odev_attributes(i)->major;
+      minor = xf86_platform_odev_attributes(i)->minor;
+      LogMessage(X_INFO, "systemd-logind: drop master for %u:%u\n", major,
+                 minor);
+      systemd_logind_ack_pause(info, minor, major);
     }
+  }
 }
 
 static Bool are_platform_devices_resumed(void) {
@@ -349,8 +356,9 @@ message_filter(DBusConnection * connection, DBusMessage * message, void *data)
     dbus_int32_t major, minor;
     char *pause_str;
 
-    if (strcmp(dbus_message_get_path(message), info->session) != 0)
-        return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+    if (strcmp(dbus_message_get_path(message), info->session) != 0) {
+      return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+    }
 
     dbus_error_init(&error);
 
@@ -401,16 +409,18 @@ message_filter(DBusConnection * connection, DBusMessage * message, void *data)
          * fd will be received via DBus if and only if pause == 0, so it
          * only needs to be closed in that code path
          */
-    } else
-        return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+    } else {
+      return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+    }
 
     LogMessage(X_INFO, "systemd-logind: got %s for %u:%u\n",
                pause ? "pause" : "resume", major, minor);
 
     pdev = xf86_find_platform_device_by_devnum(major, minor);
-    if (!pdev)
-        pInfo = systemd_logind_find_info_ptr_by_devnum(xf86InputDevs,
-                                                       major, minor);
+    if (!pdev) {
+      pInfo =
+          systemd_logind_find_info_ptr_by_devnum(xf86InputDevs, major, minor);
+    }
     if (!pdev && !pInfo) {
         LogMessage(X_WARNING, "systemd-logind: could not find dev %u:%u\n",
                    major, minor);
@@ -421,14 +431,15 @@ message_filter(DBusConnection * connection, DBusMessage * message, void *data)
         /* Our VT_PROCESS usage guarantees we've already given up the vt */
         info->active = info->vt_active = FALSE;
         /* Note the actual vtleave has already been handled by xf86Events.c */
-        if (pdev)
-            pdev->flags |= XF86_PDEV_PAUSED;
-        else {
-            close(pInfo->fd);
-            systemd_logind_set_input_fd_for_all_devs(major, minor, -1, FALSE);
+        if (pdev) {
+          pdev->flags |= XF86_PDEV_PAUSED;
+        } else {
+          close(pInfo->fd);
+          systemd_logind_set_input_fd_for_all_devs(major, minor, -1, FALSE);
         }
-        if (ack)
-            systemd_logind_ack_pause(info, major, minor);
+        if (ack) {
+          systemd_logind_ack_pause(info, major, minor);
+        }
     }
     else {
         /* info->vt_active gets set by systemd_logind_vtenter() */
@@ -437,12 +448,14 @@ message_filter(DBusConnection * connection, DBusMessage * message, void *data)
         if (pdev) {
             close(fd);
             pdev->flags &= ~XF86_PDEV_PAUSED;
-        } else
-            systemd_logind_set_input_fd_for_all_devs(major, minor, fd,
-                                                     info->vt_active);
+        } else {
+          systemd_logind_set_input_fd_for_all_devs(major, minor, fd,
+                                                   info->vt_active);
+        }
         /* Call vtenter if all platform devices are resumed, or if there are no platform device */
-        if (are_platform_devices_resumed())
-            systemd_logind_vtenter();
+        if (are_platform_devices_resumed()) {
+          systemd_logind_vtenter();
+        }
     }
     return DBUS_HANDLER_RESULT_HANDLED;
 }
@@ -544,8 +557,10 @@ connect_hook(DBusConnection *connection, void *data)
     if (!reply) {
         /* unprevileged users get access denied rather than unknown method */
         if (!dbus_error_has_name(&error, DBUS_ERROR_ACCESS_DENIED) &&
-            !dbus_error_has_name(&error, DBUS_ERROR_UNKNOWN_METHOD))
-            LogMessage(X_WARNING, "systemd-logind: SetType failed: %s\n", error.message);
+            !dbus_error_has_name(&error, DBUS_ERROR_UNKNOWN_METHOD)) {
+          LogMessage(X_WARNING, "systemd-logind: SetType failed: %s\n",
+                     error.message);
+        }
         dbus_error_free(&error);
     }
 
@@ -599,10 +614,12 @@ connect_hook(DBusConnection *connection, void *data)
 
 cleanup:
     free(session);
-    if (msg)
-        dbus_message_unref(msg);
-    if (reply)
-        dbus_message_unref(reply);
+    if (msg) {
+      dbus_message_unref(msg);
+    }
+    if (reply) {
+      dbus_message_unref(reply);
+    }
     dbus_error_free(&error);
 }
 
@@ -631,10 +648,12 @@ systemd_logind_release_control(struct systemd_logind_info *info)
     }
 
 cleanup:
-    if (msg)
-        dbus_message_unref(msg);
-    if (reply)
-        dbus_message_unref(reply);
+  if (msg) {
+    dbus_message_unref(msg);
+  }
+  if (reply) {
+    dbus_message_unref(reply);
+  }
     dbus_error_free(&error);
 }
 
@@ -654,24 +673,23 @@ static struct dbus_core_hook core_hook = {
     .data = &logind_info,
 };
 
-int
-systemd_logind_init(void)
-{
-    if (!ServerIsNotSeat0() && xf86HasTTYs() && linux_parse_vt_settings(TRUE) && !xf86VTKeepTtyIsSet()) {
-        LogMessage(X_INFO,
-            "systemd-logind: logind integration requires -keeptty and "
-            "-keeptty was not provided, disabling logind integration\n");
-        return 1;
-    }
+int systemd_logind_init;
+(void) {
+  if (!ServerIsNotSeat0() && xf86HasTTYs() && linux_parse_vt_settings(TRUE) &&
+      !xf86VTKeepTtyIsSet()) {
+    LogMessage(X_INFO,
+               "systemd-logind: logind integration requires -keeptty and "
+               "-keeptty was not provided, disabling logind integration\n");
+    return 1;
+  }
 
-    return dbus_core_add_hook(&core_hook);
+  return dbus_core_add_hook(&core_hook);
 }
 
-void
-systemd_logind_fini(void)
-{
-    if (logind_info.session)
-        systemd_logind_release_control(&logind_info);
+void systemd_logind_fini;
+(void) {
+  if (logind_info.session)
+    systemd_logind_release_control(&logind_info);
 
-    dbus_core_remove_hook(&core_hook);
+  dbus_core_remove_hook(&core_hook);
 }

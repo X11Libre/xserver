@@ -81,8 +81,9 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     REQUEST(xGetDeviceDontPropagateListReq);
     REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     CARD16 count = 0;
     int i, rc;
@@ -95,24 +96,28 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     };
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if ((others = wOtherInputMasks(pWin)) != 0) {
-        for (i = 0; i < EMASKSIZE; i++)
-            ClassFromMask(NULL, others->dontPropagateMask[i], i, &count, COUNT);
+      for (i = 0; i < EMASKSIZE; i++) {
+        ClassFromMask(NULL, others->dontPropagateMask[i], i, &count, COUNT);
+      }
         if (count) {
             reply.count = count;
             buf = calloc(count, sizeof(XEventClass));
-            if (!buf)
-                return BadAlloc;
+            if (!buf) {
+              return BadAlloc;
+            }
 
             tbuf = buf;
-            for (i = 0; i < EMASKSIZE; i++)
-                tbuf = ClassFromMask(tbuf, others->dontPropagateMask[i], i,
-                                     NULL, CREATE);
+            for (i = 0; i < EMASKSIZE; i++) {
+              tbuf = ClassFromMask(tbuf, others->dontPropagateMask[i], i, NULL,
+                                   CREATE);
+            }
 
             x_rpcbuf_write_CARD32s(&rpcbuf, buf, count);
             free(buf);
@@ -141,15 +146,18 @@ XEventClass
     int id = maskndx;
     Mask tmask = 0x80000000;
 
-    for (i = 0; i < 32; i++, tmask >>= 1)
-        if (tmask & mask) {
-            for (j = 0; j < ExtEventIndex; j++)
-                if (EventInfo[j].mask == tmask) {
-                    if (mode == COUNT)
-                        (*count)++;
-                    else
-                        *buf++ = (id << 8) | EventInfo[j].type;
-                }
+    for (i = 0; i < 32; i++, tmask >>= 1) {
+      if (tmask & mask) {
+        for (j = 0; j < ExtEventIndex; j++) {
+          if (EventInfo[j].mask == tmask) {
+            if (mode == COUNT) {
+              (*count)++;
+            } else {
+              *buf++ = (id << 8) | EventInfo[j].type;
+            }
+          }
         }
+      }
+    }
     return buf;
 }

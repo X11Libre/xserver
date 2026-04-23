@@ -39,8 +39,9 @@ void
 config_pre_init(void)
 {
 #ifdef CONFIG_UDEV
-    if (!config_udev_pre_init())
-        ErrorF("[config] failed to pre-init udev\n");
+  if (!config_udev_pre_init()) {
+    ErrorF("[config] failed to pre-init udev\n");
+  }
 #endif
 }
 
@@ -48,8 +49,9 @@ void
 config_init(void)
 {
 #ifdef CONFIG_UDEV
-    if (!config_udev_init())
-        ErrorF("[config] failed to initialise udev\n");
+  if (!config_udev_init()) {
+    ErrorF("[config] failed to initialise udev\n");
+  }
 #elif defined(CONFIG_HAL)
     if (!config_hal_init())
         ErrorF("[config] failed to initialise HAL\n");
@@ -100,13 +102,15 @@ remove_devices(const char *backend, const char *config_info)
 
     for (dev = inputInfo.devices; dev; dev = next) {
         next = dev->next;
-        if (dev->config_info && strcmp(dev->config_info, config_info) == 0)
-            remove_device(backend, dev);
+        if (dev->config_info && strcmp(dev->config_info, config_info) == 0) {
+          remove_device(backend, dev);
+        }
     }
     for (dev = inputInfo.off_devices; dev; dev = next) {
         next = dev->next;
-        if (dev->config_info && strcmp(dev->config_info, config_info) == 0)
-            remove_device(backend, dev);
+        if (dev->config_info && strcmp(dev->config_info, config_info) == 0) {
+          remove_device(backend, dev);
+        }
     }
 
     RemoveInputDeviceTraces(config_info);
@@ -118,13 +122,15 @@ device_is_duplicate(const char *config_info)
     DeviceIntPtr dev;
 
     for (dev = inputInfo.devices; dev; dev = dev->next) {
-        if (dev->config_info && (strcmp(dev->config_info, config_info) == 0))
-            return TRUE;
+      if (dev->config_info && (strcmp(dev->config_info, config_info) == 0)) {
+        return TRUE;
+      }
     }
 
     for (dev = inputInfo.off_devices; dev; dev = dev->next) {
-        if (dev->config_info && (strcmp(dev->config_info, config_info) == 0))
-            return TRUE;
+      if (dev->config_info && (strcmp(dev->config_info, config_info) == 0)) {
+        return TRUE;
+      }
     }
 
     return FALSE;
@@ -142,8 +148,9 @@ config_odev_allocate_attributes(void)
 void
 config_odev_free_attributes(struct OdevAttributes *attribs)
 {
-    if (attribs->fd != -1)
-        systemd_logind_release_fd(attribs->major, attribs->minor, attribs->fd);
+  if (attribs->fd != -1) {
+    systemd_logind_release_fd(attribs->major, attribs->minor, attribs->fd);
+  }
     free(attribs->path);
     free(attribs->syspath);
     free(attribs->busid);

@@ -35,8 +35,9 @@ present_clear_window_notifies(WindowPtr window)
     present_notify_ptr          notify;
     present_window_priv_ptr     window_priv = present_window_priv(window);
 
-    if (!window_priv)
-        return;
+    if (!window_priv) {
+      return;
+    }
 
     xorg_list_for_each_entry(notify, &window_priv->notifies, window_list) {
         notify->window = NULL;
@@ -63,8 +64,9 @@ present_add_window_notify(present_notify_ptr notify)
     WindowPtr                   window = notify->window;
     present_window_priv_ptr     window_priv = present_get_window_priv(window, TRUE);
 
-    if (!window_priv)
-        return BadAlloc;
+    if (!window_priv) {
+      return BadAlloc;
+    }
 
     xorg_list_add(&notify->window_list, &window_priv->notifies);
     return Success;
@@ -79,25 +81,29 @@ present_create_notifies(ClientPtr client, int num_notifies, xPresentNotify *x_no
     int                 status;
 
     if (num_notifies <= 0) {
-        if (num_notifies == 0)
-            return Success;
-        else
-            return BadLength;
+      if (num_notifies == 0) {
+        return Success;
+      } else {
+        return BadLength;
+      }
     }
 
     notifies = calloc (num_notifies, sizeof (present_notify_rec));
-    if (!notifies)
-        return BadAlloc;
+    if (!notifies) {
+      return BadAlloc;
+    }
 
     for (i = 0; i < num_notifies; i++) {
         status = dixLookupWindow(&notifies[i].window, x_notifies[i].window, client, DixGetAttrAccess);
-        if (status != Success)
-            goto bail;
+        if (status != Success) {
+          goto bail;
+        }
 
         notifies[i].serial = x_notifies[i].serial;
         status = present_add_window_notify(&notifies[i]);
-        if (status != Success)
-            goto bail;
+        if (status != Success) {
+          goto bail;
+        }
 
         added++;
     }
@@ -112,8 +118,9 @@ void
 present_destroy_notifies(present_notify_ptr notifies, int num_notifies)
 {
     int i;
-    for (i = 0; i < num_notifies; i++)
-        present_free_window_notify(&notifies[i]);
+    for (i = 0; i < num_notifies; i++) {
+      present_free_window_notify(&notifies[i]);
+    }
 
     free(notifies);
 }

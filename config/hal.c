@@ -62,8 +62,9 @@ device_removed(LibHalContext * ctx, const char *udi)
 {
     char *value;
 
-    if (asprintf(&value, "hal:%s", udi) == -1)
-        return;
+    if (asprintf(&value, "hal:%s", udi) == -1) {
+      return;
+    }
 
     remove_devices("hal", value);
 
@@ -98,8 +99,9 @@ get_prop_string_array(LibHalContext * hal_ctx, const char *udi,
 
     props = libhal_device_get_property_strlist(hal_ctx, udi, prop, NULL);
     if (props) {
-        for (i = 0; props[i]; i++)
-            len += strlen(props[i]);
+      for (i = 0; props[i]; i++) {
+        len += strlen(props[i]);
+      }
 
         ret = calloc(len + i, sizeof(char));    /* i - 1 commas, 1 NULL */
         if (!ret) {
@@ -159,30 +161,40 @@ device_added(LibHalContext * hal_ctx, const char *udi)
     attrs.device = strdup(path);
 
     name = get_prop_string(hal_ctx, udi, "info.product");
-    if (!name)
-        name = strdup("(unnamed)");
-    else
-        attrs.product = strdup(name);
+    if (!name) {
+      name = strdup("(unnamed)");
+    } else {
+      attrs.product = strdup(name);
+    }
 
     attrs.vendor = get_prop_string(hal_ctx, udi, "info.vendor");
     hal_tags = get_prop_string(hal_ctx, udi, "input.tags");
     attrs.tags = xstrtokenize(hal_tags, ",");
     free(hal_tags);
 
-    if (libhal_device_query_capability(hal_ctx, udi, "input.keys", NULL))
-        attrs.flags |= ATTR_KEY | ATTR_KEYBOARD;
-    if (libhal_device_query_capability(hal_ctx, udi, "input.mouse", NULL))
-        attrs.flags |= ATTR_POINTER;
-    if (libhal_device_query_capability(hal_ctx, udi, "input.joystick", NULL))
-        attrs.flags |= ATTR_JOYSTICK;
-    if (libhal_device_query_capability(hal_ctx, udi, "input.tablet", NULL))
-        attrs.flags |= ATTR_TABLET;
-    if (libhal_device_query_capability(hal_ctx, udi, "input.tablet_pad", NULL))
-        attrs.flags |= ATTR_TABLET_PAD;
-    if (libhal_device_query_capability(hal_ctx, udi, "input.touchpad", NULL))
-        attrs.flags |= ATTR_TOUCHPAD;
-    if (libhal_device_query_capability(hal_ctx, udi, "input.touchscreen", NULL))
-        attrs.flags |= ATTR_TOUCHSCREEN;
+    if (libhal_device_query_capability(hal_ctx, udi, "input.keys", NULL)) {
+      attrs.flags |= ATTR_KEY | ATTR_KEYBOARD;
+    }
+    if (libhal_device_query_capability(hal_ctx, udi, "input.mouse", NULL)) {
+      attrs.flags |= ATTR_POINTER;
+    }
+    if (libhal_device_query_capability(hal_ctx, udi, "input.joystick", NULL)) {
+      attrs.flags |= ATTR_JOYSTICK;
+    }
+    if (libhal_device_query_capability(hal_ctx, udi, "input.tablet", NULL)) {
+      attrs.flags |= ATTR_TABLET;
+    }
+    if (libhal_device_query_capability(hal_ctx, udi, "input.tablet_pad",
+                                       NULL)) {
+      attrs.flags |= ATTR_TABLET_PAD;
+    }
+    if (libhal_device_query_capability(hal_ctx, udi, "input.touchpad", NULL)) {
+      attrs.flags |= ATTR_TOUCHPAD;
+    }
+    if (libhal_device_query_capability(hal_ctx, udi, "input.touchscreen",
+                                       NULL)) {
+      attrs.flags |= ATTR_TOUCHSCREEN;
+    }
 
     parent = get_prop_string(hal_ctx, udi, "info.parent");
     if (parent) {
@@ -200,10 +212,12 @@ device_added(LibHalContext * hal_ctx, const char *udi)
         LogMessageVerb(X_INFO, 10,
                        "config/hal: getting usb.product_id on %s "
                        "returned %04x\n", parent, usb_product);
-        if (usb_vendor && usb_product)
-            if (asprintf(&attrs.usb_id, "%04x:%04x", usb_vendor, usb_product)
-                == -1)
-                attrs.usb_id = NULL;
+        if (usb_vendor && usb_product) {
+          if (asprintf(&attrs.usb_id, "%04x:%04x", usb_vendor, usb_product) ==
+              -1) {
+            attrs.usb_id = NULL;
+          }
+        }
 
         attrs.pnp_id = get_prop_string(hal_ctx, parent, "pnp.id");
         old_parent = parent;
@@ -338,24 +352,29 @@ device_added(LibHalContext * hal_ctx, const char *udi)
                     tmp = &psi_key[sizeof(LIBHAL_XKB_PROP_KEY) - 1];
 
                     if (!strcasecmp(tmp, "layout")) {
-                        if (!xkb_opts.layout)
-                            xkb_opts.layout = strdup(tmp_val);
+                      if (!xkb_opts.layout) {
+                        xkb_opts.layout = strdup(tmp_val);
+                      }
                     }
                     else if (!strcasecmp(tmp, "rules")) {
-                        if (!xkb_opts.rules)
-                            xkb_opts.rules = strdup(tmp_val);
+                      if (!xkb_opts.rules) {
+                        xkb_opts.rules = strdup(tmp_val);
+                      }
                     }
                     else if (!strcasecmp(tmp, "variant")) {
-                        if (!xkb_opts.variant)
-                            xkb_opts.variant = strdup(tmp_val);
+                      if (!xkb_opts.variant) {
+                        xkb_opts.variant = strdup(tmp_val);
+                      }
                     }
                     else if (!strcasecmp(tmp, "model")) {
-                        if (!xkb_opts.model)
-                            xkb_opts.model = strdup(tmp_val);
+                      if (!xkb_opts.model) {
+                        xkb_opts.model = strdup(tmp_val);
+                      }
                     }
                     else if (!strcasecmp(tmp, "options")) {
-                        if (!xkb_opts.options)
-                            xkb_opts.options = strdup(tmp_val);
+                      if (!xkb_opts.options) {
+                        xkb_opts.options = strdup(tmp_val);
+                      }
                     }
                     free(tmp_val);
                 }
@@ -365,8 +384,10 @@ device_added(LibHalContext * hal_ctx, const char *udi)
                     if (tmp_val &&
                         strlen(psi_key) >= sizeof(LIBHAL_XKB_PROP_KEY)) {
                         tmp = &psi_key[sizeof(LIBHAL_XKB_PROP_KEY) - 1];
-                        if (!strcasecmp(tmp, ".options") && (!xkb_opts.options))
-                            xkb_opts.options = strdup(tmp_val);
+                        if (!strcasecmp(tmp, ".options") &&
+                            (!xkb_opts.options)) {
+                          xkb_opts.options = strdup(tmp_val);
+                        }
                     }
                     free(tmp_val);
                 }
@@ -378,21 +399,26 @@ device_added(LibHalContext * hal_ctx, const char *udi)
     }
 
     /* Now add xkb options */
-    if (xkb_opts.layout)
-        input_options =
-            input_option_new(input_options, "xkb_layout", xkb_opts.layout);
-    if (xkb_opts.rules)
-        input_options =
-            input_option_new(input_options, "xkb_rules", xkb_opts.rules);
-    if (xkb_opts.variant)
-        input_options =
-            input_option_new(input_options, "xkb_variant", xkb_opts.variant);
-    if (xkb_opts.model)
-        input_options =
-            input_option_new(input_options, "xkb_model", xkb_opts.model);
-    if (xkb_opts.options)
-        input_options =
-            input_option_new(input_options, "xkb_options", xkb_opts.options);
+    if (xkb_opts.layout) {
+      input_options =
+          input_option_new(input_options, "xkb_layout", xkb_opts.layout);
+    }
+    if (xkb_opts.rules) {
+      input_options =
+          input_option_new(input_options, "xkb_rules", xkb_opts.rules);
+    }
+    if (xkb_opts.variant) {
+      input_options =
+          input_option_new(input_options, "xkb_variant", xkb_opts.variant);
+    }
+    if (xkb_opts.model) {
+      input_options =
+          input_option_new(input_options, "xkb_model", xkb_opts.model);
+    }
+    if (xkb_opts.options) {
+      input_options =
+          input_option_new(input_options, "xkb_options", xkb_opts.options);
+    }
     input_options = input_option_new(input_options, "config_info", config_info);
 
     /* this isn't an error, but how else do you output something that the user can see? */
@@ -468,8 +494,9 @@ connect_and_register(DBusConnection * connection, struct config_hal_info *info)
     char **devices;
     int num_devices, i;
 
-    if (info->hal_ctx)
-        return TRUE;            /* already registered, pretend we did something */
+    if (info->hal_ctx) {
+      return TRUE; /* already registered, pretend we did something */
+    }
 
     info->system_bus = connection;
 
@@ -512,8 +539,9 @@ connect_and_register(DBusConnection * connection, struct config_hal_info *info)
                    error.message ? error.message : "null");
         goto out_ctx;
     }
-    for (i = 0; i < num_devices; i++)
-        device_added(info->hal_ctx, devices[i]);
+    for (i = 0; i < num_devices; i++) {
+      device_added(info->hal_ctx, devices[i]);
+    }
     libhal_free_string_array(devices);
 
     dbus_error_free(&error);
@@ -578,12 +606,13 @@ ownerchanged_handler(DBusConnection * connection, DBusMessage * message,
 
             if (!old_owner || !strlen(old_owner)) {
                 DebugF("[config/hal] HAL startup detected.\n");
-                if (connect_and_register
-                    (connection, (struct config_hal_info *) data))
-                    dbus_connection_unregister_object_path(connection,
-                                                           "/org/freedesktop/DBus");
-                else
-                    ErrorF("[config/hal] Failed to connect to HAL bus.\n");
+                if (connect_and_register(connection,
+                                         (struct config_hal_info *)data)) {
+                  dbus_connection_unregister_object_path(
+                      connection, "/org/freedesktop/DBus");
+                } else {
+                  ErrorF("[config/hal] Failed to connect to HAL bus.\n");
+                }
             }
 
             ret = DBUS_HANDLER_RESULT_HANDLED;
@@ -611,12 +640,12 @@ listen_for_startup(DBusConnection * connection, void *data)
     dbus_error_init(&error);
     dbus_bus_add_match(connection, MATCH_RULE, &error);
     if (!dbus_error_is_set(&error)) {
-        if (dbus_connection_register_object_path(connection,
-                                                 "/org/freedesktop/DBus",
-                                                 &vtable, data))
-            rc = TRUE;
-        else
-            ErrorF("[config/hal] cannot register object path.\n");
+      if (dbus_connection_register_object_path(
+              connection, "/org/freedesktop/DBus", &vtable, data)) {
+        rc = TRUE;
+      } else {
+        ErrorF("[config/hal] cannot register object path.\n");
+      }
     }
     else {
         ErrorF("[config/hal] couldn't add match rule: %s (%s)\n", error.name,
@@ -635,9 +664,10 @@ connect_hook(DBusConnection * connection, void *data)
     struct config_hal_info *info = data;
 
     if (listen_for_startup(connection, data) &&
-        connect_and_register(connection, info))
-        dbus_connection_unregister_object_path(connection,
-                                               "/org/freedesktop/DBus");
+        connect_and_register(connection, info)) {
+      dbus_connection_unregister_object_path(connection,
+                                             "/org/freedesktop/DBus");
+    }
 
     return;
 }

@@ -75,11 +75,13 @@ static GLboolean __glXFreeContext(__GLXcontext * cx);
 static int
 ContextGone(__GLXcontext * cx, XID id)
 {
-    if (!cx)
-        return TRUE;
+  if (!cx) {
+    return TRUE;
+  }
 
-    if (!cx->currentClient)
-        __glXFreeContext(cx);
+  if (!cx->currentClient) {
+    __glXFreeContext(cx);
+  }
 
     return TRUE;
 }
@@ -100,10 +102,11 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
     if (glxPriv->type == GLX_DRAWABLE_WINDOW) {
         /* If this was created by glXCreateWindow, free the matching resource */
         if (glxPriv->drawId != glxPriv->pDraw->id) {
-            if (xid == glxPriv->drawId)
-                FreeResourceByType(glxPriv->pDraw->id, __glXDrawableRes, TRUE);
-            else
-                FreeResourceByType(glxPriv->drawId, __glXDrawableRes, TRUE);
+          if (xid == glxPriv->drawId) {
+            FreeResourceByType(glxPriv->pDraw->id, __glXDrawableRes, TRUE);
+          } else {
+            FreeResourceByType(glxPriv->drawId, __glXDrawableRes, TRUE);
+          }
         }
         /* otherwise this window was implicitly created by MakeCurrent */
     }
@@ -118,15 +121,18 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
             (*c->loseCurrent) (c);
             lastGLContext = NULL;
         }
-        if (c->drawPriv == glxPriv)
-            c->drawPriv = NULL;
-        if (c->readPriv == glxPriv)
-            c->readPriv = NULL;
+        if (c->drawPriv == glxPriv) {
+          c->drawPriv = NULL;
+        }
+        if (c->readPriv == glxPriv) {
+          c->readPriv = NULL;
+        }
     }
 
     /* drop our reference to any backing pixmap */
-    if (glxPriv->type == GLX_DRAWABLE_PIXMAP)
-        dixDestroyPixmap((PixmapPtr)glxPriv->pDraw, 0);
+    if (glxPriv->type == GLX_DRAWABLE_PIXMAP) {
+      dixDestroyPixmap((PixmapPtr)glxPriv->pDraw, 0);
+    }
 
     glxPriv->destroy(glxPriv);
 
@@ -152,15 +158,16 @@ __glXRemoveFromContextList(__GLXcontext * cx)
 {
     __GLXcontext *c, *prev;
 
-    if (cx == glxAllContexts)
-        glxAllContexts = cx->next;
-    else {
-        prev = glxAllContexts;
-        for (c = glxAllContexts; c; c = c->next) {
-            if (c == cx)
-                prev->next = c->next;
-            prev = c;
+    if (cx == glxAllContexts) {
+      glxAllContexts = cx->next;
+    } else {
+      prev = glxAllContexts;
+      for (c = glxAllContexts; c; c = c->next) {
+        if (c == cx) {
+          prev->next = c->next;
         }
+        prev = c;
+      }
     }
 }
 
@@ -170,8 +177,9 @@ __glXRemoveFromContextList(__GLXcontext * cx)
 static GLboolean
 __glXFreeContext(__GLXcontext * cx)
 {
-    if (cx->idExists || cx->currentClient)
-        return GL_FALSE;
+  if (cx->idExists || cx->currentClient) {
+    return GL_FALSE;
+  }
 
     __glXRemoveFromContextList(cx);
 
@@ -362,16 +370,19 @@ xorgGlxThunkRequest(ClientPtr client)
     case X_GLXvop_QueryContextInfoEXT: {
         xGLXQueryContextInfoEXTReq *req = (void *)stuff;
         REQUEST_AT_LEAST_SIZE(*req);
-        if (!(vendor = glxServer.getXIDMap(maybe_swap32(client, req->context))))
-            return __glXError(GLXBadContext);
+        if (!(vendor =
+                  glxServer.getXIDMap(maybe_swap32(client, req->context)))) {
+          return __glXError(GLXBadContext);
+        }
         break;
         }
 
     case X_GLXvop_GetFBConfigsSGIX: {
         xGLXGetFBConfigsSGIXReq *req = (void *)stuff;
         REQUEST_AT_LEAST_SIZE(*req);
-        if (!(vendor = vendorForScreen(client, req->screen)))
-            return BadValue;
+        if (!(vendor = vendorForScreen(client, req->screen))) {
+          return BadValue;
+        }
         break;
         }
 
@@ -379,8 +390,9 @@ xorgGlxThunkRequest(ClientPtr client)
         xGLXCreateContextWithConfigSGIXReq *req = (void *)stuff;
         REQUEST_AT_LEAST_SIZE(*req);
         resource = maybe_swap32(client, req->context);
-        if (!(vendor = vendorForScreen(client, req->screen)))
-            return BadValue;
+        if (!(vendor = vendorForScreen(client, req->screen))) {
+          return BadValue;
+        }
         break;
         }
 
@@ -388,8 +400,9 @@ xorgGlxThunkRequest(ClientPtr client)
         xGLXCreateGLXPixmapWithConfigSGIXReq *req = (void *)stuff;
         REQUEST_AT_LEAST_SIZE(*req);
         resource = maybe_swap32(client, req->glxpixmap);
-        if (!(vendor = vendorForScreen(client, req->screen)))
-            return BadValue;
+        if (!(vendor = vendorForScreen(client, req->screen))) {
+          return BadValue;
+        }
         break;
         }
 
@@ -397,8 +410,9 @@ xorgGlxThunkRequest(ClientPtr client)
         xGLXCreateGLXPbufferSGIXReq *req = (void *)stuff;
         REQUEST_AT_LEAST_SIZE(*req);
         resource = maybe_swap32(client, req->pbuffer);
-        if (!(vendor = vendorForScreen(client, req->screen)))
-            return BadValue;
+        if (!(vendor = vendorForScreen(client, req->screen))) {
+          return BadValue;
+        }
         break;
         }
 
@@ -408,9 +422,10 @@ xorgGlxThunkRequest(ClientPtr client)
     case X_GLXvop_GetDrawableAttributesSGIX: {
         xGLXGetDrawableAttributesSGIXReq *req = (void *)stuff;
         REQUEST_AT_LEAST_SIZE(*req);
-        if (!(vendor = glxServer.getXIDMap(maybe_swap32(client,
-                                                        req->drawable))))
-            return __glXError(GLXBadDrawable);
+        if (!(vendor =
+                  glxServer.getXIDMap(maybe_swap32(client, req->drawable)))) {
+          return __glXError(GLXBadDrawable);
+        }
         break;
         }
 
@@ -419,8 +434,9 @@ xorgGlxThunkRequest(ClientPtr client)
         /* size checked by vnd layer already */
         GLXContextTag tag = maybe_swap32(client, stuff->contextTag);
         vendor = glxServer.getContextTag(client, tag);
-        if (!vendor)
-            return __glXError(GLXBadContextTag);
+        if (!vendor) {
+          return __glXError(GLXBadContextTag);
+        }
         break;
         }
     }
@@ -428,8 +444,9 @@ xorgGlxThunkRequest(ClientPtr client)
     /* If we're creating a resource, add the map now */
     if (resource) {
         LEGAL_NEW_RESOURCE(resource, client);
-        if (!glxServer.addXIDMap(resource, vendor))
-            return BadAlloc;
+        if (!glxServer.addXIDMap(resource, vendor)) {
+          return BadAlloc;
+        }
     }
 
     ret = glxServer.forwardRequest(vendor, client);
@@ -439,8 +456,9 @@ xorgGlxThunkRequest(ClientPtr client)
         glxServer.removeXIDMap(maybe_swap32(client, req->pbuffer));
     }
 
-    if (ret != Success)
-        glxServer.removeXIDMap(resource);
+    if (ret != Success) {
+      glxServer.removeXIDMap(resource);
+    }
 
     return ret;
 }
@@ -450,13 +468,15 @@ xorgGlxGetDispatchAddress(CARD8 minorOpcode, CARD32 vendorCode)
 {
     /* we don't support any other GLX opcodes */
     if (minorOpcode != X_GLXVendorPrivate &&
-        minorOpcode != X_GLXVendorPrivateWithReply)
-        return NULL;
+        minorOpcode != X_GLXVendorPrivateWithReply) {
+      return NULL;
+    }
 
     /* we only support some vendor private requests */
     if (!__glXGetProtocolDecodeFunction(&VendorPriv_dispatch_info, vendorCode,
-                                        FALSE))
-        return NULL;
+                                        FALSE)) {
+      return NULL;
+    }
 
     return xorgGlxThunkRequest;
 }
@@ -465,21 +485,25 @@ static Bool
 xorgGlxServerPreInit(const ExtensionEntry *extEntry)
 {
         /* Mesa requires at least one True/DirectColor visual */
-        if (!checkScreenVisuals())
-            return FALSE;
+        if (!checkScreenVisuals()) {
+          return FALSE;
+        }
 
         __glXContextRes = CreateNewResourceType((DeleteType) ContextGone,
                                                 "GLXContext");
         __glXDrawableRes = CreateNewResourceType((DeleteType) DrawableGone,
                                                  "GLXDrawable");
-        if (!__glXContextRes || !__glXDrawableRes)
-            return FALSE;
+        if (!__glXContextRes || !__glXDrawableRes) {
+          return FALSE;
+        }
 
-        if (!dixRegisterPrivateKey
-            (&glxClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(__GLXclientState)))
-            return FALSE;
-        if (!AddCallback(&ClientStateCallback, glxClientCallback, 0))
-            return FALSE;
+        if (!dixRegisterPrivateKey(&glxClientPrivateKeyRec, PRIVATE_CLIENT,
+                                   sizeof(__GLXclientState))) {
+          return FALSE;
+        }
+        if (!AddCallback(&ClientStateCallback, glxClientCallback, 0)) {
+          return FALSE;
+        }
 
         __glXErrorBase = extEntry->errorBase;
         __glXEventBase = extEntry->eventBase;
@@ -604,8 +628,9 @@ __glXForceCurrent(__GLXclientState * cl, GLXContextTag tag, int *error)
         }
     }
 
-    if (cx->wait && (*cx->wait) (cx, cl, error))
-        return NULL;
+    if (cx->wait && (*cx->wait)(cx, cl, error)) {
+      return NULL;
+    }
 
     if (cx == lastGLContext) {
         /* No need to re-bind */
@@ -640,8 +665,9 @@ glxSuspendClients(void)
     int i;
 
     for (i = 1; i < currentMaxClients; i++) {
-        if (clients[i] && glxGetClient(clients[i])->client)
-            IgnoreClient(clients[i]);
+      if (clients[i] && glxGetClient(clients[i])->client) {
+        IgnoreClient(clients[i]);
+      }
     }
 
     glxBlockClients = TRUE;
@@ -656,8 +682,9 @@ glxResumeClients(void)
     glxBlockClients = FALSE;
 
     for (i = 1; i < currentMaxClients; i++) {
-        if (clients[i] && glxGetClient(clients[i])->client)
-            AttendClient(clients[i]);
+      if (clients[i] && glxGetClient(clients[i])->client) {
+        AttendClient(clients[i]);
+      }
     }
 
     for (cx = glxPendingDestroyContexts; cx != NULL; cx = next) {
@@ -698,9 +725,9 @@ __glXDispatch(ClientPtr client)
     opcode = stuff->glxCode;
     cl = glxGetClient(client);
 
-
-    if (!cl->client)
-        cl->client = client;
+    if (!cl->client) {
+      cl->client = client;
+    }
 
     /* If we're currently blocking GLX clients, just put this guy to
      * sleep, reset the request and return. */
@@ -716,8 +743,9 @@ __glXDispatch(ClientPtr client)
      */
     proc = __glXGetProtocolDecodeFunction(&Single_dispatch_info, opcode,
                                           client->swapped);
-    if (proc != NULL)
-        retval = (*proc) (cl, (GLbyte *) stuff);
+    if (proc != NULL) {
+      retval = (*proc)(cl, (GLbyte *)stuff);
+    }
 
     return retval;
 }

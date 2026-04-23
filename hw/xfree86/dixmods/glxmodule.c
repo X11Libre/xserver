@@ -67,16 +67,18 @@ glxSetup(void *module, void *opts, int *errmaj, int *errmin)
     __GLXprovider *provider;
 
     if (setupDone) {
-        if (errmaj)
-            *errmaj = LDR_ONCEONLY;
+      if (errmaj) {
+        *errmaj = LDR_ONCEONLY;
+      }
         return NULL;
     }
 
     setupDone = TRUE;
 
     provider = LoaderSymbol("__glXDRI2Provider");
-    if (provider)
-        GlxPushProvider(provider);
+    if (provider) {
+      GlxPushProvider(provider);
+    }
     xorgGlxCreateVendor();
 
     return module;

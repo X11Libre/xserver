@@ -48,25 +48,29 @@ RRPointerToNearestCrtc(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y,
         int dist;
         int scan_width, scan_height;
 
-        if (!mode)
-            continue;
-        if (crtc == skip)
-            continue;
+        if (!mode) {
+          continue;
+        }
+        if (crtc == skip) {
+          continue;
+        }
 
         RRCrtcGetScanoutSize(crtc, &scan_width, &scan_height);
 
-        if (x < crtc->x)
-            dx = crtc->x - x;
-        else if (x > crtc->x + scan_width - 1)
-            dx = crtc->x + (scan_width - 1) - x;
-        else
-            dx = 0;
-        if (y < crtc->y)
-            dy = crtc->y - y;
-        else if (y > crtc->y + scan_height - 1)
-            dy = crtc->y + (scan_height - 1) - y;
-        else
-            dy = 0;
+        if (x < crtc->x) {
+          dx = crtc->x - x;
+        } else if (x > crtc->x + scan_width - 1) {
+          dx = crtc->x + (scan_width - 1) - x;
+        } else {
+          dx = 0;
+        }
+        if (y < crtc->y) {
+          dy = crtc->y - y;
+        } else if (y > crtc->y + scan_height - 1) {
+          dy = crtc->y + (scan_height - 1) - y;
+        } else {
+          dy = 0;
+        }
         dist = dx * dx + dy * dy;
         if (!nearest || dist < best) {
             nearest = crtc;
@@ -75,9 +79,10 @@ RRPointerToNearestCrtc(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y,
             best = dist;
         }
     }
-    if (best_dx || best_dy)
-        (*pScreen->SetCursorPosition) (pDev, pScreen, x + best_dx, y + best_dy,
-                                       TRUE);
+    if (best_dx || best_dy) {
+      (*pScreen->SetCursorPosition)(pDev, pScreen, x + best_dx, y + best_dy,
+                                    TRUE);
+    }
     pScrPriv->pointerCrtc = nearest;
 }
 

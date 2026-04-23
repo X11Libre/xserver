@@ -95,8 +95,9 @@ checkDevMem(Bool warn)
     int fd;
     void *base;
 
-    if (devMemChecked)
-        return;
+    if (devMemChecked) {
+      return;
+    }
     devMemChecked = TRUE;
 
 #ifdef HAS_APERTURE_DRV

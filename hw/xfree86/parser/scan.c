@@ -166,9 +166,9 @@ xf86getNextLine(void)
             if (pos != 0) {
                 strcpy(&configBuf[pos], "\n");
                 ret = configBuf;
+            } else {
+              break;
             }
-            else
-                break;
         }
 
         /* search for EOL in the new block of chars */
@@ -176,8 +176,9 @@ xf86getNextLine(void)
         for (i = pos; i < (configBufLen - 1); i++) {
             c = configBuf[i];
 
-            if (c == '\0')
-                break;
+            if (c == '\0') {
+              break;
+            }
 
             if ((c == '\n') || (c == '\r')) {
                 eolFound = 1;
@@ -205,10 +206,12 @@ xf86getNextLine(void)
                  * EOL
                  */
 
-                if (tmpConfigBuf)
-                    configBuf = tmpConfigBuf;
-                if (tmpConfigRBuf)
-                    configRBuf = tmpConfigRBuf;
+                if (tmpConfigBuf) {
+                  configBuf = tmpConfigBuf;
+                }
+                if (tmpConfigRBuf) {
+                  configRBuf = tmpConfigRBuf;
+                }
 
                 break;
 
@@ -235,8 +238,9 @@ StringToToken(const char *str, const xf86ConfigSymTabRec * tab)
     int i;
 
     for (i = 0; tab[i].token != -1; i++) {
-        if (!xf86nameCompare(tab[i].name, str))
-            return tab[i].token;
+      if (!xf86nameCompare(tab[i].name, str)) {
+        return tab[i].token;
+      }
     }
     return ERROR_TOKEN;
 }
@@ -256,183 +260,180 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
      * In this case rBuf[] contains a valid STRING/TOKEN/NUMBER. But in the
      * oth * case the next token must be read from the input.
      */
-    if (pushToken == EOF_TOKEN)
-        return EOF_TOKEN;
-    else if (pushToken == LOCK_TOKEN) {
-        /*
-         * eol_seen is only set for the first token after a newline.
-         */
-        eol_seen = 0;
+    if (pushToken == EOF_TOKEN) {
+      return EOF_TOKEN;
+    } else if (pushToken == LOCK_TOKEN) {
+      /*
+       * eol_seen is only set for the first token after a newline.
+       */
+      eol_seen = 0;
 
-        c = configBuf[configPos];
+      c = configBuf[configPos];
 
-        /*
-         * Get start of next Token. EOF is handled,
-         * whitespaces are skipped.
-         */
+      /*
+       * Get start of next Token. EOF is handled,
+       * whitespaces are skipped.
+       */
 
- again:
-        if (!c) {
-            char *ret;
+    again:
+      if (!c) {
+        char *ret;
 
-            if (numFiles > 0)
-                ret = xf86getNextLine();
-            else {
-                if (builtinConfig[builtinIndex] == NULL)
-                    ret = NULL;
-                else {
-                    strlcpy(configBuf,
-                            builtinConfig[builtinIndex], CONFIG_BUF_LEN);
-                    ret = configBuf;
-                    builtinIndex++;
-                }
-            }
-            if (ret == NULL) {
-                /*
-                 * if necessary, move to the next file and
-                 * read the first line
-                 */
-                if (curFileIndex + 1 < numFiles) {
-                    curFileIndex++;
-                    configLineNo = 0;
-                    goto again;
-                }
-                else
-                    return pushToken = EOF_TOKEN;
-            }
-            configLineNo++;
-            configPos = 0;
-            eol_seen = 1;
+        if (numFiles > 0) {
+          ret = xf86getNextLine();
+        } else {
+          if (builtinConfig[builtinIndex] == NULL) {
+            ret = NULL;
+          } else {
+            strlcpy(configBuf, builtinConfig[builtinIndex], CONFIG_BUF_LEN);
+            ret = configBuf;
+            builtinIndex++;
+          }
         }
-
-        i = 0;
-        for (;;) {
-            c = configBuf[configPos++];
-            configRBuf[i++] = c;
-            switch (c) {
-            case ' ':
-            case '\t':
-            case '\r':
-                continue;
-            case '\n':
-                i = 0;
-                continue;
-            }
-            break;
-        }
-        if (c == '\0')
+        if (ret == NULL) {
+          /*
+           * if necessary, move to the next file and
+           * read the first line
+           */
+          if (curFileIndex + 1 < numFiles) {
+            curFileIndex++;
+            configLineNo = 0;
             goto again;
-
-        if (c == '#') {
-            do {
-                configRBuf[i++] = (c = configBuf[configPos++]);
-            }
-            while ((c != '\n') && (c != '\r') && (c != '\0'));
-            configRBuf[i] = '\0';
-            /* XXX private copy.
-             * Use xf86addComment when setting a comment.
-             */
-            xf86_lex_val.str = strdup(configRBuf);
-            return COMMENT;
+          } else {
+            return pushToken = EOF_TOKEN;
+          }
         }
+        configLineNo++;
+        configPos = 0;
+        eol_seen = 1;
+      }
 
-        /* GJA -- handle '-' and ','  * Be careful: "-hsync" is a keyword. */
-        else if ((c == ',') && !isalpha((unsigned char)configBuf[configPos])) {
-            return COMMA;
+      i = 0;
+      for (;;) {
+        c = configBuf[configPos++];
+        configRBuf[i++] = c;
+        switch (c) {
+        case ' ':
+        case '\t':
+        case '\r':
+          continue;
+        case '\n':
+          i = 0;
+          continue;
         }
-        else if ((c == '-') && !isalpha((unsigned char)configBuf[configPos])) {
-            return DASH;
-        }
+        break;
+      }
+      if (c == '\0') {
+        goto again;
+      }
 
-        /*
-         * Numbers are returned immediately ...
+      if (c == '#') {
+        do {
+          configRBuf[i++] = (c = configBuf[configPos++]);
+        } while ((c != '\n') && (c != '\r') && (c != '\0'));
+        configRBuf[i] = '\0';
+        /* XXX private copy.
+         * Use xf86addComment when setting a comment.
          */
-        if (isdigit(c)) {
-            int base;
+        xf86_lex_val.str = strdup(configRBuf);
+        return COMMENT;
+      }
 
-            if (c == '0')
-                if ((configBuf[configPos] == 'x') ||
-                    (configBuf[configPos] == 'X')) {
-                    base = 16;
-                    xf86_lex_val.numType = PARSE_HEX;
-                }
-                else {
-                    base = 8;
-                    xf86_lex_val.numType = PARSE_OCTAL;
-                }
-            else {
-                base = 10;
-                xf86_lex_val.numType = PARSE_DECIMAL;
-            }
+      /* GJA -- handle '-' and ','  * Be careful: "-hsync" is a keyword. */
+      else if ((c == ',') && !isalpha((unsigned char)configBuf[configPos])) {
+        return COMMA;
+      } else if ((c == '-') && !isalpha((unsigned char)configBuf[configPos])) {
+        return DASH;
+      }
 
-            configRBuf[0] = c;
-            i = 1;
-            while (isdigit(c = configBuf[configPos++]) ||
-                   (c == '.') || (c == 'x') || (c == 'X') ||
-                   ((base == 16) && (((c >= 'a') && (c <= 'f')) ||
-                                     ((c >= 'A') && (c <= 'F')))))
-                configRBuf[i++] = c;
-            configPos--;        /* GJA -- one too far */
-            configRBuf[i] = '\0';
-            xf86_lex_val.num = strtoul(configRBuf, NULL, 0);
-            xf86_lex_val.realnum = atof(configRBuf);
-            return NUMBER;
+      /*
+       * Numbers are returned immediately ...
+       */
+      if (isdigit(c)) {
+        int base;
+
+        if (c == '0') {
+          if ((configBuf[configPos] == 'x') || (configBuf[configPos] == 'X')) {
+            base = 16;
+            xf86_lex_val.numType = PARSE_HEX;
+          } else {
+            base = 8;
+            xf86_lex_val.numType = PARSE_OCTAL;
+          }
+        } else {
+          base = 10;
+          xf86_lex_val.numType = PARSE_DECIMAL;
         }
 
-        /*
-         * All Strings START with a \" ...
-         */
-        else if (c == '\"') {
-            i = -1;
-            do {
-                configRBuf[++i] = (c = configBuf[configPos++]);
-            }
-            while ((c != '\"') && (c != '\n') && (c != '\r') && (c != '\0'));
-            configRBuf[i] = '\0';
-            xf86_lex_val.str = calloc(1, strlen(configRBuf) + 1);
-            strcpy(xf86_lex_val.str, configRBuf);        /* private copy ! */
-            return XF86_TOKEN_STRING;
+        configRBuf[0] = c;
+        i = 1;
+        while (isdigit(c = configBuf[configPos++]) || (c == '.') ||
+               (c == 'x') || (c == 'X') ||
+               ((base == 16) &&
+                (((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))))) {
+          configRBuf[i++] = c;
         }
+        configPos--; /* GJA -- one too far */
+        configRBuf[i] = '\0';
+        xf86_lex_val.num = strtoul(configRBuf, NULL, 0);
+        xf86_lex_val.realnum = atof(configRBuf);
+        return NUMBER;
+      }
 
-        /*
-         * ... and now we MUST have a valid token.  The search is
-         * handled later along with the pushed tokens.
-         */
-        else {
-            configRBuf[0] = c;
-            i = 0;
-            do {
-                configRBuf[++i] = (c = configBuf[configPos++]);
-            }
-            while ((c != ' ') && (c != '\t') && (c != '\n') && (c != '\r') &&
-                   (c != '\0') && (c != '#'));
-            --configPos;
-            configRBuf[i] = '\0';
-            i = 0;
-        }
+      /*
+       * All Strings START with a \" ...
+       */
+      else if (c == '\"') {
+        i = -1;
+        do {
+          configRBuf[++i] = (c = configBuf[configPos++]);
+        } while ((c != '\"') && (c != '\n') && (c != '\r') && (c != '\0'));
+        configRBuf[i] = '\0';
+        xf86_lex_val.str = calloc(1, strlen(configRBuf) + 1);
+        strcpy(xf86_lex_val.str, configRBuf); /* private copy ! */
+        return XF86_TOKEN_STRING;
+      }
 
-    }
-    else {
+      /*
+       * ... and now we MUST have a valid token.  The search is
+       * handled later along with the pushed tokens.
+       */
+      else {
+        configRBuf[0] = c;
+        i = 0;
+        do {
+          configRBuf[++i] = (c = configBuf[configPos++]);
+        } while ((c != ' ') && (c != '\t') && (c != '\n') && (c != '\r') &&
+                 (c != '\0') && (c != '#'));
+        --configPos;
+        configRBuf[i] = '\0';
+        i = 0;
+      }
 
-        /*
-         * Here we deal with pushed tokens. Reinitialize pushToken again. If
-         * the pushed token was NUMBER || STRING return them again ...
-         */
-        int temp = pushToken;
+    } else {
 
-        pushToken = LOCK_TOKEN;
+      /*
+       * Here we deal with pushed tokens. Reinitialize pushToken again. If
+       * the pushed token was NUMBER || STRING return them again ...
+       */
+      int temp = pushToken;
 
-        if (temp == COMMA || temp == DASH)
-            return temp;
-        if (temp == NUMBER || temp == XF86_TOKEN_STRING)
-            return temp;
+      pushToken = LOCK_TOKEN;
+
+      if (temp == COMMA || temp == DASH) {
+        return temp;
+      }
+      if (temp == NUMBER || temp == XF86_TOKEN_STRING) {
+        return temp;
+      }
     }
 
     /*
      * Joop, at last we have to lookup the token ...
      */
-    if (tab)
-        return StringToToken(configRBuf, tab);
+    if (tab) {
+      return StringToToken(configRBuf, tab);
+    }
 
     return ERROR_TOKEN;         /* Error catcher */
 }
@@ -450,9 +451,9 @@ xf86getSubToken(char **comment)
                 free(xf86_lex_val.str);
                 xf86_lex_val.str = NULL;
             }
+        } else {
+          return token;
         }
-        else
-            return token;
     }
  /*NOTREACHED*/}
 
@@ -469,9 +470,9 @@ xf86getSubTokenWithTab(char **comment, const xf86ConfigSymTabRec * tab)
                 free(xf86_lex_val.str);
                 xf86_lex_val.str = NULL;
             }
+        } else {
+          return token;
         }
-        else
-            return token;
     }
  /*NOTREACHED*/}
 
@@ -490,8 +491,9 @@ xf86tokenString(void)
 int
 xf86pathIsAbsolute(const char *path)
 {
-    if (path && path[0] == '/')
-        return 1;
+  if (path && path[0] == '/') {
+    return 1;
+  }
     return 0;
 }
 
@@ -499,24 +501,29 @@ xf86pathIsAbsolute(const char *path)
 int
 xf86pathIsSafe(const char *path)
 {
-    if (xf86pathIsAbsolute(path))
-        return 0;
+  if (xf86pathIsAbsolute(path)) {
+    return 0;
+  }
 
     /* Compare with ".." */
-    if (!strcmp(path, ".."))
-        return 0;
+    if (!strcmp(path, "..")) {
+      return 0;
+    }
 
     /* Look for leading "../" */
-    if (!strncmp(path, "../", 3))
-        return 0;
+    if (!strncmp(path, "../", 3)) {
+      return 0;
+    }
 
     /* Look for trailing "/.." */
-    if ((strlen(path) > 3) && !strcmp(path + strlen(path) - 3, "/.."))
-        return 0;
+    if ((strlen(path) > 3) && !strcmp(path + strlen(path) - 3, "/..")) {
+      return 0;
+    }
 
     /* Look for "/../" */
-    if (strstr(path, "/../"))
-        return 0;
+    if (strstr(path, "/../")) {
+      return 0;
+    }
 
     return 1;
 }
@@ -569,17 +576,21 @@ DoSubstitution(const char *template, const char *cmdline, const char *projroot,
     static const char *env = NULL;
     static char *hostname = NULL;
 
-    if (!template)
-        return NULL;
+    if (!template) {
+      return NULL;
+    }
 
-    if (cmdlineUsed)
-        *cmdlineUsed = 0;
-    if (envUsed)
-        *envUsed = 0;
+    if (cmdlineUsed) {
+      *cmdlineUsed = 0;
+    }
+    if (envUsed) {
+      *envUsed = 0;
+    }
 
     char *result = calloc(1, PATH_MAX + 1);
-    if (!result)
-        return NULL;
+    if (!result) {
+      return NULL;
+    }
 
     l = 0;
     for (i = 0; template[i]; i++) {
@@ -592,29 +603,32 @@ DoSubstitution(const char *template, const char *cmdline, const char *projroot,
             case 'A':
                 if (cmdline && xf86pathIsAbsolute(cmdline)) {
                     APPEND_STR(cmdline);
-                    if (cmdlineUsed)
-                        *cmdlineUsed = 1;
+                    if (cmdlineUsed) {
+                      *cmdlineUsed = 1;
+                    }
+                } else {
+                  BAIL_OUT;
                 }
-                else
-                    BAIL_OUT;
                 break;
             case 'R':
                 if (cmdline && !xf86pathIsAbsolute(cmdline)) {
                     APPEND_STR(cmdline);
-                    if (cmdlineUsed)
-                        *cmdlineUsed = 1;
+                    if (cmdlineUsed) {
+                      *cmdlineUsed = 1;
+                    }
+                } else {
+                  BAIL_OUT;
                 }
-                else
-                    BAIL_OUT;
                 break;
             case 'S':
                 if (cmdline && xf86pathIsSafe(cmdline)) {
                     APPEND_STR(cmdline);
-                    if (cmdlineUsed)
-                        *cmdlineUsed = 1;
+                    if (cmdlineUsed) {
+                      *cmdlineUsed = 1;
+                    }
+                } else {
+                  BAIL_OUT;
                 }
-                else
-                    BAIL_OUT;
                 break;
             case 'X':
                 APPEND_STR(XConfigFile);
@@ -622,50 +636,59 @@ DoSubstitution(const char *template, const char *cmdline, const char *projroot,
             case 'H':
                 if (!hostname) {
                     struct xhostname hn;
-                    if (xhostname(&hn))
-                        hostname = strdup(hn.name);
+                    if (xhostname(&hn)) {
+                      hostname = strdup(hn.name);
+                    }
                 }
-                if (hostname)
-                    APPEND_STR(hostname);
+                if (hostname) {
+                  APPEND_STR(hostname);
+                }
                 break;
             case 'E':
-                if (!env)
-                    env = getenv(XCONFENV);
+              if (!env) {
+                env = getenv(XCONFENV);
+              }
                 if (env && xf86pathIsAbsolute(env)) {
                     APPEND_STR(env);
-                    if (envUsed)
-                        *envUsed = 1;
+                    if (envUsed) {
+                      *envUsed = 1;
+                    }
+                } else {
+                  BAIL_OUT;
                 }
-                else
-                    BAIL_OUT;
                 break;
             case 'F':
-                if (!env)
-                    env = getenv(XCONFENV);
+              if (!env) {
+                env = getenv(XCONFENV);
+              }
                 if (env && !xf86pathIsAbsolute(env)) {
                     APPEND_STR(env);
-                    if (envUsed)
-                        *envUsed = 1;
+                    if (envUsed) {
+                      *envUsed = 1;
+                    }
+                } else {
+                  BAIL_OUT;
                 }
-                else
-                    BAIL_OUT;
                 break;
             case 'G':
-                if (!env)
-                    env = getenv(XCONFENV);
+              if (!env) {
+                env = getenv(XCONFENV);
+              }
                 if (env && xf86pathIsSafe(env)) {
                     APPEND_STR(env);
-                    if (envUsed)
-                        *envUsed = 1;
+                    if (envUsed) {
+                      *envUsed = 1;
+                    }
+                } else {
+                  BAIL_OUT;
                 }
-                else
-                    BAIL_OUT;
                 break;
             case 'P':
-                if (projroot && xf86pathIsAbsolute(projroot))
-                    APPEND_STR(projroot);
-                else
-                    BAIL_OUT;
+              if (projroot && xf86pathIsAbsolute(projroot)) {
+                APPEND_STR(projroot);
+              } else {
+                BAIL_OUT;
+              }
                 break;
             case 'C':
                 APPEND_STR(SYSCONFDIR);
@@ -709,8 +732,9 @@ OpenConfigFile(const char *path, const char *cmdline, const char *projroot,
          template = strtok(NULL, ",")) {
         filepath = DoSubstitution(template, cmdline, projroot,
                                   &cmdlineUsed, NULL, confname);
-        if (!filepath)
-            continue;
+        if (!filepath) {
+          continue;
+        }
         if (cmdline && !cmdlineUsed) {
             free(filepath);
             filepath = NULL;
@@ -743,13 +767,16 @@ ConfigFilter(const struct dirent *de)
     size_t len;
     size_t suflen = strlen(XCONFIGSUFFIX);
 
-    if (!name || name[0] == '.')
-        return 0;
+    if (!name || name[0] == '.') {
+      return 0;
+    }
     len = strlen(name);
-    if (len <= suflen)
-        return 0;
-    if (strcmp(&name[len - suflen], XCONFIGSUFFIX) != 0)
-        return 0;
+    if (len <= suflen) {
+      return 0;
+    }
+    if (strcmp(&name[len - suflen], XCONFIGSUFFIX) != 0) {
+      return 0;
+    }
     return 1;
 }
 
@@ -809,8 +836,9 @@ OpenConfigDir(const char *path, const char *cmdline, const char *projroot,
 
         dirpath = DoSubstitution(template, cmdline, projroot,
                                  &cmdlineUsed, NULL, confname);
-        if (!dirpath)
-            continue;
+        if (!dirpath) {
+          continue;
+        }
         if (cmdline && !cmdlineUsed) {
             free(dirpath);
             dirpath = NULL;
@@ -828,8 +856,9 @@ OpenConfigDir(const char *path, const char *cmdline, const char *projroot,
             free(dirpath);
             dirpath = NULL;
         }
-        while (num--)
-            free(list[num]);
+        while (num--) {
+          free(list[num]);
+        }
         free(list);
     }
 
@@ -889,10 +918,12 @@ xf86initConfigFiles(void)
 char *
 xf86openConfigFile(const char *path, const char *cmdline, const char *projroot)
 {
-    if (!path || !path[0])
-        path = DEFAULT_CONF_PATH;
-    if (!projroot || !projroot[0])
-        projroot = PROJECTROOT;
+  if (!path || !path[0]) {
+    path = DEFAULT_CONF_PATH;
+  }
+  if (!projroot || !projroot[0]) {
+    projroot = PROJECTROOT;
+  }
 
     /* Search for a config file */
     return OpenConfigFile(path, cmdline, projroot, XCONFIGFILE);
@@ -918,10 +949,12 @@ char *
 xf86openConfigDirFiles(const char *path, const char *cmdline,
                        const char *projroot)
 {
-    if (!path || !path[0])
-        path = DEFAULT_CONF_PATH;
-    if (!projroot || !projroot[0])
-        projroot = PROJECTROOT;
+  if (!path || !path[0]) {
+    path = DEFAULT_CONF_PATH;
+  }
+  if (!projroot || !projroot[0]) {
+    projroot = PROJECTROOT;
+  }
 
     /* Search for the multiconf directory */
     return OpenConfigDir(path, cmdline, projroot, XCONFIGDIR);
@@ -1014,29 +1047,35 @@ xf86nameCompare(const char *s1, const char *s2)
     char c1, c2;
 
     if (!s1 || *s1 == 0) {
-        if (!s2 || *s2 == 0)
-            return 0;
-        else
-            return 1;
+      if (!s2 || *s2 == 0) {
+        return 0;
+      } else {
+        return 1;
+      }
     } else if (!s2 || *s2 == 0) {
         return -1;
     }
 
-    while (*s1 == '_' || *s1 == ' ' || *s1 == '\t')
-        s1++;
-    while (*s2 == '_' || *s2 == ' ' || *s2 == '\t')
-        s2++;
+    while (*s1 == '_' || *s1 == ' ' || *s1 == '\t') {
+      s1++;
+    }
+    while (*s2 == '_' || *s2 == ' ' || *s2 == '\t') {
+      s2++;
+    }
     c1 = (isupper((unsigned char)*s1) ? tolower((unsigned char)*s1) : *s1);
     c2 = (isupper((unsigned char)*s2) ? tolower((unsigned char)*s2) : *s2);
     while (c1 == c2) {
-        if (c1 == '\0')
-            return 0;
+      if (c1 == '\0') {
+        return 0;
+      }
         s1++;
         s2++;
-        while (*s1 == '_' || *s1 == ' ' || *s1 == '\t')
-            s1++;
-        while (*s2 == '_' || *s2 == ' ' || *s2 == '\t')
-            s2++;
+        while (*s1 == '_' || *s1 == ' ' || *s1 == '\t') {
+          s1++;
+        }
+        while (*s2 == '_' || *s2 == ' ' || *s2 == '\t') {
+          s2++;
+        }
         c1 = (isupper((unsigned char)*s1) ? tolower((unsigned char)*s1) : *s1);
         c2 = (isupper((unsigned char)*s2) ? tolower((unsigned char)*s2) : *s2);
     }
@@ -1050,23 +1089,26 @@ xf86addComment(char *cur, const char *add)
     const char *cstr;
     int len, curlen, iscomment, hasnewline = 0, insnewline, endnewline;
 
-    if (add == NULL || add[0] == '\0')
-        return cur;
+    if (add == NULL || add[0] == '\0') {
+      return cur;
+    }
 
     if (cur) {
         curlen = strlen(cur);
-        if (curlen)
-            hasnewline = cur[curlen - 1] == '\n';
+        if (curlen) {
+          hasnewline = cur[curlen - 1] == '\n';
+        }
         eol_seen = 0;
+    } else {
+      curlen = 0;
     }
-    else
-        curlen = 0;
 
     cstr = add;
     iscomment = 0;
     while (*cstr) {
-        if (*cstr != ' ' && *cstr != '\t')
-            break;
+      if (*cstr != ' ' && *cstr != '\t') {
+        break;
+      }
         ++cstr;
     }
     iscomment = (*cstr == '#');
@@ -1075,27 +1117,34 @@ xf86addComment(char *cur, const char *add)
     endnewline = add[len - 1] == '\n';
 
     insnewline = eol_seen || (curlen && !hasnewline);
-    if (insnewline)
-        len++;
-    if (!iscomment)
-        len++;
-    if (!endnewline)
-        len++;
+    if (insnewline) {
+      len++;
+    }
+    if (!iscomment) {
+      len++;
+    }
+    if (!endnewline) {
+      len++;
+    }
 
     /* Allocate + 1 char for '\0' terminator. */
     str = realloc(cur, curlen + len + 1);
-    if (!str)
-        return cur;
+    if (!str) {
+      return cur;
+    }
 
     cur = str;
 
-    if (insnewline)
-        cur[curlen++] = '\n';
-    if (!iscomment)
-        cur[curlen++] = '#';
+    if (insnewline) {
+      cur[curlen++] = '\n';
+    }
+    if (!iscomment) {
+      cur[curlen++] = '#';
+    }
     strcpy(cur + curlen, add);
-    if (!endnewline)
-        strcat(cur, "\n");
+    if (!endnewline) {
+      strcat(cur, "\n");
+    }
 
     return cur;
 }
@@ -1103,30 +1152,32 @@ xf86addComment(char *cur, const char *add)
 Bool
 xf86getBoolValue(Bool *val, const char *str)
 {
-    if (!val || !str)
-        return FALSE;
+  if (!val || !str) {
+    return FALSE;
+  }
     if (*str == '\0') {
         *val = TRUE;
     }
     else {
-        if (xf86nameCompare(str, "1") == 0)
-            *val = TRUE;
-        else if (xf86nameCompare(str, "on") == 0)
-            *val = TRUE;
-        else if (xf86nameCompare(str, "true") == 0)
-            *val = TRUE;
-        else if (xf86nameCompare(str, "yes") == 0)
-            *val = TRUE;
-        else if (xf86nameCompare(str, "0") == 0)
-            *val = FALSE;
-        else if (xf86nameCompare(str, "off") == 0)
-            *val = FALSE;
-        else if (xf86nameCompare(str, "false") == 0)
-            *val = FALSE;
-        else if (xf86nameCompare(str, "no") == 0)
-            *val = FALSE;
-        else
-            return FALSE;
+      if (xf86nameCompare(str, "1") == 0) {
+        *val = TRUE;
+      } else if (xf86nameCompare(str, "on") == 0) {
+        *val = TRUE;
+      } else if (xf86nameCompare(str, "true") == 0) {
+        *val = TRUE;
+      } else if (xf86nameCompare(str, "yes") == 0) {
+        *val = TRUE;
+      } else if (xf86nameCompare(str, "0") == 0) {
+        *val = FALSE;
+      } else if (xf86nameCompare(str, "off") == 0) {
+        *val = FALSE;
+      } else if (xf86nameCompare(str, "false") == 0) {
+        *val = FALSE;
+      } else if (xf86nameCompare(str, "no") == 0) {
+        *val = FALSE;
+      } else {
+        return FALSE;
+      }
     }
     return TRUE;
 }

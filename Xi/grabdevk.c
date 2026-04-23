@@ -89,30 +89,34 @@ ProcXGrabDeviceKey(ClientPtr client)
     GrabMask mask;
 
     ret = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     if (stuff->modifier_device != UseXKeyboard) {
         ret = dixLookupDevice(&mdev, stuff->modifier_device, client,
                               DixUseAccess);
-        if (ret != Success)
-            return ret;
-        if (mdev->key == NULL)
-            return BadMatch;
+        if (ret != Success) {
+          return ret;
+        }
+        if (mdev->key == NULL) {
+          return BadMatch;
+        }
     }
     else {
         mdev = PickKeyboard(client);
         ret = dixCallDeviceAccessCallback(client, mdev, DixUseAccess);
-        if (ret != Success)
-            return ret;
+        if (ret != Success) {
+          return ret;
+        }
     }
 
     class = (XEventClass *) (&stuff[1]);        /* first word of values */
 
-    if ((ret = CreateMaskFromList(client, class,
-                                  stuff->event_count, tmp, dev,
-                                  X_GrabDeviceKey)) != Success)
-        return ret;
+    if ((ret = CreateMaskFromList(client, class, stuff->event_count, tmp, dev,
+                                  X_GrabDeviceKey)) != Success) {
+      return ret;
+    }
 
     GrabParameters param = {
         .grabtype = XI,

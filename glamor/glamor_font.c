@@ -51,21 +51,24 @@ glamor_font_get(ScreenPtr screen, FontPtr font)
     CharInfoPtr         glyph;
     unsigned long       count;
 
-    if (!glamor_glsl_has_ints(glamor_priv))
-        return NULL;
+    if (!glamor_glsl_has_ints(glamor_priv)) {
+      return NULL;
+    }
 
     privates = FontGetPrivate(font, glamor_font_private_index);
     if (!privates) {
         privates = calloc(glamor_font_screen_count, sizeof (glamor_font_t));
-        if (!privates)
-            return NULL;
+        if (!privates) {
+          return NULL;
+        }
         xfont2_font_set_private(font, glamor_font_private_index, privates);
     }
 
     glamor_font = &privates[screen->myNum];
 
-    if (glamor_font->realized)
-        return glamor_font;
+    if (glamor_font->realized) {
+      return glamor_font;
+    }
 
     /* Figure out how many glyphs are in the font */
     num_cols = font->info.lastCol - font->info.firstCol + 1;
@@ -101,8 +104,9 @@ glamor_font_get(ScreenPtr screen, FontPtr font)
         return NULL;
     }
     char *bits = calloc(overall_width, overall_height);
-    if (!bits)
-        return NULL;
+    if (!bits) {
+      return NULL;
+    }
 
     /* Check whether the font has a default character */
     c[0] = font->info.lastRow + 1;
@@ -158,8 +162,9 @@ glamor_font_get(ScreenPtr screen, FontPtr font)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, overall_width, overall_height,
                  0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, bits);
     glamor_priv->suppress_gl_out_of_memory_logging = false;
-    if (glGetError() == GL_OUT_OF_MEMORY)
-        return NULL;
+    if (glGetError() == GL_OUT_OF_MEMORY) {
+      return NULL;
+    }
 
     free(bits);
 
@@ -182,13 +187,15 @@ glamor_unrealize_font(ScreenPtr screen, FontPtr font)
     glamor_font_t               *glamor_font;
     int                         s;
 
-    if (!privates)
-        return TRUE;
+    if (!privates) {
+      return TRUE;
+    }
 
     glamor_font = &privates[screen->myNum];
 
-    if (!glamor_font->realized)
-        return TRUE;
+    if (!glamor_font->realized) {
+      return TRUE;
+    }
 
     /* Unrealize the font, freeing the allocated texture */
     glamor_font->realized = FALSE;
@@ -200,9 +207,11 @@ glamor_unrealize_font(ScreenPtr screen, FontPtr font)
     /* Check to see if all of the screens are  done with this font
      * and free the private when that happens
      */
-    for (s = 0; s < glamor_font_screen_count; s++)
-        if (privates[s].realized)
-            return TRUE;
+    for (s = 0; s < glamor_font_screen_count; s++) {
+      if (privates[s].realized) {
+        return TRUE;
+      }
+    }
 
     free(privates);
     xfont2_font_set_private(font, glamor_font_private_index, NULL);
@@ -214,16 +223,19 @@ glamor_font_init(ScreenPtr screen)
 {
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
 
-    if (!glamor_glsl_has_ints(glamor_priv))
-        return TRUE;
+    if (!glamor_glsl_has_ints(glamor_priv)) {
+      return TRUE;
+    }
 
     glamor_font_private_index = xfont2_allocate_font_private_index();
-    if (glamor_font_private_index == -1)
-        return FALSE;
+    if (glamor_font_private_index == -1) {
+      return FALSE;
+    }
     glamor_font_screen_count = 0;
 
-    if (screen->myNum >= glamor_font_screen_count)
-        glamor_font_screen_count = screen->myNum + 1;
+    if (screen->myNum >= glamor_font_screen_count) {
+      glamor_font_screen_count = screen->myNum + 1;
+    }
 
     screen->RealizeFont = glamor_realize_font;
     screen->UnrealizeFont = glamor_unrealize_font;

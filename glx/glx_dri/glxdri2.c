@@ -222,8 +222,9 @@ __glXDRIdrawableSwapInterval(__GLXdrawable * drawable, int interval)
 {
     __GLXcontext *cx = lastGLContext;
 
-    if (interval <= 0)          /* || interval > BIGNUM? */
-        return GLX_BAD_VALUE;
+    if (interval <= 0) { /* || interval > BIGNUM? */
+      return GLX_BAD_VALUE;
+    }
 
     DRI2SwapInterval(drawable->pDraw, interval);
     if (cx != lastGLContext) {
@@ -307,8 +308,9 @@ __glXDRIbindTexImage(__GLXcontext * baseContext,
     const __DRItexBufferExtension *texBuffer = drawable->screen->texBuffer;
     __GLXDRIcontext *context = (__GLXDRIcontext *) baseContext;
 
-    if (texBuffer == NULL)
-        return Success;
+    if (texBuffer == NULL) {
+      return Success;
+    }
 
     if (texBuffer->base.version >= 2 && texBuffer->setTexBuffer2 != NULL) {
         (*texBuffer->setTexBuffer2) (context->driContext,
@@ -340,8 +342,9 @@ dri2_convert_glx_attribs(__GLXDRIscreen *screen, unsigned num_attribs,
 {
     unsigned i;
 
-    if (num_attribs == 0)
-        return TRUE;
+    if (num_attribs == 0) {
+      return TRUE;
+    }
 
     if (attribs == NULL) {
         *error = BadImplementation;
@@ -457,11 +460,11 @@ create_driver_context(__GLXDRIcontext * context,
         int api = __DRI_API_OPENGL;
 
         if (num_attribs != 0) {
-            if (!dri2_convert_glx_attribs(screen, num_attribs, attribs,
-                                          &major_ver, &minor_ver,
-                                          &flags, &api, &reset,
-                                          (unsigned *) error))
-                return;
+          if (!dri2_convert_glx_attribs(screen, num_attribs, attribs,
+                                        &major_ver, &minor_ver, &flags, &api,
+                                        &reset, (unsigned *)error)) {
+            return;
+          }
 
             ctx_attribs[num_ctx_attribs++] = __DRI_CTX_ATTRIB_MAJOR_VERSION;
             ctx_attribs[num_ctx_attribs++] = major_ver;
@@ -542,10 +545,11 @@ __glXDRIscreenCreateContext(__GLXscreen * baseScreen,
     __DRIcontext *driShare;
 
     shareContext = (__GLXDRIcontext *) baseShareContext;
-    if (shareContext)
-        driShare = shareContext->driContext;
-    else
-        driShare = NULL;
+    if (shareContext) {
+      driShare = shareContext->driContext;
+    } else {
+      driShare = NULL;
+    }
 
     context = calloc(1, sizeof *context);
     if (context == NULL) {
@@ -578,8 +582,9 @@ __glXDRIinvalidateBuffers(DrawablePtr pDraw, void *priv, XID id)
     __GLXDRIdrawable *private = priv;
     __GLXDRIscreen *screen = private->screen;
 
-    if (screen->flush)
-        (*screen->flush->invalidate) (private->driDrawable);
+    if (screen->flush) {
+      (*screen->flush->invalidate)(private->driDrawable);
+    }
 }
 
 static __GLXdrawable *
@@ -596,8 +601,9 @@ __glXDRIscreenCreateDrawable(ClientPtr client,
     Bool ret;
 
     private = calloc(1, sizeof *private);
-    if (private == NULL)
-        return NULL;
+    if (private == NULL) {
+      return NULL;
+    }
 
     private->screen = driScreen;
     if (!__glXDrawableInit(&private->base, screen,
@@ -790,8 +796,9 @@ glxDRIEnterVT(ScrnInfoPtr scrn)
     screen->enterVT = scrn->EnterVT;
     scrn->EnterVT = glxDRIEnterVT;
 
-    if (!ret)
-        return FALSE;
+    if (!ret) {
+      return FALSE;
+    }
 
     glxResumeClients();
 
@@ -903,8 +910,9 @@ __glXDRIscreenDestroy(__GLXscreen * baseScreen)
     __glXScreenDestroy(baseScreen);
 
     if (screen->driConfigs) {
-        for (i = 0; screen->driConfigs[i] != NULL; i++)
-            free((__DRIconfig **) screen->driConfigs[i]);
+      for (i = 0; screen->driConfigs[i] != NULL; i++) {
+        free((__DRIconfig **)screen->driConfigs[i]);
+      }
         free(screen->driConfigs);
     }
 
@@ -933,8 +941,9 @@ __glXDRIscreenProbe(ScreenPtr pScreen)
     OptionInfoPtr options;
 
     screen = calloc(1, sizeof *screen);
-    if (screen == NULL)
-        return NULL;
+    if (screen == NULL) {
+      return NULL;
+    }
 
     if (!DRI2Connect(serverClient, pScreen, DRI2DriverDRI,
                      &screen->fd, &driverName, &deviceName)) {
@@ -978,12 +987,14 @@ __glXDRIscreenProbe(ScreenPtr pScreen)
     memcpy(options, GLXOptions, sizeof(GLXOptions));
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, options);
     glvnd = xf86GetOptValString(options, GLXOPT_VENDOR_LIBRARY);
-    if (glvnd)
-        screen->base.glvnd = XNFstrdup(glvnd);
+    if (glvnd) {
+      screen->base.glvnd = XNFstrdup(glvnd);
+    }
     free(options);
 
-    if (!screen->base.glvnd)
-        screen->base.glvnd = strdup("mesa");
+    if (!screen->base.glvnd) {
+      screen->base.glvnd = strdup("mesa");
+    }
 
     __glXScreenInit(&screen->base, pScreen);
 
@@ -999,8 +1010,9 @@ __glXDRIscreenProbe(ScreenPtr pScreen)
     return &screen->base;
 
  handle_error:
-    if (screen->driver)
-        dlclose(screen->driver);
+   if (screen->driver) {
+     dlclose(screen->driver);
+   }
 
     free(screen);
 

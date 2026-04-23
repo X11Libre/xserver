@@ -71,8 +71,9 @@ doWriteConfigFile(const char *filename, XF86ConfigPtr cptr)
         return 0;
     }
 
-    if (cptr->conf_comment)
-        fprintf(cf, "%s\n", cptr->conf_comment);
+    if (cptr->conf_comment) {
+      fprintf(cf, "%s\n", cptr->conf_comment);
+    }
 
     xf86printLayoutSection(cf, cptr->conf_layout_lst);
 
@@ -140,8 +141,8 @@ xf86writeConfigFile(const char *filename, XF86ConfigPtr cptr)
                    euid, strerror(errno));
         }
         return ret;
-    }
-    else
+    } else {
 #endif                          /* WIN32 */
-        return doWriteConfigFile(filename, cptr);
+      return doWriteConfigFile(filename, cptr);
+    }
 }

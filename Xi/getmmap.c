@@ -79,12 +79,14 @@ ProcXGetDeviceModifierMapping(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xGetDeviceModifierMappingReq);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     ret = generate_modkeymap(client, dev, &modkeymap, &max_keys_per_mod);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_binary_pad(&rpcbuf, modkeymap, max_keys_per_mod * 8);

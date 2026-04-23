@@ -157,7 +157,9 @@ static size_t
 strlen_sigsafe(const char *s)
 {
     size_t len;
-    for (len = 0; s[len]; len++);
+    for (len = 0; s[len]; len++) {
+      ;
+    }
     return len;
 }
 
@@ -176,8 +178,9 @@ LogFilePrep(const char *fname, const char *backup, const char *idstring)
 
     /* the format string below is controlled by the user,
        this code should never be called with elevated privileges */
-    if (asprintf(&logFileName, fname, idstring) == -1)
-        FatalError("Cannot allocate space for the log file name\n");
+    if (asprintf(&logFileName, fname, idstring) == -1) {
+      FatalError("Cannot allocate space for the log file name\n");
+    }
 
     if (backup && *backup) {
         struct stat buf;
@@ -324,15 +327,20 @@ LogInit(const char *fname, const char *backup)
 
             /* Save the patterns for use when the display is named. */
             saved_log_fname = strdup(fname);
-            if (backup == NULL)
-                saved_log_backup = NULL;
-            else
-                saved_log_backup = strdup(backup);
-        } else
-            logFileName = LogFilePrep(fname, backup, display);
+            if (backup == NULL) {
+              saved_log_backup = NULL;
+            } else {
+              saved_log_backup = strdup(backup);
+            }
+        } else {
+          logFileName = LogFilePrep(fname, backup, display);
+        }
 
-        if ((logFileFd = open(logFileName, O_WRONLY | O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP)) == -1)
-            FatalError("Cannot open log file \"%s\": %s\n", logFileName, strerror(errno));
+        if ((logFileFd = open(logFileName, O_WRONLY | O_CREAT,
+                              S_IRUSR | S_IWUSR | S_IRGRP)) == -1) {
+          FatalError("Cannot open log file \"%s\": %s\n", logFileName,
+                     strerror(errno));
+        }
 
         /* Flush saved log information. */
         if (saveBuffer && bufferSize > 0) {
@@ -369,9 +377,10 @@ LogSetDisplay(void)
                            "Log file renamed from \"%s\" to \"%s\"\n",
                            saved_log_tempname, logFileName);
 
-            if (strlen(saved_log_tempname) >= strlen(logFileName))
-                strncpy(saved_log_tempname, logFileName,
-                        strlen(saved_log_tempname));
+            if (strlen(saved_log_tempname) >= strlen(logFileName)) {
+              strncpy(saved_log_tempname, logFileName,
+                      strlen(saved_log_tempname));
+            }
         }
         else {
             ErrorF("Failed to rename log file \"%s\" to \"%s\": %s\n",
@@ -424,10 +433,11 @@ static int parse_length_modifier(const char *format, size_t len, int *flags_retu
             case 'l':
                 BUG_RETURN_VAL(length_modifier & LMOD_SHORT, 0);
 
-                if (length_modifier & LMOD_LONG)
-                    length_modifier |= LMOD_LONGLONG;
-                else
-                    length_modifier |= LMOD_LONG;
+                if (length_modifier & LMOD_LONG) {
+                  length_modifier |= LMOD_LONGLONG;
+                } else {
+                  length_modifier |= LMOD_LONG;
+                }
                 break;
             case 'h':
                 BUG_RETURN_VAL(length_modifier & (LMOD_LONG|LMOD_LONGLONG), 0);
@@ -478,21 +488,24 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
 
         f_idx++;
 
-        if (f[f_idx] == '#')
-        /* silently ignore alternate form */
-            f_idx++;
+        if (f[f_idx] == '#') {
+          /* silently ignore alternate form */
+          f_idx++;
+        }
 
         /* silently ignore reverse justification */
-        if (f[f_idx] == '-')
-            f_idx++;
+        if (f[f_idx] == '-') {
+          f_idx++;
+        }
 
         /* silently swallow minimum field width */
         if (f[f_idx] == '*') {
             f_idx++;
             va_arg(args, int);
         } else {
-            while (f_idx < f_len && ((f[f_idx] >= '0' && f[f_idx] <= '9')))
-                f_idx++;
+          while (f_idx < f_len && ((f[f_idx] >= '0' && f[f_idx] <= '9'))) {
+            f_idx++;
+          }
         }
 
         /* is there a precision? */
@@ -505,94 +518,109 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
                 precision = va_arg(args, int);
             } else {
                 /* silently swallow precision digits */
-                while (f_idx < f_len && ((f[f_idx] >= '0' && f[f_idx] <= '9')))
-                    f_idx++;
+                while (f_idx < f_len &&
+                       ((f[f_idx] >= '0' && f[f_idx] <= '9'))) {
+                  f_idx++;
+                }
             }
         }
 
         /* non-digit length modifiers */
         if (f_idx < f_len) {
             int parsed_bytes = parse_length_modifier(&f[f_idx], f_len - f_idx, &length_modifier);
-            if (parsed_bytes < 0)
-                return 0;
+            if (parsed_bytes < 0) {
+              return 0;
+            }
             f_idx += parsed_bytes;
         }
 
-        if (f_idx >= f_len)
-            break;
+        if (f_idx >= f_len) {
+          break;
+        }
 
         switch (f[f_idx]) {
         case 's':
             string_arg = va_arg(args, char*);
 
             if (string_arg) {
-                for (i = 0; string_arg[i] != 0 && s_idx < size - 1 && s_idx < precision; i++)
-                    string[s_idx++] = string_arg[i];
+              for (i = 0;
+                   string_arg[i] != 0 && s_idx < size - 1 && s_idx < precision;
+                   i++) {
+                string[s_idx++] = string_arg[i];
+              }
             }
             break;
 
         case 'u':
-            if (length_modifier & LMOD_LONGLONG)
-                ui = va_arg(args, unsigned long long);
-            else if (length_modifier & LMOD_LONG)
-                ui = va_arg(args, unsigned long);
-            else if (length_modifier & LMOD_SIZET)
-                ui = va_arg(args, size_t);
-            else
-                ui = va_arg(args, unsigned);
+          if (length_modifier & LMOD_LONGLONG) {
+            ui = va_arg(args, unsigned long long);
+          } else if (length_modifier & LMOD_LONG) {
+            ui = va_arg(args, unsigned long);
+          } else if (length_modifier & LMOD_SIZET) {
+            ui = va_arg(args, size_t);
+          } else {
+            ui = va_arg(args, unsigned);
+          }
 
             FormatUInt64(ui, number);
             p_len = strlen_sigsafe(number);
 
-            for (i = 0; i < p_len && s_idx < size - 1; i++)
-                string[s_idx++] = number[i];
+            for (i = 0; i < p_len && s_idx < size - 1; i++) {
+              string[s_idx++] = number[i];
+            }
             break;
         case 'i':
         case 'd':
-            if (length_modifier & LMOD_LONGLONG)
-                si = va_arg(args, long long);
-            else if (length_modifier & LMOD_LONG)
-                si = va_arg(args, long);
-            else if (length_modifier & LMOD_SIZET)
-                si = va_arg(args, ssize_t);
-            else
-                si = va_arg(args, int);
+          if (length_modifier & LMOD_LONGLONG) {
+            si = va_arg(args, long long);
+          } else if (length_modifier & LMOD_LONG) {
+            si = va_arg(args, long);
+          } else if (length_modifier & LMOD_SIZET) {
+            si = va_arg(args, ssize_t);
+          } else {
+            si = va_arg(args, int);
+          }
 
             FormatInt64(si, number);
             p_len = strlen_sigsafe(number);
 
-            for (i = 0; i < p_len && s_idx < size - 1; i++)
-                string[s_idx++] = number[i];
+            for (i = 0; i < p_len && s_idx < size - 1; i++) {
+              string[s_idx++] = number[i];
+            }
             break;
 
         case 'p':
             string[s_idx++] = '0';
-            if (s_idx < size - 1)
-                string[s_idx++] = 'x';
+            if (s_idx < size - 1) {
+              string[s_idx++] = 'x';
+            }
             ui = (uintptr_t)va_arg(args, void*);
             FormatUInt64Hex(ui, number);
             p_len = strlen_sigsafe(number);
 
-            for (i = 0; i < p_len && s_idx < size - 1; i++)
-                string[s_idx++] = number[i];
+            for (i = 0; i < p_len && s_idx < size - 1; i++) {
+              string[s_idx++] = number[i];
+            }
             break;
 
         case 'x':
         case 'X': // not actually upper case, but at least accepting '%X'
-            if (length_modifier & LMOD_LONGLONG)
-                ui = va_arg(args, unsigned long long);
-            else if (length_modifier & LMOD_LONG)
-                ui = va_arg(args, unsigned long);
-            else if (length_modifier & LMOD_SIZET)
-                ui = va_arg(args, size_t);
-            else
-                ui = va_arg(args, unsigned);
+          if (length_modifier & LMOD_LONGLONG) {
+            ui = va_arg(args, unsigned long long);
+          } else if (length_modifier & LMOD_LONG) {
+            ui = va_arg(args, unsigned long);
+          } else if (length_modifier & LMOD_SIZET) {
+            ui = va_arg(args, size_t);
+          } else {
+            ui = va_arg(args, unsigned);
+          }
 
             FormatUInt64Hex(ui, number);
             p_len = strlen_sigsafe(number);
 
-            for (i = 0; i < p_len && s_idx < size - 1; i++)
-                string[s_idx++] = number[i];
+            for (i = 0; i < p_len && s_idx < size - 1; i++) {
+              string[s_idx++] = number[i];
+            }
             break;
         case 'f':
             {
@@ -600,15 +628,17 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
                 FormatDouble(d, number);
                 p_len = strlen_sigsafe(number);
 
-                for (i = 0; i < p_len && s_idx < size - 1; i++)
-                    string[s_idx++] = number[i];
+                for (i = 0; i < p_len && s_idx < size - 1; i++) {
+                  string[s_idx++] = number[i];
+                }
             }
             break;
         case 'c':
             {
                 char c = va_arg(args, int);
-                if (s_idx < size - 1)
-                    string[s_idx++] = c;
+                if (s_idx < size - 1) {
+                  string[s_idx++] = c;
+                }
             }
             break;
         case '%':
@@ -618,8 +648,9 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
             BUG_WARN_MSG(f[f_idx], "Unsupported printf directive '%c'\n", f[f_idx]);
             va_arg(args, char*);
             string[s_idx++] = '%';
-            if (s_idx < size - 1)
-                string[s_idx++] = f[f_idx];
+            if (s_idx < size - 1) {
+              string[s_idx++] = f[f_idx];
+            }
             break;
         }
     }
@@ -632,11 +663,13 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
 static void
 LogSyslogWrite(int verb, const char *buf, size_t len, Bool end_line) {
 #ifdef CONFIG_SYSLOG
-    if (inSignalContext) // syslog() ins't signal-safe yet :(
-        return;          // shall we try syslog(2) syscall instead ?
+  if (inSignalContext) { // syslog() ins't signal-safe yet :(
+    return;              // shall we try syslog(2) syscall instead ?
+  }
 
-    if (verb >= 0 && xorgSyslogVerbosity < verb)
-        return;
+  if (verb >= 0 && xorgSyslogVerbosity < verb) {
+    return;
+  }
 
     syslog(LOG_PID, "%.*s", (int)len, buf);
 #endif
@@ -705,11 +738,13 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 static const char *
 LogMessageTypeVerbString(MessageType type, int verb)
 {
-    if (type == X_ERROR)
-        verb = 0;
+  if (type == X_ERROR) {
+    verb = 0;
+  }
 
-    if (xorgLogVerbosity < verb && xorgLogFileVerbosity < verb)
-        return NULL;
+  if (xorgLogVerbosity < verb && xorgLogFileVerbosity < verb) {
+    return NULL;
+  }
 
     switch (type) {
     case X_PROBED:
@@ -746,8 +781,9 @@ LogMessageTypeVerbString(MessageType type, int verb)
 static ssize_t prepMsgHdr(MessageType type, int verb, char *buf)
 {
     const char *type_str = LogMessageTypeVerbString(type, verb);
-    if (!type_str)
-        return -1;
+    if (!type_str) {
+      return -1;
+    }
 
     size_t prefixLen = strlen_sigsafe(type_str);
     if (prefixLen) {
@@ -762,8 +798,9 @@ static ssize_t prepMsgHdr(MessageType type, int verb, char *buf)
 static inline void writeLog(int verb, char *buf, int len)
 {
     /* Force '\n' at end of truncated line */
-    if (LOG_MSG_BUF_SIZE  - len == 1)
-        buf[len - 1] = '\n';
+    if (LOG_MSG_BUF_SIZE - len == 1) {
+      buf[len - 1] = '\n';
+    }
 
     LogSWrite(verb, buf, len, (buf[len - 1] == '\n'));
 }
@@ -775,8 +812,9 @@ LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
     char buf[LOG_MSG_BUF_SIZE];
 
     size_t len = prepMsgHdr(type, verb, buf);
-    if (len == -1)
-        return;
+    if (len == -1) {
+      return;
+    }
 
     len += vpnprintf(&buf[len], sizeof(buf) - len, format, args);
 
@@ -819,14 +857,17 @@ LogVHdrMessageVerb(MessageType type, int verb, const char *msg_format,
     char buf[LOG_MSG_BUF_SIZE];
 
     size_t len = prepMsgHdr(type, verb, buf);
-    if (len == -1)
-        return;
+    if (len == -1) {
+      return;
+    }
 
-    if (hdr_format && sizeof(buf) - len > 1)
-        len += vpnprintf(&buf[len], sizeof(buf) - len, hdr_format, hdr_args);
+    if (hdr_format && sizeof(buf) - len > 1) {
+      len += vpnprintf(&buf[len], sizeof(buf) - len, hdr_format, hdr_args);
+    }
 
-    if (msg_format && sizeof(buf) - len > 1)
-        len += vpnprintf(&buf[len], sizeof(buf) - len, msg_format, msg_args);
+    if (msg_format && sizeof(buf) - len > 1) {
+      len += vpnprintf(&buf[len], sizeof(buf) - len, msg_format, msg_args);
+    }
 
     writeLog(verb, buf, len);
 }
@@ -873,12 +914,14 @@ AuditPrefix(void)
 
     time(&tm);
     autime = ctime(&tm);
-    if ((s = strchr(autime, '\n')))
-        *s = '\0';
+    if ((s = strchr(autime, '\n'))) {
+      *s = '\0';
+    }
     len = strlen(AUDIT_PREFIX) + strlen(autime) + 10 + 1;
     char *tmpBuf = calloc(1, len);
-    if (!tmpBuf)
-        return NULL;
+    if (!tmpBuf) {
+      return NULL;
+    }
     snprintf(tmpBuf, len, AUDIT_PREFIX, autime, (unsigned long) getpid());
     return tmpBuf;
 }
@@ -931,8 +974,9 @@ VAuditF(const char *f, va_list args)
     }
     else {
         /* new message */
-        if (auditTimer != NULL)
-            TimerForce(auditTimer);
+        if (auditTimer != NULL) {
+          TimerForce(auditTimer);
+        }
         ErrorF("%s%s", prefix != NULL ? prefix : "", buf);
         strlcpy(oldbuf, buf, sizeof(oldbuf));
         oldlen = len;
@@ -949,10 +993,11 @@ FatalError(const char *f, ...)
     va_list args2;
     static Bool beenhere = FALSE;
 
-    if (beenhere)
-        ErrorF("\nFatalError re-entered, aborting\n");
-    else
-        ErrorF("\nFatal server error:\n");
+    if (beenhere) {
+      ErrorF("\nFatalError re-entered, aborting\n");
+    } else {
+      ErrorF("\nFatal server error:\n");
+    }
 
     va_start(args, f);
 
@@ -972,15 +1017,16 @@ FatalError(const char *f, ...)
     LogVMessageVerb(X_NONE, -1, f, args);
     va_end(args);
     ErrorF("\n");
-    if (!beenhere)
-        OsVendorFatalError(f, args2);
+    if (!beenhere) {
+      OsVendorFatalError(f, args2);
+    }
     va_end(args2);
     if (!beenhere) {
         beenhere = TRUE;
         AbortServer();
+    } else {
+      OsAbort();
     }
-    else
-        OsAbort();
  /*NOTREACHED*/}
 
 void

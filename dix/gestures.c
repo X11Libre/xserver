@@ -97,13 +97,15 @@ GestureBeginGesture(DeviceIntPtr dev, InternalEvent *ev)
     enum EventType gesture_type = GestureTypeToBegin(ev->any.type);
 
     /* Note that we ignore begin events when an existing gesture is active */
-    if (!g || gesture_type == 0 || g->gesture.active)
-        return NULL;
+    if (!g || gesture_type == 0 || g->gesture.active) {
+      return NULL;
+    }
 
     g->gesture.type = gesture_type;
 
-    if (!GestureBuildSprite(dev, &g->gesture))
-        return NULL;
+    if (!GestureBuildSprite(dev, &g->gesture)) {
+      return NULL;
+    }
 
     g->gesture.active = TRUE;
     g->gesture.num_touches = ev->gesture_event.num_touches;
@@ -140,14 +142,17 @@ GestureBuildSprite(DeviceIntPtr sourcedev, GestureInfoPtr gi)
 {
     SpritePtr sprite = &gi->sprite;
 
-    if (!sourcedev->spriteInfo->sprite)
-        return FALSE;
+    if (!sourcedev->spriteInfo->sprite) {
+      return FALSE;
+    }
 
-    if (!CopySprite(sourcedev->spriteInfo->sprite, sprite))
-        return FALSE;
+    if (!CopySprite(sourcedev->spriteInfo->sprite, sprite)) {
+      return FALSE;
+    }
 
-    if (sprite->spriteTraceGood <= 0)
-        return FALSE;
+    if (sprite->spriteTraceGood <= 0) {
+      return FALSE;
+    }
 
     return TRUE;
 }
@@ -172,8 +177,9 @@ GestureAddListener(GestureInfoPtr gi, XID resource, int resource_type,
 
     /* We need a copy of the grab, not the grab itself since that may be deleted by
      * a UngrabButton request and leaves us with a dangling pointer */
-    if (grab)
-        g = AllocGrab(grab);
+    if (grab) {
+      g = AllocGrab(grab);
+    }
 
     gi->listener.listener = resource;
     gi->listener.resource_type = resource_type;
@@ -194,8 +200,9 @@ GestureAddGrabListener(DeviceIntPtr dev, GestureInfoPtr gi, GrabPtr grab)
         if (xi2mask_isset(grab->xi2mask, dev, XI_GesturePinchBegin) ||
             xi2mask_isset(grab->xi2mask, dev, XI_GestureSwipeBegin)) {
             type = GESTURE_LISTENER_GRAB;
-        } else
-            type = GESTURE_LISTENER_NONGESTURE_GRAB;
+        } else {
+          type = GESTURE_LISTENER_NONGESTURE_GRAB;
+        }
     }
     else if (grab->grabtype == XI || grab->grabtype == CORE) {
         type = GESTURE_LISTENER_NONGESTURE_GRAB;
@@ -219,8 +226,9 @@ GestureAddPassiveGrabListener(DeviceIntPtr dev, GestureInfoPtr gi, WindowPtr win
 
     GrabPtr grab = CheckPassiveGrabsOnWindow(win, dev, ev, check_core,
                                              activate);
-    if (!grab)
-        return;
+    if (!grab) {
+      return;
+    }
 
     /* We'll deliver later in gesture-specific code */
     ActivateGrabNoDelivery(dev, grab, ev, ev);
@@ -236,15 +244,17 @@ GestureAddRegularListener(DeviceIntPtr dev, GestureInfoPtr gi, WindowPtr win, In
     int mask;
 
     mask = EventIsDeliverable(dev, ev->any.type, win);
-    if (!mask)
-        return;
+    if (!mask) {
+      return;
+    }
 
     inputMasks = wOtherInputMasks(win);
 
     if ((mask & EVENT_XI2_MASK) && (inputMasks != NULL)) {
         nt_list_for_each_entry(iclients, inputMasks->inputClients, next) {
-            if (!xi2mask_isset(iclients->xi2mask, dev, evtype))
-                continue;
+          if (!xi2mask_isset(iclients->xi2mask, dev, evtype)) {
+            continue;
+          }
 
             GestureAddListener(gi, iclients->resource, RT_INPUTCLIENT,
                                GESTURE_LISTENER_REGULAR, win, NULL);
@@ -272,16 +282,19 @@ GestureSetupListener(DeviceIntPtr dev, GestureInfoPtr gi, InternalEvent *ev)
     i = 0;
     if (syncEvents.playingEvents) {
         while (i < dev->spriteInfo->sprite->spriteTraceGood) {
-            if (dev->spriteInfo->sprite->spriteTrace[i++] == syncEvents.replayWin)
-                break;
+          if (dev->spriteInfo->sprite->spriteTrace[i++] ==
+              syncEvents.replayWin) {
+            break;
+          }
         }
     }
 
     for (; i < sprite->spriteTraceGood; i++) {
         win = sprite->spriteTrace[i];
         GestureAddPassiveGrabListener(dev, gi, win, ev);
-        if (gi->has_listener)
-            return;
+        if (gi->has_listener) {
+          return;
+        }
     }
 
     /* Find the first client with an applicable event selection,
@@ -289,8 +302,9 @@ GestureSetupListener(DeviceIntPtr dev, GestureInfoPtr gi, InternalEvent *ev)
     for (int j = sprite->spriteTraceGood - 1; j >= 0; j--) {
         win = sprite->spriteTrace[j];
         GestureAddRegularListener(dev, gi, win, ev);
-        if (gi->has_listener)
-            return;
+        if (gi->has_listener) {
+          return;
+        }
     }
 }
 
@@ -302,19 +316,23 @@ GestureListenerGone(XID resource)
     GestureInfoPtr gi;
     InternalEvent *events = InitEventList(GetMaximumEventsNum());
 
-    if (!events)
-        FatalError("GestureListenerGone: couldn't allocate events\n");
+    if (!events) {
+      FatalError("GestureListenerGone: couldn't allocate events\n");
+    }
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-        if (!dev->gesture)
-            continue;
+      if (!dev->gesture) {
+        continue;
+      }
 
         gi = &dev->gesture->gesture;
-        if (!gi->active)
-            continue;
+        if (!gi->active) {
+          continue;
+        }
 
-        if (CLIENT_BITS(gi->listener.listener) == resource)
-            GestureEndGesture(gi);
+        if (CLIENT_BITS(gi->listener.listener) == resource) {
+          GestureEndGesture(gi);
+        }
     }
 
     FreeEventList(events, GetMaximumEventsNum());
@@ -329,8 +347,9 @@ GestureEndActiveGestures(DeviceIntPtr dev)
     GestureClassPtr g = dev->gesture;
     InternalEvent *eventlist;
 
-    if (!g)
-        return;
+    if (!g) {
+      return;
+    }
 
     eventlist = InitEventList(GetMaximumEventsNum());
 
@@ -341,8 +360,9 @@ GestureEndActiveGestures(DeviceIntPtr dev)
         int nevents = GetGestureEvents(eventlist, dev, type, g->gesture.num_touches,
                                        0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
-        for (int j = 0; j < nevents; j++)
-            mieqProcessDeviceEvent(dev, eventlist + j, NULL);
+        for (int j = 0; j < nevents; j++) {
+          mieqProcessDeviceEvent(dev, eventlist + j, NULL);
+        }
     }
     input_unlock();
 
@@ -360,8 +380,9 @@ GestureEmitGestureEndToOwner(DeviceIntPtr dev, GestureInfoPtr gi)
 {
     InternalEvent event;
     /* We're not processing a gesture end for a frozen device */
-    if (dev->deviceGrab.sync.frozen)
-        return;
+    if (dev->deviceGrab.sync.frozen) {
+      return;
+    }
 
     DeliverDeviceClassesChangedEvent(gi->sourceid, GetTimeInMillis());
     InitGestureEvent(&event, dev, GetTimeInMillis(), GestureTypeToEnd(gi->type),

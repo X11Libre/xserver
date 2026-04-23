@@ -91,8 +91,9 @@ ProcXCMiscGetXIDList(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xXCMiscGetXIDListReq);
     X_REQUEST_FIELD_CARD32(count);
 
-    if (stuff->count > UINT32_MAX / sizeof(XID))
-        return BadAlloc;
+    if (stuff->count > UINT32_MAX / sizeof(XID)) {
+      return BadAlloc;
+    }
 
     XID *pids = calloc(stuff->count, sizeof(XID));
     if (!pids) {

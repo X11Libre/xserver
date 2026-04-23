@@ -43,8 +43,9 @@ static inline ssize_t WriteRpcbufToClient(ClientPtr pClient,
 static inline int __write_reply_hdr_and_rpcbuf(
     ClientPtr pClient, void *hdrData, size_t hdrLen, x_rpcbuf_t *rpcbuf)
 {
-    if (rpcbuf->error)
-        return BadAlloc;
+  if (rpcbuf->error) {
+    return BadAlloc;
+  }
 
     xGenericReply *reply = hdrData;
     reply->type = X_Reply;

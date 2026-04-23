@@ -50,8 +50,9 @@ int_handler(xf86Int10InfoPtr pInt)
         break;
     }
 
-    if (!ret)
-        ret = run_bios_int(num, pInt);
+    if (!ret) {
+      ret = run_bios_int(num, pInt);
+    }
 
     if (!ret) {
         xf86DrvMsg(pInt->pScrn->scrnIndex, X_ERROR, "Halting on int 0x%2.2x!\n", num);
@@ -671,9 +672,11 @@ int1A_last_bus_number(struct pci_device *dev)
 
     iter = pci_slot_match_iterator_create(&m);
 
-    while ((d = pci_device_next(iter)))
-        if (d->bus > i)
-            i = d->bus;
+    while ((d = pci_device_next(iter))) {
+      if (d->bus > i) {
+        i = d->bus;
+      }
+    }
 
     pci_iterator_destroy(iter);
 
@@ -686,8 +689,9 @@ int1A_handler(xf86Int10InfoPtr pInt)
     struct pci_device *const pvp = xf86GetPciInfoForEntity(pInt->entityIndex);
     struct pci_device *dev;
 
-    if (pvp == NULL)
-        return 0;               /* oops */
+    if (pvp == NULL) {
+      return 0; /* oops */
+    }
 
 #ifdef PRINT_INT
     ErrorF("int 0x1a: ax=0x%x bx=0x%x cx=0x%x dx=0x%x di=0x%x es=0x%x\n",
@@ -840,8 +844,9 @@ int1A_handler(xf86Int10InfoPtr pInt)
         xf86DrvMsgVerb(pInt->pScrn->scrnIndex, X_NOT_IMPLEMENTED, 2,
                        "int 0x1a subfunction\n");
         dump_registers(pInt);
-        if (xf86GetVerbosity() > 3)
-            stack_trace(pInt);
+        if (xf86GetVerbosity() > 3) {
+          stack_trace(pInt);
+        }
         return 0;
     }
 }
@@ -870,8 +875,9 @@ intE6_handler(xf86Int10InfoPtr pInt)
 {
     struct pci_device *pvp;
 
-    if ((pvp = xf86GetPciInfoForEntity(pInt->entityIndex)))
-        X86_AX = (pvp->bus << 8) | (pvp->dev << 3) | (pvp->func & 0x7);
+    if ((pvp = xf86GetPciInfoForEntity(pInt->entityIndex))) {
+      X86_AX = (pvp->bus << 8) | (pvp->dev << 3) | (pvp->func & 0x7);
+    }
     pushw(pInt, X86_CS);
     pushw(pInt, X86_IP);
     X86_CS = pInt->BIOSseg;

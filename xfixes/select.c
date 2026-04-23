@@ -90,8 +90,9 @@ XFixesSelectionCallback(CallbackListPtr *callbacks, void *data, void *args)
                 .op = SELECTION_FILTER_NOTIFY,
             };
             CallCallbacks(&SelectionFilterCallback, &param);
-            if (param.skip)
-                continue;
+            if (param.skip) {
+              continue;
+            }
 
             xXFixesSelectionNotifyEvent ev = {
                 .type = XFixesEventBase + XFixesSelectionNotify,
@@ -112,8 +113,9 @@ CheckSelectionCallback(void)
 {
     if (selectionEvents) {
         if (!SelectionCallbackRegistered) {
-            if (!AddCallback(&SelectionCallback, XFixesSelectionCallback, NULL))
-                return FALSE;
+          if (!AddCallback(&SelectionCallback, XFixesSelectionCallback, NULL)) {
+            return FALSE;
+          }
             SelectionCallbackRegistered = TRUE;
         }
     }
@@ -147,15 +149,17 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
     };
     CallCallbacks(&SelectionFilterCallback, &param);
     if (param.skip) {
-        if (param.status != Success)
-            client->errorValue = param.selection;
+      if (param.status != Success) {
+        client->errorValue = param.selection;
+      }
         return param.status;
     }
 
     WindowPtr pWindow;
     int rc = dixLookupWindow(&pWindow, param.owner, param.client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     if (stuff->eventMask & ~SelectionAllEvents) {
         client->errorValue = stuff->eventMask;
         return BadValue;
@@ -166,8 +170,9 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
     Selection *selection;
 
     rc = dixLookupSelection(&selection, param.selection, param.client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     for (prev = &selectionEvents; (e = *prev); prev = &e->next) {
         if (e->selection == selection &&
@@ -183,8 +188,9 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
     }
     if (!e) {
         e = calloc(1, sizeof(SelectionEventRec));
-        if (!e)
-            return BadAlloc;
+        if (!e) {
+          return BadAlloc;
+        }
 
         e->next = 0;
         e->selection = selection;
@@ -199,15 +205,17 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
         rc = dixLookupResourceByType(&val, pWindow->drawable.id,
                                      SelectionWindowType, serverClient,
                                      DixGetAttrAccess);
-        if (rc != Success)
-            if (!AddResource(pWindow->drawable.id, SelectionWindowType,
-                             (void *) pWindow)) {
-                free(e);
-                return BadAlloc;
-            }
-
-        if (!AddResource(e->clientResource, SelectionClientType, (void *) e))
+        if (rc != Success) {
+          if (!AddResource(pWindow->drawable.id, SelectionWindowType,
+                           (void *)pWindow)) {
+            free(e);
             return BadAlloc;
+          }
+        }
+
+        if (!AddResource(e->clientResource, SelectionClientType, (void *)e)) {
+          return BadAlloc;
+        }
 
         *prev = e;
         if (!CheckSelectionCallback()) {

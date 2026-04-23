@@ -79,20 +79,23 @@ OutputDirectory(char *outdir, size_t size)
         const char *xdg_runtime_dir = getenv("XDG_RUNTIME_DIR");
 
         if (xdg_runtime_dir && xdg_runtime_dir[0] == '/' &&
-            access(xdg_runtime_dir, W_OK | X_OK) == 0)
-            directory = xdg_runtime_dir;
+            access(xdg_runtime_dir, W_OK | X_OK) == 0) {
+          directory = xdg_runtime_dir;
+        }
     }
 
-    if (directory && directory[strlen(directory) - 1] != '/')
-        pathsep = "/";
+    if (directory && directory[strlen(directory) - 1] != '/') {
+      pathsep = "/";
+    }
 
 #else
     directory = Win32TempDir();
     pathsep = "\\";
 #endif
 
-    if (directory)
-        r = snprintf(outdir, size, "%s%s", directory, pathsep);
+    if (directory) {
+      r = snprintf(outdir, size, "%s%s", directory, pathsep);
+    }
     if (r < 0 || r >= size) {
         assert(strlen("/tmp/") < size);
         strcpy(outdir, "/tmp/");
@@ -139,8 +142,9 @@ RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
 #endif
 
     if (XkbBaseDirectory != NULL) {
-        if (asprintf(&xkbbasedirflag, "\"-R%s\"", XkbBaseDirectory) == -1)
-            xkbbasedirflag = NULL;
+      if (asprintf(&xkbbasedirflag, "\"-R%s\"", XkbBaseDirectory) == -1) {
+        xkbbasedirflag = NULL;
+      }
     }
 
     if (XkbBinDirectory != NULL) {
@@ -158,12 +162,13 @@ RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
                  "\"%s%sxkbcomp\" -w %d %s -xkm \"%s\" "
                  "-em1 %s -emp %s -eml %s \"%s%s.xkm\"",
                  xkbbindir, xkbbindirsep,
-                 ((xkbDebugFlags < 2) ? 1 :
-                  ((xkbDebugFlags > 10) ? 10 : (int) xkbDebugFlags)),
-                 xkbbasedirflag ? xkbbasedirflag : "", xkmfile,
-                 PRE_ERROR_MSG, ERROR_PREFIX, POST_ERROR_MSG1,
-                 xkm_output_dir, keymap) == -1)
-        buf = NULL;
+                 ((xkbDebugFlags < 2)
+                      ? 1
+                      : ((xkbDebugFlags > 10) ? 10 : (int)xkbDebugFlags)),
+                 xkbbasedirflag ? xkbbasedirflag : "", xkmfile, PRE_ERROR_MSG,
+                 ERROR_PREFIX, POST_ERROR_MSG1, xkm_output_dir, keymap) == -1) {
+      buf = NULL;
+    }
 
     free(xkbbasedirflag);
 
@@ -189,8 +194,9 @@ RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
         if (fclose(out) == 0 && system(buf) >= 0)
 #endif
         {
-            if (xkbDebugFlags)
-                DebugF("[xkb] xkb executes: %s\n", buf);
+          if (xkbDebugFlags) {
+            DebugF("[xkb] xkb executes: %s\n", buf);
+          }
             free(buf);
 #ifdef WIN32
             unlink(tmpname);
@@ -255,13 +261,15 @@ XkbDDXCompileKeymapByNames(XkbDescPtr xkb,
     keymap = RunXkbComp(xkb_write_keymap_for_names_cb, &ctx);
 
     if (keymap) {
-        if(nameRtrn)
-            strlcpy(nameRtrn, keymap, nameRtrnLen);
+      if (nameRtrn) {
+        strlcpy(nameRtrn, keymap, nameRtrnLen);
+      }
 
         free(keymap);
         rc = TRUE;
-    } else if (nameRtrn)
-        *nameRtrn = '\0';
+    } else if (nameRtrn) {
+      *nameRtrn = '\0';
+    }
 
     return rc;
 }
@@ -320,22 +328,25 @@ XkbDDXOpenConfigFile(const char *mapName, char *fileNameRtrn, int fileNameRtrnLe
             && (!isalpha(xkm_output_dir[0]) || xkm_output_dir[1] != ':')
 #endif
             ) {
-            if (snprintf(buf, PATH_MAX, "%s/%s%s.xkm", XkbBaseDirectory,
-                         xkm_output_dir, mapName) >= PATH_MAX)
-                buf[0] = '\0';
+          if (snprintf(buf, PATH_MAX, "%s/%s%s.xkm", XkbBaseDirectory,
+                       xkm_output_dir, mapName) >= PATH_MAX) {
+            buf[0] = '\0';
+          }
         }
         else {
-            if (snprintf(buf, PATH_MAX, "%s%s.xkm", xkm_output_dir, mapName)
-                >= PATH_MAX)
-                buf[0] = '\0';
+          if (snprintf(buf, PATH_MAX, "%s%s.xkm", xkm_output_dir, mapName) >=
+              PATH_MAX) {
+            buf[0] = '\0';
+          }
         }
-        if (buf[0] != '\0')
-            file = fopen(buf, "rb");
-        else
-            file = NULL;
+        if (buf[0] != '\0') {
+          file = fopen(buf, "rb");
+        } else {
+          file = NULL;
+        }
+    } else {
+      file = NULL;
     }
-    else
-        file = NULL;
     if ((fileNameRtrn != NULL) && (fileNameRtrnLen > 0)) {
         strlcpy(fileNameRtrn, buf, fileNameRtrnLen);
     }
@@ -382,10 +393,11 @@ XkbDDXLoadKeymapByNames(DeviceIntPtr keybd,
 
     *xkbRtrn = NULL;
     if ((keybd == NULL) || (keybd->key == NULL) ||
-        (keybd->key->xkbInfo == NULL))
-        xkb = NULL;
-    else
-        xkb = keybd->key->xkbInfo->desc;
+        (keybd->key->xkbInfo == NULL)) {
+      xkb = NULL;
+    } else {
+      xkb = keybd->key->xkbInfo->desc;
+    }
     if ((names->keycodes == NULL) && (names->types == NULL) &&
         (names->compat == NULL) && (names->symbols == NULL) &&
         (names->geometry == NULL)) {
@@ -412,8 +424,9 @@ XkbDDXNamesFromRules(DeviceIntPtr keybd,
     Bool complete;
     XkbRF_RulesPtr rules;
 
-    if (!rules_name)
-        return FALSE;
+    if (!rules_name) {
+      return FALSE;
+    }
 
     if (snprintf(buf, PATH_MAX, "%s/rules/%s", XkbBaseDirectory, rules_name)
         >= PATH_MAX) {
@@ -446,8 +459,9 @@ XkbDDXNamesFromRules(DeviceIntPtr keybd,
     fclose(file);
     XkbRF_Free(rules);
 
-    if (!complete)
-        LogMessage(X_ERROR, "XKB: Rules returned no components\n");
+    if (!complete) {
+      LogMessage(X_ERROR, "XKB: Rules returned no components\n");
+    }
 
     return complete;
 }
@@ -500,8 +514,9 @@ KeymapOrDefaults(DeviceIntPtr dev, XkbDescPtr xkb)
 {
     XkbRMLVOSet dflts;
 
-    if (xkb)
-        return xkb;
+    if (xkb) {
+      return xkb;
+    }
 
     /* we didn't get what we really needed. And that will likely leave
      * us with a keyboard that doesn't work. Use the defaults instead */

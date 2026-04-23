@@ -154,8 +154,9 @@ ProcDPMSSelectInput(register ClientPtr client)
 
         /* build the entry */
         pNewEvent = calloc(1, sizeof(DPMSEventRec));
-        if (!pNewEvent)
-            return BadAlloc;
+        if (!pNewEvent) {
+          return BadAlloc;
+        }
         pNewEvent->client = client;
         pNewEvent->mask = stuff->eventMask;
         /*
@@ -164,8 +165,9 @@ ProcDPMSSelectInput(register ClientPtr client)
          */
         clientResource = FakeClientID(client->index);
         pNewEvent->clientResource = clientResource;
-        if (!AddResource(clientResource, ClientType, (void *)pNewEvent))
-            return BadAlloc;
+        if (!AddResource(clientResource, ClientType, (void *)pNewEvent)) {
+          return BadAlloc;
+        }
         /*
          * create a resource to contain a pointer to the list
          * of clients selecting input
@@ -187,17 +189,29 @@ ProcDPMSSelectInput(register ClientPtr client)
         if (i == Success && pHead) {
             pNewEvent = 0;
             for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
+<<<<<<< HEAD
                 if (pEvent->client == client) {
                     break;
                 }
+=======
+              if (pEvent->client == client) {
+                break;
+              }
+>>>>>>> 6fe7d17b85 (HACK)
                 pNewEvent = pEvent;
             }
             if (pEvent) {
                 FreeResource(pEvent->clientResource, ClientType);
                 if (pNewEvent) {
+<<<<<<< HEAD
                     pNewEvent->next = pEvent->next;
                 } else {
                     *pHead = pEvent->next;
+=======
+                  pNewEvent->next = pEvent->next;
+                } else {
+                  *pHead = pEvent->next;
+>>>>>>> 6fe7d17b85 (HACK)
                 }
                 free(pEvent);
             }
@@ -221,6 +235,7 @@ SendDPMSInfoNotify(void)
                                 serverClient,
                                 DixReadAccess);
     if (i != Success || !pHead) {
+<<<<<<< HEAD
         return;
     }
 
@@ -228,6 +243,14 @@ SendDPMSInfoNotify(void)
         if ((pEvent->mask & DPMSInfoNotifyMask) == 0) {
             continue;
         }
+=======
+      return;
+    }
+    for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
+      if ((pEvent->mask & DPMSInfoNotifyMask) == 0) {
+        continue;
+      }
+>>>>>>> 6fe7d17b85 (HACK)
         se.type = GenericEvent;
         se.extension = DPMSReqCode;
         se.length = (sizeof(xDPMSInfoNotifyEvent) - 32) >> 2;
@@ -282,6 +305,7 @@ DPMSSet(ClientPtr client, int level)
 
     if (level != DPMSModeOn) {
         if (isUnblank(screenIsSaved)) {
+<<<<<<< HEAD
             int rc = dixSaveScreens(client, SCREEN_SAVER_FORCER, ScreenSaverActive);
             if (rc != Success) {
                 return rc;
@@ -291,6 +315,17 @@ DPMSSet(ClientPtr client, int level)
         int rc = dixSaveScreens(client, SCREEN_SAVER_OFF, ScreenSaverReset);
         if (rc != Success) {
             return rc;
+=======
+            rc = dixSaveScreens(client, SCREEN_SAVER_FORCER, ScreenSaverActive);
+            if (rc != Success) {
+              return rc;
+            }
+        }
+    } else if (!isUnblank(screenIsSaved)) {
+        rc = dixSaveScreens(client, SCREEN_SAVER_OFF, ScreenSaverReset);
+        if (rc != Success) {
+          return rc;
+>>>>>>> 6fe7d17b85 (HACK)
         }
     }
 
@@ -307,7 +342,11 @@ DPMSSet(ClientPtr client, int level)
     });
 
     if (DPMSPowerLevel != old_level) {
+<<<<<<< HEAD
         SendDPMSInfoNotify();
+=======
+      SendDPMSInfoNotify();
+>>>>>>> 6fe7d17b85 (HACK)
     }
 
     return Success;
@@ -417,7 +456,11 @@ ProcDPMSDisable(ClientPtr client)
 
     DPMSEnabled = FALSE;
     if (was_enabled) {
+<<<<<<< HEAD
         SendDPMSInfoNotify();
+=======
+      SendDPMSInfoNotify();
+>>>>>>> 6fe7d17b85 (HACK)
     }
 
     return Success;
@@ -430,7 +473,11 @@ ProcDPMSForceLevel(ClientPtr client)
     X_REQUEST_FIELD_CARD16(level);
 
     if (!DPMSEnabled) {
+<<<<<<< HEAD
         return BadMatch;
+=======
+      return BadMatch;
+>>>>>>> 6fe7d17b85 (HACK)
     }
 
     if (stuff->level != DPMSModeOn &&

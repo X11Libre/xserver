@@ -84,31 +84,35 @@ ProcXSetDeviceMode(ClientPtr client)
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
-    if (dev->valuator == NULL)
-        return BadMatch;
+    if (rc != Success) {
+      return rc;
+    }
+    if (dev->valuator == NULL) {
+      return BadMatch;
+    }
 
-    if (IsXTestDevice(dev, NULL))
-        return BadMatch;
+    if (IsXTestDevice(dev, NULL)) {
+      return BadMatch;
+    }
 
-    if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client))
-        reply.status = AlreadyGrabbed;
-    else
-        reply.status = SetDeviceMode(client, dev, stuff->mode);
+    if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client)) {
+      reply.status = AlreadyGrabbed;
+    } else {
+      reply.status = SetDeviceMode(client, dev, stuff->mode);
+    }
 
-    if (reply.status == Success)
-        valuator_set_mode(dev, VALUATOR_MODE_ALL_AXES, stuff->mode);
-    else if (reply.status != AlreadyGrabbed) {
-        switch (reply.status) {
-        case BadMatch:
-        case BadImplementation:
-        case BadAlloc:
-            break;
-        default:
-            reply.status = BadMode;
-        }
-        return reply.status;
+    if (reply.status == Success) {
+      valuator_set_mode(dev, VALUATOR_MODE_ALL_AXES, stuff->mode);
+    } else if (reply.status != AlreadyGrabbed) {
+      switch (reply.status) {
+      case BadMatch:
+      case BadImplementation:
+      case BadAlloc:
+        break;
+      default:
+        reply.status = BadMode;
+      }
+      return reply.status;
     }
 
     return X_SEND_REPLY_SIMPLE(client, reply);

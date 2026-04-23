@@ -42,15 +42,17 @@ miCreatePicture(PicturePtr pPicture)
 void
 miDestroyPicture(PicturePtr pPicture)
 {
-    if (pPicture->freeCompClip)
-        RegionDestroy(pPicture->pCompositeClip);
+  if (pPicture->freeCompClip) {
+    RegionDestroy(pPicture->pCompositeClip);
+  }
 }
 
 static void
 miDestroyPictureClip(PicturePtr pPicture)
 {
-    if (pPicture->clientClip)
-        RegionDestroy(pPicture->clientClip);
+  if (pPicture->clientClip) {
+    RegionDestroy(pPicture->clientClip);
+  }
     pPicture->clientClip = NULL;
 }
 
@@ -65,8 +67,9 @@ miChangePictureClip(PicturePtr pPicture, int type, void *value, int n)
     case CT_PIXMAP:
         /* convert the pixmap to a region */
         clientClip = BitmapToRegion(pScreen, (PixmapPtr) value);
-        if (!clientClip)
-            return BadAlloc;
+        if (!clientClip) {
+          return BadAlloc;
+        }
         dixDestroyPixmap((PixmapPtr) value, 0);
         break;
     case CT_REGION:
@@ -77,8 +80,9 @@ miChangePictureClip(PicturePtr pPicture, int type, void *value, int n)
         break;
     default:
         clientClip = RegionFromRects(n, (xRectangle *) value, type);
-        if (!clientClip)
-            return BadAlloc;
+        if (!clientClip) {
+          return BadAlloc;
+        }
         free(value);
         break;
     }
@@ -125,8 +129,9 @@ miValidatePicture(PicturePtr pPicture, Mask mask)
              * by children and have no client clip.)
              */
             if (!pPicture->clientClip) {
-                if (freeCompClip)
-                    RegionDestroy(pPicture->pCompositeClip);
+              if (freeCompClip) {
+                RegionDestroy(pPicture->pCompositeClip);
+              }
                 pPicture->pCompositeClip = pregWin;
                 pPicture->freeCompClip = freeTmpClip;
             }
@@ -147,8 +152,9 @@ miValidatePicture(PicturePtr pPicture, Mask mask)
                 if (freeCompClip) {
                     RegionIntersect(pPicture->pCompositeClip,
                                     pregWin, pPicture->clientClip);
-                    if (freeTmpClip)
-                        RegionDestroy(pregWin);
+                    if (freeTmpClip) {
+                      RegionDestroy(pregWin);
+                    }
                 }
                 else if (freeTmpClip) {
                     RegionIntersect(pregWin, pregWin, pPicture->clientClip);
@@ -236,27 +242,33 @@ miClipPictureReg(pixman_region16_t * pRegion,
         pixman_box16_t *pCbox = pixman_region_rectangles(pClip, NULL);
         int v;
 
-        if (pRbox->x1 < (v = pCbox->x1 + dx))
-            pRbox->x1 = BOUND(v);
-        if (pRbox->x2 > (v = pCbox->x2 + dx))
-            pRbox->x2 = BOUND(v);
-        if (pRbox->y1 < (v = pCbox->y1 + dy))
-            pRbox->y1 = BOUND(v);
-        if (pRbox->y2 > (v = pCbox->y2 + dy))
-            pRbox->y2 = BOUND(v);
+        if (pRbox->x1 < (v = pCbox->x1 + dx)) {
+          pRbox->x1 = BOUND(v);
+        }
+        if (pRbox->x2 > (v = pCbox->x2 + dx)) {
+          pRbox->x2 = BOUND(v);
+        }
+        if (pRbox->y1 < (v = pCbox->y1 + dy)) {
+          pRbox->y1 = BOUND(v);
+        }
+        if (pRbox->y2 > (v = pCbox->y2 + dy)) {
+          pRbox->y2 = BOUND(v);
+        }
         if (pRbox->x1 >= pRbox->x2 || pRbox->y1 >= pRbox->y2) {
             pixman_region_init(pRegion);
         }
-    }
-    else if (!pixman_region_not_empty(pClip))
+    } else if (!pixman_region_not_empty(pClip)) {
+      return FALSE;
+    } else {
+      if (dx || dy) {
+        pixman_region_translate(pRegion, -dx, -dy);
+      }
+      if (!pixman_region_intersect(pRegion, pRegion, pClip)) {
         return FALSE;
-    else {
-        if (dx || dy)
-            pixman_region_translate(pRegion, -dx, -dy);
-        if (!pixman_region_intersect(pRegion, pRegion, pClip))
-            return FALSE;
-        if (dx || dy)
-            pixman_region_translate(pRegion, dx, dy);
+      }
+      if (dx || dy) {
+        pixman_region_translate(pRegion, dx, dy);
+      }
     }
     return pixman_region_not_empty(pRegion);
 }
@@ -277,8 +289,9 @@ miClipPictureSrc(RegionPtr pRegion, PicturePtr pPicture, int dx, int dy)
                                 -(pPicture->clipOrigin.x + dx),
                                 -(pPicture->clipOrigin.y + dy));
 
-        if (!result)
-            return FALSE;
+        if (!result) {
+          return FALSE;
+        }
     }
     return TRUE;
 }
@@ -289,8 +302,9 @@ SourceValidateOnePicture(PicturePtr pPicture)
     DrawablePtr pDrawable = pPicture->pDrawable;
     ScreenPtr pScreen;
 
-    if (!pDrawable)
-        return;
+    if (!pDrawable) {
+      return;
+    }
 
     pScreen = pDrawable->pScreen;
 
@@ -302,8 +316,9 @@ void
 miCompositeSourceValidate(PicturePtr pPicture)
 {
     SourceValidateOnePicture(pPicture);
-    if (pPicture->alphaMap)
-        SourceValidateOnePicture(pPicture->alphaMap);
+    if (pPicture->alphaMap) {
+      SourceValidateOnePicture(pPicture->alphaMap);
+    }
 }
 
 /*
@@ -380,8 +395,9 @@ miComputeCompositeRegion(RegionPtr pRegion,
     }
 
     miCompositeSourceValidate(pSrc);
-    if (pMask)
-        miCompositeSourceValidate(pMask);
+    if (pMask) {
+      miCompositeSourceValidate(pMask);
+    }
 
     return TRUE;
 }
@@ -438,20 +454,24 @@ miIsSolidAlpha(PicturePtr pSrc)
     ScreenPtr pScreen;
     char line[1];
 
-    if (!pSrc->pDrawable)
-        return FALSE;
+    if (!pSrc->pDrawable) {
+      return FALSE;
+    }
 
     pScreen = pSrc->pDrawable->pScreen;
 
     /* Alpha-only */
-    if (PIXMAN_FORMAT_TYPE(pSrc->format) != PIXMAN_TYPE_A)
-        return FALSE;
+    if (PIXMAN_FORMAT_TYPE(pSrc->format) != PIXMAN_TYPE_A) {
+      return FALSE;
+    }
     /* repeat */
-    if (!pSrc->repeat)
-        return FALSE;
+    if (!pSrc->repeat) {
+      return FALSE;
+    }
     /* 1x1 */
-    if (pSrc->pDrawable->width != 1 || pSrc->pDrawable->height != 1)
-        return FALSE;
+    if (pSrc->pDrawable->width != 1 || pSrc->pDrawable->height != 1) {
+      return FALSE;
+    }
     line[0] = 1;
     (*pScreen->GetImage) (pSrc->pDrawable, 0, 0, 1, 1, ZPixmap, ~0L, line);
     switch (pSrc->pDrawable->bitsPerPixel) {
@@ -509,8 +529,9 @@ miTriStrip(CARD8 op,
 
     ntri = npoints - 2;
     tris = calloc(ntri, sizeof(xTriangle));
-    if (!tris)
-        return;
+    if (!tris) {
+      return;
+    }
 
     for (tri = tris; npoints >= 3; npoints--, points++, tri++) {
         tri->p1 = points[0];
@@ -534,8 +555,9 @@ miTriFan(CARD8 op,
 
     ntri = npoints - 2;
     tris = calloc(ntri, sizeof(xTriangle));
-    if (!tris)
-        return;
+    if (!tris) {
+      return;
+    }
 
     first = points++;
     for (tri = tris; npoints >= 3; npoints--, points++, tri++) {
@@ -552,8 +574,9 @@ miPictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
 {
     PictureScreenPtr ps;
 
-    if (!PictureInit(pScreen, formats, nformats))
-        return FALSE;
+    if (!PictureInit(pScreen, formats, nformats)) {
+      return FALSE;
+    }
     ps = GetPictureScreen(pScreen);
     ps->CreatePicture = miCreatePicture;
     ps->DestroyPicture = miDestroyPicture;

@@ -17,8 +17,9 @@ static Bool clientAllowedOnClient(ClientPtr subj, ClientPtr obj) {
     struct XnamespaceClientPriv *subjPriv = XnsClientPriv(subj);
     struct XnamespaceClientPriv *objPriv = XnsClientPriv(obj);
 
-    if (subjPriv && subjPriv->ns->superPower)
-        return TRUE;
+    if (subjPriv && subjPriv->ns->superPower) {
+      return TRUE;
+    }
 
     return XnsClientSameNS(subjPriv, objPriv);
 }
@@ -28,13 +29,15 @@ void hookSend(CallbackListPtr *pcbl, void *unused, void *calldata)
     XNS_HOOK_HEAD(XaceSendAccessRec);
 
     /* if no sending client, then it's coming internally from the server itself */
-    if (!client)
-        goto pass;
+    if (!client) {
+      goto pass;
+    }
 
     ClientPtr targetClient = dixClientForWindow(param->pWin);
     struct XnamespaceClientPriv *obj = XnsClientPriv(targetClient);
-    if (clientAllowedOnClient(client, targetClient))
-        goto pass;
+    if (clientAllowedOnClient(client, targetClient)) {
+      goto pass;
+    }
 
     XNS_HOOK_LOG("BLOCK target @ %s\n", obj->ns->name);
     for (int i = 0; i < param->count; i++) {

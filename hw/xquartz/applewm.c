@@ -132,8 +132,9 @@ AppleWMDoReorderWindow(WindowPtr pWin)
     atom = xa_apple_no_order_in();
     rc = dixLookupProperty(&prop, pWin, atom, serverClient, DixReadAccess);
 
-    if (Success == rc && prop->type == atom)
-        return 0;
+    if (Success == rc && prop->type == atom) {
+      return 0;
+    }
 
     return 1;
 }
@@ -160,8 +161,9 @@ updateEventMask(WMEventPtr *pHead)
     WMEventPtr pCur;
 
     eventMask = 0;
-    for (pCur = *pHead; pCur != NULL; pCur = pCur->next)
-        eventMask |= pCur->mask;
+    for (pCur = *pHead; pCur != NULL; pCur = pCur->next) {
+      eventMask |= pCur->mask;
+    }
 }
 
 /*ARGSUSED*/
@@ -179,13 +181,15 @@ WMFreeClient(void *data, XID id)
         DixWriteAccess | DixDestroyAccess);
     if (i == Success && pHead) {
         pPrev = 0;
-        for (pCur = *pHead; pCur && pCur != pEvent; pCur = pCur->next)
-            pPrev = pCur;
+        for (pCur = *pHead; pCur && pCur != pEvent; pCur = pCur->next) {
+          pPrev = pCur;
+        }
         if (pCur) {
-            if (pPrev)
-                pPrev->next = pEvent->next;
-            else
-                *pHead = pEvent->next;
+          if (pPrev) {
+            pPrev->next = pEvent->next;
+          } else {
+            *pHead = pEvent->next;
+          }
         }
         updateEventMask(pHead);
     }
@@ -237,8 +241,9 @@ ProcAppleWMSelectInput(register ClientPtr client)
 
         /* build the entry */
         WMEventPtr pNewEvent = calloc(1, sizeof(WMEventRec));
-        if (!pNewEvent)
-            return BadAlloc;
+        if (!pNewEvent) {
+          return BadAlloc;
+        }
         pNewEvent->next = 0;
         pNewEvent->client = client;
         pNewEvent->mask = stuff->mask;
@@ -248,8 +253,9 @@ ProcAppleWMSelectInput(register ClientPtr client)
          */
         clientResource = FakeClientID(client->index);
         pNewEvent->clientResource = clientResource;
-        if (!AddResource(clientResource, ClientType, (void *)pNewEvent))
-            return BadAlloc;
+        if (!AddResource(clientResource, ClientType, (void *)pNewEvent)) {
+          return BadAlloc;
+        }
         /*
          * create a resource to contain a pointer to the list
          * of clients selecting input.  This must be indirect as
@@ -274,16 +280,18 @@ ProcAppleWMSelectInput(register ClientPtr client)
         if (i == Success && pHead) {
             WMEventPtr pNewEvent = 0;
             for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
-                if (pEvent->client == client)
-                    break;
+              if (pEvent->client == client) {
+                break;
+              }
                 pNewEvent = pEvent;
             }
             if (pEvent) {
                 FreeResource(pEvent->clientResource, ClientType);
-                if (pNewEvent)
-                    pNewEvent->next = pEvent->next;
-                else
-                    *pHead = pEvent->next;
+                if (pNewEvent) {
+                  pNewEvent->next = pEvent->next;
+                } else {
+                  *pHead = pEvent->next;
+                }
                 free(pEvent);
                 updateEventMask(pHead);
             }
@@ -311,11 +319,13 @@ AppleWMSendEvent(int type, unsigned int mask, int which, int arg)
         dixLookupResourceByType((void **)&pHead, eventResource, EventType,
                                 serverClient,
                                 DixReadAccess);
-    if (i != Success || !pHead)
-        return;
+    if (i != Success || !pHead) {
+      return;
+    }
     for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
-        if ((pEvent->mask & mask) == 0)
-            continue;
+      if ((pEvent->mask & mask) == 0) {
+        continue;
+      }
         se.type = type + WMEventBase;
         se.kind = which;
         se.arg = arg;
@@ -384,8 +394,9 @@ ProcAppleWMSetWindowMenu(register ClientPtr client)
 
         while (i < max_len)
         {
-            if (bytes[i++] == 0)
-                break;
+          if (bytes[i++] == 0) {
+            break;
+          }
         }
     }
 
@@ -432,9 +443,10 @@ ProcAppleWMSetWindowLevel(register ClientPtr client)
 
     REQUEST_SIZE_MATCH(xAppleWMSetWindowLevelReq);
 
-    if (Success != dixLookupWindow(&pWin, stuff->window, client,
-                                   DixReadAccess))
-        return BadValue;
+    if (Success !=
+        dixLookupWindow(&pWin, stuff->window, client, DixReadAccess)) {
+      return BadValue;
+    }
 
     if (stuff->level >= AppleWMNumWindowLevels) {
         return BadValue;
@@ -456,8 +468,9 @@ ProcAppleWMSendPSN(register ClientPtr client)
 
     REQUEST_SIZE_MATCH(xAppleWMSendPSNReq);
 
-    if (!appleWMProcs->SendPSN)
-        return BadRequest;
+    if (!appleWMProcs->SendPSN) {
+      return BadRequest;
+    }
 
     err = appleWMProcs->SendPSN(stuff->psn_hi, stuff->psn_lo);
     if (err != Success) {
@@ -476,17 +489,20 @@ ProcAppleWMAttachTransient(register ClientPtr client)
 
     REQUEST_SIZE_MATCH(xAppleWMAttachTransientReq);
 
-    if (!appleWMProcs->AttachTransient)
-        return BadRequest;
+    if (!appleWMProcs->AttachTransient) {
+      return BadRequest;
+    }
 
     if (Success !=
-        dixLookupWindow(&pWinChild, stuff->child, client, DixReadAccess))
-        return BadValue;
+        dixLookupWindow(&pWinChild, stuff->child, client, DixReadAccess)) {
+      return BadValue;
+    }
 
     if (stuff->parent) {
-        if (Success !=
-            dixLookupWindow(&pWinParent, stuff->parent, client, DixReadAccess))
-            return BadValue;
+      if (Success !=
+          dixLookupWindow(&pWinParent, stuff->parent, client, DixReadAccess)) {
+        return BadValue;
+      }
     }
     else {
         pWinParent = NULL;
@@ -575,9 +591,10 @@ ProcAppleWMFrameDraw(register ClientPtr client)
 
     REQUEST_AT_LEAST_SIZE(xAppleWMFrameDrawReq);
 
-    if (Success != dixLookupWindow(&pWin, stuff->window, client,
-                                   DixReadAccess))
-        return BadValue;
+    if (Success !=
+        dixLookupWindow(&pWin, stuff->window, client, DixReadAccess)) {
+      return BadValue;
+    }
 
     ir = make_box(stuff->ix, stuff->iy, stuff->iw, stuff->ih);
     or = make_box(stuff->ox, stuff->oy, stuff->ow, stuff->oh);
@@ -585,8 +602,9 @@ ProcAppleWMFrameDraw(register ClientPtr client)
     title_length = stuff->title_length;
     title_max = (client->req_len << 2) - sizeof(xAppleWMFrameDrawReq);
 
-    if (title_max < title_length)
-        return BadValue;
+    if (title_max < title_length) {
+      return BadValue;
+    }
 
     title_bytes = (unsigned char *)&stuff[1];
 
@@ -612,8 +630,9 @@ ProcAppleWMDispatch(register ClientPtr client)
         return ProcAppleWMQueryVersion(client);
     }
 
-    if (!client->local)
-        return WMErrorBase + AppleWMClientNotLocal;
+    if (!client->local) {
+      return WMErrorBase + AppleWMClientNotLocal;
+    }
 
     switch (stuff->data) {
     case X_AppleWMSelectInput:
@@ -691,8 +710,9 @@ AppleWMExtensionInit(AppleWMProcsPtr procsPtr)
         WMReqCode = (unsigned char)extEntry->base;
         WMErrorBase = extEntry->errorBase;
         WMEventBase = extEntry->eventBase;
-        for (i = 0; i < AppleWMNumberEvents; i++)
-            EventSwapVector[WMEventBase + i] = (EventSwapPtr)SNotifyEvent;
+        for (i = 0; i < AppleWMNumberEvents; i++) {
+          EventSwapVector[WMEventBase + i] = (EventSwapPtr)SNotifyEvent;
+        }
         appleWMProcs = procsPtr;
     }
 }

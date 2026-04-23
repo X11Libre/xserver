@@ -93,7 +93,9 @@ PseudoramiXAddScreen(int x, int y, int w, int h)
 {
     PseudoramiXScreenRec *s;
 
-    if (noPseudoramiXExtension) return;
+    if (noPseudoramiXExtension) {
+      return;
+    }
 
     if (pseudoramiXNumScreens == pseudoramiXScreensAllocated) {
         pseudoramiXScreensAllocated += pseudoramiXScreensAllocated + 1;
@@ -119,7 +121,9 @@ PseudoramiXExtensionInit(void)
     Bool success = FALSE;
     ExtensionEntry      *extEntry;
 
-    if (noPseudoramiXExtension) return;
+    if (noPseudoramiXExtension) {
+      return;
+    }
 
     TRACE;
 
@@ -178,8 +182,9 @@ ProcPseudoramiXGetState(ClientPtr client)
     REQUEST(xPanoramiXGetStateReq);
     REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr pWin;
     register int rc;
@@ -187,8 +192,9 @@ ProcPseudoramiXGetState(ClientPtr client)
     TRACE;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xPanoramiXGetStateReply reply = {
         .state = !noPseudoramiXExtension,
@@ -209,8 +215,9 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
     REQUEST(xPanoramiXGetScreenCountReq);
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr pWin;
     register int rc;
@@ -218,8 +225,9 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
     TRACE;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xPanoramiXGetScreenCountReply reply = {
         .ScreenCount = pseudoramiXNumScreens,
@@ -250,12 +258,14 @@ ProcPseudoramiXGetScreenSize(ClientPtr client)
 
     TRACE;
 
-    if (stuff->screen >= pseudoramiXNumScreens)
+    if (stuff->screen >= pseudoramiXNumScreens) {
       return BadMatch;
+    }
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xPanoramiXGetScreenSizeReply reply = {
         .width = pseudoramiXScreens[stuff->screen].w,
@@ -322,8 +332,9 @@ ProcPseudoramiXQueryScreens(ClientPtr client)
         .number = noPseudoramiXExtension ? 0 : pseudoramiXNumScreens
     };
 
-    if (client->swapped)
-        swapl(&reply.number);
+    if (client->swapped) {
+      swapl(&reply.number);
+    }
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

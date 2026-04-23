@@ -286,20 +286,21 @@ int
 glamor_xv_set_port_attribute(glamor_port_private *port_priv,
                              Atom attribute, INT32 value)
 {
-    if (attribute == glamorBrightness)
-        port_priv->brightness = ClipValue(value, -1000, 1000);
-    else if (attribute == glamorHue)
-        port_priv->hue = ClipValue(value, -1000, 1000);
-    else if (attribute == glamorContrast)
-        port_priv->contrast = ClipValue(value, -1000, 1000);
-    else if (attribute == glamorSaturation)
-        port_priv->saturation = ClipValue(value, -1000, 1000);
-    else if (attribute == glamorGamma)
-        port_priv->gamma = ClipValue(value, 100, 10000);
-    else if (attribute == glamorColorspace)
-        port_priv->transform_index = ClipValue(value, 0, 1);
-    else
-        return BadMatch;
+  if (attribute == glamorBrightness) {
+    port_priv->brightness = ClipValue(value, -1000, 1000);
+  } else if (attribute == glamorHue) {
+    port_priv->hue = ClipValue(value, -1000, 1000);
+  } else if (attribute == glamorContrast) {
+    port_priv->contrast = ClipValue(value, -1000, 1000);
+  } else if (attribute == glamorSaturation) {
+    port_priv->saturation = ClipValue(value, -1000, 1000);
+  } else if (attribute == glamorGamma) {
+    port_priv->gamma = ClipValue(value, 100, 10000);
+  } else if (attribute == glamorColorspace) {
+    port_priv->transform_index = ClipValue(value, 0, 1);
+  } else {
+    return BadMatch;
+  }
     return Success;
 }
 
@@ -307,20 +308,21 @@ int
 glamor_xv_get_port_attribute(glamor_port_private *port_priv,
                              Atom attribute, INT32 *value)
 {
-    if (attribute == glamorBrightness)
-        *value = port_priv->brightness;
-    else if (attribute == glamorHue)
-        *value = port_priv->hue;
-    else if (attribute == glamorContrast)
-        *value = port_priv->contrast;
-    else if (attribute == glamorSaturation)
-        *value = port_priv->saturation;
-    else if (attribute == glamorGamma)
-        *value = port_priv->gamma;
-    else if (attribute == glamorColorspace)
-        *value = port_priv->transform_index;
-    else
-        return BadMatch;
+  if (attribute == glamorBrightness) {
+    *value = port_priv->brightness;
+  } else if (attribute == glamorHue) {
+    *value = port_priv->hue;
+  } else if (attribute == glamorContrast) {
+    *value = port_priv->contrast;
+  } else if (attribute == glamorSaturation) {
+    *value = port_priv->saturation;
+  } else if (attribute == glamorGamma) {
+    *value = port_priv->gamma;
+  } else if (attribute == glamorColorspace) {
+    *value = port_priv->transform_index;
+  } else {
+    return BadMatch;
+  }
 
     return Success;
 }
@@ -332,66 +334,80 @@ glamor_xv_query_image_attributes(int id,
 {
     int size = 0, tmp;
 
-    if (offsets)
-        offsets[0] = 0;
+    if (offsets) {
+      offsets[0] = 0;
+    }
     switch (id) {
     case FOURCC_YV12:
     case FOURCC_I420:
         *w = ALIGN(*w, 2);
         *h = ALIGN(*h, 2);
         size = ALIGN(*w, 4);
-        if (pitches)
-            pitches[0] = size;
+        if (pitches) {
+          pitches[0] = size;
+        }
         size *= *h;
-        if (offsets)
-            offsets[1] = size;
+        if (offsets) {
+          offsets[1] = size;
+        }
         tmp = ALIGN(*w >> 1, 4);
-        if (pitches)
-            pitches[1] = pitches[2] = tmp;
+        if (pitches) {
+          pitches[1] = pitches[2] = tmp;
+        }
         tmp *= (*h >> 1);
         size += tmp;
-        if (offsets)
-            offsets[2] = size;
+        if (offsets) {
+          offsets[2] = size;
+        }
         size += tmp;
         break;
     case FOURCC_NV12:
         *w = ALIGN(*w, 2);
         *h = ALIGN(*h, 2);
         size = ALIGN(*w, 4);
-        if (pitches)
-            pitches[0] = size;
+        if (pitches) {
+          pitches[0] = size;
+        }
         size *= *h;
-        if (offsets)
-            offsets[1] = size;
+        if (offsets) {
+          offsets[1] = size;
+        }
         tmp = ALIGN(*w, 4);
-        if (pitches)
-            pitches[1] = tmp;
+        if (pitches) {
+          pitches[1] = tmp;
+        }
         tmp *= (*h >> 1);
         size += tmp;
         break;
     case FOURCC_RGBA32:
         size = *w * 4;
-        if(pitches)
-            pitches[0] = size;
-        if(offsets)
-            offsets[0] = 0;
+        if (pitches) {
+          pitches[0] = size;
+        }
+        if (offsets) {
+          offsets[0] = 0;
+        }
         size *= *h;
         break;
     case FOURCC_UYVY:
         /* UYVU is single-plane really, all transformation is processed inside a shader */
         size = ALIGN(*w, 2) * 2;
-        if (pitches)
-            pitches[0] = size;
-        if (offsets)
-            offsets[0] = 0;
+        if (pitches) {
+          pitches[0] = size;
+        }
+        if (offsets) {
+          offsets[0] = 0;
+        }
         size *= *h;
         break;
     case FOURCC_RGB565:
         size = *w * 2;
-        if (pitches)
-            pitches[0] = size;
-        if (offsets)
-            offsets[0] = 0;
+        if (pitches) {
+          pitches[0] = size;
+        }
+        if (offsets) {
+          offsets[0] = 0;
+        }
         size *= *h;
         break;
     }
@@ -430,8 +446,9 @@ glamor_xv_render(glamor_port_private *port_priv, int id)
     char *vbo_offset;
     int dst_box_index;
 
-    if (!port_priv->xv_prog.prog)
-        glamor_init_xv_shader(screen, port_priv, id);
+    if (!port_priv->xv_prog.prog) {
+      glamor_init_xv_shader(screen, port_priv, id);
+    }
 
     cont = RTFContrast(port_priv->contrast);
     bright = RTFBrightness(port_priv->brightness);
@@ -617,14 +634,17 @@ glamor_xv_can_reuse_port(glamor_port_private *port_priv, int id, short w, short 
 {
     int ret = TRUE;
 
-    if (port_priv->prev_fmt != id)
-        ret = FALSE;
+    if (port_priv->prev_fmt != id) {
+      ret = FALSE;
+    }
 
-    if (w != port_priv->src_pix_w || h != port_priv->src_pix_h)
-        ret = FALSE;
+    if (w != port_priv->src_pix_w || h != port_priv->src_pix_h) {
+      ret = FALSE;
+    }
 
-    if (!port_priv->src_pix[0])
-        ret = FALSE;
+    if (!port_priv->src_pix[0]) {
+      ret = FALSE;
+    }
 
     port_priv->prev_fmt = id;
 
@@ -663,9 +683,11 @@ glamor_xv_put_image(glamor_port_private *port_priv,
             port_priv->xv_prog.prog = 0;
         }
 
-        for (i = 0; i < 3; i++)
-            if (port_priv->src_pix[i])
-                glamor_destroy_pixmap(port_priv->src_pix[i]);
+        for (i = 0; i < 3; i++) {
+          if (port_priv->src_pix[i]) {
+            glamor_destroy_pixmap(port_priv->src_pix[i]);
+          }
+        }
 
         switch (id) {
         case FOURCC_YV12:
@@ -680,8 +702,9 @@ glamor_xv_put_image(glamor_port_private *port_priv,
             port_priv->src_pix[2] =
                 glamor_create_pixmap(pScreen, width >> 1, height >> 1, 8,
                                      GLAMOR_CREATE_FBO_NO_FBO);
-            if (!port_priv->src_pix[1] || !port_priv->src_pix[2])
-                return BadAlloc;
+            if (!port_priv->src_pix[1] || !port_priv->src_pix[2]) {
+              return BadAlloc;
+            }
             break;
         case FOURCC_NV12:
             port_priv->src_pix[0] =
@@ -693,8 +716,9 @@ glamor_xv_put_image(glamor_port_private *port_priv,
                                      GLAMOR_CREATE_FORMAT_CBCR);
             port_priv->src_pix[2] = NULL;
 
-            if (!port_priv->src_pix[1])
-                return BadAlloc;
+            if (!port_priv->src_pix[1]) {
+              return BadAlloc;
+            }
             break;
         case FOURCC_RGBA32:
             port_priv->src_pix[0] =
@@ -725,8 +749,9 @@ glamor_xv_put_image(glamor_port_private *port_priv,
         port_priv->src_pix_w = width;
         port_priv->src_pix_h = height;
 
-        if (!port_priv->src_pix[0])
-            return BadAlloc;
+        if (!port_priv->src_pix[0]) {
+          return BadAlloc;
+        }
     }
 
     top = (src_y) & ~1;
@@ -826,10 +851,11 @@ glamor_xv_put_image(glamor_port_private *port_priv,
         return BadMatch;
     }
 
-    if (pDrawable->type == DRAWABLE_WINDOW)
-        port_priv->pPixmap = pScreen->GetWindowPixmap((WindowPtr) pDrawable);
-    else
-        port_priv->pPixmap = (PixmapPtr) pDrawable;
+    if (pDrawable->type == DRAWABLE_WINDOW) {
+      port_priv->pPixmap = pScreen->GetWindowPixmap((WindowPtr)pDrawable);
+    } else {
+      port_priv->pPixmap = (PixmapPtr)pDrawable;
+    }
 
     RegionCopy(&port_priv->clip, clipBoxes);
 

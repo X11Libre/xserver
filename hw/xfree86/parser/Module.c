@@ -137,29 +137,33 @@ xf86parseModuleSection(XF86ConfModulePtr ptr)
             xf86_lex_val.str = NULL;
             break;
         case LOAD:
-            if (xf86getSubToken(&(ptr->mod_comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "Load");
+          if (xf86getSubToken(&(ptr->mod_comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "Load");
+          }
             ptr->mod_load_lst =
                 xf86addNewLoadDirective(ptr->mod_load_lst, xf86_lex_val.str,
                                         XF86_LOAD_MODULE, NULL);
             break;
         case DISABLE:
-            if (xf86getSubToken(&(ptr->mod_comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "Disable");
+          if (xf86getSubToken(&(ptr->mod_comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "Disable");
+          }
             ptr->mod_disable_lst =
                 xf86addNewLoadDirective(ptr->mod_disable_lst, xf86_lex_val.str,
                                         XF86_DISABLE_MODULE, NULL);
             break;
         case LOAD_DRIVER:
-            if (xf86getSubToken(&(ptr->mod_comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "LoadDriver");
+          if (xf86getSubToken(&(ptr->mod_comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "LoadDriver");
+          }
             ptr->mod_load_lst =
                 xf86addNewLoadDirective(ptr->mod_load_lst, xf86_lex_val.str,
                                         XF86_LOAD_DRIVER, NULL);
             break;
         case SUBSECTION:
-            if (xf86getSubToken(&(ptr->mod_comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "SubSection");
+          if (xf86getSubToken(&(ptr->mod_comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "SubSection");
+          }
             ptr->mod_load_lst =
                 xf86parseModuleSubSection(ptr->mod_load_lst, xf86_lex_val.str);
             break;
@@ -186,35 +190,40 @@ xf86printModuleSection(FILE * cf, XF86ConfModulePtr ptr)
 {
     XF86LoadPtr lptr;
 
-    if (ptr == NULL)
-        return;
+    if (ptr == NULL) {
+      return;
+    }
 
-    if (ptr->mod_comment)
-        fprintf(cf, "%s", ptr->mod_comment);
+    if (ptr->mod_comment) {
+      fprintf(cf, "%s", ptr->mod_comment);
+    }
     for (lptr = ptr->mod_load_lst; lptr; lptr = lptr->list.next) {
         switch (lptr->load_type) {
         case XF86_LOAD_MODULE:
             if (lptr->load_opt == NULL) {
                 fprintf(cf, "\tLoad  \"%s\"", lptr->load_name);
-                if (lptr->load_comment)
-                    fprintf(cf, "%s", lptr->load_comment);
-                else
-                    fputc('\n', cf);
+                if (lptr->load_comment) {
+                  fprintf(cf, "%s", lptr->load_comment);
+                } else {
+                  fputc('\n', cf);
+                }
             }
             else {
                 fprintf(cf, "\tSubSection \"%s\"\n", lptr->load_name);
-                if (lptr->load_comment)
-                    fprintf(cf, "%s", lptr->load_comment);
+                if (lptr->load_comment) {
+                  fprintf(cf, "%s", lptr->load_comment);
+                }
                 xf86printOptionList(cf, lptr->load_opt, 2);
                 fprintf(cf, "\tEndSubSection\n");
             }
             break;
         case XF86_LOAD_DRIVER:
             fprintf(cf, "\tLoadDriver  \"%s\"", lptr->load_name);
-            if (lptr->load_comment)
-                fprintf(cf, "%s", lptr->load_comment);
-            else
-                fputc('\n', cf);
+            if (lptr->load_comment) {
+              fprintf(cf, "%s", lptr->load_comment);
+            } else {
+              fputc('\n', cf);
+            }
             break;
 #if 0
         default:
@@ -257,8 +266,9 @@ xf86freeModules(XF86ConfModulePtr ptr)
     XF86LoadPtr lptr;
     XF86LoadPtr prev;
 
-    if (ptr == NULL)
-        return;
+    if (ptr == NULL) {
+      return;
+    }
     lptr = ptr->mod_load_lst;
     while (lptr) {
         TestFree(lptr->load_name);

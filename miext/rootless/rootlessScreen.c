@@ -90,8 +90,9 @@ RootlessUpdateScreenPixmap(ScreenPtr pScreen)
 
         s->pixmap_data_size = rowbytes;
         s->pixmap_data = calloc(1, s->pixmap_data_size);
-        if (s->pixmap_data == NULL)
-            return;
+        if (s->pixmap_data == NULL) {
+          return;
+        }
 
         memset(s->pixmap_data, 0xFF, s->pixmap_data_size);
 
@@ -155,8 +156,9 @@ RootlessGetImage(DrawablePtr pDrawable, int sx, int sy, int w, int h,
 
         /* Check that we have some place to read from. */
         winRec = WINREC(TopLevelParent((WindowPtr) pDrawable));
-        if (winRec == NULL)
-            goto out;
+        if (winRec == NULL) {
+          goto out;
+        }
 
         /* Clip to top-level window bounds. */
         /* FIXME: fbGetImage uses the width parameter to calculate the
@@ -178,8 +180,9 @@ RootlessGetImage(DrawablePtr pDrawable, int sx, int sy, int w, int h,
         w = x1 - x0;
         h = y1 - y0;
 
-        if (w <= 0 || h <= 0)
-            goto out;
+        if (w <= 0 || h <= 0) {
+          goto out;
+        }
     }
 
     pScreen->GetImage(pDrawable, sx, sy, w, h, format, planeMask, pdstLine);
@@ -232,12 +235,15 @@ RootlessComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
     // SCREEN_UNWRAP(ps, Composite);
     ps->Composite = SCREENREC(pScreen)->Composite;
 
-    if (srcWin && IsFramedWindow(srcWin))
-        RootlessStartDrawing(srcWin);
-    if (maskWin && IsFramedWindow(maskWin))
-        RootlessStartDrawing(maskWin);
-    if (dstWin && IsFramedWindow(dstWin))
-        RootlessStartDrawing(dstWin);
+    if (srcWin && IsFramedWindow(srcWin)) {
+      RootlessStartDrawing(srcWin);
+    }
+    if (maskWin && IsFramedWindow(maskWin)) {
+      RootlessStartDrawing(maskWin);
+    }
+    if (dstWin && IsFramedWindow(dstWin)) {
+      RootlessStartDrawing(dstWin);
+    }
 
     ps->Composite(op, pSrc, pMask, pDst,
                   xSrc, ySrc, xMask, yMask, xDst, yDst, width, height);
@@ -267,10 +273,12 @@ RootlessGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
     dstWin = (pDst->pDrawable->type == DRAWABLE_WINDOW) ?
         (WindowPtr) pDst->pDrawable : NULL;
 
-    if (srcWin && IsFramedWindow(srcWin))
-        RootlessStartDrawing(srcWin);
-    if (dstWin && IsFramedWindow(dstWin))
-        RootlessStartDrawing(dstWin);
+    if (srcWin && IsFramedWindow(srcWin)) {
+      RootlessStartDrawing(srcWin);
+    }
+    if (dstWin && IsFramedWindow(dstWin)) {
+      RootlessStartDrawing(dstWin);
+    }
 
     //SCREEN_UNWRAP(ps, Glyphs);
     ps->Glyphs = SCREENREC(pScreen)->Glyphs;
@@ -400,8 +408,9 @@ RootlessMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst,
 
         RL_DEBUG_MSG("is top level! ");
         /* single layered systems are easy */
-        if (ppLayerWin)
-            *ppLayerWin = pWin;
+        if (ppLayerWin) {
+          *ppLayerWin = pWin;
+        }
 
         if (pWin == pFirst) {
             /* Blindly mark pWin and all of its inferiors.   This is a slight
@@ -411,26 +420,31 @@ RootlessMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst,
             pChild = pWin;
             while (1) {
                 if (pChild->viewable) {
-                    if (RegionBroken(&pChild->winSize))
-                        SetWinSize(pChild);
-                    if (RegionBroken(&pChild->borderSize))
-                        SetBorderSize(pChild);
+                  if (RegionBroken(&pChild->winSize)) {
+                    SetWinSize(pChild);
+                  }
+                  if (RegionBroken(&pChild->borderSize)) {
+                    SetBorderSize(pChild);
+                  }
                     (*MarkWindow) (pChild);
                     if (pChild->firstChild) {
                         pChild = pChild->firstChild;
                         continue;
                     }
                 }
-                while (!pChild->nextSib && (pChild != pWin))
-                    pChild = pChild->parent;
-                if (pChild == pWin)
-                    break;
+                while (!pChild->nextSib && (pChild != pWin)) {
+                  pChild = pChild->parent;
+                }
+                if (pChild == pWin) {
+                  break;
+                }
                 pChild = pChild->nextSib;
             }
             anyMarked = TRUE;
         }
-        if (anyMarked)
-            (*MarkWindow) (pWin->parent);
+        if (anyMarked) {
+          (*MarkWindow)(pWin->parent);
+        }
         result = anyMarked;
     }
     NORMAL_ROOT(pWin);
@@ -445,8 +459,9 @@ expose_1(WindowPtr pWin)
 {
     WindowPtr pChild;
 
-    if (!pWin->realized)
-        return;
+    if (!pWin->realized) {
+      return;
+    }
 
     pWin->drawable.pScreen->PaintWindow(pWin, &pWin->borderClip, PW_BACKGROUND);
 
@@ -457,8 +472,9 @@ expose_1(WindowPtr pWin)
     miSendExposures(pWin, &pWin->borderClip,
                     pWin->drawable.x, pWin->drawable.y);
 
-    for (pChild = pWin->firstChild; pChild != NULL; pChild = pChild->nextSib)
-        expose_1(pChild);
+    for (pChild = pWin->firstChild; pChild != NULL; pChild = pChild->nextSib) {
+      expose_1(pChild);
+    }
 }
 
 void
@@ -502,8 +518,9 @@ RootlessUninstallColormap(ColormapPtr pMap)
 
     SCREEN_UNWRAP(pScreen, UninstallColormap);
 
-    if (s->colormap == pMap)
-        s->colormap = NULL;
+    if (s->colormap == pMap) {
+      s->colormap = NULL;
+    }
 
     pScreen->UninstallColormap(pMap);
 
@@ -563,8 +580,9 @@ RootlessQueueRedisplay(ScreenPtr pScreen)
 
     screenRec->redisplay_queued = TRUE;
 
-    if (screenRec->redisplay_timer_set)
-        return;
+    if (screenRec->redisplay_timer_set) {
+      return;
+    }
 
     screenRec->redisplay_timer = TimerSet(screenRec->redisplay_timer,
                                           0, ROOTLESS_REDISPLAY_DELAY,
@@ -599,20 +617,25 @@ RootlessWakeupHandler(void *data, int result)
 static Bool
 RootlessAllocatePrivates(ScreenPtr pScreen)
 {
-    if (!dixRegisterPrivateKey
-        (&rootlessGCPrivateKeyRec, PRIVATE_GC, sizeof(RootlessGCRec)))
-        return FALSE;
-    if (!dixRegisterPrivateKey(&rootlessScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
-    if (!dixRegisterPrivateKey(&rootlessWindowPrivateKeyRec, PRIVATE_WINDOW, 0))
-        return FALSE;
-    if (!dixRegisterPrivateKey
-        (&rootlessWindowOldPixmapPrivateKeyRec, PRIVATE_WINDOW, 0))
-        return FALSE;
+  if (!dixRegisterPrivateKey(&rootlessGCPrivateKeyRec, PRIVATE_GC,
+                             sizeof(RootlessGCRec))) {
+    return FALSE;
+  }
+  if (!dixRegisterPrivateKey(&rootlessScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+    return FALSE;
+  }
+  if (!dixRegisterPrivateKey(&rootlessWindowPrivateKeyRec, PRIVATE_WINDOW, 0)) {
+    return FALSE;
+  }
+  if (!dixRegisterPrivateKey(&rootlessWindowOldPixmapPrivateKeyRec,
+                             PRIVATE_WINDOW, 0)) {
+    return FALSE;
+  }
 
     RootlessScreenRec *s = calloc(1, sizeof(RootlessScreenRec));
-    if (!s)
-        return FALSE;
+    if (!s) {
+      return FALSE;
+    }
     SETSCREENREC(pScreen, s);
 
     return TRUE;
@@ -684,8 +707,9 @@ RootlessInit(ScreenPtr pScreen, RootlessFrameProcsPtr procs)
 {
     RootlessScreenRec *s;
 
-    if (!RootlessAllocatePrivates(pScreen))
-        return FALSE;
+    if (!RootlessAllocatePrivates(pScreen)) {
+      return FALSE;
+    }
 
     s = SCREENREC(pScreen);
 

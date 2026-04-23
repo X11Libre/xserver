@@ -338,12 +338,11 @@ _glamor_create_radial_gradient_program(ScreenPtr screen, int stops_count,
         _glamor_create_getcolor_fs_source(screen, stops_count,
                                           (stops_count > 0));
 
-    if (asprintf(&gradient_fs,
-                 gradient_radial_fs_template,
-                 PIXMAN_REPEAT_NONE, PIXMAN_REPEAT_NORMAL,
-                 PIXMAN_REPEAT_REFLECT,
-                 fs_getcolor_source) == -1)
-        return FALSE;
+    if (asprintf(&gradient_fs, gradient_radial_fs_template, PIXMAN_REPEAT_NONE,
+                 PIXMAN_REPEAT_NORMAL, PIXMAN_REPEAT_REFLECT,
+                 fs_getcolor_source) == -1) {
+      return FALSE;
+    }
 
     fs_prog = glamor_compile_glsl_prog(GL_FRAGMENT_SHADER, gradient_fs);
 
@@ -526,11 +525,10 @@ _glamor_create_linear_gradient_program(ScreenPtr screen, int stops_count,
     fs_getcolor_source =
         _glamor_create_getcolor_fs_source(screen, stops_count, stops_count > 0);
 
-    if (asprintf(&gradient_fs,
-                 gradient_fs_template,
-                 PIXMAN_REPEAT_NORMAL, PIXMAN_REPEAT_REFLECT,
-                 fs_getcolor_source) == -1)
-        return FALSE;
+    if (asprintf(&gradient_fs, gradient_fs_template, PIXMAN_REPEAT_NORMAL,
+                 PIXMAN_REPEAT_REFLECT, fs_getcolor_source) == -1) {
+      return FALSE;
+    }
 
     fs_prog = glamor_compile_glsl_prog(GL_FRAGMENT_SHADER, gradient_fs);
     free(gradient_fs);
@@ -581,12 +579,16 @@ glamor_init_gradient_shader(ScreenPtr screen)
     glamor_priv->radial_max_nstops = 0;
 
     if (!_glamor_create_linear_gradient_program(screen, 0, 0) ||
-        !_glamor_create_linear_gradient_program(screen, LINEAR_LARGE_STOPS, 0))
-        return FALSE;
+        !_glamor_create_linear_gradient_program(screen, LINEAR_LARGE_STOPS,
+                                                0)) {
+      return FALSE;
+    }
 
     if (!_glamor_create_radial_gradient_program(screen, 0, 0) ||
-        !_glamor_create_radial_gradient_program(screen, RADIAL_LARGE_STOPS, 0))
-        return FALSE;
+        !_glamor_create_radial_gradient_program(screen, RADIAL_LARGE_STOPS,
+                                                0)) {
+      return FALSE;
+    }
 
     return TRUE;
 }
@@ -882,8 +884,9 @@ glamor_generate_radial_gradient_picture(ScreenPtr screen,
     pixmap = glamor_create_pixmap(screen,
                                   width, height,
                                   PIXMAN_FORMAT_DEPTH(format), 0);
-    if (!pixmap)
-        goto GRADIENT_FAIL;
+    if (!pixmap) {
+      goto GRADIENT_FAIL;
+    }
 
     dst_picture = CreatePicture(0, &pixmap->drawable,
                                 PictureMatchFormat(screen,
@@ -894,8 +897,9 @@ glamor_generate_radial_gradient_picture(ScreenPtr screen,
     /* Release the reference, picture will hold the last one. */
     glamor_destroy_pixmap(pixmap);
 
-    if (!dst_picture)
-        goto GRADIENT_FAIL;
+    if (!dst_picture) {
+      goto GRADIENT_FAIL;
+    }
 
     ValidatePicture(dst_picture);
 
@@ -986,10 +990,11 @@ glamor_generate_radial_gradient_picture(ScreenPtr screen,
                            1, GL_FALSE, &identity_mat[0][0]);
     }
 
-    if (!_glamor_gradient_set_pixmap_destination
-        (screen, glamor_priv, dst_picture, &xscale, &yscale, x_source, y_source,
-         0))
-        goto GRADIENT_FAIL;
+    if (!_glamor_gradient_set_pixmap_destination(screen, glamor_priv,
+                                                 dst_picture, &xscale, &yscale,
+                                                 x_source, y_source, 0)) {
+      goto GRADIENT_FAIL;
+    }
 
     glamor_set_alu(&pixmap->drawable, GXcopy);
 
@@ -1190,8 +1195,9 @@ glamor_generate_linear_gradient_picture(ScreenPtr screen,
                                   width, height,
                                   PIXMAN_FORMAT_DEPTH(format), 0);
 
-    if (!pixmap)
-        goto GRADIENT_FAIL;
+    if (!pixmap) {
+      goto GRADIENT_FAIL;
+    }
 
     dst_picture = CreatePicture(0, &pixmap->drawable,
                                 PictureMatchFormat(screen,
@@ -1202,8 +1208,9 @@ glamor_generate_linear_gradient_picture(ScreenPtr screen,
     /* Release the reference, picture will hold the last one. */
     glamor_destroy_pixmap(pixmap);
 
-    if (!dst_picture)
-        goto GRADIENT_FAIL;
+    if (!dst_picture) {
+      goto GRADIENT_FAIL;
+    }
 
     ValidatePicture(dst_picture);
 
@@ -1301,10 +1308,11 @@ glamor_generate_linear_gradient_picture(ScreenPtr screen,
                            1, GL_FALSE, &identity_mat[0][0]);
     }
 
-    if (!_glamor_gradient_set_pixmap_destination
-        (screen, glamor_priv, dst_picture, &xscale, &yscale, x_source, y_source,
-         1))
-        goto GRADIENT_FAIL;
+    if (!_glamor_gradient_set_pixmap_destination(screen, glamor_priv,
+                                                 dst_picture, &xscale, &yscale,
+                                                 x_source, y_source, 1)) {
+      goto GRADIENT_FAIL;
+    }
 
     glamor_set_alu(&pixmap->drawable, GXcopy);
 

@@ -24,8 +24,9 @@ void hookClient(CallbackListPtr *pcbl, void *unused, void *calldata)
     XNS_HOOK_HEAD(ClientAccessCallbackParam);
     struct XnamespaceClientPriv *obj = XnsClientPriv(param->target);
 
-    if (subj->ns->superPower || XnsClientSameNS(subj, obj))
-        return;
+    if (subj->ns->superPower || XnsClientSameNS(subj, obj)) {
+      return;
+    }
 
     XNS_HOOK_LOG("BLOCKED access on client %d\n", param->target->index);
 

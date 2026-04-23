@@ -55,15 +55,17 @@ exaCreatePixmap_driver(ScreenPtr pScreen, int w, int h, int depth,
 
     ExaScreenPriv(pScreen);
 
-    if (w > 32767 || h > 32767)
-        return NullPixmap;
+    if (w > 32767 || h > 32767) {
+      return NullPixmap;
+    }
 
     swap(pExaScr, pScreen, CreatePixmap);
     pPixmap = pScreen->CreatePixmap(pScreen, 0, 0, depth, usage_hint);
     swap(pExaScr, pScreen, CreatePixmap);
 
-    if (!pPixmap)
-        return NULL;
+    if (!pPixmap) {
+      return NULL;
+    }
 
     pExaPixmap = ExaGetPixmapPriv(pPixmap);
     pExaPixmap->driverPriv = NULL;
@@ -85,13 +87,15 @@ exaCreatePixmap_driver(ScreenPtr pScreen, int w, int h, int depth,
     }
     else {
         paddedWidth = ((w * bpp + FB_MASK) >> FB_SHIFT) * sizeof(FbBits);
-        if (paddedWidth / 4 > 32767)
-            return NullPixmap;
+        if (paddedWidth / 4 > 32767) {
+          return NullPixmap;
+        }
 
         exaSetFbPitch(pExaScr, pExaPixmap, w, h, bpp);
 
-        if (paddedWidth < pExaPixmap->fb_pitch)
-            paddedWidth = pExaPixmap->fb_pitch;
+        if (paddedWidth < pExaPixmap->fb_pitch) {
+          paddedWidth = pExaPixmap->fb_pitch;
+        }
         datasize = h * paddedWidth;
         pExaPixmap->driverPriv =
             pExaScr->info->CreatePixmap(pScreen, datasize, 0);
@@ -119,8 +123,9 @@ exaCreatePixmap_driver(ScreenPtr pScreen, int w, int h, int depth,
     pExaPixmap->use_gpu_copy = exaPixmapHasGpuCopy(pPixmap);
 
     /* During a fallback we must prepare access. */
-    if (pExaScr->fallback_counter)
-        exaPrepareAccess(&pPixmap->drawable, EXA_PREPARE_AUX_DEST);
+    if (pExaScr->fallback_counter) {
+      exaPrepareAccess(&pPixmap->drawable, EXA_PREPARE_AUX_DEST);
+    }
 
     return pPixmap;
 }
@@ -135,19 +140,22 @@ exaModifyPixmapHeader_driver(PixmapPtr pPixmap, int width, int height,
     ExaPixmapPrivPtr pExaPixmap;
     Bool ret;
 
-    if (!pPixmap)
-        return FALSE;
+    if (!pPixmap) {
+      return FALSE;
+    }
 
     pScreen = pPixmap->drawable.pScreen;
     pExaScr = ExaGetScreenPriv(pScreen);
     pExaPixmap = ExaGetPixmapPriv(pPixmap);
 
     if (pExaPixmap) {
-        if (pPixData)
-            pExaPixmap->sys_ptr = pPixData;
+      if (pPixData) {
+        pExaPixmap->sys_ptr = pPixData;
+      }
 
-        if (devKind > 0)
-            pExaPixmap->sys_pitch = devKind;
+      if (devKind > 0) {
+        pExaPixmap->sys_pitch = devKind;
+      }
 
         if (width > 0 && height > 0 && bitsPerPixel > 0) {
             exaSetFbPitch(pExaScr, pExaPixmap, width, height, bitsPerPixel);
@@ -169,8 +177,9 @@ exaModifyPixmapHeader_driver(PixmapPtr pPixmap, int width, int height,
             pExaPixmap->sys_ptr = pPixmap->devPrivate.ptr;
             pExaPixmap->sys_pitch = pPixmap->devKind;
         }
-        if (ret == TRUE)
-            goto out;
+        if (ret == TRUE) {
+          goto out;
+        }
     }
 
     swap(pExaScr, pScreen, ModifyPixmapHeader);
@@ -190,13 +199,15 @@ void exaPixmapDestroy_driver(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr
     ExaScreenPriv(pScreen);
 
     ExaPixmapPriv(pPixmap);
-    if (!pExaPixmap) // we're called on an error path
-        return;
+    if (!pExaPixmap) { // we're called on an error path
+      return;
+    }
 
     exaDestroyPixmap(pPixmap);
 
-    if (pExaPixmap->driverPriv)
-        pExaScr->info->DestroyPixmap(pScreen, pExaPixmap->driverPriv);
+    if (pExaPixmap->driverPriv) {
+      pExaScr->info->DestroyPixmap(pScreen, pExaPixmap->driverPriv);
+    }
     pExaPixmap->driverPriv = NULL;
 }
 

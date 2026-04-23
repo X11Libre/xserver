@@ -83,8 +83,9 @@ xi2mask_test(void)
         SetBit(mask, i);
         assert(mask);
         assert(m);
-        if (mask)
-            assert(memcmp(mask, m, xi2mask_mask_size(xi2mask)) == 0);
+        if (mask) {
+          assert(memcmp(mask, m, xi2mask_mask_size(xi2mask)) == 0);
+        }
         ClearBit(mask, i);
     }
 
@@ -99,8 +100,9 @@ xi2mask_test(void)
     }
 
     /* re-set, zero all */
-    for (i = 0; i < xi2mask_num_masks(xi2mask); i++)
-        xi2mask_set(xi2mask, i, i);
+    for (i = 0; i < xi2mask_num_masks(xi2mask); i++) {
+      xi2mask_set(xi2mask, i, i);
+    }
     xi2mask_zero(xi2mask, -1);
 
     for (i = 0; i < xi2mask_num_masks(xi2mask); i++) {

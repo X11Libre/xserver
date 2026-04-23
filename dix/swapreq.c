@@ -179,8 +179,10 @@ SProcSendEvent(ClientPtr client)
 
     /* Swap event */
     proc = EventSwapVector[stuff->event.u.u.type & 0177];
-    if (!proc || proc == NotImplemented)        /* no swapping proc; invalid event type? */
-        return BadValue;
+    if (!proc ||
+        proc == NotImplemented) { /* no swapping proc; invalid event type? */
+      return BadValue;
+    }
     (*proc) (&stuff->event, &eventT);
     stuff->event = eventT;
 
@@ -584,8 +586,11 @@ SProcStoreColors(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xStoreColorsReq);
     swapl(&stuff->cmap);
     pItem = (xColorItem *) &stuff[1];
-    for (long count = ((client->req_len << 2) - sizeof(xStoreColorsReq)) / sizeof(xColorItem); --count >= 0;)
-        SwapColorItem(pItem++);
+    for (long count = ((client->req_len << 2) - sizeof(xStoreColorsReq)) /
+                      sizeof(xColorItem);
+         --count >= 0;) {
+      SwapColorItem(pItem++);
+    }
     return ((*ProcVector[X_StoreColors]) (client));
 }
 

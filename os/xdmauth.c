@@ -78,8 +78,9 @@ XdmAuthenticationValidator(ARRAY8Ptr privateData, ARRAY8Ptr incomingData,
     XdmcpUnwrap(incomingData->data, (unsigned char *) &privateKey,
                 incomingData->data, incomingData->length);
     if (packet_type == ACCEPT) {
-        if (incomingData->length != 8)
-            return FALSE;
+      if (incomingData->length != 8) {
+        return FALSE;
+      }
         incoming = (XdmAuthKeyPtr) incomingData->data;
         XdmcpDecrementKey(incoming);
         return XdmcpCompareKeys(incoming, &global_rho);
@@ -94,9 +95,10 @@ XdmAuthenticationGenerator(ARRAY8Ptr privateData, ARRAY8Ptr outgoingData,
     outgoingData->length = 0;
     outgoingData->data = 0;
     if (packet_type == REQUEST) {
-        if (XdmcpAllocARRAY8(outgoingData, 8))
-            XdmcpWrap((unsigned char *) &global_rho, (unsigned char *) &privateKey,
-                      outgoingData->data, 8);
+      if (XdmcpAllocARRAY8(outgoingData, 8)) {
+        XdmcpWrap((unsigned char *)&global_rho, (unsigned char *)&privateKey,
+                  outgoingData->data, 8);
+      }
     }
     return TRUE;
 }
@@ -126,17 +128,20 @@ HexToBinary(const char *in, char *out, int len)
 
     while (len > 0) {
         top = atox(in[0]);
-        if (top == -1)
-            return 0;
+        if (top == -1) {
+          return 0;
+        }
         bottom = atox(in[1]);
-        if (bottom == -1)
-            return 0;
+        if (bottom == -1) {
+          return 0;
+        }
         *out++ = (top << 4) | bottom;
         in += 2;
         len -= 2;
     }
-    if (len)
-        return 0;
+    if (len) {
+      return 0;
+    }
     *out++ = '\0';
     return 1;
 }
@@ -146,13 +151,15 @@ XdmAuthenticationInit(const char *cookie, int cookie_len)
 {
     memset(privateKey.data, 0, 8);
     if (!strncmp(cookie, "0x", 2) || !strncmp(cookie, "0X", 2)) {
-        if (cookie_len > 2 + 2 * 8)
-            cookie_len = 2 + 2 * 8;
+      if (cookie_len > 2 + 2 * 8) {
+        cookie_len = 2 + 2 * 8;
+      }
         HexToBinary(cookie + 2, (char *) privateKey.data, cookie_len - 2);
     }
     else {
-        if (cookie_len > 7)
-            cookie_len = 7;
+      if (cookie_len > 7) {
+        cookie_len = 7;
+      }
         memmove(privateKey.data + 1, cookie, cookie_len);
     }
     XdmcpGenerateKey(&global_rho);
@@ -195,11 +202,14 @@ XdmClientAuthCompare(const XdmClientAuthPtr a, const XdmClientAuthPtr b)
 {
     int i;
 
-    if (!XdmcpCompareKeys(&a->rho, &b->rho))
+    if (!XdmcpCompareKeys(&a->rho, &b->rho)) {
+      return FALSE;
+    }
+    for (i = 0; i < 6; i++) {
+      if (a->client[i] != b->client[i]) {
         return FALSE;
-    for (i = 0; i < 6; i++)
-        if (a->client[i] != b->client[i])
-            return FALSE;
+      }
+    }
     return a->time == b->time;
 }
 
@@ -233,14 +243,15 @@ XdmClientAuthTimeout(long now)
     for (client = xdmClients; client; client = next) {
         next = client->next;
         if (labs(now - client->time) > TwentyFiveMinutes) {
-            if (prev)
-                prev->next = next;
-            else
-                xdmClients = next;
+          if (prev) {
+            prev->next = next;
+          } else {
+            xdmClients = next;
+          }
             free(client);
+        } else {
+          prev = client;
         }
-        else
-            prev = client;
     }
 }
 
@@ -254,27 +265,32 @@ XdmAuthorizationValidate(unsigned char *plain, int length,
     int i;
 
     if (length != (192 / 8)) {
-        if (reason)
-            *reason = "Bad XDM authorization key length";
+      if (reason) {
+        *reason = "Bad XDM authorization key length";
+      }
         return NULL;
     }
     client = calloc(1, sizeof(XdmClientAuthRec));
-    if (!client)
-        return NULL;
+    if (!client) {
+      return NULL;
+    }
     XdmClientAuthDecode(plain, client);
     if (!XdmcpCompareKeys(&client->rho, rho)) {
         free(client);
-        if (reason)
-            *reason = "Invalid XDM-AUTHORIZATION-1 key (failed key comparison)";
+        if (reason) {
+          *reason = "Invalid XDM-AUTHORIZATION-1 key (failed key comparison)";
+        }
         return NULL;
     }
-    for (i = 18; i < 24; i++)
-        if (plain[i] != 0) {
-            free(client);
-            if (reason)
-                *reason = "Invalid XDM-AUTHORIZATION-1 key (failed NULL check)";
-            return NULL;
+    for (i = 18; i < 24; i++) {
+      if (plain[i] != 0) {
+        free(client);
+        if (reason) {
+          *reason = "Invalid XDM-AUTHORIZATION-1 key (failed NULL check)";
         }
+        return NULL;
+      }
+    }
     if (xclient) {
         int family, addr_len;
         Xtransaddr *addr;
@@ -286,9 +302,10 @@ XdmAuthorizationValidate(unsigned char *plain, int length,
                 memcmp((char *) addr, client->client, 4) != 0) {
                 free(client);
                 free(addr);
-                if (reason)
-                    *reason =
-                        "Invalid XDM-AUTHORIZATION-1 key (failed address comparison)";
+                if (reason) {
+                  *reason = "Invalid XDM-AUTHORIZATION-1 key (failed address "
+                            "comparison)";
+                }
                 return NULL;
 
             }
@@ -304,15 +321,17 @@ XdmAuthorizationValidate(unsigned char *plain, int length,
     XdmClientAuthTimeout(now);
     if (labs(client->time - now) > TwentyMinutes) {
         free(client);
-        if (reason)
-            *reason = "Excessive XDM-AUTHORIZATION-1 time offset";
+        if (reason) {
+          *reason = "Excessive XDM-AUTHORIZATION-1 time offset";
+        }
         return NULL;
     }
     for (existing = xdmClients; existing; existing = existing->next) {
         if (XdmClientAuthCompare(existing, client)) {
             free(client);
-            if (reason)
-                *reason = "XDM authorization key matches an existing client!";
+            if (reason) {
+              *reason = "XDM authorization key matches an existing client!";
+            }
             return NULL;
         }
     }
@@ -351,19 +370,22 @@ XdmAddCookie(unsigned short data_length, const char *data)
         return 0;
     }
     /* the first octet of the key must be zero */
-    if (key_bits[0] != '\0')
-        return 0;
+    if (key_bits[0] != '\0') {
+      return 0;
+    }
 
     /* check for possible duplicate and return it */
     for (XdmAuthorizationRec *walk = xdmAuth; walk; walk=walk->next) {
-        if ((memcmp(walk->key.data, key_bits, 8)==0) &&
-            (memcmp(walk->rho.data, rho_bits, 8)==0))
-            return walk->id;
+      if ((memcmp(walk->key.data, key_bits, 8) == 0) &&
+          (memcmp(walk->rho.data, rho_bits, 8) == 0)) {
+        return walk->id;
+      }
     }
 
     XdmAuthorizationPtr new = calloc(1, sizeof(XdmAuthorizationRec));
-    if (!new)
-        return 0;
+    if (!new) {
+      return 0;
+    }
     new->next = xdmAuth;
     xdmAuth = new;
     memcpy(new->key.data, key_bits, 8);
@@ -380,11 +402,13 @@ XdmCheckCookie(unsigned short cookie_length, const char *cookie,
     XdmClientAuthPtr client;
 
     /* Auth packets must be a multiple of 8 bytes long */
-    if (cookie_length & 7)
-        return (XID) -1;
+    if (cookie_length & 7) {
+      return (XID)-1;
+    }
     unsigned char *plain = calloc(1, cookie_length);
-    if (!plain)
-        return (XID) -1;
+    if (!plain) {
+      return (XID)-1;
+    }
     for (auth = xdmAuth; auth; auth = auth->next) {
         XdmcpUnwrap((unsigned char *) cookie, (unsigned char *) &auth->key,
                     plain, cookie_length);

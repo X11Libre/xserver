@@ -17,8 +17,9 @@ void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
     XNS_HOOK_HEAD(PropertyFilterParam);
 
     // no redirect on super power
-    if (subj->ns->superPower)
-        return;
+    if (subj->ns->superPower) {
+      return;
+    }
 
     const ClientPtr owner = dixLookupXIDOwner(param->window);
     if (!owner) {
@@ -30,12 +31,14 @@ void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     // whitelist anything that goes to caller's own namespace
     struct XnamespaceClientPriv *obj = XnsClientPriv(owner);
-    if (XnsClientSameNS(subj, obj))
-        return;
+    if (XnsClientSameNS(subj, obj)) {
+      return;
+    }
 
     // allow access to namespace virtual root
-    if (param->window == subj->ns->rootWindow->drawable.id)
-        return;
+    if (param->window == subj->ns->rootWindow->drawable.id) {
+      return;
+    }
 
     // redirect root window access to namespace's virtual root
     if (dixWindowIsRoot(param->window)) {

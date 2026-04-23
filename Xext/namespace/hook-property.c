@@ -13,10 +13,12 @@
 #include "hooks.h"
 
 static inline Bool winIsRoot(WindowPtr pWin) {
-    if (!pWin)
-        return FALSE;
-    if (pWin->drawable.pScreen->root == pWin)
-        return TRUE;
+  if (!pWin) {
+    return FALSE;
+  }
+  if (pWin->drawable.pScreen->root == pWin) {
+    return TRUE;
+  }
     return FALSE;
 }
 
@@ -27,11 +29,13 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     ATOM name = (*param->ppProp)->propertyName;
 
-    if (XnsClientSameNS(subj, obj))
-        return;
+    if (XnsClientSameNS(subj, obj)) {
+      return;
+    }
 
-    if (param->pWin == subj->ns->rootWindow)
-        return;
+    if (param->pWin == subj->ns->rootWindow) {
+      return;
+    }
 
     if (winIsRoot(param->pWin)) {
         XNS_HOOK_LOG("window is the screen's root window\n");

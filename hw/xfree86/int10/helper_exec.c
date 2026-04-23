@@ -53,8 +53,9 @@ int
 setup_int(xf86Int10InfoPtr pInt)
 {
     if (pInt != Int10Current) {
-        if (!MapCurrentInt10(pInt))
-            return -1;
+      if (!MapCurrentInt10(pInt)) {
+        return -1;
+      }
         Int10Current = pInt;
     }
     X86_EAX = (uint32_t) pInt->ax;
@@ -74,8 +75,9 @@ setup_int(xf86Int10InfoPtr pInt)
     X86_GS = 0;
     X86_EFLAGS = X86_IF_MASK | X86_IOPL_MASK;
 #if defined (_PC)
-    if (pInt->Flags & SET_BIOS_SCRATCH)
-        SetResetBIOSVars(pInt, TRUE);
+    if (pInt->Flags & SET_BIOS_SCRATCH) {
+      SetResetBIOSVars(pInt, TRUE);
+    }
 #endif
     OsBlockSignals();
     return 0;
@@ -95,8 +97,9 @@ finish_int(xf86Int10InfoPtr pInt, int sig)
     pInt->bp = (uint32_t) X86_EBP;
     pInt->flags = (uint32_t) X86_FLAGS;
 #if defined (_PC)
-    if (pInt->Flags & RESTORE_BIOS_SCRATCH)
-        SetResetBIOSVars(pInt, FALSE);
+    if (pInt->Flags & RESTORE_BIOS_SCRATCH) {
+      SetResetBIOSVars(pInt, FALSE);
+    }
 #endif
 }
 
@@ -170,11 +173,13 @@ dump_code(xf86Int10InfoPtr pInt)
 
     xf86DrvMsgVerb(pInt->pScrn->scrnIndex, X_INFO, 3, "code at 0x%8.8" PRIx32 ":\n",
                    (unsigned) lina);
-    for (i = 0; i < 0x10; i++)
-        xf86ErrorFVerb(3, " %2.2x", MEM_RB(pInt, lina + i));
+    for (i = 0; i < 0x10; i++) {
+      xf86ErrorFVerb(3, " %2.2x", MEM_RB(pInt, lina + i));
+    }
     xf86ErrorFVerb(3, "\n");
-    for (; i < 0x20; i++)
-        xf86ErrorFVerb(3, " %2.2x", MEM_RB(pInt, lina + i));
+    for (; i < 0x20; i++) {
+      xf86ErrorFVerb(3, " %2.2x", MEM_RB(pInt, lina + i));
+    }
     xf86ErrorFVerb(3, "\n");
 }
 
@@ -205,18 +210,21 @@ stack_trace(xf86Int10InfoPtr pInt)
     unsigned long stack = SEG_ADR((uint32_t), X86_SS, SP);
     unsigned long tail = (uint32_t) ((X86_SS << 4) + 0x1000);
 
-    if (stack >= tail)
-        return;
+    if (stack >= tail) {
+      return;
+    }
 
     LogMessageVerb(X_INFO, 3, "stack at 0x%8.8lx:\n", stack);
     for (; stack < tail; stack++) {
         xf86ErrorFVerb(3, " %2.2x", MEM_RB(pInt, stack));
         i = (i + 1) % 0x10;
-        if (!i)
-            xf86ErrorFVerb(3, "\n");
+        if (!i) {
+          xf86ErrorFVerb(3, "\n");
+        }
     }
-    if (i)
-        xf86ErrorFVerb(3, "\n");
+    if (i) {
+      xf86ErrorFVerb(3, "\n");
+    }
 }
 
 int
@@ -226,9 +234,10 @@ port_rep_inb(xf86Int10InfoPtr pInt,
     register int inc = d_f ? -1 : 1;
     uint32_t dst = base;
 
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_insb(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
+    if (PRINT_PORT && DEBUG_IO_TRACE()) {
+      ErrorF(" rep_insb(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n", port,
+             (unsigned)count, (unsigned)base, d_f ? "up" : "down");
+    }
     while (count--) {
         MEM_WB(pInt, dst, x_inb(port));
         dst += inc;
@@ -243,9 +252,10 @@ port_rep_inw(xf86Int10InfoPtr pInt,
     register int inc = d_f ? -2 : 2;
     uint32_t dst = base;
 
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_insw(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
+    if (PRINT_PORT && DEBUG_IO_TRACE()) {
+      ErrorF(" rep_insw(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n", port,
+             (unsigned)count, (unsigned)base, d_f ? "up" : "down");
+    }
     while (count--) {
         MEM_WW(pInt, dst, x_inw(port));
         dst += inc;
@@ -260,9 +270,10 @@ port_rep_inl(xf86Int10InfoPtr pInt,
     register int inc = d_f ? -4 : 4;
     uint32_t dst = base;
 
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_insl(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
+    if (PRINT_PORT && DEBUG_IO_TRACE()) {
+      ErrorF(" rep_insl(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n", port,
+             (unsigned)count, (unsigned)base, d_f ? "up" : "down");
+    }
     while (count--) {
         MEM_WL(pInt, dst, x_inl(port));
         dst += inc;
@@ -277,9 +288,10 @@ port_rep_outb(xf86Int10InfoPtr pInt,
     register int inc = d_f ? -1 : 1;
     uint32_t dst = base;
 
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_outb(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
+    if (PRINT_PORT && DEBUG_IO_TRACE()) {
+      ErrorF(" rep_outb(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n", port,
+             (unsigned)count, (unsigned)base, d_f ? "up" : "down");
+    }
     while (count--) {
         x_outb(port, MEM_RB(pInt, dst));
         dst += inc;
@@ -294,9 +306,10 @@ port_rep_outw(xf86Int10InfoPtr pInt,
     register int inc = d_f ? -2 : 2;
     uint32_t dst = base;
 
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_outw(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
+    if (PRINT_PORT && DEBUG_IO_TRACE()) {
+      ErrorF(" rep_outw(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n", port,
+             (unsigned)count, (unsigned)base, d_f ? "up" : "down");
+    }
     while (count--) {
         x_outw(port, MEM_RW(pInt, dst));
         dst += inc;
@@ -311,9 +324,10 @@ port_rep_outl(xf86Int10InfoPtr pInt,
     register int inc = d_f ? -4 : 4;
     uint32_t dst = base;
 
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_outl(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
+    if (PRINT_PORT && DEBUG_IO_TRACE()) {
+      ErrorF(" rep_outl(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n", port,
+             (unsigned)count, (unsigned)base, d_f ? "up" : "down");
+    }
     while (count--) {
         x_outl(port, MEM_RL(pInt, dst));
         dst += inc;
@@ -330,8 +344,9 @@ x_inb(uint16_t port)
         Int10Current->inb40time++;
         val = (uint8_t) (Int10Current->inb40time >>
                        ((Int10Current->inb40time & 1) << 3));
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" inb(%#x) = %2.2x\n", port, val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" inb(%#x) = %2.2x\n", port, val);
+        }
 #ifdef __NOT_YET__
     }
     else if (port < 0x0100) {   /* Don't interfere with mainboard */
@@ -346,8 +361,9 @@ x_inb(uint16_t port)
     }
     else if (!pciCfg1inb(port, &val)) {
         val = pci_io_read8(Int10Current->io, port);
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" inb(%#x) = %2.2x\n", port, val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" inb(%#x) = %2.2x\n", port, val);
+        }
     }
     return val;
 }
@@ -369,8 +385,9 @@ x_inw(uint16_t port)
     }
     else if (!pciCfg1inw(port, &val)) {
         val = pci_io_read16(Int10Current->io, port);
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" inw(%#x) = %4.4x\n", port, val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" inw(%#x) = %4.4x\n", port, val);
+        }
     }
     return val;
 }
@@ -389,8 +406,9 @@ x_outb(uint16_t port, uint8_t val)
          */
         X_GETTIMEOFDAY(&tv);
         Int10Current->inb40time = (uint16_t) (tv.tv_usec | 1);
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" outb(%#x, %2.2x)\n", port, val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" outb(%#x, %2.2x)\n", port, val);
+        }
 #ifdef __NOT_YET__
     }
     else if (port < 0x0100) {   /* Don't interfere with mainboard */
@@ -403,8 +421,9 @@ x_outb(uint16_t port, uint8_t val)
 #endif                          /* __NOT_YET__ */
     }
     else if (!pciCfg1outb(port, val)) {
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" outb(%#x, %2.2x)\n", port, val);
+      if (PRINT_PORT && DEBUG_IO_TRACE()) {
+        ErrorF(" outb(%#x, %2.2x)\n", port, val);
+      }
         pci_io_write8(Int10Current->io, port, val);
     }
 }
@@ -414,8 +433,9 @@ x_outw(uint16_t port, uint16_t val)
 {
 
     if (!pciCfg1outw(port, val)) {
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" outw(%#x, %4.4x)\n", port, val);
+      if (PRINT_PORT && DEBUG_IO_TRACE()) {
+        ErrorF(" outw(%#x, %4.4x)\n", port, val);
+      }
         pci_io_write16(Int10Current->io, port, val);
     }
 }
@@ -427,8 +447,9 @@ x_inl(uint16_t port)
 
     if (!pciCfg1in(port, &val)) {
         val = pci_io_read32(Int10Current->io, port);
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" inl(%#x) = %8.8" PRIx32 "\n", port, (unsigned) val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" inl(%#x) = %8.8" PRIx32 "\n", port, (unsigned)val);
+        }
     }
     return val;
 }
@@ -437,8 +458,9 @@ void
 x_outl(uint16_t port, uint32_t val)
 {
     if (!pciCfg1out(port, val)) {
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" outl(%#x, %8.8" PRIx32 ")\n", port, (unsigned) val);
+      if (PRINT_PORT && DEBUG_IO_TRACE()) {
+        ErrorF(" outl(%#x, %8.8" PRIx32 ")\n", port, (unsigned)val);
+      }
         pci_io_write32(Int10Current->io, port, val);
     }
 }
@@ -506,8 +528,9 @@ pci_device_for_cfg_address(uint32_t addr)
     struct pci_device_iterator *iter =
         pci_slot_match_iterator_create(&slot_match);
 
-    if (iter)
-        dev = pci_device_next(iter);
+    if (iter) {
+      dev = pci_device_next(iter);
+    }
 
     pci_iterator_destroy(iter);
 
@@ -524,9 +547,10 @@ pciCfg1in(uint16_t addr, uint32_t *val)
     if (addr == 0xCFC) {
         pci_device_cfg_read_u32(pci_device_for_cfg_address(PciCfg1Addr),
                                 (uint32_t *) val, PCI_OFFSET(PciCfg1Addr));
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" cfg_inl(%#" PRIx32 ") = %8.8" PRIx32 "\n", (unsigned) PciCfg1Addr,
-                   (unsigned) *val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" cfg_inl(%#" PRIx32 ") = %8.8" PRIx32 "\n",
+                 (unsigned)PciCfg1Addr, (unsigned)*val);
+        }
         return 1;
     }
     return 0;
@@ -540,9 +564,10 @@ pciCfg1out(uint16_t addr, uint32_t val)
         return 1;
     }
     if (addr == 0xCFC) {
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" cfg_outl(%#" PRIx32 ", %8.8" PRIx32 ")\n", (unsigned) PciCfg1Addr,
-                   (unsigned) val);
+      if (PRINT_PORT && DEBUG_IO_TRACE()) {
+        ErrorF(" cfg_outl(%#" PRIx32 ", %8.8" PRIx32 ")\n",
+               (unsigned)PciCfg1Addr, (unsigned)val);
+      }
         pci_device_cfg_write_u32(pci_device_for_cfg_address(PciCfg1Addr), val,
                                  PCI_OFFSET(PciCfg1Addr));
         return 1;
@@ -565,9 +590,10 @@ pciCfg1inw(uint16_t addr, uint16_t *val)
 
         pci_device_cfg_read_u16(pci_device_for_cfg_address(PciCfg1Addr),
                                 val, PCI_OFFSET(PciCfg1Addr) + offset);
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" cfg_inw(%#" PRIx32 ") = %4.4x\n", (unsigned) (PciCfg1Addr + offset),
-                   (unsigned) *val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" cfg_inw(%#" PRIx32 ") = %4.4x\n",
+                 (unsigned)(PciCfg1Addr + offset), (unsigned)*val);
+        }
         return 1;
     }
     return 0;
@@ -587,9 +613,10 @@ pciCfg1outw(uint16_t addr, uint16_t val)
     if ((addr >= 0xCFC) && (addr <= 0xCFF)) {
         const unsigned offset = addr - 0xCFC;
 
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" cfg_outw(%#" PRIx32 ", %4.4x)\n", (unsigned) (PciCfg1Addr + offset),
-                   (unsigned) val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" cfg_outw(%#" PRIx32 ", %4.4x)\n",
+                 (unsigned)(PciCfg1Addr + offset), (unsigned)val);
+        }
         pci_device_cfg_write_u16(pci_device_for_cfg_address(PciCfg1Addr), val,
                                  PCI_OFFSET(PciCfg1Addr) + offset);
         return 1;
@@ -612,9 +639,10 @@ pciCfg1inb(uint16_t addr, uint8_t *val)
 
         pci_device_cfg_read_u8(pci_device_for_cfg_address(PciCfg1Addr),
                                val, PCI_OFFSET(PciCfg1Addr) + offset);
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" cfg_inb(%#" PRIx32 ") = %2.2x\n", (unsigned) (PciCfg1Addr + offset),
-                   (unsigned) *val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" cfg_inb(%#" PRIx32 ") = %2.2x\n",
+                 (unsigned)(PciCfg1Addr + offset), (unsigned)*val);
+        }
         return 1;
     }
     return 0;
@@ -634,9 +662,10 @@ pciCfg1outb(uint16_t addr, uint8_t val)
     if ((addr >= 0xCFC) && (addr <= 0xCFF)) {
         const unsigned offset = addr - 0xCFC;
 
-        if (PRINT_PORT && DEBUG_IO_TRACE())
-            ErrorF(" cfg_outb(%#" PRIx32 ", %2.2x)\n", (unsigned) (PciCfg1Addr + offset),
-                   (unsigned) val);
+        if (PRINT_PORT && DEBUG_IO_TRACE()) {
+          ErrorF(" cfg_outb(%#" PRIx32 ", %2.2x)\n",
+                 (unsigned)(PciCfg1Addr + offset), (unsigned)val);
+        }
         pci_device_cfg_write_u8(pci_device_for_cfg_address(PciCfg1Addr), val,
                                 PCI_OFFSET(PciCfg1Addr) + offset);
         return 1;
@@ -649,8 +678,9 @@ bios_checksum(const uint8_t *start, int size)
 {
     uint8_t sum = 0;
 
-    while (size-- > 0)
-        sum += *start++;
+    while (size-- > 0) {
+      sum += *start++;
+    }
     return sum;
 }
 
@@ -708,17 +738,20 @@ SetResetBIOSVars(xf86Int10InfoPtr pInt, Bool set)
     unsigned char *base;
     int i;
 
-    if (pci_device_map_legacy
-        (pInt->dev, 0, pagesize, PCI_DEV_MAP_FLAG_WRITABLE, (void **) &base))
-        return;                 /* eek */
+    if (pci_device_map_legacy(pInt->dev, 0, pagesize, PCI_DEV_MAP_FLAG_WRITABLE,
+                              (void **)&base)) {
+      return; /* eek */
+    }
 
     if (set) {
-        for (i = BIOS_SCRATCH_OFF; i < BIOS_SCRATCH_END; i++)
-            MEM_WW(pInt, i, *(base + i));
+      for (i = BIOS_SCRATCH_OFF; i < BIOS_SCRATCH_END; i++) {
+        MEM_WW(pInt, i, *(base + i));
+      }
     }
     else {
-        for (i = BIOS_SCRATCH_OFF; i < BIOS_SCRATCH_END; i++)
-            *(base + i) = MEM_RW(pInt, i);
+      for (i = BIOS_SCRATCH_OFF; i < BIOS_SCRATCH_END; i++) {
+        *(base + i) = MEM_RW(pInt, i);
+      }
     }
 
     pci_device_unmap_legacy(pInt->dev, base, pagesize);
@@ -731,24 +764,29 @@ xf86Int10SaveRestoreBIOSVars(xf86Int10InfoPtr pInt, Bool save)
     unsigned char *base;
     int i;
 
-    if (!xf86IsEntityPrimary(pInt->entityIndex)
-        || (!save && !pInt->BIOSScratch))
-        return;
+    if (!xf86IsEntityPrimary(pInt->entityIndex) ||
+        (!save && !pInt->BIOSScratch)) {
+      return;
+    }
 
-    if (pci_device_map_legacy
-        (pInt->dev, 0, pagesize, PCI_DEV_MAP_FLAG_WRITABLE, (void **) &base))
-        return;                 /* eek */
+    if (pci_device_map_legacy(pInt->dev, 0, pagesize, PCI_DEV_MAP_FLAG_WRITABLE,
+                              (void **)&base)) {
+      return; /* eek */
+    }
 
     base += BIOS_SCRATCH_OFF;
     if (save) {
-        if ((pInt->BIOSScratch = XNFalloc(BIOS_SCRATCH_LEN)))
-            for (i = 0; i < BIOS_SCRATCH_LEN; i++)
-                *(((char *) pInt->BIOSScratch + i)) = *(base + i);
+      if ((pInt->BIOSScratch = XNFalloc(BIOS_SCRATCH_LEN))) {
+        for (i = 0; i < BIOS_SCRATCH_LEN; i++) {
+          *(((char *)pInt->BIOSScratch + i)) = *(base + i);
+        }
+      }
     }
     else {
         if (pInt->BIOSScratch) {
-            for (i = 0; i < BIOS_SCRATCH_LEN; i++)
-                *(base + i) = *(pInt->BIOSScratch + i);
+          for (i = 0; i < BIOS_SCRATCH_LEN; i++) {
+            *(base + i) = *(pInt->BIOSScratch + i);
+          }
             free(pInt->BIOSScratch);
             pInt->BIOSScratch = NULL;
         }

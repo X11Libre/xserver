@@ -53,38 +53,45 @@ check_for_touch_selection_conflicts(ClientPtr B, WindowPtr win, int deviceid,
     OtherInputMasks *inputMasks = wOtherInputMasks(win);
     InputClients *A = NULL;
 
-    if (inputMasks)
-        A = inputMasks->inputClients;
+    if (inputMasks) {
+      A = inputMasks->inputClients;
+    }
     for (; A; A = A->next) {
         DeviceIntPtr tmp;
 
-        if (dixClientIdForXID(A->resource) == B->index)
-            continue;
+        if (dixClientIdForXID(A->resource) == B->index) {
+          continue;
+        }
 
-        if (deviceid == XIAllDevices)
-            tmp = inputInfo.all_devices;
-        else if (deviceid == XIAllMasterDevices)
-            tmp = inputInfo.all_master_devices;
-        else
-            dixLookupDevice(&tmp, deviceid, serverClient, DixReadAccess);
-        if (!tmp)
-            return BadImplementation;       /* this shouldn't happen */
+        if (deviceid == XIAllDevices) {
+          tmp = inputInfo.all_devices;
+        } else if (deviceid == XIAllMasterDevices) {
+          tmp = inputInfo.all_master_devices;
+        } else {
+          dixLookupDevice(&tmp, deviceid, serverClient, DixReadAccess);
+        }
+        if (!tmp) {
+          return BadImplementation; /* this shouldn't happen */
+        }
 
         /* A has XIAllDevices */
         if (xi2mask_isset_for_device(A->xi2mask, inputInfo.all_devices, evtype)) {
-            if (deviceid == XIAllDevices)
-                return BadAccess;
+          if (deviceid == XIAllDevices) {
+            return BadAccess;
+          }
         }
 
         /* A has XIAllMasterDevices */
         if (xi2mask_isset_for_device(A->xi2mask, inputInfo.all_master_devices, evtype)) {
-            if (deviceid == XIAllMasterDevices)
-                return BadAccess;
+          if (deviceid == XIAllMasterDevices) {
+            return BadAccess;
+          }
         }
 
         /* A has this device */
-        if (xi2mask_isset_for_device(A->xi2mask, tmp, evtype))
-            return BadAccess;
+        if (xi2mask_isset_for_device(A->xi2mask, tmp, evtype)) {
+          return BadAccess;
+        }
     }
 
     return Success;
@@ -125,31 +132,36 @@ ProcXISelectEvents(ClientPtr client)
         int len = client->req_len - bytes_to_int32(sizeof(xXISelectEventsReq));
         xXIEventMask *evmask = (xXIEventMask *) &stuff[1];
         for (int i = 0; i < stuff->num_masks; i++) {
-            if (len < bytes_to_int32(sizeof(xXIEventMask)))
-                return BadLength;
+          if (len < bytes_to_int32(sizeof(xXIEventMask))) {
+            return BadLength;
+          }
             len -= bytes_to_int32(sizeof(xXIEventMask));
             swaps(&evmask->deviceid);
             swaps(&evmask->mask_len);
-            if (len < evmask->mask_len)
-                return BadLength;
+            if (len < evmask->mask_len) {
+              return BadLength;
+            }
             len -= evmask->mask_len;
             evmask =
                 (xXIEventMask *) (((char *) &evmask[1]) + evmask->mask_len * 4);
         }
     }
 
-    if (stuff->num_masks == 0)
-        return BadValue;
+    if (stuff->num_masks == 0) {
+      return BadValue;
+    }
 
     WindowPtr win;
     int rc = dixLookupWindow(&win, stuff->win, client, DixReceiveAccess);
 
     // when access to the window is denied, just pretend everything's okay
-    if (rc == BadAccess)
-        return Success;
+    if (rc == BadAccess) {
+      return Success;
+    }
 
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     int len = sz_xXISelectEventsReq;
 
@@ -159,19 +171,21 @@ ProcXISelectEvents(ClientPtr client)
     while (num_masks--) {
         len += sizeof(xXIEventMask) + evmask->mask_len * 4;
 
-        if (bytes_to_int32(len) > client->req_len)
-            return BadLength;
+        if (bytes_to_int32(len) > client->req_len) {
+          return BadLength;
+        }
 
         DeviceIntPtr dev;
 
         if (evmask->deviceid != XIAllDevices &&
-            evmask->deviceid != XIAllMasterDevices)
-            rc = dixLookupDevice(&dev, evmask->deviceid, client, DixUseAccess);
-        else {
-            /* XXX: XACE here? */
+            evmask->deviceid != XIAllMasterDevices) {
+          rc = dixLookupDevice(&dev, evmask->deviceid, client, DixUseAccess);
+        } else {
+          /* XXX: XACE here? */
         }
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
 
         /* hierarchy event mask is not allowed on devices */
         if (evmask->deviceid != XIAllDevices && evmask->mask_len >= 1) {
@@ -256,30 +270,34 @@ ProcXISelectEvents(ClientPtr client)
                                                          win,
                                                          evmask->deviceid,
                                                          XI_TouchBegin);
-                if (rc != Success)
-                    return rc;
+                if (rc != Success) {
+                  return rc;
+                }
             }
             if (BitIsOn(bits, XI_GesturePinchBegin)) {
                 rc = check_for_touch_selection_conflicts(client,
                                                          win,
                                                          evmask->deviceid,
                                                          XI_GesturePinchBegin);
-                if (rc != Success)
-                    return rc;
+                if (rc != Success) {
+                  return rc;
+                }
             }
             if (BitIsOn(bits, XI_GestureSwipeBegin)) {
                 rc = check_for_touch_selection_conflicts(client,
                                                          win,
                                                          evmask->deviceid,
                                                          XI_GestureSwipeBegin);
-                if (rc != Success)
-                    return rc;
+                if (rc != Success) {
+                  return rc;
+                }
             }
         }
 
-        if (XICheckInvalidMaskBits(client, (unsigned char *) &evmask[1],
-                                   evmask->mask_len * 4) != Success)
-            return BadValue;
+        if (XICheckInvalidMaskBits(client, (unsigned char *)&evmask[1],
+                                   evmask->mask_len * 4) != Success) {
+          return BadValue;
+        }
 
         evmask =
             (xXIEventMask *) (((unsigned char *) evmask) +
@@ -287,8 +305,9 @@ ProcXISelectEvents(ClientPtr client)
         evmask++;
     }
 
-    if (bytes_to_int32(len) != client->req_len)
-        return BadLength;
+    if (bytes_to_int32(len) != client->req_len) {
+      return BadLength;
+    }
 
     /* Set masks on window */
     evmask = (xXIEventMask *) &stuff[1];
@@ -300,12 +319,13 @@ ProcXISelectEvents(ClientPtr client)
             evmask->deviceid == XIAllMasterDevices) {
             dummy.id = evmask->deviceid;
             dev = &dummy;
+        } else {
+          dixLookupDevice(&dev, evmask->deviceid, client, DixUseAccess);
         }
-        else
-            dixLookupDevice(&dev, evmask->deviceid, client, DixUseAccess);
         if (XISetEventMask(dev, win, client, evmask->mask_len * 4,
-                           (unsigned char *) &evmask[1]) != Success)
-            return BadAlloc;
+                           (unsigned char *)&evmask[1]) != Success) {
+          return BadAlloc;
+        }
         evmask =
             (xXIEventMask *) (((unsigned char *) evmask) +
                               evmask->mask_len * 4);
@@ -329,8 +349,9 @@ ProcXIGetSelectedEvents(ClientPtr client)
     DeviceIntPtr dev;
 
     rc = dixLookupWindow(&win, stuff->win, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xXIGetSelectedEventsReply reply = {
         .RepType = X_XIGetSelectedEvents,
@@ -348,8 +369,9 @@ ProcXIGetSelectedEvents(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (!others)
-        goto finish;
+    if (!others) {
+      goto finish;
+    }
 
     for (i = 0; i < MAXDEVICES; i++) {
         int j;
@@ -357,8 +379,9 @@ ProcXIGetSelectedEvents(ClientPtr client)
 
         if (i > 2) {
             rc = dixLookupDevice(&dev, i, client, DixGetAttrAccess);
-            if (rc != Success)
-                continue;
+            if (rc != Success) {
+              continue;
+            }
         }
 
         for (j = xi2mask_mask_size(others->xi2mask) - 1; j >= 0; j--) {

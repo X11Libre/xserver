@@ -125,52 +125,58 @@ ProcXIWarpPointer(ClientPtr client)
         winX = src->drawable.x;
         winY = src->drawable.y;
         if (src->drawable.pScreen != pSprite->hotPhys.pScreen ||
-            x < winX + src_x ||
-            y < winY + src_y ||
+            x < winX + src_x || y < winY + src_y ||
             (stuff->src_width != 0 &&
-             winX + src_x + (int) stuff->src_width < 0) ||
+             winX + src_x + (int)stuff->src_width < 0) ||
             (stuff->src_height != 0 &&
-             winY + src_y + (int) stuff->src_height < y) ||
-            !PointInWindowIsVisible(src, x, y))
-            return Success;
+             winY + src_y + (int)stuff->src_height < y) ||
+            !PointInWindowIsVisible(src, x, y)) {
+          return Success;
+        }
     }
 
     if (dest) {
         x = dest->drawable.x;
         y = dest->drawable.y;
         newScreen = dest->drawable.pScreen;
+    } else {
+      newScreen = pSprite->hotPhys.pScreen;
     }
-    else
-        newScreen = pSprite->hotPhys.pScreen;
 
     x += dst_x;
     y += dst_y;
 
-    if (x < 0)
-        x = 0;
-    else if (x > newScreen->width)
-        x = newScreen->width - 1;
+    if (x < 0) {
+      x = 0;
+    } else if (x > newScreen->width) {
+      x = newScreen->width - 1;
+    }
 
-    if (y < 0)
-        y = 0;
-    else if (y > newScreen->height)
-        y = newScreen->height - 1;
+    if (y < 0) {
+      y = 0;
+    } else if (y > newScreen->height) {
+      y = newScreen->height - 1;
+    }
 
     if (newScreen == pSprite->hotPhys.pScreen) {
-        if (x < pSprite->physLimits.x1)
-            x = pSprite->physLimits.x1;
-        else if (x >= pSprite->physLimits.x2)
-            x = pSprite->physLimits.x2 - 1;
+      if (x < pSprite->physLimits.x1) {
+        x = pSprite->physLimits.x1;
+      } else if (x >= pSprite->physLimits.x2) {
+        x = pSprite->physLimits.x2 - 1;
+      }
 
-        if (y < pSprite->physLimits.y1)
-            y = pSprite->physLimits.y1;
-        else if (y >= pSprite->physLimits.y2)
-            y = pSprite->physLimits.y2 - 1;
+      if (y < pSprite->physLimits.y1) {
+        y = pSprite->physLimits.y1;
+      } else if (y >= pSprite->physLimits.y2) {
+        y = pSprite->physLimits.y2 - 1;
+      }
 
-        if (pSprite->hotShape)
-            ConfineToShape(pSprite->hotShape, &x, &y);
-        if (newScreen->SetCursorPosition)
-            newScreen->SetCursorPosition(pDev, newScreen, x, y, TRUE);
+      if (pSprite->hotShape) {
+        ConfineToShape(pSprite->hotShape, &x, &y);
+      }
+      if (newScreen->SetCursorPosition) {
+        newScreen->SetCursorPosition(pDev, newScreen, x, y, TRUE);
+      }
     }
     else if (!PointerConfinedToScreen(pDev)) {
         NewCurrentScreen(pDev, newScreen, x, y);
@@ -181,9 +187,10 @@ ProcXIWarpPointer(ClientPtr client)
     pDev->last.valuators[1] = y;
     miPointerUpdateSprite(pDev);
 
-    if (*newScreen->CursorWarpedTo)
-        (*newScreen->CursorWarpedTo) (pDev, newScreen, client,
-                                      dest, pSprite, x, y);
+    if (*newScreen->CursorWarpedTo) {
+      (*newScreen->CursorWarpedTo)(pDev, newScreen, client, dest, pSprite, x,
+                                   y);
+    }
 
     /* FIXME: XWarpPointer is supposed to generate an event. It doesn't do it
        here though. */

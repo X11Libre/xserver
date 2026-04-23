@@ -70,8 +70,9 @@ maxMemberInInterval(RecordSetInterval * pIntervals, int nIntervals)
     int maxMember = -1;
 
     for (i = 0; i < nIntervals; i++) {
-        if (maxMember < (int) pIntervals[i].last)
-            maxMember = pIntervals[i].last;
+      if (maxMember < (int)pIntervals[i].last) {
+        maxMember = pIntervals[i].last;
+      }
     }
     return maxMember;
 }
@@ -105,8 +106,9 @@ BitVectorIsMemberOfSet(RecordSetPtr pSet, int pm)
     BitVectorSetPtr pbvs = (BitVectorSetPtr) pSet;
     unsigned long *pbitvec;
 
-    if ((int) pm > pbvs->maxMember)
-        return FALSE;
+    if ((int)pm > pbvs->maxMember) {
+      return FALSE;
+    }
     pbitvec = (unsigned long *) (&pbvs[1]);
     return (pbitvec[pm / BITS_PER_LONG] &
             ((unsigned long) 1 << (pm % BITS_PER_LONG)));
@@ -131,8 +133,9 @@ BitVectorFindBit(RecordSetPtr pSet, int iterbit, Bool bitval)
     skipval = bitval ? 0L : ~0L;
     maxMember = pbvs->maxMember;
 
-    if (startbit > maxMember)
-        return -1;
+    if (startbit > maxMember) {
+      return -1;
+    }
     bits = *pbitvec;
     usefulbits = ~(((unsigned long) 1 << (iterbit - startbit)) - 1);
     if ((bits & usefulbits) == (skipval & usefulbits)) {
@@ -143,16 +146,18 @@ BitVectorFindBit(RecordSetPtr pSet, int iterbit, Bool bitval)
             pbitvec++;
             startbit += BITS_PER_LONG;
         }
-        if (startbit > maxMember)
-            return -1;
+        if (startbit > maxMember) {
+          return -1;
+        }
     }
 
     walkbit = (startbit < iterbit) ? iterbit - startbit : 0;
 
     bits = *pbitvec;
     while (walkbit < BITS_PER_LONG &&
-           ((!(bits & ((unsigned long) 1 << walkbit))) == bitval))
-        walkbit++;
+           ((!(bits & ((unsigned long)1 << walkbit))) == bitval)) {
+      walkbit++;
+    }
 
     return startbit + walkbit;
 }
@@ -165,8 +170,9 @@ BitVectorIterateSet(RecordSetPtr pSet, RecordSetIteratePtr pIter,
     int b;
 
     b = BitVectorFindBit(pSet, iterbit, TRUE);
-    if (b == -1)
-        return (RecordSetIteratePtr) 0;
+    if (b == -1) {
+      return (RecordSetIteratePtr)0;
+    }
     pInterval->first = b;
 
     b = BitVectorFindBit(pSet, b, FALSE);
@@ -210,8 +216,9 @@ BitVectorCreateSet(RecordSetInterval * pIntervals, int nIntervals,
     }
     else {
         pbvs = (BitVectorSetPtr) calloc(1, memsize);
-        if (!pbvs)
-            return NULL;
+        if (!pbvs) {
+          return NULL;
+        }
         pbvs->baseSet.ops = &BitVectorSetOperations;
     }
 
@@ -257,12 +264,13 @@ IntervalListIsMemberOfSet(RecordSetPtr pSet, int pm)
     hi = prls->nIntervals - 1;
     while (lo <= hi) {
         probe = (hi + lo) / 2;
-        if (pm >= pInterval[probe].first && pm <= pInterval[probe].last)
-            return 1;
-        else if (pm < pInterval[probe].first)
-            hi = probe - 1;
-        else
-            lo = probe + 1;
+        if (pm >= pInterval[probe].first && pm <= pInterval[probe].last) {
+          return 1;
+        } else if (pm < pInterval[probe].first) {
+          hi = probe - 1;
+        } else {
+          lo = probe + 1;
+        }
     }
     return 0;
 }
@@ -281,9 +289,9 @@ IntervalListIterateSet(RecordSetPtr pSet, RecordSetIteratePtr pIter,
     if ((pInterval - (RecordSetInterval *) (&prls[1])) < prls->nIntervals) {
         *pIntervalReturn = *pInterval;
         return (RecordSetIteratePtr) (++pInterval);
+    } else {
+      return (RecordSetIteratePtr)NULL;
     }
-    else
-        return (RecordSetIteratePtr) NULL;
 }
 
 static RecordSetOperations IntervalListSetOperations = {
@@ -313,16 +321,18 @@ IntervalListCreateSet(RecordSetInterval * pIntervals, int nIntervals,
 
     if (nIntervals > 0) {
         stackIntervals = calloc(nIntervals, sizeof(RecordSetInterval));
-        if (!stackIntervals)
-            return NULL;
+        if (!stackIntervals) {
+          return NULL;
+        }
 
         /* sort intervals, store in stackIntervals (insertion sort) */
 
         for (i = 0; i < nIntervals; i++) {
             first = pIntervals[i].first;
             for (j = 0; j < i; j++) {
-                if (first < stackIntervals[j].first)
-                    break;
+              if (first < stackIntervals[j].first) {
+                break;
+              }
             }
             for (k = i; k > j; k--) {
                 stackIntervals[k] = stackIntervals[k - 1];
@@ -341,8 +351,9 @@ IntervalListCreateSet(RecordSetInterval * pIntervals, int nIntervals,
                 stackIntervals[i].last = max(stackIntervals[i].last,
                                              stackIntervals[i + 1].last);
                 nIntervals--;
-                for (j = i + 1; j < nIntervals; j++)
-                    stackIntervals[j] = stackIntervals[j + 1];
+                for (j = i + 1; j < nIntervals; j++) {
+                  stackIntervals[j] = stackIntervals[j + 1];
+                }
             }
         }
     }
@@ -357,12 +368,14 @@ IntervalListCreateSet(RecordSetInterval * pIntervals, int nIntervals,
         prls = (IntervalListSetPtr)
             calloc(1, sizeof(IntervalListSet) +
                    nIntervals * sizeof(RecordSetInterval));
-        if (!prls)
-            goto bailout;
+        if (!prls) {
+          goto bailout;
+        }
         prls->baseSet.ops = &IntervalListSetOperations;
     }
-    if (stackIntervals)
-        memcpy(&prls[1], stackIntervals, nIntervals * sizeof(RecordSetInterval));
+    if (stackIntervals) {
+      memcpy(&prls[1], stackIntervals, nIntervals * sizeof(RecordSetInterval));
+    }
     prls->nIntervals = nIntervals;
  bailout:
     free(stackIntervals);
@@ -426,8 +439,9 @@ RecordCreateSet(RecordSetInterval * pIntervals, int nIntervals, void *pMem,
     size = _RecordSetMemoryRequirements(pIntervals, nIntervals, &alignment,
                                         &pCreateSet);
     if (pMem) {
-        if (((long) pMem & (alignment - 1)) || memsize < size)
-            return NULL;
+      if (((long)pMem & (alignment - 1)) || memsize < size) {
+        return NULL;
+      }
     }
     return (*pCreateSet) (pIntervals, nIntervals, pMem, size);
 }

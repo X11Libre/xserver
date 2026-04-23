@@ -45,8 +45,9 @@ GetDepthFlag(vbeInfoPtr pVbe, int id)
     VbeModeInfoBlock *mode;
     int bpp;
 
-    if ((mode = VBEGetModeInfo(pVbe, id)) == NULL)
-        return 0;
+    if ((mode = VBEGetModeInfo(pVbe, id)) == NULL) {
+      return 0;
+    }
 
     if (VBE_MODE_USABLE(mode, 0)) {
         int depth;
@@ -81,8 +82,9 @@ GetDepthFlag(vbeInfoPtr pVbe, int id)
             }
         }
     }
-    if (mode)
-        VBEFreeModeInfo(mode);
+    if (mode) {
+      VBEFreeModeInfo(mode);
+    }
     return 0;
 }
 
@@ -112,10 +114,12 @@ VBEFindSupportedDepths(vbeInfoPtr pVbe, VbeInfoBlock * vbe, int *flags24,
     }
 
     if (flags24) {
-        if (depths & V_DEPTH_24_24)
-            *flags24 |= Support24bppFb;
-        if (depths & V_DEPTH_24_32)
-            *flags24 |= Support32bppFb;
+      if (depths & V_DEPTH_24_24) {
+        *flags24 |= Support24bppFb;
+      }
+      if (depths & V_DEPTH_24_32) {
+        *flags24 |= Support32bppFb;
+      }
     }
 
     return depths;
@@ -133,8 +137,9 @@ CheckMode(ScrnInfoPtr pScrn, vbeInfoPtr pVbe, VbeInfoBlock * vbe, int id,
 
     major = (unsigned) (vbe->VESAVersion >> 8);
 
-    if ((mode = VBEGetModeInfo(pVbe, id)) == NULL)
-        return NULL;
+    if ((mode = VBEGetModeInfo(pVbe, id)) == NULL) {
+      return NULL;
+    }
 
     /* Does the mode match the depth/bpp? */
     /* Some BIOS's set BitsPerPixel to 15 instead of 16 for 15/16 */
@@ -344,8 +349,9 @@ VBEGetModePool(ScrnInfoPtr pScrn, vbeInfoPtr pVbe, VbeInfoBlock * vbe,
 void
 VBESetModeNames(DisplayModePtr pMode)
 {
-    if (!pMode)
-        return;
+  if (!pMode) {
+    return;
+  }
 
     do {
         if (!pMode->name) {
@@ -382,16 +388,19 @@ VBESetModeParameters(ScrnInfoPtr pScrn, vbeInfoPtr pVbe)
         ModeStatus status;
 
         for (p = pScrn->monitor->Modes; p != NULL; p = p->next) {
-            if ((p->HDisplay != pMode->HDisplay) ||
-                (p->VDisplay != pMode->VDisplay) ||
-                (p->Flags & (V_INTERLACE | V_DBLSCAN | V_CLKDIV2)))
-                continue;
+          if ((p->HDisplay != pMode->HDisplay) ||
+              (p->VDisplay != pMode->VDisplay) ||
+              (p->Flags & (V_INTERLACE | V_DBLSCAN | V_CLKDIV2))) {
+            continue;
+          }
             /* XXX could support the various V_ flags */
             status = xf86CheckModeForMonitor(p, pScrn->monitor);
-            if (status != MODE_OK)
-                continue;
-            if (!best || (p->Clock > best->Clock))
-                best = p;
+            if (status != MODE_OK) {
+              continue;
+            }
+            if (!best || (p->Clock > best->Clock)) {
+              best = p;
+            }
         }
 
         if (best) {
@@ -404,8 +413,9 @@ VBESetModeParameters(ScrnInfoPtr pScrn, vbeInfoPtr pVbe)
                        "Attempting to use %dHz refresh for mode \"%s\" (%x)\n",
                        (int) pMode->VRefresh, pMode->name, data->mode);
             data->block = calloc(1, sizeof(VbeCRTCInfoBlock));
-            if (!data->block)
-                continue;
+            if (!data->block) {
+              continue;
+            }
             data->block->HorizontalTotal = best->HTotal;
             data->block->HorizontalSyncStart = best->HSyncStart;
             data->block->HorizontalSyncEnd = best->HSyncEnd;
@@ -420,8 +430,9 @@ VBESetModeParameters(ScrnInfoPtr pScrn, vbeInfoPtr pVbe)
             DebugF("Setting clock %.2fMHz, closest is %.2fMHz\n",
                    (double) data->block->PixelClock / 1000000.0,
                    (double) clock / 1000000.0);
-            if (clock)
-                data->block->PixelClock = clock;
+            if (clock) {
+              data->block->PixelClock = clock;
+            }
             data->mode |= (1 << 11);
             data->block->RefreshRate = ((double) (data->block->PixelClock) /
                                         (double) (best->HTotal *

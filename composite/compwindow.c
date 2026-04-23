@@ -127,8 +127,10 @@ compSetPixmapVisitWindow(WindowPtr pWindow, void *data)
     CompPixmapVisitPtr pVisit = (CompPixmapVisitPtr) data;
     ScreenPtr pScreen = pWindow->drawable.pScreen;
 
-    if (pWindow != pVisit->pWindow && pWindow->redirectDraw != RedirectDrawNone)
-        return WT_DONTWALKCHILDREN;
+    if (pWindow != pVisit->pWindow &&
+        pWindow->redirectDraw != RedirectDrawNone) {
+      return WT_DONTWALKCHILDREN;
+    }
     (*pScreen->SetWindowPixmap) (pWindow, pVisit->pPixmap);
     /*
      * Recompute winSize and borderSize.  This is duplicate effort
@@ -137,9 +139,10 @@ compSetPixmapVisitWindow(WindowPtr pWindow, void *data)
      */
     SetWinSize(pWindow);
     SetBorderSize(pWindow);
-    if (pVisit->bw)
-        QueueWorkProc(compRepaintBorder, serverClient,
-                      (void *) (intptr_t) pWindow->drawable.id);
+    if (pVisit->bw) {
+      QueueWorkProc(compRepaintBorder, serverClient,
+                    (void *)(intptr_t)pWindow->drawable.id);
+    }
     return WT_WALKCHILDREN;
 }
 
@@ -173,22 +176,23 @@ compCheckRedirect(WindowPtr pWin)
     }
 
     if (should != (pWin->redirectDraw != RedirectDrawNone)) {
-        if (should)
-            return compAllocPixmap(pWin);
-        else {
-            ScreenPtr pScreen = pWin->drawable.pScreen;
-            PixmapPtr pPixmap = (*pScreen->GetWindowPixmap) (pWin);
+      if (should) {
+        return compAllocPixmap(pWin);
+      } else {
+        ScreenPtr pScreen = pWin->drawable.pScreen;
+        PixmapPtr pPixmap = (*pScreen->GetWindowPixmap)(pWin);
 
-            compSetParentPixmap(pWin);
-            compRestoreWindow(pWin, pPixmap);
-            dixDestroyPixmap(pPixmap, 0);
-        }
+        compSetParentPixmap(pWin);
+        compRestoreWindow(pWin, pPixmap);
+        dixDestroyPixmap(pPixmap, 0);
+      }
     }
     else if (should) {
-        if (cw->update == CompositeRedirectAutomatic)
-            pWin->redirectDraw = RedirectDrawAutomatic;
-        else
-            pWin->redirectDraw = RedirectDrawManual;
+      if (cw->update == CompositeRedirectAutomatic) {
+        pWin->redirectDraw = RedirectDrawAutomatic;
+      } else {
+        pWin->redirectDraw = RedirectDrawManual;
+      }
     }
     return TRUE;
 }
@@ -211,8 +215,9 @@ updateOverlayWindow(ScreenPtr pScreen)
 
     cs = GetCompScreen(pScreen);
     if ((pWin = cs->pOverlayWin) != NULL) {
-        if ((pWin->drawable.width == w) && (pWin->drawable.height == h))
-            return Success;
+      if ((pWin->drawable.width == w) && (pWin->drawable.height == h)) {
+        return Success;
+      }
 
         /* Let's resize the overlay window. */
         vlist[0] = w;
@@ -264,8 +269,9 @@ compRealizeWindow(WindowPtr pWin)
 
     pScreen->RealizeWindow = cs->RealizeWindow;
     compCheckRedirect(pWin);
-    if (!(*pScreen->RealizeWindow) (pWin))
-        ret = FALSE;
+    if (!(*pScreen->RealizeWindow)(pWin)) {
+      ret = FALSE;
+    }
     cs->RealizeWindow = pScreen->RealizeWindow;
     pScreen->RealizeWindow = compRealizeWindow;
     compCheckTree(pWin->drawable.pScreen);
@@ -281,8 +287,9 @@ compUnrealizeWindow(WindowPtr pWin)
 
     pScreen->UnrealizeWindow = cs->UnrealizeWindow;
     compCheckRedirect(pWin);
-    if (!(*pScreen->UnrealizeWindow) (pWin))
-        ret = FALSE;
+    if (!(*pScreen->UnrealizeWindow)(pWin)) {
+      ret = FALSE;
+    }
     cs->UnrealizeWindow = pScreen->UnrealizeWindow;
     pScreen->UnrealizeWindow = compUnrealizeWindow;
     compCheckTree(pWin->drawable.pScreen);
@@ -324,9 +331,11 @@ compIsAlternateVisual(ScreenPtr pScreen, XID visual)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
 
-    for (int i = 0; cs && i < cs->numAlternateVisuals; i++)
-        if (cs->alternateVisuals[i] == visual)
-            return TRUE;
+    for (int i = 0; cs && i < cs->numAlternateVisuals; i++) {
+      if (cs->alternateVisuals[i] == visual) {
+        return TRUE;
+      }
+    }
     return FALSE;
 }
 
@@ -336,10 +345,12 @@ CompositeIsImplicitRedirectException(ScreenPtr pScreen,
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
 
-    for (int i = 0; i < cs->numImplicitRedirectExceptions; i++)
-        if (cs->implicitRedirectExceptions[i].parentVisual == parentVisual &&
-            cs->implicitRedirectExceptions[i].winVisual == winVisual)
-            return TRUE;
+    for (int i = 0; i < cs->numImplicitRedirectExceptions; i++) {
+      if (cs->implicitRedirectExceptions[i].parentVisual == parentVisual &&
+          cs->implicitRedirectExceptions[i].winVisual == winVisual) {
+        return TRUE;
+      }
+    }
 
     return FALSE;
 }
@@ -352,13 +363,16 @@ compImplicitRedirect(WindowPtr pWin, WindowPtr pParent)
         XID winVisual = wVisual(pWin);
         XID parentVisual = wVisual(pParent);
 
-        if (CompositeIsImplicitRedirectException(pScreen, parentVisual, winVisual))
-            return FALSE;
+        if (CompositeIsImplicitRedirectException(pScreen, parentVisual,
+                                                 winVisual)) {
+          return FALSE;
+        }
 
         if (winVisual != parentVisual &&
             (compIsAlternateVisual(pScreen, winVisual) ||
-             compIsAlternateVisual(pScreen, parentVisual)))
-            return TRUE;
+             compIsAlternateVisual(pScreen, parentVisual))) {
+          return TRUE;
+        }
     }
     return FALSE;
 }
@@ -433,8 +447,9 @@ compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent)
     /*
      * Remove any implicit redirect due to synthesized visual
      */
-    if (compImplicitRedirect(pWin, pPriorParent))
-        compUnredirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
+    if (compImplicitRedirect(pWin, pPriorParent)) {
+      compUnredirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
+    }
     /*
      * Handle subwindows redirection
      */
@@ -443,8 +458,9 @@ compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent)
     /*
      * Add any implicit redirect due to synthesized visual
      */
-    if (compImplicitRedirect(pWin, pWin->parent))
-        compRedirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
+    if (compImplicitRedirect(pWin, pWin->parent)) {
+      compRedirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
+    }
 
     /*
      * Allocate any necessary redirect pixmap
@@ -455,20 +471,23 @@ compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent)
     /*
      * Reset pixmap pointers as appropriate
      */
-    if (pWin->parent && pWin->redirectDraw == RedirectDrawNone)
-        compSetPixmap(pWin, (*pScreen->GetWindowPixmap) (pWin->parent),
-                      pWin->borderWidth);
+    if (pWin->parent && pWin->redirectDraw == RedirectDrawNone) {
+      compSetPixmap(pWin, (*pScreen->GetWindowPixmap)(pWin->parent),
+                    pWin->borderWidth);
+    }
     /*
      * Call down to next function
      */
-    if (pScreen->ReparentWindow)
-        (*pScreen->ReparentWindow) (pWin, pPriorParent);
+    if (pScreen->ReparentWindow) {
+      (*pScreen->ReparentWindow)(pWin, pPriorParent);
+    }
     cs->ReparentWindow = pScreen->ReparentWindow;
     pScreen->ReparentWindow = compReparentWindow;
 
     cw = GetCompWindow(pWin);
-    if (pWin->damagedDescendants || (cw && cw->damaged))
-        compMarkAncestors(pWin);
+    if (pWin->damagedDescendants || (cw && cw->damaged)) {
+      compMarkAncestors(pWin);
+    }
 
     compCheckTree(pWin->drawable.pScreen);
 }
@@ -535,11 +554,13 @@ compCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 
     pScreen->CopyWindow = cs->CopyWindow;
     if (ptOldOrg.x != pWin->drawable.x || ptOldOrg.y != pWin->drawable.y) {
-        if (dx || dy)
-            RegionTranslate(prgnSrc, dx, dy);
+      if (dx || dy) {
+        RegionTranslate(prgnSrc, dx, dy);
+      }
         (*pScreen->CopyWindow) (pWin, ptOldOrg, prgnSrc);
-        if (dx || dy)
-            RegionTranslate(prgnSrc, -dx, -dy);
+        if (dx || dy) {
+          RegionTranslate(prgnSrc, -dx, -dy);
+        }
     }
     else {
         ptOldOrg.x -= dx;
@@ -568,14 +589,17 @@ compCreateWindow(WindowPtr pWin)
         PixmapPtr parent_pixmap = (*pScreen->GetWindowPixmap)(pWin->parent);
         PixmapPtr window_pixmap = (*pScreen->GetWindowPixmap)(pWin);
 
-        if (window_pixmap != parent_pixmap)
-            (*pScreen->SetWindowPixmap) (pWin, parent_pixmap);
-        if (csw)
-            for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next)
-                compRedirectWindow(dixClientForXID(ccw->id),
-                                   pWin, ccw->update);
-        if (compImplicitRedirect(pWin, pWin->parent))
-            compRedirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
+        if (window_pixmap != parent_pixmap) {
+          (*pScreen->SetWindowPixmap)(pWin, parent_pixmap);
+        }
+        if (csw) {
+          for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next) {
+            compRedirectWindow(dixClientForXID(ccw->id), pWin, ccw->update);
+          }
+        }
+        if (compImplicitRedirect(pWin, pWin->parent)) {
+          compRedirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
+        }
     }
     cs->CreateWindow = pScreen->CreateWindow;
     pScreen->CreateWindow = compCreateWindow;
@@ -589,10 +613,12 @@ void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
     CompWindowPtr cw;
     CompSubwindowsPtr csw;
 
-    while ((cw = GetCompWindow(pWin)))
-        FreeResource(cw->clients->id, X11_RESTYPE_NONE);
-    while ((csw = GetCompSubwindows(pWin)))
-        FreeResource(csw->clients->id, X11_RESTYPE_NONE);
+    while ((cw = GetCompWindow(pWin))) {
+      FreeResource(cw->clients->id, X11_RESTYPE_NONE);
+    }
+    while ((csw = GetCompSubwindows(pWin))) {
+      FreeResource(csw->clients->id, X11_RESTYPE_NONE);
+    }
 
     if (pWin->redirectDraw != RedirectDrawNone) {
         PixmapPtr pPixmap = (*pScreen->GetWindowPixmap) (pWin);
@@ -602,8 +628,9 @@ void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
     }
 
     /* Did we just destroy the overlay window? */
-    if (pWin == cs->pOverlayWin)
-        cs->pOverlayWin = NULL;
+    if (pWin == cs->pOverlayWin) {
+      cs->pOverlayWin = NULL;
+    }
 
 /*    compCheckTree (pWin->drawable.pScreen); can't check -- tree isn't good*/
 }
@@ -726,11 +753,13 @@ compPaintWindowToParent(WindowPtr pWin)
 void
 compPaintChildrenToWindow(WindowPtr pWin)
 {
-    if (!pWin->damagedDescendants)
-        return;
+  if (!pWin->damagedDescendants) {
+    return;
+  }
 
-    for (WindowPtr pChild = pWin->lastChild; pChild; pChild = pChild->prevSib)
-        compPaintWindowToParent(pChild);
+  for (WindowPtr pChild = pWin->lastChild; pChild; pChild = pChild->prevSib) {
+    compPaintWindowToParent(pChild);
+  }
 
     pWin->damagedDescendants = FALSE;
 }
@@ -785,12 +814,14 @@ compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
         cs->ConfigNotify = pScreen->ConfigNotify;
         pScreen->ConfigNotify = compConfigNotify;
 
-        if (ret)
-            return ret;
+        if (ret) {
+          return ret;
+        }
     }
 
-    if (pWin->redirectDraw == RedirectDrawNone)
-        return Success;
+    if (pWin->redirectDraw == RedirectDrawNone) {
+      return Success;
+    }
 
     compCheckTree(pScreen);
 
@@ -798,7 +829,8 @@ compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
     draw_y = pParent->drawable.y + y + bw;
     alloc_ret = compReallocPixmap(pWin, draw_x, draw_y, w, h, bw);
 
-    if (alloc_ret == FALSE)
-        return BadAlloc;
+    if (alloc_ret == FALSE) {
+      return BadAlloc;
+    }
     return Success;
 }

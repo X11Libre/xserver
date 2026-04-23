@@ -83,16 +83,16 @@ static unsigned char *RealizeCursorInterleave64(xf86CursorInfoPtr, CursorPtr);
 Bool
 xf86InitHardwareCursor(ScreenPtr pScreen, xf86CursorInfoPtr infoPtr)
 {
-    if ((infoPtr->MaxWidth <= 0) || (infoPtr->MaxHeight <= 0))
-        return FALSE;
+  if ((infoPtr->MaxWidth <= 0) || (infoPtr->MaxHeight <= 0)) {
+    return FALSE;
+  }
 
     /* These are required for now */
-    if (!infoPtr->SetCursorPosition ||
-        !xf86DriverHasLoadCursorImage(infoPtr) ||
-        !infoPtr->HideCursor ||
-        !xf86DriverHasShowCursor(infoPtr) ||
-        !infoPtr->SetCursorColors)
-        return FALSE;
+    if (!infoPtr->SetCursorPosition || !xf86DriverHasLoadCursorImage(infoPtr) ||
+        !infoPtr->HideCursor || !xf86DriverHasShowCursor(infoPtr) ||
+        !infoPtr->SetCursorColors) {
+      return FALSE;
+    }
 
     if (infoPtr->RealizeCursor) {
         /* Don't overwrite a driver provided Realize Cursor function */
@@ -150,8 +150,9 @@ xf86CheckHWCursor(ScreenPtr pScreen, CursorPtr cursor, xf86CursorInfoPtr infoPtr
     xorg_list_for_each_entry(pSlave, &pScreen->secondary_list, secondary_head) {
         xf86CursorScreenPtr sPriv;
 
-        if (!RRHasScanoutPixmap(pSlave))
-            continue;
+        if (!RRHasScanoutPixmap(pSlave)) {
+          continue;
+        }
 
         sPriv = dixLookupPrivate(&pSlave->devPrivates, &xf86CursorScreenKeyRec);
         if (!sPriv) { /* NULL if Option "SWCursor", possibly other conditions */
@@ -198,8 +199,9 @@ xf86ScreenSetCursor(ScreenPtr pScreen, CursorPtr pCurs, int x, int y)
      * This check can be removed once dix/privates.c gets relocation code for
      * PRIVATE_CURSOR. Also see the related comment in AddGPUScreen().
      */
-    if (!_dixGetScreenPrivateKey(&xf86ScreenCursorBitsKeyRec, pScreen))
-        return FALSE;
+    if (!_dixGetScreenPrivateKey(&xf86ScreenCursorBitsKeyRec, pScreen)) {
+      return FALSE;
+    }
 
     bits = dixLookupScreenPrivate(&pCurs->devPrivates,
                                   &xf86ScreenCursorBitsKeyRec, pScreen);
@@ -207,23 +209,27 @@ xf86ScreenSetCursor(ScreenPtr pScreen, CursorPtr pCurs, int x, int y)
     x -= infoPtr->pScrn->frameX0;
     y -= infoPtr->pScrn->frameY0;
 
-    if (!pCurs->bits->argb || !xf86DriverHasLoadCursorARGB(infoPtr))
-        if (!bits) {
-            bits = (*infoPtr->RealizeCursor) (infoPtr, pCurs);
-            dixSetScreenPrivate(&pCurs->devPrivates,
-                                &xf86ScreenCursorBitsKeyRec, pScreen, bits);
-        }
+    if (!pCurs->bits->argb || !xf86DriverHasLoadCursorARGB(infoPtr)) {
+      if (!bits) {
+        bits = (*infoPtr->RealizeCursor)(infoPtr, pCurs);
+        dixSetScreenPrivate(&pCurs->devPrivates, &xf86ScreenCursorBitsKeyRec,
+                            pScreen, bits);
+      }
+    }
 
-    if (!(infoPtr->Flags & HARDWARE_CURSOR_UPDATE_UNHIDDEN))
-        (*infoPtr->HideCursor) (infoPtr->pScrn);
+    if (!(infoPtr->Flags & HARDWARE_CURSOR_UPDATE_UNHIDDEN)) {
+      (*infoPtr->HideCursor)(infoPtr->pScrn);
+    }
 
     if (pCurs->bits->argb && xf86DriverHasLoadCursorARGB(infoPtr)) {
-        if (!xf86DriverLoadCursorARGB (infoPtr, pCurs))
-            return FALSE;
-    } else
-    if (bits)
-        if (!xf86DriverLoadCursorImage (infoPtr, bits))
-            return FALSE;
+      if (!xf86DriverLoadCursorARGB(infoPtr, pCurs)) {
+        return FALSE;
+      }
+    } else if (bits) {
+      if (!xf86DriverLoadCursorImage(infoPtr, bits)) {
+        return FALSE;
+      }
+    }
 
     xf86RecolorCursor_locked (ScreenPriv, pCurs);
 
@@ -246,13 +252,15 @@ xf86SetCursor(ScreenPtr pScreen, CursorPtr pCurs, int x, int y)
     x -= ScreenPriv->HotX;
     y -= ScreenPriv->HotY;
 
-    if (!xf86ScreenSetCursor(pScreen, pCurs, x, y))
-        goto out;
+    if (!xf86ScreenSetCursor(pScreen, pCurs, x, y)) {
+      goto out;
+    }
 
     /* ask each secondary driver to set the cursor. */
     xorg_list_for_each_entry(pSlave, &pScreen->secondary_list, secondary_head) {
-        if (!RRHasScanoutPixmap(pSlave))
-            continue;
+      if (!RRHasScanoutPixmap(pSlave)) {
+        continue;
+      }
 
         if (!xf86ScreenSetCursor(pSlave, pCurs, x, y)) {
             /*
@@ -280,16 +288,18 @@ xf86SetTransparentCursor(ScreenPtr pScreen)
 
     input_lock();
 
-    if (!ScreenPriv->transparentData)
-        ScreenPriv->transparentData =
-            (*infoPtr->RealizeCursor) (infoPtr, NullCursor);
+    if (!ScreenPriv->transparentData) {
+      ScreenPriv->transparentData =
+          (*infoPtr->RealizeCursor)(infoPtr, NullCursor);
+    }
 
-    if (!(infoPtr->Flags & HARDWARE_CURSOR_UPDATE_UNHIDDEN))
-        (*infoPtr->HideCursor) (infoPtr->pScrn);
+    if (!(infoPtr->Flags & HARDWARE_CURSOR_UPDATE_UNHIDDEN)) {
+      (*infoPtr->HideCursor)(infoPtr->pScrn);
+    }
 
-    if (ScreenPriv->transparentData)
-        xf86DriverLoadCursorImage (infoPtr,
-                                   ScreenPriv->transparentData);
+    if (ScreenPriv->transparentData) {
+      xf86DriverLoadCursorImage(infoPtr, ScreenPriv->transparentData);
+    }
 
     xf86DriverShowCursor(infoPtr);
 
@@ -327,8 +337,9 @@ xf86MoveCursor(ScreenPtr pScreen, int x, int y)
 
     /* ask each secondary driver to move the cursor */
     xorg_list_for_each_entry(pSlave, &pScreen->secondary_list, secondary_head) {
-        if (!RRHasScanoutPixmap(pSlave))
-            continue;
+      if (!RRHasScanoutPixmap(pSlave)) {
+        continue;
+      }
 
         xf86ScreenMoveCursor(pSlave, x, y);
     }
@@ -343,15 +354,17 @@ xf86RecolorCursor_locked(xf86CursorScreenPtr ScreenPriv, CursorPtr pCurs)
 
     /* recoloring isn't applicable to ARGB cursors and drivers
        shouldn't have to ignore SetCursorColors requests */
-    if (pCurs->bits->argb)
-        return;
+    if (pCurs->bits->argb) {
+      return;
+    }
 
     if (ScreenPriv->PalettedCursor) {
         xColorItem sourceColor, maskColor;
         ColormapPtr pmap = ScreenPriv->pInstalledMap;
 
-        if (!pmap)
-            return;
+        if (!pmap) {
+          return;
+        }
 
         sourceColor.red = pCurs->foreRed;
         sourceColor.green = pCurs->foreGreen;
@@ -404,14 +417,16 @@ RealizeCursorInterleave0(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
     /* how many words are in the source or mask */
     int words = size / (CUR_BITMAP_SCANLINE_PAD / 4);
 
-    if (!(mem = calloc(1, size)))
-        return NULL;
+    if (!(mem = calloc(1, size))) {
+      return NULL;
+    }
 
     if (pCurs == NullCursor) {
         if (infoPtr->Flags & HARDWARE_CURSOR_INVERT_MASK) {
             DstM = (SCANLINE *) mem;
-            if (!(infoPtr->Flags & HARDWARE_CURSOR_SWAP_SOURCE_AND_MASK))
-                DstM += words;
+            if (!(infoPtr->Flags & HARDWARE_CURSOR_SWAP_SOURCE_AND_MASK)) {
+              DstM += words;
+            }
             memset(DstM, -1, words * sizeof(SCANLINE));
         }
         return mem;
@@ -516,8 +531,9 @@ RealizeCursorInterleave1(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
     int size = (infoPtr->MaxWidth * infoPtr->MaxHeight) >> 2;
 
     /* Realize the cursor without interleaving */
-    if (!(mem2 = RealizeCursorInterleave0(infoPtr, pCurs)))
-        return NULL;
+    if (!(mem2 = RealizeCursorInterleave0(infoPtr, pCurs))) {
+      return NULL;
+    }
 
     if (!(mem = calloc(1, size))) {
         free(mem2);

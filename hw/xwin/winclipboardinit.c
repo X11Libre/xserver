@@ -86,8 +86,9 @@ winClipboardThreadProc(void *arg)
       /* Flag that clipboard client has stopped */
       g_fClipboardStarted = FALSE;
 
-      if (fShutdown)
+      if (fShutdown) {
         break;
+      }
 
       /* checking if we need to restart */
       if (clipboardRestarts >= WIN_CLIPBOARD_RETRIES) {

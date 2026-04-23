@@ -80,8 +80,9 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     REQUEST(xGetSelectedExtensionEventsReq);
     REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     int i, rc = 0;
     WindowPtr pWin;
@@ -96,42 +97,50 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     };
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if ((pOthers = wOtherInputMasks(pWin)) != 0) {
-        for (others = pOthers->inputClients; others; others = others->next)
-            for (i = 0; i < EMASKSIZE; i++)
-                ClassFromMask(NULL, others->mask[i], i,
-                              &reply.all_clients_count, COUNT);
+      for (others = pOthers->inputClients; others; others = others->next) {
+        for (i = 0; i < EMASKSIZE; i++) {
+          ClassFromMask(NULL, others->mask[i], i, &reply.all_clients_count,
+                        COUNT);
+        }
+      }
 
-        for (others = pOthers->inputClients; others; others = others->next)
-            if (SameClient(others, client)) {
-                for (i = 0; i < EMASKSIZE; i++)
-                    ClassFromMask(NULL, others->mask[i], i,
-                                  &reply.this_client_count, COUNT);
-                break;
-            }
+      for (others = pOthers->inputClients; others; others = others->next) {
+        if (SameClient(others, client)) {
+          for (i = 0; i < EMASKSIZE; i++) {
+            ClassFromMask(NULL, others->mask[i], i, &reply.this_client_count,
+                          COUNT);
+          }
+          break;
+        }
+      }
 
         size_t total_count = reply.all_clients_count + reply.this_client_count;
         size_t total_length = total_count * sizeof(XEventClass);
         buf = calloc(1, total_length);
-        if (!buf) /* rpcbuf still empty */
-            return BadAlloc;
+        if (!buf) { /* rpcbuf still empty */
+          return BadAlloc;
+        }
 
         tclient = buf;
         aclient = buf + reply.this_client_count;
-        if (others)
-            for (i = 0; i < EMASKSIZE; i++)
-                tclient =
-                    ClassFromMask(tclient, others->mask[i], i, NULL, CREATE);
+        if (others) {
+          for (i = 0; i < EMASKSIZE; i++) {
+            tclient = ClassFromMask(tclient, others->mask[i], i, NULL, CREATE);
+          }
+        }
 
-        for (others = pOthers->inputClients; others; others = others->next)
-            for (i = 0; i < EMASKSIZE; i++)
-                aclient =
-                    ClassFromMask(aclient, others->mask[i], i, NULL, CREATE);
+        for (others = pOthers->inputClients; others; others = others->next) {
+          for (i = 0; i < EMASKSIZE; i++) {
+            aclient = ClassFromMask(aclient, others->mask[i], i, NULL, CREATE);
+          }
+        }
 
         x_rpcbuf_write_CARD32s(&rpcbuf, buf, total_count);
         free(buf);

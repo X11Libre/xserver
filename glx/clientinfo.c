@@ -46,26 +46,28 @@ set_client_info(__GLXclientState * cl, xGLXSetClientInfoARBReq * req,
     size = safe_add(size, safe_pad(req->numGLExtensionBytes));
     size = safe_add(size, safe_pad(req->numGLXExtensionBytes));
 
-    if (size < 0 || req->length != (size / 4))
-        return BadLength;
+    if (size < 0 || req->length != (size / 4)) {
+      return BadLength;
+    }
 
     /* Verify that the actual length of the GL extension string matches what's
      * encoded in protocol packet.
      */
     gl_extensions = (char *) (req + 1) + (req->numVersions * bytes_per_version);
-    if (req->numGLExtensionBytes != 0
-        && memchr(gl_extensions, 0,
-                  __GLX_PAD(req->numGLExtensionBytes)) == NULL)
-        return BadLength;
+    if (req->numGLExtensionBytes != 0 &&
+        memchr(gl_extensions, 0, __GLX_PAD(req->numGLExtensionBytes)) == NULL) {
+      return BadLength;
+    }
 
     /* Verify that the actual length of the GLX extension string matches
      * what's encoded in protocol packet.
      */
     glx_extensions = gl_extensions + __GLX_PAD(req->numGLExtensionBytes);
-    if (req->numGLXExtensionBytes != 0
-        && memchr(glx_extensions, 0,
-                  __GLX_PAD(req->numGLXExtensionBytes)) == NULL)
-        return BadLength;
+    if (req->numGLXExtensionBytes != 0 &&
+        memchr(glx_extensions, 0, __GLX_PAD(req->numGLXExtensionBytes)) ==
+            NULL) {
+      return BadLength;
+    }
 
     free(cl->GLClientextensions);
     cl->GLClientextensions = strdup(gl_extensions);

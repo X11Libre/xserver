@@ -199,9 +199,10 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 		free (*addrp);
 		*addrp = NULL;
 	    }
-	    if (!*addrp)
-		*addrp = malloc (len + 1);
-	    if (*addrp) {
+            if (!*addrp) {
+              *addrp = malloc(len + 1);
+            }
+            if (*addrp) {
 		strcpy ((char *) *addrp, hn.name);
 		*addrlenp = len;
 	    } else {
@@ -210,9 +211,10 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 	}
 	else
 	{
-	    if (*addrp)
-		free (*addrp);
-	    *addrp = NULL;
+          if (*addrp) {
+            free(*addrp);
+          }
+            *addrp = NULL;
 	    *addrlenp = 0;
 	}
     }

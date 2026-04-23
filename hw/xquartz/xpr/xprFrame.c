@@ -160,9 +160,10 @@ xprCreateFrame(RootlessWindowPtr pFrame, ScreenPtr pScreen,
         wc.colormap = xprColormapCallback;
         wc.colormap_data = pScreen;
         mask |= XP_COLORMAP;
+    } else {
+      i
     }
-    else if (pWin->drawable.depth == 15)
-        wc.depth = XP_DEPTH_RGB555;
+    f(pWin->drawable.depth == 15) wc.depth = XP_DEPTH_RGB555;
     else if (pWin->drawable.depth == 24)
         wc.depth = XP_DEPTH_ARGB8888;
     else
@@ -507,10 +508,11 @@ xprIsX11Window(int windowNumber)
     Bool ret;
     xp_window_id wid;
 
-    if (xp_lookup_native_window(windowNumber, &wid))
-        ret = xprGetXWindow(wid) != NULL;
-    else
-        ret = FALSE;
+    if (xp_lookup_native_window(windowNumber, &wid)) {
+      ret = xprGetXWindow(wid) != NULL;
+    } else {
+      ret = FALSE;
+    }
 
     return ret;
 }
@@ -565,10 +567,12 @@ static inline int
 configure_window(xp_window_id id, unsigned int mask,
                  const xp_window_changes *values)
 {
-    if (!no_configure_window)
-        return xp_configure_window(id, mask, values);
-    else
-        return XP_Success;
+  if (!no_configure_window) {
+    return xp_configure_window(id, mask, values);
+  } else {
+    r
+  }
+  eturn XP_Success;
 }
 
 static

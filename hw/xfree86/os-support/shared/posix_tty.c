@@ -68,48 +68,59 @@ static int
 GetBaud(int baudrate)
 {
 #ifdef B300
-    if (baudrate == 300)
-        return B300;
+  if (baudrate == 300) {
+    return B300;
+  }
 #endif
 #ifdef B1200
-    if (baudrate == 1200)
-        return B1200;
+  if (baudrate == 1200) {
+    return B1200;
+  }
 #endif
 #ifdef B2400
-    if (baudrate == 2400)
-        return B2400;
+  if (baudrate == 2400) {
+    return B2400;
+  }
 #endif
 #ifdef B4800
-    if (baudrate == 4800)
-        return B4800;
+  if (baudrate == 4800) {
+    return B4800;
+  }
 #endif
 #ifdef B9600
-    if (baudrate == 9600)
-        return B9600;
+  if (baudrate == 9600) {
+    return B9600;
+  }
 #endif
 #ifdef B19200
-    if (baudrate == 19200)
-        return B19200;
+  if (baudrate == 19200) {
+    return B19200;
+  }
 #endif
 #ifdef B38400
-    if (baudrate == 38400)
-        return B38400;
+  if (baudrate == 38400) {
+    return B38400;
+  }
 #endif
 #ifdef B57600
-    if (baudrate == 57600)
-        return B57600;
+  if (baudrate == 57600) {
+    return B57600;
+  }
 #endif
 #ifdef B115200
-    if (baudrate == 115200)
-        return B115200;
+  if (baudrate == 115200) {
+    return B115200;
+  }
 #endif
 #ifdef B230400
-    if (baudrate == 230400)
-        return B230400;
+  if (baudrate == 230400) {
+    return B230400;
+  }
 #endif
 #ifdef B460800
-    if (baudrate == 460800)
-        return B460800;
+  if (baudrate == 460800) {
+    return B460800;
+  }
 #endif
     return 0;
 }
@@ -193,12 +204,14 @@ xf86SetSerial(int fd, XF86OptionPtr options)
     char *s;
     int baud, r;
 
-    if (fd < 0)
-        return -1;
+    if (fd < 0) {
+      return -1;
+    }
 
     /* Don't try to set parameters for non-tty devices. */
-    if (!isatty(fd))
-        return 0;
+    if (!isatty(fd)) {
+      return 0;
+    }
 
     SYSCALL(tcgetattr(fd, &t));
 
@@ -332,12 +345,14 @@ xf86SetSerialSpeed(int fd, int speed)
     struct termios t;
     int baud, r;
 
-    if (fd < 0)
-        return -1;
+    if (fd < 0) {
+      return -1;
+    }
 
     /* Don't try to set parameters for non-tty devices. */
-    if (!isatty(fd))
-        return 0;
+    if (!isatty(fd)) {
+      return 0;
+    }
 
     SYSCALL(tcgetattr(fd, &t));
 
@@ -362,8 +377,9 @@ xf86ReadSerial(int fd, void *buf, int count)
 
     SYSCALL(r = read(fd, buf, count));
     DebugF("ReadingSerial: 0x%x", (unsigned char) *(((unsigned char *) buf)));
-    for (i = 1; i < r; i++)
-        DebugF(", 0x%x", (unsigned char) *(((unsigned char *) buf) + i));
+    for (i = 1; i < r; i++) {
+      DebugF(", 0x%x", (unsigned char)*(((unsigned char *)buf) + i));
+    }
     DebugF("\n");
     return r;
 }
@@ -375,8 +391,9 @@ xf86WriteSerial(int fd, const void *buf, int count)
     int i;
 
     DebugF("WritingSerial: 0x%x", (unsigned char) *(((unsigned char *) buf)));
-    for (i = 1; i < count; i++)
-        DebugF(", 0x%x", (unsigned char) *(((unsigned char *) buf) + i));
+    for (i = 1; i < count; i++) {
+      DebugF(", 0x%x", (unsigned char)*(((unsigned char *)buf) + i));
+    }
     DebugF("\n");
     SYSCALL(r = write(fd, buf, count));
     return r;
@@ -421,14 +438,16 @@ xf86FlushInput(int fd)
     char c[256];
 
     DebugF("FlushingSerial\n");
-    if (tcflush(fd, TCIFLUSH) == 0)
-        return 0;
+    if (tcflush(fd, TCIFLUSH) == 0) {
+      return 0;
+    }
 
     poll_fd.fd = fd;
     poll_fd.events = POLLIN;
     while (xserver_poll(&poll_fd, 1, 0) > 0) {
-        if (read(fd, &c, sizeof(c)) < 1)
-            return 0;
+      if (read(fd, &c, sizeof(c)) < 1) {
+        return 0;
+      }
     }
     return 0;
 }
@@ -489,9 +508,11 @@ xf2osState(int state)
     int i;
     int ret = 0;
 
-    for (i = 0; i < numStates; i++)
-        if (state & modemStates[i].xf)
-            ret |= modemStates[i].os;
+    for (i = 0; i < numStates; i++) {
+      if (state & modemStates[i].xf) {
+        ret |= modemStates[i].os;
+      }
+    }
     return ret;
 }
 
@@ -501,9 +522,11 @@ os2xfState(int state)
     int i;
     int ret = 0;
 
-    for (i = 0; i < numStates; i++)
-        if (state & modemStates[i].os)
-            ret |= modemStates[i].xf;
+    for (i = 0; i < numStates; i++) {
+      if (state & modemStates[i].os) {
+        ret |= modemStates[i].xf;
+      }
+    }
     return ret;
 }
 
@@ -513,8 +536,9 @@ getOsStateMask(void)
     int i;
     int ret = 0;
 
-    for (i = 0; i < numStates; i++)
-        ret |= modemStates[i].os;
+    for (i = 0; i < numStates; i++) {
+      ret |= modemStates[i].os;
+    }
     return ret;
 }
 
@@ -526,30 +550,35 @@ xf86SetSerialModemState(int fd, int state)
     int ret;
     int s;
 
-    if (fd < 0)
-        return -1;
+    if (fd < 0) {
+      return -1;
+    }
 
     /* Don't try to set parameters for non-tty devices. */
-    if (!isatty(fd))
-        return 0;
+    if (!isatty(fd)) {
+      return 0;
+    }
 
 #ifndef TIOCMGET
     return -1;
 #else
-    if (!osStateMask)
-        osStateMask = getOsStateMask();
+    if (!osStateMask) {
+      osStateMask = getOsStateMask();
+    }
 
     state = xf2osState(state);
     SYSCALL((ret = ioctl(fd, TIOCMGET, &s)));
-    if (ret < 0)
-        return -1;
+    if (ret < 0) {
+      return -1;
+    }
     s &= ~osStateMask;
     s |= state;
     SYSCALL((ret = ioctl(fd, TIOCMSET, &s)));
-    if (ret < 0)
-        return -1;
-    else
-        return 0;
+    if (ret < 0) {
+      return -1;
+    } else {
+      return 0;
+    }
 #endif
 }
 
@@ -559,19 +588,22 @@ xf86GetSerialModemState(int fd)
     int ret;
     int s;
 
-    if (fd < 0)
-        return -1;
+    if (fd < 0) {
+      return -1;
+    }
 
     /* Don't try to set parameters for non-tty devices. */
-    if (!isatty(fd))
-        return 0;
+    if (!isatty(fd)) {
+      return 0;
+    }
 
 #ifndef TIOCMGET
     return -1;
 #else
     SYSCALL((ret = ioctl(fd, TIOCMGET, &s)));
-    if (ret < 0)
-        return -1;
+    if (ret < 0) {
+      return -1;
+    }
     return os2xfState(s);
 #endif
 }
@@ -582,12 +614,14 @@ xf86SerialModemSetBits(int fd, int bits)
     int ret;
     int s;
 
-    if (fd < 0)
-        return -1;
+    if (fd < 0) {
+      return -1;
+    }
 
     /* Don't try to set parameters for non-tty devices. */
-    if (!isatty(fd))
-        return 0;
+    if (!isatty(fd)) {
+      return 0;
+    }
 
 #ifndef TIOCMGET
     return -1;
@@ -604,12 +638,14 @@ xf86SerialModemClearBits(int fd, int bits)
     int ret;
     int s;
 
-    if (fd < 0)
-        return -1;
+    if (fd < 0) {
+      return -1;
+    }
 
     /* Don't try to set parameters for non-tty devices. */
-    if (!isatty(fd))
-        return 0;
+    if (!isatty(fd)) {
+      return 0;
+    }
 
 #ifndef TIOCMGET
     return -1;

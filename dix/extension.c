@@ -117,8 +117,9 @@ static int checkReserved(const char* name)
 {
     for (int i=0; i<ARRAY_SIZE(reservedExt); i++) {
         if (strcmp(name, reservedExt[i].name) == 0) {
-            if (reservedExt[i].id < (RESERVED_EXTENSIONS + EXTENSION_BASE))
-                return reservedExt[i].id;
+          if (reservedExt[i].id < (RESERVED_EXTENSIONS + EXTENSION_BASE)) {
+            return reservedExt[i].id;
+          }
             FatalError("BUG: RESERVED_EXTENSIONS too small for %d\n", reservedExt[i].id);
         }
     }
@@ -132,13 +133,16 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
              void (*CloseDownProc) (ExtensionEntry * e),
              unsigned short (*MinorOpcodeProc) (ClientPtr c3))
 {
-    if (!extensions)
-        extensions = calloc(NumExtensions, sizeof(ExtensionEntry*));
-    if (!extensions)
-        return NULL;
+  if (!extensions) {
+    extensions = calloc(NumExtensions, sizeof(ExtensionEntry *));
+  }
+  if (!extensions) {
+    return NULL;
+  }
 
-    if (!MainProc || !SwappedMainProc || !MinorOpcodeProc)
-        return ((ExtensionEntry *) NULL);
+  if (!MainProc || !SwappedMainProc || !MinorOpcodeProc) {
+    return ((ExtensionEntry *)NULL);
+  }
     if ((lastEvent + NumEvents > MAXEVENTS) ||
         (unsigned) (lastError + NumErrors > LAST_ERROR)) {
         LogMessage(X_ERROR, "Not enabling extension %s: maximum number of "
@@ -147,20 +151,24 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
     }
 
     ExtensionEntry *ext = calloc(1, sizeof(ExtensionEntry));
-    if (!ext)
-        return NULL;
-    if (!dixAllocatePrivates(&ext->devPrivates, PRIVATE_EXTENSION))
-        goto badalloc;
+    if (!ext) {
+      return NULL;
+    }
+    if (!dixAllocatePrivates(&ext->devPrivates, PRIVATE_EXTENSION)) {
+      goto badalloc;
+    }
     ext->name = strdup(name);
-    if (!ext->name)
-        goto badalloc;
+    if (!ext->name) {
+      goto badalloc;
+    }
 
     int i = checkReserved(ext->name);
     if (i == -1) {
         i = NumExtensions;
         ExtensionEntry **newexts = reallocarray(extensions, i + 1, sizeof(ExtensionEntry *));
-        if (!newexts)
-            goto badalloc;
+        if (!newexts) {
+          goto badalloc;
+        }
 
         NumExtensions++;
         extensions = newexts;
@@ -215,8 +223,9 @@ badalloc:
 ExtensionEntry *
 CheckExtension(const char *extname)
 {
-    if (!extensions)
-        return NULL;
+  if (!extensions) {
+    return NULL;
+  }
 
     for (int i = 0; i < NumExtensions; i++) {
         if (extensions[i] &&
@@ -234,11 +243,13 @@ CheckExtension(const char *extname)
 ExtensionEntry *
 GetExtensionEntry(int major)
 {
-    if ((major < EXTENSION_BASE) || !extensions)
-        return NULL;
+  if ((major < EXTENSION_BASE) || !extensions) {
+    return NULL;
+  }
     major -= EXTENSION_BASE;
-    if (major >= NumExtensions)
-        return NULL;
+    if (major >= NumExtensions) {
+      return NULL;
+    }
     return extensions[major];
 }
 
@@ -251,14 +262,17 @@ StandardMinorOpcode(ClientPtr client)
 void
 CloseDownExtensions(void)
 {
-    if (!extensions)
-        return;
+  if (!extensions) {
+    return;
+  }
 
     for (int i = NumExtensions - 1; i >= 0; i--) {
-        if (!extensions[i])
-            continue;
-        if (extensions[i]->CloseDown)
-            extensions[i]->CloseDown(extensions[i]);
+      if (!extensions[i]) {
+        continue;
+      }
+      if (extensions[i]->CloseDown) {
+        extensions[i]->CloseDown(extensions[i]);
+      }
         NumExtensions = i;
         free((void *) extensions[i]->name);
         dixFreePrivates(extensions[i]->devPrivates, PRIVATE_EXTENSION);
@@ -275,16 +289,19 @@ CloseDownExtensions(void)
 static Bool
 ExtensionAvailable(ClientPtr client, ExtensionEntry *ext)
 {
-    if (!ext)
-        return FALSE;
+  if (!ext) {
+    return FALSE;
+  }
 
     ExtensionAccessCallbackParam rec = { client, ext, DixGetAttrAccess, Success };
     CallCallbacks(&ExtensionAccessCallback, &rec);
-    if (rec.status != Success)
-        return FALSE;
+    if (rec.status != Success) {
+      return FALSE;
+    }
 
-    if (!ext->base)
-        return FALSE;
+    if (!ext->base) {
+      return FALSE;
+    }
     return TRUE;
 }
 
@@ -294,8 +311,9 @@ ProcQueryExtension(ClientPtr client)
     REQUEST(xQueryExtensionReq);
     REQUEST_AT_LEAST_SIZE(xQueryExtensionReq);
 
-    if (client->swapped)
-        swaps(&stuff->nbytes);
+    if (client->swapped) {
+      swaps(&stuff->nbytes);
+    }
 
     REQUEST_FIXED_SIZE(xQueryExtensionReq, stuff->nbytes);
 
@@ -328,8 +346,9 @@ ProcListExtensions(ClientPtr client)
 
     if (NumExtensions && extensions) {
         for (int i = 0; i < NumExtensions; i++) {
-            if (!ExtensionAvailable(client, extensions[i]))
-                continue;
+          if (!ExtensionAvailable(client, extensions[i])) {
+            continue;
+          }
 
             int len = strlen(extensions[i]->name);
 

@@ -64,8 +64,9 @@ reply_XIQueryPointer(ClientPtr client, int len, void *data)
 
     assert(len < 0xffff); /* suspicious size, swapping bug */
 
-    if (!reply.repType)
-        return;
+    if (!reply.repType) {
+      return;
+    }
 
     if (client->swapped) {
         swapl(&reply.length);
@@ -126,8 +127,9 @@ request_XIQueryPointer(ClientPtr client, xXIQueryPointerReq * req, int error)
     rc = ProcXIQueryPointer(&client_request);
     assert(rc == error);
 
-    if (rc == BadDevice)
-        assert(client_request.errorValue == req->deviceid);
+    if (rc == BadDevice) {
+      assert(client_request.errorValue == req->deviceid);
+    }
 
     client_request.swapped = TRUE;
     swaps(&req->deviceid);
@@ -136,8 +138,9 @@ request_XIQueryPointer(ClientPtr client, xXIQueryPointerReq * req, int error)
     rc = ProcXIQueryPointer(&client_request);
     assert(rc == error);
 
-    if (rc == BadDevice)
-        assert(client_request.errorValue == req->deviceid);
+    if (rc == BadDevice) {
+      assert(client_request.errorValue == req->deviceid);
+    }
 }
 
 static void

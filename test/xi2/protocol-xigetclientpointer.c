@@ -71,8 +71,9 @@ reply_XIGetClientPointer(ClientPtr client, int len, void *data)
     reply_check_defaults(&reply, len, XIGetClientPointer);
 
     assert(reply.set == test_data.cp_is_set);
-    if (reply.set)
-        assert(reply.deviceid == test_data.dev->id);
+    if (reply.set) {
+      assert(reply.deviceid == test_data.dev->id);
+    }
 }
 
 static void
@@ -87,8 +88,9 @@ request_XIGetClientPointer(ClientPtr client, xXIGetClientPointerReq * req,
     rc = ProcXIGetClientPointer(&client_request);
     assert(rc == error);
 
-    if (rc == BadWindow)
-        assert(client_request.errorValue == req->win);
+    if (rc == BadWindow) {
+      assert(client_request.errorValue == req->win);
+    }
 
     client_request.swapped = TRUE;
     swapl(&req->win);
@@ -96,8 +98,9 @@ request_XIGetClientPointer(ClientPtr client, xXIGetClientPointerReq * req,
     rc = ProcXIGetClientPointer(&client_request);
     assert(rc == error);
 
-    if (rc == BadWindow)
-        assert(client_request.errorValue == req->win);
+    if (rc == BadWindow) {
+      assert(client_request.errorValue == req->win);
+    }
 }
 
 static void

@@ -101,8 +101,9 @@ glamor_egl_get_display2(EGLint type, void *native, int platform_fallback)
     if (epoxy_has_egl_extension(NULL, "EGL_EXT_platform_base")) {
         PFNEGLGETPLATFORMDISPLAYEXTPROC getPlatformDisplayEXT =
             (void *) eglGetProcAddress("eglGetPlatformDisplayEXT");
-        if (getPlatformDisplayEXT)
-            return getPlatformDisplayEXT(type, native, NULL);
+        if (getPlatformDisplayEXT) {
+          return getPlatformDisplayEXT(type, native, NULL);
+        }
     }
 
     /* Welp, everything is awful. */

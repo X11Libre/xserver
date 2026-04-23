@@ -88,8 +88,9 @@ miInsertEdgeInET(EdgeTable * ET, EdgeTableEntry * ETE, int scanline,
     if ((!pSLL) || (pSLL->scanline > scanline)) {
         if (*iSLLBlock > SLLSPERBLOCK - 1) {
             tmpSLLBlock = calloc(1, sizeof(ScanLineListBlock));
-            if (!tmpSLLBlock)
-                return FALSE;
+            if (!tmpSLLBlock) {
+              return FALSE;
+            }
             (*SLLBlock)->next = tmpSLLBlock;
             tmpSLLBlock->next = NULL;
             *SLLBlock = tmpSLLBlock;
@@ -114,10 +115,11 @@ miInsertEdgeInET(EdgeTable * ET, EdgeTableEntry * ETE, int scanline,
     }
     ETE->next = start;
 
-    if (prev)
-        prev->next = ETE;
-    else
-        pSLL->edgelist = ETE;
+    if (prev) {
+      prev->next = ETE;
+    } else {
+      pSLL->edgelist = ETE;
+    }
     return TRUE;
 }
 
@@ -166,8 +168,9 @@ miCreateETandAET(int count, DDXPointPtr pts, EdgeTable * ET,
 
     int dy;
 
-    if (count < 2)
-        return TRUE;
+    if (count < 2) {
+      return TRUE;
+    }
 
     /*
      *  initialize the Active Edge Table
@@ -254,8 +257,9 @@ miloadAET(EdgeTableEntry * AET, EdgeTableEntry * ETEs)
         }
         tmp = ETEs->next;
         ETEs->next = AET;
-        if (AET)
-            AET->back = ETEs;
+        if (AET) {
+          AET->back = ETEs;
+        }
         ETEs->back = pPrevAET;
         pPrevAET->next = ETEs;
         pPrevAET = ETEs;
@@ -293,10 +297,11 @@ micomputeWAET(EdgeTableEntry * AET)
     pWETE = AET;
     AET = AET->next;
     while (AET) {
-        if (AET->ClockWise)
-            isInside++;
-        else
-            isInside--;
+      if (AET->ClockWise) {
+        isInside++;
+      } else {
+        isInside--;
+      }
 
         if ((!inside && !isInside) || (inside && isInside)) {
             pWETE->nextWETE = AET;
@@ -325,15 +330,17 @@ miInsertionSort(EdgeTableEntry * AET)
     while (AET) {
         pETEinsert = AET;
         pETEchase = AET;
-        while (pETEchase->back->bres.minor > AET->bres.minor)
-            pETEchase = pETEchase->back;
+        while (pETEchase->back->bres.minor > AET->bres.minor) {
+          pETEchase = pETEchase->back;
+        }
 
         AET = AET->next;
         if (pETEchase != pETEinsert) {
             pETEchaseBackTMP = pETEchase->back;
             pETEinsert->back->next = AET;
-            if (AET)
-                AET->back = pETEinsert->back;
+            if (AET) {
+              AET->back = pETEinsert->back;
+            }
             pETEinsert->next = pETEchase;
             pETEchase->back->next = pETEinsert;
             pETEchase->back = pETEinsert;
@@ -360,8 +367,9 @@ getPolyYBounds(DDXPointPtr pts, int n, int *by, int *ty)
             ptMin = pts;
             ymin = pts->y;
         }
-        if (pts->y > ymax)
-            ymax = pts->y;
+        if (pts->y > ymax) {
+          ymax = pts->y;
+        }
 
         pts++;
     }
@@ -408,8 +416,9 @@ miFillConvexPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
     imin = getPolyYBounds(ptsIn, count, &ymin, &ymax);
 
     dy = ymax - ymin + 1;
-    if ((count < 3) || (dy < 0))
-        return TRUE;
+    if ((count < 3) || (dy < 0)) {
+      return TRUE;
+    }
     ptsOut = FirstPoint = calloc(dy, sizeof(xPoint));
     width = FirstWidth = calloc(dy, sizeof(int));
     if (!FirstPoint || !FirstWidth) {
@@ -436,8 +445,9 @@ miFillConvexPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
              *  conditions of the array.
              */
             nextleft++;
-            if (nextleft >= count)
-                nextleft = 0;
+            if (nextleft >= count) {
+              nextleft = 0;
+            }
 
             /*
              *  now compute all of the random information
@@ -459,8 +469,9 @@ miFillConvexPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
              *  conditions of the array.
              */
             nextright--;
-            if (nextright < 0)
-                nextright = count - 1;
+            if (nextright < 0) {
+              nextright = count - 1;
+            }
 
             /*
              *  now compute all of the random information
@@ -539,11 +550,13 @@ miFillGeneralPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
     ScanLineListBlock SLLBlock; /* header for ScanLineList */
     int fixWAET = 0;
 
-    if (count < 3)
-        return TRUE;
+    if (count < 3) {
+      return TRUE;
+    }
 
-    if (!(pETEs = calloc(count, sizeof(EdgeTableEntry))))
-        return FALSE;
+    if (!(pETEs = calloc(count, sizeof(EdgeTableEntry)))) {
+      return FALSE;
+    }
     ptsOut = FirstPoint;
     width = FirstWidth;
     if (!miCreateETandAET(count, ptsIn, &ET, &AET, pETEs, &SLLBlock)) {
@@ -681,8 +694,9 @@ miFillPolygon(DrawablePtr dst, GCPtr pgc,
     int xorg, yorg;
     DDXPointPtr ppt;
 
-    if (count == 0)
-        return;
+    if (count == 0) {
+      return;
+    }
 
     ppt = pPts;
     if (pgc->miTranslate) {
@@ -715,8 +729,9 @@ miFillPolygon(DrawablePtr dst, GCPtr pgc,
             }
         }
     }
-    if (shape == Convex)
-        miFillConvexPoly(dst, pgc, count, pPts);
-    else
-        miFillGeneralPoly(dst, pgc, count, pPts);
+    if (shape == Convex) {
+      miFillConvexPoly(dst, pgc, count, pPts);
+    } else {
+      miFillGeneralPoly(dst, pgc, count, pPts);
+    }
 }

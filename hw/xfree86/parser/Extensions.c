@@ -87,13 +87,15 @@ xf86printExtensionsSection(FILE * cf, XF86ConfExtensionsPtr ptr)
 {
     XF86OptionPtr p;
 
-    if (ptr == NULL || ptr->ext_option_lst == NULL)
-        return;
+    if (ptr == NULL || ptr->ext_option_lst == NULL) {
+      return;
+    }
 
     p = ptr->ext_option_lst;
     fprintf(cf, "Section \"Extensions\"\n");
-    if (ptr->extensions_comment)
-        fprintf(cf, "%s", ptr->extensions_comment);
+    if (ptr->extensions_comment) {
+      fprintf(cf, "%s", ptr->extensions_comment);
+    }
     xf86printOptionList(cf, p, 1);
     fprintf(cf, "EndSection\n\n");
 }
@@ -101,8 +103,9 @@ xf86printExtensionsSection(FILE * cf, XF86ConfExtensionsPtr ptr)
 void
 xf86freeExtensions(XF86ConfExtensionsPtr ptr)
 {
-    if (ptr == NULL)
-        return;
+  if (ptr == NULL) {
+    return;
+  }
 
     xf86optionListFree(ptr->ext_option_lst);
     TestFree(ptr->extensions_comment);

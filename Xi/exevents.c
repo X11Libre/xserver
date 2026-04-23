@@ -139,8 +139,9 @@ XIShouldNotify(ClientPtr client, DeviceIntPtr dev)
     DeviceIntPtr current_ptr = PickPointer(client);
     DeviceIntPtr current_kbd = GetMaster(current_ptr, KEYBOARD_OR_FLOAT);
 
-    if (dev == current_kbd || dev == current_ptr)
-        return 1;
+    if (dev == current_kbd || dev == current_ptr) {
+      return 1;
+    }
 
     return 0;
 }
@@ -237,8 +238,9 @@ XIGetDevice(xEvent *xE)
         id = ((deviceKeyButtonPointer *) xE)->deviceid & ~MORE_EVENTS;
 
         rc = dixLookupDevice(&pDev, id, serverClient, DixUnknownAccess);
-        if (rc != Success)
-            ErrorF("[dix] XIGetDevice failed on XACE restrictions (%d)\n", rc);
+        if (rc != Success) {
+          ErrorF("[dix] XIGetDevice failed on XACE restrictions (%d)\n", rc);
+        }
     }
     return pDev;
 }
@@ -274,13 +276,15 @@ CopyKeyClass(DeviceIntPtr device, DeviceIntPtr master)
 {
     KeyClassPtr mk = master->key;
 
-    if (device == master)
-        return;
+    if (device == master) {
+      return;
+    }
 
     mk->sourceid = device->id;
 
-    if (!XkbDeviceApplyKeymap(master, device->key->xkbInfo->desc))
-        FatalError("Couldn't pivot keymap from device to core!\n");
+    if (!XkbDeviceApplyKeymap(master, device->key->xkbInfo->desc)) {
+      FatalError("Couldn't pivot keymap from device to core!\n");
+    }
 }
 
 /**
@@ -404,8 +408,9 @@ DeepCopyFeedbackClasses(DeviceIntPtr from, DeviceIntPtr to)
             }
             (*l)->CtrlProc = it->CtrlProc;
             (*l)->ctrl = it->ctrl;
-            if ((*l)->xkb_sli)
-                XkbFreeSrvLedInfo((*l)->xkb_sli);
+            if ((*l)->xkb_sli) {
+              XkbFreeSrvLedInfo((*l)->xkb_sli);
+            }
             (*l)->xkb_sli = XkbCopySrvLedInfo(from, it->xkb_sli, NULL, *l);
 
             l = &(*l)->next;
@@ -433,8 +438,9 @@ DeepCopyKeyboardClasses(DeviceIntPtr from, DeviceIntPtr to)
             classes = to->unused_classes;
 
             to->kbdfeed = classes->kbdfeed;
-            if (!to->kbdfeed)
-                InitKeyboardDeviceStruct(to, NULL, NULL, NULL);
+            if (!to->kbdfeed) {
+              InitKeyboardDeviceStruct(to, NULL, NULL, NULL);
+            }
             classes->kbdfeed = NULL;
         }
 
@@ -450,8 +456,9 @@ DeepCopyKeyboardClasses(DeviceIntPtr from, DeviceIntPtr to)
             (*k)->BellProc = it->BellProc;
             (*k)->CtrlProc = it->CtrlProc;
             (*k)->ctrl = it->ctrl;
-            if ((*k)->xkb_sli)
-                XkbFreeSrvLedInfo((*k)->xkb_sli);
+            if ((*k)->xkb_sli) {
+              XkbFreeSrvLedInfo((*k)->xkb_sli);
+            }
             (*k)->xkb_sli = XkbCopySrvLedInfo(from, it->xkb_sli, *k, NULL);
 
             k = &(*k)->next;
@@ -467,10 +474,11 @@ DeepCopyKeyboardClasses(DeviceIntPtr from, DeviceIntPtr to)
         if (!to->key) {
             classes = to->unused_classes;
             to->key = classes->key;
-            if (!to->key)
-                InitKeyboardDeviceStruct(to, NULL, NULL, NULL);
-            else
-                classes->key = NULL;
+            if (!to->key) {
+              InitKeyboardDeviceStruct(to, NULL, NULL, NULL);
+            } else {
+              classes->key = NULL;
+            }
         }
 
         CopyKeyClass(from, to);
@@ -489,8 +497,9 @@ DeepCopyKeyboardClasses(DeviceIntPtr from, DeviceIntPtr to)
         KbdFeedbackPtr k;
 
         for (k = to->kbdfeed; k; k = k->next) {
-            if (!k->xkb_sli)
-                continue;
+          if (!k->xkb_sli) {
+            continue;
+          }
             if (k->xkb_sli->flags & XkbSLI_IsDefault) {
                 assert(to->key);
                 k->xkb_sli->names = to->key->xkbInfo->desc->names->indicators;
@@ -513,19 +522,21 @@ DeepCopyKeyboardClasses(DeviceIntPtr from, DeviceIntPtr to)
             to->focus = classes->focus;
             if (!to->focus) {
                 to->focus = calloc(1, sizeof(FocusClassRec));
-                if (!to->focus)
-                    FatalError("[Xi] no memory for class shift.\n");
+                if (!to->focus) {
+                  FatalError("[Xi] no memory for class shift.\n");
+                }
+            } else {
+              classes->focus = NULL;
             }
-            else
-                classes->focus = NULL;
 
             oldTrace = to->focus->trace;
             memcpy(to->focus, from->focus, sizeof(FocusClassRec));
             to->focus->trace = reallocarray(oldTrace,
                                             to->focus->traceSize,
                                             sizeof(WindowPtr));
-            if (!to->focus->trace && to->focus->traceSize)
-                FatalError("[Xi] no memory for trace.\n");
+            if (!to->focus->trace && to->focus->traceSize) {
+              FatalError("[Xi] no memory for trace.\n");
+            }
             memcpy(to->focus->trace, from->focus->trace,
                    from->focus->traceSize * sizeof(WindowPtr));
             to->focus->sourceid = from->id;
@@ -583,14 +594,16 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
         if (!to->valuator) {
             classes = to->unused_classes;
             to->valuator = classes->valuator;
-            if (to->valuator)
-                classes->valuator = NULL;
+            if (to->valuator) {
+              classes->valuator = NULL;
+            }
         }
 
         v = AllocValuatorClass(to->valuator, from->valuator->numAxes);
 
-        if (!v)
-            FatalError("[Xi] no memory for class shift.\n");
+        if (!v) {
+          FatalError("[Xi] no memory for class shift.\n");
+        }
 
         to->valuator = v;
         memcpy(v->axes, from->valuator->axes, v->numAxes * sizeof(AxisInfo));
@@ -609,12 +622,13 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
             to->button = classes->button;
             if (!to->button) {
                 to->button = calloc(1, sizeof(ButtonClassRec));
-                if (!to->button)
-                    FatalError("[Xi] no memory for class shift.\n");
+                if (!to->button) {
+                  FatalError("[Xi] no memory for class shift.\n");
+                }
                 to->button->numButtons = from->button->numButtons;
+            } else {
+              classes->button = NULL;
             }
-            else
-                classes->button = NULL;
         }
 
         if (from->button->xkb_acts) {
@@ -647,11 +661,12 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
             to->proximity = classes->proximity;
             if (!to->proximity) {
                 to->proximity = calloc(1, sizeof(ProximityClassRec));
-                if (!to->proximity)
-                    FatalError("[Xi] no memory for class shift.\n");
+                if (!to->proximity) {
+                  FatalError("[Xi] no memory for class shift.\n");
+                }
+            } else {
+              classes->proximity = NULL;
             }
-            else
-                classes->proximity = NULL;
         }
         memcpy(to->proximity, from->proximity, sizeof(ProximityClassRec));
         to->proximity->sourceid = from->id;
@@ -672,18 +687,21 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
                 int i;
 
                 to->touch = calloc(1, sizeof(TouchClassRec));
-                if (!to->touch)
-                    FatalError("[Xi] no memory for class shift.\n");
+                if (!to->touch) {
+                  FatalError("[Xi] no memory for class shift.\n");
+                }
                 to->touch->num_touches = from->touch->num_touches;
                 to->touch->touches = calloc(to->touch->num_touches,
                                             sizeof(TouchPointInfoRec));
-                for (i = 0; i < to->touch->num_touches; i++)
-                    TouchInitTouchPoint(to->touch, to->valuator, i);
-                if (!to->touch)
-                    FatalError("[Xi] no memory for class shift.\n");
+                for (i = 0; i < to->touch->num_touches; i++) {
+                  TouchInitTouchPoint(to->touch, to->valuator, i);
+                }
+                if (!to->touch) {
+                  FatalError("[Xi] no memory for class shift.\n");
+                }
+            } else {
+              classes->touch = NULL;
             }
-            else
-                classes->touch = NULL;
         }
 
         t = to->touch;
@@ -706,11 +724,13 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
             classes = to->unused_classes;
             to->gesture = classes->gesture;
             if (!to->gesture) {
-                if (!InitGestureClassDeviceStruct(to, from->gesture->max_touches))
-                    FatalError("[Xi] no memory for class shift.\n");
+              if (!InitGestureClassDeviceStruct(to,
+                                                from->gesture->max_touches)) {
+                FatalError("[Xi] no memory for class shift.\n");
+              }
+            } else {
+              classes->gesture = NULL;
             }
-            else
-                classes->gesture = NULL;
         }
 
         to->gesture->sourceid = from->gesture->sourceid;
@@ -738,10 +758,12 @@ DeepCopyDeviceClasses(DeviceIntPtr from, DeviceIntPtr to,
     /* generic feedback classes, not tied to pointer and/or keyboard */
     DeepCopyFeedbackClasses(from, to);
 
-    if ((dce->flags & DEVCHANGE_KEYBOARD_EVENT))
-        DeepCopyKeyboardClasses(from, to);
-    if ((dce->flags & DEVCHANGE_POINTER_EVENT))
-        DeepCopyPointerClasses(from, to);
+    if ((dce->flags & DEVCHANGE_KEYBOARD_EVENT)) {
+      DeepCopyKeyboardClasses(from, to);
+    }
+    if ((dce->flags & DEVCHANGE_POINTER_EVENT)) {
+      DeepCopyPointerClasses(from, to);
+    }
 
     input_unlock();
 }
@@ -774,22 +796,27 @@ ChangeMasterDeviceClasses(DeviceIntPtr device, DeviceChangedEvent *dce)
     int rc;
 
     /* For now, we don't have devices that change physically. */
-    if (!InputDevIsMaster(device))
-        return;
+    if (!InputDevIsMaster(device)) {
+      return;
+    }
 
     rc = dixLookupDevice(&slave, dce->sourceid, serverClient, DixReadAccess);
 
-    if (rc != Success)
-        return;                 /* Device has disappeared */
+    if (rc != Success) {
+      return; /* Device has disappeared */
+    }
 
-    if (InputDevIsMaster(slave))
-        return;
+    if (InputDevIsMaster(slave)) {
+      return;
+    }
 
-    if (InputDevIsFloating(slave))
-        return;                 /* set floating since the event */
+    if (InputDevIsFloating(slave)) {
+      return; /* set floating since the event */
+    }
 
-    if (GetMaster(slave, MASTER_ATTACHED)->id != dce->masterid)
-        return;                 /* not our slave anymore, don't care */
+    if (GetMaster(slave, MASTER_ATTACHED)->id != dce->masterid) {
+      return; /* not our slave anymore, don't care */
+    }
 
     /* FIXME: we probably need to send a DCE for the new slave now */
 
@@ -827,26 +854,31 @@ static void
 IncreaseButtonCount(DeviceIntPtr dev, int key, CARD8 *buttons_down,
                     Mask *motion_mask, unsigned short *state)
 {
-    if (dev->valuator)
-        dev->valuator->motionHintWindow = NullWindow;
+  if (dev->valuator) {
+    dev->valuator->motionHintWindow = NullWindow;
+  }
 
     (*buttons_down)++;
     *motion_mask = DeviceButtonMotionMask;
-    if (dev->button->map[key] <= 5)
-        *state |= (Button1Mask >> 1) << dev->button->map[key];
+    if (dev->button->map[key] <= 5) {
+      *state |= (Button1Mask >> 1) << dev->button->map[key];
+    }
 }
 
 static void
 DecreaseButtonCount(DeviceIntPtr dev, int key, CARD8 *buttons_down,
                     Mask *motion_mask, unsigned short *state)
 {
-    if (dev->valuator)
-        dev->valuator->motionHintWindow = NullWindow;
+  if (dev->valuator) {
+    dev->valuator->motionHintWindow = NullWindow;
+  }
 
-    if (*buttons_down >= 1 && !--(*buttons_down))
-        *motion_mask = 0;
-    if (dev->button->map[key] <= 5)
-        *state &= ~((Button1Mask >> 1) << dev->button->map[key]);
+  if (*buttons_down >= 1 && !--(*buttons_down)) {
+    *motion_mask = 0;
+  }
+  if (dev->button->map[key] <= 5) {
+    *state &= ~((Button1Mask >> 1) << dev->button->map[key]);
+  }
 }
 
 /**
@@ -921,54 +953,67 @@ UpdateDeviceState(DeviceIntPtr device, DeviceEvent *event)
 
     for (i = 0; i <= last_valuator && i < v->numAxes; i++) {
         /* XXX: Relative/Absolute mode */
-        if (BitIsOn(&event->valuators.mask, i))
-            v->axisVal[i] = event->valuators.data[i];
+        if (BitIsOn(&event->valuators.mask, i)) {
+          v->axisVal[i] = event->valuators.data[i];
+        }
     }
 
     if (event->type == ET_KeyPress) {
-        if (!k)
-            return DONT_PROCESS;
+      if (!k) {
+        return DONT_PROCESS;
+      }
 
         /* don't allow ddx to generate multiple downs, but repeats are okay */
-        if (key_is_down(device, key, KEY_PROCESSED) && !event->key_repeat)
-            return DONT_PROCESS;
+        if (key_is_down(device, key, KEY_PROCESSED) && !event->key_repeat) {
+          return DONT_PROCESS;
+        }
 
-        if (device->valuator)
-            device->valuator->motionHintWindow = NullWindow;
+        if (device->valuator) {
+          device->valuator->motionHintWindow = NullWindow;
+        }
         set_key_down(device, key, KEY_PROCESSED);
     }
     else if (event->type == ET_KeyRelease) {
-        if (!k)
-            return DONT_PROCESS;
+      if (!k) {
+        return DONT_PROCESS;
+      }
 
-        if (!key_is_down(device, key, KEY_PROCESSED))   /* guard against duplicates */
-            return DONT_PROCESS;
-        if (device->valuator)
-            device->valuator->motionHintWindow = NullWindow;
+      if (!key_is_down(device, key,
+                       KEY_PROCESSED)) { /* guard against duplicates */
+        return DONT_PROCESS;
+      }
+      if (device->valuator) {
+        device->valuator->motionHintWindow = NullWindow;
+      }
         set_key_up(device, key, KEY_PROCESSED);
     }
     else if (event->type == ET_ButtonPress) {
-        if (!b)
-            return DONT_PROCESS;
+      if (!b) {
+        return DONT_PROCESS;
+      }
 
-        if (button_is_down(device, key, BUTTON_PROCESSED))
-            return DONT_PROCESS;
+      if (button_is_down(device, key, BUTTON_PROCESSED)) {
+        return DONT_PROCESS;
+      }
 
         set_button_down(device, key, BUTTON_PROCESSED);
 
-        if (!b->map[key])
-            return DONT_PROCESS;
+        if (!b->map[key]) {
+          return DONT_PROCESS;
+        }
 
         IncreaseButtonCount(device, key, &b->buttonsDown, &b->motionMask,
                             &b->state);
         UpdateDeviceMotionMask(device, b->state, b->motionMask);
     }
     else if (event->type == ET_ButtonRelease) {
-        if (!b)
-            return DONT_PROCESS;
+      if (!b) {
+        return DONT_PROCESS;
+      }
 
-        if (!button_is_down(device, key, BUTTON_PROCESSED))
-            return DONT_PROCESS;
+      if (!button_is_down(device, key, BUTTON_PROCESSED)) {
+        return DONT_PROCESS;
+      }
         if (InputDevIsMaster(device)) {
             DeviceIntPtr sd;
 
@@ -978,56 +1023,64 @@ UpdateDeviceState(DeviceIntPtr device, DeviceEvent *event)
              * event being delivered through the slave first
              */
             for (sd = inputInfo.devices; sd; sd = sd->next) {
-                if (InputDevIsMaster(sd) || GetMaster(sd, MASTER_POINTER) != device)
-                    continue;
-                if (!sd->button)
-                    continue;
-                for (i = 1; i <= sd->button->numButtons; i++)
-                    if (sd->button->map[i] == key &&
-                        button_is_down(sd, i, BUTTON_PROCESSED))
-                        return DONT_PROCESS;
+              if (InputDevIsMaster(sd) ||
+                  GetMaster(sd, MASTER_POINTER) != device) {
+                continue;
+              }
+              if (!sd->button) {
+                continue;
+              }
+              for (i = 1; i <= sd->button->numButtons; i++) {
+                if (sd->button->map[i] == key &&
+                    button_is_down(sd, i, BUTTON_PROCESSED)) {
+                  return DONT_PROCESS;
+                }
+              }
             }
         }
         set_button_up(device, key, BUTTON_PROCESSED);
-        if (!b->map[key])
-            return DONT_PROCESS;
+        if (!b->map[key]) {
+          return DONT_PROCESS;
+        }
 
         DecreaseButtonCount(device, key, &b->buttonsDown, &b->motionMask,
                             &b->state);
         UpdateDeviceMotionMask(device, b->state, b->motionMask);
-    }
-    else if (event->type == ET_ProximityIn)
-        device->proximity->in_proximity = TRUE;
-    else if (event->type == ET_ProximityOut)
-        device->proximity->in_proximity = FALSE;
-    else if (event->type == ET_TouchBegin) {
-        BUG_RETURN_VAL(!b || !v, DONT_PROCESS);
-        BUG_RETURN_VAL(!t, DONT_PROCESS);
+    } else if (event->type == ET_ProximityIn) {
+      device->proximity->in_proximity = TRUE;
+    } else if (event->type == ET_ProximityOut) {
+      device->proximity->in_proximity = FALSE;
+    } else if (event->type == ET_TouchBegin) {
+      BUG_RETURN_VAL(!b || !v, DONT_PROCESS);
+      BUG_RETURN_VAL(!t, DONT_PROCESS);
 
-        if (!b->map[key])
-            return DONT_PROCESS;
+      if (!b->map[key]) {
+        return DONT_PROCESS;
+      }
 
-        if (!(event->flags & TOUCH_POINTER_EMULATED) ||
-            (event->flags & TOUCH_REPLAYING))
-            return DONT_PROCESS;
+      if (!(event->flags & TOUCH_POINTER_EMULATED) ||
+          (event->flags & TOUCH_REPLAYING)) {
+        return DONT_PROCESS;
+      }
 
-        IncreaseButtonCount(device, key, &t->buttonsDown, &t->motionMask,
-                            &t->state);
-        UpdateDeviceMotionMask(device, t->state, DeviceButtonMotionMask);
-    }
-    else if (event->type == ET_TouchEnd) {
-        BUG_RETURN_VAL(!b || !v, DONT_PROCESS);
-        BUG_RETURN_VAL(!t, DONT_PROCESS);
+      IncreaseButtonCount(device, key, &t->buttonsDown, &t->motionMask,
+                          &t->state);
+      UpdateDeviceMotionMask(device, t->state, DeviceButtonMotionMask);
+    } else if (event->type == ET_TouchEnd) {
+      BUG_RETURN_VAL(!b || !v, DONT_PROCESS);
+      BUG_RETURN_VAL(!t, DONT_PROCESS);
 
-        if (t->buttonsDown <= 0 || !b->map[key])
-            return DONT_PROCESS;
+      if (t->buttonsDown <= 0 || !b->map[key]) {
+        return DONT_PROCESS;
+      }
 
-        if (!(event->flags & TOUCH_POINTER_EMULATED))
-            return DONT_PROCESS;
+      if (!(event->flags & TOUCH_POINTER_EMULATED)) {
+        return DONT_PROCESS;
+      }
 
-        DecreaseButtonCount(device, key, &t->buttonsDown, &t->motionMask,
-                            &t->state);
-        UpdateDeviceMotionMask(device, t->state, DeviceButtonMotionMask);
+      DecreaseButtonCount(device, key, &t->buttonsDown, &t->motionMask,
+                          &t->state);
+      UpdateDeviceMotionMask(device, t->state, DeviceButtonMotionMask);
     }
 
     return DEFAULT;
@@ -1048,8 +1101,9 @@ TouchClientWantsOwnershipEvents(ClientPtr client, DeviceIntPtr dev,
 
     assert(wOtherInputMasks(win));
     nt_list_for_each_entry(iclient, wOtherInputMasks(win)->inputClients, next) {
-        if (dixClientForInputClients(iclient) != client)
-            continue;
+      if (dixClientForInputClients(iclient) != client) {
+        continue;
+      }
 
         return xi2mask_isset(iclient->xi2mask, dev, XI_TouchOwnership);
     }
@@ -1065,8 +1119,9 @@ TouchSendOwnershipEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, int reason,
     InternalEvent *tel = InitEventList(GetMaximumEventsNum());
 
     nev = GetTouchOwnershipEvents(tel, dev, ti, reason, resource, 0);
-    for (i = 0; i < nev; i++)
-        mieqProcessDeviceEvent(dev, tel + i, NULL);
+    for (i = 0; i < nev; i++) {
+      mieqProcessDeviceEvent(dev, tel + i, NULL);
+    }
 
     FreeEventList(tel, GetMaximumEventsNum());
 }
@@ -1088,19 +1143,23 @@ DeliverOneTouchEvent(ClientPtr client, DeviceIntPtr dev, TouchPointInfoPtr ti,
     /* If the client does not have the ownership mask set and is not
      * the current owner of the touch, only pretend we delivered */
     if (!grab && ti->num_grabs != 0 &&
-        !TouchClientWantsOwnershipEvents(client, dev, win))
-        return TRUE;
+        !TouchClientWantsOwnershipEvents(client, dev, win)) {
+      return TRUE;
+    }
 
     /* If we fail here, we're going to leave a client hanging. */
     err = EventToXI2(ev, &xi2);
-    if (err != Success)
-        FatalError("[Xi] %s: XI2 conversion failed in %s"
-                   " (%d)\n", dev->name, __func__, err);
+    if (err != Success) {
+      FatalError("[Xi] %s: XI2 conversion failed in %s"
+                 " (%d)\n",
+                 dev->name, __func__, err);
+    }
 
     FixUpEventFromWindow(&ti->sprite, xi2, win, child, FALSE, XI2);
     filter = GetEventFilter(dev, xi2);
-    if (XaceHookReceiveAccess(client, win, xi2, 1) != Success)
-        return FALSE;
+    if (XaceHookReceiveAccess(client, win, xi2, 1) != Success) {
+      return FALSE;
+    }
     TryClientEvents(client, dev, xi2, 1, filter, filter, NullGrab);
     free(xi2);
 
@@ -1123,8 +1182,10 @@ ActivateEarlyAccept(DeviceIntPtr dev, TouchPointInfoPtr ti)
     client = dixClientForGrab(grab);
 
     if (TouchAcceptReject(client, dev, XIAcceptTouch, ti->client_id,
-                          ti->listeners[0].window->drawable.id, &error) != Success)
-        ErrorF("[Xi] Failed to accept touch grab after early acceptance.\n");
+                          ti->listeners[0].window->drawable.id,
+                          &error) != Success) {
+      ErrorF("[Xi] Failed to accept touch grab after early acceptance.\n");
+    }
 }
 
 /**
@@ -1146,24 +1207,28 @@ FindOldestPointerEmulatedTouch(DeviceIntPtr dev)
         TouchPointInfoPtr ti = dev->touch->touches + i;
         int j;
 
-        if (!ti->active || !ti->emulate_pointer)
-            continue;
+        if (!ti->active || !ti->emulate_pointer) {
+          continue;
+        }
 
         for (j = 0; j < ti->num_listeners; j++) {
-            if (ti->listeners[j].type == TOUCH_LISTENER_POINTER_GRAB ||
-                ti->listeners[j].type == TOUCH_LISTENER_POINTER_REGULAR)
-                break;
+          if (ti->listeners[j].type == TOUCH_LISTENER_POINTER_GRAB ||
+              ti->listeners[j].type == TOUCH_LISTENER_POINTER_REGULAR) {
+            break;
+          }
         }
-        if (j == ti->num_listeners)
-            continue;
+        if (j == ti->num_listeners) {
+          continue;
+        }
 
         if (!oldest) {
             oldest = ti;
             continue;
         }
 
-        if (oldest->client_id - ti->client_id < UINT_MAX / 2)
-            oldest = ti;
+        if (oldest->client_id - ti->client_id < UINT_MAX / 2) {
+          oldest = ti;
+        }
     }
 
     return oldest;
@@ -1181,18 +1246,18 @@ TouchPuntToNextOwner(DeviceIntPtr dev, TouchPointInfoPtr ti,
     int accepted_early = listener->state == TOUCH_LISTENER_EARLY_ACCEPT;
 
     /* Deliver the ownership */
-    if (listener->state == TOUCH_LISTENER_AWAITING_OWNER || accepted_early)
-        DeliverTouchEvents(dev, ti, (InternalEvent *) ev,
-                           listener->listener);
-    else if (listener->state == TOUCH_LISTENER_AWAITING_BEGIN) {
-        /* We can't punt to a pointer listener unless all older pointer
-         * emulated touches have been seen already. */
-        if ((listener->type == TOUCH_LISTENER_POINTER_GRAB ||
-             listener->type == TOUCH_LISTENER_POINTER_REGULAR) &&
-            ti != FindOldestPointerEmulatedTouch(dev))
-            return;
+    if (listener->state == TOUCH_LISTENER_AWAITING_OWNER || accepted_early) {
+      DeliverTouchEvents(dev, ti, (InternalEvent *)ev, listener->listener);
+    } else if (listener->state == TOUCH_LISTENER_AWAITING_BEGIN) {
+      /* We can't punt to a pointer listener unless all older pointer
+       * emulated touches have been seen already. */
+      if ((listener->type == TOUCH_LISTENER_POINTER_GRAB ||
+           listener->type == TOUCH_LISTENER_POINTER_REGULAR) &&
+          ti != FindOldestPointerEmulatedTouch(dev)) {
+        return;
+      }
 
-        TouchEventHistoryReplay(ti, dev, listener->listener);
+      TouchEventHistoryReplay(ti, dev, listener->listener);
     }
 
     /* New owner has Begin/Update but not end. If touch is pending_finish,
@@ -1212,8 +1277,9 @@ TouchPuntToNextOwner(DeviceIntPtr dev, TouchPointInfoPtr ti,
         }
     }
 
-    if (accepted_early)
-        ActivateEarlyAccept(dev, ti);
+    if (accepted_early) {
+      ActivateEarlyAccept(dev, ti);
+    }
 }
 
 /**
@@ -1231,8 +1297,9 @@ CheckOldestTouch(DeviceIntPtr dev)
 {
     TouchPointInfoPtr oldest = FindOldestPointerEmulatedTouch(dev);
 
-    if (oldest && oldest->listeners[0].state == TOUCH_LISTENER_AWAITING_BEGIN)
-        TouchPuntToNextOwner(dev, oldest, NULL);
+    if (oldest && oldest->listeners[0].state == TOUCH_LISTENER_AWAITING_BEGIN) {
+      TouchPuntToNextOwner(dev, oldest, NULL);
+    }
 }
 
 /**
@@ -1255,8 +1322,9 @@ TouchRejected(DeviceIntPtr sourcedev, TouchPointInfoPtr ti, XID resource,
      * haven't received one yet already */
     for (i = 0; i < ti->num_listeners; i++) {
         if (ti->listeners[i].listener == resource) {
-            if (ti->listeners[i].state != TOUCH_LISTENER_HAS_END)
-                TouchEmitTouchEnd(sourcedev, ti, TOUCH_REJECT, resource);
+          if (ti->listeners[i].state != TOUCH_LISTENER_HAS_END) {
+            TouchEmitTouchEnd(sourcedev, ti, TOUCH_REJECT, resource);
+          }
             break;
         }
     }
@@ -1267,10 +1335,11 @@ TouchRejected(DeviceIntPtr sourcedev, TouchPointInfoPtr ti, XID resource,
 
     /* If the current owner was removed and there are further listeners, deliver
      * the TouchOwnership or TouchBegin event to the new owner. */
-    if (ev && ti->num_listeners > 0 && was_owner)
-        TouchPuntToNextOwner(sourcedev, ti, ev);
-    else if (ti->num_listeners == 0)
-        TouchEndTouch(sourcedev, ti);
+    if (ev && ti->num_listeners > 0 && was_owner) {
+      TouchPuntToNextOwner(sourcedev, ti, ev);
+    } else if (ti->num_listeners == 0) {
+      TouchEndTouch(sourcedev, ti);
+    }
 
     CheckOldestTouch(sourcedev);
 }
@@ -1294,36 +1363,38 @@ ProcessTouchOwnershipEvent(TouchOwnershipEvent *ev,
         return;
     }
 
-    if (ev->reason == XIRejectTouch)
-        TouchRejected(dev, ti, ev->resource, ev);
-    else if (ev->reason == XIAcceptTouch) {
-        int i;
+    if (ev->reason == XIRejectTouch) {
+      TouchRejected(dev, ti, ev->resource, ev);
+    } else if (ev->reason == XIAcceptTouch) {
+      int i;
 
+      /* For pointer-emulated listeners that ungrabbed the active grab,
+       * the state was forced to TOUCH_LISTENER_HAS_END. Still go
+       * through the motions of ending the touch if the listener has
+       * already seen the end. This ensures that the touch record is ended in
+       * the server.
+       */
+      if (ti->listeners[0].state == TOUCH_LISTENER_HAS_END) {
+        TouchEmitTouchEnd(dev, ti, TOUCH_ACCEPT, ti->listeners[0].listener);
+      }
 
-        /* For pointer-emulated listeners that ungrabbed the active grab,
-         * the state was forced to TOUCH_LISTENER_HAS_END. Still go
-         * through the motions of ending the touch if the listener has
-         * already seen the end. This ensures that the touch record is ended in
-         * the server.
-         */
-        if (ti->listeners[0].state == TOUCH_LISTENER_HAS_END)
-            TouchEmitTouchEnd(dev, ti, TOUCH_ACCEPT, ti->listeners[0].listener);
+      /* The touch owner has accepted the touch.  Send TouchEnd events to
+       * everyone else, and truncate the list of listeners. */
+      for (i = 1; i < ti->num_listeners; i++) {
+        TouchEmitTouchEnd(dev, ti, TOUCH_ACCEPT, ti->listeners[i].listener);
+      }
 
-        /* The touch owner has accepted the touch.  Send TouchEnd events to
-         * everyone else, and truncate the list of listeners. */
-        for (i = 1; i < ti->num_listeners; i++)
-            TouchEmitTouchEnd(dev, ti, TOUCH_ACCEPT, ti->listeners[i].listener);
-
-        while (ti->num_listeners > 1)
-            TouchRemoveListener(ti, ti->listeners[1].listener);
-        /* Owner accepted after receiving end */
-        if (ti->listeners[0].state == TOUCH_LISTENER_HAS_END)
-            TouchEndTouch(dev, ti);
-        else
-            ti->listeners[0].state = TOUCH_LISTENER_HAS_ACCEPTED;
-    }
-    else {  /* this is the very first ownership event for a grab */
-        DeliverTouchEvents(dev, ti, (InternalEvent *) ev, ev->resource);
+      while (ti->num_listeners > 1) {
+        TouchRemoveListener(ti, ti->listeners[1].listener);
+      }
+      /* Owner accepted after receiving end */
+      if (ti->listeners[0].state == TOUCH_LISTENER_HAS_END) {
+        TouchEndTouch(dev, ti);
+      } else {
+        ti->listeners[0].state = TOUCH_LISTENER_HAS_ACCEPTED;
+      }
+    } else { /* this is the very first ownership event for a grab */
+      DeliverTouchEvents(dev, ti, (InternalEvent *)ev, ev->resource);
     }
 }
 
@@ -1336,9 +1407,11 @@ TouchCopyValuatorData(DeviceEvent *ev, TouchPointInfoPtr ti)
 {
     int i;
 
-    for (i = 0; i < ARRAY_SIZE(ev->valuators.data); i++)
-        if (BitIsOn(ev->valuators.mask, i))
-            valuator_mask_set_double(ti->valuators, i, ev->valuators.data[i]);
+    for (i = 0; i < ARRAY_SIZE(ev->valuators.data); i++) {
+      if (BitIsOn(ev->valuators.mask, i)) {
+        valuator_mask_set_double(ti->valuators, i, ev->valuators.data[i]);
+      }
+    }
 }
 
 /**
@@ -1379,25 +1452,28 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
         rc = dixLookupResourceByType((void **) win, listener->listener,
                                      listener->resource_type,
                                      serverClient, DixSendAccess);
-        if (rc != Success)
-            return FALSE;
+        if (rc != Success) {
+          return FALSE;
+        }
 
         if (listener->level == XI2) {
             int evtype;
 
             if (ti->emulate_pointer &&
-                listener->type == TOUCH_LISTENER_POINTER_REGULAR)
-                evtype = GetXI2Type(TouchGetPointerEventType(ev));
-            else
-                evtype = GetXI2Type(ev->any.type);
+                listener->type == TOUCH_LISTENER_POINTER_REGULAR) {
+              evtype = GetXI2Type(TouchGetPointerEventType(ev));
+            } else {
+              evtype = GetXI2Type(ev->any.type);
+            }
 
             assert(wOtherInputMasks(*win));
 
             InputClients *iclients = NULL;
-            nt_list_for_each_entry(iclients,
-                                   wOtherInputMasks(*win)->inputClients, next)
-                if (xi2mask_isset(iclients->xi2mask, dev, evtype))
-                break;
+            nt_list_for_each_entry(
+                iclients, wOtherInputMasks(*win)->inputClients,
+                next) if (xi2mask_isset(iclients->xi2mask, dev, evtype)) {
+              break;
+            }
 
             BUG_RETURN_VAL(!iclients, FALSE);
 
@@ -1411,10 +1487,11 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
             assert(wOtherInputMasks(*win));
 
             InputClients *iclients = NULL;
-            nt_list_for_each_entry(iclients,
-                                   wOtherInputMasks(*win)->inputClients, next)
-                if (iclients->mask[dev->id] & xi_filter)
-                break;
+            nt_list_for_each_entry(
+                iclients, wOtherInputMasks(*win)->inputClients,
+                next) if (iclients->mask[dev->id] & xi_filter) {
+              break;
+            }
             BUG_RETURN_VAL(!iclients, FALSE);
 
             *client = dixClientForInputClients(iclients);
@@ -1426,9 +1503,10 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
 
             /* all others */
             nt_list_for_each_entry(oclients,
-                                   (OtherClients *) wOtherClients(*win), next)
-                if (oclients->mask & core_filter)
-                    break;
+                                   (OtherClients *)wOtherClients(*win),
+                                   next) if (oclients->mask & core_filter) {
+              break;
+            }
 
             /* if owner selected, oclients is NULL */
             *client = oclients ? dixClientForOtherClients(oclients) : dixClientForWindow(*win);
@@ -1453,15 +1531,19 @@ DeliverTouchEmulatedEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
     /* There may be a pointer grab on the device */
     if (!grab) {
         grab = dev->deviceGrab.grab;
-        if (grab) win = grab->window;
+        if (grab) {
+          win = grab->window;
+        }
     }
 
     /* We don't deliver pointer events to non-owners */
-    if (!TouchResourceIsOwner(ti, listener->listener))
-        return !Success;
+    if (!TouchResourceIsOwner(ti, listener->listener)) {
+      return !Success;
+    }
 
-    if (!ti->emulate_pointer)
-        return !Success;
+    if (!ti->emulate_pointer) {
+      return !Success;
+    }
 
     nevents = TouchConvertToPointerEvent(ev, &motion, &button);
     BUG_RETURN_VAL(nevents == 0, BadValue);
@@ -1472,8 +1554,9 @@ DeliverTouchEmulatedEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
      * TouchUpdate results in Motion
      * TouchEnd results in ButtonRelease (motion is handled in DeliverEmulatedMotionEvent)
      */
-    if (nevents > 1)
-        ptrev = &button;
+    if (nevents > 1) {
+      ptrev = &button;
+    }
 
     kbd = GetMaster(dev, KEYBOARD_OR_FLOAT);
     event_set_state(dev, kbd, &ptrev->device_event);
@@ -1481,40 +1564,44 @@ DeliverTouchEmulatedEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
 
     if (grab) {
         /* this side-steps the usual activation mechanisms, but... */
-        if (ev->any.type == ET_TouchBegin && !dev->deviceGrab.grab)
-            ActivatePassiveGrab(dev, grab, ptrev, ev);  /* also delivers the event */
-        else {
-            int deliveries = 0;
+        if (ev->any.type == ET_TouchBegin && !dev->deviceGrab.grab) {
+          ActivatePassiveGrab(dev, grab, ptrev,
+                              ev); /* also delivers the event */
+        } else {
+          int deliveries = 0;
 
-            /* 'grab' is the passive grab, but if the grab isn't active,
-             * don't deliver */
-            if (!dev->deviceGrab.grab)
-                return !Success;
+          /* 'grab' is the passive grab, but if the grab isn't active,
+           * don't deliver */
+          if (!dev->deviceGrab.grab) {
+            return !Success;
+          }
 
-            if (grab->ownerEvents) {
-                WindowPtr focus = NullWindow;
-                WindowPtr sprite_win = DeepestSpriteWin(dev->spriteInfo->sprite);
+          if (grab->ownerEvents) {
+            WindowPtr focus = NullWindow;
+            WindowPtr sprite_win = DeepestSpriteWin(dev->spriteInfo->sprite);
 
-                deliveries = DeliverDeviceEvents(sprite_win, ptrev, grab, focus, dev);
-            }
+            deliveries =
+                DeliverDeviceEvents(sprite_win, ptrev, grab, focus, dev);
+          }
 
-            if (!deliveries)
-                deliveries = DeliverOneGrabbedEvent(ptrev, dev, grab->grabtype);
+          if (!deliveries) {
+            deliveries = DeliverOneGrabbedEvent(ptrev, dev, grab->grabtype);
+          }
 
-            /* We must accept the touch sequence once a pointer listener has
-             * received one event past ButtonPress. */
-            if (deliveries && ev->any.type != ET_TouchBegin &&
-                !(ev->device_event.flags & TOUCH_CLIENT_ID))
-                TouchListenerAcceptReject(dev, ti, 0, XIAcceptTouch);
+          /* We must accept the touch sequence once a pointer listener has
+           * received one event past ButtonPress. */
+          if (deliveries && ev->any.type != ET_TouchBegin &&
+              !(ev->device_event.flags & TOUCH_CLIENT_ID)) {
+            TouchListenerAcceptReject(dev, ti, 0, XIAcceptTouch);
+          }
 
-            if (ev->any.type == ET_TouchEnd &&
-                ti->num_listeners == 1 &&
-                !dev->button->buttonsDown &&
-                dev->deviceGrab.fromPassiveGrab && GrabIsPointerGrab(grab)) {
-                (*dev->deviceGrab.DeactivateGrab) (dev);
-                CheckOldestTouch(dev);
-                return Success;
-            }
+          if (ev->any.type == ET_TouchEnd && ti->num_listeners == 1 &&
+              !dev->button->buttonsDown && dev->deviceGrab.fromPassiveGrab &&
+              GrabIsPointerGrab(grab)) {
+            (*dev->deviceGrab.DeactivateGrab)(dev);
+            CheckOldestTouch(dev);
+            return Success;
+          }
         }
     }
     else {
@@ -1545,17 +1632,19 @@ DeliverTouchEmulatedEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
             l->grab = g;
             //l->resource_type = X11_RESTYPE_NONE;
 
-            if (devgrab->grabtype != XI2 || devgrab->type != XI_TouchBegin)
-                l->type = TOUCH_LISTENER_POINTER_GRAB;
-            else
-                l->type = TOUCH_LISTENER_GRAB;
+            if (devgrab->grabtype != XI2 || devgrab->type != XI_TouchBegin) {
+              l->type = TOUCH_LISTENER_POINTER_GRAB;
+            } else {
+              l->type = TOUCH_LISTENER_GRAB;
+            }
         }
 
     }
-    if (ev->any.type == ET_TouchBegin)
-        listener->state = TOUCH_LISTENER_IS_OWNER;
-    else if (ev->any.type == ET_TouchEnd)
-        listener->state = TOUCH_LISTENER_HAS_END;
+    if (ev->any.type == ET_TouchBegin) {
+      listener->state = TOUCH_LISTENER_IS_OWNER;
+    } else if (ev->any.type == ET_TouchEnd) {
+      listener->state = TOUCH_LISTENER_HAS_END;
+    }
 
     return Success;
 }
@@ -1573,17 +1662,18 @@ DeliverEmulatedMotionEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
         XI2Mask *mask;
 
         if (ti->listeners[0].type != TOUCH_LISTENER_POINTER_REGULAR &&
-            ti->listeners[0].type != TOUCH_LISTENER_POINTER_GRAB)
-            return;
+            ti->listeners[0].type != TOUCH_LISTENER_POINTER_GRAB) {
+          return;
+        }
 
         motion.device_event = ev->device_event;
         motion.device_event.type = ET_TouchUpdate;
         motion.device_event.detail.button = 0;
 
-        if (!RetrieveTouchDeliveryData(dev, ti, &motion,
-                                       &ti->listeners[0], &client, &win, &grab,
-                                       &mask))
-            return;
+        if (!RetrieveTouchDeliveryData(dev, ti, &motion, &ti->listeners[0],
+                                       &client, &win, &grab, &mask)) {
+          return;
+        }
 
         DeliverTouchEmulatedEvent(dev, ti, &motion, &ti->listeners[0], win, grab);
     }
@@ -1594,8 +1684,9 @@ DeliverEmulatedMotionEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
         converted = TouchConvertToPointerEvent(ev, &motion, &button);
 
         BUG_WARN(converted == 0);
-        if (converted)
-            ProcessOtherEvent(&motion, dev);
+        if (converted) {
+          ProcessOtherEvent(&motion, dev);
+        }
     }
 }
 
@@ -1617,17 +1708,18 @@ ProcessTouchEvent(InternalEvent *ev, DeviceIntPtr dev)
     int emulate_pointer = ! !(ev->device_event.flags & TOUCH_POINTER_EMULATED);
     DeviceIntPtr kbd;
 
-    if (!t)
-        return;
+    if (!t) {
+      return;
+    }
 
     touchid = ev->device_event.touchid;
 
     if (type == ET_TouchBegin && !(ev->device_event.flags & TOUCH_REPLAYING)) {
         ti = TouchBeginTouch(dev, ev->device_event.sourceid, touchid,
                              emulate_pointer);
+    } else {
+      ti = TouchFindByClientID(dev, touchid);
     }
-    else
-        ti = TouchFindByClientID(dev, touchid);
 
     /* Active pointer grab */
     if (emulate_pointer && dev->deviceGrab.grab && !dev->deviceGrab.fromPassiveGrab &&
@@ -1639,30 +1731,30 @@ ProcessTouchEvent(InternalEvent *ev, DeviceIntPtr dev)
          * touchpoint accepted, otherwise clients waiting for ownership will
          * wait on this touchpoint until this client ungrabs, or the cows come
          * home, whichever is earlier */
-        if (ti && type == ET_TouchEnd)
-            TouchListenerAcceptReject(dev, ti, 0, XIAcceptTouch);
-        else if (!ti && type != ET_TouchBegin) {
-            /* Under the following circumstances we create a new touch record for an
-             * existing touch:
-             *
-             * - The touch may be pointer emulated
-             * - An explicit grab is active on the device
-             * - The grab is a pointer grab
-             *
-             * This allows for an explicit grab to receive pointer events for an already
-             * active touch.
-             */
-            ti = TouchBeginTouch(dev, ev->device_event.sourceid, touchid,
-                                 emulate_pointer);
-            if (!ti) {
-                DebugF("[Xi] %s: Failed to create new dix record for explicitly "
-                       "grabbed touchpoint %d\n",
-                       dev->name, touchid);
-                return;
-            }
+        if (ti && type == ET_TouchEnd) {
+          TouchListenerAcceptReject(dev, ti, 0, XIAcceptTouch);
+        } else if (!ti && type != ET_TouchBegin) {
+          /* Under the following circumstances we create a new touch record for
+           * an existing touch:
+           *
+           * - The touch may be pointer emulated
+           * - An explicit grab is active on the device
+           * - The grab is a pointer grab
+           *
+           * This allows for an explicit grab to receive pointer events for an
+           * already active touch.
+           */
+          ti = TouchBeginTouch(dev, ev->device_event.sourceid, touchid,
+                               emulate_pointer);
+          if (!ti) {
+            DebugF("[Xi] %s: Failed to create new dix record for explicitly "
+                   "grabbed touchpoint %d\n",
+                   dev->name, touchid);
+            return;
+          }
 
-            TouchBuildSprite(dev, ti, ev);
-            TouchSetupListeners(dev, ti, ev);
+          TouchBuildSprite(dev, ti, ev);
+          TouchSetupListeners(dev, ti, ev);
         }
     }
 
@@ -1675,12 +1767,15 @@ ProcessTouchEvent(InternalEvent *ev, DeviceIntPtr dev)
     /* if emulate_pointer is set, emulate the motion event right
      * here, so we can ignore it for button event emulation. TouchUpdate
      * events which _only_ emulate motion just work normally */
-    if (emulate_pointer && (ev->any.type == ET_TouchBegin ||
-                           (ev->any.type == ET_TouchEnd && ti->num_listeners > 0)))
-        DeliverEmulatedMotionEvent(dev, ti, ev);
+    if (emulate_pointer &&
+        (ev->any.type == ET_TouchBegin ||
+         (ev->any.type == ET_TouchEnd && ti->num_listeners > 0))) {
+      DeliverEmulatedMotionEvent(dev, ti, ev);
+    }
 
-    if (emulate_pointer && InputDevIsMaster(dev))
-        CheckMotion(&ev->device_event, dev);
+    if (emulate_pointer && InputDevIsMaster(dev)) {
+      CheckMotion(&ev->device_event, dev);
+    }
 
     kbd = GetMaster(dev, KEYBOARD_OR_FLOAT);
     event_set_state(NULL, kbd, &ev->device_event);
@@ -1690,23 +1785,25 @@ ProcessTouchEvent(InternalEvent *ev, DeviceIntPtr dev)
      * called after event type mutation. Touch end events are always processed
      * in order to end touch records. */
     /* FIXME: check this */
-    if ((type == ET_TouchBegin &&
-         !(ev->device_event.flags & TOUCH_REPLAYING) &&
+    if ((type == ET_TouchBegin && !(ev->device_event.flags & TOUCH_REPLAYING) &&
          !TouchBuildSprite(dev, ti, ev)) ||
-        (type != ET_TouchEnd && ti->sprite.spriteTraceGood == 0))
-        return;
+        (type != ET_TouchEnd && ti->sprite.spriteTraceGood == 0)) {
+      return;
+    }
 
     TouchCopyValuatorData(&ev->device_event, ti);
     /* WARNING: the event type may change to TouchUpdate in
      * DeliverTouchEvents if a TouchEnd was delivered to a grabbing
      * owner */
     DeliverTouchEvents(dev, ti, ev, ev->device_event.resource);
-    if (ev->any.type == ET_TouchEnd)
-        TouchEndTouch(dev, ti);
+    if (ev->any.type == ET_TouchEnd) {
+      TouchEndTouch(dev, ti);
+    }
 
  out:
-    if (emulate_pointer)
-        UpdateDeviceState(dev, &ev->device_event);
+   if (emulate_pointer) {
+     UpdateDeviceState(dev, &ev->device_event);
+   }
 }
 
 static void
@@ -1719,14 +1816,18 @@ ProcessBarrierEvent(InternalEvent *e, DeviceIntPtr dev)
     int rc;
     GrabPtr grab = dev->deviceGrab.grab;
 
-    if (!InputDevIsMaster(dev))
-        return;
+    if (!InputDevIsMaster(dev)) {
+      return;
+    }
 
-    if (dixLookupWindow(&pWin, be->window, serverClient, DixReadAccess) != Success)
-        return;
+    if (dixLookupWindow(&pWin, be->window, serverClient, DixReadAccess) !=
+        Success) {
+      return;
+    }
 
-    if (grab)
-        be->flags |= XIBarrierDeviceIsGrabbed;
+    if (grab) {
+      be->flags |= XIBarrierDeviceIsGrabbed;
+    }
 
     rc = EventToXI2(e, &ev);
     if (rc != Success) {
@@ -1777,16 +1878,19 @@ ProcessGestureEvent(InternalEvent *ev, DeviceIntPtr dev)
     Bool deactivateGestureGrab = FALSE;
     Bool delivered = FALSE;
 
-    if (!dev->gesture)
-        return;
+    if (!dev->gesture) {
+      return;
+    }
 
-    if (InputDevIsMaster(dev) && IsAnotherGestureActiveOnMaster(dev, ev))
-        return;
+    if (InputDevIsMaster(dev) && IsAnotherGestureActiveOnMaster(dev, ev)) {
+      return;
+    }
 
-    if (IsGestureBeginEvent(ev))
-        gi = GestureBeginGesture(dev, ev);
-    else
-        gi = GestureFindActiveByEventType(dev, ev->any.type);
+    if (IsGestureBeginEvent(ev)) {
+      gi = GestureBeginGesture(dev, ev);
+    } else {
+      gi = GestureFindActiveByEventType(dev, ev->any.type);
+    }
 
     if (!gi) {
         /* This may happen if gesture is no longer active or was never started. */
@@ -1796,26 +1900,30 @@ ProcessGestureEvent(InternalEvent *ev, DeviceIntPtr dev)
     kbd = GetMaster(dev, KEYBOARD_OR_FLOAT);
     event_set_state_gesture(kbd, &ev->gesture_event);
 
-    if (IsGestureBeginEvent(ev))
-        GestureSetupListener(dev, gi, ev);
+    if (IsGestureBeginEvent(ev)) {
+      GestureSetupListener(dev, gi, ev);
+    }
 
-    if (IsGestureEndEvent(ev) &&
-            dev->deviceGrab.grab &&
-            dev->deviceGrab.fromPassiveGrab &&
-            GrabIsGestureGrab(dev->deviceGrab.grab))
-        deactivateGestureGrab = TRUE;
+    if (IsGestureEndEvent(ev) && dev->deviceGrab.grab &&
+        dev->deviceGrab.fromPassiveGrab &&
+        GrabIsGestureGrab(dev->deviceGrab.grab)) {
+      deactivateGestureGrab = TRUE;
+    }
 
     delivered = DeliverGestureEventToOwner(dev, gi, ev);
 
     if (delivered && !deactivateGestureGrab &&
-            (IsGestureBeginEvent(ev) || IsGestureEndEvent(ev)))
-        FreezeThisEventIfNeededForSyncGrab(dev, ev);
+        (IsGestureBeginEvent(ev) || IsGestureEndEvent(ev))) {
+      FreezeThisEventIfNeededForSyncGrab(dev, ev);
+    }
 
-    if (IsGestureEndEvent(ev))
-        GestureEndGesture(gi);
+    if (IsGestureEndEvent(ev)) {
+      GestureEndGesture(gi);
+    }
 
-    if (deactivateGestureGrab)
-        (*dev->deviceGrab.DeactivateGrab) (dev);
+    if (deactivateGestureGrab) {
+      (*dev->deviceGrab.DeactivateGrab)(dev);
+    }
 }
 
 /**
@@ -1836,27 +1944,31 @@ ProcessDeviceEvent(InternalEvent *ev, DeviceIntPtr device)
     if (IsPointerDevice(device)) {
         kbd = GetMaster(device, KEYBOARD_OR_FLOAT);
         mouse = device;
-        if (!kbd->key)          /* can happen with floating SDs */
-            kbd = NULL;
+        if (!kbd->key) { /* can happen with floating SDs */
+          kbd = NULL;
+        }
     }
     else {
         mouse = GetMaster(device, POINTER_OR_FLOAT);
         kbd = device;
-        if (!mouse->valuator || !mouse->button) /* may be float. SDs */
-            mouse = NULL;
+        if (!mouse->valuator || !mouse->button) { /* may be float. SDs */
+          mouse = NULL;
+        }
     }
 
     corestate = event_get_corestate(mouse, kbd);
     event_set_state(mouse, kbd, event);
 
     ret = UpdateDeviceState(device, event);
-    if (ret == DONT_PROCESS)
-        return;
+    if (ret == DONT_PROCESS) {
+      return;
+    }
 
     b = device->button;
 
-    if (InputDevIsMaster(device) || InputDevIsFloating(device))
-        CheckMotion(event, device);
+    if (InputDevIsMaster(device) || InputDevIsFloating(device)) {
+      CheckMotion(event, device);
+    }
 
     switch (event->type) {
     case ET_Motion:
@@ -1882,8 +1994,9 @@ ProcessDeviceEvent(InternalEvent *ev, DeviceIntPtr device)
         SpritePtr pSprite = device->spriteInfo->sprite;
 
         /* see comment in EnqueueEvents regarding the next three lines */
-        if (ev->any.type == ET_Motion)
-            ev->device_event.root = pSprite->hotPhys.pScreen->root->drawable.id;
+        if (ev->any.type == ET_Motion) {
+          ev->device_event.root = pSprite->hotPhys.pScreen->root->drawable.id;
+        }
 
         eventinfo.device = device;
         eventinfo.event = ev;
@@ -1896,20 +2009,24 @@ ProcessDeviceEvent(InternalEvent *ev, DeviceIntPtr device)
     case ET_KeyPress:
         /* Don't deliver focus events (e.g. from KeymapNotify when running
          * nested) to clients. */
-        if (event->source_type == EVENT_SOURCE_FOCUS)
-            return;
-        if (!grab && CheckDeviceGrabs(device, ev, 0))
-            return;
+        if (event->source_type == EVENT_SOURCE_FOCUS) {
+          return;
+        }
+        if (!grab && CheckDeviceGrabs(device, ev, 0)) {
+          return;
+        }
         break;
     case ET_KeyRelease:
-        if (grab && device->deviceGrab.fromPassiveGrab &&
-            (key == device->deviceGrab.activatingKey) &&
-            GrabIsKeyboardGrab(device->deviceGrab.grab))
-            deactivateDeviceGrab = TRUE;
+      if (grab && device->deviceGrab.fromPassiveGrab &&
+          (key == device->deviceGrab.activatingKey) &&
+          GrabIsKeyboardGrab(device->deviceGrab.grab)) {
+        deactivateDeviceGrab = TRUE;
+      }
         break;
     case ET_ButtonPress:
-        if (b->map[key] == 0)   /* there's no button 0 */
-            return;
+      if (b->map[key] == 0) { /* there's no button 0 */
+        return;
+      }
         event->detail.button = b->map[key];
         if (!grab && CheckDeviceGrabs(device, ev, 0)) {
             /* if a passive grab was activated, the event has been sent
@@ -1918,13 +2035,14 @@ ProcessDeviceEvent(InternalEvent *ev, DeviceIntPtr device)
         }
         break;
     case ET_ButtonRelease:
-        if (b->map[key] == 0)   /* there's no button 0 */
-            return;
+      if (b->map[key] == 0) { /* there's no button 0 */
+        return;
+      }
         event->detail.button = b->map[key];
-        if (grab && !b->buttonsDown &&
-            device->deviceGrab.fromPassiveGrab &&
-            GrabIsPointerGrab(device->deviceGrab.grab))
-            deactivateDeviceGrab = TRUE;
+        if (grab && !b->buttonsDown && device->deviceGrab.fromPassiveGrab &&
+            GrabIsPointerGrab(device->deviceGrab.grab)) {
+          deactivateDeviceGrab = TRUE;
+        }
     default:
         break;
     }
@@ -1932,15 +2050,17 @@ ProcessDeviceEvent(InternalEvent *ev, DeviceIntPtr device)
     /* Don't deliver focus events (e.g. from KeymapNotify when running
      * nested) to clients. */
     if (event->source_type != EVENT_SOURCE_FOCUS) {
-        if (grab)
-            DeliverGrabbedEvent((InternalEvent *) event, device,
-                                deactivateDeviceGrab);
-        else if (device->focus && !IsPointerEvent(ev))
-            DeliverFocusedEvent(device, (InternalEvent *) event,
-                                InputDevSpriteWindow(device));
-        else
-            DeliverDeviceEvents(InputDevSpriteWindow(device), (InternalEvent *) event,
-                                NullGrab, NullWindow, device);
+      if (grab) {
+        DeliverGrabbedEvent((InternalEvent *)event, device,
+                            deactivateDeviceGrab);
+      } else if (device->focus && !IsPointerEvent(ev)) {
+        DeliverFocusedEvent(device, (InternalEvent *)event,
+                            InputDevSpriteWindow(device));
+      } else {
+        DeliverDeviceEvents(InputDevSpriteWindow(device),
+                            (InternalEvent *)event, NullGrab, NullWindow,
+                            device);
+      }
     }
 
     if (deactivateDeviceGrab == TRUE) {
@@ -1955,9 +2075,10 @@ ProcessDeviceEvent(InternalEvent *ev, DeviceIntPtr device)
             UpdateFromMaster (&dce, device, flags, &num_events);
             BUG_WARN(num_events > 1);
 
-            if (num_events == 1)
-                ChangeMasterDeviceClasses(GetMaster (device, MASTER_ATTACHED),
-                                          &dce.changed_event);
+            if (num_events == 1) {
+              ChangeMasterDeviceClasses(GetMaster(device, MASTER_ATTACHED),
+                                        &dce.changed_event);
+            }
         }
 
     }
@@ -2031,32 +2152,36 @@ DeliverTouchBeginEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
             listener->state = TOUCH_LISTENER_IS_OWNER;
             /* async grabs cannot replay, so automatically accept this touch */
             if (listener->type == TOUCH_LISTENER_POINTER_GRAB &&
-                dev->deviceGrab.grab &&
-                dev->deviceGrab.fromPassiveGrab &&
-                dev->deviceGrab.grab->pointerMode == GrabModeAsync)
-                ActivateEarlyAccept(dev, ti);
+                dev->deviceGrab.grab && dev->deviceGrab.fromPassiveGrab &&
+                dev->deviceGrab.grab->pointerMode == GrabModeAsync) {
+              ActivateEarlyAccept(dev, ti);
+            }
         }
         goto out;
     }
 
     has_ownershipmask = xi2mask_isset(xi2mask, dev, XI_TouchOwnership);
 
-    if (TouchResourceIsOwner(ti, listener->listener) || has_ownershipmask)
-        rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
+    if (TouchResourceIsOwner(ti, listener->listener) || has_ownershipmask) {
+      rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
+    }
     if (!TouchResourceIsOwner(ti, listener->listener)) {
-        if (has_ownershipmask)
-            state = TOUCH_LISTENER_AWAITING_OWNER;
-        else
-            state = TOUCH_LISTENER_AWAITING_BEGIN;
+      if (has_ownershipmask) {
+        state = TOUCH_LISTENER_AWAITING_OWNER;
+      } else {
+        state = TOUCH_LISTENER_AWAITING_BEGIN;
+      }
     }
     else {
-        if (has_ownershipmask)
-            TouchSendOwnershipEvent(dev, ti, 0, listener->listener);
+      if (has_ownershipmask) {
+        TouchSendOwnershipEvent(dev, ti, 0, listener->listener);
+      }
 
-        if (listener->type == TOUCH_LISTENER_REGULAR)
-            state = TOUCH_LISTENER_HAS_ACCEPTED;
-        else
-            state = TOUCH_LISTENER_IS_OWNER;
+      if (listener->type == TOUCH_LISTENER_REGULAR) {
+        state = TOUCH_LISTENER_HAS_ACCEPTED;
+      } else {
+        state = TOUCH_LISTENER_IS_OWNER;
+      }
     }
     listener->state = state;
 
@@ -2086,8 +2211,9 @@ DeliverTouchEndEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, InternalEvent *ev,
               * GrabModeSync + replay. This listener now gets the end event,
               * and we can continue.
               */
-            if (rc == Success)
-                listener->state = TOUCH_LISTENER_HAS_END;
+            if (rc == Success) {
+              listener->state = TOUCH_LISTENER_HAS_END;
+            }
         }
         goto out;
     }
@@ -2102,16 +2228,18 @@ DeliverTouchEndEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, InternalEvent *ev,
     if (ev->device_event.flags & TOUCH_REJECT ||
         (ev->device_event.flags & TOUCH_ACCEPT && !TouchResourceIsOwner(ti, listener->listener))) {
         /* Touch has been rejected, or accepted by its owner which is not this listener */
-        if (listener->state != TOUCH_LISTENER_HAS_END)
-            rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
+        if (listener->state != TOUCH_LISTENER_HAS_END) {
+          rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
+        }
         listener->state = TOUCH_LISTENER_HAS_END;
     }
     else if (TouchResourceIsOwner(ti, listener->listener)) {
         Bool normal_end = !(ev->device_event.flags & TOUCH_ACCEPT);
 
         /* FIXME: what about early acceptance */
-        if (normal_end && listener->state != TOUCH_LISTENER_HAS_END)
-            rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
+        if (normal_end && listener->state != TOUCH_LISTENER_HAS_END) {
+          rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
+        }
 
         if ((ti->num_listeners > 1 ||
              (ti->num_grabs > 0 && listener->state != TOUCH_LISTENER_HAS_ACCEPTED)) &&
@@ -2121,8 +2249,9 @@ DeliverTouchEndEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, InternalEvent *ev,
             ti->pending_finish = TRUE;
         }
 
-        if (normal_end)
-            listener->state = TOUCH_LISTENER_HAS_END;
+        if (normal_end) {
+          listener->state = TOUCH_LISTENER_HAS_END;
+        }
     }
 
  out:
@@ -2137,34 +2266,37 @@ DeliverTouchEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, InternalEvent *ev,
     Bool has_ownershipmask = FALSE;
     int rc = Success;
 
-    if (xi2mask)
-        has_ownershipmask = xi2mask_isset(xi2mask, dev, XI_TouchOwnership);
+    if (xi2mask) {
+      has_ownershipmask = xi2mask_isset(xi2mask, dev, XI_TouchOwnership);
+    }
 
     if (ev->any.type == ET_TouchOwnership) {
         ev->touch_ownership_event.deviceid = dev->id;
-        if (!TouchResourceIsOwner(ti, listener->listener))
-            goto out;
+        if (!TouchResourceIsOwner(ti, listener->listener)) {
+          goto out;
+        }
         rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
         listener->state = TOUCH_LISTENER_IS_OWNER;
+    } else {
+      ev->device_event.deviceid = dev->id;
     }
-    else
-        ev->device_event.deviceid = dev->id;
 
     if (ev->any.type == ET_TouchBegin) {
         rc = DeliverTouchBeginEvent(dev, ti, ev, listener, client, win, grab,
                                     xi2mask);
     }
     else if (ev->any.type == ET_TouchUpdate) {
-        if (listener->type == TOUCH_LISTENER_POINTER_REGULAR ||
-            listener->type == TOUCH_LISTENER_POINTER_GRAB)
-            DeliverTouchEmulatedEvent(dev, ti, ev, listener, win, grab);
-        else if (TouchResourceIsOwner(ti, listener->listener) ||
-                 has_ownershipmask)
-            rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
+      if (listener->type == TOUCH_LISTENER_POINTER_REGULAR ||
+          listener->type == TOUCH_LISTENER_POINTER_GRAB) {
+        DeliverTouchEmulatedEvent(dev, ti, ev, listener, win, grab);
+      } else if (TouchResourceIsOwner(ti, listener->listener) ||
+                 has_ownershipmask) {
+        rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
+      }
+    } else if (ev->any.type == ET_TouchEnd) {
+      rc = DeliverTouchEndEvent(dev, ti, ev, listener, client, win, grab,
+                                xi2mask);
     }
-    else if (ev->any.type == ET_TouchEnd)
-        rc = DeliverTouchEndEvent(dev, ti, ev, listener, client, win, grab,
-                                  xi2mask);
 
  out:
     return rc;
@@ -2186,8 +2318,9 @@ DeliverTouchEvents(DeviceIntPtr dev, TouchPointInfoPtr ti,
     int i;
 
     if (ev->any.type == ET_TouchBegin &&
-        !(ev->device_event.flags & (TOUCH_CLIENT_ID | TOUCH_REPLAYING)))
-        TouchSetupListeners(dev, ti, ev);
+        !(ev->device_event.flags & (TOUCH_CLIENT_ID | TOUCH_REPLAYING))) {
+      TouchSetupListeners(dev, ti, ev);
+    }
 
     TouchEventHistoryPush(ti, &ev->device_event);
 
@@ -2198,12 +2331,14 @@ DeliverTouchEvents(DeviceIntPtr dev, TouchPointInfoPtr ti,
         XI2Mask *mask;
         TouchListener *listener = &ti->listeners[i];
 
-        if (resource && listener->listener != resource)
-            continue;
+        if (resource && listener->listener != resource) {
+          continue;
+        }
 
         if (!RetrieveTouchDeliveryData(dev, ti, ev, listener, &client, &win,
-                                       &grab, &mask))
-            continue;
+                                       &grab, &mask)) {
+          continue;
+        }
 
         DeliverTouchEvent(dev, ti, ev, listener, client, win, grab, mask);
     }
@@ -2223,14 +2358,17 @@ DeliverOneGestureEvent(ClientPtr client, DeviceIntPtr dev, GestureInfoPtr gi,
 
     /* If we fail here, we're going to leave a client hanging. */
     err = EventToXI2(ev, &xi2);
-    if (err != Success)
-        FatalError("[Xi] %s: XI2 conversion failed in %s"
-                   " (%d)\n", dev->name, __func__, err);
+    if (err != Success) {
+      FatalError("[Xi] %s: XI2 conversion failed in %s"
+                 " (%d)\n",
+                 dev->name, __func__, err);
+    }
 
     FixUpEventFromWindow(&gi->sprite, xi2, win, child, FALSE, XI2);
     filter = GetEventFilter(dev, xi2);
-    if (XaceHookReceiveAccess(client, win, xi2, 1) != Success)
-        return FALSE;
+    if (XaceHookReceiveAccess(client, win, xi2, 1) != Success) {
+      return FALSE;
+    }
     TryClientEvents(client, dev, xi2, 1, filter, filter, NullGrab);
     free(xi2);
 
@@ -2272,17 +2410,20 @@ RetrieveGestureDeliveryData(DeviceIntPtr dev, InternalEvent *ev, GestureListener
     else {
         rc = dixLookupResourceByType((void **) win, listener->listener, listener->resource_type,
                                      serverClient, DixSendAccess);
-        if (rc != Success)
-            return FALSE;
+        if (rc != Success) {
+          return FALSE;
+        }
 
         /* note that we only will have XI2 listeners as
            listener->type == GESTURE_LISTENER_REGULAR */
         evtype = GetXI2Type(ev->any.type);
 
         assert(wOtherInputMasks(*win));
-        nt_list_for_each_entry(iclients, wOtherInputMasks(*win)->inputClients, next)
-            if (xi2mask_isset(iclients->xi2mask, dev, evtype))
-                break;
+        nt_list_for_each_entry(
+            iclients, wOtherInputMasks(*win)->inputClients,
+            next) if (xi2mask_isset(iclients->xi2mask, dev, evtype)) {
+          break;
+        }
 
         BUG_RETURN_VAL(!iclients, FALSE);
 
@@ -2307,8 +2448,10 @@ DeliverGestureEventToOwner(DeviceIntPtr dev, GestureInfoPtr gi, InternalEvent *e
         return 0;
     }
 
-    if (!RetrieveGestureDeliveryData(dev, ev, &gi->listener, &client, &win, &grab))
-        return 0;
+    if (!RetrieveGestureDeliveryData(dev, ev, &gi->listener, &client, &win,
+                                     &grab)) {
+      return 0;
+    }
 
     ev->gesture_event.deviceid = dev->id;
 
@@ -2322,8 +2465,9 @@ InitProximityClassDeviceStruct(DeviceIntPtr dev)
     BUG_RETURN_VAL(dev->proximity != NULL, FALSE);
 
     ProximityClassPtr proxc = calloc(1, sizeof(ProximityClassRec));
-    if (!proxc)
-        return FALSE;
+    if (!proxc) {
+      return FALSE;
+    }
     proxc->sourceid = dev->id;
     proxc->in_proximity = TRUE;
     dev->proximity = proxc;
@@ -2361,8 +2505,9 @@ InitValuatorAxisStruct(DeviceIntPtr dev, int axnum, Atom label, int minval,
     ax->label = label;
     ax->mode = mode;
 
-    if (mode & OutOfProximity)
-        dev->proximity->in_proximity = FALSE;
+    if (mode & OutOfProximity) {
+      dev->proximity->in_proximity = FALSE;
+    }
 
     return SetScrollValuator(dev, axnum, SCROLL_TYPE_NONE, 0, SCROLL_FLAG_NONE);
 }
@@ -2398,15 +2543,16 @@ SetScrollValuator(DeviceIntPtr dev, int axnum, enum ScrollType type,
         return FALSE;
     }
 
-    if (increment == 0.0)
-        return FALSE;
+    if (increment == 0.0) {
+      return FALSE;
+    }
 
     if (*current_ax != -1 && axnum != *current_ax) {
         ax = &dev->valuator->axes[*current_ax];
-        if (ax->scroll.type == type &&
-            (flags & SCROLL_FLAG_PREFERRED) &&
-            (ax->scroll.flags & SCROLL_FLAG_PREFERRED))
-            return FALSE;
+        if (ax->scroll.type == type && (flags & SCROLL_FLAG_PREFERRED) &&
+            (ax->scroll.flags & SCROLL_FLAG_PREFERRED)) {
+          return FALSE;
+        }
     }
     *current_ax = axnum;
 
@@ -2424,8 +2570,9 @@ SetScrollValuator(DeviceIntPtr dev, int axnum, enum ScrollType type,
     /* if the current slave is us, update the master. If not, we'll update
      * whenever the next slave switch happens anyway. CMDC sends the event
      * for us */
-    if (master && master->lastSlave == dev)
-        ChangeMasterDeviceClasses(master, &dce.changed_event);
+    if (master && master->lastSlave == dev) {
+      ChangeMasterDeviceClasses(master, &dce.changed_event);
+    }
 
     return TRUE;
 }
@@ -2478,46 +2625,53 @@ GrabButton(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
     Mask access_mode = DixGrabAccess;
 
     rc = CheckGrabValues(client, param);
-    if (rc != Success)
-        return rc;
-    if (param->confineTo == None)
-        confineTo = NullWindow;
-    else {
-        rc = dixLookupWindow(&confineTo, param->confineTo, client,
-                             DixSetAttrAccess);
-        if (rc != Success)
-            return rc;
+    if (rc != Success) {
+      return rc;
     }
-    if (param->cursor == None)
-        cursor = NullCursor;
-    else {
-        rc = dixLookupResourceByType((void **) &cursor, param->cursor,
-                                     X11_RESTYPE_CURSOR, client, DixUseAccess);
-        if (rc != Success) {
-            client->errorValue = param->cursor;
-            return rc;
-        }
-        access_mode |= DixForceAccess;
+    if (param->confineTo == None) {
+      confineTo = NullWindow;
+    } else {
+      rc = dixLookupWindow(&confineTo, param->confineTo, client,
+                           DixSetAttrAccess);
+      if (rc != Success) {
+        return rc;
+      }
+    }
+    if (param->cursor == None) {
+      cursor = NullCursor;
+    } else {
+      rc = dixLookupResourceByType((void **)&cursor, param->cursor,
+                                   X11_RESTYPE_CURSOR, client, DixUseAccess);
+      if (rc != Success) {
+        client->errorValue = param->cursor;
+        return rc;
+      }
+      access_mode |= DixForceAccess;
     }
     if (param->this_device_mode == GrabModeSync ||
-        param->other_devices_mode == GrabModeSync)
-        access_mode |= DixFreezeAccess;
+        param->other_devices_mode == GrabModeSync) {
+      access_mode |= DixFreezeAccess;
+    }
     rc = dixCallDeviceAccessCallback(client, dev, access_mode);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     rc = dixLookupWindow(&pWin, param->grabWindow, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
-    if (grabtype == XI)
-        type = DeviceButtonPress;
-    else if (grabtype == XI2)
-        type = XI_ButtonPress;
+    if (grabtype == XI) {
+      type = DeviceButtonPress;
+    } else if (grabtype == XI2) {
+      type = XI_ButtonPress;
+    }
 
     grab = CreateGrab(client, dev, modifier_device, pWin, grabtype,
                       mask, param, type, button, confineTo, cursor);
-    if (!grab)
-        return BadAlloc;
+    if (!grab) {
+      return BadAlloc;
+    }
     return AddPassiveGrabToList(client, grab);
 }
 
@@ -2536,10 +2690,13 @@ GrabKey(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
     int rc, type = -1;
 
     rc = CheckGrabValues(client, param);
-    if (rc != Success)
-        return rc;
-    if ((dev->id != XIAllDevices && dev->id != XIAllMasterDevices) && k == NULL)
-        return BadMatch;
+    if (rc != Success) {
+      return rc;
+    }
+    if ((dev->id != XIAllDevices && dev->id != XIAllMasterDevices) &&
+        k == NULL) {
+      return BadMatch;
+    }
     if (grabtype == XI) {
         if ((key > k->xkbInfo->desc->max_key_code ||
              key < k->xkbInfo->desc->min_key_code)
@@ -2548,24 +2705,28 @@ GrabKey(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
             return BadValue;
         }
         type = DeviceKeyPress;
+    } else if (grabtype == XI2) {
+      type = XI_KeyPress;
     }
-    else if (grabtype == XI2)
-        type = XI_KeyPress;
 
     rc = dixLookupWindow(&pWin, param->grabWindow, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     if (param->this_device_mode == GrabModeSync ||
-        param->other_devices_mode == GrabModeSync)
-        access_mode |= DixFreezeAccess;
+        param->other_devices_mode == GrabModeSync) {
+      access_mode |= DixFreezeAccess;
+    }
     rc = dixCallDeviceAccessCallback(client, dev, access_mode);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     grab = CreateGrab(client, dev, modifier_device, pWin, grabtype,
                       mask, param, type, key, NULL, NULL);
-    if (!grab)
-        return BadAlloc;
+    if (!grab) {
+      return BadAlloc;
+    }
     return AddPassiveGrabToList(client, grab);
 }
 
@@ -2581,37 +2742,42 @@ GrabWindow(ClientPtr client, DeviceIntPtr dev, int type,
     int rc;
 
     rc = CheckGrabValues(client, param);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     rc = dixLookupWindow(&pWin, param->grabWindow, client, DixSetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
+      return rc;
+    }
+    if (param->cursor == None) {
+      cursor = NullCursor;
+    } else {
+      rc = dixLookupResourceByType((void **)&cursor, param->cursor,
+                                   X11_RESTYPE_CURSOR, client, DixUseAccess);
+      if (rc != Success) {
+        client->errorValue = param->cursor;
         return rc;
-    if (param->cursor == None)
-        cursor = NullCursor;
-    else {
-        rc = dixLookupResourceByType((void **) &cursor, param->cursor,
-                                     X11_RESTYPE_CURSOR, client, DixUseAccess);
-        if (rc != Success) {
-            client->errorValue = param->cursor;
-            return rc;
-        }
-        access_mode |= DixForceAccess;
+      }
+      access_mode |= DixForceAccess;
     }
     if (param->this_device_mode == GrabModeSync ||
-        param->other_devices_mode == GrabModeSync)
-        access_mode |= DixFreezeAccess;
+        param->other_devices_mode == GrabModeSync) {
+      access_mode |= DixFreezeAccess;
+    }
     rc = dixCallDeviceAccessCallback(client, dev, access_mode);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     grab = CreateGrab(client, dev, dev, pWin, XI2,
                       mask, param,
                       (type == XIGrabtypeEnter) ? XI_Enter : XI_FocusIn, 0,
                       NULL, cursor);
 
-    if (!grab)
-        return BadAlloc;
+    if (!grab) {
+      return BadAlloc;
+    }
 
     return AddPassiveGrabToList(client, grab);
 }
@@ -2626,20 +2792,24 @@ GrabTouchOrGesture(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr mod_dev,
     int rc;
 
     rc = CheckGrabValues(client, param);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     rc = dixLookupWindow(&pWin, param->grabWindow, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     rc = dixCallDeviceAccessCallback(client, dev, DixGrabAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     grab = CreateGrab(client, dev, mod_dev, pWin, XI2,
                       mask, param, type, 0, NullWindow, NullCursor);
-    if (!grab)
-        return BadAlloc;
+    if (!grab) {
+      return BadAlloc;
+    }
 
     return AddPassiveGrabToList(client, grab);
 }
@@ -2662,9 +2832,10 @@ SelectForWindow(DeviceIntPtr dev, WindowPtr pWin, ClientPtr client,
              */
             for (others = wOtherInputMasks(pWin)->inputClients; others;
                  others = others->next) {
-                if (!SameClient(others, client) && (check &
-                                                    others->mask[mskidx]))
-                    return BadAccess;
+              if (!SameClient(others, client) &&
+                  (check & others->mask[mskidx])) {
+                return BadAccess;
+              }
             }
         }
         assert(wOtherInputMasks(pWin));
@@ -2674,13 +2845,16 @@ SelectForWindow(DeviceIntPtr dev, WindowPtr pWin, ClientPtr client,
                 check = others->mask[mskidx];
                 others->mask[mskidx] = mask;
                 if (mask == 0) {
-                    for (i = 0; i < EMASKSIZE; i++)
-                        if (i != mskidx && others->mask[i] != 0)
-                            break;
+                  for (i = 0; i < EMASKSIZE; i++) {
+                    if (i != mskidx && others->mask[i] != 0) {
+                      break;
+                    }
+                  }
                     if (i == EMASKSIZE) {
                         RecalculateDeviceDeliverableEvents(pWin);
-                        if (ShouldFreeInputMasks(pWin, FALSE))
-                            FreeResource(others->resource, X11_RESTYPE_NONE);
+                        if (ShouldFreeInputMasks(pWin, FALSE)) {
+                          FreeResource(others->resource, X11_RESTYPE_NONE);
+                        }
                         return Success;
                     }
                 }
@@ -2689,14 +2863,17 @@ SelectForWindow(DeviceIntPtr dev, WindowPtr pWin, ClientPtr client,
         }
     }
     check = 0;
-    if ((ret = AddExtensionClient(pWin, client, mask, mskidx)) != Success)
-        return ret;
+    if ((ret = AddExtensionClient(pWin, client, mask, mskidx)) != Success) {
+      return ret;
+    }
  maskSet:
-    if (dev->valuator)
-        if ((dev->valuator->motionHintWindow == pWin) &&
-            (mask & DevicePointerMotionHintMask) &&
-            !(check & DevicePointerMotionHintMask) && !dev->deviceGrab.grab)
-            dev->valuator->motionHintWindow = NullWindow;
+   if (dev->valuator) {
+     if ((dev->valuator->motionHintWindow == pWin) &&
+         (mask & DevicePointerMotionHintMask) &&
+         !(check & DevicePointerMotionHintMask) && !dev->deviceGrab.grab) {
+       dev->valuator->motionHintWindow = NullWindow;
+     }
+   }
     RecalculateDeviceDeliverableEvents(pWin);
     return Success;
 }
@@ -2720,22 +2897,27 @@ AddExtensionClient(WindowPtr pWin, ClientPtr client, Mask mask, int mskidx)
 {
     InputClientsPtr others;
 
-    if (!MakeWindowOptional(pWin))
-        return BadAlloc;
+    if (!MakeWindowOptional(pWin)) {
+      return BadAlloc;
+    }
     others = AllocInputClient();
-    if (!others)
-        return BadAlloc;
-    if (!pWin->optional->inputMasks && !MakeInputMasks(pWin))
-        goto bail;
+    if (!others) {
+      return BadAlloc;
+    }
+    if (!pWin->optional->inputMasks && !MakeInputMasks(pWin)) {
+      goto bail;
+    }
     others->xi2mask = xi2mask_new();
-    if (!others->xi2mask)
-        goto bail;
+    if (!others->xi2mask) {
+      goto bail;
+    }
     others->mask[mskidx] = mask;
     others->resource = FakeClientID(client->index);
     others->next = pWin->optional->inputMasks->inputClients;
     pWin->optional->inputMasks->inputClients = others;
-    if (!AddResource(others->resource, RT_INPUTCLIENT, (void *) pWin))
-        goto bail;
+    if (!AddResource(others->resource, RT_INPUTCLIENT, (void *)pWin)) {
+      goto bail;
+    }
     return Success;
 
  bail:
@@ -2749,8 +2931,9 @@ MakeInputMasks(WindowPtr pWin)
     struct _OtherInputMasks *imasks;
 
     imasks = calloc(1, sizeof(struct _OtherInputMasks));
-    if (!imasks)
-        return FALSE;
+    if (!imasks) {
+      return FALSE;
+    }
     imasks->xi2mask = xi2mask_new();
     if (!imasks->xi2mask) {
         free(imasks);
@@ -2788,28 +2971,34 @@ RecalculateDeviceDeliverableEvents(WindowPtr pWin)
             xi2mask_zero(inputMasks->xi2mask, -1);
             for (others = inputMasks->inputClients; others;
                  others = others->next) {
-                for (i = 0; i < EMASKSIZE; i++)
-                    inputMasks->inputEvents[i] |= others->mask[i];
+              for (i = 0; i < EMASKSIZE; i++) {
+                inputMasks->inputEvents[i] |= others->mask[i];
+              }
                 xi2mask_merge(inputMasks->xi2mask, others->xi2mask);
             }
-            for (i = 0; i < EMASKSIZE; i++)
-                inputMasks->deliverableEvents[i] = inputMasks->inputEvents[i];
-            for (tmp = pChild->parent; tmp; tmp = tmp->parent)
-                if (wOtherInputMasks(tmp))
-                    for (i = 0; i < EMASKSIZE; i++)
-                        inputMasks->deliverableEvents[i] |=
-                            (wOtherInputMasks(tmp)->deliverableEvents[i]
-                             & ~inputMasks->dontPropagateMask[i] &
-                             XIPropagateMask);
+            for (i = 0; i < EMASKSIZE; i++) {
+              inputMasks->deliverableEvents[i] = inputMasks->inputEvents[i];
+            }
+            for (tmp = pChild->parent; tmp; tmp = tmp->parent) {
+              if (wOtherInputMasks(tmp)) {
+                for (i = 0; i < EMASKSIZE; i++) {
+                  inputMasks->deliverableEvents[i] |=
+                      (wOtherInputMasks(tmp)->deliverableEvents[i] &
+                       ~inputMasks->dontPropagateMask[i] & XIPropagateMask);
+                }
+              }
+            }
         }
         if (pChild->firstChild) {
             pChild = pChild->firstChild;
             continue;
         }
-        while (!pChild->nextSib && (pChild != pWin))
-            pChild = pChild->parent;
-        if (pChild == pWin)
-            break;
+        while (!pChild->nextSib && (pChild != pWin)) {
+          pChild = pChild->parent;
+        }
+        if (pChild == pWin) {
+          break;
+        }
         pChild = pChild->nextSib;
     }
 }
@@ -2819,8 +3008,9 @@ InputClientGone(WindowPtr pWin, XID id)
 {
     InputClientsPtr other, prev;
 
-    if (!wOtherInputMasks(pWin))
-        return Success;
+    if (!wOtherInputMasks(pWin)) {
+      return Success;
+    }
     prev = 0;
     for (other = wOtherInputMasks(pWin)->inputClients; other;
          other = other->next) {
@@ -2842,8 +3032,9 @@ InputClientGone(WindowPtr pWin, XID id)
                 else {
                     other->resource = dixAllocServerXID();
                     if (!AddResource(other->resource, RT_INPUTCLIENT,
-                                     (void *) pWin))
-                        return BadAlloc;
+                                     (void *)pWin)) {
+                      return BadAlloc;
+                    }
                 }
             }
             else {
@@ -2872,8 +3063,9 @@ WindowGone(WindowPtr win)
         TouchClassPtr t = dev->touch;
         int i;
 
-        if (!t)
-            continue;
+        if (!t) {
+          continue;
+        }
 
         for (i = 0; i < t->num_touches; i++) {
             SpritePtr sprite = &t->touches[i].sprite;
@@ -2897,38 +3089,43 @@ SendEvent(ClientPtr client, DeviceIntPtr d, Window dest, Bool propagate,
     WindowPtr effectiveFocus = NullWindow;      /* only set if dest==InputFocus */
     WindowPtr spriteWin = InputDevSpriteWindow(d);
 
-    if (dest == PointerWindow)
+    if (dest == PointerWindow) {
+      pWin = spriteWin;
+    } else if (dest == InputFocus) {
+      WindowPtr inputFocus;
+
+      if (!d->focus) {
+        inputFocus = spriteWin;
+      } else {
+        inputFocus = d->focus->win;
+      }
+
+      if (inputFocus == FollowKeyboardWin) {
+        inputFocus = inputInfo.keyboard->focus->win;
+      }
+
+      if (inputFocus == NoneWin) {
+        return Success;
+      }
+
+      /* If the input focus is PointerRootWin, send the event to where
+       * the pointer is if possible, then perhaps propagate up to root. */
+      if (inputFocus == PointerRootWin) {
+        inputFocus = InputDevCurrentRootWindow(d);
+      }
+
+      if (WindowIsParent(inputFocus, spriteWin)) {
+        effectiveFocus = inputFocus;
         pWin = spriteWin;
-    else if (dest == InputFocus) {
-        WindowPtr inputFocus;
-
-        if (!d->focus)
-            inputFocus = spriteWin;
-        else
-            inputFocus = d->focus->win;
-
-        if (inputFocus == FollowKeyboardWin)
-            inputFocus = inputInfo.keyboard->focus->win;
-
-        if (inputFocus == NoneWin)
-            return Success;
-
-        /* If the input focus is PointerRootWin, send the event to where
-         * the pointer is if possible, then perhaps propagate up to root. */
-        if (inputFocus == PointerRootWin)
-            inputFocus = InputDevCurrentRootWindow(d);
-
-        if (WindowIsParent(inputFocus, spriteWin)) {
-            effectiveFocus = inputFocus;
-            pWin = spriteWin;
-        }
-        else
-            effectiveFocus = pWin = inputFocus;
+      } else {
+        effectiveFocus = pWin = inputFocus;
+      }
+    } else {
+      dixLookupWindow(&pWin, dest, client, DixSendAccess);
     }
-    else
-        dixLookupWindow(&pWin, dest, client, DixSendAccess);
-    if (!pWin)
-        return BadWindow;
+    if (!pWin) {
+      return BadWindow;
+    }
     if ((propagate != xFalse) && (propagate != xTrue)) {
         client->errorValue = propagate;
         return BadValue;
@@ -2936,18 +3133,22 @@ SendEvent(ClientPtr client, DeviceIntPtr d, Window dest, Bool propagate,
     ev->u.u.type |= 0x80;
     if (propagate) {
         for (; pWin; pWin = pWin->parent) {
-            if (DeliverEventsToWindow(d, pWin, ev, count, mask, NullGrab))
-                return Success;
-            if (pWin == effectiveFocus)
-                return Success;
-            if (wOtherInputMasks(pWin))
-                mask &= ~wOtherInputMasks(pWin)->dontPropagateMask[d->id];
-            if (!mask)
-                break;
+          if (DeliverEventsToWindow(d, pWin, ev, count, mask, NullGrab)) {
+            return Success;
+          }
+          if (pWin == effectiveFocus) {
+            return Success;
+          }
+          if (wOtherInputMasks(pWin)) {
+            mask &= ~wOtherInputMasks(pWin)->dontPropagateMask[d->id];
+          }
+          if (!mask) {
+            break;
+          }
         }
+    } else if (!XaceHookSendAccess(client, NULL, pWin, ev, count)) {
+      DeliverEventsToWindow(d, pWin, ev, count, mask, NullGrab);
     }
-    else if (!XaceHookSendAccess(client, NULL, pWin, ev, count))
-        DeliverEventsToWindow(d, pWin, ev, count, mask, NullGrab);
     return Success;
 }
 
@@ -2957,20 +3158,25 @@ SetButtonMapping(ClientPtr client, DeviceIntPtr dev, int nElts, BYTE * map)
     int i;
     ButtonClassPtr b = dev->button;
 
-    if (b == NULL)
-        return BadMatch;
+    if (b == NULL) {
+      return BadMatch;
+    }
 
     if (nElts != b->numButtons) {
         client->errorValue = nElts;
         return BadValue;
     }
-    if (BadDeviceMap(&map[0], nElts, 1, 255, &client->errorValue))
-        return BadValue;
-    for (i = 0; i < nElts; i++)
-        if ((b->map[i + 1] != map[i]) && BitIsOn(b->down, i + 1))
-            return MappingBusy;
-    for (i = 0; i < nElts; i++)
-        b->map[i + 1] = map[i];
+    if (BadDeviceMap(&map[0], nElts, 1, 255, &client->errorValue)) {
+      return BadValue;
+    }
+    for (i = 0; i < nElts; i++) {
+      if ((b->map[i + 1] != map[i]) && BitIsOn(b->down, i + 1)) {
+        return MappingBusy;
+      }
+    }
+    for (i = 0; i < nElts; i++) {
+      b->map[i + 1] = map[i];
+    }
     return Success;
 }
 
@@ -2985,11 +3191,13 @@ ChangeKeyMapping(ClientPtr client,
     KeySymsRec keysyms;
     KeyClassPtr k = dev->key;
 
-    if (k == NULL)
-        return BadMatch;
+    if (k == NULL) {
+      return BadMatch;
+    }
 
-    if (len != (keyCodes * keySymsPerKeyCode))
-        return BadLength;
+    if (len != (keyCodes * keySymsPerKeyCode)) {
+      return BadLength;
+    }
 
     if ((firstKeyCode < k->xkbInfo->desc->min_key_code) ||
         (firstKeyCode + keyCodes - 1 > k->xkbInfo->desc->max_key_code)) {
@@ -3020,8 +3228,9 @@ DeleteDeviceFromAnyExtEvents(WindowPtr pWin, DeviceIntPtr dev)
      * any input focus changes.
      * Deactivating a device grab should cause focus events. */
 
-    if (dev->deviceGrab.grab && (dev->deviceGrab.grab->window == pWin))
-        (*dev->deviceGrab.DeactivateGrab) (dev);
+    if (dev->deviceGrab.grab && (dev->deviceGrab.grab->window == pWin)) {
+      (*dev->deviceGrab.DeactivateGrab)(dev);
+    }
 
     /* If the focus window is a root window (ie. has no parent)
      * then don't delete the focus from it. */
@@ -3031,13 +3240,15 @@ DeleteDeviceFromAnyExtEvents(WindowPtr pWin, DeviceIntPtr dev)
 
         /* If a grab is in progress, then alter the mode of focus events. */
 
-        if (dev->deviceGrab.grab)
-            focusEventMode = NotifyWhileGrabbed;
+        if (dev->deviceGrab.grab) {
+          focusEventMode = NotifyWhileGrabbed;
+        }
 
         switch (dev->focus->revert) {
         case RevertToNone:
-            if (!ActivateFocusInGrab(dev, pWin, NoneWin))
-                DoFocusEvents(dev, pWin, NoneWin, focusEventMode);
+          if (!ActivateFocusInGrab(dev, pWin, NoneWin)) {
+            DoFocusEvents(dev, pWin, NoneWin, focusEventMode);
+          }
             dev->focus->win = NoneWin;
             dev->focus->traceGood = 0;
             break;
@@ -3048,14 +3259,16 @@ DeleteDeviceFromAnyExtEvents(WindowPtr pWin, DeviceIntPtr dev)
                 dev->focus->traceGood--;
             }
             while (!parent->realized);
-            if (!ActivateFocusInGrab(dev, pWin, parent))
-                DoFocusEvents(dev, pWin, parent, focusEventMode);
+            if (!ActivateFocusInGrab(dev, pWin, parent)) {
+              DoFocusEvents(dev, pWin, parent, focusEventMode);
+            }
             dev->focus->win = parent;
             dev->focus->revert = RevertToNone;
             break;
         case RevertToPointerRoot:
-            if (!ActivateFocusInGrab(dev, pWin, PointerRootWin))
-                DoFocusEvents(dev, pWin, PointerRootWin, focusEventMode);
+          if (!ActivateFocusInGrab(dev, pWin, PointerRootWin)) {
+            DoFocusEvents(dev, pWin, PointerRootWin, focusEventMode);
+          }
             dev->focus->win = PointerRootWin;
             dev->focus->traceGood = 0;
             break;
@@ -3063,17 +3276,20 @@ DeleteDeviceFromAnyExtEvents(WindowPtr pWin, DeviceIntPtr dev)
         {
             DeviceIntPtr kbd = GetMaster(dev, MASTER_KEYBOARD);
 
-            if (!kbd || (kbd == dev && kbd != inputInfo.keyboard))
-                kbd = inputInfo.keyboard;
+            if (!kbd || (kbd == dev && kbd != inputInfo.keyboard)) {
+              kbd = inputInfo.keyboard;
+            }
             if (kbd->focus->win) {
-                if (!ActivateFocusInGrab(dev, pWin, kbd->focus->win))
-                    DoFocusEvents(dev, pWin, kbd->focus->win, focusEventMode);
+              if (!ActivateFocusInGrab(dev, pWin, kbd->focus->win)) {
+                DoFocusEvents(dev, pWin, kbd->focus->win, focusEventMode);
+              }
                 dev->focus->win = FollowKeyboardWin;
                 dev->focus->traceGood = 0;
             }
             else {
-                if (!ActivateFocusInGrab(dev, pWin, NoneWin))
-                    DoFocusEvents(dev, pWin, NoneWin, focusEventMode);
+              if (!ActivateFocusInGrab(dev, pWin, NoneWin)) {
+                DoFocusEvents(dev, pWin, NoneWin, focusEventMode);
+              }
                 dev->focus->win = NoneWin;
                 dev->focus->traceGood = 0;
             }
@@ -3082,9 +3298,11 @@ DeleteDeviceFromAnyExtEvents(WindowPtr pWin, DeviceIntPtr dev)
         }
     }
 
-    if (dev->valuator)
-        if (dev->valuator->motionHintWindow == pWin)
-            dev->valuator->motionHintWindow = NullWindow;
+    if (dev->valuator) {
+      if (dev->valuator->motionHintWindow == pWin) {
+        dev->valuator->motionHintWindow = NullWindow;
+      }
+    }
 }
 
 void
@@ -3099,16 +3317,19 @@ DeleteWindowFromAnyExtEvents(WindowPtr pWin, Bool freeResources)
         DeleteDeviceFromAnyExtEvents(pWin, dev);
     }
 
-    for (dev = inputInfo.off_devices; dev; dev = dev->next)
-        DeleteDeviceFromAnyExtEvents(pWin, dev);
+    for (dev = inputInfo.off_devices; dev; dev = dev->next) {
+      DeleteDeviceFromAnyExtEvents(pWin, dev);
+    }
 
-    if (freeResources)
-        while ((inputMasks = wOtherInputMasks(pWin)) != 0) {
-            ic = inputMasks->inputClients;
-            for (i = 0; i < EMASKSIZE; i++)
-                inputMasks->dontPropagateMask[i] = 0;
-            FreeResource(ic->resource, X11_RESTYPE_NONE);
+    if (freeResources) {
+      while ((inputMasks = wOtherInputMasks(pWin)) != 0) {
+        ic = inputMasks->inputClients;
+        for (i = 0; i < EMASKSIZE; i++) {
+          inputMasks->dontPropagateMask[i] = 0;
         }
+        FreeResource(ic->resource, X11_RESTYPE_NONE);
+      }
+    }
 }
 
 int
@@ -3118,8 +3339,9 @@ MaybeSendDeviceMotionNotifyHint(deviceKeyButtonPointer *pEvents, Mask mask)
 
     dixLookupDevice(&dev, pEvents->deviceid & DEVICE_BITS, serverClient,
                     DixReadAccess);
-    if (!dev)
-        return 0;
+    if (!dev) {
+      return 0;
+    }
 
     if (pEvents->type == DeviceMotionNotify) {
         if (mask & DevicePointerMotionHintMask) {
@@ -3144,32 +3366,34 @@ CheckDeviceGrabAndHintWindow(WindowPtr pWin, int type,
 
     dixLookupDevice(&dev, xE->deviceid & DEVICE_BITS, serverClient,
                     DixGrabAccess);
-    if (!dev)
+    if (!dev) {
+      return;
+    }
+
+    if (type == DeviceMotionNotify) {
+      dev->valuator->motionHintWindow = pWin;
+    } else if ((type == DeviceButtonPress) && (!grab) &&
+               (deliveryMask & DeviceButtonGrabMask)) {
+      GrabPtr tempGrab;
+
+      tempGrab = AllocGrab(NULL);
+      if (!tempGrab) {
         return;
+      }
 
-    if (type == DeviceMotionNotify)
-        dev->valuator->motionHintWindow = pWin;
-    else if ((type == DeviceButtonPress) && (!grab) &&
-             (deliveryMask & DeviceButtonGrabMask)) {
-        GrabPtr tempGrab;
-
-        tempGrab = AllocGrab(NULL);
-        if (!tempGrab)
-            return;
-
-        tempGrab->device = dev;
-        tempGrab->resource = client->clientAsMask;
-        tempGrab->window = pWin;
-        tempGrab->ownerEvents =
-            (deliveryMask & DeviceOwnerGrabButtonMask) ? TRUE : FALSE;
-        tempGrab->eventMask = deliveryMask;
-        tempGrab->keyboardMode = GrabModeAsync;
-        tempGrab->pointerMode = GrabModeAsync;
-        tempGrab->confineTo = NullWindow;
-        tempGrab->cursor = NullCursor;
-        tempGrab->next = NULL;
-        (*dev->deviceGrab.ActivateGrab) (dev, tempGrab, currentTime, TRUE);
-        FreeGrab(tempGrab);
+      tempGrab->device = dev;
+      tempGrab->resource = client->clientAsMask;
+      tempGrab->window = pWin;
+      tempGrab->ownerEvents =
+          (deliveryMask & DeviceOwnerGrabButtonMask) ? TRUE : FALSE;
+      tempGrab->eventMask = deliveryMask;
+      tempGrab->keyboardMode = GrabModeAsync;
+      tempGrab->pointerMode = GrabModeAsync;
+      tempGrab->confineTo = NullWindow;
+      tempGrab->cursor = NullCursor;
+      tempGrab->next = NULL;
+      (*dev->deviceGrab.ActivateGrab)(dev, tempGrab, currentTime, TRUE);
+      FreeGrab(tempGrab);
     }
 }
 
@@ -3178,12 +3402,14 @@ DeviceEventMaskForClient(DeviceIntPtr dev, WindowPtr pWin, ClientPtr client)
 {
     InputClientsPtr other;
 
-    if (!wOtherInputMasks(pWin))
-        return 0;
+    if (!wOtherInputMasks(pWin)) {
+      return 0;
+    }
     for (other = wOtherInputMasks(pWin)->inputClients; other;
          other = other->next) {
-        if (SameClient(other, client))
-            return other->mask[dev->id];
+      if (SameClient(other, client)) {
+        return other->mask[dev->id];
+      }
     }
     return 0;
 }
@@ -3198,13 +3424,12 @@ MaybeStopDeviceHint(DeviceIntPtr dev, ClientPtr client)
 
     if ((grab && SameClient(grab, client) &&
          ((grab->eventMask & DevicePointerMotionHintMask) ||
-          (grab->ownerEvents &&
-           (DeviceEventMaskForClient(dev, pWin, client) &
-            DevicePointerMotionHintMask)))) ||
-        (!grab &&
-         (DeviceEventMaskForClient(dev, pWin, client) &
-          DevicePointerMotionHintMask)))
-        dev->valuator->motionHintWindow = NullWindow;
+          (grab->ownerEvents && (DeviceEventMaskForClient(dev, pWin, client) &
+                                 DevicePointerMotionHintMask)))) ||
+        (!grab && (DeviceEventMaskForClient(dev, pWin, client) &
+                   DevicePointerMotionHintMask))) {
+      dev->valuator->motionHintWindow = NullWindow;
+    }
 }
 
 int
@@ -3219,15 +3444,17 @@ DeviceEventSuppressForWindow(WindowPtr pWin, ClientPtr client, Mask mask,
     }
 
     if (mask == 0) {
-        if (inputMasks)
-            inputMasks->dontPropagateMask[maskndx] = mask;
+      if (inputMasks) {
+        inputMasks->dontPropagateMask[maskndx] = mask;
+      }
     }
     else {
         if (!inputMasks) {
             int ret = AddExtensionClient(pWin, client, 0, 0);
 
-            if (ret != Success)
-                return ret;
+            if (ret != Success) {
+              return ret;
+            }
             inputMasks = wOtherInputMasks(pWin);
             BUG_RETURN_VAL(!inputMasks, BadAlloc);
         }
@@ -3249,15 +3476,19 @@ ShouldFreeInputMasks(WindowPtr pWin, Bool ignoreSelectedEvents)
     Mask allInputEventMasks = 0;
     struct _OtherInputMasks *inputMasks = wOtherInputMasks(pWin);
 
-    for (i = 0; i < EMASKSIZE; i++)
-        allInputEventMasks |= inputMasks->dontPropagateMask[i];
-    if (!ignoreSelectedEvents)
-        for (i = 0; i < EMASKSIZE; i++)
-            allInputEventMasks |= inputMasks->inputEvents[i];
-    if (allInputEventMasks == 0)
-        return TRUE;
-    else
-        return FALSE;
+    for (i = 0; i < EMASKSIZE; i++) {
+      allInputEventMasks |= inputMasks->dontPropagateMask[i];
+    }
+    if (!ignoreSelectedEvents) {
+      for (i = 0; i < EMASKSIZE; i++) {
+        allInputEventMasks |= inputMasks->inputEvents[i];
+      }
+    }
+    if (allInputEventMasks == 0) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
 }
 
 /***********************************************************************
@@ -3326,8 +3557,9 @@ XISetEventMask(DeviceIntPtr dev, WindowPtr win, ClientPtr client,
     }
 
     if (len && !others) {
-        if (AddExtensionClient(win, client, 0, 0) != Success)
-            return BadAlloc;
+      if (AddExtensionClient(win, client, 0, 0) != Success) {
+        return BadAlloc;
+      }
         assert(wOtherInputMasks(win));
         others = wOtherInputMasks(win)->inputClients;
     }

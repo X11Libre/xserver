@@ -274,8 +274,9 @@ request_XISelectEvents_masks(xXISelectEventsReq * req)
         bits = (unsigned char *) &mask[1];
         mask->mask_len = (nmasks + 3) / 4;
         memset(bits, 0, mask->mask_len * 4);
-        for (j = 0; j <= XI2LASTEVENT; j++)
-            _set_bit(bits, j);
+        for (j = 0; j <= XI2LASTEVENT; j++) {
+          _set_bit(bits, j);
+        }
         _clear_bit(bits, XI_HierarchyChanged);
         for (j = 1; j < 6; j++) {
             mask->deviceid = j;

@@ -95,8 +95,9 @@ ProcXChangeDeviceControl(ClientPtr client)
 
     len = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
-    if (ret != Success)
-        goto out;
+    if (ret != Success) {
+      goto out;
+    }
 
     /* XTest devices are special, none of the below apply to them anyway */
     if (IsXTestDevice(dev, NULL)) {
@@ -135,12 +136,15 @@ ProcXChangeDeviceControl(ClientPtr client)
         status = ChangeDeviceControl(client, dev, (xDeviceCtl *) r);
         if (status == Success) {
             a = &dev->valuator->axes[r->first_valuator];
-            for (i = 0; i < r->num_valuators; i++)
-                if (*(resolution + i) < (a + i)->min_resolution ||
-                    *(resolution + i) > (a + i)->max_resolution)
-                    return BadValue;
-            for (i = 0; i < r->num_valuators; i++)
-                (a++)->resolution = *resolution++;
+            for (i = 0; i < r->num_valuators; i++) {
+              if (*(resolution + i) < (a + i)->min_resolution ||
+                  *(resolution + i) > (a + i)->max_resolution) {
+                return BadValue;
+              }
+            }
+            for (i = 0; i < r->num_valuators; i++) {
+              (a++)->resolution = *resolution++;
+            }
 
             ret = Success;
         }
@@ -170,16 +174,18 @@ ProcXChangeDeviceControl(ClientPtr client)
             goto out;
         }
 
-        if (IsXTestDevice(dev, NULL))
-            status = !Success;
-        else
-            status = ChangeDeviceControl(client, dev, (xDeviceCtl *) e);
+        if (IsXTestDevice(dev, NULL)) {
+          status = !Success;
+        } else {
+          status = ChangeDeviceControl(client, dev, (xDeviceCtl *)e);
+        }
 
         if (status == Success) {
-            if (e->enable)
-                EnableDevice(dev, TRUE);
-            else
-                DisableDevice(dev, TRUE);
+          if (e->enable) {
+            EnableDevice(dev, TRUE);
+          } else {
+            DisableDevice(dev, TRUE);
+          }
             ret = Success;
         }
         else if (status == DeviceBusy) {

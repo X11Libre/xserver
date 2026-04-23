@@ -87,36 +87,38 @@ winTranslateKey(WPARAM wParam, LPARAM lParam)
  * scan code of 1
  */
     if (iParamScanCode <= 1) {
-        if (VK_PRIOR <= wParam && wParam <= VK_DOWN)
-            /* Trigger special case table to translate to extended
-             * keycode, otherwise if num_lock is on, we can get keypad
-             * numbers instead of navigation keys. */
-            iParam |= KF_EXTENDED;
-        else
-            iParamScanCode = MapVirtualKeyEx(wParam,
-                                             /*MAPVK_VK_TO_VSC */ 0,
-                                             GetKeyboardLayout(0));
+      if (VK_PRIOR <= wParam && wParam <= VK_DOWN) {
+        /* Trigger special case table to translate to extended
+         * keycode, otherwise if num_lock is on, we can get keypad
+         * numbers instead of navigation keys. */
+        iParam |= KF_EXTENDED;
+      } else {
+        iParamScanCode =
+            MapVirtualKeyEx(wParam,
+                            /*MAPVK_VK_TO_VSC */ 0, GetKeyboardLayout(0));
+      }
     }
 
     /* Branch on special extended, special non-extended, or normal key */
-    if ((iParam & KF_EXTENDED) && iKeyFixupEx)
-        iScanCode = iKeyFixupEx;
-    else if (iKeyFixup)
-        iScanCode = iKeyFixup;
-    else if (wParam == 0 && iParamScanCode == 0x70)
+    if ((iParam & KF_EXTENDED) && iKeyFixupEx) {
+      iScanCode = iKeyFixupEx;
+    } else if (iKeyFixup) {
+      iScanCode = iKeyFixup;
+    } else if (wParam == 0 && iParamScanCode == 0x70) {
+      iScanCode = KEY_HKTG;
+    } else {
+      switch (iParamScanCode) {
+      case 0x70:
         iScanCode = KEY_HKTG;
-    else
-        switch (iParamScanCode) {
-        case 0x70:
-            iScanCode = KEY_HKTG;
-            break;
-        case 0x73:
-            iScanCode = KEY_BSlash2;
-            break;
-        default:
-            iScanCode = iParamScanCode;
-            break;
-        }
+        break;
+      case 0x73:
+        iScanCode = KEY_BSlash2;
+        break;
+      default:
+        iScanCode = iParamScanCode;
+        break;
+      }
+    }
 
     return iScanCode;
 }
@@ -249,18 +251,21 @@ winRestoreModeKeyStates(void)
     unsigned short internalKeyStates;
 
     /* X server is being initialized */
-    if (!inputInfo.keyboard || !inputInfo.keyboard->key)
-        return;
+    if (!inputInfo.keyboard || !inputInfo.keyboard->key) {
+      return;
+    }
 
     /* Only process events if the rootwindow is mapped. The keyboard events
      * will cause segfaults otherwise */
     ScreenPtr masterScreen = dixGetMasterScreen();
-    if (masterScreen->root && masterScreen->root->mapped == FALSE)
-        processEvents = FALSE;
+    if (masterScreen->root && masterScreen->root->mapped == FALSE) {
+      processEvents = FALSE;
+    }
 
     /* Force to process all pending events in the mi event queue */
-    if (processEvents)
-        mieqProcessInputEvents();
+    if (processEvents) {
+      mieqProcessInputEvents();
+    }
 
     /* Read the mode key states of our X server */
     /* (stored in the virtual core keyboard) */
@@ -282,26 +287,33 @@ winRestoreModeKeyStates(void)
            If AltGr and CtrlL appear to be pressed, assume the
            CtrL is a fake one
          */
-        if (lctrl && altgr)
-            lctrl = FALSE;
+        if (lctrl && altgr) {
+          lctrl = FALSE;
+        }
 
-        if (lctrl)
-            winSendKeyEvent(KEY_LCtrl, TRUE);
+        if (lctrl) {
+          winSendKeyEvent(KEY_LCtrl, TRUE);
+        }
 
-        if (rctrl)
-            winSendKeyEvent(KEY_RCtrl, TRUE);
+        if (rctrl) {
+          winSendKeyEvent(KEY_RCtrl, TRUE);
+        }
 
-        if (lshift)
-            winSendKeyEvent(KEY_ShiftL, TRUE);
+        if (lshift) {
+          winSendKeyEvent(KEY_ShiftL, TRUE);
+        }
 
-        if (rshift)
-            winSendKeyEvent(KEY_ShiftL, TRUE);
+        if (rshift) {
+          winSendKeyEvent(KEY_ShiftL, TRUE);
+        }
 
-        if (alt)
-            winSendKeyEvent(KEY_Alt, TRUE);
+        if (alt) {
+          winSendKeyEvent(KEY_Alt, TRUE);
+        }
 
-        if (altgr)
-            winSendKeyEvent(KEY_AltLang, TRUE);
+        if (altgr) {
+          winSendKeyEvent(KEY_AltLang, TRUE);
+        }
     }
 
     /*
@@ -371,8 +383,9 @@ winIsFakeCtrl_L(UINT message, WPARAM wParam, LPARAM lParam)
                               WM_KEYDOWN, WM_SYSKEYDOWN, PM_NOREMOVE);
 
         if (fReturn && msgNext.message != WM_KEYDOWN &&
-            msgNext.message != WM_SYSKEYDOWN)
-            fReturn = 0;
+            msgNext.message != WM_SYSKEYDOWN) {
+          fReturn = 0;
+        }
 
         if (!fReturn) {
             lastWasControlL = TRUE;
@@ -430,8 +443,9 @@ winIsFakeCtrl_L(UINT message, WPARAM wParam, LPARAM lParam)
                               WM_KEYUP, WM_SYSKEYUP, PM_NOREMOVE);
 
         if (fReturn && msgNext.message != WM_KEYUP &&
-            msgNext.message != WM_SYSKEYUP)
-            fReturn = 0;
+            msgNext.message != WM_SYSKEYUP) {
+          fReturn = 0;
+        }
 
         lastWasControlL = FALSE;
 
@@ -477,8 +491,9 @@ winKeybdReleaseKeys(void)
     /* Loop through all keys */
     for (i = 0; i < NUM_KEYCODES; ++i) {
         /* Pop key if pressed */
-        if (g_winKeyState[i])
-            winSendKeyEvent(i, FALSE);
+        if (g_winKeyState[i]) {
+          winSendKeyEvent(i, FALSE);
+        }
 
         /* Reset pressed flag for keys */
         g_winKeyState[i] = FALSE;
@@ -498,8 +513,9 @@ winSendKeyEvent(DWORD dwKey, Bool fDown)
      * When alt-tabing between screens we can get phantom key up messages
      * Here we only pass them through it we think we should!
      */
-    if (g_winKeyState[dwKey] == FALSE && fDown == FALSE)
-        return;
+    if (g_winKeyState[dwKey] == FALSE && fDown == FALSE) {
+      return;
+    }
 
     /* Update the keyState map */
     g_winKeyState[dwKey] = fDown;
@@ -515,16 +531,20 @@ winCheckKeyPressed(WPARAM wParam, LPARAM lParam)
 {
     switch (wParam) {
     case VK_CONTROL:
-        if ((lParam & 0x1ff0000) == 0x11d0000 && g_winKeyState[KEY_RCtrl])
-            return TRUE;
-        if ((lParam & 0x1ff0000) == 0x01d0000 && g_winKeyState[KEY_LCtrl])
-            return TRUE;
+      if ((lParam & 0x1ff0000) == 0x11d0000 && g_winKeyState[KEY_RCtrl]) {
+        return TRUE;
+      }
+      if ((lParam & 0x1ff0000) == 0x01d0000 && g_winKeyState[KEY_LCtrl]) {
+        return TRUE;
+      }
         break;
     case VK_SHIFT:
-        if ((lParam & 0x1ff0000) == 0x0360000 && g_winKeyState[KEY_ShiftR])
-            return TRUE;
-        if ((lParam & 0x1ff0000) == 0x02a0000 && g_winKeyState[KEY_ShiftL])
-            return TRUE;
+      if ((lParam & 0x1ff0000) == 0x0360000 && g_winKeyState[KEY_ShiftR]) {
+        return TRUE;
+      }
+      if ((lParam & 0x1ff0000) == 0x02a0000 && g_winKeyState[KEY_ShiftL]) {
+        return TRUE;
+      }
         break;
     default:
         return TRUE;
@@ -538,11 +558,14 @@ winCheckKeyPressed(WPARAM wParam, LPARAM lParam)
 void
 winFixShiftKeys(int iScanCode)
 {
-    if (GetKeyState(VK_SHIFT) & 0x8000)
-        return;
+  if (GetKeyState(VK_SHIFT) & 0x8000) {
+    return;
+  }
 
-    if (iScanCode == KEY_ShiftL && g_winKeyState[KEY_ShiftR])
-        winSendKeyEvent(KEY_ShiftR, FALSE);
-    if (iScanCode == KEY_ShiftR && g_winKeyState[KEY_ShiftL])
-        winSendKeyEvent(KEY_ShiftL, FALSE);
+  if (iScanCode == KEY_ShiftL && g_winKeyState[KEY_ShiftR]) {
+    winSendKeyEvent(KEY_ShiftR, FALSE);
+  }
+  if (iScanCode == KEY_ShiftR && g_winKeyState[KEY_ShiftL]) {
+    winSendKeyEvent(KEY_ShiftL, FALSE);
+  }
 }

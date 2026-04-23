@@ -78,14 +78,17 @@ dixLookupSelection(Selection ** result, Atom selectionName,
 
     client->errorValue = selectionName;
 
-    for (pSel = CurrentSelections; pSel; pSel = pSel->next)
-        if (pSel->selection == selectionName)
-            break;
+    for (pSel = CurrentSelections; pSel; pSel = pSel->next) {
+      if (pSel->selection == selectionName) {
+        break;
+      }
+    }
 
     if (!pSel) {
         pSel = dixAllocateObjectWithPrivates(Selection, PRIVATE_SELECTION);
-        if (!pSel)
-            return BadAlloc;
+        if (!pSel) {
+          return BadAlloc;
+        }
         pSel->selection = selectionName;
         pSel->next = CurrentSelections;
         CurrentSelections = pSel;
@@ -127,27 +130,29 @@ CallSelectionCallback(Selection * pSel, ClientPtr client,
 void
 DeleteWindowFromAnySelections(WindowPtr pWin)
 {
-    for (Selection *pSel = CurrentSelections; pSel; pSel = pSel->next)
-        if (pSel->pWin == pWin) {
-            CallSelectionCallback(pSel, NULL, SelectionWindowDestroy);
+  for (Selection *pSel = CurrentSelections; pSel; pSel = pSel->next) {
+    if (pSel->pWin == pWin) {
+      CallSelectionCallback(pSel, NULL, SelectionWindowDestroy);
 
-            pSel->pWin = (WindowPtr) NULL;
-            pSel->window = None;
-            pSel->client = NULL;
-        }
+      pSel->pWin = (WindowPtr)NULL;
+      pSel->window = None;
+      pSel->client = NULL;
+    }
+  }
 }
 
 void
 DeleteClientFromAnySelections(ClientPtr client)
 {
-    for (Selection *pSel = CurrentSelections; pSel; pSel = pSel->next)
-        if (pSel->client == client) {
-            CallSelectionCallback(pSel, NULL, SelectionClientClose);
+  for (Selection *pSel = CurrentSelections; pSel; pSel = pSel->next) {
+    if (pSel->client == client) {
+      CallSelectionCallback(pSel, NULL, SelectionClientClose);
 
-            pSel->pWin = (WindowPtr) NULL;
-            pSel->window = None;
-            pSel->client = NULL;
-        }
+      pSel->pWin = (WindowPtr)NULL;
+      pSel->window = None;
+      pSel->client = NULL;
+    }
+  }
 }
 
 int
@@ -172,8 +177,9 @@ ProcSetSelectionOwner(ClientPtr client)
 
     /* If the client's time stamp is in the future relative to the server's
        time stamp, do not set the selection, just return success. */
-    if (CompareTimeStamps(time, currentTime) == LATER)
-        return Success;
+    if (CompareTimeStamps(time, currentTime) == LATER) {
+      return Success;
+    }
 
     /* allow extensions to intercept */
     SelectionFilterParamRec param = {
@@ -184,15 +190,17 @@ ProcSetSelectionOwner(ClientPtr client)
     };
     CallCallbacks(&SelectionFilterCallback, &param);
     if (param.skip) {
-        if (param.status != Success)
-            client->errorValue = stuff->selection;
+      if (param.status != Success) {
+        client->errorValue = stuff->selection;
+      }
         return param.status;
     }
 
     if (param.owner != None) {
         rc = dixLookupWindow(&pWin, param.owner, client, DixSetAttrAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
     }
 
     if (!ValidAtom(param.selection)) {
@@ -213,8 +221,9 @@ ProcSetSelectionOwner(ClientPtr client)
        to the time stamp indicating the last time the owner of the
        selection was set, do not set the selection, just return
        success. */
-    if (CompareTimeStamps(time, pSel->lastTimeChanged) == EARLIER)
-        return Success;
+    if (CompareTimeStamps(time, pSel->lastTimeChanged) == EARLIER) {
+      return Success;
+    }
     if (pSel->client && (!pWin || (pSel->client != client))) {
         SelectionFilterParamRec eventParam = {
             .client = client,
@@ -252,8 +261,9 @@ ProcGetSelectionOwner(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
-    if (client->swapped)
-        swapl(&stuff->id);
+    if (client->swapped) {
+      swapl(&stuff->id);
+    }
 
     /* allow extensions to intercept */
     SelectionFilterParamRec param = {
@@ -274,12 +284,13 @@ ProcGetSelectionOwner(ClientPtr client)
     xGetSelectionOwnerReply reply = { 0 };
 
     param.status = dixLookupSelection(&pSel, param.selection, param.client, DixGetAttrAccess);
-    if (param.status == Success)
-        reply.owner = pSel->window;
-    else if (param.status == BadMatch)
-        reply.owner = None;
-    else
-        goto out;
+    if (param.status == Success) {
+      reply.owner = pSel->window;
+    } else if (param.status == BadMatch) {
+      reply.owner = None;
+    } else {
+      goto out;
+    }
 
     if (client->swapped) {
         swapl(&reply.owner);
@@ -288,8 +299,9 @@ ProcGetSelectionOwner(ClientPtr client)
     return X_SEND_REPLY_SIMPLE(client, reply);
 
 out:
-    if (param.status != Success)
-        client->errorValue = stuff->id;
+  if (param.status != Success) {
+    client->errorValue = stuff->id;
+  }
     return param.status;
 }
 
@@ -317,14 +329,16 @@ ProcConvertSelection(ClientPtr client)
     };
     CallCallbacks(&SelectionFilterCallback, &param);
     if (param.skip) {
-        if (param.status != Success)
-            client->errorValue = stuff->selection;
+      if (param.status != Success) {
+        client->errorValue = stuff->selection;
+      }
         return param.status;
     }
 
     rc = dixLookupWindow(&pWin, param.requestor, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     paramsOkay = ValidAtom(param.selection) && ValidAtom(param.target);
     paramsOkay &= (param.property == None) || ValidAtom(param.property);
@@ -333,14 +347,16 @@ ProcConvertSelection(ClientPtr client)
         return BadAtom;
     }
 
-    if (stuff->time == CurrentTime)
-        UpdateCurrentTime();
+    if (stuff->time == CurrentTime) {
+      UpdateCurrentTime();
+    }
 
     rc = dixLookupSelection(&pSel, param.selection, client, DixReadAccess);
 
     memset(&event, 0, sizeof(xEvent));
-    if (rc != Success && rc != BadMatch)
-        return rc;
+    if (rc != Success && rc != BadMatch) {
+      return rc;
+    }
 
     /* If the specified selection has an owner, the X server sends
        SelectionRequest event to that owner */
@@ -361,8 +377,9 @@ ProcConvertSelection(ClientPtr client)
 
         CallCallbacks(&SelectionFilterCallback, &evParam);
         if (evParam.skip) {
-            if (evParam.status != Success)
-                client->errorValue = stuff->selection;
+          if (evParam.status != Success) {
+            client->errorValue = stuff->selection;
+          }
             return evParam.status;
         }
 
@@ -382,8 +399,9 @@ ProcConvertSelection(ClientPtr client)
     param.property = None;
     CallCallbacks(&SelectionFilterCallback, &param);
     if (param.skip) {
-        if (param.status != Success)
-            client->errorValue = stuff->selection;
+      if (param.status != Success) {
+        client->errorValue = stuff->selection;
+      }
         return param.status;
     }
 

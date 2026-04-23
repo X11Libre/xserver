@@ -150,13 +150,15 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
     borderSize.y1 = pParent->drawable.y - wBorderWidth(pParent);
     dx = (int) pParent->drawable.x + (int) pParent->drawable.width +
         wBorderWidth(pParent);
-    if (dx > 32767)
-        dx = 32767;
+    if (dx > 32767) {
+      dx = 32767;
+    }
     borderSize.x2 = dx;
     dy = (int) pParent->drawable.y + (int) pParent->drawable.height +
         wBorderWidth(pParent);
-    if (dy > 32767)
-        dy = 32767;
+    if (dy > 32767) {
+      dy = 32767;
+    }
     borderSize.y2 = dy;
 
     oldVis = pParent->visibility;
@@ -189,10 +191,10 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
     }
 
     pParent->visibility = newVis;
-    if (oldVis != newVis &&
-        ((pParent->
-          eventMask | wOtherEventMasks(pParent)) & VisibilityChangeMask))
-        SendVisibilityNotify(pParent);
+    if (oldVis != newVis && ((pParent->eventMask | wOtherEventMasks(pParent)) &
+                             VisibilityChangeMask)) {
+      SendVisibilityNotify(pParent);
+    }
 
     dx = pParent->drawable.x - pParent->valdata->before.oldAbsCorner.x;
     dy = pParent->drawable.y - pParent->valdata->before.oldAbsCorner.y;
@@ -217,9 +219,9 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
                         RegionTranslate(&pChild->borderClip, dx, dy);
                         RegionTranslate(&pChild->clipList, dx, dy);
                         pChild->drawable.serialNumber = NEXT_SERIAL_NUMBER;
-                        if (pScreen->ClipNotify)
-                            (*pScreen->ClipNotify) (pChild, dx, dy);
-
+                        if (pScreen->ClipNotify) {
+                          (*pScreen->ClipNotify)(pChild, dx, dy);
+                        }
                     }
                     if (pChild->valdata) {
                         RegionNull(&pChild->valdata->after.borderExposed);
@@ -235,10 +237,12 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
                         continue;
                     }
                 }
-                while (!pChild->nextSib && (pChild != pParent))
-                    pChild = pChild->parent;
-                if (pChild == pParent)
-                    break;
+                while (!pChild->nextSib && (pChild != pParent)) {
+                  pChild = pChild->parent;
+                }
+                if (pChild == pParent) {
+                  break;
+                }
                 pChild = pChild->nextSib;
             }
             return;
@@ -309,9 +313,9 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
          */
 
         RegionIntersect(universe, universe, &pParent->winSize);
+    } else {
+      RegionCopy(&pParent->borderClip, universe);
     }
-    else
-        RegionCopy(&pParent->borderClip, universe);
 
     if ((pChild = pParent->firstChild) && pParent->mapped) {
         RegionNull(&childUniverse);
@@ -320,14 +324,16 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
             ((pChild->drawable.y == pParent->lastChild->drawable.y) &&
              (pChild->drawable.x < pParent->lastChild->drawable.x))) {
             for (; pChild; pChild = pChild->nextSib) {
-                if (pChild->viewable)
-                    RegionAppend(&childUnion, &pChild->borderSize);
+              if (pChild->viewable) {
+                RegionAppend(&childUnion, &pChild->borderSize);
+              }
             }
         }
         else {
             for (pChild = pParent->lastChild; pChild; pChild = pChild->prevSib) {
-                if (pChild->viewable)
-                    RegionAppend(&childUnion, &pChild->borderSize);
+              if (pChild->viewable) {
+                RegionAppend(&childUnion, &pChild->borderSize);
+              }
             }
         }
         RegionValidate(&childUnion, &overlap);
@@ -354,12 +360,14 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
                  * from the current universe, thus denying its space to any
                  * other sibling.
                  */
-                if (overlap)
-                    RegionSubtract(universe, universe, &pChild->borderSize);
+                if (overlap) {
+                  RegionSubtract(universe, universe, &pChild->borderSize);
+                }
             }
         }
-        if (!overlap)
-            RegionSubtract(universe, universe, &childUnion);
+        if (!overlap) {
+          RegionSubtract(universe, universe, &childUnion);
+        }
         RegionUninit(&childUnion);
         RegionUninit(&childUniverse);
     }                           /* if any children */
@@ -395,8 +403,9 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
 
     pParent->drawable.serialNumber = NEXT_SERIAL_NUMBER;
 
-    if (pScreen->ClipNotify)
-        (*pScreen->ClipNotify) (pParent, dx, dy);
+    if (pScreen->ClipNotify) {
+      (*pScreen->ClipNotify)(pParent, dx, dy);
+    }
 }
 
 static void
@@ -410,18 +419,21 @@ RootlessTreeObscured(WindowPtr pParent)
         if (pChild->viewable) {
             oldVis = pChild->visibility;
             if (oldVis != (pChild->visibility = VisibilityFullyObscured) &&
-                ((pChild->
-                  eventMask | wOtherEventMasks(pChild)) & VisibilityChangeMask))
-                SendVisibilityNotify(pChild);
+                ((pChild->eventMask | wOtherEventMasks(pChild)) &
+                 VisibilityChangeMask)) {
+              SendVisibilityNotify(pChild);
+            }
             if (pChild->firstChild) {
                 pChild = pChild->firstChild;
                 continue;
             }
         }
-        while (!pChild->nextSib && (pChild != pParent))
-            pChild = pChild->parent;
-        if (pChild == pParent)
-            break;
+        while (!pChild->nextSib && (pChild != pParent)) {
+          pChild = pChild->parent;
+        }
+        if (pChild == pParent) {
+          break;
+        }
         pChild = pChild->nextSib;
     }
 }
@@ -477,8 +489,9 @@ RootlessMiValidateTree(WindowPtr pRoot, /* Parent to validate */
     register WindowPtr pWin;
 
     pScreen = pRoot->drawable.pScreen;
-    if (pChild == NullWindow)
-        pChild = pRoot->firstChild;
+    if (pChild == NullWindow) {
+      pChild = pRoot->firstChild;
+    }
 
     RegionNull(&childClip);
     RegionNull(&exposed);
@@ -509,8 +522,9 @@ RootlessMiValidateTree(WindowPtr pRoot, /* Parent to validate */
         else {
             if (pWin->valdata) {
                 RegionEmpty(&pWin->clipList);
-                if (pScreen->ClipNotify)
-                    (*pScreen->ClipNotify) (pWin, 0, 0);
+                if (pScreen->ClipNotify) {
+                  (*pScreen->ClipNotify)(pWin, 0, 0);
+                }
                 RegionEmpty(&pWin->borderClip);
                 pWin->valdata = NULL;
             }

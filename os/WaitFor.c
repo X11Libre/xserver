@@ -114,8 +114,9 @@ static inline OsTimerPtr
 first_timer(void)
 {
     /* inline xorg_list_is_empty which can't handle volatile */
-    if (timers.next == &timers)
-        return NULL;
+    if (timers.next == &timers) {
+      return NULL;
+    }
     return xorg_list_first_entry(&timers, struct _OsTimerRec, list);
 }
 
@@ -136,8 +137,9 @@ check_timers(void)
             DoTimers(now);
         } else {
             /* Make sure the timeout is sane */
-            if (timeout < timer->delta + 250)
-                return timeout;
+            if (timeout < timer->delta + 250) {
+              return timeout;
+            }
 
             /* time has rewound.  reset the timers. */
             CheckAllTimers();
@@ -194,38 +196,45 @@ WaitForSomething(Bool are_ready)
         timeout = check_timers();
         are_ready = clients_are_ready();
 
-        if (are_ready)
-            timeout = 0;
+        if (are_ready) {
+          timeout = 0;
+        }
 
         BlockHandler(&timeout);
-        if (NewOutputPending)
-            FlushAllOutput();
+        if (NewOutputPending) {
+          FlushAllOutput();
+        }
         /* keep this check close to select() call to minimize race */
-        if (dispatchException)
-            i = -1;
-        else
-            i = ospoll_wait(server_poll, timeout);
+        if (dispatchException) {
+          i = -1;
+        } else {
+          i = ospoll_wait(server_poll, timeout);
+        }
         pollerr = GetErrno();
         WakeupHandler(i);
         if (i <= 0) {           /* An error or timeout occurred */
-            if (dispatchException)
-                return FALSE;
+          if (dispatchException) {
+            return FALSE;
+          }
             if (i < 0) {
                 if (pollerr != EINTR && ossock_wouldblock(pollerr)) {
                     ErrorF("WaitForSomething(): poll: %s\n",
                            strerror(pollerr));
                 }
             }
-        } else
-            are_ready = clients_are_ready();
+        } else {
+          are_ready = clients_are_ready();
+        }
 
-        if (InputCheckPending())
-            return FALSE;
+        if (InputCheckPending()) {
+          return FALSE;
+        }
 
         if (are_ready) {
             were_ready = TRUE;
-            if (!timer_is_running)
-                SmartScheduleStartTimer();
+            if (!timer_is_running) {
+              SmartScheduleStartTimer();
+            }
             return TRUE;
         }
     }
@@ -237,8 +246,9 @@ AdjustWaitForDelay(void *waitTime, int newdelay)
     int *timeoutp = waitTime;
     int timeout = *timeoutp;
 
-    if (timeout < 0 || newdelay < timeout)
-        *timeoutp = newdelay;
+    if (timeout < 0 || newdelay < timeout) {
+      *timeoutp = newdelay;
+    }
 }
 
 static inline Bool timer_pending(OsTimerPtr timer) {
@@ -273,8 +283,9 @@ DoTimer(OsTimerPtr timer, CARD32 now)
 
     xorg_list_del(&timer->list);
     newTime = (*timer->callback) (timer, now, timer->arg);
-    if (newTime)
-        TimerSet(timer, 0, newTime, timer->callback, timer->arg);
+    if (newTime) {
+      TimerSet(timer, 0, newTime, timer->callback, timer->arg);
+    }
 }
 
 void DoTimers(CARD32 now)
@@ -283,8 +294,9 @@ void DoTimers(CARD32 now)
 
     input_lock();
     while ((timer = first_timer())) {
-        if ((int) (timer->expires - now) > 0)
-            break;
+      if ((int)(timer->expires - now) > 0) {
+        break;
+      }
         DoTimer(timer, now);
     }
     input_unlock();
@@ -299,21 +311,24 @@ TimerSet(OsTimerPtr timer, int flags, CARD32 millis,
 
     if (!timer) {
         timer = calloc(1, sizeof(struct _OsTimerRec));
-        if (!timer)
-            return NULL;
+        if (!timer) {
+          return NULL;
+        }
         xorg_list_init(&timer->list);
     }
     else {
         input_lock();
         if (timer_pending(timer)) {
             xorg_list_del(&timer->list);
-            if (flags & TimerForceOld)
-                (void) (*timer->callback) (timer, now, timer->arg);
+            if (flags & TimerForceOld) {
+              (void)(*timer->callback)(timer, now, timer->arg);
+            }
         }
         input_unlock();
     }
-    if (!millis)
-        return timer;
+    if (!millis) {
+      return timer;
+    }
     if (flags & TimerAbsolute) {
         timer->delta = millis - now;
     }
@@ -327,15 +342,17 @@ TimerSet(OsTimerPtr timer, int flags, CARD32 millis,
     input_lock();
 
     /* Sort into list */
-    xorg_list_for_each_entry(existing, &timers, list)
-        if ((int) (existing->expires - millis) > 0)
-            break;
+    xorg_list_for_each_entry(existing, &timers,
+                             list) if ((int)(existing->expires - millis) > 0) {
+      break;
+    }
     /* This even works at the end of the list -- existing->list will be timers */
     xorg_list_append(&timer->list, &existing->list);
 
     /* Check to see if the timer is ready to run now */
-    if ((int) (millis - now) <= 0)
-        DoTimer(timer, now);
+    if ((int)(millis - now) <= 0) {
+      DoTimer(timer, now);
+    }
 
     input_unlock();
     return timer;
@@ -348,8 +365,9 @@ TimerForce(OsTimerPtr timer)
 
     input_lock();
     pending = timer_pending(timer);
-    if (pending)
-        DoTimer(timer, GetTimeInMillis());
+    if (pending) {
+      DoTimer(timer, GetTimeInMillis());
+    }
     input_unlock();
     return pending;
 }
@@ -357,8 +375,9 @@ TimerForce(OsTimerPtr timer)
 void
 TimerCancel(OsTimerPtr timer)
 {
-    if (!timer)
-        return;
+  if (!timer) {
+    return;
+  }
     input_lock();
     xorg_list_del(&timer->list);
     input_unlock();
@@ -367,8 +386,9 @@ TimerCancel(OsTimerPtr timer)
 void
 TimerFree(OsTimerPtr timer)
 {
-    if (!timer)
-        return;
+  if (!timer) {
+    return;
+  }
     TimerCancel(timer);
     free(timer);
 }
@@ -446,12 +466,14 @@ ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
      * Only do the screensaver checks if we're not in a DPMS
      * power saving mode
      */
-    if (DPMSPowerLevel != DPMSModeOn)
-        return nextTimeout;
+    if (DPMSPowerLevel != DPMSModeOn) {
+      return nextTimeout;
+    }
 #endif                          /* DPMSExtension */
 
-    if (!ScreenSaverTime)
-        return nextTimeout;
+    if (!ScreenSaverTime) {
+      return nextTimeout;
+    }
 
     if (timeout < ScreenSaverTime) {
         return nextTimeout > 0 ?
@@ -492,14 +514,15 @@ SetScreenSaverTimer(void)
          * A higher DPMS level has a timeout that's either less
          * than or equal to that of a lower DPMS level.
          */
-        if (DPMSStandbyTime > 0)
-            timeout = DPMSStandbyTime;
+        if (DPMSStandbyTime > 0) {
+          timeout = DPMSStandbyTime;
 
-        else if (DPMSSuspendTime > 0)
-            timeout = DPMSSuspendTime;
+        } else if (DPMSSuspendTime > 0) {
+          timeout = DPMSSuspendTime;
 
-        else if (DPMSOffTime > 0)
-            timeout = DPMSOffTime;
+        } else if (DPMSOffTime > 0) {
+          timeout = DPMSOffTime;
+        }
     }
 #endif
 

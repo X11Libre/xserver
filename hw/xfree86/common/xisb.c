@@ -41,8 +41,9 @@ XISBuffer *
 XisbNew(int fd, ssize_t size)
 {
     XISBuffer *b = calloc(1, sizeof(XISBuffer));
-    if (!b)
-        return NULL;
+    if (!b) {
+      return NULL;
+    }
     b->buf = calloc(sizeof(unsigned char), size);
     if (!b->buf) {
         free(b);
@@ -72,8 +73,9 @@ XisbRead(XISBuffer * b)
 
     if (b->current >= b->end) {
         if (b->block_duration >= 0) {
-            if (xf86WaitForInput(b->fd, b->block_duration) < 1)
-                return -1;
+          if (xf86WaitForInput(b->fd, b->block_duration) < 1) {
+            return -1;
+          }
         }
         else {
             /*
@@ -96,9 +98,10 @@ XisbRead(XISBuffer * b)
             break;
         }
     }
-    if (b->trace)
-        ErrorF("read 0x%02x (%c)\n", b->buf[b->current],
-               isprint(b->buf[b->current]) ? b->buf[b->current] : '.');
+    if (b->trace) {
+      ErrorF("read 0x%02x (%c)\n", b->buf[b->current],
+             isprint(b->buf[b->current]) ? b->buf[b->current] : '.');
+    }
 
     return b->buf[b->current++];
 }

@@ -163,8 +163,10 @@ XvExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, sizeof(XvScreenRec)))
-        return;
+    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN,
+                               sizeof(XvScreenRec))) {
+      return;
+    }
 
     /* Look to see if any screens were initialized; if not then
        init global variables so the extension can function */
@@ -207,8 +209,9 @@ static Bool
 CreateResourceTypes(void)
 {
 
-    if (XvResourceGeneration == serverGeneration)
-        return TRUE;
+  if (XvResourceGeneration == serverGeneration) {
+    return TRUE;
+  }
 
     XvResourceGeneration = serverGeneration;
 
@@ -279,8 +282,10 @@ XvScreenInit(ScreenPtr pScreen)
         XvScreenGeneration = serverGeneration;
     }
 
-    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, sizeof(XvScreenRec)))
-        return BadAlloc;
+    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN,
+                               sizeof(XvScreenRec))) {
+      return BadAlloc;
+    }
 
     dixScreenHookWindowDestroy(pScreen, XvWindowDestroy);
     dixScreenHookClose(pScreen, XvScreenClose);
@@ -385,8 +390,9 @@ XvdiDestroyVideoNotifyList(void *pn, XID id)
 
     while (cpn) {
         npn = cpn->next;
-        if (cpn->client)
-            FreeResource(cpn->id, XvRTVideoNotify);
+        if (cpn->client) {
+          FreeResource(cpn->id, XvRTVideoNotify);
+        }
         free(cpn);
         cpn = npn;
     }
@@ -739,24 +745,28 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
 
     rc = dixLookupResourceByType((void **) &pn, pDraw->id,
                                  XvRTVideoNotifyList, client, DixWriteAccess);
-    if (rc != Success && rc != BadValue)
-        return rc;
+    if (rc != Success && rc != BadValue) {
+      return rc;
+    }
 
     /* IF ONE DONES'T EXIST AND NO MASK, THEN JUST RETURN */
 
-    if (!onoff && !pn)
-        return Success;
+    if (!onoff && !pn) {
+      return Success;
+    }
 
     /* IF ONE DOESN'T EXIST CREATE IT AND ADD A RESOURCE SO THAT THE LIST
        WILL BE DELETED WHEN THE DRAWABLE IS DESTROYED */
 
     if (!pn) {
-        if (!(tpn = calloc(1, sizeof(XvVideoNotifyRec))))
-            return BadAlloc;
+      if (!(tpn = calloc(1, sizeof(XvVideoNotifyRec)))) {
+        return BadAlloc;
+      }
         tpn->next = NULL;
         tpn->client = NULL;
-        if (!AddResource(pDraw->id, XvRTVideoNotifyList, tpn))
-            return BadAlloc;
+        if (!AddResource(pDraw->id, XvRTVideoNotifyList, tpn)) {
+          return BadAlloc;
+        }
     }
     else {
         /* LOOK TO SEE IF ENTRY ALREADY EXISTS */
@@ -771,15 +781,17 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
                 }
                 return Success;
             }
-            if (!tpn->client)
-                fpn = tpn;      /* TAKE NOTE OF FREE ENTRY */
+            if (!tpn->client) {
+              fpn = tpn; /* TAKE NOTE OF FREE ENTRY */
+            }
             tpn = tpn->next;
         }
 
         /* IF TURNING OFF, THEN JUST RETURN */
 
-        if (!onoff)
-            return Success;
+        if (!onoff) {
+          return Success;
+        }
 
         /* IF ONE ISN'T FOUND THEN ALLOCATE ONE AND LINK IT INTO THE LIST */
 
@@ -787,8 +799,9 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
             tpn = fpn;
         }
         else {
-            if (!(tpn = calloc(1, sizeof(XvVideoNotifyRec))))
-                return BadAlloc;
+          if (!(tpn = calloc(1, sizeof(XvVideoNotifyRec)))) {
+            return BadAlloc;
+          }
             tpn->next = pn->next;
             pn->next = tpn;
         }
@@ -799,8 +812,9 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
 
     tpn->client = NULL;
     tpn->id = FakeClientID(client->index);
-    if (!AddResource(tpn->id, XvRTVideoNotify, tpn))
-        return BadAlloc;
+    if (!AddResource(tpn->id, XvRTVideoNotify, tpn)) {
+      return BadAlloc;
+    }
 
     tpn->client = client;
     return Success;
@@ -817,10 +831,12 @@ XvdiSelectPortNotify(ClientPtr client, XvPortPtr pPort, BOOL onoff)
     tpn = NULL;
     pn = pPort->pNotify;
     while (pn) {
-        if (!pn->client)
-            tpn = pn;           /* TAKE NOTE OF FREE ENTRY */
-        if (pn->client == client)
-            break;
+      if (!pn->client) {
+        tpn = pn; /* TAKE NOTE OF FREE ENTRY */
+      }
+      if (pn->client == client) {
+        break;
+      }
         pn = pn->next;
     }
 
@@ -841,16 +857,18 @@ XvdiSelectPortNotify(ClientPtr client, XvPortPtr pPort, BOOL onoff)
        CREATE A NEW ONE AND ADD IT TO THE BEGINNING OF THE LIST */
 
     if (!tpn) {
-        if (!(tpn = calloc(1, sizeof(XvPortNotifyRec))))
-            return BadAlloc;
+      if (!(tpn = calloc(1, sizeof(XvPortNotifyRec)))) {
+        return BadAlloc;
+      }
         tpn->next = pPort->pNotify;
         pPort->pNotify = tpn;
     }
 
     tpn->client = client;
     tpn->id = FakeClientID(client->index);
-    if (!AddResource(tpn->id, XvRTPortNotify, tpn))
-        return BadAlloc;
+    if (!AddResource(tpn->id, XvRTPortNotify, tpn)) {
+      return BadAlloc;
+    }
 
     return Success;
 
@@ -898,15 +916,17 @@ XvdiMatchPort(XvPortPtr pPort, DrawablePtr pDraw)
 
     pa = pPort->pAdaptor;
 
-    if (pa->pScreen != pDraw->pScreen)
-        return BadMatch;
+    if (pa->pScreen != pDraw->pScreen) {
+      return BadMatch;
+    }
 
     nf = pa->nFormats;
     pf = pa->pFormats;
 
     while (nf--) {
-        if (pf->depth == pDraw->depth)
-            return Success;
+      if (pf->depth == pDraw->depth) {
+        return Success;
+      }
         pf++;
     }
 
@@ -923,8 +943,9 @@ XvdiSetPortAttribute(ClientPtr client,
     status =
         (*pPort->pAdaptor->ddSetPortAttribute) (pPort, attribute,
                                                 value);
-    if (status == Success)
-        XvdiSendPortNotify(pPort, attribute, value);
+    if (status == Success) {
+      XvdiSendPortNotify(pPort, attribute, value);
+    }
 
     return status;
 }
@@ -978,8 +999,9 @@ XvFreeAdaptor(XvAdaptorPtr pAdaptor)
     if (pAdaptor->pEncodings) {
         XvEncodingPtr pEncode = pAdaptor->pEncodings;
 
-        for (i = 0; i < pAdaptor->nEncodings; i++, pEncode++)
-            free(pEncode->name);
+        for (i = 0; i < pAdaptor->nEncodings; i++, pEncode++) {
+          free(pEncode->name);
+        }
         free(pAdaptor->pEncodings);
         pAdaptor->pEncodings = NULL;
     }
@@ -993,8 +1015,9 @@ XvFreeAdaptor(XvAdaptorPtr pAdaptor)
     if (pAdaptor->pAttributes) {
         XvAttributePtr pAttribute = pAdaptor->pAttributes;
 
-        for (i = 0; i < pAdaptor->nAttributes; i++, pAttribute++)
-            free(pAttribute->name);
+        for (i = 0; i < pAdaptor->nAttributes; i++, pAttribute++) {
+          free(pAttribute->name);
+        }
         free(pAdaptor->pAttributes);
         pAdaptor->pAttributes = NULL;
     }
@@ -1017,8 +1040,9 @@ XvFillColorKey(DrawablePtr pDraw, CARD32 key, RegionPtr region)
     GCPtr gc;
 
     gc = GetScratchGC(pDraw->depth, pScreen);
-    if (!gc)
-        return;
+    if (!gc) {
+      return;
+    }
 
     pval[0].val = key;
     pval[1].val = IncludeInferiors;

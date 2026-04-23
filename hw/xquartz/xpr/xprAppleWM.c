@@ -55,14 +55,16 @@ xprSetWindowLevel(WindowPtr pWin, int level)
     }
 
     wid = x_cvt_vptr_to_uint(RootlessFrameForWindow(pWin, TRUE));
-    if (wid == 0)
-        return BadWindow;
+    if (wid == 0) {
+      return BadWindow;
+    }
 
     RootlessStopDrawing(pWin, FALSE);
     winRec = WINREC(pWin);
 
-    if (!winRec)
-        return BadWindow;
+    if (!winRec) {
+      return BadWindow;
+    }
 
     if (XQuartzIsRootless)
         wc.window_level = normal_window_levels[level];
@@ -87,14 +89,16 @@ xprAttachTransient(WindowPtr pWinChild, WindowPtr pWinParent)
     xp_window_changes wc;
 
     child_wid = x_cvt_vptr_to_uint(RootlessFrameForWindow(pWinChild, TRUE));
-    if (child_wid == 0)
-        return BadWindow;
+    if (child_wid == 0) {
+      return BadWindow;
+    }
 
     if (pWinParent) {
         parent_wid =
             x_cvt_vptr_to_uint(RootlessFrameForWindow(pWinParent, TRUE));
-        if (parent_wid == 0)
-            return BadWindow;
+        if (parent_wid == 0) {
+          return BadWindow;
+        }
     }
     else {
         parent_wid = 0;
@@ -124,8 +128,9 @@ xprFrameDraw(WindowPtr pWin,
     xp_window_id wid;
 
     wid = x_cvt_vptr_to_uint(RootlessFrameForWindow(pWin, FALSE));
-    if (wid == 0)
-        return BadWindow;
+    if (wid == 0) {
+      return BadWindow;
+    }
 
     if (xp_frame_draw(wid, class, attr, outer, inner,
                       title_len, title_bytes) != Success) {

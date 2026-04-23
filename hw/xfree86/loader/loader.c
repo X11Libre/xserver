@@ -109,8 +109,9 @@ LoaderOpen(const char *module, int *errmaj)
 
     if (!(ret = dlopen(module, RTLD_LAZY | RTLD_GLOBAL))) {
         LogMessage(X_ERROR, "Failed to load %s: %s\n", module, dlerror());
-        if (errmaj)
-            *errmaj = LDR_NOLOAD;
+        if (errmaj) {
+          *errmaj = LDR_NOLOAD;
+        }
         return NULL;
     }
 
@@ -124,14 +125,17 @@ LoaderSymbol(const char *name)
     void *p;
 
     p = dlsym(RTLD_DEFAULT, name);
-    if (p != NULL)
-        return p;
+    if (p != NULL) {
+      return p;
+    }
 
-    if (!global_scope)
-        global_scope = dlopen(NULL, RTLD_LAZY | RTLD_GLOBAL);
+    if (!global_scope) {
+      global_scope = dlopen(NULL, RTLD_LAZY | RTLD_GLOBAL);
+    }
 
-    if (global_scope)
-        return dlsym(global_scope, name);
+    if (global_scope) {
+      return dlsym(global_scope, name);
+    }
 
     return NULL;
 }
@@ -147,8 +151,9 @@ void
 LoaderUnload(const char *name, void *handle)
 {
     LogMessageVerb(X_INFO, 1, "Unloading %s\n", name);
-    if (handle)
-        dlclose(handle);
+    if (handle) {
+      dlclose(handle);
+    }
 }
 
 Bool LoaderIgnoreAbi = FALSE;

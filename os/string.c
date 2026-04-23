@@ -15,8 +15,9 @@
 char *
 Xstrdup(const char *s)
 {
-    if (s == NULL)
-        return NULL;
+  if (s == NULL) {
+    return NULL;
+  }
     return strdup(s);
 }
 
@@ -25,12 +26,14 @@ XNFstrdup(const char *s)
 {
     char *ret;
 
-    if (s == NULL)
-        return NULL;
+    if (s == NULL) {
+      return NULL;
+    }
 
     ret = strdup(s);
-    if (!ret)
-        FatalError("XNFstrdup: Out of memory");
+    if (!ret) {
+      FatalError("XNFstrdup: Out of memory");
+    }
     return ret;
 }
 
@@ -45,22 +48,27 @@ xstrtokenize(const char *str, const char *separators)
     char *tok, *tmp;
     unsigned num = 0, n;
 
-    if (!str)
-        return NULL;
+    if (!str) {
+      return NULL;
+    }
     list = calloc(1, sizeof(*list));
-    if (!list)
-        return NULL;
+    if (!list) {
+      return NULL;
+    }
     tmp = strdup(str);
-    if (!tmp)
-        goto error;
+    if (!tmp) {
+      goto error;
+    }
     for (tok = strtok(tmp, separators); tok; tok = strtok(NULL, separators)) {
         nlist = reallocarray(list, num + 2, sizeof(*list));
-        if (!nlist)
-            goto error;
+        if (!nlist) {
+          goto error;
+        }
         list = nlist;
         list[num] = strdup(tok);
-        if (!list[num])
-            goto error;
+        if (!list[num]) {
+          goto error;
+        }
         list[++num] = NULL;
     }
     free(tmp);
@@ -68,8 +76,9 @@ xstrtokenize(const char *str, const char *separators)
 
  error:
     free(tmp);
-    for (n = 0; n < num; n++)
-        free(list[n]);
+    for (n = 0; n < num; n++) {
+      free(list[n]);
+    }
     free(list);
     return NULL;
 }

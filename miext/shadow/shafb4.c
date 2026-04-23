@@ -98,8 +98,9 @@ shadowUpdateAfb4(ScreenPtr pScreen, shadowBufPtr pBuf)
 
     fbGetDrawable(&pShadow->drawable, shaBase, shaStride, shaBpp, shaXoff,
                   shaYoff);
-    if (sizeof(FbBits) != sizeof(CARD32))
-        shaStride = shaStride * sizeof(FbBits) / sizeof(CARD32);
+    if (sizeof(FbBits) != sizeof(CARD32)) {
+      shaStride = shaStride * sizeof(FbBits) / sizeof(CARD32);
+    }
 
     while (nbox--) {
         x = pbox->x1;
@@ -121,8 +122,9 @@ shadowUpdateAfb4(ScreenPtr pScreen, shadowBufPtr pBuf)
                                              SHADOW_WINDOW_WRITE,
                                              &winStride,
                                              pBuf->closure);
-            if (!win)
-                return;
+            if (!win) {
+              return;
+            }
             for (i = 0; i < n; i++) {
                 memcpy(d.bytes, sha, sizeof(d.bytes));
                 c2p_32x4(d.words);

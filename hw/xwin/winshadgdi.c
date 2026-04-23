@@ -447,9 +447,10 @@ winShadowUpdateGDI(ScreenPtr pScreen, shadowBufPtr pBuf)
      * Return immediately if the app is not active
      * and we are fullscreen, or if we have a bad display depth
      */
-    if ((!pScreenPriv->fActive && pScreenInfo->fFullScreen)
-        || pScreenPriv->fBadDepth)
-        return;
+    if ((!pScreenPriv->fActive && pScreenInfo->fFullScreen) ||
+        pScreenPriv->fBadDepth) {
+      return;
+    }
 
 #ifdef XWIN_UPDATESTATS
     ++s_dwTotalUpdates;
@@ -594,8 +595,9 @@ winCloseScreenShadowGDI(ScreenPtr pScreen)
     ReleaseDC(pScreenPriv->hwndScreen, pScreenPriv->hdcScreen);
 
     /* Delete tray icon, if we have one */
-    if (!pScreenInfo->fNoTrayIcon)
-        winDeleteNotifyIcon(pScreenPriv);
+    if (!pScreenInfo->fNoTrayIcon) {
+      winDeleteNotifyIcon(pScreenPriv);
+    }
 
     /* Free the exit confirmation dialog box, if it exists */
     if (g_hDlgExit != NULL) {
@@ -848,16 +850,14 @@ winBltExposedWindowRegionShadowGDI(ScreenPtr pScreen, WindowPtr pWin)
         SelectObject(hdcPixmap, hBitmap);
 
         /* Blt from the window bitmap to the invalidated region */
-        if (!BitBlt(hdcUpdate,
-                    ps.rcPaint.left, ps.rcPaint.top,
+        if (!BitBlt(hdcUpdate, ps.rcPaint.left, ps.rcPaint.top,
                     ps.rcPaint.right - ps.rcPaint.left,
-                    ps.rcPaint.bottom - ps.rcPaint.top,
-                    hdcPixmap,
+                    ps.rcPaint.bottom - ps.rcPaint.top, hdcPixmap,
                     ps.rcPaint.left + pWin->borderWidth,
-                    ps.rcPaint.top + pWin->borderWidth,
-                    SRCCOPY))
-            ErrorF("winBltExposedWindowRegionShadowGDI - BitBlt failed: 0x%08x\n",
-                   (unsigned int)GetLastError());
+                    ps.rcPaint.top + pWin->borderWidth, SRCCOPY)) {
+          ErrorF("winBltExposedWindowRegionShadowGDI - BitBlt failed: 0x%08x\n",
+                 (unsigned int)GetLastError());
+        }
 
         /* Release DC */
         DeleteDC(hdcPixmap);
@@ -1252,11 +1252,11 @@ winSetEngineFunctionsShadowGDI(ScreenPtr pScreen)
     pScreenPriv->pwinCloseScreen = winCloseScreenShadowGDI;
     pScreenPriv->pwinInitVisuals = winInitVisualsShadowGDI;
     pScreenPriv->pwinAdjustVideoMode = winAdjustVideoModeShadowGDI;
-    if (pScreenInfo->fFullScreen)
-        pScreenPriv->pwinCreateBoundingWindow =
-            winCreateBoundingWindowFullScreen;
-    else
-        pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowWindowed;
+    if (pScreenInfo->fFullScreen) {
+      pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowFullScreen;
+    } else {
+      pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowWindowed;
+    }
     pScreenPriv->pwinBltExposedRegions = winBltExposedRegionsShadowGDI;
     pScreenPriv->pwinBltExposedWindowRegion = winBltExposedWindowRegionShadowGDI;
     pScreenPriv->pwinActivateApp = winActivateAppShadowGDI;

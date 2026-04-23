@@ -18,8 +18,9 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(DeviceAccessCallbackParam);
 
-    if (subj->ns->superPower)
-        goto pass;
+    if (subj->ns->superPower) {
+      goto pass;
+    }
 
     // should be safe to pass for anybody
     switch (client->majorOp) {

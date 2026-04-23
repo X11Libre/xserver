@@ -203,10 +203,11 @@ fbBltOne(FbStip * src, FbStride srcStride,      /* FbStip units per scanline */
 
     copy = FALSE;
     transparent = FALSE;
-    if (bgand == 0 && fgand == 0)
-        copy = TRUE;
-    else if (bgand == FB_ALLONES && bgxor == 0)
-        transparent = TRUE;
+    if (bgand == 0 && fgand == 0) {
+      copy = TRUE;
+    } else if (bgand == FB_ALLONES && bgxor == 0) {
+      transparent = TRUE;
+    }
 
     /*
      * Adjust source and dest to nearest FbBits boundary
@@ -261,8 +262,9 @@ fbBltOne(FbStip * src, FbStride srcStride,      /* FbStip units per scanline */
      * don't count endmask
      */
     nDst = nmiddle;
-    if (startmask)
-        nDst++;
+    if (startmask) {
+      nDst++;
+    }
 
     dstStride -= nDst;
 
@@ -272,12 +274,14 @@ fbBltOne(FbStip * src, FbStride srcStride,      /* FbStip units per scanline */
 
     srcinc = (nDst + unitsPerSrc - 1) / unitsPerSrc;
 
-    if (srcX > dstS)
-        srcinc++;
+    if (srcX > dstS) {
+      srcinc++;
+    }
     if (endmask) {
         endNeedsLoad = nDst % unitsPerSrc == 0;
-        if (endNeedsLoad)
-            srcinc++;
+        if (endNeedsLoad) {
+          srcinc++;
+        }
     }
 
     srcStride -= srcinc;
@@ -288,12 +292,14 @@ fbBltOne(FbStip * src, FbStride srcStride,      /* FbStip units per scanline */
     while (height--) {
         w = nDst;               /* total units across scanline */
         n = unitsPerSrc;        /* units avail in single stipple */
-        if (n > w)
-            n = w;
+        if (n > w) {
+          n = w;
+        }
 
         bitsLeft = 0;
-        if (srcX > dstS)
-            bitsLeft = READ(src++);
+        if (srcX > dstS) {
+          bitsLeft = READ(src++);
+        }
         if (n) {
             /*
              * Load first set of stipple bits
@@ -339,15 +345,17 @@ fbBltOne(FbStip * src, FbStride srcStride,      /* FbStip units per scanline */
                         bits = FbStipLeft(bits, pixelsPerDst);
                     }
                 }
-                if (!w)
-                    break;
+                if (!w) {
+                  break;
+                }
                 /*
                  * Load another set and reset number of available units
                  */
                 LoadBits;
                 n = unitsPerSrc;
-                if (n > w)
-                    n = w;
+                if (n > w) {
+                  n = w;
+                }
             }
         }
         /*
@@ -400,8 +408,9 @@ fbBltPlane(FbBits * src,
     int w;
     int wt;
 
-    if (!width)
-        return;
+    if (!width) {
+      return;
+    }
 
     src += srcX >> FB_SHIFT;
     srcX &= FB_MASK;
@@ -445,17 +454,20 @@ fbBltPlane(FbBits * src,
                 dstUnion = 0;
                 dstBits = 0;
             }
-            if (srcBits & srcMask)
-                dstBits |= dstMask;
+            if (srcBits & srcMask) {
+              dstBits |= dstMask;
+            }
             dstUnion |= dstMask;
-            if (srcBpp == FB_UNIT)
-                srcMask = 0;
-            else
-                srcMask = FbScrRight(srcMask, srcBpp);
+            if (srcBpp == FB_UNIT) {
+              srcMask = 0;
+            } else {
+              srcMask = FbScrRight(srcMask, srcBpp);
+            }
             dstMask = FbStipRight(dstMask, 1);
         }
-        if (dstUnion)
-            WRITE(d, FbStippleRRopMask(READ(d), dstBits,
-                                       fgand, fgxor, bgand, bgxor, dstUnion));
+        if (dstUnion) {
+          WRITE(d, FbStippleRRopMask(READ(d), dstBits, fgand, fgxor, bgand,
+                                     bgxor, dstUnion));
+        }
     }
 }

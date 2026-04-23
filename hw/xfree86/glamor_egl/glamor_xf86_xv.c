@@ -51,8 +51,9 @@ static XF86VideoFormatRec Formats[NUM_FORMATS] = {
 static void
 glamor_xf86_xv_stop_video(ScrnInfoPtr pScrn, void *data, Bool cleanup)
 {
-    if (!cleanup)
-        return;
+  if (!cleanup) {
+    return;
+  }
 
     glamor_xv_stop_video(data);
 }
@@ -132,8 +133,9 @@ glamor_xv_init(ScreenPtr screen, int num_texture_ports)
 
     adapt = calloc(1, sizeof(XF86VideoAdaptorRec) + num_texture_ports *
                    (sizeof(glamor_port_private) + sizeof(DevUnion)));
-    if (adapt == NULL)
-        return NULL;
+    if (adapt == NULL) {
+      return NULL;
+    }
 
     adapt->type = XvWindowMask | XvInputMask | XvImageMask;
     adapt->flags = 0;

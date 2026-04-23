@@ -60,8 +60,9 @@ getMonitorInfo(HMONITOR hMonitor, HDC hdc, LPRECT rect, LPARAM _data)
 bool QueryMonitor(int i, struct GetMonitorInfoData *data)
 {
     /* prepare data */
-    if (data == NULL)
-        return FALSE;
+    if (data == NULL) {
+      return FALSE;
+    }
     memset(data, 0, sizeof(*data));
     data->requestedMonitor = i;
 

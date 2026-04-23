@@ -71,8 +71,9 @@ ProcWindowsDRIQueryDirectRenderingCapable(ClientPtr client)
     REQUEST(xWindowsDRIQueryDirectRenderingCapableReq);
     REQUEST_SIZE_MATCH(xWindowsDRIQueryDirectRenderingCapableReq);
 
-    if (client->swapped)
-        swapl(&stuff->screen);
+    if (client->swapped) {
+      swapl(&stuff->screen);
+    }
 
     xWindowsDRIQueryDirectRenderingCapableReply reply = {
         .isCapable = client->local &&
@@ -98,8 +99,9 @@ ProcWindowsDRIQueryDrawable(ClientPtr client)
     xWindowsDRIQueryDrawableReply reply = { 0 };
     rc = glxWinQueryDrawable(client, stuff->drawable, &(reply.drawable_type), &(reply.handle));
 
-    if (rc)
-        return rc;
+    if (rc) {
+      return rc;
+    }
 
     if (client->swapped) {
         swapl(&reply.handle);

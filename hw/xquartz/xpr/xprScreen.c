@@ -105,10 +105,11 @@ eventHandler(unsigned int type, const void *arg,
         if (arg_size == sizeof(xp_surface_id)) {
             int kind;
 
-            if (type == XP_EVENT_SURFACE_DESTROYED)
-                kind = AppleDRISurfaceNotifyDestroyed;
-            else
-                kind = AppleDRISurfaceNotifyChanged;
+            if (type == XP_EVENT_SURFACE_DESTROYED) {
+              kind = AppleDRISurfaceNotifyDestroyed;
+            } else {
+              kind = AppleDRISurfaceNotifyChanged;
+            }
 
             DRISurfaceNotify(*(xp_surface_id *)arg, kind);
         }
@@ -222,8 +223,9 @@ xprAddPseudoramiXScreens(int *x, int *y, int *width, int *height,
         displayCount = 1;
 
     CGDirectDisplayID *displayList = calloc(displayCount, sizeof(CGDirectDisplayID));
-    if (!displayList)
-        FatalError("Unable to allocate memory for list of displays.\n");
+    if (!displayList) {
+      FatalError("Unable to allocate memory for list of displays.\n");
+    }
     CGGetActiveDisplayList(displayCount, displayList, &displayCount);
     QuartzCopyDisplayIDs(pScreen, displayCount, displayList);
 
@@ -284,8 +286,9 @@ xprDisplayInit(void)
         darwinScreensFound = 1;
     }
 
-    if (xp_init(XP_BACKGROUND_EVENTS | XP_NO_DEFERRED_UPDATES) != Success)
-        FatalError("Could not initialize the Xplugin library.");
+    if (xp_init(XP_BACKGROUND_EVENTS | XP_NO_DEFERRED_UPDATES) != Success) {
+      FatalError("Could not initialize the Xplugin library.");
+    }
 
     xp_select_events(XP_EVENT_DISPLAY_CHANGED
                      | XP_EVENT_WINDOW_STATE_CHANGED
@@ -301,8 +304,9 @@ xprDisplayInit(void)
     xprAppleWMInit();
 
     XQuartzIsRootless = XQuartzRootlessDefault;
-    if (!XQuartzIsRootless)
-        RootlessHideAllWindows();
+    if (!XQuartzIsRootless) {
+      RootlessHideAllWindows();
+    }
 }
 
 /*
@@ -322,13 +326,15 @@ xprAddScreen(int index, ScreenPtr pScreen)
         CFStringRef encStrRef;
 
         modeRef = CGDisplayCopyDisplayMode(kCGDirectMainDisplay);
-        if (!modeRef)
-            goto have_depth;
+        if (!modeRef) {
+          goto have_depth;
+        }
 
         encStrRef = CGDisplayModeCopyPixelEncoding(modeRef);
         CFRelease(modeRef);
-        if (!encStrRef)
-            goto have_depth;
+        if (!encStrRef) {
+          goto have_depth;
+        }
 
         if (CFStringCompare(encStrRef, CFSTR(IO32BitDirectPixels),
                             kCFCompareCaseInsensitive) ==
@@ -437,13 +443,15 @@ xprSetupScreen(int index, ScreenPtr pScreen)
 #ifdef DAMAGE
     // The Damage extension needs to wrap underneath the
     // generic rootless layer, so do it now.
-    if (!DamageSetup(pScreen))
-        return FALSE;
+    if (!DamageSetup(pScreen)) {
+      return FALSE;
+    }
 #endif
 
     // Initialize generic rootless code
-    if (!xprInit(pScreen))
-        return FALSE;
+    if (!xprInit(pScreen)) {
+      return FALSE;
+    }
 
     return DRIFinishScreenInit(pScreen);
 }

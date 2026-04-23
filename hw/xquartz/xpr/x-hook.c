@@ -52,8 +52,9 @@ X_PFX(hook_remove) (x_list * lst, x_hook_function * fun, void *data) {
 
     for (node = lst; node != NULL; node = node->next) {
         cell = node->data;
-        if (CELL_FUN(cell) == fun && CELL_DATA(cell) == data)
-            to_delete = X_PFX(list_prepend) (to_delete, cell);
+        if (CELL_FUN(cell) == fun && CELL_DATA(cell) == data) {
+          to_delete = X_PFX(list_prepend)(to_delete, cell);
+        }
     }
 
     for (node = to_delete; node != NULL; node = node->next) {
@@ -70,8 +71,9 @@ X_EXTERN void
 X_PFX(hook_run) (x_list * lst, void *arg) {
     x_list *node;
 
-    if (!lst)
-        return;
+    if (!lst) {
+      return;
+    }
 
     for (node = lst; node != NULL; node = node->next) {
         x_list *cell = node->data;

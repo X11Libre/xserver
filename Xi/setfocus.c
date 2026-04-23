@@ -81,10 +81,12 @@ ProcXSetDeviceFocus(ClientPtr client)
     DeviceIntPtr dev;
 
     ret = dixLookupDevice(&dev, stuff->device, client, DixSetFocusAccess);
-    if (ret != Success)
-        return ret;
-    if (!dev->focus)
-        return BadDevice;
+    if (ret != Success) {
+      return ret;
+    }
+    if (!dev->focus) {
+      return BadDevice;
+    }
 
     ret = SetInputFocus(client, dev, stuff->focus, stuff->revertTo,
                         stuff->time, TRUE);

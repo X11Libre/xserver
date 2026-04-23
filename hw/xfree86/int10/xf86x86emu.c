@@ -30,8 +30,9 @@ xf86ExecX86int10(xf86Int10InfoPtr pInt)
 {
     int sig = setup_int(pInt);
 
-    if (sig < 0)
-        return;
+    if (sig < 0) {
+      return;
+    }
 
     if (int_handler(pInt)) {
         X86EMU_exec();
@@ -71,8 +72,9 @@ xf86Int10ExecSetup(xf86Int10InfoPtr pInt)
     M.mem_size = 1024 * 1024 + 1024;
     X86EMU_setupPioFuncs(&pioFuncs);
 
-    for (i = 0; i < 256; i++)
-        intFuncs[i] = x86emu_do_int;
+    for (i = 0; i < 256; i++) {
+      intFuncs[i] = x86emu_do_int;
+    }
     X86EMU_setupIntrFuncs(intFuncs);
     return TRUE;
 }

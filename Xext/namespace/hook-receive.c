@@ -23,8 +23,9 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
     struct XnamespaceClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
 
     // send and receive within same namespace permitted without restrictions
-    if (XnsClientSameNS(subj, obj))
-        goto pass;
+    if (XnsClientSameNS(subj, obj)) {
+      goto pass;
+    }
 
     for (int i=0; i<param->count; i++) {
         const int type = param->events[i].u.u.type;
@@ -34,8 +35,10 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                 if (gev->extension == EXTENSION_MAJOR_XINPUT) {
                     switch (gev->evtype) {
                         case XI_RawMotion:
-                            if ((!subj->ns->allowMouseMotion) || !isRootWin(param->pWin))
-                                goto reject;
+                          if ((!subj->ns->allowMouseMotion) ||
+                              !isRootWin(param->pWin)) {
+                            goto reject;
+                          }
                             continue;
                         case XI_RawKeyPress:
                         case XI_RawKeyRelease:

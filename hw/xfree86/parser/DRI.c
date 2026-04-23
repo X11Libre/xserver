@@ -55,18 +55,22 @@ xf86parseDRISection(void)
     while ((token = xf86getToken(DRITab)) != ENDSECTION) {
         switch (token) {
         case GROUP:
-            if ((token = xf86getSubToken(&(ptr->dri_comment))) == XF86_TOKEN_STRING)
-                ptr->dri_group_name = xf86_lex_val.str;
-            else if (token == NUMBER)
-                ptr->dri_group = xf86_lex_val.num;
-            else
-                Error(GROUP_MSG);
+          if ((token = xf86getSubToken(&(ptr->dri_comment))) ==
+              XF86_TOKEN_STRING) {
+            ptr->dri_group_name = xf86_lex_val.str;
+          } else if (token == NUMBER) {
+            ptr->dri_group = xf86_lex_val.num;
+          } else {
+            Error(GROUP_MSG);
+          }
             break;
         case MODE:
-            if (xf86getSubToken(&(ptr->dri_comment)) != NUMBER)
-                Error(NUMBER_MSG, "Mode");
-            if (xf86_lex_val.numType != PARSE_OCTAL)
-                Error(MUST_BE_OCTAL_MSG, xf86_lex_val.num);
+          if (xf86getSubToken(&(ptr->dri_comment)) != NUMBER) {
+            Error(NUMBER_MSG, "Mode");
+          }
+          if (xf86_lex_val.numType != PARSE_OCTAL) {
+            Error(MUST_BE_OCTAL_MSG, xf86_lex_val.num);
+          }
             ptr->dri_mode = xf86_lex_val.num;
             break;
         case EOF_TOKEN:
@@ -95,26 +99,31 @@ xf86parseDRISection(void)
 void
 xf86printDRISection(FILE * cf, XF86ConfDRIPtr ptr)
 {
-    if (ptr == NULL)
-        return;
+  if (ptr == NULL) {
+    return;
+  }
 
     fprintf(cf, "Section \"DRI\"\n");
-    if (ptr->dri_comment)
-        fprintf(cf, "%s", ptr->dri_comment);
-    if (ptr->dri_group_name)
-        fprintf(cf, "\tGroup        \"%s\"\n", ptr->dri_group_name);
-    else if (ptr->dri_group >= 0)
-        fprintf(cf, "\tGroup        %d\n", ptr->dri_group);
-    if (ptr->dri_mode)
-        fprintf(cf, "\tMode         0%o\n", ptr->dri_mode);
+    if (ptr->dri_comment) {
+      fprintf(cf, "%s", ptr->dri_comment);
+    }
+    if (ptr->dri_group_name) {
+      fprintf(cf, "\tGroup        \"%s\"\n", ptr->dri_group_name);
+    } else if (ptr->dri_group >= 0) {
+      fprintf(cf, "\tGroup        %d\n", ptr->dri_group);
+    }
+    if (ptr->dri_mode) {
+      fprintf(cf, "\tMode         0%o\n", ptr->dri_mode);
+    }
     fprintf(cf, "EndSection\n\n");
 }
 
 void
 xf86freeDRI(XF86ConfDRIPtr ptr)
 {
-    if (ptr == NULL)
-        return;
+  if (ptr == NULL) {
+    return;
+  }
 
     TestFree(ptr->dri_comment);
     free(ptr);

@@ -70,13 +70,15 @@ XISendDeviceHierarchyEvent(int flags[MAXDEVICES])
     DeviceIntPtr dev;
     int i;
 
-    if (!flags)
-        return;
+    if (!flags) {
+      return;
+    }
 
     ev = calloc(1, sizeof(xXIHierarchyEvent) +
                 MAXDEVICES * sizeof(xXIHierarchyInfo));
-    if (!ev)
-        return;
+    if (!ev) {
+      return;
+    }
     ev->type = GenericEvent;
     ev->extension = EXTENSION_MAJOR_XINPUT;
     ev->evtype = XI_HierarchyChanged;
@@ -147,11 +149,13 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
 
     rc = AllocDevicePair(client, name, &ptr, &keybd,
                          CorePointerProc, CoreKeyboardProc, TRUE);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
-    if (!c->send_core)
-        ptr->coreEvents = keybd->coreEvents = FALSE;
+    if (!c->send_core) {
+      ptr->coreEvents = keybd->coreEvents = FALSE;
+    }
 
     /* Allocate virtual slave devices for xtest events */
     rc = AllocXTestDevice(client, name, &XTestptr, &XTestkeybd, ptr, keybd);
@@ -190,8 +194,9 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
     flags[XTestptr->id] |= XISlaveAttached;
     flags[XTestkeybd->id] |= XISlaveAttached;
 
-    for (int i = 0; i < currentMaxClients; i++)
-        XIBarrierNewMasterDevice(clients[i], ptr->id);
+    for (int i = 0; i < currentMaxClients; i++) {
+      XIBarrierNewMasterDevice(clients[i], ptr->id);
+    }
 
  unwind:
     free(name);
@@ -206,8 +211,9 @@ disable_clientpointer(DeviceIntPtr dev)
     for (i = 0; i < currentMaxClients; i++) {
         ClientPtr client = clients[i];
 
-        if (client && client->clientPtr == dev)
-            client->clientPtr = NULL;
+        if (client && client->clientPtr == dev) {
+          client->clientPtr = NULL;
+        }
     }
 }
 
@@ -219,8 +225,9 @@ find_disabled_master(int type)
     /* Once a master device is disabled it loses the pairing, so returning the first
      * match is good enough */
     for (dev = inputInfo.off_devices; dev; dev = dev->next) {
-        if (dev->type == type)
-            return dev;
+      if (dev->type == type) {
+        return dev;
+      }
     }
 
     return NULL;
@@ -232,12 +239,14 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
     DeviceIntPtr dev, ptr, keybd, XTestptr, XTestkeybd;
     int rc = Success;
 
-    if (r->return_mode != XIAttachToMaster && r->return_mode != XIFloating)
-        return BadValue;
+    if (r->return_mode != XIAttachToMaster && r->return_mode != XIFloating) {
+      return BadValue;
+    }
 
     rc = dixLookupDevice(&dev, r->deviceid, client, DixDestroyAccess);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
     if (!InputDevIsMaster(dev)) {
         client->errorValue = r->deviceid;
@@ -251,31 +260,37 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
         goto unwind;
     }
 
-    if ((ptr = GetMaster(dev, MASTER_POINTER)) == NULL)
-        ptr = find_disabled_master(MASTER_POINTER);
+    if ((ptr = GetMaster(dev, MASTER_POINTER)) == NULL) {
+      ptr = find_disabled_master(MASTER_POINTER);
+    }
     BUG_RETURN_VAL(ptr == NULL, BadDevice);
     rc = dixLookupDevice(&ptr, ptr->id, client, DixDestroyAccess);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
-    if ((keybd = GetMaster(dev, MASTER_KEYBOARD)) == NULL)
-        keybd = find_disabled_master(MASTER_KEYBOARD);
+    if ((keybd = GetMaster(dev, MASTER_KEYBOARD)) == NULL) {
+      keybd = find_disabled_master(MASTER_KEYBOARD);
+    }
     BUG_RETURN_VAL(keybd == NULL, BadDevice);
     rc = dixLookupDevice(&keybd, keybd->id, client, DixDestroyAccess);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
     XTestptr = GetXTestDevice(ptr);
     BUG_RETURN_VAL(XTestptr == NULL, BadDevice);
     rc = dixLookupDevice(&XTestptr, XTestptr->id, client, DixDestroyAccess);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
     XTestkeybd = GetXTestDevice(keybd);
     BUG_RETURN_VAL(XTestkeybd == NULL, BadDevice);
     rc = dixLookupDevice(&XTestkeybd, XTestkeybd->id, client, DixDestroyAccess);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
     disable_clientpointer(ptr);
 
@@ -285,8 +300,9 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
         DeviceIntPtr attached, newptr, newkeybd;
 
         rc = dixLookupDevice(&newptr, r->return_pointer, client, DixAddAccess);
-        if (rc != Success)
-            goto unwind;
+        if (rc != Success) {
+          goto unwind;
+        }
 
         if (!InputDevIsMaster(newptr) || !IsPointerDevice(newptr)) {
             client->errorValue = r->return_pointer;
@@ -296,8 +312,9 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
 
         rc = dixLookupDevice(&newkeybd, r->return_keyboard,
                              client, DixAddAccess);
-        if (rc != Success)
-            goto unwind;
+        if (rc != Success) {
+          goto unwind;
+        }
 
         if (!InputDevIsMaster(newkeybd) || !IsKeyboardDevice(newkeybd)) {
             client->errorValue = r->return_keyboard;
@@ -319,8 +336,9 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
         }
     }
 
-    for (int i = 0; i < currentMaxClients; i++)
-        XIBarrierRemoveMasterDevice(clients[i], ptr->id);
+    for (int i = 0; i < currentMaxClients; i++) {
+      XIBarrierRemoveMasterDevice(clients[i], ptr->id);
+    }
 
     /* disable the remove the devices, XTest devices must be done first
        else the sprites they rely on will be destroyed  */
@@ -354,8 +372,9 @@ detach_slave(ClientPtr client, xXIDetachSlaveInfo * c, int flags[MAXDEVICES])
     int rc;
 
     rc = dixLookupDevice(&dev, c->deviceid, client, DixManageAccess);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
     if (InputDevIsMaster(dev)) {
         client->errorValue = c->deviceid;
@@ -386,8 +405,9 @@ attach_slave(ClientPtr client, xXIAttachSlaveInfo * c, int flags[MAXDEVICES])
     int rc;
 
     rc = dixLookupDevice(&dev, c->deviceid, client, DixManageAccess);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
     if (InputDevIsMaster(dev)) {
         client->errorValue = c->deviceid;
@@ -403,8 +423,9 @@ attach_slave(ClientPtr client, xXIAttachSlaveInfo * c, int flags[MAXDEVICES])
     }
 
     rc = dixLookupDevice(&newmaster, c->new_master, client, DixAddAccess);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
     if (!InputDevIsMaster(newmaster)) {
         client->errorValue = c->new_master;
         rc = BadDevice;
@@ -440,8 +461,9 @@ ProcXIChangeHierarchy(ClientPtr client)
 
     X_REQUEST_HEAD_AT_LEAST(xXIChangeHierarchyReq);
 
-    if (!stuff->num_changes)
-        return rc;
+    if (!stuff->num_changes) {
+      return rc;
+    }
 
     len = ((size_t)client->req_len << 2) - sizeof(xXIChangeHierarchyReq);
 
@@ -457,8 +479,9 @@ ProcXIChangeHierarchy(ClientPtr client)
             swaps(&any->length);
         }
 
-        if (len < ((size_t)any->length << 2))
-            return BadLength;
+        if (len < ((size_t)any->length << 2)) {
+          return BadLength;
+        }
 
 #define CHANGE_SIZE_MATCH(type) \
     do { \
@@ -479,8 +502,9 @@ ProcXIChangeHierarchy(ClientPtr client)
                 goto unwind;
             }
 
-            if (client->swapped)
-                swaps(&c->name_len);
+            if (client->swapped) {
+              swaps(&c->name_len);
+            }
 
             if (c->name_len > (len - sizeof(xXIAddMasterInfo))) {
                 rc = BadLength;
@@ -488,8 +512,9 @@ ProcXIChangeHierarchy(ClientPtr client)
             }
 
             rc = add_master(client, c, flags);
-            if (rc != Success)
-                goto unwind;
+            if (rc != Success) {
+              goto unwind;
+            }
             changes = FLUSH;
             break;
         }
@@ -499,8 +524,9 @@ ProcXIChangeHierarchy(ClientPtr client)
 
             CHANGE_SIZE_MATCH(xXIRemoveMasterInfo);
             rc = remove_master(client, r, flags);
-            if (rc != Success)
-                goto unwind;
+            if (rc != Success) {
+              goto unwind;
+            }
             changes = FLUSH;
             break;
         }
@@ -510,8 +536,9 @@ ProcXIChangeHierarchy(ClientPtr client)
 
             CHANGE_SIZE_MATCH(xXIDetachSlaveInfo);
             rc = detach_slave(client, c, flags);
-            if (rc != Success)
-                goto unwind;
+            if (rc != Success) {
+              goto unwind;
+            }
             changes = CHANGED;
             break;
         }
@@ -521,8 +548,9 @@ ProcXIChangeHierarchy(ClientPtr client)
 
             CHANGE_SIZE_MATCH(xXIAttachSlaveInfo);
             rc = attach_slave(client, c, flags);
-            if (rc != Success)
-                goto unwind;
+            if (rc != Success) {
+              goto unwind;
+            }
             changes = CHANGED;
             break;
         }
@@ -541,7 +569,8 @@ ProcXIChangeHierarchy(ClientPtr client)
     }
 
  unwind:
-    if (changes != NO_CHANGE)
-        XISendDeviceHierarchyEvent(flags);
+   if (changes != NO_CHANGE) {
+     XISendDeviceHierarchyEvent(flags);
+   }
     return rc;
 }

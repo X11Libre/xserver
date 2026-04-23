@@ -85,24 +85,26 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         fp = fp * 27 + (unsigned int)string[len - 1 - i];
     }
     while (*np != NULL) {
-        if (fp < (*np)->fingerPrint)
-            np = &((*np)->left);
-        else if (fp > (*np)->fingerPrint)
-            np = &((*np)->right);
-        else {                  /* now start testing the strings */
-            comp = strncmp(string, (*np)->string, len);
-            if ((comp < 0) || ((comp == 0) && (len < strlen((*np)->string))))
-                np = &((*np)->left);
-            else if (comp > 0)
-                np = &((*np)->right);
-            else
-                return (*np)->a;
+      if (fp < (*np)->fingerPrint) {
+        np = &((*np)->left);
+      } else if (fp > (*np)->fingerPrint) {
+        np = &((*np)->right);
+      } else { /* now start testing the strings */
+        comp = strncmp(string, (*np)->string, len);
+        if ((comp < 0) || ((comp == 0) && (len < strlen((*np)->string)))) {
+          np = &((*np)->left);
+        } else if (comp > 0) {
+          np = &((*np)->right);
+        } else {
+          return (*np)->a;
         }
+      }
     }
     if (makeit) {
         NodePtr nd = calloc(1, sizeof(NodeRec));
-        if (!nd)
-            return BAD_RESOURCE;
+        if (!nd) {
+          return BAD_RESOURCE;
+        }
         if (lastAtom < XA_LAST_PREDEFINED) {
             nd->string = string;
         }
@@ -134,9 +136,9 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         nd->a = ++lastAtom;
         nodeTable[lastAtom] = nd;
         return nd->a;
+    } else {
+      return None;
     }
-    else
-        return None;
 }
 
 Bool
@@ -150,20 +152,24 @@ NameForAtom(Atom atom)
 {
     NodePtr node;
 
-    if (atom > lastAtom)
-        return 0;
-    if ((node = nodeTable[atom]) == NULL)
-        return 0;
+    if (atom > lastAtom) {
+      return 0;
+    }
+    if ((node = nodeTable[atom]) == NULL) {
+      return 0;
+    }
     return node->string;
 }
 
 static void
 FreeAtom(NodePtr patom)
 {
-    if (patom->left)
-        FreeAtom(patom->left);
-    if (patom->right)
-        FreeAtom(patom->right);
+  if (patom->left) {
+    FreeAtom(patom->left);
+  }
+  if (patom->right) {
+    FreeAtom(patom->right);
+  }
     if (patom->a > XA_LAST_PREDEFINED) {
         /*
          * All strings above XA_LAST_PREDEFINED are strdup'ed, so it's safe to
@@ -177,8 +183,9 @@ FreeAtom(NodePtr patom)
 void
 FreeAllAtoms(void)
 {
-    if (atomRoot == NULL)
-        return;
+  if (atomRoot == NULL) {
+    return;
+  }
     FreeAtom(atomRoot);
     atomRoot = NULL;
     free(nodeTable);
@@ -192,10 +199,12 @@ InitAtoms(void)
     FreeAllAtoms();
     tableLength = InitialTableSize;
     nodeTable = calloc(InitialTableSize, sizeof(NodePtr));
-    if (!nodeTable)
-        FatalError("creating atom table");
+    if (!nodeTable) {
+      FatalError("creating atom table");
+    }
     nodeTable[None] = NULL;
     MakePredeclaredAtoms();
-    if (lastAtom != XA_LAST_PREDEFINED)
-        FatalError("builtin atom number mismatch");
+    if (lastAtom != XA_LAST_PREDEFINED) {
+      FatalError("builtin atom number mismatch");
+    }
 }

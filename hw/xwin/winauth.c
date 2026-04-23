@@ -113,8 +113,9 @@ winGenerateAuthorization(void)
 xcb_auth_info_t *
 winGetXcbAuthInfo(void)
 {
-    if (g_pAuthData)
-        return &auth_info;
+  if (g_pAuthData) {
+    return &auth_info;
+  }
 
     return NULL;
 }

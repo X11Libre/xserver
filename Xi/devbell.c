@@ -91,9 +91,11 @@ ProcXDeviceBell(ClientPtr client)
         return BadValue;
     }
     if (stuff->feedbackclass == KbdFeedbackClass) {
-        for (k = dev->kbdfeed; k; k = k->next)
-            if (k->ctrl.id == stuff->feedbackid)
-                break;
+      for (k = dev->kbdfeed; k; k = k->next) {
+        if (k->ctrl.id == stuff->feedbackid) {
+          break;
+        }
+      }
         if (!k) {
             client->errorValue = stuff->feedbackid;
             return BadValue;
@@ -104,9 +106,11 @@ ProcXDeviceBell(ClientPtr client)
         class = KbdFeedbackClass;
     }
     else if (stuff->feedbackclass == BellFeedbackClass) {
-        for (b = dev->bell; b; b = b->next)
-            if (b->ctrl.id == stuff->feedbackid)
-                break;
+      for (b = dev->bell; b; b = b->next) {
+        if (b->ctrl.id == stuff->feedbackid) {
+          break;
+        }
+      }
         if (!b) {
             client->errorValue = stuff->feedbackid;
             return BadValue;
@@ -121,12 +125,14 @@ ProcXDeviceBell(ClientPtr client)
         return BadValue;
     }
     newpercent = (base * stuff->percent) / 100;
-    if (stuff->percent < 0)
-        newpercent = base + newpercent;
-    else
-        newpercent = base - newpercent + stuff->percent;
-    if (proc == NULL)
-        return BadValue;
+    if (stuff->percent < 0) {
+      newpercent = base + newpercent;
+    } else {
+      newpercent = base - newpercent + stuff->percent;
+    }
+    if (proc == NULL) {
+      return BadValue;
+    }
     (*proc) (newpercent, dev, ctrl, class);
     return Success;
 }

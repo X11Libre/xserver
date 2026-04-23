@@ -92,8 +92,9 @@ X_PFX(list_prepend) (x_list * lst, void *data) {
         x_list_block *b = calloc(1, sizeof(x_list_block));
         assert(b != NULL);
 
-        for (i = 0; i < NODES_PER_BLOCK - 1; i++)
-            b->l[i].next = &(b->l[i + 1]);
+        for (i = 0; i < NODES_PER_BLOCK - 1; i++) {
+          b->l[i].next = &(b->l[i + 1]);
+        }
         b->l[i].next = NULL;
 
         freelist = b->l;
@@ -114,11 +115,13 @@ X_EXTERN x_list *
 X_PFX(list_append) (x_list * lst, void *data) {
     x_list *head = lst;
 
-    if (lst == NULL)
-        return X_PFX(list_prepend) (NULL, data);
+    if (lst == NULL) {
+      return X_PFX(list_prepend)(NULL, data);
+    }
 
-    while (lst->next != NULL)
-        lst = lst->next;
+    while (lst->next != NULL) {
+      lst = lst->next;
+    }
 
     lst->next = X_PFX(list_prepend) (NULL, data);
 
@@ -143,8 +146,9 @@ X_PFX(list_reverse) (x_list * lst) {
 X_EXTERN x_list *
 X_PFX(list_find) (x_list * lst, void *data) {
     for (; lst != NULL; lst = lst->next) {
-        if (lst->data == data)
-            return lst;
+      if (lst->data == data) {
+        return lst;
+      }
     }
 
     return NULL;
@@ -152,8 +156,9 @@ X_PFX(list_find) (x_list * lst, void *data) {
 
 X_EXTERN x_list *
 X_PFX(list_nth) (x_list * lst, int n) {
-    while (n-- > 0 && lst != NULL)
-        lst = lst->next;
+  while (n-- > 0 && lst != NULL) {
+    lst = lst->next;
+  }
 
     return lst;
 }
@@ -169,8 +174,9 @@ X_PFX(list_pop) (x_list * lst, void **data_ret) {
         X_PFX(list_free_1) (tem);
     }
 
-    if (data_ret != NULL)
-        *data_ret = data;
+    if (data_ret != NULL) {
+      *data_ret = data;
+    }
 
     return lst;
 }
@@ -181,8 +187,9 @@ X_PFX(list_filter) (x_list * lst,
     x_list *ret = NULL, *node;
 
     for (node = lst; node != NULL; node = node->next) {
-        if ((*pred)(node->data, data))
-            ret = X_PFX(list_prepend) (ret, node->data);
+      if ((*pred)(node->data, data)) {
+        ret = X_PFX(list_prepend)(ret, node->data);
+      }
     }
 
     return X_PFX(list_reverse) (ret);
@@ -221,9 +228,9 @@ X_PFX(list_remove) (x_list * lst, void *data) {
         if (node->data == data) {
             *ptr = node->next;
             X_PFX(list_free_1) (node);
+        } else {
+          ptr = &((*ptr)->next);
         }
-        else
-            ptr = &((*ptr)->next);
     }
 
     return lst;
@@ -234,8 +241,9 @@ X_PFX(list_length) (x_list * lst) {
     unsigned int n;
 
     n = 0;
-    for (; lst != NULL; lst = lst->next)
-        n++;
+    for (; lst != NULL; lst = lst->next) {
+      n++;
+    }
 
     return n;
 }
@@ -259,15 +267,17 @@ list_sort_1(x_list *lst, int length,
 
     /* This is a standard (stable) list merge sort */
 
-    if (length < 2)
-        return lst;
+    if (length < 2) {
+      return lst;
+    }
 
     /* Calculate the halfway point. Split the list into two sub-lists. */
 
     mid_point = length / 2;
     ptr = lst;
-    for (i = mid_point - 1; i > 0; i--)
-        ptr = ptr->next;
+    for (i = mid_point - 1; i > 0; i--) {
+      ptr = ptr->next;
+    }
     mid = ptr->next;
     ptr->next = NULL;
 
@@ -281,23 +291,26 @@ list_sort_1(x_list *lst, int length,
     assert(lst != NULL);
     assert(mid != NULL);
 
-    if ((*less)(mid->data, lst->data))
-        out = out_head = mid, mid = mid->next;
-    else
-        out = out_head = lst, lst = lst->next;
+    if ((*less)(mid->data, lst->data)) {
+      out = out_head = mid, mid = mid->next;
+    } else {
+      out = out_head = lst, lst = lst->next;
+    }
 
     while (lst != NULL && mid != NULL)
     {
-        if ((*less)(mid->data, lst->data))
-            out = out->next = mid, mid = mid->next;
-        else
-            out = out->next = lst, lst = lst->next;
+      if ((*less)(mid->data, lst->data)) {
+        out = out->next = mid, mid = mid->next;
+      } else {
+        out = out->next = lst, lst = lst->next;
+      }
     }
 
-    if (lst != NULL)
-        out->next = lst;
-    else
-        out->next = mid;
+    if (lst != NULL) {
+      out->next = lst;
+    } else {
+      out->next = mid;
+    }
 
     return out_head;
 }

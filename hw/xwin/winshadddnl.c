@@ -524,13 +524,15 @@ winShadowUpdateDDNL(ScreenPtr pScreen, shadowBufPtr pBuf)
      * Return immediately if the app is not active
      * and we are fullscreen, or if we have a bad display depth
      */
-    if ((!pScreenPriv->fActive && pScreenInfo->fFullScreen)
-        || pScreenPriv->fBadDepth)
-        return;
+    if ((!pScreenPriv->fActive && pScreenInfo->fFullScreen) ||
+        pScreenPriv->fBadDepth) {
+      return;
+    }
 
     /* Return immediately if we didn't get needed surfaces */
-    if (!pScreenPriv->pddsPrimary4 || !pScreenPriv->pddsShadow4)
-        return;
+    if (!pScreenPriv->pddsPrimary4 || !pScreenPriv->pddsShadow4) {
+      return;
+    }
 
     /* Get the origin of the window in the screen coords */
     ptOrigin.x = pScreenInfo->dwXOffset;
@@ -672,8 +674,9 @@ winCloseScreenShadowDDNL(ScreenPtr pScreen)
     RemoveProp(pScreenPriv->hwndScreen, WIN_SCR_PROP);
 
     /* Delete tray icon, if we have one */
-    if (!pScreenInfo->fNoTrayIcon)
-        winDeleteNotifyIcon(pScreenPriv);
+    if (!pScreenInfo->fNoTrayIcon) {
+      winDeleteNotifyIcon(pScreenPriv);
+    }
 
     /* Free the exit confirmation dialog box, if it exists */
     if (g_hDlgExit != NULL) {
@@ -720,9 +723,12 @@ winInitVisualsShadowDDNL(ScreenPtr pScreen)
     dwBlueBits = winCountBits(pScreenPriv->dwBlueMask);
 
     /* Store the maximum number of ones in a color mask as the bitsPerRGB */
-    if (dwRedBits == 0 || dwGreenBits == 0 || dwBlueBits == 0)
-        pScreenPriv->dwBitsPerRGB = 8;
-    else if (dwRedBits > dwGreenBits && dwRedBits > dwBlueBits)
+    if (dwRedBits == 0 || dwGreenBits == 0 || dwBlueBits == 0) {
+      pScreenPriv->dwBitsPerRGB = 8;
+    } else {
+      i
+    }
+    f(dwRedBits > dwGreenBits && dwRedBits > dwBlueBits)
         pScreenPriv->dwBitsPerRGB = dwRedBits;
     else if (dwGreenBits > dwRedBits && dwGreenBits > dwBlueBits)
         pScreenPriv->dwBitsPerRGB = dwGreenBits;
@@ -854,8 +860,9 @@ winBltExposedRegionsShadowDDNL(ScreenPtr pScreen)
         Sleep(100);
         return FALSE;
     }
-    if (pScreenPriv->pddsPrimary4 == NULL)
-        return FALSE;
+    if (pScreenPriv->pddsPrimary4 == NULL) {
+      return FALSE;
+    }
 
     /* BeginPaint gives us an hdc that clips to the invalidated region */
     hdcUpdate = BeginPaint(pScreenPriv->hwndScreen, &ps);
@@ -902,20 +909,22 @@ winBltExposedRegionsShadowDDNL(ScreenPtr pScreen)
             ddrval = IDirectDrawSurface4_Restore(pScreenPriv->pddsPrimary4);
             winDebug("winBltExposedRegionsShadowDDNL - "
                      "IDirectDrawSurface4_Restore returned: ");
-            if (ddrval == DD_OK)
-                winDebug("DD_OK\n");
-            else if (ddrval == DDERR_WRONGMODE)
-                winDebug("DDERR_WRONGMODE\n");
-            else if (ddrval == DDERR_INCOMPATIBLEPRIMARY)
-                winDebug("DDERR_INCOMPATIBLEPRIMARY\n");
-            else if (ddrval == DDERR_UNSUPPORTED)
-                winDebug("DDERR_UNSUPPORTED\n");
-            else if (ddrval == DDERR_INVALIDPARAMS)
-                winDebug("DDERR_INVALIDPARAMS\n");
-            else if (ddrval == DDERR_INVALIDOBJECT)
-                winDebug("DDERR_INVALIDOBJECT\n");
-            else
-                winDebug("unknown error: %08x\n", (unsigned int) ddrval);
+            if (ddrval == DD_OK) {
+              winDebug("DD_OK\n");
+            } else if (ddrval == DDERR_WRONGMODE) {
+              winDebug("DDERR_WRONGMODE\n");
+            } else if (ddrval == DDERR_INCOMPATIBLEPRIMARY) {
+              winDebug("DDERR_INCOMPATIBLEPRIMARY\n");
+            } else if (ddrval == DDERR_UNSUPPORTED) {
+              winDebug("DDERR_UNSUPPORTED\n");
+            } else if (ddrval == DDERR_INVALIDPARAMS) {
+              winDebug("DDERR_INVALIDPARAMS\n");
+            } else if (ddrval == DDERR_INVALIDOBJECT) {
+              winDebug("DDERR_INVALIDOBJECT\n");
+            } else {
+              w
+            }
+            inDebug("unknown error: %08x\n", (unsigned int)ddrval);
 
             /* Loop around to try the blit one more time */
             continue;
@@ -978,8 +987,9 @@ winRedrawScreenShadowDDNL(ScreenPtr pScreen)
     POINT ptOrigin;
 
     /* Return immediately if we didn't get needed surfaces */
-    if (!pScreenPriv->pddsPrimary4 || !pScreenPriv->pddsShadow4)
-        return FALSE;
+    if (!pScreenPriv->pddsPrimary4 || !pScreenPriv->pddsShadow4) {
+      return FALSE;
+    }
 
     /* Get the origin of the window in the screen coords */
     ptOrigin.x = pScreenInfo->dwXOffset;
@@ -1184,11 +1194,11 @@ winSetEngineFunctionsShadowDDNL(ScreenPtr pScreen)
     pScreenPriv->pwinCloseScreen = winCloseScreenShadowDDNL;
     pScreenPriv->pwinInitVisuals = winInitVisualsShadowDDNL;
     pScreenPriv->pwinAdjustVideoMode = winAdjustVideoModeShadowDDNL;
-    if (pScreenInfo->fFullScreen)
-        pScreenPriv->pwinCreateBoundingWindow =
-            winCreateBoundingWindowFullScreen;
-    else
-        pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowWindowed;
+    if (pScreenInfo->fFullScreen) {
+      pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowFullScreen;
+    } else {
+      pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowWindowed;
+    }
     pScreenPriv->pwinBltExposedRegions = winBltExposedRegionsShadowDDNL;
     pScreenPriv->pwinBltExposedWindowRegion = NULL;
     pScreenPriv->pwinActivateApp = winActivateAppShadowDDNL;

@@ -56,13 +56,14 @@ miBuildRenderColormap(ColormapPtr pColormap, Pixel * pixels, int *nump)
 
         policy = PictureCmapPolicy;
         if (policy == PictureCmapPolicyDefault) {
-            if (avail >= 256 &&
-                (pColormap->pVisual->class | DynamicClass) == PseudoColor)
-                policy = PictureCmapPolicyColor;
-            else if (avail >= 64)
-                policy = PictureCmapPolicyGray;
-            else
-                policy = PictureCmapPolicyMono;
+          if (avail >= 256 &&
+              (pColormap->pVisual->class | DynamicClass) == PseudoColor) {
+            policy = PictureCmapPolicyColor;
+          } else if (avail >= 64) {
+            policy = PictureCmapPolicyGray;
+          } else {
+            policy = PictureCmapPolicyMono;
+          }
         }
     }
     /*
@@ -84,8 +85,9 @@ miBuildRenderColormap(ColormapPtr pColormap, Pixel * pixels, int *nump)
             needed = 0;
             break;
         }
-        if (needed <= pColormap->freeRed)
-            break;
+        if (needed <= pColormap->freeRed) {
+          break;
+        }
         policy--;
     }
 
@@ -99,15 +101,18 @@ miBuildRenderColormap(ColormapPtr pColormap, Pixel * pixels, int *nump)
          * Allocate as big a cube as possible
          */
         if ((pColormap->pVisual->class | DynamicClass) == PseudoColor) {
-            for (cube = 1;
-                 cube * cube * cube < pColormap->pVisual->ColormapEntries;
-                 cube++);
+          for (cube = 1;
+               cube * cube * cube < pColormap->pVisual->ColormapEntries;
+               cube++) {
+            ;
+          }
             cube--;
-            if (cube == 1)
-                cube = 0;
+            if (cube == 1) {
+              cube = 0;
+            }
+        } else {
+          cube = 0;
         }
-        else
-            cube = 0;
         /*
          * Figure out how many gray levels to use so that they
          * line up neatly with the cube
@@ -118,9 +123,9 @@ miBuildRenderColormap(ColormapPtr pColormap, Pixel * pixels, int *nump)
             gray = needed / (cube - 1);
             /* total levels */
             gray = (gray + 1) * (cube - 1) + 1;
+        } else {
+          gray = pColormap->pVisual->ColormapEntries;
         }
-        else
-            gray = pColormap->pVisual->ColormapEntries;
         break;
 
     case PictureCmapPolicyColor:
@@ -136,29 +141,35 @@ miBuildRenderColormap(ColormapPtr pColormap, Pixel * pixels, int *nump)
     }
 
     memset(used, '\0', pColormap->pVisual->ColormapEntries * sizeof(Bool));
-    for (r = 0; r < cube; r++)
-        for (g = 0; g < cube; g++)
-            for (b = 0; b < cube; b++) {
-                pixel = 0;
-                red = (r * 65535 + (cube - 1) / 2) / (cube - 1);
-                green = (g * 65535 + (cube - 1) / 2) / (cube - 1);
-                blue = (b * 65535 + (cube - 1) / 2) / (cube - 1);
-                if (AllocColor(pColormap, &red, &green,
-                               &blue, &pixel, 0) != Success)
-                    return FALSE;
-                used[pixel] = TRUE;
-            }
+    for (r = 0; r < cube; r++) {
+      for (g = 0; g < cube; g++) {
+        for (b = 0; b < cube; b++) {
+          pixel = 0;
+          red = (r * 65535 + (cube - 1) / 2) / (cube - 1);
+          green = (g * 65535 + (cube - 1) / 2) / (cube - 1);
+          blue = (b * 65535 + (cube - 1) / 2) / (cube - 1);
+          if (AllocColor(pColormap, &red, &green, &blue, &pixel, 0) !=
+              Success) {
+            return FALSE;
+          }
+          used[pixel] = TRUE;
+        }
+      }
+    }
     for (g = 0; g < gray; g++) {
         pixel = 0;
         red = green = blue = (g * 65535 + (gray - 1) / 2) / (gray - 1);
-        if (AllocColor(pColormap, &red, &green, &blue, &pixel, 0) != Success)
-            return FALSE;
+        if (AllocColor(pColormap, &red, &green, &blue, &pixel, 0) != Success) {
+          return FALSE;
+        }
         used[pixel] = TRUE;
     }
     n = 0;
-    for (i = 0; i < pColormap->pVisual->ColormapEntries; i++)
-        if (used[i])
-            pixels[n++] = i;
+    for (i = 0; i < pColormap->pVisual->ColormapEntries; i++) {
+      if (used[i]) {
+        pixels[n++] = i;
+      }
+    }
 
     *nump = n;
 
@@ -231,22 +242,26 @@ miInitIndexed(ScreenPtr pScreen, PictFormatPtr pFormat)
     int i;
     Pixel p, r, g, b;
 
-    if (pVisual->ColormapEntries > MI_MAX_INDEXED)
-        return FALSE;
+    if (pVisual->ColormapEntries > MI_MAX_INDEXED) {
+      return FALSE;
+    }
 
     if (pVisual->class & DynamicClass) {
-        if (!miBuildRenderColormap(pColormap, pixels, &num))
-            return FALSE;
+      if (!miBuildRenderColormap(pColormap, pixels, &num)) {
+        return FALSE;
+      }
     }
     else {
         num = pVisual->ColormapEntries;
-        for (p = 0; p < num; p++)
-            pixels[p] = p;
+        for (p = 0; p < num; p++) {
+          pixels[p] = p;
+        }
     }
 
     miIndexedPtr pIndexed = calloc(1, sizeof(miIndexedRec));
-    if (!pIndexed)
-        return FALSE;
+    if (!pIndexed) {
+      return FALSE;
+    }
 
     pFormat->index.nvalues = num;
     pFormat->index.pValues = calloc(num, sizeof(xIndexValue));
@@ -279,19 +294,21 @@ miInitIndexed(ScreenPtr pScreen, PictFormatPtr pFormat)
     switch (pVisual->class | DynamicClass) {
     case GrayScale:
         pIndexed->color = FALSE;
-        for (r = 0; r < 32768; r++)
-            pIndexed->ent[r] = FindBestGray(pIndexed, pixels, num, r);
+        for (r = 0; r < 32768; r++) {
+          pIndexed->ent[r] = FindBestGray(pIndexed, pixels, num, r);
+        }
         break;
     case PseudoColor:
         pIndexed->color = TRUE;
         p = 0;
-        for (r = 0; r < 32; r++)
-            for (g = 0; g < 32; g++)
-                for (b = 0; b < 32; b++) {
-                    pIndexed->ent[p] = FindBestColor(pIndexed, pixels, num,
-                                                     r, g, b);
-                    p++;
-                }
+        for (r = 0; r < 32; r++) {
+          for (g = 0; g < 32; g++) {
+            for (b = 0; b < 32; b++) {
+              pIndexed->ent[p] = FindBestColor(pIndexed, pixels, num, r, g, b);
+              p++;
+            }
+          }
+        }
         break;
     }
     pFormat->index.devPrivate = pIndexed;

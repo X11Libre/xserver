@@ -99,20 +99,23 @@ print_input_features(int scrnIndex, struct disp_features *c,
     if (DIGITAL(c->input_type)) {
         xf86DrvMsg(scrnIndex, X_INFO, "Digital Display Input\n");
         if (v->revision == 2 || v->revision == 3) {
-            if (c->input_dfp)
-                xf86DrvMsg(scrnIndex, X_INFO, "DFP 1.x compatible TMDS\n");
+          if (c->input_dfp) {
+            xf86DrvMsg(scrnIndex, X_INFO, "DFP 1.x compatible TMDS\n");
+          }
         }
         else if (v->revision >= 4) {
             int interface = c->input_interface;
             int bpc = c->input_bpc;
 
-            if (interface > 6)
-                interface = 6;  /* unknown */
-            if (bpc == 0 || bpc == 7)
-                xf86DrvMsg(scrnIndex, X_INFO, "Undefined color depth\n");
-            else
-                xf86DrvMsg(scrnIndex, X_INFO, "%d bits per channel\n",
-                           bpc * 2 + 4);
+            if (interface > 6) {
+              interface = 6; /* unknown */
+            }
+            if (bpc == 0 || bpc == 7) {
+              xf86DrvMsg(scrnIndex, X_INFO, "Undefined color depth\n");
+            } else {
+              xf86DrvMsg(scrnIndex, X_INFO, "%d bits per channel\n",
+                         bpc * 2 + 4);
+            }
             xf86DrvMsg(scrnIndex, X_INFO, "Digital interface is %s\n",
                        digital_interfaces[interface]);
         }
@@ -136,20 +139,25 @@ print_input_features(int scrnIndex, struct disp_features *c,
         default:
             xf86ErrorF("undefined\n");
         }
-        if (c->input_setup)
-            xf86DrvMsg(scrnIndex, X_INFO, "Signal levels configurable\n");
+        if (c->input_setup) {
+          xf86DrvMsg(scrnIndex, X_INFO, "Signal levels configurable\n");
+        }
         xf86DrvMsg(scrnIndex, X_INFO, "Sync:");
-        if (SEP_SYNC(c->input_sync))
-            xf86ErrorF("  Separate");
-        if (COMP_SYNC(c->input_sync))
-            xf86ErrorF("  Composite");
-        if (SYNC_O_GREEN(c->input_sync))
-            xf86ErrorF("  SyncOnGreen");
-        if (SYNC_SERR(c->input_sync))
-            xf86ErrorF("Serration on. "
-                       "V.Sync Pulse req. if CompSync or SyncOnGreen\n");
-        else
-            xf86ErrorF("\n");
+        if (SEP_SYNC(c->input_sync)) {
+          xf86ErrorF("  Separate");
+        }
+        if (COMP_SYNC(c->input_sync)) {
+          xf86ErrorF("  Composite");
+        }
+        if (SYNC_O_GREEN(c->input_sync)) {
+          xf86ErrorF("  SyncOnGreen");
+        }
+        if (SYNC_SERR(c->input_sync)) {
+          xf86ErrorF("Serration on. "
+                     "V.Sync Pulse req. if CompSync or SyncOnGreen\n");
+        } else {
+          xf86ErrorF("\n");
+        }
     }
 }
 
@@ -159,15 +167,18 @@ print_dpms_features(int scrnIndex, struct disp_features *c,
 {
     if (c->dpms) {
         xf86DrvMsg(scrnIndex, X_INFO, "DPMS capabilities:");
-        if (DPMS_STANDBY(c->dpms))
-            xf86ErrorF(" StandBy");
-        if (DPMS_SUSPEND(c->dpms))
-            xf86ErrorF(" Suspend");
-        if (DPMS_OFF(c->dpms))
-            xf86ErrorF(" Off");
+        if (DPMS_STANDBY(c->dpms)) {
+          xf86ErrorF(" StandBy");
+        }
+        if (DPMS_SUSPEND(c->dpms)) {
+          xf86ErrorF(" Suspend");
+        }
+        if (DPMS_OFF(c->dpms)) {
+          xf86ErrorF(" Off");
+        }
+    } else {
+      xf86DrvMsg(scrnIndex, X_INFO, "No DPMS capabilities specified");
     }
-    else
-        xf86DrvMsg(scrnIndex, X_INFO, "No DPMS capabilities specified");
     if (!c->input_type) {       /* analog */
         switch (c->display_type) {
         case DISP_MONO:
@@ -194,16 +205,19 @@ print_dpms_features(int scrnIndex, struct disp_features *c,
                    enc & DISP_YCRCB422 ? "YCrCb 4:2:2" : "");
     }
 
-    if (STD_COLOR_SPACE(c->msc))
-        xf86DrvMsg(scrnIndex, X_INFO,
-                   "Default color space is primary color space\n");
+    if (STD_COLOR_SPACE(c->msc)) {
+      xf86DrvMsg(scrnIndex, X_INFO,
+                 "Default color space is primary color space\n");
+    }
 
     if (PREFERRED_TIMING_MODE(c->msc) || v->revision >= 4) {
         xf86DrvMsg(scrnIndex, X_INFO,
                    "First detailed timing is preferred mode\n");
-        if (v->revision >= 4)
-            xf86DrvMsg(scrnIndex, X_INFO,
-                       "Preferred mode is native pixel format and refresh rate\n");
+        if (v->revision >= 4) {
+          xf86DrvMsg(
+              scrnIndex, X_INFO,
+              "Preferred mode is native pixel format and refresh rate\n");
+        }
     }
     else if (v->revision == 3) {
         xf86DrvMsg(scrnIndex, X_INFO,
@@ -217,8 +231,9 @@ print_dpms_features(int scrnIndex, struct disp_features *c,
         }
     }
     else {
-        if (GFT_SUPPORTED(c->msc))
-            xf86DrvMsg(scrnIndex, X_INFO, "GTF timings supported\n");
+      if (GFT_SUPPORTED(c->msc)) {
+        xf86DrvMsg(scrnIndex, X_INFO, "GTF timings supported\n");
+      }
     }
 }
 
@@ -243,22 +258,25 @@ print_display(int scrnIndex, struct disp_features *disp, struct edid_version *v)
         xf86ErrorF("vert.: %i\n", disp->vsize);
     }
     else if (v->revision >= 4 && (disp->hsize || disp->vsize)) {
-        if (disp->hsize)
-            xf86DrvMsg(scrnIndex, X_INFO, "Aspect ratio: %.2f (landscape)\n",
-                       (disp->hsize + 99) / 100.0);
-        if (disp->vsize)
-            xf86DrvMsg(scrnIndex, X_INFO, "Aspect ratio: %.2f (portrait)\n",
-                       100.0 / (float) (disp->vsize + 99));
+      if (disp->hsize) {
+        xf86DrvMsg(scrnIndex, X_INFO, "Aspect ratio: %.2f (landscape)\n",
+                   (disp->hsize + 99) / 100.0);
+      }
+      if (disp->vsize) {
+        xf86DrvMsg(scrnIndex, X_INFO, "Aspect ratio: %.2f (portrait)\n",
+                   100.0 / (float)(disp->vsize + 99));
+      }
 
     }
     else {
         xf86DrvMsg(scrnIndex, X_INFO, "Indeterminate output size\n");
     }
 
-    if (!disp->gamma && v->revision >= 1.4)
-        xf86DrvMsg(scrnIndex, X_INFO, "Gamma defined in extension block\n");
-    else
-        xf86DrvMsg(scrnIndex, X_INFO, "Gamma: %.2f\n", disp->gamma);
+    if (!disp->gamma && v->revision >= 1.4) {
+      xf86DrvMsg(scrnIndex, X_INFO, "Gamma defined in extension block\n");
+    } else {
+      xf86DrvMsg(scrnIndex, X_INFO, "Gamma: %.2f\n", disp->gamma);
+    }
 
     print_dpms_features(scrnIndex, disp, v);
     print_whitepoint(scrnIndex, disp);
@@ -269,45 +287,63 @@ print_established_timings(int scrnIndex, struct established_timings *t)
 {
     unsigned char c;
 
-    if (t->t1 || t->t2 || t->t_manu)
-        xf86DrvMsg(scrnIndex, X_INFO, "Supported established timings:\n");
+    if (t->t1 || t->t2 || t->t_manu) {
+      xf86DrvMsg(scrnIndex, X_INFO, "Supported established timings:\n");
+    }
     c = t->t1;
-    if (c & 0x80)
-        xf86DrvMsg(scrnIndex, X_INFO, "720x400@70Hz\n");
-    if (c & 0x40)
-        xf86DrvMsg(scrnIndex, X_INFO, "720x400@88Hz\n");
-    if (c & 0x20)
-        xf86DrvMsg(scrnIndex, X_INFO, "640x480@60Hz\n");
-    if (c & 0x10)
-        xf86DrvMsg(scrnIndex, X_INFO, "640x480@67Hz\n");
-    if (c & 0x08)
-        xf86DrvMsg(scrnIndex, X_INFO, "640x480@72Hz\n");
-    if (c & 0x04)
-        xf86DrvMsg(scrnIndex, X_INFO, "640x480@75Hz\n");
-    if (c & 0x02)
-        xf86DrvMsg(scrnIndex, X_INFO, "800x600@56Hz\n");
-    if (c & 0x01)
-        xf86DrvMsg(scrnIndex, X_INFO, "800x600@60Hz\n");
+    if (c & 0x80) {
+      xf86DrvMsg(scrnIndex, X_INFO, "720x400@70Hz\n");
+    }
+    if (c & 0x40) {
+      xf86DrvMsg(scrnIndex, X_INFO, "720x400@88Hz\n");
+    }
+    if (c & 0x20) {
+      xf86DrvMsg(scrnIndex, X_INFO, "640x480@60Hz\n");
+    }
+    if (c & 0x10) {
+      xf86DrvMsg(scrnIndex, X_INFO, "640x480@67Hz\n");
+    }
+    if (c & 0x08) {
+      xf86DrvMsg(scrnIndex, X_INFO, "640x480@72Hz\n");
+    }
+    if (c & 0x04) {
+      xf86DrvMsg(scrnIndex, X_INFO, "640x480@75Hz\n");
+    }
+    if (c & 0x02) {
+      xf86DrvMsg(scrnIndex, X_INFO, "800x600@56Hz\n");
+    }
+    if (c & 0x01) {
+      xf86DrvMsg(scrnIndex, X_INFO, "800x600@60Hz\n");
+    }
     c = t->t2;
-    if (c & 0x80)
-        xf86DrvMsg(scrnIndex, X_INFO, "800x600@72Hz\n");
-    if (c & 0x40)
-        xf86DrvMsg(scrnIndex, X_INFO, "800x600@75Hz\n");
-    if (c & 0x20)
-        xf86DrvMsg(scrnIndex, X_INFO, "832x624@75Hz\n");
-    if (c & 0x10)
-        xf86DrvMsg(scrnIndex, X_INFO, "1024x768@87Hz (interlaced)\n");
-    if (c & 0x08)
-        xf86DrvMsg(scrnIndex, X_INFO, "1024x768@60Hz\n");
-    if (c & 0x04)
-        xf86DrvMsg(scrnIndex, X_INFO, "1024x768@70Hz\n");
-    if (c & 0x02)
-        xf86DrvMsg(scrnIndex, X_INFO, "1024x768@75Hz\n");
-    if (c & 0x01)
-        xf86DrvMsg(scrnIndex, X_INFO, "1280x1024@75Hz\n");
+    if (c & 0x80) {
+      xf86DrvMsg(scrnIndex, X_INFO, "800x600@72Hz\n");
+    }
+    if (c & 0x40) {
+      xf86DrvMsg(scrnIndex, X_INFO, "800x600@75Hz\n");
+    }
+    if (c & 0x20) {
+      xf86DrvMsg(scrnIndex, X_INFO, "832x624@75Hz\n");
+    }
+    if (c & 0x10) {
+      xf86DrvMsg(scrnIndex, X_INFO, "1024x768@87Hz (interlaced)\n");
+    }
+    if (c & 0x08) {
+      xf86DrvMsg(scrnIndex, X_INFO, "1024x768@60Hz\n");
+    }
+    if (c & 0x04) {
+      xf86DrvMsg(scrnIndex, X_INFO, "1024x768@70Hz\n");
+    }
+    if (c & 0x02) {
+      xf86DrvMsg(scrnIndex, X_INFO, "1024x768@75Hz\n");
+    }
+    if (c & 0x01) {
+      xf86DrvMsg(scrnIndex, X_INFO, "1280x1024@75Hz\n");
+    }
     c = t->t_manu;
-    if (c & 0x80)
-        xf86DrvMsg(scrnIndex, X_INFO, "1152x864@75Hz\n");
+    if (c & 0x80) {
+      xf86DrvMsg(scrnIndex, X_INFO, "1152x864@75Hz\n");
+    }
     xf86DrvMsg(scrnIndex, X_INFO, "Manufacturer's mask: %X\n", c & 0x7F);
 }
 
@@ -344,9 +380,9 @@ print_cvt_timings(int si, struct cvt_timings *t)
                        t[i].rates & 0x04 ? "75," : "",
                        t[i].rates & 0x02 ? "85," : "",
                        t[i].rates & 0x01 ? "60RB" : "");
+        } else {
+          break;
         }
-        else
-            break;
     }
 }
 
@@ -374,22 +410,25 @@ print_detailed_timings(int scrnIndex, struct detailed_timings *t)
         if (t->stereo) {
             xf86DrvMsg(scrnIndex, X_INFO, "Stereo: ");
             if (IS_RIGHT_STEREO(t->stereo)) {
-                if (!t->stereo_1)
-                    xf86ErrorF("right channel on sync\n");
-                else
-                    xf86ErrorF("left channel on sync\n");
+              if (!t->stereo_1) {
+                xf86ErrorF("right channel on sync\n");
+              } else {
+                xf86ErrorF("left channel on sync\n");
+              }
             }
             else if (IS_LEFT_STEREO(t->stereo)) {
-                if (!t->stereo_1)
-                    xf86ErrorF("right channel on even line\n");
-                else
-                    xf86ErrorF("left channel on evel line\n");
+              if (!t->stereo_1) {
+                xf86ErrorF("right channel on even line\n");
+              } else {
+                xf86ErrorF("left channel on evel line\n");
+              }
             }
             if (IS_4WAY_STEREO(t->stereo)) {
-                if (!t->stereo_1)
-                    xf86ErrorF("4-way interleaved\n");
-                else
-                    xf86ErrorF("side-by-side interleaved");
+              if (!t->stereo_1) {
+                xf86ErrorF("4-way interleaved\n");
+              } else {
+                xf86ErrorF("side-by-side interleaved");
+              }
             }
         }
     }
@@ -439,53 +478,67 @@ handle_detailed_print(struct detailed_monitor_section *det_mon, void *data)
                    r->min_v, r->max_v, r->min_h, r->max_h);
         if (r->max_clock_khz != 0) {
             xf86ErrorF(" PixClock max %i kHz\n", r->max_clock_khz);
-            if (r->maxwidth)
-                xf86DrvMsg(scrnIndex, X_INFO, "Maximum pixel width: %d\n",
-                           r->maxwidth);
+            if (r->maxwidth) {
+              xf86DrvMsg(scrnIndex, X_INFO, "Maximum pixel width: %d\n",
+                         r->maxwidth);
+            }
             xf86DrvMsg(scrnIndex, X_INFO, "Supported aspect ratios:");
-            if (r->supported_aspect & SUPPORTED_ASPECT_4_3)
-                xf86ErrorF(" 4:3%s",
-                           r->preferred_aspect ==
-                           PREFERRED_ASPECT_4_3 ? "*" : "");
-            if (r->supported_aspect & SUPPORTED_ASPECT_16_9)
-                xf86ErrorF(" 16:9%s",
-                           r->preferred_aspect ==
-                           PREFERRED_ASPECT_16_9 ? "*" : "");
-            if (r->supported_aspect & SUPPORTED_ASPECT_16_10)
-                xf86ErrorF(" 16:10%s",
-                           r->preferred_aspect ==
-                           PREFERRED_ASPECT_16_10 ? "*" : "");
-            if (r->supported_aspect & SUPPORTED_ASPECT_5_4)
-                xf86ErrorF(" 5:4%s",
-                           r->preferred_aspect ==
-                           PREFERRED_ASPECT_5_4 ? "*" : "");
-            if (r->supported_aspect & SUPPORTED_ASPECT_15_9)
-                xf86ErrorF(" 15:9%s",
-                           r->preferred_aspect ==
-                           PREFERRED_ASPECT_15_9 ? "*" : "");
+            if (r->supported_aspect & SUPPORTED_ASPECT_4_3) {
+              xf86ErrorF(" 4:3%s", r->preferred_aspect == PREFERRED_ASPECT_4_3
+                                       ? "*"
+                                       : "");
+            }
+            if (r->supported_aspect & SUPPORTED_ASPECT_16_9) {
+              xf86ErrorF(" 16:9%s", r->preferred_aspect == PREFERRED_ASPECT_16_9
+                                        ? "*"
+                                        : "");
+            }
+            if (r->supported_aspect & SUPPORTED_ASPECT_16_10) {
+              xf86ErrorF(" 16:10%s",
+                         r->preferred_aspect == PREFERRED_ASPECT_16_10 ? "*"
+                                                                       : "");
+            }
+            if (r->supported_aspect & SUPPORTED_ASPECT_5_4) {
+              xf86ErrorF(" 5:4%s", r->preferred_aspect == PREFERRED_ASPECT_5_4
+                                       ? "*"
+                                       : "");
+            }
+            if (r->supported_aspect & SUPPORTED_ASPECT_15_9) {
+              xf86ErrorF(" 15:9%s", r->preferred_aspect == PREFERRED_ASPECT_15_9
+                                        ? "*"
+                                        : "");
+            }
             xf86ErrorF("\n");
             xf86DrvMsg(scrnIndex, X_INFO, "Supported blankings:");
-            if (r->supported_blanking & CVT_STANDARD)
-                xf86ErrorF(" standard");
-            if (r->supported_blanking & CVT_REDUCED)
-                xf86ErrorF(" reduced");
+            if (r->supported_blanking & CVT_STANDARD) {
+              xf86ErrorF(" standard");
+            }
+            if (r->supported_blanking & CVT_REDUCED) {
+              xf86ErrorF(" reduced");
+            }
             xf86ErrorF("\n");
             xf86DrvMsg(scrnIndex, X_INFO, "Supported scalings:");
-            if (r->supported_scaling & SCALING_HSHRINK)
-                xf86ErrorF(" hshrink");
-            if (r->supported_scaling & SCALING_HSTRETCH)
-                xf86ErrorF(" hstretch");
-            if (r->supported_scaling & SCALING_VSHRINK)
-                xf86ErrorF(" vshrink");
-            if (r->supported_scaling & SCALING_VSTRETCH)
-                xf86ErrorF(" vstretch");
+            if (r->supported_scaling & SCALING_HSHRINK) {
+              xf86ErrorF(" hshrink");
+            }
+            if (r->supported_scaling & SCALING_HSTRETCH) {
+              xf86ErrorF(" hstretch");
+            }
+            if (r->supported_scaling & SCALING_VSHRINK) {
+              xf86ErrorF(" vshrink");
+            }
+            if (r->supported_scaling & SCALING_VSTRETCH) {
+              xf86ErrorF(" vstretch");
+            }
             xf86ErrorF("\n");
-            if (r->preferred_refresh)
-                xf86DrvMsg(scrnIndex, X_INFO, "Preferred refresh rate: %d\n",
-                           r->preferred_refresh);
-            else
-                xf86DrvMsg(scrnIndex, X_INFO, "Buggy monitor, no preferred "
-                           "refresh rate given\n");
+            if (r->preferred_refresh) {
+              xf86DrvMsg(scrnIndex, X_INFO, "Preferred refresh rate: %d\n",
+                         r->preferred_refresh);
+            } else {
+              xf86DrvMsg(scrnIndex, X_INFO,
+                         "Buggy monitor, no preferred "
+                         "refresh rate given\n");
+            }
         }
         else if (r->max_clock != 0) {
             xf86ErrorF(" PixClock max %i MHz\n", r->max_clock);
@@ -493,30 +546,37 @@ handle_detailed_print(struct detailed_monitor_section *det_mon, void *data)
         else {
             xf86ErrorF("\n");
         }
-        if (r->gtf_2nd_f > 0)
-            xf86DrvMsg(scrnIndex, X_INFO, " 2nd GTF parameters: f: %i kHz "
-                       "c: %i m: %i k %i j %i\n", r->gtf_2nd_f,
-                       r->gtf_2nd_c, r->gtf_2nd_m, r->gtf_2nd_k, r->gtf_2nd_j);
+        if (r->gtf_2nd_f > 0) {
+          xf86DrvMsg(scrnIndex, X_INFO,
+                     " 2nd GTF parameters: f: %i kHz "
+                     "c: %i m: %i k %i j %i\n",
+                     r->gtf_2nd_f, r->gtf_2nd_c, r->gtf_2nd_m, r->gtf_2nd_k,
+                     r->gtf_2nd_j);
+        }
         break;
     }
     case DS_STD_TIMINGS:
-        for (j = 0; j < 5; j++)
-            xf86DrvMsg(scrnIndex, X_INFO,
-                       "#%i: hsize: %i  vsize %i  refresh: %i  "
-                       "vid: %i\n", p->index, det_mon->section.std_t[j].hsize,
-                       det_mon->section.std_t[j].vsize,
-                       det_mon->section.std_t[j].refresh,
-                       det_mon->section.std_t[j].id);
+      for (j = 0; j < 5; j++) {
+        xf86DrvMsg(scrnIndex, X_INFO,
+                   "#%i: hsize: %i  vsize %i  refresh: %i  "
+                   "vid: %i\n",
+                   p->index, det_mon->section.std_t[j].hsize,
+                   det_mon->section.std_t[j].vsize,
+                   det_mon->section.std_t[j].refresh,
+                   det_mon->section.std_t[j].id);
+      }
         break;
     case DS_WHITE_P:
-        for (j = 0; j < 2; j++)
-            if (det_mon->section.wp[j].index != 0)
-                xf86DrvMsg(scrnIndex, X_INFO,
-                           "White point %i: whiteX: %f, whiteY: %f; gamma: %f\n",
-                           det_mon->section.wp[j].index,
-                           det_mon->section.wp[j].white_x,
-                           det_mon->section.wp[j].white_y,
-                           det_mon->section.wp[j].white_gamma);
+      for (j = 0; j < 2; j++) {
+        if (det_mon->section.wp[j].index != 0) {
+          xf86DrvMsg(scrnIndex, X_INFO,
+                     "White point %i: whiteX: %f, whiteY: %f; gamma: %f\n",
+                     det_mon->section.wp[j].index,
+                     det_mon->section.wp[j].white_x,
+                     det_mon->section.wp[j].white_y,
+                     det_mon->section.wp[j].white_gamma);
+        }
+      }
         break;
     case DS_CMD:
         xf86DrvMsg(scrnIndex, X_INFO, "Color management data: (not decoded)\n");
@@ -545,9 +605,10 @@ handle_detailed_print(struct detailed_monitor_section *det_mon, void *data)
 static void
 print_number_sections(int scrnIndex, int num)
 {
-    if (num)
-        xf86DrvMsg(scrnIndex, X_INFO, "Number of EDID sections to follow: %i\n",
-                   num);
+  if (num) {
+    xf86DrvMsg(scrnIndex, X_INFO, "Number of EDID sections to follow: %i\n",
+               num);
+  }
 }
 
 xf86MonPtr
@@ -557,8 +618,9 @@ xf86PrintEDID(xf86MonPtr m)
     char buf[EDID_WIDTH * 2 + 1];
     struct det_print_parameter p;
 
-    if (!m)
-        return NULL;
+    if (!m) {
+      return NULL;
+    }
 
     print_vendor(m->scrnIndex, &m->vendor);
     print_version(m->scrnIndex, &m->ver);
@@ -576,8 +638,9 @@ xf86PrintEDID(xf86MonPtr m)
     xf86DrvMsg(m->scrnIndex, X_INFO, "EDID (in hex):\n");
 
     n = 128;
-    if (m->flags & EDID_COMPLETE_RAWDATA)
-        n += m->no_sections * 128;
+    if (m->flags & EDID_COMPLETE_RAWDATA) {
+      n += m->no_sections * 128;
+    }
 
     for (i = 0; i < n; i += j) {
         for (j = 0; j < EDID_WIDTH; ++j) {

@@ -16,8 +16,9 @@ CallbackListPtr ScreenAccessCallback = NULL;
 
 void dixFreeScreen(ScreenPtr pScreen)
 {
-    if (!pScreen)
-        return;
+  if (!pScreen) {
+    return;
+  }
 
     FreeGCperDepth(pScreen);
     dixDestroyPixmap(pScreen->defaultStipple, 0);

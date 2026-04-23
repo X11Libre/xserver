@@ -13,29 +13,33 @@
 #include "include/windowstr.h"
 
 ClientPtr dixClientForWindow(WindowPtr pWin) {
-    if (!pWin)
-        return NULL;
+  if (!pWin) {
+    return NULL;
+  }
 
     return dixClientForXID(pWin->drawable.id);
 }
 
 ClientPtr dixClientForGrab(GrabPtr pGrab) {
-    if (!pGrab)
-        return NULL;
+  if (!pGrab) {
+    return NULL;
+  }
 
     return dixClientForXID(pGrab->resource);
 }
 
 ClientPtr dixClientForInputClients(InputClientsPtr pInputClients) {
-    if (!pInputClients)
-        return NULL;
+  if (!pInputClients) {
+    return NULL;
+  }
 
     return dixClientForXID(pInputClients->resource);
 }
 
 ClientPtr dixClientForOtherClients(OtherClientsPtr pOtherClients) {
-    if (!pOtherClients)
-        return NULL;
+  if (!pOtherClients) {
+    return NULL;
+  }
 
     return dixClientForXID(pOtherClients->resource);
 }

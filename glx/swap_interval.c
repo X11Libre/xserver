@@ -69,8 +69,9 @@ DoSwapInterval(__GLXclientState * cl, GLbyte * pc, int do_swap)
         ? bswap_32(*(int *) (pc + 0))
         : *(int *) (pc + 0);
 
-    if (interval <= 0)
-        return BadValue;
+    if (interval <= 0) {
+      return BadValue;
+    }
 
     (void) (*cx->pGlxScreen->swapInterval) (cx->drawPriv, interval);
     return Success;

@@ -73,12 +73,14 @@ ProcXQueryDeviceState(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xQueryDeviceStateReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
-    if (rc != Success && rc != BadAccess)
-        return rc;
+    if (rc != Success && rc != BadAccess) {
+      return rc;
+    }
 
     v = dev->valuator;
-    if (v != NULL && v->motionHintWindow != NULL)
-        MaybeStopDeviceHint(dev, client);
+    if (v != NULL && v->motionHintWindow != NULL) {
+      MaybeStopDeviceHint(dev, client);
+    }
 
     k = dev->key;
     if (k != NULL) {
@@ -99,8 +101,9 @@ ProcXQueryDeviceState(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
-    if (!buf)
-        return BadAlloc;
+    if (!buf) {
+      return BadAlloc;
+    }
 
     if (k != NULL) {
         tk = (xKeyState *) buf;
@@ -108,9 +111,11 @@ ProcXQueryDeviceState(ClientPtr client)
         tk->length = sizeof(xKeyState);
         tk->num_keys = k->xkbInfo->desc->max_key_code -
             k->xkbInfo->desc->min_key_code + 1;
-        if (rc != BadAccess)
-            for (i = 0; i < 32; i++)
-                tk->keys[i] = k->down[i];
+        if (rc != BadAccess) {
+          for (i = 0; i < 32; i++) {
+            tk->keys[i] = k->down[i];
+          }
+        }
         buf += sizeof(xKeyState);
     }
 
@@ -119,8 +124,9 @@ ProcXQueryDeviceState(ClientPtr client)
         tb->class = ButtonClass;
         tb->length = sizeof(xButtonState);
         tb->num_buttons = b->numButtons;
-        if (rc != BadAccess)
-            memcpy(tb->buttons, b->down, sizeof(b->down));
+        if (rc != BadAccess) {
+          memcpy(tb->buttons, b->down, sizeof(b->down));
+        }
         buf += sizeof(xButtonState);
     }
 
@@ -134,8 +140,9 @@ ProcXQueryDeviceState(ClientPtr client)
                      !dev->proximity->in_proximity) ? OutOfProximity : 0;
         buf += sizeof(xValuatorState);
         for (i = 0, values = v->axisVal; i < v->numAxes; i++) {
-            if (rc != BadAccess)
-                *((int *) buf) = *values;
+          if (rc != BadAccess) {
+            *((int *)buf) = *values;
+          }
             values++;
             if (client->swapped) {
                 swapl((int *) buf);

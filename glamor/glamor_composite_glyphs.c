@@ -87,8 +87,9 @@ glamor_copy_glyph(PixmapPtr     glyph_pixmap,
                                              glyph_draw->height,
                                              atlas_draw->depth,
                                              GLAMOR_CREATE_PIXMAP_CPU);
-        if (!upload_pixmap)
-            return;
+        if (!upload_pixmap) {
+          return;
+        }
 
         scratch_gc = GetScratchGC(upload_pixmap->drawable.depth, screen);
         if (!scratch_gc) {
@@ -120,8 +121,9 @@ glamor_copy_glyph(PixmapPtr     glyph_pixmap,
                         upload_pixmap->devPrivate.ptr,
                         upload_pixmap->devKind);
 
-    if (upload_pixmap != glyph_pixmap)
-        glamor_destroy_pixmap(upload_pixmap);
+    if (upload_pixmap != glyph_pixmap) {
+      glamor_destroy_pixmap(upload_pixmap);
+    }
 }
 
 static Bool
@@ -158,8 +160,9 @@ glamor_glyph_can_add(struct glamor_glyph_atlas *atlas, int dim, DrawablePtr glyp
     }
 
     /* Check for overfull */
-    if (atlas->y + glyph_draw->height > dim)
-        return FALSE;
+    if (atlas->y + glyph_draw->height > dim) {
+      return FALSE;
+    }
 
     return TRUE;
 }
@@ -177,8 +180,9 @@ glamor_glyph_add(struct glamor_glyph_atlas *atlas, DrawablePtr glyph_draw)
     glyph_priv->serial = atlas->serial;
 
     atlas->x += glyph_draw->width;
-    if (atlas->row_height < glyph_draw->height)
-        atlas->row_height = glyph_draw->height;
+    if (atlas->row_height < glyph_draw->height) {
+      atlas->row_height = glyph_draw->height;
+    }
 
     atlas->nglyph++;
 
@@ -287,8 +291,9 @@ glamor_glyphs_flush(CARD8 op, PicturePtr src, PicturePtr dst,
     glamor_bind_texture(glamor_priv, GL_TEXTURE1, atlas_fbo, FALSE);
 
     for (;;) {
-        if (!glamor_use_program_render(prog, op, src, dst))
-            break;
+      if (!glamor_use_program_render(prog, op, src, dst)) {
+        break;
+      }
 
         glUniform1i(prog->atlas_uniform, 1);
 
@@ -313,14 +318,16 @@ glamor_glyphs_flush(CARD8 op, PicturePtr src, PicturePtr dst,
                           box->y2 - box->y1);
                 box++;
 
-                if (glamor_glsl_has_ints(glamor_priv))
-                    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, nglyph);
-                else
-                    glamor_glDrawArrays_GL_QUADS(glamor_priv, nglyph);
+                if (glamor_glsl_has_ints(glamor_priv)) {
+                  glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, nglyph);
+                } else {
+                  glamor_glDrawArrays_GL_QUADS(glamor_priv, nglyph);
+                }
             }
         }
-        if (prog->alpha != glamor_program_alpha_ca_first)
-            break;
+        if (prog->alpha != glamor_program_alpha_ca_first) {
+          break;
+        }
         prog++;
     }
 
@@ -373,10 +380,11 @@ glamor_glyph_start(ScreenPtr screen, int count)
 static inline struct glamor_glyph_atlas *
 glamor_atlas_for_glyph(glamor_screen_private *glamor_priv, DrawablePtr drawable)
 {
-    if (drawable->depth == 32)
-        return glamor_priv->glyph_atlas_argb;
-    else
-        return glamor_priv->glyph_atlas_a;
+  if (drawable->depth == 32) {
+    return glamor_priv->glyph_atlas_argb;
+  } else {
+    return glamor_priv->glyph_atlas_a;
+  }
 }
 
 void
@@ -403,8 +411,9 @@ glamor_composite_glyphs(CARD8 op,
     int nglyph = 0;
     int screen_num = screen->myNum;
 
-    for (n = 0; n < nlist; n++)
-        nglyph += list[n].len;
+    for (n = 0; n < nlist; n++) {
+      nglyph += list[n].len;
+    }
 
     glamor_make_current(glamor_priv);
 
@@ -470,8 +479,9 @@ glamor_composite_glyphs(CARD8 op,
                         }
                         if (!glyph_atlas->atlas) {
                             glamor_glyph_atlas_init(screen, glyph_atlas);
-                            if (!glyph_atlas->atlas)
-                                goto bail_one;
+                            if (!glyph_atlas->atlas) {
+                              goto bail_one;
+                            }
                         }
                         glamor_glyph_add(glyph_atlas, glyph_draw);
                     }
@@ -479,22 +489,24 @@ glamor_composite_glyphs(CARD8 op,
                     /* First glyph in the current atlas?
                      */
                     if (_X_UNLIKELY(glyphs_queued == 0)) {
-                        if (glamor_glsl_has_ints(glamor_priv))
-                            prog = glamor_setup_program_render(op, src, glyph_pict, dst,
-                                                               glyphs_program,
-                                                               glamor_priv->is_gles ?
-                                                                   &glamor_facet_composite_glyphs_es300 :
-                                                                   &glamor_facet_composite_glyphs_130,
-                                                               glamor_priv->glyph_defines);
-                        else
-                            prog = glamor_setup_program_render(op, src, glyph_pict, dst,
-                                                               glyphs_program,
-                                                               glamor_priv->has_dual_blend ?
-                                                                   &glamor_facet_composite_glyphs_gles2 :
-                                                                   &glamor_facet_composite_glyphs_120,
-                                                               glamor_priv->glyph_defines);
-                        if (!prog)
-                            goto bail_one;
+                      if (glamor_glsl_has_ints(glamor_priv)) {
+                        prog = glamor_setup_program_render(
+                            op, src, glyph_pict, dst, glyphs_program,
+                            glamor_priv->is_gles
+                                ? &glamor_facet_composite_glyphs_es300
+                                : &glamor_facet_composite_glyphs_130,
+                            glamor_priv->glyph_defines);
+                      } else {
+                        prog = glamor_setup_program_render(
+                            op, src, glyph_pict, dst, glyphs_program,
+                            glamor_priv->has_dual_blend
+                                ? &glamor_facet_composite_glyphs_gles2
+                                : &glamor_facet_composite_glyphs_120,
+                            glamor_priv->glyph_defines);
+                      }
+                      if (!prog) {
+                        goto bail_one;
+                      }
                         v = glamor_glyph_start(screen, nglyph);
                     }
 
@@ -543,8 +555,9 @@ glamor_composite_glyphs(CARD8 op,
         }
     }
 
-    if (glyphs_queued)
-        glamor_glyphs_flush(op, src, dst, prog, glyph_atlas, glyphs_queued);
+    if (glyphs_queued) {
+      glamor_glyphs_flush(op, src, dst, prog, glyph_atlas, glyphs_queued);
+    }
 
     return;
 }
@@ -556,11 +569,13 @@ glamor_alloc_glyph_atlas(ScreenPtr screen, int depth, CARD32 f)
     struct glamor_glyph_atlas    *glyph_atlas;
 
     format = PictureMatchFormat(screen, depth, f);
-    if (!format)
-        return NULL;
+    if (!format) {
+      return NULL;
+    }
     glyph_atlas = calloc (1, sizeof (struct glamor_glyph_atlas));
-    if (!glyph_atlas)
-        return NULL;
+    if (!glyph_atlas) {
+      return NULL;
+    }
     glyph_atlas->format = format;
     glyph_atlas->serial = 1;
 
@@ -572,8 +587,10 @@ glamor_composite_glyphs_init(ScreenPtr screen)
 {
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
 
-    if (!dixRegisterPrivateKey(&glamor_glyph_private_key, PRIVATE_PIXMAP, sizeof (struct glamor_glyph_private)))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&glamor_glyph_private_key, PRIVATE_PIXMAP,
+                               sizeof(struct glamor_glyph_private))) {
+      return FALSE;
+    }
 
     /* Make glyph atlases of a reasonable size, but no larger than the maximum
      * supported by the hardware
@@ -584,23 +601,26 @@ glamor_composite_glyphs_init(ScreenPtr screen)
     glamor_priv->glyph_max_dim = glamor_priv->glyph_atlas_dim / 8;
 
     glamor_priv->glyph_atlas_a = glamor_alloc_glyph_atlas(screen, 8, PIXMAN_a8);
-    if (!glamor_priv->glyph_atlas_a)
-        return FALSE;
+    if (!glamor_priv->glyph_atlas_a) {
+      return FALSE;
+    }
     glamor_priv->glyph_atlas_argb = glamor_alloc_glyph_atlas(screen, 32, PIXMAN_a8r8g8b8);
     if (!glamor_priv->glyph_atlas_argb) {
         free (glamor_priv->glyph_atlas_a);
         return FALSE;
     }
-    if (!glamor_glyphs_init_facet(screen))
-        return FALSE;
+    if (!glamor_glyphs_init_facet(screen)) {
+      return FALSE;
+    }
     return TRUE;
 }
 
 static void
 glamor_free_glyph_atlas(struct glamor_glyph_atlas *atlas)
 {
-    if (!atlas)
-        return;
+  if (!atlas) {
+    return;
+  }
     dixDestroyPixmap(atlas->atlas, 0);
     free (atlas);
 }

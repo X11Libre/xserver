@@ -83,8 +83,9 @@ ProcXSendExtensionEvent(ClientPtr client)
 
     if (client->req_len !=
         bytes_to_int32(sizeof(xSendExtensionEventReq)) + stuff->count +
-        (stuff->num_events * bytes_to_int32(sizeof(xEvent))))
-        return BadLength;
+            (stuff->num_events * bytes_to_int32(sizeof(xEvent)))) {
+      return BadLength;
+    }
 
     if (client->swapped) {
         xEvent *eventP = (xEvent *) &stuff[1];
@@ -116,11 +117,13 @@ ProcXSendExtensionEvent(ClientPtr client)
     struct tmask tmp[EMASKSIZE];
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixWriteAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
-    if (stuff->num_events == 0)
-        return ret;
+    if (stuff->num_events == 0) {
+      return ret;
+    }
 
     /* The client's event type must be one defined by an extension. */
 
@@ -135,8 +138,9 @@ ProcXSendExtensionEvent(ClientPtr client)
 
     list = (XEventClass *) (first + stuff->num_events);
     if ((ret = CreateMaskFromList(client, list, stuff->count, tmp, dev,
-                                  X_SendExtensionEvent)) != Success)
-        return ret;
+                                  X_SendExtensionEvent)) != Success) {
+      return ret;
+    }
 
     ret = (SendEvent(client, dev, stuff->destination,
                      stuff->propagate, (xEvent *) &stuff[1],

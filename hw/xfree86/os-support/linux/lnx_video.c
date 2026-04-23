@@ -143,12 +143,14 @@ hwEnableIO(void)
     fp = fopen("/proc/ioports", "r");
     while (getline(&buf, &n, fp) != -1) {
         if ((strstr(buf, "keyboard") != NULL) || (strstr(buf, "timer") != NULL)) {
-            for (i=0; i<4; i++)
-                target[i] = buf[i+2];
+          for (i = 0; i < 4; i++) {
+            target[i] = buf[i + 2];
+          }
             begin = atoi(target);
 
-            for (i=0; i<4; i++)
-                target[i] = buf[i+7];
+            for (i = 0; i < 4; i++) {
+              target[i] = buf[i + 7];
+            }
             end = atoi(target);
 
             ioperm(begin, end-begin+1, 0);
@@ -178,8 +180,9 @@ hwDisableIO(void)
 Bool
 xf86EnableIO(void)
 {
-    if (ExtendedEnabled)
-        return TRUE;
+  if (ExtendedEnabled) {
+    return TRUE;
+  }
 
     ExtendedEnabled = hwEnableIO();
 
@@ -189,8 +192,9 @@ xf86EnableIO(void)
 void
 xf86DisableIO(void)
 {
-    if (!ExtendedEnabled)
-        return;
+  if (!ExtendedEnabled) {
+    return;
+  }
 
     hwDisableIO();
 

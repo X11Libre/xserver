@@ -203,8 +203,9 @@ xf86AutoConfigOutputDevices(void)
 {
     int i;
 
-    if (!xf86Info.autoBindGPU)
-        return;
+    if (!xf86Info.autoBindGPU) {
+      return;
+    }
 
     for (i = 0; i < xf86NumGPUScreens; i++) {
         int scrnum = xf86GPUScreens[i]->confScreen->screennum;
@@ -224,9 +225,10 @@ AddSeatId(CallbackListPtr *pcbl, void *data, void *screen)
                                   XA_STRING, 8, PropModeReplace,
                                   strlen(data) + 1, data, FALSE);
 
-    if (err != Success)
-        xf86DrvMsg(pScreen->myNum, X_WARNING,
-                   "Failed to register seat property\n");
+    if (err != Success) {
+      xf86DrvMsg(pScreen->myNum, X_WARNING,
+                 "Failed to register seat property\n");
+    }
 }
 
 static void
@@ -246,9 +248,10 @@ AddVTAtoms(CallbackListPtr *pcbl, void *data, void *screen)
                                    XA_INTEGER, 32, PropModeReplace, 1,
                                    &HasVT, FALSE);
 
-    if (err != Success)
-        xf86DrvMsg(pScreen->myNum, X_WARNING,
-                   "Failed to register VT properties\n");
+    if (err != Success) {
+      xf86DrvMsg(pScreen->myNum, X_WARNING,
+                 "Failed to register VT properties\n");
+    }
 }
 
 static Bool
@@ -264,9 +267,9 @@ static void
 xf86EnsureRANDR(ScreenPtr pScreen)
 {
 #ifdef RANDR
-        if (!dixPrivateKeyRegistered(rrPrivKey) ||
-            !rrGetScrPriv(pScreen))
-            xf86RandRInit(pScreen);
+  if (!dixPrivateKeyRegistered(rrPrivKey) || !rrGetScrPriv(pScreen)) {
+    xf86RandRInit(pScreen);
+  }
 #endif
 }
 
@@ -328,8 +331,9 @@ InitOutput(int argc, char **argv)
             LoaderSetIgnoreAbi();
         }
 
-        if (xf86DoShowOptions)
-            DoShowOptions();
+        if (xf86DoShowOptions) {
+          DoShowOptions();
+        }
 
         dbus_core_init();
         seatd_libseat_init(xf86VTKeepTtyIsSet());
@@ -338,8 +342,9 @@ InitOutput(int argc, char **argv)
         /* Do a general bus probe.  This will be a PCI probe for x86 platforms */
         xf86BusProbe();
 
-        if (xf86DoConfigure)
-            DoConfigure();
+        if (xf86DoConfigure) {
+          DoConfigure();
+        }
 
         if (autoconfig) {
             if (!xf86AutoConfig()) {
@@ -410,36 +415,42 @@ InitOutput(int argc, char **argv)
         for (i = 0; i < xf86NumDrivers; i++) {
             xorgHWFlags flags = HW_IO;
 
-            if (xf86DriverList[i]->Identify != NULL)
-                xf86DriverList[i]->Identify(0);
+            if (xf86DriverList[i]->Identify != NULL) {
+              xf86DriverList[i]->Identify(0);
+            }
 
-            if (xf86DriverList[i]->driverFunc)
-                xf86DriverList[i]->driverFunc(NULL,
-                                              GET_REQUIRED_HW_INTERFACES,
-                                              &flags);
+            if (xf86DriverList[i]->driverFunc) {
+              xf86DriverList[i]->driverFunc(NULL, GET_REQUIRED_HW_INTERFACES,
+                                            &flags);
+            }
 
-            if (NEED_IO_ENABLED(flags))
-                want_hw_access = TRUE;
+            if (NEED_IO_ENABLED(flags)) {
+              want_hw_access = TRUE;
+            }
 
             /* Non-seat0 X servers should not open console */
-            if (!(flags & HW_SKIP_CONSOLE) && !ServerIsNotSeat0() && xf86HasTTYs())
-                xorgHWOpenConsole = TRUE;
+            if (!(flags & HW_SKIP_CONSOLE) && !ServerIsNotSeat0() &&
+                xf86HasTTYs()) {
+              xorgHWOpenConsole = TRUE;
+            }
         }
 
         if (xorgHWOpenConsole) {
             if (!seatd_libseat_controls_session()) {
                 xf86OpenConsole();
             }
-        } else
-            xf86Info.dontVTSwitch = TRUE;
+        } else {
+          xf86Info.dontVTSwitch = TRUE;
+        }
 
-	/* Enable full I/O access */
-	if (want_hw_access)
-	    xorgHWAccess = xf86EnableIO();
+        /* Enable full I/O access */
+        if (want_hw_access) {
+          xorgHWAccess = xf86EnableIO();
+        }
 
-        if (xf86BusConfig(xf86Info.singleDriver) == FALSE)
-            return;
-
+        if (xf86BusConfig(xf86Info.singleDriver) == FALSE) {
+          return;
+        }
 
         /*
          * Sort the drivers to match the requested ordering.  Using a slow
@@ -470,25 +481,31 @@ InitOutput(int argc, char **argv)
             xf86VGAarbiterScrnInit(xf86Screens[i]);
             xf86VGAarbiterLock(xf86Screens[i]);
             if (xf86Screens[i]->PreInit &&
-                xf86Screens[i]->PreInit(xf86Screens[i], 0))
-                xf86Screens[i]->configured = TRUE;
+                xf86Screens[i]->PreInit(xf86Screens[i], 0)) {
+              xf86Screens[i]->configured = TRUE;
+            }
             xf86VGAarbiterUnlock(xf86Screens[i]);
         }
-        for (i = 0; i < xf86NumScreens; i++)
-            if (!xf86Screens[i]->configured)
-                xf86DeleteScreen(xf86Screens[i--]);
+        for (i = 0; i < xf86NumScreens; i++) {
+          if (!xf86Screens[i]->configured) {
+            xf86DeleteScreen(xf86Screens[i--]);
+          }
+        }
 
         for (i = 0; i < xf86NumGPUScreens; i++) {
             xf86VGAarbiterScrnInit(xf86GPUScreens[i]);
             xf86VGAarbiterLock(xf86GPUScreens[i]);
             if (xf86GPUScreens[i]->PreInit &&
-                xf86GPUScreens[i]->PreInit(xf86GPUScreens[i], 0))
-                xf86GPUScreens[i]->configured = TRUE;
+                xf86GPUScreens[i]->PreInit(xf86GPUScreens[i], 0)) {
+              xf86GPUScreens[i]->configured = TRUE;
+            }
             xf86VGAarbiterUnlock(xf86GPUScreens[i]);
         }
-        for (i = 0; i < xf86NumGPUScreens; i++)
-            if (!xf86GPUScreens[i]->configured)
-                xf86DeleteScreen(xf86GPUScreens[i--]);
+        for (i = 0; i < xf86NumGPUScreens; i++) {
+          if (!xf86GPUScreens[i]->configured) {
+            xf86DeleteScreen(xf86GPUScreens[i--]);
+          }
+        }
 
         /*
          * If no screens left, return now.
@@ -501,36 +518,41 @@ InitOutput(int argc, char **argv)
         }
 
         /* Remove (unload) drivers that are not required */
-        for (i = 0; i < xf86NumDrivers; i++)
-            if (xf86DriverList[i] && xf86DriverList[i]->refCount <= 0)
-                xf86DeleteDriver(i);
+        for (i = 0; i < xf86NumDrivers; i++) {
+          if (xf86DriverList[i] && xf86DriverList[i]->refCount <= 0) {
+            xf86DeleteDriver(i);
+          }
+        }
 
         /*
          * At this stage we know how many screens there are.
          */
 
-        for (i = 0; i < xf86NumScreens; i++)
-            xf86InitViewport(xf86Screens[i]);
+        for (i = 0; i < xf86NumScreens; i++) {
+          xf86InitViewport(xf86Screens[i]);
+        }
 
         /*
          * Collect all pixmap formats and check for conflicts at the display
          * level.  Should we die here?  Or just delete the offending screens?
          */
         for (i = 0; i < xf86NumScreens; i++) {
-            if (xf86Screens[i]->imageByteOrder !=
-                xf86Screens[0]->imageByteOrder)
-                FatalError("Inconsistent display bitmapBitOrder.  Exiting\n");
-            if (xf86Screens[i]->bitmapScanlinePad !=
-                xf86Screens[0]->bitmapScanlinePad)
-                FatalError
-                    ("Inconsistent display bitmapScanlinePad.  Exiting\n");
-            if (xf86Screens[i]->bitmapScanlineUnit !=
-                xf86Screens[0]->bitmapScanlineUnit)
-                FatalError
-                    ("Inconsistent display bitmapScanlineUnit.  Exiting\n");
-            if (xf86Screens[i]->bitmapBitOrder !=
-                xf86Screens[0]->bitmapBitOrder)
-                FatalError("Inconsistent display bitmapBitOrder.  Exiting\n");
+          if (xf86Screens[i]->imageByteOrder !=
+              xf86Screens[0]->imageByteOrder) {
+            FatalError("Inconsistent display bitmapBitOrder.  Exiting\n");
+          }
+          if (xf86Screens[i]->bitmapScanlinePad !=
+              xf86Screens[0]->bitmapScanlinePad) {
+            FatalError("Inconsistent display bitmapScanlinePad.  Exiting\n");
+          }
+          if (xf86Screens[i]->bitmapScanlineUnit !=
+              xf86Screens[0]->bitmapScanlineUnit) {
+            FatalError("Inconsistent display bitmapScanlineUnit.  Exiting\n");
+          }
+          if (xf86Screens[i]->bitmapBitOrder !=
+              xf86Screens[0]->bitmapBitOrder) {
+            FatalError("Inconsistent display bitmapBitOrder.  Exiting\n");
+          }
         }
 
         /* Collect additional formats */
@@ -538,18 +560,20 @@ InitOutput(int argc, char **argv)
             for (j = 0; j < xf86Screens[i]->numFormats; j++) {
                 for (k = 0;; k++) {
                     if (k >= numFormats) {
-                        if (k >= MAXFORMATS)
-                            FatalError("Too many pixmap formats!  Exiting\n");
+                      if (k >= MAXFORMATS) {
+                        FatalError("Too many pixmap formats!  Exiting\n");
+                      }
                         formats[k] = xf86Screens[i]->formats[j];
                         numFormats++;
                         break;
                     }
                     if (formats[k].depth == xf86Screens[i]->formats[j].depth) {
-                        if ((formats[k].bitsPerPixel ==
-                             xf86Screens[i]->formats[j].bitsPerPixel) &&
-                            (formats[k].scanlinePad ==
-                             xf86Screens[i]->formats[j].scanlinePad))
-                            break;
+                      if ((formats[k].bitsPerPixel ==
+                           xf86Screens[i]->formats[j].bitsPerPixel) &&
+                          (formats[k].scanlinePad ==
+                           xf86Screens[i]->formats[j].scanlinePad)) {
+                        break;
+                      }
                         FatalError("Inconsistent pixmap format for depth %d."
                                    "  Exiting\n", formats[k].depth);
                     }
@@ -573,21 +597,26 @@ InitOutput(int argc, char **argv)
            device. We could leave this to the OS layer. For now we simply
            close it here
          */
-        if (xf86OSPMClose)
-            xf86OSPMClose();
-        if ((xf86OSPMClose = xf86OSPMOpen()) != NULL)
-            LogMessageVerb(X_INFO, 3, "APM registered successfully\n");
+        if (xf86OSPMClose) {
+          xf86OSPMClose();
+        }
+        if ((xf86OSPMClose = xf86OSPMOpen()) != NULL) {
+          LogMessageVerb(X_INFO, 3, "APM registered successfully\n");
+        }
 
         /* Make sure full I/O access is enabled */
-        if (xorgHWAccess)
-            xf86EnableIO();
+        if (xorgHWAccess) {
+          xf86EnableIO();
+        }
     }
 
-    if (xf86Info.vtno >= 0)
-        AddCallback(&RootWindowFinalizeCallback, AddVTAtoms, NULL);
+    if (xf86Info.vtno >= 0) {
+      AddCallback(&RootWindowFinalizeCallback, AddVTAtoms, NULL);
+    }
 
-    if (dixSettingSeatId)
-        AddCallback(&RootWindowFinalizeCallback, AddSeatId, dixSettingSeatId);
+    if (dixSettingSeatId) {
+      AddCallback(&RootWindowFinalizeCallback, AddSeatId, dixSettingSeatId);
+    }
 
     /*
      * Use the previously collected parts to setup screenInfo
@@ -598,8 +627,9 @@ InitOutput(int argc, char **argv)
     screenInfo.bitmapScanlineUnit = xf86Screens[0]->bitmapScanlineUnit;
     screenInfo.bitmapBitOrder = xf86Screens[0]->bitmapBitOrder;
     screenInfo.numPixmapFormats = numFormats;
-    for (i = 0; i < numFormats; i++)
-        screenInfo.formats[i] = formats[i];
+    for (i = 0; i < numFormats; i++) {
+      screenInfo.formats[i] = formats[i];
+    }
 
     /* Make sure the server's VT is active */
 
@@ -615,12 +645,15 @@ InitOutput(int argc, char **argv)
         }
     }
 
-    for (i = 0; i < xf86NumScreens; i++)
-        if (!xf86ColormapAllocatePrivates(xf86Screens[i]))
-            FatalError("Cannot register DDX private keys");
-
-    if (!dixRegisterPrivateKey(&xf86ScreenKeyRec, PRIVATE_SCREEN, 0))
+    for (i = 0; i < xf86NumScreens; i++) {
+      if (!xf86ColormapAllocatePrivates(xf86Screens[i])) {
         FatalError("Cannot register DDX private keys");
+      }
+    }
+
+    if (!dixRegisterPrivateKey(&xf86ScreenKeyRec, PRIVATE_SCREEN, 0)) {
+      FatalError("Cannot register DDX private keys");
+    }
 
     for (i = 0; i < xf86NumScreens; i++) {
         xf86VGAarbiterLock(xf86Screens[i]);
@@ -700,8 +733,9 @@ InitOutput(int argc, char **argv)
     xf86AutoConfigOutputDevices();
 
     xf86VGAarbiterWrapFunctions();
-    if (sigio_blocked)
-        input_unlock();
+    if (sigio_blocked) {
+      input_unlock();
+    }
 
     xf86InitOrigins();
 
@@ -736,8 +770,9 @@ InitInput(int argc, char **argv)
         (*pInfo)->options =
             xf86AddNewOption((*pInfo)->options, "identifier", (*pInfo)->name);
         /* If one fails, the others will too */
-        if (NewInputDeviceRequest((*pInfo)->options, NULL, &dev) == BadAlloc)
-            break;
+        if (NewInputDeviceRequest((*pInfo)->options, NULL, &dev) == BadAlloc) {
+          break;
+        }
     }
 
     config_init();
@@ -812,28 +847,31 @@ ddxGiveUp(enum ExitCode error)
 
         /* try to restore the original video state */
 #ifdef DPMSExtension            /* Turn screens back on */
-        if (DPMSPowerLevel != DPMSModeOn)
-            DPMSSet(serverClient, DPMSModeOn);
+        if (DPMSPowerLevel != DPMSModeOn) {
+          DPMSSet(serverClient, DPMSModeOn);
+        }
 #endif
         if (xf86Screens) {
-            for (i = 0; i < xf86NumScreens; i++)
-                if (xf86Screens[i]->vtSema) {
-                    /*
-                     * if we are aborting before ScreenInit() has finished we
-                     * might not have been wrapped yet. Therefore enable screen
-                     * explicitly.
-                     */
-                    xf86VGAarbiterLock(xf86Screens[i]);
-                    (xf86Screens[i]->LeaveVT) (xf86Screens[i]);
-                    xf86VGAarbiterUnlock(xf86Screens[i]);
-                }
+          for (i = 0; i < xf86NumScreens; i++) {
+            if (xf86Screens[i]->vtSema) {
+              /*
+               * if we are aborting before ScreenInit() has finished we
+               * might not have been wrapped yet. Therefore enable screen
+               * explicitly.
+               */
+              xf86VGAarbiterLock(xf86Screens[i]);
+              (xf86Screens[i]->LeaveVT)(xf86Screens[i]);
+              xf86VGAarbiterUnlock(xf86Screens[i]);
+            }
+          }
         }
     }
 
     xf86VGAarbiterFini();
 
-    if (xf86OSPMClose)
-        xf86OSPMClose();
+    if (xf86OSPMClose) {
+      xf86OSPMClose();
+    }
     xf86OSPMClose = NULL;
 
     for (i = 0; i < xf86NumScreens; i++) {
@@ -861,9 +899,11 @@ void
 OsVendorFatalError(const char *f, va_list args)
 {
     ErrorF("\nPlease consult the XLibre support: https://www.xlibre.net/\n");
-    if (xf86LogFile && xf86LogFileWasOpened)
-        ErrorF("Please also check the log file at \"%s\" for additional "
-               "information.\n", xf86LogFile);
+    if (xf86LogFile && xf86LogFileWasOpened) {
+      ErrorF("Please also check the log file at \"%s\" for additional "
+             "information.\n",
+             xf86LogFile);
+    }
     ErrorF("\n");
 }
 
@@ -918,18 +958,20 @@ ddxProcessArgument(int argc, char **argv, int i)
     /* First the options that are not allowed with elevated privileges */
     if (!strcmp(argv[i], "-modulepath")) {
         CHECK_FOR_REQUIRED_ARGUMENTS(1);
-        if (PrivsElevated())
-              FatalError("\nInvalid argument -modulepath "
-                "with elevated privileges\n");
+        if (PrivsElevated()) {
+          FatalError("\nInvalid argument -modulepath "
+                     "with elevated privileges\n");
+        }
         xf86ModulePath = argv[i + 1];
         xf86ModPathFrom = X_CMDLINE;
         return 2;
     }
     if (!strcmp(argv[i], "-logfile")) {
         CHECK_FOR_REQUIRED_ARGUMENTS(1);
-        if (PrivsElevated())
-              FatalError("\nInvalid argument -logfile "
-                "with elevated privileges\n");
+        if (PrivsElevated()) {
+          FatalError("\nInvalid argument -logfile "
+                     "with elevated privileges\n");
+        }
         xf86LogFile = argv[i + 1];
         xf86LogFileFrom = X_CMDLINE;
         return 2;
@@ -1083,14 +1125,15 @@ ddxProcessArgument(int argc, char **argv, int i)
                        " is valid\n", GAMMA_MIN, GAMMA_MAX);
                 return 0;
             }
-            if (!strcmp(argv[i - 1], "-gamma"))
-                xf86Gamma.red = xf86Gamma.green = xf86Gamma.blue = gamma;
-            else if (!strcmp(argv[i - 1], "-rgamma"))
-                xf86Gamma.red = gamma;
-            else if (!strcmp(argv[i - 1], "-ggamma"))
-                xf86Gamma.green = gamma;
-            else if (!strcmp(argv[i - 1], "-bgamma"))
-                xf86Gamma.blue = gamma;
+            if (!strcmp(argv[i - 1], "-gamma")) {
+              xf86Gamma.red = xf86Gamma.green = xf86Gamma.blue = gamma;
+            } else if (!strcmp(argv[i - 1], "-rgamma")) {
+              xf86Gamma.red = gamma;
+            } else if (!strcmp(argv[i - 1], "-ggamma")) {
+              xf86Gamma.green = gamma;
+            } else if (!strcmp(argv[i - 1], "-bgamma")) {
+              xf86Gamma.blue = gamma;
+            }
             return 2;
         }
     }
@@ -1260,8 +1303,9 @@ xf86LoadModules(const char **list, void **optlist)
     char *name;
     Bool failed = FALSE;
 
-    if (!list)
-        return TRUE;
+    if (!list) {
+      return TRUE;
+    }
 
     for (i = 0; list[i] != NULL; i++) {
 
@@ -1279,10 +1323,11 @@ xf86LoadModules(const char **list, void **optlist)
             strcpy(name, "kbd");
         }
 
-        if (optlist)
-            opt = optlist[i];
-        else
-            opt = NULL;
+        if (optlist) {
+          opt = optlist[i];
+        } else {
+          opt = NULL;
+        }
 
         if (!LoadModule(name, opt, NULL, &errmaj)) {
             LoaderErrorMsg(NULL, name, errmaj, 0);
@@ -1300,18 +1345,23 @@ xf86GetPixFormat(ScrnInfoPtr pScrn, int depth)
 {
     int i;
 
-    for (i = 0; i < numFormats; i++)
-        if (formats[i].depth == depth)
-            break;
-    if (i != numFormats)
-        return &formats[i];
-    else if (!formatsDone) {
-        /* Check for screen-specified formats */
-        for (i = 0; i < pScrn->numFormats; i++)
-            if (pScrn->formats[i].depth == depth)
-                break;
-        if (i != pScrn->numFormats)
-            return &pScrn->formats[i];
+    for (i = 0; i < numFormats; i++) {
+      if (formats[i].depth == depth) {
+        break;
+      }
+    }
+    if (i != numFormats) {
+      return &formats[i];
+    } else if (!formatsDone) {
+      /* Check for screen-specified formats */
+      for (i = 0; i < pScrn->numFormats; i++) {
+        if (pScrn->formats[i].depth == depth) {
+          break;
+        }
+      }
+      if (i != pScrn->numFormats) {
+        return &pScrn->formats[i];
+      }
     }
     return NULL;
 }
@@ -1322,10 +1372,11 @@ xf86GetBppFromDepth(ScrnInfoPtr pScrn, int depth)
     PixmapFormatPtr format;
 
     format = xf86GetPixFormat(pScrn, depth);
-    if (format)
-        return format->bitsPerPixel;
-    else
-        return 0;
+    if (format) {
+      return format->bitsPerPixel;
+    } else {
+      return 0;
+    }
 }
 
 #if INPUTTHREAD

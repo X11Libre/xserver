@@ -76,14 +76,16 @@ _XkbLookupAnyDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
 {
     int rc = XkbKeyboardErrorCode;
 
-    if (id == XkbUseCoreKbd)
-        id = PickKeyboard(client)->id;
-    else if (id == XkbUseCorePtr)
-        id = PickPointer(client)->id;
+    if (id == XkbUseCoreKbd) {
+      id = PickKeyboard(client)->id;
+    } else if (id == XkbUseCorePtr) {
+      id = PickPointer(client)->id;
+    }
 
     rc = dixLookupDevice(pDev, id, client, access_mode);
-    if (rc != Success)
-        *xkb_err = XkbErr_BadDevice;
+    if (rc != Success) {
+      *xkb_err = XkbErr_BadDevice;
+    }
 
     return rc;
 }
@@ -95,12 +97,14 @@ _XkbLookupKeyboard(DeviceIntPtr *pDev, int id, ClientPtr client,
     DeviceIntPtr dev;
     int rc;
 
-    if (id == XkbDfltXIId)
-        id = XkbUseCoreKbd;
+    if (id == XkbDfltXIId) {
+      id = XkbUseCoreKbd;
+    }
 
     rc = _XkbLookupAnyDevice(pDev, id, client, access_mode, xkb_err);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     dev = *pDev;
     if (!dev->key || !dev->key->xkbInfo) {
@@ -119,8 +123,9 @@ _XkbLookupBellDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
     int rc;
 
     rc = _XkbLookupAnyDevice(pDev, id, client, access_mode, xkb_err);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     dev = *pDev;
     if (!dev->kbdfeed && !dev->bell) {
@@ -138,12 +143,14 @@ _XkbLookupLedDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
     DeviceIntPtr dev;
     int rc;
 
-    if (id == XkbDfltXIId)
-        id = XkbUseCorePtr;
+    if (id == XkbDfltXIId) {
+      id = XkbUseCorePtr;
+    }
 
     rc = _XkbLookupAnyDevice(pDev, id, client, access_mode, xkb_err);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     dev = *pDev;
     if (!dev->kbdfeed && !dev->leds) {
@@ -162,8 +169,9 @@ _XkbLookupButtonDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
     int rc;
 
     rc = _XkbLookupAnyDevice(pDev, id, client, access_mode, xkb_err);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     dev = *pDev;
     if (!dev->button) {
@@ -183,16 +191,20 @@ XkbSetActionKeyMods(XkbDescPtr xkb, XkbAction *act, unsigned mods)
     case XkbSA_SetMods:
     case XkbSA_LatchMods:
     case XkbSA_LockMods:
-        if (act->mods.flags & XkbSA_UseModMapMods)
-            act->mods.real_mods = act->mods.mask = mods;
-        if ((tmp = XkbModActionVMods(&act->mods)) != 0)
-            act->mods.mask |= XkbMaskForVMask(xkb, tmp);
+      if (act->mods.flags & XkbSA_UseModMapMods) {
+        act->mods.real_mods = act->mods.mask = mods;
+      }
+      if ((tmp = XkbModActionVMods(&act->mods)) != 0) {
+        act->mods.mask |= XkbMaskForVMask(xkb, tmp);
+      }
         break;
     case XkbSA_ISOLock:
-        if (act->iso.flags & XkbSA_UseModMapMods)
-            act->iso.real_mods = act->iso.mask = mods;
-        if ((tmp = XkbModActionVMods(&act->iso)) != 0)
-            act->iso.mask |= XkbMaskForVMask(xkb, tmp);
+      if (act->iso.flags & XkbSA_UseModMapMods) {
+        act->iso.real_mods = act->iso.mask = mods;
+      }
+      if ((tmp = XkbModActionVMods(&act->iso)) != 0) {
+        act->iso.mask |= XkbMaskForVMask(xkb, tmp);
+      }
         break;
     }
     return;
@@ -205,8 +217,9 @@ XkbMaskForVMask(XkbDescPtr xkb, unsigned vmask)
     register unsigned mask;
 
     for (mask = i = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
-        if (vmask & bit)
-            mask |= xkb->server->vmods[i];
+      if (vmask & bit) {
+        mask |= xkb->server->vmods[i];
+      }
     }
     return mask;
 }
@@ -251,10 +264,12 @@ XkbUpdateKeyTypesFromCore(DeviceIntPtr pXDev,
         oldLast = changes->map.first_key_sym + changes->map.num_key_syms - 1;
         newLast = first + num - 1;
 
-        if (first < changes->map.first_key_sym)
-            changes->map.first_key_sym = first;
-        if (oldLast > newLast)
-            newLast = oldLast;
+        if (first < changes->map.first_key_sym) {
+          changes->map.first_key_sym = first;
+        }
+        if (oldLast > newLast) {
+          newLast = oldLast;
+        }
         changes->map.num_key_syms = newLast - changes->map.first_key_sym + 1;
     }
     else {
@@ -283,8 +298,9 @@ XkbUpdateDescActions(XkbDescPtr xkb,
         memset(newVMods, 0, XkbNumVirtualMods);
         present = 0;
         for (key = xkb->min_key_code; key <= xkb->max_key_code; key++) {
-            if (xkb->server->vmodmap[key] == 0)
-                continue;
+          if (xkb->server->vmodmap[key] == 0) {
+            continue;
+          }
             for (i = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
                 if (bit & xkb->server->vmodmap[key]) {
                     present |= bit;
@@ -300,8 +316,9 @@ XkbUpdateDescActions(XkbDescPtr xkb,
             }
         }
     }
-    if (changes->map.changed & XkbVirtualModsMask)
-        XkbApplyVirtualModChanges(xkb, changes->map.vmods, changes);
+    if (changes->map.changed & XkbVirtualModsMask) {
+      XkbApplyVirtualModChanges(xkb, changes->map.vmods, changes);
+    }
 
     if (changes->map.changed & XkbKeyActionsMask) {
         CARD8 oldLast, newLast;
@@ -309,10 +326,12 @@ XkbUpdateDescActions(XkbDescPtr xkb,
         oldLast = changes->map.first_key_act + changes->map.num_key_acts - 1;
         newLast = first + num - 1;
 
-        if (first < changes->map.first_key_act)
-            changes->map.first_key_act = first;
-        if (newLast > oldLast)
-            newLast = oldLast;
+        if (first < changes->map.first_key_act) {
+          changes->map.first_key_act = first;
+        }
+        if (newLast > oldLast) {
+          newLast = oldLast;
+        }
         changes->map.num_key_acts = newLast - changes->map.first_key_act + 1;
     }
     else {
@@ -334,15 +353,17 @@ XkbUpdateActions(DeviceIntPtr pXDev,
     XkbDescPtr xkb;
     CARD8 *repeat;
 
-    if (needChecksRtrn)
-        *needChecksRtrn = 0;
+    if (needChecksRtrn) {
+      *needChecksRtrn = 0;
+    }
     xkbi = pXDev->key->xkbInfo;
     xkb = xkbi->desc;
     repeat = xkb->ctrls->per_key_repeat;
 
     /* before letting XKB do any changes, copy the current core values */
-    if (pXDev->kbdfeed)
-        memcpy(repeat, pXDev->kbdfeed->ctrl.autoRepeats, XkbPerKeyBitArraySize);
+    if (pXDev->kbdfeed) {
+      memcpy(repeat, pXDev->kbdfeed->ctrl.autoRepeats, XkbPerKeyBitArraySize);
+    }
 
     XkbUpdateDescActions(xkb, first, num, changes);
 
@@ -350,8 +371,9 @@ XkbUpdateActions(DeviceIntPtr pXDev,
         (changes->ctrls.changed_ctrls & XkbPerKeyRepeatMask)) {
         /* now copy the modified changes back to core */
         memcpy(pXDev->kbdfeed->ctrl.autoRepeats, repeat, XkbPerKeyBitArraySize);
-        if (pXDev->kbdfeed->CtrlProc)
-            (*pXDev->kbdfeed->CtrlProc) (pXDev, &pXDev->kbdfeed->ctrl);
+        if (pXDev->kbdfeed->CtrlProc) {
+          (*pXDev->kbdfeed->CtrlProc)(pXDev, &pXDev->kbdfeed->ctrl);
+        }
     }
     return;
 }
@@ -365,8 +387,9 @@ XkbGetCoreMap(DeviceIntPtr keybd)
     KeySymsPtr syms;
     int maxNumberOfGroups;
 
-    if (!keybd || !keybd->key || !keybd->key->xkbInfo)
-        return NULL;
+    if (!keybd || !keybd->key || !keybd->key->xkbInfo) {
+      return NULL;
+    }
 
     xkb = keybd->key->xkbInfo->desc;
     maxSymsPerKey = maxGroup1Width = 0;
@@ -381,51 +404,62 @@ XkbGetCoreMap(DeviceIntPtr keybd)
             nGroups = XkbKeyNumGroups(xkb, key);
             tmp = 0;
             if (nGroups > 0) {
-                if ((w = XkbKeyGroupWidth(xkb, key, XkbGroup1Index)) <= 2)
-                    tmp += 2;
-                else
-                    tmp += w + 2;
+              if ((w = XkbKeyGroupWidth(xkb, key, XkbGroup1Index)) <= 2) {
+                tmp += 2;
+              } else {
+                tmp += w + 2;
+              }
                 /* remember highest G1 width */
-                if (w > maxGroup1Width)
-                    maxGroup1Width = w;
+                if (w > maxGroup1Width) {
+                  maxGroup1Width = w;
+                }
             }
             if (nGroups > 1) {
                 if (tmp <= 2) {
-                    if ((w = XkbKeyGroupWidth(xkb, key, XkbGroup2Index)) < 2)
-                        tmp += 2;
-                    else
-                        tmp += w;
+                  if ((w = XkbKeyGroupWidth(xkb, key, XkbGroup2Index)) < 2) {
+                    tmp += 2;
+                  } else {
+                    tmp += w;
+                  }
                 }
                 else {
-                    if ((w = XkbKeyGroupWidth(xkb, key, XkbGroup2Index)) > 2)
-                        tmp += w - 2;
+                  if ((w = XkbKeyGroupWidth(xkb, key, XkbGroup2Index)) > 2) {
+                    tmp += w - 2;
+                  }
                 }
             }
-            if (nGroups > 2)
-                tmp += XkbKeyGroupWidth(xkb, key, XkbGroup3Index);
-            if (nGroups > 3)
-                tmp += XkbKeyGroupWidth(xkb, key, XkbGroup4Index);
-            if (tmp > maxSymsPerKey)
-                maxSymsPerKey = tmp;
-            if (nGroups > maxNumberOfGroups)
-                maxNumberOfGroups = nGroups;
+            if (nGroups > 2) {
+              tmp += XkbKeyGroupWidth(xkb, key, XkbGroup3Index);
+            }
+            if (nGroups > 3) {
+              tmp += XkbKeyGroupWidth(xkb, key, XkbGroup4Index);
+            }
+            if (tmp > maxSymsPerKey) {
+              maxSymsPerKey = tmp;
+            }
+            if (nGroups > maxNumberOfGroups) {
+              maxNumberOfGroups = nGroups;
+            }
         }
     }
 
-    if (maxSymsPerKey <= 0)
-        return NULL;
+    if (maxSymsPerKey <= 0) {
+      return NULL;
+    }
 
     syms = calloc(1, sizeof(*syms));
-    if (!syms)
-        return NULL;
+    if (!syms) {
+      return NULL;
+    }
 
     /* See Section 12.4 of the XKB Protocol spec. Because of the
      * single-group distribution for multi-group keyboards, we have to
      * have enough symbols for the largest group 1 to replicate across the
      * number of groups on the keyboard. e.g. a single-group key with 4
      * symbols on a keyboard that has 3 groups -> 12 syms per key */
-    if (maxSymsPerKey < maxNumberOfGroups * maxGroup1Width)
-        maxSymsPerKey = maxNumberOfGroups * maxGroup1Width;
+    if (maxSymsPerKey < maxNumberOfGroups * maxGroup1Width) {
+      maxSymsPerKey = maxNumberOfGroups * maxGroup1Width;
+    }
 
     syms->mapWidth = maxSymsPerKey;
     syms->minKeyCode = xkb->min_key_code;
@@ -449,14 +483,18 @@ XkbGetCoreMap(DeviceIntPtr keybd)
         nOut = 2;
         if (nGroups > 0) {
             groupWidth = XkbKeyGroupWidth(xkb, key, XkbGroup1Index);
-            if (groupWidth > 0)
-                pCore[0] = pXKB[0];
-            if (groupWidth > 1)
-                pCore[1] = pXKB[1];
-            for (n = 2; n < groupWidth; n++)
-                pCore[2 + n] = pXKB[n];
-            if (groupWidth > 2)
-                nOut = groupWidth;
+            if (groupWidth > 0) {
+              pCore[0] = pXKB[0];
+            }
+            if (groupWidth > 1) {
+              pCore[1] = pXKB[1];
+            }
+            for (n = 2; n < groupWidth; n++) {
+              pCore[2 + n] = pXKB[n];
+            }
+            if (groupWidth > 2) {
+              nOut = groupWidth;
+            }
         }
 
         /* See XKB Protocol Sec, Section 12.4.
@@ -469,10 +507,12 @@ XkbGetCoreMap(DeviceIntPtr keybd)
             groupWidth = XkbKeyGroupWidth(xkb, key, XkbGroup1Index);
 
             /* AB..CDE... -> ABABCDE... */
-            if (groupWidth > 0 && syms->mapWidth >= 3)
-                pCore[2] = pCore[0];
-            if (groupWidth > 1 && syms->mapWidth >= 4)
-                pCore[3] = pCore[1];
+            if (groupWidth > 0 && syms->mapWidth >= 3) {
+              pCore[2] = pCore[0];
+            }
+            if (groupWidth > 1 && syms->mapWidth >= 4) {
+              pCore[3] = pCore[1];
+            }
 
             /* ABABCDE... -> ABABCDECDE */
             idx = 2 + groupWidth;
@@ -482,27 +522,33 @@ XkbGetCoreMap(DeviceIntPtr keybd)
                 idx++;
             }
             idx = 2 * groupWidth;
-            if (idx < 4)
-                idx = 4;
+            if (idx < 4) {
+              idx = 4;
+            }
             /* 3 or more groups: ABABCDECDEABCDEABCDE */
-            for (j = 3; j <= maxNumberOfGroups; j++)
-                for (n = 0; n < groupWidth && idx < maxSymsPerKey; n++)
-                    pCore[idx++] = pXKB[n];
+            for (j = 3; j <= maxNumberOfGroups; j++) {
+              for (n = 0; n < groupWidth && idx < maxSymsPerKey; n++) {
+                pCore[idx++] = pXKB[n];
+              }
+            }
         }
 
         pXKB += XkbKeyGroupsWidth(xkb, key);
         nOut += 2;
         if (nGroups > 1) {
             groupWidth = XkbKeyGroupWidth(xkb, key, XkbGroup2Index);
-            if (groupWidth > 0)
-                pCore[2] = pXKB[0];
-            if (groupWidth > 1)
-                pCore[3] = pXKB[1];
+            if (groupWidth > 0) {
+              pCore[2] = pXKB[0];
+            }
+            if (groupWidth > 1) {
+              pCore[3] = pXKB[1];
+            }
             for (n = 2; n < groupWidth; n++) {
                 pCore[nOut + (n - 2)] = pXKB[n];
             }
-            if (groupWidth > 2)
-                nOut += (groupWidth - 2);
+            if (groupWidth > 2) {
+              nOut += (groupWidth - 2);
+            }
         }
         pXKB += XkbKeyGroupsWidth(xkb, key);
         for (n = XkbGroup3Index; n < nGroups; n++) {
@@ -530,18 +576,20 @@ XkbSetRepeatKeys(DeviceIntPtr pXDev, int key, int onoff)
         old = *ctrls;
 
         if (key == -1) {        /* global autorepeat setting changed */
-            if (onoff)
-                ctrls->enabled_ctrls |= XkbRepeatKeysMask;
-            else
-                ctrls->enabled_ctrls &= ~XkbRepeatKeysMask;
+          if (onoff) {
+            ctrls->enabled_ctrls |= XkbRepeatKeysMask;
+          } else {
+            ctrls->enabled_ctrls &= ~XkbRepeatKeysMask;
+          }
         }
         else if (pXDev->kbdfeed) {
             ctrls->per_key_repeat[key / 8] =
                 pXDev->kbdfeed->ctrl.autoRepeats[key / 8];
         }
 
-        if (XkbComputeControlsNotify(pXDev, &old, ctrls, &cn, TRUE))
-            XkbSendControlsNotify(pXDev, &cn);
+        if (XkbComputeControlsNotify(pXDev, &old, ctrls, &cn, TRUE)) {
+          XkbSendControlsNotify(pXDev, &cn);
+        }
     }
     return;
 }
@@ -566,8 +614,9 @@ XkbApplyMappingChange(DeviceIntPtr kbd, KeySymsPtr map, KeyCode first_key,
         XkbUpdateKeyTypesFromCore(kbd, map, first_key, num_keys, &changes);
         XkbUpdateActions(kbd, first_key, num_keys, &changes, &check, &cause);
 
-        if (check)
-            XkbCheckSecondaryEffects(kbd->key->xkbInfo, 1, &changes, &cause);
+        if (check) {
+          XkbCheckSecondaryEffects(kbd->key->xkbInfo, 1, &changes, &cause);
+        }
     }
 
     if (modmap) {
@@ -585,8 +634,9 @@ XkbApplyMappingChange(DeviceIntPtr kbd, KeySymsPtr map, KeyCode first_key,
         XkbUpdateActions(kbd, xkb->min_key_code, num_keys, &changes, &check,
                          &cause);
 
-        if (check)
-            XkbCheckSecondaryEffects(kbd->key->xkbInfo, 1, &changes, &cause);
+        if (check) {
+          XkbCheckSecondaryEffects(kbd->key->xkbInfo, 1, &changes, &cause);
+        }
     }
 
     XkbSendNotification(kbd, &changes, &cause);
@@ -625,11 +675,13 @@ XkbStateChangedFlags(XkbStatePtr old, XkbStatePtr new)
     changed |=
         (old->compat_state != new->compat_state ? XkbCompatStateMask : 0);
     changed |= (old->grab_mods != new->grab_mods ? XkbGrabModsMask : 0);
-    if (old->compat_grab_mods != new->compat_grab_mods)
-        changed |= XkbCompatGrabModsMask;
+    if (old->compat_grab_mods != new->compat_grab_mods) {
+      changed |= XkbCompatGrabModsMask;
+    }
     changed |= (old->lookup_mods != new->lookup_mods ? XkbLookupModsMask : 0);
-    if (old->compat_lookup_mods != new->compat_lookup_mods)
-        changed |= XkbCompatLookupModsMask;
+    if (old->compat_lookup_mods != new->compat_lookup_mods) {
+      changed |= XkbCompatLookupModsMask;
+    }
     changed |=
         (old->ptr_buttons != new->ptr_buttons ? XkbPointerButtonMask : 0);
     return changed;
@@ -643,8 +695,9 @@ XkbComputeCompatState(XkbSrvInfoPtr xkbi)
     XkbCompatMapPtr map;
     XkbControlsPtr ctrls;
 
-    if (!state || !xkbi->desc || !xkbi->desc->ctrls || !xkbi->desc->compat)
-        return;
+    if (!state || !xkbi->desc || !xkbi->desc->ctrls || !xkbi->desc->compat) {
+      return;
+    }
 
     map = xkbi->desc->compat;
     grp_mask = map->groups[state->group].mask;
@@ -654,8 +707,9 @@ XkbComputeCompatState(XkbSrvInfoPtr xkbi)
 
     if (ctrls->enabled_ctrls & XkbIgnoreGroupLockMask) {
 	unsigned char grp = state->base_group+state->latched_group;
-	if (grp >= ctrls->num_groups)
-	    grp = XkbAdjustGroup(XkbCharToInt(grp), ctrls);
+        if (grp >= ctrls->num_groups) {
+          grp = XkbAdjustGroup(XkbCharToInt(grp), ctrls);
+        }
         grp_mask = map->groups[grp].mask;
     }
     state->compat_grab_mods = state->grab_mods | grp_mask;
@@ -677,10 +731,11 @@ XkbAdjustGroup(int group, XkbControlsPtr ctrls)
                 int newGroup;
 
                 newGroup = XkbOutOfRangeGroupNumber(ctrls->groups_wrap);
-                if (newGroup >= ctrls->num_groups)
-                    group = XkbGroup1Index;
-                else
-                    group = newGroup;
+                if (newGroup >= ctrls->num_groups) {
+                  group = XkbGroup1Index;
+                } else {
+                  group = newGroup;
+                }
             }
             else {
                 group += ctrls->num_groups;
@@ -695,10 +750,11 @@ XkbAdjustGroup(int group, XkbControlsPtr ctrls)
             int newGroup;
 
             newGroup = XkbOutOfRangeGroupNumber(ctrls->groups_wrap);
-            if (newGroup >= ctrls->num_groups)
-                group = XkbGroup1Index;
-            else
-                group = newGroup;
+            if (newGroup >= ctrls->num_groups) {
+              group = XkbGroup1Index;
+            } else {
+              group = newGroup;
+            }
         }
         else {
             group %= ctrls->num_groups;
@@ -714,8 +770,9 @@ XkbComputeDerivedState(XkbSrvInfoPtr xkbi)
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
     unsigned char grp;
 
-    if (!state || !ctrls)
-        return;
+    if (!state || !ctrls) {
+      return;
+    }
 
     state->mods = (state->base_mods | state->latched_mods | state->locked_mods);
     state->lookup_mods = state->mods & (~ctrls->internal.mask);
@@ -724,14 +781,16 @@ XkbComputeDerivedState(XkbSrvInfoPtr xkbi)
         ((state->base_mods | state->latched_mods) & ctrls->ignore_lock.mask);
 
     grp = state->locked_group;
-    if (grp >= ctrls->num_groups)
-        state->locked_group = XkbAdjustGroup(XkbCharToInt(grp), ctrls);
+    if (grp >= ctrls->num_groups) {
+      state->locked_group = XkbAdjustGroup(XkbCharToInt(grp), ctrls);
+    }
 
     grp = state->locked_group + state->base_group + state->latched_group;
-    if (grp >= ctrls->num_groups)
-        state->group = XkbAdjustGroup(XkbCharToInt(grp), ctrls);
-    else
-        state->group = grp;
+    if (grp >= ctrls->num_groups) {
+      state->group = XkbAdjustGroup(XkbCharToInt(grp), ctrls);
+    } else {
+      state->group = grp;
+    }
     XkbComputeCompatState(xkbi);
     return;
 }
@@ -750,9 +809,10 @@ XkbCheckSecondaryEffects(XkbSrvInfoPtr xkbi,
         changes->state_changes |= XkbStateChangedFlags(&old, &xkbi->state);
         XkbComputeDerivedState(xkbi);
     }
-    if (which & XkbIndicatorStateNotifyMask)
-        XkbUpdateIndicators(xkbi->device, XkbAllIndicatorsMask, TRUE, changes,
-                            cause);
+    if (which & XkbIndicatorStateNotifyMask) {
+      XkbUpdateIndicators(xkbi->device, XkbAllIndicatorsMask, TRUE, changes,
+                          cause);
+    }
     return;
 }
 
@@ -772,8 +832,9 @@ XkbEnableDisableControls(XkbSrvInfoPtr xkbi,
     old = ctrls->enabled_ctrls;
     ctrls->enabled_ctrls &= ~change;
     ctrls->enabled_ctrls |= (change & newValues);
-    if (old == ctrls->enabled_ctrls)
-        return FALSE;
+    if (old == ctrls->enabled_ctrls) {
+      return FALSE;
+    }
     if (cause != NULL) {
         xkbControlsNotify cn;
 
@@ -794,10 +855,11 @@ XkbEnableDisableControls(XkbSrvInfoPtr xkbi,
         /* same token, we have to figure out whether or not ControlsEnabled */
         /* should be set or not in the changes structure */
         changes->ctrls.enabled_ctrls_changes ^= (ctrls->enabled_ctrls ^ old);
-        if (changes->ctrls.enabled_ctrls_changes)
-            changes->ctrls.changed_ctrls |= XkbControlsEnabledMask;
-        else
-            changes->ctrls.changed_ctrls &= ~XkbControlsEnabledMask;
+        if (changes->ctrls.enabled_ctrls_changes) {
+          changes->ctrls.changed_ctrls |= XkbControlsEnabledMask;
+        } else {
+          changes->ctrls.changed_ctrls &= ~XkbControlsEnabledMask;
+        }
     }
     sli = XkbFindSrvLedInfo(xkbi->device, XkbDfltXIClass, XkbDfltXIId, 0);
     XkbUpdateIndicators(xkbi->device, sli->usesControls, TRUE, changes, cause);
@@ -816,12 +878,14 @@ XkbLookupNamedGeometry(DeviceIntPtr dev, Atom name, Bool *shouldFree)
 
     *shouldFree = 0;
     if (name == None) {
-        if (xkb->geom != NULL)
-            return xkb->geom;
+      if (xkb->geom != NULL) {
+        return xkb->geom;
+      }
         name = xkb->names->geometry;
     }
-    if ((xkb->geom != NULL) && (xkb->geom->name == name))
-        return xkb->geom;
+    if ((xkb->geom != NULL) && (xkb->geom->name == name)) {
+      return xkb->geom;
+    }
     *shouldFree = 1;
     return NULL;
 }
@@ -833,96 +897,102 @@ XkbConvertCase(register KeySym sym, KeySym * lower, KeySym * upper)
     *upper = sym;
     switch (sym >> 8) {
     case 0:                    /* Latin 1 */
-        if ((sym >= XK_A) && (sym <= XK_Z))
-            *lower += (XK_a - XK_A);
-        else if ((sym >= XK_a) && (sym <= XK_z))
-            *upper -= (XK_a - XK_A);
-        else if ((sym >= XK_Agrave) && (sym <= XK_Odiaeresis))
-            *lower += (XK_agrave - XK_Agrave);
-        else if ((sym >= XK_agrave) && (sym <= XK_odiaeresis))
-            *upper -= (XK_agrave - XK_Agrave);
-        else if ((sym >= XK_Ooblique) && (sym <= XK_Thorn))
-            *lower += (XK_oslash - XK_Ooblique);
-        else if ((sym >= XK_oslash) && (sym <= XK_thorn))
-            *upper -= (XK_oslash - XK_Ooblique);
+      if ((sym >= XK_A) && (sym <= XK_Z)) {
+        *lower += (XK_a - XK_A);
+      } else if ((sym >= XK_a) && (sym <= XK_z)) {
+        *upper -= (XK_a - XK_A);
+      } else if ((sym >= XK_Agrave) && (sym <= XK_Odiaeresis)) {
+        *lower += (XK_agrave - XK_Agrave);
+      } else if ((sym >= XK_agrave) && (sym <= XK_odiaeresis)) {
+        *upper -= (XK_agrave - XK_Agrave);
+      } else if ((sym >= XK_Ooblique) && (sym <= XK_Thorn)) {
+        *lower += (XK_oslash - XK_Ooblique);
+      } else if ((sym >= XK_oslash) && (sym <= XK_thorn)) {
+        *upper -= (XK_oslash - XK_Ooblique);
+      }
         break;
     case 1:                    /* Latin 2 */
         /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym == XK_Aogonek)
-            *lower = XK_aogonek;
-        else if (sym >= XK_Lstroke && sym <= XK_Sacute)
-            *lower += (XK_lstroke - XK_Lstroke);
-        else if (sym >= XK_Scaron && sym <= XK_Zacute)
-            *lower += (XK_scaron - XK_Scaron);
-        else if (sym >= XK_Zcaron && sym <= XK_Zabovedot)
-            *lower += (XK_zcaron - XK_Zcaron);
-        else if (sym == XK_aogonek)
-            *upper = XK_Aogonek;
-        else if (sym >= XK_lstroke && sym <= XK_sacute)
-            *upper -= (XK_lstroke - XK_Lstroke);
-        else if (sym >= XK_scaron && sym <= XK_zacute)
-            *upper -= (XK_scaron - XK_Scaron);
-        else if (sym >= XK_zcaron && sym <= XK_zabovedot)
-            *upper -= (XK_zcaron - XK_Zcaron);
-        else if (sym >= XK_Racute && sym <= XK_Tcedilla)
-            *lower += (XK_racute - XK_Racute);
-        else if (sym >= XK_racute && sym <= XK_tcedilla)
-            *upper -= (XK_racute - XK_Racute);
+        if (sym == XK_Aogonek) {
+          *lower = XK_aogonek;
+        } else if (sym >= XK_Lstroke && sym <= XK_Sacute) {
+          *lower += (XK_lstroke - XK_Lstroke);
+        } else if (sym >= XK_Scaron && sym <= XK_Zacute) {
+          *lower += (XK_scaron - XK_Scaron);
+        } else if (sym >= XK_Zcaron && sym <= XK_Zabovedot) {
+          *lower += (XK_zcaron - XK_Zcaron);
+        } else if (sym == XK_aogonek) {
+          *upper = XK_Aogonek;
+        } else if (sym >= XK_lstroke && sym <= XK_sacute) {
+          *upper -= (XK_lstroke - XK_Lstroke);
+        } else if (sym >= XK_scaron && sym <= XK_zacute) {
+          *upper -= (XK_scaron - XK_Scaron);
+        } else if (sym >= XK_zcaron && sym <= XK_zabovedot) {
+          *upper -= (XK_zcaron - XK_Zcaron);
+        } else if (sym >= XK_Racute && sym <= XK_Tcedilla) {
+          *lower += (XK_racute - XK_Racute);
+        } else if (sym >= XK_racute && sym <= XK_tcedilla) {
+          *upper -= (XK_racute - XK_Racute);
+        }
         break;
     case 2:                    /* Latin 3 */
         /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym >= XK_Hstroke && sym <= XK_Hcircumflex)
-            *lower += (XK_hstroke - XK_Hstroke);
-        else if (sym >= XK_Gbreve && sym <= XK_Jcircumflex)
-            *lower += (XK_gbreve - XK_Gbreve);
-        else if (sym >= XK_hstroke && sym <= XK_hcircumflex)
-            *upper -= (XK_hstroke - XK_Hstroke);
-        else if (sym >= XK_gbreve && sym <= XK_jcircumflex)
-            *upper -= (XK_gbreve - XK_Gbreve);
-        else if (sym >= XK_Cabovedot && sym <= XK_Scircumflex)
-            *lower += (XK_cabovedot - XK_Cabovedot);
-        else if (sym >= XK_cabovedot && sym <= XK_scircumflex)
-            *upper -= (XK_cabovedot - XK_Cabovedot);
+        if (sym >= XK_Hstroke && sym <= XK_Hcircumflex) {
+          *lower += (XK_hstroke - XK_Hstroke);
+        } else if (sym >= XK_Gbreve && sym <= XK_Jcircumflex) {
+          *lower += (XK_gbreve - XK_Gbreve);
+        } else if (sym >= XK_hstroke && sym <= XK_hcircumflex) {
+          *upper -= (XK_hstroke - XK_Hstroke);
+        } else if (sym >= XK_gbreve && sym <= XK_jcircumflex) {
+          *upper -= (XK_gbreve - XK_Gbreve);
+        } else if (sym >= XK_Cabovedot && sym <= XK_Scircumflex) {
+          *lower += (XK_cabovedot - XK_Cabovedot);
+        } else if (sym >= XK_cabovedot && sym <= XK_scircumflex) {
+          *upper -= (XK_cabovedot - XK_Cabovedot);
+        }
         break;
     case 3:                    /* Latin 4 */
         /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym >= XK_Rcedilla && sym <= XK_Tslash)
-            *lower += (XK_rcedilla - XK_Rcedilla);
-        else if (sym >= XK_rcedilla && sym <= XK_tslash)
-            *upper -= (XK_rcedilla - XK_Rcedilla);
-        else if (sym == XK_ENG)
-            *lower = XK_eng;
-        else if (sym == XK_eng)
-            *upper = XK_ENG;
-        else if (sym >= XK_Amacron && sym <= XK_Umacron)
-            *lower += (XK_amacron - XK_Amacron);
-        else if (sym >= XK_amacron && sym <= XK_umacron)
-            *upper -= (XK_amacron - XK_Amacron);
+        if (sym >= XK_Rcedilla && sym <= XK_Tslash) {
+          *lower += (XK_rcedilla - XK_Rcedilla);
+        } else if (sym >= XK_rcedilla && sym <= XK_tslash) {
+          *upper -= (XK_rcedilla - XK_Rcedilla);
+        } else if (sym == XK_ENG) {
+          *lower = XK_eng;
+        } else if (sym == XK_eng) {
+          *upper = XK_ENG;
+        } else if (sym >= XK_Amacron && sym <= XK_Umacron) {
+          *lower += (XK_amacron - XK_Amacron);
+        } else if (sym >= XK_amacron && sym <= XK_umacron) {
+          *upper -= (XK_amacron - XK_Amacron);
+        }
         break;
     case 6:                    /* Cyrillic */
         /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym >= XK_Serbian_DJE && sym <= XK_Cyrillic_DZHE)
-            *lower -= (XK_Serbian_DJE - XK_Serbian_dje);
-        else if (sym >= XK_Serbian_dje && sym <= XK_Cyrillic_dzhe)
-            *upper += (XK_Serbian_DJE - XK_Serbian_dje);
-        else if (sym >= XK_Cyrillic_YU && sym <= XK_Cyrillic_HARDSIGN)
-            *lower -= (XK_Cyrillic_YU - XK_Cyrillic_yu);
-        else if (sym >= XK_Cyrillic_yu && sym <= XK_Cyrillic_hardsign)
-            *upper += (XK_Cyrillic_YU - XK_Cyrillic_yu);
+        if (sym >= XK_Serbian_DJE && sym <= XK_Cyrillic_DZHE) {
+          *lower -= (XK_Serbian_DJE - XK_Serbian_dje);
+        } else if (sym >= XK_Serbian_dje && sym <= XK_Cyrillic_dzhe) {
+          *upper += (XK_Serbian_DJE - XK_Serbian_dje);
+        } else if (sym >= XK_Cyrillic_YU && sym <= XK_Cyrillic_HARDSIGN) {
+          *lower -= (XK_Cyrillic_YU - XK_Cyrillic_yu);
+        } else if (sym >= XK_Cyrillic_yu && sym <= XK_Cyrillic_hardsign) {
+          *upper += (XK_Cyrillic_YU - XK_Cyrillic_yu);
+        }
         break;
     case 7:                    /* Greek */
         /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym >= XK_Greek_ALPHAaccent && sym <= XK_Greek_OMEGAaccent)
-            *lower += (XK_Greek_alphaaccent - XK_Greek_ALPHAaccent);
-        else if (sym >= XK_Greek_alphaaccent && sym <= XK_Greek_omegaaccent &&
-                 sym != XK_Greek_iotaaccentdieresis &&
-                 sym != XK_Greek_upsilonaccentdieresis)
-            *upper -= (XK_Greek_alphaaccent - XK_Greek_ALPHAaccent);
-        else if (sym >= XK_Greek_ALPHA && sym <= XK_Greek_OMEGA)
-            *lower += (XK_Greek_alpha - XK_Greek_ALPHA);
-        else if (sym >= XK_Greek_alpha && sym <= XK_Greek_omega &&
-                 sym != XK_Greek_finalsmallsigma)
-            *upper -= (XK_Greek_alpha - XK_Greek_ALPHA);
+        if (sym >= XK_Greek_ALPHAaccent && sym <= XK_Greek_OMEGAaccent) {
+          *lower += (XK_Greek_alphaaccent - XK_Greek_ALPHAaccent);
+        } else if (sym >= XK_Greek_alphaaccent && sym <= XK_Greek_omegaaccent &&
+                   sym != XK_Greek_iotaaccentdieresis &&
+                   sym != XK_Greek_upsilonaccentdieresis) {
+          *upper -= (XK_Greek_alphaaccent - XK_Greek_ALPHAaccent);
+        } else if (sym >= XK_Greek_ALPHA && sym <= XK_Greek_OMEGA) {
+          *lower += (XK_Greek_alpha - XK_Greek_ALPHA);
+        } else if (sym >= XK_Greek_alpha && sym <= XK_Greek_omega &&
+                   sym != XK_Greek_finalsmallsigma) {
+          *upper -= (XK_Greek_alpha - XK_Greek_ALPHA);
+        }
         break;
     }
 }
@@ -939,8 +1009,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
     if (src->map) {
         if (!dst->map) {
             tmp = calloc(1, sizeof(XkbClientMapRec));
-            if (!tmp)
-                return FALSE;
+            if (!tmp) {
+              return FALSE;
+            }
             dst->map = tmp;
         }
 
@@ -948,8 +1019,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
             if (src->map->size_syms != dst->map->size_syms) {
                 tmp = reallocarray(dst->map->syms,
                                    src->map->size_syms, sizeof(KeySym));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->map->syms = tmp;
 
             }
@@ -968,8 +1040,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
             if (!dst->map->key_sym_map) {
                 tmp = reallocarray(dst->map->key_sym_map,
                                    MAP_LENGTH, sizeof(XkbSymMapRec));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->map->key_sym_map = tmp;
             }
             if (gap > 0) {
@@ -990,8 +1063,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                 if (dst->map->types && dst->map->size_types) {
                     tmp = reallocarray(dst->map->types, src->map->num_types,
                                        sizeof(XkbKeyTypeRec));
-                    if (!tmp)
-                        return FALSE;
+                    if (!tmp) {
+                      return FALSE;
+                    }
                     dst->map->types = tmp;
                     memset(dst->map->types + dst->map->num_types, 0,
                            (src->map->num_types - dst->map->num_types) *
@@ -999,8 +1073,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                 }
                 else {
                     tmp = calloc(src->map->num_types, sizeof(XkbKeyTypeRec));
-                    if (!tmp)
-                        return FALSE;
+                    if (!tmp) {
+                      return FALSE;
+                    }
                     dst->map->types = tmp;
                 }
             }
@@ -1027,15 +1102,17 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                         i < dst->map->num_types) {
                         tmp = reallocarray(dtype->level_names,
                                            stype->num_levels, sizeof(Atom));
-                        if (!tmp)
-                            continue;
+                        if (!tmp) {
+                          continue;
+                        }
                         dtype->level_names = tmp;
                     }
                     else if (!dtype->num_levels || !dtype->level_names ||
                              i >= dst->map->num_types) {
                         tmp = calloc(stype->num_levels, sizeof(Atom));
-                        if (!tmp)
-                            continue;
+                        if (!tmp) {
+                          continue;
+                        }
                         dtype->level_names = tmp;
                     }
                     dtype->num_levels = stype->num_levels;
@@ -1043,9 +1120,10 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                            stype->num_levels * sizeof(Atom));
                 }
                 else {
-                    if (dtype->num_levels && dtype->level_names &&
-                        i < dst->map->num_types)
-                        free(dtype->level_names);
+                  if (dtype->num_levels && dtype->level_names &&
+                      i < dst->map->num_types) {
+                    free(dtype->level_names);
+                  }
                     dtype->num_levels = stype->num_levels;
                     dtype->level_names = NULL;
                 }
@@ -1061,16 +1139,18 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                             tmp = reallocarray(dtype->map,
                                                stype->map_count,
                                                sizeof(XkbKTMapEntryRec));
-                            if (!tmp)
-                                return FALSE;
+                            if (!tmp) {
+                              return FALSE;
+                            }
                             dtype->map = tmp;
                         }
                         else if (!dtype->map_count || !dtype->map ||
                                  i >= dst->map->num_types) {
                             tmp = calloc(stype->map_count,
                                          sizeof(XkbKTMapEntryRec));
-                            if (!tmp)
-                                return FALSE;
+                            if (!tmp) {
+                              return FALSE;
+                            }
                             dtype->map = tmp;
                         }
 
@@ -1078,8 +1158,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                                stype->map_count * sizeof(XkbKTMapEntryRec));
                     }
                     else {
-                        if (dtype->map && i < dst->map->num_types)
-                            free(dtype->map);
+                      if (dtype->map && i < dst->map->num_types) {
+                        free(dtype->map);
+                      }
                         dtype->map = NULL;
                     }
 
@@ -1090,15 +1171,17 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                             tmp = reallocarray(dtype->preserve,
                                                stype->map_count,
                                                sizeof(XkbModsRec));
-                            if (!tmp)
-                                return FALSE;
+                            if (!tmp) {
+                              return FALSE;
+                            }
                             dtype->preserve = tmp;
                         }
                         else if (!dtype->preserve || !dtype->map_count ||
                                  i >= dst->map->num_types) {
                             tmp = calloc(stype->map_count, sizeof(XkbModsRec));
-                            if (!tmp)
-                                return FALSE;
+                            if (!tmp) {
+                              return FALSE;
+                            }
                             dtype->preserve = tmp;
                         }
 
@@ -1106,8 +1189,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                                stype->map_count * sizeof(XkbModsRec));
                     }
                     else {
-                        if (dtype->preserve && i < dst->map->num_types)
-                            free(dtype->preserve);
+                      if (dtype->preserve && i < dst->map->num_types) {
+                        free(dtype->preserve);
+                      }
                         dtype->preserve = NULL;
                     }
 
@@ -1132,10 +1216,12 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                 for (i = 0, dtype = dst->map->types; i < dst->map->num_types;
                      i++, dtype++) {
                     free(dtype->level_names);
-                    if (dtype->map && dtype->map_count)
-                        free(dtype->map);
-                    if (dtype->preserve && dtype->map_count)
-                        free(dtype->preserve);
+                    if (dtype->map && dtype->map_count) {
+                      free(dtype->map);
+                    }
+                    if (dtype->preserve && dtype->map_count) {
+                      free(dtype->preserve);
+                    }
                 }
             }
             free(dst->map->types);
@@ -1147,8 +1233,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
         if (src->map->modmap) {
             if (!dst->map->modmap) {
                 tmp = realloc(dst->map->modmap, MAP_LENGTH);
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->map->modmap = tmp;
             }
             if (gap > 0) {
@@ -1162,8 +1249,9 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
         }
     }
     else {
-        if (dst->map)
-            XkbFreeClientMap(dst, XkbAllClientInfoMask, TRUE);
+      if (dst->map) {
+        XkbFreeClientMap(dst, XkbAllClientInfoMask, TRUE);
+      }
     }
 
     return TRUE;
@@ -1179,8 +1267,9 @@ _XkbCopyServerMap(XkbDescPtr src, XkbDescPtr dst)
     if (src->server) {
         if (!dst->server) {
             tmp = calloc(1, sizeof(XkbServerMapRec));
-            if (!tmp)
-                return FALSE;
+            if (!tmp) {
+              return FALSE;
+            }
             dst->server = tmp;
         }
 
@@ -1188,12 +1277,14 @@ _XkbCopyServerMap(XkbDescPtr src, XkbDescPtr dst)
         if (src->server->explicit) {
             if (!dst->server->explicit) {
                 tmp = realloc(dst->server->explicit, MAP_LENGTH);
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->server->explicit = tmp;
             }
-            if (gap > 0)
-                memset(dst->server->explicit + gap, 0, gap);
+            if (gap > 0) {
+              memset(dst->server->explicit + gap, 0, gap);
+            }
             memcpy(dst->server->explicit, src->server->explicit,
                    src->max_key_code + 1);
         }
@@ -1206,8 +1297,9 @@ _XkbCopyServerMap(XkbDescPtr src, XkbDescPtr dst)
             if (src->server->size_acts != dst->server->size_acts) {
                 tmp = reallocarray(dst->server->acts,
                                    src->server->size_acts, sizeof(XkbAction));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->server->acts = tmp;
             }
             memcpy(dst->server->acts, src->server->acts,
@@ -1224,12 +1316,15 @@ _XkbCopyServerMap(XkbDescPtr src, XkbDescPtr dst)
             if (!dst->server->key_acts) {
                 tmp = reallocarray(dst->server->key_acts,
                                    MAP_LENGTH, sizeof(unsigned short));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->server->key_acts = tmp;
             }
-            if (gap > 0)
-                memset((char *) &dst->server->key_acts[gap], 0, gap * sizeof(unsigned short));
+            if (gap > 0) {
+              memset((char *)&dst->server->key_acts[gap], 0,
+                     gap * sizeof(unsigned short));
+            }
             memcpy(dst->server->key_acts, src->server->key_acts,
                    (src->max_key_code + 1) * sizeof(unsigned short));
         }
@@ -1242,12 +1337,15 @@ _XkbCopyServerMap(XkbDescPtr src, XkbDescPtr dst)
             if (!dst->server->behaviors) {
                 tmp = reallocarray(dst->server->behaviors,
                                    MAP_LENGTH, sizeof(XkbBehavior));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->server->behaviors = tmp;
             }
-            if (gap > 0)
-                memset((char *) &dst->server->behaviors[gap], 0, gap * sizeof(XkbBehavior));
+            if (gap > 0) {
+              memset((char *)&dst->server->behaviors[gap], 0,
+                     gap * sizeof(XkbBehavior));
+            }
             memcpy(dst->server->behaviors, src->server->behaviors,
                    (src->max_key_code + 1) * sizeof(XkbBehavior));
         }
@@ -1262,12 +1360,15 @@ _XkbCopyServerMap(XkbDescPtr src, XkbDescPtr dst)
             if (!dst->server->vmodmap) {
                 tmp = reallocarray(dst->server->vmodmap,
                                    MAP_LENGTH, sizeof(unsigned short));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->server->vmodmap = tmp;
             }
-            if (gap > 0)
-                memset((char *) &dst->server->vmodmap[gap], 0, gap * sizeof(unsigned short));
+            if (gap > 0) {
+              memset((char *)&dst->server->vmodmap[gap], 0,
+                     gap * sizeof(unsigned short));
+            }
             memcpy(dst->server->vmodmap, src->server->vmodmap,
                    (src->max_key_code + 1) * sizeof(unsigned short));
         }
@@ -1277,8 +1378,9 @@ _XkbCopyServerMap(XkbDescPtr src, XkbDescPtr dst)
         }
     }
     else {
-        if (dst->server)
-            XkbFreeServerMap(dst, XkbAllServerInfoMask, TRUE);
+      if (dst->server) {
+        XkbFreeServerMap(dst, XkbAllServerInfoMask, TRUE);
+      }
     }
 
     return TRUE;
@@ -1294,8 +1396,9 @@ _XkbCopyNames(XkbDescPtr src, XkbDescPtr dst)
     if (src->names) {
         if (!dst->names) {
             dst->names = calloc(1, sizeof(XkbNamesRec));
-            if (!dst->names)
-                return FALSE;
+            if (!dst->names) {
+              return FALSE;
+            }
         }
 
         gap = MAP_LENGTH - (src->max_key_code + 1);
@@ -1303,12 +1406,15 @@ _XkbCopyNames(XkbDescPtr src, XkbDescPtr dst)
             if (!dst->names->keys) {
                 tmp = reallocarray(dst->names->keys, MAP_LENGTH,
                                    sizeof(XkbKeyNameRec));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->names->keys = tmp;
             }
-            if (gap > 0)
-                memset((char *) &dst->names->keys[gap], 0, gap * sizeof(XkbKeyNameRec));
+            if (gap > 0) {
+              memset((char *)&dst->names->keys[gap], 0,
+                     gap * sizeof(XkbKeyNameRec));
+            }
             memcpy(dst->names->keys, src->names->keys,
                    (src->max_key_code + 1) * sizeof(XkbKeyNameRec));
         }
@@ -1322,8 +1428,9 @@ _XkbCopyNames(XkbDescPtr src, XkbDescPtr dst)
                 tmp = reallocarray(dst->names->key_aliases,
                                    src->names->num_key_aliases,
                                    sizeof(XkbKeyAliasRec));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->names->key_aliases = tmp;
             }
             memcpy(dst->names->key_aliases, src->names->key_aliases,
@@ -1339,8 +1446,9 @@ _XkbCopyNames(XkbDescPtr src, XkbDescPtr dst)
             if (src->names->num_rg != dst->names->num_rg) {
                 tmp = reallocarray(dst->names->radio_groups,
                                    src->names->num_rg, sizeof(Atom));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->names->radio_groups = tmp;
             }
             memcpy(dst->names->radio_groups, src->names->radio_groups,
@@ -1367,8 +1475,9 @@ _XkbCopyNames(XkbDescPtr src, XkbDescPtr dst)
                XkbNumKbdGroups * sizeof(Atom));
     }
     else {
-        if (dst->names)
-            XkbFreeNames(dst, XkbAllNamesMask, TRUE);
+      if (dst->names) {
+        XkbFreeNames(dst, XkbAllNamesMask, TRUE);
+      }
     }
 
     return TRUE;
@@ -1383,8 +1492,9 @@ _XkbCopyCompat(XkbDescPtr src, XkbDescPtr dst)
     if (src->compat) {
         if (!dst->compat) {
             dst->compat = calloc(1, sizeof(XkbCompatMapRec));
-            if (!dst->compat)
-                return FALSE;
+            if (!dst->compat) {
+              return FALSE;
+            }
         }
 
         if (src->compat->sym_interpret && src->compat->num_si) {
@@ -1392,8 +1502,9 @@ _XkbCopyCompat(XkbDescPtr src, XkbDescPtr dst)
                 tmp = reallocarray(dst->compat->sym_interpret,
                                    src->compat->num_si,
                                    sizeof(XkbSymInterpretRec));
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->compat->sym_interpret = tmp;
             }
             memcpy(dst->compat->sym_interpret, src->compat->sym_interpret,
@@ -1403,8 +1514,9 @@ _XkbCopyCompat(XkbDescPtr src, XkbDescPtr dst)
             dst->compat->size_si = src->compat->num_si;
         }
         else {
-            if (dst->compat->sym_interpret && dst->compat->size_si)
-                free(dst->compat->sym_interpret);
+          if (dst->compat->sym_interpret && dst->compat->size_si) {
+            free(dst->compat->sym_interpret);
+          }
 
             dst->compat->sym_interpret = NULL;
             dst->compat->num_si = 0;
@@ -1415,8 +1527,9 @@ _XkbCopyCompat(XkbDescPtr src, XkbDescPtr dst)
                XkbNumKbdGroups * sizeof(XkbModsRec));
     }
     else {
-        if (dst->compat)
-            XkbFreeCompatMap(dst, XkbAllCompatMask, TRUE);
+      if (dst->compat) {
+        XkbFreeCompatMap(dst, XkbAllCompatMask, TRUE);
+      }
     }
 
     return TRUE;
@@ -1439,8 +1552,9 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
     if (src->geom) {
         if (!dst->geom) {
             dst->geom = calloc(sizeof(XkbGeometryRec), 1);
-            if (!dst->geom)
-                return FALSE;
+            if (!dst->geom) {
+              return FALSE;
+            }
         }
 
         /* properties */
@@ -1458,11 +1572,12 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
             }
 
             /* Reallocate and clear all new items if the buffer grows. */
-            if (!XkbGeomRealloc
-                ((void **) &dst->geom->properties, dst->geom->sz_properties,
-                 src->geom->num_properties, sizeof(XkbPropertyRec),
-                 XKB_GEOM_CLEAR_EXCESS))
-                return FALSE;
+            if (!XkbGeomRealloc(
+                    (void **)&dst->geom->properties, dst->geom->sz_properties,
+                    src->geom->num_properties, sizeof(XkbPropertyRec),
+                    XKB_GEOM_CLEAR_EXCESS)) {
+              return FALSE;
+            }
             /* We don't set num_properties as we need it to try and avoid
              * too much reallocing. */
             dst->geom->sz_properties = src->geom->num_properties;
@@ -1474,14 +1589,16 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                 if (i < dst->geom->num_properties) {
                     if (strlen(sprop->name) != strlen(dprop->name)) {
                         tmp = realloc(dprop->name, strlen(sprop->name) + 1);
-                        if (!tmp)
-                            return FALSE;
+                        if (!tmp) {
+                          return FALSE;
+                        }
                         dprop->name = tmp;
                     }
                     if (strlen(sprop->value) != strlen(dprop->value)) {
                         tmp = realloc(dprop->value, strlen(sprop->value) + 1);
-                        if (!tmp)
-                            return FALSE;
+                        if (!tmp) {
+                          return FALSE;
+                        }
                         dprop->value = tmp;
                     }
                     strcpy(dprop->name, sprop->name);
@@ -1521,11 +1638,11 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
             }
 
             /* Reallocate and clear all new items if the buffer grows. */
-            if (!XkbGeomRealloc
-                ((void **) &dst->geom->colors, dst->geom->sz_colors,
-                 src->geom->num_colors, sizeof(XkbColorRec),
-                 XKB_GEOM_CLEAR_EXCESS))
-                return FALSE;
+            if (!XkbGeomRealloc((void **)&dst->geom->colors,
+                                dst->geom->sz_colors, src->geom->num_colors,
+                                sizeof(XkbColorRec), XKB_GEOM_CLEAR_EXCESS)) {
+              return FALSE;
+            }
             dst->geom->sz_colors = src->geom->num_colors;
 
             for (i = 0,
@@ -1535,8 +1652,9 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                 if (i < dst->geom->num_colors) {
                     if (strlen(scolor->spec) != strlen(dcolor->spec)) {
                         tmp = realloc(dcolor->spec, strlen(scolor->spec) + 1);
-                        if (!tmp)
-                            return FALSE;
+                        if (!tmp) {
+                          return FALSE;
+                        }
                         dcolor->spec = tmp;
                     }
                     strcpy(dcolor->spec, scolor->spec);
@@ -1570,8 +1688,9 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                  i < dst->geom->num_shapes; i++, dshape++) {
                 for (j = 0, doutline = dshape->outlines;
                      j < dshape->num_outlines; j++, doutline++) {
-                    if (doutline->sz_points)
-                        free(doutline->points);
+                  if (doutline->sz_points) {
+                    free(doutline->points);
+                  }
                 }
 
                 if (dshape->sz_outlines) {
@@ -1586,18 +1705,19 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
 
         if (src->geom->num_shapes) {
             /* Reallocate and clear all items. */
-            if (!XkbGeomRealloc
-                ((void **) &dst->geom->shapes, dst->geom->sz_shapes,
-                 src->geom->num_shapes, sizeof(XkbShapeRec),
-                 XKB_GEOM_CLEAR_ALL))
-                return FALSE;
+            if (!XkbGeomRealloc((void **)&dst->geom->shapes,
+                                dst->geom->sz_shapes, src->geom->num_shapes,
+                                sizeof(XkbShapeRec), XKB_GEOM_CLEAR_ALL)) {
+              return FALSE;
+            }
 
             for (i = 0, sshape = src->geom->shapes, dshape = dst->geom->shapes;
                  i < src->geom->num_shapes; i++, sshape++, dshape++) {
                 if (sshape->num_outlines) {
                     tmp = calloc(sshape->num_outlines, sizeof(XkbOutlineRec));
-                    if (!tmp)
-                        return FALSE;
+                    if (!tmp) {
+                      return FALSE;
+                    }
                     dshape->outlines = tmp;
 
                     for (j = 0,
@@ -1608,8 +1728,9 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                         if (soutline->num_points) {
                             tmp = calloc(soutline->num_points,
                                          sizeof(XkbPointRec));
-                            if (!tmp)
-                                return FALSE;
+                            if (!tmp) {
+                              return FALSE;
+                            }
                             doutline->points = tmp;
 
                             memcpy(doutline->points, soutline->points,
@@ -1679,12 +1800,14 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                  i < dst->geom->num_sections; i++, dsection++) {
                 for (j = 0, drow = dsection->rows;
                      j < dsection->num_rows; j++, drow++) {
-                    if (drow->num_keys)
-                        free(drow->keys);
+                  if (drow->num_keys) {
+                    free(drow->keys);
+                  }
                 }
 
-                if (dsection->num_rows)
-                    free(dsection->rows);
+                if (dsection->num_rows) {
+                  free(dsection->rows);
+                }
 
                 /* cut and waste from geom/doodad below. */
                 for (j = 0, ddoodad = dsection->doodads;
@@ -1709,11 +1832,11 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
 
         if (src->geom->num_sections) {
             /* Reallocate and clear all items. */
-            if (!XkbGeomRealloc
-                ((void **) &dst->geom->sections, dst->geom->sz_sections,
-                 src->geom->num_sections, sizeof(XkbSectionRec),
-                 XKB_GEOM_CLEAR_ALL))
-                return FALSE;
+            if (!XkbGeomRealloc((void **)&dst->geom->sections,
+                                dst->geom->sz_sections, src->geom->num_sections,
+                                sizeof(XkbSectionRec), XKB_GEOM_CLEAR_ALL)) {
+              return FALSE;
+            }
             dst->geom->num_sections = src->geom->num_sections;
             dst->geom->sz_sections = src->geom->num_sections;
 
@@ -1724,8 +1847,9 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                 *dsection = *ssection;
                 if (ssection->num_rows) {
                     tmp = calloc(ssection->num_rows, sizeof(XkbRowRec));
-                    if (!tmp)
-                        return FALSE;
+                    if (!tmp) {
+                      return FALSE;
+                    }
                     dsection->rows = tmp;
                 }
                 dsection->num_rows = ssection->num_rows;
@@ -1735,8 +1859,9 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                      j < ssection->num_rows; j++, srow++, drow++) {
                     if (srow->num_keys) {
                         tmp = calloc(srow->num_keys, sizeof(XkbKeyRec));
-                        if (!tmp)
-                            return FALSE;
+                        if (!tmp) {
+                          return FALSE;
+                        }
                         drow->keys = tmp;
                         memcpy(drow->keys, srow->keys,
                                srow->num_keys * sizeof(XkbKeyRec));
@@ -1751,8 +1876,9 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
 
                 if (ssection->num_doodads) {
                     tmp = calloc(ssection->num_doodads, sizeof(XkbDoodadRec));
-                    if (!tmp)
-                        return FALSE;
+                    if (!tmp) {
+                      return FALSE;
+                    }
                     dsection->doodads = tmp;
                 }
                 else {
@@ -1766,15 +1892,18 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                      k < ssection->num_doodads; k++, sdoodad++, ddoodad++) {
                     memcpy(ddoodad, sdoodad, sizeof(XkbDoodadRec));
                     if (sdoodad->any.type == XkbTextDoodad) {
-                        if (sdoodad->text.text)
-                            ddoodad->text.text = strdup(sdoodad->text.text);
-                        if (sdoodad->text.font)
-                            ddoodad->text.font = strdup(sdoodad->text.font);
+                      if (sdoodad->text.text) {
+                        ddoodad->text.text = strdup(sdoodad->text.text);
+                      }
+                      if (sdoodad->text.font) {
+                        ddoodad->text.font = strdup(sdoodad->text.font);
+                      }
                     }
                     else if (sdoodad->any.type == XkbLogoDoodad) {
-                        if (sdoodad->logo.logo_name)
-                            ddoodad->logo.logo_name =
-                                strdup(sdoodad->logo.logo_name);
+                      if (sdoodad->logo.logo_name) {
+                        ddoodad->logo.logo_name =
+                            strdup(sdoodad->logo.logo_name);
+                      }
                     }
                 }
                 dsection->overlays = NULL;
@@ -1814,11 +1943,11 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
 
         if (src->geom->num_doodads) {
             /* Reallocate and clear all items. */
-            if (!XkbGeomRealloc
-                ((void **) &dst->geom->doodads, dst->geom->sz_doodads,
-                 src->geom->num_doodads, sizeof(XkbDoodadRec),
-                 XKB_GEOM_CLEAR_ALL))
-                return FALSE;
+            if (!XkbGeomRealloc((void **)&dst->geom->doodads,
+                                dst->geom->sz_doodads, src->geom->num_doodads,
+                                sizeof(XkbDoodadRec), XKB_GEOM_CLEAR_ALL)) {
+              return FALSE;
+            }
 
             dst->geom->sz_doodads = src->geom->num_doodads;
 
@@ -1828,15 +1957,17 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                  i < src->geom->num_doodads; i++, sdoodad++, ddoodad++) {
                 memcpy(ddoodad, sdoodad, sizeof(XkbDoodadRec));
                 if (sdoodad->any.type == XkbTextDoodad) {
-                    if (sdoodad->text.text)
-                        ddoodad->text.text = strdup(sdoodad->text.text);
-                    if (sdoodad->text.font)
-                        ddoodad->text.font = strdup(sdoodad->text.font);
+                  if (sdoodad->text.text) {
+                    ddoodad->text.text = strdup(sdoodad->text.text);
+                  }
+                  if (sdoodad->text.font) {
+                    ddoodad->text.font = strdup(sdoodad->text.font);
+                  }
                 }
                 else if (sdoodad->any.type == XkbLogoDoodad) {
-                    if (sdoodad->logo.logo_name)
-                        ddoodad->logo.logo_name =
-                            strdup(sdoodad->logo.logo_name);
+                  if (sdoodad->logo.logo_name) {
+                    ddoodad->logo.logo_name = strdup(sdoodad->logo.logo_name);
+                  }
                 }
             }
 
@@ -1857,11 +1988,12 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
             /* Reallocate but don't clear any items. There is no need
              * to clear anything because data is immediately copied
              * over the whole memory area with memcpy. */
-            if (!XkbGeomRealloc
-                ((void **) &dst->geom->key_aliases, dst->geom->sz_key_aliases,
-                 src->geom->num_key_aliases, 2 * XkbKeyNameLength,
-                 XKB_GEOM_CLEAR_NONE))
-                return FALSE;
+            if (!XkbGeomRealloc((void **)&dst->geom->key_aliases,
+                                dst->geom->sz_key_aliases,
+                                src->geom->num_key_aliases,
+                                2 * XkbKeyNameLength, XKB_GEOM_CLEAR_NONE)) {
+              return FALSE;
+            }
 
             dst->geom->sz_key_aliases = src->geom->num_key_aliases;
 
@@ -1881,16 +2013,18 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
         if (src->geom->label_font) {
             if (!dst->geom->label_font) {
                 tmp = calloc(1, strlen(src->geom->label_font) + 1);
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->geom->label_font = tmp;
             }
             else if (strlen(src->geom->label_font) !=
                      strlen(dst->geom->label_font)) {
                 tmp = realloc(dst->geom->label_font,
                               strlen(src->geom->label_font) + 1);
-                if (!tmp)
-                    return FALSE;
+                if (!tmp) {
+                  return FALSE;
+                }
                 dst->geom->label_font = tmp;
             }
 
@@ -1929,8 +2063,9 @@ _XkbCopyIndicators(XkbDescPtr src, XkbDescPtr dst)
     if (src->indicators) {
         if (!dst->indicators) {
             dst->indicators = calloc(1, sizeof(XkbIndicatorRec));
-            if (!dst->indicators)
-                return FALSE;
+            if (!dst->indicators) {
+              return FALSE;
+            }
         }
         memcpy(dst->indicators, src->indicators, sizeof(XkbIndicatorRec));
     }
@@ -1948,8 +2083,9 @@ _XkbCopyControls(XkbDescPtr src, XkbDescPtr dst)
     if (src->ctrls) {
         if (!dst->ctrls) {
             dst->ctrls = calloc(1, sizeof(XkbControlsRec));
-            if (!dst->ctrls)
-                return FALSE;
+            if (!dst->ctrls) {
+              return FALSE;
+            }
         }
         memcpy(dst->ctrls, src->ctrls, sizeof(XkbControlsRec));
     }
@@ -1984,8 +2120,9 @@ XkbCopyKeymap(XkbDescPtr dst, XkbDescPtr src)
         return FALSE;
     }
 
-    if (src == dst)
-        return TRUE;
+    if (src == dst) {
+      return TRUE;
+    }
 
     if (!_XkbCopyClientMap(src, dst)) {
         DebugF("XkbCopyKeymap: failed to copy client map\n");
@@ -2028,8 +2165,9 @@ XkbDeviceApplyKeymap(DeviceIntPtr dst, XkbDescPtr desc)
     xkbNewKeyboardNotify nkn;
     Bool ret;
 
-    if (!dst->key || !desc)
-        return FALSE;
+    if (!dst->key || !desc) {
+      return FALSE;
+    }
 
     memset(&nkn, 0, sizeof(xkbNewKeyboardNotify));
     nkn.oldMinKeyCode = dst->key->xkbInfo->desc->min_key_code;
@@ -2041,12 +2179,14 @@ XkbDeviceApplyKeymap(DeviceIntPtr dst, XkbDescPtr desc)
     nkn.requestMajor = XkbReqCode;
     nkn.requestMinor = X_kbSetMap;      /* Near enough's good enough. */
     nkn.changed = XkbNKN_KeycodesMask;
-    if (desc->geom)
-        nkn.changed |= XkbNKN_GeometryMask;
+    if (desc->geom) {
+      nkn.changed |= XkbNKN_GeometryMask;
+    }
 
     ret = XkbCopyKeymap(dst->key->xkbInfo->desc, desc);
-    if (ret)
-        XkbSendNewKeyboardNotify(dst, &nkn);
+    if (ret) {
+      XkbSendNewKeyboardNotify(dst, &nkn);
+    }
 
     return ret;
 }
@@ -2063,11 +2203,13 @@ XkbGetEffectiveGroup(XkbSrvInfoPtr xkbi, XkbStatePtr xkbState, CARD8 keycode)
     XkbDescPtr xkb = xkbi->desc;
     int effectiveGroup = xkbState->group;
 
-    if (!XkbKeycodeInRange(xkb, keycode))
-        return -1;
+    if (!XkbKeycodeInRange(xkb, keycode)) {
+      return -1;
+    }
 
-    if (effectiveGroup == XkbGroup1Index)
-        return effectiveGroup;
+    if (effectiveGroup == XkbGroup1Index) {
+      return effectiveGroup;
+    }
 
     if (XkbKeyNumGroups(xkb, keycode) > 1U) {
         if (effectiveGroup >= XkbKeyNumGroups(xkb, keycode)) {
@@ -2083,14 +2225,15 @@ XkbGetEffectiveGroup(XkbSrvInfoPtr xkbi, XkbStatePtr xkbState, CARD8 keycode)
                 break;
             case XkbRedirectIntoRange:
                 effectiveGroup = XkbOutOfRangeGroupInfo(gi);
-                if (effectiveGroup >= XkbKeyNumGroups(xkb, keycode))
-                    effectiveGroup = 0;
+                if (effectiveGroup >= XkbKeyNumGroups(xkb, keycode)) {
+                  effectiveGroup = 0;
+                }
                 break;
             }
         }
+    } else {
+      effectiveGroup = XkbGroup1Index;
     }
-    else
-        effectiveGroup = XkbGroup1Index;
 
     return effectiveGroup;
 }
@@ -2104,18 +2247,22 @@ XkbMergeLockedPtrBtns(DeviceIntPtr master)
     DeviceIntPtr d = inputInfo.devices;
     XkbSrvInfoPtr xkbi = NULL;
 
-    if (!InputDevIsMaster(master))
-        return;
+    if (!InputDevIsMaster(master)) {
+      return;
+    }
 
-    if (!master->key)
-        return;
+    if (!master->key) {
+      return;
+    }
 
     xkbi = master->key->xkbInfo;
     xkbi->lockedPtrButtons = 0;
 
     for (; d; d = d->next) {
-        if (InputDevIsMaster(d) || GetMaster(d, MASTER_KEYBOARD) != master || !d->key)
-            continue;
+      if (InputDevIsMaster(d) || GetMaster(d, MASTER_KEYBOARD) != master ||
+          !d->key) {
+        continue;
+      }
 
         xkbi->lockedPtrButtons |= d->key->xkbInfo->lockedPtrButtons;
     }
@@ -2126,8 +2273,9 @@ XkbCopyControls(XkbDescPtr dst, XkbDescPtr src)
 {
     int i, nG, nTG;
 
-    if (!dst || !src)
-        return;
+    if (!dst || !src) {
+      return;
+    }
 
     *dst->ctrls = *src->ctrls;
 

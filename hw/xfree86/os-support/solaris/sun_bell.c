@@ -92,8 +92,9 @@ xf86OSRingBell(int loudness, int pitch, int duration)
         for (i = 0; i < BELL_SAMPLES; i++) {
             samples[i] = (short) (ampl * sin(2.0 * M_PI * phase));
             phase += cyclen;
-            if (phase >= 1.0)
-                phase -= 1.0;
+            if (phase >= 1.0) {
+              phase -= 1.0;
+            }
         }
     }
 

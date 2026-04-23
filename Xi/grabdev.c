@@ -92,13 +92,15 @@ ProcXGrabDevice(ClientPtr client)
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
-    if ((rc = CreateMaskFromList(client, (XEventClass *) &stuff[1],
-                                 stuff->event_count, tmp, dev,
-                                 X_GrabDevice)) != Success)
-        return rc;
+    if ((rc = CreateMaskFromList(client, (XEventClass *)&stuff[1],
+                                 stuff->event_count, tmp, dev, X_GrabDevice)) !=
+        Success) {
+      return rc;
+    }
 
     mask.xi = tmp[stuff->deviceid].mask;
 
@@ -107,8 +109,9 @@ ProcXGrabDevice(ClientPtr client)
                     stuff->ownerEvents, stuff->time,
                     &mask, XI, None, None, &reply.status);
 
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -149,21 +152,25 @@ CreateMaskFromList(ClientPtr client, XEventClass * list, int count,
 
     for (i = 0; i < count; i++, list++) {
         device = *list >> 8;
-        if (device > 255)
-            return BadClass;
+        if (device > 255) {
+          return BadClass;
+        }
 
         rc = dixLookupDevice(&tdev, device, client, DixUseAccess);
-        if (rc != BadDevice && rc != Success)
-            return rc;
-        if (rc == BadDevice || (dev != NULL && tdev != dev))
-            return BadClass;
+        if (rc != BadDevice && rc != Success) {
+          return rc;
+        }
+        if (rc == BadDevice || (dev != NULL && tdev != dev)) {
+          return BadClass;
+        }
 
-        for (j = 0; j < ExtEventIndex; j++)
-            if (EventInfo[j].type == (*list & 0xff)) {
-                mask[device].mask |= EventInfo[j].mask;
-                mask[device].dev = (void *) tdev;
-                break;
-            }
+        for (j = 0; j < ExtEventIndex; j++) {
+          if (EventInfo[j].type == (*list & 0xff)) {
+            mask[device].mask |= EventInfo[j].mask;
+            mask[device].dev = (void *)tdev;
+            break;
+          }
+        }
     }
     return Success;
 }

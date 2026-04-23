@@ -396,9 +396,10 @@ __glXDispSwap_ChangeDrawableAttributes(__GLXclientState * cl, GLbyte * pc)
         client->errorValue = req->numAttribs;
         return BadValue;
     }
-    if (((sizeof(xGLXChangeDrawableAttributesReq) +
-          (req->numAttribs << 3)) >> 2) < client->req_len)
-        return BadLength;
+    if (((sizeof(xGLXChangeDrawableAttributesReq) + (req->numAttribs << 3)) >>
+         2) < client->req_len) {
+      return BadLength;
+    }
 
     attribs = (CARD32 *) (req + 1);
     SwapLongs(attribs, req->numAttribs << 1);
@@ -560,8 +561,9 @@ __glXDispSwap_BindTexImageEXT(__GLXclientState * cl, GLbyte * pc)
     int *buffer;
     CARD32 *num_attribs;
 
-    if ((sizeof(xGLXVendorPrivateReq) + 12) >> 2 > client->req_len)
-        return BadLength;
+    if ((sizeof(xGLXVendorPrivateReq) + 12) >> 2 > client->req_len) {
+      return BadLength;
+    }
 
     pc += __GLX_VENDPRIV_HDR_SIZE;
 

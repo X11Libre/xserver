@@ -61,12 +61,14 @@ miCopyRegion(DrawablePtr pSrcDrawable,
         if (nbox > 1) {
             /* keep ordering in each band, reverse order of bands */
             pboxNew1 = calloc(nbox, sizeof(BoxRec));
-            if (!pboxNew1)
-                return;
+            if (!pboxNew1) {
+              return;
+            }
             pboxBase = pboxNext = pbox + nbox - 1;
             while (pboxBase >= pbox) {
-                while ((pboxNext >= pbox) && (pboxBase->y1 == pboxNext->y1))
-                    pboxNext--;
+              while ((pboxNext >= pbox) && (pboxBase->y1 == pboxNext->y1)) {
+                pboxNext--;
+              }
                 pboxTmp = pboxNext + 1;
                 while (pboxTmp <= pboxBase) {
                     *pboxNew1++ = *pboxTmp++;
@@ -84,10 +86,11 @@ miCopyRegion(DrawablePtr pSrcDrawable,
 
     if (careful && dx < 0) {
         /* walk source right to left */
-        if (dy <= 0)
-            reverse = TRUE;
-        else
-            reverse = FALSE;
+        if (dy <= 0) {
+          reverse = TRUE;
+        } else {
+          reverse = FALSE;
+        }
 
         if (nbox > 1) {
             /* reverse order of rects in each band */
@@ -98,9 +101,10 @@ miCopyRegion(DrawablePtr pSrcDrawable,
             }
             pboxBase = pboxNext = pbox;
             while (pboxBase < pbox + nbox) {
-                while ((pboxNext < pbox + nbox) &&
-                       (pboxNext->y1 == pboxBase->y1))
-                    pboxNext++;
+              while ((pboxNext < pbox + nbox) &&
+                     (pboxNext->y1 == pboxBase->y1)) {
+                pboxNext++;
+              }
                 pboxTmp = pboxNext;
                 while (pboxTmp != pboxBase) {
                     *pboxNew2++ = *--pboxTmp;
@@ -163,10 +167,11 @@ miDoCopy(DrawablePtr pSrcDrawable,
 
     /* Compute source clip region */
     if (pSrcDrawable->type == DRAWABLE_PIXMAP) {
-        if ((pSrcDrawable == pDstDrawable) && (!pGC->clientClip))
-            prgnSrcClip = miGetCompositeClip(pGC);
-        else
-            fastSrc = TRUE;
+      if ((pSrcDrawable == pDstDrawable) && (!pGC->clientClip)) {
+        prgnSrcClip = miGetCompositeClip(pGC);
+      } else {
+        fastSrc = TRUE;
+      }
     }
     else {
         if (pGC->subWindowMode == IncludeInferiors) {
@@ -249,14 +254,18 @@ miDoCopy(DrawablePtr pSrcDrawable,
         if (RegionNumRects(cclip) == 1) {
             BoxPtr pBox = RegionRects(cclip);
 
-            if (box_x1 < pBox->x1)
-                box_x1 = pBox->x1;
-            if (box_x2 > pBox->x2)
-                box_x2 = pBox->x2;
-            if (box_y1 < pBox->y1)
-                box_y1 = pBox->y1;
-            if (box_y2 > pBox->y2)
-                box_y2 = pBox->y2;
+            if (box_x1 < pBox->x1) {
+              box_x1 = pBox->x1;
+            }
+            if (box_x2 > pBox->x2) {
+              box_x2 = pBox->x2;
+            }
+            if (box_y1 < pBox->y1) {
+              box_y1 = pBox->y1;
+            }
+            if (box_y2 > pBox->y2) {
+              box_y2 = pBox->y2;
+            }
             fastDst = TRUE;
         }
     }
@@ -288,20 +297,21 @@ miDoCopy(DrawablePtr pSrcDrawable,
 
     /* Do bit blitting */
     numRects = RegionNumRects(&rgnDst);
-    if (numRects && widthSrc && heightSrc)
-        miCopyRegion(pSrcDrawable, pDstDrawable, pGC,
-                     &rgnDst, dx, dy, copyProc, bitPlane, closure);
+    if (numRects && widthSrc && heightSrc) {
+      miCopyRegion(pSrcDrawable, pDstDrawable, pGC, &rgnDst, dx, dy, copyProc,
+                   bitPlane, closure);
+    }
 
     /* Pixmap sources generate a NoExposed (we return NULL to do this) */
-    if (!fastExpose && pGC->fExpose)
-        prgnExposed = miHandleExposures(pSrcDrawable, pDstDrawable, pGC,
-                                        xIn - pSrcDrawable->x,
-                                        yIn - pSrcDrawable->y,
-                                        widthSrc, heightSrc,
-                                        xOut - pDstDrawable->x,
-                                        yOut - pDstDrawable->y);
+    if (!fastExpose && pGC->fExpose) {
+      prgnExposed = miHandleExposures(
+          pSrcDrawable, pDstDrawable, pGC, xIn - pSrcDrawable->x,
+          yIn - pSrcDrawable->y, widthSrc, heightSrc, xOut - pDstDrawable->x,
+          yOut - pDstDrawable->y);
+    }
     RegionUninit(&rgnDst);
-    if (freeSrcClip)
-        RegionDestroy(prgnSrcClip);
+    if (freeSrcClip) {
+      RegionDestroy(prgnSrcClip);
+    }
     return prgnExposed;
 }

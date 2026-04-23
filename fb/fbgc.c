@@ -127,16 +127,17 @@ fbValidateGC(GCPtr pGC, unsigned long changes, DrawablePtr pDrawable)
     }
 
     if (changes & GCTile) {
-        if (!pGC->tileIsPixel &&
-            FbEvenTile(pGC->tile.pixmap->drawable.width *
-                       pDrawable->bitsPerPixel))
-            fbPadPixmap(pGC->tile.pixmap);
+      if (!pGC->tileIsPixel && FbEvenTile(pGC->tile.pixmap->drawable.width *
+                                          pDrawable->bitsPerPixel)) {
+        fbPadPixmap(pGC->tile.pixmap);
+      }
     }
     if (changes & GCStipple) {
         if (pGC->stipple) {
-            if (pGC->stipple->drawable.width * pDrawable->bitsPerPixel <
-                FB_UNIT)
-                fbPadPixmap(pGC->stipple);
+          if (pGC->stipple->drawable.width * pDrawable->bitsPerPixel <
+              FB_UNIT) {
+            fbPadPixmap(pGC->stipple);
+          }
         }
     }
     /*
@@ -152,10 +153,11 @@ fbValidateGC(GCPtr pGC, unsigned long changes, DrawablePtr pDrawable)
         pPriv->fg = pGC->fgPixel & mask;
         pPriv->bg = pGC->bgPixel & mask;
 
-        if ((pGC->planemask & depthMask) == depthMask)
-            pPriv->pm = mask;
-        else
-            pPriv->pm = pGC->planemask & mask;
+        if ((pGC->planemask & depthMask) == depthMask) {
+          pPriv->pm = mask;
+        } else {
+          pPriv->pm = pGC->planemask & mask;
+        }
 
         s = pDrawable->bitsPerPixel;
         while (s < FB_UNIT) {
@@ -174,8 +176,9 @@ fbValidateGC(GCPtr pGC, unsigned long changes, DrawablePtr pDrawable)
         unsigned char *dash = pGC->dash;
         unsigned int dashLength = 0;
 
-        while (n--)
-            dashLength += (unsigned int) *dash++;
+        while (n--) {
+          dashLength += (unsigned int)*dash++;
+        }
         pPriv->dashLength = dashLength;
     }
 }

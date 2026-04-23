@@ -109,8 +109,9 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
         return BadValue;
     }
 
-    if (!client->local || client->swapped)
-        isCapable = 0;
+    if (!client->local || client->swapped) {
+      isCapable = 0;
+    }
 
     xXF86DRIQueryDirectRenderingCapableReply reply = {
         .isCapable = isCapable
@@ -282,8 +283,9 @@ ProcXF86DRICreateDrawable(ClientPtr client)
 
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xXF86DRICreateDrawableReply reply = { 0 };
     if (!DRICreateDrawable(pScreen, client,
@@ -311,8 +313,9 @@ ProcXF86DRIDestroyDrawable(register ClientPtr client)
 
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (!DRIDestroyDrawable(pScreen, client,
                             pDrawable)) {
@@ -341,8 +344,9 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xXF86DRIGetDrawableInfoReply reply = { 0 };
 
@@ -454,8 +458,9 @@ ProcXF86DRIDispatch(register ClientPtr client)
         return ProcXF86DRIQueryDirectRenderingCapable(client);
     }
 
-    if (!client->local)
-        return DRIErrorBase + XF86DRIClientNotLocal;
+    if (!client->local) {
+      return DRIErrorBase + XF86DRIClientNotLocal;
+    }
 
     switch (stuff->data) {
     case X_XF86DRIOpenConnection:

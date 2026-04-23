@@ -96,8 +96,9 @@ xf86SigIOAdd(int fd)
     struct pollfd *n;
 
     n = realloc(xf86SigIOFds, (xf86SigIONum + 1) * sizeof (struct pollfd));
-    if (!n)
-        return FALSE;
+    if (!n) {
+      return FALSE;
+    }
 
     n[xf86SigIONum].fd = fd;
     n[xf86SigIONum].events = POLLIN;
@@ -110,12 +111,14 @@ static void
 xf86SigIORemove(int fd)
 {
     int i;
-    for (i = 0; i < xf86SigIONum; i++)
-        if (xf86SigIOFds[i].fd == fd) {
-            memmove(&xf86SigIOFds[i], &xf86SigIOFds[i+1], (xf86SigIONum - i - 1) * sizeof (struct pollfd));
-            xf86SigIONum--;
-            break;
-        }
+    for (i = 0; i < xf86SigIONum; i++) {
+      if (xf86SigIOFds[i].fd == fd) {
+        memmove(&xf86SigIOFds[i], &xf86SigIOFds[i + 1],
+                (xf86SigIONum - i - 1) * sizeof(struct pollfd));
+        xf86SigIONum--;
+        break;
+      }
+    }
 }
 
 /*
@@ -134,10 +137,13 @@ xf86SIGIO(int sig)
     SYSCALL(r = xserver_poll(xf86SigIOFds, xf86SigIONum, 0));
     for (f = 0; r > 0 && f < xf86SigIONum; f++) {
         if (xf86SigIOFds[f].revents & POLLIN) {
-            for (i = 0; i < xf86SigIOMax; i++)
-                if (xf86SigIOFuncs[i].f && xf86SigIOFuncs[i].fd == xf86SigIOFds[f].fd)
-                    (*xf86SigIOFuncs[i].f) (xf86SigIOFuncs[i].fd,
-                                            xf86SigIOFuncs[i].closure);
+          for (i = 0; i < xf86SigIOMax; i++) {
+            if (xf86SigIOFuncs[i].f &&
+                xf86SigIOFuncs[i].fd == xf86SigIOFds[f].fd) {
+              (*xf86SigIOFuncs[i].f)(xf86SigIOFuncs[i].fd,
+                                     xf86SigIOFuncs[i].closure);
+            }
+          }
             r--;
         }
     }
@@ -155,8 +161,9 @@ xf86IsPipe(int fd)
 {
     struct stat buf;
 
-    if (fstat(fd, &buf) < 0)
-        return 0;
+    if (fstat(fd, &buf) < 0) {
+      return 0;
+    }
     return S_ISFIFO(buf.st_mode);
 }
 
@@ -190,8 +197,9 @@ xf86InstallSIGIOHandler(int fd, void (*f) (int, void *), void *closure)
 
     for (i = 0; i < MAX_FUNCS; i++) {
         if (!xf86SigIOFuncs[i].f) {
-            if (xf86IsPipe(fd))
-                return 0;
+          if (xf86IsPipe(fd)) {
+            return 0;
+          }
             block_sigio();
 #ifdef O_ASYNC
             if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_ASYNC) == -1) {
@@ -232,8 +240,9 @@ xf86InstallSIGIOHandler(int fd, void (*f) (int, void *), void *closure)
             xf86SigIOFuncs[i].fd = fd;
             xf86SigIOFuncs[i].closure = closure;
             xf86SigIOFuncs[i].f = f;
-            if (i >= xf86SigIOMax)
-                xf86SigIOMax = i + 1;
+            if (i >= xf86SigIOMax) {
+              xf86SigIOMax = i + 1;
+            }
             xf86SigIOAdd(fd);
             release_sigio();
             return 1;

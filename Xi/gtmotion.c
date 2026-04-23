@@ -78,15 +78,18 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
 
     DeviceIntPtr dev;
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     const ValuatorClassPtr v = dev->valuator;
-    if (v == NULL || v->numAxes == 0)
-        return BadMatch;
+    if (v == NULL || v->numAxes == 0) {
+      return BadMatch;
+    }
 
-    if (dev->valuator->motionHintWindow)
-        MaybeStopDeviceHint(dev, client);
+    if (dev->valuator->motionHintWindow) {
+      MaybeStopDeviceHint(dev, client);
+    }
 
     xGetDeviceMotionEventsReply reply = {
         .RepType = X_GetDeviceMotionEvents,
@@ -101,8 +104,9 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
 
     if (CompareTimeStamps(start, stop) != LATER &&
         CompareTimeStamps(start, currentTime) != LATER) {
-        if (CompareTimeStamps(stop, currentTime) == LATER)
-            stop = currentTime;
+      if (CompareTimeStamps(stop, currentTime) == LATER) {
+        stop = currentTime;
+      }
         if (v->numMotionEvents) {
             const int size = sizeof(Time) + (v->numAxes * sizeof(INT32));
             INT32 *coords = NULL;

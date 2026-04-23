@@ -198,23 +198,27 @@ AccelSetProfileProperty(DeviceIntPtr dev, Atom atom,
     int rc;
     int nelem = 1;
 
-    if (atom != XIGetKnownProperty(ACCEL_PROP_PROFILE_NUMBER))
-        return Success;
+    if (atom != XIGetKnownProperty(ACCEL_PROP_PROFILE_NUMBER)) {
+      return Success;
+    }
 
     vel = GetDevicePredictableAccelData(dev);
-    if (!vel)
-        return BadValue;
+    if (!vel) {
+      return BadValue;
+    }
     rc = XIPropToInt(val, &nelem, &ptr);
 
     if (checkOnly) {
-        if (rc)
-            return rc;
+      if (rc) {
+        return rc;
+      }
 
-        if (GetAccelerationProfile(vel, profile) == NULL)
-            return BadValue;
+      if (GetAccelerationProfile(vel, profile) == NULL) {
+        return BadValue;
+      }
+    } else {
+      SetAccelerationProfile(vel, profile);
     }
-    else
-        SetAccelerationProfile(vel, profile);
 
     return Success;
 }
@@ -243,17 +247,20 @@ AccelSetDecelProperty(DeviceIntPtr dev, Atom atom,
     int rc;
     int nelem = 1;
 
-    if (atom != XIGetKnownProperty(ACCEL_PROP_CONSTANT_DECELERATION))
-        return Success;
+    if (atom != XIGetKnownProperty(ACCEL_PROP_CONSTANT_DECELERATION)) {
+      return Success;
+    }
 
     vel = GetDevicePredictableAccelData(dev);
-    if (!vel)
-        return BadValue;
+    if (!vel) {
+      return BadValue;
+    }
     rc = XIPropToFloat(val, &nelem, &ptr);
 
     if (checkOnly) {
-        if (rc)
-            return rc;
+      if (rc) {
+        return rc;
+      }
         return (v > 0) ? Success : BadValue;
     }
 
@@ -287,22 +294,26 @@ AccelSetAdaptDecelProperty(DeviceIntPtr dev, Atom atom,
     int rc;
     int nelem = 1;
 
-    if (atom != XIGetKnownProperty(ACCEL_PROP_ADAPTIVE_DECELERATION))
-        return Success;
+    if (atom != XIGetKnownProperty(ACCEL_PROP_ADAPTIVE_DECELERATION)) {
+      return Success;
+    }
 
     veloc = GetDevicePredictableAccelData(dev);
-    if (!veloc)
-        return BadValue;
+    if (!veloc) {
+      return BadValue;
+    }
     rc = XIPropToFloat(val, &nelem, &ptr);
 
     if (checkOnly) {
-        if (rc)
-            return rc;
+      if (rc) {
+        return rc;
+      }
         return (v >= 1.0f) ? Success : BadValue;
     }
 
-    if (v >= 1.0f)
-        veloc->min_acceleration = 1 / v;
+    if (v >= 1.0f) {
+      veloc->min_acceleration = 1 / v;
+    }
 
     return Success;
 }
@@ -334,23 +345,27 @@ AccelSetScaleProperty(DeviceIntPtr dev, Atom atom,
     int rc;
     int nelem = 1;
 
-    if (atom != XIGetKnownProperty(ACCEL_PROP_VELOCITY_SCALING))
-        return Success;
+    if (atom != XIGetKnownProperty(ACCEL_PROP_VELOCITY_SCALING)) {
+      return Success;
+    }
 
     vel = GetDevicePredictableAccelData(dev);
-    if (!vel)
-        return BadValue;
+    if (!vel) {
+      return BadValue;
+    }
     rc = XIPropToFloat(val, &nelem, &ptr);
 
     if (checkOnly) {
-        if (rc)
-            return rc;
+      if (rc) {
+        return rc;
+      }
 
         return (v > 0) ? Success : BadValue;
     }
 
-    if (v > 0)
-        vel->corr_mul = v;
+    if (v > 0) {
+      vel->corr_mul = v;
+    }
 
     return Success;
 }
@@ -376,12 +391,14 @@ InitializePredictableAccelerationProperties(DeviceIntPtr dev,
 {
     int num_handlers = 4;
 
-    if (!vel)
-        return FALSE;
+    if (!vel) {
+      return FALSE;
+    }
 
     schemeData->prop_handlers = calloc(num_handlers, sizeof(long));
-    if (!schemeData->prop_handlers)
-        return FALSE;
+    if (!schemeData->prop_handlers) {
+      return FALSE;
+    }
     schemeData->num_prop_handlers = num_handlers;
     schemeData->prop_handlers[0] = AccelInitProfileProperty(dev, vel);
     schemeData->prop_handlers[1] = AccelInitDecelProperty(dev, vel);
@@ -409,9 +426,11 @@ DeletePredictableAccelerationProperties(DeviceIntPtr dev,
 
     vel = GetDevicePredictableAccelData(dev);
     if (vel) {
-        for (int i = 0; i < scheme->num_prop_handlers; i++)
-            if (scheme->prop_handlers[i])
-                XIUnregisterPropertyHandler(dev, scheme->prop_handlers[i]);
+      for (int i = 0; i < scheme->num_prop_handlers; i++) {
+        if (scheme->prop_handlers[i]) {
+          XIUnregisterPropertyHandler(dev, scheme->prop_handlers[i]);
+        }
+      }
     }
 
     free(scheme->prop_handlers);
@@ -467,25 +486,26 @@ DoGetDirection(int dx, int dy)
     /* on insignificant mickeys, flag 135 degrees */
     if (abs(dx) < 2 && abs(dy) < 2) {
         /* first check diagonal cases */
-        if (dx > 0 && dy > 0)
-            dir = E | SE | S;
-        else if (dx > 0 && dy < 0)
-            dir = N | NE | E;
-        else if (dx < 0 && dy < 0)
-            dir = W | NW | N;
-        else if (dx < 0 && dy > 0)
-            dir = W | SW | S;
-        /* check axis-aligned directions */
-        else if (dx > 0)
-            dir = NE | E | SE;
-        else if (dx < 0)
-            dir = NW | W | SW;
-        else if (dy > 0)
-            dir = SE | S | SW;
-        else if (dy < 0)
-            dir = NE | N | NW;
-        else
-            dir = UNDEFINED;    /* shouldn't happen */
+        if (dx > 0 && dy > 0) {
+          dir = E | SE | S;
+        } else if (dx > 0 && dy < 0) {
+          dir = N | NE | E;
+        } else if (dx < 0 && dy < 0) {
+          dir = W | NW | N;
+        } else if (dx < 0 && dy > 0) {
+          dir = W | SW | S;
+          /* check axis-aligned directions */
+        } else if (dx > 0) {
+          dir = NE | E | SE;
+        } else if (dx < 0) {
+          dir = NW | W | SW;
+        } else if (dy > 0) {
+          dir = SE | S | SW;
+        } else if (dy < 0) {
+          dir = NE | N | NW;
+        } else {
+          dir = UNDEFINED; /* shouldn't happen */
+        }
     }
     else {                      /* compute angle and set appropriate flags */
         double r;
@@ -508,10 +528,11 @@ DoGetDirection(int dx, int dy)
          * except on very well-aligned mickeys. */
         i1 = (int) (r + 0.1) % 8;
         i2 = (int) (r + 0.9) % 8;
-        if (i1 < 0 || i1 > 7 || i2 < 0 || i2 > 7)
-            dir = UNDEFINED;    /* shouldn't happen */
-        else
-            dir = (1 << i1 | 1 << i2);
+        if (i1 < 0 || i1 > 7 || i2 < 0 || i2 > 7) {
+          dir = UNDEFINED; /* shouldn't happen */
+        } else {
+          dir = (1 << i1 | 1 << i2);
+        }
     }
     return dir;
 }
@@ -590,10 +611,11 @@ CalcTracker(const MotionTracker * tracker, int cur_t)
     double dist = sqrt(tracker->dx * tracker->dx + tracker->dy * tracker->dy);
     int dtime = cur_t - tracker->time;
 
-    if (dtime > 0)
-        return dist / dtime;
-    else
-        return 0;               /* synonymous for NaN, since we're not C99 */
+    if (dtime > 0) {
+      return dist / dtime;
+    } else {
+      return 0; /* synonymous for NaN, since we're not C99 */
+    }
 }
 
 /* find the most plausible velocity. That is, the most distant
@@ -716,10 +738,11 @@ ApplySimpleSoftening(double prev_delta, double delta)
     double result = delta;
 
     if (delta < -1.0 || delta > 1.0) {
-        if (delta > prev_delta)
-            result -= 0.5;
-        else if (delta < prev_delta)
-            result += 0.5;
+      if (delta > prev_delta) {
+        result -= 0.5;
+      } else if (delta < prev_delta) {
+        result += 0.5;
+      }
     }
     return result;
 }
@@ -761,8 +784,9 @@ static double BasicComputeAcceleration(DeviceIntPtr dev,
     result = vel->Profile(dev, vel, velocity, threshold, acc);
 
     /* enforce min_acceleration */
-    if (result < vel->min_acceleration)
-        result = vel->min_acceleration;
+    if (result < vel->min_acceleration) {
+      result = vel->min_acceleration;
+    }
     return result;
 }
 
@@ -864,8 +888,9 @@ PowerProfile(DeviceIntPtr dev,
 
     acc = (acc - 1.0) * 0.1 + 1.0;     /* without this, acc of 2 is unusable */
 
-    if (velocity <= threshold)
-        return vel->min_acceleration;
+    if (velocity <= threshold) {
+      return vel->min_acceleration;
+    }
     vel_dist = velocity - threshold;
     return (pow(acc, vel_dist)) * vel->min_acceleration;
 }
@@ -894,17 +919,21 @@ SimpleSmoothProfile(DeviceIntPtr dev,
                     DeviceVelocityPtr vel,
                     double velocity, double threshold, double acc)
 {
-    if (velocity < 1.0f)
-        return CalcPenumbralGradient(0.5 + velocity * 0.5) * 2.0f - 1.0f;
-    if (threshold < 1.0f)
-        threshold = 1.0f;
-    if (velocity <= threshold)
-        return 1;
+  if (velocity < 1.0f) {
+    return CalcPenumbralGradient(0.5 + velocity * 0.5) * 2.0f - 1.0f;
+  }
+  if (threshold < 1.0f) {
+    threshold = 1.0f;
+  }
+  if (velocity <= threshold) {
+    return 1;
+  }
     velocity /= threshold;
-    if (velocity >= acc)
-        return acc;
-    else
-        return 1.0f + (CalcPenumbralGradient(velocity / acc) * (acc - 1.0f));
+    if (velocity >= acc) {
+      return acc;
+    } else {
+      return 1.0f + (CalcPenumbralGradient(velocity / acc) * (acc - 1.0f));
+    }
 }
 
 /**
@@ -918,10 +947,11 @@ SmoothLinearProfile(DeviceIntPtr dev,
 {
     double res, nv;
 
-    if (acc > 1.0)
-        acc -= 1.0;            /*this is so acc = 1 is no acceleration */
-    else
-        return 1.0;
+    if (acc > 1.0) {
+      acc -= 1.0; /*this is so acc = 1 is no acceleration */
+    } else {
+      return 1.0;
+    }
 
     nv = (velocity - threshold) * acc * 0.5;
 
@@ -951,8 +981,9 @@ SmoothLimitedProfile(DeviceIntPtr dev,
 {
     double res;
 
-    if (velocity >= threshold || threshold == 0.0)
-        return acc;
+    if (velocity >= threshold || threshold == 0.0) {
+      return acc;
+    }
 
     velocity /= threshold;      /* should be [0..1[ now */
 
@@ -1019,8 +1050,9 @@ static int SetAccelerationProfile(DeviceVelocityPtr vel, int profile_num)
 
     profile = GetAccelerationProfile(vel, profile_num);
 
-    if (profile == NULL && profile_num != PROFILE_UNINITIALIZE)
-        return FALSE;
+    if (profile == NULL && profile_num != PROFILE_UNINITIALIZE) {
+      return FALSE;
+    }
 
     /* Here one could free old profile-private data */
     free(vel->profile_private);
@@ -1048,8 +1080,9 @@ void
 SetDeviceSpecificAccelerationProfile(DeviceVelocityPtr vel,
                                      PointerAccelerationProfileFunc profile)
 {
-    if (vel)
-        vel->deviceSpecificProfile = profile;
+  if (vel) {
+    vel->deviceSpecificProfile = profile;
+  }
 }
 
 /**
@@ -1088,8 +1121,9 @@ acceleratePointerPredictable(DeviceIntPtr dev, ValuatorMask *val, CARD32 evtime)
     DeviceVelocityPtr velocitydata = GetDevicePredictableAccelData(dev);
     Bool soften = TRUE;
 
-    if (valuator_mask_num_valuators(val) == 0 || !velocitydata)
-        return;
+    if (valuator_mask_num_valuators(val) == 0 || !velocitydata) {
+      return;
+    }
 
     if (velocitydata->statistics.profile_number == AccelProfileNone &&
         velocitydata->const_acceleration == 1.0) {
@@ -1121,14 +1155,17 @@ acceleratePointerPredictable(DeviceIntPtr dev, ValuatorMask *val, CARD32 evtime)
 
             DebugAccelF("mult is %f\n", mult);
             if (mult != 1.0 || velocitydata->const_acceleration != 1.0) {
-                if (mult > 1.0 && soften)
-                    ApplySoftening(velocitydata, &dx, &dy);
+              if (mult > 1.0 && soften) {
+                ApplySoftening(velocitydata, &dx, &dy);
+              }
                 ApplyConstantDeceleration(velocitydata, &dx, &dy);
 
-                if (dx != 0.0)
-                    valuator_mask_set_double(val, 0, mult * dx);
-                if (dy != 0.0)
-                    valuator_mask_set_double(val, 1, mult * dy);
+                if (dx != 0.0) {
+                  valuator_mask_set_double(val, 0, mult * dx);
+                }
+                if (dy != 0.0) {
+                  valuator_mask_set_double(val, 1, mult * dy);
+                }
                 DebugAccelF("delta x:%.3f y:%.3f\n", mult * dx, mult * dy);
             }
         }
@@ -1157,8 +1194,9 @@ acceleratePointerLightweight(DeviceIntPtr dev,
         dy = valuator_mask_get(val, 1);
     }
 
-    if (valuator_mask_num_valuators(val) == 0)
-        return;
+    if (valuator_mask_num_valuators(val) == 0) {
+      return;
+    }
 
     if (dev->ptrfeed && dev->ptrfeed->ctrl.num) {
         /* modeled from xf86Events.c */
@@ -1181,10 +1219,12 @@ acceleratePointerLightweight(DeviceIntPtr dev,
             mult = pow(dx * dx + dy * dy,
                        ((double) (dev->ptrfeed->ctrl.num) /
                         (double) (dev->ptrfeed->ctrl.den) - 1.0) / 2.0) / 2.0;
-            if (dx != 0.0)
-                valuator_mask_set_double(val, 0, mult * dx);
-            if (dy != 0.0)
-                valuator_mask_set_double(val, 1, mult * dy);
+            if (dx != 0.0) {
+              valuator_mask_set_double(val, 0, mult * dx);
+            }
+            if (dy != 0.0) {
+              valuator_mask_set_double(val, 1, mult * dy);
+            }
         }
     }
 }

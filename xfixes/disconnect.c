@@ -96,11 +96,14 @@ XFixesShouldDisconnectClient(ClientPtr client)
 {
     ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
 
-    if (!pDisconnect)
-        return FALSE;
+    if (!pDisconnect) {
+      return FALSE;
+    }
 
-    if (dispatchExceptionAtReset & DE_TERMINATE)
-        return (pDisconnect->disconnect_mode & XFixesClientDisconnectFlagTerminate);
+    if (dispatchExceptionAtReset & DE_TERMINATE) {
+      return (pDisconnect->disconnect_mode &
+              XFixesClientDisconnectFlagTerminate);
+    }
 
     return FALSE;
 }
@@ -108,9 +111,10 @@ XFixesShouldDisconnectClient(ClientPtr client)
 Bool
 XFixesClientDisconnectInit(void)
 {
-    if (!dixRegisterPrivateKey(&ClientDisconnectPrivateKeyRec,
-                               PRIVATE_CLIENT, sizeof(ClientDisconnectRec)))
-        return FALSE;
+  if (!dixRegisterPrivateKey(&ClientDisconnectPrivateKeyRec, PRIVATE_CLIENT,
+                             sizeof(ClientDisconnectRec))) {
+    return FALSE;
+  }
 
     return TRUE;
 }

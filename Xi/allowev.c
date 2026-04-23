@@ -78,8 +78,9 @@ ProcXAllowDeviceEvents(ClientPtr client)
     int rc;
 
     rc = dixLookupDevice(&thisdev, stuff->deviceid, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
     time = ClientTimeToServerTime(stuff->time);
 
     switch (stuff->mode) {

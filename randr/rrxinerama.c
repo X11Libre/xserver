@@ -117,8 +117,9 @@ ProcRRXineramaGetState(ClientPtr client)
     REQUEST(xPanoramiXGetStateReq);
     REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr pWin;
     register int rc;
@@ -127,8 +128,9 @@ ProcRRXineramaGetState(ClientPtr client)
     Bool active = FALSE;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     pScreen = pWin->drawable.pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
@@ -165,15 +167,17 @@ ProcRRXineramaGetScreenCount(ClientPtr client)
     REQUEST(xPanoramiXGetScreenCountReq);
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
+    if (client->swapped) {
+      swapl(&stuff->window);
+    }
 
     WindowPtr pWin;
     register int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     xPanoramiXGetScreenCountReply reply = {
         .ScreenCount = RRXineramaScreenCount(pWin->drawable.pScreen),
@@ -201,8 +205,9 @@ ProcRRXineramaGetScreenSize(ClientPtr client)
     register int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     pScreen = pWin->drawable.pScreen;
     pRoot = pScreen->root;
@@ -248,8 +253,9 @@ ProcRRXineramaQueryScreens(ClientPtr client)
 
     if (RRXineramaScreenActive(pScreen)) {
         RRGetInfo(pScreen, FALSE);
-        if (!RRMonitorMakeList(pScreen, TRUE, &monitors, &nmonitors))
-            return BadAlloc;
+        if (!RRMonitorMakeList(pScreen, TRUE, &monitors, &nmonitors)) {
+          return BadAlloc;
+        }
     }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
@@ -271,8 +277,9 @@ ProcRRXineramaQueryScreens(ClientPtr client)
                             box.y2 - box.y1);
     }
 
-    if (monitors)
-        RRMonitorFreeList(monitors, nmonitors);
+    if (monitors) {
+      RRMonitorFreeList(monitors, nmonitors);
+    }
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -302,20 +309,23 @@ void
 RRXineramaExtensionInit(void)
 {
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return;
+  if (!noPanoramiXExtension) {
+    return;
+  }
 #endif /* XINERAMA */
 
-    if (noRRXineramaExtension)
-      return;
+  if (noRRXineramaExtension) {
+    return;
+  }
 
     /*
      * Xinerama isn't capable enough to have multiple protocol screens each
      * with their own output geometry.  So if there's more than one protocol
      * screen, just don't even try.
      */
-    if (dixGetScreenPtr(1))
-        return;
+    if (dixGetScreenPtr(1)) {
+      return;
+    }
 
     (void) AddExtension(PANORAMIX_PROTOCOL_NAME, 0, 0,
                         ProcRRXineramaDispatch,

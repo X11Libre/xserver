@@ -160,8 +160,9 @@ x_sha1_init(void)
 {
     struct sha1_ctx *ctx = calloc(1, sizeof(struct sha1_ctx ));
 
-    if (!ctx)
-        return NULL;
+    if (!ctx) {
+      return NULL;
+    }
     sha1_init(ctx);
     return ctx;
 }

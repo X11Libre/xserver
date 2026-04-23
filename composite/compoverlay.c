@@ -70,8 +70,9 @@ compFreeOverlayClient(CompOverlayClientPtr pOcToDel)
     }
 
     /* Destroy overlay window when there are no more clients using it */
-    if (cs->pOverlayClients == NULL)
-        compDestroyOverlayWindow(pScreen);
+    if (cs->pOverlayClients == NULL) {
+      compDestroyOverlayWindow(pScreen);
+    }
 }
 
 /*
@@ -82,10 +83,12 @@ compFindOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
 
-    for (CompOverlayClientPtr pOc = cs->pOverlayClients;
-                          pOc != NULL; pOc = pOc->pNext)
-        if (pOc->pClient == pClient)
-            return pOc;
+    for (CompOverlayClientPtr pOc = cs->pOverlayClients; pOc != NULL;
+         pOc = pOc->pNext) {
+      if (pOc->pClient == pClient) {
+        return pOc;
+      }
+    }
 
     return NULL;
 }
@@ -98,8 +101,9 @@ compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
     CompOverlayClientPtr pOc = calloc(1, sizeof(CompOverlayClientRec));
-    if (pOc == NULL)
-        return NULL;
+    if (pOc == NULL) {
+      return NULL;
+    }
 
     pOc->pClient = pClient;
     pOc->pScreen = pScreen;
@@ -111,8 +115,9 @@ compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
      * Create a resource for this element so it can be deleted
      * when the client goes away.
      */
-    if (!AddResource(pOc->resource, CompositeClientOverlayType, (void *) pOc))
-        return NULL;
+    if (!AddResource(pOc->resource, CompositeClientOverlayType, (void *)pOc)) {
+      return NULL;
+    }
 
     return pOc;
 }
@@ -146,11 +151,13 @@ compCreateOverlayWindow(ScreenPtr pScreen)
                      InputOutput, CWBackPixmap | CWOverrideRedirect, &attrs[0],
                      pRoot->drawable.depth,
                      serverClient, pScreen->rootVisual, &result);
-    if (pWin == NULL)
-        return FALSE;
+    if (pWin == NULL) {
+      return FALSE;
+    }
 
-    if (!AddResource(pWin->drawable.id, X11_RESTYPE_WINDOW, (void *) pWin))
-        return FALSE;
+    if (!AddResource(pWin->drawable.id, X11_RESTYPE_WINDOW, (void *)pWin)) {
+      return FALSE;
+    }
 
     MapWindow(pWin, serverClient);
 

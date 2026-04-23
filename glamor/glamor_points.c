@@ -54,24 +54,26 @@ glamor_poly_point_gl(DrawablePtr drawable, GCPtr gc, int mode, int npt, DDXPoint
     Bool ret = FALSE;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
     glamor_make_current(glamor_priv);
 
-    if (prog->failed)
-        goto bail;
-
-    if (!prog->prog) {
-        if (!glamor_build_program(screen, prog,
-                                  &glamor_facet_point,
-                                  &glamor_fill_solid,
-                                  NULL, NULL))
-            goto bail;
+    if (prog->failed) {
+      goto bail;
     }
 
-    if (!glamor_use_program(drawable, gc, prog, NULL))
+    if (!prog->prog) {
+      if (!glamor_build_program(screen, prog, &glamor_facet_point,
+                                &glamor_fill_solid, NULL, NULL)) {
         goto bail;
+      }
+    }
+
+    if (!glamor_use_program(drawable, gc, prog, NULL)) {
+      goto bail;
+    }
 
     vbo_ppt = glamor_get_vbo_space(screen, npt * (2 * sizeof (INT16)), &vbo_offset);
     glEnableVertexAttribArray(GLAMOR_VERTEX_POS);
@@ -85,8 +87,9 @@ glamor_poly_point_gl(DrawablePtr drawable, GCPtr gc, int mode, int npt, DDXPoint
             vbo_ppt += 2;
             ppt++;
         }
-    } else
-        memcpy(vbo_ppt, ppt, npt * (2 * sizeof (INT16)));
+    } else {
+      memcpy(vbo_ppt, ppt, npt * (2 * sizeof(INT16)));
+    }
     glamor_put_vbo_space(screen);
 
     glEnable(GL_SCISSOR_TEST);
@@ -98,8 +101,10 @@ glamor_poly_point_gl(DrawablePtr drawable, GCPtr gc, int mode, int npt, DDXPoint
         BoxPtr box = RegionRects(gc->pCompositeClip);
 
         if (!glamor_set_destination_drawable(drawable, box_index, TRUE, TRUE,
-                                             prog->matrix_uniform, &off_x, &off_y))
-            goto bail;
+                                             prog->matrix_uniform, &off_x,
+                                             &off_y)) {
+          goto bail;
+        }
 
         while (nbox--) {
             glScissor(box->x1 + off_x,
@@ -124,7 +129,8 @@ void
 glamor_poly_point(DrawablePtr drawable, GCPtr gc, int mode, int npt,
                   DDXPointPtr ppt)
 {
-    if (glamor_poly_point_gl(drawable, gc, mode, npt, ppt))
-        return;
+  if (glamor_poly_point_gl(drawable, gc, mode, npt, ppt)) {
+    return;
+  }
     miPolyPoint(drawable, gc, mode, npt, ppt);
 }

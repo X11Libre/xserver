@@ -189,8 +189,9 @@ DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
     static int foundIndex = 0;
     Bool ret;
 
-    if (!dixRegisterPrivateKey(&darwinScreenKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&darwinScreenKeyRec, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
 
     // reset index of found screens for each server generation
     if (pScreen->myNum == 0) {
@@ -209,8 +210,9 @@ DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
     // setup hardware/mode specific details
     ret = QuartzAddScreen(foundIndex, pScreen);
     foundIndex++;
-    if (!ret)
-        return FALSE;
+    if (!ret) {
+      return FALSE;
+    }
 
     // setup a single visual appropriate for our pixel type
     if (!miSetVisualTypesAndMasks(dfb->depth, dfb->visuals, dfb->bitsPerRGB,
@@ -229,20 +231,21 @@ DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
     //                             RM_ARGB(0, 5, 5, 5), GM_ARGB(0, 5, 5,
     //                                                          5),
     //                             BM_ARGB(0, 5, 5, 5));
-    if (dfb->depth > 24)
-        miSetVisualTypesAndMasks(24, TrueColorMask, 8, TrueColor,
-                                 RM_ARGB(0, 8, 8, 8), GM_ARGB(0, 8, 8,
-                                                              8),
-                                 BM_ARGB(0, 8, 8, 8));
+    if (dfb->depth > 24) {
+      miSetVisualTypesAndMasks(24, TrueColorMask, 8, TrueColor,
+                               RM_ARGB(0, 8, 8, 8), GM_ARGB(0, 8, 8, 8),
+                               BM_ARGB(0, 8, 8, 8));
+    }
 
     miSetPixmapDepths();
 
     // machine independent screen init
     // setup _Screen structure in pScreen
-    if (monitorResolution)
-        dpi = monitorResolution;
-    else
-        dpi = 96;
+    if (monitorResolution) {
+      dpi = monitorResolution;
+    } else {
+      dpi = 96;
+    }
 
     // initialize fb
     if (!fbScreenInit(pScreen,
@@ -492,10 +495,11 @@ DarwinParseModifierList(const char *constmodifiers, int separatelr)
         while (p) {
             modifier = strsep(&p, " ,+&|/"); // allow lots of separators
             nxkey = DarwinModifierStringToNXMask(modifier, separatelr);
-            if (nxkey)
-                result |= nxkey;
-            else
-                ErrorF("fakebuttons: Unknown modifier \"%s\"\n", modifier);
+            if (nxkey) {
+              result |= nxkey;
+            } else {
+              ErrorF("fakebuttons: Unknown modifier \"%s\"\n", modifier);
+            }
         }
         free(modifiers);
     }
@@ -641,8 +645,9 @@ InitOutput(int argc, char **argv)
 
     // List how we want common pixmap formats to be padded
     screenInfo.numPixmapFormats = ARRAY_SIZE(formats);
-    for (i = 0; i < ARRAY_SIZE(formats); i++)
-        screenInfo.formats[i] = formats[i];
+    for (i = 0; i < ARRAY_SIZE(formats); i++) {
+      screenInfo.formats[i] = formats[i];
+    }
 
     // Discover screens and do mode specific initialization
     QuartzInitOutput(argc, argv);
@@ -732,10 +737,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
         if (i == argc - 1) {
             FatalError("-fakemouse2 must be followed by a modifier list\n");
         }
-        if (!strcasecmp(argv[i + 1], "none") || !strcmp(argv[i + 1], ""))
-            darwinFakeMouse2Mask = 0;
-        else
-            darwinFakeMouse2Mask = DarwinParseModifierList(argv[i + 1], 1);
+        if (!strcasecmp(argv[i + 1], "none") || !strcmp(argv[i + 1], "")) {
+          darwinFakeMouse2Mask = 0;
+        } else {
+          darwinFakeMouse2Mask = DarwinParseModifierList(argv[i + 1], 1);
+        }
         ErrorF("Modifier mask to fake mouse button 2 = 0x%x\n",
                darwinFakeMouse2Mask);
         return 2;
@@ -745,10 +751,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
         if (i == argc - 1) {
             FatalError("-fakemouse3 must be followed by a modifier list\n");
         }
-        if (!strcasecmp(argv[i + 1], "none") || !strcmp(argv[i + 1], ""))
-            darwinFakeMouse3Mask = 0;
-        else
-            darwinFakeMouse3Mask = DarwinParseModifierList(argv[i + 1], 1);
+        if (!strcasecmp(argv[i + 1], "none") || !strcmp(argv[i + 1], "")) {
+          darwinFakeMouse3Mask = 0;
+        } else {
+          darwinFakeMouse3Mask = DarwinParseModifierList(argv[i + 1], 1);
+        }
         ErrorF("Modifier mask to fake mouse button 3 = 0x%x\n",
                darwinFakeMouse3Mask);
         return 2;

@@ -60,8 +60,9 @@ static void box_intersect(BoxPtr dest, BoxPtr a, BoxPtr b)
 
     dest->y1 = a->y1 > b->y1 ? a->y1 : b->y1;
     dest->y2 = a->y2 < b->y2 ? a->y2 : b->y2;
-    if (dest->y1 >= dest->y2)
-        dest->x1 = dest->x2 = dest->y1 = dest->y2 = 0;
+    if (dest->y1 >= dest->y2) {
+      dest->x1 = dest->x2 = dest->y1 = dest->y2 = 0;
+    }
 }
 
 static void rr_crtc_box(RRCrtcPtr crtc, BoxPtr crtc_box)
@@ -82,8 +83,9 @@ static void rr_crtc_box(RRCrtcPtr crtc, BoxPtr crtc_box)
                 crtc_box->y2 = crtc->y + crtc->mode->mode.width;
                 break;
         }
-    } else
-        crtc_box->x1 = crtc_box->x2 = crtc_box->y1 = crtc_box->y2 = 0;
+    } else {
+      crtc_box->x1 = crtc_box->x2 = crtc_box->y1 = crtc_box->y2 = 0;
+    }
 }
 
 static int box_area(BoxPtr box)
@@ -129,25 +131,29 @@ rr_crtc_covering_box(ScreenPtr pScreen, BoxPtr box, Bool screen_is_xf86_hint)
     best_crtc = NULL;
     best_coverage = 0;
 
-    if (!dixPrivateKeyRegistered(rrPrivKey))
-        return NULL;
+    if (!dixPrivateKeyRegistered(rrPrivKey)) {
+      return NULL;
+    }
 
     pScrPriv = rrGetScrPriv(pScreen);
 
-    if (!pScrPriv)
-        return NULL;
+    if (!pScrPriv) {
+      return NULL;
+    }
 
     primary_crtc = NULL;
     primary_output = RRFirstOutput(pScreen);
-    if (primary_output)
-        primary_crtc = primary_output->crtc;
+    if (primary_output) {
+      primary_crtc = primary_output->crtc;
+    }
 
     for (c = 0; c < pScrPriv->numCrtcs; c++) {
         crtc = pScrPriv->crtcs[c];
 
         /* If the CRTC is off, treat it as not covering */
-        if (!rr_crtc_on(crtc, screen_is_xf86_hint))
-            continue;
+        if (!rr_crtc_on(crtc, screen_is_xf86_hint)) {
+          continue;
+        }
 
         rr_crtc_box(crtc, &crtc_box);
         box_intersect(&cover_box, &crtc_box, box);
@@ -170,12 +176,14 @@ rr_crtc_covering_box_on_secondary(ScreenPtr pScreen, BoxPtr box)
         RRCrtcPtr crtc = NULL;
 
         xorg_list_for_each_entry(secondary, &pScreen->secondary_list, secondary_head) {
-            if (!secondary->is_output_secondary)
-                continue;
+          if (!secondary->is_output_secondary) {
+            continue;
+          }
 
             crtc = rr_crtc_covering_box(secondary, box, FALSE);
-            if (crtc)
-                return crtc;
+            if (crtc) {
+              return crtc;
+            }
         }
     }
 
@@ -239,8 +247,9 @@ ms_get_kernel_ust_msc(xf86CrtcPtr crtc,
                                  msc, &ns);
         if (ret != -1 || (errno != ENOTTY && errno != EINVAL)) {
             ms->has_queue_sequence = TRUE;
-            if (ret == 0)
-                *ust = ns / 1000;
+            if (ret == 0) {
+              *ust = ns / 1000;
+            }
             return ret == 0;
         }
     }
@@ -282,8 +291,9 @@ ms_drm_set_seq_queued(uint32_t seq, uint64_t msc)
     xorg_list_for_each_entry(q, &ms_drm_queue, list) {
         if (q->seq == seq) {
             drmmode_crtc = q->crtc->driver_private;
-            if (msc < drmmode_crtc->next_msc)
-                drmmode_crtc->next_msc = msc;
+            if (msc < drmmode_crtc->next_msc) {
+              drmmode_crtc->next_msc = msc;
+            }
             q->msc = msc;
             q->kernel_queued = TRUE;
             break;
@@ -297,8 +307,9 @@ ms_queue_coalesce(xf86CrtcPtr crtc, uint32_t seq, uint64_t msc)
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 
     /* If the next MSC is too late, then this event can't be coalesced */
-    if (msc < drmmode_crtc->next_msc)
-        return FALSE;
+    if (msc < drmmode_crtc->next_msc) {
+      return FALSE;
+    }
 
     /* Set the target MSC on this sequence number */
     ms_drm_set_seq_msc(seq, msc);
@@ -317,8 +328,9 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
     int ret;
 
     /* Try coalescing this event into another to avoid event queue exhaustion */
-    if (flags == MS_QUEUE_ABSOLUTE && ms_queue_coalesce(crtc, seq, msc))
-        return TRUE;
+    if (flags == MS_QUEUE_ABSOLUTE && ms_queue_coalesce(crtc, seq, msc)) {
+      return TRUE;
+    }
 
     for (;;) {
         /* Queue an event at the specified sequence */
@@ -328,18 +340,21 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
 
             ms->tried_queue_sequence = TRUE;
 
-            if (flags & MS_QUEUE_RELATIVE)
-                drm_flags |= DRM_CRTC_SEQUENCE_RELATIVE;
-            if (flags & MS_QUEUE_NEXT_ON_MISS)
-                drm_flags |= DRM_CRTC_SEQUENCE_NEXT_ON_MISS;
+            if (flags & MS_QUEUE_RELATIVE) {
+              drm_flags |= DRM_CRTC_SEQUENCE_RELATIVE;
+            }
+            if (flags & MS_QUEUE_NEXT_ON_MISS) {
+              drm_flags |= DRM_CRTC_SEQUENCE_NEXT_ON_MISS;
+            }
 
             ret = drmCrtcQueueSequence(ms->fd, drmmode_crtc->mode_crtc->crtc_id,
                                        drm_flags, msc, &kernel_queued, seq);
             if (ret == 0) {
                 msc = ms_kernel_msc_to_crtc_msc(crtc, kernel_queued, TRUE);
                 ms_drm_set_seq_queued(seq, msc);
-                if (msc_queued)
-                    *msc_queued = msc;
+                if (msc_queued) {
+                  *msc_queued = msc;
+                }
                 ms->has_queue_sequence = TRUE;
                 return TRUE;
             }
@@ -350,12 +365,14 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
             }
         }
         vbl.request.type = DRM_VBLANK_EVENT | drmmode_crtc->vblank_pipe;
-        if (flags & MS_QUEUE_RELATIVE)
-            vbl.request.type |= DRM_VBLANK_RELATIVE;
-        else
-            vbl.request.type |= DRM_VBLANK_ABSOLUTE;
-        if (flags & MS_QUEUE_NEXT_ON_MISS)
-            vbl.request.type |= DRM_VBLANK_NEXTONMISS;
+        if (flags & MS_QUEUE_RELATIVE) {
+          vbl.request.type |= DRM_VBLANK_RELATIVE;
+        } else {
+          vbl.request.type |= DRM_VBLANK_ABSOLUTE;
+        }
+        if (flags & MS_QUEUE_NEXT_ON_MISS) {
+          vbl.request.type |= DRM_VBLANK_NEXTONMISS;
+        }
 
         vbl.request.sequence = msc;
         vbl.request.signal = seq;
@@ -363,8 +380,9 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
         if (ret == 0) {
             msc = ms_kernel_msc_to_crtc_msc(crtc, vbl.reply.sequence, FALSE);
             ms_drm_set_seq_queued(seq, msc);
-            if (msc_queued)
-                *msc_queued = msc;
+            if (msc_queued) {
+              *msc_queued = msc;
+            }
             return TRUE;
         }
     check:
@@ -393,11 +411,15 @@ ms_kernel_msc_to_crtc_msc(xf86CrtcPtr crtc, uint64_t sequence, Bool is64bit)
          * Track and handle 32-Bit wrapping, somewhat robust against occasional
          * out-of-order not always monotonically increasing sequence values.
          */
-        if ((int64_t) sequence < ((int64_t) drmmode_crtc->msc_prev - 0x40000000))
-            drmmode_crtc->msc_high += 0x100000000L;
+        if ((int64_t)sequence <
+            ((int64_t)drmmode_crtc->msc_prev - 0x40000000)) {
+          drmmode_crtc->msc_high += 0x100000000L;
+        }
 
-        if ((int64_t) sequence > ((int64_t) drmmode_crtc->msc_prev + 0x40000000))
-            drmmode_crtc->msc_high -= 0x100000000L;
+        if ((int64_t)sequence >
+            ((int64_t)drmmode_crtc->msc_prev + 0x40000000)) {
+          drmmode_crtc->msc_high -= 0x100000000L;
+        }
 
         drmmode_crtc->msc_prev = sequence;
 
@@ -427,8 +449,9 @@ ms_get_crtc_ust_msc(xf86CrtcPtr crtc, CARD64 *ust, CARD64 *msc)
     modesettingPtr ms = modesettingPTR(scrn);
     uint64_t kernel_msc;
 
-    if (!ms_get_kernel_ust_msc(crtc, &kernel_msc, ust))
-        return BadMatch;
+    if (!ms_get_kernel_ust_msc(crtc, &kernel_msc, ust)) {
+      return BadMatch;
+    }
     *msc = ms_kernel_msc_to_crtc_msc(crtc, kernel_msc, ms->has_queue_sequence);
 
     return Success;
@@ -444,8 +467,9 @@ ms_drm_socket_handler(int fd, int ready, void *data)
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
 
-    if (data == NULL)
-        return;
+    if (data == NULL) {
+      return;
+    }
 
     drmHandleEvent(fd, &ms->event_context);
 }
@@ -466,10 +490,12 @@ ms_drm_queue_alloc(xf86CrtcPtr crtc,
 
     q = calloc(1, sizeof(struct ms_drm_queue));
 
-    if (!q)
-        return 0;
-    if (!ms_drm_seq)
-        ++ms_drm_seq;
+    if (!q) {
+      return 0;
+    }
+    if (!ms_drm_seq) {
+      ++ms_drm_seq;
+    }
     q->seq = ms_drm_seq++;
     q->msc = UINT64_MAX;
     q->scrn = scrn;
@@ -492,8 +518,9 @@ ms_drm_queue_alloc(xf86CrtcPtr crtc,
 static void
 ms_drm_abort_one(struct ms_drm_queue *q)
 {
-    if (q->aborted)
-        return;
+  if (q->aborted) {
+    return;
+  }
 
     /* Don't remove vblank events if they were queued in the kernel */
     if (q->kernel_queued) {
@@ -516,8 +543,9 @@ ms_drm_abort_scrn(ScrnInfoPtr scrn)
     struct ms_drm_queue *q, *tmp;
 
     xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
-        if (q->scrn == scrn)
-            ms_drm_abort_one(q);
+      if (q->scrn == scrn) {
+        ms_drm_abort_one(q);
+      }
     }
 }
 
@@ -586,15 +614,17 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
         }
     }
 
-    if (!crtc)
-        return;
+    if (!crtc) {
+      return;
+    }
 
     /* Now run all of the vblank events for this CRTC with an expired MSC */
     xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
         if (q->crtc == crtc && q->msc <= msc) {
             xorg_list_del(&q->list);
-            if (!q->aborted)
-                q->handler(msc, ns / 1000, q->data);
+            if (!q->aborted) {
+              q->handler(msc, ns / 1000, q->data);
+            }
             free(q);
         }
     }
@@ -604,8 +634,9 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     xorg_list_for_each_entry(q, &ms_drm_queue, list) {
         if (q->crtc == crtc) {
             if (q->kernel_queued) {
-                if (q->msc < next_msc)
-                    next_msc = q->msc;
+              if (q->msc < next_msc) {
+                next_msc = q->msc;
+              }
             } else if (q->msc < msc) {
                 msc = q->msc;
                 seq = q->seq;
@@ -620,8 +651,9 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
         xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
                    "failed to queue next vblank event, aborting lost events\n");
         xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
-            if (q->crtc == crtc && q->msc < next_msc)
-                ms_drm_abort_one(q);
+          if (q->crtc == crtc && q->msc < next_msc) {
+            ms_drm_abort_one(q);
+          }
         }
     }
 }
@@ -669,8 +701,9 @@ ms_vblank_screen_init(ScreenPtr screen)
         SetNotifyFd(ms->fd, ms_drm_socket_handler, X_NOTIFY_READ, screen);
         ms_ent->fd_wakeup_registered = serverGeneration;
         ms_ent->fd_wakeup_ref = 1;
-    } else
-        ms_ent->fd_wakeup_ref++;
+    } else {
+      ms_ent->fd_wakeup_ref++;
+    }
 
     return TRUE;
 }

@@ -37,14 +37,18 @@ fbGlyphIn(RegionPtr pRegion, int x, int y, int width, int height)
     /*
      * Check extents by hand to avoid 16 bit overflows
      */
-    if (x < (int) pExtents->x1)
-        return FALSE;
-    if ((int) pExtents->x2 < x + width)
-        return FALSE;
-    if (y < (int) pExtents->y1)
-        return FALSE;
-    if ((int) pExtents->y2 < y + height)
-        return FALSE;
+    if (x < (int)pExtents->x1) {
+      return FALSE;
+    }
+    if ((int)pExtents->x2 < x + width) {
+      return FALSE;
+    }
+    if (y < (int)pExtents->y1) {
+      return FALSE;
+    }
+    if ((int)pExtents->y2 < y + height) {
+      return FALSE;
+    }
     box.x1 = x;
     box.x2 = x + width;
     box.y1 = y;
@@ -169,8 +173,9 @@ fbImageGlyphBlt(DrawablePtr pDrawable,
         ppci = ppciInit;
         n = nglyph;
         widthBack = 0;
-        while (n--)
-            widthBack += (*ppci++)->metrics.characterWidth;
+        while (n--) {
+          widthBack += (*ppci++)->metrics.characterWidth;
+        }
 
         xBack = x;
         if (widthBack < 0) {

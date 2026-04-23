@@ -42,15 +42,18 @@ exaCreateDriverPixmap_mixed(PixmapPtr pPixmap)
     int paddedWidth = pExaPixmap->sys_pitch;
 
     /* Already done. */
-    if (pExaPixmap->driverPriv)
-        return;
+    if (pExaPixmap->driverPriv) {
+      return;
+    }
 
-    if (exaPixmapIsPinned(pPixmap))
-        return;
+    if (exaPixmapIsPinned(pPixmap)) {
+      return;
+    }
 
     /* Can't accel 1/4 bpp. */
-    if (pExaPixmap->accel_blocked || bpp < 8)
-        return;
+    if (pExaPixmap->accel_blocked || bpp < 8) {
+      return;
+    }
 
     if (pExaScr->info->CreatePixmap2) {
         int new_pitch = 0;
@@ -61,14 +64,16 @@ exaCreateDriverPixmap_mixed(PixmapPtr pPixmap)
         paddedWidth = pExaPixmap->fb_pitch = new_pitch;
     }
     else {
-        if (paddedWidth < pExaPixmap->fb_pitch)
-            paddedWidth = pExaPixmap->fb_pitch;
+      if (paddedWidth < pExaPixmap->fb_pitch) {
+        paddedWidth = pExaPixmap->fb_pitch;
+      }
         pExaPixmap->driverPriv =
             pExaScr->info->CreatePixmap(pScreen, paddedWidth * h, 0);
     }
 
-    if (!pExaPixmap->driverPriv)
-        return;
+    if (!pExaPixmap->driverPriv) {
+      return;
+    }
 
     (*pScreen->ModifyPixmapHeader) (pPixmap, w, h, 0, 0, paddedWidth, NULL);
 }
@@ -90,16 +95,18 @@ exaDoMigration_mixed(ExaMigrationPtr pixmaps, int npixmaps, Bool can_accel)
     }
 
     /* We can do nothing. */
-    if (!can_accel)
-        return;
+    if (!can_accel) {
+      return;
+    }
 
     for (i = 0; i < npixmaps; i++) {
         PixmapPtr pPixmap = pixmaps[i].pPix;
 
         ExaPixmapPriv(pPixmap);
 
-        if (!pExaPixmap->driverPriv)
-            exaCreateDriverPixmap_mixed(pPixmap);
+        if (!pExaPixmap->driverPriv) {
+          exaCreateDriverPixmap_mixed(pPixmap);
+        }
 
         if (pExaPixmap->pDamage && exaPixmapHasGpuCopy(pPixmap)) {
             ExaScreenPriv(pPixmap->drawable.pScreen);
@@ -116,8 +123,9 @@ exaDoMigration_mixed(ExaMigrationPtr pixmaps, int npixmaps, Bool can_accel)
             exaCopyDirtyToFb(pixmaps + i);
 
             if (pExaScr->deferred_mixed_pixmap == pPixmap &&
-                !pixmaps[i].as_dst && !pixmaps[i].pReg)
-                pExaScr->deferred_mixed_pixmap = NULL;
+                !pixmaps[i].as_dst && !pixmaps[i].pReg) {
+              pExaScr->deferred_mixed_pixmap = NULL;
+            }
         }
 
         pExaPixmap->use_gpu_copy = exaPixmapHasGpuCopy(pPixmap);
@@ -154,8 +162,9 @@ exaDamageReport_mixed(DamagePtr pDamage, RegionPtr pRegion, void *closure)
         ExaScreenPriv(pPixmap->drawable.pScreen);
 
         if (pExaScr->deferred_mixed_pixmap &&
-            pExaScr->deferred_mixed_pixmap != pPixmap)
-            exaMoveInPixmap_mixed(pExaScr->deferred_mixed_pixmap);
+            pExaScr->deferred_mixed_pixmap != pPixmap) {
+          exaMoveInPixmap_mixed(pExaScr->deferred_mixed_pixmap);
+        }
         pExaScr->deferred_mixed_pixmap = pPixmap;
     }
 }
@@ -205,9 +214,10 @@ exaPrepareAccessReg_mixed(PixmapPtr pPixmap, int index, RegionPtr pReg)
         if (!pExaPixmap->sys_ptr) {
             pExaPixmap->sys_ptr = calloc(pExaPixmap->sys_pitch,
                                          pPixmap->drawable.height);
-            if (!pExaPixmap->sys_ptr)
-                FatalError("EXA: malloc failed for size %d bytes\n",
-                           pExaPixmap->sys_pitch * pPixmap->drawable.height);
+            if (!pExaPixmap->sys_ptr) {
+              FatalError("EXA: malloc failed for size %d bytes\n",
+                         pExaPixmap->sys_pitch * pPixmap->drawable.height);
+            }
         }
 
         if (index == EXA_PREPARE_DEST || index == EXA_PREPARE_AUX_DEST) {
@@ -254,12 +264,13 @@ exaPrepareAccessReg_mixed(PixmapPtr pPixmap, int index, RegionPtr pReg)
                 exaCopyDirtyToSys(pixmaps);
             }
 
-            if (as_dst)
-                exaPixmapDirty(pPixmap, 0, 0, pPixmap->drawable.width,
-                               pPixmap->drawable.height);
+            if (as_dst) {
+              exaPixmapDirty(pPixmap, 0, 0, pPixmap->drawable.width,
+                             pPixmap->drawable.height);
+            }
+        } else if (has_gpu_copy) {
+          exaCopyDirtyToSys(pixmaps);
         }
-        else if (has_gpu_copy)
-            exaCopyDirtyToSys(pixmaps);
 
         pPixmap->devPrivate.ptr = pExaPixmap->sys_ptr;
         pPixmap->devKind = pExaPixmap->sys_pitch;

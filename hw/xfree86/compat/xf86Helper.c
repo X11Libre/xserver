@@ -25,8 +25,9 @@ xf86IsScreenPrimary(ScrnInfoPtr pScrn)
     int i;
 
     for (i = 0; i < pScrn->numEntities; i++) {
-        if (xf86IsEntityPrimary(i))
-            return TRUE;
+      if (xf86IsEntityPrimary(i)) {
+        return TRUE;
+      }
     }
     return FALSE;
 }

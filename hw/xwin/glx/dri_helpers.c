@@ -102,8 +102,9 @@ glxWinFBConfigIDToPixelFormatIndex(int scr, int fbConfigID)
     for (c = screen->fbconfigs;
          c != NULL;
          c = c->next) {
-        if (c->fbconfigID == fbConfigID)
-            return ((GLXWinConfig *)c)->pixelFormatIndex;
+      if (c->fbconfigID == fbConfigID) {
+        return ((GLXWinConfig *)c)->pixelFormatIndex;
+      }
     }
 
     return 0;
