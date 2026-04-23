@@ -72,8 +72,9 @@ miInstallColormap(ColormapPtr pmap)
     if (pmap != oldpmap) {
         /* Uninstall pInstalledMap. No hardware changes required, just
          * notify all interested parties. */
-        if (oldpmap != (ColormapPtr) None)
-            WalkTree(pmap->pScreen, TellLostMap, (char *) &oldpmap->mid);
+        if (oldpmap != (ColormapPtr)None) {
+          WalkTree(pmap->pScreen, TellLostMap, (char *)&oldpmap->mid);
+        }
         /* Install pmap */
         SetInstalledmiColormap(pmap->pScreen, pmap);
         WalkTree(pmap->pScreen, TellGainedMap, (char *) &pmap->mid);
@@ -254,28 +255,33 @@ miCreateDefColormap(ScreenPtr pScreen)
     ColormapPtr cmap;
     int alloctype;
 
-    if (!dixRegisterPrivateKey(&micmapScrPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&micmapScrPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
 
-    for (pVisual = pScreen->visuals;
-         pVisual->vid != pScreen->rootVisual; pVisual++);
+    for (pVisual = pScreen->visuals; pVisual->vid != pScreen->rootVisual;
+         pVisual++) {
+      ;
+    }
 
-    if (pScreen->rootDepth == 1 || (pVisual->class & DynamicClass))
-        alloctype = AllocNone;
-    else
-        alloctype = AllocAll;
+    if (pScreen->rootDepth == 1 || (pVisual->class & DynamicClass)) {
+      alloctype = AllocNone;
+    } else {
+      alloctype = AllocAll;
+    }
 
     if (dixCreateColormap(pScreen->defColormap, pScreen, pVisual, &cmap,
-                          alloctype, serverClient) != Success)
-        return FALSE;
+                          alloctype, serverClient) != Success) {
+      return FALSE;
+    }
 
     if (pScreen->rootDepth > 1) {
         wp = pScreen->whitePixel;
         bp = pScreen->blackPixel;
-        if ((AllocColor(cmap, &ones, &ones, &ones, &wp, 0) !=
-             Success) ||
-            (AllocColor(cmap, &zero, &zero, &zero, &bp, 0) != Success))
-            return FALSE;
+        if ((AllocColor(cmap, &ones, &ones, &ones, &wp, 0) != Success) ||
+            (AllocColor(cmap, &zero, &zero, &zero, &bp, 0) != Success)) {
+          return FALSE;
+        }
         pScreen->whitePixel = wp;
         pScreen->blackPixel = bp;
     }
@@ -337,8 +343,9 @@ miSetVisualTypesAndMasks(int depth, int visuals, int bitsPerRGB,
     miVisualsPtr *prev, v;
 
     miVisualsPtr new = calloc(1, sizeof *new);
-    if (!new)
-        return FALSE;
+    if (!new) {
+      return FALSE;
+    }
     if (!redMask || !greenMask || !blueMask) {
         redMask = _RM(depth);
         greenMask = _GM(depth);
@@ -353,7 +360,9 @@ miSetVisualTypesAndMasks(int depth, int visuals, int bitsPerRGB,
     new->greenMask = greenMask;
     new->blueMask = blueMask;
     new->count = Ones(visuals);
-    for (prev = &miVisuals; (v = *prev); prev = &v->next);
+    for (prev = &miVisuals; (v = *prev); prev = &v->next) {
+      ;
+    }
     *prev = new;
     return TRUE;
 }
@@ -368,14 +377,15 @@ miSetVisualTypes(int depth, int visuals, int bitsPerRGB, int preferredCVC)
 int
 miGetDefaultVisualMask(int depth)
 {
-    if (depth > MAX_PSEUDO_DEPTH)
-        return LARGE_VISUALS;
-    else if (depth >= MIN_TRUE_DEPTH)
-        return ALL_VISUALS;
-    else if (depth == 1)
-        return StaticGrayMask;
-    else
-        return SMALL_VISUALS;
+  if (depth > MAX_PSEUDO_DEPTH) {
+    return LARGE_VISUALS;
+  } else if (depth >= MIN_TRUE_DEPTH) {
+    return ALL_VISUALS;
+  } else if (depth == 1) {
+    return StaticGrayMask;
+  } else {
+    return SMALL_VISUALS;
+  }
 }
 
 static Bool
@@ -383,9 +393,11 @@ miVisualTypesSet(int depth)
 {
     miVisualsPtr visuals;
 
-    for (visuals = miVisuals; visuals; visuals = visuals->next)
-        if (visuals->depth == depth)
-            return TRUE;
+    for (visuals = miVisuals; visuals; visuals = visuals->next) {
+      if (visuals->depth == depth) {
+        return TRUE;
+      }
+    }
     return FALSE;
 }
 
@@ -398,8 +410,9 @@ miSetPixmapDepths(void)
     for (f = 0; f < screenInfo.numPixmapFormats; f++) {
         d = screenInfo.formats[f].depth;
         if (!miVisualTypesSet(d)) {
-            if (!miSetVisualTypes(d, 0, 0, -1))
-                return FALSE;
+          if (!miSetVisualTypes(d, 0, 0, -1)) {
+            return FALSE;
+          }
         }
     }
     return TRUE;
@@ -413,8 +426,9 @@ maskShift(Pixel p)
 {
     int s;
 
-    if (!p)
-        return 0;
+    if (!p) {
+      return 0;
+    }
     s = 0;
     while (!(p & 1)) {
         s++;
@@ -444,8 +458,9 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
             int d = screenInfo.formats[f].depth;
             int b = screenInfo.formats[f].bitsPerPixel;
             int vtype = ((sizes & (1 << (b - 1))) ? miGetDefaultVisualMask(d) : 0);
-            if (!miSetVisualTypes(d, vtype, bitsPerRGB, -1))
-                return FALSE;
+            if (!miSetVisualTypes(d, vtype, bitsPerRGB, -1)) {
+              return FALSE;
+            }
         }
     }
 
@@ -494,17 +509,19 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
         depth->numVids = nvtype;
         depth->vids = vid;
         for (i = 0; i < NUM_PRIORITY; i++) {
-            if (!(vtype & (1 << miVisualPriority[i])))
-                continue;
+          if (!(vtype & (1 << miVisualPriority[i]))) {
+            continue;
+          }
             visual->class = miVisualPriority[i];
             visual->bitsPerRGBValue = visuals->bitsPerRGB;
             visual->ColormapEntries = 1 << d;
             visual->nplanes = d;
             visual->vid = dixAllocServerXID();
-            if (vid)
-                *vid = visual->vid;
-            else
-                BUG_WARN(vid == 0);
+            if (vid) {
+              *vid = visual->vid;
+            } else {
+              BUG_WARN(vid == 0);
+            }
 
             switch (visual->class) {
             case PseudoColor:
@@ -558,28 +575,35 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
     for (i = first_depth; i < ndepth; i++) {
         int prefColorVisualClass = -1;
 
-        if (defaultColorVisualClass >= 0)
-            prefColorVisualClass = defaultColorVisualClass;
-        else if (preferredVis >= 0)
-            prefColorVisualClass = preferredVis;
-        else if (preferredCVCs[i] >= 0)
-            prefColorVisualClass = preferredCVCs[i];
+        if (defaultColorVisualClass >= 0) {
+          prefColorVisualClass = defaultColorVisualClass;
+        } else if (preferredVis >= 0) {
+          prefColorVisualClass = preferredVis;
+        } else if (preferredCVCs[i] >= 0) {
+          prefColorVisualClass = preferredCVCs[i];
+        }
 
-        if (*rootDepthp && *rootDepthp != depth[i].depth)
-            continue;
+        if (*rootDepthp && *rootDepthp != depth[i].depth) {
+          continue;
+        }
 
         for (j = 0; j < depth[i].numVids; j++) {
-            for (k = 0; k < nvisual; k++)
-                if (visual[k].vid == depth[i].vids[j])
-                    break;
-            if (k == nvisual)
-                continue;
-            if (prefColorVisualClass < 0 ||
-                visual[k].class == prefColorVisualClass)
-                break;
-        }
-        if (j != depth[i].numVids)
+          for (k = 0; k < nvisual; k++) {
+            if (visual[k].vid == depth[i].vids[j]) {
+              break;
+            }
+          }
+          if (k == nvisual) {
+            continue;
+          }
+          if (prefColorVisualClass < 0 ||
+              visual[k].class == prefColorVisualClass) {
             break;
+          }
+        }
+        if (j != depth[i].numVids) {
+          break;
+        }
     }
     if (i == ndepth) {
         i = 0;

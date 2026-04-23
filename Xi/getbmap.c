@@ -78,12 +78,14 @@ ProcXGetDeviceButtonMapping(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xGetDeviceButtonMappingReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     b = dev->button;
-    if (b == NULL)
-        return BadMatch;
+    if (b == NULL) {
+      return BadMatch;
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_CARD8s(&rpcbuf, &b->map[1], b->numButtons);

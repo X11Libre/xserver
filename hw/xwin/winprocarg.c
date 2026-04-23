@@ -69,8 +69,9 @@ winInitializeScreenDefaults(void)
     static Bool fInitializedScreenDefaults = FALSE;
 
     /* Bail out early if default screen has already been initialized */
-    if (fInitializedScreenDefaults)
-        return;
+    if (fInitializedScreenDefaults) {
+      return;
+    }
 
     /* Zero the memory used for storing the screen info */
     memset(&defaultScreenInfo, 0, sizeof(winScreenInfo));
@@ -181,8 +182,9 @@ winInitializeScreens(int maxscreens)
             realloc(g_ScreenInfo, maxscreens * sizeof(winScreenInfo));
 
         /* Set default values for any new screens */
-        for (i = g_iNumScreens; i < maxscreens; i++)
-            winInitializeScreen(i);
+        for (i = g_iNumScreens; i < maxscreens; i++) {
+          winInitializeScreen(i);
+        }
 
         /* Keep a count of the number of screens */
         g_iNumScreens = maxscreens;
@@ -502,8 +504,9 @@ ddxProcessArgument(int argc, char *argv[], int i)
      * Look for the '-fullscreen' argument
      */
     if (IS_OPTION("-fullscreen")) {
-        if (!screenInfoPtr->fMultiMonitorOverride)
-            screenInfoPtr->fMultipleMonitors = FALSE;
+      if (!screenInfoPtr->fMultiMonitorOverride) {
+        screenInfoPtr->fMultipleMonitors = FALSE;
+      }
         screenInfoPtr->fFullScreen = TRUE;
 
         /* Indicate that we have processed this argument */
@@ -524,8 +527,9 @@ ddxProcessArgument(int argc, char *argv[], int i)
      * Look for the '-nodecoration' argument
      */
     if (IS_OPTION("-nodecoration")) {
-        if (!screenInfoPtr->fMultiMonitorOverride)
-            screenInfoPtr->fMultipleMonitors = FALSE;
+      if (!screenInfoPtr->fMultiMonitorOverride) {
+        screenInfoPtr->fMultipleMonitors = FALSE;
+      }
         screenInfoPtr->fDecoration = FALSE;
 
         /* Indicate that we have processed this argument */
@@ -536,8 +540,9 @@ ddxProcessArgument(int argc, char *argv[], int i)
      * Look for the '-rootless' argument
      */
     if (IS_OPTION("-rootless")) {
-        if (!screenInfoPtr->fMultiMonitorOverride)
-            screenInfoPtr->fMultipleMonitors = FALSE;
+      if (!screenInfoPtr->fMultiMonitorOverride) {
+        screenInfoPtr->fMultipleMonitors = FALSE;
+      }
         screenInfoPtr->fRootless = TRUE;
 
         /* Indicate that we have processed this argument */
@@ -548,8 +553,9 @@ ddxProcessArgument(int argc, char *argv[], int i)
      * Look for the '-multiwindow' argument
      */
     if (IS_OPTION("-multiwindow")) {
-        if (!screenInfoPtr->fMultiMonitorOverride)
-            screenInfoPtr->fMultipleMonitors = TRUE;
+      if (!screenInfoPtr->fMultiMonitorOverride) {
+        screenInfoPtr->fMultipleMonitors = TRUE;
+      }
         screenInfoPtr->fMultiWindow = TRUE;
 
         /* Indicate that we have processed this argument */
@@ -636,29 +642,28 @@ ddxProcessArgument(int argc, char *argv[], int i)
         (strncmp(argv[i], "-resize=", strlen("-resize=")) == 0)) {
         winResizeMode mode;
 
-        if (IS_OPTION("-resize"))
-            mode = resizeWithRandr;
-        else if (IS_OPTION("-noresize"))
-            mode = resizeNotAllowed;
-        else if (strncmp(argv[i], "-resize=", strlen("-resize=")) == 0) {
-            char *option = argv[i] + strlen("-resize=");
+        if (IS_OPTION("-resize")) {
+          mode = resizeWithRandr;
+        } else if (IS_OPTION("-noresize")) {
+          mode = resizeNotAllowed;
+        } else if (strncmp(argv[i], "-resize=", strlen("-resize=")) == 0) {
+          char *option = argv[i] + strlen("-resize=");
 
-            if (strcmp(option, "randr") == 0)
-                mode = resizeWithRandr;
-            else if (strcmp(option, "scrollbars") == 0)
-                mode = resizeWithScrollbars;
-            else if (strcmp(option, "none") == 0)
-                mode = resizeNotAllowed;
-            else {
-                ErrorF("ddxProcessArgument - resize - Invalid resize mode %s\n",
-                       option);
-                return 0;
-            }
-        }
-        else {
-            ErrorF("ddxProcessArgument - resize - Invalid resize option %s\n",
-                   argv[i]);
+          if (strcmp(option, "randr") == 0) {
+            mode = resizeWithRandr;
+          } else if (strcmp(option, "scrollbars") == 0) {
+            mode = resizeWithScrollbars;
+          } else if (strcmp(option, "none") == 0) {
+            mode = resizeNotAllowed;
+          } else {
+            ErrorF("ddxProcessArgument - resize - Invalid resize mode %s\n",
+                   option);
             return 0;
+          }
+        } else {
+          ErrorF("ddxProcessArgument - resize - Invalid resize option %s\n",
+                 argv[i]);
+          return 0;
         }
 
         screenInfoPtr->iResizeMode = mode;
@@ -1049,32 +1054,35 @@ winLogCommandLine(int argc, char *argv[])
 #define CHARS_PER_LINE 60
 
     /* Bail if command line has already been logged */
-    if (g_pszCommandLine)
-        return;
+    if (g_pszCommandLine) {
+      return;
+    }
 
     /* Count how much memory is needed for concatenated command line */
-    for (i = 0, iCurrLen = 0; i < argc; ++i)
-        if (argv[i]) {
-            /* Adds two characters for lines that overflow */
-            if ((strlen(argv[i]) < CHARS_PER_LINE
-                 && iCurrLen + strlen(argv[i]) > CHARS_PER_LINE)
-                || strlen(argv[i]) > CHARS_PER_LINE) {
-                iCurrLen = 0;
-                iSize += 2;
-            }
-
-            /* Add space for item and trailing space */
-            iSize += strlen(argv[i]) + 1;
-
-            /* Update current line length */
-            iCurrLen += strlen(argv[i]);
+    for (i = 0, iCurrLen = 0; i < argc; ++i) {
+      if (argv[i]) {
+        /* Adds two characters for lines that overflow */
+        if ((strlen(argv[i]) < CHARS_PER_LINE &&
+             iCurrLen + strlen(argv[i]) > CHARS_PER_LINE) ||
+            strlen(argv[i]) > CHARS_PER_LINE) {
+          iCurrLen = 0;
+          iSize += 2;
         }
+
+        /* Add space for item and trailing space */
+        iSize += strlen(argv[i]) + 1;
+
+        /* Update current line length */
+        iCurrLen += strlen(argv[i]);
+      }
+    }
 
     /* Allocate memory for concatenated command line */
     g_pszCommandLine = calloc(1, iSize + 1);
-    if (!g_pszCommandLine)
-        FatalError("winLogCommandLine - Could not allocate memory for "
-                   "command line string.  Exiting.\n");
+    if (!g_pszCommandLine) {
+      FatalError("winLogCommandLine - Could not allocate memory for "
+                 "command line string.  Exiting.\n");
+    }
 
     /* Set first character to concatenated command line to null */
     g_pszCommandLine[0] = '\0';
@@ -1111,8 +1119,9 @@ winLogVersionInfo(void)
 {
     static Bool s_fBeenHere = FALSE;
 
-    if (s_fBeenHere)
-        return;
+    if (s_fBeenHere) {
+      return;
+    }
     s_fBeenHere = TRUE;
 
     ErrorF("Welcome to the XLibre XWin X Server\n");

@@ -839,11 +839,13 @@ xf86CompatOutput(ScrnInfoPtr pScrn)
 {
     xf86CrtcConfigPtr config;
 
-    if (xf86CrtcConfigPrivateIndex == -1)
-        return NULL;
+    if (xf86CrtcConfigPrivateIndex == -1) {
+      return NULL;
+    }
     config = XF86_CRTC_CONFIG_PTR(pScrn);
-    if ((config == NULL) || (config->compat_output < 0))
-        return NULL;
+    if ((config == NULL) || (config->compat_output < 0)) {
+      return NULL;
+    }
     return config->output[config->compat_output];
 }
 
@@ -852,8 +854,9 @@ xf86CompatCrtc(ScrnInfoPtr pScrn)
 {
     xf86OutputPtr compat_output = xf86CompatOutput(pScrn);
 
-    if (!compat_output)
-        return NULL;
+    if (!compat_output) {
+      return NULL;
+    }
     return compat_output->crtc;
 }
 
@@ -862,8 +865,9 @@ xf86CompatRRCrtc(ScrnInfoPtr pScrn)
 {
     xf86CrtcPtr compat_crtc = xf86CompatCrtc(pScrn);
 
-    if (!compat_crtc)
-        return NULL;
+    if (!compat_crtc) {
+      return NULL;
+    }
     return compat_crtc->randr_crtc;
 }
 

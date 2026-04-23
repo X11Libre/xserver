@@ -103,8 +103,9 @@ static inline unsigned short dixClientIdForXID(XID xid) {
  */
 static inline ClientPtr dixClientForXID(XID xid) {
     const int idx = dixClientIdForXID(xid);
-    if (idx < MAXCLIENTS)
-        return clients[idx];
+    if (idx < MAXCLIENTS) {
+      return clients[idx];
+    }
     return NULL;
 }
 

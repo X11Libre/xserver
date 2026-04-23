@@ -78,16 +78,16 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     void *tmp;
     int mask_len;
 
-    if (stuff->deviceid == XIAllDevices)
-        dev = inputInfo.all_devices;
-    else if (stuff->deviceid == XIAllMasterDevices)
-        dev = inputInfo.all_master_devices;
-    else {
-        ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
-        if (ret != Success) {
-            client->errorValue = stuff->deviceid;
-            return ret;
-        }
+    if (stuff->deviceid == XIAllDevices) {
+      dev = inputInfo.all_devices;
+    } else if (stuff->deviceid == XIAllMasterDevices) {
+      dev = inputInfo.all_master_devices;
+    } else {
+      ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
+      if (ret != Success) {
+        client->errorValue = stuff->deviceid;
+        return ret;
+      }
     }
 
     if (stuff->grab_type != XIGrabtypeButton &&
@@ -118,12 +118,14 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     }
 
     if (XICheckInvalidMaskBits(client, (unsigned char *) &stuff[1],
-                               stuff->mask_len * 4) != Success)
+                               stuff->mask_len * 4) != Success) {
         return BadValue;
+    }
 
     mask.xi2mask = xi2mask_new();
-    if (!mask.xi2mask)
-        return BadAlloc;
+    if (!mask.xi2mask) {
+      return BadAlloc;
+    }
 
     mask_len = min(xi2mask_mask_size(mask.xi2mask), stuff->mask_len * 4);
     xi2mask_set_one_mask(mask.xi2mask, stuff->deviceid,
@@ -158,12 +160,14 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     ret =
         dixLookupWindow((WindowPtr *) &tmp, stuff->grab_window, client,
                         DixSetAttrAccess);
-    if (ret != Success)
-        goto out;
+    if (ret != Success) {
+      goto out;
+    }
 
     ret = CheckGrabValues(client, &param);
-    if (ret != Success)
-        goto out;
+    if (ret != Success) {
+      goto out;
+    }
 
     modifiers = (uint32_t *) &stuff[1] + stuff->mask_len;
     mod_dev = (InputDevIsFloating(dev)) ? dev : GetMaster(dev, MASTER_KEYBOARD);
@@ -181,8 +185,9 @@ ProcXIPassiveGrabDevice(ClientPtr client)
 
         param.modifiers = *modifiers;
         ret = CheckGrabValues(client, &param);
-        if (ret != Success)
-            goto out;
+        if (ret != Success) {
+          goto out;
+        }
 
         switch (stuff->grab_type) {
         case XIGrabtypeButton:
@@ -253,14 +258,15 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
     uint32_t *modifiers;
     int i, rc;
 
-    if (stuff->deviceid == XIAllDevices)
-        dev = inputInfo.all_devices;
-    else if (stuff->deviceid == XIAllMasterDevices)
-        dev = inputInfo.all_master_devices;
-    else {
-        rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
-        if (rc != Success)
-            return rc;
+    if (stuff->deviceid == XIAllDevices) {
+      dev = inputInfo.all_devices;
+    } else if (stuff->deviceid == XIAllMasterDevices) {
+      dev = inputInfo.all_master_devices;
+    } else {
+      rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
+      if (rc != Success) {
+        return rc;
+      }
     }
 
     if (stuff->grab_type != XIGrabtypeButton &&
@@ -290,14 +296,16 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
     }
 
     rc = dixLookupWindow(&win, stuff->grab_window, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     mod_dev = (InputDevIsFloating(dev)) ? dev : GetMaster(dev, MASTER_KEYBOARD);
 
     tempGrab = AllocGrab(NULL);
-    if (!tempGrab)
-        return BadAlloc;
+    if (!tempGrab) {
+      return BadAlloc;
+    }
 
     tempGrab->resource = client->clientAsMask;
     tempGrab->device = dev;

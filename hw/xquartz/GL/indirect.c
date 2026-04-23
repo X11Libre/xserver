@@ -146,8 +146,9 @@ __glXAquaScreenCreateContext(__GLXscreen *screen,
 
     context = calloc(1, sizeof(__GLXAquaContext));
 
-    if (context == NULL)
-        return NULL;
+    if (context == NULL) {
+      return NULL;
+    }
 
     memset(context, 0, sizeof *context);
 
@@ -205,11 +206,13 @@ __glXAquaContextDestroy(__GLXcontext *baseContext)
                                     context->sid), lst);
         }
 
-        if (context->ctx != NULL)
-            CGLDestroyContext(context->ctx);
+        if (context->ctx != NULL) {
+          CGLDestroyContext(context->ctx);
+        }
 
-        if (context->pixelFormat != NULL)
-            CGLDestroyPixelFormat(context->pixelFormat);
+        if (context->pixelFormat != NULL) {
+          CGLDestroyPixelFormat(context->pixelFormat);
+        }
 
         free(context);
     }
@@ -283,8 +286,9 @@ attach(__GLXAquaContext *context, __GLXAquaDrawable *draw)
 
     GLAQUA_DEBUG_MSG("attach(%p, %p)\n", context, draw);
 
-    if (NULL == context || NULL == draw)
-        return TRUE;
+    if (NULL == context || NULL == draw) {
+      return TRUE;
+    }
 
     pDraw = draw->base.pDraw;
 
@@ -295,10 +299,10 @@ attach(__GLXAquaContext *context, __GLXAquaDrawable *draw)
 
     if (draw->sid == 0) {
         //if (!quartzProcs->CreateSurface(pDraw->pScreen, pDraw->id, pDraw,
-        if (!DRICreateSurface(pDraw->pScreen, pDraw->id, pDraw,
-                              0, &draw->sid, NULL,
-                              surface_notify, draw))
-            return TRUE;
+        if (!DRICreateSurface(pDraw->pScreen, pDraw->id, pDraw, 0, &draw->sid,
+                              NULL, surface_notify, draw)) {
+          return TRUE;
+        }
         draw->pDraw = pDraw;
     }
 
@@ -309,9 +313,9 @@ attach(__GLXAquaContext *context, __GLXAquaDrawable *draw)
             //quartzProcs->DestroySurface(pDraw->pScreen, pDraw->id, pDraw,
             DRIDestroySurface(pDraw->pScreen, pDraw->id, pDraw,
                               surface_notify, draw);
-            if (surface_hash != NULL)
-                x_hash_table_remove(surface_hash,
-                                    x_cvt_uint_to_vptr(draw->sid));
+            if (surface_hash != NULL) {
+              x_hash_table_remove(surface_hash, x_cvt_uint_to_vptr(draw->sid));
+            }
 
             draw->sid = 0;
             return TRUE;
@@ -320,8 +324,9 @@ attach(__GLXAquaContext *context, __GLXAquaDrawable *draw)
         context->isAttached = TRUE;
         context->sid = draw->sid;
 
-        if (surface_hash == NULL)
-            surface_hash = x_hash_table_new(NULL, NULL, NULL, NULL);
+        if (surface_hash == NULL) {
+          surface_hash = x_hash_table_new(NULL, NULL, NULL, NULL);
+        }
 
         lst =
             x_hash_table_lookup(surface_hash, x_cvt_uint_to_vptr(
@@ -350,11 +355,13 @@ __glXAquaContextMakeCurrent(__GLXcontext *baseContext)
 
     GLAQUA_DEBUG_MSG("glAquaMakeCurrent (ctx 0x%p)\n", baseContext);
 
-    if (context->base.drawPriv != context->base.readPriv)
-        return 0;
+    if (context->base.drawPriv != context->base.readPriv) {
+      return 0;
+    }
 
-    if (attach(context, drawPriv))
-        return /*error*/ 0;
+    if (attach(context, drawPriv)) {
+      return /*error*/ 0;
+    }
 
     gl_err = CGLSetCurrentContext(context->ctx);
     if (gl_err != 0)
@@ -491,13 +498,15 @@ __glXAquaScreenProbe(ScreenPtr pScreen)
 
     GLAQUA_DEBUG_MSG("glXAquaScreenProbe\n");
 
-    if (pScreen == NULL)
-        return NULL;
+    if (pScreen == NULL) {
+      return NULL;
+    }
 
     screen = calloc(1, sizeof *screen);
 
-    if (NULL == screen)
-        return NULL;
+    if (NULL == screen) {
+      return NULL;
+    }
 
     screen->base.destroy = __glXAquaScreenDestroy;
     screen->base.createContext = __glXAquaScreenCreateContext;
@@ -551,8 +560,9 @@ __glXAquaScreenCreateDrawable(ClientPtr client,
 {
     __GLXAquaDrawable *glxPriv = calloc(1, sizeof *glxPriv);
 
-    if (glxPriv == NULL)
-        return NULL;
+    if (glxPriv == NULL) {
+      return NULL;
+    }
 
     memset(glxPriv, 0, sizeof *glxPriv);
 

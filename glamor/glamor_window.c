@@ -55,14 +55,15 @@ Bool
 glamor_change_window_attributes(WindowPtr pWin, unsigned long mask)
 {
     if (mask & CWBackPixmap) {
-        if (pWin->backgroundState == BackgroundPixmap)
-            glamor_fixup_window_pixmap(&pWin->drawable,
-                                       &pWin->background.pixmap);
+      if (pWin->backgroundState == BackgroundPixmap) {
+        glamor_fixup_window_pixmap(&pWin->drawable, &pWin->background.pixmap);
+      }
     }
 
     if (mask & CWBorderPixmap) {
-        if (pWin->borderIsPixel == FALSE)
-            glamor_fixup_window_pixmap(&pWin->drawable, &pWin->border.pixmap);
+      if (pWin->borderIsPixel == FALSE) {
+        glamor_fixup_window_pixmap(&pWin->drawable, &pWin->border.pixmap);
+      }
     }
     return TRUE;
 }

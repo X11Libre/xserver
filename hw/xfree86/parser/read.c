@@ -73,12 +73,15 @@ static const xf86ConfigSymTabRec TopLevelTab[] = {
 static int
 xf86validateConfig(XF86ConfigPtr p)
 {
-    if (!xf86validateScreen(p))
-        return FALSE;
-    if (!xf86validateInput(p))
-        return FALSE;
-    if (!xf86validateLayout(p))
-        return FALSE;
+  if (!xf86validateScreen(p)) {
+    return FALSE;
+  }
+  if (!xf86validateInput(p)) {
+    return FALSE;
+  }
+  if (!xf86validateLayout(p)) {
+    return FALSE;
+  }
 
     return TRUE;
 }
@@ -211,11 +214,11 @@ xf86readConfigFile(void)
         }
     }
 
-    if (xf86validateConfig(ptr))
-        return ptr;
-    else {
-        CLEANUP(ptr);
-        return NULL;
+    if (xf86validateConfig(ptr)) {
+      return ptr;
+    } else {
+      CLEANUP(ptr);
+      return NULL;
     }
 }
 
@@ -241,9 +244,9 @@ xf86addListItem(GenericListPtr head, GenericListPtr new)
     if (last) {
         last->next = new;
         return head;
+    } else {
+      return new;
     }
-    else
-        return new;
 }
 
 /*
@@ -286,8 +289,9 @@ XF86ConfigPtr xf86allocateConfig(void)
 void
 xf86freeConfig(XF86ConfigPtr p)
 {
-    if (p == NULL)
-        return;
+  if (p == NULL) {
+    return;
+  }
 
     xf86freeFiles(p->conf_files);
     xf86freeModules(p->conf_modules);

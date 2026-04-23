@@ -110,8 +110,9 @@ __glXDRIdrawableCopySubBuffer(__GLXdrawable * basePrivate,
     const __DRIcopySubBufferExtension *copySubBuffer =
         private->screen->copySubBuffer;
 
-    if (copySubBuffer)
-        (*copySubBuffer->copySubBuffer) (private->driDrawable, x, y, w, h);
+    if (copySubBuffer) {
+      (*copySubBuffer->copySubBuffer)(private->driDrawable, x, y, w, h);
+    }
 }
 
 static void
@@ -166,19 +167,20 @@ __glXDRIbindTexImage(__GLXcontext * baseContext,
     const __DRItexBufferExtension *texBuffer = drawable->screen->texBuffer;
     __GLXDRIcontext *context = (__GLXDRIcontext *) baseContext;
 
-    if (texBuffer == NULL)
-        return Success;
+    if (texBuffer == NULL) {
+      return Success;
+    }
 
 #if __DRI_TEX_BUFFER_VERSION >= 2
     if (texBuffer->base.version >= 2 && texBuffer->setTexBuffer2 != NULL) {
         (*texBuffer->setTexBuffer2) (context->driContext,
                                      glxPixmap->target,
                                      glxPixmap->format, drawable->driDrawable);
-    }
-    else
+    } else {
 #endif
-        texBuffer->setTexBuffer(context->driContext,
-                                glxPixmap->target, drawable->driDrawable);
+      texBuffer->setTexBuffer(context->driContext, glxPixmap->target,
+                              drawable->driDrawable);
+    }
 
     return Success;
 }
@@ -214,14 +216,16 @@ __glXDRIscreenCreateContext(__GLXscreen * baseScreen,
     (void) error;
 
     shareContext = (__GLXDRIcontext *) baseShareContext;
-    if (shareContext)
-        driShare = shareContext->driContext;
-    else
-        driShare = NULL;
+    if (shareContext) {
+      driShare = shareContext->driContext;
+    } else {
+      driShare = NULL;
+    }
 
     context = calloc(1, sizeof *context);
-    if (context == NULL)
-        return NULL;
+    if (context == NULL) {
+      return NULL;
+    }
 
     context->base.config = glxConfig;
     context->base.destroy = __glXDRIcontextDestroy;
@@ -250,8 +254,9 @@ __glXDRIscreenCreateDrawable(ClientPtr client,
     __GLXDRIdrawable *private;
 
     private = calloc(1, sizeof *private);
-    if (private == NULL)
-        return NULL;
+    if (private == NULL) {
+      return NULL;
+    }
 
     private->screen = driScreen;
     if (!__glXDrawableInit(&private->base, screen,
@@ -400,8 +405,9 @@ __glXDRIscreenDestroy(__GLXscreen * baseScreen)
     __glXScreenDestroy(baseScreen);
 
     if (screen->driConfigs) {
-        for (i = 0; screen->driConfigs[i] != NULL; i++)
-            free((__DRIconfig **) screen->driConfigs[i]);
+      for (i = 0; screen->driConfigs[i] != NULL; i++) {
+        free((__DRIconfig **)screen->driConfigs[i]);
+      }
         free(screen->driConfigs);
     }
 
@@ -415,8 +421,9 @@ __glXDRIscreenProbe(ScreenPtr pScreen)
     __GLXDRIscreen *screen;
 
     screen = calloc(1, sizeof *screen);
-    if (screen == NULL)
-        return NULL;
+    if (screen == NULL) {
+      return NULL;
+    }
 
     screen->base.destroy = __glXDRIscreenDestroy;
     screen->base.createContext = __glXDRIscreenCreateContext;
@@ -462,8 +469,9 @@ __glXDRIscreenProbe(ScreenPtr pScreen)
     return &screen->base;
 
  handle_error:
-    if (screen->driver)
-        dlclose(screen->driver);
+   if (screen->driver) {
+     dlclose(screen->driver);
+   }
 
     free(screen);
 

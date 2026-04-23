@@ -35,8 +35,9 @@ xf86DriverHasLoadCursorImage(xf86CursorInfoPtr infoPtr)
 static inline Bool
 xf86DriverLoadCursorImage(xf86CursorInfoPtr infoPtr, unsigned char *bits)
 {
-    if(infoPtr->LoadCursorImageCheck)
-        return infoPtr->LoadCursorImageCheck(infoPtr->pScrn, bits);
+  if (infoPtr->LoadCursorImageCheck) {
+    return infoPtr->LoadCursorImageCheck(infoPtr->pScrn, bits);
+  }
     infoPtr->LoadCursorImage(infoPtr->pScrn, bits);
     return TRUE;
 }
@@ -50,8 +51,9 @@ xf86DriverHasShowCursor(xf86CursorInfoPtr infoPtr)
 static inline Bool
 xf86DriverShowCursor(xf86CursorInfoPtr infoPtr)
 {
-    if(infoPtr->ShowCursorCheck)
-        return infoPtr->ShowCursorCheck(infoPtr->pScrn);
+  if (infoPtr->ShowCursorCheck) {
+    return infoPtr->ShowCursorCheck(infoPtr->pScrn);
+  }
     infoPtr->ShowCursor(infoPtr->pScrn);
     return TRUE;
 }
@@ -65,8 +67,9 @@ xf86DriverHasLoadCursorARGB(xf86CursorInfoPtr infoPtr)
 static inline Bool
 xf86DriverLoadCursorARGB(xf86CursorInfoPtr infoPtr, CursorPtr pCursor)
 {
-    if(infoPtr->LoadCursorARGBCheck)
-        return infoPtr->LoadCursorARGBCheck(infoPtr->pScrn, pCursor);
+  if (infoPtr->LoadCursorARGBCheck) {
+    return infoPtr->LoadCursorARGBCheck(infoPtr->pScrn, pCursor);
+  }
     infoPtr->LoadCursorARGB(infoPtr->pScrn, pCursor);
     return TRUE;
 }

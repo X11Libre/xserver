@@ -81,12 +81,13 @@ reply_XIQueryDevice(ClientPtr client, int len, void *data)
 
     reply_check_defaults(&reply, len, XIQueryDevice);
 
-    if (test_data.which_device == XIAllDevices)
-        assert(reply.num_devices == devices.num_devices);
-    else if (test_data.which_device == XIAllMasterDevices)
-        assert(reply.num_devices == devices.num_master_devices);
-    else
-        assert(reply.num_devices == 1);
+    if (test_data.which_device == XIAllDevices) {
+      assert(reply.num_devices == devices.num_devices);
+    } else if (test_data.which_device == XIAllMasterDevices) {
+      assert(reply.num_devices == devices.num_master_devices);
+    } else {
+      assert(reply.num_devices == 1);
+    }
 
     test_data.num_devices_in_reply = reply.num_devices;
 
@@ -114,8 +115,9 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
             swaps(&info->name_len);
         }
 
-        if (test_data.which_device > XIAllMasterDevices)
-            assert(info->deviceid == test_data.which_device);
+        if (test_data.which_device > XIAllMasterDevices) {
+          assert(info->deviceid == test_data.which_device);
+        }
 
         assert(info->deviceid >= 2);    /* 0 and 1 is reserved */
 
@@ -172,8 +174,9 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
                 XkbDescPtr xkb = devices.vck->key->xkbInfo->desc;
                 uint32_t *kc;
 
-                if (client->swapped)
-                    swaps(&ki->num_keycodes);
+                if (client->swapped) {
+                  swaps(&ki->num_keycodes);
+                }
 
                 assert(any->type == XIKeyClass);
                 assert(ki->num_keycodes ==
@@ -182,8 +185,9 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
 
                 kc = (uint32_t *) &ki[1];
                 for (k = 0; k < ki->num_keycodes; k++, kc++) {
-                    if (client->swapped)
-                        swapl(kc);
+                  if (client->swapped) {
+                    swapl(kc);
+                  }
 
                     assert(*kc >= xkb->min_key_code);
                     assert(*kc <= xkb->max_key_code);
@@ -227,16 +231,18 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
                 /* fall through */
             case 2:            /* VCP and mouse have the same properties except for scroll */
             {
-                if (info->deviceid == 2)        /* VCP */
-                    assert(any->type == XIButtonClass ||
-                           any->type == XIValuatorClass);
+              if (info->deviceid == 2) { /* VCP */
+                assert(any->type == XIButtonClass ||
+                       any->type == XIValuatorClass);
+              }
 
                 if (any->type == XIButtonClass) {
                     int l;
                     xXIButtonInfo *bi = (xXIButtonInfo *) any;
 
-                    if (client->swapped)
-                        swaps(&bi->num_buttons);
+                    if (client->swapped) {
+                      swaps(&bi->num_buttons);
+                    }
 
                     assert(bi->num_buttons == devices.vcp->button->numButtons);
 
@@ -260,8 +266,9 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
                     assert(vi->length == 11);
                     assert(vi->number >= 0);
                     assert(vi->number < 4);
-                    if (info->deviceid == 2)    /* VCP */
-                        assert(vi->number < 2);
+                    if (info->deviceid == 2) { /* VCP */
+                      assert(vi->number < 2);
+                    }
 
                     assert(vi->mode == XIModeRelative);
                     /* device was set up as relative, so standard
@@ -299,8 +306,9 @@ request_XIQueryDevice(struct test_data *querydata, int deviceid, int error)
     rc = ProcXIQueryDevice(&client);
     assert(rc == error);
 
-    if (rc != Success)
-        assert(client.errorValue == deviceid);
+    if (rc != Success) {
+      assert(client.errorValue == deviceid);
+    }
 
     wrapped_WriteToClient = reply_XIQueryDevice;
 
@@ -310,8 +318,9 @@ request_XIQueryDevice(struct test_data *querydata, int deviceid, int error)
     rc = ProcXIQueryDevice(&client);
     assert(rc == error);
 
-    if (rc != Success)
-        assert(client.errorValue == deviceid);
+    if (rc != Success) {
+      assert(client.errorValue == deviceid);
+    }
 }
 
 static void
@@ -331,12 +340,14 @@ test_XIQueryDevice(void)
     request_XIQueryDevice(&test_data, XIAllMasterDevices, Success);
 
     dbg("Testing existing device ids.\n");
-    for (i = 2; i < 6; i++)
-        request_XIQueryDevice(&test_data, i, Success);
+    for (i = 2; i < 6; i++) {
+      request_XIQueryDevice(&test_data, i, Success);
+    }
 
     dbg("Testing non-existing device ids.\n");
-    for (i = 6; i <= 0xFFFF; i++)
-        request_XIQueryDevice(&test_data, i, BadDevice);
+    for (i = 6; i <= 0xFFFF; i++) {
+      request_XIQueryDevice(&test_data, i, BadDevice);
+    }
 }
 
 const testfunc_t*

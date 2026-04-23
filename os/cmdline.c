@@ -14,8 +14,9 @@
 
 int ProcessCmdLineMultiInt(int argc, char *argv[], int *idx, const char* name, int *value)
 {
-    if (strcmp(argv[*idx], name))
-        return 0;
+  if (strcmp(argv[*idx], name)) {
+    return 0;
+  }
 
     int i2 = *idx+1;
     if (i2 < argc && argv[i2]) {

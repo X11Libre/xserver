@@ -141,12 +141,13 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             CARD8 newalu;
             NEXTVAL(CARD8, newalu);
 
-            if (newalu <= GXset)
-                pGC->alu = newalu;
-            else {
-                if (client)
-                    client->errorValue = newalu;
-                error = BadValue;
+            if (newalu <= GXset) {
+              pGC->alu = newalu;
+            } else {
+              if (client) {
+                client->errorValue = newalu;
+              }
+              error = BadValue;
             }
             break;
         }
@@ -178,12 +179,13 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             unsigned int newlinestyle;
             NEXTVAL(unsigned int, newlinestyle);
 
-            if (newlinestyle <= LineDoubleDash)
-                pGC->lineStyle = newlinestyle;
-            else {
-                if (client)
-                    client->errorValue = newlinestyle;
-                error = BadValue;
+            if (newlinestyle <= LineDoubleDash) {
+              pGC->lineStyle = newlinestyle;
+            } else {
+              if (client) {
+                client->errorValue = newlinestyle;
+              }
+              error = BadValue;
             }
             break;
         }
@@ -192,12 +194,13 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             unsigned int newcapstyle;
             NEXTVAL(unsigned int, newcapstyle);
 
-            if (newcapstyle <= CapProjecting)
-                pGC->capStyle = newcapstyle;
-            else {
-                if (client)
-                    client->errorValue = newcapstyle;
-                error = BadValue;
+            if (newcapstyle <= CapProjecting) {
+              pGC->capStyle = newcapstyle;
+            } else {
+              if (client) {
+                client->errorValue = newcapstyle;
+              }
+              error = BadValue;
             }
             break;
         }
@@ -206,12 +209,13 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             unsigned int newjoinstyle;
             NEXTVAL(unsigned int, newjoinstyle);
 
-            if (newjoinstyle <= JoinBevel)
-                pGC->joinStyle = newjoinstyle;
-            else {
-                if (client)
-                    client->errorValue = newjoinstyle;
-                error = BadValue;
+            if (newjoinstyle <= JoinBevel) {
+              pGC->joinStyle = newjoinstyle;
+            } else {
+              if (client) {
+                client->errorValue = newjoinstyle;
+              }
+              error = BadValue;
             }
             break;
         }
@@ -220,12 +224,13 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             unsigned int newfillstyle;
             NEXTVAL(unsigned int, newfillstyle);
 
-            if (newfillstyle <= FillOpaqueStippled)
-                pGC->fillStyle = newfillstyle;
-            else {
-                if (client)
-                    client->errorValue = newfillstyle;
-                error = BadValue;
+            if (newfillstyle <= FillOpaqueStippled) {
+              pGC->fillStyle = newfillstyle;
+            } else {
+              if (client) {
+                client->errorValue = newfillstyle;
+              }
+              error = BadValue;
             }
             break;
         }
@@ -234,12 +239,13 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             unsigned int newfillrule;
             NEXTVAL(unsigned int, newfillrule);
 
-            if (newfillrule <= WindingRule)
-                pGC->fillRule = newfillrule;
-            else {
-                if (client)
-                    client->errorValue = newfillrule;
-                error = BadValue;
+            if (newfillrule <= WindingRule) {
+              pGC->fillRule = newfillrule;
+            } else {
+              if (client) {
+                client->errorValue = newfillrule;
+              }
+              error = BadValue;
             }
             break;
         }
@@ -252,8 +258,9 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             }
             else {
                 pPixmap->refcnt++;
-                if (!pGC->tileIsPixel)
-                    dixDestroyPixmap(pGC->tile.pixmap, 0);
+                if (!pGC->tileIsPixel) {
+                  dixDestroyPixmap(pGC->tile.pixmap, 0);
+                }
                 pGC->tileIsPixel = FALSE;
                 pGC->tile.pixmap = pPixmap;
             }
@@ -267,10 +274,12 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
                 error = BadMatch;
             }
             else {
-                if (pPixmap)
-                    pPixmap->refcnt++;
-                if (pGC->stipple)
-                    dixDestroyPixmap(pGC->stipple, 0);
+              if (pPixmap) {
+                pPixmap->refcnt++;
+              }
+              if (pGC->stipple) {
+                dixDestroyPixmap(pGC->stipple, 0);
+              }
                 pGC->stipple = pPixmap;
             }
             break;
@@ -288,8 +297,9 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             NEXT_PTR(FontPtr, pFont);
 
             pFont->refcnt++;
-            if (pGC->font)
-                CloseFont(pGC->font, (Font) 0);
+            if (pGC->font) {
+              CloseFont(pGC->font, (Font)0);
+            }
             pGC->font = pFont;
             break;
         }
@@ -298,12 +308,13 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             unsigned int newclipmode;
             NEXTVAL(unsigned int, newclipmode);
 
-            if (newclipmode <= IncludeInferiors)
-                pGC->subWindowMode = newclipmode;
-            else {
-                if (client)
-                    client->errorValue = newclipmode;
-                error = BadValue;
+            if (newclipmode <= IncludeInferiors) {
+              pGC->subWindowMode = newclipmode;
+            } else {
+              if (client) {
+                client->errorValue = newclipmode;
+              }
+              error = BadValue;
             }
             break;
         }
@@ -312,12 +323,13 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             unsigned int newge;
             NEXTVAL(unsigned int, newge);
 
-            if (newge <= xTrue)
-                pGC->graphicsExposures = newge;
-            else {
-                if (client)
-                    client->errorValue = newge;
-                error = BadValue;
+            if (newge <= xTrue) {
+              pGC->graphicsExposures = newge;
+            } else {
+              if (client) {
+                client->errorValue = newge;
+              }
+              error = BadValue;
             }
             break;
         }
@@ -362,19 +374,21 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             else if (newdash != 0) {
                 unsigned char *dash = calloc(2, sizeof(unsigned char));
                 if (dash) {
-                    if (pGC->dash != DefaultDash)
-                        free(pGC->dash);
+                  if (pGC->dash != DefaultDash) {
+                    free(pGC->dash);
+                  }
                     pGC->numInDashList = 2;
                     pGC->dash = dash;
                     dash[0] = newdash;
                     dash[1] = newdash;
+                } else {
+                  error = BadAlloc;
                 }
-                else
-                    error = BadAlloc;
             }
             else {
-                if (client)
-                    client->errorValue = newdash;
+              if (client) {
+                client->errorValue = newdash;
+              }
                 error = BadValue;
             }
             break;
@@ -384,18 +398,20 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             unsigned int newarcmode;
             NEXTVAL(unsigned int, newarcmode);
 
-            if (newarcmode <= ArcPieSlice)
-                pGC->arcMode = newarcmode;
-            else {
-                if (client)
-                    client->errorValue = newarcmode;
-                error = BadValue;
+            if (newarcmode <= ArcPieSlice) {
+              pGC->arcMode = newarcmode;
+            } else {
+              if (client) {
+                client->errorValue = newarcmode;
+              }
+              error = BadValue;
             }
             break;
         }
         default:
-            if (client)
-                client->errorValue = maskQ;
+          if (client) {
+            client->errorValue = maskQ;
+          }
             error = BadValue;
             break;
         }
@@ -434,14 +450,16 @@ ChangeGCXIDs(ClientPtr client, GCPtr pGC, BITS32 mask, CARD32 *pC32)
         client->errorValue = mask;
         return BadValue;
     }
-    for (int i = Ones(mask); i--;)
-        vals[i].val = pC32[i];
+    for (int i = Ones(mask); i--;) {
+      vals[i].val = pC32[i];
+    }
     for (int i = 0; i < ARRAY_SIZE(xidfields); ++i) {
         int offset, rc;
         XID id;
 
-        if (!(mask & xidfields[i].mask))
-            continue;
+        if (!(mask & xidfields[i].mask)) {
+          continue;
+        }
         offset = Ones(mask & (xidfields[i].mask - 1));
         if (xidfields[i].mask == GCClipMask && vals[offset].val == None) {
             vals[offset].ptr = NullPixmap;
@@ -502,11 +520,13 @@ NewGCObject(ScreenPtr pScreen, int depth)
 
     /* use the default font and stipple */
     pGC->font = defaultFont;
-    if (pGC->font)              /* necessary, because open of default font could fail */
-        pGC->font->refcnt++;
+    if (pGC->font) { /* necessary, because open of default font could fail */
+      pGC->font->refcnt++;
+    }
     pGC->stipple = pGC->pScreen->defaultStipple;
-    if (pGC->stipple)
-        pGC->stipple->refcnt++;
+    if (pGC->stipple) {
+      pGC->stipple->refcnt++;
+    }
 
     /* this is not a scratch GC */
     pGC->scratch_inuse = FALSE;
@@ -549,21 +569,24 @@ CreateGC(DrawablePtr pDrawable, BITS32 mask, XID *pval, int *pStatus,
     /* security creation/labeling check */
     *pStatus = XaceHookResourceAccess(client, gcid, X11_RESTYPE_GC, pGC,
                         X11_RESTYPE_NONE, NULL, DixCreateAccess | DixSetAttrAccess);
-    if (*pStatus != Success)
-        goto out;
+    if (*pStatus != Success) {
+      goto out;
+    }
 
     pGC->stateChanges = GCAllBits;
-    if (!(*pGC->pScreen->CreateGC) (pGC))
-        *pStatus = BadAlloc;
-    else if (mask)
-        *pStatus = ChangeGCXIDs(client, pGC, mask, pval);
-    else
-        *pStatus = Success;
+    if (!(*pGC->pScreen->CreateGC)(pGC)) {
+      *pStatus = BadAlloc;
+    } else if (mask) {
+      *pStatus = ChangeGCXIDs(client, pGC, mask, pval);
+    } else {
+      *pStatus = Success;
+    }
 
  out:
     if (*pStatus != Success) {
-        if (!pGC->tileIsPixel && !pGC->tile.pixmap)
-            pGC->tileIsPixel = TRUE;    /* undo special case */
+      if (!pGC->tileIsPixel && !pGC->tile.pixmap) {
+        pGC->tileIsPixel = TRUE; /* undo special case */
+      }
         FreeGC(pGC, (XID) 0);
         pGC = (GCPtr) NULL;
     }
@@ -588,8 +611,9 @@ CreateDefaultTile(GCPtr pGC)
     pgcScratch = GetScratchGC(pGC->depth, pGC->pScreen);
     if (!pTile || !pgcScratch) {
         dixDestroyPixmap(pTile, 0);
-        if (pgcScratch)
-            FreeScratchGC(pgcScratch);
+        if (pgcScratch) {
+          FreeScratchGC(pgcScratch);
+        }
         return FALSE;
     }
     tmpval[0].val = GXcopy;
@@ -619,8 +643,9 @@ CopyGC(GCPtr pgcSrc, GCPtr pgcDst, BITS32 mask)
     BITS32 maskQ;
     int error = 0;
 
-    if (pgcSrc == pgcDst)
-        return Success;
+    if (pgcSrc == pgcDst) {
+      return Success;
+    }
     pgcDst->serialNumber |= GC_CHANGE_SERIAL_BIT;
     pgcDst->stateChanges |= mask;
     maskQ = mask;
@@ -665,23 +690,28 @@ CopyGC(GCPtr pgcSrc, GCPtr pgcDst, BITS32 mask)
                               pgcSrc->tileIsPixel, pgcSrc->tile)) {
                 break;
             }
-            if (!pgcDst->tileIsPixel)
-                dixDestroyPixmap(pgcDst->tile.pixmap, 0);
+            if (!pgcDst->tileIsPixel) {
+              dixDestroyPixmap(pgcDst->tile.pixmap, 0);
+            }
             pgcDst->tileIsPixel = pgcSrc->tileIsPixel;
             pgcDst->tile = pgcSrc->tile;
-            if (!pgcDst->tileIsPixel)
-                pgcDst->tile.pixmap->refcnt++;
+            if (!pgcDst->tileIsPixel) {
+              pgcDst->tile.pixmap->refcnt++;
+            }
             break;
         }
         case GCStipple:
         {
-            if (pgcDst->stipple == pgcSrc->stipple)
-                break;
-            if (pgcDst->stipple)
-                dixDestroyPixmap(pgcDst->stipple, 0);
+          if (pgcDst->stipple == pgcSrc->stipple) {
+            break;
+          }
+          if (pgcDst->stipple) {
+            dixDestroyPixmap(pgcDst->stipple, 0);
+          }
             pgcDst->stipple = pgcSrc->stipple;
-            if (pgcDst->stipple)
-                pgcDst->stipple->refcnt++;
+            if (pgcDst->stipple) {
+              pgcDst->stipple->refcnt++;
+            }
             break;
         }
         case GCTileStipXOrigin:
@@ -691,12 +721,15 @@ CopyGC(GCPtr pgcSrc, GCPtr pgcDst, BITS32 mask)
             pgcDst->patOrg.y = pgcSrc->patOrg.y;
             break;
         case GCFont:
-            if (pgcDst->font == pgcSrc->font)
-                break;
-            if (pgcDst->font)
-                CloseFont(pgcDst->font, (Font) 0);
-            if ((pgcDst->font = pgcSrc->font) != NullFont)
-                (pgcDst->font)->refcnt++;
+          if (pgcDst->font == pgcSrc->font) {
+            break;
+          }
+          if (pgcDst->font) {
+            CloseFont(pgcDst->font, (Font)0);
+          }
+          if ((pgcDst->font = pgcSrc->font) != NullFont) {
+            (pgcDst->font)->refcnt++;
+          }
             break;
         case GCSubwindowMode:
             pgcDst->subWindowMode = pgcSrc->subWindowMode;
@@ -727,15 +760,17 @@ CopyGC(GCPtr pgcSrc, GCPtr pgcDst, BITS32 mask)
             else {
                 unsigned char *dash = calloc(pgcSrc->numInDashList, sizeof(unsigned char));
                 if (dash) {
-                    if (pgcDst->dash != DefaultDash)
-                        free(pgcDst->dash);
+                  if (pgcDst->dash != DefaultDash) {
+                    free(pgcDst->dash);
+                  }
                     pgcDst->numInDashList = pgcSrc->numInDashList;
                     pgcDst->dash = dash;
-                    for (unsigned int i = 0; i < pgcSrc->numInDashList; i++)
-                        dash[i] = pgcSrc->dash[i];
+                    for (unsigned int i = 0; i < pgcSrc->numInDashList; i++) {
+                      dash[i] = pgcSrc->dash[i];
+                    }
+                } else {
+                  error = BadAlloc;
                 }
-                else
-                    error = BadAlloc;
             }
             break;
         case GCArcMode:
@@ -764,22 +799,28 @@ int
 FreeGC(void *value, XID gid)
 {
     GCPtr pGC = (GCPtr) value;
-    if (!pGC)
-        return BadMatch;
+    if (!pGC) {
+      return BadMatch;
+    }
 
     CloseFont(pGC->font, (Font) 0);
-    if (pGC->funcs)
-        (*pGC->funcs->DestroyClip) (pGC);
+    if (pGC->funcs) {
+      (*pGC->funcs->DestroyClip)(pGC);
+    }
 
-    if (!pGC->tileIsPixel)
-        dixDestroyPixmap(pGC->tile.pixmap, 0);
-    if (pGC->stipple)
-        dixDestroyPixmap(pGC->stipple, 0);
+    if (!pGC->tileIsPixel) {
+      dixDestroyPixmap(pGC->tile.pixmap, 0);
+    }
+    if (pGC->stipple) {
+      dixDestroyPixmap(pGC->stipple, 0);
+    }
 
-    if (pGC->funcs)
-        (*pGC->funcs->DestroyGC) (pGC);
-    if (pGC->dash != DefaultDash)
-        free(pGC->dash);
+    if (pGC->funcs) {
+      (*pGC->funcs->DestroyGC)(pGC);
+    }
+    if (pGC->dash != DefaultDash) {
+      free(pGC->dash);
+    }
     dixFreeObjectWithPrivates(pGC, PRIVATE_GC);
     return Success;
 }
@@ -803,16 +844,17 @@ CreateScratchGC(ScreenPtr pScreen, unsigned depth)
     GCPtr pGC;
 
     pGC = NewGCObject(pScreen, depth);
-    if (!pGC)
-        return (GCPtr) NULL;
+    if (!pGC) {
+      return (GCPtr)NULL;
+    }
 
     pGC->stateChanges = GCAllBits;
     if (!(*pScreen->CreateGC) (pGC)) {
         FreeGC(pGC, (XID) 0);
         pGC = (GCPtr) NULL;
+    } else {
+      pGC->graphicsExposures = FALSE;
     }
-    else
-        pGC->graphicsExposures = FALSE;
     return pGC;
 }
 
@@ -821,8 +863,9 @@ FreeGCperDepth(ScreenPtr pScreen)
 {
     GCPtr *ppGC;
 
-    if (!pScreen)
-        return;
+    if (!pScreen) {
+      return;
+    }
 
     ppGC = pScreen->GCperDepth;
 
@@ -840,17 +883,20 @@ CreateGCperDepth(ScreenPtr pScreen)
 
     ppGC = pScreen->GCperDepth;
     /* do depth 1 separately because it's not included in list */
-    if (!(ppGC[0] = CreateScratchGC(pScreen, 1)))
-        return FALSE;
+    if (!(ppGC[0] = CreateScratchGC(pScreen, 1))) {
+      return FALSE;
+    }
     /* Make sure we don't overflow GCperDepth[] */
-    if (pScreen->numDepths > MAXFORMATS)
-        return FALSE;
+    if (pScreen->numDepths > MAXFORMATS) {
+      return FALSE;
+    }
 
     pDepth = pScreen->allowedDepths;
     for (int i = 0; i < pScreen->numDepths; i++, pDepth++) {
         if (!(ppGC[i + 1] = CreateScratchGC(pScreen, pDepth->depth))) {
-            for (; i >= 0; i--)
-                (void) FreeGC(ppGC[i], (XID) 0);
+          for (; i >= 0; i--) {
+            (void)FreeGC(ppGC[i], (XID)0);
+          }
             return FALSE;
         }
     }
@@ -868,8 +914,10 @@ CreateDefaultStipple(ScreenPtr pScreen)
     w = 16;
     h = 16;
     (*pScreen->QueryBestSize) (StippleShape, &w, &h, pScreen);
-    if (!(pScreen->defaultStipple = pScreen->CreatePixmap(pScreen, w, h, 1, 0)))
-        return FALSE;
+    if (!(pScreen->defaultStipple =
+              pScreen->CreatePixmap(pScreen, w, h, 1, 0))) {
+      return FALSE;
+    }
     /* fill stipple with 1 */
     tmpval[0].val = GXcopy;
     tmpval[1].val = 1;
@@ -908,12 +956,14 @@ SetDashes(GCPtr pGC, unsigned offset, unsigned ndash, unsigned char *pdash)
         }
     }
 
-    if (ndash & 1)
-        p = calloc(2 * ndash, sizeof(unsigned char));
-    else
-        p = calloc(ndash, sizeof(unsigned char));
-    if (!p)
-        return BadAlloc;
+    if (ndash & 1) {
+      p = calloc(2 * ndash, sizeof(unsigned char));
+    } else {
+      p = calloc(ndash, sizeof(unsigned char));
+    }
+    if (!p) {
+      return BadAlloc;
+    }
 
     pGC->serialNumber |= GC_CHANGE_SERIAL_BIT;
     if (offset != pGC->dashOffset) {
@@ -922,24 +972,28 @@ SetDashes(GCPtr pGC, unsigned offset, unsigned ndash, unsigned char *pdash)
         maskQ |= GCDashOffset;
     }
 
-    if (pGC->dash != DefaultDash)
-        free(pGC->dash);
+    if (pGC->dash != DefaultDash) {
+      free(pGC->dash);
+    }
     pGC->numInDashList = ndash;
     pGC->dash = p;
     if (ndash & 1) {
         pGC->numInDashList += ndash;
         indash = pdash;
         i = ndash;
-        while (i--)
-            *p++ = *indash++;
+        while (i--) {
+          *p++ = *indash++;
+        }
     }
-    while (ndash--)
-        *p++ = *pdash++;
+    while (ndash--) {
+      *p++ = *pdash++;
+    }
     pGC->stateChanges |= GCDashList;
     maskQ |= GCDashList;
 
-    if (pGC->funcs->ChangeGC)
-        (*pGC->funcs->ChangeGC) (pGC, maskQ);
+    if (pGC->funcs->ChangeGC) {
+      (*pGC->funcs->ChangeGC)(pGC, maskQ);
+    }
     return Success;
 }
 
@@ -954,31 +1008,37 @@ VerifyRectOrder(int nrects, xRectangle *prects, int ordering)
         return CT_UNSORTED;
     case YSorted:
         if (nrects > 1) {
-            for (i = 1, prectP = prects, prectN = prects + 1;
-                 i < nrects; i++, prectP++, prectN++)
-                if (prectN->y < prectP->y)
-                    return -1;
+          for (i = 1, prectP = prects, prectN = prects + 1; i < nrects;
+               i++, prectP++, prectN++) {
+            if (prectN->y < prectP->y) {
+              return -1;
+            }
+          }
         }
         return CT_YSORTED;
     case YXSorted:
         if (nrects > 1) {
-            for (i = 1, prectP = prects, prectN = prects + 1;
-                 i < nrects; i++, prectP++, prectN++)
-                if ((prectN->y < prectP->y) ||
-                    ((prectN->y == prectP->y) && (prectN->x < prectP->x)))
-                    return -1;
+          for (i = 1, prectP = prects, prectN = prects + 1; i < nrects;
+               i++, prectP++, prectN++) {
+            if ((prectN->y < prectP->y) ||
+                ((prectN->y == prectP->y) && (prectN->x < prectP->x))) {
+              return -1;
+            }
+          }
         }
         return CT_YXSORTED;
     case YXBanded:
         if (nrects > 1) {
-            for (i = 1, prectP = prects, prectN = prects + 1;
-                 i < nrects; i++, prectP++, prectN++)
-                if ((prectN->y != prectP->y &&
-                     prectN->y < prectP->y + (int) prectP->height) ||
-                    ((prectN->y == prectP->y) &&
-                     (prectN->height != prectP->height ||
-                      prectN->x < prectP->x + (int) prectP->width)))
-                    return -1;
+          for (i = 1, prectP = prects, prectN = prects + 1; i < nrects;
+               i++, prectP++, prectN++) {
+            if ((prectN->y != prectP->y &&
+                 prectN->y < prectP->y + (int)prectP->height) ||
+                ((prectN->y == prectP->y) &&
+                 (prectN->height != prectP->height ||
+                  prectN->x < prectP->x + (int)prectP->width))) {
+              return -1;
+            }
+          }
         }
         return CT_YXBANDED;
     }
@@ -992,13 +1052,15 @@ SetClipRects(GCPtr pGC, INT16 xOrigin, INT16 yOrigin, size_t nrects,
     int newct, size;
 
     newct = VerifyRectOrder(nrects, prects, ordering);
-    if (newct < 0)
-        return BadMatch;
+    if (newct < 0) {
+      return BadMatch;
+    }
     size = nrects * sizeof(xRectangle);
 
     xRectangle *prectsNew = calloc(1, size);
-    if (!prectsNew && size)
-        return BadAlloc;
+    if (!prectsNew && size) {
+      return BadAlloc;
+    }
 
     pGC->serialNumber |= GC_CHANGE_SERIAL_BIT;
     pGC->clipOrg.x = xOrigin;
@@ -1007,12 +1069,13 @@ SetClipRects(GCPtr pGC, INT16 xOrigin, INT16 yOrigin, size_t nrects,
     pGC->clipOrg.y = yOrigin;
     pGC->stateChanges |= GCClipYOrigin;
 
-    if (size && prectsNew)
-        memmove((char *) prectsNew, (char *) prects, size);
+    if (size && prectsNew) {
+      memmove((char *)prectsNew, (char *)prects, size);
+    }
     (*pGC->funcs->ChangeClip) (pGC, newct, (void *) prectsNew, nrects);
-    if (pGC->funcs->ChangeGC)
-        (*pGC->funcs->ChangeGC) (pGC,
-                                 GCClipXOrigin | GCClipYOrigin | GCClipMask);
+    if (pGC->funcs->ChangeGC) {
+      (*pGC->funcs->ChangeGC)(pGC, GCClipXOrigin | GCClipYOrigin | GCClipMask);
+    }
     return Success;
 }
 
@@ -1050,8 +1113,9 @@ GetScratchGC(unsigned depth, ScreenPtr pScreen)
             pGC->graphicsExposures = FALSE;
             pGC->clipOrg.x = 0;
             pGC->clipOrg.y = 0;
-            if (pGC->clientClip)
-                (*pGC->funcs->ChangeClip) (pGC, CT_NONE, NULL, 0);
+            if (pGC->clientClip) {
+              (*pGC->funcs->ChangeClip)(pGC, CT_NONE, NULL, 0);
+            }
             pGC->stateChanges = GCAllBits;
             return pGC;
         }
@@ -1068,8 +1132,9 @@ mark it as available.
 void
 FreeScratchGC(GCPtr pGC)
 {
-    if (pGC->scratch_inuse)
-        pGC->scratch_inuse = FALSE;
-    else
-        FreeGC(pGC, (GContext) 0);
+  if (pGC->scratch_inuse) {
+    pGC->scratch_inuse = FALSE;
+  } else {
+    FreeGC(pGC, (GContext)0);
+  }
 }

@@ -64,8 +64,9 @@ SELinuxArraySet(SELinuxArrayRec * rec, unsigned key, void *val)
     if (key >= rec->size) {
         /* Need to increase size of array */
         rec->array = reallocarray(rec->array, key + 1, sizeof(val));
-        if (!rec->array)
-            return FALSE;
+        if (!rec->array) {
+          return FALSE;
+        }
         memset(rec->array + rec->size, 0, (key - rec->size + 1) * sizeof(val));
         rec->size = key + 1;
     }

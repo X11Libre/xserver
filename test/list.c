@@ -247,8 +247,9 @@ test_nt_list_append(void)
         item->b = i * 2;
         nt_list_init(item, next);
 
-        if (item != foo)
-            nt_list_append(item, foo, struct foo, next);
+        if (item != foo) {
+          nt_list_append(item, foo, struct foo, next);
+        }
     }
 
     /* Test using nt_list_next */
@@ -327,8 +328,9 @@ test_nt_list_delete(void)
         item->b = i * 2;
         nt_list_init(item, next);
 
-        if (item != foo)
-            nt_list_append(item, foo, struct foo, next);
+        if (item != foo) {
+          nt_list_append(item, foo, struct foo, next);
+        }
     }
 
     i = 0;

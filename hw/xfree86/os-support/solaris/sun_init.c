@@ -86,14 +86,16 @@ switch_to(int vt, const char *from)
     int ret;
 
     SYSCALL(ret = ioctl(xf86Info.consoleFd, VT_ACTIVATE, vt));
-    if (ret != 0)
-        LogMessageVerb(X_WARNING, 1, "%s: VT_ACTIVATE failed: %s\n",
-                       from, strerror(errno));
+    if (ret != 0) {
+      LogMessageVerb(X_WARNING, 1, "%s: VT_ACTIVATE failed: %s\n", from,
+                     strerror(errno));
+    }
 
     SYSCALL(ret = ioctl(xf86Info.consoleFd, VT_WAITACTIVE, vt));
-    if (ret != 0)
-        LogMessageVerb(X_WARNING, 1, "%s: VT_WAITACTIVE failed: %s\n",
-                       from, strerror(errno));
+    if (ret != 0) {
+      LogMessageVerb(X_WARNING, 1, "%s: VT_WAITACTIVE failed: %s\n", from,
+                     strerror(errno));
+    }
 }
 #endif
 
@@ -111,8 +113,9 @@ xf86OpenConsole(void)
 
     if (serverGeneration == 1) {
         /* Check if we're run with euid==0 */
-        if (geteuid() != 0)
-            FatalError("xf86OpenConsole: Server must be suid root\n");
+        if (geteuid() != 0) {
+          FatalError("xf86OpenConsole: Server must be suid root\n");
+        }
 
 #ifdef HAS_USL_VTS
 
@@ -143,9 +146,9 @@ xf86OpenConsole(void)
                 xf86StartVT = 0;
             }
             else {
-                if (ioctl(fd, VT_GETSTATE, &vtinfo) < 0)
-                    FatalError
-                        ("xf86OpenConsole: Cannot determine current VT\n");
+              if (ioctl(fd, VT_GETSTATE, &vtinfo) < 0) {
+                FatalError("xf86OpenConsole: Cannot determine current VT\n");
+              }
                 xf86StartVT = vtinfo.v_active;
             }
 #endif                          /*  HAS_USL_VTS */
@@ -164,8 +167,9 @@ xf86OpenConsole(void)
             goto OPENCONSOLE;
         }
 
-        if (ioctl(fd, VT_GETSTATE, &vtinfo) < 0)
-            FatalError("xf86OpenConsole: Cannot determine current VT\n");
+        if (ioctl(fd, VT_GETSTATE, &vtinfo) < 0) {
+          FatalError("xf86OpenConsole: Cannot determine current VT\n");
+        }
 
         xf86StartVT = vtinfo.v_active;
 
@@ -194,19 +198,22 @@ xf86OpenConsole(void)
 #endif                          /* HAS_USL_VTS */
 
  OPENCONSOLE:
-        if (!KeepTty)
-            setpgrp();
+   if (!KeepTty) {
+     setpgrp();
+   }
 
-        if (((xf86Info.consoleFd = open(consoleDev, O_RDWR | O_NDELAY, 0)) < 0))
-            FatalError("xf86OpenConsole: Cannot open %s (%s)\n",
-                       consoleDev, strerror(errno));
+   if (((xf86Info.consoleFd = open(consoleDev, O_RDWR | O_NDELAY, 0)) < 0)) {
+     FatalError("xf86OpenConsole: Cannot open %s (%s)\n", consoleDev,
+                strerror(errno));
+   }
 
         /* Change ownership of the vt or console */
         chown(consoleDev, getuid(), getgid());
 
 #ifdef HAS_USL_VTS
-        if (xf86Info.ShareVTs)
-            return;
+        if (xf86Info.ShareVTs) {
+          return;
+        }
 
         if (vtEnabled) {
             /*
@@ -221,8 +228,9 @@ xf86OpenConsole(void)
                                    "xf86OpenConsole: VT_SET_CONSUSER failed\n");
 #endif
 
-            if (ioctl(xf86Info.consoleFd, VT_GETMODE, &VT) < 0)
-                FatalError("xf86OpenConsole: VT_GETMODE failed\n");
+            if (ioctl(xf86Info.consoleFd, VT_GETMODE, &VT) < 0) {
+              FatalError("xf86OpenConsole: VT_GETMODE failed\n");
+            }
 
             OsSignal(SIGUSR1, xf86VTAcquire);
             OsSignal(SIGUSR2, xf86VTRelease);
@@ -231,11 +239,14 @@ xf86OpenConsole(void)
             VT.acqsig = SIGUSR1;
             VT.relsig = SIGUSR2;
 
-            if (ioctl(xf86Info.consoleFd, VT_SETMODE, &VT) < 0)
-                FatalError("xf86OpenConsole: VT_SETMODE VT_PROCESS failed\n");
+            if (ioctl(xf86Info.consoleFd, VT_SETMODE, &VT) < 0) {
+              FatalError("xf86OpenConsole: VT_SETMODE VT_PROCESS failed\n");
+            }
 
-            if (ioctl(xf86Info.consoleFd, VT_SETDISPINFO, atoi(display)) < 0)
-                LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_SETDISPINFO failed\n");
+            if (ioctl(xf86Info.consoleFd, VT_SETDISPINFO, atoi(display)) < 0) {
+              LogMessageVerb(X_WARNING, 1,
+                             "xf86OpenConsole: VT_SETDISPINFO failed\n");
+            }
         }
 #endif
 
@@ -255,8 +266,9 @@ xf86OpenConsole(void)
             /*
              * Now re-get the VT
              */
-            if (xf86Info.autoVTSwitch)
-                switch_to(xf86Info.vtno, "xf86OpenConsole");
+            if (xf86Info.autoVTSwitch) {
+              switch_to(xf86Info.vtno, "xf86OpenConsole");
+            }
 
 #ifdef VT_SET_CONSUSER          /* added in snv_139 */
             if (strcmp(display, "0") == 0)
@@ -270,8 +282,9 @@ xf86OpenConsole(void)
              * this is to make sure we don't continue until the activate
              * signal is received.
              */
-            if (!xf86VTOwner())
-                sleep(5);
+            if (!xf86VTOwner()) {
+              sleep(5);
+            }
         }
 #endif                          /* HAS_USL_VTS */
 
@@ -346,8 +359,9 @@ xf86CloseConsole(void)
         }
 
         /* Activate the VT that X was started on */
-        if (xf86Info.autoVTSwitch)
-            switch_to(xf86StartVT, "xf86CloseConsole");
+        if (xf86Info.autoVTSwitch) {
+          switch_to(xf86StartVT, "xf86CloseConsole");
+        }
     }
 #endif                          /* HAS_USL_VTS */
 

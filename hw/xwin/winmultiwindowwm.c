@@ -442,8 +442,9 @@ GetWindowName(WMInfoPtr pWMInfo, xcb_window_t iWin, char **ppWindowName)
             /* If client machine name looks like a FQDN, find the hostname */
             pszClientHostname = strdup(pszClientMachine);
             dot = strchr(pszClientHostname, '.');
-            if (dot)
-                *dot = '\0';
+            if (dot) {
+              *dot = '\0';
+            }
 
             /*
                If we have a client machine hostname
@@ -485,11 +486,12 @@ IsWmProtocolAvailable(WMInfoPtr pWMInfo, xcb_window_t iWindow, xcb_atom_t atmPro
 
   cookie = xcb_icccm_get_wm_protocols(conn, iWindow, pWMInfo->ewmh.WM_PROTOCOLS);
   if (xcb_icccm_get_wm_protocols_reply(conn, cookie, &reply, NULL)) {
-    for (i = 0; i < reply.atoms_len; ++i)
+    for (i = 0; i < reply.atoms_len; ++i) {
       if (reply.atoms[i] == atmProtocol) {
               ++found;
               break;
       }
+    }
     xcb_icccm_get_wm_protocols_reply_wipe(&reply);
   }
 
@@ -543,10 +545,12 @@ getHwnd(WMInfoPtr pWMInfo, xcb_window_t iWindow)
     }
 
     /* Some sanity checks */
-    if (!hWnd)
-        return NULL;
-    if (!IsWindow(hWnd))
-        return NULL;
+    if (!hWnd) {
+      return NULL;
+    }
+    if (!IsWindow(hWnd)) {
+      return NULL;
+    }
 
     return hWnd;
 }
@@ -618,8 +622,9 @@ UpdateName(WMInfoPtr pWMInfo, xcb_window_t iWindow)
     HWND hWnd;
 
     hWnd = getHwnd(pWMInfo, iWindow);
-    if (!hWnd)
-        return;
+    if (!hWnd) {
+      return;
+    }
 
     /* If window isn't override-redirect */
     if (!IsOverrideRedirect(pWMInfo->conn, iWindow)) {
@@ -656,8 +661,9 @@ UpdateIcon(WMInfoPtr pWMInfo, xcb_window_t iWindow)
     HICON hIconNew = NULL;
 
     hWnd = getHwnd(pWMInfo, iWindow);
-    if (!hWnd)
-        return;
+    if (!hWnd) {
+      return;
+    }
 
     /* If window isn't override-redirect */
     if (!IsOverrideRedirect(pWMInfo->conn, iWindow)) {
@@ -688,8 +694,9 @@ UpdateStyle(WMInfoPtr pWMInfo, xcb_window_t iWindow)
     UINT flags;
 
     hWnd = getHwnd(pWMInfo, iWindow);
-    if (!hWnd)
-        return;
+    if (!hWnd) {
+      return;
+    }
 
     /* Determine the Window style, which determines borders and clipping region... */
     winApplyHints(pWMInfo, iWindow, hWnd, &zstyle);
@@ -728,8 +735,9 @@ UpdateState(WMInfoPtr pWMInfo, xcb_window_t iWindow)
     winDebug("UpdateState: iWindow 0x%08x\n", (int)iWindow);
 
     hWnd = getHwnd(pWMInfo, iWindow);
-    if (!hWnd)
-        return;
+    if (!hWnd) {
+      return;
+    }
 
     ShowWindow(hWnd, SW_MINIMIZE);
 }
@@ -884,14 +892,13 @@ winMultiWindowWMProc(void *pArg)
         case WM_WM_KILL:
             {
                 /* --- */
-                if (IsWmProtocolAvailable(pWMInfo,
-                                          pNode->msg.iWindow,
-                                          pWMInfo->atmWmDelete))
-                    SendXMessage(pWMInfo->conn,
-                                 pNode->msg.iWindow,
-                                 pWMInfo->atmWmProtos, pWMInfo->atmWmDelete);
-                else
-                    xcb_kill_client(pWMInfo->conn, pNode->msg.iWindow);
+                if (IsWmProtocolAvailable(pWMInfo, pNode->msg.iWindow,
+                                          pWMInfo->atmWmDelete)) {
+                  SendXMessage(pWMInfo->conn, pNode->msg.iWindow,
+                               pWMInfo->atmWmProtos, pWMInfo->atmWmDelete);
+                } else {
+                  xcb_kill_client(pWMInfo->conn, pNode->msg.iWindow);
+                }
             }
             break;
 
@@ -915,20 +922,21 @@ winMultiWindowWMProc(void *pArg)
               cookie = xcb_icccm_get_wm_hints(pWMInfo->conn, pNode->msg.iWindow);
               if (xcb_icccm_get_wm_hints_reply(pWMInfo->conn, cookie, &hints,
                                                NULL)) {
-                if (hints.flags & XCB_ICCCM_WM_HINT_INPUT)
+                if (hints.flags & XCB_ICCCM_WM_HINT_INPUT) {
                   neverFocus = !hints.input;
+                }
               }
 
-              if (!neverFocus)
+              if (!neverFocus) {
                 xcb_set_input_focus(pWMInfo->conn, XCB_INPUT_FOCUS_PARENT,
                                     pNode->msg.iWindow, XCB_CURRENT_TIME);
+              }
 
-              if (IsWmProtocolAvailable(pWMInfo,
-                                        pNode->msg.iWindow,
-                                        pWMInfo->atmWmTakeFocus))
-                SendXMessage(pWMInfo->conn,
-                             pNode->msg.iWindow,
+              if (IsWmProtocolAvailable(pWMInfo, pNode->msg.iWindow,
+                                        pWMInfo->atmWmTakeFocus)) {
+                SendXMessage(pWMInfo->conn, pNode->msg.iWindow,
                              pWMInfo->atmWmProtos, pWMInfo->atmWmTakeFocus);
+              }
 
             }
             else
@@ -951,8 +959,9 @@ winMultiWindowWMProc(void *pArg)
         case WM_WM_HINTS_EVENT:
             {
             /* Don't do anything if this is an override-redirect window */
-            if (IsOverrideRedirect(pWMInfo->conn, pNode->msg.iWindow))
+            if (IsOverrideRedirect(pWMInfo->conn, pNode->msg.iWindow)) {
               break;
+            }
 
             UpdateStyle(pWMInfo, pNode->msg.iWindow);
             }
@@ -1099,9 +1108,9 @@ winMultiWindowXMsgProc(void *pArg)
             ++iRetries;
             sleep(WIN_CONNECT_DELAY);
             continue;
+        } else {
+          break;
         }
-        else
-            break;
     }
     while (xcb_connection_has_error(pProcArg->conn) && iRetries < WIN_CONNECT_RETRIES);
 
@@ -1205,8 +1214,9 @@ winMultiWindowXMsgProc(void *pArg)
         uint8_t type;
         Bool send_event;
 
-        if (g_shutdown)
-            break;
+        if (g_shutdown) {
+          break;
+        }
 
         /* Fetch next event */
         event = xcb_wait_for_event(pProcArg->conn);
@@ -1512,9 +1522,9 @@ winInitMultiWindowWM(WMInfoPtr pWMInfo, WMProcArgPtr pProcArg)
             ++iRetries;
             sleep(WIN_CONNECT_DELAY);
             continue;
+        } else {
+          break;
         }
-        else
-            break;
     }
     while (xcb_connection_has_error(pWMInfo->conn) && iRetries < WIN_CONNECT_RETRIES);
 
@@ -1732,10 +1742,12 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
     unsigned long hint = 0, maxmin = 0;
     unsigned long style, exStyle;
 
-    if (!hWnd)
-        return;
-    if (!IsWindow(hWnd))
-        return;
+    if (!hWnd) {
+      return;
+    }
+    if (!IsWindow(hWnd)) {
+      return;
+    }
 
     if (generation != serverGeneration) {
         generation = serverGeneration;
@@ -1758,12 +1770,14 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
         xcb_atom_t *pAtom = xcb_get_property_value(reply);
 
             for (i = 0; i < nitems; i++) {
-                if (pAtom[i] == skiptaskbarState)
-                    hint |= HINT_SKIPTASKBAR;
-                if (pAtom[i] == hiddenState)
-                    maxmin |= HINT_MIN;
-                else if (pAtom[i] == fullscreenState)
-                    maxmin |= HINT_MAX;
+              if (pAtom[i] == skiptaskbarState) {
+                hint |= HINT_SKIPTASKBAR;
+              }
+              if (pAtom[i] == hiddenState) {
+                maxmin |= HINT_MIN;
+              } else if (pAtom[i] == fullscreenState) {
+                maxmin |= HINT_MAX;
+              }
                 if (pAtom[i] == belowState)
                     *zstyle = HWND_BOTTOM;
                 else if (pAtom[i] == aboveState)
@@ -1782,28 +1796,34 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
         MwmHints *mwm_hint = xcb_get_property_value(reply);
         if (mwm_hint && (nitems >= PropMwmHintsElements) &&
             (mwm_hint->flags & MwmHintsDecorations)) {
-            if (!mwm_hint->decorations)
-                hint |= (HINT_NOFRAME | HINT_NOSYSMENU | HINT_NOMINIMIZE | HINT_NOMAXIMIZE);
-            else if (!(mwm_hint->decorations & MwmDecorAll)) {
-                if (mwm_hint->decorations & MwmDecorBorder)
-                    hint |= HINT_BORDER;
-                if (mwm_hint->decorations & MwmDecorHandle)
-                    hint |= HINT_SIZEBOX;
-                if (mwm_hint->decorations & MwmDecorTitle)
-                    hint |= HINT_CAPTION;
-                if (!(mwm_hint->decorations & MwmDecorMenu))
-                    hint |= HINT_NOSYSMENU;
-                if (!(mwm_hint->decorations & MwmDecorMinimize))
-                    hint |= HINT_NOMINIMIZE;
-                if (!(mwm_hint->decorations & MwmDecorMaximize))
-                    hint |= HINT_NOMAXIMIZE;
+          if (!mwm_hint->decorations) {
+            hint |= (HINT_NOFRAME | HINT_NOSYSMENU | HINT_NOMINIMIZE |
+                     HINT_NOMAXIMIZE);
+          } else if (!(mwm_hint->decorations & MwmDecorAll)) {
+            if (mwm_hint->decorations & MwmDecorBorder) {
+              hint |= HINT_BORDER;
             }
-            else {
-                /*
-                   MwmDecorAll means all decorations *except* those specified by other flag
-                   bits that are set.  Not yet implemented.
-                 */
+            if (mwm_hint->decorations & MwmDecorHandle) {
+              hint |= HINT_SIZEBOX;
             }
+            if (mwm_hint->decorations & MwmDecorTitle) {
+              hint |= HINT_CAPTION;
+            }
+            if (!(mwm_hint->decorations & MwmDecorMenu)) {
+              hint |= HINT_NOSYSMENU;
+            }
+            if (!(mwm_hint->decorations & MwmDecorMinimize)) {
+              hint |= HINT_NOMINIMIZE;
+            }
+            if (!(mwm_hint->decorations & MwmDecorMaximize)) {
+              hint |= HINT_NOMAXIMIZE;
+            }
+          } else {
+            /*
+               MwmDecorAll means all decorations *except* those specified by
+               other flag bits that are set.  Not yet implemented.
+             */
+          }
         }
         free(reply);
       }
@@ -1838,18 +1858,22 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
 
                 /* Not maximizable if a maximum size is specified, and that size
                    is smaller (in either dimension) than the screen size */
-                if ((size_hints.max_width < GetSystemMetrics(SM_CXVIRTUALSCREEN))
-                    || (size_hints.max_height < GetSystemMetrics(SM_CYVIRTUALSCREEN)))
-                    hint |= HINT_NOMAXIMIZE;
+                if ((size_hints.max_width <
+                     GetSystemMetrics(SM_CXVIRTUALSCREEN)) ||
+                    (size_hints.max_height <
+                     GetSystemMetrics(SM_CYVIRTUALSCREEN))) {
+                  hint |= HINT_NOMAXIMIZE;
+                }
 
                 if (size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE) {
                     /*
                        If both minimum size and maximum size are specified and are the same,
                        don't bother with a resizing frame
                      */
-                    if ((size_hints.min_width == size_hints.max_width)
-                        && (size_hints.min_height == size_hints.max_height))
-                        hint = (hint & ~HINT_SIZEBOX);
+                    if ((size_hints.min_width == size_hints.max_width) &&
+                        (size_hints.min_height == size_hints.max_height)) {
+                      hint = (hint & ~HINT_SIZEBOX);
+                    }
                 }
             }
         }
@@ -1888,37 +1912,39 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
         free(window_name);
     }
 
-    if (style & STYLE_TOPMOST)
-        *zstyle = HWND_TOPMOST;
-    else if (style & STYLE_MAXIMIZE)
-        maxmin = (hint & ~HINT_MIN) | HINT_MAX;
-    else if (style & STYLE_MINIMIZE)
-        maxmin = (hint & ~HINT_MAX) | HINT_MIN;
-    else if (style & STYLE_BOTTOM)
-        *zstyle = HWND_BOTTOM;
+    if (style & STYLE_TOPMOST) {
+      *zstyle = HWND_TOPMOST;
+    } else if (style & STYLE_MAXIMIZE) {
+      maxmin = (hint & ~HINT_MIN) | HINT_MAX;
+    } else if (style & STYLE_MINIMIZE) {
+      maxmin = (hint & ~HINT_MAX) | HINT_MIN;
+    } else {
+      i
+    }
+    f(style & STYLE_BOTTOM) *zstyle = HWND_BOTTOM;
 
     if (maxmin & HINT_MAX)
         SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     else if (maxmin & HINT_MIN)
         SendMessage(hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
 
-    if (style & STYLE_NOTITLE)
-        hint =
-            (hint & ~HINT_NOFRAME & ~HINT_BORDER & ~HINT_CAPTION) |
-            HINT_SIZEBOX;
-    else if (style & STYLE_OUTLINE)
-        hint =
-            (hint & ~HINT_NOFRAME & ~HINT_SIZEBOX & ~HINT_CAPTION) |
-            HINT_BORDER;
-    else if (style & STYLE_NOFRAME)
-        hint =
-            (hint & ~HINT_BORDER & ~HINT_CAPTION & ~HINT_SIZEBOX) |
-            HINT_NOFRAME;
+    if (style & STYLE_NOTITLE) {
+      hint =
+          (hint & ~HINT_NOFRAME & ~HINT_BORDER & ~HINT_CAPTION) | HINT_SIZEBOX;
+    } else if (style & STYLE_OUTLINE) {
+      hint =
+          (hint & ~HINT_NOFRAME & ~HINT_SIZEBOX & ~HINT_CAPTION) | HINT_BORDER;
+    } else if (style & STYLE_NOFRAME) {
+      hint =
+          (hint & ~HINT_BORDER & ~HINT_CAPTION & ~HINT_SIZEBOX) | HINT_NOFRAME;
+    }
 
     /* Now apply styles to window */
     style = GetWindowLongPtr(hWnd, GWL_STYLE);
-    if (!style)
-        return;                 /* GetWindowLongPointer returns 0 on failure, we hope this isn't a valid style */
+    if (!style) {
+      return; /* GetWindowLongPointer returns 0 on failure, we hope this isn't a
+                 valid style */
+    }
 
     style &= ~WS_CAPTION & ~WS_SIZEBOX; /* Just in case */
 
@@ -1966,11 +1992,13 @@ winUpdateWindowPosition(HWND hWnd, HWND * zstyle)
     WindowPtr pWin = GetProp(hWnd, WIN_WINDOW_PROP);
     DrawablePtr pDraw = NULL;
 
-    if (!pWin)
-        return;
+    if (!pWin) {
+      return;
+    }
     pDraw = &pWin->drawable;
-    if (!pDraw)
-        return;
+    if (!pDraw) {
+      return;
+    }
 
     /* Get the X and Y location of the X window */
     iX = pWin->drawable.x + GetSystemMetrics(SM_XVIRTUALSCREEN);

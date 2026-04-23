@@ -43,8 +43,9 @@ dri3_screen_can_one_point_one(ScreenPtr screen)
     dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
 
     if (dri3 && dri3->info && dri3->info->version >= 1 &&
-        dri3->info->fd_from_pixmap)
-        return TRUE;
+        dri3->info->fd_from_pixmap) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -57,8 +58,9 @@ dri3_screen_can_one_point_two(ScreenPtr screen)
     if (dri3 && dri3->info && dri3->info->version >= 2 &&
         dri3->info->pixmap_from_fds && dri3->info->fds_from_pixmap &&
         dri3->info->get_formats && dri3->info->get_modifiers &&
-        dri3->info->get_drawable_modifiers)
-        return TRUE;
+        dri3->info->get_drawable_modifiers) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -171,26 +173,30 @@ proc_dri3_open(ClientPtr client)
     int status;
 
     status = dixLookupDrawable(&drawable, stuff->drawable, client, 0, DixGetAttrAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
-    if (stuff->provider == None)
-        provider = NULL;
-    else if (!RRProviderType) {
-        return BadMatch;
+    if (stuff->provider == None) {
+      provider = NULL;
+    } else if (!RRProviderType) {
+      return BadMatch;
     } else {
-        VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
-        if (drawable->pScreen != provider->pScreen)
-            return BadMatch;
+      VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
+      if (drawable->pScreen != provider->pScreen) {
+        return BadMatch;
+      }
     }
     screen = drawable->pScreen;
 
     status = dri3_open(client, screen, provider, &fd);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
-    if (client->ignoreCount == 0)
-        return dri3_send_open_reply(client, fd);
+    if (client->ignoreCount == 0) {
+      return dri3_send_open_reply(client, fd);
+    }
 
     return Success;
 }
@@ -225,15 +231,18 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
         return BadValue;
     }
 
-    if (stuff->width > 32767 || stuff->height > 32767)
-        return BadAlloc;
+    if (stuff->width > 32767 || stuff->height > 32767) {
+      return BadAlloc;
+    }
 
     if (stuff->depth != 1) {
         DepthPtr depth = drawable->pScreen->allowedDepths;
         int i;
-        for (i = 0; i < drawable->pScreen->numDepths; i++, depth++)
-            if (depth->depth == stuff->depth)
-                break;
+        for (i = 0; i < drawable->pScreen->numDepths; i++, depth++) {
+          if (depth->depth == stuff->depth) {
+            break;
+          }
+        }
         if (i == drawable->pScreen->numDepths) {
             client->errorValue = stuff->depth;
             return BadValue;
@@ -241,8 +250,9 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
     }
 
     fd = ReadFdFromClient(client);
-    if (fd < 0)
-        return BadValue;
+    if (fd < 0) {
+      return BadValue;
+    }
 
     offset = 0;
     stride = stuff->stride;
@@ -253,8 +263,9 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
                               stuff->depth, stuff->bpp,
                               DRM_FORMAT_MOD_INVALID);
     close (fd);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     pixmap->drawable.id = stuff->pixmap;
 
@@ -266,8 +277,9 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
         dixDestroyPixmap(pixmap, 0);
         return rc;
     }
-    if (!AddResource(stuff->pixmap, X11_RESTYPE_PIXMAP, (void *) pixmap))
-        return BadAlloc;
+    if (!AddResource(stuff->pixmap, X11_RESTYPE_PIXMAP, (void *)pixmap)) {
+      return BadAlloc;
+    }
 
     return Success;
 }
@@ -298,8 +310,9 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
     };
 
     fd = dri3_fd_from_pixmap(pixmap, &reply.stride, &reply.size);
-    if (fd < 0)
-        return BadPixmap;
+    if (fd < 0) {
+      return BadPixmap;
+    }
 
     if (WriteFdToClient(client, fd, TRUE) < 0) {
         close(fd);
@@ -329,12 +342,14 @@ proc_dri3_fence_from_fd(ClientPtr client)
     LEGAL_NEW_RESOURCE(stuff->fence, client);
 
     status = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
     fd = ReadFdFromClient(client);
-    if (fd < 0)
-        return BadValue;
+    if (fd < 0) {
+      return BadValue;
+    }
 
     status = SyncCreateFenceFromFD(client, drawable, stuff->fence,
                                    fd, stuff->initially_triggered);
@@ -358,18 +373,22 @@ proc_dri3_fd_from_fence(ClientPtr client)
     SyncFence *fence;
 
     status = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
     status = SyncVerifyFence(&fence, stuff->fence, client, DixWriteAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
     fd = SyncFDFromFence(client, drawable, fence);
-    if (fd < 0)
-        return BadMatch;
+    if (fd < 0) {
+      return BadMatch;
+    }
 
-    if (WriteFdToClient(client, fd, FALSE) < 0)
-        return BadAlloc;
+    if (WriteFdToClient(client, fd, FALSE) < 0) {
+      return BadAlloc;
+    }
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -389,8 +408,9 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
     int status;
 
     status = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
     pScreen = window->drawable.pScreen;
 
     dri3_get_supported_modifiers(pScreen, &window->drawable,
@@ -456,15 +476,18 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
         return BadValue;
     }
 
-    if (stuff->width > 32767 || stuff->height > 32767)
-        return BadAlloc;
+    if (stuff->width > 32767 || stuff->height > 32767) {
+      return BadAlloc;
+    }
 
     if (stuff->depth != 1) {
         DepthPtr depth = screen->allowedDepths;
         int j;
-        for (j = 0; j < screen->numDepths; j++, depth++)
-            if (depth->depth == stuff->depth)
-                break;
+        for (j = 0; j < screen->numDepths; j++, depth++) {
+          if (depth->depth == stuff->depth) {
+            break;
+          }
+        }
         if (j == screen->numDepths) {
             client->errorValue = stuff->depth;
             return BadValue;
@@ -479,8 +502,9 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
     for (i = 0; i < stuff->num_buffers; i++) {
         fds[i] = ReadFdFromClient(client);
         if (fds[i] < 0) {
-            while (--i >= 0)
-                close(fds[i]);
+          while (--i >= 0) {
+            close(fds[i]);
+          }
             return BadValue;
         }
     }
@@ -501,11 +525,13 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
                               stuff->depth, stuff->bpp,
                               stuff->modifier);
 
-    for (i = 0; i < stuff->num_buffers; i++)
-        close (fds[i]);
+    for (i = 0; i < stuff->num_buffers; i++) {
+      close(fds[i]);
+    }
 
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     pixmap->drawable.id = stuff->pixmap;
 
@@ -517,8 +543,9 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
         dixDestroyPixmap(pixmap, 0);
         return rc;
     }
-    if (!AddResource(stuff->pixmap, X11_RESTYPE_PIXMAP, (void *) pixmap))
-        return BadAlloc;
+    if (!AddResource(stuff->pixmap, X11_RESTYPE_PIXMAP, (void *)pixmap)) {
+      return BadAlloc;
+    }
 
     return Success;
 }
@@ -545,13 +572,15 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
     }
 
     num_fds = dri3_fds_from_pixmap(pixmap, fds, strides, offsets, &modifier);
-    if (num_fds == 0)
-        return BadPixmap;
+    if (num_fds == 0) {
+      return BadPixmap;
+    }
 
     for (i = 0; i < num_fds; i++) {
         if (WriteFdToClient(client, fds[i], TRUE) < 0) {
-            while (i--)
-                close(fds[i]);
+          while (i--) {
+            close(fds[i]);
+          }
             return BadAlloc;
         }
     }
@@ -589,8 +618,9 @@ proc_dri3_set_drm_device_in_use(ClientPtr client)
 
     status = dixLookupWindow(&window, stuff->window, client,
                              DixGetAttrAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
     /* TODO Eventually we should use this information to have
      * DRI3GetSupportedModifiers return device-specific modifiers, but for now
@@ -617,14 +647,16 @@ proc_dri3_import_syncobj(ClientPtr client)
 
     status = dixLookupDrawable(&drawable, stuff->drawable, client,
                                M_ANY, DixGetAttrAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
     screen = drawable->pScreen;
 
     fd = ReadFdFromClient(client);
-    if (fd < 0)
-        return BadValue;
+    if (fd < 0) {
+      return BadValue;
+    }
 
     return dri3_import_syncobj(client, screen, stuff->syncobj, fd);
 }
@@ -640,8 +672,9 @@ proc_dri3_free_syncobj(ClientPtr client)
 
     status = dixLookupResourceByType((void **) &syncobj, stuff->syncobj,
                                      dri3_syncobj_type, client, DixWriteAccess);
-    if (status != Success)
-        return status;
+    if (status != Success) {
+      return status;
+    }
 
     FreeResource(stuff->syncobj, RT_NONE);
     return Success;
@@ -651,8 +684,9 @@ int
 proc_dri3_dispatch(ClientPtr client)
 {
     REQUEST(xReq);
-    if (!client->local)
-        return BadMatch;
+    if (!client->local) {
+      return BadMatch;
+    }
 
     switch (stuff->data) {
         case X_DRI3QueryVersion:

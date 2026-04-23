@@ -70,9 +70,11 @@ present_execute_wait(present_vblank_ptr vblank, uint64_t crtc_msc)
      * using a flip.
      */
     if (vblank->exec_msc == crtc_msc + 1 &&
-        screen_priv->queue_vblank(screen, window, vblank->crtc, vblank->event_id,
-                                  vblank->exec_msc) == Success)
-        return TRUE;
+        screen_priv->queue_vblank(screen, window, vblank->crtc,
+                                  vblank->event_id,
+                                  vblank->exec_msc) == Success) {
+      return TRUE;
+    }
 
     if (vblank->wait_fence) {
         if (!present_fence_check_triggered(vblank->wait_fence)) {
@@ -146,16 +148,18 @@ present_execute_post(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc)
      */
     if (vblank->kind == PresentCompleteKindPixmap) {
         if (vblank->pixmap && vblank->window) {
-            if (vblank->has_suboptimal && vblank->reason == PRESENT_FLIP_REASON_BUFFER_FORMAT)
-                mode = PresentCompleteModeSuboptimalCopy;
-            else
-                mode = PresentCompleteModeCopy;
+          if (vblank->has_suboptimal &&
+              vblank->reason == PRESENT_FLIP_REASON_BUFFER_FORMAT) {
+            mode = PresentCompleteModeSuboptimalCopy;
+          } else {
+            mode = PresentCompleteModeCopy;
+          }
         } else {
             mode = PresentCompleteModeSkip;
         }
+    } else {
+      mode = PresentCompleteModeCopy;
     }
-    else
-        mode = PresentCompleteModeCopy;
 
     present_vblank_notify(vblank, vblank->kind, mode, ust, crtc_msc);
     present_vblank_destroy(vblank);

@@ -228,18 +228,23 @@ winDisplayExitDialog(winPrivScreenPtr pScreenPriv)
     int liveClients = 0;
 
     /* Count up running clients (clients[0] is serverClient) */
-    for (i = 1; i < currentMaxClients; i++)
-        if (clients[i] != NULL)
-            liveClients++;
+    for (i = 1; i < currentMaxClients; i++) {
+      if (clients[i] != NULL) {
+        liveClients++;
+      }
+    }
     /* Count down server internal clients */
-    if (pScreenPriv->pScreenInfo->fMultiWindow)
-        liveClients -= 2;       /* multiwindow window manager & XMsgProc  */
-    if (g_fClipboardStarted)
-        liveClients--;          /* clipboard manager */
+    if (pScreenPriv->pScreenInfo->fMultiWindow) {
+      liveClients -= 2; /* multiwindow window manager & XMsgProc  */
+    }
+    if (g_fClipboardStarted) {
+      liveClients--; /* clipboard manager */
+    }
 
     /* A user reported that this sometimes drops below zero. just eye-candy. */
-    if (liveClients < 0)
-        liveClients = 0;
+    if (liveClients < 0) {
+      liveClients = 0;
+    }
 
     /* Don't show the exit confirmation dialog if SilentExit & no clients,
        or ForceExit, is enabled */
@@ -392,9 +397,10 @@ winDisplayDepthChangeDialog(winPrivScreenPtr pScreenPriv)
     /* Show the dialog box */
     ShowWindow(g_hDlgDepthChange, SW_SHOW);
 
-    if (!g_hDlgDepthChange)
-        ErrorF("winDisplayDepthChangeDialog - GetLastError: %d\n",
-                (int) GetLastError());
+    if (!g_hDlgDepthChange) {
+      ErrorF("winDisplayDepthChangeDialog - GetLastError: %d\n",
+             (int)GetLastError());
+    }
 
     /* Minimize the display window */
     ShowWindow(pScreenPriv->hwndScreen, SW_MINIMIZE);

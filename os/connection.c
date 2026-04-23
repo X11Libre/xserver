@@ -162,9 +162,11 @@ lookup_trans_conn(int fd)
     if (ListenTransFds) {
         int i;
 
-        for (i = 0; i < ListenTransCount; i++)
-            if (ListenTransFds[i] == fd)
-                return ListenTransConns[i];
+        for (i = 0; i < ListenTransCount; i++) {
+          if (ListenTransFds[i] == fd) {
+            return ListenTransConns[i];
+          }
+        }
     }
 
     return NULL;
@@ -190,8 +192,9 @@ InitParentProcess(void)
     OsSigHandlerPtr handler;
 
     handler = OsSignal(SIGUSR1, SIG_IGN);
-    if (handler == SIG_IGN)
-        RunFromSmartParent = TRUE;
+    if (handler == SIG_IGN) {
+      RunFromSmartParent = TRUE;
+    }
     OsSignal(SIGUSR1, handler);
     ParentProcess = getppid();
 #endif
@@ -202,10 +205,12 @@ NotifyParentProcess(void)
 {
 #if !defined(WIN32)
     if (displayfd >= 0) {
-        if (write(displayfd, display, strlen(display)) != strlen(display))
-            FatalError("Cannot write display number to fd %d\n", displayfd);
-        if (write(displayfd, "\n", 1) != 1)
-            FatalError("Cannot write display number to fd %d\n", displayfd);
+      if (write(displayfd, display, strlen(display)) != strlen(display)) {
+        FatalError("Cannot write display number to fd %d\n", displayfd);
+      }
+      if (write(displayfd, "\n", 1) != 1) {
+        FatalError("Cannot write display number to fd %d\n", displayfd);
+      }
         close(displayfd);
         displayfd = -1;
     }
@@ -252,10 +257,11 @@ CreateWellKnownSockets(void)
         ListenTransCount = 0;
     }
     else if ((displayfd < 0) || explicit_display) {
-        if (TryCreateSocket(atoi(display), &partial) &&
-            ListenTransCount >= 1)
-            if (!PartialNetwork && partial)
-                FatalError ("Failed to establish all listening sockets");
+      if (TryCreateSocket(atoi(display), &partial) && ListenTransCount >= 1) {
+        if (!PartialNetwork && partial) {
+          FatalError("Failed to establish all listening sockets");
+        }
+      }
     }
     else { /* -displayfd and no explicit display number */
         Bool found = 0;
@@ -263,12 +269,13 @@ CreateWellKnownSockets(void)
             if (TryCreateSocket(i, &partial) && !partial) {
                 found = 1;
                 break;
+            } else {
+              CloseWellKnownConnections();
             }
-            else
-                CloseWellKnownConnections();
         }
-        if (!found)
-            FatalError("Failed to find a socket to listen on");
+        if (!found) {
+          FatalError("Failed to find a socket to listen on");
+        }
         snprintf(dynamic_display, sizeof(dynamic_display), "%d", i);
         display = dynamic_display;
         LogSetDisplay();
@@ -280,8 +287,9 @@ CreateWellKnownSockets(void)
     }
 
     ListenTransFds = calloc(ListenTransCount, sizeof(int));
-    if (ListenTransFds == NULL)
-        FatalError ("Failed to create listening socket array");
+    if (ListenTransFds == NULL) {
+      FatalError("Failed to create listening socket array");
+    }
 
     for (i = 0; i < ListenTransCount; i++) {
         int fd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
@@ -289,13 +297,15 @@ CreateWellKnownSockets(void)
         ListenTransFds[i] = fd;
         SetNotifyFd(fd, EstablishNewConnections, X_NOTIFY_READ, NULL);
 
-        if (!_XSERVTransIsLocal(ListenTransConns[i]))
-            DefineSelf (fd);
+        if (!_XSERVTransIsLocal(ListenTransConns[i])) {
+          DefineSelf(fd);
+        }
     }
 
-    if (ListenTransCount == 0 && !NoListenAll)
-        FatalError
-            ("Cannot establish any listening sockets - Make sure an X server isn't already running");
+    if (ListenTransCount == 0 && !NoListenAll) {
+      FatalError("Cannot establish any listening sockets - Make sure an X "
+                 "server isn't already running");
+    }
 
 #if !defined(WIN32)
     OsSignal(SIGPIPE, SIG_IGN);
@@ -320,8 +330,9 @@ CloseWellKnownConnections(void)
         if (ListenTransConns[i] != NULL) {
             _XSERVTransClose(ListenTransConns[i]);
             ListenTransConns[i] = NULL;
-            if (ListenTransFds != NULL)
-                RemoveNotifyFd(ListenTransFds[i]);
+            if (ListenTransFds != NULL) {
+              RemoveNotifyFd(ListenTransFds[i]);
+            }
         }
     }
     ListenTransCount = 0;
@@ -341,11 +352,11 @@ AuthAudit(ClientPtr client, Bool letin,
     zoneid_t client_zid = -1;
 #endif
 
-    if (!len)
-        strlcpy(addr, "local host", sizeof(addr));
-    else
-        switch (saddr->sa_family) {
-        case AF_UNSPEC:
+    if (!len) {
+      strlcpy(addr, "local host", sizeof(addr));
+    } else {
+      switch (saddr->sa_family) {
+      case AF_UNSPEC:
 #if defined(UNIXCONN)
         case AF_UNIX:
 #endif
@@ -377,6 +388,7 @@ AuthAudit(ClientPtr client, Bool letin,
         default:
             strlcpy(addr, "unknown address", sizeof(addr));
         }
+    }
 
     if (GetLocalClientCreds(client, &lcc) != -1) {
         int slen;               /* length written to client_uid_string */
@@ -430,25 +442,25 @@ AuthAudit(ClientPtr client, Bool letin,
     XSERVER_CLIENT_AUTH(client->index, addr, client_pid, client_zid);
 #endif
     if (auditTrailLevel > 1) {
-        if (proto_n)
-            AuditF("client %d %s from %s%s\n  Auth name: %.*s ID: %d\n",
-                   client->index, letin ? "connected" : "rejected", addr,
-                   client_uid_string, (int) proto_n, auth_proto, auth_id);
-        else
-            AuditF("client %d %s from %s%s\n",
-                   client->index, letin ? "connected" : "rejected", addr,
-                   client_uid_string);
-
+      if (proto_n) {
+        AuditF("client %d %s from %s%s\n  Auth name: %.*s ID: %d\n",
+               client->index, letin ? "connected" : "rejected", addr,
+               client_uid_string, (int)proto_n, auth_proto, auth_id);
+      } else {
+        AuditF("client %d %s from %s%s\n", client->index,
+               letin ? "connected" : "rejected", addr, client_uid_string);
+      }
     }
 }
 
 XID
 AuthorizationIDOfClient(ClientPtr client)
 {
-    if (client->osPrivate)
-        return ((OsCommPtr) client->osPrivate)->auth_id;
-    else
-        return None;
+  if (client->osPrivate) {
+    return ((OsCommPtr)client->osPrivate)->auth_id;
+  } else {
+    return None;
+  }
 }
 
 /*****************************************************************
@@ -499,29 +511,30 @@ ClientAuthorized(ClientPtr client,
 
     if (auth_id == (XID) ~0L) {
         if (_XSERVTransGetPeerAddr(trans_conn, &family, &fromlen, &from) != -1) {
-            if (InvalidHost((struct sockaddr *) from, fromlen, client))
-                AuthAudit(client, FALSE, (struct sockaddr *) from,
-                          fromlen, proto_n, auth_proto, auth_id);
-            else {
-                auth_id = (XID) 0;
+          if (InvalidHost((struct sockaddr *)from, fromlen, client)) {
+            AuthAudit(client, FALSE, (struct sockaddr *)from, fromlen, proto_n,
+                      auth_proto, auth_id);
+          } else {
+            auth_id = (XID)0;
 #ifdef XSERVER_DTRACE
                 if ((auditTrailLevel > 1) || XSERVER_CLIENT_AUTH_ENABLED())
 #else
-                if (auditTrailLevel > 1)
+            if (auditTrailLevel > 1) {
 #endif
-                    AuthAudit(client, TRUE,
-                              (struct sockaddr *) from, fromlen,
-                              proto_n, auth_proto, auth_id);
+                  AuthAudit(client, TRUE, (struct sockaddr *)from, fromlen,
+                            proto_n, auth_proto, auth_id);
+          }
             }
 
             free(from);
         }
 
         if (auth_id == (XID) ~0L) {
-            if (reason)
-                return reason;
-            else
-                return "Client is not authorized to connect to Server";
+          if (reason) {
+            return reason;
+          } else {
+            return "Client is not authorized to connect to Server";
+          }
         }
     }
 #ifdef XSERVER_DTRACE
@@ -563,8 +576,9 @@ ClientReady(int fd, int xevents, void *data)
         CloseDownClient(client);
         return;
     }
-    if (xevents & X_NOTIFY_READ)
-        mark_client_ready(client);
+    if (xevents & X_NOTIFY_READ) {
+      mark_client_ready(client);
+    }
     if (xevents & X_NOTIFY_WRITE) {
         ospoll_mute(server_poll, fd, X_NOTIFY_WRITE);
         NewOutputPending = TRUE;
@@ -577,8 +591,9 @@ AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
     ClientPtr client;
 
     OsCommPtr oc = calloc(1, sizeof(OsCommRec));
-    if (!oc)
-        return NULL;
+    if (!oc) {
+      return NULL;
+    }
     oc->trans_conn = trans_conn;
     oc->fd = fd;
     oc->conn_time = conn_time;
@@ -627,23 +642,27 @@ EstablishNewConnections(int curconn, int ready, void *data)
             oc = (OsCommPtr) (client->osPrivate);
             if ((oc && (oc->conn_time != 0) &&
                  (connect_time - oc->conn_time) >= TimeOutValue) ||
-                (client->noClientException != Success && !client->clientGone))
-                CloseDownClient(client);
+                (client->noClientException != Success && !client->clientGone)) {
+              CloseDownClient(client);
+            }
         }
     }
 
-    if ((trans_conn = lookup_trans_conn(curconn)) == NULL)
-        return;
+    if ((trans_conn = lookup_trans_conn(curconn)) == NULL) {
+      return;
+    }
 
-    if ((new_trans_conn = _XSERVTransAccept(trans_conn)) == NULL)
-        return;
+    if ((new_trans_conn = _XSERVTransAccept(trans_conn)) == NULL) {
+      return;
+    }
 
     newconn = _XSERVTransGetConnectionNumber(new_trans_conn);
 
     _XSERVTransNonBlock(new_trans_conn);
 
-    if (trans_conn->flags & TRANS_NOXAUTH)
-        new_trans_conn->flags = new_trans_conn->flags | TRANS_NOXAUTH;
+    if (trans_conn->flags & TRANS_NOXAUTH) {
+      new_trans_conn->flags = new_trans_conn->flags | TRANS_NOXAUTH;
+    }
 
     if (!AllocNewConnection(new_trans_conn, newconn, connect_time)) {
         ErrorConnMax(new_trans_conn);
@@ -695,8 +714,9 @@ ConnMaxNotify(int fd, int events, void *data)
 static void
 ErrorConnMax(XtransConnInfo trans_conn)
 {
-    if (!SetNotifyFd(trans_conn->fd, ConnMaxNotify, X_NOTIFY_READ, trans_conn))
-        _XSERVTransClose(trans_conn);
+  if (!SetNotifyFd(trans_conn->fd, ConnMaxNotify, X_NOTIFY_READ, trans_conn)) {
+    _XSERVTransClose(trans_conn);
+  }
 }
 
 /************
@@ -730,17 +750,20 @@ CloseDownConnection(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
 
-    if (FlushCallback)
-        CallCallbacks(&FlushCallback, client);
+    if (FlushCallback) {
+      CallCallbacks(&FlushCallback, client);
+    }
 
-    if (oc->output)
-	FlushClient(client, oc);
+    if (oc->output) {
+      FlushClient(client, oc);
+    }
     CloseDownFileDescriptor(oc);
     FreeOsBuffers(oc);
     free(client->osPrivate);
     client->osPrivate = (void *) NULL;
-    if (auditTrailLevel > 1)
-        AuditF("client %d disconnected\n", client->index);
+    if (auditTrailLevel > 1) {
+      AuditF("client %d disconnected\n", client->index);
+    }
 }
 
 struct notify_fd {
@@ -775,12 +798,14 @@ SetNotifyFd(int fd, NotifyFdProcPtr notify, int mask, void *data)
 
     n = ospoll_data(server_poll, fd);
     if (!n) {
-        if (mask == 0)
-            return TRUE;
+      if (mask == 0) {
+        return TRUE;
+      }
 
         n = calloc(1, sizeof (struct notify_fd));
-        if (!n)
-            return FALSE;
+        if (!n) {
+          return FALSE;
+        }
         ospoll_add(server_poll, fd,
                    ospoll_trigger_level,
                    HandleNotifyFd,
@@ -794,10 +819,12 @@ SetNotifyFd(int fd, NotifyFdProcPtr notify, int mask, void *data)
         int listen = mask & ~n->mask;
         int mute = n->mask & ~mask;
 
-        if (listen)
-            ospoll_listen(server_poll, fd, listen);
-        if (mute)
-            ospoll_mute(server_poll, fd, mute);
+        if (listen) {
+          ospoll_listen(server_poll, fd, listen);
+        }
+        if (mute) {
+          ospoll_mute(server_poll, fd, mute);
+        }
         n->mask = mask;
         n->data = data;
         n->notify = notify;
@@ -822,8 +849,9 @@ OnlyListenToOneClient(ClientPtr client)
     int rc;
 
     rc = dixCallServerAccessCallback(client, DixGrabAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (!GrabInProgress) {
         GrabInProgress = client->index;
@@ -859,8 +887,9 @@ IgnoreClient(ClientPtr client)
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
 
     client->ignoreCount++;
-    if (client->ignoreCount > 1)
-        return;
+    if (client->ignoreCount > 1) {
+      return;
+    }
 
     isItTimeToYield = TRUE;
     mark_client_not_ready(client);
@@ -888,16 +917,17 @@ AttendClient(ClientPtr client)
     }
 
     client->ignoreCount--;
-    if (client->ignoreCount)
-        return;
+    if (client->ignoreCount) {
+      return;
+    }
 
     oc->flags &= ~OS_COMM_IGNORED;
     set_poll_client(client);
-    if (listen_to_client(client))
-        mark_client_ready(client);
-    else {
-        /* grab active, mark ready when grab goes away */
-        mark_client_saved_ready(client);
+    if (listen_to_client(client)) {
+      mark_client_ready(client);
+    } else {
+      /* grab active, mark ready when grab goes away */
+      mark_client_saved_ready(client);
     }
 }
 
@@ -985,8 +1015,9 @@ ListenOnOpenFD(int fd, int noxauth)
         return;
     }
 
-    if (noxauth)
-        ciptr->flags = ciptr->flags | TRANS_NOXAUTH;
+    if (noxauth) {
+      ciptr->flags = ciptr->flags | TRANS_NOXAUTH;
+    }
 
     /* Allocate space to store it */
     ListenTransFds =
@@ -1014,8 +1045,9 @@ AddClientOnOpenFD(int fd)
 
     snprintf(port, sizeof(port), ":%d", atoi(display));
     ciptr = _XSERVTransReopenCOTSServer(5, fd, port);
-    if (ciptr == NULL)
-        return FALSE;
+    if (ciptr == NULL) {
+      return FALSE;
+    }
 
     _XSERVTransNonBlock(ciptr);
     ciptr->flags |= TRANS_NOXAUTH;
@@ -1035,17 +1067,21 @@ listen_to_client(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
 
-    if (oc->flags & OS_COMM_IGNORED)
-        return FALSE;
+    if (oc->flags & OS_COMM_IGNORED) {
+      return FALSE;
+    }
 
-    if (!GrabInProgress)
-        return TRUE;
+    if (!GrabInProgress) {
+      return TRUE;
+    }
 
-    if (client->index == GrabInProgress)
-        return TRUE;
+    if (client->index == GrabInProgress) {
+      return TRUE;
+    }
 
-    if (oc->flags & OS_COMM_GRAB_IMPERVIOUS)
-        return TRUE;
+    if (oc->flags & OS_COMM_GRAB_IMPERVIOUS) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -1056,10 +1092,11 @@ set_poll_client(ClientPtr client)
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
 
     if (oc->trans_conn) {
-        if (listen_to_client(client))
-            ospoll_listen(server_poll, oc->trans_conn->fd, X_NOTIFY_READ);
-        else
-            ospoll_mute(server_poll, oc->trans_conn->fd, X_NOTIFY_READ);
+      if (listen_to_client(client)) {
+        ospoll_listen(server_poll, oc->trans_conn->fd, X_NOTIFY_READ);
+      } else {
+        ospoll_mute(server_poll, oc->trans_conn->fd, X_NOTIFY_READ);
+      }
     }
 }
 
@@ -1070,7 +1107,8 @@ set_poll_clients(void)
 
     for (i = 1; i < currentMaxClients; i++) {
         ClientPtr client = clients[i];
-        if (client && !client->clientGone)
-            set_poll_client(client);
+        if (client && !client->clientGone) {
+          set_poll_client(client);
+        }
     }
 }

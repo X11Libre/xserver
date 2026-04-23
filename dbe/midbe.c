@@ -418,11 +418,13 @@ miDbeWinPrivDelete(DbeWindowPrivPtr pDbeWindowPriv, XID bufId)
      */
 
     /* Destroy the front and back pixmaps. */
-    if (pDbeWindowPriv->pFrontBuffer)
-         dixDestroyPixmap(pDbeWindowPriv->pFrontBuffer, 0);
+    if (pDbeWindowPriv->pFrontBuffer) {
+      dixDestroyPixmap(pDbeWindowPriv->pFrontBuffer, 0);
+    }
 
-    if (pDbeWindowPriv->pBackBuffer)
-        dixDestroyPixmap(pDbeWindowPriv->pBackBuffer, 0);
+    if (pDbeWindowPriv->pBackBuffer) {
+      dixDestroyPixmap(pDbeWindowPriv->pBackBuffer, 0);
+    }
 }
 
 /******************************************************************************
@@ -460,12 +462,14 @@ void miDbeWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWin
      **************************************************************************
      */
 
-    if (!(pDbeWindowPriv = DBE_WINDOW_PRIV(pWin)))
-        return;
+    if (!(pDbeWindowPriv = DBE_WINDOW_PRIV(pWin))) {
+      return;
+    }
 
     if (pDbeWindowPriv->width == pWin->drawable.width &&
-        pDbeWindowPriv->height == pWin->drawable.height)
-        return;
+        pDbeWindowPriv->height == pWin->drawable.height) {
+      return;
+    }
 
     width = pWin->drawable.width;
     height = pWin->drawable.height;

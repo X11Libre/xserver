@@ -64,8 +64,9 @@ get_drm_info(struct OdevAttributes *attribs, char *path, int delayed_index)
             delayed_index = xf86_num_platform_devices - 1;
     }
 
-    if (server_fd)
-        xf86_platform_devices[delayed_index].flags |= XF86_PDEV_SERVER_FD;
+    if (server_fd) {
+      xf86_platform_devices[delayed_index].flags |= XF86_PDEV_SERVER_FD;
+    }
 
     v = drmGetVersion(fd);
     if (!v) {
@@ -77,8 +78,9 @@ get_drm_info(struct OdevAttributes *attribs, char *path, int delayed_index)
     drmFreeVersion(v);
 
 out:
-    if (!server_fd)
-        close(fd);
+  if (!server_fd) {
+    close(fd);
+  }
     return (err == 0);
 }
 
@@ -89,14 +91,16 @@ xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *bu
     BusType bustype;
     const char *id;
 
-    if (!syspath)
-        return FALSE;
+    if (!syspath) {
+      return FALSE;
+    }
 
     bustype = StringToBusType(busid, &id);
     if (bustype == BUS_PCI) {
         struct pci_device *pPci = device->pdev;
-        if (!pPci)
-            return FALSE;
+        if (!pPci) {
+          return FALSE;
+        }
 
         if (xf86ComparePciBusString(busid,
                                     ((pPci->domain << 8)
@@ -109,16 +113,19 @@ xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *bu
         /* match on the minimum string */
         int len = strlen(id);
 
-        if (strlen(syspath) < strlen(id))
-            len = strlen(syspath);
+        if (strlen(syspath) < strlen(id)) {
+          len = strlen(syspath);
+        }
 
-        if (strncmp(id, syspath, len))
-            return FALSE;
+        if (strncmp(id, syspath, len)) {
+          return FALSE;
+        }
         return TRUE;
     }
     else if (bustype == BUS_USB) {
-        if (strcasecmp(busid, device->attribs->busid))
-            return FALSE;
+      if (strcasecmp(busid, device->attribs->busid)) {
+        return FALSE;
+      }
         return TRUE;
     }
     return FALSE;
@@ -136,8 +143,9 @@ xf86PlatformReprobeDevice(int index, struct OdevAttributes *attribs)
         return;
     }
     ret = xf86platformAddDevice(xf86PlatformFindHotplugDriver(index), index);
-    if (ret == -1)
-        xf86_remove_platform_device(index);
+    if (ret == -1) {
+      xf86_remove_platform_device(index);
+    }
 }
 
 void
@@ -147,18 +155,21 @@ xf86PlatformDeviceProbe(struct OdevAttributes *attribs)
     char *path = attribs->path;
     Bool ret;
 
-    if (!path)
-        goto out_free;
+    if (!path) {
+      goto out_free;
+    }
 
     for (i = 0; i < xf86_num_platform_devices; i++) {
         char *dpath = xf86_platform_odev_attributes(i)->path;
 
-        if (dpath && !strcmp(path, dpath))
-            break;
+        if (dpath && !strcmp(path, dpath)) {
+          break;
+        }
     }
 
-    if (i != xf86_num_platform_devices)
-        goto out_free;
+    if (i != xf86_num_platform_devices) {
+      goto out_free;
+    }
 
     LogMessage(X_INFO, "xfree86: Adding drm device (%s)\n", path);
 
@@ -170,8 +181,9 @@ xf86PlatformDeviceProbe(struct OdevAttributes *attribs)
     }
 
     ret = get_drm_info(attribs, path, -1);
-    if (ret == FALSE)
-        goto out_free;
+    if (ret == FALSE) {
+      goto out_free;
+    }
 
     return;
 
@@ -187,19 +199,23 @@ void NewGPUDeviceRequest(struct OdevAttributes *attribs)
 
     xf86PlatformDeviceProbe(attribs);
 
-    if (old_num == xf86_num_platform_devices)
-        return;
+    if (old_num == xf86_num_platform_devices) {
+      return;
+    }
 
-    if (xf86_get_platform_device_unowned(xf86_num_platform_devices - 1) == TRUE)
-        return;
+    if (xf86_get_platform_device_unowned(xf86_num_platform_devices - 1) ==
+        TRUE) {
+      return;
+    }
 
     /* Scan and update PCI devices before adding new platform device */
     xf86PlatformScanPciDev();
     driver_name = xf86PlatformFindHotplugDriver(xf86_num_platform_devices - 1);
 
     ret = xf86platformAddDevice(driver_name, xf86_num_platform_devices-1);
-    if (ret == -1)
-        xf86_remove_platform_device(xf86_num_platform_devices-1);
+    if (ret == -1) {
+      xf86_remove_platform_device(xf86_num_platform_devices - 1);
+    }
 
     ErrorF("xf86: found device %d\n", xf86_num_platform_devices);
     return;
@@ -210,24 +226,28 @@ void DeleteGPUDeviceRequest(struct OdevAttributes *attribs)
     int index;
     char *syspath = attribs->syspath;
 
-    if (!syspath)
-        goto out;
+    if (!syspath) {
+      goto out;
+    }
 
     for (index = 0; index < xf86_num_platform_devices; index++) {
         char *dspath = xf86_platform_odev_attributes(index)->syspath;
-        if (dspath && !strcmp(syspath, dspath))
-            break;
+        if (dspath && !strcmp(syspath, dspath)) {
+          break;
+        }
     }
 
-    if (index == xf86_num_platform_devices)
-        goto out;
+    if (index == xf86_num_platform_devices) {
+      goto out;
+    }
 
     ErrorF("xf86: remove device %d %s\n", index, syspath);
 
-    if (xf86_get_platform_device_unowned(index) == TRUE)
-            xf86_remove_platform_device(index);
-    else
-            xf86platformRemoveDevice(index);
+    if (xf86_get_platform_device_unowned(index) == TRUE) {
+      xf86_remove_platform_device(index);
+    } else {
+      xf86platformRemoveDevice(index);
+    }
 out:
     config_odev_free_attributes(attribs);
 }

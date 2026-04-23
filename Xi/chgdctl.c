@@ -89,8 +89,9 @@ ProcXChangeDeviceControl(ClientPtr client)
 
     DeviceIntPtr dev;
     int ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
-    if (ret != Success)
+    if (ret != Success) {
         goto out;
+    }
 
     /* XTest devices are special, none of the below apply to them anyway */
     if (IsXTestDevice(dev, NULL)) {
@@ -133,13 +134,15 @@ ProcXChangeDeviceControl(ClientPtr client)
         int status = ChangeDeviceControl(client, dev, (xDeviceCtl *) r);
         if (status == Success) {
             AxisInfoPtr a = &dev->valuator->axes[r->first_valuator];
-            for (int i = 0; i < r->num_valuators; i++)
+            for (int i = 0; i < r->num_valuators; i++) {
                 if (*(resolution + i) < (a + i)->min_resolution ||
-                    *(resolution + i) > (a + i)->max_resolution)
+                    *(resolution + i) > (a + i)->max_resolution) {
                     return BadValue;
-            for (int i = 0; i < r->num_valuators; i++)
+                }
+            }
+            for (int i = 0; i < r->num_valuators; i++) {
                 (a++)->resolution = *resolution++;
-
+            }
             ret = Success;
         }
         else if (status == DeviceBusy) {
@@ -174,10 +177,11 @@ ProcXChangeDeviceControl(ClientPtr client)
                       (!Success) : ChangeDeviceControl(client, dev, (xDeviceCtl *) e));
 
         if (status == Success) {
-            if (e->enable)
-                EnableDevice(dev, TRUE);
-            else
-                DisableDevice(dev, TRUE);
+          if (e->enable) {
+            EnableDevice(dev, TRUE);
+          } else {
+            DisableDevice(dev, TRUE);
+          }
             ret = Success;
         }
         else if (status == DeviceBusy) {

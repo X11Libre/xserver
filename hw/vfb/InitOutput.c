@@ -177,8 +177,9 @@ vfbAddCrtcInfo(vfbScreenInfoPtr screen, int numCrtcs)
     if (count > 0) {
         vfbCrtcInfoPtr crtcs =
             reallocarray(screen->crtcs, numCrtcs, sizeof(*crtcs));
-        if (!crtcs)
-            FatalError("Not enough memory for %d CRTCs", numCrtcs);
+        if (!crtcs) {
+          FatalError("Not enough memory for %d CRTCs", numCrtcs);
+        }
 
         memset(crtcs + screen->numCrtcs, 0, count * sizeof(*crtcs));
 
@@ -199,8 +200,9 @@ vfbInitializeScreenInfo(vfbScreenInfoPtr screen)
     vfbAddCrtcInfo(screen, VFB_DEFAULT_NUM_CRTCS);
 
     /* First CRTC initializes with one output */
-    if (screen->numCrtcs > 0)
-        screen->crtcs[0].numOutputs = 1;
+    if (screen->numCrtcs > 0) {
+      screen->crtcs[0].numOutputs = 1;
+    }
 
     return screen;
 }
@@ -211,21 +213,23 @@ vfbInitializePixmapDepths(void)
     int i;
 
     vfbPixmapDepths[1] = TRUE;  /* always need bitmaps */
-    for (i = 2; i <= 32; i++)
-        vfbPixmapDepths[i] = FALSE;
+    for (i = 2; i <= 32; i++) {
+      vfbPixmapDepths[i] = FALSE;
+    }
 }
 
 static int
 vfbBitsPerPixel(int depth)
 {
-    if (depth == 1)
-        return 1;
-    else if (depth <= 8)
-        return 8;
-    else if (depth <= 16)
-        return 16;
-    else
-        return 32;
+  if (depth == 1) {
+    return 1;
+  } else if (depth <= 8) {
+    return 8;
+  } else if (depth <= 16) {
+    return 16;
+  } else {
+    return 32;
+  }
 }
 
 static void
@@ -336,10 +340,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
         firstTime = FALSE;
     }
 
-    if (lastScreen == -1)
-        currentScreen = vfbInitializeScreenInfo(&defaultScreenInfo);
-    else
-        currentScreen = &vfbScreens[lastScreen];
+    if (lastScreen == -1) {
+      currentScreen = vfbInitializeScreenInfo(&defaultScreenInfo);
+    } else {
+      currentScreen = &vfbScreens[lastScreen];
+    }
 
     if (strcmp(argv[i], "-screen") == 0) {      /* -screen n WxHxD */
         int screenNum;
@@ -358,10 +363,12 @@ ddxProcessArgument(int argc, char *argv[], int i)
         if (vfbNumScreens <= screenNum) {
             vfbScreens =
                 reallocarray(vfbScreens, screenNum + 1, sizeof(*vfbScreens));
-            if (!vfbScreens)
-                FatalError("Not enough memory for screen %d\n", screenNum);
-            for (; vfbNumScreens <= screenNum; ++vfbNumScreens)
-                vfbInitializeScreenInfo(&vfbScreens[vfbNumScreens]);
+            if (!vfbScreens) {
+              FatalError("Not enough memory for screen %d\n", screenNum);
+            }
+            for (; vfbNumScreens <= screenNum; ++vfbNumScreens) {
+              vfbInitializeScreenInfo(&vfbScreens[vfbNumScreens]);
+            }
         }
 
         if (3 != sscanf(argv[i + 2], "%dx%dx%d",
@@ -507,11 +514,13 @@ vfbInstallColormap(ColormapPtr pmap)
         ppix = calloc(entries, sizeof(Pixel));
         prgb = calloc(entries, sizeof(xrgb));
         defs = calloc(entries, sizeof(xColorItem));
-        if (!ppix || !prgb || !defs)
-            goto out;
+        if (!ppix || !prgb || !defs) {
+          goto out;
+        }
 
-        for (i = 0; i < entries; i++)
-            ppix[i] = i;
+        for (i = 0; i < entries; i++) {
+          ppix[i] = i;
+        }
         /* XXX truecolor */
         QueryColors(pmap, entries, ppix, prgb, serverClient);
 
@@ -670,8 +679,9 @@ vfbAllocateSharedMemoryFramebuffer(vfbScreenInfoPtr pvfb)
 static char *
 vfbAllocateFramebufferMemory(vfbScreenInfoPtr pvfb)
 {
-    if (pvfb->pfbMemory)
-        return pvfb->pfbMemory; /* already done */
+  if (pvfb->pfbMemory) {
+    return pvfb->pfbMemory; /* already done */
+  }
 
     pvfb->sizeInBytes = pvfb->paddedBytesWidth * pvfb->height;
 
@@ -687,8 +697,9 @@ vfbAllocateFramebufferMemory(vfbScreenInfoPtr pvfb)
     else {                      /* decomposed colormaps */
         int nplanes_per_color_component = pvfb->depth / 3;
 
-        if (pvfb->depth % 3)
-            nplanes_per_color_component++;
+        if (pvfb->depth % 3) {
+          nplanes_per_color_component++;
+        }
         pvfb->ncolors = 1 << nplanes_per_color_component;
     }
 
@@ -891,10 +902,11 @@ vfbRROutputValidateMode(ScreenPtr           pScreen,
     if (pScrPriv->minWidth <= mode->mode.width &&
         pScrPriv->maxWidth >= mode->mode.width &&
         pScrPriv->minHeight <= mode->mode.height &&
-        pScrPriv->maxHeight >= mode->mode.height)
-        return TRUE;
-    else
-        return FALSE;
+        pScrPriv->maxHeight >= mode->mode.height) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
 }
 
 static Bool
@@ -973,8 +985,9 @@ vfbRandRInit(ScreenPtr pScreen)
 #endif
     int mmWidth, mmHeight;
 
-    if (!RRScreenInit(pScreen))
-        return FALSE;
+    if (!RRScreenInit(pScreen)) {
+      return FALSE;
+    }
     pScrPriv = rrGetScrPriv(pScreen);
     pScrPriv->rrGetInfo = vfbRRGetInfo;
 #if RANDR_12_INTERFACE
@@ -996,8 +1009,9 @@ vfbRandRInit(ScreenPtr pScreen)
         mmHeight = pvci->height * 25.4 / monitorResolution;
 
         crtc = RRCrtcCreate(pScreen, pvci);
-        if (!crtc)
-            return FALSE;
+        if (!crtc) {
+          return FALSE;
+        }
 
         /* Set gamma to avoid xrandr complaints */
         RRCrtcGammaSetSize(crtc, 256);
@@ -1005,16 +1019,21 @@ vfbRandRInit(ScreenPtr pScreen)
         /* Setup an Output for each CRTC: 'screen' for the first, then 'screen_N' */
         snprintf(name, sizeof(name), i == 0 ? "screen" : "screen_%d", i);
         output = RROutputCreate(pScreen, name, strlen(name), NULL);
-        if (!output)
-            return FALSE;
-        if (!RROutputSetClones(output, NULL, 0))
-            return FALSE;
-        if (!RROutputSetCrtcs(output, &crtc, 1))
-            return FALSE;
-        if (!RROutputSetConnection(output, RR_Connected))
-            return FALSE;
-        if (!RROutputSetPhysicalSize(output, mmWidth, mmHeight))
-            return FALSE;
+        if (!output) {
+          return FALSE;
+        }
+        if (!RROutputSetClones(output, NULL, 0)) {
+          return FALSE;
+        }
+        if (!RROutputSetCrtcs(output, &crtc, 1)) {
+          return FALSE;
+        }
+        if (!RROutputSetConnection(output, RR_Connected)) {
+          return FALSE;
+        }
+        if (!RROutputSetPhysicalSize(output, mmWidth, mmHeight)) {
+          return FALSE;
+        }
 
         /* Setup a Mode and notify only for CRTCs with Outputs */
         if (pvci->numOutputs > 0) {
@@ -1025,13 +1044,16 @@ vfbRandRInit(ScreenPtr pScreen)
             modeInfo.nameLength = strlen(name);
 
             mode = RRModeGet(&modeInfo, name);
-            if (!mode)
-                return FALSE;
-            if (!RROutputSetModes(output, &mode, 1, 0))
-                return FALSE;
+            if (!mode) {
+              return FALSE;
+            }
+            if (!RROutputSetModes(output, &mode, 1, 0)) {
+              return FALSE;
+            }
             if (!RRCrtcNotify(crtc, mode, pvci->x, pvci->y, RR_Rotate_0, NULL,
-                              1, &output))
-                return FALSE;
+                              1, &output)) {
+              return FALSE;
+            }
         }
     }
 #endif
@@ -1046,21 +1068,25 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
     int ret;
     char *pbits;
 
-    if (dpix == 0)
-        dpix = 100;
+    if (dpix == 0) {
+      dpix = 100;
+    }
 
-    if (dpiy == 0)
-        dpiy = 100;
+    if (dpiy == 0) {
+      dpiy = 100;
+    }
 
     pvfb->paddedBytesWidth = PixmapBytePad(pvfb->width, pvfb->depth);
     pvfb->bitsPerPixel = vfbBitsPerPixel(pvfb->depth);
-    if (pvfb->bitsPerPixel >= 8)
-        pvfb->paddedWidth = pvfb->paddedBytesWidth / (pvfb->bitsPerPixel / 8);
-    else
-        pvfb->paddedWidth = pvfb->paddedBytesWidth * 8;
+    if (pvfb->bitsPerPixel >= 8) {
+      pvfb->paddedWidth = pvfb->paddedBytesWidth / (pvfb->bitsPerPixel / 8);
+    } else {
+      pvfb->paddedWidth = pvfb->paddedBytesWidth * 8;
+    }
     pbits = vfbAllocateFramebufferMemory(pvfb);
-    if (!pbits)
-        return FALSE;
+    if (!pbits) {
+      return FALSE;
+    }
 
     switch (pvfb->depth) {
     case 8:
@@ -1106,8 +1132,9 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
     ret = fbScreenInit(pScreen, pbits, pvfb->width, pvfb->height,
                        dpix, dpiy, pvfb->paddedWidth, pvfb->bitsPerPixel);
 
-    if (!ret)
-        return FALSE;
+    if (!ret) {
+      return FALSE;
+    }
 
     if (Render) {
         fbPictureInit(pScreen, 0, 0);
@@ -1116,8 +1143,9 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 #endif
     }
 
-    if (!vfbRandRInit(pScreen))
+    if (!vfbRandRInit(pScreen)) {
        return FALSE;
+    }
 
     pScreen->InstallColormap = vfbInstallColormap;
     pScreen->StoreColors = vfbStoreColors;
@@ -1146,8 +1174,9 @@ InitOutput(int argc, char **argv)
     int i;
     int NumFormats = 0;
 
-    if (!monitorResolution)
-               monitorResolution = 96;
+    if (!monitorResolution) {
+      monitorResolution = 96;
+    }
 
     /* initialize pixmap formats */
 
@@ -1177,8 +1206,9 @@ InitOutput(int argc, char **argv)
 
     for (i = 1; i <= 32; i++) {
         if (vfbPixmapDepths[i]) {
-            if (NumFormats >= MAXFORMATS)
-                FatalError("MAXFORMATS is too small for this server\n");
+          if (NumFormats >= MAXFORMATS) {
+            FatalError("MAXFORMATS is too small for this server\n");
+          }
             screenInfo.formats[NumFormats].depth = i;
             screenInfo.formats[NumFormats].bitsPerPixel = vfbBitsPerPixel(i);
             screenInfo.formats[NumFormats].scanlinePad = BITMAP_SCANLINE_PAD;

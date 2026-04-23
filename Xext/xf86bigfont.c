@@ -229,8 +229,9 @@ XF86BigfontFreeFontShm(FontPtr pFont)
     /* If during shutdown of the server, XF86BigfontCleanup() has already
      * called shmdealloc() for all segments, we don't need to do it here.
      */
-    if (!ShmList)
-        return;
+    if (!ShmList) {
+      return;
+    }
 
     pDesc = (ShmDescPtr) FontGetPrivate(pFont, FontShmdescIndex);
     if (pDesc) {
@@ -361,8 +362,9 @@ ProcXF86BigfontQueryFont(ClientPtr client)
     }
 
     if (dixLookupFontable(&pFont, stuff->id, client, DixGetAttrAccess) !=
-        Success)
-        return BadFont;         /* protocol spec says only error is BadFont */
+        Success) {
+      return BadFont; /* protocol spec says only error is BadFont */
+    }
 
     pmax = FONTINKMAX(pFont);
     pmin = FONTINKMIN(pFont);
@@ -459,8 +461,9 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             CARD32 i, j;
 
             hashModulus = 67;
-            if (hashModulus > nCharInfos + 1)
-                hashModulus = nCharInfos + 1;
+            if (hashModulus > nCharInfos + 1) {
+              hashModulus = nCharInfos + 1;
+            }
 
             tmp = calloc(4 * nCharInfos + 1, sizeof(CARD16));
             if (!tmp) {
@@ -495,13 +498,14 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                 for (i = pHash2UniqIndex[hashCode];
                      i != (CARD16) (-1); i = pUniqIndex2NextUniqIndex[i]) {
                     j = pUniqIndex2Index[i];
-                    if (pCI[j].leftSideBearing == p->leftSideBearing
-                        && pCI[j].rightSideBearing == p->rightSideBearing
-                        && pCI[j].characterWidth == p->characterWidth
-                        && pCI[j].ascent == p->ascent
-                        && pCI[j].descent == p->descent
-                        && pCI[j].attributes == p->attributes)
-                        break;
+                    if (pCI[j].leftSideBearing == p->leftSideBearing &&
+                        pCI[j].rightSideBearing == p->rightSideBearing &&
+                        pCI[j].characterWidth == p->characterWidth &&
+                        pCI[j].ascent == p->ascent &&
+                        pCI[j].descent == p->descent &&
+                        pCI[j].attributes == p->attributes) {
+                      break;
+                    }
                 }
                 if (i != (CARD16) (-1)) {
                     /* Found *p at Index j, UniqIndex i */

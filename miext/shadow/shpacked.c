@@ -85,15 +85,17 @@ shadowUpdatePacked(ScreenPtr pScreen, shadowBufPtr pBuf)
                                                           SHADOW_WINDOW_WRITE,
                                                           &winSize,
                                                           pBuf->closure);
-                    if (!winBase)
-                        return;
+                    if (!winBase) {
+                      return;
+                    }
                     scrBase = scr;
                     winSize /= sizeof(FbBits);
                     i = winSize;
                 }
                 win = winBase + (scr - scrBase);
-                if (i > width)
-                    i = width;
+                if (i > width) {
+                  i = width;
+                }
                 width -= i;
                 scr += i;
                 memcpy(win, sha, i * sizeof(FbBits));

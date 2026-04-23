@@ -85,8 +85,9 @@ TestPointerProc(DeviceIntPtr pDev, int what)
 
     switch (what) {
     case DEVICE_INIT:
-        for (i = 1; i <= NBUTTONS; i++)
-            map[i] = i;
+      for (i = 1; i <= NBUTTONS; i++) {
+        map[i] = i;
+      }
 
         btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
         btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
@@ -277,8 +278,9 @@ init_simple(void)
 
     serverClient = &server_client;
     InitClient(serverClient, 0, (void *) NULL);
-    if (!InitClientResources(serverClient)) /* for root resources */
-        FatalError("couldn't init server resources");
+    if (!InitClientResources(serverClient)) { /* for root resources */
+      FatalError("couldn't init server resources");
+    }
     SyncExtensionInit();
 
     devices = init_devices();
@@ -336,8 +338,9 @@ extern ClientRec client_window;
 WRAP_FUNCTION(dixLookupResourceOwner, int,
               ClientPtr *pClient, XID rid, ClientPtr client, Mask access)
 {
-    if (rid == ROOT_WINDOW_ID)
-        return BadWindow;
+  if (rid == ROOT_WINDOW_ID) {
+    return BadWindow;
+  }
 
     if (rid == CLIENT_WINDOW_ID) {
         *pClient = &client_window;

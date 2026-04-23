@@ -64,8 +64,9 @@ request_XISetClientPointer(xXISetClientPointerReq * req, int error)
     rc = ProcXISetClientPointer(&client_request);
     assert(rc == error);
 
-    if (rc == BadDevice)
-        assert(client_request.errorValue == req->deviceid);
+    if (rc == BadDevice) {
+      assert(client_request.errorValue == req->deviceid);
+    }
 
     client_request.swapped = TRUE;
 
@@ -84,9 +85,9 @@ request_XISetClientPointer(xXISetClientPointerReq * req, int error)
     rc = ProcXISetClientPointer(&client_request);
     assert(rc == error);
 
-    if (rc == BadDevice)
-        assert(client_request.errorValue == req->deviceid);
-
+    if (rc == BadDevice) {
+      assert(client_request.errorValue == req->deviceid);
+    }
 }
 
 static void

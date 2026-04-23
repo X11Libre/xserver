@@ -80,8 +80,9 @@ dix_update_desktop_dimensions(void)
     int i;
     ScreenRec screens[MAXSCREENS];
 
-    for (i = 0; i < MAXSCREENS; i++)
-        screenInfo.screens[i] = &screens[i];
+    for (i = 0; i < MAXSCREENS; i++) {
+      screenInfo.screens[i] = &screens[i];
+    }
 
     short x = 0;
     short y = 0;

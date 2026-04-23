@@ -56,13 +56,16 @@ void *glXGetProcAddressARB(const char *symbol)
     void *proc;
 
     /* Default to the mesa GL implementation if one hasn't been selected yet */
-    if (!hMod)
-        glWinSelectImplementation(0);
+    if (!hMod) {
+      glWinSelectImplementation(0);
+    }
 
     proc = GetProcAddress(hMod, symbol);
 
-    if (glxWinDebugSettings.enableGLcallTrace)
-        ErrorF("glXGetProcAddressARB: Resolved '%s' in %p to %p\n", symbol, hMod, proc);
+    if (glxWinDebugSettings.enableGLcallTrace) {
+      ErrorF("glXGetProcAddressARB: Resolved '%s' in %p to %p\n", symbol, hMod,
+             proc);
+    }
 
     return proc;
 }

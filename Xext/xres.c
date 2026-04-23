@@ -245,8 +245,9 @@ ProcXResQueryClientResources(ClientPtr client)
     }
 
     int *counts = calloc(lastResourceType + 1, sizeof(int));
-    if (!counts)
-        return BadAlloc;
+    if (!counts) {
+      return BadAlloc;
+    }
 
     FindAllClientResources(resClient, ResFindAllRes, counts);
 
@@ -832,8 +833,9 @@ ProcXResQueryResourceBytes (ClientPtr client)
 
     if (client->swapped) {
         xXResResourceIdSpec *specs = (void*) ((char*) stuff + sizeof(*stuff));
-        for (int c = 0; c < stuff->numSpecs; ++c)
-            SwapXResResourceIdSpec(specs + c);
+        for (int c = 0; c < stuff->numSpecs; ++c) {
+          SwapXResResourceIdSpec(specs + c);
+        }
     }
 
     ConstructResourceBytesCtx ctx;
@@ -864,9 +866,12 @@ ProcXResQueryResourceBytes (ClientPtr client)
             x_rpcbuf_write_CARD8s(&rpcbuf, FRAGMENT_DATA(it), it->bytes);
         }
 
-        if (rpcbuf.wpos != ctx.resultBytes)
-            LogMessage(X_WARNING, "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
-                       (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
+        if (rpcbuf.wpos != ctx.resultBytes) {
+          LogMessage(
+              X_WARNING,
+              "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
+              (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
+        }
 
         rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }

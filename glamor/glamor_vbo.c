@@ -55,8 +55,9 @@ glamor_get_vbo_space(ScreenPtr screen, unsigned size, char **vbo_offset)
 
     if (glamor_priv->has_buffer_storage) {
         if (glamor_priv->vbo_size < glamor_priv->vbo_offset + size) {
-            if (glamor_priv->vbo_size)
-                glUnmapBuffer(GL_ARRAY_BUFFER);
+          if (glamor_priv->vbo_size) {
+            glUnmapBuffer(GL_ARRAY_BUFFER);
+          }
 
             if (size > glamor_priv->vbo_size) {
                 glamor_priv->vbo_size = MAX(GLAMOR_VBO_SIZE, size);
@@ -103,8 +104,9 @@ glamor_get_vbo_space(ScreenPtr screen, unsigned size, char **vbo_offset)
          * version, Mesa would sometimes throw errors on unmapping a
          * zero-size mapping.
          */
-        if (size == 0)
-            return NULL;
+        if (size == 0) {
+          return NULL;
+        }
 
         if (glamor_priv->vbo_size < glamor_priv->vbo_offset + size) {
             glamor_priv->vbo_size = MAX(GLAMOR_VBO_SIZE, size);
@@ -188,6 +190,7 @@ glamor_fini_vbo(ScreenPtr screen)
 
     glDeleteVertexArrays(1, &glamor_priv->vao);
     glamor_priv->vao = 0;
-    if (!glamor_priv->has_map_buffer_range)
-        free(glamor_priv->vb);
+    if (!glamor_priv->has_map_buffer_range) {
+      free(glamor_priv->vb);
+    }
 }

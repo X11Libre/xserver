@@ -263,8 +263,9 @@ miArcSegment(DrawablePtr pDraw, GCPtr pGC, xArc tarc, miArcFacePtr right,
     int a0, a1, startAngle, endAngle;
     miArcFacePtr temp;
 
-    if (!l)
-        l = 1;
+    if (!l) {
+      l = 1;
+    }
 
     if (tarc.width == 0 || tarc.height == 0) {
         drawZeroArc(pDraw, pGC, &tarc, l, left, right);
@@ -278,10 +279,11 @@ miArcSegment(DrawablePtr pDraw, GCPtr pGC, xArc tarc, miArcFacePtr right,
 
     a0 = tarc.angle1;
     a1 = tarc.angle2;
-    if (a1 > FULLCIRCLE)
-        a1 = FULLCIRCLE;
-    else if (a1 < -FULLCIRCLE)
-        a1 = -FULLCIRCLE;
+    if (a1 > FULLCIRCLE) {
+      a1 = FULLCIRCLE;
+    } else if (a1 < -FULLCIRCLE) {
+      a1 = -FULLCIRCLE;
+    }
     if (a1 < 0) {
         startAngle = a0 + a1;
         endAngle = a0;
@@ -296,14 +298,18 @@ miArcSegment(DrawablePtr pDraw, GCPtr pGC, xArc tarc, miArcFacePtr right,
     /*
      * bounds check the two angles
      */
-    if (startAngle < 0)
-        startAngle = FULLCIRCLE - (-startAngle) % FULLCIRCLE;
-    if (startAngle >= FULLCIRCLE)
-        startAngle = startAngle % FULLCIRCLE;
-    if (endAngle < 0)
-        endAngle = FULLCIRCLE - (-endAngle) % FULLCIRCLE;
-    if (endAngle > FULLCIRCLE)
-        endAngle = (endAngle - 1) % FULLCIRCLE + 1;
+    if (startAngle < 0) {
+      startAngle = FULLCIRCLE - (-startAngle) % FULLCIRCLE;
+    }
+    if (startAngle >= FULLCIRCLE) {
+      startAngle = startAngle % FULLCIRCLE;
+    }
+    if (endAngle < 0) {
+      endAngle = FULLCIRCLE - (-endAngle) % FULLCIRCLE;
+    }
+    if (endAngle > FULLCIRCLE) {
+      endAngle = (endAngle - 1) % FULLCIRCLE + 1;
+    }
     if ((startAngle == endAngle) && a1) {
         startAngle = 0;
         endAngle = FULLCIRCLE;
@@ -425,15 +431,16 @@ miComputeCircleSpans(int lw, xArc * parc, miArcSpanData * spdata)
         span++;
     }
     if (spdata->bot) {
-        if (spdata->count2)
-            spdata->count2--;
-        else {
-            if (lw > (int) parc->height)
-                span[-1].rx = span[-1].rw = -((lw - (int) parc->height) >> 1);
-            else
-                span[-1].rw = 0;
-            spdata->count1--;
+      if (spdata->count2) {
+        spdata->count2--;
+      } else {
+        if (lw > (int)parc->height) {
+          span[-1].rx = span[-1].rw = -((lw - (int)parc->height) >> 1);
+        } else {
+          span[-1].rw = 0;
         }
+        spdata->count1--;
+      }
     }
 }
 
@@ -461,10 +468,11 @@ miComputeEllipseSpans(int lw, xArc * parc, miArcSpanData * spdata)
     hepm = h - EPSILON;
     K = h + ((lw - 1) >> 1);
     span = spdata->spans;
-    if (parc->width & 1)
-        xorg = .5;
-    else
-        xorg = 0.0;
+    if (parc->width & 1) {
+      xorg = .5;
+    } else {
+      xorg = 0.0;
+    }
     if (spdata->top) {
         span->lx = 0;
         span->lw = 1;
@@ -489,10 +497,11 @@ miComputeEllipseSpans(int lw, xArc * parc, miArcSpanData * spdata)
                 d = -d;
             }
             Z = N - 2.0 * b * cos(acos(-t / d) / 3.0);
-            if ((Z < 0.0) == (Vr < 0.0))
-                flip = 2;
-            else
-                flip = 1;
+            if ((Z < 0.0) == (Vr < 0.0)) {
+              flip = 2;
+            } else {
+              flip = 1;
+            }
         }
         else {
             d = Vr * sqrt(d);
@@ -510,19 +519,22 @@ miComputeEllipseSpans(int lw, xArc * parc, miArcSpanData * spdata)
             y = (b + d) / 2;
             if ((y >= 0.0) && (y < hepp)) {
                 solution = TRUE;
-                if (y > hepm)
-                    y = h;
+                if (y > hepm) {
+                  y = h;
+                }
                 t = y / h;
                 x = w * sqrt(1 - (t * t));
                 t = K - y;
-                if (rs - (t * t) >= 0)
-                    t = sqrt(rs - (t * t));
-                else
-                    t = 0;
-                if (flip == 2)
-                    inx = x - t;
-                else
-                    outx = x + t;
+                if (rs - (t * t) >= 0) {
+                  t = sqrt(rs - (t * t));
+                } else {
+                  t = 0;
+                }
+                if (flip == 2) {
+                  inx = x - t;
+                } else {
+                  outx = x + t;
+                }
             }
         }
         b = A + K;
@@ -531,37 +543,43 @@ miComputeEllipseSpans(int lw, xArc * parc, miArcSpanData * spdata)
          * that sometimes we end up with a negative value near the axis, when
          * it should be positive.  This is a workaround.
          */
-        if (d < 0 && !solution)
-            d = 0.0;
+        if (d < 0 && !solution) {
+          d = 0.0;
+        }
         if (d >= 0) {
             d = sqrt(d);
             y = (b + d) / 2;
             if (y < hepp) {
-                if (y > hepm)
-                    y = h;
+              if (y > hepm) {
+                y = h;
+              }
                 t = y / h;
                 x = w * sqrt(1 - (t * t));
                 t = K - y;
-                if (rs - (t * t) >= 0)
-                    inx = x - sqrt(rs - (t * t));
-                else
-                    inx = x;
+                if (rs - (t * t) >= 0) {
+                  inx = x - sqrt(rs - (t * t));
+                } else {
+                  inx = x;
+                }
             }
             y = (b - d) / 2;
             if (y >= 0.0) {
-                if (y > hepm)
-                    y = h;
+              if (y > hepm) {
+                y = h;
+              }
                 t = y / h;
                 x = w * sqrt(1 - (t * t));
                 t = K - y;
-                if (rs - (t * t) >= 0)
-                    t = sqrt(rs - (t * t));
-                else
-                    t = 0;
-                if (flip == 1)
-                    inx = x - t;
-                else
-                    outx = x + t;
+                if (rs - (t * t) >= 0) {
+                  t = sqrt(rs - (t * t));
+                } else {
+                  t = 0;
+                }
+                if (flip == 1) {
+                  inx = x - t;
+                } else {
+                  outx = x + t;
+                }
             }
         }
         span->lx = ICEIL(xorg - outx);
@@ -581,15 +599,16 @@ miComputeEllipseSpans(int lw, xArc * parc, miArcSpanData * spdata)
     }
     if (spdata->bot) {
         outx = w + r;
-        if (r >= h && r <= w)
-            inx = 0.0;
-        else if (Nk < 0.0 && -Nk < Hs) {
-            inx = w * sqrt(1 + Nk / Hs) - sqrt(rs + Nk);
-            if (inx > w - r)
-                inx = w - r;
-        }
-        else
+        if (r >= h && r <= w) {
+          inx = 0.0;
+        } else if (Nk < 0.0 && -Nk < Hs) {
+          inx = w * sqrt(1 + Nk / Hs) - sqrt(rs + Nk);
+          if (inx > w - r) {
             inx = w - r;
+          }
+        } else {
+          inx = w - r;
+        }
         span->lx = ICEIL(xorg - outx);
         if (inx <= 0.0) {
             span->lw = ICEIL(xorg + outx) - span->lx;
@@ -638,11 +657,13 @@ tailX(double K,
             xs[0] = w * sqrt(1 + Nk / Hs) - sqrt(rs + Nk);
             xs[1] = w - r;
             if (acc->left.valid && boundedLe(K, bounds->left) &&
-                !boundedLe(K, bounds->outer) && xs[0] >= 0.0 && xs[1] >= 0.0)
-                return xs[1];
+                !boundedLe(K, bounds->outer) && xs[0] >= 0.0 && xs[1] >= 0.0) {
+              return xs[1];
+            }
             if (acc->right.valid && boundedLe(K, bounds->right) &&
-                !boundedLe(K, bounds->inner) && xs[0] <= 0.0 && xs[1] <= 0.0)
-                return xs[1];
+                !boundedLe(K, bounds->inner) && xs[0] <= 0.0 && xs[1] <= 0.0) {
+              return xs[1];
+            }
             return xs[0];
         }
         return w - r;
@@ -665,10 +686,11 @@ tailX(double K,
             d = -d;
         }
         Z = N - 2.0 * b * cos(acos(-t / d) / 3.0);
-        if ((Z < 0.0) == (Vr < 0.0))
-            flip = 2;
-        else
-            flip = 1;
+        if ((Z < 0.0) == (Vr < 0.0)) {
+          flip = 2;
+        } else {
+          flip = 1;
+        }
     }
     else {
         d = Vr * sqrt(d);
@@ -685,15 +707,17 @@ tailX(double K,
         y = (b + d) / 2;
         if ((y >= 0.0) && (y < hepp)) {
             solution = TRUE;
-            if (y > hepm)
-                y = h;
+            if (y > hepm) {
+              y = h;
+            }
             t = y / h;
             x = w * sqrt(1 - (t * t));
             t = K - y;
-            if (rs - (t * t) >= 0)
-                t = sqrt(rs - (t * t));
-            else
-                t = 0;
+            if (rs - (t * t) >= 0) {
+              t = sqrt(rs - (t * t));
+            } else {
+              t = 0;
+            }
             *xp++ = x - t;
         }
     }
@@ -703,43 +727,50 @@ tailX(double K,
      * that sometimes we end up with a negative value near the axis, when
      * it should be positive.  This is a workaround.
      */
-    if (d < 0 && !solution)
-        d = 0.0;
+    if (d < 0 && !solution) {
+      d = 0.0;
+    }
     if (d >= 0) {
         d = sqrt(d);
         y = (b + d) / 2;
         if (y < hepp) {
-            if (y > hepm)
-                y = h;
+          if (y > hepm) {
+            y = h;
+          }
             t = y / h;
             x = w * sqrt(1 - (t * t));
             t = K - y;
-            if (rs - (t * t) >= 0)
-                *xp++ = x - sqrt(rs - (t * t));
-            else
-                *xp++ = x;
+            if (rs - (t * t) >= 0) {
+              *xp++ = x - sqrt(rs - (t * t));
+            } else {
+              *xp++ = x;
+            }
         }
         y = (b - d) / 2;
         if (y >= 0.0 && flip == 1) {
-            if (y > hepm)
-                y = h;
+          if (y > hepm) {
+            y = h;
+          }
             t = y / h;
             x = w * sqrt(1 - (t * t));
             t = K - y;
-            if (rs - (t * t) >= 0)
-                t = sqrt(rs - (t * t));
-            else
-                t = 0;
+            if (rs - (t * t) >= 0) {
+              t = sqrt(rs - (t * t));
+            } else {
+              t = 0;
+            }
             *xp++ = x - t;
         }
     }
     if (xp > &xs[1]) {
-        if (acc->left.valid && boundedLe(K, bounds->left) &&
-            !boundedLe(K, bounds->outer) && xs[0] >= 0.0 && xs[1] >= 0.0)
-            return xs[1];
-        if (acc->right.valid && boundedLe(K, bounds->right) &&
-            !boundedLe(K, bounds->inner) && xs[0] <= 0.0 && xs[1] <= 0.0)
-            return xs[1];
+      if (acc->left.valid && boundedLe(K, bounds->left) &&
+          !boundedLe(K, bounds->outer) && xs[0] >= 0.0 && xs[1] >= 0.0) {
+        return xs[1];
+      }
+      if (acc->right.valid && boundedLe(K, bounds->right) &&
+          !boundedLe(K, bounds->inner) && xs[0] <= 0.0 && xs[1] <= 0.0) {
+        return xs[1];
+      }
     }
     return xs[0];
 }
@@ -749,20 +780,23 @@ miComputeWideEllipse(int lw, xArc * parc)
 {
     int k;
 
-    if (!lw)
-        lw = 1;
+    if (!lw) {
+      lw = 1;
+    }
     k = (parc->height >> 1) + ((lw - 1) >> 1);
     miArcSpanData *spdata = calloc(1, sizeof(miArcSpanData) + sizeof(miArcSpan) * (k + 2));
-    if (!spdata)
-        return NULL;
+    if (!spdata) {
+      return NULL;
+    }
     spdata->spans = (miArcSpan *) (spdata + 1);
     spdata->k = k;
     spdata->top = !(lw & 1) && !(parc->width & 1);
     spdata->bot = !(parc->height & 1);
-    if (parc->width == parc->height)
-        miComputeCircleSpans(lw, parc, spdata);
-    else
-        miComputeEllipseSpans(lw, parc, spdata);
+    if (parc->width == parc->height) {
+      miComputeCircleSpans(lw, parc, spdata);
+    } else {
+      miComputeEllipseSpans(lw, parc, spdata);
+    }
     return spdata;
 }
 
@@ -780,8 +814,9 @@ miFillWideEllipse(DrawablePtr pDraw, GCPtr pGC, xArc * parc)
     yorgu = parc->height + pGC->lineWidth;
     n = (sizeof(int) * 2) * yorgu;
     int *widths = calloc(1, n + (sizeof(xPoint) * 2) * yorgu);
-    if (!widths)
-        return;
+    if (!widths) {
+      return;
+    }
     points = (DDXPointPtr) ((char *) widths + n);
     spdata = miComputeWideEllipse((int) pGC->lineWidth, parc);
     if (!spdata) {
@@ -917,8 +952,9 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
         while (parcs->width && parcs->height &&
                (parcs->angle2 >= FULLCIRCLE || parcs->angle2 <= -FULLCIRCLE)) {
             miFillWideEllipse(pDraw, pGC, parcs);
-            if (!--narcs)
-                return;
+            if (!--narcs) {
+              return;
+            }
             parcs++;
         }
     }
@@ -961,8 +997,9 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
         pixmapHeight = min(yMax, pDraw->height) - yOrg;
 
         /* if nothing left, return */
-        if ((pixmapWidth <= 0) || (pixmapHeight <= 0))
-            return;
+        if ((pixmapWidth <= 0) || (pixmapHeight <= 0)) {
+          return;
+        }
 
         for (i = narcs, parc = parcs; --i >= 0; parc++) {
             parc->x -= xOrg;
@@ -975,8 +1012,9 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
 
         /* set up scratch GC */
         pGCTo = GetScratchGC(1, pDraw->pScreen);
-        if (!pGCTo)
-            return;
+        if (!pGCTo) {
+          return;
+        }
         {
             ChangeGCVal gcvals[6];
 
@@ -1008,12 +1046,14 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
 
     /* the protocol sez these don't cause color changes */
     if ((pGC->fillStyle == FillTiled) ||
-        (pGC->fillStyle == FillOpaqueStippled))
-        bg = fg;
+        (pGC->fillStyle == FillOpaqueStippled)) {
+      bg = fg;
+    }
 
     polyArcs = miComputeArcs(parcs, narcs, pGC);
-    if (!polyArcs)
-        goto out;
+    if (!polyArcs) {
+      goto out;
+    }
 
     cap[0] = cap[1] = 0;
     join[0] = join[1] = 0;
@@ -1051,8 +1091,9 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
                 fillSpans(pDrawTo, pGCTo);
                 /* don't cap self-joining arcs */
                 if (polyArcs[iphase].arcs[i].selfJoin &&
-                    cap[iphase] < polyArcs[iphase].arcs[i].cap)
-                    cap[iphase]++;
+                    cap[iphase] < polyArcs[iphase].arcs[i].cap) {
+                  cap[iphase]++;
+                }
                 while (cap[iphase] < polyArcs[iphase].arcs[i].cap) {
                     int arcIndex, end;
                     miArcDataPtr arcData0;
@@ -1094,8 +1135,9 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
                     ++join[iphase];
                 }
                 if (fTricky) {
-                    if (pGC->serialNumber != pDraw->serialNumber)
-                        ValidateGC(pDraw, pGC);
+                  if (pGC->serialNumber != pDraw->serialNumber) {
+                    ValidateGC(pDraw, pGC);
+                  }
                     (*pGC->ops->PushPixels) (pGC, (PixmapPtr) pDrawTo,
                                              pDraw, pixmapWidth,
                                              pixmapHeight, xOrg, yOrg);
@@ -1132,8 +1174,9 @@ GetFPolyYBounds(SppPointPtr pts, int n, double yFtrans, int *by, int *ty)
             ptMin = pts;
             ymin = pts->y;
         }
-        if (pts->y > ymax)
-            ymax = pts->y;
+        if (pts->y > ymax) {
+          ymax = pts->y;
+        }
 
         pts++;
     }
@@ -1189,8 +1232,9 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
     imin = GetFPolyYBounds(ptsIn, count, yFtrans, &ymin, &ymax);
 
     y = ymax - ymin + 1;
-    if ((count < 3) || (y <= 0))
-        return;
+    if ((count < 3) || (y <= 0)) {
+      return;
+    }
     ptsOut = FirstPoint = calloc(y, sizeof(xPoint));
     width = FirstWidth = calloc(y, sizeof(int));
     Marked = calloc(count, sizeof(int));
@@ -1202,8 +1246,9 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
         return;
     }
 
-    for (j = 0; j < count; j++)
-        Marked[j] = 0;
+    for (j = 0; j < count; j++) {
+      Marked[j] = 0;
+    }
     nextleft = nextright = imin;
     Marked[imin] = -1;
     y = ICEIL(ptsIn[nextleft].y + yFtrans);
@@ -1220,8 +1265,9 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
             left = nextleft++;
 
             /* find the next edge, considering the end conditions */
-            if (nextleft >= count)
-                nextleft = 0;
+            if (nextleft >= count) {
+              nextleft = 0;
+            }
 
             /* now compute the starting point and slope */
             dy = ptsIn[nextleft].y - ptsIn[left].y;
@@ -1240,8 +1286,9 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
             right = nextright--;
 
             /* find the next edge, considering the end conditions */
-            if (nextright < 0)
-                nextright = count - 1;
+            if (nextright < 0) {
+              nextright = count - 1;
+            }
 
             /* now compute the starting point and slope */
             dy = ptsIn[nextright].y - ptsIn[right].y;
@@ -1269,8 +1316,9 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
         }
         else {
             j = (int) i;
-            if (!j)
-                j++;
+            if (!j) {
+              j++;
+            }
         }
         while (j > 0) {
             int cxl, cxr;
@@ -1316,10 +1364,11 @@ angleBetween(SppPointRec center, SppPointRec point1, SppPointRec point2)
     a1 = miDatan2(-(point1.y - center.y), point1.x - center.x);
     a2 = miDatan2(-(point2.y - center.y), point2.x - center.x);
     a = a2 - a1;
-    if (a <= -180.0)
-        a += 360.0;
-    else if (a > 180.0)
-        a -= 360.0;
+    if (a <= -180.0) {
+      a += 360.0;
+    } else if (a > 180.0) {
+      a -= 360.0;
+    }
     return a;
 }
 
@@ -1370,8 +1419,9 @@ miArcJoin(DrawablePtr pDraw, GCPtr pGC, miArcFacePtr pLeft,
     pLeft = &Left;
 
     if (pRight->clock.x == pLeft->counterClock.x &&
-        pRight->clock.y == pLeft->counterClock.y)
-        return;
+        pRight->clock.y == pLeft->counterClock.y) {
+      return;
+    }
     center = pRight->center;
     if (0 <= (a = angleBetween(center, pRight->clock, pLeft->counterClock))
         && a <= 180.0) {
@@ -1394,8 +1444,9 @@ miArcJoin(DrawablePtr pDraw, GCPtr pGC, miArcFacePtr pLeft,
         arc.angle1 = -miDatan2(corner.y - center.y, corner.x - center.x);
         arc.angle2 = a;
         pArcPts = calloc(3, sizeof(SppPointRec));
-        if (!pArcPts)
-            return;
+        if (!pArcPts) {
+          return;
+        }
         pArcPts[0].x = otherCorner.x;
         pArcPts[0].y = otherCorner.y;
         pArcPts[1].x = center.x;
@@ -1509,14 +1560,15 @@ miRoundCap(DrawablePtr pDraw,
     arc.width = width;
     arc.height = width;
     arc.angle1 = -miDatan2(pCorner.y - pCenter.y, pCorner.x - pCenter.x);
-    if (PTISEQUAL(pCenter, pEnd))
-        arc.angle2 = -180.0;
-    else {
-        arc.angle2 =
-            -miDatan2(pOtherCorner.y - pCenter.y,
-                      pOtherCorner.x - pCenter.x) - arc.angle1;
-        if (arc.angle2 < 0)
-            arc.angle2 += 360.0;
+    if (PTISEQUAL(pCenter, pEnd)) {
+      arc.angle2 = -180.0;
+    } else {
+      arc.angle2 =
+          -miDatan2(pOtherCorner.y - pCenter.y, pOtherCorner.x - pCenter.x) -
+          arc.angle1;
+      if (arc.angle2 < 0) {
+        arc.angle2 += 360.0;
+      }
     }
     pArcPts = (SppPointPtr) NULL;
     if ((cpt = miGetArcPts(&arc, 0, &pArcPts))) {
@@ -1589,12 +1641,15 @@ miDsin(double a)
 static double
 miDasin(double v)
 {
-    if (v == 0)
-        return 0.0;
-    if (v == 1.0)
-        return 90.0;
-    if (v == -1.0)
-        return -90.0;
+  if (v == 0) {
+    return 0.0;
+  }
+  if (v == 1.0) {
+    return 90.0;
+  }
+  if (v == -1.0) {
+    return -90.0;
+  }
     return asin(v) * (180.0 / M_PI);
 }
 
@@ -1602,24 +1657,28 @@ static double
 miDatan2(double dy, double dx)
 {
     if (dy == 0) {
-        if (dx >= 0)
-            return 0.0;
+      if (dx >= 0) {
+        return 0.0;
+      }
         return 180.0;
     }
     else if (dx == 0) {
-        if (dy > 0)
-            return 90.0;
+      if (dy > 0) {
+        return 90.0;
+      }
         return -90.0;
     }
     else if (fabs(dy) == fabs(dx)) {
         if (dy > 0) {
-            if (dx > 0)
-                return 45.0;
+          if (dx > 0) {
+            return 45.0;
+          }
             return 135.0;
         }
         else {
-            if (dx > 0)
-                return 315.0;
+          if (dx > 0) {
+            return 315.0;
+          }
             return 225.0;
         }
     }
@@ -1669,13 +1728,16 @@ miGetArcPts(SppArcPtr parc,     /* points to an arc */
      * I'm just using cdt 'cause I'm lazy.
      */
     cdt = parc->width;
-    if (parc->height > cdt)
-        cdt = parc->height;
+    if (parc->height > cdt) {
+      cdt = parc->height;
+    }
     cdt /= 2.0;
-    if (cdt <= 0)
-        return 0;
-    if (cdt < 1.0)
-        cdt = 1.0;
+    if (cdt <= 0) {
+      return 0;
+    }
+    if (cdt < 1.0) {
+      cdt = 1.0;
+    }
     dt = miDasin(1.0 / cdt);    /* minimum step necessary */
     count = et / dt;
     count = abs(count) + 1;
@@ -1683,8 +1745,9 @@ miGetArcPts(SppArcPtr parc,     /* points to an arc */
     count++;
 
     cdt = 2 * miDcos(dt);
-    if (!(poly = reallocarray(*ppPts, cpt + count, sizeof(SppPointRec))))
-        return 0;
+    if (!(poly = reallocarray(*ppPts, cpt + count, sizeof(SppPointRec)))) {
+      return 0;
+    }
     *ppPts = poly;
 
     xc = parc->width / 2.0;     /* store half width and half height */
@@ -1715,11 +1778,11 @@ miGetArcPts(SppArcPtr parc,     /* points to an arc */
         y1 = y2;
     }
     /* adjust the last point */
-    if (fabs(parc->angle2) >= 360.0)
-        poly[cpt + i - 1] = poly[0];
-    else {
-        poly[cpt + i - 1].x = (miDcos(st + et) * parc->width / 2.0 + xc);
-        poly[cpt + i - 1].y = (miDsin(st + et) * parc->height / 2.0 + yc);
+    if (fabs(parc->angle2) >= 360.0) {
+      poly[cpt + i - 1] = poly[0];
+    } else {
+      poly[cpt + i - 1].x = (miDcos(st + et) * parc->width / 2.0 + xc);
+      poly[cpt + i - 1].y = (miDsin(st + et) * parc->height / 2.0 + yc);
     }
 
     return count;
@@ -1741,8 +1804,9 @@ addCap(miArcCapPtr * capsp, int *ncapsp, int *sizep, int end, int arcIndex)
     if (*ncapsp == *sizep) {
         newsize = *sizep + ADD_REALLOC_STEP;
         cap = reallocarray(*capsp, newsize, sizeof(**capsp));
-        if (!cap)
-            return;
+        if (!cap) {
+          return;
+        }
         *sizep = newsize;
         *capsp = cap;
     }
@@ -1764,8 +1828,9 @@ addJoin(miArcJoinPtr * joinsp,
     if (*njoinsp == *sizep) {
         newsize = *sizep + ADD_REALLOC_STEP;
         join = reallocarray(*joinsp, newsize, sizeof(**joinsp));
-        if (!join)
-            return;
+        if (!join) {
+          return;
+        }
         *sizep = newsize;
         *joinsp = join;
     }
@@ -1788,8 +1853,9 @@ addArc(miArcDataPtr * arcsp, int *narcsp, int *sizep, xArc * xarc)
     if (*narcsp == *sizep) {
         newsize = *sizep + ADD_REALLOC_STEP;
         arc = reallocarray(*arcsp, newsize, sizeof(**arcsp));
-        if (!arc)
-            return NULL;
+        if (!arc) {
+          return NULL;
+        }
         *sizep = newsize;
         *arcsp = arc;
     }
@@ -1806,12 +1872,15 @@ miFreeArcs(miPolyArcPtr arcs, GCPtr pGC)
 
     for (iphase = ((pGC->lineStyle == LineDoubleDash) ? 1 : 0);
          iphase >= 0; iphase--) {
-        if (arcs[iphase].narcs > 0)
-            free(arcs[iphase].arcs);
-        if (arcs[iphase].njoins > 0)
-            free(arcs[iphase].joins);
-        if (arcs[iphase].ncaps > 0)
-            free(arcs[iphase].caps);
+      if (arcs[iphase].narcs > 0) {
+        free(arcs[iphase].arcs);
+      }
+      if (arcs[iphase].njoins > 0) {
+        free(arcs[iphase].joins);
+      }
+      if (arcs[iphase].ncaps > 0) {
+        free(arcs[iphase].caps);
+      }
     }
     free(arcs);
 }
@@ -1894,8 +1963,9 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
     dashOffset = pGC->dashOffset;
 
     data = calloc(narcs, sizeof(struct arcData));
-    if (!data)
-        return NULL;
+    if (!data) {
+      return NULL;
+    }
     arcs = calloc(isDoubleDash ? 2 : 1, sizeof(*arcs));
     if (!arcs) {
         free(data);
@@ -1904,10 +1974,11 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
     for (i = 0; i < narcs; i++) {
         a0 = todeg(parcs[i].angle1);
         angle2 = parcs[i].angle2;
-        if (angle2 > FULLCIRCLE)
-            angle2 = FULLCIRCLE;
-        else if (angle2 < -FULLCIRCLE)
-            angle2 = -FULLCIRCLE;
+        if (angle2 > FULLCIRCLE) {
+          angle2 = FULLCIRCLE;
+        } else if (angle2 < -FULLCIRCLE) {
+          angle2 = -FULLCIRCLE;
+        }
         data[i].selfJoin = angle2 == FULLCIRCLE || angle2 == -FULLCIRCLE;
         a1 = todeg(parcs[i].angle1 + angle2);
         data[i].x0 =
@@ -1943,8 +2014,9 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
                 dashOffset -= dashRemaining;
                 iphase = iphase ? 0 : 1;
                 iDash++;
-                if (iDash == pGC->numInDashList)
-                    iDash = 0;
+                if (iDash == pGC->numInDashList) {
+                  iDash = 0;
+                }
                 dashRemaining = pGC->dash[iDash];
             }
             else {
@@ -1959,28 +2031,33 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
 
     for (i = narcs - 1; i >= 0; i--) {
         j = i + 1;
-        if (j == narcs)
-            j = 0;
+        if (j == narcs) {
+          j = 0;
+        }
         if (data[i].selfJoin || i == j ||
             (UNEQUAL(data[i].x1, data[j].x0) ||
              UNEQUAL(data[i].y1, data[j].y0))) {
-            if (iphase == 0 || isDoubleDash)
-                addCap(&arcs[iphase].caps, &arcs[iphase].ncaps,
-                       &capSize[iphase], RIGHT_END, 0);
+          if (iphase == 0 || isDoubleDash) {
+            addCap(&arcs[iphase].caps, &arcs[iphase].ncaps, &capSize[iphase],
+                   RIGHT_END, 0);
+          }
             break;
         }
     }
     start = i + 1;
-    if (start == narcs)
-        start = 0;
+    if (start == narcs) {
+      start = 0;
+    }
     i = start;
     for (;;) {
         j = i + 1;
-        if (j == narcs)
-            j = 0;
+        if (j == narcs) {
+          j = 0;
+        }
         nexti = i + 1;
-        if (nexti == narcs)
-            nexti = 0;
+        if (nexti == narcs) {
+          nexti = 0;
+        }
         if (isDashed) {
             /*
              ** deal with dashed arcs.  Use special rules for certain 0 area arcs.
@@ -1989,14 +2066,15 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
             arcTypes arcType = OTHER;
             CARD16 thisLength;
 
-            if (parcs[i].height == 0
-                && (parcs[i].angle1 % FULLCIRCLE) == 0x2d00
-                && parcs[i].angle2 == 0x2d00)
-                arcType = HORIZONTAL;
-            else if (parcs[i].width == 0
-                     && (parcs[i].angle1 % FULLCIRCLE) == 0x1680
-                     && parcs[i].angle2 == 0x2d00)
-                arcType = VERTICAL;
+            if (parcs[i].height == 0 &&
+                (parcs[i].angle1 % FULLCIRCLE) == 0x2d00 &&
+                parcs[i].angle2 == 0x2d00) {
+              arcType = HORIZONTAL;
+            } else if (parcs[i].width == 0 &&
+                       (parcs[i].angle1 % FULLCIRCLE) == 0x1680 &&
+                       parcs[i].angle2 == 0x2d00) {
+              arcType = VERTICAL;
+            }
             if (arcType == OTHER) {
                 /*
                  * precompute an approximation map
@@ -2008,14 +2086,17 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
                  */
                 startAngle = parcs[i].angle1;
                 spanAngle = parcs[i].angle2;
-                if (spanAngle > FULLCIRCLE)
-                    spanAngle = FULLCIRCLE;
-                else if (spanAngle < -FULLCIRCLE)
-                    spanAngle = -FULLCIRCLE;
-                if (startAngle < 0)
-                    startAngle = FULLCIRCLE - (-startAngle) % FULLCIRCLE;
-                if (startAngle >= FULLCIRCLE)
-                    startAngle = startAngle % FULLCIRCLE;
+                if (spanAngle > FULLCIRCLE) {
+                  spanAngle = FULLCIRCLE;
+                } else if (spanAngle < -FULLCIRCLE) {
+                  spanAngle = -FULLCIRCLE;
+                }
+                if (startAngle < 0) {
+                  startAngle = FULLCIRCLE - (-startAngle) % FULLCIRCLE;
+                }
+                if (startAngle >= FULLCIRCLE) {
+                  startAngle = startAngle % FULLCIRCLE;
+                }
                 endAngle = startAngle + spanAngle;
                 backwards = spanAngle < 0;
             }
@@ -2046,10 +2127,11 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
                                                      backwards);
                     /* avoid troubles with huge arcs and small dashes */
                     if (dashAngle == prevDashAngle) {
-                        if (backwards)
-                            dashAngle--;
-                        else
-                            dashAngle++;
+                      if (backwards) {
+                        dashAngle--;
+                      } else {
+                        dashAngle++;
+                      }
                     }
                 }
                 else {
@@ -2070,30 +2152,37 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
                     if (arcType == OTHER) {
                         xarc = parcs[i];
                         spanAngle = prevDashAngle;
-                        if (spanAngle < 0)
-                            spanAngle = FULLCIRCLE - (-spanAngle) % FULLCIRCLE;
-                        if (spanAngle >= FULLCIRCLE)
-                            spanAngle = spanAngle % FULLCIRCLE;
+                        if (spanAngle < 0) {
+                          spanAngle = FULLCIRCLE - (-spanAngle) % FULLCIRCLE;
+                        }
+                        if (spanAngle >= FULLCIRCLE) {
+                          spanAngle = spanAngle % FULLCIRCLE;
+                        }
                         xarc.angle1 = spanAngle;
                         spanAngle = dashAngle - prevDashAngle;
                         if (backwards) {
-                            if (dashAngle > prevDashAngle)
-                                spanAngle = -FULLCIRCLE + spanAngle;
+                          if (dashAngle > prevDashAngle) {
+                            spanAngle = -FULLCIRCLE + spanAngle;
+                          }
                         }
                         else {
-                            if (dashAngle < prevDashAngle)
-                                spanAngle = FULLCIRCLE + spanAngle;
+                          if (dashAngle < prevDashAngle) {
+                            spanAngle = FULLCIRCLE + spanAngle;
+                          }
                         }
-                        if (spanAngle > FULLCIRCLE)
-                            spanAngle = FULLCIRCLE;
-                        if (spanAngle < -FULLCIRCLE)
-                            spanAngle = -FULLCIRCLE;
+                        if (spanAngle > FULLCIRCLE) {
+                          spanAngle = FULLCIRCLE;
+                        }
+                        if (spanAngle < -FULLCIRCLE) {
+                          spanAngle = -FULLCIRCLE;
+                        }
                         xarc.angle2 = spanAngle;
                     }
                     arc = addArc(&arcs[iphase].arcs, &arcs[iphase].narcs,
                                  &arcSize[iphase], &xarc);
-                    if (!arc)
-                        goto arcfail;
+                    if (!arc) {
+                      goto arcfail;
+                    }
                     /*
                      * cap each end of an on/off dash
                      */
@@ -2116,14 +2205,16 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
                     arc->join = arcs[iphase].njoins;
                     arc->render = 0;
                     arc->selfJoin = 0;
-                    if (dashAngle == endAngle)
-                        arc->selfJoin = selfJoin;
+                    if (dashAngle == endAngle) {
+                      arc->selfJoin = selfJoin;
+                    }
                 }
                 prevphase = iphase;
                 if (dashRemaining <= 0) {
                     ++iDash;
-                    if (iDash == pGC->numInDashList)
-                        iDash = 0;
+                    if (iDash == pGC->numInDashList) {
+                      iDash = 0;
+                    }
                     iphase = iphase ? 0 : 1;
                     dashRemaining = pGC->dash[iDash];
                 }
@@ -2134,12 +2225,14 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
              */
             if (startAngle == endAngle) {
                 prevphase = iphase;
-                if (!isDoubleDash && iphase == 1)
-                    prevphase = 0;
+                if (!isDoubleDash && iphase == 1) {
+                  prevphase = 0;
+                }
                 arc = addArc(&arcs[prevphase].arcs, &arcs[prevphase].narcs,
                              &arcSize[prevphase], &parcs[i]);
-                if (!arc)
-                    goto arcfail;
+                if (!arc) {
+                  goto arcfail;
+                }
                 arc->join = arcs[prevphase].njoins;
                 arc->cap = arcs[prevphase].ncaps;
                 arc->selfJoin = data[i].selfJoin;
@@ -2148,17 +2241,20 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
         else {
             arc = addArc(&arcs[iphase].arcs, &arcs[iphase].narcs,
                          &arcSize[iphase], &parcs[i]);
-            if (!arc)
-                goto arcfail;
+            if (!arc) {
+              goto arcfail;
+            }
             arc->join = arcs[iphase].njoins;
             arc->cap = arcs[iphase].ncaps;
             arc->selfJoin = data[i].selfJoin;
             prevphase = iphase;
         }
-        if (prevphase == 0 || isDoubleDash)
-            k = arcs[prevphase].narcs - 1;
-        if (iphase == 0 || isDoubleDash)
-            nextk = arcs[iphase].narcs;
+        if (prevphase == 0 || isDoubleDash) {
+          k = arcs[prevphase].narcs - 1;
+        }
+        if (iphase == 0 || isDoubleDash) {
+          nextk = arcs[iphase].narcs;
+        }
         if (nexti == start) {
             nextk = 0;
             if (isDashed) {
@@ -2172,17 +2268,19 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
             ISEQUAL(data[i].y1, data[j].y0) &&
             !data[i].selfJoin && !data[j].selfJoin;
         if (arc) {
-            if (arcsJoin)
-                arc->render = 0;
-            else
-                arc->render = 1;
+          if (arcsJoin) {
+            arc->render = 0;
+          } else {
+            arc->render = 1;
+          }
         }
         if (arcsJoin &&
             (prevphase == 0 || isDoubleDash) && (iphase == 0 || isDoubleDash)) {
             joinphase = iphase;
             if (isDoubleDash) {
-                if (nexti == start)
-                    joinphase = iphaseStart;
+              if (nexti == start) {
+                joinphase = iphaseStart;
+              }
                 /*
                  * if the join is right at the dash,
                  * draw the join in foreground
@@ -2190,8 +2288,9 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
                  * arcs are computed second, the results
                  * of which are needed to draw the join
                  */
-                if (joinphase != prevphase)
-                    joinphase = 0;
+                if (joinphase != prevphase) {
+                  joinphase = 0;
+                }
             }
             if (joinphase == 0 || isDoubleDash) {
                 addJoin(&arcs[joinphase].joins,
@@ -2233,24 +2332,26 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
              * hardly matters...
              */
             if ((iphase == 0 || isDoubleDash) &&
-                (nexti != start || (arcsJoin && isDashed)))
-                addCap(&arcs[iphase].caps, &arcs[iphase].ncaps,
-                       &capSize[iphase], RIGHT_END, nextk);
+                (nexti != start || (arcsJoin && isDashed))) {
+              addCap(&arcs[iphase].caps, &arcs[iphase].ncaps, &capSize[iphase],
+                     RIGHT_END, nextk);
+            }
         }
         i = nexti;
-        if (i == start)
-            break;
+        if (i == start) {
+          break;
+        }
     }
     /*
      * make sure the last section is rendered
      */
-    for (iphase = 0; iphase < (isDoubleDash ? 2 : 1); iphase++)
-        if (arcs[iphase].narcs > 0) {
-            arcs[iphase].arcs[arcs[iphase].narcs - 1].render = 1;
-            arcs[iphase].arcs[arcs[iphase].narcs - 1].join =
-                arcs[iphase].njoins;
-            arcs[iphase].arcs[arcs[iphase].narcs - 1].cap = arcs[iphase].ncaps;
-        }
+    for (iphase = 0; iphase < (isDoubleDash ? 2 : 1); iphase++) {
+      if (arcs[iphase].narcs > 0) {
+        arcs[iphase].arcs[arcs[iphase].narcs - 1].render = 1;
+        arcs[iphase].arcs[arcs[iphase].narcs - 1].join = arcs[iphase].njoins;
+        arcs[iphase].arcs[arcs[iphase].narcs - 1].cap = arcs[iphase].ncaps;
+      }
+    }
     free(data);
     return arcs;
  arcfail:
@@ -2282,8 +2383,9 @@ angleToLength(int angle, dashMap * map)
             oddSide = !oddSide;
         }
     }
-    if (oddSide)
-        angle = 90 * 64 - angle;
+    if (oddSide) {
+      angle = 90 * 64 - angle;
+    }
 
     di = xAngleToDashIndex(angle);
     excess = angle - dashIndexToXAngle(di);
@@ -2297,10 +2399,11 @@ angleToLength(int angle, dashMap * map)
             ((double) excess) / dashXAngleStep;
         len += excesslen;
     }
-    if (oddSide)
-        totallen += (sidelen - len);
-    else
-        totallen += len;
+    if (oddSide) {
+      totallen += (sidelen - len);
+    } else {
+      totallen += len;
+    }
     return totallen;
 }
 
@@ -2323,8 +2426,9 @@ lengthToAngle(double len, dashMap * map)
      * map should be interpolated in reverse
      */
     if (len >= 0) {
-        if (sidelen == 0)
-            return 2 * FULLCIRCLE;      /* infinity */
+      if (sidelen == 0) {
+        return 2 * FULLCIRCLE; /* infinity */
+      }
         while (len >= sidelen) {
             angle += 90 * 64;
             len -= sidelen;
@@ -2332,16 +2436,18 @@ lengthToAngle(double len, dashMap * map)
         }
     }
     else {
-        if (sidelen == 0)
-            return -2 * FULLCIRCLE;     /* infinity */
+      if (sidelen == 0) {
+        return -2 * FULLCIRCLE; /* infinity */
+      }
         while (len < 0) {
             angle -= 90 * 64;
             len += sidelen;
             oddSide = !oddSide;
         }
     }
-    if (oddSide)
-        len = sidelen - len;
+    if (oddSide) {
+      len = sidelen - len;
+    }
     a0 = 0;
     a1 = DASH_MAP_SIZE - 1;
     /*
@@ -2349,10 +2455,11 @@ lengthToAngle(double len, dashMap * map)
      */
     while (a1 - a0 > 1) {
         a = (a0 + a1) / 2;
-        if (len > map->map[a])
-            a0 = a;
-        else
-            a1 = a;
+        if (len > map->map[a]) {
+          a0 = a;
+        } else {
+          a1 = a;
+        }
     }
     angleexcess = dashIndexToXAngle(a0);
     /*
@@ -2360,10 +2467,11 @@ lengthToAngle(double len, dashMap * map)
      */
     angleexcess += (len - map->map[a0]) /
         (map->map[a0 + 1] - map->map[a0]) * dashXAngleStep;
-    if (oddSide)
-        angle += (90 * 64) - angleexcess;
-    else
-        angle += angleexcess;
+    if (oddSide) {
+      angle += (90 * 64) - angleexcess;
+    } else {
+      angle += angleexcess;
+    }
     return angle;
 }
 
@@ -2398,18 +2506,20 @@ computeAngleFromPath(int startAngle, int endAngle,      /* normalized absolute a
         a0 = FULLCIRCLE - a0;
         a1 = FULLCIRCLE - a1;
     }
-    if (a1 < a0)
-        a1 += FULLCIRCLE;
+    if (a1 < a0) {
+      a1 += FULLCIRCLE;
+    }
     len0 = angleToLength(a0, map);
     a = lengthToAngle(len0 + len, map);
     if (a > a1) {
         a = a1;
         len -= angleToLength(a1, map) - len0;
+    } else {
+      len = 0;
     }
-    else
-        len = 0;
-    if (backwards)
-        a = FULLCIRCLE - a;
+    if (backwards) {
+      a = FULLCIRCLE - a;
+    }
     *lenp = len;
     return a;
 }
@@ -2436,10 +2546,11 @@ drawZeroArc(DrawablePtr pDraw,
     l = lw / 2.0;
     a0 = tarc->angle1;
     a1 = tarc->angle2;
-    if (a1 > FULLCIRCLE)
-        a1 = FULLCIRCLE;
-    else if (a1 < -FULLCIRCLE)
-        a1 = -FULLCIRCLE;
+    if (a1 > FULLCIRCLE) {
+      a1 = FULLCIRCLE;
+    } else if (a1 < -FULLCIRCLE) {
+      a1 = -FULLCIRCLE;
+    }
     w = (double) tarc->width / 2.0;
     h = (double) tarc->height / 2.0;
     /*
@@ -2464,38 +2575,46 @@ drawZeroArc(DrawablePtr pDraw,
             x1 = x;
             y1 = y;
         }
-        if (x > xmax)
-            xmax = x;
-        if (x < xmin)
-            xmin = x;
-        if (y > ymax)
-            ymax = y;
-        if (y < ymin)
-            ymin = y;
-        if (a == endAngle)
-            break;
+        if (x > xmax) {
+          xmax = x;
+        }
+        if (x < xmin) {
+          xmin = x;
+        }
+        if (y > ymax) {
+          ymax = y;
+        }
+        if (y < ymin) {
+          ymin = y;
+        }
+        if (a == endAngle) {
+          break;
+        }
         if (a1 < 0) {           /* clockwise */
-            if (floor(a / 90.0) == floor(endAngle / 90.0))
-                a = endAngle;
-            else
-                a = 90 * (floor(a / 90.0) + 1);
+          if (floor(a / 90.0) == floor(endAngle / 90.0)) {
+            a = endAngle;
+          } else {
+            a = 90 * (floor(a / 90.0) + 1);
+          }
         }
         else {
-            if (ceil(a / 90.0) == ceil(endAngle / 90.0))
-                a = endAngle;
-            else
-                a = 90 * (ceil(a / 90.0) - 1);
+          if (ceil(a / 90.0) == ceil(endAngle / 90.0)) {
+            a = endAngle;
+          } else {
+            a = 90 * (ceil(a / 90.0) - 1);
+          }
         }
     }
     lx = ly = l;
-    if ((x1 - x0) + (y1 - y0) < 0)
-        lx = ly = -l;
+    if ((x1 - x0) + (y1 - y0) < 0) {
+      lx = ly = -l;
+    }
     if (h) {
         ly = 0.0;
         lx = -lx;
+    } else {
+      lx = 0.0;
     }
-    else
-        lx = 0.0;
     if (right) {
         right->center.x = x0;
         right->center.y = y0;
@@ -2552,21 +2671,25 @@ tailEllipseY(struct arc_def *def, struct accelerators *acc)
     double t;
 
     acc->tail_y = 0.0;
-    if (def->w == def->h)
-        return;
+    if (def->w == def->h) {
+      return;
+    }
     t = def->l * def->w;
     if (def->w > def->h) {
-        if (t < acc->h2)
-            return;
+      if (t < acc->h2) {
+        return;
+      }
     }
     else {
-        if (t > acc->h2)
-            return;
+      if (t > acc->h2) {
+        return;
+      }
     }
     t = 2.0 * def->h * t;
     t = (CUBED_ROOT_4 * acc->h2 - cbrt(t * t)) / acc->h2mw2;
-    if (t > 0.0)
-        acc->tail_y = def->h / CUBED_ROOT_2 * sqrt(t);
+    if (t > 0.0) {
+      acc->tail_y = def->h / CUBED_ROOT_2 * sqrt(t);
+    }
 }
 
 /*
@@ -2611,13 +2734,13 @@ innerYfromY(double y, struct arc_def *def, struct accelerators *acc)
 static void
 computeLine(double x1, double y1, double x2, double y2, struct line *line)
 {
-    if (y1 == y2)
-        line->valid = 0;
-    else {
-        line->m = (x1 - x2) / (y1 - y2);
-        line->b = x1 - y1 * line->m;
-        line->valid = 1;
-    }
+  if (y1 == y2) {
+    line->valid = 0;
+  } else {
+    line->m = (x1 - x2) / (y1 - y2);
+    line->b = x1 - y1 * line->m;
+    line->valid = 1;
+  }
 }
 
 /*
@@ -2665,14 +2788,16 @@ computeBound(struct arc_def *def,
 
     bound->ellipse.min = Dsin(def->a0) * def->h;
     bound->ellipse.max = Dsin(def->a1) * def->h;
-    if (def->a0 == 45 && def->w == def->h)
-        ellipsex.min = bound->ellipse.min;
-    else
-        ellipsex.min = Dcos(def->a0) * def->w;
-    if (def->a1 == 45 && def->w == def->h)
-        ellipsex.max = bound->ellipse.max;
-    else
-        ellipsex.max = Dcos(def->a1) * def->w;
+    if (def->a0 == 45 && def->w == def->h) {
+      ellipsex.min = bound->ellipse.min;
+    } else {
+      ellipsex.min = Dcos(def->a0) * def->w;
+    }
+    if (def->a1 == 45 && def->w == def->h) {
+      ellipsex.max = bound->ellipse.max;
+    } else {
+      ellipsex.max = Dcos(def->a1) * def->w;
+    }
     bound->outer.min = outerYfromXY(ellipsex.min, bound->ellipse.min, def, acc);
     bound->outer.max = outerYfromXY(ellipsex.max, bound->ellipse.max, def, acc);
     bound->inner.min = innerYfromXY(ellipsex.min, bound->ellipse.min, def, acc);
@@ -2725,15 +2850,18 @@ computeBound(struct arc_def *def,
         bound->inner.max = t;
     }
     tail_y = acc->tail_y;
-    if (tail_y > bound->ellipse.max)
-        tail_y = bound->ellipse.max;
-    else if (tail_y < bound->ellipse.min)
-        tail_y = bound->ellipse.min;
+    if (tail_y > bound->ellipse.max) {
+      tail_y = bound->ellipse.max;
+    } else if (tail_y < bound->ellipse.min) {
+      tail_y = bound->ellipse.min;
+    }
     innerTaily = innerYfromY(tail_y, def, acc);
-    if (bound->inner.min > innerTaily)
-        bound->inner.min = innerTaily;
-    if (bound->inner.max < innerTaily)
-        bound->inner.max = innerTaily;
+    if (bound->inner.min > innerTaily) {
+      bound->inner.min = innerTaily;
+    }
+    if (bound->inner.max < innerTaily) {
+      bound->inner.max = innerTaily;
+    }
     bound->inneri.min = ICEIL(bound->inner.min - acc->fromIntY);
     bound->inneri.max = floor(bound->inner.max - acc->fromIntY);
     bound->outeri.min = ICEIL(bound->outer.min - acc->fromIntY);
@@ -2797,15 +2925,17 @@ hookEllipseY(double scan_y,
     double ret;
 
     if (acc->h2mw2 == 0) {
-        if ((scan_y > 0 && !left) || (scan_y < 0 && left))
-            return bound->ellipse.min;
+      if ((scan_y > 0 && !left) || (scan_y < 0 && left)) {
+        return bound->ellipse.min;
+      }
         return bound->ellipse.max;
     }
     ret = (acc->h4 * scan_y) / (acc->h2mw2);
-    if (ret >= 0)
-        return cbrt(ret);
-    else
-        return -cbrt(-ret);
+    if (ret >= 0) {
+      return cbrt(ret);
+    } else {
+      return -cbrt(-ret);
+    }
 }
 
 /*
@@ -2831,8 +2961,9 @@ hookX(double scan_y,
             maxMin = ellipse_y * ellipse_y * ellipse_y * acc->h2mw2 -
                 acc->h2 * scan_y * (3 * ellipse_y * ellipse_y - 2 * acc->h2);
             if ((left && maxMin > 0) || (!left && maxMin < 0)) {
-                if (ellipse_y == 0)
-                    return def->w + left ? -def->l : def->l;
+              if (ellipse_y == 0) {
+                return def->w + left ? -def->l : def->l;
+              }
                 x = (acc->h2 * scan_y - ellipse_y * acc->h2mw2) *
                     sqrt(acc->h2 - ellipse_y * ellipse_y) /
                     (def->h * def->w * ellipse_y);
@@ -2845,10 +2976,11 @@ hookX(double scan_y,
             x = intersectLine(scan_y, acc->left);
         }
         else {
-            if (acc->right.valid)
-                x = intersectLine(scan_y, acc->right);
-            else
-                x = def->w - def->l;
+          if (acc->right.valid) {
+            x = intersectLine(scan_y, acc->right);
+          } else {
+            x = def->w - def->l;
+          }
         }
     }
     else {
@@ -2856,10 +2988,11 @@ hookX(double scan_y,
             x = intersectLine(scan_y, acc->right);
         }
         else {
-            if (acc->left.valid)
-                x = intersectLine(scan_y, acc->left);
-            else
-                x = def->w - def->l;
+          if (acc->left.valid) {
+            x = intersectLine(scan_y, acc->left);
+          } else {
+            x = def->w - def->l;
+          }
         }
     }
     return x;
@@ -2893,8 +3026,9 @@ arcSpan(int y,
         x = hookX(y + acc->fromIntY, def, bounds, acc, 1);
         if (acc->right.valid && boundedLe(y + acc->fromIntY, bounds->right)) {
             altx = intersectLine(y + acc->fromIntY, acc->right);
-            if (altx < x)
-                x = altx;
+            if (altx < x) {
+              x = altx;
+            }
         }
         linx = -ICEIL(acc->fromIntX - x);
         rinx = ICEIL(acc->fromIntX + x);
@@ -2911,23 +3045,28 @@ arcSpan(int y,
         if (acc->left.valid && boundedLe(y + acc->fromIntY, bounds->left)) {
             altx = x;
             x = intersectLine(y + acc->fromIntY, acc->left);
-            if (x < altx)
-                x = altx;
+            if (x < altx) {
+              x = altx;
+            }
         }
         loutx = -ICEIL(acc->fromIntX - x);
         routx = ICEIL(acc->fromIntX + x);
     }
     if (routx > rinx) {
-        if (mask & 1)
-            newFinalSpan(acc->yorgu - y, acc->xorg + rinx, acc->xorg + routx);
-        if (mask & 8)
-            newFinalSpan(acc->yorgl + y, acc->xorg + rinx, acc->xorg + routx);
+      if (mask & 1) {
+        newFinalSpan(acc->yorgu - y, acc->xorg + rinx, acc->xorg + routx);
+      }
+      if (mask & 8) {
+        newFinalSpan(acc->yorgl + y, acc->xorg + rinx, acc->xorg + routx);
+      }
     }
     if (loutx > linx) {
-        if (mask & 2)
-            newFinalSpan(acc->yorgu - y, acc->xorg - loutx, acc->xorg - linx);
-        if (mask & 4)
-            newFinalSpan(acc->yorgl + y, acc->xorg - loutx, acc->xorg - linx);
+      if (mask & 2) {
+        newFinalSpan(acc->yorgu - y, acc->xorg - loutx, acc->xorg - linx);
+      }
+      if (mask & 4) {
+        newFinalSpan(acc->yorgl + y, acc->xorg - loutx, acc->xorg - linx);
+      }
     }
 }
 
@@ -2944,8 +3083,9 @@ arcSpan0(int lx,
     if (boundedLe(0, bounds->inneri) &&
         acc->left.valid && boundedLe(0, bounds->left) && acc->left.b > 0) {
         x = def->w - def->l;
-        if (acc->left.b < x)
-            x = acc->left.b;
+        if (acc->left.b < x) {
+          x = acc->left.b;
+        }
         lw = ICEIL(acc->fromIntX - x) - lx;
         rw += rx;
         rx = ICEIL(acc->fromIntX + x);
@@ -2964,37 +3104,42 @@ tailSpan(int y,
     double yy, xalt, x, lx, rx;
     int n;
 
-    if (boundedLe(y, bounds->outeri))
-        arcSpan(y, 0, lw, -rw, rw, def, bounds, acc, mask);
-    else if (def->w != def->h) {
-        yy = y + acc->fromIntY;
-        x = tailX(yy, def, bounds, acc);
-        if (yy == 0.0 && x == -rw - acc->fromIntX)
-            return;
-        if (acc->right.valid && boundedLe(yy, bounds->right)) {
-            rx = x;
-            lx = -x;
-            xalt = intersectLine(yy, acc->right);
-            if (xalt >= -rw - acc->fromIntX && xalt <= rx)
-                rx = xalt;
-            n = ICEIL(acc->fromIntX + lx);
-            if (lw > n) {
-                if (mask & 2)
-                    newFinalSpan(acc->yorgu - y, acc->xorg + n, acc->xorg + lw);
-                if (mask & 4)
-                    newFinalSpan(acc->yorgl + y, acc->xorg + n, acc->xorg + lw);
-            }
-            n = ICEIL(acc->fromIntX + rx);
-            if (n > -rw) {
-                if (mask & 1)
-                    newFinalSpan(acc->yorgu - y, acc->xorg - rw, acc->xorg + n);
-                if (mask & 8)
-                    newFinalSpan(acc->yorgl + y, acc->xorg - rw, acc->xorg + n);
-            }
+    if (boundedLe(y, bounds->outeri)) {
+      arcSpan(y, 0, lw, -rw, rw, def, bounds, acc, mask);
+    } else if (def->w != def->h) {
+      yy = y + acc->fromIntY;
+      x = tailX(yy, def, bounds, acc);
+      if (yy == 0.0 && x == -rw - acc->fromIntX) {
+        return;
+      }
+      if (acc->right.valid && boundedLe(yy, bounds->right)) {
+        rx = x;
+        lx = -x;
+        xalt = intersectLine(yy, acc->right);
+        if (xalt >= -rw - acc->fromIntX && xalt <= rx) {
+          rx = xalt;
         }
-        arcSpan(y,
-                ICEIL(acc->fromIntX - x), 0,
-                ICEIL(acc->fromIntX + x), 0, def, bounds, acc, mask);
+        n = ICEIL(acc->fromIntX + lx);
+        if (lw > n) {
+          if (mask & 2) {
+            newFinalSpan(acc->yorgu - y, acc->xorg + n, acc->xorg + lw);
+          }
+          if (mask & 4) {
+            newFinalSpan(acc->yorgl + y, acc->xorg + n, acc->xorg + lw);
+          }
+        }
+        n = ICEIL(acc->fromIntX + rx);
+        if (n > -rw) {
+          if (mask & 1) {
+            newFinalSpan(acc->yorgu - y, acc->xorg - rw, acc->xorg + n);
+          }
+          if (mask & 8) {
+            newFinalSpan(acc->yorgl + y, acc->xorg - rw, acc->xorg + n);
+          }
+        }
+      }
+      arcSpan(y, ICEIL(acc->fromIntX - x), 0, ICEIL(acc->fromIntX + x), 0, def,
+              bounds, acc, mask);
     }
 }
 
@@ -3039,8 +3184,9 @@ realAllocSpan(void)
     int i;
 
     struct finalSpanChunk *newChunk = calloc(1, sizeof(struct finalSpanChunk));
-    if (!newChunk)
-        return (struct finalSpan *) NULL;
+    if (!newChunk) {
+      return (struct finalSpan *)NULL;
+    }
     newChunk->next = chunks;
     chunks = newChunk;
     freeFinalSpans = span = newChunk->data + 1;
@@ -3081,8 +3227,9 @@ fillSpans(DrawablePtr pDrawable, GCPtr pGC)
     DDXPointPtr xSpans;
     int *xWidths;
 
-    if (nspans == 0)
-        return;
+    if (nspans == 0) {
+      return;
+    }
     xSpan = xSpans = calloc(nspans, sizeof(xPoint));
     xWidth = xWidths = calloc(nspans, sizeof(int));
     if (xSpans && xWidths) {
@@ -3090,8 +3237,9 @@ fillSpans(DrawablePtr pDrawable, GCPtr pGC)
         f = finalSpans;
         for (spany = finalMiny; spany <= finalMaxy; spany++, f++) {
             for (span = *f; span; span = span->next) {
-                if (span->max <= span->min)
-                    continue;
+              if (span->max <= span->min) {
+                continue;
+              }
                 xSpan->x = span->min;
                 xSpan->y = spany;
                 ++xSpan;
@@ -3129,24 +3277,28 @@ realFindSpan(int y)
             finalMiny = y;
             finalMaxy = y - 1;
         }
-        if (y < finalMiny)
-            change = finalMiny - y;
-        else
-            change = y - finalMaxy;
-        if (change >= SPAN_REALLOC)
-            change += SPAN_REALLOC;
-        else
-            change = SPAN_REALLOC;
+        if (y < finalMiny) {
+          change = finalMiny - y;
+        } else {
+          change = y - finalMaxy;
+        }
+        if (change >= SPAN_REALLOC) {
+          change += SPAN_REALLOC;
+        } else {
+          change = SPAN_REALLOC;
+        }
         newSize = finalSize + change;
         newSpans = calloc(newSize, sizeof(struct finalSpan *));
-        if (!newSpans)
-            return NULL;
+        if (!newSpans) {
+          return NULL;
+        }
         newMiny = finalMiny;
         newMaxy = finalMaxy;
-        if (y < finalMiny)
-            newMiny = finalMiny - change;
-        else
-            newMaxy = finalMaxy + change;
+        if (y < finalMiny) {
+          newMiny = finalMiny - change;
+        } else {
+          newMaxy = finalMaxy + change;
+        }
         if (finalSpans) {
             memcpy(((char *) newSpans) +
                     (finalMiny - newMiny) * sizeof(struct finalSpan *),
@@ -3154,11 +3306,13 @@ realFindSpan(int y)
                    finalSize * sizeof(struct finalSpan *));
             free(finalSpans);
         }
-        if ((i = finalMiny - newMiny) > 0)
-            memset((char *) newSpans, 0, i * sizeof(struct finalSpan *));
-        if ((i = newMaxy - finalMaxy) > 0)
-            memset((char *) (newSpans + newSize - i), 0,
-                   i * sizeof(struct finalSpan *));
+        if ((i = finalMiny - newMiny) > 0) {
+          memset((char *)newSpans, 0, i * sizeof(struct finalSpan *));
+        }
+        if ((i = newMaxy - finalMaxy) > 0) {
+          memset((char *)(newSpans + newSize - i), 0,
+                 i * sizeof(struct finalSpan *));
+        }
         finalSpans = newSpans;
         finalMaxy = newMaxy;
         finalMiny = newMiny;
@@ -3176,8 +3330,9 @@ newFinalSpan(int y, int xmin, int xmax)
     struct finalSpan *prev;
 
     f = findSpan(y);
-    if (!f)
-        return;
+    if (!f) {
+      return;
+    }
     oldx = 0;
     for (;;) {
         prev = 0;
@@ -3190,10 +3345,11 @@ newFinalSpan(int y, int xmin, int xmax)
                 if (oldx) {
                     oldx->min = min(x->min, xmin);
                     oldx->max = max(x->max, xmax);
-                    if (prev)
-                        prev->next = x->next;
-                    else
-                        *f = x->next;
+                    if (prev) {
+                      prev->next = x->next;
+                    } else {
+                      *f = x->next;
+                    }
                     --nspans;
                 }
                 else {
@@ -3207,8 +3363,9 @@ newFinalSpan(int y, int xmin, int xmax)
             }
             prev = x;
         }
-        if (!x)
-            break;
+        if (!x) {
+          break;
+        }
     }
     if (!oldx) {
         x = allocFinalSpan();
@@ -3272,32 +3429,38 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
     int flipRight = 0, flipLeft = 0;
     int copyEnd = 0;
 
-    if (!spdata)
-        spdata = miComputeWideEllipse(l, tarc);
-    if (!spdata)
-        return NULL;
+    if (!spdata) {
+      spdata = miComputeWideEllipse(l, tarc);
+    }
+    if (!spdata) {
+      return NULL;
+    }
 
-    if (a1 < a0)
-        a1 += 360 * 64;
+    if (a1 < a0) {
+      a1 += 360 * 64;
+    }
     startq = a0 / (90 * 64);
-    if (a0 == a1)
-        endq = startq;
-    else
-        endq = (a1 - 1) / (90 * 64);
+    if (a0 == a1) {
+      endq = startq;
+    } else {
+      endq = (a1 - 1) / (90 * 64);
+    }
     bandno = 0;
     curq = startq;
     rightq = -1;
     for (;;) {
         switch (curq) {
         case 0:
-            if (a0 > 90 * 64)
-                q0 = 0;
-            else
-                q0 = a0;
-            if (a1 < 360 * 64)
-                q1 = min(a1, 90 * 64);
-            else
-                q1 = 90 * 64;
+          if (a0 > 90 * 64) {
+            q0 = 0;
+          } else {
+            q0 = a0;
+          }
+          if (a1 < 360 * 64) {
+            q1 = min(a1, 90 * 64);
+          } else {
+            q1 = 90 * 64;
+          }
             if (curq == startq && a0 == q0 && rightq < 0) {
                 righta = q0;
                 rightq = curq;
@@ -3308,14 +3471,16 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
             }
             break;
         case 1:
-            if (a1 < 90 * 64)
-                q0 = 0;
-            else
-                q0 = 180 * 64 - min(a1, 180 * 64);
-            if (a0 > 180 * 64)
-                q1 = 90 * 64;
-            else
-                q1 = 180 * 64 - max(a0, 90 * 64);
+          if (a1 < 90 * 64) {
+            q0 = 0;
+          } else {
+            q0 = 180 * 64 - min(a1, 180 * 64);
+          }
+          if (a0 > 180 * 64) {
+            q1 = 90 * 64;
+          } else {
+            q1 = 180 * 64 - max(a0, 90 * 64);
+          }
             if (curq == startq && 180 * 64 - a0 == q1) {
                 righta = q1;
                 rightq = curq;
@@ -3326,14 +3491,16 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
             }
             break;
         case 2:
-            if (a0 > 270 * 64)
-                q0 = 0;
-            else
-                q0 = max(a0, 180 * 64) - 180 * 64;
-            if (a1 < 180 * 64)
-                q1 = 90 * 64;
-            else
-                q1 = min(a1, 270 * 64) - 180 * 64;
+          if (a0 > 270 * 64) {
+            q0 = 0;
+          } else {
+            q0 = max(a0, 180 * 64) - 180 * 64;
+          }
+          if (a1 < 180 * 64) {
+            q1 = 90 * 64;
+          } else {
+            q1 = min(a1, 270 * 64) - 180 * 64;
+          }
             if (curq == startq && a0 - 180 * 64 == q0) {
                 righta = q0;
                 rightq = curq;
@@ -3344,10 +3511,11 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
             }
             break;
         case 3:
-            if (a1 < 270 * 64)
-                q0 = 0;
-            else
-                q0 = 360 * 64 - min(a1, 360 * 64);
+          if (a1 < 270 * 64) {
+            q0 = 0;
+          } else {
+            q0 = 360 * 64 - min(a1, 360 * 64);
+          }
             q1 = 360 * 64 - max(a0, 270 * 64);
             if (curq == startq && 360 * 64 - a0 == q1) {
                 righta = q1;
@@ -3363,8 +3531,9 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
         band[bandno].a1 = q1;
         band[bandno].mask = 1 << curq;
         bandno++;
-        if (curq == endq)
-            break;
+        if (curq == endq) {
+          break;
+        }
         curq++;
         if (curq == 4) {
             a0 = 0;
@@ -3380,27 +3549,31 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
         /*
          * find left-most point
          */
-        for (i = 0; i < bandno; i++)
-            if (band[i].a0 <= q0) {
-                q0 = band[i].a0;
-                q1 = band[i].a1;
-                mask = band[i].mask;
-            }
-        if (!mask)
-            break;
+        for (i = 0; i < bandno; i++) {
+          if (band[i].a0 <= q0) {
+            q0 = band[i].a0;
+            q1 = band[i].a1;
+            mask = band[i].mask;
+          }
+        }
+        if (!mask) {
+          break;
+        }
         /*
          * locate next point of change
          */
-        for (i = 0; i < bandno; i++)
-            if (!(mask & band[i].mask)) {
-                if (band[i].a0 == q0) {
-                    if (band[i].a1 < q1)
-                        q1 = band[i].a1;
-                    mask |= band[i].mask;
-                }
-                else if (band[i].a0 < q1)
-                    q1 = band[i].a0;
+        for (i = 0; i < bandno; i++) {
+          if (!(mask & band[i].mask)) {
+            if (band[i].a0 == q0) {
+              if (band[i].a1 < q1) {
+                q1 = band[i].a1;
+              }
+              mask |= band[i].mask;
+            } else if (band[i].a0 < q1) {
+              q1 = band[i].a0;
             }
+          }
+        }
         /*
          * create a new sweep
          */
@@ -3411,37 +3584,41 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
         /*
          * subtract the sweep from the affected bands
          */
-        for (i = 0; i < bandno; i++)
-            if (band[i].a0 == q0) {
-                band[i].a0 = q1;
-                /*
-                 * check if this band is empty
-                 */
-                if (band[i].a0 == band[i].a1)
-                    band[i].a1 = band[i].a0 = 90 * 64 + 1;
+        for (i = 0; i < bandno; i++) {
+          if (band[i].a0 == q0) {
+            band[i].a0 = q1;
+            /*
+             * check if this band is empty
+             */
+            if (band[i].a0 == band[i].a1) {
+              band[i].a1 = band[i].a0 = 90 * 64 + 1;
             }
+          }
+        }
     }
     computeAcc(tarc, l, &def, &acc);
     for (j = 0; j < sweepno; j++) {
         mask = sweep[j].mask;
         passRight = passLeft = 0;
         if (mask & (1 << rightq)) {
-            if (sweep[j].a0 == righta)
-                passRight = right;
-            else if (sweep[j].a1 == righta) {
-                passLeft = right;
-                flipRight = 1;
-            }
+          if (sweep[j].a0 == righta) {
+            passRight = right;
+          } else if (sweep[j].a1 == righta) {
+            passLeft = right;
+            flipRight = 1;
+          }
         }
         if (mask & (1 << leftq)) {
             if (sweep[j].a1 == lefta) {
-                if (passLeft)
-                    copyEnd = 1;
+              if (passLeft) {
+                copyEnd = 1;
+              }
                 passLeft = left;
             }
             else if (sweep[j].a0 == lefta) {
-                if (passRight)
-                    copyEnd = 1;
+              if (passRight) {
+                copyEnd = 1;
+              }
                 passRight = left;
                 flipLeft = 1;
             }
@@ -3455,8 +3632,9 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
      * so the left end will be the only one holding the data.  Copy
      * it from there.
      */
-    if (copyEnd)
-        *right = *left;
+    if (copyEnd) {
+      *right = *left;
+    }
     /*
      * mirror the coordinates generated for the
      * faces of the arc
@@ -3506,61 +3684,71 @@ drawQuadrant(struct arc_def *def,
     def->a1 = ((double) a1) / 64.0;
     computeBound(def, &bound, acc, right, left);
     yy = bound.inner.min;
-    if (bound.outer.min < yy)
-        yy = bound.outer.min;
+    if (bound.outer.min < yy) {
+      yy = bound.outer.min;
+    }
     miny = ICEIL(yy - acc->fromIntY);
     yy = bound.inner.max;
-    if (bound.outer.max > yy)
-        yy = bound.outer.max;
+    if (bound.outer.max > yy) {
+      yy = bound.outer.max;
+    }
     maxy = floor(yy - acc->fromIntY);
     y = spdata->k;
     span = spdata->spans;
     if (spdata->top) {
-        if (a1 == 90 * 64 && (mask & 1))
-            newFinalSpan(acc->yorgu - y - 1, acc->xorg, acc->xorg + 1);
+      if (a1 == 90 * 64 && (mask & 1)) {
+        newFinalSpan(acc->yorgu - y - 1, acc->xorg, acc->xorg + 1);
+      }
         span++;
     }
     for (n = spdata->count1; --n >= 0;) {
-        if (y < miny)
-            return;
+      if (y < miny) {
+        return;
+      }
         if (y <= maxy) {
             arcSpan(y,
                     span->lx, -span->lx, 0, span->lx + span->lw,
                     def, &bound, acc, mask);
-            if (span->rw + span->rx)
-                tailSpan(y, -span->rw, -span->rx, def, &bound, acc, mask);
+            if (span->rw + span->rx) {
+              tailSpan(y, -span->rw, -span->rx, def, &bound, acc, mask);
+            }
         }
         y--;
         span++;
     }
-    if (y < miny)
-        return;
+    if (y < miny) {
+      return;
+    }
     if (spdata->hole) {
-        if (y <= maxy)
-            arcSpan(y, 0, 0, 0, 1, def, &bound, acc, mask & 0xc);
+      if (y <= maxy) {
+        arcSpan(y, 0, 0, 0, 1, def, &bound, acc, mask & 0xc);
+      }
     }
     for (n = spdata->count2; --n >= 0;) {
-        if (y < miny)
-            return;
-        if (y <= maxy)
-            arcSpan(y, span->lx, span->lw, span->rx, span->rw,
-                    def, &bound, acc, mask);
+      if (y < miny) {
+        return;
+      }
+      if (y <= maxy) {
+        arcSpan(y, span->lx, span->lw, span->rx, span->rw, def, &bound, acc,
+                mask);
+      }
         y--;
         span++;
     }
     if (spdata->bot && miny <= y && y <= maxy) {
         n = mask;
-        if (y == miny)
-            n &= 0xc;
+        if (y == miny) {
+          n &= 0xc;
+        }
         if (span->rw <= 0) {
             arcSpan0(span->lx, -span->lx, 0, span->lx + span->lw,
                      def, &bound, acc, n);
-            if (span->rw + span->rx)
-                tailSpan(y, -span->rw, -span->rx, def, &bound, acc, n);
+            if (span->rw + span->rx) {
+              tailSpan(y, -span->rw, -span->rx, def, &bound, acc, n);
+            }
+        } else {
+          arcSpan0(span->lx, span->lw, span->rx, span->rw, def, &bound, acc, n);
         }
-        else
-            arcSpan0(span->lx, span->lw, span->rx, span->rw,
-                     def, &bound, acc, n);
         y--;
     }
     while (y >= miny) {
@@ -3573,13 +3761,15 @@ drawQuadrant(struct arc_def *def,
             x = tailX(yy, def, &bound, acc);
             if (acc->left.valid && boundedLe(yy, bound.left)) {
                 xalt = intersectLine(yy, acc->left);
-                if (xalt < x)
-                    x = xalt;
+                if (xalt < x) {
+                  x = xalt;
+                }
             }
             if (acc->right.valid && boundedLe(yy, bound.right)) {
                 xalt = intersectLine(yy, acc->right);
-                if (xalt < x)
-                    x = xalt;
+                if (xalt < x) {
+                  x = xalt;
+                }
             }
         }
         arcSpan(y,
@@ -3592,8 +3782,9 @@ drawQuadrant(struct arc_def *def,
 void
 miPolyArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
 {
-    if (pGC->lineWidth == 0)
-        miZeroPolyArc(pDraw, pGC, narcs, parcs);
-    else
-        miWideArc(pDraw, pGC, narcs, parcs);
+  if (pGC->lineWidth == 0) {
+    miZeroPolyArc(pDraw, pGC, narcs, parcs);
+  } else {
+    miWideArc(pDraw, pGC, narcs, parcs);
+  }
 }

@@ -19,10 +19,11 @@ XkbDDXPrivate(DeviceIntPtr dev, KeyCode key, XkbAction *act)
     if (xf86act->type == XkbSA_XFree86Private) {
         memcpy(msgbuf, xf86act->data, XkbAnyActionDataSize);
         msgbuf[XkbAnyActionDataSize] = '\0';
-        if (strcasecmp(msgbuf, "-vmode") == 0)
-            xf86ProcessActionEvent(ACTION_PREV_MODE, NULL);
-        else if (strcasecmp(msgbuf, "+vmode") == 0)
-            xf86ProcessActionEvent(ACTION_NEXT_MODE, NULL);
+        if (strcasecmp(msgbuf, "-vmode") == 0) {
+          xf86ProcessActionEvent(ACTION_PREV_MODE, NULL);
+        } else if (strcasecmp(msgbuf, "+vmode") == 0) {
+          xf86ProcessActionEvent(ACTION_NEXT_MODE, NULL);
+        }
     }
 
     return 0;

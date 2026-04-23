@@ -267,8 +267,12 @@ DarwinBuildModifierMaps(darwinKeyboardInfo *info)
         case XK_Alt_L:
             info->modifierKeycodes[NX_MODIFIERKEY_ALTERNATE][0] = i;
             info->modMap[MIN_KEYCODE + i] = Mod1Mask;
-            if (!XQuartzOptionSendsAlt)
-                *k = XK_Mode_switch;     // Yes, this is ugly.  This needs to be cleaned up when we integrate quartzKeyboard with this code and refactor.
+            if (!XQuartzOptionSendsAlt) {
+              *k =
+                  XK_Mode_switch; // Yes, this is ugly.  This needs to be
+                                  // cleaned up when we integrate quartzKeyboard
+                                  // with this code and refactor.
+            }
             break;
 
         case XK_Alt_R:
@@ -277,8 +281,12 @@ DarwinBuildModifierMaps(darwinKeyboardInfo *info)
 #else
             info->modifierKeycodes[NX_MODIFIERKEY_ALTERNATE][0] = i;
 #endif
-            if (!XQuartzOptionSendsAlt)
-                *k = XK_Mode_switch;     // Yes, this is ugly.  This needs to be cleaned up when we integrate quartzKeyboard with this code and refactor.
+            if (!XQuartzOptionSendsAlt) {
+              *k =
+                  XK_Mode_switch; // Yes, this is ugly.  This needs to be
+                                  // cleaned up when we integrate quartzKeyboard
+                                  // with this code and refactor.
+            }
             info->modMap[MIN_KEYCODE + i] = Mod1Mask;
             break;
 
@@ -362,26 +370,30 @@ DarwinKeyboardSetRepeat(DeviceIntPtr pDev, int initialKeyRepeatValue,
 
         /* Turn off key-repeat for modifier keys, on for others */
         /* First set them all on */
-        for (i = 0; i < XkbPerKeyBitArraySize; i++)
-            ctrl->per_key_repeat[i] = -1;
+        for (i = 0; i < XkbPerKeyBitArraySize; i++) {
+          ctrl->per_key_repeat[i] = -1;
+        }
 
         /* Now turn off the modifiers */
         for (i = 0; i < 32; i++) {
             unsigned char keycode;
 
             keycode = keyInfo.modifierKeycodes[i][0];
-            if (keycode)
-                ClearBit(ctrl->per_key_repeat, keycode + MIN_KEYCODE);
+            if (keycode) {
+              ClearBit(ctrl->per_key_repeat, keycode + MIN_KEYCODE);
+            }
 
             keycode = keyInfo.modifierKeycodes[i][1];
-            if (keycode)
-                ClearBit(ctrl->per_key_repeat, keycode + MIN_KEYCODE);
+            if (keycode) {
+              ClearBit(ctrl->per_key_repeat, keycode + MIN_KEYCODE);
+            }
         }
 
         /* Hurray for data duplication */
-        if (pDev->kbdfeed)
-            memcpy(pDev->kbdfeed->ctrl.autoRepeats, ctrl->per_key_repeat,
-                   XkbPerKeyBitArraySize);
+        if (pDev->kbdfeed) {
+          memcpy(pDev->kbdfeed->ctrl.autoRepeats, ctrl->per_key_repeat,
+                 XkbPerKeyBitArraySize);
+        }
 
         //ErrorF("per_key_repeat =\n");
         //for(i=0; i < XkbPerKeyBitArraySize; i++)
@@ -540,7 +552,9 @@ DarwinModifierNXKeycodeToNXKey(unsigned char keycode, int *outSide)
     if (key == NX_NUMMODIFIERS) {
         return -1;
     }
-    if (outSide) *outSide = side;
+    if (outSide) {
+      *outSide = side;
+    }
 
     return key;
 }
@@ -741,8 +755,11 @@ make_dead_key(KeySym in)
 {
     int i;
 
-    for (i = 0; i < ARRAY_SIZE(dead_keys); i++)
-        if (dead_keys[i].normal == in) return dead_keys[i].dead;
+    for (i = 0; i < ARRAY_SIZE(dead_keys); i++) {
+      if (dead_keys[i].normal == in) {
+        return dead_keys[i].dead;
+      }
+    }
 
     return in;
 }
@@ -811,7 +828,9 @@ QuartzReadSystemKeymap(darwinKeyboardInfo *info)
             err = UCKeyTranslate(ctx.chr_data, i, kUCKeyActionDown,
                                  mods[j] >> 8, ctx.kbd_type, 0,
                                  &dead_key_state, 8, &len, s);
-            if (err != noErr) continue;
+            if (err != noErr) {
+              continue;
+            }
 
             if (len == 0 && dead_key_state != 0) {
                 /* Found a dead key. Work out which one it is, but
@@ -820,7 +839,9 @@ QuartzReadSystemKeymap(darwinKeyboardInfo *info)
                                      mods[j] >> 8, ctx.kbd_type,
                                      kUCKeyTranslateNoDeadKeysMask,
                                      &extra_dead, 8, &len, s);
-                if (err != noErr) continue;
+                if (err != noErr) {
+                  continue;
+                }
             }
 
             /* Not sure why 0x0010 is there.
@@ -828,14 +849,24 @@ QuartzReadSystemKeymap(darwinKeyboardInfo *info)
              */
             if (len > 0 && s[0] != 0x0010 && s[0] != 0x0000) {
                 k[j] = ucs2keysym(s[0]);
-                if (dead_key_state != 0) k[j] = make_dead_key(k[j]);
+                if (dead_key_state != 0) {
+                  k[j] = make_dead_key(k[j]);
+                }
             }
         }
 
-        if (k[3] == k[2]) k[3] = NoSymbol;
-        if (k[1] == k[0]) k[1] = NoSymbol;
-        if (k[0] == k[2] && k[1] == k[3]) k[2] = k[3] = NoSymbol;
-        if (k[3] == k[0] && k[2] == k[1] && k[2] == NoSymbol) k[3] = NoSymbol;
+        if (k[3] == k[2]) {
+          k[3] = NoSymbol;
+        }
+        if (k[1] == k[0]) {
+          k[1] = NoSymbol;
+        }
+        if (k[0] == k[2] && k[1] == k[3]) {
+          k[2] = k[3] = NoSymbol;
+        }
+        if (k[3] == k[0] && k[2] == k[1] && k[2] == NoSymbol) {
+          k[3] = NoSymbol;
+        }
     }
 
 #if HACK_MISSING
@@ -844,9 +875,10 @@ QuartzReadSystemKeymap(darwinKeyboardInfo *info)
     for (i = 0; i < ARRAY_SIZE(known_keys); i++) {
         k = info->keyMap + known_keys[i].keycode * GLYPHS_PER_KEY;
 
-        if (k[0] == NoSymbol && k[1] == NoSymbol
-            && k[2] == NoSymbol && k[3] == NoSymbol)
-            k[0] = known_keys[i].keysym;
+        if (k[0] == NoSymbol && k[1] == NoSymbol && k[2] == NoSymbol &&
+            k[3] == NoSymbol) {
+          k[0] = known_keys[i].keysym;
+        }
     }
 #endif
 
@@ -856,8 +888,9 @@ QuartzReadSystemKeymap(darwinKeyboardInfo *info)
     for (i = 0; i < ARRAY_SIZE(known_numeric_keys); i++) {
         k = info->keyMap + known_numeric_keys[i].keycode * GLYPHS_PER_KEY;
 
-        if (k[0] == known_numeric_keys[i].normal)
-            k[0] = known_numeric_keys[i].keypad;
+        if (k[0] == known_numeric_keys[i].normal) {
+          k[0] = known_numeric_keys[i].keypad;
+        }
     }
 #endif
 
@@ -884,8 +917,9 @@ QuartsResyncKeymap(Bool sendDDXEvent)
     pthread_mutex_unlock(&keyInfo_mutex);
 
     /* Tell server thread to deal with new keyInfo */
-    if (sendDDXEvent)
-        DarwinSendDDXEvent(kXquartzReloadKeymap, 0);
+    if (sendDDXEvent) {
+      DarwinSendDDXEvent(kXquartzReloadKeymap, 0);
+    }
 
     return retval;
 }

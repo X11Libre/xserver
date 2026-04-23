@@ -133,8 +133,9 @@ xorg_list_init(struct xorg_list *list)
 static inline void
 __xorg_list_autoinit(struct xorg_list *head)
 {
-    if ((!head->prev) && (!head->next))
-        xorg_list_init(head);
+  if ((!head->prev) && (!head->next)) {
+    xorg_list_init(head);
+  }
 }
 
 static inline void
@@ -245,8 +246,9 @@ static inline int
 xorg_list_present(struct xorg_list *entry, struct xorg_list *head)
 {
     for (struct xorg_list *l=head->next; l && (l != head); l=l->next) {
-        if (l == entry)
-            return 1;
+      if (l == entry) {
+        return 1;
+      }
     }
     return 0;
 }
@@ -263,8 +265,9 @@ xorg_list_present(struct xorg_list *entry, struct xorg_list *head)
 static inline int
 xorg_list_add_ndup(struct xorg_list *entry, struct xorg_list *head)
 {
-    if (xorg_list_present(entry, head))
-        return 0;
+  if (xorg_list_present(entry, head)) {
+    return 0;
+  }
 
     xorg_list_add(entry, head);
     return 1;
@@ -282,8 +285,9 @@ xorg_list_add_ndup(struct xorg_list *entry, struct xorg_list *head)
 static inline int
 xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
 {
-    if (xorg_list_present(entry, head))
-        return 0;
+  if (xorg_list_present(entry, head)) {
+    return 0;
+  }
 
     xorg_list_append(entry, head);
     return 1;

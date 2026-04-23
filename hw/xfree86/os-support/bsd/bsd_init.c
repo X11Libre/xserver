@@ -170,8 +170,9 @@ xf86OpenConsole(void)
 
         /* detect which driver we are running on */
         for (unsigned idx=0; idx < ARRAY_SIZE(console_drivers); idx++) {
-            if ((xf86Info.consoleFd = console_drivers[idx].open()) >= 0)
-                break;
+          if ((xf86Info.consoleFd = console_drivers[idx].open()) >= 0) {
+            break;
+          }
         }
 
         /* Check that a supported console driver was found */
@@ -527,8 +528,9 @@ xf86CloseConsole(void)
     struct vt_mode VT;
 #endif
 
-    if (xf86Info.ShareVTs)
-        return;
+    if (xf86Info.ShareVTs) {
+      return;
+    }
 
     switch (xf86Info.consType) {
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)

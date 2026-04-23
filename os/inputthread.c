@@ -130,8 +130,9 @@ input_force_unlock(void)
     if (pthread_mutex_trylock(&input_mutex) == 0) {
         input_mutex_count++;
         /* unlock +1 times for the trylock */
-        while (input_mutex_count > 0)
-            input_unlock();
+        while (input_mutex_count > 0) {
+          input_unlock();
+        }
     }
 }
 
@@ -164,11 +165,13 @@ InputThreadReadPipe(int readHead)
     int ret, array[10];
 
     ret = read(readHead, &array, sizeof(array));
-    if (ret >= 0)
-        return ret;
+    if (ret >= 0) {
+      return ret;
+    }
 
-    if (errno != EAGAIN)
-        FatalError("input-thread: draining pipe (%d)", errno);
+    if (errno != EAGAIN) {
+      FatalError("input-thread: draining pipe (%d)", errno);
+    }
 
     return 1;
 }
@@ -179,8 +182,9 @@ InputReady(int fd, int xevents, void *data)
     InputThreadDevice *dev = data;
 
     input_lock();
-    if (dev->state == device_state_running)
-        dev->readInputProc(fd, xevents, dev->readInputArgs);
+    if (dev->state == device_state_running) {
+      dev->readInputProc(fd, xevents, dev->readInputArgs);
+    }
     input_unlock();
 }
 
@@ -200,8 +204,9 @@ InputThreadRegisterDev(int fd,
 {
     InputThreadDevice *dev, *old;
 
-    if (!inputThreadInfo)
-        return SetNotifyFd(fd, readInputProc, X_NOTIFY_READ, readInputArgs);
+    if (!inputThreadInfo) {
+      return SetNotifyFd(fd, readInputProc, X_NOTIFY_READ, readInputArgs);
+    }
 
     input_lock();
 
@@ -370,10 +375,11 @@ InputThreadDoWork(void *arg)
         }
 
         if (ospoll_wait(inputThreadInfo->fds, -1) < 0) {
-            if (errno == EINVAL)
-                FatalError("input-thread: %s (%s)", __func__, strerror(errno));
-            else if (errno != EINTR)
-                ErrorF("input-thread: %s (%s)\n", __func__, strerror(errno));
+          if (errno == EINVAL) {
+            FatalError("input-thread: %s (%s)", __func__, strerror(errno));
+          } else if (errno != EINTR) {
+            ErrorF("input-thread: %s (%s)\n", __func__, strerror(errno));
+          }
         }
 
         /* Kick main thread to process the generated input events and drain
@@ -402,18 +408,22 @@ InputThreadPreInit(void)
     int fds[2], hotplugPipe[2];
     int flags;
 
-    if (!InputThreadEnable)
-        return;
+    if (!InputThreadEnable) {
+      return;
+    }
 
-    if (pipe(fds) < 0)
-        FatalError("input-thread: could not create pipe");
+    if (pipe(fds) < 0) {
+      FatalError("input-thread: could not create pipe");
+    }
 
-     if (pipe(hotplugPipe) < 0)
-        FatalError("input-thread: could not create pipe");
+    if (pipe(hotplugPipe) < 0) {
+      FatalError("input-thread: could not create pipe");
+    }
 
     inputThreadInfo = calloc(1, sizeof(InputThreadInfo));
-    if (!inputThreadInfo)
-        FatalError("input-thread: could not allocate memory");
+    if (!inputThreadInfo) {
+      FatalError("input-thread: could not allocate memory");
+    }
 
     inputThreadInfo->changed = FALSE;
 
@@ -469,8 +479,9 @@ InputThreadInit(void)
     /* If the driver hasn't asked for input thread support by calling
      * InputThreadPreInit, then do nothing here
      */
-    if (!inputThreadInfo)
-        return;
+    if (!inputThreadInfo) {
+      return;
+    }
 
     pthread_attr_init(&attr);
 
@@ -479,8 +490,9 @@ InputThreadInit(void)
      * every thread as a normal process. Therefore this probably has no meaning
      * if we are under Linux.
      */
-    if (pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM) != 0)
-        ErrorF("input-thread: error setting thread scope\n");
+    if (pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM) != 0) {
+      ErrorF("input-thread: error setting thread scope\n");
+    }
 
     DebugF("input-thread: creating thread\n");
     pthread_create(&inputThreadInfo->thread, &attr,
@@ -499,8 +511,9 @@ InputThreadFini(void)
 {
     InputThreadDevice *dev, *next;
 
-    if (!inputThreadInfo)
-        return;
+    if (!inputThreadInfo) {
+      return;
+    }
 
     /* Close the pipe to get the input thread to shut down */
     close(hotplugPipeWrite);

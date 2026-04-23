@@ -46,11 +46,13 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
 
     BUG_RETURN_VAL(!priv, FALSE);
 
-    if (priv->type == GLAMOR_DRM_ONLY)
-        return FALSE;
+    if (priv->type == GLAMOR_DRM_ONLY) {
+      return FALSE;
+    }
 
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(priv))
-        return TRUE;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(priv)) {
+      return TRUE;
+    }
 
     glamor_make_current(glamor_priv);
 
@@ -68,8 +70,9 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
          * we'll assume that it's directly mapped
          * by a lower level driver
          */
-        if (!priv->prepared)
-            return TRUE;
+        if (!priv->prepared) {
+          return TRUE;
+        }
 
         /* In X, multiple Drawables can be stored in the same Pixmap (such as
          * each individual window in a non-composited screen pixmap, or the
@@ -80,11 +83,13 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
          * need to add more boxes to the set of data we've downloaded, as we go.
          */
         RegionSubtract(&region, &region, &priv->prepare_region);
-        if (!RegionNotEmpty(&region))
-            return TRUE;
+        if (!RegionNotEmpty(&region)) {
+          return TRUE;
+        }
 
-        if (access == GLAMOR_ACCESS_RW)
-            FatalError("attempt to remap buffer as writable");
+        if (access == GLAMOR_ACCESS_RW) {
+          FatalError("attempt to remap buffer as writable");
+        }
 
         if (priv->pbo) {
             glBindBuffer(GL_PIXEL_PACK_BUFFER, priv->pbo);
@@ -95,8 +100,9 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
         RegionInit(&priv->prepare_region, box, 1);
 
         if (glamor_priv->has_rw_pbo) {
-            if (priv->pbo == 0)
-                glGenBuffers(1, &priv->pbo);
+          if (priv->pbo == 0) {
+            glGenBuffers(1, &priv->pbo);
+          }
 
             gl_usage = GL_STREAM_READ;
 
@@ -125,8 +131,9 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
         if (!priv->pbo) {
             pixmap->devPrivate.ptr = calloc(pixmap->devKind,
                                             pixmap->drawable.height);
-            if (!pixmap->devPrivate.ptr)
-                return FALSE;
+            if (!pixmap->devPrivate.ptr) {
+              return FALSE;
+            }
         }
         priv->map_access = access;
     }
@@ -137,10 +144,11 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
     RegionUninit(&region);
 
     if (priv->pbo) {
-        if (priv->map_access == GLAMOR_ACCESS_RW)
-            gl_access = GL_READ_WRITE;
-        else
-            gl_access = GL_READ_ONLY;
+      if (priv->map_access == GLAMOR_ACCESS_RW) {
+        gl_access = GL_READ_WRITE;
+      } else {
+        gl_access = GL_READ_ONLY;
+      }
 
         pixmap->devPrivate.ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, gl_access);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -161,13 +169,15 @@ glamor_finish_access(DrawablePtr drawable)
     PixmapPtr pixmap = glamor_get_drawable_pixmap(drawable);
     glamor_pixmap_private       *priv = glamor_get_pixmap_private(pixmap);
 
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(priv))
-        return;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(priv)) {
+      return;
+    }
 
     BUG_RETURN(!priv);
 
-    if (!priv->prepared)
-        return;
+    if (!priv->prepared) {
+      return;
+    }
 
     if (priv->pbo &&
         !(glamor_drawable_effective_depth(drawable) == 24 && pixmap->drawable.depth == 32)) {
@@ -186,10 +196,12 @@ glamor_finish_access(DrawablePtr drawable)
     RegionUninit(&priv->prepare_region);
 
     if (priv->pbo) {
-        if (glamor_drawable_effective_depth(drawable) == 24 && pixmap->drawable.depth == 32)
-            pixmap->devPrivate.ptr = NULL;
-        else
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+      if (glamor_drawable_effective_depth(drawable) == 24 &&
+          pixmap->drawable.depth == 32) {
+        pixmap->devPrivate.ptr = NULL;
+      } else {
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+      }
 
         glDeleteBuffers(1, &priv->pbo);
         priv->pbo = 0;
@@ -233,8 +245,9 @@ glamor_prepare_access_box(DrawablePtr drawable, glamor_access_t access,
 Bool
 glamor_prepare_access_picture(PicturePtr picture, glamor_access_t access)
 {
-    if (!picture || !picture->pDrawable)
-        return TRUE;
+  if (!picture || !picture->pDrawable) {
+    return TRUE;
+  }
 
     return glamor_prepare_access(picture->pDrawable, access);
 }
@@ -243,8 +256,9 @@ Bool
 glamor_prepare_access_picture_box(PicturePtr picture, glamor_access_t access,
                         int x, int y, int w, int h)
 {
-    if (!picture || !picture->pDrawable)
-        return TRUE;
+  if (!picture || !picture->pDrawable) {
+    return TRUE;
+  }
 
     /* If a transform is set, we don't know what the bounds is on the
      * source, so just prepare the whole pixmap.  XXX: We could
@@ -266,8 +280,9 @@ glamor_prepare_access_picture_box(PicturePtr picture, glamor_access_t access,
 void
 glamor_finish_access_picture(PicturePtr picture)
 {
-    if (!picture || !picture->pDrawable)
-        return;
+  if (!picture || !picture->pDrawable) {
+    return;
+  }
 
     glamor_finish_access(picture->pDrawable);
 }

@@ -127,8 +127,9 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
     if (!strcmp(argv[i], "-geometry")) {
         if (++i < argc) {
-            if (xnest_parse_geometry(argv[i], &xnestGeometry))
-                return 2;
+          if (xnest_parse_geometry(argv[i], &xnestGeometry)) {
+            return 2;
+          }
         }
         return 0;
     }

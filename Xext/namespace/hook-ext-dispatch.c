@@ -23,8 +23,9 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
     XNS_HOOK_HEAD(ExtensionAccessCallbackParam);
 
     /* root NS has super powers */
-    if (subj->ns->superPower)
-        goto pass;
+    if (subj->ns->superPower) {
+      goto pass;
+    }
 
     switch (client->majorOp) {
         /* unrestricted access to these */
@@ -39,8 +40,9 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         /* allow several operations */
         case EXTENSION_MAJOR_XKEYBOARD:
-            if (subj->ns->allowXKeyboard)
-                goto pass;
+          if (subj->ns->allowXKeyboard) {
+            goto pass;
+          }
             switch (client->minorOp) {
                 case X_kbUseExtension:
                 case X_kbGetMap:
@@ -56,12 +58,14 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         /* allow if namespace has flag set */
         case EXTENSION_MAJOR_SHAPE:
-            if (subj->ns->allowShape)
-                goto pass;
+          if (subj->ns->allowShape) {
+            goto pass;
+          }
         break;
         case EXTENSION_MAJOR_XINPUT:
-            if (subj->ns->allowXInput)
-                goto pass;
+          if (subj->ns->allowXInput) {
+            goto pass;
+          }
             switch (client->minorOp) {
                 case X_ListInputDevices:
                     goto pass;

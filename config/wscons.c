@@ -116,59 +116,62 @@ wscons_add_keyboard(void)
     close(fd);
 
     input_options = input_option_new(input_options, "_source", "server/wscons");
-    if (input_options == NULL)
-        return;
+    if (input_options == NULL) {
+      return;
+    }
 
     LogMessage(X_INFO, "config/wscons: checking input device %s\n",
                WSCONS_KBD_DEVICE);
     input_options = input_option_new(input_options, "name", WSCONS_KBD_DEVICE);
     input_options = input_option_new(input_options, "driver", "kbd");
 
-    if (asprintf(&config_info, "wscons:%s", WSCONS_KBD_DEVICE) == -1)
-        goto unwind;
+    if (asprintf(&config_info, "wscons:%s", WSCONS_KBD_DEVICE) == -1) {
+      goto unwind;
+    }
     if (KB_ENCODING(wsenc) == KB_USER) {
         /* Ignore wscons "user" layout */
         LogMessageVerb(X_INFO, 3, "wskbd: ignoring \"user\" layout\n");
         goto kbd_config_done;
     }
-    for (i = 0; kbdenc[i].val; i++)
-        if (KB_ENCODING(wsenc) == kbdenc[i].val) {
-            LogMessageVerb(X_INFO, 3, "wskbd: using layout %s\n",
-                           kbdenc[i].name);
-            input_options = input_option_new(input_options,
-                                             "xkb_layout", kbdenc[i].name);
-            break;
-        }
-    for (i = 0; kbdvar[i].val; i++)
-        if (wsenc == kbdvar[i].val || KB_VARIANT(wsenc) == kbdvar[i].val) {
-            LogMessageVerb(X_INFO, 3, "wskbd: using variant %s\n",
-                           kbdvar[i].name);
-            input_options = input_option_new(input_options,
-                                             "xkb_variant", kbdvar[i].name);
-            break;
-        }
-    for (i = 0; kbdopt[i].val; i++)
-        if (KB_VARIANT(wsenc) == kbdopt[i].val) {
-            LogMessageVerb(X_INFO, 3, "wskbd: using option %s\n",
-                           kbdopt[i].name);
-            input_options = input_option_new(input_options,
-                                             "xkb_options", kbdopt[i].name);
-            break;
-        }
-    for (i = 0; kbdmodel[i].val; i++)
-        if (type == kbdmodel[i].val) {
-            LogMessageVerb(X_INFO, 3, "wskbd: using model %s\n",
-                           kbdmodel[i].name);
-            input_options = input_option_new(input_options,
-                                             "xkb_model", kbdmodel[i].name);
-            break;
-        }
+    for (i = 0; kbdenc[i].val; i++) {
+      if (KB_ENCODING(wsenc) == kbdenc[i].val) {
+        LogMessageVerb(X_INFO, 3, "wskbd: using layout %s\n", kbdenc[i].name);
+        input_options =
+            input_option_new(input_options, "xkb_layout", kbdenc[i].name);
+        break;
+      }
+    }
+    for (i = 0; kbdvar[i].val; i++) {
+      if (wsenc == kbdvar[i].val || KB_VARIANT(wsenc) == kbdvar[i].val) {
+        LogMessageVerb(X_INFO, 3, "wskbd: using variant %s\n", kbdvar[i].name);
+        input_options =
+            input_option_new(input_options, "xkb_variant", kbdvar[i].name);
+        break;
+      }
+    }
+    for (i = 0; kbdopt[i].val; i++) {
+      if (KB_VARIANT(wsenc) == kbdopt[i].val) {
+        LogMessageVerb(X_INFO, 3, "wskbd: using option %s\n", kbdopt[i].name);
+        input_options =
+            input_option_new(input_options, "xkb_options", kbdopt[i].name);
+        break;
+      }
+    }
+    for (i = 0; kbdmodel[i].val; i++) {
+      if (type == kbdmodel[i].val) {
+        LogMessageVerb(X_INFO, 3, "wskbd: using model %s\n", kbdmodel[i].name);
+        input_options =
+            input_option_new(input_options, "xkb_model", kbdmodel[i].name);
+        break;
+      }
+    }
 
  kbd_config_done:
     attrs.flags |= ATTR_KEY | ATTR_KEYBOARD;
     rc = NewInputDeviceRequest(input_options, &attrs, &dev);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
     for (; dev; dev = dev->next) {
         free(dev->config_info);
@@ -187,12 +190,14 @@ wscons_add_pointer(const char *path, const char *driver, int flags)
     char *config_info = NULL;
     int rc;
 
-    if (asprintf(&config_info, "wscons:%s", path) == -1)
-        return;
+    if (asprintf(&config_info, "wscons:%s", path) == -1) {
+      return;
+    }
 
     input_options = input_option_new(input_options, "_source", "server/wscons");
-    if (input_options == NULL)
-        return;
+    if (input_options == NULL) {
+      return;
+    }
 
     input_options = input_option_new(input_options, "name", strdup(path));
     input_options = input_option_new(input_options, "driver", strdup(driver));
@@ -200,8 +205,9 @@ wscons_add_pointer(const char *path, const char *driver, int flags)
     LogMessage(X_INFO, "config/wscons: checking input device %s\n", path);
     attrs.flags |= flags;
     rc = NewInputDeviceRequest(input_options, &attrs, &dev);
-    if (rc != Success)
-        goto unwind;
+    if (rc != Success) {
+      goto unwind;
+    }
 
     for (; dev; dev = dev->next) {
         free(dev->config_info);

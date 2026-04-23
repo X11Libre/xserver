@@ -70,8 +70,9 @@ compMarkAncestors(WindowPtr pWin)
 {
     pWin = pWin->parent;
     while (pWin) {
-        if (pWin->damagedDescendants)
-            return;
+      if (pWin->damagedDescendants) {
+        return;
+      }
         pWin->damagedDescendants = TRUE;
         pWin = pWin->parent;
     }
@@ -111,8 +112,9 @@ compMarkWindows(WindowPtr pWin, WindowPtr *ppLayerWin)
     ScreenPtr pScreen = pWin->drawable.pScreen;
     WindowPtr pLayerWin = pWin;
 
-    if (!pWin->viewable)
-        return FALSE;
+    if (!pWin->viewable) {
+      return FALSE;
+    }
 
     (*pScreen->MarkOverlappedWindows) (pWin, pWin, &pLayerWin);
     (*pScreen->MarkWindow) (pLayerWin->parent);
@@ -129,8 +131,9 @@ compHandleMarkedWindows(WindowPtr pWin, WindowPtr pLayerWin)
 
     (*pScreen->ValidateTree) (pLayerWin->parent, pLayerWin, VTOther);
     (*pScreen->HandleExposures) (pLayerWin->parent);
-    if (pScreen->PostValidateTree)
-        (*pScreen->PostValidateTree) (pLayerWin->parent, pLayerWin, VTOther);
+    if (pScreen->PostValidateTree) {
+      (*pScreen->PostValidateTree)(pLayerWin->parent, pLayerWin, VTOther);
+    }
 }
 
 /*
@@ -151,16 +154,20 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
         return Success;
     }
 
-    if (!pWin->parent)
-        return BadMatch;
+    if (!pWin->parent) {
+      return BadMatch;
+    }
 
     /*
      * Only one Manual update is allowed
      */
-    if (cw && update == CompositeRedirectManual)
-        for (CompClientWindowPtr ccw = cw->clients; ccw; ccw = ccw->next)
-            if (ccw->update == CompositeRedirectManual)
-                return BadAccess;
+    if (cw && update == CompositeRedirectManual) {
+      for (CompClientWindowPtr ccw = cw->clients; ccw; ccw = ccw->next) {
+        if (ccw->update == CompositeRedirectManual) {
+          return BadAccess;
+        }
+      }
+    }
 
     /*
      * Allocate per-client per-window structure
@@ -168,8 +175,9 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
      * it is not expected to be common
      */
     CompClientWindowPtr ccw = calloc(1, sizeof(CompClientWindowRec));
-    if (!ccw)
-        return BadAlloc;
+    if (!ccw) {
+      return BadAlloc;
+    }
     ccw->id = FakeClientID(pClient->index);
     ccw->update = update;
     /*
@@ -205,11 +213,13 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
     }
     ccw->next = cw->clients;
     cw->clients = ccw;
-    if (!AddResource(ccw->id, CompositeClientWindowType, pWin))
-        return BadAlloc;
+    if (!AddResource(ccw->id, CompositeClientWindowType, pWin)) {
+      return BadAlloc;
+    }
     if (ccw->update == CompositeRedirectManual) {
-        if (!anyMarked)
-            anyMarked = compMarkWindows(pWin, &pLayerWin);
+      if (!anyMarked) {
+        anyMarked = compMarkWindows(pWin, &pLayerWin);
+      }
 
         if (cw->damageRegistered) {
             DamageUnregister(cw->damage);
@@ -218,8 +228,9 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
         cw->update = CompositeRedirectManual;
     }
     else if (cw->update == CompositeRedirectAutomatic && !cw->damageRegistered) {
-        if (!anyMarked)
-            anyMarked = compMarkWindows(pWin, &pLayerWin);
+      if (!anyMarked) {
+        anyMarked = compMarkWindows(pWin, &pLayerWin);
+      }
     }
 
     if (!compCheckRedirect(pWin)) {
@@ -227,8 +238,9 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
         status = BadAlloc;
     }
 
-    if (anyMarked)
-        compHandleMarkedWindows(pWin, pLayerWin);
+    if (anyMarked) {
+      compHandleMarkedWindows(pWin, pLayerWin);
+    }
 
     return status;
 }
@@ -273,14 +285,16 @@ compFreeClientWindow(WindowPtr pWin, XID id)
     WindowPtr pLayerWin;
     PixmapPtr pPixmap = NULL;
 
-    if (!cw)
-        return;
+    if (!cw) {
+      return;
+    }
     for (CompClientWindowPtr *prev = &cw->clients, ccw;
                     (ccw = *prev); prev = &ccw->next) {
         if (ccw->id == id) {
             *prev = ccw->next;
-            if (ccw->update == CompositeRedirectManual)
-                cw->update = CompositeRedirectAutomatic;
+            if (ccw->update == CompositeRedirectManual) {
+              cw->update = CompositeRedirectAutomatic;
+            }
             free(ccw);
             break;
         }
@@ -293,8 +307,9 @@ compFreeClientWindow(WindowPtr pWin, XID id)
             compSetParentPixmap(pWin);
         }
 
-        if (cw->damage)
-            DamageDestroy(cw->damage);
+        if (cw->damage) {
+          DamageDestroy(cw->damage);
+        }
 
         RegionUninit(&cw->borderClip);
 
@@ -311,8 +326,9 @@ compFreeClientWindow(WindowPtr pWin, XID id)
         DamageDamageRegion(&pWin->drawable, &pWin->borderSize);
     }
 
-    if (anyMarked)
-        compHandleMarkedWindows(pWin, pLayerWin);
+    if (anyMarked) {
+      compHandleMarkedWindows(pWin, pLayerWin);
+    }
 
     if (pPixmap) {
         compRestoreWindow(pWin, pPixmap);
@@ -331,14 +347,17 @@ compUnredirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
 
     BUG_RETURN_VAL(!pClient, BadValue);
 
-    if (!cw)
-        return BadValue;
+    if (!cw) {
+      return BadValue;
+    }
 
-    for (CompClientWindowPtr ccw = cw->clients; ccw; ccw = ccw->next)
-        if (ccw->update == update && dixClientIdForXID(ccw->id) == pClient->index) {
-            FreeResource(ccw->id, X11_RESTYPE_NONE);
-            return Success;
-        }
+    for (CompClientWindowPtr ccw = cw->clients; ccw; ccw = ccw->next) {
+      if (ccw->update == update &&
+          dixClientIdForXID(ccw->id) == pClient->index) {
+        FreeResource(ccw->id, X11_RESTYPE_NONE);
+        return Success;
+      }
+    }
     return BadValue;
 }
 
@@ -354,18 +373,22 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
     /*
      * Only one Manual update is allowed
      */
-    if (csw && update == CompositeRedirectManual)
-        for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next)
-            if (ccw->update == CompositeRedirectManual)
-                return BadAccess;
+    if (csw && update == CompositeRedirectManual) {
+      for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next) {
+        if (ccw->update == CompositeRedirectManual) {
+          return BadAccess;
+        }
+      }
+    }
     /*
      * Allocate per-client per-window structure
      * The client *could* allocate multiple, but while supported,
      * it is not expected to be common
      */
     CompClientWindowPtr ccw = calloc(1, sizeof(CompClientWindowRec));
-    if (!ccw)
-        return BadAlloc;
+    if (!ccw) {
+      return BadAlloc;
+    }
     ccw->id = FakeClientID(pClient->index);
     ccw->update = update;
     /*
@@ -388,8 +411,9 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
         int ret = compRedirectWindow(pClient, pChild, update);
 
         if (ret != Success) {
-            for (WindowPtr pSib = pChild->nextSib; pSib; pSib = pSib->nextSib)
-                (void) compUnredirectWindow(pClient, pSib, update);
+          for (WindowPtr pSib = pChild->nextSib; pSib; pSib = pSib->nextSib) {
+            (void)compUnredirectWindow(pClient, pSib, update);
+          }
             if (!csw->clients) {
                 free(csw);
                 dixSetPrivate(&pWin->devPrivates, CompSubwindowsPrivateKey, 0);
@@ -403,8 +427,9 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
      */
     ccw->next = csw->clients;
     csw->clients = ccw;
-    if (!AddResource(ccw->id, CompositeClientSubwindowsType, pWin))
-        return BadAlloc;
+    if (!AddResource(ccw->id, CompositeClientSubwindowsType, pWin)) {
+      return BadAlloc;
+    }
     if (ccw->update == CompositeRedirectManual) {
         csw->update = CompositeRedirectManual;
         /*
@@ -426,8 +451,9 @@ compFreeClientSubwindows(WindowPtr pWin, XID id)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pWin);
 
-    if (!csw)
-        return;
+    if (!csw) {
+      return;
+    }
     for (CompClientWindowPtr *prev = &csw->clients, ccw;
                     (ccw = *prev); prev = &ccw->next) {
         if (ccw->id == id) {
@@ -442,17 +468,19 @@ compFreeClientSubwindows(WindowPtr pWin, XID id)
                 DamageExtSetCritical(pClient, false);
                 csw->update = CompositeRedirectAutomatic;
                 pWin->inhibitBGPaint = FALSE;
-                if (pWin->mapped)
-                    (*pWin->drawable.pScreen->ClearToBackground) (pWin, 0, 0, 0,
-                                                                  0, TRUE);
+                if (pWin->mapped) {
+                  (*pWin->drawable.pScreen->ClearToBackground)(pWin, 0, 0, 0, 0,
+                                                               TRUE);
+                }
             }
 
             /*
              * Unredirect all existing subwindows
              */
-            for (WindowPtr pChild = pWin->lastChild;
-                    pChild; pChild = pChild->prevSib)
-                (void) compUnredirectWindow(pClient, pChild, ccw->update);
+            for (WindowPtr pChild = pWin->lastChild; pChild;
+                 pChild = pChild->prevSib) {
+              (void)compUnredirectWindow(pClient, pChild, ccw->update);
+            }
 
             free(ccw);
             break;
@@ -477,13 +505,16 @@ compUnredirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pWin);
 
-    if (!csw)
-        return BadValue;
-    for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next)
-        if (ccw->update == update && dixClientIdForXID(ccw->id) == pClient->index) {
-            FreeResource(ccw->id, X11_RESTYPE_NONE);
-            return Success;
-        }
+    if (!csw) {
+      return BadValue;
+    }
+    for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next) {
+      if (ccw->update == update &&
+          dixClientIdForXID(ccw->id) == pClient->index) {
+        FreeResource(ccw->id, X11_RESTYPE_NONE);
+        return Success;
+      }
+    }
     return BadValue;
 }
 
@@ -496,13 +527,15 @@ compRedirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pParent);
 
-    if (!csw)
-        return Success;
+    if (!csw) {
+      return Success;
+    }
     for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next) {
         int ret = compRedirectWindow(dixClientForXID(ccw->id),
                                      pWin, ccw->update);
-        if (ret != Success)
-            return ret;
+        if (ret != Success) {
+          return ret;
+        }
     }
     return Success;
 }
@@ -516,13 +549,15 @@ compUnredirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pParent);
 
-    if (!csw)
-        return Success;
+    if (!csw) {
+      return Success;
+    }
     for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next) {
         int ret = compUnredirectWindow(dixClientForXID(ccw->id),
                                        pWin, ccw->update);
-        if (ret != Success)
-            return ret;
+        if (ret != Success) {
+          return ret;
+        }
     }
     return Success;
 }
@@ -530,8 +565,9 @@ compUnredirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
 static unsigned
 compGetBackgroundState(WindowPtr pWin)
 {
-    while (pWin->backgroundState == ParentRelative)
-        pWin = pWin->parent;
+  while (pWin->backgroundState == ParentRelative) {
+    pWin = pWin->parent;
+  }
 
     return pWin->backgroundState;
 }
@@ -546,8 +582,9 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
     pPixmap = (*pScreen->CreatePixmap) (pScreen, w, h, pWin->drawable.depth,
                                         CREATE_PIXMAP_USAGE_BACKING_PIXMAP);
 
-    if (!pPixmap)
-        return 0;
+    if (!pPixmap) {
+      return 0;
+    }
 
     pPixmap->screen_x = x;
     pPixmap->screen_y = y;
@@ -604,10 +641,12 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
                              x - pParent->drawable.x,
                              y - pParent->drawable.y, 0, 0, 0, 0, w, h);
         }
-        if (pSrcPicture)
-            FreePicture(pSrcPicture, 0);
-        if (pDstPicture)
-            FreePicture(pDstPicture, 0);
+        if (pSrcPicture) {
+          FreePicture(pSrcPicture, 0);
+        }
+        if (pDstPicture) {
+          FreePicture(pDstPicture, 0);
+        }
     }
     return pPixmap;
 }
@@ -628,10 +667,11 @@ compAllocPixmap(WindowPtr pWin)
         status = FALSE;
         goto out;
     }
-    if (cw->update == CompositeRedirectAutomatic)
-        pWin->redirectDraw = RedirectDrawAutomatic;
-    else
-        pWin->redirectDraw = RedirectDrawManual;
+    if (cw->update == CompositeRedirectAutomatic) {
+      pWin->redirectDraw = RedirectDrawAutomatic;
+    } else {
+      pWin->redirectDraw = RedirectDrawManual;
+    }
 
     compSetPixmap(pWin, pPixmap, bw);
     cw->oldx = COMP_ORIGIN_INVALID;
@@ -703,8 +743,9 @@ compReallocPixmap(WindowPtr pWin, int draw_x, int draw_y,
     pix_h = h + (bw << 1);
     if (pix_w != pOld->drawable.width || pix_h != pOld->drawable.height) {
         pNew = compNewPixmap(pWin, pix_x, pix_y, pix_w, pix_h);
-        if (!pNew)
-            return FALSE;
+        if (!pNew) {
+          return FALSE;
+        }
         cw->pOldPixmap = pOld;
         compSetPixmap(pWin, pNew, bw);
     }

@@ -107,14 +107,18 @@ Author:  Adobe Systems Incorporated
 int
 CompareTimeStamps(TimeStamp a, TimeStamp b)
 {
-    if (a.months < b.months)
-        return EARLIER;
-    if (a.months > b.months)
-        return LATER;
-    if (a.milliseconds < b.milliseconds)
-        return EARLIER;
-    if (a.milliseconds > b.milliseconds)
-        return LATER;
+  if (a.months < b.months) {
+    return EARLIER;
+  }
+  if (a.months > b.months) {
+    return LATER;
+  }
+  if (a.milliseconds < b.milliseconds) {
+    return EARLIER;
+  }
+  if (a.milliseconds > b.milliseconds) {
+    return LATER;
+  }
     return SAMETIME;
 }
 
@@ -128,17 +132,20 @@ ClientTimeToServerTime(CARD32 c)
 {
     TimeStamp ts;
 
-    if (c == CurrentTime)
-        return currentTime;
+    if (c == CurrentTime) {
+      return currentTime;
+    }
     ts.months = currentTime.months;
     ts.milliseconds = c;
     if (c > currentTime.milliseconds) {
-        if (((unsigned long) c - currentTime.milliseconds) > HALFMONTH)
-            ts.months -= 1;
+      if (((unsigned long)c - currentTime.milliseconds) > HALFMONTH) {
+        ts.months -= 1;
+      }
     }
     else if (c < currentTime.milliseconds) {
-        if (((unsigned long) currentTime.milliseconds - c) > HALFMONTH)
-            ts.months += 1;
+      if (((unsigned long)currentTime.milliseconds - c) > HALFMONTH) {
+        ts.months += 1;
+      }
     }
     return ts;
 }
@@ -164,15 +171,19 @@ dixLookupDrawable(DrawablePtr *pDraw, XID id, ClientPtr client,
     rc = dixLookupResourceByClass((void **) &pTmp, id, RC_DRAWABLE, client,
                                   access);
 
-    if (rc != Success)
-        client->errorValue = id;
+    if (rc != Success) {
+      client->errorValue = id;
+    }
 
-    if (rc == BadValue)
-        return BadDrawable;
-    if (rc != Success)
-        return rc;
-    if (!((1 << pTmp->type) & (type ? type : M_DRAWABLE)))
-        return BadMatch;
+    if (rc == BadValue) {
+      return BadDrawable;
+    }
+    if (rc != Success) {
+      return rc;
+    }
+    if (!((1 << pTmp->type) & (type ? type : M_DRAWABLE))) {
+      return BadMatch;
+    }
 
     *pDraw = pTmp;
     return Success;
@@ -187,11 +198,13 @@ dixLookupWindow(WindowPtr *pWin, XID id, ClientPtr client, Mask access)
     /* dixLookupDrawable returns BadMatch iff id is a valid Drawable
        but is not a Window. Users of dixLookupWindow expect a BadWindow
        error in this case; they don't care that it's a valid non-Window XID */
-    if (rc == BadMatch)
-        rc = BadWindow;
+    if (rc == BadMatch) {
+      rc = BadWindow;
+    }
     /* Similarly, users of dixLookupWindow don't want BadDrawable. */
-    if (rc == BadDrawable)
-        rc = BadWindow;
+    if (rc == BadDrawable) {
+      rc = BadWindow;
+    }
     return rc;
 }
 
@@ -210,13 +223,16 @@ dixLookupFontable(FontPtr *pFont, XID id, ClientPtr client, Mask access)
     client->errorValue = id;    /* EITHER font or gc */
     rc = dixLookupResourceByType((void **) pFont, id, X11_RESTYPE_FONT, client,
                                  access);
-    if (rc != BadFont)
-        return rc;
+    if (rc != BadFont) {
+      return rc;
+    }
     rc = dixLookupResourceByType((void **) &pGC, id, X11_RESTYPE_GC, client, access);
-    if (rc == BadGC)
-        return BadFont;
-    if (rc == Success)
-        *pFont = pGC->font;
+    if (rc == BadGC) {
+      return BadFont;
+    }
+    if (rc == Success) {
+      *pFont = pGC->font;
+    }
     return rc;
 }
 
@@ -226,22 +242,26 @@ dixLookupResourceOwner(ClientPtr *result, XID id, ClientPtr client, Mask access_
     void *pRes;
     int rc = BadValue, clientIndex = dixClientIdForXID(id);
 
-    if (!clientIndex || !clients[clientIndex] || (id & SERVER_BIT))
-        goto bad;
+    if (!clientIndex || !clients[clientIndex] || (id & SERVER_BIT)) {
+      goto bad;
+    }
 
     rc = dixLookupResourceByClass(&pRes, id, RC_ANY, client, DixGetAttrAccess);
-    if (rc != Success)
-        goto bad;
+    if (rc != Success) {
+      goto bad;
+    }
 
     rc = dixCallClientAccessCallback(client, clients[clientIndex], access_mode);
-    if (rc != Success)
-        goto bad;
+    if (rc != Success) {
+      goto bad;
+    }
 
     *result = clients[clientIndex];
     return Success;
  bad:
-    if (client)
-        client->errorValue = id;
+   if (client) {
+     client->errorValue = id;
+   }
     *result = NULL;
     return rc;
 }
@@ -258,16 +278,19 @@ AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
     j = 0;
     if (numnow) {
         pTmp = client->saveSet;
-        while ((j < numnow) && (SaveSetWindow(pTmp[j]) != (void *) pWin))
-            j++;
+        while ((j < numnow) && (SaveSetWindow(pTmp[j]) != (void *)pWin)) {
+          j++;
+        }
     }
     if (mode == SetModeInsert) {
-        if (j < numnow)         /* duplicate */
-            return Success;
+      if (j < numnow) { /* duplicate */
+        return Success;
+      }
         numnow++;
         pTmp = (SaveSetElt *) realloc(client->saveSet, sizeof(*pTmp) * numnow);
-        if (!pTmp)
-            return BadAlloc;
+        if (!pTmp) {
+          return BadAlloc;
+        }
         client->saveSet = pTmp;
         client->numSaved = numnow;
         SaveSetAssignWindow(client->saveSet[numnow - 1], pWin);
@@ -284,8 +307,9 @@ AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
         if (numnow) {
             pTmp =
                 (SaveSetElt *) realloc(client->saveSet, sizeof(*pTmp) * numnow);
-            if (pTmp)
-                client->saveSet = pTmp;
+            if (pTmp) {
+              client->saveSet = pTmp;
+            }
         }
         else {
             free(client->saveSet);
@@ -304,9 +328,9 @@ DeleteWindowFromAnySaveSet(WindowPtr pWin)
 
     for (int i = 0; i < currentMaxClients; i++) {
         client = clients[i];
-        if (client && client->numSaved)
-            (void) AlterSaveSetForClient(client, pWin, SetModeDelete, FALSE,
-                                         TRUE);
+        if (client && client->numSaved) {
+          (void)AlterSaveSetForClient(client, pWin, SetModeDelete, FALSE, TRUE);
+        }
     }
 }
 
@@ -341,9 +365,11 @@ void
 BlockHandler(void *pTimeout)
 {
     ++inHandler;
-    for (size_t i = 0; i < numHandlers; i++)
-        if (!handlers[i].deleted)
-            (*handlers[i].BlockHandler) (handlers[i].blockData, pTimeout);
+    for (size_t i = 0; i < numHandlers; i++) {
+      if (!handlers[i].deleted) {
+        (*handlers[i].BlockHandler)(handlers[i].blockData, pTimeout);
+      }
+    }
 
     DIX_FOR_EACH_GPU_SCREEN({
         if (walkScreen->BlockHandler)
@@ -356,14 +382,16 @@ BlockHandler(void *pTimeout)
     });
 
     if (handlerDeleted) {
-        for (size_t i = 0; i < numHandlers;)
-            if (handlers[i].deleted) {
-                for (size_t j = i; j < numHandlers - 1; j++)
-                    handlers[j] = handlers[j + 1];
-                numHandlers--;
-            }
-            else
-                i++;
+      for (size_t i = 0; i < numHandlers;) {
+        if (handlers[i].deleted) {
+          for (size_t j = i; j < numHandlers - 1; j++) {
+            handlers[j] = handlers[j + 1];
+          }
+          numHandlers--;
+        } else {
+          i++;
+        }
+      }
         handlerDeleted = FALSE;
     }
     --inHandler;
@@ -389,18 +417,22 @@ WakeupHandler(int result)
             walkScreen->WakeupHandler(walkScreen, result);
     });
 
-    for (size_t i = numHandlers; i > 0; i--)
-        if (!handlers[i-1].deleted)
-            handlers[i-1].WakeupHandler(handlers[i-1].blockData, result);
+    for (size_t i = numHandlers; i > 0; i--) {
+      if (!handlers[i - 1].deleted) {
+        handlers[i - 1].WakeupHandler(handlers[i - 1].blockData, result);
+      }
+    }
     if (handlerDeleted) {
-        for (size_t i = 0; i < numHandlers;)
-            if (handlers[i].deleted) {
-                for (size_t j = i; j < numHandlers - 1; j++)
-                    handlers[j] = handlers[j + 1];
-                numHandlers--;
-            }
-            else
-                i++;
+      for (size_t i = 0; i < numHandlers;) {
+        if (handlers[i].deleted) {
+          for (size_t j = i; j < numHandlers - 1; j++) {
+            handlers[j] = handlers[j + 1];
+          }
+          numHandlers--;
+        } else {
+          i++;
+        }
+      }
         handlerDeleted = FALSE;
     }
     --inHandler;
@@ -420,8 +452,9 @@ RegisterBlockAndWakeupHandlers(ServerBlockHandlerProcPtr blockHandler,
     if (numHandlers >= sizeHandlers) {
         new = (BlockHandlerPtr) realloc(handlers, (numHandlers + 1) *
                                         sizeof(BlockHandlerRec));
-        if (!new)
-            return FALSE;
+        if (!new) {
+          return FALSE;
+        }
         handlers = new;
         sizeHandlers = numHandlers + 1;
     }
@@ -438,21 +471,22 @@ RemoveBlockAndWakeupHandlers(ServerBlockHandlerProcPtr blockHandler,
                              ServerWakeupHandlerProcPtr wakeupHandler,
                              void *blockData)
 {
-    for (size_t i = 0; i < numHandlers; i++)
-        if (handlers[i].BlockHandler == blockHandler &&
-            handlers[i].WakeupHandler == wakeupHandler &&
-            handlers[i].blockData == blockData) {
-            if (inHandler) {
-                handlerDeleted = TRUE;
-                handlers[i].deleted = TRUE;
-            }
-            else {
-                for (; i < numHandlers - 1; i++)
-                    handlers[i] = handlers[i + 1];
-                numHandlers--;
-            }
-            break;
+  for (size_t i = 0; i < numHandlers; i++) {
+    if (handlers[i].BlockHandler == blockHandler &&
+        handlers[i].WakeupHandler == wakeupHandler &&
+        handlers[i].blockData == blockData) {
+      if (inHandler) {
+        handlerDeleted = TRUE;
+        handlers[i].deleted = TRUE;
+      } else {
+        for (; i < numHandlers - 1; i++) {
+          handlers[i] = handlers[i + 1];
         }
+        numHandlers--;
+      }
+      break;
+    }
+  }
 }
 
 void
@@ -498,8 +532,9 @@ ProcessWorkQueue(void)
     WorkQueuePtr q, *p;
 
     // don't have a work queue yet
-    if (!workQueue)
-        return;
+    if (!workQueue) {
+      return;
+    }
 
     p = &workQueue;
     /*
@@ -546,8 +581,9 @@ QueueWorkProc(Bool (*function) (ClientPtr pClient, void *closure),
               ClientPtr client, void *closure)
 {
     WorkQueuePtr q = calloc(1, sizeof *q);
-    if (!q)
-        return FALSE;
+    if (!q) {
+      return FALSE;
+    }
     q->function = function;
     q->client = client;
     q->closure = closure;
@@ -578,8 +614,9 @@ Bool
 ClientSleep(ClientPtr client, ClientSleepProcPtr function, void *closure)
 {
     SleepQueuePtr q = calloc(1, sizeof *q);
-    if (!q)
-        return FALSE;
+    if (!q) {
+      return FALSE;
+    }
 
     IgnoreClient(client);
     q->next = sleepQueue;
@@ -592,10 +629,11 @@ ClientSleep(ClientPtr client, ClientSleepProcPtr function, void *closure)
 
 Bool dixClientSignal(ClientPtr client)
 {
-    for (SleepQueuePtr q = sleepQueue; q; q = q->next)
-        if (q->client == client) {
-            return QueueWorkProc(q->function, q->client, q->closure);
-        }
+  for (SleepQueuePtr q = sleepQueue; q; q = q->next) {
+    if (q->client == client) {
+      return QueueWorkProc(q->function, q->client, q->closure);
+    }
+  }
     return FALSE;
 }
 
@@ -605,14 +643,17 @@ ClientSignalAll(ClientPtr client, ClientSleepProcPtr function, void *closure)
     int count = 0;
 
     for (SleepQueuePtr q = sleepQueue; q; q = q->next) {
-        if (!(client == CLIENT_SIGNAL_ANY || q->client == client))
-            continue;
+      if (!(client == CLIENT_SIGNAL_ANY || q->client == client)) {
+        continue;
+      }
 
-        if (!(function == CLIENT_SIGNAL_ANY || q->function == function))
-            continue;
+      if (!(function == CLIENT_SIGNAL_ANY || q->function == function)) {
+        continue;
+      }
 
-        if (!(closure == CLIENT_SIGNAL_ANY || q->closure == closure))
-            continue;
+      if (!(closure == CLIENT_SIGNAL_ANY || q->closure == closure)) {
+        continue;
+      }
 
         count += QueueWorkProc(q->function, q->client, q->closure);
     }
@@ -640,9 +681,11 @@ ClientWakeup(ClientPtr client)
 Bool
 ClientIsAsleep(ClientPtr client)
 {
-    for (SleepQueuePtr q = sleepQueue; q; q = q->next)
-        if (q->client == client)
-            return TRUE;
+  for (SleepQueuePtr q = sleepQueue; q; q = q->next) {
+    if (q->client == client) {
+      return TRUE;
+    }
+  }
     return FALSE;
 }
 
@@ -659,8 +702,9 @@ static Bool
 _AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
     CallbackPtr cbr = calloc(1, sizeof(CallbackRec));
-    if (!cbr)
-        return FALSE;
+    if (!cbr) {
+      return FALSE;
+    }
     cbr->proc = callback;
     cbr->data = data;
     cbr->next = (*pcbl)->list;
@@ -676,8 +720,9 @@ _DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
     CallbackPtr cbr, pcbr;
 
     for (pcbr = NULL, cbr = cbl->list; cbr != NULL; pcbr = cbr, cbr = cbr->next) {
-        if ((cbr->proc == callback) && (cbr->data == data))
-            break;
+      if ((cbr->proc == callback) && (cbr->data == data)) {
+        break;
+      }
     }
     if (cbr != NULL) {
         if (cbl->inCallback) {
@@ -685,10 +730,11 @@ _DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
             cbr->deleted = TRUE;
         }
         else {
-            if (pcbr == NULL)
-                cbl->list = cbr->next;
-            else
-                pcbr->next = cbr->next;
+          if (pcbr == NULL) {
+            cbl->list = cbr->next;
+          } else {
+            pcbr->next = cbr->next;
+          }
             free(cbr);
         }
         return TRUE;
@@ -708,8 +754,9 @@ _CallCallbacks(CallbackListPtr *pcbl, void *call_data)
     }
     --(cbl->inCallback);
 
-    if (cbl->inCallback)
-        return;
+    if (cbl->inCallback) {
+      return;
+    }
 
     /* Was the entire list marked for deletion? */
 
@@ -748,8 +795,9 @@ _CallCallbacks(CallbackListPtr *pcbl, void *call_data)
 
 void DeleteCallbackList(CallbackListPtr *pcbl)
 {
-    if (!pcbl || !*pcbl)
-        return;
+  if (!pcbl || !*pcbl) {
+    return;
+  }
 
     CallbackListPtr cbl = *pcbl;
 
@@ -776,12 +824,14 @@ void DeleteCallbackList(CallbackListPtr *pcbl)
 static Bool
 CreateCallbackList(CallbackListPtr *pcbl)
 {
-    if (!pcbl)
-        return FALSE;
+  if (!pcbl) {
+    return FALSE;
+  }
 
     CallbackListPtr cbl = calloc(1, sizeof(CallbackListRec));
-    if (!cbl)
-        return FALSE;
+    if (!cbl) {
+      return FALSE;
+    }
     cbl->inCallback = 0;
     cbl->deleted = FALSE;
     cbl->numDeleted = 0;
@@ -809,11 +859,13 @@ CreateCallbackList(CallbackListPtr *pcbl)
 Bool
 AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
-    if (!pcbl)
-        return FALSE;
+  if (!pcbl) {
+    return FALSE;
+  }
     if (!*pcbl) {               /* list hasn't been created yet; go create it */
-        if (!CreateCallbackList(pcbl))
-            return FALSE;
+      if (!CreateCallbackList(pcbl)) {
+        return FALSE;
+      }
     }
     return _AddCallback(pcbl, callback, data);
 }
@@ -821,8 +873,9 @@ AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 Bool
 DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
-    if (!pcbl || !*pcbl)
-        return FALSE;
+  if (!pcbl || !*pcbl) {
+    return FALSE;
+  }
     return _DeleteCallback(pcbl, callback, data);
 }
 

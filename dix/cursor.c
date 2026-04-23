@@ -78,8 +78,9 @@ static CARD32 cursorSerial;
 static void
 FreeCursorBits(CursorBitsPtr bits)
 {
-    if (--bits->refcnt > 0)
-        return;
+  if (--bits->refcnt > 0) {
+    return;
+  }
     free(bits->source);
     free(bits->mask);
     free(bits->argb);
@@ -87,8 +88,10 @@ FreeCursorBits(CursorBitsPtr bits)
     if (bits->refcnt == 0) {
         GlyphSharePtr *prev, this;
 
-        for (prev = &sharedGlyphs;
-             (this = *prev) && (this->bits != bits); prev = &this->next);
+        for (prev = &sharedGlyphs; (this = *prev) && (this->bits != bits);
+             prev = &this->next) {
+          ;
+        }
         if (this) {
             *prev = this->next;
             CloseFont(this->font, (Font) 0);
@@ -113,8 +116,9 @@ FreeCursor(void *value, XID cid)
     DeviceIntPtr pDev = NULL;   /* unused anyway */
 
     UnrefCursor(pCurs);
-    if (CursorRefCount(pCurs) != 0)
-        return Success;
+    if (CursorRefCount(pCurs) != 0) {
+      return Success;
+    }
 
     BUG_WARN(CursorRefCount(pCurs) < 0);
 
@@ -132,16 +136,18 @@ FreeCursor(void *value, XID cid)
 CursorPtr
 RefCursor(CursorPtr cursor)
 {
-    if (cursor)
-        cursor->refcnt++;
+  if (cursor) {
+    cursor->refcnt++;
+  }
     return cursor;
 }
 
 CursorPtr
 UnrefCursor(CursorPtr cursor)
 {
-    if (cursor)
-        cursor->refcnt--;
+  if (cursor) {
+    cursor->refcnt--;
+  }
     return cursor;
 }
 
@@ -162,16 +168,20 @@ CheckForEmptyMask(CursorBitsPtr bits)
     int n = BitmapBytePad(bits->width) * bits->height;
 
     bits->emptyMask = FALSE;
-    while (n--)
-        if (*(msk++) != 0)
-            return;
+    while (n--) {
+      if (*(msk++) != 0) {
+        return;
+      }
+    }
     if (bits->argb) {
         CARD32 *argb = bits->argb;
 
         n = bits->width * bits->height;
-        while (n--)
-            if (*argb++ & 0xff000000)
-                return;
+        while (n--) {
+          if (*argb++ & 0xff000000) {
+            return;
+          }
+        }
     }
     bits->emptyMask = TRUE;
 }
@@ -281,12 +291,14 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
     /* security creation/labeling check */
     int rc = XaceHookResourceAccess(client, cid, X11_RESTYPE_CURSOR,
                   pCurs, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (rc != Success)
-        goto error;
+    if (rc != Success) {
+      goto error;
+    }
 
     rc = RealizeCursorAllScreens(pCurs);
-    if (rc != Success)
-        goto error;
+    if (rc != Success) {
+      goto error;
+    }
 
     *ppCurs = pCurs;
 
@@ -345,9 +357,9 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
     }
 
     GlyphSharePtr pShare;
-    if (sourcefont != maskfont)
+    if (sourcefont != maskfont) {
         pShare = (GlyphSharePtr) NULL;
-    else {
+    } else {
         for (pShare = sharedGlyphs;
              pShare &&
              ((pShare->font != sourcefont) ||
@@ -359,8 +371,9 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
     CursorBitsPtr bits;
     if (pShare) {
         pCurs = (CursorPtr) calloc(CURSOR_REC_SIZE, 1);
-        if (!pCurs)
-            return BadAlloc;
+        if (!pCurs) {
+          return BadAlloc;
+        }
         dixInitPrivates(pCurs, pCurs + 1, PRIVATE_CURSOR);
         bits = pShare->bits;
         bits->refcnt++;
@@ -376,8 +389,9 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
         if (!maskfont) {
             size_t n = BitmapBytePad(cm.width) * (long) cm.height;
             mskbits = calloc(1, n);
-            if (!mskbits)
-                return BadAlloc;
+            if (!mskbits) {
+              return BadAlloc;
+            }
             memset(mskbits, 0xFF, n);
         }
         else {
@@ -385,8 +399,9 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
                 client->errorValue = maskChar;
                 return BadValue;
             }
-            if ((rc = ServerBitsFromGlyph(maskfont, maskChar, &cm, &mskbits)))
-                return rc;
+            if ((rc = ServerBitsFromGlyph(maskfont, maskChar, &cm, &mskbits))) {
+              return rc;
+            }
         }
 
         unsigned char *srcbits;
@@ -396,17 +411,19 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
         }
         if (sourcefont != maskfont) {
             pCurs = (CursorPtr) calloc(CURSOR_REC_SIZE + CURSOR_BITS_SIZE, 1);
-            if (pCurs)
-                bits = (CursorBitsPtr) ((char *) pCurs + CURSOR_REC_SIZE);
-            else
-                bits = (CursorBitsPtr) NULL;
+            if (pCurs) {
+              bits = (CursorBitsPtr)((char *)pCurs + CURSOR_REC_SIZE);
+            } else {
+              bits = (CursorBitsPtr)NULL;
+            }
         }
         else {
             pCurs = (CursorPtr) calloc(CURSOR_REC_SIZE, 1);
-            if (pCurs)
-                bits = (CursorBitsPtr) calloc(CURSOR_BITS_SIZE, 1);
-            else
-                bits = (CursorBitsPtr) NULL;
+            if (pCurs) {
+              bits = (CursorBitsPtr)calloc(CURSOR_BITS_SIZE, 1);
+            } else {
+              bits = (CursorBitsPtr)NULL;
+            }
         }
         if (!bits) {
             free(pCurs);
@@ -423,22 +440,22 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
         bits->height = cm.height;
         bits->xhot = cm.xhot;
         bits->yhot = cm.yhot;
-        if (sourcefont != maskfont)
-            bits->refcnt = -1;
-        else {
-            bits->refcnt = 1;
-            pShare = calloc(1, sizeof(GlyphShare));
-            if (!pShare) {
-                FreeCursorBits(bits);
-                return BadAlloc;
-            }
-            pShare->font = sourcefont;
-            sourcefont->refcnt++;
-            pShare->sourceChar = sourceChar;
-            pShare->maskChar = maskChar;
-            pShare->bits = bits;
-            pShare->next = sharedGlyphs;
-            sharedGlyphs = pShare;
+        if (sourcefont != maskfont) {
+          bits->refcnt = -1;
+        } else {
+          bits->refcnt = 1;
+          pShare = calloc(1, sizeof(GlyphShare));
+          if (!pShare) {
+            FreeCursorBits(bits);
+            return BadAlloc;
+          }
+          pShare->font = sourcefont;
+          sourcefont->refcnt++;
+          pShare->sourceChar = sourceChar;
+          pShare->maskChar = maskChar;
+          pShare->bits = bits;
+          pShare->next = sharedGlyphs;
+          sharedGlyphs = pShare;
         }
     }
 
@@ -461,12 +478,14 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
     /* security creation/labeling check */
     rc = XaceHookResourceAccess(client, cid, X11_RESTYPE_CURSOR,
                   pCurs, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (rc != Success)
-        goto error;
+    if (rc != Success) {
+      goto error;
+    }
 
     rc = RealizeCursorAllScreens(pCurs);
-    if (rc != Success)
-        goto error;
+    if (rc != Success) {
+      goto error;
+    }
 
     *ppCurs = pCurs;
     return Success;
@@ -496,22 +515,26 @@ CreateRootCursor(void)
     XID fontID = dixAllocServerXID();
     int err = OpenFont(serverClient, fontID, FontLoadAll | FontOpenSync,
                    (unsigned) strlen(defaultCursorFont), defaultCursorFont);
-    if (err != Success)
-        return NullCursor;
+    if (err != Success) {
+      return NullCursor;
+    }
 
     FontPtr cursorfont;
     err = dixLookupResourceByType((void **) &cursorfont, fontID, X11_RESTYPE_FONT,
                                   serverClient, DixReadAccess);
-    if (err != Success)
+    if (err != Success) {
         return NullCursor;
+    }
 
     CursorPtr curs;
     if (AllocGlyphCursor(fontID, 0, fontID, 1, 0, 0, 0, (unsigned short)~0U, (unsigned short)~0U, (unsigned short)~0U,
-                         &curs, serverClient, (XID) 0) != Success)
+                         &curs, serverClient, (XID) 0) != Success) {
         return NullCursor;
+    }
 
-    if (!AddResource(dixAllocServerXID(), X11_RESTYPE_CURSOR, (void *) curs))
-        return NullCursor;
+    if (!AddResource(dixAllocServerXID(), X11_RESTYPE_CURSOR, (void *)curs)) {
+      return NullCursor;
+    }
 
     return curs;
 }

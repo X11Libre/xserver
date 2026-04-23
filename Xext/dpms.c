@@ -154,8 +154,9 @@ ProcDPMSSelectInput(register ClientPtr client)
 
         /* build the entry */
         pNewEvent = calloc(1, sizeof(DPMSEventRec));
-        if (!pNewEvent)
-            return BadAlloc;
+        if (!pNewEvent) {
+          return BadAlloc;
+        }
         pNewEvent->client = client;
         pNewEvent->mask = stuff->eventMask;
         /*
@@ -164,8 +165,9 @@ ProcDPMSSelectInput(register ClientPtr client)
          */
         clientResource = FakeClientID(client->index);
         pNewEvent->clientResource = clientResource;
-        if (!AddResource(clientResource, ClientType, (void *)pNewEvent))
-            return BadAlloc;
+        if (!AddResource(clientResource, ClientType, (void *)pNewEvent)) {
+          return BadAlloc;
+        }
         /*
          * create a resource to contain a pointer to the list
          * of clients selecting input

@@ -47,8 +47,9 @@ CheckSbusDevice(const char *device, int fbNum)
     sbusDevicePtr psdp;
 
     fd = open(device, O_RDONLY, 0);
-    if (fd < 0)
-        return;
+    if (fd < 0) {
+      return;
+    }
     memset(&fbattr, 0, sizeof(fbattr));
     if (ioctl(fd, FBIOGATTR, &fbattr) < 0) {
         if (ioctl(fd, FBIOGTYPE, &fbattr.fbtype) < 0) {
@@ -57,11 +58,14 @@ CheckSbusDevice(const char *device, int fbNum)
         }
     }
     close(fd);
-    for (i = 0; sbusDeviceTable[i].devId; i++)
-        if (sbusDeviceTable[i].fbType == fbattr.fbtype.fb_type)
-            break;
-    if (!sbusDeviceTable[i].devId)
-        return;
+    for (i = 0; sbusDeviceTable[i].devId; i++) {
+      if (sbusDeviceTable[i].fbType == fbattr.fbtype.fb_type) {
+        break;
+      }
+    }
+    if (!sbusDeviceTable[i].devId) {
+      return;
+    }
     xf86SbusInfo =
         XNFreallocarray(xf86SbusInfo, ++xf86nSbusInfo + 1, sizeof(psdp));
     xf86SbusInfo[xf86nSbusInfo] = NULL;
@@ -92,9 +96,11 @@ xf86SbusProbe(void)
         sparcPromAssignNodes();
     }
     for (psdpp = xf86SbusInfo; (psdp = *psdpp); psdpp++) {
-        for (i = 0; sbusDeviceTable[i].devId; i++)
-            if (sbusDeviceTable[i].devId == psdp->devId)
-                psdp->descr = sbusDeviceTable[i].descr;
+      for (i = 0; sbusDeviceTable[i].devId; i++) {
+        if (sbusDeviceTable[i].devId == psdp->devId) {
+          psdp->descr = sbusDeviceTable[i].descr;
+        }
+      }
         /*
          * If we can use PROM information and found the PROM node for this
          * device, we can tell more about the card.
@@ -108,11 +114,13 @@ xf86SbusProbe(void)
                 chiprev = 0;
                 vmsize = 0;
                 prop = sparcPromGetProperty(&psdp->node, "chiprev", &len);
-                if (prop && len == 4)
-                    chiprev = *(int *) prop;
+                if (prop && len == 4) {
+                  chiprev = *(int *)prop;
+                }
                 prop = sparcPromGetProperty(&psdp->node, "vmsize", &len);
-                if (prop && len == 4)
-                    vmsize = *(int *) prop;
+                if (prop && len == 4) {
+                  vmsize = *(int *)prop;
+                }
                 switch (chiprev) {
                 case 1:
                 case 2:
@@ -144,8 +152,9 @@ xf86SbusProbe(void)
             case SBUS_DEVICE_CG14:
                 prop = sparcPromGetProperty(&psdp->node, "reg", &len);
                 vmsize = 0;
-                if (prop && !(len % 12) && len > 0)
-                    vmsize = *(int *) (prop + len - 4);
+                if (prop && !(len % 12) && len > 0) {
+                  vmsize = *(int *)(prop + len - 4);
+                }
                 switch (vmsize) {
                 case 0x400000:
                     psdp->descr = "Sun SX with 4M VSIMM";
@@ -157,24 +166,28 @@ xf86SbusProbe(void)
                 break;
             case SBUS_DEVICE_LEO:
                 prop = sparcPromGetProperty(&psdp->node, "model", &len);
-                if (prop && len > 0 && !strstr(prop, "501-2503"))
-                    psdp->descr = "Sun Turbo ZX";
+                if (prop && len > 0 && !strstr(prop, "501-2503")) {
+                  psdp->descr = "Sun Turbo ZX";
+                }
                 break;
             case SBUS_DEVICE_TCX:
-                if (sparcPromGetBool(&psdp->node, "tcx-8-bit"))
-                    psdp->descr = "Sun TCX (8bit)";
-                else
-                    psdp->descr = "Sun TCX (S24)";
+              if (sparcPromGetBool(&psdp->node, "tcx-8-bit")) {
+                psdp->descr = "Sun TCX (8bit)";
+              } else {
+                psdp->descr = "Sun TCX (S24)";
+              }
                 break;
             case SBUS_DEVICE_FFB:
                 prop = sparcPromGetProperty(&psdp->node, "name", &len);
                 chiprev = 0;
                 prop = sparcPromGetProperty(&psdp->node, "board_type", &len);
-                if (prop && len == 4)
-                    chiprev = *(int *) prop;
+                if (prop && len == 4) {
+                  chiprev = *(int *)prop;
+                }
                 if (strstr(prop, "afb")) {
-                    if (chiprev == 3)
-                        psdp->descr = "Sun|Elite3D-M6 Horizontal";
+                  if (chiprev == 3) {
+                    psdp->descr = "Sun|Elite3D-M6 Horizontal";
+                  }
                 }
                 else {
                     switch (chiprev) {
@@ -220,13 +233,14 @@ xf86SbusProbe(void)
                 xf86ErrorF(" at %s", promPath);
                 free(promPath);
             }
+        } else {
+          LogMessageVerb(X_PROBED, 1, "SBUS: %s", psdp->descr);
         }
-        else
-            LogMessageVerb(X_PROBED, 1, "SBUS: %s", psdp->descr);
         xf86ErrorF("\n");
     }
-    if (useProm)
-        sparcPromClose();
+    if (useProm) {
+      sparcPromClose();
+    }
 }
 
 /*
@@ -248,13 +262,15 @@ xf86ParseSbusBusString(const char *busID, int *fbNum)
     const char *id;
     int i, len;
 
-    if (StringToBusType(busID, &id) != BUS_SBUS)
-        return FALSE;
+    if (StringToBusType(busID, &id) != BUS_SBUS) {
+      return FALSE;
+    }
 
     if (*id != '/') {
         if (!strncmp(id, "fb", 2)) {
-            if (!isdigit(id[2]))
-                return FALSE;
+          if (!isdigit(id[2])) {
+            return FALSE;
+          }
             *fbNum = atoi(id + 2);
             return TRUE;
         }
@@ -264,17 +280,20 @@ xf86ParseSbusBusString(const char *busID, int *fbNum)
 
             for (i = 0, len = 0; sbusDeviceTable[i].devId; i++) {
                 len = strlen(sbusDeviceTable[i].promName);
-                if (!strncmp(sbusDeviceTable[i].promName, id, len)
-                    && isdigit(id[len]))
-                    break;
+                if (!strncmp(sbusDeviceTable[i].promName, id, len) &&
+                    isdigit(id[len])) {
+                  break;
+                }
             }
             devId = sbusDeviceTable[i].devId;
-            if (!devId)
-                return FALSE;
+            if (!devId) {
+              return FALSE;
+            }
             i = atoi(id + len);
             for (psdpp = xf86SbusInfo; *psdpp; ++psdpp) {
-                if ((*psdpp)->devId != devId)
-                    continue;
+              if ((*psdpp)->devId != devId) {
+                continue;
+              }
                 if (!i) {
                     *fbNum = (*psdpp)->fbNum;
                     return TRUE;
@@ -332,8 +351,9 @@ xf86CheckSbusSlot(int fbNum)
     for (i = 0; i < xf86NumEntities; i++) {
         p = xf86Entities[i];
         /* Check if this SBUS slot is taken */
-        if (p->bus.type == BUS_SBUS && p->bus.id.sbus.fbNum == fbNum)
-            return FALSE;
+        if (p->bus.type == BUS_SBUS && p->bus.id.sbus.fbNum == fbNum) {
+          return FALSE;
+        }
     }
 
     return TRUE;
@@ -362,9 +382,9 @@ xf86ClaimSbusSlot(sbusDevicePtr psdp, DriverPtr drvp, GDevPtr dev, Bool active)
         p->active = active;
         p->inUse = FALSE;
         return num;
+    } else {
+      return -1;
     }
-    else
-        return -1;
 }
 
 int
@@ -390,10 +410,12 @@ xf86MatchSbusInstances(const char *driverName, int sbusDevId,
 
     *foundEntities = NULL;
     for (psdpp = xf86SbusInfo, psdp = *psdpp; psdp; psdp = *++psdpp) {
-        if (psdp->devId != sbusDevId)
-            continue;
-        if (psdp->fd == -2)
-            continue;
+      if (psdp->devId != sbusDevId) {
+        continue;
+      }
+      if (psdp->fd == -2) {
+        continue;
+      }
         ++allocatedInstances;
         instances = XNFreallocarray(instances,
                                     allocatedInstances, sizeof(struct Inst));
@@ -413,8 +435,9 @@ xf86MatchSbusInstances(const char *driverName, int sbusDevId,
         return 0;
     }
 
-    if (sparcPromInit() >= 0)
-        useProm = 1;
+    if (sparcPromInit() >= 0) {
+      useProm = 1;
+    }
 
     if (xf86DoConfigure && xf86DoConfigurePass1) {
         GDevPtr pGDev;
@@ -433,8 +456,9 @@ xf86MatchSbusInstances(const char *driverName, int sbusDevId,
             }
         }
         free(instances);
-        if (useProm)
-            sparcPromClose();
+        if (useProm) {
+          sparcPromClose();
+        }
         return actualcards;
     }
 
@@ -446,53 +470,60 @@ xf86MatchSbusInstances(const char *driverName, int sbusDevId,
         psdp = instances[i].sbus;
         devBus = NULL;
         dev = NULL;
-        if (useProm && psdp->node.node)
-            promPath = sparcPromNode2Pathname(&psdp->node);
+        if (useProm && psdp->node.node) {
+          promPath = sparcPromNode2Pathname(&psdp->node);
+        }
 
         for (j = 0; j < numDevs; j++) {
             if (devList[j]->busID && *devList[j]->busID) {
                 if (xf86CompareSbusBusString(devList[j]->busID, psdp->fbNum)) {
-                    if (devBus)
-                        LogMessageVerb(X_WARNING, 0,
-                                      "%s: More than one matching Device section for "
-                                      "instance (BusID: %s) found: %s\n",
-                                      driverName, devList[j]->identifier,
-                                      devList[j]->busID);
-                    else
-                        devBus = devList[j];
+                  if (devBus) {
+                    LogMessageVerb(
+                        X_WARNING, 0,
+                        "%s: More than one matching Device section for "
+                        "instance (BusID: %s) found: %s\n",
+                        driverName, devList[j]->identifier, devList[j]->busID);
+                  } else {
+                    devBus = devList[j];
+                  }
                 }
             }
             else {
                 if (!dev && !devBus) {
-                    if (promPath)
-                        LogMessageVerb(X_PROBED, 1,
-                                       "Assigning device section with no busID to SBUS:%s\n",
-                                       promPath);
-                    else
-                        LogMessageVerb(X_PROBED, 1,
-                                       "Assigning device section with no busID to SBUS:fb%d\n",
-                                       psdp->fbNum);
+                  if (promPath) {
+                    LogMessageVerb(
+                        X_PROBED, 1,
+                        "Assigning device section with no busID to SBUS:%s\n",
+                        promPath);
+                  } else {
+                    LogMessageVerb(
+                        X_PROBED, 1,
+                        "Assigning device section with no busID to SBUS:fb%d\n",
+                        psdp->fbNum);
+                  }
                     dev = devList[j];
+                } else {
+                  LogMessageVerb(X_WARNING, 0,
+                                 "%s: More than one matching Device section "
+                                 "found: %s\n",
+                                 driverName, devList[j]->identifier);
                 }
-                else
-                    LogMessageVerb(X_WARNING, 0,
-                                  "%s: More than one matching Device section "
-                                  "found: %s\n", driverName,
-                                  devList[j]->identifier);
             }
         }
-        if (devBus)
-            dev = devBus;       /* busID preferred */
+        if (devBus) {
+          dev = devBus; /* busID preferred */
+        }
         if (!dev && psdp->fd != -2) {
             if (promPath) {
                 LogMessageVerb(X_WARNING, 0, "%s: No matching Device section "
                               "for instance (BusID SBUS:%s) found\n",
                               driverName, promPath);
+            } else {
+              LogMessageVerb(X_WARNING, 0,
+                             "%s: No matching Device section "
+                             "for instance (BusID SBUS:fb%d) found\n",
+                             driverName, psdp->fbNum);
             }
-            else
-                LogMessageVerb(X_WARNING, 0, "%s: No matching Device section "
-                              "for instance (BusID SBUS:fb%d) found\n",
-                              driverName, psdp->fbNum);
         }
         else if (dev) {
             numClaimedInstances++;
@@ -510,11 +541,13 @@ xf86MatchSbusInstances(const char *driverName, int sbusDevId,
      */
     numFound = 0;
     for (i = 0; i < allocatedInstances && numClaimedInstances > 0; i++) {
-        if (!instances[i].claimed)
-            continue;
+      if (!instances[i].claimed) {
+        continue;
+      }
         psdp = instances[i].sbus;
-        if (!xf86CheckSbusSlot(psdp->fbNum))
-            continue;
+        if (!xf86CheckSbusSlot(psdp->fbNum)) {
+          continue;
+        }
 
         DebugF("%s: card at fb%d %08x is claimed by a Device section\n",
                driverName, psdp->fbNum, psdp->node.node);
@@ -531,8 +564,9 @@ xf86MatchSbusInstances(const char *driverName, int sbusDevId,
         *foundEntities = retEntities;
     }
 
-    if (useProm)
-        sparcPromClose();
+    if (useProm) {
+      sparcPromClose();
+    }
 
     return numFound;
 }
@@ -546,12 +580,14 @@ xf86GetSbusInfoForEntity(int entityIndex)
     sbusDevicePtr *psdpp;
     EntityPtr p = xf86Entities[entityIndex];
 
-    if (entityIndex >= xf86NumEntities || p->bus.type != BUS_SBUS)
-        return NULL;
+    if (entityIndex >= xf86NumEntities || p->bus.type != BUS_SBUS) {
+      return NULL;
+    }
 
     for (psdpp = xf86SbusInfo; *psdpp != NULL; psdpp++) {
-        if (p->bus.id.sbus.fbNum == (*psdpp)->fbNum)
-            return *psdpp;
+      if (p->bus.id.sbus.fbNum == (*psdpp)->fbNum) {
+        return *psdpp;
+      }
     }
     return NULL;
 }
@@ -615,13 +651,15 @@ xf86SbusCmapLoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
     unsigned char *data;
 
     cmap = SBUSCMAPPTR(pScrn->pScreen);
-    if (!cmap)
-        return;
+    if (!cmap) {
+      return;
+    }
     fbcmap.count = 0;
     fbcmap.index = indices[0];
     fbcmap.red = data = calloc(numColors, 3);
-    if (!data)
-        return;
+    if (!data) {
+      return;
+    }
     fbcmap.green = data + numColors;
     fbcmap.blue = fbcmap.green + numColors;
     for (i = 0; i < numColors; i++) {
@@ -648,8 +686,9 @@ static void xf86SbusCmapCloseScreen(CallbackListPtr *pcbl,
     dixScreenUnhook(pScreen, xf86SbusCmapCloseScreen);
 
     cmap = SBUSCMAPPTR(pScreen);
-    if (!cmap)
-        return;
+    if (!cmap) {
+      return;
+    }
 
     if (cmap->origCmapValid) {
         fbcmap.index = 0;
@@ -670,8 +709,9 @@ xf86SbusHandleColormaps(ScreenPtr pScreen, sbusDevicePtr psdp)
     struct fbcmap fbcmap;
     unsigned char data[2];
 
-    if (!dixRegisterPrivateKey(sbusPaletteKey, PRIVATE_SCREEN, 0))
-        FatalError("Cannot register sbus private key");
+    if (!dixRegisterPrivateKey(sbusPaletteKey, PRIVATE_SCREEN, 0)) {
+      FatalError("Cannot register sbus private key");
+    }
 
     cmap = XNFcallocarray(1, sizeof(sbusCmapRec));
     dixSetPrivate(&pScreen->devPrivates, sbusPaletteKey, cmap);
@@ -681,8 +721,9 @@ xf86SbusHandleColormaps(ScreenPtr pScreen, sbusDevicePtr psdp)
     fbcmap.red = cmap->origRed;
     fbcmap.green = cmap->origGreen;
     fbcmap.blue = cmap->origBlue;
-    if (ioctl(psdp->fd, FBIOGETCMAP, &fbcmap) >= 0)
-        cmap->origCmapValid = TRUE;
+    if (ioctl(psdp->fd, FBIOGETCMAP, &fbcmap) >= 0) {
+      cmap->origCmapValid = TRUE;
+    }
     fbcmap.index = 0;
     fbcmap.count = 2;
     fbcmap.red = data;
@@ -705,8 +746,9 @@ xf86SbusHandleColormaps(ScreenPtr pScreen, sbusDevicePtr psdp)
 Bool
 xf86SbusConfigure(void *busData, sbusDevicePtr sBus)
 {
-    if (sBus && sBus->fbNum == ((sbusDevicePtr) busData)->fbNum)
-        return 0;
+  if (sBus && sBus->fbNum == ((sbusDevicePtr)busData)->fbNum) {
+    return 0;
+  }
     return 1;
 }
 

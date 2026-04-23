@@ -53,14 +53,16 @@ MitAddCookie(unsigned short data_length, const char *data)
 
     // check for possible duplicate and return it instead
     for (struct auth *walk=mit_auth; walk; walk=walk->next) {
-        if ((walk->len == data_length) &&
-            (memcmp(walk->data, data, data_length) == 0))
-            return walk->id;
+      if ((walk->len == data_length) &&
+          (memcmp(walk->data, data, data_length) == 0)) {
+        return walk->id;
+      }
     }
 
     new = calloc(1, sizeof(struct auth));
-    if (!new)
-        return 0;
+    if (!new) {
+      return 0;
+    }
     new->data = calloc(1, (unsigned) data_length);
     if (!new->data) {
         free(new);
@@ -81,9 +83,10 @@ MitCheckCookie(unsigned short data_length,
     struct auth *auth;
 
     for (auth = mit_auth; auth; auth = auth->next) {
-        if (data_length == auth->len &&
-            timingsafe_memcmp(data, auth->data, (int) data_length) == 0)
-            return auth->id;
+      if (data_length == auth->len &&
+          timingsafe_memcmp(data, auth->data, (int)data_length) == 0) {
+        return auth->id;
+      }
     }
     *reason = "Invalid MIT-MAGIC-COOKIE-1 key";
     return (XID) -1;
@@ -127,10 +130,11 @@ MitRemoveCookie(unsigned short data_length, const char *data)
     for (auth = mit_auth; auth; prev = auth, auth = auth->next) {
         if (data_length == auth->len &&
             memcmp(data, auth->data, data_length) == 0) {
-            if (prev)
-                prev->next = auth->next;
-            else
-                mit_auth = auth->next;
+          if (prev) {
+            prev->next = auth->next;
+          } else {
+            mit_auth = auth->next;
+          }
             free(auth->data);
             free(auth);
             return 1;
@@ -150,13 +154,15 @@ MitGenerateCookie(unsigned data_length,
 
     while (data_length--) {
         cookie[i++] += *data++;
-        if (i >= sizeof(cookie))
-            i = 0;
+        if (i >= sizeof(cookie)) {
+          i = 0;
+        }
     }
     arc4random_buf(cookie, sizeof(cookie));
     XID id = MitAddCookie(sizeof(cookie), cookie);
-    if (!id)
-        return 0;
+    if (!id) {
+      return 0;
+    }
 
     *data_return = cookie;
     *data_length_return = sizeof(cookie);

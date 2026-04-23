@@ -52,8 +52,9 @@ ProcessInputEvents(void)
 int
 TimeSinceLastInputEvent(void)
 {
-    if (lastEventTime == 0)
-        lastEventTime = GetTimeInMillis();
+  if (lastEventTime == 0) {
+    lastEventTime = GetTimeInMillis();
+  }
     return GetTimeInMillis() - lastEventTime;
 }
 
@@ -75,8 +76,9 @@ xnestQueueKeyEvent(int type, unsigned int keycode)
 static void
 xnest_handle_event(xcb_generic_event_t *event)
 {
-    if (!event)
-        return;
+  if (!event) {
+    return;
+  }
 
     switch (event->response_type & ~0x80) {
         case KeyPress:
@@ -138,8 +140,9 @@ xnest_handle_event(xcb_generic_event_t *event)
             EVTYPE(xcb_focus_in_event_t);
             if (ev->detail != NotifyInferior) {
                 ScreenPtr pScreen = xnestScreen(ev->event);
-                if (pScreen)
-                    xnestDirectInstallColormaps(pScreen);
+                if (pScreen) {
+                  xnestDirectInstallColormaps(pScreen);
+                }
             }
             break;
         }
@@ -149,8 +152,9 @@ xnest_handle_event(xcb_generic_event_t *event)
             EVTYPE(xcb_focus_out_event_t);
             if (ev->detail != NotifyInferior) {
                 ScreenPtr pScreen = xnestScreen(ev->event);
-                if (pScreen)
-                    xnestDirectUninstallColormaps(pScreen);
+                if (pScreen) {
+                  xnestDirectUninstallColormaps(pScreen);
+                }
             }
             break;
         }
@@ -195,9 +199,9 @@ xnest_handle_event(xcb_generic_event_t *event)
         case DestroyNotify:
         {
             xcb_destroy_notify_event_t *ev = (xcb_destroy_notify_event_t*)event;
-            if (xnestParentWindow &&
-                ev->window == xnestParentWindow)
-                exit(0);
+            if (xnestParentWindow && ev->window == xnestParentWindow) {
+              exit(0);
+            }
             break;
         }
 

@@ -80,14 +80,17 @@ MonitorSelection(xcb_xfixes_selection_notify_event_t * e, unsigned int i)
 
         /* If this selection is not owned, the other monitored selection must be the most
            recently owned, if it is owned at all */
-        if (i == CLIP_OWN_PRIMARY)
-            other_index = CLIP_OWN_CLIPBOARD;
-        if (i == CLIP_OWN_CLIPBOARD)
-            other_index = CLIP_OWN_PRIMARY;
-        if (XCB_NONE != s_iOwners[other_index])
-            lastOwnedSelectionIndex = other_index;
-        else
-            lastOwnedSelectionIndex = CLIP_OWN_NONE;
+        if (i == CLIP_OWN_PRIMARY) {
+          other_index = CLIP_OWN_CLIPBOARD;
+        }
+        if (i == CLIP_OWN_CLIPBOARD) {
+          other_index = CLIP_OWN_PRIMARY;
+        }
+        if (XCB_NONE != s_iOwners[other_index]) {
+          lastOwnedSelectionIndex = other_index;
+        } else {
+          lastOwnedSelectionIndex = CLIP_OWN_NONE;
+        }
     }
 
     /* Save last owned selection */
@@ -104,14 +107,17 @@ MonitorSelection(xcb_xfixes_selection_notify_event_t * e, unsigned int i)
 xcb_atom_t
 winClipboardGetLastOwnedSelectionAtom(ClipboardAtoms *atoms)
 {
-    if (lastOwnedSelectionIndex == CLIP_OWN_NONE)
-        return XCB_NONE;
+  if (lastOwnedSelectionIndex == CLIP_OWN_NONE) {
+    return XCB_NONE;
+  }
 
-    if (lastOwnedSelectionIndex == CLIP_OWN_PRIMARY)
-        return XCB_ATOM_PRIMARY;
+  if (lastOwnedSelectionIndex == CLIP_OWN_PRIMARY) {
+    return XCB_ATOM_PRIMARY;
+  }
 
-    if (lastOwnedSelectionIndex == CLIP_OWN_CLIPBOARD)
-        return atoms->atomClipboard;
+  if (lastOwnedSelectionIndex == CLIP_OWN_CLIPBOARD) {
+    return atoms->atomClipboard;
+  }
 
     return XCB_NONE;
 }
@@ -122,8 +128,9 @@ winClipboardInitMonitoredSelections(void)
 {
     /* Initialize static variables */
     int i;
-    for (i = 0; i < CLIP_NUM_SELECTIONS; ++i)
+    for (i = 0; i < CLIP_NUM_SELECTIONS; ++i) {
       s_iOwners[i] = XCB_NONE;
+    }
 
     lastOwnedSelectionIndex = CLIP_OWN_NONE;
 }
@@ -133,8 +140,9 @@ static char *get_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
     char *ret;
     xcb_get_atom_name_cookie_t cookie = xcb_get_atom_name(conn, atom);
     xcb_get_atom_name_reply_t *reply = xcb_get_atom_name_reply(conn, cookie, NULL);
-    if (!reply)
-        return NULL;
+    if (!reply) {
+      return NULL;
+    }
     ret = calloc(1, xcb_get_atom_name_name_length(reply) + 1);
     if (ret) {
         memcpy(ret, xcb_get_atom_name_name(reply), xcb_get_atom_name_name_length(reply));
@@ -222,8 +230,10 @@ winClipboardSelectionNotifyData(HWND hwnd, xcb_window_t iWindow, xcb_connection_
         format = reply->format;
         // We assume format == 8 (i.e. data is a sequence of bytes).  It's not
         // clear how anything else should be handled.
-        if (format != 8)
-            ErrorF("SelectionNotify: format is %d, proceeding as if it was 8\n", format);
+        if (format != 8) {
+          ErrorF("SelectionNotify: format is %d, proceeding as if it was 8\n",
+                 format);
+        }
     }
 
     {
@@ -504,13 +514,15 @@ winClipboardFlushXEvents(HWND hwnd,
                 static int count;       /* Hack to stop acroread spamming the log */
                 static HWND lasthwnd;   /* I've not seen any other client get here repeatedly? */
 
-                if (hwnd != lasthwnd)
-                    count = 0;
+                if (hwnd != lasthwnd) {
+                  count = 0;
+                }
                 count++;
-                if (count < 6)
-                    ErrorF("winClipboardFlushXEvents - CF_UNICODETEXT is not "
-                           "available from Win32 clipboard.  Aborting %d.\n",
-                           count);
+                if (count < 6) {
+                  ErrorF("winClipboardFlushXEvents - CF_UNICODETEXT is not "
+                         "available from Win32 clipboard.  Aborting %d.\n",
+                         count);
+                }
                 lasthwnd = hwnd;
 
                 /* Abort */
@@ -719,8 +731,10 @@ winClipboardFlushXEvents(HWND hwnd,
             /* If INCR is in progress, collect the data */
             if (data->incr &&
                 (property_notify->atom == atoms->atomLocalProperty) &&
-                (property_notify->state == XCB_PROPERTY_NEW_VALUE))
-                return winClipboardSelectionNotifyData(hwnd, iWindow, conn, data, atoms);
+                (property_notify->state == XCB_PROPERTY_NEW_VALUE)) {
+              return winClipboardSelectionNotifyData(hwnd, iWindow, conn, data,
+                                                     atoms);
+            }
 
             break;
         }
@@ -750,9 +764,9 @@ winClipboardFlushXEvents(HWND hwnd,
                 }
                 else if (e->selection == atomClipboard) {
                     MonitorSelection(e, CLIP_OWN_CLIPBOARD);
+                } else {
+                  break;
                 }
-                else
-                    break;
 
                 /* Selection is being disowned */
                 if (e->owner == XCB_NONE) {

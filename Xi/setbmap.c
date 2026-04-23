@@ -77,22 +77,26 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
 
     X_REQUEST_HEAD_AT_LEAST(xSetDeviceButtonMappingReq);
 
-    if (client->req_len !=
-        bytes_to_int32(sizeof(xSetDeviceButtonMappingReq) + stuff->map_length))
-        return BadLength;
+    if (client->req_len != bytes_to_int32(sizeof(xSetDeviceButtonMappingReq) +
+                                          stuff->map_length)) {
+      return BadLength;
+    }
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     ret =
         ApplyPointerMapping(dev, (CARD8 *) &stuff[1], stuff->map_length,
                             client);
-    if (ret == -1)
-        return BadValue;
+    if (ret == -1) {
+      return BadValue;
+    }
 
-    if ((ret != Success) && (ret != MappingBusy))
-        return ret;
+    if ((ret != Success) && (ret != MappingBusy)) {
+      return ret;
+    }
 
     xSetDeviceButtonMappingReply reply = {
         .RepType = X_SetDeviceButtonMapping,

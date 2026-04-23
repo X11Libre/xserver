@@ -35,12 +35,14 @@ FormatUInt64(uint64_t num, char *string)
     int len;
     int i;
 
-    for (len = 1, divisor = 10;
-         len < 20 && num / divisor;
-         len++, divisor *= 10);
+    for (len = 1, divisor = 10; len < 20 && num / divisor;
+         len++, divisor *= 10) {
+      ;
+    }
 
-    for (i = len, divisor = 1; i > 0; i--, divisor *= 10)
-        string[i - 1] = '0' + ((num / divisor) % 10);
+    for (i = len, divisor = 1; i > 0; i--, divisor *= 10) {
+      string[i - 1] = '0' + ((num / divisor) % 10);
+    }
 
     string[len] = '\0';
 }
@@ -58,19 +60,22 @@ FormatDouble(double dbl, char *string)
     frac %= 100;
 
     /* write decimal part to string */
-    if (dbl < 0 && dbl > -1)
-        string[slen++] = '-';
+    if (dbl < 0 && dbl > -1) {
+      string[slen++] = '-';
+    }
     FormatInt64((int64_t)dbl, &string[slen]);
 
-    while(string[slen] != '\0')
-        slen++;
+    while (string[slen] != '\0') {
+      slen++;
+    }
 
     /* append fractional part, but only if we have enough characters. We
      * expect string to be 21 chars (incl trailing \0) */
     if (slen <= 17) {
         string[slen++] = '.';
-        if (frac < 10)
-            string[slen++] = '0';
+        if (frac < 10) {
+          string[slen++] = '0';
+        }
 
         FormatUInt64(frac, &string[slen]);
     }
@@ -86,17 +91,19 @@ FormatUInt64Hex(uint64_t num, char *string)
     int len;
     int i;
 
-    for (len = 1, divisor = 0x10;
-         len < 16 && num / divisor;
-         len++, divisor *= 0x10);
+    for (len = 1, divisor = 0x10; len < 16 && num / divisor;
+         len++, divisor *= 0x10) {
+      ;
+    }
 
     for (i = len, divisor = 1; i > 0; i--, divisor *= 0x10) {
         int val = (num / divisor) % 0x10;
 
-        if (val < 10)
-            string[i - 1] = '0' + val;
-        else
-            string[i - 1] = 'a' + val - 10;
+        if (val < 10) {
+          string[i - 1] = '0' + val;
+        } else {
+          string[i - 1] = 'a' + val - 10;
+        }
     }
 
     string[len] = '\0';

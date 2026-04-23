@@ -33,7 +33,7 @@ NamespaceExtensionInit(void)
     }
 
     if (!(dixRegisterPrivateKey(&namespaceClientPrivKeyRec, PRIVATE_CLIENT,
-            sizeof(struct XnamespaceClientPriv)) &&
+                                sizeof(struct XnamespaceClientPriv)) &&
           AddCallback(&ClientStateCallback, hookClientState, NULL) &&
           AddCallback(&PostInitRootWindowCallback, hookInitRootWindow, NULL) &&
           AddCallback(&PropertyFilterCallback, hookWindowProperty, NULL) &&
@@ -44,11 +44,14 @@ NamespaceExtensionInit(void)
           AddCallback(&ClientDestroyCallback, hookClientDestroy, NULL) &&
           AddCallback(&ClientAccessCallback, hookClient, NULL) &&
           AddCallback(&DeviceAccessCallback, hookDevice, NULL) &&
-          XaceRegisterCallback(XACE_PROPERTY_ACCESS, hookPropertyAccess, NULL) &&
+          XaceRegisterCallback(XACE_PROPERTY_ACCESS, hookPropertyAccess,
+                               NULL) &&
           XaceRegisterCallback(XACE_RECEIVE_ACCESS, hookReceive, NULL) &&
-          XaceRegisterCallback(XACE_RESOURCE_ACCESS, hookResourceAccess, NULL) &&
-          XaceRegisterCallback(XACE_SEND_ACCESS, hookSend, NULL)))
-        FatalError("NamespaceExtensionInit: allocation failure\n");
+          XaceRegisterCallback(XACE_RESOURCE_ACCESS, hookResourceAccess,
+                               NULL) &&
+          XaceRegisterCallback(XACE_SEND_ACCESS, hookSend, NULL))) {
+      FatalError("NamespaceExtensionInit: allocation failure\n");
+    }
 
     /* Do the serverClient */
     struct XnamespaceClientPriv *srv = XnsClientPriv(serverClient);
@@ -58,21 +61,24 @@ NamespaceExtensionInit(void)
 
 void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *newns)
 {
-    if (priv->ns != NULL)
-        priv->ns->refcnt--;
+  if (priv->ns != NULL) {
+    priv->ns->refcnt--;
+  }
 
     priv->ns = newns;
 
-    if (newns != NULL)
-        newns->refcnt++;
+    if (newns != NULL) {
+      newns->refcnt++;
+    }
 }
 
 void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name)
 {
     struct Xnamespace *newns = XnsFindByName(name);
 
-    if (newns == NULL)
-        newns = &ns_anon;
+    if (newns == NULL) {
+      newns = &ns_anon;
+    }
 
     XnamespaceAssignClient(priv, newns);
 }
@@ -86,9 +92,10 @@ struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size
             int protoLen = at->authProto ? strlen(at->authProto) : 0;
             if ((protoLen == szAuthProto) &&
                 (at->authTokenLen == szAuthToken) &&
-                (memcmp(at->authTokenData, authToken, szAuthToken)==0) &&
-                (memcmp(at->authProto, authProto, szAuthProto)==0))
-                return walk;
+                (memcmp(at->authTokenData, authToken, szAuthToken) == 0) &&
+                (memcmp(at->authProto, authProto, szAuthProto) == 0)) {
+              return walk;
+            }
         }
     }
 

@@ -45,8 +45,9 @@ XkbAllocClientMap(XkbDescPtr xkb, unsigned which, unsigned nTotalTypes)
     XkbClientMapPtr map;
 
     if ((xkb == NULL) ||
-        ((nTotalTypes > 0) && (nTotalTypes < XkbNumRequiredTypes)))
-        return BadValue;
+        ((nTotalTypes > 0) && (nTotalTypes < XkbNumRequiredTypes))) {
+      return BadValue;
+    }
     if ((which & XkbKeySymsMask) &&
         ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
          (!XkbIsLegalKeycode(xkb->max_key_code)) ||
@@ -58,18 +59,20 @@ XkbAllocClientMap(XkbDescPtr xkb, unsigned which, unsigned nTotalTypes)
 
     if (xkb->map == NULL) {
         map = calloc(1, sizeof(XkbClientMapRec));
-        if (map == NULL)
-            return BadAlloc;
+        if (map == NULL) {
+          return BadAlloc;
+        }
         xkb->map = map;
+    } else {
+      map = xkb->map;
     }
-    else
-        map = xkb->map;
 
     if ((which & XkbKeyTypesMask) && (nTotalTypes > 0)) {
         if (map->types == NULL) {
             map->types = calloc(nTotalTypes, sizeof(XkbKeyTypeRec));
-            if (map->types == NULL)
-                return BadAlloc;
+            if (map->types == NULL) {
+              return BadAlloc;
+            }
             map->num_types = 0;
             map->size_types = nTotalTypes;
         }
@@ -104,19 +107,22 @@ XkbAllocClientMap(XkbDescPtr xkb, unsigned which, unsigned nTotalTypes)
         }
         if (map->key_sym_map == NULL) {
             map->key_sym_map = calloc(MAP_LENGTH, sizeof(XkbSymMapRec));
-            if (map->key_sym_map == NULL)
-                return BadAlloc;
+            if (map->key_sym_map == NULL) {
+              return BadAlloc;
+            }
         }
     }
     if (which & XkbModifierMapMask) {
-        if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
-            (!XkbIsLegalKeycode(xkb->max_key_code)) ||
-            (xkb->max_key_code < xkb->min_key_code))
-            return BadMatch;
+      if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
+          (!XkbIsLegalKeycode(xkb->max_key_code)) ||
+          (xkb->max_key_code < xkb->min_key_code)) {
+        return BadMatch;
+      }
         if (map->modmap == NULL) {
             map->modmap = calloc(MAP_LENGTH, sizeof(unsigned char));
-            if (map->modmap == NULL)
-                return BadAlloc;
+            if (map->modmap == NULL) {
+              return BadAlloc;
+            }
         }
     }
     return Success;
@@ -128,41 +134,48 @@ XkbAllocServerMap(XkbDescPtr xkb, unsigned which, unsigned nNewActions)
     register int i;
     XkbServerMapPtr map;
 
-    if (xkb == NULL)
-        return BadMatch;
+    if (xkb == NULL) {
+      return BadMatch;
+    }
     if (xkb->server == NULL) {
         map = calloc(1, sizeof(XkbServerMapRec));
-        if (map == NULL)
-            return BadAlloc;
+        if (map == NULL) {
+          return BadAlloc;
+        }
         for (i = 0; i < XkbNumVirtualMods; i++) {
             map->vmods[i] = XkbNoModifierMask;
         }
         xkb->server = map;
+    } else {
+      map = xkb->server;
     }
-    else
-        map = xkb->server;
     if (which & XkbExplicitComponentsMask) {
-        if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
-            (!XkbIsLegalKeycode(xkb->max_key_code)) ||
-            (xkb->max_key_code < xkb->min_key_code))
-            return BadMatch;
+      if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
+          (!XkbIsLegalKeycode(xkb->max_key_code)) ||
+          (xkb->max_key_code < xkb->min_key_code)) {
+        return BadMatch;
+      }
         if (map->explicit == NULL) {
             map->explicit = calloc(MAP_LENGTH, sizeof(unsigned char));
-            if (map->explicit == NULL)
-                return BadAlloc;
+            if (map->explicit == NULL) {
+              return BadAlloc;
+            }
         }
     }
     if (which & XkbKeyActionsMask) {
-        if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
-            (!XkbIsLegalKeycode(xkb->max_key_code)) ||
-            (xkb->max_key_code < xkb->min_key_code))
-            return BadMatch;
-        if (nNewActions < 1)
-            nNewActions = 1;
+      if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
+          (!XkbIsLegalKeycode(xkb->max_key_code)) ||
+          (xkb->max_key_code < xkb->min_key_code)) {
+        return BadMatch;
+      }
+      if (nNewActions < 1) {
+        nNewActions = 1;
+      }
         if (map->acts == NULL) {
             map->acts = calloc((nNewActions + 1), sizeof(XkbAction));
-            if (map->acts == NULL)
-                return BadAlloc;
+            if (map->acts == NULL) {
+              return BadAlloc;
+            }
             map->num_acts = 1;
             map->size_acts = nNewActions + 1;
         }
@@ -183,30 +196,35 @@ XkbAllocServerMap(XkbDescPtr xkb, unsigned which, unsigned nNewActions)
         }
         if (map->key_acts == NULL) {
             map->key_acts = calloc(MAP_LENGTH, sizeof(unsigned short));
-            if (map->key_acts == NULL)
-                return BadAlloc;
+            if (map->key_acts == NULL) {
+              return BadAlloc;
+            }
         }
     }
     if (which & XkbKeyBehaviorsMask) {
-        if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
-            (!XkbIsLegalKeycode(xkb->max_key_code)) ||
-            (xkb->max_key_code < xkb->min_key_code))
-            return BadMatch;
+      if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
+          (!XkbIsLegalKeycode(xkb->max_key_code)) ||
+          (xkb->max_key_code < xkb->min_key_code)) {
+        return BadMatch;
+      }
         if (map->behaviors == NULL) {
             map->behaviors = calloc(MAP_LENGTH, sizeof(XkbBehavior));
-            if (map->behaviors == NULL)
-                return BadAlloc;
+            if (map->behaviors == NULL) {
+              return BadAlloc;
+            }
         }
     }
     if (which & XkbVirtualModMapMask) {
-        if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
-            (!XkbIsLegalKeycode(xkb->max_key_code)) ||
-            (xkb->max_key_code < xkb->min_key_code))
-            return BadMatch;
+      if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
+          (!XkbIsLegalKeycode(xkb->max_key_code)) ||
+          (xkb->max_key_code < xkb->min_key_code)) {
+        return BadMatch;
+      }
         if (map->vmodmap == NULL) {
             map->vmodmap = calloc(MAP_LENGTH, sizeof(unsigned short));
-            if (map->vmodmap == NULL)
-                return BadAlloc;
+            if (map->vmodmap == NULL) {
+              return BadAlloc;
+            }
         }
     }
     return Success;
@@ -217,8 +235,9 @@ XkbAllocServerMap(XkbDescPtr xkb, unsigned which, unsigned nNewActions)
 static Status
 XkbCopyKeyType(XkbKeyTypePtr from, XkbKeyTypePtr into)
 {
-    if ((!from) || (!into))
-        return BadMatch;
+  if ((!from) || (!into)) {
+    return BadMatch;
+  }
     free(into->map);
     into->map = NULL;
     free(into->preserve);
@@ -228,22 +247,25 @@ XkbCopyKeyType(XkbKeyTypePtr from, XkbKeyTypePtr into)
     *into = *from;
     if ((from->map) && (into->map_count > 0)) {
         into->map = calloc(into->map_count, sizeof(XkbKTMapEntryRec));
-        if (!into->map)
-            return BadAlloc;
+        if (!into->map) {
+          return BadAlloc;
+        }
         memcpy(into->map, from->map,
                into->map_count * sizeof(XkbKTMapEntryRec));
     }
     if ((from->preserve) && (into->map_count > 0)) {
         into->preserve = calloc(into->map_count, sizeof(XkbModsRec));
-        if (!into->preserve)
-            return BadAlloc;
+        if (!into->preserve) {
+          return BadAlloc;
+        }
         memcpy(into->preserve, from->preserve,
                into->map_count * sizeof(XkbModsRec));
     }
     if ((from->level_names) && (into->num_levels > 0)) {
         into->level_names = calloc(into->num_levels, sizeof(Atom));
-        if (!into->level_names)
-            return BadAlloc;
+        if (!into->level_names) {
+          return BadAlloc;
+        }
         memcpy(into->level_names, from->level_names,
                into->num_levels * sizeof(Atom));
     }
@@ -255,11 +277,13 @@ XkbCopyKeyTypes(XkbKeyTypePtr from, XkbKeyTypePtr into, int num_types)
 {
     register int i, rtrn;
 
-    if ((!from) || (!into) || (num_types < 0))
-        return BadMatch;
+    if ((!from) || (!into) || (num_types < 0)) {
+      return BadMatch;
+    }
     for (i = 0; i < num_types; i++) {
-        if ((rtrn = XkbCopyKeyType(from++, into++)) != Success)
-            return rtrn;
+      if ((rtrn = XkbCopyKeyType(from++, into++)) != Success) {
+        return rtrn;
+      }
     }
     return Success;
 }
@@ -272,19 +296,22 @@ XkbResizeKeyType(XkbDescPtr xkb,
     XkbKeyTypePtr type;
     KeyCode matchingKeys[XkbMaxKeyCount], nMatchingKeys;
 
-    if ((type_ndx < 0) || (type_ndx >= xkb->map->num_types) || (map_count < 0)
-        || (new_num_lvls < 1))
-        return BadValue;
+    if ((type_ndx < 0) || (type_ndx >= xkb->map->num_types) ||
+        (map_count < 0) || (new_num_lvls < 1)) {
+      return BadValue;
+    }
     switch (type_ndx) {
     case XkbOneLevelIndex:
-        if (new_num_lvls != 1)
-            return BadMatch;
+      if (new_num_lvls != 1) {
+        return BadMatch;
+      }
         break;
     case XkbTwoLevelIndex:
     case XkbAlphabeticIndex:
     case XkbKeypadIndex:
-        if (new_num_lvls != 2)
-            return BadMatch;
+      if (new_num_lvls != 2) {
+        return BadMatch;
+      }
         break;
     }
     type = &xkb->map->types[type_ndx];
@@ -298,9 +325,10 @@ XkbResizeKeyType(XkbDescPtr xkb,
     else {
         XkbKTMapEntryRec *prev_map = type->map;
 
-        if ((map_count > type->map_count) || (type->map == NULL))
-            type->map =
-                reallocarray(type->map, map_count, sizeof(XkbKTMapEntryRec));
+        if ((map_count > type->map_count) || (type->map == NULL)) {
+          type->map =
+              reallocarray(type->map, map_count, sizeof(XkbKTMapEntryRec));
+        }
         if (!type->map) {
             free(prev_map);
             return BadAlloc;
@@ -377,11 +405,11 @@ XkbResizeKeyType(XkbDescPtr xkb,
                     match = 1;
                 }
             }
-            if (!match)
-                nTotal += XkbKeyNumSyms(xkb, i);
-            else {
-                nTotal += XkbKeyNumGroups(xkb, i) * new_num_lvls;
-                nResize++;
+            if (!match) {
+              nTotal += XkbKeyNumSyms(xkb, i);
+            } else {
+              nTotal += XkbKeyNumGroups(xkb, i) * new_num_lvls;
+              nResize++;
             }
         }
         if (nResize > 0) {
@@ -389,8 +417,9 @@ XkbResizeKeyType(XkbDescPtr xkb,
 
             xkb->map->size_syms = (nTotal * 15) / 10;
             newSyms = calloc(xkb->map->size_syms, sizeof(KeySym));
-            if (newSyms == NULL)
-                return BadAlloc;
+            if (newSyms == NULL) {
+              return BadAlloc;
+            }
             nextMatch = 0;
             nSyms = 1;
             for (i = xkb->min_key_code; i <= xkb->max_key_code; i++) {
@@ -427,8 +456,9 @@ XkbResizeKeyType(XkbDescPtr xkb,
 
         for (i = xkb->min_key_code; i <= xkb->max_key_code; i++) {
             width = XkbKeyGroupsWidth(xkb, i);
-            if (width < type->num_levels)
-                continue;
+            if (width < type->num_levels) {
+              continue;
+            }
             for (match = 0, g = XkbKeyNumGroups(xkb, i) - 1;
                  (g >= 0) && (!match); g--) {
                 if (XkbKeyKeyTypeIndex(xkb, i, g) == type_ndx) {
@@ -442,10 +472,11 @@ XkbResizeKeyType(XkbDescPtr xkb,
         int key, firstClear;
         register int i, g;
 
-        if (new_num_lvls > type->num_levels)
-            firstClear = type->num_levels;
-        else
-            firstClear = new_num_lvls;
+        if (new_num_lvls > type->num_levels) {
+          firstClear = type->num_levels;
+        } else {
+          firstClear = new_num_lvls;
+        }
         for (i = 0; i < nMatchingKeys; i++) {
             KeySym *pSyms;
             int width, nClear;
@@ -456,9 +487,10 @@ XkbResizeKeyType(XkbDescPtr xkb,
             pSyms = XkbKeySymsPtr(xkb, key);
             for (g = XkbKeyNumGroups(xkb, key) - 1; g >= 0; g--) {
                 if (XkbKeyKeyTypeIndex(xkb, key, g) == type_ndx) {
-                    if (nClear > 0)
-                        memset(&pSyms[g * width + firstClear], 0,
-                               nClear * sizeof(KeySym));
+                  if (nClear > 0) {
+                    memset(&pSyms[g * width + firstClear], 0,
+                           nClear * sizeof(KeySym));
+                  }
                 }
             }
         }
@@ -498,24 +530,29 @@ XkbResizeKeySyms(XkbDescPtr xkb, int key, int needed)
     }
     xkb->map->size_syms += (needed > 32 ? needed : 32);
     newSyms = calloc(xkb->map->size_syms, sizeof(KeySym));
-    if (newSyms == NULL)
-        return NULL;
+    if (newSyms == NULL) {
+      return NULL;
+    }
     newSyms[0] = NoSymbol;
     nSyms = 1;
     for (i = xkb->min_key_code; i <= (int) xkb->max_key_code; i++) {
         int nCopy;
 
         nCopy = nKeySyms = XkbKeyNumSyms(xkb, i);
-        if ((nKeySyms == 0) && (i != key))
-            continue;
-        if (i == key)
-            nKeySyms = needed;
-        if (nCopy != 0)
-            memcpy(&newSyms[nSyms], XkbKeySymsPtr(xkb, i),
-                   nCopy * sizeof(KeySym));
-        if (nKeySyms > nCopy)
-            memset(&newSyms[nSyms + nCopy], 0,
-                   (nKeySyms - nCopy) * sizeof(KeySym));
+        if ((nKeySyms == 0) && (i != key)) {
+          continue;
+        }
+        if (i == key) {
+          nKeySyms = needed;
+        }
+        if (nCopy != 0) {
+          memcpy(&newSyms[nSyms], XkbKeySymsPtr(xkb, i),
+                 nCopy * sizeof(KeySym));
+        }
+        if (nKeySyms > nCopy) {
+          memset(&newSyms[nSyms + nCopy], 0,
+                 (nKeySyms - nCopy) * sizeof(KeySym));
+        }
         xkb->map->key_sym_map[i].offset = nSyms;
         nSyms += nKeySyms;
     }
@@ -555,13 +592,17 @@ XkbChangeKeycodeRange(XkbDescPtr xkb,
 {
     int tmp;
 
-    if ((!xkb) || (minKC < XkbMinLegalKeyCode) || (maxKC > XkbMaxLegalKeyCode))
-        return BadValue;
-    if (minKC > maxKC)
-        return BadMatch;
+    if ((!xkb) || (minKC < XkbMinLegalKeyCode) ||
+        (maxKC > XkbMaxLegalKeyCode)) {
+      return BadValue;
+    }
+    if (minKC > maxKC) {
+      return BadMatch;
+    }
     if (minKC < xkb->min_key_code) {
-        if (changes)
-            changes->map.min_key_code = minKC;
+      if (changes) {
+        changes->map.min_key_code = minKC;
+      }
         tmp = xkb->min_key_code - minKC;
         if (xkb->map) {
             if (xkb->map->key_sym_map) {
@@ -643,8 +684,9 @@ XkbChangeKeycodeRange(XkbDescPtr xkb,
         xkb->min_key_code = minKC;
     }
     if (maxKC > xkb->max_key_code) {
-        if (changes)
-            changes->map.max_key_code = maxKC;
+      if (changes) {
+        changes->map.max_key_code = maxKC;
+      }
         tmp = MAP_LENGTH - xkb->max_key_code;
         if (xkb->map) {
             if (xkb->map->key_sym_map) {
@@ -739,8 +781,9 @@ XkbResizeKeyActions(XkbDescPtr xkb, int key, int needed)
         return NULL;
     }
     if (XkbKeyHasActions(xkb, key) &&
-        (XkbKeyNumSyms(xkb, key) >= (unsigned) needed))
-        return XkbKeyActionsPtr(xkb, key);
+        (XkbKeyNumSyms(xkb, key) >= (unsigned)needed)) {
+      return XkbKeyActionsPtr(xkb, key);
+    }
     if (xkb->server->size_acts - xkb->server->num_acts >= (unsigned) needed) {
         xkb->server->key_acts[key] = xkb->server->num_acts;
         xkb->server->num_acts += needed;
@@ -748,29 +791,34 @@ XkbResizeKeyActions(XkbDescPtr xkb, int key, int needed)
     }
     xkb->server->size_acts = xkb->server->num_acts + needed + 8;
     newActs = calloc(xkb->server->size_acts, sizeof(XkbAction));
-    if (newActs == NULL)
-        return NULL;
+    if (newActs == NULL) {
+      return NULL;
+    }
     newActs[0].type = XkbSA_NoAction;
     nActs = 1;
     for (i = xkb->min_key_code; i <= (int) xkb->max_key_code; i++) {
         int nKeyActs, nCopy;
 
-        if ((xkb->server->key_acts[i] == 0) && (i != key))
-            continue;
+        if ((xkb->server->key_acts[i] == 0) && (i != key)) {
+          continue;
+        }
 
         nCopy = nKeyActs = XkbKeyNumActions(xkb, i);
         if (i == key) {
             nKeyActs = needed;
-            if (needed < nCopy)
-                nCopy = needed;
+            if (needed < nCopy) {
+              nCopy = needed;
+            }
         }
 
-        if (nCopy > 0)
-            memcpy(&newActs[nActs], XkbKeyActionsPtr(xkb, i),
-                   nCopy * sizeof(XkbAction));
-        if (nCopy < nKeyActs)
-            memset(&newActs[nActs + nCopy], 0,
-                   (nKeyActs - nCopy) * sizeof(XkbAction));
+        if (nCopy > 0) {
+          memcpy(&newActs[nActs], XkbKeyActionsPtr(xkb, i),
+                 nCopy * sizeof(XkbAction));
+        }
+        if (nCopy < nKeyActs) {
+          memset(&newActs[nActs + nCopy], 0,
+                 (nKeyActs - nCopy) * sizeof(XkbAction));
+        }
         xkb->server->key_acts[i] = nActs;
         nActs += nKeyActs;
     }
@@ -785,10 +833,12 @@ XkbFreeClientMap(XkbDescPtr xkb, unsigned what, Bool freeMap)
 {
     XkbClientMapPtr map;
 
-    if ((xkb == NULL) || (xkb->map == NULL))
-        return;
-    if (freeMap)
-        what = XkbAllClientInfoMask;
+    if ((xkb == NULL) || (xkb->map == NULL)) {
+      return;
+    }
+    if (freeMap) {
+      what = XkbAllClientInfoMask;
+    }
     map = xkb->map;
     if (what & XkbKeyTypesMask) {
         if (map->types != NULL) {
@@ -836,10 +886,12 @@ XkbFreeServerMap(XkbDescPtr xkb, unsigned what, Bool freeMap)
 {
     XkbServerMapPtr map;
 
-    if ((xkb == NULL) || (xkb->server == NULL))
-        return;
-    if (freeMap)
-        what = XkbAllServerInfoMask;
+    if ((xkb == NULL) || (xkb->server == NULL)) {
+      return;
+    }
+    if (freeMap) {
+      what = XkbAllServerInfoMask;
+    }
     map = xkb->server;
     if ((what & XkbExplicitComponentsMask) && (map->explicit != NULL)) {
         free(map->explicit);

@@ -123,8 +123,9 @@ DRISurfaceRestoreDrawable(DrawablePtr pDraw,
 {
     PixmapPtr pPix = (PixmapPtr)pDraw;
 
-    if (!saved->didSave)
-        return;
+    if (!saved->didSave) {
+      return;
+    }
 
     pPix->devKind = saved->devKind;
     pPix->devPrivate.ptr = saved->devPrivate.ptr;
@@ -550,12 +551,14 @@ DRIWrapInit(ScreenPtr pScreen)
 {
     DRIWrapScreenRec *pScreenPriv;
 
-    if (!dixRegisterPrivateKey(&driGCKeyRec, PRIVATE_GC, sizeof(DRIGCRec)))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&driGCKeyRec, PRIVATE_GC, sizeof(DRIGCRec))) {
+      return FALSE;
+    }
 
     if (!dixRegisterPrivateKey(&driWrapScreenKeyRec, PRIVATE_SCREEN,
-                               sizeof(DRIWrapScreenRec)))
-        return FALSE;
+                               sizeof(DRIWrapScreenRec))) {
+      return FALSE;
+    }
 
     pScreenPriv = dixGetPrivateAddr(&pScreen->devPrivates,
                                     &driWrapScreenKeyRec);

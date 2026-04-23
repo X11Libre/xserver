@@ -96,8 +96,9 @@ winProcessXEventsTimeout(HWND hwnd, xcb_window_t iWindow, xcb_connection_t *conn
         tv.tv_usec = (remainingTime % 1000) * 1000;
 
         /* Break out if no time left */
-        if (remainingTime <= 0)
-            return WIN_XEVENTS_SUCCESS;
+        if (remainingTime <= 0) {
+          return WIN_XEVENTS_SUCCESS;
+        }
 
         /* Wait for an X event */
         iReturn = select(iConnNumber + 1,       /* Highest fds number */

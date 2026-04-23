@@ -335,14 +335,13 @@ glamor_create_composite_fs(glamor_screen_private *glamor_priv, struct shader_key
         FatalError("Bad composite IN type");
     }
 
-    if (asprintf(&source,
-                 "%s"
-                 GLAMOR_DEFAULT_PRECISION
-                 "%s%s%s%s%s%s%s%s", header, GLAMOR_COMPAT_DEFINES_FS,
-                 repeat_define, relocate_texture,
+    if (asprintf(&source, "%s" GLAMOR_DEFAULT_PRECISION "%s%s%s%s%s%s%s%s",
+                 header, GLAMOR_COMPAT_DEFINES_FS, repeat_define,
+                 relocate_texture,
                  enable_rel_sampler ? rel_sampler : stub_rel_sampler,
-                 source_fetch, mask_fetch, dest_swizzle, in) == -1)
-        FatalError("Memory allocation on asprintf() failed\n");
+                 source_fetch, mask_fetch, dest_swizzle, in) == -1) {
+      FatalError("Memory allocation on asprintf() failed\n");
+    }
 
     prog = glamor_compile_glsl_prog(GL_FRAGMENT_SHADER, source);
     free(source);
@@ -374,25 +373,27 @@ glamor_create_composite_vs(glamor_screen_private* priv, struct shader_key *key)
     char *source;
     GLuint prog;
 
-    if (key->source != SHADER_SOURCE_SOLID)
-        source_coords_setup = source_coords;
+    if (key->source != SHADER_SOURCE_SOLID) {
+      source_coords_setup = source_coords;
+    }
 
-    if (key->mask != SHADER_MASK_NONE && key->mask != SHADER_MASK_SOLID)
-        mask_coords_setup = mask_coords;
+    if (key->mask != SHADER_MASK_NONE && key->mask != SHADER_MASK_SOLID) {
+      mask_coords_setup = mask_coords;
+    }
 
-    if (priv->is_gles)
-        version = version_gles2;
+    if (priv->is_gles) {
+      version = version_gles2;
+    }
 
-    if (priv->is_gles && priv->glsl_version > 120)
-        version = version_gles3;
+    if (priv->is_gles && priv->glsl_version > 120) {
+      version = version_gles3;
+    }
 
-    if (asprintf(&source,
-                 "%s"
-                 GLAMOR_DEFAULT_PRECISION
-                 "%s%s%s%s%s",
-                 version, defines, main_opening, source_coords_setup,
-                 mask_coords_setup, main_closing) == -1)
-        FatalError("malloc on asprintf() failed\n");
+    if (asprintf(&source, "%s" GLAMOR_DEFAULT_PRECISION "%s%s%s%s%s", version,
+                 defines, main_opening, source_coords_setup, mask_coords_setup,
+                 main_closing) == -1) {
+      FatalError("malloc on asprintf() failed\n");
+    }
 
     prog = glamor_compile_glsl_prog(GL_VERTEX_SHADER, source);
     free(source);
@@ -411,11 +412,13 @@ glamor_create_composite_shader(ScreenPtr screen, struct shader_key *key,
 
     glamor_make_current(glamor_priv);
     vs = glamor_create_composite_vs(glamor_priv, key);
-    if (vs == 0)
-        return;
+    if (vs == 0) {
+      return;
+    }
     fs = glamor_create_composite_fs(glamor_priv, key, enable_rel_sampler);
-    if (fs == 0)
-        return;
+    if (fs == 0) {
+      return;
+    }
 
     prog = glCreateProgram();
     glAttachShader(prog, vs);
@@ -437,8 +440,9 @@ glamor_create_composite_shader(ScreenPtr screen, struct shader_key *key,
         enable_rel_sampler = FALSE;
         glDetachShader(prog, fs);
         fs = glamor_create_composite_fs(glamor_priv, key, enable_rel_sampler);
-        if (fs == 0)
-            return;
+        if (fs == 0) {
+          return;
+        }
         glAttachShader(prog, fs);
         glDeleteShader(fs);
 
@@ -488,8 +492,9 @@ glamor_lookup_composite_shader(ScreenPtr screen, struct
     glamor_composite_shader *shader;
 
     shader = &glamor_priv->composite_shader[key->source][key->mask][key->in][key->dest_swizzle];
-    if (shader->prog == 0)
-        glamor_create_composite_shader(screen, key, shader);
+    if (shader->prog == 0) {
+      glamor_create_composite_shader(screen, key, shader);
+    }
 
     return shader;
 }
@@ -535,10 +540,11 @@ glamor_set_composite_op(ScreenPtr screen,
      * it as always 1.
      */
     if (PIXMAN_FORMAT_A(dest->format) == 0 && op_info->dest_alpha) {
-        if (source_blend == GL_DST_ALPHA)
-            source_blend = GL_ONE;
-        else if (source_blend == GL_ONE_MINUS_DST_ALPHA)
-            source_blend = GL_ZERO;
+      if (source_blend == GL_DST_ALPHA) {
+        source_blend = GL_ONE;
+      } else if (source_blend == GL_ONE_MINUS_DST_ALPHA) {
+        source_blend = GL_ZERO;
+      }
     }
 
     /* Set up the source alpha value for blending in component alpha mode. */
@@ -662,8 +668,9 @@ glamor_set_composite_solid(float *color, GLint uniform_location)
 static char
 glamor_get_picture_location(PicturePtr picture)
 {
-    if (picture == NULL)
-        return ' ';
+  if (picture == NULL) {
+    return ' ';
+  }
 
     if (picture->pDrawable == NULL) {
         switch (picture->pSourcePict->type) {
@@ -690,10 +697,12 @@ glamor_setup_composite_vbo(ScreenPtr screen, int n_verts)
 
     glamor_priv->render_nr_quads = 0;
     glamor_priv->vb_stride = 2 * sizeof(float);
-    if (glamor_priv->has_source_coords)
-        glamor_priv->vb_stride += 2 * sizeof(float);
-    if (glamor_priv->has_mask_coords)
-        glamor_priv->vb_stride += 2 * sizeof(float);
+    if (glamor_priv->has_source_coords) {
+      glamor_priv->vb_stride += 2 * sizeof(float);
+    }
+    if (glamor_priv->has_mask_coords) {
+      glamor_priv->vb_stride += 2 * sizeof(float);
+    }
 
     vert_size = n_verts * glamor_priv->vb_stride;
 
@@ -730,8 +739,9 @@ glamor_flush_composite_rects(ScreenPtr screen)
 
     glamor_make_current(glamor_priv);
 
-    if (!glamor_priv->render_nr_quads)
-        return;
+    if (!glamor_priv->render_nr_quads) {
+      return;
+    }
 
     glamor_glDrawArrays_GL_QUADS(glamor_priv, glamor_priv->render_nr_quads);
 }
@@ -811,27 +821,21 @@ glamor_set_normalize_tcoords_generic(PixmapPtr pixmap,
                                      float *texcoords,
                                      int stride)
 {
-    if (!matrix && repeat_type == RepeatNone)
-        glamor_set_normalize_tcoords_ext(priv, xscale, yscale,
-                                         x1, y1,
-                                         x2, y2, texcoords, stride);
-    else if (matrix && repeat_type == RepeatNone)
-        glamor_set_transformed_normalize_tcoords_ext(priv, matrix, xscale,
-                                                     yscale, x1, y1,
-                                                     x2, y2,
-                                                     texcoords, stride);
-    else if (!matrix && repeat_type != RepeatNone)
-        glamor_set_repeat_normalize_tcoords_ext(pixmap, priv, repeat_type,
-                                                xscale, yscale,
-                                                x1, y1,
-                                                x2, y2,
-                                                texcoords, stride);
-    else if (matrix && repeat_type != RepeatNone)
-        glamor_set_repeat_transformed_normalize_tcoords_ext(pixmap, priv, repeat_type,
-                                                            matrix, xscale,
-                                                            yscale, x1, y1, x2,
-                                                            y2,
-                                                            texcoords, stride);
+  if (!matrix && repeat_type == RepeatNone) {
+    glamor_set_normalize_tcoords_ext(priv, xscale, yscale, x1, y1, x2, y2,
+                                     texcoords, stride);
+  } else if (matrix && repeat_type == RepeatNone) {
+    glamor_set_transformed_normalize_tcoords_ext(
+        priv, matrix, xscale, yscale, x1, y1, x2, y2, texcoords, stride);
+  } else if (!matrix && repeat_type != RepeatNone) {
+    glamor_set_repeat_normalize_tcoords_ext(pixmap, priv, repeat_type, xscale,
+                                            yscale, x1, y1, x2, y2, texcoords,
+                                            stride);
+  } else if (matrix && repeat_type != RepeatNone) {
+    glamor_set_repeat_transformed_normalize_tcoords_ext(
+        pixmap, priv, repeat_type, matrix, xscale, yscale, x1, y1, x2, y2,
+        texcoords, stride);
+  }
 }
 
 /**
@@ -851,14 +855,16 @@ glamor_render_format_is_supported(PicturePtr picture)
     struct glamor_format *f;
 
     /* Source-only pictures should always work */
-    if (!picture->pDrawable)
-        return TRUE;
+    if (!picture->pDrawable) {
+      return TRUE;
+    }
 
     glamor_priv = glamor_get_screen_private(picture->pDrawable->pScreen);
     f = &glamor_priv->formats[glamor_drawable_effective_depth(picture->pDrawable)];
 
-    if (!f->rendering_supported)
-        return FALSE;
+    if (!f->rendering_supported) {
+      return FALSE;
+    }
 
     storage_format = f->render_format;
 
@@ -940,15 +946,16 @@ glamor_composite_choose_shader(CARD8 op,
             key.source = SHADER_SOURCE_SOLID;
             glamor_get_rgba_from_color(&sp->solidFill.fullcolor,
                                        source_solid_color);
+        } else {
+          goto fail;
         }
-        else
-            goto fail;
     }
     else {
-        if (PIXMAN_FORMAT_A(source->format))
-            key.source = SHADER_SOURCE_TEXTURE_ALPHA;
-        else
-            key.source = SHADER_SOURCE_TEXTURE;
+      if (PIXMAN_FORMAT_A(source->format)) {
+        key.source = SHADER_SOURCE_TEXTURE_ALPHA;
+      } else {
+        key.source = SHADER_SOURCE_TEXTURE;
+      }
     }
 
     if (mask) {
@@ -958,39 +965,37 @@ glamor_composite_choose_shader(CARD8 op,
                 key.mask = SHADER_MASK_SOLID;
                 glamor_get_rgba_from_color(&sp->solidFill.fullcolor,
                                            mask_solid_color);
+            } else {
+              goto fail;
             }
-            else
-                goto fail;
         }
         else {
-            if (PIXMAN_FORMAT_A(mask->format))
-                key.mask = SHADER_MASK_TEXTURE_ALPHA;
-            else
-                key.mask = SHADER_MASK_TEXTURE;
+          if (PIXMAN_FORMAT_A(mask->format)) {
+            key.mask = SHADER_MASK_TEXTURE_ALPHA;
+          } else {
+            key.mask = SHADER_MASK_TEXTURE;
+          }
         }
 
         if (!mask->componentAlpha) {
             key.in = glamor_program_alpha_normal;
         }
         else {
-            if (op == PictOpClear)
-                key.mask = SHADER_MASK_NONE;
-            else if (glamor_priv->has_dual_blend) {
-                key.in = glamor_glsl_has_ints(glamor_priv) ?
-                    glamor_program_alpha_dual_blend :
-                    glamor_program_alpha_dual_blend_gles2;
-            }
-            else if (op == PictOpSrc || op == PictOpAdd
-                     || op == PictOpIn || op == PictOpOut
-                     || op == PictOpOverReverse)
-                key.in = glamor_program_alpha_ca_second;
-            else if (op == PictOpOutReverse || op == PictOpInReverse) {
-                key.in = glamor_program_alpha_ca_first;
-            }
-            else {
-                glamor_fallback("Unsupported component alpha op: %d\n", op);
-                goto fail;
-            }
+          if (op == PictOpClear) {
+            key.mask = SHADER_MASK_NONE;
+          } else if (glamor_priv->has_dual_blend) {
+            key.in = glamor_glsl_has_ints(glamor_priv)
+                         ? glamor_program_alpha_dual_blend
+                         : glamor_program_alpha_dual_blend_gles2;
+          } else if (op == PictOpSrc || op == PictOpAdd || op == PictOpIn ||
+                     op == PictOpOut || op == PictOpOverReverse) {
+            key.in = glamor_program_alpha_ca_second;
+          } else if (op == PictOpOutReverse || op == PictOpInReverse) {
+            key.in = glamor_program_alpha_ca_first;
+          } else {
+            glamor_fallback("Unsupported component alpha op: %d\n", op);
+            goto fail;
+          }
         }
     }
     else {
@@ -1001,12 +1006,13 @@ glamor_composite_choose_shader(CARD8 op,
         glamor_priv->formats[8].format == GL_RED) {
         key.dest_swizzle = SHADER_DEST_SWIZZLE_ALPHA_TO_RED;
     } else {
-        if (dest_pixmap->drawable.depth == 32 &&
-            glamor_drawable_effective_depth(dest->pDrawable) == 24 &&
-            !render_op_uses_src_alpha(op))
-            key.dest_swizzle = SHADER_DEST_SWIZZLE_IGNORE_ALPHA;
-        else
-            key.dest_swizzle = SHADER_DEST_SWIZZLE_DEFAULT;
+      if (dest_pixmap->drawable.depth == 32 &&
+          glamor_drawable_effective_depth(dest->pDrawable) == 24 &&
+          !render_op_uses_src_alpha(op)) {
+        key.dest_swizzle = SHADER_DEST_SWIZZLE_IGNORE_ALPHA;
+      } else {
+        key.dest_swizzle = SHADER_DEST_SWIZZLE_DEFAULT;
+      }
     }
 
     if (source && source->alphaMap) {
@@ -1070,13 +1076,15 @@ glamor_composite_choose_shader(CARD8 op,
              * because we wire the alpha to 1.
              *
              **/
-            if (!PIXMAN_FORMAT_A(saved_source_format)
-                && PIXMAN_FORMAT_A(mask->format))
-                key.source = SHADER_SOURCE_TEXTURE;
+            if (!PIXMAN_FORMAT_A(saved_source_format) &&
+                PIXMAN_FORMAT_A(mask->format)) {
+              key.source = SHADER_SOURCE_TEXTURE;
+            }
 
-            if (!PIXMAN_FORMAT_A(mask->format)
-                && PIXMAN_FORMAT_A(saved_source_format))
-                key.mask = SHADER_MASK_TEXTURE;
+            if (!PIXMAN_FORMAT_A(mask->format) &&
+                PIXMAN_FORMAT_A(saved_source_format)) {
+              key.mask = SHADER_MASK_TEXTURE;
+            }
         }
 
         if (!glamor_upload_picture_to_texture(source)) {
@@ -1132,20 +1140,20 @@ glamor_composite_choose_shader(CARD8 op,
         goto fail;
     }
 
-    if (key.source == SHADER_SOURCE_SOLID)
-        memcpy(&(*shader)->source.solid_color[0],
-               source_solid_color, 4 * sizeof(float));
-    else {
-        (*shader)->source.pict.pixmap = source_pixmap;
-        (*shader)->source.pict.picture = source;
+    if (key.source == SHADER_SOURCE_SOLID) {
+      memcpy(&(*shader)->source.solid_color[0], source_solid_color,
+             4 * sizeof(float));
+    } else {
+      (*shader)->source.pict.pixmap = source_pixmap;
+      (*shader)->source.pict.picture = source;
     }
 
-    if (key.mask == SHADER_MASK_SOLID)
-        memcpy(&(*shader)->mask.solid_color[0],
-               mask_solid_color, 4 * sizeof(float));
-    else {
-        (*shader)->mask.pict.pixmap = mask_pixmap;
-        (*shader)->mask.pict.picture = mask;
+    if (key.mask == SHADER_MASK_SOLID) {
+      memcpy(&(*shader)->mask.solid_color[0], mask_solid_color,
+             4 * sizeof(float));
+    } else {
+      (*shader)->mask.pict.pixmap = mask_pixmap;
+      (*shader)->mask.pict.picture = mask;
     }
 
     ret = TRUE;
@@ -1154,8 +1162,9 @@ glamor_composite_choose_shader(CARD8 op,
     goto done;
 
  fail:
-    if (saved_source_format)
-        source->format = saved_source_format;
+   if (saved_source_format) {
+     source->format = saved_source_format;
+   }
  done:
     return ret;
 }
@@ -1198,8 +1207,9 @@ glamor_composite_set_shader_blend(glamor_screen_private *glamor_priv,
         }
     }
 
-    if (!glamor_priv->is_gles)
-        glDisable(GL_COLOR_LOGIC_OP);
+    if (!glamor_priv->is_gles) {
+      glDisable(GL_COLOR_LOGIC_OP);
+    }
 
     if (op_info->source_blend == GL_ONE && op_info->dest_blend == GL_ZERO) {
         glDisable(GL_BLEND);
@@ -1321,8 +1331,9 @@ glamor_composite_with_shader(CARD8 op,
             glamor_bounds_union_box(&bounds, &box);
         }
 
-        if (bounds.x1 >= bounds.x2 || bounds.y1 >= bounds.y2)
-            goto disable_va;
+        if (bounds.x1 >= bounds.x2 || bounds.y1 >= bounds.y2) {
+          goto disable_va;
+        }
 
         glEnable(GL_SCISSOR_TEST);
         glScissor(bounds.x1 + dest_x_off,
@@ -1406,31 +1417,36 @@ glamor_composite_with_shader(CARD8 op,
             glamor_composite_set_shader_blend(glamor_priv, dest_pixmap_priv,
                                               &key_ca, shader_ca, &op_info_ca);
             glamor_flush_composite_rects(screen);
-            if (nrect)
-                glamor_composite_set_shader_blend(glamor_priv, dest_pixmap_priv,
-                                                  &key, shader, &op_info);
+            if (nrect) {
+              glamor_composite_set_shader_blend(glamor_priv, dest_pixmap_priv,
+                                                &key, shader, &op_info);
+            }
         }
     }
 
     glDisable(GL_SCISSOR_TEST);
 disable_va:
-    if (restore_colormask)
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  if (restore_colormask) {
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  }
     glDisableVertexAttribArray(GLAMOR_VERTEX_POS);
     glDisableVertexAttribArray(GLAMOR_VERTEX_SOURCE);
     glDisableVertexAttribArray(GLAMOR_VERTEX_MASK);
     glDisable(GL_BLEND);
     DEBUGF("finish rendering.\n");
-    if (saved_source_format)
-        source->format = saved_source_format;
+    if (saved_source_format) {
+      source->format = saved_source_format;
+    }
 
     ret = TRUE;
 
 fail:
-    if (mask_pixmap && glamor_pixmap_is_memory(mask_pixmap))
-        glamor_pixmap_destroy_fbo(mask_pixmap);
-    if (source_pixmap && glamor_pixmap_is_memory(source_pixmap))
-        glamor_pixmap_destroy_fbo(source_pixmap);
+  if (mask_pixmap && glamor_pixmap_is_memory(mask_pixmap)) {
+    glamor_pixmap_destroy_fbo(mask_pixmap);
+  }
+  if (source_pixmap && glamor_pixmap_is_memory(source_pixmap)) {
+    glamor_pixmap_destroy_fbo(source_pixmap);
+  }
 
     return ret;
 }
@@ -1481,14 +1497,16 @@ glamor_convert_gradient_picture(ScreenPtr screen,
                                   PIXMAN_FORMAT_DEPTH(format),
                                   GLAMOR_CREATE_PIXMAP_CPU);
 
-    if (!pixmap)
-        return NULL;
+    if (!pixmap) {
+      return NULL;
+    }
 
     dst = CreatePicture(0,
                         &pixmap->drawable, pFormat, 0, 0, serverClient, &error);
     glamor_destroy_pixmap(pixmap);
-    if (!dst)
-        return NULL;
+    if (!dst) {
+      return NULL;
+    }
 
     ValidatePicture(dst);
 
@@ -1664,11 +1682,11 @@ glamor_composite_clipped_region(CARD8 op,
 
     if (nbox > ARRAY_SIZE(rect)) {
         prect = calloc(nbox, sizeof(*prect));
-        if (prect)
-            prect_size = nbox;
-        else {
-            prect = rect;
-            prect_size = ARRAY_SIZE(rect);
+        if (prect) {
+          prect_size = nbox;
+        } else {
+          prect = rect;
+          prect_size = ARRAY_SIZE(rect);
         }
     }
     while (nbox) {
@@ -1691,19 +1709,23 @@ glamor_composite_clipped_region(CARD8 op,
                                           temp_src_priv, temp_mask_priv,
                                           dest_pixmap_priv,
                                           box_cnt, prect, ca_state);
-        if (!ok)
-            break;
+        if (!ok) {
+          break;
+        }
         nbox -= box_cnt;
         box += box_cnt;
     }
 
-    if (prect != rect)
-        free(prect);
+    if (prect != rect) {
+      free(prect);
+    }
  out:
-    if (temp_src != source)
-        FreePicture(temp_src, 0);
-    if (temp_mask != mask)
-        FreePicture(temp_mask, 0);
+   if (temp_src != source) {
+     FreePicture(temp_src, 0);
+   }
+   if (temp_mask != mask) {
+     FreePicture(temp_mask, 0);
+   }
 
     return ok;
 }
@@ -1730,14 +1752,16 @@ glamor_composite(CARD8 op,
 
     if (source->pDrawable) {
         source_pixmap = glamor_get_drawable_pixmap(source->pDrawable);
-        if (glamor_pixmap_drm_only(source_pixmap))
-            goto fail;
+        if (glamor_pixmap_drm_only(source_pixmap)) {
+          goto fail;
+        }
     }
 
     if (mask && mask->pDrawable) {
         mask_pixmap = glamor_get_drawable_pixmap(mask->pDrawable);
-        if (glamor_pixmap_drm_only(mask_pixmap))
-            goto fail;
+        if (glamor_pixmap_drm_only(mask_pixmap)) {
+          goto fail;
+        }
     }
 
     DEBUGF
@@ -1745,8 +1769,9 @@ glamor_composite(CARD8 op,
          source_pixmap, x_source, y_source, x_mask, y_mask, x_dest, y_dest,
          width, height);
 
-    if (!glamor_pixmap_has_fbo(dest_pixmap))
-        goto fail;
+    if (!glamor_pixmap_has_fbo(dest_pixmap)) {
+      goto fail;
+    }
 
     if (op >= ARRAY_SIZE(composite_op_info)) {
         glamor_fallback("Unsupported composite op %x\n", op);
@@ -1787,8 +1812,9 @@ glamor_composite(CARD8 op,
     DEBUGF("first clipped when compositing.\n");
     DEBUGRegionPrint(&region);
     extent = RegionExtents(&region);
-    if (nbox == 0)
-        return;
+    if (nbox == 0) {
+      return;
+    }
 
     /* If destination is not a large pixmap, but the region is larger
      * than texture size limitation, and source or mask is memory pixmap,
@@ -1796,48 +1822,38 @@ glamor_composite(CARD8 op,
      * texture, and this is not permitted. Then we force to clip the
      * destination and make sure latter will not upload a large memory
      * pixmap. */
-    if (!glamor_check_fbo_size(glamor_priv,
-                               extent->x2 - extent->x1, extent->y2 - extent->y1)
-        && glamor_pixmap_is_large(dest_pixmap)
-        && ((source_pixmap
-             && (glamor_pixmap_is_memory(source_pixmap) ||
-                 source->repeatType == RepeatPad))
-            || (mask_pixmap &&
-                (glamor_pixmap_is_memory(mask_pixmap) ||
-                 mask->repeatType == RepeatPad))
-            || (!source_pixmap &&
-                (source->pSourcePict->type != SourcePictTypeSolidFill))
-            || (!mask_pixmap && mask &&
-                mask->pSourcePict->type != SourcePictTypeSolidFill)))
-        force_clip = 1;
+    if (!glamor_check_fbo_size(glamor_priv, extent->x2 - extent->x1,
+                               extent->y2 - extent->y1) &&
+        glamor_pixmap_is_large(dest_pixmap) &&
+        ((source_pixmap && (glamor_pixmap_is_memory(source_pixmap) ||
+                            source->repeatType == RepeatPad)) ||
+         (mask_pixmap && (glamor_pixmap_is_memory(mask_pixmap) ||
+                          mask->repeatType == RepeatPad)) ||
+         (!source_pixmap &&
+          (source->pSourcePict->type != SourcePictTypeSolidFill)) ||
+         (!mask_pixmap && mask &&
+          mask->pSourcePict->type != SourcePictTypeSolidFill))) {
+      force_clip = 1;
+    }
 
-    if (force_clip || glamor_pixmap_is_large(dest_pixmap)
-        || (source_pixmap
-            && glamor_pixmap_is_large(source_pixmap))
-        || (mask_pixmap && glamor_pixmap_is_large(mask_pixmap)))
-        ok = glamor_composite_largepixmap_region(op,
-                                                 source, mask, dest,
-                                                 source_pixmap,
-                                                 mask_pixmap,
-                                                 dest_pixmap,
-                                                 &region, force_clip,
-                                                 x_source, y_source,
-                                                 x_mask, y_mask,
-                                                 x_dest, y_dest, width, height);
-    else
-        ok = glamor_composite_clipped_region(op, source,
-                                             mask, dest,
-                                             source_pixmap,
-                                             mask_pixmap,
-                                             dest_pixmap,
-                                             &region,
-                                             x_source, y_source,
-                                             x_mask, y_mask, x_dest, y_dest);
+    if (force_clip || glamor_pixmap_is_large(dest_pixmap) ||
+        (source_pixmap && glamor_pixmap_is_large(source_pixmap)) ||
+        (mask_pixmap && glamor_pixmap_is_large(mask_pixmap))) {
+      ok = glamor_composite_largepixmap_region(
+          op, source, mask, dest, source_pixmap, mask_pixmap, dest_pixmap,
+          &region, force_clip, x_source, y_source, x_mask, y_mask, x_dest,
+          y_dest, width, height);
+    } else {
+      ok = glamor_composite_clipped_region(
+          op, source, mask, dest, source_pixmap, mask_pixmap, dest_pixmap,
+          &region, x_source, y_source, x_mask, y_mask, x_dest, y_dest);
+    }
 
     REGION_UNINIT(dest->pDrawable->pScreen, &region);
 
-    if (ok)
-        return;
+    if (ok) {
+      return;
+    }
 
  fail:
 

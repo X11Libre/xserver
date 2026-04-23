@@ -57,8 +57,9 @@ glamor_set_destination_drawable(DrawablePtr     drawable,
     glamor_pixmap_fbo *pixmap_fbo;
 
     pixmap_fbo = glamor_pixmap_fbo_at(pixmap_priv, box_index);
-    if (!pixmap_fbo)
-        return FALSE;
+    if (!pixmap_fbo) {
+      return FALSE;
+    }
 
     glamor_get_drawable_deltas(drawable, pixmap, &off_x, &off_y);
 
@@ -93,8 +94,9 @@ glamor_set_destination_drawable(DrawablePtr     drawable,
      * To get GL_POINTS drawn in the right spot, we need to adjust the
      * coordinates by 1/2 a pixel.
      */
-    if (center_offset)
-        center_adjust = 0.5f;
+    if (center_offset) {
+      center_adjust = 0.5f;
+    }
 
     glUniform4f(matrix_uniform_location,
                 scale_x, (off_x + center_adjust) * scale_x - 1.0f,
@@ -124,8 +126,9 @@ glamor_set_color_depth(ScreenPtr      pScreen,
                                &color[0], &color[1], &color[2], &color[3],
                                glamor_priv->formats[depth].render_format);
 
-    if ((depth <= 8) && glamor_priv->formats[8].format == GL_RED)
+    if ((depth <= 8) && glamor_priv->formats[8].format == GL_RED) {
       color[0] = color[3];
+    }
 
     glUniform4fv(uniform, 1, color);
 }
@@ -139,8 +142,9 @@ glamor_set_solid(DrawablePtr    drawable,
     CARD32      pixel;
     int         alu = use_alu ? gc->alu : GXcopy;
 
-    if (!glamor_set_planemask(gc->depth, gc->planemask))
-        return FALSE;
+    if (!glamor_set_planemask(gc->depth, gc->planemask)) {
+      return FALSE;
+    }
 
     pixel = gc->fgPixel;
 
@@ -171,11 +175,13 @@ glamor_set_texture_pixmap(PixmapPtr texture, Bool destination_red)
 
     texture_priv = glamor_get_pixmap_private(texture);
 
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(texture_priv))
-        return FALSE;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(texture_priv)) {
+      return FALSE;
+    }
 
-    if (glamor_pixmap_priv_is_large(texture_priv))
-        return FALSE;
+    if (glamor_pixmap_priv_is_large(texture_priv)) {
+      return FALSE;
+    }
 
     glamor_bind_texture(glamor_get_screen_private(texture->drawable.pScreen),
                         GL_TEXTURE0,
@@ -196,8 +202,9 @@ glamor_set_texture(PixmapPtr    texture,
                    GLint        offset_uniform,
                    GLint        size_inv_uniform)
 {
-    if (!glamor_set_texture_pixmap(texture, destination_red))
-        return FALSE;
+  if (!glamor_set_texture_pixmap(texture, destination_red)) {
+    return FALSE;
+  }
 
     glUniform2f(offset_uniform, off_x, off_y);
     glUniform2f(size_inv_uniform, 1.0f/texture->drawable.width, 1.0f/texture->drawable.height);
@@ -210,11 +217,13 @@ glamor_set_tiled(DrawablePtr    drawable,
                  GLint          offset_uniform,
                  GLint          size_inv_uniform)
 {
-    if (!glamor_set_alu(drawable, gc->alu))
-        return FALSE;
+  if (!glamor_set_alu(drawable, gc->alu)) {
+    return FALSE;
+  }
 
-    if (!glamor_set_planemask(gc->depth, gc->planemask))
-        return FALSE;
+  if (!glamor_set_planemask(gc->depth, gc->planemask)) {
+    return FALSE;
+  }
 
     return glamor_set_texture(gc->tile.pixmap,
                               TRUE,
@@ -234,29 +243,34 @@ glamor_get_stipple_pixmap(GCPtr gc)
     GCPtr       scratch_gc;
     ChangeGCVal changes[2];
 
-    if (gc_priv->stipple)
-        return gc_priv->stipple;
+    if (gc_priv->stipple) {
+      return gc_priv->stipple;
+    }
 
     bitmap = gc->stipple;
-    if (!bitmap)
-        goto bail;
+    if (!bitmap) {
+      goto bail;
+    }
 
     pixmap = glamor_create_pixmap(screen,
                                   bitmap->drawable.width,
                                   bitmap->drawable.height,
                                   8, GLAMOR_CREATE_NO_LARGE);
-    if (!pixmap)
-        goto bail;
+    if (!pixmap) {
+      goto bail;
+    }
 
     scratch_gc = GetScratchGC(8, screen);
-    if (!scratch_gc)
-        goto bail_pixmap;
+    if (!scratch_gc) {
+      goto bail_pixmap;
+    }
 
     changes[0].val = 0xff;
     changes[1].val = 0x00;
-    if (ChangeGC(NULL, scratch_gc,
-                 GCForeground|GCBackground, changes) != Success)
-        goto bail_gc;
+    if (ChangeGC(NULL, scratch_gc, GCForeground | GCBackground, changes) !=
+        Success) {
+      goto bail_gc;
+    }
     ValidateGC(&pixmap->drawable, scratch_gc);
 
     (*scratch_gc->ops->CopyPlane)(&bitmap->drawable,
@@ -292,11 +306,13 @@ glamor_set_stippled(DrawablePtr    drawable,
     PixmapPtr   stipple;
 
     stipple = glamor_get_stipple_pixmap(gc);
-    if (!stipple)
-        return FALSE;
+    if (!stipple) {
+      return FALSE;
+    }
 
-    if (!glamor_set_solid(drawable, gc, TRUE, fg_uniform))
-        return FALSE;
+    if (!glamor_set_solid(drawable, gc, TRUE, fg_uniform)) {
+      return FALSE;
+    }
 
     return glamor_set_texture(stipple,
                               FALSE,

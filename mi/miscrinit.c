@@ -64,8 +64,9 @@ Bool
 miModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
                      int bitsPerPixel, int devKind, void *pPixData)
 {
-    if (!pPixmap)
-        return FALSE;
+  if (!pPixmap) {
+    return FALSE;
+  }
 
     /*
      * If all arguments are specified, reinitialize everything (including
@@ -89,32 +90,38 @@ miModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
          * Only modify specified fields, keeping all others intact.
          */
 
-        if (width > 0)
-            pPixmap->drawable.width = width;
+        if (width > 0) {
+          pPixmap->drawable.width = width;
+        }
 
-        if (height > 0)
-            pPixmap->drawable.height = height;
+        if (height > 0) {
+          pPixmap->drawable.height = height;
+        }
 
-        if (depth > 0)
-            pPixmap->drawable.depth = depth;
+        if (depth > 0) {
+          pPixmap->drawable.depth = depth;
+        }
 
-        if (bitsPerPixel > 0)
-            pPixmap->drawable.bitsPerPixel = bitsPerPixel;
-        else if ((bitsPerPixel < 0) && (depth > 0))
-            pPixmap->drawable.bitsPerPixel = BitsPerPixel(depth);
+        if (bitsPerPixel > 0) {
+          pPixmap->drawable.bitsPerPixel = bitsPerPixel;
+        } else if ((bitsPerPixel < 0) && (depth > 0)) {
+          pPixmap->drawable.bitsPerPixel = BitsPerPixel(depth);
+        }
 
         /*
          * CAVEAT:  Non-SI DDXen may use devKind and devPrivate fields for
          *          other purposes.
          */
-        if (devKind > 0)
-            pPixmap->devKind = devKind;
-        else if ((devKind < 0) && ((width > 0) || (depth > 0)))
-            pPixmap->devKind = PixmapBytePad(pPixmap->drawable.width,
-                                             pPixmap->drawable.depth);
+        if (devKind > 0) {
+          pPixmap->devKind = devKind;
+        } else if ((devKind < 0) && ((width > 0) || (depth > 0))) {
+          pPixmap->devKind =
+              PixmapBytePad(pPixmap->drawable.width, pPixmap->drawable.depth);
+        }
 
-        if (pPixData)
-            pPixmap->devPrivate.ptr = pPixData;
+        if (pPixData) {
+          pPixmap->devPrivate.ptr = pPixData;
+        }
     }
     pPixmap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
     return TRUE;
@@ -166,17 +173,17 @@ miCreateScreenResources(ScreenPtr pScreen)
          */
         pPixmap =
             (*pScreen->CreatePixmap) (pScreen, 0, 0, pScreen->rootDepth, 0);
-        if (!pPixmap)
-            return FALSE;
+        if (!pPixmap) {
+          return FALSE;
+        }
 
-        if (!(*pScreen->ModifyPixmapHeader) (pPixmap, pScrInitParms->xsize,
-                                             pScrInitParms->ysize,
-                                             pScreen->rootDepth,
-                                             BitsPerPixel(pScreen->rootDepth),
-                                             PixmapBytePad(pScrInitParms->width,
-                                                           pScreen->rootDepth),
-                                             pScrInitParms->pbits))
-            return FALSE;
+        if (!(*pScreen->ModifyPixmapHeader)(
+                pPixmap, pScrInitParms->xsize, pScrInitParms->ysize,
+                pScreen->rootDepth, BitsPerPixel(pScreen->rootDepth),
+                PixmapBytePad(pScrInitParms->width, pScreen->rootDepth),
+                pScrInitParms->pbits)) {
+          return FALSE;
+        }
         value = (void *) pPixmap;
     }
     else {
@@ -195,8 +202,9 @@ miScreenDevPrivateInit(ScreenPtr pScreen, int width, void *pbits, int xsize, int
      * screen pixmap.
      */
     miScreenInitParmsPtr pScrInitParms = calloc(1, sizeof(miScreenInitParmsRec));
-    if (!pScrInitParms)
-        return FALSE;
+    if (!pScrInitParms) {
+      return FALSE;
+    }
     pScrInitParms->pbits = pbits;
     pScrInitParms->width = width;
     pScrInitParms->xsize = xsize;
@@ -214,8 +222,9 @@ miGetScreenPixmap(ScreenPtr pScreen)
 static void
 miSetScreenPixmap(PixmapPtr pPix)
 {
-    if (pPix)
-        pPix->drawable.pScreen->devPrivate = (void *) pPix;
+  if (pPix) {
+    pPix->drawable.pScreen->devPrivate = (void *)pPix;
+  }
 }
 
 Bool
@@ -302,8 +311,9 @@ DevPrivateKeyRec miZeroLineScreenKeyRec;
 void
 miSetZeroLineBias(ScreenPtr pScreen, unsigned int bias)
 {
-    if (!dixRegisterPrivateKey(&miZeroLineScreenKeyRec, PRIVATE_SCREEN, 0))
-        return;
+  if (!dixRegisterPrivateKey(&miZeroLineScreenKeyRec, PRIVATE_SCREEN, 0)) {
+    return;
+  }
 
     dixSetPrivate(&pScreen->devPrivates, miZeroLineScreenKey,
                   (unsigned long *) (unsigned long) bias);

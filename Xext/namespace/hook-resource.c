@@ -25,8 +25,9 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     struct XnamespaceClientPriv *obj = XnsClientPriv(owner);
 
     // server can do anything
-    if (param->client == serverClient)
-        goto pass;
+    if (param->client == serverClient) {
+      goto pass;
+    }
 
     // special filtering for windows: block transparency for untrusted clients
     if (param->rtype == X11_RESTYPE_WINDOW) {
@@ -39,8 +40,9 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     }
 
     // resource access inside same namespace is always permitted
-    if (XnsClientSameNS(subj, obj))
-        goto pass;
+    if (XnsClientSameNS(subj, obj)) {
+      goto pass;
+    }
 
     // check for root windows (screen or ns-virtual)
     if (param->rtype == X11_RESTYPE_WINDOW) {
@@ -63,22 +65,25 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         if (pWindow && (pWindow == pWindow->drawable.pScreen->root)) {
             switch (client->majorOp) {
                 case X_CreateWindow:
-                    if (checkAllowed(param->access_mode, DixAddAccess))
-                        goto pass;
+                  if (checkAllowed(param->access_mode, DixAddAccess)) {
+                    goto pass;
+                  }
                 break;
 
                 case X_CreateGC:
                 case X_CreatePixmap:
-                    if (checkAllowed(param->access_mode, DixGetAttrAccess))
-                        goto pass;
+                  if (checkAllowed(param->access_mode, DixGetAttrAccess)) {
+                    goto pass;
+                  }
                 break;
 
                 // we reach here when destroying a top-level window:
                 // ProcDestroyWindow() checks whether one may remove a child
                 // from it's parent.
                 case X_DestroyWindow:
-                    if (param->access_mode == DixRemoveAccess)
-                        goto pass;
+                  if (param->access_mode == DixRemoveAccess) {
+                    goto pass;
+                  }
                 break;
 
                 case X_TranslateCoords:
@@ -108,8 +113,11 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     /* server resources */
     if (obj->isServer) {
         if (param->rtype == X11_RESTYPE_COLORMAP) {
-            if (checkAllowed(param->access_mode, DixReadAccess | DixGetPropAccess | DixUseAccess | DixGetAttrAccess | DixAddAccess))
-                goto pass;
+          if (checkAllowed(param->access_mode,
+                           DixReadAccess | DixGetPropAccess | DixUseAccess |
+                               DixGetAttrAccess | DixAddAccess)) {
+            goto pass;
+          }
         }
 
         if (param->rtype == X11_RESTYPE_WINDOW) {
@@ -118,8 +126,9 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
             goto reject;
         }
 
-        if (checkAllowed(param->access_mode, DixReadAccess))
-            goto pass;
+        if (checkAllowed(param->access_mode, DixReadAccess)) {
+          goto pass;
+        }
     }
 
 reject: ;

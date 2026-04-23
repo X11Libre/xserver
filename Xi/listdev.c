@@ -86,12 +86,15 @@ SizeDeviceInfo(DeviceIntPtr d, int *namesize, int *size)
     int chunks;
 
     *namesize += 1;
-    if (d->name)
-        *namesize += strlen(d->name);
-    if (d->key != NULL)
-        *size += sizeof(xKeyInfo);
-    if (d->button != NULL)
-        *size += sizeof(xButtonInfo);
+    if (d->name) {
+      *namesize += strlen(d->name);
+    }
+    if (d->key != NULL) {
+      *size += sizeof(xKeyInfo);
+    }
+    if (d->button != NULL) {
+      *size += sizeof(xButtonInfo);
+    }
     if (d->valuator != NULL) {
         chunks = ((int) d->valuator->numAxes + 19) / VPC;
         *size += (chunks * sizeof(xValuatorInfo) +
@@ -162,16 +165,17 @@ CopySwapDevice(ClientPtr client, DeviceIntPtr d, int num_classes, char **buf)
     dev->id = d->id;
     dev->type = d->xinput_type;
     dev->num_classes = num_classes;
-    if (InputDevIsMaster(d) && IsKeyboardDevice(d))
-        dev->use = IsXKeyboard;
-    else if (InputDevIsMaster(d) && IsPointerDevice(d))
-        dev->use = IsXPointer;
-    else if (d->valuator && d->button)
-        dev->use = IsXExtensionPointer;
-    else if (d->key && d->kbdfeed)
-        dev->use = IsXExtensionKeyboard;
-    else
-        dev->use = IsXExtensionDevice;
+    if (InputDevIsMaster(d) && IsKeyboardDevice(d)) {
+      dev->use = IsXKeyboard;
+    } else if (InputDevIsMaster(d) && IsPointerDevice(d)) {
+      dev->use = IsXPointer;
+    } else if (d->valuator && d->button) {
+      dev->use = IsXExtensionPointer;
+    } else if (d->key && d->kbdfeed) {
+      dev->use = IsXExtensionKeyboard;
+    } else {
+      dev->use = IsXExtensionDevice;
+    }
 
     if (client->swapped) {
         swapl(&dev->type);
@@ -226,8 +230,9 @@ CopySwapValuatorClass(ClientPtr client, DeviceIntPtr dev, char **buf)
     for (i = 0, axes = v->numAxes; i < ((v->numAxes + 19) / VPC);
          i++, axes -= VPC) {
         t_axes = axes < VPC ? axes : VPC;
-        if (t_axes < 0)
-            t_axes = v->numAxes % VPC;
+        if (t_axes < 0) {
+          t_axes = v->numAxes % VPC;
+        }
         v2 = (xValuatorInfoPtr) * buf;
         v2->class = ValuatorClass;
         v2->length = sizeof(xValuatorInfo) + t_axes * sizeof(xAxisInfo);
@@ -302,8 +307,9 @@ ShouldSkipDevice(ClientPtr client, DeviceIntPtr d)
     if (!InputDevIsMaster(d) || d == inputInfo.pointer ||d == inputInfo.keyboard) {
         int rc = dixCallDeviceAccessCallback(client, d, DixGetAttrAccess);
 
-        if (rc == Success)
-            return FALSE;
+        if (rc == Success) {
+          return FALSE;
+        }
     }
     return TRUE;
 }
@@ -334,15 +340,17 @@ ProcXListInputDevices(ClientPtr client)
 
     /* allocate space for saving skip value */
     skip = calloc(inputInfo.numDevices, sizeof(Bool));
-    if (!skip)
-        return BadAlloc;
+    if (!skip) {
+      return BadAlloc;
+    }
 
     /* figure out which devices to skip */
     numdevs = 0;
     for (d = inputInfo.devices; d; d = d->next, i++) {
         skip[i] = ShouldSkipDevice(client, d);
-        if (skip[i])
-            continue;
+        if (skip[i]) {
+          continue;
+        }
 
         SizeDeviceInfo(d, &namesize, &size);
         numdevs++;
@@ -350,8 +358,9 @@ ProcXListInputDevices(ClientPtr client)
 
     for (d = inputInfo.off_devices; d; d = d->next, i++) {
         skip[i] = ShouldSkipDevice(client, d);
-        if (skip[i])
-            continue;
+        if (skip[i]) {
+          continue;
+        }
 
         SizeDeviceInfo(d, &namesize, &size);
         numdevs++;
@@ -374,15 +383,17 @@ ProcXListInputDevices(ClientPtr client)
     i = 0;
     dev = (xDeviceInfoPtr) devbuf;
     for (d = inputInfo.devices; d; d = d->next, i++) {
-        if (skip[i])
-            continue;
+      if (skip[i]) {
+        continue;
+      }
 
         ListDeviceInfo(client, d, dev++, &devbuf, &classbuf, &namebuf);
     }
 
     for (d = inputInfo.off_devices; d; d = d->next, i++) {
-        if (skip[i])
-            continue;
+      if (skip[i]) {
+        continue;
+      }
 
         ListDeviceInfo(client, d, dev++, &devbuf, &classbuf, &namebuf);
     }

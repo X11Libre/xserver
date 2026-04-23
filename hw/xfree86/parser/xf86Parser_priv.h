@@ -31,8 +31,9 @@ static inline void xf86freeMatchGroup(xf86MatchGroup *group)
     xf86MatchPattern *pattern, *next_pattern;
     xorg_list_for_each_entry_safe(pattern, next_pattern, &group->patterns, entry) {
         xorg_list_del(&pattern->entry);
-        if (pattern->str)
-            free(pattern->str);
+        if (pattern->str) {
+          free(pattern->str);
+        }
         free(pattern);
     }
     free(group);

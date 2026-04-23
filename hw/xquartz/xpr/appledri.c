@@ -114,8 +114,9 @@ ProcAppleDRIQueryDirectRenderingCapable(register ClientPtr client)
     REQUEST(xAppleDRIQueryDirectRenderingCapableReq);
     REQUEST_SIZE_MATCH(xAppleDRIQueryDirectRenderingCapableReq);
 
-    if (client->swapped)
-        swapl(&stuff->screen);
+    if (client->swapped) {
+      swapl(&stuff->screen);
+    }
 
     Bool isCapable;
 
@@ -129,8 +130,9 @@ ProcAppleDRIQueryDirectRenderingCapable(register ClientPtr client)
         return BadValue;
     }
 
-    if (!client->local)
-        isCapable = FALSE;
+    if (!client->local) {
+      isCapable = FALSE;
+    }
 
     xAppleDRIQueryDirectRenderingCapableReply reply = {
         .isCapable = isCapable,
@@ -175,8 +177,9 @@ surface_notify(void *_arg,
     int client_index = (int)x_cvt_vptr_to_uint(data);
     xAppleDRINotifyEvent se;
 
-    if (client_index < 0 || client_index >= currentMaxClients)
-        return;
+    if (client_index < 0 || client_index >= currentMaxClients) {
+      return;
+    }
 
     se.type = DRIEventBase + AppleDRISurfaceNotify;
     se.kind = arg->kind;
@@ -204,9 +207,9 @@ ProcAppleDRICreateSurface(ClientPtr client)
 
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixReadAccess);
-    if (rc != Success)
-        return rc;
-
+    if (rc != Success) {
+      return rc;
+    }
 
     if (!DRICreateSurface(screenInfo.screens[stuff->screen],
                           (Drawable)stuff->drawable, pDrawable,
@@ -247,8 +250,9 @@ ProcAppleDRIDestroySurface(register ClientPtr client)
 
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (!DRIDestroySurface(screenInfo.screens[stuff->screen],
                            (Drawable)stuff->drawable,
@@ -281,8 +285,9 @@ ProcAppleDRICreatePixmap(ClientPtr client)
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixReadAccess);
 
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (!DRICreatePixmap(screenInfo.screens[stuff->screen],
                          (Drawable)stuff->drawable,
@@ -328,8 +333,9 @@ ProcAppleDRIDestroyPixmap(ClientPtr client)
     REQUEST(xAppleDRIDestroyPixmapReq);
     REQUEST_SIZE_MATCH(xAppleDRIDestroyPixmapReq);
 
-    if (client->swapped)
-        swapl(&stuff->drawable);
+    if (client->swapped) {
+      swapl(&stuff->drawable);
+    }
 
     DrawablePtr pDrawable;
     int rc;
@@ -337,8 +343,9 @@ ProcAppleDRIDestroyPixmap(ClientPtr client)
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixReadAccess);
 
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     DRIDestroyPixmap(pDrawable);
 
@@ -360,8 +367,9 @@ ProcAppleDRIDispatch(register ClientPtr client)
         return ProcAppleDRIQueryDirectRenderingCapable(client);
     }
 
-    if (!client->local)
-        return DRIErrorBase + AppleDRIClientNotLocal;
+    if (!client->local) {
+      return DRIErrorBase + AppleDRIClientNotLocal;
+    }
 
     switch (stuff->data) {
     case X_AppleDRIAuthConnection:
@@ -411,7 +419,8 @@ AppleDRIExtensionInit(void)
         size_t i;
         DRIErrorBase = extEntry->errorBase;
         DRIEventBase = extEntry->eventBase;
-        for (i = 0; i < AppleDRINumberEvents; i++)
-            EventSwapVector[DRIEventBase + i] = (EventSwapPtr)SNotifyEvent;
+        for (i = 0; i < AppleDRINumberEvents; i++) {
+          EventSwapVector[DRIEventBase + i] = (EventSwapPtr)SNotifyEvent;
+        }
     }
 }

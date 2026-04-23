@@ -132,10 +132,11 @@ winConfigKeyboard(DeviceIntPtr pDevice)
                 /* Japanese layouts have problems with key event messages
                    such as the lack of WM_KEYUP for Caps Lock key.
                    Loading US layout fixes this problem. */
-                if (LoadKeyboardLayout("00000409", KLF_ACTIVATE) != NULL)
-                    winMsg(X_INFO, "Loading US keyboard layout.\n");
-                else
-                    winMsg(X_ERROR, "LoadKeyboardLayout failed.\n");
+                if (LoadKeyboardLayout("00000409", KLF_ACTIVATE) != NULL) {
+                  winMsg(X_INFO, "Loading US keyboard layout.\n");
+                } else {
+                  winMsg(X_ERROR, "LoadKeyboardLayout failed.\n");
+                }
             }
         }
 
@@ -168,14 +169,18 @@ winConfigKeyboard(DeviceIntPtr pDevice)
         for (pass = 0; pass < 2; pass++) {
             /* If we didn't find an exact match for the input locale identifier,
                try to find an match on the language identifier part only  */
-            if (pass == 1)
-                layoutNum = (layoutNum & 0xffff);
+            if (pass == 1) {
+              layoutNum = (layoutNum & 0xffff);
+            }
 
             for (pLayout = winKBLayouts; pLayout->winlayout != -1; pLayout++) {
-                if (pLayout->winlayout != layoutNum)
-                    continue;
-                if (pLayout->winkbtype > 0 && pLayout->winkbtype != keyboardType)
-                    continue;
+              if (pLayout->winlayout != layoutNum) {
+                continue;
+              }
+              if (pLayout->winkbtype > 0 &&
+                  pLayout->winkbtype != keyboardType) {
+                continue;
+              }
 
                 bfound = TRUE;
                 winMsg(X_PROBED,
@@ -204,8 +209,9 @@ winConfigKeyboard(DeviceIntPtr pDevice)
                 break;
             }
 
-            if (bfound)
-                break;
+            if (bfound) {
+              break;
+            }
         }
 
         if (!bfound) {
@@ -310,30 +316,36 @@ winNameCompare(const char *s1, const char *s2)
     char c1, c2;
 
     if (!s1 || *s1 == 0) {
-        if (!s2 || *s2 == 0)
-            return 0;
-        else
-            return 1;
+      if (!s2 || *s2 == 0) {
+        return 0;
+      } else {
+        return 1;
+      }
     }
 
-    while (*s1 == '_' || *s1 == ' ' || *s1 == '\t')
-        s1++;
-    while (*s2 == '_' || *s2 == ' ' || *s2 == '\t')
-        s2++;
+    while (*s1 == '_' || *s1 == ' ' || *s1 == '\t') {
+      s1++;
+    }
+    while (*s2 == '_' || *s2 == ' ' || *s2 == '\t') {
+      s2++;
+    }
 
     c1 = (isupper((int) *s1) ? tolower((int) *s1) : *s1);
     c2 = (isupper((int) *s2) ? tolower((int) *s2) : *s2);
 
     while (c1 == c2) {
-        if (c1 == 0)
-            return 0;
+      if (c1 == 0) {
+        return 0;
+      }
         s1++;
         s2++;
 
-        while (*s1 == '_' || *s1 == ' ' || *s1 == '\t')
-            s1++;
-        while (*s2 == '_' || *s2 == ' ' || *s2 == '\t')
-            s2++;
+        while (*s1 == '_' || *s1 == ' ' || *s1 == '\t') {
+          s1++;
+        }
+        while (*s2 == '_' || *s2 == ' ' || *s2 == '\t') {
+          s2++;
+        }
 
         c1 = (isupper((int) *s1) ? tolower((int) *s1) : *s1);
         c2 = (isupper((int) *s2) ? tolower((int) *s2) : *s2);
@@ -347,8 +359,9 @@ winNormalizeName(const char *s)
     char *q;
     const char *p;
 
-    if (s == NULL)
-        return NULL;
+    if (s == NULL) {
+      return NULL;
+    }
 
     char *ret = calloc(1, strlen(s) + 1);
     for (p = s, q = ret; *p != 0; p++) {
@@ -358,10 +371,11 @@ winNormalizeName(const char *s)
         case '\t':
             continue;
         default:
-            if (isupper((int) *p))
-                *q++ = tolower((int) *p);
-            else
-                *q++ = *p;
+          if (isupper((int)*p)) {
+            *q++ = tolower((int)*p);
+          } else {
+            *q++ = *p;
+          }
         }
     }
     *q = '\0';

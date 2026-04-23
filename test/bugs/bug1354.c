@@ -80,9 +80,8 @@ int main(int argc, char* argv[])
 	uint32_t test_pixels[3] = {0xff0000, 0x00ff00, 0x0000ff};
 	int gv;
 
-	while ((gv = getopt (argc, argv, "t:r:")) != -1)
-	switch (gv)
-	  {
+        while ((gv = getopt(argc, argv, "t:r:")) != -1) {
+          switch (gv) {
 	  case 't':
 		name_test = optarg;
 		break;
@@ -90,20 +89,22 @@ int main(int argc, char* argv[])
 		name_relevant = optarg;
 		break;
 	  case '?':
-		if (optopt == 't' || optopt == 'r')
-		  fprintf (stderr, "Option -%c requires an argument - test screen name.\n", optopt);
-		else if (isprint (optopt))
-		  fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-		else
-		  fprintf (stderr,
-		           "Unknown option character `\\x%x'.\n",
-		           optopt);
-		return 1;
+            if (optopt == 't' || optopt == 'r') {
+              fprintf(stderr,
+                      "Option -%c requires an argument - test screen name.\n",
+                      optopt);
+            } else if (isprint(optopt)) {
+              fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+            } else {
+              fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+            }
+                return 1;
 	  default:
 		abort ();
-	  }
+          }
+        }
 
-	printf("test=%s, rel=%s\n", name_test, name_relevant);
+        printf("test=%s, rel=%s\n", name_test, name_relevant);
 
 	c = xcb_connect (name_test, NULL);
 	r = xcb_connect (name_relevant, NULL);

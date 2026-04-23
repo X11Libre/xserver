@@ -530,9 +530,11 @@ void LastEventTimeToggleResetAll(Bool state);
 static inline int CountBits(const uint8_t * mask, int len)
 {
     int ret = 0;
-    for (int i = 0; i < len; i++)
-        if (BitIsOn(mask, i))
-            ret++;
+    for (int i = 0; i < len; i++) {
+      if (BitIsOn(mask, i)) {
+        ret++;
+      }
+    }
     return ret;
 }
 

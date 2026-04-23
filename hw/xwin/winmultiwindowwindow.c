@@ -371,8 +371,9 @@ winRestackWindowMultiWindow(WindowPtr pWin, WindowPtr pOldNextSib)
      * Calling winReorderWindowsMultiWindow here means our window manager
      * (i.e. Windows Explorer) has initiative to determine Z order.
      */
-    if (pWin->nextSib != pOldNextSib)
-        winReorderWindowsMultiWindow();
+    if (pWin->nextSib != pOldNextSib) {
+      winReorderWindowsMultiWindow();
+    }
 #else
     /* Bail out if no window privates or window handle is invalid */
     if (!pWinPriv || !pWinPriv->hWnd)
@@ -481,8 +482,9 @@ winCreateWindowsWindow(WindowPtr pWin)
     }
     else {
         /* Default positions if none specified */
-        if (!winMultiWindowGetWMNormalHints(pWin, &hints))
-            hints.flags = 0;
+        if (!winMultiWindowGetWMNormalHints(pWin, &hints)) {
+          hints.flags = 0;
+        }
         if (!(hints.flags & (USPosition | PPosition)) &&
             !pWin->overrideRedirect) {
             iX = CW_USEDEFAULT;
@@ -575,8 +577,9 @@ winDestroyWindowsWindow(WindowPtr pWin)
              (unsigned int)pWin->drawable.id);
 
     /* Bail out if the Windows window handle is invalid */
-    if (pWinPriv->hWnd == NULL)
-        return;
+    if (pWinPriv->hWnd == NULL) {
+      return;
+    }
 
     winInDestroyWindowsWindow = TRUE;
 
@@ -943,8 +946,9 @@ winCreatePixmapMultiwindow(ScreenPtr pScreen, int width, int height, int depth,
 
     /* allocate Pixmap header and privates */
     pPixmap = AllocatePixmap(pScreen, 0);
-    if (!pPixmap)
-        return NullPixmap;
+    if (!pPixmap) {
+      return NullPixmap;
+    }
 
     bpp = BitsPerPixel(depth);
     /*
@@ -1010,8 +1014,9 @@ winDestroyPixmapMultiwindow(PixmapPtr pPixmap)
 
     /* Decrement reference count, return if nonzero */
     --pPixmap->refcnt;
-    if (pPixmap->refcnt != 0)
-        return TRUE;
+    if (pPixmap->refcnt != 0) {
+      return TRUE;
+    }
 
     winDebug("winDestroyPixmap: pPixmap %p\n", pPixmap);
 
@@ -1019,12 +1024,14 @@ winDestroyPixmapMultiwindow(PixmapPtr pPixmap)
     pPixmapPriv = winGetPixmapPriv(pPixmap);
 
     /* Nothing to do if we don't own the DIB */
-    if (!pPixmapPriv->owned)
-        return TRUE;
+    if (!pPixmapPriv->owned) {
+      return TRUE;
+    }
 
     /* Free GDI bitmap */
-    if (pPixmapPriv->hBitmap)
-        DeleteObject(pPixmapPriv->hBitmap);
+    if (pPixmapPriv->hBitmap) {
+      DeleteObject(pPixmapPriv->hBitmap);
+    }
 
     /* Free the bitmap info header memory */
     free(pPixmapPriv->pbmih);

@@ -88,22 +88,26 @@ xf86parseOutputClassSection(void)
             xf86_lex_val.str = NULL;
             break;
         case IDENTIFIER:
-            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "Identifier");
-            if (has_ident == TRUE)
-                Error(MULTIPLE_MSG, "Identifier");
+          if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "Identifier");
+          }
+          if (has_ident == TRUE) {
+            Error(MULTIPLE_MSG, "Identifier");
+          }
             ptr->identifier = xf86_lex_val.str;
             has_ident = TRUE;
             break;
         case DRIVER:
-            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "Driver");
-            else
-                ptr->driver = xf86_lex_val.str;
+          if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "Driver");
+          } else {
+            ptr->driver = xf86_lex_val.str;
+          }
             break;
         case MODULE:
-            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "Module");
+          if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "Module");
+          }
             if (ptr->modules) {
                 char *path;
                 XNFasprintf(&path, "%s,%s", ptr->modules, xf86_lex_val.str);
@@ -115,8 +119,9 @@ xf86parseOutputClassSection(void)
             }
             break;
         case MODULEPATH:
-            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "ModulePath");
+          if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "ModulePath");
+          }
             if (ptr->modulepath) {
                 char *path = NULL;
                 if (asprintf(&path, "%s,%s", ptr->modulepath, xf86_lex_val.str) == -1)
@@ -132,24 +137,26 @@ xf86parseOutputClassSection(void)
             ptr->option_lst = xf86parseOption(ptr->option_lst);
             break;
         case MATCH_DRIVER:
-            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "MatchDriver");
-            else {
-                group = xf86createMatchGroup(xf86_lex_val.str, MATCH_EXACT, FALSE);
-                if (group)
-                    xorg_list_add(&group->entry, &ptr->match_driver);
-                free(xf86_lex_val.str);
+          if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "MatchDriver");
+          } else {
+            group = xf86createMatchGroup(xf86_lex_val.str, MATCH_EXACT, FALSE);
+            if (group) {
+              xorg_list_add(&group->entry, &ptr->match_driver);
             }
+            free(xf86_lex_val.str);
+          }
             break;
         case MATCH_LAYOUT:
-            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "MatchLayout");
-            else {
-                group = xf86createMatchGroup(xf86_lex_val.str, MATCH_EXACT, FALSE);
-                if (group)
-                    xorg_list_add(&group->entry, &ptr->match_layout);
-                free(xf86_lex_val.str);
+          if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "MatchLayout");
+          } else {
+            group = xf86createMatchGroup(xf86_lex_val.str, MATCH_EXACT, FALSE);
+            if (group) {
+              xorg_list_add(&group->entry, &ptr->match_layout);
             }
+            free(xf86_lex_val.str);
+          }
             break;
         case EOF_TOKEN:
             Error(UNEXPECTED_EOF_MSG);
@@ -160,8 +167,9 @@ xf86parseOutputClassSection(void)
         }
     }
 
-    if (!has_ident)
-        Error(NO_IDENT_MSG);
+    if (!has_ident) {
+      Error(NO_IDENT_MSG);
+    }
 
 #ifdef DEBUG
     printf("OutputClass section parsed\n");
@@ -179,16 +187,21 @@ xf86printOutputClassSection(FILE * cf, XF86ConfOutputClassPtr ptr)
 
     while (ptr) {
         fprintf(cf, "Section \"OutputClass\"\n");
-        if (ptr->comment)
-            fprintf(cf, "%s", ptr->comment);
-        if (ptr->identifier)
-            fprintf(cf, "\tIdentifier      \"%s\"\n", ptr->identifier);
-        if (ptr->driver)
-            fprintf(cf, "\tDriver          \"%s\"\n", ptr->driver);
-        if (ptr->modules)
-            fprintf(cf, "\tModule          \"%s\"\n", ptr->modules);
-        if (ptr->modulepath)
-            fprintf(cf, "\tModulePath      \"%s\"\n", ptr->modulepath);
+        if (ptr->comment) {
+          fprintf(cf, "%s", ptr->comment);
+        }
+        if (ptr->identifier) {
+          fprintf(cf, "\tIdentifier      \"%s\"\n", ptr->identifier);
+        }
+        if (ptr->driver) {
+          fprintf(cf, "\tDriver          \"%s\"\n", ptr->driver);
+        }
+        if (ptr->modules) {
+          fprintf(cf, "\tModule          \"%s\"\n", ptr->modules);
+        }
+        if (ptr->modulepath) {
+          fprintf(cf, "\tModulePath      \"%s\"\n", ptr->modulepath);
+        }
 
         xorg_list_for_each_entry(group, &ptr->match_driver, entry) {
             fprintf(cf, "\tMatchDriver     \"");

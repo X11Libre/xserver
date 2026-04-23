@@ -141,8 +141,9 @@ void XwinExtensionInit(void)
 #endif
 
     /* need this to prevent compiler warning */
-    if (ARRAY_SIZE(xwinExtensions) > 0)
-        LoadExtensionList(xwinExtensions, ARRAY_SIZE(xwinExtensions), TRUE);
+    if (ARRAY_SIZE(xwinExtensions) > 0) {
+      LoadExtensionList(xwinExtensions, ARRAY_SIZE(xwinExtensions), TRUE);
+    }
 }
 
 /*
@@ -198,8 +199,9 @@ ddxGiveUp(enum ExitCode error)
     /* Perform per-screen deinitialization */
     for (i = 0; i < g_iNumScreens; ++i) {
         /* Delete the tray icon */
-        if (!g_ScreenInfo[i].fNoTrayIcon && g_ScreenInfo[i].pScreen)
-            winDeleteNotifyIcon(winGetScreenPriv(g_ScreenInfo[i].pScreen));
+        if (!g_ScreenInfo[i].fNoTrayIcon && g_ScreenInfo[i].pScreen) {
+          winDeleteNotifyIcon(winGetScreenPriv(g_ScreenInfo[i].pScreen));
+        }
     }
 
     /* Unload libraries for taskbar grouping */
@@ -551,8 +553,9 @@ winFixupPaths(void)
         changed_fontpath = TRUE;
     }
 #endif                          /* RELOCATE_PROJECTROOT */
-    if (changed_fontpath)
-        winMsg(font_from, "FontPath set to \"%s\"\n", defaultFontPath);
+    if (changed_fontpath) {
+      winMsg(font_from, "FontPath set to \"%s\"\n", defaultFontPath);
+    }
 
 #ifdef RELOCATE_PROJECTROOT
     if (getenv("XKEYSYMDB") == NULL) {
@@ -628,8 +631,9 @@ OsVendorInit(void)
     xorgLogFileVerbosity = g_iLogVerbose;
 
     /* Log the version information */
-    if (serverGeneration == 1)
-        winLogVersionInfo();
+    if (serverGeneration == 1) {
+      winLogVersionInfo();
+    }
 
     winCheckMount();
 
@@ -682,10 +686,11 @@ OsVendorInit(void)
         int j;
         for (j = 0; j < g_iNumScreens; j++) {
             if (g_ScreenInfo[j].iResizeMode == resizeDefault) {
-                if (g_ScreenInfo[j].fFullScreen)
-                    g_ScreenInfo[j].iResizeMode = resizeNotAllowed;
-                else
-                    g_ScreenInfo[j].iResizeMode = resizeWithRandr;
+              if (g_ScreenInfo[j].fFullScreen) {
+                g_ScreenInfo[j].iResizeMode = resizeNotAllowed;
+              } else {
+                g_ScreenInfo[j].iResizeMode = resizeWithRandr;
+              }
                 }
         }
     }
@@ -874,8 +879,9 @@ InitOutput(int argc, char *argv[])
 {
     int i;
 
-    if (serverGeneration == 1)
-        XwinExtensionInit();
+    if (serverGeneration == 1) {
+      XwinExtensionInit();
+    }
 
     /* Log the command line */
     winLogCommandLine(argc, argv);
@@ -919,8 +925,9 @@ InitOutput(int argc, char *argv[])
     g_hInstance = GetModuleHandle(NULL);
 
     /* Create the messaging window */
-    if (serverGeneration == 1)
-        winCreateMsgWindowThread();
+    if (serverGeneration == 1) {
+      winCreateMsgWindowThread();
+    }
 
     /* Initialize each screen */
     for (i = 0; i < g_iNumScreens; ++i) {
@@ -933,8 +940,9 @@ InitOutput(int argc, char *argv[])
   /*
      Unless full xinerama has been explicitly enabled, register all native screens with pseudoramiX
   */
-  if (!noPanoramiXExtension)
+    if (!noPanoramiXExtension) {
       noPseudoramiXExtension = TRUE;
+    }
 
   if ((g_ScreenInfo[0].fMultipleMonitors) && !noPseudoramiXExtension)
     {
@@ -975,9 +983,9 @@ InitOutput(int argc, char *argv[])
                                                data.monitorWidth, data.monitorHeight);
                         }
                     }
-                }
-              else
+              } else {
                 break;
+              }
             }
         }
     }
@@ -985,9 +993,9 @@ InitOutput(int argc, char *argv[])
     xorgGlxCreateVendor();
 
     /* Generate a cookie used by internal clients for authorization */
-    if (g_fXdmcpEnabled || g_fAuthEnabled)
-        winGenerateAuthorization();
-
+    if (g_fXdmcpEnabled || g_fAuthEnabled) {
+      winGenerateAuthorization();
+    }
 
 #if ENABLE_DEBUG || YES
     winDebug("InitOutput - Returning.\n");

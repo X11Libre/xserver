@@ -52,8 +52,9 @@ fbPushPattern(DrawablePtr pDrawable,
                 lenspan = 0;
                 do {
                     lenspan++;
-                    if (lenspan == w)
-                        break;
+                    if (lenspan == w) {
+                      break;
+                    }
                     bitsMask = FbStipRight(bitsMask, 1);
                     if (!bitsMask) {
                         bits = READ(s++);
@@ -68,8 +69,9 @@ fbPushPattern(DrawablePtr pDrawable,
                 do {
                     w--;
                     xspan++;
-                    if (!w)
-                        break;
+                    if (!w) {
+                      break;
+                    }
                     bitsMask = FbStipRight(bitsMask, 1);
                     if (!bitsMask) {
                         bits = READ(s++);
@@ -152,16 +154,21 @@ fbPushImage(DrawablePtr pDrawable,
         y1 = y;
         x2 = x + width;
         y2 = y + height;
-        if (x1 < pbox->x1)
-            x1 = pbox->x1;
-        if (y1 < pbox->y1)
-            y1 = pbox->y1;
-        if (x2 > pbox->x2)
-            x2 = pbox->x2;
-        if (y2 > pbox->y2)
-            y2 = pbox->y2;
-        if (x1 >= x2 || y1 >= y2)
-            continue;
+        if (x1 < pbox->x1) {
+          x1 = pbox->x1;
+        }
+        if (y1 < pbox->y1) {
+          y1 = pbox->y1;
+        }
+        if (x2 > pbox->x2) {
+          x2 = pbox->x2;
+        }
+        if (y2 > pbox->y2) {
+          y2 = pbox->y2;
+        }
+        if (x1 >= x2 || y1 >= y2) {
+          continue;
+        }
         fbPushFill(pDrawable,
                    pGC,
                    src + (y1 - y) * srcStride,

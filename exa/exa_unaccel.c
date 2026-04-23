@@ -43,10 +43,12 @@
 void
 exaPrepareAccessGC(GCPtr pGC)
 {
-    if (pGC->stipple)
-        exaPrepareAccess(&pGC->stipple->drawable, EXA_PREPARE_MASK);
-    if (pGC->fillStyle == FillTiled)
-        exaPrepareAccess(&pGC->tile.pixmap->drawable, EXA_PREPARE_SRC);
+  if (pGC->stipple) {
+    exaPrepareAccess(&pGC->stipple->drawable, EXA_PREPARE_MASK);
+  }
+  if (pGC->fillStyle == FillTiled) {
+    exaPrepareAccess(&pGC->tile.pixmap->drawable, EXA_PREPARE_SRC);
+  }
 }
 
 /**
@@ -55,10 +57,12 @@ exaPrepareAccessGC(GCPtr pGC)
 void
 exaFinishAccessGC(GCPtr pGC)
 {
-    if (pGC->fillStyle == FillTiled)
-        exaFinishAccess(&pGC->tile.pixmap->drawable, EXA_PREPARE_SRC);
-    if (pGC->stipple)
-        exaFinishAccess(&pGC->stipple->drawable, EXA_PREPARE_MASK);
+  if (pGC->fillStyle == FillTiled) {
+    exaFinishAccess(&pGC->tile.pixmap->drawable, EXA_PREPARE_SRC);
+  }
+  if (pGC->stipple) {
+    exaFinishAccess(&pGC->stipple->drawable, EXA_PREPARE_MASK);
+  }
 }
 
 #if DEBUG_TRACE_FALL
@@ -108,11 +112,12 @@ ExaCheckPutImage(DrawablePtr pDrawable, GCPtr pGC, int depth,
     EXA_FALLBACK(("to %p (%c)\n", pDrawable, exaDrawableLocation(pDrawable)));
     if (!pExaScr->prepare_access_reg || !pExaPixmap->pDamage ||
         exaGCReadsDestination(pDrawable, pGC->planemask, pGC->fillStyle,
-                              pGC->alu, pGC->clientClip != NULL))
-        exaPrepareAccess(pDrawable, EXA_PREPARE_DEST);
-    else
-        pExaScr->prepare_access_reg(pPixmap, EXA_PREPARE_DEST,
-                                    DamagePendingRegion(pExaPixmap->pDamage));
+                              pGC->alu, pGC->clientClip != NULL)) {
+      exaPrepareAccess(pDrawable, EXA_PREPARE_DEST);
+    } else {
+      pExaScr->prepare_access_reg(pPixmap, EXA_PREPARE_DEST,
+                                  DamagePendingRegion(pExaPixmap->pDamage));
+    }
     pGC->ops->PutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format,
                        bits);
     exaFinishAccess(pDrawable, EXA_PREPARE_DEST);
@@ -138,9 +143,9 @@ ExaCheckCopyNtoN(DrawablePtr pSrc, DrawablePtr pDst, GCPtr pGC,
         RegionTranslate(&reg, xoff + dx, yoff + dy);
         pExaScr->prepare_access_reg(pPixmap, EXA_PREPARE_SRC, &reg);
         RegionUninit(&reg);
+    } else {
+      exaPrepareAccess(pSrc, EXA_PREPARE_SRC);
     }
-    else
-        exaPrepareAccess(pSrc, EXA_PREPARE_SRC);
 
     if (pExaScr->prepare_access_reg &&
         !exaGCReadsDestination(pDst, pGC->planemask, pGC->fillStyle,
@@ -152,9 +157,9 @@ ExaCheckCopyNtoN(DrawablePtr pSrc, DrawablePtr pDst, GCPtr pGC,
         RegionTranslate(&reg, xoff, yoff);
         pExaScr->prepare_access_reg(pPixmap, EXA_PREPARE_DEST, &reg);
         RegionUninit(&reg);
+    } else {
+      exaPrepareAccess(pDst, EXA_PREPARE_DEST);
     }
-    else
-        exaPrepareAccess(pDst, EXA_PREPARE_DEST);
 
     /* This will eventually call fbCopyNtoN, with some calculation overhead. */
     while (nbox--) {
@@ -197,9 +202,9 @@ ExaFallbackPrepareReg(DrawablePtr pDrawable,
         RegionInit(&reg, &box, 1);
         pExaScr->prepare_access_reg(pPixmap, index, &reg);
         RegionUninit(&reg);
+    } else {
+      exaPrepareAccess(pDrawable, index);
     }
-    else
-        exaPrepareAccess(pDrawable, index);
 }
 
 RegionPtr
@@ -384,9 +389,9 @@ ExaCheckCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
         RegionTranslate(prgnSrc, xoff, yoff);
         pExaScr->prepare_access_reg(pPixmap, EXA_PREPARE_SRC, prgnSrc);
         RegionTranslate(prgnSrc, -xoff, -yoff);
+    } else {
+      exaPrepareAccess(pDrawable, EXA_PREPARE_SRC);
     }
-    else
-        exaPrepareAccess(pDrawable, EXA_PREPARE_SRC);
 
     swap(pExaScr, pScreen, CopyWindow);
     pScreen->CopyWindow(pWin, ptOldOrg, prgnSrc);
@@ -442,12 +447,13 @@ ExaSrcValidate(DrawablePtr pDrawable,
     RegionPtr dst;
     int xoff, yoff;
 
-    if (pExaScr->srcPix == pPix)
-        dst = &pExaScr->srcReg;
-    else if (pExaScr->maskPix == pPix)
-        dst = &pExaScr->maskReg;
-    else
-        return;
+    if (pExaScr->srcPix == pPix) {
+      dst = &pExaScr->srcReg;
+    } else if (pExaScr->maskPix == pPix) {
+      dst = &pExaScr->maskReg;
+    } else {
+      return;
+    }
 
     exaGetDrawableDeltas(pDrawable, pPix, &xoff, &yoff);
 
@@ -495,22 +501,26 @@ ExaPrepareCompositeReg(ScreenPtr pScreen,
         RegionNull(&pExaScr->srcReg);
         srcReg = &pExaScr->srcReg;
         pExaScr->srcPix = pSrcPix;
-        if (pSrc != pDst)
-            RegionTranslate(pSrc->pCompositeClip,
-                            -pSrc->pDrawable->x, -pSrc->pDrawable->y);
-    } else
-        pExaScr->srcPix = NULL;
+        if (pSrc != pDst) {
+          RegionTranslate(pSrc->pCompositeClip, -pSrc->pDrawable->x,
+                          -pSrc->pDrawable->y);
+        }
+    } else {
+      pExaScr->srcPix = NULL;
+    }
 
     if (pMask && pMask->pDrawable) {
         pMaskPix = exaGetDrawablePixmap(pMask->pDrawable);
         RegionNull(&pExaScr->maskReg);
         maskReg = &pExaScr->maskReg;
         pExaScr->maskPix = pMaskPix;
-        if (pMask != pDst && pMask != pSrc)
-            RegionTranslate(pMask->pCompositeClip,
-                            -pMask->pDrawable->x, -pMask->pDrawable->y);
-    } else
-        pExaScr->maskPix = NULL;
+        if (pMask != pDst && pMask != pSrc) {
+          RegionTranslate(pMask->pCompositeClip, -pMask->pDrawable->x,
+                          -pMask->pDrawable->y);
+        }
+    } else {
+      pExaScr->maskPix = NULL;
+    }
 
     RegionTranslate(pDst->pCompositeClip,
                     -pDst->pDrawable->x, -pDst->pDrawable->y);
@@ -524,18 +534,22 @@ ExaPrepareCompositeReg(ScreenPtr pScreen,
 
     RegionTranslate(pDst->pCompositeClip,
                     pDst->pDrawable->x, pDst->pDrawable->y);
-    if (pSrc->pDrawable && pSrc != pDst)
-        RegionTranslate(pSrc->pCompositeClip,
-                        pSrc->pDrawable->x, pSrc->pDrawable->y);
-    if (pMask && pMask->pDrawable && pMask != pDst && pMask != pSrc)
-        RegionTranslate(pMask->pCompositeClip,
-                        pMask->pDrawable->x, pMask->pDrawable->y);
+    if (pSrc->pDrawable && pSrc != pDst) {
+      RegionTranslate(pSrc->pCompositeClip, pSrc->pDrawable->x,
+                      pSrc->pDrawable->y);
+    }
+    if (pMask && pMask->pDrawable && pMask != pDst && pMask != pSrc) {
+      RegionTranslate(pMask->pCompositeClip, pMask->pDrawable->x,
+                      pMask->pDrawable->y);
+    }
 
     if (!ret) {
-        if (srcReg)
-            RegionUninit(srcReg);
-        if (maskReg)
-            RegionUninit(maskReg);
+      if (srcReg) {
+        RegionUninit(srcReg);
+      }
+      if (maskReg) {
+        RegionUninit(maskReg);
+      }
 
         return FALSE;
     }
@@ -545,25 +559,31 @@ ExaPrepareCompositeReg(ScreenPtr pScreen,
      * should be done.
      */
 
-    if (pSrc->alphaMap && pSrc->alphaMap->pDrawable)
-        pExaScr->
-            prepare_access_reg(exaGetDrawablePixmap(pSrc->alphaMap->pDrawable),
-                               EXA_PREPARE_AUX_SRC, NULL);
-    if (pMask && pMask->alphaMap && pMask->alphaMap->pDrawable)
-        pExaScr->
-            prepare_access_reg(exaGetDrawablePixmap(pMask->alphaMap->pDrawable),
-                               EXA_PREPARE_AUX_MASK, NULL);
+    if (pSrc->alphaMap && pSrc->alphaMap->pDrawable) {
+      pExaScr->prepare_access_reg(
+          exaGetDrawablePixmap(pSrc->alphaMap->pDrawable), EXA_PREPARE_AUX_SRC,
+          NULL);
+    }
+    if (pMask && pMask->alphaMap && pMask->alphaMap->pDrawable) {
+      pExaScr->prepare_access_reg(
+          exaGetDrawablePixmap(pMask->alphaMap->pDrawable),
+          EXA_PREPARE_AUX_MASK, NULL);
+    }
 
-    if (pSrcPix)
-        pExaScr->prepare_access_reg(pSrcPix, EXA_PREPARE_SRC, srcReg);
+    if (pSrcPix) {
+      pExaScr->prepare_access_reg(pSrcPix, EXA_PREPARE_SRC, srcReg);
+    }
 
-    if (pMaskPix)
-        pExaScr->prepare_access_reg(pMaskPix, EXA_PREPARE_MASK, maskReg);
+    if (pMaskPix) {
+      pExaScr->prepare_access_reg(pMaskPix, EXA_PREPARE_MASK, maskReg);
+    }
 
-    if (srcReg)
-        RegionUninit(srcReg);
-    if (maskReg)
-        RegionUninit(maskReg);
+    if (srcReg) {
+      RegionUninit(srcReg);
+    }
+    if (maskReg) {
+      RegionUninit(maskReg);
+    }
 
     pDstPix = exaGetDrawablePixmap(pDst->pDrawable);
     if (!exaOpReadsDestination(op)) {
@@ -576,10 +596,11 @@ ExaPrepareCompositeReg(ScreenPtr pScreen,
         dstReg = &region;
     }
 
-    if (pDst->alphaMap && pDst->alphaMap->pDrawable)
-        pExaScr->
-            prepare_access_reg(exaGetDrawablePixmap(pDst->alphaMap->pDrawable),
-                               EXA_PREPARE_AUX_DEST, dstReg);
+    if (pDst->alphaMap && pDst->alphaMap->pDrawable) {
+      pExaScr->prepare_access_reg(
+          exaGetDrawablePixmap(pDst->alphaMap->pDrawable), EXA_PREPARE_AUX_DEST,
+          dstReg);
+    }
     pExaScr->prepare_access_reg(pDstPix, EXA_PREPARE_DEST, dstReg);
 
     RegionUninit(&region);
@@ -603,10 +624,10 @@ ExaCheckComposite(CARD8 op,
     EXA_PRE_FALLBACK(pScreen);
 
     if (pExaScr->prepare_access_reg) {
-        if (!ExaPrepareCompositeReg(pScreen, op, pSrc, pMask, pDst, xSrc,
-                                    ySrc, xMask, yMask, xDst, yDst, width,
-                                    height))
-            goto out_no_clip;
+      if (!ExaPrepareCompositeReg(pScreen, op, pSrc, pMask, pDst, xSrc, ySrc,
+                                  xMask, yMask, xDst, yDst, width, height)) {
+        goto out_no_clip;
+      }
     }
     else {
 
@@ -615,21 +636,26 @@ ExaCheckComposite(CARD8 op,
          * in which case EXA_PREPARE_SRC may be used for moving them out.
          */
 
-        if (pSrc->alphaMap && pSrc->alphaMap->pDrawable)
-            exaPrepareAccess(pSrc->alphaMap->pDrawable, EXA_PREPARE_AUX_SRC);
-        if (pMask && pMask->alphaMap && pMask->alphaMap->pDrawable)
-            exaPrepareAccess(pMask->alphaMap->pDrawable, EXA_PREPARE_AUX_MASK);
-        if (pDst->alphaMap && pDst->alphaMap->pDrawable)
-            exaPrepareAccess(pDst->alphaMap->pDrawable, EXA_PREPARE_AUX_DEST);
+        if (pSrc->alphaMap && pSrc->alphaMap->pDrawable) {
+          exaPrepareAccess(pSrc->alphaMap->pDrawable, EXA_PREPARE_AUX_SRC);
+        }
+        if (pMask && pMask->alphaMap && pMask->alphaMap->pDrawable) {
+          exaPrepareAccess(pMask->alphaMap->pDrawable, EXA_PREPARE_AUX_MASK);
+        }
+        if (pDst->alphaMap && pDst->alphaMap->pDrawable) {
+          exaPrepareAccess(pDst->alphaMap->pDrawable, EXA_PREPARE_AUX_DEST);
+        }
 
         exaPrepareAccess(pDst->pDrawable, EXA_PREPARE_DEST);
 
         EXA_FALLBACK(("from picts %p/%p to pict %p\n", pSrc, pMask, pDst));
 
-        if (pSrc->pDrawable != NULL)
-            exaPrepareAccess(pSrc->pDrawable, EXA_PREPARE_SRC);
-        if (pMask && pMask->pDrawable != NULL)
-            exaPrepareAccess(pMask->pDrawable, EXA_PREPARE_MASK);
+        if (pSrc->pDrawable != NULL) {
+          exaPrepareAccess(pSrc->pDrawable, EXA_PREPARE_SRC);
+        }
+        if (pMask && pMask->pDrawable != NULL) {
+          exaPrepareAccess(pMask->pDrawable, EXA_PREPARE_MASK);
+        }
     }
 
     swap(pExaScr, ps, Composite);
@@ -638,17 +664,22 @@ ExaCheckComposite(CARD8 op,
                   pMask,
                   pDst, xSrc, ySrc, xMask, yMask, xDst, yDst, width, height);
     swap(pExaScr, ps, Composite);
-    if (pMask && pMask->pDrawable != NULL)
-        exaFinishAccess(pMask->pDrawable, EXA_PREPARE_MASK);
-    if (pSrc->pDrawable != NULL)
-        exaFinishAccess(pSrc->pDrawable, EXA_PREPARE_SRC);
+    if (pMask && pMask->pDrawable != NULL) {
+      exaFinishAccess(pMask->pDrawable, EXA_PREPARE_MASK);
+    }
+    if (pSrc->pDrawable != NULL) {
+      exaFinishAccess(pSrc->pDrawable, EXA_PREPARE_SRC);
+    }
     exaFinishAccess(pDst->pDrawable, EXA_PREPARE_DEST);
-    if (pDst->alphaMap && pDst->alphaMap->pDrawable)
-        exaFinishAccess(pDst->alphaMap->pDrawable, EXA_PREPARE_AUX_DEST);
-    if (pSrc->alphaMap && pSrc->alphaMap->pDrawable)
-        exaFinishAccess(pSrc->alphaMap->pDrawable, EXA_PREPARE_AUX_SRC);
-    if (pMask && pMask->alphaMap && pMask->alphaMap->pDrawable)
-        exaFinishAccess(pMask->alphaMap->pDrawable, EXA_PREPARE_AUX_MASK);
+    if (pDst->alphaMap && pDst->alphaMap->pDrawable) {
+      exaFinishAccess(pDst->alphaMap->pDrawable, EXA_PREPARE_AUX_DEST);
+    }
+    if (pSrc->alphaMap && pSrc->alphaMap->pDrawable) {
+      exaFinishAccess(pSrc->alphaMap->pDrawable, EXA_PREPARE_AUX_SRC);
+    }
+    if (pMask && pMask->alphaMap && pMask->alphaMap->pDrawable) {
+      exaFinishAccess(pMask->alphaMap->pDrawable, EXA_PREPARE_AUX_MASK);
+    }
 
  out_no_clip:
     EXA_POST_FALLBACK(pScreen);

@@ -80,9 +80,9 @@ ConstrainSize(WinXSizeHints hints, int *widthp, int *heightp)
     else if (hints.flags & PBaseSize) {
         minWidth = hints.base_width;
         minHeight = hints.base_height;
+    } else {
+      minWidth = minHeight = 1;
     }
-    else
-        minWidth = minHeight = 1;
 
     if (hints.flags & PBaseSize) {
         baseWidth = hints.base_width;
@@ -91,9 +91,9 @@ ConstrainSize(WinXSizeHints hints, int *widthp, int *heightp)
     else if (hints.flags & PMinSize) {
         baseWidth = hints.min_width;
         baseHeight = hints.min_height;
+    } else {
+      baseWidth = baseHeight = 0;
     }
-    else
-        baseWidth = baseHeight = 0;
 
     if (hints.flags & PMaxSize) {
         maxWidth = hints.max_width;
@@ -107,22 +107,26 @@ ConstrainSize(WinXSizeHints hints, int *widthp, int *heightp)
     if (hints.flags & PResizeInc) {
         xinc = hints.width_inc;
         yinc = hints.height_inc;
+    } else {
+      xinc = yinc = 1;
     }
-    else
-        xinc = yinc = 1;
 
     /*
      * First, clamp to min and max values
      */
-    if (dwidth < minWidth)
-        dwidth = minWidth;
-    if (dheight < minHeight)
-        dheight = minHeight;
+    if (dwidth < minWidth) {
+      dwidth = minWidth;
+    }
+    if (dheight < minHeight) {
+      dheight = minHeight;
+    }
 
-    if (dwidth > maxWidth)
-        dwidth = maxWidth;
-    if (dheight > maxHeight)
-        dheight = maxHeight;
+    if (dwidth > maxWidth) {
+      dwidth = maxWidth;
+    }
+    if (dheight > maxHeight) {
+      dheight = maxHeight;
+    }
 
     /*
      * Second, fit to base + N * inc
@@ -154,15 +158,15 @@ ConstrainSize(WinXSizeHints hints, int *widthp, int *heightp)
             delta =
                 makemult(hints.min_aspect.x * dheight / hints.min_aspect.y -
                          dwidth, xinc);
-            if (dwidth + delta <= maxWidth)
-                dwidth += delta;
-            else {
-                delta =
-                    makemult(dheight -
-                             dwidth * hints.min_aspect.y / hints.min_aspect.x,
-                             yinc);
-                if (dheight - delta >= minHeight)
-                    dheight -= delta;
+            if (dwidth + delta <= maxWidth) {
+              dwidth += delta;
+            } else {
+              delta = makemult(dheight - dwidth * hints.min_aspect.y /
+                                             hints.min_aspect.x,
+                               yinc);
+              if (dheight - delta >= minHeight) {
+                dheight -= delta;
+              }
             }
         }
 
@@ -170,15 +174,15 @@ ConstrainSize(WinXSizeHints hints, int *widthp, int *heightp)
             delta =
                 makemult(dwidth * hints.max_aspect.y / hints.max_aspect.x -
                          dheight, yinc);
-            if (dheight + delta <= maxHeight)
-                dheight += delta;
-            else {
-                delta =
-                    makemult(dwidth -
-                             hints.max_aspect.x * dheight / hints.max_aspect.y,
-                             xinc);
-                if (dwidth - delta >= minWidth)
-                    dwidth -= delta;
+            if (dheight + delta <= maxHeight) {
+              dheight += delta;
+            } else {
+              delta = makemult(dwidth - hints.max_aspect.x * dheight /
+                                            hints.max_aspect.y,
+                               xinc);
+              if (dwidth - delta >= minWidth) {
+                dwidth -= delta;
+              }
             }
         }
     }
@@ -203,19 +207,23 @@ ValidateSizing(HWND hwnd, WindowPtr pWin, WPARAM wParam, LPARAM lParam)
     int iBorderWidthX, iBorderWidthY;
 
     /* Invalid input checking */
-    if (pWin == NULL || lParam == 0)
-        return FALSE;
+    if (pWin == NULL || lParam == 0) {
+      return FALSE;
+    }
 
     /* No size hints, no checking */
-    if (!winMultiWindowGetWMNormalHints(pWin, &sizeHints))
-        return FALSE;
+    if (!winMultiWindowGetWMNormalHints(pWin, &sizeHints)) {
+      return FALSE;
+    }
 
     /* Avoid divide-by-zero */
     if (sizeHints.flags & PResizeInc) {
-        if (sizeHints.width_inc == 0)
-            sizeHints.width_inc = 1;
-        if (sizeHints.height_inc == 0)
-            sizeHints.height_inc = 1;
+      if (sizeHints.width_inc == 0) {
+        sizeHints.width_inc = 1;
+      }
+      if (sizeHints.height_inc == 0) {
+        sizeHints.height_inc = 1;
+      }
     }
 
     rect = (RECT *) lParam;
@@ -294,10 +302,11 @@ winStartMousePolling(winPrivScreenPtr s_pScreenPriv)
      * programs like xeyes follow the mouse properly when the
      * mouse pointer is outside of any X window.
      */
-    if (g_uipMousePollingTimerID == 0)
-        g_uipMousePollingTimerID = SetTimer(s_pScreenPriv->hwndScreen,
-                                            WIN_POLLING_MOUSE_TIMER_ID,
-                                            MOUSE_POLLING_INTERVAL, NULL);
+    if (g_uipMousePollingTimerID == 0) {
+      g_uipMousePollingTimerID =
+          SetTimer(s_pScreenPriv->hwndScreen, WIN_POLLING_MOUSE_TIMER_ID,
+                   MOUSE_POLLING_INTERVAL, NULL);
+    }
 }
 
 /* Undocumented */
@@ -359,12 +368,14 @@ CheckForAlpha(HWND hWnd, WindowPtr pWin, winScreenInfo *pScreenInfo)
         }
 
     /* alpha-channel use is wanted */
-    if (!g_fCompositeAlpha || !pScreenInfo->fCompositeWM)
-        return;
+        if (!g_fCompositeAlpha || !pScreenInfo->fCompositeWM) {
+          return;
+        }
 
     /* Image has alpha ... */
-    if (pWin->drawable.depth != 32)
-        return;
+        if (pWin->drawable.depth != 32) {
+          return;
+        }
 
     /* ... and we can do something useful with it? */
     if (pSetWindowCompositionAttribute)
@@ -378,8 +389,10 @@ CheckForAlpha(HWND hWnd, WindowPtr pWin, winScreenInfo *pScreenInfo)
             /* This turns on DWM looking at the alpha-channel of this window */
             winDebug("enabling alpha for XID %08x hWnd %p, using SetWindowCompositionAttribute()\n", (unsigned int)pWin->drawable.id, hWnd);
             rc = pSetWindowCompositionAttribute(hWnd, &data);
-            if (!rc)
-                ErrorF("SetWindowCompositionAttribute failed: %d\n", (int)GetLastError());
+            if (!rc) {
+              ErrorF("SetWindowCompositionAttribute failed: %d\n",
+                     (int)GetLastError());
+            }
         }
     else if (useDwmEnableBlurBehindWindow)
         {

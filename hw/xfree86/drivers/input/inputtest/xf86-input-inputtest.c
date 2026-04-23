@@ -180,13 +180,15 @@ try_accept_connection(int fd, int ready, void *data)
     int connection_fd;
     int flags;
 
-    if (driver_data->connection_fd >= 0)
-        return;
+    if (driver_data->connection_fd >= 0) {
+      return;
+    }
 
     connection_fd = accept(driver_data->socket_fd, NULL, NULL);
     if (connection_fd < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
-            return;
+      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+        return;
+      }
         xf86IDrvMsg(pInfo, X_ERROR, "Failed to accept a connection\n");
         return;
     }
@@ -216,8 +218,10 @@ device_on(DeviceIntPtr dev)
     driver_data->buffer.valid_length = 0;
 
     try_accept_connection(-1, 0, dev);
-    if (driver_data->connection_fd < 0)
-        SetNotifyFd(driver_data->socket_fd, try_accept_connection, X_NOTIFY_READ, dev);
+    if (driver_data->connection_fd < 0) {
+      SetNotifyFd(driver_data->socket_fd, try_accept_connection, X_NOTIFY_READ,
+                  dev);
+    }
 
     return Success;
 }
@@ -263,8 +267,9 @@ init_button_map(unsigned char *btnmap, size_t size)
     int i;
 
     memset(btnmap, 0, size);
-    for (i = 0; i < size; i++)
-        btnmap[i] = i;
+    for (i = 0; i < size; i++) {
+      btnmap[i] = i;
+    }
 }
 
 static void
@@ -310,8 +315,9 @@ init_pointer(InputInfoPtr pInfo)
     axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_Y);
     axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_HSCROLL);
     axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_VSCROLL);
-    if (has_pressure)
-        axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_ABS_PRESSURE);
+    if (has_pressure) {
+      axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_ABS_PRESSURE);
+    }
 
     InitPointerDeviceStruct((DevicePtr)dev,
                             btnmap,
@@ -364,8 +370,9 @@ init_pointer_absolute(InputInfoPtr pInfo)
     axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_ABS_Y);
     axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_HSCROLL);
     axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_VSCROLL);
-    if (has_pressure)
-        axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_ABS_PRESSURE);
+    if (has_pressure) {
+      axislabels[num_axes++] = XIGetKnownProperty(AXIS_LABEL_PROP_ABS_PRESSURE);
+    }
 
     InitPointerDeviceStruct((DevicePtr)dev,
                             btnmap,
@@ -469,8 +476,9 @@ init_touch(InputInfoPtr pInfo)
                                min, TABLET_PRESSURE_AXIS_MAX, res * 1000, 0, res * 1000, Absolute);
 
     ntouches = xf86SetIntOption(pInfo->options, "TouchCount", TOUCH_MAX_SLOTS);
-    if (ntouches == 0) /* unknown */
-        ntouches = TOUCH_MAX_SLOTS;
+    if (ntouches == 0) { /* unknown */
+      ntouches = TOUCH_MAX_SLOTS;
+    }
     InitTouchClassDeviceStruct(dev, ntouches, XIDirectTouch, 2);
 }
 
@@ -781,8 +789,9 @@ handle_event(InputInfoPtr pInfo, xf86ITEventAny *event)
 {
     xf86ITDevicePtr driver_data = pInfo->private;
 
-    if (!pInfo->dev->public.on)
-        return;
+    if (!pInfo->dev->public.on) {
+      return;
+    }
 
     switch (driver_data->client_state) {
         case CLIENT_STATE_NOT_CONNECTED:
@@ -844,8 +853,9 @@ read_input_from_connection(InputInfoPtr pInfo)
                              EVENT_BUFFER_SIZE - driver_data->buffer.valid_length);
 
         if (read_size < 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
-                return;
+          if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            return;
+          }
 
             xf86IDrvMsg(pInfo, X_ERROR, "Error reading events: %s\n", strerror(errno));
             teardown_client_connection(pInfo);
@@ -858,8 +868,10 @@ read_input_from_connection(InputInfoPtr pInfo)
             xf86ITEventHeader event_header;
             char *event_begin = driver_data->buffer.data + processed_size;
 
-            if (driver_data->buffer.valid_length - processed_size < sizeof(xf86ITEventHeader))
-                break;
+            if (driver_data->buffer.valid_length - processed_size <
+                sizeof(xf86ITEventHeader)) {
+              break;
+            }
 
             /* Note that event_begin pointer is not aligned, accessing it directly is
                undefined behavior. We must use memcpy to copy the data to aligned data
@@ -874,8 +886,10 @@ read_input_from_connection(InputInfoPtr pInfo)
                 return;
             }
 
-            if (driver_data->buffer.valid_length - processed_size < event_header.length)
-                break;
+            if (driver_data->buffer.valid_length - processed_size <
+                event_header.length) {
+              break;
+            }
 
             if (is_supported_event(event_header.type)) {
                 int expected_event_size = get_event_size(event_header.type);
@@ -906,8 +920,9 @@ read_input_from_connection(InputInfoPtr pInfo)
             driver_data->buffer.valid_length -= processed_size;
         }
 
-        if (read_size == 0)
-            break;
+        if (read_size == 0) {
+          break;
+        }
     }
 }
 
@@ -941,8 +956,9 @@ device_alloc(void)
 {
     xf86ITDevicePtr driver_data = calloc(1, sizeof(xf86ITDevice));
 
-    if (!driver_data)
-        return NULL;
+    if (!driver_data) {
+      return NULL;
+    }
 
     driver_data->socket_fd = -1;
     driver_data->connection_fd = -1;
@@ -956,15 +972,18 @@ free_driver_data(xf86ITDevicePtr driver_data)
     if (driver_data) {
         close(driver_data->connection_fd);
         close(driver_data->socket_fd);
-        if (driver_data->socket_path)
-            unlink(driver_data->socket_path);
+        if (driver_data->socket_path) {
+          unlink(driver_data->socket_path);
+        }
         free(driver_data->socket_path);
         pthread_mutex_destroy(&driver_data->waiting_for_drain_mutex);
 
-        if (driver_data->valuators)
-            valuator_mask_free(&driver_data->valuators);
-        if (driver_data->valuators_unaccelerated)
-            valuator_mask_free(&driver_data->valuators_unaccelerated);
+        if (driver_data->valuators) {
+          valuator_mask_free(&driver_data->valuators);
+        }
+        if (driver_data->valuators_unaccelerated) {
+          valuator_mask_free(&driver_data->valuators_unaccelerated);
+        }
     }
     free(driver_data);
 }
@@ -983,8 +1002,9 @@ pre_init(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
     pInfo->switch_mode = NULL;
 
     driver_data = device_alloc();
-    if (!driver_data)
-        goto fail;
+    if (!driver_data) {
+      goto fail;
+    }
 
     driver_data->client_state = CLIENT_STATE_NOT_CONNECTED;
     driver_data->last_event_num = 1;
@@ -993,12 +1013,14 @@ pre_init(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
     pthread_mutex_init(&driver_data->waiting_for_drain_mutex, NULL);
 
     driver_data->valuators = valuator_mask_new(6);
-    if (!driver_data->valuators)
-        goto fail;
+    if (!driver_data->valuators) {
+      goto fail;
+    }
 
     driver_data->valuators_unaccelerated = valuator_mask_new(2);
-    if (!driver_data->valuators_unaccelerated)
-        goto fail;
+    if (!driver_data->valuators_unaccelerated) {
+      goto fail;
+    }
 
     driver_data->socket_path = xf86SetStrOption(pInfo->options, "SocketPath", NULL);
     if (!driver_data->socket_path){

@@ -22,8 +22,9 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
     ScreenPtr pScreen = (ScreenPtr)screen;
 
     // only act on first screen
-    if (pScreen->myNum)
-        return;
+    if (pScreen->myNum) {
+      return;
+    }
 
     /* create the virtual root windows */
     WindowPtr realRoot = pScreen->root;
@@ -51,13 +52,18 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
             wVisual(realRoot), /* visual */
             &rc);
 
-        if (!pWin)
-            FatalError("hookInitRootWindow: cant create per-namespace root window for %s\n", walk->name);
+        if (!pWin) {
+          FatalError("hookInitRootWindow: cant create per-namespace root "
+                     "window for %s\n",
+                     walk->name);
+        }
 
         Mask mask = pWin->eventMask;
         pWin->eventMask = 0;    /* subterfuge in case AddResource fails */
-        if (!AddResource(pWin->drawable.id, X11_RESTYPE_WINDOW, (void *) pWin))
-            FatalError("hookInitRootWindow: cant add per-namespace root window as resource\n");
+        if (!AddResource(pWin->drawable.id, X11_RESTYPE_WINDOW, (void *)pWin)) {
+          FatalError("hookInitRootWindow: cant add per-namespace root window "
+                     "as resource\n");
+        }
         pWin->eventMask = mask;
 
         walk->rootWindow = pWin;

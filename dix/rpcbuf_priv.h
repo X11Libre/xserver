@@ -368,8 +368,9 @@ static inline void x_rpcbuf_write_counted_string_pad(
 static inline void x_rpcbuf_write_rpcbuf_pad(
         x_rpcbuf_t *rpcbuf, x_rpcbuf_t *source)
 {
-    if (!source)
-        return;
+  if (!source) {
+    return;
+  }
 
     if (source->error) {
         rpcbuf->error = TRUE;

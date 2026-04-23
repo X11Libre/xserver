@@ -118,10 +118,11 @@ static int map_poll_spec
     {
         /* Skip any bad FDs in the array. */
 
-        if (pCur->fd < 0)
-            continue;
+        if (pCur->fd < 0) {
+          continue;
+        }
 
-	if (pCur->events & POLLIN)
+        if (pCur->events & POLLIN)
 	{
 	    /* "Input Ready" notification desired. */
 	    FD_SET (pCur->fd, pReadSet);
@@ -216,20 +217,23 @@ static void map_select_results
     {
         /* Skip any bad FDs in the array. */
 
-        if (pCur->fd < 0)
-            continue;
+        if (pCur->fd < 0) {
+          continue;
+        }
 
-	/* Exception events take priority over input events. */
+        /* Exception events take priority over input events. */
 
 	pCur->revents = 0;
-	if (FD_ISSET (pCur->fd, pExceptSet))
-	    pCur->revents |= POLLPRI;
+        if (FD_ISSET(pCur->fd, pExceptSet)) {
+          pCur->revents |= POLLPRI;
 
-	else if (FD_ISSET (pCur->fd, pReadSet))
-	    pCur->revents |= POLLIN;
+        } else if (FD_ISSET(pCur->fd, pReadSet)) {
+          pCur->revents |= POLLIN;
+        }
 
-	if (FD_ISSET (pCur->fd, pWriteSet))
-	    pCur->revents |= POLLOUT;
+        if (FD_ISSET(pCur->fd, pWriteSet)) {
+          pCur->revents |= POLLOUT;
+        }
     }
 
     return;

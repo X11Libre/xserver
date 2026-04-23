@@ -32,8 +32,9 @@ glamor_solid_boxes(DrawablePtr drawable,
     int n;
 
     rect = calloc(nbox, sizeof(xRectangle));
-    if (!rect)
-        return;
+    if (!rect) {
+      return;
+    }
     for (n = 0; n < nbox; n++) {
         rect[n].x = box[n].x1;
         rect[n].y = box[n].y1;
@@ -65,8 +66,9 @@ glamor_solid(PixmapPtr pixmap, int x, int y, int width, int height,
 
     vals[0].val = fg_pixel;
     gc = GetScratchGC(drawable->depth, drawable->pScreen);
-    if (!gc)
-        return;
+    if (!gc) {
+      return;
+    }
     ChangeGC(NULL, gc, GCForeground, vals);
     ValidateGC(drawable, gc);
     rect.x = x;

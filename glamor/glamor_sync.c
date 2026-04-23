@@ -87,15 +87,16 @@ glamor_sync_init(ScreenPtr screen)
 	SyncScreenFuncsPtr      screen_funcs;
 
 	if (!dixPrivateKeyRegistered(&glamor_sync_fence_key)) {
-		if (!dixRegisterPrivateKey(&glamor_sync_fence_key,
-					   PRIVATE_SYNC_FENCE,
-					   sizeof (struct glamor_sync_fence)))
-			return FALSE;
-	}
+          if (!dixRegisterPrivateKey(&glamor_sync_fence_key, PRIVATE_SYNC_FENCE,
+                                     sizeof(struct glamor_sync_fence))) {
+            return FALSE;
+          }
+        }
 
 #ifdef HAVE_XSHMFENCE
-	if (!miSyncShmScreenInit(screen))
-		return FALSE;
+        if (!miSyncShmScreenInit(screen)) {
+          return FALSE;
+        }
 #else
 	if (!miSyncSetup(screen))
 		return FALSE;
@@ -115,7 +116,9 @@ glamor_sync_close(ScreenPtr screen)
         glamor_screen_private   *glamor = glamor_get_screen_private(screen);
         SyncScreenFuncsPtr      screen_funcs = miSyncGetScreenFuncs(screen);
 
-        if (screen_funcs)
-                screen_funcs->CreateFence = glamor->saved_procs.sync_screen_funcs.CreateFence;
+        if (screen_funcs) {
+          screen_funcs->CreateFence =
+              glamor->saved_procs.sync_screen_funcs.CreateFence;
+        }
 #endif
 }

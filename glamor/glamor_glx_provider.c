@@ -117,8 +117,9 @@ egl_create_glx_drawable(ClientPtr client, __GLXscreen *screen,
     __GLXdrawable *ret;
 
     ret = calloc(1, sizeof *ret);
-    if (!ret)
-        return NULL;
+    if (!ret) {
+      return NULL;
+    }
 
     if (!__glXDrawableInit(ret, screen, draw, type, glxdrawid, modes)) {
         free(ret);
@@ -152,8 +153,9 @@ translate_eglconfig(ScreenPtr pScreen, struct egl_screen *screen, EGLConfig hc,
     int i;
     struct egl_config *c = calloc(1, sizeof *c);
 
-    if (!c)
-        return chain;
+    if (!c) {
+      return chain;
+    }
 
     /* constants.  changing these requires (at least) new EGL extensions */
     c->base.stereoMode = GL_FALSE;
@@ -190,15 +192,17 @@ translate_eglconfig(ScreenPtr pScreen, struct egl_screen *screen, EGLConfig hc,
     c->base.accumAlphaBits = 0;
 
     /* parametric state */
-    if (direct_color)
-        c->base.visualType = GLX_DIRECT_COLOR;
-    else
-        c->base.visualType = GLX_TRUE_COLOR;
+    if (direct_color) {
+      c->base.visualType = GLX_DIRECT_COLOR;
+    } else {
+      c->base.visualType = GLX_TRUE_COLOR;
+    }
 
-    if (double_buffer)
-        c->base.doubleBufferMode = GL_TRUE;
-    else
-        c->base.doubleBufferMode = GL_FALSE;
+    if (double_buffer) {
+      c->base.doubleBufferMode = GL_TRUE;
+    } else {
+      c->base.doubleBufferMode = GL_FALSE;
+    }
 
     /* direct-mapped state */
 #define GET(attr, slot) \
@@ -227,8 +231,9 @@ translate_eglconfig(ScreenPtr pScreen, struct egl_screen *screen, EGLConfig hc,
      */
     valid_depth = false;
     for (i = 0; i < pScreen->numDepths && !valid_depth; i++) {
-        if (pScreen->allowedDepths[i].depth == c->base.rgbBits)
-            valid_depth = true;
+      if (pScreen->allowedDepths[i].depth == c->base.rgbBits) {
+        valid_depth = true;
+      }
     }
     if (!valid_depth) {
         free(c);
@@ -237,12 +242,13 @@ translate_eglconfig(ScreenPtr pScreen, struct egl_screen *screen, EGLConfig hc,
 
     /* derived state: config caveats */
     eglGetConfigAttrib(screen->display, hc, EGL_CONFIG_CAVEAT, &value);
-    if (value == EGL_NONE)
-        c->base.visualRating = GLX_NONE;
-    else if (value == EGL_SLOW_CONFIG)
-        c->base.visualRating = GLX_SLOW_CONFIG;
-    else if (value == EGL_NON_CONFORMANT_CONFIG)
-        c->base.visualRating = GLX_NON_CONFORMANT_CONFIG;
+    if (value == EGL_NONE) {
+      c->base.visualRating = GLX_NONE;
+    } else if (value == EGL_SLOW_CONFIG) {
+      c->base.visualRating = GLX_SLOW_CONFIG;
+    } else if (value == EGL_NON_CONFORMANT_CONFIG) {
+      c->base.visualRating = GLX_NON_CONFORMANT_CONFIG;
+    }
     /* else panic */
 
     /* derived state: float configs */
@@ -293,18 +299,20 @@ translate_eglconfig(ScreenPtr pScreen, struct egl_screen *screen, EGLConfig hc,
             c->base.blueMask  = 0x000000ff;
             c->base.greenMask = 0x0000ff00;
             c->base.redMask   = 0x00ff0000;
-            if (c->base.alphaBits)
-                /* assume all remaining bits are alpha */
-                c->base.alphaMask = 0xff000000;
+            if (c->base.alphaBits) {
+              /* assume all remaining bits are alpha */
+              c->base.alphaMask = 0xff000000;
+            }
         }
         else if (c->base.redBits == 10 &&
             (c->base.rgbBits == 30 || c->base.rgbBits == 32)) {
             c->base.blueMask  = 0x000003ff;
             c->base.greenMask = 0x000ffc00;
             c->base.redMask   = 0x3ff00000;
-            if (c->base.alphaBits)
-                /* assume all remaining bits are alpha */
-                c->base.alphaMask = 0xc000000;
+            if (c->base.alphaBits) {
+              /* assume all remaining bits are alpha */
+              c->base.alphaMask = 0xc000000;
+            }
         }
     }
 
@@ -345,30 +353,34 @@ egl_mirror_configs(ScreenPtr pScreen, struct egl_screen *screen)
                     epoxy_has_gl_extension("GL_EXT_sRGB_write_control");
 
     eglGetConfigs(screen->display, NULL, 0, &nconfigs);
-    if (!(host_configs = calloc(nconfigs, sizeof *host_configs)))
-        return NULL;
+    if (!(host_configs = calloc(nconfigs, sizeof *host_configs))) {
+      return NULL;
+    }
 
     eglGetConfigs(screen->display, host_configs, nconfigs, &nconfigs);
 
     /* We walk the EGL configs backwards to make building the
      * ->next chain easier.
      */
-    for (i = nconfigs - 1; i >= 0; i--)
-        for (j = 0; j < 3; j++) /* direct_color */
-            for (k = 0; k < 2; k++) /* double_buffer */ {
-                if (can_srgb)
-                    c = translate_eglconfig(pScreen, screen, host_configs[i], c,
-                                            /* direct_color */ j == 1,
-                                            /* double_buffer */ k > 0,
-                                            /* duplicate_for_composite */ j == 0,
-                                            /* srgb_only */ true);
+    for (i = nconfigs - 1; i >= 0; i--) {
+      for (j = 0; j < 3; j++) { /* direct_color */
+        for (k = 0; k < 2; k++) /* double_buffer */ {
+          if (can_srgb) {
+            c = translate_eglconfig(pScreen, screen, host_configs[i], c,
+                                    /* direct_color */ j == 1,
+                                    /* double_buffer */ k > 0,
+                                    /* duplicate_for_composite */ j == 0,
+                                    /* srgb_only */ true);
+          }
 
-                c = translate_eglconfig(pScreen, screen, host_configs[i], c,
-                                        /* direct_color */ j == 1,
-                                        /* double_buffer */ k > 0,
-                                        /* duplicate_for_composite */ j == 0,
-                                        /* srgb_only */ false);
-            }
+          c = translate_eglconfig(pScreen, screen, host_configs[i], c,
+                                  /* direct_color */ j == 1,
+                                  /* double_buffer */ k > 0,
+                                  /* duplicate_for_composite */ j == 0,
+                                  /* srgb_only */ false);
+        }
+      }
+    }
 
     screen->configs = host_configs;
     return c ? &c->base : NULL;
@@ -381,15 +393,18 @@ egl_screen_probe(ScreenPtr pScreen)
     glamor_screen_private *glamor_screen;
     __GLXscreen *base;
 
-    if (enableIndirectGLX)
-        return NULL; /* not implemented */
+    if (enableIndirectGLX) {
+      return NULL; /* not implemented */
+    }
 
     glamor_screen = glamor_get_screen_private(pScreen);
-    if (!glamor_screen)
-        return NULL;
+    if (!glamor_screen) {
+      return NULL;
+    }
 
-    if (!(screen = calloc(1, sizeof *screen)))
-        return NULL;
+    if (!(screen = calloc(1, sizeof *screen))) {
+      return NULL;
+    }
 
     base = &screen->base;
     base->destroy = egl_screen_destroy;
@@ -420,11 +435,13 @@ egl_screen_probe(ScreenPtr pScreen)
         return NULL;
     }
 
-    if (!screen->base.glvnd && glamor_screen->glvnd_vendor)
-        screen->base.glvnd = strdup(glamor_screen->glvnd_vendor);
+    if (!screen->base.glvnd && glamor_screen->glvnd_vendor) {
+      screen->base.glvnd = strdup(glamor_screen->glvnd_vendor);
+    }
 
-    if (!screen->base.glvnd)
-        screen->base.glvnd = strdup("mesa");
+    if (!screen->base.glvnd) {
+      screen->base.glvnd = strdup("mesa");
+    }
 
     __glXScreenInit(base, pScreen);
     __glXsetGetProcAddress(eglGetProcAddress);

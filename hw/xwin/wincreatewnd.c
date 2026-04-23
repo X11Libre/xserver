@@ -81,15 +81,13 @@ winCreateBoundingWindowFullScreen(ScreenPtr pScreen)
     RegisterClassEx(&wc);
 
     /* Set display and screen-specific tooltip text */
-    if (g_pszQueryHost != NULL)
-        snprintf(szTitle,
-                 sizeof(szTitle),
-                 WINDOW_TITLE_XDMCP,
-                 g_pszQueryHost, display, (int) pScreenInfo->dwScreen);
-    else
-        snprintf(szTitle,
-                 sizeof(szTitle),
-                 WINDOW_TITLE, display, (int) pScreenInfo->dwScreen);
+    if (g_pszQueryHost != NULL) {
+      snprintf(szTitle, sizeof(szTitle), WINDOW_TITLE_XDMCP, g_pszQueryHost,
+               display, (int)pScreenInfo->dwScreen);
+    } else {
+      snprintf(szTitle, sizeof(szTitle), WINDOW_TITLE, display,
+               (int)pScreenInfo->dwScreen);
+    }
 
     /* Create the window */
     *phwnd = CreateWindowExA(0, /* Extended styles */
@@ -162,9 +160,10 @@ winCreateBoundingWindowWindowed(ScreenPtr pScreen)
         dwWindowStyle |= WS_CAPTION;
         if (pScreenInfo->iResizeMode != resizeNotAllowed)
             dwWindowStyle |= WS_THICKFRAME | WS_MAXIMIZEBOX;
+    } else {
+      d
     }
-    else
-        dwWindowStyle |= WS_POPUP;
+    wWindowStyle |= WS_POPUP;
 
     /* Setup our window class */
     wc.cbSize = sizeof(WNDCLASSEX);
@@ -280,15 +279,13 @@ winCreateBoundingWindowWindowed(ScreenPtr pScreen)
     }
 
     /* Set display and screen-specific tooltip text */
-    if (g_pszQueryHost != NULL)
-        snprintf(szTitle,
-                 sizeof(szTitle),
-                 WINDOW_TITLE_XDMCP,
-                 g_pszQueryHost, display, (int) pScreenInfo->dwScreen);
-    else
-        snprintf(szTitle,
-                 sizeof(szTitle),
-                 WINDOW_TITLE, display, (int) pScreenInfo->dwScreen);
+    if (g_pszQueryHost != NULL) {
+      snprintf(szTitle, sizeof(szTitle), WINDOW_TITLE_XDMCP, g_pszQueryHost,
+               display, (int)pScreenInfo->dwScreen);
+    } else {
+      snprintf(szTitle, sizeof(szTitle), WINDOW_TITLE, display,
+               (int)pScreenInfo->dwScreen);
+    }
 
     /* Create the window */
     *phwnd = CreateWindowExA(0, /* Extended styles */
@@ -399,9 +396,10 @@ winCreateBoundingWindowWindowed(ScreenPtr pScreen)
         ) {
         pScreenPriv->fRootWindowShown = FALSE;
         ShowWindow(*phwnd, SW_HIDE);
+    } else {
+      S
     }
-    else
-        ShowWindow(*phwnd, SW_SHOWNORMAL);
+    howWindow(*phwnd, SW_SHOWNORMAL);
     if (!UpdateWindow(*phwnd)) {
         ErrorF("winCreateBoundingWindowWindowed - UpdateWindow () failed\n");
         return FALSE;
@@ -525,8 +523,9 @@ winTaskbarOnScreenEdge(unsigned int uEdge, winScreenInfo * pScreenInfo)
          */
         if (pScreenInfo->fMultipleMonitors ||
             (MonitorFromWindow(hwndAutoHide, MONITOR_DEFAULTTONULL) ==
-             pScreenInfo->hMonitor))
-            return TRUE;
+             pScreenInfo->hMonitor)) {
+          return TRUE;
+        }
     }
     return FALSE;
 }
@@ -548,8 +547,9 @@ winAdjustForAutoHide(RECT * prcWorkArea, winScreenInfo * pScreenInfo)
              (int) prcWorkArea->bottom, (int) prcWorkArea->right);
 
     /* Find out if the Windows taskbar is set to auto-hide */
-    if (SHAppBarMessage(ABM_GETSTATE, &abd) & ABS_AUTOHIDE)
-        winDebug("winAdjustForAutoHide - Taskbar is auto hide\n");
+    if (SHAppBarMessage(ABM_GETSTATE, &abd) & ABS_AUTOHIDE) {
+      winDebug("winAdjustForAutoHide - Taskbar is auto hide\n");
+    }
 
     /*
        Despite the forgoing, we are checking for any AppBar

@@ -44,15 +44,17 @@ miChangeGC(GCPtr pGC, unsigned long mask)
 void
 miDestroyGC(GCPtr pGC)
 {
-    if (pGC->freeCompClip)
-        RegionDestroy(pGC->pCompositeClip);
+  if (pGC->freeCompClip) {
+    RegionDestroy(pGC->pCompositeClip);
+  }
 }
 
 void
 miDestroyClip(GCPtr pGC)
 {
-    if (pGC->clientClip)
-        RegionDestroy(pGC->clientClip);
+  if (pGC->clientClip) {
+    RegionDestroy(pGC->clientClip);
+  }
     pGC->clientClip = NULL;
 }
 
@@ -121,8 +123,9 @@ miComputeCompositeClip(GCPtr pGC, DrawablePtr pDrawable)
          * and have no client clip.)
          */
         if (!pGC->clientClip) {
-            if (freeCompClip)
-                RegionDestroy(pGC->pCompositeClip);
+          if (freeCompClip) {
+            RegionDestroy(pGC->pCompositeClip);
+          }
             pGC->pCompositeClip = pregWin;
             pGC->freeCompClip = freeTmpClip;
         }
@@ -142,8 +145,9 @@ miComputeCompositeClip(GCPtr pGC, DrawablePtr pDrawable)
 
             if (freeCompClip) {
                 RegionIntersect(pGC->pCompositeClip, pregWin, pGC->clientClip);
-                if (freeTmpClip)
-                    RegionDestroy(pregWin);
+                if (freeTmpClip) {
+                  RegionDestroy(pregWin);
+                }
             }
             else if (freeTmpClip) {
                 RegionIntersect(pregWin, pregWin, pGC->clientClip);

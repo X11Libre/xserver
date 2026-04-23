@@ -96,16 +96,21 @@ fbPutZImage(DrawablePtr pDrawable,
         y1 = y;
         x2 = x + width;
         y2 = y + height;
-        if (x1 < pbox->x1)
-            x1 = pbox->x1;
-        if (y1 < pbox->y1)
-            y1 = pbox->y1;
-        if (x2 > pbox->x2)
-            x2 = pbox->x2;
-        if (y2 > pbox->y2)
-            y2 = pbox->y2;
-        if (x1 >= x2 || y1 >= y2)
-            continue;
+        if (x1 < pbox->x1) {
+          x1 = pbox->x1;
+        }
+        if (y1 < pbox->y1) {
+          y1 = pbox->y1;
+        }
+        if (x2 > pbox->x2) {
+          x2 = pbox->x2;
+        }
+        if (y2 > pbox->y2) {
+          y2 = pbox->y2;
+        }
+        if (x1 >= x2 || y1 >= y2) {
+          continue;
+        }
         fbBltStip(src + (y1 - y) * srcStride,
                   srcStride,
                   (x1 - x) * dstBpp,
@@ -142,10 +147,11 @@ fbPutXYImage(DrawablePtr pDrawable,
     fbGetDrawable(pDrawable, dst, dstStride, dstBpp, dstXoff, dstYoff);
 
     if (dstBpp == 1) {
-        if (opaque)
-            alu = FbOpaqueStipple1Rop(alu, fg, bg);
-        else
-            alu = FbStipple1Rop(alu, fg);
+      if (opaque) {
+        alu = FbOpaqueStipple1Rop(alu, fg, bg);
+      } else {
+        alu = FbStipple1Rop(alu, fg);
+      }
     }
     else {
         fgand = fbAnd(alu, fg, pm);
@@ -166,16 +172,21 @@ fbPutXYImage(DrawablePtr pDrawable,
         y1 = y;
         x2 = x + width;
         y2 = y + height;
-        if (x1 < pbox->x1)
-            x1 = pbox->x1;
-        if (y1 < pbox->y1)
-            y1 = pbox->y1;
-        if (x2 > pbox->x2)
-            x2 = pbox->x2;
-        if (y2 > pbox->y2)
-            y2 = pbox->y2;
-        if (x1 >= x2 || y1 >= y2)
-            continue;
+        if (x1 < pbox->x1) {
+          x1 = pbox->x1;
+        }
+        if (y1 < pbox->y1) {
+          y1 = pbox->y1;
+        }
+        if (x2 > pbox->x2) {
+          x2 = pbox->x2;
+        }
+        if (y2 > pbox->y2) {
+          y2 = pbox->y2;
+        }
+        if (x1 >= x2 || y1 >= y2) {
+          continue;
+        }
         if (dstBpp == 1) {
             fbBltStip(src + (y1 - y) * srcStride,
                       srcStride,
@@ -217,8 +228,9 @@ fbGetImage(DrawablePtr pDrawable,
      * XFree86 DDX empties the root borderClip when the VT is
      * switched away; this checks for that case
      */
-    if (!fbDrawableEnabled(pDrawable))
-        return;
+    if (!fbDrawableEnabled(pDrawable)) {
+      return;
+    }
 
     fbGetDrawable(pDrawable, src, srcStride, srcBpp, srcXoff, srcYoff);
 
@@ -238,8 +250,9 @@ fbGetImage(DrawablePtr pDrawable,
                   dst, dstStride, 0, w * srcBpp, h, GXcopy, FB_ALLONES, srcBpp);
 
         if (pm != FB_ALLONES) {
-            for (int i = 0; i < dstStride * h; i++)
-                dst[i] &= pm;
+          for (int i = 0; i < dstStride * h; i++) {
+            dst[i] &= pm;
+          }
         }
     }
     else {

@@ -67,8 +67,9 @@ __glXDisp_ReadPixels(__GLXclientState * cl, GLbyte * pc)
     swapBytes = *(GLboolean *) (pc + 24);
     lsbFirst = *(GLboolean *) (pc + 25);
     compsize = __glReadPixels_size(format, type, width, height);
-    if (compsize < 0)
-        return BadLength;
+    if (compsize < 0) {
+      return BadLength;
+    }
 
     glPixelStorei(GL_PACK_SWAP_BYTES, swapBytes);
     glPixelStorei(GL_PACK_LSB_FIRST, lsbFirst);
@@ -128,8 +129,9 @@ __glXDisp_GetTexImage(__GLXclientState * cl, GLbyte * pc)
      */
     compsize =
         __glGetTexImage_size(target, level, format, type, width, height, depth);
-    if (compsize < 0)
-        return BadLength;
+    if (compsize < 0) {
+      return BadLength;
+    }
 
     glPixelStorei(GL_PACK_SWAP_BYTES, swapBytes);
     __GLX_GET_ANSWER_BUFFER(answer, cl, compsize, 1);
@@ -226,10 +228,12 @@ GetSeparableFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     compsize = __glGetTexImage_size(target, 1, format, type, width, 1, 1);
     compsize2 = __glGetTexImage_size(target, 1, format, type, height, 1, 1);
 
-    if ((compsize = safe_pad(compsize)) < 0)
-        return BadLength;
-    if ((compsize2 = safe_pad(compsize2)) < 0)
-        return BadLength;
+    if ((compsize = safe_pad(compsize)) < 0) {
+      return BadLength;
+    }
+    if ((compsize2 = safe_pad(compsize2)) < 0) {
+      return BadLength;
+    }
 
     glPixelStorei(GL_PACK_SWAP_BYTES, swapBytes);
     __GLX_GET_ANSWER_BUFFER(answer, cl, safe_add(compsize, compsize2), 1);
@@ -305,8 +309,9 @@ GetConvolutionFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
      * are illegal, but then width and height would still be zero anyway.
      */
     compsize = __glGetTexImage_size(target, 1, format, type, width, height, 1);
-    if (compsize < 0)
-        return BadLength;
+    if (compsize < 0) {
+      return BadLength;
+    }
 
     glPixelStorei(GL_PACK_SWAP_BYTES, swapBytes);
     __GLX_GET_ANSWER_BUFFER(answer, cl, compsize, 1);
@@ -377,8 +382,9 @@ GetHistogram(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
      * are illegal, but then width would still be zero anyway.
      */
     compsize = __glGetTexImage_size(target, 1, format, type, width, 1, 1);
-    if (compsize < 0)
-        return BadLength;
+    if (compsize < 0) {
+      return BadLength;
+    }
 
     glPixelStorei(GL_PACK_SWAP_BYTES, swapBytes);
     __GLX_GET_ANSWER_BUFFER(answer, cl, compsize, 1);
@@ -441,8 +447,9 @@ GetMinmax(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     reset = *(GLboolean *) (pc + 13);
 
     compsize = __glGetTexImage_size(target, 1, format, type, 2, 1, 1);
-    if (compsize < 0)
-        return BadLength;
+    if (compsize < 0) {
+      return BadLength;
+    }
 
     glPixelStorei(GL_PACK_SWAP_BYTES, swapBytes);
     __GLX_GET_ANSWER_BUFFER(answer, cl, compsize, 1);
@@ -509,8 +516,9 @@ GetColorTable(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
      * are illegal, but then width would still be zero anyway.
      */
     compsize = __glGetTexImage_size(target, 1, format, type, width, 1, 1);
-    if (compsize < 0)
-        return BadLength;
+    if (compsize < 0) {
+      return BadLength;
+    }
 
     glPixelStorei(GL_PACK_SWAP_BYTES, swapBytes);
     __GLX_GET_ANSWER_BUFFER(answer, cl, compsize, 1);

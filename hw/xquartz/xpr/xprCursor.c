@@ -98,8 +98,9 @@ load_cursor(CursorPtr src, int screen)
         if (!data) {
             FatalError("Failed to allocate memory in %s\n", __func__);
         }
-        for (i = 0; i < (src->bits->width * src->bits->height); i++)
-            data[i] = ntohl(be_data[i]);
+        for (i = 0; i < (src->bits->width * src->bits->height); i++) {
+          data[i] = ntohl(be_data[i]);
+        }
 #endif
     }
     else
@@ -154,10 +155,11 @@ load_cursor(CursorPtr src, int screen)
                         s <<= 1;
                         m <<= 1;
 #else
-                        if (m & 1)
-                            *dptr++ = (s & 1) ? fg_color : bg_color;
-                        else
-                            *dptr++ = 0;
+                      if (m & 1) {
+                        *dptr++ = (s & 1) ? fg_color : bg_color;
+                      } else {
+                        *dptr++ = 0;
+                      }
                         s >>= 1;
                         m >>= 1;
 #endif
@@ -175,8 +177,9 @@ load_cursor(CursorPtr src, int screen)
     }
 
     err = xp_set_cursor(width, height, hot_x, hot_y, data, rowbytes);
-    if (free_data)
-        free(data);
+    if (free_data) {
+      free(data);
+    }
     return err == Success;
 }
 
@@ -195,8 +198,9 @@ load_cursor(CursorPtr src, int screen)
 static Bool
 QuartzRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    if (pCursor == NULL || pCursor->bits == NULL)
-        return FALSE;
+  if (pCursor == NULL || pCursor->bits == NULL) {
+    return FALSE;
+  }
 
     /* FIXME: cache ARGB8888 representation? */
 
@@ -224,8 +228,9 @@ QuartzSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor,
 {
     QuartzCursorScreenPtr ScreenPriv = CURSOR_PRIV(pScreen);
 
-    if (!XQuartzServerVisible)
-        return;
+    if (!XQuartzServerVisible) {
+      return;
+    }
 
     if (pCursor == NULL) {
         if (ScreenPriv->cursorVisible) {
@@ -344,15 +349,18 @@ QuartzInitCursor(ScreenPtr pScreen)
     miPointerScreenPtr PointPriv;
 
     /* initialize software cursor handling (always needed as backup) */
-    if (!miDCInitialize(pScreen, &quartzScreenFuncsRec))
-        return FALSE;
+    if (!miDCInitialize(pScreen, &quartzScreenFuncsRec)) {
+      return FALSE;
+    }
 
-    if (!dixRegisterPrivateKey(&darwinCursorScreenKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&darwinCursorScreenKeyRec, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
 
     ScreenPriv = calloc(1, sizeof(QuartzCursorScreenRec));
-    if (ScreenPriv == NULL)
-        return FALSE;
+    if (ScreenPriv == NULL) {
+      return FALSE;
+    }
 
     /* CURSOR_PRIV(pScreen) = ScreenPriv; */
     dixSetPrivate(&pScreen->devPrivates, darwinCursorScreenKey, ScreenPriv);
@@ -397,12 +405,14 @@ QuartzResumeXCursor(ScreenPtr pScreen)
     /* TODO: Tablet? */
 
     pWin = InputDevSpriteWindow(darwinPointer);
-    if (pWin->drawable.pScreen != pScreen)
-        return;
+    if (pWin->drawable.pScreen != pScreen) {
+      return;
+    }
 
     pCursor = InputDevGetSpriteCursor(darwinPointer);
-    if (pCursor == NULL)
-        return;
+    if (pCursor == NULL) {
+      return;
+    }
 
     QuartzSetCursor(darwinPointer, pScreen, pCursor, /* x */ 0, /* y */ 0);
 }

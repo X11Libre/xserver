@@ -52,19 +52,22 @@ xnestRealizeFont(ScreenPtr pScreen, FontPtr pFont)
     nprops = pFont->info.nprops;
     props = pFont->info.props;
 
-    for (i = 0; i < nprops; i++)
-        if (props[i].name == name_atom) {
-            value_atom = props[i].value;
-            break;
-        }
+    for (i = 0; i < nprops; i++) {
+      if (props[i].name == name_atom) {
+        value_atom = props[i].value;
+        break;
+      }
+    }
 
-    if (!value_atom)
-        return FALSE;
+    if (!value_atom) {
+      return FALSE;
+    }
 
     name = NameForAtom(value_atom);
 
-    if (!name)
-        return FALSE;
+    if (!name) {
+      return FALSE;
+    }
 
     xnestPrivFont* priv = calloc(1, sizeof(xnestPrivFont));
     xfont2_font_set_private(pFont, xnestFontPrivateIndex, priv);

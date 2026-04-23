@@ -165,8 +165,9 @@ xf86PointerMoved(ScrnInfoPtr pScr, int x, int y)
         frameChanged = TRUE;
     }
 
-    if (frameChanged && pScr->AdjustFrame != NULL)
-        pScr->AdjustFrame(pScr, pScr->frameX0, pScr->frameY0);
+    if (frameChanged && pScr->AdjustFrame != NULL) {
+      pScr->AdjustFrame(pScr, pScr->frameX0, pScr->frameY0);
+    }
 }
 
 /*
@@ -196,31 +197,37 @@ xf86SwitchMode(ScreenPtr pScreen, DisplayModePtr mode)
     int px, py;
     DeviceIntPtr dev, it;
 
-    if (!pScr->vtSema || !mode || !pScr->SwitchMode)
-        return FALSE;
+    if (!pScr->vtSema || !mode || !pScr->SwitchMode) {
+      return FALSE;
+    }
 
 #ifdef XFreeXDGA
-    if (DGAActive(pScr->scrnIndex))
-        return FALSE;
+    if (DGAActive(pScr->scrnIndex)) {
+      return FALSE;
+    }
 #endif
 
-    if (mode == pScr->currentMode)
-        return TRUE;
+    if (mode == pScr->currentMode) {
+      return TRUE;
+    }
 
-    if (mode->HDisplay > pScr->virtualX || mode->VDisplay > pScr->virtualY)
-        return FALSE;
+    if (mode->HDisplay > pScr->virtualX || mode->VDisplay > pScr->virtualY) {
+      return FALSE;
+    }
 
     /* Let's take an educated guess for which pointer to take here. And about as
        educated as it gets is to take the first pointer we find.
      */
     for (dev = inputInfo.devices; dev; dev = dev->next) {
-        if (IsPointerDevice(dev) && dev->spriteInfo->spriteOwner)
-            break;
+      if (IsPointerDevice(dev) && dev->spriteInfo->spriteOwner) {
+        break;
+      }
     }
 
     pCursorScreen = miPointerGetScreen(dev);
-    if (pScreen == pCursorScreen)
-        miPointerGetPosition(dev, &px, &py);
+    if (pScreen == pCursorScreen) {
+      miPointerGetPosition(dev, &px, &py);
+    }
 
     input_lock();
     Switched = (*pScr->SwitchMode) (pScr, mode);
@@ -231,14 +238,16 @@ xf86SwitchMode(ScreenPtr pScreen, DisplayModePtr mode)
          * Adjust frame for new display size.
          * Frame is centered around cursor position if cursor is on same screen.
          */
-        if (pScreen == pCursorScreen)
-            pScr->frameX0 = px - (mode->HDisplay / 2) + 1;
-        else
-            pScr->frameX0 =
-                (pScr->frameX0 + pScr->frameX1 + 1 - mode->HDisplay) / 2;
+        if (pScreen == pCursorScreen) {
+          pScr->frameX0 = px - (mode->HDisplay / 2) + 1;
+        } else {
+          pScr->frameX0 =
+              (pScr->frameX0 + pScr->frameX1 + 1 - mode->HDisplay) / 2;
+        }
 
-        if (pScr->frameX0 < 0)
-            pScr->frameX0 = 0;
+        if (pScr->frameX0 < 0) {
+          pScr->frameX0 = 0;
+        }
 
         pScr->frameX1 = pScr->frameX0 + mode->HDisplay - 1;
         if (pScr->frameX1 >= pScr->virtualX) {
@@ -246,14 +255,16 @@ xf86SwitchMode(ScreenPtr pScreen, DisplayModePtr mode)
             pScr->frameX1 = pScr->virtualX - 1;
         }
 
-        if (pScreen == pCursorScreen)
-            pScr->frameY0 = py - (mode->VDisplay / 2) + 1;
-        else
-            pScr->frameY0 =
-                (pScr->frameY0 + pScr->frameY1 + 1 - mode->VDisplay) / 2;
+        if (pScreen == pCursorScreen) {
+          pScr->frameY0 = py - (mode->VDisplay / 2) + 1;
+        } else {
+          pScr->frameY0 =
+              (pScr->frameY0 + pScr->frameY1 + 1 - mode->VDisplay) / 2;
+        }
 
-        if (pScr->frameY0 < 0)
-            pScr->frameY0 = 0;
+        if (pScr->frameY0 < 0) {
+          pScr->frameY0 = 0;
+        }
 
         pScr->frameY1 = pScr->frameY0 + mode->VDisplay - 1;
         if (pScr->frameY1 >= pScr->virtualY) {
@@ -263,8 +274,9 @@ xf86SwitchMode(ScreenPtr pScreen, DisplayModePtr mode)
     }
     input_unlock();
 
-    if (pScr->AdjustFrame)
-        (*pScr->AdjustFrame) (pScr, pScr->frameX0, pScr->frameY0);
+    if (pScr->AdjustFrame) {
+      (*pScr->AdjustFrame)(pScr, pScr->frameX0, pScr->frameY0);
+    }
 
     /* The original code centered the frame around the cursor if possible.
      * Since this is hard to achieve with multiple cursors, we do the following:
@@ -277,22 +289,25 @@ xf86SwitchMode(ScreenPtr pScreen, DisplayModePtr mode)
     }
 
     for (it = inputInfo.devices; it; it = it->next) {
-        if (it == dev)
-            continue;
+      if (it == dev) {
+        continue;
+      }
 
         if (IsPointerDevice(it) && it->spriteInfo->spriteOwner) {
             pCursorScreen = miPointerGetScreen(it);
             if (pScreen == pCursorScreen) {
                 miPointerGetPosition(it, &px, &py);
-                if (px < pScr->frameX0)
-                    px = pScr->frameX0;
-                else if (px > pScr->frameX1)
-                    px = pScr->frameX1;
+                if (px < pScr->frameX0) {
+                  px = pScr->frameX0;
+                } else if (px > pScr->frameX1) {
+                  px = pScr->frameX1;
+                }
 
-                if (py < pScr->frameY0)
-                    py = pScr->frameY0;
-                else if (py > pScr->frameY1)
-                    py = pScr->frameY1;
+                if (py < pScr->frameY0) {
+                  py = pScr->frameY0;
+                } else if (py > pScr->frameY1) {
+                  py = pScr->frameY1;
+                }
 
                 xf86WarpCursor(it, pScreen, px, py);
             }
@@ -313,14 +328,16 @@ xf86ZoomViewport(ScreenPtr pScreen, int zoom)
     ScrnInfoPtr pScr = xf86ScreenToScrn(pScreen);
     DisplayModePtr mode;
 
-    if (pScr->zoomLocked || !(mode = pScr->currentMode))
-        return;
+    if (pScr->zoomLocked || !(mode = pScr->currentMode)) {
+      return;
+    }
 
     do {
-        if (zoom > 0)
-            mode = mode->next;
-        else
-            mode = mode->prev;
+      if (zoom > 0) {
+        mode = mode->next;
+      } else {
+        mode = mode->prev;
+      }
     } while (mode != pScr->currentMode && !(mode->type & M_T_USERDEF));
 
     (void) xf86SwitchMode(pScreen, mode);
@@ -329,11 +346,13 @@ xf86ZoomViewport(ScreenPtr pScreen, int zoom)
 static xf86EdgePtr
 FindEdge(xf86EdgePtr edge, int val)
 {
-    while (edge && (edge->end <= val))
-        edge = edge->next;
+  while (edge && (edge->end <= val)) {
+    edge = edge->next;
+  }
 
-    if (edge && (edge->start <= val))
-        return edge;
+  if (edge && (edge->start <= val)) {
+    return edge;
+  }
 
     return NULL;
 }
@@ -349,82 +368,95 @@ xf86CursorOffScreen(ScreenPtr *pScreen, int *x, int *y)
     xf86EdgePtr edge;
     int tmp;
 
-    if (!dixGetScreenPtr(1))
-        return FALSE;
+    if (!dixGetScreenPtr(1)) {
+      return FALSE;
+    }
 
     if (*x < 0) {
         tmp = *y;
-        if (tmp < 0)
-            tmp = 0;
-        if (tmp >= (*pScreen)->height)
-            tmp = (*pScreen)->height - 1;
+        if (tmp < 0) {
+          tmp = 0;
+        }
+        if (tmp >= (*pScreen)->height) {
+          tmp = (*pScreen)->height - 1;
+        }
 
-        if ((edge = xf86ScreenLayout[(*pScreen)->myNum].left))
-            edge = FindEdge(edge, tmp);
+        if ((edge = xf86ScreenLayout[(*pScreen)->myNum].left)) {
+          edge = FindEdge(edge, tmp);
+        }
 
-        if (!edge)
-            *x = 0;
-        else {
-            *x += edge->offset.x;
-            *y += edge->offset.y;
-            *pScreen = xf86Screens[edge->screen]->pScreen;
+        if (!edge) {
+          *x = 0;
+        } else {
+          *x += edge->offset.x;
+          *y += edge->offset.y;
+          *pScreen = xf86Screens[edge->screen]->pScreen;
         }
     }
 
     if (*x >= (*pScreen)->width) {
         tmp = *y;
-        if (tmp < 0)
-            tmp = 0;
-        if (tmp >= (*pScreen)->height)
-            tmp = (*pScreen)->height - 1;
+        if (tmp < 0) {
+          tmp = 0;
+        }
+        if (tmp >= (*pScreen)->height) {
+          tmp = (*pScreen)->height - 1;
+        }
 
-        if ((edge = xf86ScreenLayout[(*pScreen)->myNum].right))
-            edge = FindEdge(edge, tmp);
+        if ((edge = xf86ScreenLayout[(*pScreen)->myNum].right)) {
+          edge = FindEdge(edge, tmp);
+        }
 
-        if (!edge)
-            *x = (*pScreen)->width - 1;
-        else {
-            *x += edge->offset.x;
-            *y += edge->offset.y;
-            *pScreen = xf86Screens[edge->screen]->pScreen;
+        if (!edge) {
+          *x = (*pScreen)->width - 1;
+        } else {
+          *x += edge->offset.x;
+          *y += edge->offset.y;
+          *pScreen = xf86Screens[edge->screen]->pScreen;
         }
     }
 
     if (*y < 0) {
         tmp = *x;
-        if (tmp < 0)
-            tmp = 0;
-        if (tmp >= (*pScreen)->width)
-            tmp = (*pScreen)->width - 1;
+        if (tmp < 0) {
+          tmp = 0;
+        }
+        if (tmp >= (*pScreen)->width) {
+          tmp = (*pScreen)->width - 1;
+        }
 
-        if ((edge = xf86ScreenLayout[(*pScreen)->myNum].up))
-            edge = FindEdge(edge, tmp);
+        if ((edge = xf86ScreenLayout[(*pScreen)->myNum].up)) {
+          edge = FindEdge(edge, tmp);
+        }
 
-        if (!edge)
-            *y = 0;
-        else {
-            *x += edge->offset.x;
-            *y += edge->offset.y;
-            *pScreen = xf86Screens[edge->screen]->pScreen;
+        if (!edge) {
+          *y = 0;
+        } else {
+          *x += edge->offset.x;
+          *y += edge->offset.y;
+          *pScreen = xf86Screens[edge->screen]->pScreen;
         }
     }
 
     if (*y >= (*pScreen)->height) {
         tmp = *x;
-        if (tmp < 0)
-            tmp = 0;
-        if (tmp >= (*pScreen)->width)
-            tmp = (*pScreen)->width - 1;
+        if (tmp < 0) {
+          tmp = 0;
+        }
+        if (tmp >= (*pScreen)->width) {
+          tmp = (*pScreen)->width - 1;
+        }
 
-        if ((edge = xf86ScreenLayout[(*pScreen)->myNum].down))
-            edge = FindEdge(edge, tmp);
+        if ((edge = xf86ScreenLayout[(*pScreen)->myNum].down)) {
+          edge = FindEdge(edge, tmp);
+        }
 
-        if (!edge)
-            *y = (*pScreen)->height - 1;
-        else {
-            *x += edge->offset.x;
-            *y += edge->offset.y;
-            (*pScreen) = xf86Screens[edge->screen]->pScreen;
+        if (!edge) {
+          *y = (*pScreen)->height - 1;
+        } else {
+          *x += edge->offset.x;
+          *y += edge->offset.y;
+          (*pScreen) = xf86Screens[edge->screen]->pScreen;
         }
     }
 
@@ -479,8 +511,9 @@ AddEdge(xf86EdgePtr edge,
         }
 
         if (!pEdge) {
-            if (!(pNew = calloc(1, sizeof(xf86EdgeRec))))
-                break;
+          if (!(pNew = calloc(1, sizeof(xf86EdgeRec)))) {
+            break;
+          }
 
             pNew->screen = screen;
             pNew->start = min;
@@ -489,16 +522,18 @@ AddEdge(xf86EdgePtr edge,
             pNew->offset.y = dy;
             pNew->next = NULL;
 
-            if (pPrev)
-                pPrev->next = pNew;
-            else
-                edge = pNew;
+            if (pPrev) {
+              pPrev->next = pNew;
+            } else {
+              edge = pNew;
+            }
 
             break;
         }
         else if (min < pEdge->start) {
-            if (!(pNew = calloc(1, sizeof(xf86EdgeRec))))
-                break;
+          if (!(pNew = calloc(1, sizeof(xf86EdgeRec)))) {
+            break;
+          }
 
             pNew->screen = screen;
             pNew->start = min;
@@ -506,10 +541,11 @@ AddEdge(xf86EdgePtr edge,
             pNew->offset.y = dy;
             pNew->next = pEdge;
 
-            if (pPrev)
-                pPrev->next = pNew;
-            else
-                edge = pNew;
+            if (pPrev) {
+              pPrev->next = pNew;
+            } else {
+              edge = pNew;
+            }
 
             if (max <= pEdge->start) {
                 pNew->end = max;
@@ -519,15 +555,16 @@ AddEdge(xf86EdgePtr edge,
                 pNew->end = pEdge->start;
                 min = pEdge->end;
             }
+        } else {
+          min = pEdge->end;
         }
-        else
-            min = pEdge->end;
 
         pPrev = pEdge;
         pEdge = pEdge->next;
 
-        if (max <= min)
-            break;
+        if (max <= min) {
+          break;
+        }
     }
 
     return edge;
@@ -539,8 +576,9 @@ FillOutEdge(xf86EdgePtr pEdge, int limit)
     xf86EdgePtr pNext;
     int diff;
 
-    if (pEdge->start > 0)
-        pEdge->start = 0;
+    if (pEdge->start > 0) {
+      pEdge->start = 0;
+    }
 
     while ((pNext = pEdge->next)) {
         diff = pNext->start - pEdge->end;
@@ -551,8 +589,9 @@ FillOutEdge(xf86EdgePtr pEdge, int limit)
         pEdge = pNext;
     }
 
-    if (pEdge->end < limit)
-        pEdge->end = limit;
+    if (pEdge->end < limit) {
+      pEdge->end = limit;
+    }
 }
 
 /*
@@ -577,8 +616,9 @@ xf86InitOrigins(void)
 
     while (1) {
         for (mask = screensLeft, i = 0; mask; mask >>= 1, i++) {
-            if (!(mask & 1L))
-                continue;
+          if (!(mask & 1L)) {
+            continue;
+          }
 
             screen = &xf86ConfigLayout.screens[i];
 
@@ -654,8 +694,9 @@ xf86InitOrigins(void)
                     ErrorF("Referenced uninitialized screen in Layout!\n");
                     break;
                 }
-                if (screensLeft & (1 << ref))
-                    break;
+                if (screensLeft & (1 << ref)) {
+                  break;
+                }
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x + screen->x;
                 pScreen->y = refScreen->y + screen->y;
@@ -667,8 +708,9 @@ xf86InitOrigins(void)
                     ErrorF("Referenced uninitialized screen in Layout!\n");
                     break;
                 }
-                if (screensLeft & (1 << ref))
-                    break;
+                if (screensLeft & (1 << ref)) {
+                  break;
+                }
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x + refScreen->width;
                 pScreen->y = refScreen->y;
@@ -680,8 +722,9 @@ xf86InitOrigins(void)
                     ErrorF("Referenced uninitialized screen in Layout!\n");
                     break;
                 }
-                if (screensLeft & (1 << ref))
-                    break;
+                if (screensLeft & (1 << ref)) {
+                  break;
+                }
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x - pScreen->width;
                 pScreen->y = refScreen->y;
@@ -693,8 +736,9 @@ xf86InitOrigins(void)
                     ErrorF("Referenced uninitialized screen in Layout!\n");
                     break;
                 }
-                if (screensLeft & (1 << ref))
-                    break;
+                if (screensLeft & (1 << ref)) {
+                  break;
+                }
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x;
                 pScreen->y = refScreen->y + refScreen->height;
@@ -706,8 +750,9 @@ xf86InitOrigins(void)
                     ErrorF("Referenced uninitialized screen in Layout!\n");
                     break;
                 }
-                if (screensLeft & (1 << ref))
-                    break;
+                if (screensLeft & (1 << ref)) {
+                  break;
+                }
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x;
                 pScreen->y = refScreen->y - pScreen->height;
@@ -720,8 +765,9 @@ xf86InitOrigins(void)
 
         }
 
-        if (!screensLeft)
-            break;
+        if (!screensLeft) {
+          break;
+        }
 
         if (screensLeft == prevScreensLeft) {
             /* All the remaining screens are referencing each other.
@@ -744,10 +790,12 @@ xf86InitOrigins(void)
     minY = xf86Screens[0]->pScreen->y;
 
     for (i = 1; i < xf86NumScreens; i++) {
-        if (xf86Screens[i]->pScreen->x < minX)
-            minX = xf86Screens[i]->pScreen->x;
-        if (xf86Screens[i]->pScreen->y < minY)
-            minY = xf86Screens[i]->pScreen->y;
+      if (xf86Screens[i]->pScreen->x < minX) {
+        minX = xf86Screens[i]->pScreen->x;
+      }
+      if (xf86Screens[i]->pScreen->y < minY) {
+        minY = xf86Screens[i]->pScreen->y;
+      }
     }
 
     if (minX || minY) {
@@ -771,8 +819,9 @@ xf86InitOrigins(void)
             bottom = top + pScreen->height;
 
             for (j = 0; j < xf86NumScreens; j++) {
-                if (i == j)
-                    continue;
+              if (i == j) {
+                continue;
+              }
 
                 refScreen = xf86Screens[j]->pScreen;
 
@@ -783,40 +832,48 @@ xf86InitOrigins(void)
 
                 if ((bottom > y1) && (top < y2)) {
                     min = y1 - top;
-                    if (min < 0)
-                        min = 0;
+                    if (min < 0) {
+                      min = 0;
+                    }
                     max = pScreen->height - (bottom - y2);
-                    if (max > pScreen->height)
-                        max = pScreen->height;
+                    if (max > pScreen->height) {
+                      max = pScreen->height;
+                    }
 
-                    if (((left - 1) >= x1) && ((left - 1) < x2))
-                        pLayout->left = AddEdge(pLayout->left, min, max,
-                                                pScreen->x - refScreen->x,
-                                                pScreen->y - refScreen->y, j);
+                    if (((left - 1) >= x1) && ((left - 1) < x2)) {
+                      pLayout->left = AddEdge(pLayout->left, min, max,
+                                              pScreen->x - refScreen->x,
+                                              pScreen->y - refScreen->y, j);
+                    }
 
-                    if ((right >= x1) && (right < x2))
-                        pLayout->right = AddEdge(pLayout->right, min, max,
-                                                 pScreen->x - refScreen->x,
-                                                 pScreen->y - refScreen->y, j);
+                    if ((right >= x1) && (right < x2)) {
+                      pLayout->right = AddEdge(pLayout->right, min, max,
+                                               pScreen->x - refScreen->x,
+                                               pScreen->y - refScreen->y, j);
+                    }
                 }
 
                 if ((left < x2) && (right > x1)) {
                     min = x1 - left;
-                    if (min < 0)
-                        min = 0;
+                    if (min < 0) {
+                      min = 0;
+                    }
                     max = pScreen->width - (right - x2);
-                    if (max > pScreen->width)
-                        max = pScreen->width;
+                    if (max > pScreen->width) {
+                      max = pScreen->width;
+                    }
 
-                    if (((top - 1) >= y1) && ((top - 1) < y2))
-                        pLayout->up = AddEdge(pLayout->up, min, max,
+                    if (((top - 1) >= y1) && ((top - 1) < y2)) {
+                      pLayout->up = AddEdge(pLayout->up, min, max,
+                                            pScreen->x - refScreen->x,
+                                            pScreen->y - refScreen->y, j);
+                    }
+
+                    if ((bottom >= y1) && (bottom < y2)) {
+                      pLayout->down = AddEdge(pLayout->down, min, max,
                                               pScreen->x - refScreen->x,
                                               pScreen->y - refScreen->y, j);
-
-                    if ((bottom >= y1) && (bottom < y2))
-                        pLayout->down = AddEdge(pLayout->down, min, max,
-                                                pScreen->x - refScreen->x,
-                                                pScreen->y - refScreen->y, j);
+                    }
                 }
             }
         }
@@ -826,14 +883,18 @@ xf86InitOrigins(void)
         for (i = 0; i < xf86NumScreens; i++) {
             pLayout = &xf86ScreenLayout[i];
             pScreen = xf86Screens[i]->pScreen;
-            if (pLayout->left)
-                FillOutEdge(pLayout->left, pScreen->height);
-            if (pLayout->right)
-                FillOutEdge(pLayout->right, pScreen->height);
-            if (pLayout->up)
-                FillOutEdge(pLayout->up, pScreen->width);
-            if (pLayout->down)
-                FillOutEdge(pLayout->down, pScreen->width);
+            if (pLayout->left) {
+              FillOutEdge(pLayout->left, pScreen->height);
+            }
+            if (pLayout->right) {
+              FillOutEdge(pLayout->right, pScreen->height);
+            }
+            if (pLayout->up) {
+              FillOutEdge(pLayout->up, pScreen->width);
+            }
+            if (pLayout->down) {
+              FillOutEdge(pLayout->down, pScreen->width);
+            }
         }
     }
 

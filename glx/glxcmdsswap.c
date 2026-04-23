@@ -559,8 +559,9 @@ __glXDispSwap_BindTexImageEXT(__GLXclientState * cl, GLbyte * pc)
     int *buffer;
     CARD32 *num_attribs;
 
-    if ((sizeof(xGLXVendorPrivateReq) + 12) >> 2 > client->req_len)
-        return BadLength;
+    if ((sizeof(xGLXVendorPrivateReq) + 12) >> 2 > client->req_len) {
+      return BadLength;
+    }
 
     pc += __GLX_VENDPRIV_HDR_SIZE;
 

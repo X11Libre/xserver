@@ -83,11 +83,13 @@ test_values_XIRawEvent(RawDeviceEvent *in, xXIRawEvent * out, BOOL swap)
     bits_set = 0;
 
     for (i = 0; out->valuators_len && i < sizeof(in->valuators.mask) * 8; i++) {
-        if (i >= MAX_VALUATORS)
-            assert(!XIMaskIsSet(in->valuators.mask, i));
+      if (i >= MAX_VALUATORS) {
+        assert(!XIMaskIsSet(in->valuators.mask, i));
+      }
         assert(XIMaskIsSet(in->valuators.mask, i) == XIMaskIsSet(ptr, i));
-        if (XIMaskIsSet(in->valuators.mask, i))
-            bits_set++;
+        if (XIMaskIsSet(in->valuators.mask, i)) {
+          bits_set++;
+        }
     }
 
     /* length is len of valuator mask (in 4-byte units) + the number of bits
@@ -352,13 +354,16 @@ test_values_XIDeviceEvent(DeviceEvent *in, xXIDeviceEvent * out, BOOL swap)
     }
 
     ptr = (unsigned char *) &out[1];
-    for (i = 0; i < sizeof(in->buttons) * 8; i++)
-        assert(XIMaskIsSet(in->buttons, i) == XIMaskIsSet(ptr, i));
+    for (i = 0; i < sizeof(in->buttons) * 8; i++) {
+      assert(XIMaskIsSet(in->buttons, i) == XIMaskIsSet(ptr, i));
+    }
 
     valuators = 0;
-    for (i = 0; i < MAX_VALUATORS; i++)
-        if (XIMaskIsSet(in->valuators.mask, i))
-            valuators++;
+    for (i = 0; i < MAX_VALUATORS; i++) {
+      if (XIMaskIsSet(in->valuators.mask, i)) {
+        valuators++;
+      }
+    }
 
     assert(out->valuators_len >= bytes_to_int32(bits_to_bytes(valuators)));
 
@@ -369,29 +374,28 @@ test_values_XIDeviceEvent(DeviceEvent *in, xXIDeviceEvent * out, BOOL swap)
         if (i >= MAX_VALUATORS) {
             assert(!XIMaskIsSet(in->valuators.mask, i));
             assert(!XIMaskIsSet(ptr, i));
-        }
-        else if (i > sizeof(in->valuators.mask) * 8)
-            assert(!XIMaskIsSet(ptr, i));
-        else if (i > out->valuators_len * 4 * 8)
-            assert(!XIMaskIsSet(in->valuators.mask, i));
-        else {
-            assert(XIMaskIsSet(in->valuators.mask, i) == XIMaskIsSet(ptr, i));
+        } else if (i > sizeof(in->valuators.mask) * 8) {
+          assert(!XIMaskIsSet(ptr, i));
+        } else if (i > out->valuators_len * 4 * 8) {
+          assert(!XIMaskIsSet(in->valuators.mask, i));
+        } else {
+          assert(XIMaskIsSet(in->valuators.mask, i) == XIMaskIsSet(ptr, i));
 
-            if (XIMaskIsSet(ptr, i)) {
-                FP3232 vi, vo;
+          if (XIMaskIsSet(ptr, i)) {
+            FP3232 vi, vo;
 
-                vi = double_to_fp3232(in->valuators.data[i]);
-                vo = *values;
+            vi = double_to_fp3232(in->valuators.data[i]);
+            vo = *values;
 
-                if (swap) {
-                    swapl(&vo.integral);
-                    swapl(&vo.frac);
-                }
-
-                assert(vi.integral == vo.integral);
-                assert(vi.frac == vo.frac);
-                values++;
+            if (swap) {
+              swapl(&vo.integral);
+              swapl(&vo.frac);
             }
+
+            assert(vi.integral == vo.integral);
+            assert(vi.frac == vo.frac);
+            values++;
+          }
         }
     }
 }
@@ -734,9 +738,10 @@ test_values_XIDeviceChangedEvent(DeviceChangedEvent *in,
                        SCROLL_TYPE_HORIZONTAL);
                 break;
             }
-            if (s->flags & XIScrollFlagPreferred)
-                assert(in->valuators[s->number].scroll.
-                       flags & SCROLL_FLAG_PREFERRED);
+            if (s->flags & XIScrollFlagPreferred) {
+              assert(in->valuators[s->number].scroll.flags &
+                     SCROLL_FLAG_PREFERRED);
+            }
         }
         default:
             dbg("Invalid class type.\n\n");
@@ -787,8 +792,9 @@ test_convert_XIDeviceChangedEvent(void)
         DEVCHANGE_SLAVE_SWITCH | DEVCHANGE_POINTER_EVENT |
         DEVCHANGE_KEYBOARD_EVENT;
 
-    for (i = 0; i < MAX_BUTTONS; i++)
-        in.buttons.names[i] = i + 10;
+    for (i = 0; i < MAX_BUTTONS; i++) {
+      in.buttons.names[i] = i + 10;
+    }
 
     in.keys.min_keycode = 8;
     in.keys.max_keycode = 255;
@@ -983,8 +989,9 @@ test_convert_XITouchOwnershipEvent(void)
     for (i = 1;; i <<= 1) {
         in.touchid = i;
         test_XITouchOwnershipEvent(&in);
-        if (i == ((long) 1 << 31))
-            break;
+        if (i == ((long)1 << 31)) {
+          break;
+        }
     }
 }
 

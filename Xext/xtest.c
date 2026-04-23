@@ -170,8 +170,10 @@ XTestDeviceSendEvents(DeviceIntPtr dev,
         break;
     }
 
-    for (i = 0; i < nevents; i++)
-        mieqProcessDeviceEvent(dev, &xtest_evlist[i], miPointerGetScreen(inputInfo.pointer));
+    for (i = 0; i < nevents; i++) {
+      mieqProcessDeviceEvent(dev, &xtest_evlist[i],
+                             miPointerGetScreen(inputInfo.pointer));
+    }
 }
 
 static int
@@ -200,8 +202,9 @@ ProcXTestFakeInput(ClientPtr client)
     int need_ptr_update = 1;
 
     nev = (client->req_len << 2) - sizeof(xReq);
-    if ((nev % sizeof(xEvent)) || !nev)
-        return BadLength;
+    if ((nev % sizeof(xEvent)) || !nev) {
+      return BadLength;
+    }
     nev /= sizeof(xEvent);
     UpdateCurrentTime();
     ev = (xEvent *) &((xReq *) stuff)[1];
@@ -321,8 +324,9 @@ ProcXTestFakeInput(ClientPtr client)
 
     }
     else {
-        if (nev != 1)
-            return BadLength;
+      if (nev != 1) {
+        return BadLength;
+      }
         switch (type) {
         case KeyPress:
         case KeyRelease:
@@ -338,8 +342,9 @@ ProcXTestFakeInput(ClientPtr client)
             valuators[1] = ev->u.keyButtonPointer.rootY;
             numValuators = 2;
             firstValuator = 0;
-            if (ev->u.u.detail == xFalse)
-                flags = POINTER_ABSOLUTE | POINTER_DESKTOP;
+            if (ev->u.u.detail == xFalse) {
+              flags = POINTER_ABSOLUTE | POINTER_DESKTOP;
+            }
             break;
         default:
             client->errorValue = ev->u.u.type;
@@ -450,8 +455,9 @@ ProcXTestFakeInput(ClientPtr client)
         }
         break;
     }
-    if (screenIsSaved == SCREEN_SAVER_ON)
-        dixSaveScreens(serverClient, SCREEN_SAVER_OFF, ScreenSaverReset);
+    if (screenIsSaved == SCREEN_SAVER_ON) {
+      dixSaveScreens(serverClient, SCREEN_SAVER_OFF, ScreenSaverReset);
+    }
 
     valuator_mask_set_range(&mask, firstValuator, numValuators, valuators);
 

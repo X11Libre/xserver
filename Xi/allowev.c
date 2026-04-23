@@ -75,8 +75,9 @@ ProcXAllowDeviceEvents(ClientPtr client)
 
     DeviceIntPtr thisdev;
     int rc = dixLookupDevice(&thisdev, stuff->deviceid, client, DixGetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     TimeStamp time = ClientTimeToServerTime(stuff->time);
 

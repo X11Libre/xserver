@@ -155,11 +155,13 @@ dix_main(int argc, char *argv[], char *envp[])
         OsInit();
 
             CreateWellKnownSockets();
-            for (int i = 1; i < LimitClients; i++)
-                clients[i] = NULL;
+            for (int i = 1; i < LimitClients; i++) {
+              clients[i] = NULL;
+            }
             serverClient = calloc(1, sizeof(ClientRec));
-            if (!serverClient)
-                FatalError("couldn't create server client");
+            if (!serverClient) {
+              FatalError("couldn't create server client");
+            }
             InitClient(serverClient, 0, (void *) NULL);
 
         clients[0] = serverClient;
@@ -174,11 +176,13 @@ dix_main(int argc, char *argv[], char *envp[])
         /* Initialize server client devPrivates, to be reallocated as
          * more client privates are registered
          */
-        if (!dixAllocatePrivates(&serverClient->devPrivates, PRIVATE_CLIENT))
-            FatalError("failed to create server client privates");
+        if (!dixAllocatePrivates(&serverClient->devPrivates, PRIVATE_CLIENT)) {
+          FatalError("failed to create server client privates");
+        }
 
-        if (!InitClientResources(serverClient)) /* for root resources */
-            FatalError("couldn't init server resources");
+        if (!InitClientResources(serverClient)) { /* for root resources */
+          FatalError("couldn't init server resources");
+        }
 
         HWEventQueueType alwaysCheckForInput[2] = { 0, 1 };
         SetInputCheck(&alwaysCheckForInput[0], &alwaysCheckForInput[1]);
@@ -192,8 +196,9 @@ dix_main(int argc, char *argv[], char *envp[])
         InitCallbackManager();
         InitOutput(argc, argv);
 
-        if (screenInfo.numScreens < 1)
-            FatalError("no screens found");
+        if (screenInfo.numScreens < 1) {
+          FatalError("no screens found");
+        }
         LogMessageVerb(X_INFO, 1, "Output(s) initialized\n");
 
         InitExtensions(argc, argv);
@@ -245,8 +250,9 @@ dix_main(int argc, char *argv[], char *envp[])
         /*
          * Consolidate window and colourmap information for each screen
          */
-        if (!noPanoramiXExtension)
-            PanoramiXConsolidate();
+        if (!noPanoramiXExtension) {
+          PanoramiXConsolidate();
+        }
 #endif /* XINERAMA */
 
         DIX_FOR_EACH_SCREEN({
@@ -293,8 +299,9 @@ dix_main(int argc, char *argv[], char *envp[])
         DisableAllDevices();
 
         /* Now free up whatever must be freed */
-        if (screenIsSaved == SCREEN_SAVER_ON)
-            dixSaveScreens(serverClient, SCREEN_SAVER_OFF, ScreenSaverReset);
+        if (screenIsSaved == SCREEN_SAVER_ON) {
+          dixSaveScreens(serverClient, SCREEN_SAVER_OFF, ScreenSaverReset);
+        }
         FreeScreenSaverTimer();
         CloseDownExtensions();
 

@@ -61,24 +61,28 @@ Bool
 xf86VTSwitchAway(void)
 {
     xf86Info.vtRequestsPending = FALSE;
-    if (seatd_libseat_controls_session())
-        return TRUE;
-    if (ioctl(xf86Info.consoleFd, VT_RELDISP, 1) < 0)
-        return FALSE;
-    else
-        return TRUE;
+    if (seatd_libseat_controls_session()) {
+      return TRUE;
+    }
+    if (ioctl(xf86Info.consoleFd, VT_RELDISP, 1) < 0) {
+      return FALSE;
+    } else {
+      return TRUE;
+    }
 }
 
 Bool
 xf86VTSwitchTo(void)
 {
     xf86Info.vtRequestsPending = FALSE;
-    if (seatd_libseat_controls_session())
-        return TRUE;
-    if (ioctl(xf86Info.consoleFd, VT_RELDISP, VT_ACKACQ) < 0)
-        return FALSE;
-    else
-        return TRUE;
+    if (seatd_libseat_controls_session()) {
+      return TRUE;
+    }
+    if (ioctl(xf86Info.consoleFd, VT_RELDISP, VT_ACKACQ) < 0) {
+      return FALSE;
+    } else {
+      return TRUE;
+    }
 }
 
 Bool

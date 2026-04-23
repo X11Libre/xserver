@@ -54,14 +54,17 @@ ShadowFBInit2(ScreenPtr pScreen,
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     ShadowScreenPtr pPriv;
 
-    if (!preRefreshArea && !postRefreshArea)
-        return FALSE;
+    if (!preRefreshArea && !postRefreshArea) {
+      return FALSE;
+    }
 
-    if (!dixRegisterPrivateKey(&ShadowScreenKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&ShadowScreenKeyRec, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
 
-    if (!(pPriv = (ShadowScreenPtr) calloc(1, sizeof(ShadowScreenRec))))
-        return FALSE;
+    if (!(pPriv = (ShadowScreenPtr)calloc(1, sizeof(ShadowScreenRec)))) {
+      return FALSE;
+    }
 
     dixSetPrivate(&pScreen->devPrivates, &ShadowScreenKeyRec, pPriv);
 
@@ -97,8 +100,9 @@ shadowfbReportPre(DamagePtr damage, RegionPtr reg, void *closure)
 {
     ShadowScreenPtr pPriv = closure;
 
-    if (!pPriv->pScrn->vtSema)
-        return;
+    if (!pPriv->pScrn->vtSema) {
+      return;
+    }
 
     pPriv->preRefresh(pPriv->pScrn, RegionNumRects(reg), RegionRects(reg));
 }
@@ -108,8 +112,9 @@ shadowfbReportPost(DamagePtr damage, RegionPtr reg, void *closure)
 {
     ShadowScreenPtr pPriv = closure;
 
-    if (!pPriv->pScrn->vtSema)
-        return;
+    if (!pPriv->pScrn->vtSema) {
+      return;
+    }
 
     pPriv->postRefresh(pPriv->pScrn, RegionNumRects(reg), RegionRects(reg));
 }
@@ -122,8 +127,9 @@ ShadowCreateRootWindow(WindowPtr pWin)
     ShadowScreenPtr pPriv = shadowfbGetScreenPrivate(pScreen);
 
     /* paranoia */
-    if (pWin != pScreen->root)
-        ErrorF("ShadowCreateRootWindow called unexpectedly\n");
+    if (pWin != pScreen->root) {
+      ErrorF("ShadowCreateRootWindow called unexpectedly\n");
+    }
 
     /* call down, but don't hook ourselves back in; we know the first time
      * we're called it's for the root window.
@@ -161,8 +167,9 @@ static void ShadowCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *un
     dixScreenUnhookClose(pScreen, ShadowCloseScreen);
 
     ShadowScreenPtr pPriv = shadowfbGetScreenPrivate(pScreen);
-    if (!pPriv)
-        return;
+    if (!pPriv) {
+      return;
+    }
 
     free(pPriv);
     dixSetPrivate(&pScreen->devPrivates, &ShadowScreenKeyRec, NULL);

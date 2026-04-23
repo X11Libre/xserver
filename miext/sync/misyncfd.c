@@ -38,8 +38,9 @@ typedef struct _SyncFdScreenPrivate {
 
 static inline SyncFdScreenPrivatePtr sync_fd_screen_priv(ScreenPtr pScreen)
 {
-    if (!dixPrivateKeyRegistered(&syncFdScreenPrivateKey))
-        return NULL;
+  if (!dixPrivateKeyRegistered(&syncFdScreenPrivateKey)) {
+    return NULL;
+  }
     return dixLookupPrivate(&pScreen->devPrivates, &syncFdScreenPrivateKey);
 }
 
@@ -49,8 +50,9 @@ miSyncInitFenceFromFD(DrawablePtr pDraw, SyncFence *pFence, int fd, BOOL initial
 {
     SyncFdScreenPrivatePtr      priv = sync_fd_screen_priv(pDraw->pScreen);
 
-    if (!priv)
-        return BadMatch;
+    if (!priv) {
+      return BadMatch;
+    }
 
     return (*priv->funcs.CreateFenceFromFd)(pDraw->pScreen, pFence, fd, initially_triggered);
 }
@@ -60,8 +62,9 @@ miSyncFDFromFence(DrawablePtr pDraw, SyncFence *pFence)
 {
     SyncFdScreenPrivatePtr      priv = sync_fd_screen_priv(pDraw->pScreen);
 
-    if (!priv)
-        return -1;
+    if (!priv) {
+      return -1;
+    }
 
     return (*priv->funcs.GetFenceFd)(pDraw->pScreen, pFence);
 }
@@ -72,20 +75,24 @@ Bool miSyncFdScreenInit(ScreenPtr pScreen,
     SyncFdScreenPrivatePtr     priv;
 
     /* Check to see if we've already been initialized */
-    if (sync_fd_screen_priv(pScreen) != NULL)
-        return FALSE;
+    if (sync_fd_screen_priv(pScreen) != NULL) {
+      return FALSE;
+    }
 
-    if (!miSyncSetup(pScreen))
-        return FALSE;
+    if (!miSyncSetup(pScreen)) {
+      return FALSE;
+    }
 
     if (!dixPrivateKeyRegistered(&syncFdScreenPrivateKey)) {
-        if (!dixRegisterPrivateKey(&syncFdScreenPrivateKey, PRIVATE_SCREEN, 0))
-            return FALSE;
+      if (!dixRegisterPrivateKey(&syncFdScreenPrivateKey, PRIVATE_SCREEN, 0)) {
+        return FALSE;
+      }
     }
 
     priv = calloc(1, sizeof (SyncFdScreenPrivateRec));
-    if (!priv)
-        return FALSE;
+    if (!priv) {
+      return FALSE;
+    }
 
     /* Will require version checks when there are multiple versions
      * of the funcs structure

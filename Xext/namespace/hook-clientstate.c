@@ -47,8 +47,9 @@ void hookClientDestroy(CallbackListPtr *pcbl, void *unused, void *calldata)
     ClientPtr client = calldata;
     struct XnamespaceClientPriv *subj = XnsClientPriv(client);
 
-    if (!subj)
-        return; /* no XNS devprivate assigned ? */
+    if (!subj) {
+      return; /* no XNS devprivate assigned ? */
+    }
 
     XnamespaceAssignClient(subj, NULL);
     /* the devprivate is embedded, so no free() necessary */

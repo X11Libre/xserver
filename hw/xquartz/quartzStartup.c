@@ -82,8 +82,9 @@ void
 QuartzInitServer(int argc, char **argv, char **envp)
 {
     struct arg *args = calloc(1, sizeof(struct arg));
-    if (!args)
-        FatalError("Could not allocate memory.\n");
+    if (!args) {
+      FatalError("Could not allocate memory.\n");
+    }
 
     args->argc = argc;
     args->argv = argv;

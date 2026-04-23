@@ -135,8 +135,9 @@ EventToCore(InternalEvent *event, xEvent **core_out, int *count_out)
         }
 
         core = calloc(1, sizeof(*core));
-        if (!core)
-            return BadAlloc;
+        if (!core) {
+          return BadAlloc;
+        }
         count = 1;
         core->u.u.type = e->type - ET_KeyPress + KeyPress;
         core->u.u.detail = e->detail.key & 0xFF;
@@ -366,8 +367,9 @@ eventToKeyButtonPointer(DeviceEvent *ev, xEvent **xi, int *count)
     EventSetKeyRepeatFlag((xEvent *) kbp,
                           (ev->type == ET_KeyPress && ev->key_repeat));
 
-    if (num_events > 1)
-        kbp->deviceid |= MORE_EVENTS;
+    if (num_events > 1) {
+      kbp->deviceid |= MORE_EVENTS;
+    }
 
     switch (ev->type) {
     case ET_Motion:
@@ -414,8 +416,9 @@ countValuators(DeviceEvent *ev, int *first)
 
     for (int i = 0; i < sizeof(ev->valuators.mask) * 8; i++) {
         if (BitIsOn(ev->valuators.mask, i)) {
-            if (first_valuator == -1)
-                first_valuator = i;
+          if (first_valuator == -1) {
+            first_valuator = i;
+          }
             last_valuator = i;
         }
     }
@@ -457,11 +460,13 @@ getValuatorEvents(DeviceEvent *ev, deviceValuator * xv)
 
         /* Unset valuators in masked valuator events have the proper data values
          * in the case of an absolute axis in between two set valuators. */
-        for (int j = 0; j < xv->num_valuators; j++)
-            valuators[j] = ev->valuators.data[xv->first_valuator + j];
+        for (int j = 0; j < xv->num_valuators; j++) {
+          valuators[j] = ev->valuators.data[xv->first_valuator + j];
+        }
 
-        if (i + 6 < num_valuators)
-            xv->deviceid |= MORE_EVENTS;
+        if (i + 6 < num_valuators) {
+          xv->deviceid |= MORE_EVENTS;
+        }
     }
 
     return (num_valuators + 5) / 6;
@@ -478,8 +483,9 @@ appendKeyInfo(DeviceChangedEvent *dce, xXIKeyInfo * info)
     info->sourceid = dce->sourceid;
 
     kc = (uint32_t *) &info[1];
-    for (int i = 0; i < info->num_keycodes; i++)
-        *kc++ = i + dce->keys.min_keycode;
+    for (int i = 0; i < info->num_keycodes; i++) {
+      *kc++ = i + dce->keys.min_keycode;
+    }
 
     return info->length * 4;
 }
@@ -531,8 +537,9 @@ appendValuatorInfo(DeviceChangedEvent *dce, xXIValuatorInfo * info,
 static int
 appendScrollInfo(DeviceChangedEvent *dce, xXIScrollInfo * info, int axisnumber)
 {
-    if (dce->valuators[axisnumber].scroll.type == SCROLL_TYPE_NONE)
-        return 0;
+  if (dce->valuators[axisnumber].scroll.type == SCROLL_TYPE_NONE) {
+    return 0;
+  }
 
     info->type = XIScrollClass;
     info->length = sizeof(xXIScrollInfo) / 4;
@@ -555,10 +562,12 @@ appendScrollInfo(DeviceChangedEvent *dce, xXIScrollInfo * info, int axisnumber)
 
     info->flags = 0;
 
-    if (dce->valuators[axisnumber].scroll.flags & SCROLL_FLAG_DONT_EMULATE)
-        info->flags |= XIScrollFlagNoEmulation;
-    if (dce->valuators[axisnumber].scroll.flags & SCROLL_FLAG_PREFERRED)
-        info->flags |= XIScrollFlagPreferred;
+    if (dce->valuators[axisnumber].scroll.flags & SCROLL_FLAG_DONT_EMULATE) {
+      info->flags |= XIScrollFlagNoEmulation;
+    }
+    if (dce->valuators[axisnumber].scroll.flags & SCROLL_FLAG_PREFERRED) {
+      info->flags |= XIScrollFlagPreferred;
+    }
 
     return info->length * 4;
 }
@@ -579,9 +588,11 @@ eventToDeviceChanged(DeviceChangedEvent *dce, xEvent **xi)
     if (dce->num_valuators) {
         len += sizeof(xXIValuatorInfo) * dce->num_valuators;
 
-        for (int i = 0; i < dce->num_valuators; i++)
-            if (dce->valuators[i].scroll.type != SCROLL_TYPE_NONE)
-                len += sizeof(xXIScrollInfo);
+        for (int i = 0; i < dce->num_valuators; i++) {
+          if (dce->valuators[i].scroll.type != SCROLL_TYPE_NONE) {
+            len += sizeof(xXIScrollInfo);
+          }
+        }
     }
 
     nkeys = (dce->keys.max_keycode > 0) ?
@@ -621,8 +632,9 @@ eventToDeviceChanged(DeviceChangedEvent *dce, xEvent **xi)
 
     if (dce->num_valuators) {
         dcce->num_classes += dce->num_valuators;
-        for (int i = 0; i < dce->num_valuators; i++)
-            ptr += appendValuatorInfo(dce, (xXIValuatorInfo *) ptr, i);
+        for (int i = 0; i < dce->num_valuators; i++) {
+          ptr += appendValuatorInfo(dce, (xXIValuatorInfo *)ptr, i);
+        }
 
         for (int i = 0; i < dce->num_valuators; i++) {
             if (dce->valuators[i].scroll.type != SCROLL_TYPE_NONE) {
@@ -674,18 +686,20 @@ eventToDeviceEvent(DeviceEvent *ev, xEvent **xi)
     len += vallen * 4;          /* valuators mask */
 
     *xi = calloc(1, len);
-    if (*xi == NULL)
-        return BadAlloc;
+    if (*xi == NULL) {
+      return BadAlloc;
+    }
     xde = (xXIDeviceEvent *) * xi;
     xde->type = GenericEvent;
     xde->extension = EXTENSION_MAJOR_XINPUT;
     xde->evtype = GetXI2Type(ev->type);
     xde->time = ev->time;
     xde->length = bytes_to_int32(len - sizeof(xEvent));
-    if (IsTouchEvent((InternalEvent *) ev))
-        xde->detail = ev->touchid;
-    else
-        xde->detail = ev->detail.button;
+    if (IsTouchEvent((InternalEvent *)ev)) {
+      xde->detail = ev->touchid;
+    } else {
+      xde->detail = ev->detail.button;
+    }
 
     xde->root = ev->root;
     xde->buttons_len = btlen;
@@ -696,16 +710,19 @@ eventToDeviceEvent(DeviceEvent *ev, xEvent **xi)
     xde->root_y = double_to_fp1616(ev->root_y + ev->root_y_frac);
 
     if (IsTouchEvent((InternalEvent *)ev)) {
-        if (ev->type == ET_TouchUpdate)
-            xde->flags |= (ev->flags & TOUCH_PENDING_END) ? XITouchPendingEnd : 0;
+      if (ev->type == ET_TouchUpdate) {
+        xde->flags |= (ev->flags & TOUCH_PENDING_END) ? XITouchPendingEnd : 0;
+      }
 
-        if (ev->flags & TOUCH_POINTER_EMULATED)
-            xde->flags |= XITouchEmulatingPointer;
+      if (ev->flags & TOUCH_POINTER_EMULATED) {
+        xde->flags |= XITouchEmulatingPointer;
+      }
     } else {
         xde->flags = ev->flags;
 
-        if (ev->key_repeat)
-            xde->flags |= XIKeyRepeat;
+        if (ev->key_repeat) {
+          xde->flags |= XIKeyRepeat;
+        }
     }
 
     xde->mods.base_mods = ev->mods.base;
@@ -720,8 +737,9 @@ eventToDeviceEvent(DeviceEvent *ev, xEvent **xi)
 
     ptr = (char *) &xde[1];
     for (int i = 0; i < sizeof(ev->buttons) * 8; i++) {
-        if (BitIsOn(ev->buttons, i))
-            SetBit(ptr, i);
+      if (BitIsOn(ev->buttons, i)) {
+        SetBit(ptr, i);
+      }
     }
 
     ptr += xde->buttons_len * 4;
@@ -744,8 +762,9 @@ eventToTouchOwnershipEvent(TouchOwnershipEvent *ev, xEvent **xi)
     xXITouchOwnershipEvent *xtoe;
 
     *xi = calloc(1, len);
-    if (*xi == NULL)
-        return BadAlloc;
+    if (*xi == NULL) {
+      return BadAlloc;
+    }
     xtoe = (xXITouchOwnershipEvent *) * xi;
     xtoe->type = GenericEvent;
     xtoe->extension = EXTENSION_MAJOR_XINPUT;
@@ -776,8 +795,9 @@ eventToRawEvent(RawDeviceEvent *ev, xEvent **xi)
     len += vallen * 4;          /* valuators mask */
 
     *xi = calloc(1, len);
-    if (*xi == NULL)
-        return BadAlloc;
+    if (*xi == NULL) {
+      return BadAlloc;
+    }
     raw = (xXIRawEvent *) * xi;
     raw->type = GenericEvent;
     raw->extension = EXTENSION_MAJOR_XINPUT;
@@ -813,8 +833,9 @@ eventToBarrierEvent(BarrierEvent *ev, xEvent **xi)
     int len = sizeof(xXIBarrierEvent);
 
     *xi = calloc(1, len);
-    if (*xi == NULL)
-        return BadAlloc;
+    if (*xi == NULL) {
+      return BadAlloc;
+    }
     barrier = (xXIBarrierEvent*) *xi;
     barrier->type = GenericEvent;
     barrier->extension = EXTENSION_MAJOR_XINPUT;
@@ -844,8 +865,9 @@ eventToGesturePinchEvent(GestureEvent *ev, xEvent **xi)
     xXIGesturePinchEvent *xpe;
 
     *xi = calloc(1, len);
-    if (*xi == NULL)
-        return BadAlloc;
+    if (*xi == NULL) {
+      return BadAlloc;
+    }
     xpe = (xXIGesturePinchEvent *) * xi;
     xpe->type = GenericEvent;
     xpe->extension = EXTENSION_MAJOR_XINPUT;
@@ -888,8 +910,9 @@ eventToGestureSwipeEvent(GestureEvent *ev, xEvent **xi)
     xXIGestureSwipeEvent *xde;
 
     *xi = calloc(1, len);
-    if (*xi == NULL)
-        return BadAlloc;
+    if (*xi == NULL) {
+      return BadAlloc;
+    }
     xde = (xXIGestureSwipeEvent *) * xi;
     xde->type = GenericEvent;
     xde->extension = EXTENSION_MAJOR_XINPUT;

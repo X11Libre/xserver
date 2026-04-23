@@ -48,16 +48,19 @@ xf86_dga_get_modes(ScreenPtr pScreen)
     while (display_mode) {
         num++;
         display_mode = display_mode->next;
-        if (display_mode == scrn->modes)
-            break;
+        if (display_mode == scrn->modes) {
+          break;
+        }
     }
 
-    if (!num)
-        return FALSE;
+    if (!num) {
+      return FALSE;
+    }
 
     modes = calloc(num, sizeof(DGAModeRec));
-    if (!modes)
-        return FALSE;
+    if (!modes) {
+      return FALSE;
+    }
 
     num = 0;
     display_mode = scrn->modes;
@@ -66,10 +69,12 @@ xf86_dga_get_modes(ScreenPtr pScreen)
 
         mode->mode = display_mode;
         mode->flags = DGA_CONCURRENT_ACCESS;
-        if (display_mode->Flags & V_DBLSCAN)
-            mode->flags |= DGA_DOUBLESCAN;
-        if (display_mode->Flags & V_INTERLACE)
-            mode->flags |= DGA_INTERLACED;
+        if (display_mode->Flags & V_DBLSCAN) {
+          mode->flags |= DGA_DOUBLESCAN;
+        }
+        if (display_mode->Flags & V_INTERLACE) {
+          mode->flags |= DGA_INTERLACED;
+        }
         mode->byteOrder = scrn->imageByteOrder;
         mode->depth = scrn->depth;
         mode->bitsPerPixel = scrn->bitsPerPixel;
@@ -93,8 +98,9 @@ xf86_dga_get_modes(ScreenPtr pScreen)
         mode->maxViewportY = 0;
 
         display_mode = display_mode->next;
-        if (display_mode == scrn->modes)
-            break;
+        if (display_mode == scrn->modes) {
+          break;
+        }
     }
     free(xf86_config->dga_modes);
     xf86_config->dga_nmode = num;
@@ -173,11 +179,13 @@ _xf86_di_dga_reinit_internal(ScreenPtr pScreen)
     ScrnInfoPtr scrn = xf86ScreenToScrn(pScreen);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
 
-    if (!DGAScreenAvailable(pScreen))
-        return TRUE;
+    if (!DGAScreenAvailable(pScreen)) {
+      return TRUE;
+    }
 
-    if (!xf86_dga_get_modes(pScreen))
-        return FALSE;
+    if (!xf86_dga_get_modes(pScreen)) {
+      return FALSE;
+    }
 
     return DGAReInitModes(pScreen, xf86_config->dga_modes,
                           xf86_config->dga_nmode);
@@ -201,8 +209,9 @@ _xf86_di_dga_init_internal(ScreenPtr pScreen)
     xf86_config->dga_height = 0;
     xf86_config->dga_stride = 0;
 
-    if (!xf86_dga_get_modes(pScreen))
-        return FALSE;
+    if (!xf86_dga_get_modes(pScreen)) {
+      return FALSE;
+    }
 
     return DGAInit(pScreen, &xf86_dga_funcs, xf86_config->dga_modes,
                    xf86_config->dga_nmode);

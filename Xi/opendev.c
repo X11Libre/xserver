@@ -93,20 +93,25 @@ ProcXOpenDevice(ClientPtr client)
     status = dixLookupDevice(&dev, stuff->deviceid, client, DixUseAccess);
 
     if (status == BadDevice) {  /* not open */
-        for (dev = inputInfo.off_devices; dev; dev = dev->next)
-            if (dev->id == stuff->deviceid)
-                break;
-        if (dev == NULL)
-            return BadDevice;
-    }
-    else if (status != Success)
-        return status;
-
-    if (InputDevIsMaster(dev))
+      for (dev = inputInfo.off_devices; dev; dev = dev->next) {
+        if (dev->id == stuff->deviceid) {
+          break;
+        }
+      }
+      if (dev == NULL) {
         return BadDevice;
+      }
+    } else if (status != Success) {
+      return status;
+    }
 
-    if (status != Success)
-        return status;
+    if (InputDevIsMaster(dev)) {
+      return BadDevice;
+    }
+
+    if (status != Success) {
+      return status;
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 

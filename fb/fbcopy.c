@@ -52,15 +52,15 @@ fbCopyNtoN(DrawablePtr pSrcDrawable,
     while (nbox--) {
 #ifndef FB_ACCESS_WRAPPER       /* pixman_blt() doesn't support accessors yet */
         if (pm == FB_ALLONES && alu == GXcopy && !reverse && !upsidedown) {
-            if (!pixman_blt
-                ((uint32_t *) src, (uint32_t *) dst, srcStride, dstStride,
-                 srcBpp, dstBpp, (pbox->x1 + dx + srcXoff),
-                 (pbox->y1 + dy + srcYoff), (pbox->x1 + dstXoff),
-                 (pbox->y1 + dstYoff), (pbox->x2 - pbox->x1),
-                 (pbox->y2 - pbox->y1)))
-                goto fallback;
-            else
-                goto next;
+          if (!pixman_blt((uint32_t *)src, (uint32_t *)dst, srcStride,
+                          dstStride, srcBpp, dstBpp, (pbox->x1 + dx + srcXoff),
+                          (pbox->y1 + dy + srcYoff), (pbox->x1 + dstXoff),
+                          (pbox->y1 + dstYoff), (pbox->x2 - pbox->x1),
+                          (pbox->y2 - pbox->y1))) {
+            goto fallback;
+          } else {
+            goto next;
+          }
         }
  fallback:
 #endif
@@ -193,8 +193,9 @@ fbCopyNto1(DrawablePtr pSrcDrawable,
 
             tmpStride = ((width + FB_STIP_MASK) >> FB_STIP_SHIFT);
             tmp = calloc(tmpStride * height, sizeof(FbStip));
-            if (!tmp)
-                return;
+            if (!tmp) {
+              return;
+            }
 
             fbGetDrawable(pSrcDrawable, src, srcStride, srcBpp, srcXoff,
                           srcYoff);
@@ -252,16 +253,14 @@ fbCopyPlane(DrawablePtr pSrcDrawable,
             int widthSrc,
             int heightSrc, int xOut, int yOut, unsigned long bitplane)
 {
-    if (pSrcDrawable->bitsPerPixel > 1)
-        return miDoCopy(pSrcDrawable, pDstDrawable, pGC,
-                        xIn, yIn, widthSrc, heightSrc,
-                        xOut, yOut, fbCopyNto1, (Pixel) bitplane, 0);
-    else if (bitplane & 1)
-        return miDoCopy(pSrcDrawable, pDstDrawable, pGC, xIn, yIn,
-                        widthSrc, heightSrc, xOut, yOut, fbCopy1toN,
-                        (Pixel) bitplane, 0);
-    else
-        return miHandleExposures(pSrcDrawable, pDstDrawable, pGC,
-                                 xIn, yIn,
-                                 widthSrc, heightSrc, xOut, yOut);
+  if (pSrcDrawable->bitsPerPixel > 1) {
+    return miDoCopy(pSrcDrawable, pDstDrawable, pGC, xIn, yIn, widthSrc,
+                    heightSrc, xOut, yOut, fbCopyNto1, (Pixel)bitplane, 0);
+  } else if (bitplane & 1) {
+    return miDoCopy(pSrcDrawable, pDstDrawable, pGC, xIn, yIn, widthSrc,
+                    heightSrc, xOut, yOut, fbCopy1toN, (Pixel)bitplane, 0);
+  } else {
+    return miHandleExposures(pSrcDrawable, pDstDrawable, pGC, xIn, yIn,
+                             widthSrc, heightSrc, xOut, yOut);
+  }
 }

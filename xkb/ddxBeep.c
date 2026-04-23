@@ -124,8 +124,9 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
     Atom name;
 
     if ((dev == NULL) || (dev->key == NULL) || (dev->key->xkbInfo == NULL) ||
-        (dev->kbdfeed == NULL))
-        return 0;
+        (dev->kbdfeed == NULL)) {
+      return 0;
+    }
 
     _XkbDDXBeepInitAtoms();
 
@@ -149,18 +150,21 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
          * beeps for off.
          */
     case _BEEP_LED_ON:
-        if (name == None)
-            name = ledOn;
+      if (name == None) {
+        name = ledOn;
+      }
         duration = SHORT_TONE;
         pitch = HIGH_PITCH;
         break;
     case _BEEP_LED_OFF:
-        if (name == None)
-            name = ledOff;
+      if (name == None) {
+        name = ledOff;
+      }
         duration = SHORT_TONE;
         pitch = LOW_PITCH;
-        if (!doesPitch && xkbInfo->beepCount < 1)
-            next = SHORT_DELAY;
+        if (!doesPitch && xkbInfo->beepCount < 1) {
+          next = SHORT_DELAY;
+        }
         break;
 
         /* When a Feature is turned on, we want an up-siren.
@@ -169,13 +173,15 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
          * beeps for off.
          */
     case _BEEP_FEATURE_ON:
-        if (name == None)
-            name = featureOn;
+      if (name == None) {
+        name = featureOn;
+      }
         if (xkbInfo->beepCount < 1) {
             pitch = LOW_PITCH;
             duration = VERY_LONG_TONE;
-            if (doesPitch)
-                next = SHORT_DELAY;
+            if (doesPitch) {
+              next = SHORT_DELAY;
+            }
         }
         else {
             pitch = MID_PITCH;
@@ -184,14 +190,16 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
         break;
 
     case _BEEP_FEATURE_OFF:
-        if (name == None)
-            name = featureOff;
+      if (name == None) {
+        name = featureOff;
+      }
         if (xkbInfo->beepCount < 1) {
             pitch = MID_PITCH;
-            if (doesPitch)
-                duration = VERY_LONG_TONE;
-            else
-                duration = SHORT_TONE;
+            if (doesPitch) {
+              duration = VERY_LONG_TONE;
+            } else {
+              duration = SHORT_TONE;
+            }
             next = SHORT_DELAY;
         }
         else {
@@ -205,11 +213,13 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
          * [[[WDW - This is not in AccessDOS ]]]
          */
     case _BEEP_LED_CHANGE:
-        if (name == None)
-            name = ledChange;
+      if (name == None) {
+        name = ledChange;
+      }
     case _BEEP_FEATURE_CHANGE:
-        if (name == None)
-            name = featureChange;
+      if (name == None) {
+        name = featureChange;
+      }
         duration = SHORT_TONE;
         pitch = HIGH_PITCH;
         if (xkbInfo->beepCount < 1) {
@@ -221,12 +231,14 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
          * is going to be turned on or off.
          */
     case _BEEP_SLOW_WARN:
-        if (name == None)
-            name = slowWarn;
+      if (name == None) {
+        name = slowWarn;
+      }
         duration = SHORT_TONE;
         pitch = HIGH_PITCH;
-        if (xkbInfo->beepCount < 2)
-            next = SHORT_DELAY;
+        if (xkbInfo->beepCount < 2) {
+          next = SHORT_DELAY;
+        }
         break;
 
         /* Click on SlowKeys press and accept.
@@ -235,23 +247,28 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
          * If we cannot do pitch, we want single beeps.
          */
     case _BEEP_SLOW_PRESS:
-        if (name == None)
-            name = slowPress;
+      if (name == None) {
+        name = slowPress;
+      }
     case _BEEP_SLOW_ACCEPT:
-        if (name == None)
-            name = slowAccept;
+      if (name == None) {
+        name = slowAccept;
+      }
     case _BEEP_SLOW_RELEASE:
-        if (name == None)
-            name = slowRelease;
+      if (name == None) {
+        name = slowRelease;
+      }
         duration = CLICK_DURATION;
         pitch = CLICK_PITCH;
         break;
     case _BEEP_BOUNCE_REJECT:
-        if (name == None)
-            name = bounceReject;
+      if (name == None) {
+        name = bounceReject;
+      }
     case _BEEP_SLOW_REJECT:
-        if (name == None)
-            name = slowReject;
+      if (name == None) {
+        name = slowReject;
+      }
         duration = SHORT_TONE;
         pitch = DEEP_PITCH;
         break;
@@ -263,31 +280,35 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
          * lock, and two for unlock.
          */
     case _BEEP_STICKY_LATCH:
-        if (name == None)
-            name = stickyLatch;
+      if (name == None) {
+        name = stickyLatch;
+      }
         duration = SHORT_TONE;
         if (xkbInfo->beepCount < 1) {
             next = SHORT_DELAY;
             pitch = LOW_PITCH;
+        } else {
+          pitch = HIGH_PITCH;
         }
-        else
-            pitch = HIGH_PITCH;
         break;
     case _BEEP_STICKY_LOCK:
-        if (name == None)
-            name = stickyLock;
+      if (name == None) {
+        name = stickyLock;
+      }
         if (doesPitch) {
             duration = SHORT_TONE;
             pitch = HIGH_PITCH;
         }
         break;
     case _BEEP_STICKY_UNLOCK:
-        if (name == None)
-            name = stickyUnlock;
+      if (name == None) {
+        name = stickyUnlock;
+      }
         duration = SHORT_TONE;
         pitch = LOW_PITCH;
-        if (!doesPitch && xkbInfo->beepCount < 1)
-            next = SHORT_DELAY;
+        if (!doesPitch && xkbInfo->beepCount < 1) {
+          next = SHORT_DELAY;
+        }
         break;
     }
     if (timer == NULL && duration > 0) {

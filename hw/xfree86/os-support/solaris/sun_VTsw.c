@@ -90,8 +90,9 @@ xf86VTSwitchAway(void)
     door_arg.desc_ptr = NULL;
     door_arg.desc_num = 0;
 
-    if ((door_fd = open(VT_DAEMON_DOOR_FILE, O_RDONLY)) < 0)
-        return FALSE;
+    if ((door_fd = open(VT_DAEMON_DOOR_FILE, O_RDONLY)) < 0) {
+      return FALSE;
+    }
 
     if (door_call(door_fd, &door_arg) != 0) {
         close(door_fd);
@@ -119,11 +120,13 @@ xf86VTActivate(int vtno)
 {
     struct vt_stat state;
 
-    if (ioctl(xf86Info.consoleFd, VT_GETSTATE, &state) < 0)
-        return FALSE;
+    if (ioctl(xf86Info.consoleFd, VT_GETSTATE, &state) < 0) {
+      return FALSE;
+    }
 
-    if ((state.v_state & (1 << vtno)) == 0)
-        return FALSE;
+    if ((state.v_state & (1 << vtno)) == 0) {
+      return FALSE;
+    }
 
     xf86Info.vtRequestsPending = TRUE;
     xf86Info.vtPendingNum = vtno;

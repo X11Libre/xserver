@@ -101,11 +101,13 @@ InitOutput(int argc, char *argv[])
 
     xnestFontPrivateIndex = xfont2_allocate_font_private_index();
 
-    if (!xnestNumScreens)
-        xnestNumScreens = 1;
+    if (!xnestNumScreens) {
+      xnestNumScreens = 1;
+    }
 
-    for (i = 0; i < xnestNumScreens; i++)
-        AddScreen(xnestOpenScreen, argc, argv);
+    for (i = 0; i < xnestNumScreens; i++) {
+      AddScreen(xnestOpenScreen, argc, argv);
+    }
 
     xnestNumScreens = screenInfo.numScreens;
 
@@ -128,8 +130,9 @@ InitInput(int argc, char *argv[])
                          &xnestKeyboardDevice,
                          xnestPointerProc, xnestKeyboardProc, FALSE);
 
-    if (rc != Success)
-        FatalError("Failed to init Xnest default devices.\n");
+    if (rc != Success) {
+      FatalError("Failed to init Xnest default devices.\n");
+    }
 
     mieqInit();
 

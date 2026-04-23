@@ -36,10 +36,11 @@ ExaGetPixmapAddress(PixmapPtr p)
 {
     ExaPixmapPriv(p);
 
-    if (pExaPixmap->use_gpu_copy && pExaPixmap->fb_ptr)
-        return pExaPixmap->fb_ptr;
-    else
-        return pExaPixmap->sys_ptr;
+    if (pExaPixmap->use_gpu_copy && pExaPixmap->fb_ptr) {
+      return pExaPixmap->fb_ptr;
+    } else {
+      return pExaPixmap->sys_ptr;
+    }
 }
 
 /**
@@ -61,15 +62,17 @@ exaCreatePixmap_classic(ScreenPtr pScreen, int w, int h, int depth,
 
     ExaScreenPriv(pScreen);
 
-    if (w > 32767 || h > 32767)
-        return NullPixmap;
+    if (w > 32767 || h > 32767) {
+      return NullPixmap;
+    }
 
     swap(pExaScr, pScreen, CreatePixmap);
     pPixmap = pScreen->CreatePixmap(pScreen, w, h, depth, usage_hint);
     swap(pExaScr, pScreen, CreatePixmap);
 
-    if (!pPixmap)
-        return NULL;
+    if (!pPixmap) {
+      return NULL;
+    }
 
     pExaPixmap = ExaGetPixmapPriv(pPixmap);
     pExaPixmap->driverPriv = NULL;
@@ -80,10 +83,11 @@ exaCreatePixmap_classic(ScreenPtr pScreen, int w, int h, int depth,
     /* Scratch pixmaps may have w/h equal to zero, and may not be
      * migrated.
      */
-    if (!w || !h)
-        pExaPixmap->score = EXA_PIXMAP_SCORE_PINNED;
-    else
-        pExaPixmap->score = EXA_PIXMAP_SCORE_INIT;
+    if (!w || !h) {
+      pExaPixmap->score = EXA_PIXMAP_SCORE_PINNED;
+    } else {
+      pExaPixmap->score = EXA_PIXMAP_SCORE_INIT;
+    }
 
     pExaPixmap->sys_ptr = pPixmap->devPrivate.ptr;
     pExaPixmap->sys_pitch = pPixmap->devKind;
@@ -136,8 +140,9 @@ exaCreatePixmap_classic(ScreenPtr pScreen, int w, int h, int depth,
     exaSetAccelBlock(pExaScr, pExaPixmap, w, h, bpp);
 
     /* During a fallback we must prepare access. */
-    if (pExaScr->fallback_counter)
-        exaPrepareAccess(&pPixmap->drawable, EXA_PREPARE_AUX_DEST);
+    if (pExaScr->fallback_counter) {
+      exaPrepareAccess(&pPixmap->drawable, EXA_PREPARE_AUX_DEST);
+    }
 
     return pPixmap;
 }
@@ -152,19 +157,22 @@ exaModifyPixmapHeader_classic(PixmapPtr pPixmap, int width, int height,
     ExaPixmapPrivPtr pExaPixmap;
     Bool ret;
 
-    if (!pPixmap)
-        return FALSE;
+    if (!pPixmap) {
+      return FALSE;
+    }
 
     pScreen = pPixmap->drawable.pScreen;
     pExaScr = ExaGetScreenPriv(pScreen);
     pExaPixmap = ExaGetPixmapPriv(pPixmap);
 
     if (pExaPixmap) {
-        if (pPixData)
-            pExaPixmap->sys_ptr = pPixData;
+      if (pPixData) {
+        pExaPixmap->sys_ptr = pPixData;
+      }
 
-        if (devKind > 0)
-            pExaPixmap->sys_pitch = devKind;
+      if (devKind > 0) {
+        pExaPixmap->sys_pitch = devKind;
+      }
 
         /* Classic EXA:
          * - Framebuffer.
@@ -209,8 +217,9 @@ exaModifyPixmapHeader_classic(PixmapPtr pPixmap, int width, int height,
 void exaPixmapDestroy_classic(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
     ExaPixmapPriv(pPixmap);
-    if (!pExaPixmap) // we're called on an error path
-        return;
+    if (!pExaPixmap) { // we're called on an error path
+      return;
+    }
 
     exaDestroyPixmap(pPixmap);
 
@@ -243,9 +252,9 @@ exaPixmapHasGpuCopy_classic(PixmapPtr pPixmap)
         pPixmap->devPrivate.ptr = ExaGetPixmapAddress(pPixmap);
         ret = pExaScr->info->PixmapIsOffscreen(pPixmap);
         pPixmap->devPrivate.ptr = old_ptr;
+    } else {
+      ret = (pExaPixmap->use_gpu_copy && pExaPixmap->fb_ptr);
     }
-    else
-        ret = (pExaPixmap->use_gpu_copy && pExaPixmap->fb_ptr);
 
     return ret;
 }

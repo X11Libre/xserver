@@ -91,8 +91,9 @@ xnestPointerProc(DeviceIntPtr pDev, int onoff)
 
         const int nmap = xcb_get_pointer_mapping_map_length(pm_reply);
         uint8_t *map = xcb_get_pointer_mapping_map(pm_reply);
-        for (i=0; i<nmap; i++)
-            map[i] = i;         /* buttons are already mapped */
+        for (i = 0; i < nmap; i++) {
+          map[i] = i; /* buttons are already mapped */
+        }
 
         InitPointerDeviceStruct(&pDev->public,
                                 map,
@@ -105,19 +106,19 @@ xnestPointerProc(DeviceIntPtr pDev, int onoff)
     }
     case DEVICE_ON:
         xnestEventMask |= XNEST_POINTER_EVENT_MASK;
-        for (i = 0; i < xnestNumScreens; i++)
-            xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[i],
-                                         XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+        for (i = 0; i < xnestNumScreens; i++) {
+          xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                       xnestDefaultWindows[i],
+                                       XCB_CW_EVENT_MASK, &xnestEventMask);
+        }
         break;
     case DEVICE_OFF:
         xnestEventMask &= ~XNEST_POINTER_EVENT_MASK;
-        for (i = 0; i < xnestNumScreens; i++)
-            xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[i],
-                                         XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+        for (i = 0; i < xnestNumScreens; i++) {
+          xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                       xnestDefaultWindows[i],
+                                       XCB_CW_EVENT_MASK, &xnestEventMask);
+        }
         break;
     case DEVICE_CLOSE:
         break;

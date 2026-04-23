@@ -99,13 +99,15 @@ HandleDevicePresenceMask(ClientPtr client, WindowPtr win,
 
     *count = j;
 
-    if (mask == 0)
-        return Success;
+    if (mask == 0) {
+      return Success;
+    }
 
     /* We always only use mksidx = AllDevices for events not bound to
      * devices */
-    if (AddExtensionClient(win, client, mask, XIAllDevices) != Success)
-        return BadAlloc;
+    if (AddExtensionClient(win, client, mask, XIAllDevices) != Success) {
+      return BadAlloc;
+    }
 
     RecalculateDeviceDeliverableEvents(win);
 
@@ -132,29 +134,34 @@ ProcXSelectExtensionEvent(ClientPtr client)
     struct tmask tmp[EMASKSIZE];
 
     ret = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
-    if (HandleDevicePresenceMask(client, pWin, (XEventClass *) &stuff[1],
-                                 &stuff->count) != Success)
-        return BadAlloc;
+    if (HandleDevicePresenceMask(client, pWin, (XEventClass *)&stuff[1],
+                                 &stuff->count) != Success) {
+      return BadAlloc;
+    }
 
-    if ((ret = CreateMaskFromList(client, (XEventClass *) &stuff[1],
+    if ((ret = CreateMaskFromList(client, (XEventClass *)&stuff[1],
                                   stuff->count, tmp, NULL,
-                                  X_SelectExtensionEvent)) != Success)
-        return ret;
+                                  X_SelectExtensionEvent)) != Success) {
+      return ret;
+    }
 
-    for (i = 0; i < EMASKSIZE; i++)
-        if (tmp[i].dev != NULL) {
-            if (tmp[i].mask & ~XIAllMasks) {
-                client->errorValue = tmp[i].mask;
-                return BadValue;
-            }
-            if ((ret =
-                 SelectForWindow((DeviceIntPtr) tmp[i].dev, pWin, client,
-                                 tmp[i].mask, DeviceButtonGrabMask)) != Success)
-                return ret;
+    for (i = 0; i < EMASKSIZE; i++) {
+      if (tmp[i].dev != NULL) {
+        if (tmp[i].mask & ~XIAllMasks) {
+          client->errorValue = tmp[i].mask;
+          return BadValue;
         }
+        if ((ret = SelectForWindow((DeviceIntPtr)tmp[i].dev, pWin, client,
+                                   tmp[i].mask, DeviceButtonGrabMask)) !=
+            Success) {
+          return ret;
+        }
+      }
+    }
 
     return Success;
 }

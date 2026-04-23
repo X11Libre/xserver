@@ -47,8 +47,9 @@ find_start(unsigned int *ptr)
     unsigned int comp[9], test[9];
     int i, j;
 
-    if (!ptr)
-        return -1;
+    if (!ptr) {
+      return -1;
+    }
 
     for (i = 0; i < 9; i++) {
         comp[i] = *(ptr++);
@@ -59,9 +60,11 @@ find_start(unsigned int *ptr)
             test[j] = test[j] & !(comp[j] ^ *(ptr++));
         }
     }
-    for (i = 0; i < 9; i++)
-        if (test[i])
-            return i + 1;
+    for (i = 0; i < 9; i++) {
+      if (test[i]) {
+        return i + 1;
+      }
+    }
     return -1;
 }
 
@@ -78,17 +81,21 @@ find_header(unsigned char *block)
 
         head_ptr = ptr;
         for (i = 0; i < 8; i++) {
-            if (header[i] != *(head_ptr++))
-                break;
-            if (head_ptr == end)
-                head_ptr = block;
-        }
-        if (i == 8)
+          if (header[i] != *(head_ptr++)) {
             break;
+          }
+          if (head_ptr == end) {
+            head_ptr = block;
+          }
+        }
+        if (i == 8) {
+          break;
+        }
         ptr++;
     }
-    if (ptr == end)
-        return NULL;
+    if (ptr == end) {
+      return NULL;
+    }
     return ptr;
 }
 
@@ -99,20 +106,23 @@ resort(unsigned char *s_block)
     unsigned char tmp;
 
     s_ptr = find_header(s_block);
-    if (!s_ptr)
-        return NULL;
+    if (!s_ptr) {
+      return NULL;
+    }
     s_end = s_block + EDID1_LEN;
 
     unsigned char *d_new = calloc(1, EDID1_LEN);
-    if (!d_new)
-        return NULL;
+    if (!d_new) {
+      return NULL;
+    }
     d_end = d_new + EDID1_LEN;
 
     for (d_ptr = d_new; d_ptr < d_end; d_ptr++) {
         tmp = *(s_ptr++);
         *d_ptr = tmp;
-        if (s_ptr == s_end)
-            s_ptr = s_block;
+        if (s_ptr == s_end) {
+          s_ptr = s_block;
+        }
     }
     free(s_block);
     return d_new;
@@ -137,8 +147,9 @@ DDC_checksum(const unsigned char *block, int len)
 #endif
 
     /* catch the trivial case where all bytes are 0 */
-    if (!not_null)
-        return 1;
+    if (!not_null) {
+      return 1;
+    }
 
     return result & 0xFF;
 }
@@ -152,13 +163,15 @@ GetEDID_DDC1(unsigned int *s_ptr)
     int i, j;
 
     s_start = find_start(s_ptr);
-    if (s_start == -1)
-        return NULL;
+    if (s_start == -1) {
+      return NULL;
+    }
     s_end = s_ptr + NUM;
     s_pos = s_ptr + s_start;
     d_block = calloc(1, EDID1_LEN);
-    if (!d_block)
-        return NULL;
+    if (!d_block) {
+      return NULL;
+    }
     d_pos = d_block;
     for (i = 0; i < EDID1_LEN; i++) {
         for (j = 0; j < 8; j++) {
@@ -167,12 +180,14 @@ GetEDID_DDC1(unsigned int *s_ptr)
                 *d_pos |= 0x01;
             }
             s_pos++;
-            if (s_pos == s_end)
-                s_pos = s_ptr;
+            if (s_pos == s_end) {
+              s_pos = s_ptr;
+            }
         };
         s_pos++;
-        if (s_pos == s_end)
-            s_pos = s_ptr;
+        if (s_pos == s_end) {
+          s_pos = s_ptr;
+        }
         d_pos++;
     }
     free(s_ptr);
@@ -193,8 +208,9 @@ FetchEDID_DDC1(register ScrnInfoPtr pScrn,
 
     ptr = xp = calloc(NUM, sizeof(int));
 
-    if (!ptr)
-        return NULL;
+    if (!ptr) {
+      return NULL;
+    }
     do {
         /* wait for next retrace */
         *xp = read_DDC(pScrn);
@@ -213,8 +229,9 @@ TestDDC1(ScrnInfoPtr pScrn, unsigned int (*read_DDC) (ScrnInfoPtr))
     count = HEADER * BITS_PER_BYTE;
     do {
         /* wait for next retrace */
-        if (old != read_DDC(pScrn))
-            break;
+        if (old != read_DDC(pScrn)) {
+          break;
+        }
     } while (count--);
     return count;
 }
@@ -242,14 +259,16 @@ EDIDRead_DDC1(ScrnInfoPtr pScrn, DDC1SetSpeedProc DDCSpeed,
         return NULL;
     };
 
-    if (DDCSpeed)
-        DDCSpeed(pScrn, DDC_FAST);
+    if (DDCSpeed) {
+      DDCSpeed(pScrn, DDC_FAST);
+    }
     do {
         EDID_block = GetEDID_DDC1(FetchEDID_DDC1(pScrn, read_DDC));
         count--;
     } while (!EDID_block && count);
-    if (DDCSpeed)
-        DDCSpeed(pScrn, DDC_SLOW);
+    if (DDCSpeed) {
+      DDCSpeed(pScrn, DDC_SLOW);
+    }
 
     return EDID_block;
 }
@@ -284,8 +303,9 @@ xf86DoEDID_DDC1(ScrnInfoPtr pScrn, DDC1SetSpeedProc DDC1SetSpeed,
     xf86GetOptValBool(options, DDCOPT_NODDC1, &noddc1);
     free(options);
 
-    if (noddc || noddc1)
-        return NULL;
+    if (noddc || noddc1) {
+      return NULL;
+    }
 
     OsBlockSignals();
     EDID_block = EDIDRead_DDC1(pScrn, DDC1SetSpeed, DDC1Read);
@@ -341,8 +361,9 @@ DDC2Init(I2CBusPtr pBus)
     pBus->RiseFallTime = 20;
 
     dev = DDC2MakeDevice(pBus, 0x00A0, "ddc2");
-    if (xf86I2CProbeAddress(pBus, 0x0060))
-        DDC2MakeDevice(pBus, 0x0060, "E-EDID segment register");
+    if (xf86I2CProbeAddress(pBus, 0x0060)) {
+      DDC2MakeDevice(pBus, 0x0060, "E-EDID segment register");
+    }
 
     return dev;
 }
@@ -368,8 +389,9 @@ DDC2Read(I2CDevPtr dev, int block, unsigned char *R_Buffer)
         if (segment) {
             Bool b;
 
-            if (!(seg = xf86I2CFindDev(dev->pI2CBus, 0x0060)))
-                return FALSE;
+            if (!(seg = xf86I2CFindDev(dev->pI2CBus, 0x0060))) {
+              return FALSE;
+            }
 
             W_Buffer[0] = segment;
 
@@ -388,8 +410,9 @@ DDC2Read(I2CDevPtr dev, int block, unsigned char *R_Buffer)
         W_Buffer[0] = (block & 0x01) * EDID1_LEN;
 
         if (xf86I2CWriteRead(dev, W_Buffer, 1, R_Buffer, EDID1_LEN)) {
-            if (!DDC_checksum(R_Buffer, EDID1_LEN))
-                return TRUE;
+          if (!DDC_checksum(R_Buffer, EDID1_LEN)) {
+            return TRUE;
+          }
         }
     }
 
@@ -419,8 +442,9 @@ xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool complete)
     /* Default DDC and DDC2 to enabled. */
     Bool noddc = FALSE, noddc2 = FALSE;
     OptionInfoPtr options = calloc(1, sizeof(DDCOptions));
-    if (!options)
-        return NULL;
+    if (!options) {
+      return NULL;
+    }
     memcpy(options, DDCOptions, sizeof(DDCOptions));
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, options);
 
@@ -428,15 +452,18 @@ xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool complete)
     xf86GetOptValBool(options, DDCOPT_NODDC2, &noddc2);
     free(options);
 
-    if (noddc || noddc2)
-        return NULL;
+    if (noddc || noddc2) {
+      return NULL;
+    }
 
-    if (!(dev = DDC2Init(pBus)))
-        return NULL;
+    if (!(dev = DDC2Init(pBus))) {
+      return NULL;
+    }
 
     EDID_block = calloc(1, EDID1_LEN);
-    if (!EDID_block)
-        return NULL;
+    if (!EDID_block) {
+      return NULL;
+    }
 
     if (DDC2Read(dev, 0, EDID_block)) {
         int i, n = EDID_block[0x7e];
@@ -444,15 +471,17 @@ xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool complete)
         if (complete && n) {
             EDID_block = reallocarray(EDID_block, 1 + n, EDID1_LEN);
 
-            for (i = 0; i < n; i++)
-                DDC2Read(dev, i + 1, EDID_block + (EDID1_LEN * (1 + i)));
+            for (i = 0; i < n; i++) {
+              DDC2Read(dev, i + 1, EDID_block + (EDID1_LEN * (1 + i)));
+            }
         }
 
         tmp = xf86InterpretEEDID(pScrn->scrnIndex, EDID_block);
     }
 
-    if (tmp && complete)
-        tmp->flags |= MONITOR_EDID_COMPLETE_RAWDATA;
+    if (tmp && complete) {
+      tmp->flags |= MONITOR_EDID_COMPLETE_RAWDATA;
+    }
 
     return tmp;
 }

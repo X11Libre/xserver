@@ -176,10 +176,11 @@ dixSetPrivate(PrivatePtr *privates, const DevPrivateKey key, void *val)
 static inline void *
 dixLookupPrivate(PrivatePtr *privates, const DevPrivateKey key)
 {
-    if (key->size)
-        return dixGetPrivateAddr(privates, key);
-    else
-        return dixGetPrivate(privates, key);
+  if (key->size) {
+    return dixGetPrivateAddr(privates, key);
+  } else {
+    return dixGetPrivate(privates, key);
+  }
 }
 
 /*

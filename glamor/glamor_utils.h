@@ -618,8 +618,9 @@ glamor_get_rgba_from_pixel(CARD32 pixel,
     else if (PIXMAN_FORMAT_TYPE(format) == PIXMAN_TYPE_BGRA) {
         ashift = 0;
         rshift = abits;
-        if (abits == 0)
-            rshift = PIXMAN_FORMAT_BPP(format) - (rbits + gbits + bbits);
+        if (abits == 0) {
+          rshift = PIXMAN_FORMAT_BPP(format) - (rbits + gbits + bbits);
+        }
         gshift = rshift + rbits;
         bshift = gshift + gbits;
     }
@@ -630,25 +631,29 @@ glamor_get_rgba_from_pixel(CARD32 pixel,
   *_fc_ = (((_p_) >> (_s_)) & (( 1 << (_bits_)) - 1))	\
     / (float)((1<<(_bits_)) - 1)
 
-    if (rbits)
-        COLOR_INT_TO_FLOAT(red, pixel, rshift, rbits);
-    else
-        *red = 0;
+    if (rbits) {
+      COLOR_INT_TO_FLOAT(red, pixel, rshift, rbits);
+    } else {
+      *red = 0;
+    }
 
-    if (gbits)
-        COLOR_INT_TO_FLOAT(green, pixel, gshift, gbits);
-    else
-        *green = 0;
+    if (gbits) {
+      COLOR_INT_TO_FLOAT(green, pixel, gshift, gbits);
+    } else {
+      *green = 0;
+    }
 
-    if (bbits)
-        COLOR_INT_TO_FLOAT(blue, pixel, bshift, bbits);
-    else
-        *blue = 0;
+    if (bbits) {
+      COLOR_INT_TO_FLOAT(blue, pixel, bshift, bbits);
+    } else {
+      *blue = 0;
+    }
 
-    if (abits)
-        COLOR_INT_TO_FLOAT(alpha, pixel, ashift, abits);
-    else
-        *alpha = 1;
+    if (abits) {
+      COLOR_INT_TO_FLOAT(alpha, pixel, ashift, abits);
+    } else {
+      *alpha = 1;
+    }
 
     return TRUE;
 }

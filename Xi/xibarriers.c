@@ -107,8 +107,9 @@ typedef struct _BarrierScreen {
 static struct PointerBarrierDevice *AllocBarrierDevice(void)
 {
     struct PointerBarrierDevice *pbd = calloc(1, sizeof(struct PointerBarrierDevice));
-    if (!pbd)
-        return NULL;
+    if (!pbd) {
+      return NULL;
+    }
 
     pbd->deviceid = -1; /* must be set by caller */
     pbd->barrier_event_id = 1;
@@ -168,14 +169,18 @@ barrier_get_direction(int x1, int y1, int x2, int y2)
     int direction = 0;
 
     /* which way are we trying to go */
-    if (x2 > x1)
-        direction |= BarrierPositiveX;
-    if (x2 < x1)
-        direction |= BarrierNegativeX;
-    if (y2 > y1)
-        direction |= BarrierPositiveY;
-    if (y2 < y1)
-        direction |= BarrierNegativeY;
+    if (x2 > x1) {
+      direction |= BarrierPositiveX;
+    }
+    if (x2 < x1) {
+      direction |= BarrierNegativeX;
+    }
+    if (y2 > y1) {
+      direction |= BarrierPositiveY;
+    }
+    if (y2 < y1) {
+      direction |= BarrierNegativeY;
+    }
 
     return direction;
 }
@@ -199,14 +204,15 @@ barrier_is_blocking_direction(const struct PointerBarrier * barrier,
 static BOOL
 inside_segment(int v, int v1, int v2)
 {
-    if (v1 < 0 && v2 < 0) /* line */
-        return TRUE;
-    else if (v1 < 0)      /* ray */
-        return v <= v2;
-    else if (v2 < 0)      /* ray */
-        return v >= v1;
-    else                  /* line segment */
-        return v >= v1 && v <= v2;
+  if (v1 < 0 && v2 < 0) { /* line */
+    return TRUE;
+  } else if (v1 < 0) { /* ray */
+    return v <= v2;
+  } else if (v2 < 0) { /* ray */
+    return v >= v1;
+  } else { /* line segment */
+    return v >= v1 && v <= v2;
+  }
 }
 
 #define T(v, a, b) (((float)v) - (a)) / ((b) - (a))
@@ -232,16 +238,19 @@ barrier_is_blocking(const struct PointerBarrier * barrier,
     if (barrier_is_vertical(barrier)) {
         float t, y;
         t = T(barrier->x1, x1, x2);
-        if (t < 0 || t > 1)
-            return FALSE;
+        if (t < 0 || t > 1) {
+          return FALSE;
+        }
 
         /* Edge case: moving away from barrier. */
-        if (x2 > x1 && t == 0)
-            return FALSE;
+        if (x2 > x1 && t == 0) {
+          return FALSE;
+        }
 
         y = F(t, y1, y2);
-        if (!inside_segment(y, barrier->y1, barrier->y2))
-            return FALSE;
+        if (!inside_segment(y, barrier->y1, barrier->y2)) {
+          return FALSE;
+        }
 
         *distance = sqrt((pow(y - y1, 2) + pow(barrier->x1 - x1, 2)));
         return TRUE;
@@ -249,16 +258,19 @@ barrier_is_blocking(const struct PointerBarrier * barrier,
     else {
         float t, x;
         t = T(barrier->y1, y1, y2);
-        if (t < 0 || t > 1)
-            return FALSE;
+        if (t < 0 || t > 1) {
+          return FALSE;
+        }
 
         /* Edge case: moving away from barrier. */
-        if (y2 > y1 && t == 0)
-            return FALSE;
+        if (y2 > y1 && t == 0) {
+          return FALSE;
+        }
 
         x = F(t, x1, x2);
-        if (!inside_segment(x, barrier->x1, barrier->x2))
-            return FALSE;
+        if (!inside_segment(x, barrier->x1, barrier->x2)) {
+          return FALSE;
+        }
 
         *distance = sqrt((pow(x - x1, 2) + pow(barrier->y1 - y1, 2)));
         return TRUE;
@@ -279,16 +291,20 @@ barrier_inside_hit_box(struct PointerBarrier *barrier, int x, int y)
     dir = ~(barrier->directions);
 
     if (barrier_is_vertical(barrier)) {
-        if (dir & BarrierPositiveX)
-            x1 -= HIT_EDGE_EXTENTS;
-        if (dir & BarrierNegativeX)
-            x2 += HIT_EDGE_EXTENTS;
+      if (dir & BarrierPositiveX) {
+        x1 -= HIT_EDGE_EXTENTS;
+      }
+      if (dir & BarrierNegativeX) {
+        x2 += HIT_EDGE_EXTENTS;
+      }
     }
     if (barrier_is_horizontal(barrier)) {
-        if (dir & BarrierPositiveY)
-            y1 -= HIT_EDGE_EXTENTS;
-        if (dir & BarrierNegativeY)
-            y2 += HIT_EDGE_EXTENTS;
+      if (dir & BarrierPositiveY) {
+        y1 -= HIT_EDGE_EXTENTS;
+      }
+      if (dir & BarrierNegativeY) {
+        y2 += HIT_EDGE_EXTENTS;
+      }
     }
 
     return x >= x1 && x <= x2 && y >= y1 && y <= y2;
@@ -303,17 +319,18 @@ barrier_blocks_device(struct PointerBarrierClient *client,
 
     /* Clients with no devices are treated as
      * if they specified XIAllDevices. */
-    if (client->num_devices == 0)
-        return TRUE;
+    if (client->num_devices == 0) {
+      return TRUE;
+    }
 
     master_id = GetMaster(dev, POINTER_OR_FLOAT)->id;
 
     for (i = 0; i < client->num_devices; i++) {
         int device_id = client->device_ids[i];
-        if (device_id == XIAllDevices ||
-            device_id == XIAllMasterDevices ||
-            device_id == master_id)
-            return TRUE;
+        if (device_id == XIAllDevices || device_id == XIAllMasterDevices ||
+            device_id == master_id) {
+          return TRUE;
+        }
     }
 
     return FALSE;
@@ -343,17 +360,21 @@ barrier_find_nearest(BarrierScreenPtr cs, DeviceIntPtr dev,
         double distance;
 
         pbd = GetBarrierDevice(c, dev->id);
-        if (!pbd)
-            continue;
+        if (!pbd) {
+          continue;
+        }
 
-        if (pbd->seen)
-            continue;
+        if (pbd->seen) {
+          continue;
+        }
 
-        if (!barrier_is_blocking_direction(b, dir))
-            continue;
+        if (!barrier_is_blocking_direction(b, dir)) {
+          continue;
+        }
 
-        if (!barrier_blocks_device(c, dev))
-            continue;
+        if (!barrier_blocks_device(c, dev)) {
+          continue;
+        }
 
         if (barrier_is_blocking(b, x1, y1, x2, y2, &distance)) {
             if (min_distance > distance) {
@@ -379,16 +400,20 @@ barrier_clamp_to_barrier(struct PointerBarrier *barrier, int dir, int *x,
                          int *y)
 {
     if (barrier_is_vertical(barrier)) {
-        if ((dir & BarrierNegativeX) & ~barrier->directions)
-            *x = barrier->x1;
-        if ((dir & BarrierPositiveX) & ~barrier->directions)
-            *x = barrier->x1 - 1;
+      if ((dir & BarrierNegativeX) & ~barrier->directions) {
+        *x = barrier->x1;
+      }
+      if ((dir & BarrierPositiveX) & ~barrier->directions) {
+        *x = barrier->x1 - 1;
+      }
     }
     if (barrier_is_horizontal(barrier)) {
-        if ((dir & BarrierNegativeY) & ~barrier->directions)
-            *y = barrier->y1;
-        if ((dir & BarrierPositiveY) & ~barrier->directions)
-            *y = barrier->y1 - 1;
+      if ((dir & BarrierNegativeY) & ~barrier->directions) {
+        *y = barrier->y1;
+      }
+      if ((dir & BarrierPositiveY) & ~barrier->directions) {
+        *y = barrier->y1 - 1;
+      }
     }
 }
 
@@ -421,11 +446,13 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
     InternalEvent *barrier_events = events;
     DeviceIntPtr master;
 
-    if (nevents)
-        *nevents = 0;
+    if (nevents) {
+      *nevents = 0;
+    }
 
-    if (xorg_list_is_empty(&cs->barriers) || InputDevIsFloating(dev))
-        goto out;
+    if (xorg_list_is_empty(&cs->barriers) || InputDevIsFloating(dev)) {
+      goto out;
+    }
 
     /**
      * This function is only called for slave devices, but pointer-barriers
@@ -448,22 +475,25 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
         struct PointerBarrierDevice *pbd;
 
         c = barrier_find_nearest(cs, master, dir, current_x, current_y, x, y);
-        if (!c)
-            break;
+        if (!c) {
+          break;
+        }
 
         nearest = &c->barrier;
 
         pbd = GetBarrierDevice(c, master->id);
-        if (!pbd)
-            continue;
+        if (!pbd) {
+          continue;
+        }
 
         new_sequence = !pbd->hit;
 
         pbd->seen = TRUE;
         pbd->hit = TRUE;
 
-        if (pbd->barrier_event_id == pbd->release_event_id)
-            continue;
+        if (pbd->barrier_event_id == pbd->release_event_id) {
+          continue;
+        }
 
         ev.type = ET_BarrierHit;
         barrier_clamp_to_barrier(nearest, dir, &x, &y);
@@ -497,22 +527,26 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
         int flags = 0;
 
         pbd = GetBarrierDevice(c, master->id);
-        if (!pbd)
-            continue;
+        if (!pbd) {
+          continue;
+        }
 
         pbd->seen = FALSE;
-        if (!pbd->hit)
-            continue;
+        if (!pbd->hit) {
+          continue;
+        }
 
-        if (barrier_inside_hit_box(&c->barrier, x, y))
-            continue;
+        if (barrier_inside_hit_box(&c->barrier, x, y)) {
+          continue;
+        }
 
         pbd->hit = FALSE;
 
         ev.type = ET_BarrierLeave;
 
-        if (pbd->barrier_event_id == pbd->release_event_id)
-            flags |= XIBarrierPointerReleased;
+        if (pbd->barrier_event_id == pbd->release_event_id) {
+          flags |= XIBarrierPointerReleased;
+        }
 
         ev.flags = flags;
         ev.event_id = pbd->barrier_event_id;
@@ -542,8 +576,9 @@ static void
 sort_min_max(INT16 *a, INT16 *b)
 {
     INT16 A, B;
-    if (*a < 0 || *b < 0)
-        return;
+    if (*a < 0 || *b < 0) {
+      return;
+    }
     A = *a;
     B = *b;
     *a = min(A, B);
@@ -583,10 +618,11 @@ CreatePointerBarrierClient(ClientPtr client,
     ret->pScreen = pScreen;
     ret->window = stuff->window;
     ret->num_devices = stuff->num_devices;
-    if (ret->num_devices > 0)
-        ret->device_ids = (int*)&ret[1];
-    else
-        ret->device_ids = NULL;
+    if (ret->num_devices > 0) {
+      ret->device_ids = (int *)&ret[1];
+    } else {
+      ret->device_ids = NULL;
+    }
 
     in_devices = (CARD16 *) &stuff[1];
     for (i = 0; i < stuff->num_devices; i++) {
@@ -613,8 +649,9 @@ CreatePointerBarrierClient(ClientPtr client,
     nt_list_for_each_entry(dev, inputInfo.devices, next) {
         struct PointerBarrierDevice *pbd;
 
-        if (dev->type != MASTER_POINTER)
-            continue;
+        if (dev->type != MASTER_POINTER) {
+          continue;
+        }
 
         pbd = AllocBarrierDevice();
         if (!pbd) {
@@ -636,10 +673,12 @@ CreatePointerBarrierClient(ClientPtr client,
     sort_min_max(&ret->barrier.x1, &ret->barrier.x2);
     sort_min_max(&ret->barrier.y1, &ret->barrier.y2);
     ret->barrier.directions = stuff->directions & 0x0f;
-    if (barrier_is_horizontal(&ret->barrier))
-        ret->barrier.directions &= ~(BarrierPositiveX | BarrierNegativeX);
-    if (barrier_is_vertical(&ret->barrier))
-        ret->barrier.directions &= ~(BarrierPositiveY | BarrierNegativeY);
+    if (barrier_is_horizontal(&ret->barrier)) {
+      ret->barrier.directions &= ~(BarrierPositiveX | BarrierNegativeX);
+    }
+    if (barrier_is_vertical(&ret->barrier)) {
+      ret->barrier.directions &= ~(BarrierPositiveY | BarrierNegativeY);
+    }
     input_lock();
     xorg_list_add(&ret->entry, &cs->barriers);
     input_unlock();
@@ -685,16 +724,18 @@ BarrierFreeBarrier(void *data, XID id)
             .flags = XIBarrierPointerReleased,
         };
 
-
-        if (dev->type != MASTER_POINTER)
-            continue;
+        if (dev->type != MASTER_POINTER) {
+          continue;
+        }
 
         pbd = GetBarrierDevice(c, dev->id);
-        if (!pbd)
-            continue;
+        if (!pbd) {
+          continue;
+        }
 
-        if (!pbd->hit)
-            continue;
+        if (!pbd->hit) {
+          continue;
+        }
 
         ev.deviceid = dev->id;
         ev.event_id = pbd->barrier_event_id;
@@ -725,8 +766,9 @@ static void add_master_func(void *res, XID id, void *devid)
     barrier = container_of(b, struct PointerBarrierClient, barrier);
 
     struct PointerBarrierDevice *pbd = AllocBarrierDevice();
-    if (!pbd)
-        return;
+    if (!pbd) {
+      return;
+    }
     pbd->deviceid = *deviceid;
 
     input_lock();
@@ -745,15 +787,17 @@ static void remove_master_func(void *res, XID id, void *devid)
     Time ms = GetTimeInMillis();
 
     rc = dixLookupDevice(&dev, *deviceid, serverClient, DixSendAccess);
-    if (rc != Success)
-        return;
+    if (rc != Success) {
+      return;
+    }
 
     b = res;
     barrier = container_of(b, struct PointerBarrierClient, barrier);
 
     pbd = GetBarrierDevice(barrier, *deviceid);
-    if (!pbd)
-        return;
+    if (!pbd) {
+      return;
+    }
 
     if (pbd->hit) {
         BarrierEvent ev = {
@@ -805,25 +849,31 @@ XICreatePointerBarrier(ClientPtr client,
     b.y1 = stuff->y1;
     b.y2 = stuff->y2;
 
-    if (!barrier_is_horizontal(&b) && !barrier_is_vertical(&b))
-        return BadValue;
+    if (!barrier_is_horizontal(&b) && !barrier_is_vertical(&b)) {
+      return BadValue;
+    }
 
     /* no 0-sized barriers */
-    if (barrier_is_horizontal(&b) && barrier_is_vertical(&b))
-        return BadValue;
+    if (barrier_is_horizontal(&b) && barrier_is_vertical(&b)) {
+      return BadValue;
+    }
 
     /* no infinite barriers on the wrong axis */
-    if (barrier_is_horizontal(&b) && (b.y1 < 0 || b.y2 < 0))
-        return BadValue;
+    if (barrier_is_horizontal(&b) && (b.y1 < 0 || b.y2 < 0)) {
+      return BadValue;
+    }
 
-    if (barrier_is_vertical(&b) && (b.x1 < 0 || b.x2 < 0))
-        return BadValue;
+    if (barrier_is_vertical(&b) && (b.x1 < 0 || b.x2 < 0)) {
+      return BadValue;
+    }
 
-    if ((err = CreatePointerBarrierClient(client, stuff, &barrier)))
-        return err;
+    if ((err = CreatePointerBarrierClient(client, stuff, &barrier))) {
+      return err;
+    }
 
-    if (!AddResource(stuff->barrier, PointerBarrierType, &barrier->barrier))
-        return BadAlloc;
+    if (!AddResource(stuff->barrier, PointerBarrierType, &barrier->barrier)) {
+      return BadAlloc;
+    }
 
     return Success;
 }
@@ -842,8 +892,9 @@ XIDestroyPointerBarrier(ClientPtr client,
         return err;
     }
 
-    if (dixClientIdForXID(stuff->barrier) != client->index)
-        return BadAccess;
+    if (dixClientIdForXID(stuff->barrier) != client->index) {
+      return BadAccess;
+    }
 
     FreeResource(stuff->barrier, X11_RESTYPE_NONE);
     return Success;
@@ -855,8 +906,10 @@ ProcXIBarrierReleasePointer(ClientPtr client)
     X_REQUEST_HEAD_AT_LEAST(xXIBarrierReleasePointerReq);
     X_REQUEST_FIELD_CARD32(num_barriers);
 
-    if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
-        return BadLength;
+    if (stuff->num_barriers >
+        UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo)) {
+      return BadLength;
+    }
     REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
 
     if (client->swapped) {
@@ -897,8 +950,9 @@ ProcXIBarrierReleasePointer(ClientPtr client)
             return err;
         }
 
-        if (dixClientIdForXID(barrier_id) != client->index)
-            return BadAccess;
+        if (dixClientIdForXID(barrier_id) != client->index) {
+          return BadAccess;
+        }
 
         barrier = container_of(b, struct PointerBarrierClient, barrier);
 
@@ -908,8 +962,9 @@ ProcXIBarrierReleasePointer(ClientPtr client)
             return BadDevice;
         }
 
-        if (pbd->barrier_event_id == event_id)
-            pbd->release_event_id = event_id;
+        if (pbd->barrier_event_id == event_id) {
+          pbd->release_event_id = event_id;
+        }
     }
 
     return Success;
@@ -918,8 +973,9 @@ ProcXIBarrierReleasePointer(ClientPtr client)
 Bool
 XIBarrierInit(void)
 {
-    if (!dixRegisterPrivateKey(&BarrierScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+  if (!dixRegisterPrivateKey(&BarrierScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+    return FALSE;
+  }
 
     DIX_FOR_EACH_SCREEN({
         BarrierScreenPtr cs;

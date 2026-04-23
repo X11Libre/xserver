@@ -82,21 +82,24 @@ lnxACPIGetEventFromOs(int fd, pmEvent * events, int num)
 
         strtok(ev, " ");
 
-        if (!(GFX = strtok(NULL, " ")))
-            return 0;
+        if (!(GFX = strtok(NULL, " "))) {
+          return 0;
+        }
 #if 0
         ErrorF("GFX: %s\n", GFX);
 #endif
 
-        if (!(notify = strtok(NULL, " ")))
-            return 0;
+        if (!(notify = strtok(NULL, " "))) {
+          return 0;
+        }
         notify_l = strtoul(notify, NULL, 16);
 #if 0
         ErrorF("notify: 0x%lx\n", notify_l);
 #endif
 
-        if (!(data = strtok(NULL, " ")))
-            return 0;
+        if (!(data = strtok(NULL, " "))) {
+          return 0;
+        }
 #if 0
         data_l = strtoul(data, NULL, 16);
         ErrorF("data: 0x%lx\n", data_l);
@@ -139,8 +142,9 @@ lnxACPIOpen(void)
     static int warned = 0;
 
     DebugF("ACPI: OSPMOpen called\n");
-    if (ACPIihPtr || !xf86Info.pmFlag)
-        return NULL;
+    if (ACPIihPtr || !xf86Info.pmFlag) {
+      return NULL;
+    }
 
     DebugF("ACPI: Opening device\n");
     if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) > -1) {
@@ -148,9 +152,10 @@ lnxACPIOpen(void)
         addr.sun_family = AF_UNIX;
         strcpy(addr.sun_path, ACPI_SOCKET);
         if ((r = connect(fd, (struct sockaddr *) &addr, sizeof(addr))) == -1) {
-            if (!warned)
-                LogMessageVerb(X_WARNING, 3, "Open ACPI failed (%s) (%s)\n",
-                            ACPI_SOCKET, strerror(errno));
+          if (!warned) {
+            LogMessageVerb(X_WARNING, 3, "Open ACPI failed (%s) (%s)\n",
+                           ACPI_SOCKET, strerror(errno));
+          }
             warned = 1;
             shutdown(fd, 2);
             close(fd);

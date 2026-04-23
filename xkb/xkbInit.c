@@ -120,8 +120,9 @@ XkbGetRulesDflts(XkbRMLVOSet * rmlvo)
 void
 XkbFreeRMLVOSet(XkbRMLVOSet * rmlvo, Bool freeRMLVO)
 {
-    if (!rmlvo)
-        return;
+  if (!rmlvo) {
+    return;
+  }
 
     free(rmlvo->rules);
     free(rmlvo->model);
@@ -129,10 +130,11 @@ XkbFreeRMLVOSet(XkbRMLVOSet * rmlvo, Bool freeRMLVO)
     free(rmlvo->variant);
     free(rmlvo->options);
 
-    if (freeRMLVO)
-        free(rmlvo);
-    else
-        memset(rmlvo, 0, sizeof(XkbRMLVOSet));
+    if (freeRMLVO) {
+      free(rmlvo);
+    } else {
+      memset(rmlvo, 0, sizeof(XkbRMLVOSet));
+    }
 }
 
 static Bool
@@ -146,8 +148,9 @@ XkbWriteRulesProp(void)
     len += (XkbLayoutUsed ? strlen(XkbLayoutUsed) : 0);
     len += (XkbVariantUsed ? strlen(XkbVariantUsed) : 0);
     len += (XkbOptionsUsed ? strlen(XkbOptionsUsed) : 0);
-    if (len < 1)
-        return TRUE;
+    if (len < 1) {
+      return TRUE;
+    }
 
     len += 5;                   /* trailing NULs */
 
@@ -227,8 +230,9 @@ XkbSetRulesUsed(XkbRMLVOSet * rmlvo)
     XkbVariantUsed = (rmlvo->variant ? Xstrdup(rmlvo->variant) : NULL);
     free(XkbOptionsUsed);
     XkbOptionsUsed = (rmlvo->options ? Xstrdup(rmlvo->options) : NULL);
-    if (XkbWantRulesProp)
-        XkbWriteRulesProp();
+    if (XkbWantRulesProp) {
+      XkbWriteRulesProp();
+    }
     return;
 }
 
@@ -296,12 +300,13 @@ XkbDeleteRulesDflts(void)
 static Bool
 XkbCompareUsedRMLVO(XkbRMLVOSet * rmlvo)
 {
-    if (DIFFERS(rmlvo->rules, XkbRulesUsed) ||
-        DIFFERS(rmlvo->model, XkbModelUsed) ||
-        DIFFERS(rmlvo->layout, XkbLayoutUsed) ||
-        DIFFERS(rmlvo->variant, XkbVariantUsed) ||
-        DIFFERS(rmlvo->options, XkbOptionsUsed))
-        return FALSE;
+  if (DIFFERS(rmlvo->rules, XkbRulesUsed) ||
+      DIFFERS(rmlvo->model, XkbModelUsed) ||
+      DIFFERS(rmlvo->layout, XkbLayoutUsed) ||
+      DIFFERS(rmlvo->variant, XkbVariantUsed) ||
+      DIFFERS(rmlvo->options, XkbOptionsUsed)) {
+    return FALSE;
+  }
     return TRUE;
 }
 
@@ -314,12 +319,14 @@ XkbCompareUsedRMLVO(XkbRMLVOSet * rmlvo)
 static Bool
 XkbInitKeyTypes(XkbDescPtr xkb)
 {
-    if (xkb->defined & XkmTypesMask)
-        return TRUE;
+  if (xkb->defined & XkmTypesMask) {
+    return TRUE;
+  }
 
     initTypeNames(NULL);
-    if (XkbAllocClientMap(xkb, XkbKeyTypesMask, num_dflt_types) != Success)
-        return FALSE;
+    if (XkbAllocClientMap(xkb, XkbKeyTypesMask, num_dflt_types) != Success) {
+      return FALSE;
+    }
     if (XkbCopyKeyTypes(dflt_types, xkb->map->types, num_dflt_types) != Success) {
         return FALSE;
     }
@@ -341,11 +348,13 @@ XkbInitCompatStructs(XkbDescPtr xkb)
     register int i;
     XkbCompatMapPtr compat;
 
-    if (xkb->defined & XkmCompatMapMask)
-        return TRUE;
+    if (xkb->defined & XkmCompatMapMask) {
+      return TRUE;
+    }
 
-    if (XkbAllocCompatMap(xkb, XkbAllCompatMask, num_dfltSI) != Success)
-        return BadAlloc;
+    if (XkbAllocCompatMap(xkb, XkbAllCompatMask, num_dfltSI) != Success) {
+      return BadAlloc;
+    }
     compat = xkb->compat;
     if (compat->sym_interpret) {
         compat->num_si = num_dfltSI;
@@ -358,9 +367,9 @@ XkbInitCompatStructs(XkbDescPtr xkb)
 
             mask = XkbMaskForVMask(xkb, compat->groups[i].vmods);
             compat->groups[i].mask = compat->groups[i].real_mods | mask;
+        } else {
+          compat->groups[i].mask = compat->groups[i].real_mods;
         }
-        else
-            compat->groups[i].mask = compat->groups[i].real_mods;
     }
     return Success;
 }
@@ -384,50 +393,64 @@ XkbInitNames(XkbSrvInfoPtr xkbi)
     Atom unknown;
 
     xkb = xkbi->desc;
-    if ((rtrn = XkbAllocNames(xkb, XkbAllNamesMask, 0, 0)) != Success)
-        return rtrn;
+    if ((rtrn = XkbAllocNames(xkb, XkbAllNamesMask, 0, 0)) != Success) {
+      return rtrn;
+    }
     unknown = dixAddAtom("unknown");
     names = xkb->names;
-    if (names->keycodes == None)
-        names->keycodes = unknown;
-    if (names->geometry == None)
-        names->geometry = unknown;
-    if (names->phys_symbols == None)
-        names->phys_symbols = unknown;
-    if (names->symbols == None)
-        names->symbols = unknown;
-    if (names->types == None)
-        names->types = unknown;
-    if (names->compat == None)
-        names->compat = unknown;
+    if (names->keycodes == None) {
+      names->keycodes = unknown;
+    }
+    if (names->geometry == None) {
+      names->geometry = unknown;
+    }
+    if (names->phys_symbols == None) {
+      names->phys_symbols = unknown;
+    }
+    if (names->symbols == None) {
+      names->symbols = unknown;
+    }
+    if (names->types == None) {
+      names->types = unknown;
+    }
+    if (names->compat == None) {
+      names->compat = unknown;
+    }
     if (!(xkb->defined & XkmVirtualModsMask)) {
-        if (names->vmods[vmod_NumLock] == None)
-            names->vmods[vmod_NumLock] = dixAddAtom("NumLock");
-        if (names->vmods[vmod_Alt] == None)
-            names->vmods[vmod_Alt] = dixAddAtom("Alt");
-        if (names->vmods[vmod_AltGr] == None)
-            names->vmods[vmod_AltGr] = dixAddAtom("ModeSwitch");
+      if (names->vmods[vmod_NumLock] == None) {
+        names->vmods[vmod_NumLock] = dixAddAtom("NumLock");
+      }
+      if (names->vmods[vmod_Alt] == None) {
+        names->vmods[vmod_Alt] = dixAddAtom("Alt");
+      }
+      if (names->vmods[vmod_AltGr] == None) {
+        names->vmods[vmod_AltGr] = dixAddAtom("ModeSwitch");
+      }
     }
 
     if (!(xkb->defined & XkmIndicatorsMask) ||
         !(xkb->defined & XkmGeometryMask)) {
         initIndicatorNames(NULL, xkb);
-        if (names->indicators[LED_CAPS - 1] == None)
-            names->indicators[LED_CAPS - 1] = dixAddAtom("Caps Lock");
-        if (names->indicators[LED_NUM - 1] == None)
-            names->indicators[LED_NUM - 1] = dixAddAtom("Num Lock");
-        if (names->indicators[LED_SCROLL - 1] == None)
-            names->indicators[LED_SCROLL - 1] = dixAddAtom("Scroll Lock");
+        if (names->indicators[LED_CAPS - 1] == None) {
+          names->indicators[LED_CAPS - 1] = dixAddAtom("Caps Lock");
+        }
+        if (names->indicators[LED_NUM - 1] == None) {
+          names->indicators[LED_NUM - 1] = dixAddAtom("Num Lock");
+        }
+        if (names->indicators[LED_SCROLL - 1] == None) {
+          names->indicators[LED_SCROLL - 1] = dixAddAtom("Scroll Lock");
+        }
 #ifdef LED_COMPOSE
         if (names->indicators[LED_COMPOSE - 1] == None)
             names->indicators[LED_COMPOSE - 1] = dixAddAtom("Compose");
 #endif
     }
 
-    if (xkb->geom != NULL)
-        names->geometry = xkb->geom->name;
-    else
-        names->geometry = unknown;
+    if (xkb->geom != NULL) {
+      names->geometry = xkb->geom->name;
+    } else {
+      names->geometry = unknown;
+    }
 
     return Success;
 }
@@ -440,8 +463,9 @@ XkbInitIndicatorMap(XkbSrvInfoPtr xkbi)
     XkbSrvLedInfoPtr sli;
 
     xkb = xkbi->desc;
-    if (XkbAllocIndicatorMaps(xkb) != Success)
-        return BadAlloc;
+    if (XkbAllocIndicatorMaps(xkb) != Success) {
+      return BadAlloc;
+    }
 
     if (!(xkb->defined & XkmIndicatorsMask)) {
         map = xkb->indicators;
@@ -464,8 +488,9 @@ XkbInitIndicatorMap(XkbSrvInfoPtr xkbi)
     }
 
     sli = XkbFindSrvLedInfo(xkbi->device, XkbDfltXIClass, XkbDfltXIId, 0);
-    if (sli)
-        XkbCheckIndicatorMaps(xkbi->device, sli, XkbAllIndicatorsMask);
+    if (sli) {
+      XkbCheckIndicatorMaps(xkbi->device, sli, XkbAllIndicatorsMask);
+    }
 
     return Success;
 }
@@ -478,11 +503,13 @@ XkbInitControls(DeviceIntPtr pXDev, XkbSrvInfoPtr xkbi)
 
     xkb = xkbi->desc;
     /* 12/31/94 (ef) -- XXX! Should check if controls loaded from file */
-    if (XkbAllocControls(xkb, XkbAllControlsMask) != Success)
-        FatalError("Couldn't allocate keyboard controls\n");
+    if (XkbAllocControls(xkb, XkbAllControlsMask) != Success) {
+      FatalError("Couldn't allocate keyboard controls\n");
+    }
     ctrls = xkb->ctrls;
-    if (!(xkb->defined & XkmSymbolsMask))
-        ctrls->num_groups = 1;
+    if (!(xkb->defined & XkmSymbolsMask)) {
+      ctrls->num_groups = 1;
+    }
     ctrls->groups_wrap = XkbSetGroupInfo(1, XkbWrapIntoRange, 0);
     ctrls->internal.mask = 0;
     ctrls->internal.real_mods = 0;
@@ -492,8 +519,9 @@ XkbInitControls(DeviceIntPtr pXDev, XkbSrvInfoPtr xkbi)
     ctrls->ignore_lock.vmods = 0;
     ctrls->enabled_ctrls = XkbAccessXTimeoutMask | XkbRepeatKeysMask |
         XkbMouseKeysAccelMask | XkbAudibleBellMask | XkbIgnoreGroupLockMask;
-    if (XkbWantAccessX)
-        ctrls->enabled_ctrls |= XkbAccessXKeysMask;
+    if (XkbWantAccessX) {
+      ctrls->enabled_ctrls |= XkbAccessXKeysMask;
+    }
     AccessXInit(pXDev);
     return Success;
 }
@@ -557,18 +585,19 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
         xkb_cached_map = NULL;
     }
 
-    if (xkb_cached_map)
-        LogMessageVerb(X_INFO, 4, "XKB: Reusing cached keymap\n");
-    else {
-        if (rmlvo)
-            xkb_cached_map = XkbCompileKeymap(dev, rmlvo);
-        else
-            xkb_cached_map = XkbCompileKeymapFromString(dev, keymap, keymap_length);
+    if (xkb_cached_map) {
+      LogMessageVerb(X_INFO, 4, "XKB: Reusing cached keymap\n");
+    } else {
+      if (rmlvo) {
+        xkb_cached_map = XkbCompileKeymap(dev, rmlvo);
+      } else {
+        xkb_cached_map = XkbCompileKeymapFromString(dev, keymap, keymap_length);
+      }
 
-        if (!xkb_cached_map) {
-            ErrorF("XKB: Failed to compile keymap\n");
-            goto unwind_info;
-        }
+      if (!xkb_cached_map) {
+        ErrorF("XKB: Failed to compile keymap\n");
+        goto unwind_info;
+      }
     }
 
     xkb = XkbAllocKeyboard();
@@ -586,16 +615,20 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     xkb->device_spec = xkb_cached_map->device_spec;
     xkbi->desc = xkb;
 
-    if (xkb->min_key_code == 0)
-        xkb->min_key_code = 8;
-    if (xkb->max_key_code == 0)
-        xkb->max_key_code = 255;
+    if (xkb->min_key_code == 0) {
+      xkb->min_key_code = 8;
+    }
+    if (xkb->max_key_code == 0) {
+      xkb->max_key_code = 255;
+    }
 
     i = XkbNumKeys(xkb) / 3 + 1;
-    if (XkbAllocClientMap(xkb, XkbAllClientInfoMask, 0) != Success)
-        goto unwind_desc;
-    if (XkbAllocServerMap(xkb, XkbAllServerInfoMask, i) != Success)
-        goto unwind_desc;
+    if (XkbAllocClientMap(xkb, XkbAllClientInfoMask, 0) != Success) {
+      goto unwind_desc;
+    }
+    if (XkbAllocServerMap(xkb, XkbAllServerInfoMask, i) != Success) {
+      goto unwind_desc;
+    }
 
     xkbi->dfltPtrDelta = 1;
     xkbi->device = dev;
@@ -613,25 +646,28 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     XkbUpdateActions(dev, xkb->min_key_code, XkbNumKeys(xkb), &changes,
                      &check, &cause);
 
-    if (!dev->focus)
-        InitFocusClassDeviceStruct(dev);
+    if (!dev->focus) {
+      InitFocusClassDeviceStruct(dev);
+    }
 
     xkbi->kbdProc = ctrl_func;
     dev->kbdfeed->BellProc = bell_func;
     dev->kbdfeed->CtrlProc = XkbDDXKeybdCtrlProc;
 
     dev->kbdfeed->ctrl = defaultKeyboardControl;
-    if (dev->kbdfeed->ctrl.autoRepeat)
-        xkb->ctrls->enabled_ctrls |= XkbRepeatKeysMask;
+    if (dev->kbdfeed->ctrl.autoRepeat) {
+      xkb->ctrls->enabled_ctrls |= XkbRepeatKeysMask;
+    }
 
     memcpy(dev->kbdfeed->ctrl.autoRepeats, xkb->ctrls->per_key_repeat,
            XkbPerKeyBitArraySize);
 
     sli = XkbFindSrvLedInfo(dev, XkbDfltXIClass, XkbDfltXIId, 0);
-    if (sli)
-        XkbCheckIndicatorMaps(dev, sli, XkbAllIndicatorsMask);
-    else
-        DebugF("XKB: No indicator feedback in XkbFinishInit!\n");
+    if (sli) {
+      XkbCheckIndicatorMaps(dev, sli, XkbAllIndicatorsMask);
+    } else {
+      DebugF("XKB: No indicator feedback in XkbFinishInit!\n");
+    }
 
     dev->kbdfeed->CtrlProc(dev, &dev->kbdfeed->ctrl);
 
@@ -767,53 +803,56 @@ XkbProcessArguments(int argc, char *argv[], int i)
              (strncmp(argv[i], "+accessx", 8) == 0)) {
         int j = 1;
 
-        if (argv[i][0] == '-')
-            XkbWantAccessX = 0;
-        else {
-            XkbWantAccessX = 1;
+        if (argv[i][0] == '-') {
+          XkbWantAccessX = 0;
+        } else {
+          XkbWantAccessX = 1;
+
+          if (((i + 1) < argc) && (isdigit((unsigned char)argv[i + 1][0]))) {
+            XkbDfltAccessXTimeout = atoi(argv[++i]);
+            j++;
 
             if (((i + 1) < argc) && (isdigit((unsigned char)argv[i + 1][0]))) {
-                XkbDfltAccessXTimeout = atoi(argv[++i]);
-                j++;
-
-                if (((i + 1) < argc) && (isdigit((unsigned char)argv[i + 1][0]))) {
-                    /*
-                     * presumption that the reasonably useful range of
-                     * values fits in 0..MAXINT since SunOS 4 doesn't
-                     * have strtoul.
-                     */
-                    XkbDfltAccessXTimeoutMask = (unsigned int)
-                        strtol(argv[++i], NULL, 16);
-                    j++;
-                }
-                if (((i + 1) < argc) && (isdigit((unsigned char)argv[i + 1][0]))) {
-                    if (argv[++i][0] == '1')
-                        XkbDfltAccessXFeedback = XkbAccessXFeedbackMask;
-                    else
-                        XkbDfltAccessXFeedback = 0;
-                    j++;
-                }
-                if (((i + 1) < argc) && (isdigit((unsigned char)argv[i + 1][0]))) {
-                    XkbDfltAccessXOptions = (unsigned short)
-                        strtol(argv[++i], NULL, 16);
-                    j++;
-                }
+              /*
+               * presumption that the reasonably useful range of
+               * values fits in 0..MAXINT since SunOS 4 doesn't
+               * have strtoul.
+               */
+              XkbDfltAccessXTimeoutMask =
+                  (unsigned int)strtol(argv[++i], NULL, 16);
+              j++;
             }
+            if (((i + 1) < argc) && (isdigit((unsigned char)argv[i + 1][0]))) {
+              if (argv[++i][0] == '1') {
+                XkbDfltAccessXFeedback = XkbAccessXFeedbackMask;
+              } else {
+                XkbDfltAccessXFeedback = 0;
+              }
+              j++;
+            }
+            if (((i + 1) < argc) && (isdigit((unsigned char)argv[i + 1][0]))) {
+              XkbDfltAccessXOptions =
+                  (unsigned short)strtol(argv[++i], NULL, 16);
+              j++;
+            }
+          }
         }
         return j;
     }
     if ((strcmp(argv[i], "-ardelay") == 0) || (strcmp(argv[i], "-ar1") == 0)) { /* -ardelay int */
-        if (++i >= argc)
-            UseMsg();
-        else
-            XkbDfltRepeatDelay = (long) atoi(argv[i]);
+      if (++i >= argc) {
+        UseMsg();
+      } else {
+        XkbDfltRepeatDelay = (long)atoi(argv[i]);
+      }
         return 2;
     }
     if ((strcmp(argv[i], "-arinterval") == 0) || (strcmp(argv[i], "-ar2") == 0)) {      /* -arinterval int */
-        if (++i >= argc)
-            UseMsg();
-        else
-            XkbDfltRepeatInterval = (long) atoi(argv[i]);
+      if (++i >= argc) {
+        UseMsg();
+      } else {
+        XkbDfltRepeatInterval = (long)atoi(argv[i]);
+      }
         return 2;
     }
     return 0;

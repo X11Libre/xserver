@@ -434,8 +434,9 @@ SELinuxSend(CallbackListPtr *pcbl, void *unused, void *calldata)
         class = (type & 128) ? SECCLASS_X_FAKEEVENT : SECCLASS_X_EVENT;
 
         rc = SELinuxEventToSID(type, obj->sid, &ev_sid);
-        if (rc != Success)
-            goto err;
+        if (rc != Success) {
+          goto err;
+        }
 
         auditdata.event = type;
         rc = SELinuxDoCheck(subj, &ev_sid, class, DixSendAccess, &auditdata);
@@ -548,8 +549,9 @@ SELinuxSelection(CallbackListPtr *pcbl, void *unused, void *calldata)
     /* If this is a new object that needs labeling, do it now */
     if (access_mode & DixCreateAccess) {
         int rc = SELinuxSelectionToSID(name, subj, &obj->sid, &obj->poly);
-        if (rc != Success)
+        if (rc != Success) {
             obj->sid = unlabeled_sid;
+        }
         access_mode = DixSetAttrAccess;
     }
     /* If this is a polyinstantiated object, find the right instance */
@@ -844,9 +846,9 @@ SELinuxResourceState(CallbackListPtr *pcbl, void *unused, void *calldata)
             FatalError("SELinux: Failed to set label property on window!\n");
         }
         freecon(ctx);
+    } else {
+      FatalError("SELinux: Unexpected unlabeled client found\n");
     }
-    else
-        FatalError("SELinux: Unexpected unlabeled client found\n");
 
     obj = dixLookupPrivate(&pWin->devPrivates, objectKey);
 
@@ -959,8 +961,8 @@ SELinuxFlaskInit(void)
     }
 
     /* Allocate private storage */
-    if (!dixRegisterPrivateKey
-        (subjectKey, PRIVATE_XSELINUX, sizeof(SELinuxSubjectRec)) ||
+    if (!dixRegisterPrivateKey(subjectKey, PRIVATE_XSELINUX,
+                               sizeof(SELinuxSubjectRec)) ||
         !dixRegisterPrivateKey(objectKey, PRIVATE_XSELINUX,
                                sizeof(SELinuxObjectRec)) ||
         !dixRegisterPrivateKey(dataKey, PRIVATE_XSELINUX,

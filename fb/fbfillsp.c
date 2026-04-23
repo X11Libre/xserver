@@ -47,17 +47,21 @@ fbFillSpans(DrawablePtr pDrawable,
         ppt++;
         pwidth++;
 
-        if (fullY1 < extentY1 || extentY2 <= fullY1)
-            continue;
+        if (fullY1 < extentY1 || extentY2 <= fullY1) {
+          continue;
+        }
 
-        if (fullX1 < extentX1)
-            fullX1 = extentX1;
+        if (fullX1 < extentX1) {
+          fullX1 = extentX1;
+        }
 
-        if (fullX2 > extentX2)
-            fullX2 = extentX2;
+        if (fullX2 > extentX2) {
+          fullX2 = extentX2;
+        }
 
-        if (fullX1 >= fullX2)
-            continue;
+        if (fullX1 >= fullX2) {
+          continue;
+        }
 
         nbox = RegionNumRects(pClip);
         if (nbox == 1) {
@@ -68,11 +72,13 @@ fbFillSpans(DrawablePtr pDrawable,
             while (nbox--) {
                 if (pbox->y1 <= fullY1 && fullY1 < pbox->y2) {
                     partX1 = pbox->x1;
-                    if (partX1 < fullX1)
-                        partX1 = fullX1;
+                    if (partX1 < fullX1) {
+                      partX1 = fullX1;
+                    }
                     partX2 = pbox->x2;
-                    if (partX2 > fullX2)
-                        partX2 = fullX2;
+                    if (partX2 > fullX2) {
+                      partX2 = fullX2;
+                    }
                     if (partX2 > partX1) {
                         fbFill(pDrawable, pGC,
                                partX1, fullY1, partX2 - partX1, 1);

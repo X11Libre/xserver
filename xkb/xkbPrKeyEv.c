@@ -54,13 +54,15 @@ XkbProcessKeyboardEvent(DeviceEvent *event, DeviceIntPtr keybd)
 
     xkbi = keyc->xkbInfo;
     key = event->detail.key;
-    if (xkbDebugFlags & 0x8)
-        DebugF("[xkb] XkbPKE: Key %d %s\n", key,
-               (event->type == ET_KeyPress ? "down" : "up"));
+    if (xkbDebugFlags & 0x8) {
+      DebugF("[xkb] XkbPKE: Key %d %s\n", key,
+             (event->type == ET_KeyPress ? "down" : "up"));
+    }
 
     if (xkbi->repeatKey == key && event->type == ET_KeyRelease &&
-        !(xkbi->desc->ctrls->enabled_ctrls & XkbRepeatKeysMask))
-        AccessXCancelRepeatKey(xkbi, key);
+        !(xkbi->desc->ctrls->enabled_ctrls & XkbRepeatKeysMask)) {
+      AccessXCancelRepeatKey(xkbi, key);
+    }
 
     behavior = xkbi->desc->server->behaviors[key];
     /* The "permanent" flag indicates a hard-wired behavior that occurs */
@@ -74,25 +76,28 @@ XkbProcessKeyboardEvent(DeviceEvent *event, DeviceIntPtr keybd)
             /* Neither of these should happen in practice, but ignore them
                anyway. */
             if (event->type == ET_KeyPress && !event->key_repeat &&
-                key_is_down(keybd, key, KEY_PROCESSED))
-                return;
-            else if (event->type == ET_KeyRelease &&
-                     !key_is_down(keybd, key, KEY_PROCESSED))
-                return;
+                key_is_down(keybd, key, KEY_PROCESSED)) {
+              return;
+            } else if (event->type == ET_KeyRelease &&
+                       !key_is_down(keybd, key, KEY_PROCESSED)) {
+              return;
+            }
             break;
         case XkbKB_Lock:
-            if (event->type == ET_KeyRelease)
-                return;
-            else if (key_is_down(keybd, key, KEY_PROCESSED))
-                event->type = ET_KeyRelease;
+          if (event->type == ET_KeyRelease) {
+            return;
+          } else if (key_is_down(keybd, key, KEY_PROCESSED)) {
+            event->type = ET_KeyRelease;
+          }
             break;
         case XkbKB_RadioGroup:
             ndx = (behavior.data & (~XkbKB_RGAllowNone));
             if (ndx < xkbi->nRadioGroups) {
                 XkbRadioGroupPtr rg;
 
-                if (event->type == ET_KeyRelease)
-                    return;
+                if (event->type == ET_KeyRelease) {
+                  return;
+                }
 
                 rg = &xkbi->radioGroups[ndx];
                 if (rg->currentDown == event->detail.key) {
@@ -113,9 +118,9 @@ XkbProcessKeyboardEvent(DeviceEvent *event, DeviceIntPtr keybd)
                     event->detail.key = tmpkey;
                 }
                 rg->currentDown = key;
+            } else {
+              ErrorF("[xkb] InternalError! Illegal radio group %d\n", ndx);
             }
-            else
-                ErrorF("[xkb] InternalError! Illegal radio group %d\n", ndx);
             break;
         case XkbKB_Overlay1:
         case XkbKB_Overlay2:
@@ -127,20 +132,23 @@ XkbProcessKeyboardEvent(DeviceEvent *event, DeviceIntPtr keybd)
              * for when overlay is already released, but the key is not. */
             unsigned key_was_overlaid = 0;
 
-            if (behavior.type == XkbKB_Overlay1)
-                which = XkbOverlay1Mask;
-            else
-                which = XkbOverlay2Mask;
+            if (behavior.type == XkbKB_Overlay1) {
+              which = XkbOverlay1Mask;
+            } else {
+              which = XkbOverlay2Mask;
+            }
             overlay_active_now = (xkbi->desc->ctrls->enabled_ctrls & which) ? 1 : 0;
 
             if ((unsigned char)key == key) {
                 key_was_overlaid = BitIsOn(xkbi->overlay_perkey_state, key);
                 if (!is_keyrelease) {
-                    if (overlay_active_now)
-                        SetBit(xkbi->overlay_perkey_state, key);
+                  if (overlay_active_now) {
+                    SetBit(xkbi->overlay_perkey_state, key);
+                  }
                 } else {
-                    if (key_was_overlaid)
-                        ClearBit(xkbi->overlay_perkey_state, key);
+                  if (key_was_overlaid) {
+                    ClearBit(xkbi->overlay_perkey_state, key);
+                  }
                 }
             }
 
@@ -190,10 +198,11 @@ ProcessKeyboardEvent(InternalEvent *ev, DeviceIntPtr keybd)
      * If AXF[PK]E don't intercept anything (which they probably won't),
      * they'll punt through XPKE anyway. */
     if ((xkbi->desc->ctrls->enabled_ctrls & XkbAllFilteredEventsMask)) {
-        if (is_press)
-            AccessXFilterPressEvent(event, keybd);
-        else if (is_release)
-            AccessXFilterReleaseEvent(event, keybd);
+      if (is_press) {
+        AccessXFilterPressEvent(event, keybd);
+      } else if (is_release) {
+        AccessXFilterReleaseEvent(event, keybd);
+      }
         return;
     }
     else {

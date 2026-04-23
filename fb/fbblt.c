@@ -102,16 +102,17 @@ fbBlt(FbBits * srcLine,
         {
             int i;
 
-            if (!upsidedown)
-                for (i = 0; i < height; i++)
-                    MEMCPY_WRAPPED(dst_byte + i * dst_byte_stride,
-                                   src_byte + i * src_byte_stride,
-                                   width_byte);
-            else
-                for (i = height - 1; i >= 0; i--)
-                    MEMCPY_WRAPPED(dst_byte + i * dst_byte_stride,
-                                   src_byte + i * src_byte_stride,
-                                   width_byte);
+            if (!upsidedown) {
+              for (i = 0; i < height; i++) {
+                MEMCPY_WRAPPED(dst_byte + i * dst_byte_stride,
+                               src_byte + i * src_byte_stride, width_byte);
+              }
+            } else {
+              for (i = height - 1; i >= 0; i--) {
+                MEMCPY_WRAPPED(dst_byte + i * dst_byte_stride,
+                               src_byte + i * src_byte_stride, width_byte);
+              }
+            }
 
             return;
         }
@@ -153,8 +154,9 @@ fbBlt(FbBits * srcLine,
                 }
                 n = nmiddle;
                 if (destInvarient) {
-                    while (n--)
-                        WRITE(--dst, FbDoDestInvarientMergeRop(READ(--src)));
+                  while (n--) {
+                    WRITE(--dst, FbDoDestInvarientMergeRop(READ(--src)));
+                  }
                 }
                 else {
                     while (n--) {
@@ -199,8 +201,9 @@ fbBlt(FbBits * srcLine,
                         }
                     }
 #endif
-                    while (n--)
-                        WRITE(dst++, FbDoDestInvarientMergeRop(READ(src++)));
+                  while (n--) {
+                    WRITE(dst++, FbDoDestInvarientMergeRop(READ(src++)));
+                  }
                 }
                 else {
                     while (n--) {
@@ -233,8 +236,9 @@ fbBlt(FbBits * srcLine,
 
             bits1 = 0;
             if (reverse) {
-                if (srcX < dstX)
-                    bits1 = READ(--src);
+              if (srcX < dstX) {
+                bits1 = READ(--src);
+              }
                 if (endmask) {
                     bits = FbScrRight(bits1, rightShift);
                     if (FbScrRight(endmask, leftShift)) {
@@ -274,8 +278,9 @@ fbBlt(FbBits * srcLine,
                 }
             }
             else {
-                if (srcX > dstX)
-                    bits1 = READ(src++);
+              if (srcX > dstX) {
+                bits1 = READ(src++);
+              }
                 if (startmask) {
                     bits = FbScrLeft(bits1, leftShift);
                     if (FbScrLeft(startmask, rightShift)) {

@@ -85,8 +85,9 @@ xtest_init(void)
     dixResetPrivates();
     serverClient = &server_client;
     InitClient(serverClient, 0, (void *) NULL);
-    if (!InitClientResources(serverClient)) /* for root resources */
-        FatalError("couldn't init server resources");
+    if (!InitClientResources(serverClient)) { /* for root resources */
+      FatalError("couldn't init server resources");
+    }
     InitAtoms();
     SyncExtensionInit();
 

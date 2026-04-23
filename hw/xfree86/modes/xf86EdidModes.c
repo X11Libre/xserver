@@ -42,9 +42,11 @@
 static void
 handle_detailed_rblank(struct detailed_monitor_section *det_mon, void *data)
 {
-    if (det_mon->type == DS_RANGES)
-        if (det_mon->section.ranges.supported_blanking & CVT_REDUCED)
-            *(Bool *) data = TRUE;
+  if (det_mon->type == DS_RANGES) {
+    if (det_mon->section.ranges.supported_blanking & CVT_REDUCED) {
+      *(Bool *)data = TRUE;
+    }
+  }
 }
 
 static Bool
@@ -59,8 +61,9 @@ xf86MonitorSupportsReducedBlanking(xf86MonPtr DDC)
     }
 
     /* For anything older, assume digital means RB support. Boo. */
-    if (DDC->features.input_type)
-        return TRUE;
+    if (DDC->features.input_type) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -70,25 +73,31 @@ quirk_prefer_large_60(int scrnIndex, xf86MonPtr DDC)
 {
     /* Belinea 10 15 55 */
     if (memcmp(DDC->vendor.name, "MAX", 4) == 0 &&
-        ((DDC->vendor.prod_id == 1516) || (DDC->vendor.prod_id == 0x77e)))
-        return TRUE;
+        ((DDC->vendor.prod_id == 1516) || (DDC->vendor.prod_id == 0x77e))) {
+      return TRUE;
+    }
 
     /* Acer AL1706 */
-    if (memcmp(DDC->vendor.name, "ACR", 4) == 0 && DDC->vendor.prod_id == 44358)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "ACR", 4) == 0 &&
+        DDC->vendor.prod_id == 44358) {
+      return TRUE;
+    }
 
     /* Bug #10814: Samsung SyncMaster 225BW */
-    if (memcmp(DDC->vendor.name, "SAM", 4) == 0 && DDC->vendor.prod_id == 596)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "SAM", 4) == 0 && DDC->vendor.prod_id == 596) {
+      return TRUE;
+    }
 
     /* Bug #10545: Samsung SyncMaster 226BW */
-    if (memcmp(DDC->vendor.name, "SAM", 4) == 0 && DDC->vendor.prod_id == 638)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "SAM", 4) == 0 && DDC->vendor.prod_id == 638) {
+      return TRUE;
+    }
 
     /* Acer F51 */
     if (memcmp(DDC->vendor.name, "API", 4) == 0 &&
-        DDC->vendor.prod_id == 0x7602)
-        return TRUE;
+        DDC->vendor.prod_id == 0x7602) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -97,8 +106,10 @@ static Bool
 quirk_prefer_large_75(int scrnIndex, xf86MonPtr DDC)
 {
     /* Bug #11603: Funai Electronics PM36B */
-    if (memcmp(DDC->vendor.name, "FCM", 4) == 0 && DDC->vendor.prod_id == 13600)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "FCM", 4) == 0 &&
+        DDC->vendor.prod_id == 13600) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -107,8 +118,10 @@ static Bool
 quirk_detailed_h_in_cm(int scrnIndex, xf86MonPtr DDC)
 {
     /* Bug #11603: Funai Electronics PM36B */
-    if (memcmp(DDC->vendor.name, "FCM", 4) == 0 && DDC->vendor.prod_id == 13600)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "FCM", 4) == 0 &&
+        DDC->vendor.prod_id == 13600) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -117,29 +130,39 @@ static Bool
 quirk_detailed_v_in_cm(int scrnIndex, xf86MonPtr DDC)
 {
     /* Bug #11603: Funai Electronics PM36B */
-    if (memcmp(DDC->vendor.name, "FCM", 4) == 0 && DDC->vendor.prod_id == 13600)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "FCM", 4) == 0 &&
+        DDC->vendor.prod_id == 13600) {
+      return TRUE;
+    }
 
     /* Bug #21000: LGPhilipsLCD LP154W01-TLAJ */
-    if (memcmp(DDC->vendor.name, "LPL", 4) == 0 && DDC->vendor.prod_id == 47360)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "LPL", 4) == 0 &&
+        DDC->vendor.prod_id == 47360) {
+      return TRUE;
+    }
 
     /* Bug #10304: LGPhilipsLCD LP154W01-A5 */
-    if (memcmp(DDC->vendor.name, "LPL", 4) == 0 && DDC->vendor.prod_id == 0)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "LPL", 4) == 0 && DDC->vendor.prod_id == 0) {
+      return TRUE;
+    }
 
     /* Bug #24482: LGPhilipsLCD LP154W01-TLA1 */
     if (memcmp(DDC->vendor.name, "LPL", 4) == 0 &&
-        DDC->vendor.prod_id == 0x2a00)
-        return TRUE;
+        DDC->vendor.prod_id == 0x2a00) {
+      return TRUE;
+    }
 
     /* Bug #28414: HP Compaq NC8430 LP154W01-TLA8 */
-    if (memcmp(DDC->vendor.name, "LPL", 4) == 0 && DDC->vendor.prod_id == 5750)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "LPL", 4) == 0 &&
+        DDC->vendor.prod_id == 5750) {
+      return TRUE;
+    }
 
     /* Bug #21750: Samsung Syncmaster 2333HD */
-    if (memcmp(DDC->vendor.name, "SAM", 4) == 0 && DDC->vendor.prod_id == 1157)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "SAM", 4) == 0 &&
+        DDC->vendor.prod_id == 1157) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -148,23 +171,27 @@ static Bool
 quirk_detailed_use_maximum_size(int scrnIndex, xf86MonPtr DDC)
 {
     /* ADA 1024x600 7" display */
-    if (memcmp(DDC->vendor.name, "ADA", 4) == 0 &&
-        DDC->vendor.prod_id == 4)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "ADA", 4) == 0 && DDC->vendor.prod_id == 4) {
+      return TRUE;
+    }
 
     /* Bug #21324: Iiyama Vision Master 450 */
-    if (memcmp(DDC->vendor.name, "IVM", 4) == 0 && DDC->vendor.prod_id == 6400)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "IVM", 4) == 0 &&
+        DDC->vendor.prod_id == 6400) {
+      return TRUE;
+    }
 
     /* Bug #41141: Acer Aspire One */
     if (memcmp(DDC->vendor.name, "LGD", 4) == 0 &&
-        DDC->vendor.prod_id == 0x7f01)
-        return TRUE;
+        DDC->vendor.prod_id == 0x7f01) {
+      return TRUE;
+    }
 
     /* Sony Vaio Pro 13 */
     if (memcmp(DDC->vendor.name, "MEI", 4) == 0 &&
-        DDC->vendor.prod_id == 0x96a2)
-        return TRUE;
+        DDC->vendor.prod_id == 0x96a2) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -173,8 +200,10 @@ static Bool
 quirk_135_clock_too_high(int scrnIndex, xf86MonPtr DDC)
 {
     /* Envision Peripherals, Inc. EN-7100e.  See bug #9550. */
-    if (memcmp(DDC->vendor.name, "EPI", 4) == 0 && DDC->vendor.prod_id == 59264)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "EPI", 4) == 0 &&
+        DDC->vendor.prod_id == 59264) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -183,20 +212,27 @@ static Bool
 quirk_first_detailed_preferred(int scrnIndex, xf86MonPtr DDC)
 {
     /* Philips 107p5 CRT. Reported on xorg@ with pastebin. */
-    if (memcmp(DDC->vendor.name, "PHL", 4) == 0 && DDC->vendor.prod_id == 57364)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "PHL", 4) == 0 &&
+        DDC->vendor.prod_id == 57364) {
+      return TRUE;
+    }
 
     /* Proview AY765C 17" LCD. See bug #15160 */
-    if (memcmp(DDC->vendor.name, "PTS", 4) == 0 && DDC->vendor.prod_id == 765)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "PTS", 4) == 0 && DDC->vendor.prod_id == 765) {
+      return TRUE;
+    }
 
     /* ACR of some sort RH #284231 */
-    if (memcmp(DDC->vendor.name, "ACR", 4) == 0 && DDC->vendor.prod_id == 2423)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "ACR", 4) == 0 &&
+        DDC->vendor.prod_id == 2423) {
+      return TRUE;
+    }
 
     /* Peacock Ergovision 19.  See rh#492359 */
-    if (memcmp(DDC->vendor.name, "PEA", 4) == 0 && DDC->vendor.prod_id == 9003)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "PEA", 4) == 0 &&
+        DDC->vendor.prod_id == 9003) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -205,8 +241,9 @@ static Bool
 quirk_detailed_sync_pp(int scrnIndex, xf86MonPtr DDC)
 {
     /* Bug #12439: Samsung SyncMaster 205BW */
-    if (memcmp(DDC->vendor.name, "SAM", 4) == 0 && DDC->vendor.prod_id == 541)
-        return TRUE;
+    if (memcmp(DDC->vendor.name, "SAM", 4) == 0 && DDC->vendor.prod_id == 541) {
+      return TRUE;
+    }
     return FALSE;
 }
 
@@ -216,8 +253,9 @@ quirk_dvi_single_link(int scrnIndex, xf86MonPtr DDC)
 {
     /* Red Hat bug #453106: Apple 23" Cinema Display */
     if (memcmp(DDC->vendor.name, "APL", 4) == 0 &&
-        DDC->vendor.prod_id == 0x921c)
-        return TRUE;
+        DDC->vendor.prod_id == 0x921c) {
+      return TRUE;
+    }
     return FALSE;
 }
 
@@ -431,12 +469,14 @@ FindDMTMode(int hsize, int vsize, int refresh, Bool rb)
     for (i = 0; i < ARRAY_SIZE(DMTModes); i++) {
         ret = &DMTModes[i];
 
-        if (!rb && xf86ModeIsReduced(ret))
-            continue;
+        if (!rb && xf86ModeIsReduced(ret)) {
+          continue;
+        }
 
-        if (ret->HDisplay == hsize &&
-            ret->VDisplay == vsize && refresh == ModeRefresh(ret))
-            return xf86DuplicateMode(ret);
+        if (ret->HDisplay == hsize && ret->VDisplay == vsize &&
+            refresh == ModeRefresh(ret)) {
+          return xf86DuplicateMode(ret);
+        }
     }
 
     return NULL;
@@ -483,12 +523,14 @@ DDCModesFromStandardTiming(DisplayModePtr pool, struct std_timings *timing,
 
         /* If we already have a detailed timing for this size, don't add more */
         for (p = pool; p; p = p->next) {
-            if (p->HDisplay == hsize && p->VDisplay == vsize &&
-                refresh == round(xf86ModeVRefresh(p)))
-                break;
+          if (p->HDisplay == hsize && p->VDisplay == vsize &&
+              refresh == round(xf86ModeVRefresh(p))) {
+            break;
+          }
         }
-        if (p)
-            continue;
+        if (p) {
+          continue;
+        }
 
         /* HDTV hack, because you can't say 1366 */
         if (refresh == 60 && hsize == 1366 && vsize == 768) {
@@ -501,11 +543,12 @@ DDCModesFromStandardTiming(DisplayModePtr pool, struct std_timings *timing,
             Mode = FindDMTMode(hsize, vsize, refresh, rb);
 
             if (!Mode) {
-                if (timing_level == LEVEL_CVT)
-                    /* pass rb here too? */
-                    Mode = xf86CVTMode(hsize, vsize, refresh, FALSE, FALSE);
-                else if (timing_level == LEVEL_GTF)
-                    Mode = xf86GTFMode(hsize, vsize, refresh, FALSE, FALSE);
+              if (timing_level == LEVEL_CVT) {
+                /* pass rb here too? */
+                Mode = xf86CVTMode(hsize, vsize, refresh, FALSE, FALSE);
+              } else if (timing_level == LEVEL_GTF) {
+                Mode = xf86GTFMode(hsize, vsize, refresh, FALSE, FALSE);
+              }
             }
 
         }
@@ -597,13 +640,15 @@ DDCModeFromDetailedTiming(int scrnIndex, struct detailed_timings *timing,
     Mode = XNFcallocarray(1, sizeof(DisplayModeRec));
 
     Mode->type = M_T_DRIVER;
-    if (preferred)
-        Mode->type |= M_T_PREFERRED;
+    if (preferred) {
+      Mode->type |= M_T_PREFERRED;
+    }
 
-    if ((quirks & DDC_QUIRK_135_CLOCK_TOO_HIGH) && timing->clock == 135000000)
-        Mode->Clock = 108880;
-    else
-        Mode->Clock = timing->clock / 1000.0;
+    if ((quirks & DDC_QUIRK_135_CLOCK_TOO_HIGH) && timing->clock == 135000000) {
+      Mode->Clock = 108880;
+    } else {
+      Mode->Clock = timing->clock / 1000.0;
+    }
 
     Mode->HDisplay = timing->h_active;
     Mode->HSyncStart = timing->h_active + timing->h_sync_off;
@@ -623,21 +668,24 @@ DDCModeFromDetailedTiming(int scrnIndex, struct detailed_timings *timing,
 
     /* We ignore h/v_size and h/v_border for now. */
 
-    if (timing->interlaced)
-        DDCModeDoInterlaceQuirks(Mode);
+    if (timing->interlaced) {
+      DDCModeDoInterlaceQuirks(Mode);
+    }
 
-    if (quirks & DDC_QUIRK_DETAILED_SYNC_PP)
-        Mode->Flags |= V_PVSYNC | V_PHSYNC;
-    else {
-        if (timing->misc & 0x02)
-            Mode->Flags |= V_PVSYNC;
-        else
-            Mode->Flags |= V_NVSYNC;
+    if (quirks & DDC_QUIRK_DETAILED_SYNC_PP) {
+      Mode->Flags |= V_PVSYNC | V_PHSYNC;
+    } else {
+      if (timing->misc & 0x02) {
+        Mode->Flags |= V_PVSYNC;
+      } else {
+        Mode->Flags |= V_NVSYNC;
+      }
 
-        if (timing->misc & 0x01)
-            Mode->Flags |= V_PHSYNC;
-        else
-            Mode->Flags |= V_NHSYNC;
+      if (timing->misc & 0x01) {
+        Mode->Flags |= V_PHSYNC;
+      } else {
+        Mode->Flags |= V_NHSYNC;
+      }
     }
 
     xf86SetModeDefaultName(Mode);
@@ -653,29 +701,29 @@ DDCModesFromCVT(int scrnIndex, struct cvt_timings *t)
 
     for (i = 0; i < 4; i++) {
         if (t[i].height) {
-            if (t[i].rates & 0x10)
-                modes = xf86ModesAdd(modes,
-                                     xf86CVTMode(t[i].width, t[i].height, 50, 0,
-                                                 0));
-            if (t[i].rates & 0x08)
-                modes = xf86ModesAdd(modes,
-                                     xf86CVTMode(t[i].width, t[i].height, 60, 0,
-                                                 0));
-            if (t[i].rates & 0x04)
-                modes = xf86ModesAdd(modes,
-                                     xf86CVTMode(t[i].width, t[i].height, 75, 0,
-                                                 0));
-            if (t[i].rates & 0x02)
-                modes = xf86ModesAdd(modes,
-                                     xf86CVTMode(t[i].width, t[i].height, 85, 0,
-                                                 0));
-            if (t[i].rates & 0x01)
-                modes = xf86ModesAdd(modes,
-                                     xf86CVTMode(t[i].width, t[i].height, 60, 1,
-                                                 0));
+          if (t[i].rates & 0x10) {
+            modes = xf86ModesAdd(
+                modes, xf86CVTMode(t[i].width, t[i].height, 50, 0, 0));
+          }
+          if (t[i].rates & 0x08) {
+            modes = xf86ModesAdd(
+                modes, xf86CVTMode(t[i].width, t[i].height, 60, 0, 0));
+          }
+          if (t[i].rates & 0x04) {
+            modes = xf86ModesAdd(
+                modes, xf86CVTMode(t[i].width, t[i].height, 75, 0, 0));
+          }
+          if (t[i].rates & 0x02) {
+            modes = xf86ModesAdd(
+                modes, xf86CVTMode(t[i].width, t[i].height, 85, 0, 0));
+          }
+          if (t[i].rates & 0x01) {
+            modes = xf86ModesAdd(
+                modes, xf86CVTMode(t[i].width, t[i].height, 60, 1, 0));
+          }
+        } else {
+          break;
         }
-        else
-            break;
     }
 
     return modes;
@@ -754,12 +802,11 @@ DDCModesFromEstIII(unsigned char *est)
         for (j = 7; j >= 0; j--) {
             if (est[i] & (1 << j)) {
                 m = (i * 8) + (7 - j);
-                if (EstIIIModes[m].w)
-                    modes = xf86ModesAdd(modes,
-                                     FindDMTMode(EstIIIModes[m].w,
-                                                 EstIIIModes[m].h,
-                                                 EstIIIModes[m].r,
-                                                 EstIIIModes[m].rb));
+                if (EstIIIModes[m].w) {
+                  modes = xf86ModesAdd(
+                      modes, FindDMTMode(EstIIIModes[m].w, EstIIIModes[m].h,
+                                         EstIIIModes[m].r, EstIIIModes[m].rb));
+                }
             }
         }
     }
@@ -779,8 +826,9 @@ DDCGuessRangesFromModes(int scrnIndex, MonPtr Monitor, DisplayModePtr Modes)
 {
     DisplayModePtr Mode = Modes;
 
-    if (!Monitor || !Modes)
-        return;
+    if (!Monitor || !Modes) {
+      return;
+    }
 
     /* set up the ranges for scanning through the modes */
     Monitor->nHsync = 1;
@@ -792,24 +840,30 @@ DDCGuessRangesFromModes(int scrnIndex, MonPtr Monitor, DisplayModePtr Modes)
     Monitor->vrefresh[0].hi = 0.0;
 
     while (Mode) {
-        if (!Mode->HSync)
-            Mode->HSync = ((float) Mode->Clock) / ((float) Mode->HTotal);
+      if (!Mode->HSync) {
+        Mode->HSync = ((float)Mode->Clock) / ((float)Mode->HTotal);
+      }
 
-        if (!Mode->VRefresh)
-            Mode->VRefresh = (1000.0 * ((float) Mode->Clock)) /
-                ((float) (Mode->HTotal * Mode->VTotal));
+      if (!Mode->VRefresh) {
+        Mode->VRefresh = (1000.0 * ((float)Mode->Clock)) /
+                         ((float)(Mode->HTotal * Mode->VTotal));
+      }
 
-        if (Mode->HSync < Monitor->hsync[0].lo)
-            Monitor->hsync[0].lo = Mode->HSync;
+      if (Mode->HSync < Monitor->hsync[0].lo) {
+        Monitor->hsync[0].lo = Mode->HSync;
+      }
 
-        if (Mode->HSync > Monitor->hsync[0].hi)
-            Monitor->hsync[0].hi = Mode->HSync;
+      if (Mode->HSync > Monitor->hsync[0].hi) {
+        Monitor->hsync[0].hi = Mode->HSync;
+      }
 
-        if (Mode->VRefresh < Monitor->vrefresh[0].lo)
-            Monitor->vrefresh[0].lo = Mode->VRefresh;
+      if (Mode->VRefresh < Monitor->vrefresh[0].lo) {
+        Monitor->vrefresh[0].lo = Mode->VRefresh;
+      }
 
-        if (Mode->VRefresh > Monitor->vrefresh[0].hi)
-            Monitor->vrefresh[0].hi = Mode->VRefresh;
+      if (Mode->VRefresh > Monitor->vrefresh[0].hi) {
+        Monitor->vrefresh[0].hi = Mode->VRefresh;
+      }
 
         Mode = Mode->next;
     }
@@ -839,14 +893,17 @@ void
 xf86DetTimingApplyQuirks(struct detailed_monitor_section *det_mon,
                          ddc_quirk_t quirks, int hsize, int vsize)
 {
-    if (det_mon->type != DT)
-        return;
+  if (det_mon->type != DT) {
+    return;
+  }
 
-    if (quirks & DDC_QUIRK_DETAILED_H_IN_CM)
-        det_mon->section.d_timings.h_size *= 10;
+  if (quirks & DDC_QUIRK_DETAILED_H_IN_CM) {
+    det_mon->section.d_timings.h_size *= 10;
+  }
 
-    if (quirks & DDC_QUIRK_DETAILED_V_IN_CM)
-        det_mon->section.d_timings.v_size *= 10;
+  if (quirks & DDC_QUIRK_DETAILED_V_IN_CM) {
+    det_mon->section.d_timings.v_size *= 10;
+  }
 
     if (quirks & DDC_QUIRK_DETAILED_USE_MAXIMUM_SIZE) {
         det_mon->section.d_timings.h_size = 10 * hsize;
@@ -885,8 +942,9 @@ xf86DDCSetPreferredRefresh(int scrnIndex, DisplayModePtr modes,
     for (mode = modes; mode; mode = mode->next) {
         mode->type &= ~M_T_PREFERRED;
 
-        if (mode == best)
-            continue;
+        if (mode == best) {
+          continue;
+        }
 
         if (mode->HDisplay * mode->VDisplay > best->HDisplay * best->VDisplay) {
             best = mode;
@@ -904,8 +962,9 @@ xf86DDCSetPreferredRefresh(int scrnIndex, DisplayModePtr modes,
             }
         }
     }
-    if (best)
-        best->type |= M_T_PREFERRED;
+    if (best) {
+      best->type |= M_T_PREFERRED;
+    }
 }
 
 #define CEA_VIDEO_MODES_NUM  64
@@ -1061,12 +1120,15 @@ xf86DDCGetModes(int scrnIndex, xf86MonPtr DDC)
     quirks = xf86DDCDetectQuirks(scrnIndex, DDC, TRUE);
 
     preferred = PREFERRED_TIMING_MODE(DDC->features.msc);
-    if (DDC->ver.revision >= 4)
-        preferred = TRUE;
-    if (quirks & DDC_QUIRK_FIRST_DETAILED_PREFERRED)
-        preferred = TRUE;
-    if (quirks & (DDC_QUIRK_PREFER_LARGE_60 | DDC_QUIRK_PREFER_LARGE_75))
-        preferred = FALSE;
+    if (DDC->ver.revision >= 4) {
+      preferred = TRUE;
+    }
+    if (quirks & DDC_QUIRK_FIRST_DETAILED_PREFERRED) {
+      preferred = TRUE;
+    }
+    if (quirks & (DDC_QUIRK_PREFER_LARGE_60 | DDC_QUIRK_PREFER_LARGE_75)) {
+      preferred = FALSE;
+    }
 
     rb = xf86MonitorSupportsReducedBlanking(DDC);
 
@@ -1094,11 +1156,13 @@ xf86DDCGetModes(int scrnIndex, xf86MonPtr DDC)
                                       timing_level, rb);
     Modes = xf86ModesAdd(Modes, Mode);
 
-    if (quirks & DDC_QUIRK_PREFER_LARGE_60)
-        xf86DDCSetPreferredRefresh(scrnIndex, Modes, 60);
+    if (quirks & DDC_QUIRK_PREFER_LARGE_60) {
+      xf86DDCSetPreferredRefresh(scrnIndex, Modes, 60);
+    }
 
-    if (quirks & DDC_QUIRK_PREFER_LARGE_75)
-        xf86DDCSetPreferredRefresh(scrnIndex, Modes, 75);
+    if (quirks & DDC_QUIRK_PREFER_LARGE_75) {
+      xf86DDCSetPreferredRefresh(scrnIndex, Modes, 75);
+    }
 
     Modes = xf86PruneDuplicateModes(Modes);
 
@@ -1123,9 +1187,10 @@ handle_detailed_monset(struct detailed_monitor_section *det_mon, void *data)
     switch (det_mon->type) {
     case DS_RANGES:
         if (!p->have_hsync) {
-            if (!p->Monitor->nHsync)
-                xf86DrvMsg(scrnIndex, X_INFO,
-                           "Using EDID range info for horizontal sync\n");
+          if (!p->Monitor->nHsync) {
+            xf86DrvMsg(scrnIndex, X_INFO,
+                       "Using EDID range info for horizontal sync\n");
+          }
             p->Monitor->hsync[p->Monitor->nHsync].lo =
                 det_mon->section.ranges.min_h;
             p->Monitor->hsync[p->Monitor->nHsync].hi =
@@ -1138,9 +1203,10 @@ handle_detailed_monset(struct detailed_monitor_section *det_mon, void *data)
         }
 
         if (!p->have_vrefresh) {
-            if (!p->Monitor->nVrefresh)
-                xf86DrvMsg(scrnIndex, X_INFO,
-                           "Using EDID range info for vertical refresh\n");
+          if (!p->Monitor->nVrefresh) {
+            xf86DrvMsg(scrnIndex, X_INFO,
+                       "Using EDID range info for vertical refresh\n");
+          }
             p->Monitor->vrefresh[p->Monitor->nVrefresh].lo =
                 det_mon->section.ranges.min_v;
             p->Monitor->vrefresh[p->Monitor->nVrefresh].hi =
@@ -1153,10 +1219,12 @@ handle_detailed_monset(struct detailed_monitor_section *det_mon, void *data)
         }
 
         clock = det_mon->section.ranges.max_clock * 1000;
-        if (p->quirks & DDC_QUIRK_DVI_SINGLE_LINK)
-            clock = min(clock, 165000);
-        if (!p->have_maxpixclock && clock > p->Monitor->maxPixClock)
-            p->Monitor->maxPixClock = clock;
+        if (p->quirks & DDC_QUIRK_DVI_SINGLE_LINK) {
+          clock = min(clock, 165000);
+        }
+        if (!p->have_maxpixclock && clock > p->Monitor->maxPixClock) {
+          p->Monitor->maxPixClock = clock;
+        }
 
         break;
     default:
@@ -1173,8 +1241,9 @@ xf86EdidMonitorSet(int scrnIndex, MonPtr Monitor, xf86MonPtr DDC)
     DisplayModePtr Modes = NULL, Mode;
     struct det_mon_parameter p;
 
-    if (!Monitor || !DDC)
-        return;
+    if (!Monitor || !DDC) {
+      return;
+    }
 
     Monitor->DDC = DDC;
 
@@ -1206,8 +1275,9 @@ xf86EdidMonitorSet(int scrnIndex, MonPtr Monitor, xf86MonPtr DDC)
         }
 
         /* Do we still need ranges to be filled in? */
-        if (!Monitor->nHsync || !Monitor->nVrefresh)
-            DDCGuessRangesFromModes(scrnIndex, Monitor, Modes);
+        if (!Monitor->nHsync || !Monitor->nVrefresh) {
+          DDCGuessRangesFromModes(scrnIndex, Monitor, Modes);
+        }
 
         /* add to MonPtr */
         if (Monitor->Modes) {

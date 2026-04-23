@@ -44,10 +44,11 @@ glamor_get_glyphs(FontPtr font, glamor_font_t *glamor_font,
 
     if (sixteen) {
         char_step = 2;
-        if (FONTLASTROW(font) == 0)
-            encoding = Linear16Bit;
-        else
-            encoding = TwoD16Bit;
+        if (FONTLASTROW(font) == 0) {
+          encoding = Linear16Bit;
+        } else {
+          encoding = TwoD16Bit;
+        }
     } else {
         char_step = 1;
         encoding = Linear8Bit;
@@ -73,15 +74,17 @@ glamor_get_glyphs(FontPtr font, glamor_font_t *glamor_font,
          * the one-at-a-time code below. Not doing this check would
          * result in uninitialized memory accesses in the rendering code.
          */
-        if (nglyphs == count)
-            return;
+        if (nglyphs == count) {
+          return;
+        }
     }
 
     for (c = 0; c < count; c++) {
         GetGlyphs(font, 1, (unsigned char *) chars,
                   encoding, &nglyphs, &charinfo[c]);
-        if (!nglyphs)
-            charinfo[c] = NULL;
+        if (!nglyphs) {
+          charinfo[c] = NULL;
+        }
         chars += char_step;
     }
 }
@@ -159,14 +162,15 @@ glamor_text(DrawablePtr drawable, GCPtr gc,
                 if (FONTLASTROW(font) != 0) {
                     ty = ((row - firstRow) / 2) * glyph_spacing_y;
                     second_row = (row - firstRow) & 1;
+                } else {
+                  col += row << 8;
                 }
-                else
-                    col += row << 8;
             } else {
-                if (ci == glamor_font->default_char)
-                    col = glamor_font->default_col;
-                else
-                    col = chars[0];
+              if (ci == glamor_font->default_char) {
+                col = glamor_font->default_col;
+              } else {
+                col = chars[0];
+              }
             }
 
             tx = (col - firstCol) * glyph_spacing_x;
@@ -290,21 +294,24 @@ glamor_poly_text(DrawablePtr drawable, GCPtr gc,
     CharInfoPtr charinfo[255];  /* encoding only has 1 byte for count */
 
     glamor_font = glamor_font_get(drawable->pScreen, gc->font);
-    if (!glamor_font)
-        goto bail;
+    if (!glamor_font) {
+      goto bail;
+    }
 
     glamor_get_glyphs(gc->font, glamor_font, count, chars, sixteen, charinfo);
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
     glamor_make_current(glamor_priv);
 
     prog = glamor_use_program_fill(drawable, gc, &glamor_priv->poly_text_progs, &glamor_facet_poly_text);
 
-    if (!prog)
-        goto bail;
+    if (!prog) {
+      goto bail;
+    }
 
     x = glamor_text(drawable, gc, glamor_font, prog,
                     x, y, count, chars, charinfo, sixteen);
@@ -322,8 +329,9 @@ glamor_poly_text8(DrawablePtr drawable, GCPtr gc,
 {
     int final_pos;
 
-    if (glamor_poly_text(drawable, gc, x, y, count, chars, FALSE, &final_pos))
-        return final_pos;
+    if (glamor_poly_text(drawable, gc, x, y, count, chars, FALSE, &final_pos)) {
+      return final_pos;
+    }
     return miPolyText8(drawable, gc, x, y, count, chars);
 }
 
@@ -333,8 +341,10 @@ glamor_poly_text16(DrawablePtr drawable, GCPtr gc,
 {
     int final_pos;
 
-    if (glamor_poly_text(drawable, gc, x, y, count, (char *) chars, TRUE, &final_pos))
-        return final_pos;
+    if (glamor_poly_text(drawable, gc, x, y, count, (char *)chars, TRUE,
+                         &final_pos)) {
+      return final_pos;
+    }
     return miPolyText16(drawable, gc, x, y, count, chars);
 }
 
@@ -374,8 +384,9 @@ static const glamor_facet glamor_facet_image_fill = {
 static Bool
 glamor_te_text_use(DrawablePtr drawable, GCPtr gc, glamor_program *prog, void *arg)
 {
-    if (!glamor_set_solid(drawable, gc, FALSE, prog->fg_uniform))
-        return FALSE;
+  if (!glamor_set_solid(drawable, gc, FALSE, prog->fg_uniform)) {
+    return FALSE;
+  }
     glamor_set_color(drawable, gc->bgPixel, prog->bg_uniform);
     return TRUE;
 }
@@ -408,24 +419,28 @@ glamor_image_text(DrawablePtr drawable, GCPtr gc,
     CharInfoPtr charinfo[255];  /* encoding only has 1 byte for count */
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        return FALSE;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      return FALSE;
+    }
 
     glamor_font = glamor_font_get(drawable->pScreen, gc->font);
-    if (!glamor_font)
-        return FALSE;
+    if (!glamor_font) {
+      return FALSE;
+    }
 
     glamor_get_glyphs(gc->font, glamor_font, count, chars, sixteen, charinfo);
 
     glamor_make_current(glamor_priv);
 
-    if (TERMINALFONT(gc->font))
-        prog = &glamor_priv->te_text_prog;
-    else
-        prog = &glamor_priv->image_text_prog;
+    if (TERMINALFONT(gc->font)) {
+      prog = &glamor_priv->te_text_prog;
+    } else {
+      prog = &glamor_priv->image_text_prog;
+    }
 
-    if (prog->failed)
-        goto bail;
+    if (prog->failed) {
+      goto bail;
+    }
 
     if (!prog->prog) {
         if (TERMINALFONT(gc->font)) {
@@ -436,8 +451,10 @@ glamor_image_text(DrawablePtr drawable, GCPtr gc,
             fill_facet = &glamor_facet_image_fill;
         }
 
-        if (!glamor_build_program(screen, prog, prim_facet, fill_facet, NULL, NULL))
-            goto bail;
+        if (!glamor_build_program(screen, prog, prim_facet, fill_facet, NULL,
+                                  NULL)) {
+          goto bail;
+        }
     }
 
     if (!TERMINALFONT(gc->font)) {
@@ -449,11 +466,14 @@ glamor_image_text(DrawablePtr drawable, GCPtr gc,
         /* Check planemask before drawing background to
          * bail early if it's not OK
          */
-        if (!glamor_set_planemask(gc->depth, gc->planemask))
-            goto bail;
-        for (c = 0; c < count; c++)
-            if (charinfo[c])
-                width += charinfo[c]->metrics.characterWidth;
+        if (!glamor_set_planemask(gc->depth, gc->planemask)) {
+          goto bail;
+        }
+        for (c = 0; c < count; c++) {
+          if (charinfo[c]) {
+            width += charinfo[c]->metrics.characterWidth;
+          }
+        }
 
         if (width >= 0) {
             box.x1 = drawable->x + x;
@@ -471,8 +491,9 @@ glamor_image_text(DrawablePtr drawable, GCPtr gc,
         RegionUninit(&region);
     }
 
-    if (!glamor_use_program(drawable, gc, prog, NULL))
-        goto bail;
+    if (!glamor_use_program(drawable, gc, prog, NULL)) {
+      goto bail;
+    }
 
     (void) glamor_text(drawable, gc, glamor_font, prog,
                        x, y, count, chars, charinfo, sixteen);
@@ -487,14 +508,16 @@ void
 glamor_image_text8(DrawablePtr drawable, GCPtr gc,
                    int x, int y, int count, char *chars)
 {
-    if (!glamor_image_text(drawable, gc, x, y, count, chars, FALSE))
-        miImageText8(drawable, gc, x, y, count, chars);
+  if (!glamor_image_text(drawable, gc, x, y, count, chars, FALSE)) {
+    miImageText8(drawable, gc, x, y, count, chars);
+  }
 }
 
 void
 glamor_image_text16(DrawablePtr drawable, GCPtr gc,
                     int x, int y, int count, unsigned short *chars)
 {
-    if (!glamor_image_text(drawable, gc, x, y, count, (char *) chars, TRUE))
-        miImageText16(drawable, gc, x, y, count, chars);
+  if (!glamor_image_text(drawable, gc, x, y, count, (char *)chars, TRUE)) {
+    miImageText16(drawable, gc, x, y, count, chars);
+  }
 }

@@ -100,8 +100,9 @@ winDoRandRScreenSetSize(ScreenPtr pScreen,
 
     /* Ignore changes which do nothing */
     if ((pScreen->width == width) && (pScreen->height == height) &&
-        (pScreen->mmWidth == mmWidth) && (pScreen->mmHeight == mmHeight))
-        return;
+        (pScreen->mmWidth == mmWidth) && (pScreen->mmHeight == mmHeight)) {
+      return;
+    }
 
     // Prevent screen updates while we change things around
     SetRootClip(pScreen, ROOT_CLIP_NONE);
@@ -248,14 +249,16 @@ winRandRInit(ScreenPtr pScreen)
         RROutputPtr output;
 
         crtc = RRCrtcCreate(pScreen, NULL);
-        if (!crtc)
-            return FALSE;
+        if (!crtc) {
+          return FALSE;
+        }
 
         crtc->rotations = RR_Rotate_0;
 
         output = RROutputCreate(pScreen, "default", 7, NULL);
-        if (!output)
-            return FALSE;
+        if (!output) {
+          return FALSE;
+        }
 
         RROutputSetCrtcs(output, &crtc, 1);
         RROutputSetConnection(output, RR_Connected);

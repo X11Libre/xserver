@@ -29,15 +29,17 @@ int xnestNumVisualMap;
 bool xnest_upstream_setup(const char* displayName)
 {
     xnestUpstreamInfo.conn = xcb_connect(displayName, &xnestUpstreamInfo.screenId);
-    if (!xnestUpstreamInfo.conn)
-        return FALSE;
+    if (!xnestUpstreamInfo.conn) {
+      return FALSE;
+    }
 
     /* retrieve setup data for our screen */
     xnestUpstreamInfo.setup = xcb_get_setup(xnestUpstreamInfo.conn);
     xcb_screen_iterator_t iter = xcb_setup_roots_iterator (xnestUpstreamInfo.setup);
 
-    for (int i = 0; i < xnestUpstreamInfo.screenId; ++i)
-        xcb_screen_next (&iter);
+    for (int i = 0; i < xnestUpstreamInfo.screenId; ++i) {
+      xcb_screen_next(&iter);
+    }
     xnestUpstreamInfo.screenInfo = iter.data;
 
     xorg_list_init(&xnestUpstreamInfo.eventQueue.entry);
@@ -47,10 +49,14 @@ bool xnest_upstream_setup(const char* displayName)
 
 /* retrieve upstream GC XID for our xserver GC */
 uint32_t xnest_upstream_gc(GCPtr pGC) {
-    if (pGC == NULL) return 0;
+  if (pGC == NULL) {
+    return 0;
+  }
 
     xnestPrivGC *priv = dixLookupPrivate(&(pGC)->devPrivates, xnestGCPrivateKey);
-    if (priv == NULL) return 0;
+    if (priv == NULL) {
+      return 0;
+    }
 
     return priv->gc;
 }
@@ -71,8 +77,9 @@ void xnest_wm_colormap_windows(
             WM_COLORMAP_WINDOWS),
         NULL);
 
-    if (!reply)
-        return;
+    if (!reply) {
+      return;
+    }
 
     xcb_icccm_set_wm_colormap_windows_checked(
         conn,
@@ -165,15 +172,18 @@ void xnest_set_command(
 {
     int i = 0, nbytes = 0;
 
-    for (i = 0, nbytes = 0; i < argc; i++)
-        nbytes += strlen(argv[i]) + 1;
+    for (i = 0, nbytes = 0; i < argc; i++) {
+      nbytes += strlen(argv[i]) + 1;
+    }
 
-    if (nbytes >= (1<<16) - 1)
-        return;
+    if (nbytes >= (1 << 16) - 1) {
+      return;
+    }
 
     char *buf = calloc(1, nbytes+1);
-    if (!buf)
-        return; // BadAlloc
+    if (!buf) {
+      return; // BadAlloc
+    }
 
     char *bp = buf;
 
@@ -334,15 +344,16 @@ static int __readint(const char *str, const char **next)
 {
     int res = 0, sign = 1;
 
-    if (*str=='+')
-        str++;
-    else if (*str=='-') {
-        str++;
-        sign = -1;
+    if (*str == '+') {
+      str++;
+    } else if (*str == '-') {
+      str++;
+      sign = -1;
     }
 
-    for (; (*str>='0') && (*str<='9'); str++)
-        res = (res * 10) + (*str-'0');
+    for (; (*str >= '0') && (*str <= '9'); str++) {
+      res = (res * 10) + (*str - '0');
+    }
 
     *next = str;
     return sign * res;
@@ -354,15 +365,19 @@ int xnest_parse_geometry(const char *string, xRectangle *geometry)
     const char *next;
     xRectangle temp = { 0 };
 
-    if ((string == NULL) || (*string == '\0')) return 0;
+    if ((string == NULL) || (*string == '\0')) {
+      return 0;
+    }
 
-    if (*string == '=')
-        string++;  /* ignore possible '=' at beg of geometry spec */
+    if (*string == '=') {
+      string++; /* ignore possible '=' at beg of geometry spec */
+    }
 
     if (*string != '+' && *string != '-' && *string != 'x') {
         temp.width = __readint(string, &next);
-        if (string == next)
-            return 0;
+        if (string == next) {
+          return 0;
+        }
         string = next;
         mask |= XCB_CONFIG_WINDOW_WIDTH;
     }
@@ -370,8 +385,9 @@ int xnest_parse_geometry(const char *string, xRectangle *geometry)
     if (*string == 'x' || *string == 'X') {
         string++;
         temp.height = __readint(string, &next);
-        if (string == next)
-            return 0;
+        if (string == next) {
+          return 0;
+        }
         string = next;
         mask |= XCB_CONFIG_WINDOW_HEIGHT;
     }
@@ -380,16 +396,18 @@ int xnest_parse_geometry(const char *string, xRectangle *geometry)
         if (*string== '-') {
             string++;
             temp.x = -__readint(string, &next);
-            if (string == next)
-                return 0;
+            if (string == next) {
+              return 0;
+            }
             string = next;
         }
         else
         {
             string++;
             temp.x = __readint(string, &next);
-            if (string == next)
-                return 0;
+            if (string == next) {
+              return 0;
+            }
             string = next;
         }
         mask |= XCB_CONFIG_WINDOW_X;
@@ -397,32 +415,40 @@ int xnest_parse_geometry(const char *string, xRectangle *geometry)
             if (*string== '-') {
                 string++;
                 temp.y = -__readint(string, &next);
-                if (string == next)
-                    return 0;
+                if (string == next) {
+                  return 0;
+                }
                 string = next;
             }
             else
             {
                 string++;
                 temp.y = __readint(string, &next);
-                if (string == next)
-                    return 0;
+                if (string == next) {
+                  return 0;
+                }
                 string = next;
             }
             mask |= XCB_CONFIG_WINDOW_Y;
         }
     }
 
-    if (*string != '\0') return 0;
+    if (*string != '\0') {
+      return 0;
+    }
 
-    if (mask & XCB_CONFIG_WINDOW_X)
-        geometry->x = temp.x;
-    if (mask & XCB_CONFIG_WINDOW_Y)
-        geometry->y = temp.y;
-    if (mask & XCB_CONFIG_WINDOW_WIDTH)
-        geometry->width = temp.width;
-    if (mask & XCB_CONFIG_WINDOW_HEIGHT)
-        geometry->height = temp.height;
+    if (mask & XCB_CONFIG_WINDOW_X) {
+      geometry->x = temp.x;
+    }
+    if (mask & XCB_CONFIG_WINDOW_Y) {
+      geometry->y = temp.y;
+    }
+    if (mask & XCB_CONFIG_WINDOW_WIDTH) {
+      geometry->width = temp.width;
+    }
+    if (mask & XCB_CONFIG_WINDOW_HEIGHT) {
+      geometry->height = temp.height;
+    }
 
     return mask;
 }
@@ -518,13 +544,16 @@ int xnest_text_width(xnestPrivFont *font, const char *string, int count)
 {
     xcb_charinfo_t *def;
 
-    if (font->font_reply->max_byte1 == 0)
-        XN_CI_GET_CHAR_INFO_1D (font, font->font_reply->default_char, NULL, def);
-    else
-        XN_CI_GET_DEFAULT_INFO_2D (font, def);
+    if (font->font_reply->max_byte1 == 0) {
+      XN_CI_GET_CHAR_INFO_1D(font, font->font_reply->default_char, NULL, def);
+    } else {
+      XN_CI_GET_DEFAULT_INFO_2D(font, def);
+    }
 
-    if (def && font->font_reply->min_bounds.character_width == font->font_reply->max_bounds.character_width)
-        return (font->font_reply->min_bounds.character_width * count);
+    if (def && font->font_reply->min_bounds.character_width ==
+                   font->font_reply->max_bounds.character_width) {
+      return (font->font_reply->min_bounds.character_width * count);
+    }
 
     int width = 0, i = 0;
     unsigned char *us;
@@ -538,7 +567,9 @@ int xnest_text_width(xnestPrivFont *font, const char *string, int count)
             XN_CI_GET_ROWZERO_CHAR_INFO_2D (font, uc, def, cs);
         }
 
-        if (cs) width += cs->character_width;
+        if (cs) {
+          width += cs->character_width;
+        }
     }
 
     return width;
@@ -549,13 +580,16 @@ int xnest_text_width_16 (xnestPrivFont *font, const uint16_t* str, int count)
     xcb_charinfo_t *def;
     xcb_char2b_t *string = (xcb_char2b_t*)str;
 
-    if (font->font_reply->max_byte1 == 0)
-        XN_CI_GET_CHAR_INFO_1D (font, font->font_reply->default_char, NULL, def);
-    else
-        XN_CI_GET_DEFAULT_INFO_2D (font, def);
+    if (font->font_reply->max_byte1 == 0) {
+      XN_CI_GET_CHAR_INFO_1D(font, font->font_reply->default_char, NULL, def);
+    } else {
+      XN_CI_GET_DEFAULT_INFO_2D(font, def);
+    }
 
-    if (def && font->font_reply->min_bounds.character_width == font->font_reply->max_bounds.character_width)
-        return (font->font_reply->min_bounds.character_width * count);
+    if (def && font->font_reply->min_bounds.character_width ==
+                   font->font_reply->max_bounds.character_width) {
+      return (font->font_reply->min_bounds.character_width * count);
+    }
 
     int width = 0;
     for (int i = 0; i < count; i++, string++) {
@@ -570,7 +604,9 @@ int xnest_text_width_16 (xnestPrivFont *font, const uint16_t* str, int count)
             XN_CI_GET_CHAR_INFO_2D (font, r, c, def, cs);
         }
 
-        if (cs) width += cs->character_width;
+        if (cs) {
+          width += cs->character_width;
+        }
     }
 
     return width;

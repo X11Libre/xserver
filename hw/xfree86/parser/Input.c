@@ -85,22 +85,25 @@ xf86parseInputSection(void)
             xf86_lex_val.str = NULL;
             break;
         case IDENTIFIER:
-            if (xf86getSubToken(&(ptr->inp_comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "Identifier");
-            if (has_ident == TRUE)
-                Error(MULTIPLE_MSG, "Identifier");
+          if (xf86getSubToken(&(ptr->inp_comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "Identifier");
+          }
+          if (has_ident == TRUE) {
+            Error(MULTIPLE_MSG, "Identifier");
+          }
             ptr->inp_identifier = xf86_lex_val.str;
             has_ident = TRUE;
             break;
         case DRIVER:
-            if (xf86getSubToken(&(ptr->inp_comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "Driver");
+          if (xf86getSubToken(&(ptr->inp_comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "Driver");
+          }
             if (strcmp(xf86_lex_val.str, "keyboard") == 0) {
                 ptr->inp_driver = strdup("kbd");
                 free(xf86_lex_val.str);
+            } else {
+              ptr->inp_driver = xf86_lex_val.str;
             }
-            else
-                ptr->inp_driver = xf86_lex_val.str;
             break;
         case OPTION:
             ptr->inp_option_lst = xf86parseOption(ptr->inp_option_lst);
@@ -114,8 +117,9 @@ xf86parseInputSection(void)
         }
     }
 
-    if (!has_ident)
-        Error(NO_IDENT_MSG);
+    if (!has_ident) {
+      Error(NO_IDENT_MSG);
+    }
 
 #ifdef DEBUG
     printf("InputDevice section parsed\n");
@@ -131,12 +135,15 @@ xf86printInputSection(FILE * cf, XF86ConfInputPtr ptr)
 {
     while (ptr) {
         fprintf(cf, "Section \"InputDevice\"\n");
-        if (ptr->inp_comment)
-            fprintf(cf, "%s", ptr->inp_comment);
-        if (ptr->inp_identifier)
-            fprintf(cf, "\tIdentifier  \"%s\"\n", ptr->inp_identifier);
-        if (ptr->inp_driver)
-            fprintf(cf, "\tDriver      \"%s\"\n", ptr->inp_driver);
+        if (ptr->inp_comment) {
+          fprintf(cf, "%s", ptr->inp_comment);
+        }
+        if (ptr->inp_identifier) {
+          fprintf(cf, "\tIdentifier  \"%s\"\n", ptr->inp_identifier);
+        }
+        if (ptr->inp_driver) {
+          fprintf(cf, "\tDriver      \"%s\"\n", ptr->inp_driver);
+        }
         xf86printOptionList(cf, ptr->inp_option_lst, 1);
         fprintf(cf, "EndSection\n\n");
         ptr = ptr->list.next;
@@ -180,8 +187,9 @@ XF86ConfInputPtr
 xf86findInput(const char *ident, XF86ConfInputPtr p)
 {
     while (p) {
-        if (xf86nameCompare(ident, p->inp_identifier) == 0)
-            return p;
+      if (xf86nameCompare(ident, p->inp_identifier) == 0) {
+        return p;
+      }
 
         p = p->list.next;
     }
@@ -192,8 +200,9 @@ XF86ConfInputPtr
 xf86findInputByDriver(const char *driver, XF86ConfInputPtr p)
 {
     while (p) {
-        if (xf86nameCompare(driver, p->inp_driver) == 0)
-            return p;
+      if (xf86nameCompare(driver, p->inp_driver) == 0) {
+        return p;
+      }
 
         p = p->list.next;
     }

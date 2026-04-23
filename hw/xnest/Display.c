@@ -50,21 +50,25 @@ xnestOpenDisplay(int argc, char *argv[])
 {
     int i;
 
-    if (!xnestDoFullGeneration)
-        return;
+    if (!xnestDoFullGeneration) {
+      return;
+    }
 
     xnestCloseDisplay();
 
-    if (!xnest_upstream_setup(xnestDisplayName))
-        FatalError("Unable to open display \"%s\".\n", xnestDisplayName);
+    if (!xnest_upstream_setup(xnestDisplayName)) {
+      FatalError("Unable to open display \"%s\".\n", xnestDisplayName);
+    }
 
-    if (xnestParentWindow != (Window) 0)
-        xnestEventMask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-    else
-        xnestEventMask = 0L;
+    if (xnestParentWindow != (Window)0) {
+      xnestEventMask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+    } else {
+      xnestEventMask = 0L;
+    }
 
-    for (i = 0; i <= MAXDEPTH; i++)
-        xnestDefaultDrawables[i] = XCB_WINDOW_NONE;
+    for (i = 0; i <= MAXDEPTH; i++) {
+      xnestDefaultDrawables[i] = XCB_WINDOW_NONE;
+    }
 
     xcb_format_t *fmt = xcb_setup_pixmap_formats(xnestUpstreamInfo.setup);
     const xcb_format_t *fmtend = fmt + xcb_setup_pixmap_formats_length(xnestUpstreamInfo.setup);
@@ -93,22 +97,29 @@ xnestOpenDisplay(int argc, char *argv[])
                   0,
                   NULL);
 
-    if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_X))
-        xnestGeometry.x = 0;
-
-    if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_Y))
-        xnestGeometry.y = 0;
-
-    if (xnestParentWindow == 0) {
-        if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_WIDTH))
-            xnestGeometry.width = 3 * xnestUpstreamInfo.screenInfo->width_in_pixels / 4;
-
-        if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_HEIGHT))
-            xnestGeometry.height = 3 * xnestUpstreamInfo.screenInfo->height_in_pixels / 4;
+    if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_X)) {
+      xnestGeometry.x = 0;
     }
 
-    if (!xnestUserBorderWidth)
-        xnestBorderWidth = 1;
+    if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_Y)) {
+      xnestGeometry.y = 0;
+    }
+
+    if (xnestParentWindow == 0) {
+      if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_WIDTH)) {
+        xnestGeometry.width =
+            3 * xnestUpstreamInfo.screenInfo->width_in_pixels / 4;
+      }
+
+      if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_HEIGHT)) {
+        xnestGeometry.height =
+            3 * xnestUpstreamInfo.screenInfo->height_in_pixels / 4;
+      }
+    }
+
+    if (!xnestUserBorderWidth) {
+      xnestBorderWidth = 1;
+    }
 
     xnestIconBitmap =
         xnest_create_bitmap_from_data(xnestUpstreamInfo.conn,
@@ -130,8 +141,9 @@ xnestOpenDisplay(int argc, char *argv[])
 void
 xnestCloseDisplay(void)
 {
-    if (!xnestDoFullGeneration || !xnestUpstreamInfo.conn)
-        return;
+  if (!xnestDoFullGeneration || !xnestUpstreamInfo.conn) {
+    return;
+  }
 
     /*
        If xnestDoFullGeneration all x resources will be destroyed upon closing

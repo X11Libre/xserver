@@ -76,8 +76,9 @@ get_image(struct test_setup *setup, xcb_drawable_t drawable)
     assert(len == 4 * setup->width * setup->height);
 
     uint32_t *result = calloc(setup->width * setup->height, sizeof(uint32_t));
-    if (!result)
-        return NULL;
+    if (!result) {
+      return NULL;
+    }
 
     memcpy(result, data, len);
     free(reply);

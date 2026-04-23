@@ -51,9 +51,9 @@ xnestFindWindowMatch(WindowPtr pWin, void *ptr)
     if (wm->window == xnestWindow(pWin)) {
         wm->pWin = pWin;
         return WT_STOPWALKING;
+    } else {
+      return WT_WALKCHILDREN;
     }
-    else
-        return WT_WALKCHILDREN;
 }
 
 WindowPtr
@@ -68,8 +68,9 @@ xnestWindowPtr(xcb_window_t window)
     for (i = 0; i < xnestNumScreens; i++) {
         ScreenPtr walkScreen = screenInfo.screens[i];
         WalkTree(walkScreen, xnestFindWindowMatch, (void *) &wm);
-        if (wm.pWin)
-            break;
+        if (wm.pWin) {
+          break;
+        }
     }
 
     return wm.pWin;
@@ -102,12 +103,12 @@ xnestCreateWindow(WindowPtr pWin)
                                             X11_RESTYPE_COLORMAP, serverClient,
                                             DixUseAccess);
                     attributes.colormap = xnestColormap(pCmap);
+                } else {
+                  attributes.colormap = xnest_upstream_visual_to_cmap(visual);
                 }
-                else
-                    attributes.colormap = xnest_upstream_visual_to_cmap(visual);
+            } else {
+              visual = CopyFromParent;
             }
-            else
-                visual = CopyFromParent;
         }
         else {                  /* root windows have their own colormaps at creation time */
             visual = xnest_visual_map_to_upstream(wVisual(pWin));
@@ -140,13 +141,15 @@ xnestCreateWindow(WindowPtr pWin)
     xnestWindowPriv(pWin)->height = pWin->drawable.height;
     xnestWindowPriv(pWin)->border_width = pWin->borderWidth;
     xnestWindowPriv(pWin)->sibling_above = XCB_WINDOW_NONE;
-    if (pWin->nextSib)
-        xnestWindowPriv(pWin->nextSib)->sibling_above = xnestWindow(pWin);
+    if (pWin->nextSib) {
+      xnestWindowPriv(pWin->nextSib)->sibling_above = xnestWindow(pWin);
+    }
     xnestWindowPriv(pWin)->bounding_shape = RegionCreate(NULL, 1);
     xnestWindowPriv(pWin)->clip_shape = RegionCreate(NULL, 1);
 
-    if (!pWin->parent)          /* only the root window will have the right colormap */
-        xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
+    if (!pWin->parent) { /* only the root window will have the right colormap */
+      xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
+    }
 
     return TRUE;
 }
@@ -154,16 +157,18 @@ xnestCreateWindow(WindowPtr pWin)
 Bool
 xnestDestroyWindow(WindowPtr pWin)
 {
-    if (pWin->nextSib)
-        xnestWindowPriv(pWin->nextSib)->sibling_above =
-            xnestWindowPriv(pWin)->sibling_above;
+  if (pWin->nextSib) {
+    xnestWindowPriv(pWin->nextSib)->sibling_above =
+        xnestWindowPriv(pWin)->sibling_above;
+  }
     RegionDestroy(xnestWindowPriv(pWin)->bounding_shape);
     RegionDestroy(xnestWindowPriv(pWin)->clip_shape);
     xcb_destroy_window(xnestUpstreamInfo.conn, xnestWindow(pWin));
     xnestWindowPriv(pWin)->window = XCB_WINDOW_NONE;
 
-    if (pWin->optional && pWin->optional->colormap && pWin->parent)
-        xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
+    if (pWin->optional && pWin->optional->colormap && pWin->parent) {
+      xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
+    }
 
     return TRUE;
 }
@@ -202,8 +207,9 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
         xnestWindowPriv(pWin)->x = pWin->origin.x - wBorderWidth(pWin);
         xnestWindowPriv(pWin)->y = pWin->origin.y - wBorderWidth(pWin);
         xnestWindowPriv(pWin)->sibling_above = XCB_WINDOW_NONE;
-        if (pWin->nextSib)
-            xnestWindowPriv(pWin->nextSib)->sibling_above = xnestWindow(pWin);
+        if (pWin->nextSib) {
+          xnestWindowPriv(pWin->nextSib)->sibling_above = xnestWindow(pWin);
+        }
     }
 
     valuemask = 0;
@@ -247,7 +253,9 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
         WindowPtr pSib;
 
         /* find the top sibling */
-        for (pSib = pWin; pSib->prevSib != NullWindow; pSib = pSib->prevSib);
+        for (pSib = pWin; pSib->prevSib != NullWindow; pSib = pSib->prevSib) {
+          ;
+        }
 
         /* the top sibling */
         valuemask = XCB_CONFIG_WINDOW_STACK_MODE;
@@ -273,72 +281,85 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 {
     xcb_params_cw_t attributes;
 
-    if (mask & XCB_CW_BACK_PIXMAP)
-        switch (pWin->backgroundState) {
-        case XCB_BACK_PIXMAP_NONE:
-            attributes.back_pixmap = XCB_PIXMAP_NONE;
-            break;
+    if (mask & XCB_CW_BACK_PIXMAP) {
+      switch (pWin->backgroundState) {
+      case XCB_BACK_PIXMAP_NONE:
+        attributes.back_pixmap = XCB_PIXMAP_NONE;
+        break;
 
-        case XCB_BACK_PIXMAP_PARENT_RELATIVE:
-            attributes.back_pixmap = ParentRelative;
-            break;
+      case XCB_BACK_PIXMAP_PARENT_RELATIVE:
+        attributes.back_pixmap = ParentRelative;
+        break;
 
-        case BackgroundPixmap:
-            attributes.back_pixmap = xnestPixmap(pWin->background.pixmap);
-            break;
+      case BackgroundPixmap:
+        attributes.back_pixmap = xnestPixmap(pWin->background.pixmap);
+        break;
 
-        case BackgroundPixel:
-            mask &= ~XCB_CW_BACK_PIXMAP;
-            break;
-        }
+      case BackgroundPixel:
+        mask &= ~XCB_CW_BACK_PIXMAP;
+        break;
+      }
+    }
 
     if (mask & XCB_CW_BACK_PIXEL) {
-        if (pWin->backgroundState == BackgroundPixel)
-            attributes.back_pixel = xnestPixel(pWin->background.pixel);
-        else
-            mask &= ~XCB_CW_BACK_PIXEL;
+      if (pWin->backgroundState == BackgroundPixel) {
+        attributes.back_pixel = xnestPixel(pWin->background.pixel);
+      } else {
+        mask &= ~XCB_CW_BACK_PIXEL;
+      }
     }
 
     if (mask & XCB_CW_BORDER_PIXMAP) {
-        if (pWin->borderIsPixel)
-            mask &= ~XCB_CW_BORDER_PIXMAP;
-        else
-            attributes.border_pixmap = xnestPixmap(pWin->border.pixmap);
+      if (pWin->borderIsPixel) {
+        mask &= ~XCB_CW_BORDER_PIXMAP;
+      } else {
+        attributes.border_pixmap = xnestPixmap(pWin->border.pixmap);
+      }
     }
 
     if (mask & XCB_CW_BORDER_PIXEL) {
-        if (pWin->borderIsPixel)
-            attributes.border_pixel = xnestPixel(pWin->border.pixel);
-        else
-            mask &= ~XCB_CW_BORDER_PIXEL;
+      if (pWin->borderIsPixel) {
+        attributes.border_pixel = xnestPixel(pWin->border.pixel);
+      } else {
+        mask &= ~XCB_CW_BORDER_PIXEL;
+      }
     }
 
-    if (mask & XCB_CW_BIT_GRAVITY)
-        attributes.bit_gravity = pWin->bitGravity;
+    if (mask & XCB_CW_BIT_GRAVITY) {
+      attributes.bit_gravity = pWin->bitGravity;
+    }
 
-    if (mask & XCB_CW_WIN_GRAVITY)    /* dix does this for us */
-        mask &= ~XCB_CW_WIN_GRAVITY;
+    if (mask & XCB_CW_WIN_GRAVITY) { /* dix does this for us */
+      mask &= ~XCB_CW_WIN_GRAVITY;
+    }
 
-    if (mask & XCB_CW_BACKING_STORE)  /* this is really not useful */
-        mask &= ~XCB_CW_BACKING_STORE;
+    if (mask & XCB_CW_BACKING_STORE) { /* this is really not useful */
+      mask &= ~XCB_CW_BACKING_STORE;
+    }
 
-    if (mask & XCB_CW_BACKING_PLANES) /* this is really not useful */
-        mask &= ~XCB_CW_BACKING_PLANES;
+    if (mask & XCB_CW_BACKING_PLANES) { /* this is really not useful */
+      mask &= ~XCB_CW_BACKING_PLANES;
+    }
 
-    if (mask & XCB_CW_BACKING_PIXEL)  /* this is really not useful */
-        mask &= ~XCB_CW_BACKING_PIXEL;
+    if (mask & XCB_CW_BACKING_PIXEL) { /* this is really not useful */
+      mask &= ~XCB_CW_BACKING_PIXEL;
+    }
 
-    if (mask & XCB_CW_OVERRIDE_REDIRECT)
-        attributes.override_redirect = pWin->overrideRedirect;
+    if (mask & XCB_CW_OVERRIDE_REDIRECT) {
+      attributes.override_redirect = pWin->overrideRedirect;
+    }
 
-    if (mask & XCB_CW_SAVE_UNDER)     /* this is really not useful */
-        mask &= ~XCB_CW_SAVE_UNDER;
+    if (mask & XCB_CW_SAVE_UNDER) { /* this is really not useful */
+      mask &= ~XCB_CW_SAVE_UNDER;
+    }
 
-    if (mask & XCB_CW_EVENT_MASK)     /* events are handled elsewhere */
-        mask &= ~XCB_CW_EVENT_MASK;
+    if (mask & XCB_CW_EVENT_MASK) { /* events are handled elsewhere */
+      mask &= ~XCB_CW_EVENT_MASK;
+    }
 
-    if (mask & XCB_CW_DONT_PROPAGATE) /* events are handled elsewhere */
-        mask &= ~XCB_CW_DONT_PROPAGATE;
+    if (mask & XCB_CW_DONT_PROPAGATE) { /* events are handled elsewhere */
+      mask &= ~XCB_CW_DONT_PROPAGATE;
+    }
 
     if (mask & XCB_CW_COLORMAP) {
         ColormapPtr pCmap;
@@ -351,8 +372,9 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
         xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
     }
 
-    if (mask & XCB_CW_CURSOR)        /* this is handled in cursor code */
-        mask &= ~XCB_CW_CURSOR;
+    if (mask & XCB_CW_CURSOR) { /* this is handled in cursor code */
+      mask &= ~XCB_CW_CURSOR;
+    }
 
     if (mask) {
         xcb_aux_change_window_attributes(xnestUpstreamInfo.conn,
@@ -405,11 +427,13 @@ xnestRegionEqual(RegionPtr pReg1, RegionPtr pReg2)
     BoxPtr pBox1, pBox2;
     unsigned int n1, n2;
 
-    if (pReg1 == pReg2)
-        return TRUE;
+    if (pReg1 == pReg2) {
+      return TRUE;
+    }
 
-    if (pReg1 == NullRegion || pReg2 == NullRegion)
-        return FALSE;
+    if (pReg1 == NullRegion || pReg2 == NullRegion) {
+      return FALSE;
+    }
 
     pBox1 = RegionRects(pReg1);
     n1 = RegionNumRects(pReg1);
@@ -417,14 +441,17 @@ xnestRegionEqual(RegionPtr pReg1, RegionPtr pReg2)
     pBox2 = RegionRects(pReg2);
     n2 = RegionNumRects(pReg2);
 
-    if (n1 != n2)
-        return FALSE;
+    if (n1 != n2) {
+      return FALSE;
+    }
 
-    if (pBox1 == pBox2)
-        return TRUE;
+    if (pBox1 == pBox2) {
+      return TRUE;
+    }
 
-    if (memcmp(pBox1, pBox2, n1 * sizeof(BoxRec)))
-        return FALSE;
+    if (memcmp(pBox1, pBox2, n1 * sizeof(BoxRec))) {
+      return FALSE;
+    }
 
     return TRUE;
 }

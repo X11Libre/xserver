@@ -189,15 +189,16 @@ DarwinUpdateModifiers(int pressed,                    // KeyPress or KeyRelease
         DarwinPressModifierKey(KeyRelease, NX_MODIFIERKEY_ALPHALOCK);
     }
 
-    for (f = darwin_x11_modifier_mask_list; *f; f++)
-        if (*f & flags && *f != NX_ALPHASHIFTMASK) {
-            key = DarwinModifierNXMaskToNXKey(*f);
-            if (key == -1)
-                ErrorF("DarwinUpdateModifiers: Unsupported NXMask: 0x%x\n",
-                       *f);
-            else
-                DarwinPressModifierKey(pressed, key);
+    for (f = darwin_x11_modifier_mask_list; *f; f++) {
+      if (*f & flags && *f != NX_ALPHASHIFTMASK) {
+        key = DarwinModifierNXMaskToNXKey(*f);
+        if (key == -1) {
+          ErrorF("DarwinUpdateModifiers: Unsupported NXMask: 0x%x\n", *f);
+        } else {
+          DarwinPressModifierKey(pressed, key);
         }
+      }
+    }
 }
 
 /* Generic handler for Xquartz-specific events.  When possible, these should
@@ -251,11 +252,11 @@ DarwinEventHandler(int screenNum, InternalEvent *ie, DeviceIntPtr dev)
 
     case kXquartzToggleFullscreen:
         DEBUG_LOG("kXquartzToggleFullscreen\n");
-        if (XQuartzIsRootless)
-            ErrorF(
-                "Ignoring kXquartzToggleFullscreen because of rootless mode.");
-        else
-            QuartzRandRToggleFullscreen();
+        if (XQuartzIsRootless) {
+          ErrorF("Ignoring kXquartzToggleFullscreen because of rootless mode.");
+        } else {
+          QuartzRandRToggleFullscreen();
+        }
         break;
 
     case kXquartzSetRootless:
@@ -310,10 +311,11 @@ DarwinListenOnOpenFD(int fd)
     ErrorF("DarwinListenOnOpenFD: %d\n", fd);
 
     pthread_mutex_lock(&fd_add_lock);
-    if (fd_add_count < FD_ADD_MAX)
-        fd_add[fd_add_count++] = fd;
-    else
-        ErrorF("FD Addition buffer at max.  Dropping fd addition request.\n");
+    if (fd_add_count < FD_ADD_MAX) {
+      fd_add[fd_add_count++] = fd;
+    } else {
+      ErrorF("FD Addition buffer at max.  Dropping fd addition request.\n");
+    }
 
     pthread_cond_broadcast(&fd_add_ready_cond);
     pthread_mutex_unlock(&fd_add_lock);
@@ -372,8 +374,9 @@ void DarwinEQInit(void)
     mieqInit();
     mieqSetHandler(ET_XQuartz, DarwinEventHandler);
 
-    if (!fd_add_tid)
-        fd_add_tid = create_thread(DarwinProcessFDAdditionQueue_thread, NULL);
+    if (!fd_add_tid) {
+      fd_add_tid = create_thread(DarwinProcessFDAdditionQueue_thread, NULL);
+    }
 
     signal_mieq_init();
 }
@@ -547,10 +550,12 @@ DarwinSendPointerEvents(DeviceIntPtr pDev, int ev_type, int ev_button,
     valuator_mask_set_double(&valuators, 1, pointer_y);
 
     if (ev_type == MotionNotify) {
-        if (pointer_dx != 0.0)
-            valuator_mask_set_double(&valuators, 2, pointer_dx);
-        if (pointer_dy != 0.0)
-            valuator_mask_set_double(&valuators, 3, pointer_dy);
+      if (pointer_dx != 0.0) {
+        valuator_mask_set_double(&valuators, 2, pointer_dx);
+      }
+      if (pointer_dy != 0.0) {
+        valuator_mask_set_double(&valuators, 3, pointer_dy);
+      }
     }
 
     input_lock();

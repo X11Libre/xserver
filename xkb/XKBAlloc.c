@@ -48,15 +48,18 @@ XkbAllocCompatMap(XkbDescPtr xkb, unsigned which, unsigned nSI)
     XkbCompatMapPtr compat;
     XkbSymInterpretRec *prev_interpret;
 
-    if (!xkb)
-        return BadMatch;
+    if (!xkb) {
+      return BadMatch;
+    }
     if (xkb->compat) {
-        if (xkb->compat->size_si >= nSI)
-            return Success;
+      if (xkb->compat->size_si >= nSI) {
+        return Success;
+      }
         compat = xkb->compat;
         compat->size_si = nSI;
-        if (compat->sym_interpret == NULL)
-            compat->num_si = 0;
+        if (compat->sym_interpret == NULL) {
+          compat->num_si = 0;
+        }
         prev_interpret = compat->sym_interpret;
         compat->sym_interpret = reallocarray(compat->sym_interpret,
                                              nSI, sizeof(XkbSymInterpretRec));
@@ -73,8 +76,9 @@ XkbAllocCompatMap(XkbDescPtr xkb, unsigned which, unsigned nSI)
         return Success;
     }
     compat = calloc(1, sizeof(XkbCompatMapRec));
-    if (compat == NULL)
-        return BadAlloc;
+    if (compat == NULL) {
+      return BadAlloc;
+    }
     if (nSI > 0) {
         compat->sym_interpret = calloc(nSI, sizeof(XkbSymInterpretRec));
         if (!compat->sym_interpret) {
@@ -95,17 +99,21 @@ XkbFreeCompatMap(XkbDescPtr xkb, unsigned which, Bool freeMap)
 {
     register XkbCompatMapPtr compat;
 
-    if ((xkb == NULL) || (xkb->compat == NULL))
-        return;
+    if ((xkb == NULL) || (xkb->compat == NULL)) {
+      return;
+    }
     compat = xkb->compat;
-    if (freeMap)
-        which = XkbAllCompatMask;
-    if (which & XkbGroupCompatMask)
-        memset((char *) &compat->groups[0], 0,
-               XkbNumKbdGroups * sizeof(XkbModsRec));
+    if (freeMap) {
+      which = XkbAllCompatMask;
+    }
+    if (which & XkbGroupCompatMask) {
+      memset((char *)&compat->groups[0], 0,
+             XkbNumKbdGroups * sizeof(XkbModsRec));
+    }
     if (which & XkbSymInterpMask) {
-        if ((compat->sym_interpret) && (compat->size_si > 0))
-            free(compat->sym_interpret);
+      if ((compat->sym_interpret) && (compat->size_si > 0)) {
+        free(compat->sym_interpret);
+      }
         compat->size_si = compat->num_si = 0;
         compat->sym_interpret = NULL;
     }
@@ -123,12 +131,14 @@ XkbAllocNames(XkbDescPtr xkb, unsigned which, int nTotalRG, int nTotalAliases)
 {
     XkbNamesPtr names;
 
-    if (xkb == NULL)
-        return BadMatch;
+    if (xkb == NULL) {
+      return BadMatch;
+    }
     if (xkb->names == NULL) {
         xkb->names = calloc(1, sizeof(XkbNamesRec));
-        if (xkb->names == NULL)
-            return BadAlloc;
+        if (xkb->names == NULL) {
+          return BadAlloc;
+        }
     }
     names = xkb->names;
     if ((which & XkbKTLevelNamesMask) && (xkb->map != NULL) &&
@@ -140,19 +150,22 @@ XkbAllocNames(XkbDescPtr xkb, unsigned which, int nTotalRG, int nTotalAliases)
         for (i = 0; i < xkb->map->num_types; i++, type++) {
             if (type->level_names == NULL) {
                 type->level_names = calloc(type->num_levels, sizeof(Atom));
-                if (type->level_names == NULL)
-                    return BadAlloc;
+                if (type->level_names == NULL) {
+                  return BadAlloc;
+                }
             }
         }
     }
     if ((which & XkbKeyNamesMask) && (names->keys == NULL)) {
-        if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
-            (!XkbIsLegalKeycode(xkb->max_key_code)) ||
-            (xkb->max_key_code < xkb->min_key_code))
-            return BadValue;
+      if ((!XkbIsLegalKeycode(xkb->min_key_code)) ||
+          (!XkbIsLegalKeycode(xkb->max_key_code)) ||
+          (xkb->max_key_code < xkb->min_key_code)) {
+        return BadValue;
+      }
         names->keys = calloc((xkb->max_key_code + 1), sizeof(XkbKeyNameRec));
-        if (names->keys == NULL)
-            return BadAlloc;
+        if (names->keys == NULL) {
+          return BadAlloc;
+        }
     }
     if ((which & XkbKeyAliasesMask) && (nTotalAliases > 0)) {
         if (names->key_aliases == NULL) {
@@ -210,11 +223,13 @@ XkbFreeNames(XkbDescPtr xkb, unsigned which, Bool freeMap)
 {
     XkbNamesPtr names;
 
-    if ((xkb == NULL) || (xkb->names == NULL))
-        return;
+    if ((xkb == NULL) || (xkb->names == NULL)) {
+      return;
+    }
     names = xkb->names;
-    if (freeMap)
-        which = XkbAllNamesMask;
+    if (freeMap) {
+      which = XkbAllNamesMask;
+    }
     if (which & XkbKTLevelNamesMask) {
         XkbClientMapPtr map = xkb->map;
 
@@ -256,13 +271,15 @@ XkbFreeNames(XkbDescPtr xkb, unsigned which, Bool freeMap)
  /*ARGSUSED*/ int
 XkbAllocControls(XkbDescPtr xkb, unsigned which)
 {
-    if (xkb == NULL)
-        return BadMatch;
+  if (xkb == NULL) {
+    return BadMatch;
+  }
 
     if (xkb->ctrls == NULL) {
         xkb->ctrls = calloc(1, sizeof(XkbControlsRec));
-        if (!xkb->ctrls)
-            return BadAlloc;
+        if (!xkb->ctrls) {
+          return BadAlloc;
+        }
     }
     return Success;
 }
@@ -282,12 +299,14 @@ XkbFreeControls(XkbDescPtr xkb, unsigned which, Bool freeMap)
 int
 XkbAllocIndicatorMaps(XkbDescPtr xkb)
 {
-    if (xkb == NULL)
-        return BadMatch;
+  if (xkb == NULL) {
+    return BadMatch;
+  }
     if (xkb->indicators == NULL) {
         xkb->indicators = calloc(1, sizeof(XkbIndicatorRec));
-        if (!xkb->indicators)
-            return BadAlloc;
+        if (!xkb->indicators) {
+          return BadAlloc;
+        }
     }
     return Success;
 }
@@ -310,37 +329,47 @@ XkbAllocKeyboard(void)
     XkbDescRec *xkb;
 
     xkb = calloc(1, sizeof(XkbDescRec));
-    if (xkb)
-        xkb->device_spec = XkbUseCoreKbd;
+    if (xkb) {
+      xkb->device_spec = XkbUseCoreKbd;
+    }
     return xkb;
 }
 
 void
 XkbFreeKeyboard(XkbDescPtr xkb, unsigned which, Bool freeAll)
 {
-    if (xkb == NULL)
-        return;
-    if (freeAll)
-        which = XkbAllComponentsMask;
-    if (which & XkbClientMapMask)
-        XkbFreeClientMap(xkb, XkbAllClientInfoMask, TRUE);
-    if (which & XkbServerMapMask)
-        XkbFreeServerMap(xkb, XkbAllServerInfoMask, TRUE);
-    if (which & XkbCompatMapMask)
-        XkbFreeCompatMap(xkb, XkbAllCompatMask, TRUE);
-    if (which & XkbIndicatorMapMask)
-        XkbFreeIndicatorMaps(xkb);
-    if (which & XkbNamesMask)
-        XkbFreeNames(xkb, XkbAllNamesMask, TRUE);
+  if (xkb == NULL) {
+    return;
+  }
+  if (freeAll) {
+    which = XkbAllComponentsMask;
+  }
+  if (which & XkbClientMapMask) {
+    XkbFreeClientMap(xkb, XkbAllClientInfoMask, TRUE);
+  }
+  if (which & XkbServerMapMask) {
+    XkbFreeServerMap(xkb, XkbAllServerInfoMask, TRUE);
+  }
+  if (which & XkbCompatMapMask) {
+    XkbFreeCompatMap(xkb, XkbAllCompatMask, TRUE);
+  }
+  if (which & XkbIndicatorMapMask) {
+    XkbFreeIndicatorMaps(xkb);
+  }
+  if (which & XkbNamesMask) {
+    XkbFreeNames(xkb, XkbAllNamesMask, TRUE);
+  }
     if ((which & XkbGeometryMask) && (xkb->geom != NULL)) {
         XkbFreeGeometry(xkb->geom, XkbGeomAllMask, TRUE);
         /* PERHAPS BONGHITS etc */
         xkb->geom = NULL;
     }
-    if (which & XkbControlsMask)
-        XkbFreeControls(xkb, XkbAllControlsMask, TRUE);
-    if (freeAll)
-        free(xkb);
+    if (which & XkbControlsMask) {
+      XkbFreeControls(xkb, XkbAllControlsMask, TRUE);
+    }
+    if (freeAll) {
+      free(xkb);
+    }
     return;
 }
 
@@ -357,6 +386,7 @@ XkbFreeComponentNames(XkbComponentNamesPtr names, Bool freeNames)
         free(names->geometry);
         memset(names, 0, sizeof(XkbComponentNamesRec));
     }
-    if (freeNames)
-        free(names);
+    if (freeNames) {
+      free(names);
+    }
 }

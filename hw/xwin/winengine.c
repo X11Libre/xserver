@@ -89,10 +89,12 @@ winDetectSupportedEngines(void)
         }
 
         /* Cleanup DirectDraw interfaces */
-        if (lpdd4 != NULL)
-            IDirectDraw_Release(lpdd4);
-        if (lpdd != NULL)
-            IDirectDraw_Release(lpdd);
+        if (lpdd4 != NULL) {
+          IDirectDraw_Release(lpdd4);
+        }
+        if (lpdd != NULL) {
+          IDirectDraw_Release(lpdd);
+        }
     }
 
     winErrorFVerb(2,

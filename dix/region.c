@@ -171,10 +171,10 @@ Equipment Corporation.
 // might point to RegionBrokenData (.data segment), which we must not free()
 // (this also can create analyzer false alarms)
 static inline void xfreeData(RegionPtr reg) {
-    if (reg && reg->data && reg->data->size &&
-        reg->data != &RegionBrokenData &&
-        reg->data != &RegionEmptyData)
-            free(reg->data);
+  if (reg && reg->data && reg->data->size && reg->data != &RegionBrokenData &&
+      reg->data != &RegionEmptyData) {
+    free(reg->data);
+  }
 }
 
 #define RECTALLOC_BAIL(pReg,n,bail) \
@@ -243,8 +243,9 @@ RegionPtr
 RegionCreate(BoxPtr rect, int size)
 {
     RegionPtr pReg = calloc(1, sizeof(RegionRec));
-    if (!pReg)
-        return &RegionBrokenRegion;
+    if (!pReg) {
+      return &RegionBrokenRegion;
+    }
 
     RegionInit(pReg, rect, size);
 
@@ -255,8 +256,9 @@ void
 RegionDestroy(RegionPtr pReg)
 {
     pixman_region_fini(pReg);
-    if (pReg != &RegionBrokenRegion)
-        free(pReg);
+    if (pReg != &RegionBrokenRegion) {
+      free(pReg);
+    }
 }
 
 RegionPtr
@@ -265,8 +267,9 @@ RegionDuplicate(RegionPtr pOld)
     RegionPtr   pNew;
 
     pNew = RegionCreate(&pOld->extents, 0);
-    if (!pNew)
-        return NULL;
+    if (!pNew) {
+      return NULL;
+    }
     if (!RegionCopy(pNew, pOld)) {
         RegionDestroy(pNew);
         return NULL;
@@ -286,9 +289,10 @@ RegionPrint(RegionPtr rgn)
     ErrorF("[mi] num: %d size: %d\n", num, size);
     ErrorF("[mi] extents: %d %d %d %d\n",
            rgn->extents.x1, rgn->extents.y1, rgn->extents.x2, rgn->extents.y2);
-    for (int i = 0; i < num; i++)
-        ErrorF("[mi] %d %d %d %d \n",
-               rects[i].x1, rects[i].y1, rects[i].x2, rects[i].y2);
+    for (int i = 0; i < num; i++) {
+      ErrorF("[mi] %d %d %d %d \n", rects[i].x1, rects[i].y1, rects[i].x2,
+             rects[i].y2);
+    }
     ErrorF("[mi] \n");
 }
 
@@ -354,29 +358,33 @@ RegionRectAlloc(RegionPtr pRgn, int n)
         n++;
         rgnSize = RegionSizeof(n);
         pRgn->data = (rgnSize > 0) ? calloc(1, rgnSize) : NULL;
-        if (!pRgn->data)
-            return RegionBreak(pRgn);
+        if (!pRgn->data) {
+          return RegionBreak(pRgn);
+        }
         pRgn->data->numRects = 1;
         *RegionBoxptr(pRgn) = pRgn->extents;
     }
     else if (!pRgn->data->size) {
         rgnSize = RegionSizeof(n);
         pRgn->data = (rgnSize > 0) ? calloc(1, rgnSize) : NULL;
-        if (!pRgn->data)
-            return RegionBreak(pRgn);
+        if (!pRgn->data) {
+          return RegionBreak(pRgn);
+        }
         pRgn->data->numRects = 0;
     }
     else {
         if (n == 1) {
             n = pRgn->data->numRects;
-            if (n > 500)        /* XXX pick numbers out of a hat */
-                n = 250;
+            if (n > 500) { /* XXX pick numbers out of a hat */
+              n = 250;
+            }
         }
         n += pRgn->data->numRects;
         rgnSize = RegionSizeof(n);
         data = (rgnSize > 0) ? realloc(pRgn->data, rgnSize) : NULL;
-        if (!data)
-            return RegionBreak(pRgn);
+        if (!data) {
+          return RegionBreak(pRgn);
+        }
         pRgn->data = data;
     }
     pRgn->data->size = n;
@@ -421,8 +429,9 @@ RegionCoalesce(RegionPtr pReg,  /* Region to coalesce                */
     numRects = curStart - prevStart;
     assert(numRects == pReg->data->numRects - curStart);
 
-    if (!numRects)
-        return curStart;
+    if (!numRects) {
+      return curStart;
+    }
 
     /*
      * The bands may only be coalesced if the bottom of the previous
@@ -430,8 +439,9 @@ RegionCoalesce(RegionPtr pReg,  /* Region to coalesce                */
      */
     pPrevBox = RegionBox(pReg, prevStart);
     pCurBox = RegionBox(pReg, curStart);
-    if (pPrevBox->y2 != pCurBox->y1)
-        return curStart;
+    if (pPrevBox->y2 != pCurBox->y1) {
+      return curStart;
+    }
 
     /*
      * Make sure the bands have boxes in the same places. This
@@ -605,8 +615,9 @@ RegionOp(RegionPtr newReg,      /* Place to store result         */
     /*
      * Break any region computed from a broken region
      */
-    if (RegionNar(reg1) || RegionNar(reg2))
-        return RegionBreak(newReg);
+    if (RegionNar(reg1) || RegionNar(reg2)) {
+      return RegionBreak(newReg);
+    }
 
     /*
      * Initialization:
@@ -632,16 +643,20 @@ RegionOp(RegionPtr newReg,      /* Place to store result         */
         newReg->data = &RegionEmptyData;
     }
     /* guess at new size */
-    if (numRects > newSize)
-        newSize = numRects;
+    if (numRects > newSize) {
+      newSize = numRects;
+    }
     newSize <<= 1;
-    if (!newReg->data)
-        newReg->data = &RegionEmptyData;
-    else if (newReg->data->size)
-        newReg->data->numRects = 0;
-    if (newSize > newReg->data->size)
-        if (!RegionRectAlloc(newReg, newSize))
-            return FALSE;
+    if (!newReg->data) {
+      newReg->data = &RegionEmptyData;
+    } else if (newReg->data->size) {
+      newReg->data->numRects = 0;
+    }
+    if (newSize > newReg->data->size) {
+      if (!RegionRectAlloc(newReg, newSize)) {
+        return FALSE;
+      }
+    }
 
     /*
      * Initialize ybot.
@@ -736,10 +751,12 @@ RegionOp(RegionPtr newReg,      /* Place to store result         */
          * If we've finished with a band (y2 == ybot) we skip forward
          * in the region to the next band.
          */
-        if (r1->y2 == ybot)
-            r1 = r1BandEnd;
-        if (r2->y2 == ybot)
-            r2 = r2BandEnd;
+        if (r1->y2 == ybot) {
+          r1 = r1BandEnd;
+        }
+        if (r2->y2 == ybot) {
+          r2 = r2BandEnd;
+        }
 
     } while (r1 != r1End && r2 != r2End);
 
@@ -809,8 +826,9 @@ RegionSetExtents(RegionPtr pReg)
 {
     BoxPtr pBox, pBoxEnd;
 
-    if (!pReg->data)
-        return;
+    if (!pReg->data) {
+      return;
+    }
     if (!pReg->data->size) {
         pReg->extents.x2 = pReg->extents.x1;
         pReg->extents.y2 = pReg->extents.y1;
@@ -834,10 +852,12 @@ RegionSetExtents(RegionPtr pReg)
 
     assert(pReg->extents.y1 < pReg->extents.y2);
     while (pBox <= pBoxEnd) {
-        if (pBox->x1 < pReg->extents.x1)
-            pReg->extents.x1 = pBox->x1;
-        if (pBox->x2 > pReg->extents.x2)
-            pReg->extents.x2 = pBox->x2;
+      if (pBox->x1 < pReg->extents.x1) {
+        pReg->extents.x1 = pBox->x1;
+      }
+      if (pBox->x2 > pReg->extents.x2) {
+        pReg->extents.x2 = pBox->x2;
+      }
         pBox++;
     };
 
@@ -973,8 +993,9 @@ RegionAppend(RegionPtr dstrgn, RegionPtr rgn)
     BoxPtr new, old;
     Bool prepend;
 
-    if (RegionNar(rgn))
-        return RegionBreak(dstrgn);
+    if (RegionNar(rgn)) {
+      return RegionBreak(dstrgn);
+    }
 
     if (!rgn->data && (dstrgn->data == &RegionEmptyData)) {
         dstrgn->extents = rgn->extents;
@@ -983,63 +1004,70 @@ RegionAppend(RegionPtr dstrgn, RegionPtr rgn)
     }
 
     numRects = RegionNumRects(rgn);
-    if (!numRects)
-        return TRUE;
+    if (!numRects) {
+      return TRUE;
+    }
     prepend = FALSE;
     size = numRects;
     dnumRects = RegionNumRects(dstrgn);
-    if (!dnumRects && (size < 200))
-        size = 200;             /* XXX pick numbers out of a hat */
+    if (!dnumRects && (size < 200)) {
+      size = 200; /* XXX pick numbers out of a hat */
+    }
     RECTALLOC(dstrgn, size);
     old = RegionRects(rgn);
-    if (!dnumRects)
-        dstrgn->extents = rgn->extents;
-    else if (dstrgn->extents.x2 > dstrgn->extents.x1) {
-        BoxPtr first, last;
+    if (!dnumRects) {
+      dstrgn->extents = rgn->extents;
+    } else if (dstrgn->extents.x2 > dstrgn->extents.x1) {
+      BoxPtr first, last;
 
-        first = old;
-        last = RegionBoxptr(dstrgn) + (dnumRects - 1);
+      first = old;
+      last = RegionBoxptr(dstrgn) + (dnumRects - 1);
+      if ((first->y1 > last->y2) ||
+          ((first->y1 == last->y1) && (first->y2 == last->y2) &&
+           (first->x1 > last->x2))) {
+        if (rgn->extents.x1 < dstrgn->extents.x1) {
+          dstrgn->extents.x1 = rgn->extents.x1;
+        }
+        if (rgn->extents.x2 > dstrgn->extents.x2) {
+          dstrgn->extents.x2 = rgn->extents.x2;
+        }
+        dstrgn->extents.y2 = rgn->extents.y2;
+      } else {
+        first = RegionBoxptr(dstrgn);
+        last = old + (numRects - 1);
         if ((first->y1 > last->y2) ||
             ((first->y1 == last->y1) && (first->y2 == last->y2) &&
              (first->x1 > last->x2))) {
-            if (rgn->extents.x1 < dstrgn->extents.x1)
-                dstrgn->extents.x1 = rgn->extents.x1;
-            if (rgn->extents.x2 > dstrgn->extents.x2)
-                dstrgn->extents.x2 = rgn->extents.x2;
-            dstrgn->extents.y2 = rgn->extents.y2;
+          prepend = TRUE;
+          if (rgn->extents.x1 < dstrgn->extents.x1) {
+            dstrgn->extents.x1 = rgn->extents.x1;
+          }
+          if (rgn->extents.x2 > dstrgn->extents.x2) {
+            dstrgn->extents.x2 = rgn->extents.x2;
+          }
+          dstrgn->extents.y1 = rgn->extents.y1;
+        } else {
+          dstrgn->extents.x2 = dstrgn->extents.x1;
         }
-        else {
-            first = RegionBoxptr(dstrgn);
-            last = old + (numRects - 1);
-            if ((first->y1 > last->y2) ||
-                ((first->y1 == last->y1) && (first->y2 == last->y2) &&
-                 (first->x1 > last->x2))) {
-                prepend = TRUE;
-                if (rgn->extents.x1 < dstrgn->extents.x1)
-                    dstrgn->extents.x1 = rgn->extents.x1;
-                if (rgn->extents.x2 > dstrgn->extents.x2)
-                    dstrgn->extents.x2 = rgn->extents.x2;
-                dstrgn->extents.y1 = rgn->extents.y1;
-            }
-            else
-                dstrgn->extents.x2 = dstrgn->extents.x1;
-        }
+      }
     }
     if (prepend) {
         new = RegionBox(dstrgn, numRects);
-        if (dnumRects == 1)
-            *new = *RegionBoxptr(dstrgn);
-        else
-            memmove((char *) new, (char *) RegionBoxptr(dstrgn),
-                    dnumRects * sizeof(BoxRec));
+        if (dnumRects == 1) {
+          *new = *RegionBoxptr(dstrgn);
+        } else {
+          memmove((char *)new, (char *)RegionBoxptr(dstrgn),
+                  dnumRects * sizeof(BoxRec));
+        }
         new = RegionBoxptr(dstrgn);
+    } else {
+      new = RegionBoxptr(dstrgn) + dnumRects;
     }
-    else
-        new = RegionBoxptr(dstrgn) + dnumRects;
-    if (numRects == 1)
-        *new = *old;
-    else
-        memmove((char *) new, (char *) old, numRects * sizeof(BoxRec));
+    if (numRects == 1) {
+      *new = *old;
+    } else {
+      memmove((char *)new, (char *)old, numRects * sizeof(BoxRec));
+    }
     dstrgn->data->numRects += numRects;
     return TRUE;
 }
@@ -1098,8 +1126,9 @@ QuickSortRects(BoxRec rects[], int numRects)
         ExchangeRects(0, j);
 
         /* Recurse */
-        if (numRects - j - 1 > 1)
-            QuickSortRects(&rects[j + 1], numRects - j - 1);
+        if (numRects - j - 1 > 1) {
+          QuickSortRects(&rects[j + 1], numRects - j - 1);
+        }
         numRects = j;
     } while (numRects > 1);
 }
@@ -1163,8 +1192,9 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     }
     numRects = badreg->data->numRects;
     if (!numRects) {
-        if (RegionNar(badreg))
-            return FALSE;
+      if (RegionNar(badreg)) {
+        return FALSE;
+      }
         good(badreg);
         return TRUE;
     }
@@ -1188,8 +1218,9 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     /* Set up the first region to be the first rectangle in badreg */
     /* Note that step 2 code will never overflow the ri[0].reg rects array */
     RegionInfo *ri = calloc(4, sizeof(RegionInfo));
-    if (!ri)
-        return RegionBreak(badreg);
+    if (!ri) {
+      return RegionBreak(badreg);
+    }
     sizeRI = 4;
     numRI = 1;
     ri[0].prevBand = 0;
@@ -1217,10 +1248,12 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
                 /* box is in same band as riBox.  Merge or append it */
                 if (box->x1 <= riBox->x2) {
                     /* Merge it with riBox */
-                    if (box->x1 < riBox->x2)
-                        *pOverlap = TRUE;
-                    if (box->x2 > riBox->x2)
-                        riBox->x2 = box->x2;
+                    if (box->x1 < riBox->x2) {
+                      *pOverlap = TRUE;
+                    }
+                    if (box->x2 > riBox->x2) {
+                      riBox->x2 = box->x2;
+                    }
                 }
                 else {
                     RECTALLOC_BAIL(reg, 1, bail);
@@ -1231,10 +1264,12 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
             }
             else if (box->y1 >= riBox->y2) {
                 /* Put box into new band */
-                if (reg->extents.x2 < riBox->x2)
-                    reg->extents.x2 = riBox->x2;
-                if (reg->extents.x1 > box->x1)
-                    reg->extents.x1 = box->x1;
+                if (reg->extents.x2 < riBox->x2) {
+                  reg->extents.x2 = riBox->x2;
+                }
+                if (reg->extents.x1 > box->x1) {
+                  reg->extents.x1 = box->x1;
+                }
                 Coalesce(reg, rit->prevBand, rit->curBand);
                 rit->curBand = reg->data->numRects;
                 RECTALLOC_BAIL(reg, 1, bail);
@@ -1250,8 +1285,9 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
             /* Oops, allocate space for new region information */
             sizeRI <<= 1;
             rit = (RegionInfo *) reallocarray(ri, sizeRI, sizeof(RegionInfo));
-            if (!rit)
-                goto bail;
+            if (!rit) {
+              goto bail;
+            }
             ri = rit;
             rit = &ri[numRI];
         }
@@ -1260,8 +1296,10 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
         rit->curBand = 0;
         rit->reg.extents = *box;
         rit->reg.data = NULL;
-        if (!RegionRectAlloc(&rit->reg, (i + numRI) / numRI))   /* MUST force allocation */
-            goto bail;
+        if (!RegionRectAlloc(&rit->reg,
+                             (i + numRI) / numRI)) { /* MUST force allocation */
+          goto bail;
+        }
  NextRect:;
     }                           /* for i */
 
@@ -1273,8 +1311,9 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
         reg = &rit->reg;
         riBox = RegionEnd(reg);
         reg->extents.y2 = riBox->y2;
-        if (reg->extents.x2 < riBox->x2)
-            reg->extents.x2 = riBox->x2;
+        if (reg->extents.x2 < riBox->x2) {
+          reg->extents.x2 = riBox->x2;
+        }
         Coalesce(reg, rit->prevBand, rit->curBand);
         if (reg->data->numRects == 1) { /* keep unions happy below */
             xfreeData(reg);
@@ -1289,16 +1328,21 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
         for (int j = numRI & 1; j < (half + (numRI & 1)); j++) {
             reg = &ri[j].reg;
             hreg = &ri[j + half].reg;
-            if (!RegionOp(reg, reg, hreg, RegionUnionO, TRUE, TRUE, pOverlap))
-                ret = FALSE;
-            if (hreg->extents.x1 < reg->extents.x1)
-                reg->extents.x1 = hreg->extents.x1;
-            if (hreg->extents.y1 < reg->extents.y1)
-                reg->extents.y1 = hreg->extents.y1;
-            if (hreg->extents.x2 > reg->extents.x2)
-                reg->extents.x2 = hreg->extents.x2;
-            if (hreg->extents.y2 > reg->extents.y2)
-                reg->extents.y2 = hreg->extents.y2;
+            if (!RegionOp(reg, reg, hreg, RegionUnionO, TRUE, TRUE, pOverlap)) {
+              ret = FALSE;
+            }
+            if (hreg->extents.x1 < reg->extents.x1) {
+              reg->extents.x1 = hreg->extents.x1;
+            }
+            if (hreg->extents.y1 < reg->extents.y1) {
+              reg->extents.y1 = hreg->extents.y1;
+            }
+            if (hreg->extents.x2 > reg->extents.x2) {
+              reg->extents.x2 = hreg->extents.x2;
+            }
+            if (hreg->extents.y2 > reg->extents.y2) {
+              reg->extents.y2 = hreg->extents.y2;
+            }
             xfreeData(hreg);
         }
         numRI -= half;
@@ -1308,8 +1352,9 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     good(badreg);
     return ret;
  bail:
-    for (int i = 0; i < numRI; i++)
-        xfreeData(&ri[i].reg);
+   for (int i = 0; i < numRI; i++) {
+     xfreeData(&ri[i].reg);
+   }
     free(ri);
     return RegionBreak(badreg);
 }
@@ -1324,17 +1369,21 @@ RegionFromRects(int nrects, xRectangle *prect, int ctype)
     int x1, y1, x2, y2;
 
     pRgn = RegionCreate(NullBox, 0);
-    if (RegionNar(pRgn))
-        return pRgn;
-    if (!nrects)
-        return pRgn;
+    if (RegionNar(pRgn)) {
+      return pRgn;
+    }
+    if (!nrects) {
+      return pRgn;
+    }
     if (nrects == 1) {
         x1 = prect->x;
         y1 = prect->y;
-        if ((x2 = x1 + (int) prect->width) > MAXSHORT)
-            x2 = MAXSHORT;
-        if ((y2 = y1 + (int) prect->height) > MAXSHORT)
-            y2 = MAXSHORT;
+        if ((x2 = x1 + (int)prect->width) > MAXSHORT) {
+          x2 = MAXSHORT;
+        }
+        if ((y2 = y1 + (int)prect->height) > MAXSHORT) {
+          y2 = MAXSHORT;
+        }
         if (x1 != x2 && y1 != y2) {
             pRgn->extents.x1 = x1;
             pRgn->extents.y1 = y1;
@@ -1354,10 +1403,12 @@ RegionFromRects(int nrects, xRectangle *prect, int ctype)
     for (int i = nrects; --i >= 0; prect++) {
         x1 = prect->x;
         y1 = prect->y;
-        if ((x2 = x1 + (int) prect->width) > MAXSHORT)
-            x2 = MAXSHORT;
-        if ((y2 = y1 + (int) prect->height) > MAXSHORT)
-            y2 = MAXSHORT;
+        if ((x2 = x1 + (int)prect->width) > MAXSHORT) {
+          x2 = MAXSHORT;
+        }
+        if ((y2 = y1 + (int)prect->height) > MAXSHORT) {
+          y2 = MAXSHORT;
+        }
         if (x1 != x2 && y1 != y2) {
             pBox->x1 = x1;
             pBox->y1 = y1;
@@ -1375,9 +1426,9 @@ RegionFromRects(int nrects, xRectangle *prect, int ctype)
 
             pRgn->extents.x1 = pRgn->extents.x2 = 0;
             RegionValidate(pRgn, &overlap);
+        } else {
+          RegionSetExtents(pRgn);
         }
-        else
-            RegionSetExtents(pRgn);
         good(pRgn);
     }
     else {

@@ -292,8 +292,9 @@ vert_refresh(int h_pixels, int v_lines, float freq, int interlaced, int margins)
     float v_odd_front_porch_lines;
 
     mode *m = (mode *) calloc(1, sizeof(mode));
-    if (!m)
-        return NULL;
+    if (!m) {
+      return NULL;
+    }
 
     /*  1. In order to give correct results, the number of horizontal
      *  pixels requested is first processed to ensure that it is divisible
@@ -603,11 +604,13 @@ parse_command_line(int argc, char *argv[])
     int n;
 
     options *o = (options *) calloc(1, sizeof(options));
-    if (!o)
-        goto bad_option;
+    if (!o) {
+      goto bad_option;
+    }
 
-    if (argc < 4)
-        goto bad_option;
+    if (argc < 4) {
+      goto bad_option;
+    }
 
     o->x = atoi(argv[1]);
     o->y = atoi(argv[2]);
@@ -640,8 +643,9 @@ parse_command_line(int argc, char *argv[])
     /* if neither xorgmode nor fbmode were requested, default to
        xorgmode */
 
-    if (!o->fbmode && !o->xorgmode)
-        o->xorgmode = 1;
+    if (!o->fbmode && !o->xorgmode) {
+      o->xorgmode = 1;
+    }
 
     return o;
 
@@ -680,18 +684,22 @@ main(int argc, char *argv[])
     options *o;
 
     o = parse_command_line(argc, argv);
-    if (!o)
-        exit(1);
+    if (!o) {
+      exit(1);
+    }
 
     m = vert_refresh(o->x, o->y, o->v_freq, 0, 0);
-    if (!m)
-        exit(1);
+    if (!m) {
+      exit(1);
+    }
 
-    if (o->xorgmode)
-        print_xf86_mode(m);
+    if (o->xorgmode) {
+      print_xf86_mode(m);
+    }
 
-    if (o->fbmode)
-        print_fb_mode(m);
+    if (o->fbmode) {
+      print_fb_mode(m);
+    }
 
     free(m);
 

@@ -18,8 +18,10 @@
 
 static inline void
 SetReqFds(ClientPtr client, int req_fds) {
-    if (client->req_fds != 0 && req_fds != client->req_fds)
-        LogMessage(X_ERROR, "Mismatching number of request fds %d != %d\n", req_fds, client->req_fds);
+  if (client->req_fds != 0 && req_fds != client->req_fds) {
+    LogMessage(X_ERROR, "Mismatching number of request fds %d != %d\n", req_fds,
+               client->req_fds);
+  }
     client->req_fds = req_fds;
 }
 
@@ -63,8 +65,9 @@ extern struct xorg_list output_pending_clients;
 static inline void
 output_pending_mark(ClientPtr client)
 {
-    if (!client->clientGone && xorg_list_is_empty(&client->output_pending))
-        xorg_list_append(&client->output_pending, &output_pending_clients);
+  if (!client->clientGone && xorg_list_is_empty(&client->output_pending)) {
+    xorg_list_append(&client->output_pending, &output_pending_clients);
+  }
 }
 
 static inline void

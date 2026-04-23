@@ -66,16 +66,18 @@ ProcXIGrabDevice(ClientPtr client)
     REQUEST_FIXED_SIZE(xXIGrabDeviceReq, ((size_t) stuff->mask_len) * 4);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     if (!dev->enabled) {
         status = XIAlreadyGrabbed;
         goto reply;
     }
 
-    if (!InputDevIsMaster(dev))
-        stuff->paired_device_mode = GrabModeAsync;
+    if (!InputDevIsMaster(dev)) {
+      stuff->paired_device_mode = GrabModeAsync;
+    }
 
     if (IsKeyboardDevice(dev)) {
         keyboard_mode = stuff->grab_mode;
@@ -86,13 +88,15 @@ ProcXIGrabDevice(ClientPtr client)
         pointer_mode = stuff->grab_mode;
     }
 
-    if (XICheckInvalidMaskBits(client, (unsigned char *) &stuff[1],
-                               stuff->mask_len * 4) != Success)
-        return BadValue;
+    if (XICheckInvalidMaskBits(client, (unsigned char *)&stuff[1],
+                               stuff->mask_len * 4) != Success) {
+      return BadValue;
+    }
 
     mask.xi2mask = xi2mask_new();
-    if (!mask.xi2mask)
-        return BadAlloc;
+    if (!mask.xi2mask) {
+      return BadAlloc;
+    }
 
     mask_len = min(xi2mask_mask_size(mask.xi2mask), stuff->mask_len * 4);
     /* FIXME: I think the old code was broken here */
@@ -109,8 +113,9 @@ ProcXIGrabDevice(ClientPtr client)
 
     xi2mask_free(&mask.xi2mask);
 
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
 reply:
     ;
@@ -135,16 +140,18 @@ ProcXIUngrabDevice(ClientPtr client)
     TimeStamp time;
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     grab = dev->deviceGrab.grab;
 
     time = ClientTimeToServerTime(stuff->time);
     if ((CompareTimeStamps(time, currentTime) != LATER) &&
         (CompareTimeStamps(time, dev->deviceGrab.grabTime) != EARLIER) &&
-        (grab) && SameClient(grab, client) && grab->grabtype == XI2)
-        (*dev->deviceGrab.DeactivateGrab) (dev);
+        (grab) && SameClient(grab, client) && grab->grabtype == XI2) {
+      (*dev->deviceGrab.DeactivateGrab)(dev);
+    }
 
     return Success;
 }

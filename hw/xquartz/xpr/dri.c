@@ -102,14 +102,18 @@ DRIScreenInit(ScreenPtr pScreen)
     DRIScreenPrivPtr pDRIPriv;
     int i;
 
-    if (!dixRegisterPrivateKey(&DRIScreenPrivKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
-    if (!dixRegisterPrivateKey(&DRIWindowPrivKeyRec, PRIVATE_WINDOW, 0))
-        return FALSE;
-    if (!dixRegisterPrivateKey(&DRIPixmapPrivKeyRec, PRIVATE_PIXMAP, 0))
-        return FALSE;
-    if (!dixRegisterPrivateKey(&DRIPixmapBufferPrivKeyRec, PRIVATE_PIXMAP, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&DRIScreenPrivKeyRec, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
+    if (!dixRegisterPrivateKey(&DRIWindowPrivKeyRec, PRIVATE_WINDOW, 0)) {
+      return FALSE;
+    }
+    if (!dixRegisterPrivateKey(&DRIPixmapPrivKeyRec, PRIVATE_PIXMAP, 0)) {
+      return FALSE;
+    }
+    if (!dixRegisterPrivateKey(&DRIPixmapBufferPrivKeyRec, PRIVATE_PIXMAP, 0)) {
+      return FALSE;
+    }
 
     pDRIPriv = (DRIScreenPrivPtr)calloc(1, sizeof(DRIScreenPrivRec));
     if (!pDRIPriv) {
@@ -183,10 +187,11 @@ DRIQueryDirectRenderingCapable(ScreenPtr pScreen, Bool* isCapable)
 {
     DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(pScreen);
 
-    if (pDRIPriv)
-        *isCapable = pDRIPriv->directRenderingSupport;
-    else
-        *isCapable = FALSE;
+    if (pDRIPriv) {
+      *isCapable = pDRIPriv->directRenderingSupport;
+    } else {
+      *isCapable = FALSE;
+    }
 
     return TRUE;
 }
@@ -210,8 +215,9 @@ DRIUpdateSurface(DRIDrawablePrivPtr pDRIDrawablePriv, DrawablePtr pDraw)
     xp_window_changes wc;
     unsigned int flags = 0;
 
-    if (pDRIDrawablePriv->sid == 0)
-        return;
+    if (pDRIDrawablePriv->sid == 0) {
+      return;
+    }
 
     wc.depth = (pDraw->bitsPerPixel == 32 ? XP_DEPTH_ARGB8888
                 : pDraw->bitsPerPixel == 16 ? XP_DEPTH_RGB555 : XP_DEPTH_NIL);
@@ -375,14 +381,16 @@ DRICreateSurface(ScreenPtr pScreen, Drawable id,
         pDRIDrawablePriv = CreateSurfaceForWindow(pScreen,
                                                   (WindowPtr)pDrawable, &wid);
 
-        if (NULL == pDRIDrawablePriv)
-            return FALSE;  /*error*/
+        if (NULL == pDRIDrawablePriv) {
+          return FALSE; /*error*/
+        }
     } else if (pDrawable->type == DRAWABLE_PIXMAP) {
         pDRIDrawablePriv = CreateSurfaceForPixmap(pScreen,
                                                   (PixmapPtr)pDrawable);
 
-        if (NULL == pDRIDrawablePriv)
-            return FALSE;  /*error*/
+        if (NULL == pDRIDrawablePriv) {
+          return FALSE; /*error*/
+        }
     } else {
         /* We handle GLXPbuffers in a different way (via CGL). */
         return FALSE;
@@ -430,8 +438,9 @@ DRICreateSurface(ScreenPtr pScreen, Drawable id,
         ++pDRIPriv->nrWindows;
 
         /* and stash it by surface id */
-        if (surface_hash == NULL)
-            surface_hash = x_hash_table_new(NULL, NULL, NULL, NULL);
+        if (surface_hash == NULL) {
+          surface_hash = x_hash_table_new(NULL, NULL, NULL, NULL);
+        }
         x_hash_table_insert(surface_hash,
                             x_cvt_uint_to_vptr(
                                 pDRIDrawablePriv->sid), pDRIDrawablePriv);
@@ -547,8 +556,9 @@ DRIDrawablePrivDelete(void *pResource, XID id)
                          AppleDRISurfaceNotifyDestroyed);
     }
 
-    if (pDRIDrawablePriv->notifiers != NULL)
-        x_hook_free(pDRIDrawablePriv->notifiers);
+    if (pDRIDrawablePriv->notifiers != NULL) {
+      x_hook_free(pDRIDrawablePriv->notifiers);
+    }
 
     free(pDRIDrawablePriv);
 
@@ -647,8 +657,9 @@ DRISurfaceNotify(xp_surface_id id, int kind)
                                                x_cvt_uint_to_vptr(id), NULL);
     }
 
-    if (pDRIDrawablePriv == NULL)
-        return;
+    if (pDRIDrawablePriv == NULL) {
+      return;
+    }
 
     if (kind == AppleDRISurfaceNotifyDestroyed) {
         x_hash_table_remove(surface_hash, x_cvt_uint_to_vptr(id));
@@ -683,8 +694,9 @@ DRICreatePixmap(ScreenPtr pScreen, Drawable id,
 {
     PixmapPtr pPix;
 
-    if (pDrawable->type != DRAWABLE_PIXMAP)
-        return FALSE;
+    if (pDrawable->type != DRAWABLE_PIXMAP) {
+      return FALSE;
+    }
 
     pPix = (PixmapPtr)pDrawable;
 
@@ -759,15 +771,17 @@ DRIGetPixmapData(DrawablePtr pDrawable, int *width, int *height,
     PixmapPtr pPix;
     DRIPixmapBufferPtr shared;
 
-    if (pDrawable->type != DRAWABLE_PIXMAP)
-        return FALSE;
+    if (pDrawable->type != DRAWABLE_PIXMAP) {
+      return FALSE;
+    }
 
     pPix = (PixmapPtr)pDrawable;
 
     shared = dixLookupPrivate(&pPix->devPrivates, DRIPixmapBufferPrivKey);
 
-    if (NULL == shared)
-        return FALSE;
+    if (NULL == shared) {
+      return FALSE;
+    }
 
     assert(pDrawable->width == shared->width);
     assert(pDrawable->height == shared->height);
@@ -787,15 +801,17 @@ DRIFreePixmapImp(DrawablePtr pDrawable)
     DRIPixmapBufferPtr shared;
     PixmapPtr pPix;
 
-    if (pDrawable->type != DRAWABLE_PIXMAP)
-        return FALSE;
+    if (pDrawable->type != DRAWABLE_PIXMAP) {
+      return FALSE;
+    }
 
     pPix = (PixmapPtr)pDrawable;
 
     shared = dixLookupPrivate(&pPix->devPrivates, DRIPixmapBufferPrivKey);
 
-    if (NULL == shared)
-        return FALSE;
+    if (NULL == shared) {
+      return FALSE;
+    }
 
     close(shared->fd);
     munmap(shared->buffer, shared->length);
@@ -810,7 +826,7 @@ DRIFreePixmapImp(DrawablePtr pDrawable)
 void
 DRIDestroyPixmap(DrawablePtr pDrawable)
 {
-    if (DRIFreePixmapImp(pDrawable))
-        FreeResourceByType(pDrawable->id, DRIDrawablePrivResType, FALSE);
-
+  if (DRIFreePixmapImp(pDrawable)) {
+    FreeResourceByType(pDrawable->id, DRIDrawablePrivResType, FALSE);
+  }
 }

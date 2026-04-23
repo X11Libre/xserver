@@ -78,21 +78,26 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
 
     X_REQUEST_HEAD_AT_LEAST(xSetDeviceModifierMappingReq);
 
-    if (client->req_len != bytes_to_int32(sizeof(xSetDeviceModifierMappingReq)) +
-        (stuff->numKeyPerModifier << 1))
-        return BadLength;
+    if (client->req_len !=
+        bytes_to_int32(sizeof(xSetDeviceModifierMappingReq)) +
+            (stuff->numKeyPerModifier << 1)) {
+      return BadLength;
+    }
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     ret = change_modmap(client, dev, (KeyCode *) &stuff[1],
                         stuff->numKeyPerModifier);
-    if (ret == Success)
-        ret = MappingSuccess;
+    if (ret == Success) {
+      ret = MappingSuccess;
+    }
 
-    if (ret != MappingSuccess && ret != MappingBusy && ret != MappingFailed)
-        return ret;
+    if (ret != MappingSuccess && ret != MappingBusy && ret != MappingFailed) {
+      return ret;
+    }
 
     xSetDeviceModifierMappingReply reply = {
         .RepType = X_SetDeviceModifierMapping,

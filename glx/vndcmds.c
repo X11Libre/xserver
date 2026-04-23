@@ -460,8 +460,9 @@ int GlxDispatchRequest(ClientPtr client)
     REQUEST(xReq);
     int result;
 
-    if (GlxExtensionEntry->base == 0)
-        return BadRequest;
+    if (GlxExtensionEntry->base == 0) {
+      return BadRequest;
+    }
 
     GlxSetRequestClient(client);
 

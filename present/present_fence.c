@@ -55,8 +55,9 @@ present_fence_sync_trigger_fired(SyncTrigger *trigger)
 {
     struct present_fence        *present_fence = container_of(trigger, struct present_fence, trigger);
 
-    if (present_fence->callback)
-        (*present_fence->callback)(present_fence->param);
+    if (present_fence->callback) {
+      (*present_fence->callback)(present_fence->param);
+    }
 }
 
 static void
@@ -73,8 +74,9 @@ present_fence_create(SyncFence *fence)
     struct present_fence        *present_fence;
 
     present_fence = calloc (1, sizeof (struct present_fence));
-    if (!present_fence)
-        return NULL;
+    if (!present_fence) {
+      return NULL;
+    }
 
     present_fence->fence = fence;
     present_fence->trigger.pSync = (SyncObject *) fence;
@@ -93,8 +95,9 @@ void
 present_fence_destroy(struct present_fence *present_fence)
 {
     if (present_fence) {
-        if (present_fence->fence)
-            SyncDeleteTriggerFromSyncObject(&present_fence->trigger);
+      if (present_fence->fence) {
+        SyncDeleteTriggerFromSyncObject(&present_fence->trigger);
+      }
         free(present_fence);
     }
 }
@@ -102,18 +105,22 @@ present_fence_destroy(struct present_fence *present_fence)
 void
 present_fence_set_triggered(struct present_fence *present_fence)
 {
-    if (present_fence)
-        if (present_fence->fence)
-            (*present_fence->fence->funcs.SetTriggered) (present_fence->fence);
+  if (present_fence) {
+    if (present_fence->fence) {
+      (*present_fence->fence->funcs.SetTriggered)(present_fence->fence);
+    }
+  }
 }
 
 Bool
 present_fence_check_triggered(struct present_fence *present_fence)
 {
-    if (!present_fence)
-        return TRUE;
-    if (!present_fence->fence)
-        return TRUE;
+  if (!present_fence) {
+    return TRUE;
+  }
+  if (!present_fence->fence) {
+    return TRUE;
+  }
     return (*present_fence->fence->funcs.CheckTriggered)(present_fence->fence);
 }
 
@@ -129,9 +136,11 @@ present_fence_set_callback(struct present_fence *present_fence,
 XID
 present_fence_id(struct present_fence *present_fence)
 {
-    if (!present_fence)
-        return None;
-    if (!present_fence->fence)
-        return None;
+  if (!present_fence) {
+    return None;
+  }
+  if (!present_fence->fence) {
+    return None;
+  }
     return present_fence->fence->sync.id;
 }

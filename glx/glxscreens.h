@@ -38,13 +38,13 @@
 
 struct __GLXconfig {
     /* Management */
-    __GLXconfig *next;
+    struct __GLXconfig *next;
     GLboolean duplicatedForComp;
-    GLuint doubleBufferMode;
-    GLuint stereoMode;
+    uint doubleBufferMode;
+    uint stereoMode;
 
     GLint redBits, greenBits, blueBits, alphaBits;      /* bits per comp */
-    GLuint redMask, greenMask, blueMask, alphaMask;
+    uint redMask, greenMask, blueMask, alphaMask;
     GLint rgbBits;              /* total bits for rgb */
     GLint indexBits;            /* total bits for colorindex */
 
@@ -112,40 +112,37 @@ GLint glxConvertToXVisualType(int visualType);
 ** interface for context management on a screen.
 */
 struct __GLXscreen {
-    void (*destroy) (__GLXscreen * screen);
+  void (*destroy)(struct __GLXscreen *screen);
 
-    __GLXcontext *(*createContext) (__GLXscreen * screen,
-                                    __GLXconfig * modes,
-                                    __GLXcontext * shareContext,
-                                    unsigned num_attribs,
-                                    const uint32_t *attribs,
-                                    int *error);
+  __GLXcontext *(*createContext)(struct __GLXscreen *screen,
+                                 struct __GLXconfig *modes,
+                                 __GLXcontext *shareContext,
+                                 unsigned num_attribs, const uint32_t *attribs,
+                                 int *error);
 
-    __GLXdrawable *(*createDrawable) (ClientPtr client,
-                                      __GLXscreen * context,
-                                      DrawablePtr pDraw,
-                                      XID drawId,
-                                      int type,
-                                      XID glxDrawId, __GLXconfig * modes);
-    int (*swapInterval) (__GLXdrawable * drawable, int interval);
+  __GLXdrawable *(*createDrawable)(ClientPtr client,
+                                   struct __GLXscreen *context,
+                                   DrawablePtr pDraw, XID drawId, int type,
+                                   XID glxDrawId, struct __GLXconfig *modes);
+  int (*swapInterval)(__GLXdrawable *drawable, int interval);
 
-    ScreenPtr pScreen;
+  ScreenPtr pScreen;
 
-    /* Linked list of valid fbconfigs for this screen. */
-    __GLXconfig *fbconfigs;
-    int numFBConfigs;
+  /* Linked list of valid fbconfigs for this screen. */
+  struct __GLXconfig *fbconfigs;
+  int numFBConfigs;
 
-    /* Subset of fbconfigs that are exposed as GLX visuals. */
-    __GLXconfig **visuals;
-    GLint numVisuals;
+  /* Subset of fbconfigs that are exposed as GLX visuals. */
+  struct __GLXconfig **visuals;
+  GLint numVisuals;
 
-    char *GLextensions;
-    char *GLXextensions;
-    char *glvnd;
-    unsigned char glx_enable_bits[__GLX_EXT_BYTES];
+  char *GLextensions;
+  char *GLXextensions;
+  char *glvnd;
+  unsigned char glx_enable_bits[__GLX_EXT_BYTES];
 };
 
-void __glXScreenInit(__GLXscreen * screen, ScreenPtr pScreen);
-void __glXScreenDestroy(__GLXscreen * screen);
+void __glXScreenInit(struct __GLXscreen *screen, ScreenPtr pScreen);
+void __glXScreenDestroy(struct __GLXscreen *screen);
 
 #endif                          /* !__GLX_screens_h__ */

@@ -54,8 +54,9 @@ fbOverlayCreateWindow(WindowPtr pWin)
     int i;
     PixmapPtr pPixmap;
 
-    if (pWin->drawable.class != InputOutput)
-        return TRUE;
+    if (pWin->drawable.class != InputOutput) {
+      return TRUE;
+    }
 
     for (i = 0; i < pScrPriv->nlayers; i++) {
         pPixmap = pScrPriv->layer[i].u.run.pixmap;
@@ -99,10 +100,12 @@ fbOverlayWindowLayer(WindowPtr pWin)
     FbOverlayScrPrivPtr pScrPriv = fbOverlayGetScrPriv(pWin->drawable.pScreen);
     int i;
 
-    for (i = 0; i < pScrPriv->nlayers; i++)
-        if (dixLookupPrivate(&pWin->devPrivates, fbGetWinPrivateKey(pWin)) ==
-            (void *) pScrPriv->layer[i].u.run.pixmap)
-            return i;
+    for (i = 0; i < pScrPriv->nlayers; i++) {
+      if (dixLookupPrivate(&pWin->devPrivates, fbGetWinPrivateKey(pWin)) ==
+          (void *)pScrPriv->layer[i].u.run.pixmap) {
+        return i;
+      }
+    }
     return 0;
 }
 
@@ -117,8 +120,9 @@ fbOverlayCreateScreenResources(ScreenPtr pScreen)
     int depth;
     BoxRec box;
 
-    if (!miCreateScreenResources(pScreen))
-        return FALSE;
+    if (!miCreateScreenResources(pScreen)) {
+      return FALSE;
+    }
 
     box.x1 = 0;
     box.y1 = 0;
@@ -129,14 +133,14 @@ fbOverlayCreateScreenResources(ScreenPtr pScreen)
         width = pScrPriv->layer[i].u.init.width;
         depth = pScrPriv->layer[i].u.init.depth;
         pPixmap = (*pScreen->CreatePixmap) (pScreen, 0, 0, depth, 0);
-        if (!pPixmap)
-            return FALSE;
-        if (!(*pScreen->ModifyPixmapHeader) (pPixmap, pScreen->width,
-                                             pScreen->height, depth,
-                                             BitsPerPixel(depth),
-                                             PixmapBytePad(width, depth),
-                                             pbits))
-            return FALSE;
+        if (!pPixmap) {
+          return FALSE;
+        }
+        if (!(*pScreen->ModifyPixmapHeader)(
+                pPixmap, pScreen->width, pScreen->height, depth,
+                BitsPerPixel(depth), PixmapBytePad(width, depth), pbits)) {
+          return FALSE;
+        }
         pScrPriv->layer[i].u.run.pixmap = pPixmap;
         RegionInit(&pScrPriv->layer[i].u.run.region, &box, 0);
     }
@@ -162,8 +166,9 @@ fbOverlayUpdateLayerRegion(ScreenPtr pScreen, int layer, RegionPtr prgn)
     int i;
     RegionRec rgnNew;
 
-    if (!prgn || !RegionNotEmpty(prgn))
-        return;
+    if (!prgn || !RegionNotEmpty(prgn)) {
+      return;
+    }
     for (i = 0; i < pScrPriv->nlayers; i++) {
         if (i == layer) {
             /* add new piece to this fb */
@@ -229,8 +234,9 @@ fbOverlayCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
      * Update regions
      */
     for (i = 0; i < pScrPriv->nlayers; i++) {
-        if (RegionNotEmpty(&layerRgn[i]))
-            fbOverlayUpdateLayerRegion(pScreen, i, &layerRgn[i]);
+      if (RegionNotEmpty(&layerRgn[i])) {
+        fbOverlayUpdateLayerRegion(pScreen, i, &layerRgn[i]);
+      }
 
         RegionUninit(&layerRgn[i]);
     }
@@ -263,16 +269,19 @@ fbOverlayFinishScreenInit(ScreenPtr pScreen,
     int ndepths;
     VisualID defaultVisual;
 
-    if (!dixRegisterPrivateKey
-        (&fbOverlayScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&fbOverlayScreenPrivateKeyRec, PRIVATE_SCREEN,
+                               0)) {
+      return FALSE;
+    }
 
-    if (bpp1 == 24 || bpp2 == 24)
-        return FALSE;
+    if (bpp1 == 24 || bpp2 == 24) {
+      return FALSE;
+    }
 
     FbOverlayScrPrivPtr pScrPriv = calloc(1, sizeof(FbOverlayScrPrivRec));
-    if (!pScrPriv)
-        return FALSE;
+    if (!pScrPriv) {
+      return FALSE;
+    }
 
     if (!fbInitVisuals(&visuals, &depths, &nvisuals, &ndepths, &depth1,
                        &defaultVisual, ((unsigned long) 1 << (bpp1 - 1)) |

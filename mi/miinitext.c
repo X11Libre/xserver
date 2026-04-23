@@ -228,8 +228,9 @@ EnableDisableExtensionError(const char *name, Bool enable)
     if (found == FALSE) {
         ErrorF("[mi] Extension \"%s\" is not recognized\n", name);
         /* Disabling a non-existing extension is a no-op anyway */
-        if (enable == FALSE)
-            return;
+        if (enable == FALSE) {
+          return;
+        }
     }
     ListStaticExtensions();
 }
@@ -242,8 +243,9 @@ AddStaticExtensions(void)
 {
     static Bool listInitialised = FALSE;
 
-    if (listInitialised)
-        return;
+    if (listInitialised) {
+      return;
+    }
     listInitialised = TRUE;
 
     /* Add built-in extensions to the list. */
@@ -277,8 +279,9 @@ NewExtensionModuleList(int size)
     int n;
 
     /* Sanity check */
-    if (!ExtensionModuleList)
-        numExtensionModules = 0;
+    if (!ExtensionModuleList) {
+      numExtensionModules = 0;
+    }
 
     n = numExtensionModules + size;
     ExtensionModuleList = reallocarray(ExtensionModuleList, n,
@@ -303,8 +306,9 @@ LoadExtensionList(const ExtensionModule ext[], int size, Bool builtin)
      * in modules. */
     AddStaticExtensions();
 
-    if (!(newext = NewExtensionModuleList(size)))
-        return;
+    if (!(newext = NewExtensionModuleList(size))) {
+      return;
+    }
 
     for (i = 0; i < size; i++, newext++) {
         newext->name = ext[i].name;

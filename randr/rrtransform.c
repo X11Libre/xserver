@@ -38,22 +38,30 @@ RRTransformInit(RRTransformPtr transform)
 Bool
 RRTransformEqual(RRTransformPtr a, RRTransformPtr b)
 {
-    if (a && pixman_transform_is_identity(&a->transform))
-        a = NULL;
-    if (b && pixman_transform_is_identity(&b->transform))
-        b = NULL;
-    if (a == NULL && b == NULL)
-        return TRUE;
-    if (a == NULL || b == NULL)
-        return FALSE;
-    if (memcmp(&a->transform, &b->transform, sizeof(a->transform)) != 0)
-        return FALSE;
-    if (a->filter != b->filter)
-        return FALSE;
-    if (a->nparams != b->nparams)
-        return FALSE;
-    if (memcmp(a->params, b->params, a->nparams * sizeof(xFixed)) != 0)
-        return FALSE;
+  if (a && pixman_transform_is_identity(&a->transform)) {
+    a = NULL;
+  }
+  if (b && pixman_transform_is_identity(&b->transform)) {
+    b = NULL;
+  }
+  if (a == NULL && b == NULL) {
+    return TRUE;
+  }
+  if (a == NULL || b == NULL) {
+    return FALSE;
+  }
+  if (memcmp(&a->transform, &b->transform, sizeof(a->transform)) != 0) {
+    return FALSE;
+  }
+  if (a->filter != b->filter) {
+    return FALSE;
+  }
+  if (a->nparams != b->nparams) {
+    return FALSE;
+  }
+  if (memcmp(a->params, b->params, a->nparams * sizeof(xFixed)) != 0) {
+    return FALSE;
+  }
     return TRUE;
 }
 
@@ -66,12 +74,13 @@ RRTransformSetFilter(RRTransformPtr dst,
 
     if (nparams) {
         new_params = calloc(nparams, sizeof(xFixed));
-        if (!new_params)
-            return FALSE;
+        if (!new_params) {
+          return FALSE;
+        }
         memcpy(new_params, params, nparams * sizeof(xFixed));
+    } else {
+      new_params = NULL;
     }
-    else
-        new_params = NULL;
     free(dst->params);
     dst->filter = filter;
     dst->params = new_params;
@@ -84,21 +93,23 @@ RRTransformSetFilter(RRTransformPtr dst,
 Bool
 RRTransformCopy(RRTransformPtr dst, RRTransformPtr src)
 {
-    if (src && pixman_transform_is_identity(&src->transform))
-        src = NULL;
+  if (src && pixman_transform_is_identity(&src->transform)) {
+    src = NULL;
+  }
 
     if (src) {
-        if (!RRTransformSetFilter(dst, src->filter,
-                                  src->params, src->nparams, src->width,
-                                  src->height))
-            return FALSE;
+      if (!RRTransformSetFilter(dst, src->filter, src->params, src->nparams,
+                                src->width, src->height)) {
+        return FALSE;
+      }
         dst->transform = src->transform;
         dst->f_transform = src->f_transform;
         dst->f_inverse = src->f_inverse;
     }
     else {
-        if (!RRTransformSetFilter(dst, NULL, NULL, 0, 0, 0))
-            return FALSE;
+      if (!RRTransformSetFilter(dst, NULL, NULL, 0, 0, 0)) {
+        return FALSE;
+      }
         pixman_transform_init_identity(&dst->transform);
         pixman_f_transform_init_identity(&dst->f_transform);
         pixman_f_transform_init_identity(&dst->f_inverse);
@@ -114,14 +125,19 @@ RRTransformRescale(struct pixman_f_transform *f_transform, double limit)
     double max = 0, v, scale;
     int i, j;
 
-    for (j = 0; j < 3; j++)
-        for (i = 0; i < 3; i++)
-            if ((v = fabs(f_transform->m[j][i])) > max)
-                max = v;
+    for (j = 0; j < 3; j++) {
+      for (i = 0; i < 3; i++) {
+        if ((v = fabs(f_transform->m[j][i])) > max) {
+          max = v;
+        }
+      }
+    }
     scale = limit / max;
-    for (j = 0; j < 3; j++)
-        for (i = 0; i < 3; i++)
-            f_transform->m[j][i] *= scale;
+    for (j = 0; j < 3; j++) {
+      for (i = 0; i < 3; i++) {
+        f_transform->m[j][i] *= scale;
+      }
+    }
 }
 
 /*
@@ -146,12 +162,15 @@ RRTransformCompute(int x,
     struct pixman_f_transform tf_transform, tf_inverse;
     Bool overflow = FALSE;
 
-    if (!transform)
-        transform = &t_transform;
-    if (!f_transform)
-        f_transform = &tf_transform;
-    if (!f_inverse)
-        f_inverse = &tf_inverse;
+    if (!transform) {
+      transform = &t_transform;
+    }
+    if (!f_transform) {
+      f_transform = &tf_transform;
+    }
+    if (!f_inverse) {
+      f_inverse = &tf_inverse;
+    }
 
     pixman_transform_init_identity(transform);
     pixman_transform_init_identity(&inverse);
@@ -257,9 +276,10 @@ RRTransformCompute(int x,
 
 #ifdef RANDR_12_INTERFACE
     if (rr_transform) {
-        if (!pixman_transform_multiply
-            (transform, &rr_transform->transform, transform))
-            overflow = TRUE;
+      if (!pixman_transform_multiply(transform, &rr_transform->transform,
+                                     transform)) {
+        overflow = TRUE;
+      }
         pixman_f_transform_multiply(f_transform, &rr_transform->f_transform,
                                     f_transform);
         pixman_f_transform_multiply(f_inverse, f_inverse,
@@ -278,8 +298,9 @@ RRTransformCompute(int x,
     }
     else {
         pixman_f_transform_translate(f_transform, f_inverse, x, y);
-        if (!pixman_transform_translate(transform, &inverse, F(x), F(y)))
-            overflow = TRUE;
+        if (!pixman_transform_translate(transform, &inverse, F(x), F(y))) {
+          overflow = TRUE;
+        }
         if (overflow) {
             struct pixman_f_transform f_scaled;
 

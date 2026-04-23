@@ -162,8 +162,9 @@ reset_int_vect(xf86Int10InfoPtr pInt)
     };
     int i;
 
-    for (i = 0; i < sizeof(VideoParms); i++)
-        MEM_WB(pInt, i + (0x1000 - sizeof(VideoParms)), VideoParms[i]);
+    for (i = 0; i < sizeof(VideoParms); i++) {
+      MEM_WB(pInt, i + (0x1000 - sizeof(VideoParms)), VideoParms[i]);
+    }
     MEM_WW(pInt, 0x1d << 2, 0x1000 - sizeof(VideoParms));
     MEM_WW(pInt, (0x1d << 2) + 2, 0);
 
@@ -200,13 +201,16 @@ xf86HandleInt10Options(ScrnInfoPtr pScrn, int entityIndex)
         void *configOptions = NULL;
 
         /* Check if xf86CollectOptions() has already been called */
-        if (((pEnt->index < 0) ||
-             !pScrn || !(configOptions = pScrn->options)) && pEnt->device)
-            configOptions = pEnt->device->options;
+        if (((pEnt->index < 0) || !pScrn ||
+             !(configOptions = pScrn->options)) &&
+            pEnt->device) {
+          configOptions = pEnt->device->options;
+        }
 
         if (configOptions) {
-            if (!(options = (OptionInfoPtr) calloc(1, sizeof(INT10Options))))
-                return NULL;
+          if (!(options = (OptionInfoPtr)calloc(1, sizeof(INT10Options)))) {
+            return NULL;
+          }
 
             (void) memcpy(options, INT10Options, sizeof(INT10Options));
             xf86ProcessOptions(pScrn->scrnIndex, configOptions, options);
@@ -222,8 +226,9 @@ int10skip(const void *options)
 {
     Bool noint10 = FALSE;
 
-    if (!options)
-        return FALSE;
+    if (!options) {
+      return FALSE;
+    }
 
     xf86GetOptValBool(options, OPT_NOINT10, &noint10);
     return noint10;
@@ -234,20 +239,24 @@ int10_check_bios(int scrnIndex, int codeSeg, const unsigned char *vbiosMem)
 {
     int size;
 
-    if ((codeSeg & 0x1f) ||     /* Not 512-byte aligned otherwise */
-        ((codeSeg << 4) < V_BIOS) || ((codeSeg << 4) >= SYS_SIZE))
-        return FALSE;
+    if ((codeSeg & 0x1f) || /* Not 512-byte aligned otherwise */
+        ((codeSeg << 4) < V_BIOS) || ((codeSeg << 4) >= SYS_SIZE)) {
+      return FALSE;
+    }
 
-    if ((*vbiosMem != 0x55) || (*(vbiosMem + 1) != 0xAA) || !*(vbiosMem + 2))
-        return FALSE;
+    if ((*vbiosMem != 0x55) || (*(vbiosMem + 1) != 0xAA) || !*(vbiosMem + 2)) {
+      return FALSE;
+    }
 
     size = *(vbiosMem + 2) * 512;
 
-    if ((size + (codeSeg << 4)) > SYS_SIZE)
-        return FALSE;
+    if ((size + (codeSeg << 4)) > SYS_SIZE) {
+      return FALSE;
+    }
 
-    if (bios_checksum(vbiosMem, size))
-        xf86DrvMsg(scrnIndex, X_INFO, "Bad V_BIOS checksum\n");
+    if (bios_checksum(vbiosMem, size)) {
+      xf86DrvMsg(scrnIndex, X_INFO, "Bad V_BIOS checksum\n");
+    }
 
     return TRUE;
 }
@@ -257,8 +266,9 @@ initPrimary(const void *options)
 {
     Bool initPrimary = FALSE;
 
-    if (!options)
-        return FALSE;
+    if (!options) {
+      return FALSE;
+    }
 
     xf86GetOptValBool(options, OPT_INIT_PRIMARY, &initPrimary);
     return initPrimary;

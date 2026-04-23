@@ -74,8 +74,9 @@ extern _X_EXPORT void _CallCallbacks(CallbackListPtr *pcbl,
 static inline void
 CallCallbacks(CallbackListPtr *pcbl, void *call_data)
 {
-    if (!pcbl || !*pcbl)
-        return;
+  if (!pcbl || !*pcbl) {
+    return;
+  }
     _CallCallbacks(pcbl, call_data);
 }
 

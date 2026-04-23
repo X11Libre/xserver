@@ -71,12 +71,14 @@ winScaleXImageToWindowsIcon(int iconSize,
     unsigned int color;
 
     effXBPP = pixmap->bpp;
-    if (pixmap->bpp == 15)
-        effXBPP = 16;
+    if (pixmap->bpp == 15) {
+      effXBPP = 16;
+    }
 
     effXDepth = pixmap->depth;
-    if (pixmap->depth == 15)
-        effXDepth = 16;
+    if (pixmap->depth == 15) {
+      effXDepth = 16;
+    }
 
     xStride = pixmap->stride;
     if (stride == 0 || xStride == 0) {
@@ -91,10 +93,11 @@ winScaleXImageToWindowsIcon(int iconSize,
     /* Keep aspect ratio */
     factX = ((float) pixmap->width) / ((float) iconSize);
     factY = ((float) pixmap->height) / ((float) iconSize);
-    if (factX > factY)
-        factY = factX;
-    else
-        factX = factY;
+    if (factX > factY) {
+      factY = factX;
+    } else {
+      factX = factY;
+    }
 
     /* Out-of-bounds, fill icon with zero */
     zero = 0;
@@ -110,50 +113,53 @@ winScaleXImageToWindowsIcon(int iconSize,
                 ptr += posX / 8;
 
                 /* Out of X icon bounds, leave space blank */
-                if (posX >= pixmap->width || posY >= pixmap->height)
-                    ptr = (unsigned char *) &zero;
+                if (posX >= pixmap->width || posY >= pixmap->height) {
+                  ptr = (unsigned char *)&zero;
+                }
 
-                if ((*ptr) & (1 << (posX & 7)))
-                    switch (effBPP) {
-                    case 32:
-                        *(outPtr++) = 0;
-                    case 24:
-                        *(outPtr++) = 0;
-                    case 16:
-                        *(outPtr++) = 0;
-                    case 8:
-                        *(outPtr++) = 0;
-                        break;
-                    case 1:
-                        outPtr[column / 8] &= ~(1 << (7 - (column & 7)));
-                        break;
-                    }
-                else
-                    switch (effBPP) {
-                    case 32:
-                        *(outPtr++) = 255;
-                        *(outPtr++) = 255;
-                        *(outPtr++) = 255;
-                        *(outPtr++) = 0;
-                        break;
-                    case 24:
-                        *(outPtr++) = 255;
-                    case 16:
-                        *(outPtr++) = 255;
-                    case 8:
-                        *(outPtr++) = 255;
-                        break;
-                    case 1:
-                        outPtr[column / 8] |= (1 << (7 - (column & 7)));
-                        break;
-                    }
+                if ((*ptr) & (1 << (posX & 7))) {
+                  switch (effBPP) {
+                  case 32:
+                    *(outPtr++) = 0;
+                  case 24:
+                    *(outPtr++) = 0;
+                  case 16:
+                    *(outPtr++) = 0;
+                  case 8:
+                    *(outPtr++) = 0;
+                    break;
+                  case 1:
+                    outPtr[column / 8] &= ~(1 << (7 - (column & 7)));
+                    break;
+                  }
+                } else {
+                  switch (effBPP) {
+                  case 32:
+                    *(outPtr++) = 255;
+                    *(outPtr++) = 255;
+                    *(outPtr++) = 255;
+                    *(outPtr++) = 0;
+                    break;
+                  case 24:
+                    *(outPtr++) = 255;
+                  case 16:
+                    *(outPtr++) = 255;
+                  case 8:
+                    *(outPtr++) = 255;
+                    break;
+                  case 1:
+                    outPtr[column / 8] |= (1 << (7 - (column & 7)));
+                    break;
+                  }
+                }
             }
             else if (effXDepth == 24 || effXDepth == 32) {
                 ptr += posX * (effXBPP / 8);
 
                 /* Out of X icon bounds, leave space blank */
-                if (posX >= pixmap->width || posY >= pixmap->height)
-                    ptr = (unsigned char *) &zero;
+                if (posX >= pixmap->width || posY >= pixmap->height) {
+                  ptr = (unsigned char *)&zero;
+                }
                 color = (((*ptr) << 16)
                          + ((*(ptr + 1)) << 8)
                          + ((*(ptr + 2)) << 0));
@@ -182,18 +188,20 @@ winScaleXImageToWindowsIcon(int iconSize,
                     *(outPtr++) = color;
                     break;
                 case 1:
-                    if (color)
-                        outPtr[column / 8] |= (1 << (7 - (column & 7)));
-                    else
-                        outPtr[column / 8] &= ~(1 << (7 - (column & 7)));
+                  if (color) {
+                    outPtr[column / 8] |= (1 << (7 - (column & 7)));
+                  } else {
+                    outPtr[column / 8] &= ~(1 << (7 - (column & 7)));
+                  }
                 }
             }
             else if (effXDepth == 16) {
                 ptr += posX * (effXBPP / 8);
 
                 /* Out of X icon bounds, leave space blank */
-                if (posX >= pixmap->width || posY >= pixmap->height)
-                    ptr = (unsigned char *) &zero;
+                if (posX >= pixmap->width || posY >= pixmap->height) {
+                  ptr = (unsigned char *)&zero;
+                }
                 color = ((*ptr) << 8) + (*(ptr + 1));
                 switch (effBPP) {
                 case 32:
@@ -217,10 +225,11 @@ winScaleXImageToWindowsIcon(int iconSize,
                                     + ((color >> 10) & 31)) / 3) << 2;
                     break;
                 case 1:
-                    if (color)
-                        outPtr[column / 8] |= (1 << (7 - (column & 7)));
-                    else
-                        outPtr[column / 8] &= ~(1 << (7 - (column & 7)));
+                  if (color) {
+                    outPtr[column / 8] |= (1 << (7 - (column & 7)));
+                  } else {
+                    outPtr[column / 8] &= ~(1 << (7 - (column & 7)));
+                  }
                     break;
                 }               /* end switch(effbpp) */
             }                   /* end if effxbpp==16) */
@@ -259,8 +268,9 @@ NetWMToWinIconAlpha(uint32_t * icon)
                                    0);
     ReleaseDC(NULL, hdc);
 
-    if (!ii.hbmColor)
+    if (!ii.hbmColor) {
       return NULL;
+    }
 
     ii.hbmMask = CreateBitmap(width, height, 1, 1, NULL);
     memcpy(DIB_pixels, pixels, height * width * 4);
@@ -356,10 +366,11 @@ NetWMToWinIcon(int bpp, uint32_t * icon)
                hasIconAlphaChannel ? "yes" : "no");
     }
 
-    if (hasIconAlphaChannel && (bpp == 32))
-        return NetWMToWinIconAlpha(icon);
-    else
-        return NetWMToWinIconThreshold(icon);
+    if (hasIconAlphaChannel && (bpp == 32)) {
+      return NetWMToWinIconAlpha(icon);
+    } else {
+      return NetWMToWinIconThreshold(icon);
+    }
 }
 
 /*
@@ -487,19 +498,21 @@ winXIconToHICON(xcb_connection_t *conn, xcb_window_t id, int iconSize)
                   winDebug("winXIconToHICON: id 0x%x icon Ximage 0x%p\n",
                            (unsigned int)id, xImageIcon);
 
-                  if (hints.icon_mask)
-                    xImageMask = xcb_image_get(conn, hints.icon_mask,
-                                               0, 0, width, height,
-                                               0xFFFFFFFF, XCB_IMAGE_FORMAT_Z_PIXMAP);
+                  if (hints.icon_mask) {
+                    xImageMask = xcb_image_get(conn, hints.icon_mask, 0, 0,
+                                               width, height, 0xFFFFFFFF,
+                                               XCB_IMAGE_FORMAT_Z_PIXMAP);
+                  }
 
                   if (xImageIcon) {
                     int effBPP, stride, maskStride;
 
                     /* 15 BPP is really 16BPP as far as we care */
-                    if (bpp == 15)
-                        effBPP = 16;
-                    else
-                        effBPP = bpp;
+                    if (bpp == 15) {
+                      effBPP = 16;
+                    } else {
+                      effBPP = bpp;
+                    }
 
                     /* Need 16-bit aligned rows for DDBitmaps */
                     stride = ((iconSize * effBPP + 15) & (~15)) / 8;
@@ -530,11 +543,13 @@ winXIconToHICON(xcb_connection_t *conn, xcb_window_t id, int iconSize)
                     dst = image;
                     src = imageMask;
 
-                    for (i = 0; i < (stride * iconSize); i++)
-                        if ((*(src++)))
-                            *(dst++) = 0;
-                        else
-                            dst++;
+                    for (i = 0; i < (stride * iconSize); i++) {
+                      if ((*(src++))) {
+                        *(dst++) = 0;
+                      } else {
+                        dst++;
+                      }
+                    }
 
                     ii.fIcon = TRUE;
                     ii.xHotspot = 0;    /* ignored */
@@ -560,8 +575,9 @@ winXIconToHICON(xcb_connection_t *conn, xcb_window_t id, int iconSize)
                     free(image);
                     free(imageMask);
 
-                    if (xImageMask)
+                    if (xImageMask) {
                       xcb_image_destroy(xImageMask);
+                    }
 
                     xcb_image_destroy(xImageIcon);
                   }
@@ -660,8 +676,8 @@ void
 winDestroyIcon(HICON hIcon)
 {
     /* Delete the icon if its not one of the application defaults or an override */
-    if (hIcon &&
-        hIcon != g_hIconX &&
-        hIcon != g_hSmallIconX && !winIconIsOverride(hIcon))
-        DestroyIcon(hIcon);
+    if (hIcon && hIcon != g_hIconX && hIcon != g_hSmallIconX &&
+        !winIconIsOverride(hIcon)) {
+      DestroyIcon(hIcon);
+    }
 }

@@ -72,8 +72,9 @@ override_GrabButton(ClientPtr client, DeviceIntPtr dev,
                   GrabMask *mask)
 {
     /* Fail every odd modifier */
-    if (param->modifiers % 2)
-        return BadAccess;
+    if (param->modifiers % 2) {
+      return BadAccess;
+    }
 
     return Success;
 }
@@ -98,8 +99,9 @@ reply_XIPassiveGrabDevice(ClientPtr client, int len, void *data)
 
     /* ProcXIPassiveGrabDevice sends the data in two batches, let the second
      * handler handle the modifier data */
-    if (reply.num_modifiers > 0)
-        wrapped_WriteToClient = reply_XIPassiveGrabDevice_data;
+    if (reply.num_modifiers > 0) {
+      wrapped_WriteToClient = reply_XIPassiveGrabDevice_data;
+    }
 }
 
 static void
@@ -112,8 +114,9 @@ reply_XIPassiveGrabDevice_data(ClientPtr client, int len, void *data)
     assert(len < 0xffff); /* suspicious size, swapping bug */
 
     for (i = 0; i < testdata.num_modifiers; i++, mods++) {
-        if (client->swapped)
-            swapl(&mods->modifiers);
+      if (client->swapped) {
+        swapl(&mods->modifiers);
+      }
 
         /* 1 - 7 is the range we use for the global modifiers array
          * above */
@@ -141,8 +144,9 @@ request_XIPassiveGrabDevice(ClientPtr client, xXIPassiveGrabDeviceReq * req,
     rc = ProcXIPassiveGrabDevice(&client_request);
     assert(rc == error);
 
-    if (rc != Success)
-        assert(client_request.errorValue == errval);
+    if (rc != Success) {
+      assert(client_request.errorValue == errval);
+    }
 
     client_request.swapped = TRUE;
 
@@ -175,8 +179,9 @@ request_XIPassiveGrabDevice(ClientPtr client, xXIPassiveGrabDeviceReq * req,
     rc = ProcXIPassiveGrabDevice(&client_request);
     assert(rc == error);
 
-    if (rc != Success)
-        assert(client_request.errorValue == errval);
+    if (rc != Success) {
+      assert(client_request.errorValue == errval);
+    }
 }
 
 static unsigned char *data[4096];       /* the request buffer */

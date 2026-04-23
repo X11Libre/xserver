@@ -116,8 +116,9 @@ LoadAuthorization(void)
     int count = 0;
 
     ShouldLoadAuth = FALSE;
-    if (!authorization_file)
-        return 0;
+    if (!authorization_file) {
+      return 0;
+    }
 
     errno = 0;
     f = Fopen(authorization_file, "r");
@@ -134,8 +135,9 @@ LoadAuthorization(void)
             if (strlen(protocols[i].name) == auth->name_length &&
                 memcmp(protocols[i].name, auth->name,
                        (int) auth->name_length) == 0 && protocols[i].Add) {
-                if (protocols[i].Add(auth->data_length, auth->data))
-                    count++;
+              if (protocols[i].Add(auth->data_length, auth->data)) {
+                count++;
+              }
             }
         }
         XauDisposeAuth(auth);
@@ -155,8 +157,9 @@ RegisterAuthorizations(void)
 {
     int i;
 
-    for (i = 0; i < NUM_AUTHORIZATION; i++)
-        XdmcpRegisterAuthorization(protocols[i].name);
+    for (i = 0; i < NUM_AUTHORIZATION; i++) {
+      XdmcpRegisterAuthorization(protocols[i].name);
+    }
 }
 #endif
 
@@ -201,9 +204,9 @@ CheckAuthorization(unsigned int name_length,
         if (loadauth > 0) {
             DisableLocalAccess(); /* got at least one */
             loaded = TRUE;
+        } else if (loadauth == 0 || !loaded) {
+          EnableLocalAccess();
         }
-        else if (loadauth == 0 || !loaded)
-            EnableLocalAccess();
     }
     if (name_length) {
         for (i = 0; i < NUM_AUTHORIZATION; i++) {
@@ -214,9 +217,10 @@ CheckAuthorization(unsigned int name_length,
             }
             *reason = "Authorization protocol not supported by server\n";
         }
+    } else {
+      *reason =
+          "Authorization required, but no authorization protocol specified\n";
     }
-    else
-        *reason = "Authorization required, but no authorization protocol specified\n";
     return (XID) ~0L;
 }
 
@@ -225,9 +229,11 @@ ResetAuthorization(void)
 {
     int i;
 
-    for (i = 0; i < NUM_AUTHORIZATION; i++)
-        if (protocols[i].Reset)
-            (*protocols[i].Reset) ();
+    for (i = 0; i < NUM_AUTHORIZATION; i++) {
+      if (protocols[i].Reset) {
+        (*protocols[i].Reset)();
+      }
+    }
     ShouldLoadAuth = TRUE;
 }
 

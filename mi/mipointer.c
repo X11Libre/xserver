@@ -129,15 +129,18 @@ miPointerInitialize(ScreenPtr pScreen,
 {
     miPointerScreenPtr pScreenPriv;
 
-    if (!dixRegisterPrivateKey(&miPointerScreenKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&miPointerScreenKeyRec, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
 
-    if (!dixRegisterPrivateKey(&miPointerPrivKeyRec, PRIVATE_DEVICE, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&miPointerPrivKeyRec, PRIVATE_DEVICE, 0)) {
+      return FALSE;
+    }
 
     pScreenPriv = calloc(1, sizeof(miPointerScreenRec));
-    if (!pScreenPriv)
-        return FALSE;
+    if (!pScreenPriv) {
+      return FALSE;
+    }
     pScreenPriv->spriteFuncs = spriteFuncs;
     pScreenPriv->screenFuncs = screenFuncs;
     pScreenPriv->waitForUpdate = waitForUpdate;
@@ -203,12 +206,14 @@ miPointerDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     miPointerPtr pPointer;
 
     /* return for keyboards */
-    if (!IsPointerDevice(pDev))
-        return FALSE;
+    if (!IsPointerDevice(pDev)) {
+      return FALSE;
+    }
 
     pPointer = MIPOINTER(pDev);
-    if (!pPointer)
-        return FALSE;
+    if (!pPointer) {
+      return FALSE;
+    }
 
     pPointer->pCursor = pCursor;
     pPointer->pScreen = pScreen;
@@ -231,8 +236,9 @@ miPointerConstrainCursor(DeviceIntPtr pDev, ScreenPtr pScreen, BoxPtr pBox)
     miPointerPtr pPointer;
 
     pPointer = MIPOINTER(pDev);
-    if (!pPointer)
-        return;
+    if (!pPointer) {
+      return;
+    }
 
     pPointer->limits = *pBox;
     pPointer->confined = PointerConfinedToScreen(pDev);
@@ -284,18 +290,21 @@ miPointerSetCursorPosition(DeviceIntPtr pDev, ScreenPtr pScreen,
     SetupScreen(pScreen);
     miPointerPtr pPointer = MIPOINTER(pDev);
 
-    if (!pPointer)
-        return TRUE;
+    if (!pPointer) {
+      return TRUE;
+    }
 
     pPointer->generateEvent = generateEvent;
 
-    if (pScreen->ConstrainCursorHarder)
-        pScreen->ConstrainCursorHarder(pDev, pScreen, Absolute, &x, &y);
+    if (pScreen->ConstrainCursorHarder) {
+      pScreen->ConstrainCursorHarder(pDev, pScreen, Absolute, &x, &y);
+    }
 
     /* device dependent - must pend signal and call miPointerWarpCursor */
     (*pScreenPriv->screenFuncs->WarpCursor) (pDev, pScreen, x, y);
-    if (!generateEvent)
-        miPointerUpdateSprite(pDev);
+    if (!generateEvent) {
+      miPointerUpdateSprite(pDev);
+    }
     return TRUE;
 }
 
@@ -309,8 +318,9 @@ miRecolorCursor(DeviceIntPtr pDev, ScreenPtr pScr,
      */
     pScr->UnrealizeCursor(pDev, pScr, pCurs);
     pScr->RealizeCursor(pDev, pScr, pCurs);
-    if (displayed)
-        pScr->DisplayCursor(pDev, pScr, pCurs);
+    if (displayed) {
+      pScr->DisplayCursor(pDev, pScr, pCurs);
+    }
 }
 
 /**
@@ -327,8 +337,9 @@ miPointerDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
     SetupScreen(pScreen);
 
     miPointerPtr pPointer = calloc(1, sizeof(miPointerRec));
-    if (!pPointer)
-        return FALSE;
+    if (!pPointer) {
+      return FALSE;
+    }
 
     pPointer->pScreen = NULL;
     pPointer->pSpriteScreen = NULL;
@@ -364,8 +375,9 @@ miPointerDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
 {
     SetupScreen(pScreen);
 
-    if (!InputDevIsMaster(pDev) && !InputDevIsFloating(pDev))
-        return;
+    if (!InputDevIsMaster(pDev) && !InputDevIsFloating(pDev)) {
+      return;
+    }
 
     (*pScreenPriv->spriteFuncs->DeviceCursorCleanup) (pDev, pScreen);
     free(dixLookupPrivate(&pDev->devPrivates, miPointerPrivKey));
@@ -391,18 +403,20 @@ miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
     BOOL changedScreen = FALSE;
 
     pPointer = MIPOINTER(pDev);
-    if (!pPointer)
-        return;
+    if (!pPointer) {
+      return;
+    }
 
     if (pPointer->pScreen != pScreen) {
         mieqSwitchScreen(pDev, pScreen, TRUE);
         changedScreen = TRUE;
     }
 
-    if (pPointer->generateEvent)
-        miPointerMove(pDev, pScreen, x, y);
-    else
-        miPointerMoveNoEvent(pDev, pScreen, x, y);
+    if (pPointer->generateEvent) {
+      miPointerMove(pDev, pScreen, x, y);
+    } else {
+      miPointerMoveNoEvent(pDev, pScreen, x, y);
+    }
 
     /* Don't call USFS if we use Xinerama, otherwise the root window is
      * updated to the second screen, and we never receive any events.
@@ -422,8 +436,9 @@ miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
              * too niche to fix.
              */
             LeaveWindow(pDev);
-            if (master)
-                LeaveWindow(master);
+            if (master) {
+              LeaveWindow(master);
+            }
             UpdateSpriteForScreen(pDev, pScreen);
     }
 }
@@ -442,17 +457,20 @@ miPointerUpdateSprite(DeviceIntPtr pDev)
     int x, y, devx, devy;
     miPointerPtr pPointer;
 
-    if (!pDev || !pDev->coreEvents)
-        return;
+    if (!pDev || !pDev->coreEvents) {
+      return;
+    }
 
     pPointer = MIPOINTER(pDev);
 
-    if (!pPointer)
-        return;
+    if (!pPointer) {
+      return;
+    }
 
     pScreen = pPointer->pScreen;
-    if (!pScreen)
-        return;
+    if (!pScreen) {
+      return;
+    }
 
     x = pPointer->x;
     y = pPointer->y;
@@ -490,8 +508,9 @@ miPointerUpdateSprite(DeviceIntPtr pDev)
     else if (pPointer->pCursor != pPointer->pSpriteCursor) {
         pCursor = pPointer->pCursor;
         if (!pCursor ||
-            (pCursor->bits->emptyMask && !pScreenPriv->showTransparent))
-            pCursor = NullCursor;
+            (pCursor->bits->emptyMask && !pScreenPriv->showTransparent)) {
+          pCursor = NullCursor;
+        }
         (*pScreenPriv->spriteFuncs->SetCursor) (pDev, pScreen, pCursor, x, y);
 
         pPointer->devx = x;
@@ -501,8 +520,9 @@ miPointerUpdateSprite(DeviceIntPtr pDev)
     else if (x != devx || y != devy) {
         pPointer->devx = x;
         pPointer->devy = y;
-        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask)
-            (*pScreenPriv->spriteFuncs->MoveCursor) (pDev, pScreen, x, y);
+        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask) {
+          (*pScreenPriv->spriteFuncs->MoveCursor)(pDev, pScreen, x, y);
+        }
     }
 }
 
@@ -518,8 +538,9 @@ miPointerInvalidateSprite(DeviceIntPtr pDev)
     miPointerPtr pPointer;
 
     pPointer = MIPOINTER(pDev);
-    if (!pPointer)
-        return;
+    if (!pPointer) {
+      return;
+    }
 
     pPointer->pSpriteCursor = (CursorPtr) 1;
 }
@@ -539,8 +560,9 @@ miPointerSetScreen(DeviceIntPtr pDev, int screen_no, int x, int y)
     miPointerPtr pPointer;
 
     pPointer = MIPOINTER(pDev);
-    if (!pPointer)
-        return;
+    if (!pPointer) {
+      return;
+    }
 
     pScreen = screenInfo.screens[screen_no];
     mieqSwitchScreen(pDev, pScreen, FALSE);
@@ -585,8 +607,9 @@ miPointerMoveNoEvent(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
     SetupScreen(pScreen);
 
     pPointer = MIPOINTER(pDev);
-    if (!pPointer)
-        return;
+    if (!pPointer) {
+      return;
+    }
 
     /* Hack: We mustn't call into ->MoveCursor for anything but the
      * VCP, as this may cause a non-HW rendered cursor to be rendered while
@@ -597,8 +620,9 @@ miPointerMoveNoEvent(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
         &&!pScreenPriv->waitForUpdate && pScreen == pPointer->pSpriteScreen) {
         pPointer->devx = x;
         pPointer->devy = y;
-        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask)
-            (*pScreenPriv->spriteFuncs->MoveCursor) (pDev, pScreen, x, y);
+        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask) {
+          (*pScreenPriv->spriteFuncs->MoveCursor)(pDev, pScreen, x, y);
+        }
     }
 
     pPointer->x = x;
@@ -687,20 +711,26 @@ miPointerSetPosition(DeviceIntPtr pDev, int mode, double *screenx,
         }
     }
     /* Constrain the sprite to the current limits. */
-    if (x < pPointer->limits.x1)
-        x = pPointer->limits.x1;
-    if (x >= pPointer->limits.x2)
-        x = pPointer->limits.x2 - 1;
-    if (y < pPointer->limits.y1)
-        y = pPointer->limits.y1;
-    if (y >= pPointer->limits.y2)
-        y = pPointer->limits.y2 - 1;
+    if (x < pPointer->limits.x1) {
+      x = pPointer->limits.x1;
+    }
+    if (x >= pPointer->limits.x2) {
+      x = pPointer->limits.x2 - 1;
+    }
+    if (y < pPointer->limits.y1) {
+      y = pPointer->limits.y1;
+    }
+    if (y >= pPointer->limits.y2) {
+      y = pPointer->limits.y2 - 1;
+    }
 
-    if (pScreen->ConstrainCursorHarder)
-        pScreen->ConstrainCursorHarder(pDev, pScreen, mode, &x, &y);
+    if (pScreen->ConstrainCursorHarder) {
+      pScreen->ConstrainCursorHarder(pDev, pScreen, mode, &x, &y);
+    }
 
-    if (pPointer->x != x || pPointer->y != y || pPointer->pScreen != pScreen)
-        miPointerMoveNoEvent(pDev, pScreen, x, y);
+    if (pPointer->x != x || pPointer->y != y || pPointer->pScreen != pScreen) {
+      miPointerMoveNoEvent(pDev, pScreen, x, y);
+    }
 
     /* check if we generated any barrier events and if so, update root x/y
      * to the fully constrained coords */
@@ -722,10 +752,12 @@ miPointerSetPosition(DeviceIntPtr pDev, int mode, double *screenx,
      * drop the float component on the floor
      * FIXME: only drop remainder for ConstrainCursorHarder, not for screen
      * crossings */
-    if (x != floor(*screenx))
-        *screenx = x;
-    if (y != floor(*screeny))
-        *screeny = y;
+    if (x != floor(*screenx)) {
+      *screenx = x;
+    }
+    if (y != floor(*screeny)) {
+      *screeny = y;
+    }
 
     return pScreen;
 }
@@ -787,7 +819,8 @@ miPointerMove(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
                                POINTER_NORAW, &mask);
 
     input_lock();
-    for (i = 0; i < nevents; i++)
-        mieqEnqueue(pDev, &mipointermove_events[i]);
+    for (i = 0; i < nevents; i++) {
+      mieqEnqueue(pDev, &mipointermove_events[i]);
+    }
     input_unlock();
 }

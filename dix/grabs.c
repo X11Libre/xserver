@@ -118,9 +118,10 @@ PrintDeviceGrabInfo(DeviceIntPtr dev)
     }
 
     /* XXX is this even correct? */
-    if (devGrab->sync.other)
-        ErrorF("      grab ID 0x%lx from paired device\n",
-               (unsigned long) devGrab->sync.other->resource);
+    if (devGrab->sync.other) {
+      ErrorF("      grab ID 0x%lx from paired device\n",
+             (unsigned long)devGrab->sync.other->resource);
+    }
 
     ErrorF("      at %ld (from %s grab)%s (device %s, state %d)\n",
            (unsigned long) devGrab->grabTime.milliseconds,
@@ -150,11 +151,13 @@ PrintDeviceGrabInfo(DeviceIntPtr dev)
                     break;
                 }
             }
-            if (!print)
-                continue;
+            if (!print) {
+              continue;
+            }
             ErrorF("      xi2 event mask for device %d: 0x", dev->id);
-            for (int j = 0; j < xi2mask_mask_size(grab->xi2mask); j++)
-                ErrorF("%x", mask[j]);
+            for (int j = 0; j < xi2mask_mask_size(grab->xi2mask); j++) {
+              ErrorF("%x", mask[j]);
+            }
             ErrorF("\n");
         }
     }
@@ -179,14 +182,17 @@ UngrabAllDevices(Bool kill_client)
            kill_client ? " and killing their owners" : "");
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-        if (!dev->deviceGrab.grab)
-            continue;
+      if (!dev->deviceGrab.grab) {
+        continue;
+      }
         PrintDeviceGrabInfo(dev);
         ClientPtr client = dixClientForXID(dev->deviceGrab.grab->resource);
-        if (!kill_client || !client || client->clientGone)
-            dev->deviceGrab.DeactivateGrab(dev);
-        if (kill_client)
-            CloseDownClient(client);
+        if (!kill_client || !client || client->clientGone) {
+          dev->deviceGrab.DeactivateGrab(dev);
+        }
+        if (kill_client) {
+          CloseDownClient(client);
+        }
     }
 
     ErrorF("End list of ungrabbed devices\n");
@@ -225,15 +231,17 @@ CreateGrab(ClientPtr client, DeviceIntPtr device, DeviceIntPtr modDevice,
     GrabPtr grab;
 
     grab = AllocGrab(NULL);
-    if (!grab)
-        return (GrabPtr) NULL;
+    if (!grab) {
+      return (GrabPtr)NULL;
+    }
     grab->resource = FakeClientID(client->index);
     grab->device = device;
     grab->window = window;
-    if (grabtype == CORE || grabtype == XI)
-        grab->eventMask = mask->core;       /* same for XI */
-    else
-        grab->eventMask = 0;
+    if (grabtype == CORE || grabtype == XI) {
+      grab->eventMask = mask->core; /* same for XI */
+    } else {
+      grab->eventMask = 0;
+    }
     grab->deviceMask = 0;
     grab->ownerEvents = param->ownerEvents;
     grab->keyboardMode = param->this_device_mode;
@@ -249,16 +257,18 @@ CreateGrab(ClientPtr client, DeviceIntPtr device, DeviceIntPtr modDevice,
     grab->cursor = RefCursor(cursor);
     grab->next = NULL;
 
-    if (grabtype == XI2)
-        xi2mask_merge(grab->xi2mask, mask->xi2mask);
+    if (grabtype == XI2) {
+      xi2mask_merge(grab->xi2mask, mask->xi2mask);
+    }
     return grab;
 }
 
 void
 FreeGrab(GrabPtr pGrab)
 {
-    if (!pGrab)
-        return;
+  if (!pGrab) {
+    return;
+  }
 
     free(pGrab->modifiersDetail.pMask);
     free(pGrab->detail.pMask);
@@ -279,8 +289,9 @@ CopyGrab(GrabPtr dst, const GrabPtr src)
         int len = MasksPerDetailMask * sizeof(Mask);
 
         mdetails_mask = calloc(1, len);
-        if (!mdetails_mask)
-            return FALSE;
+        if (!mdetails_mask) {
+          return FALSE;
+        }
         memcpy(mdetails_mask, src->modifiersDetail.pMask, len);
     }
 
@@ -327,10 +338,11 @@ DeletePassiveGrab(void *value, XID id)
     /* it is OK if the grab isn't found */
     for (GrabPtr g = (wPassiveGrabs(pGrab->window)), prev = 0; g; g = g->next) {
         if (pGrab == g) {
-            if (prev)
-                prev->next = g->next;
-            else if (!(pGrab->window->optional->passiveGrabs = g->next))
-                CheckWindowOptionalNeed(pGrab->window);
+          if (prev) {
+            prev->next = g->next;
+          } else if (!(pGrab->window->optional->passiveGrabs = g->next)) {
+            CheckWindowOptionalNeed(pGrab->window);
+          }
             break;
         }
         prev = g;
@@ -344,12 +356,15 @@ DeleteDetailFromMask(Mask *pDetailMask, unsigned int detail)
 {
     Mask *mask = calloc(MasksPerDetailMask, sizeof(Mask));
     if (mask) {
-        if (pDetailMask)
-            for (int i = 0; i < MasksPerDetailMask; i++)
-                mask[i] = pDetailMask[i];
-        else
-            for (int i = 0; i < MasksPerDetailMask; i++)
-                mask[i] = ~0L;
+      if (pDetailMask) {
+        for (int i = 0; i < MasksPerDetailMask; i++) {
+          mask[i] = pDetailMask[i];
+        }
+      } else {
+        for (int i = 0; i < MasksPerDetailMask; i++) {
+          mask[i] = ~0L;
+        }
+      }
         BITCLEAR(mask, detail);
     }
     return mask;
@@ -360,15 +375,18 @@ IsInGrabMask(DetailRec firstDetail,
              DetailRec secondDetail, unsigned int exception)
 {
     if (firstDetail.exact == exception) {
-        if (firstDetail.pMask == NULL)
-            return TRUE;
+      if (firstDetail.pMask == NULL) {
+        return TRUE;
+      }
 
         /* (at present) never called with two non-null pMasks */
-        if (secondDetail.exact == exception)
-            return FALSE;
+        if (secondDetail.exact == exception) {
+          return FALSE;
+        }
 
-        if (GETBIT(firstDetail.pMask, secondDetail.exact))
-            return TRUE;
+        if (GETBIT(firstDetail.pMask, secondDetail.exact)) {
+          return TRUE;
+        }
     }
 
     return FALSE;
@@ -378,11 +396,13 @@ static Bool
 IdenticalExactDetails(unsigned int firstExact,
                       unsigned int secondExact, unsigned int exception)
 {
-    if ((firstExact == exception) || (secondExact == exception))
-        return FALSE;
+  if ((firstExact == exception) || (secondExact == exception)) {
+    return FALSE;
+  }
 
-    if (firstExact == secondExact)
-        return TRUE;
+  if (firstExact == secondExact) {
+    return TRUE;
+  }
 
     return FALSE;
 }
@@ -391,11 +411,13 @@ static Bool
 DetailSupersedesSecond(DetailRec firstDetail,
                        DetailRec secondDetail, unsigned int exception)
 {
-    if (IsInGrabMask(firstDetail, secondDetail, exception))
-        return TRUE;
+  if (IsInGrabMask(firstDetail, secondDetail, exception)) {
+    return TRUE;
+  }
 
-    if (IdenticalExactDetails(firstDetail.exact, secondDetail.exact, exception))
-        return TRUE;
+  if (IdenticalExactDetails(firstDetail.exact, secondDetail.exact, exception)) {
+    return TRUE;
+  }
 
     return FALSE;
 }
@@ -406,12 +428,14 @@ GrabSupersedesSecond(GrabPtr pFirstGrab, GrabPtr pSecondGrab)
     unsigned int any_modifier = (pFirstGrab->grabtype == XI2) ?
         (unsigned int) XIAnyModifier : (unsigned int) AnyModifier;
     if (!DetailSupersedesSecond(pFirstGrab->modifiersDetail,
-                                pSecondGrab->modifiersDetail, any_modifier))
-        return FALSE;
+                                pSecondGrab->modifiersDetail, any_modifier)) {
+      return FALSE;
+    }
 
-    if (DetailSupersedesSecond(pFirstGrab->detail,
-                               pSecondGrab->detail, (unsigned int) AnyKey))
-        return TRUE;
+    if (DetailSupersedesSecond(pFirstGrab->detail, pSecondGrab->detail,
+                               (unsigned int)AnyKey)) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -435,8 +459,9 @@ GrabMatchesSecond(GrabPtr pFirstGrab, GrabPtr pSecondGrab, Bool ignoreDevice)
     unsigned int any_modifier = (pFirstGrab->grabtype == XI2) ?
         (unsigned int) XIAnyModifier : (unsigned int) AnyModifier;
 
-    if (pFirstGrab->grabtype != pSecondGrab->grabtype)
-        return FALSE;
+    if (pFirstGrab->grabtype != pSecondGrab->grabtype) {
+      return FALSE;
+    }
 
     if (pFirstGrab->grabtype == XI2) {
         if (pFirstGrab->device == inputInfo.all_devices ||
@@ -444,43 +469,47 @@ GrabMatchesSecond(GrabPtr pFirstGrab, GrabPtr pSecondGrab, Bool ignoreDevice)
             /* do nothing */
         }
         else if (pFirstGrab->device == inputInfo.all_master_devices) {
-            if (pSecondGrab->device != inputInfo.all_master_devices &&
-                !InputDevIsMaster(pSecondGrab->device))
-                return FALSE;
+          if (pSecondGrab->device != inputInfo.all_master_devices &&
+              !InputDevIsMaster(pSecondGrab->device)) {
+            return FALSE;
+          }
         }
         else if (pSecondGrab->device == inputInfo.all_master_devices) {
-            if (pFirstGrab->device != inputInfo.all_master_devices &&
-                !InputDevIsMaster(pFirstGrab->device))
-                return FALSE;
-        }
-        else if (pSecondGrab->device != pFirstGrab->device)
+          if (pFirstGrab->device != inputInfo.all_master_devices &&
+              !InputDevIsMaster(pFirstGrab->device)) {
             return FALSE;
+          }
+        } else if (pSecondGrab->device != pFirstGrab->device) {
+          return FALSE;
+        }
+    } else if (!ignoreDevice &&
+               ((pFirstGrab->device != pSecondGrab->device) ||
+                (pFirstGrab->modifierDevice != pSecondGrab->modifierDevice))) {
+      return FALSE;
     }
-    else if (!ignoreDevice &&
-             ((pFirstGrab->device != pSecondGrab->device) ||
-              (pFirstGrab->modifierDevice != pSecondGrab->modifierDevice)))
-        return FALSE;
 
-    if (pFirstGrab->type != pSecondGrab->type)
-        return FALSE;
+    if (pFirstGrab->type != pSecondGrab->type) {
+      return FALSE;
+    }
 
     if (GrabSupersedesSecond(pFirstGrab, pSecondGrab) ||
-        GrabSupersedesSecond(pSecondGrab, pFirstGrab))
-        return TRUE;
+        GrabSupersedesSecond(pSecondGrab, pFirstGrab)) {
+      return TRUE;
+    }
 
     if (DetailSupersedesSecond(pSecondGrab->detail, pFirstGrab->detail,
-                               (unsigned int) AnyKey)
-        &&
+                               (unsigned int)AnyKey) &&
         DetailSupersedesSecond(pFirstGrab->modifiersDetail,
-                               pSecondGrab->modifiersDetail, any_modifier))
-        return TRUE;
+                               pSecondGrab->modifiersDetail, any_modifier)) {
+      return TRUE;
+    }
 
     if (DetailSupersedesSecond(pFirstGrab->detail, pSecondGrab->detail,
-                               (unsigned int) AnyKey)
-        &&
+                               (unsigned int)AnyKey) &&
         DetailSupersedesSecond(pSecondGrab->modifiersDetail,
-                               pFirstGrab->modifiersDetail, any_modifier))
-        return TRUE;
+                               pFirstGrab->modifiersDetail, any_modifier)) {
+      return TRUE;
+    }
 
     return FALSE;
 }
@@ -491,27 +520,29 @@ GrabsAreIdentical(GrabPtr pFirstGrab, GrabPtr pSecondGrab)
     unsigned int any_modifier = (pFirstGrab->grabtype == XI2) ?
         (unsigned int) XIAnyModifier : (unsigned int) AnyModifier;
 
-    if (pFirstGrab->grabtype != pSecondGrab->grabtype)
-        return FALSE;
+    if (pFirstGrab->grabtype != pSecondGrab->grabtype) {
+      return FALSE;
+    }
 
     if (pFirstGrab->device != pSecondGrab->device ||
         (pFirstGrab->modifierDevice != pSecondGrab->modifierDevice) ||
-        (pFirstGrab->type != pSecondGrab->type))
-        return FALSE;
+        (pFirstGrab->type != pSecondGrab->type)) {
+      return FALSE;
+    }
 
-    if (!(DetailSupersedesSecond(pFirstGrab->detail,
-                                 pSecondGrab->detail,
-                                 (unsigned int) AnyKey) &&
-          DetailSupersedesSecond(pSecondGrab->detail,
-                                 pFirstGrab->detail, (unsigned int) AnyKey)))
-        return FALSE;
+    if (!(DetailSupersedesSecond(pFirstGrab->detail, pSecondGrab->detail,
+                                 (unsigned int)AnyKey) &&
+          DetailSupersedesSecond(pSecondGrab->detail, pFirstGrab->detail,
+                                 (unsigned int)AnyKey))) {
+      return FALSE;
+    }
 
     if (!(DetailSupersedesSecond(pFirstGrab->modifiersDetail,
-                                 pSecondGrab->modifiersDetail,
-                                 any_modifier) &&
+                                 pSecondGrab->modifiersDetail, any_modifier) &&
           DetailSupersedesSecond(pSecondGrab->modifiersDetail,
-                                 pFirstGrab->modifiersDetail, any_modifier)))
-        return FALSE;
+                                 pFirstGrab->modifiersDetail, any_modifier))) {
+      return FALSE;
+    }
 
     return TRUE;
 }
@@ -540,11 +571,13 @@ AddPassiveGrabToList(ClientPtr client, GrabPtr pGrab)
     }
 
     if (pGrab->keyboardMode == GrabModeSync ||
-        pGrab->pointerMode == GrabModeSync)
-        access_mode |= DixFreezeAccess;
+        pGrab->pointerMode == GrabModeSync) {
+      access_mode |= DixFreezeAccess;
+    }
     rc = dixCallDeviceAccessCallback(client, pGrab->device, access_mode);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     /* Remove all grabs that match the new one exactly */
     for (GrabPtr grab = wPassiveGrabs(pGrab->window); grab; grab = grab->next) {
@@ -561,8 +594,9 @@ AddPassiveGrabToList(ClientPtr client, GrabPtr pGrab)
 
     pGrab->next = pGrab->window->optional->passiveGrabs;
     pGrab->window->optional->passiveGrabs = pGrab;
-    if (AddResource(pGrab->resource, X11_RESTYPE_PASSIVEGRAB, (void *) pGrab))
-        return Success;
+    if (AddResource(pGrab->resource, X11_RESTYPE_PASSIVEGRAB, (void *)pGrab)) {
+      return Success;
+    }
     return BadAlloc;
 }
 
@@ -587,10 +621,13 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
 	  updates[nups++] = &(mask)
 
     i = 0;
-    for (GrabPtr grab = wPassiveGrabs(pMinuendGrab->window); grab; grab = grab->next)
-        i++;
-    if (!i)
-        return TRUE;
+    for (GrabPtr grab = wPassiveGrabs(pMinuendGrab->window); grab;
+         grab = grab->next) {
+      i++;
+    }
+    if (!i) {
+      return TRUE;
+    }
     deletes = calloc(i, sizeof(GrabPtr));
     adds = calloc(i, sizeof(GrabPtr));
     updates = calloc(i, sizeof(Mask **));
@@ -611,9 +648,11 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
     ok = TRUE;
     for (GrabPtr grab = wPassiveGrabs(pMinuendGrab->window);
          grab && ok; grab = grab->next) {
-        if ((dixClientIdForXID(grab->resource) != dixClientIdForXID(pMinuendGrab->resource))
-            || !GrabMatchesSecond(grab, pMinuendGrab, (grab->grabtype == CORE)))
-            continue;
+      if ((dixClientIdForXID(grab->resource) !=
+           dixClientIdForXID(pMinuendGrab->resource)) ||
+          !GrabMatchesSecond(grab, pMinuendGrab, (grab->grabtype == CORE))) {
+        continue;
+      }
         if (GrabSupersedesSecond(pMinuendGrab, grab)) {
             deletes[ndels++] = grab;
         }
@@ -646,21 +685,20 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
                                   &param, (int) grab->type,
                                   pMinuendGrab->detail.exact,
                                   grab->confineTo, grab->cursor);
-            if (!pNewGrab)
-                ok = FALSE;
-            else if (!(pNewGrab->modifiersDetail.pMask =
-                       DeleteDetailFromMask(grab->modifiersDetail.pMask,
-                                            pMinuendGrab->modifiersDetail.
-                                            exact))
-                     || (!MakeWindowOptional(pNewGrab->window))) {
-                FreeGrab(pNewGrab);
-                ok = FALSE;
+            if (!pNewGrab) {
+              ok = FALSE;
+            } else if (!(pNewGrab->modifiersDetail.pMask = DeleteDetailFromMask(
+                             grab->modifiersDetail.pMask,
+                             pMinuendGrab->modifiersDetail.exact)) ||
+                       (!MakeWindowOptional(pNewGrab->window))) {
+              FreeGrab(pNewGrab);
+              ok = FALSE;
+            } else if (!AddResource(pNewGrab->resource, X11_RESTYPE_PASSIVEGRAB,
+                                    (void *)pNewGrab)) {
+              ok = FALSE;
+            } else {
+              adds[nadds++] = pNewGrab;
             }
-            else if (!AddResource(pNewGrab->resource, X11_RESTYPE_PASSIVEGRAB,
-                                  (void *) pNewGrab))
-                ok = FALSE;
-            else
-                adds[nadds++] = pNewGrab;
         }
         else if (pMinuendGrab->detail.exact == any_key) {
             UPDATE(grab->modifiersDetail.pMask,
@@ -672,14 +710,17 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
     }
 
     if (!ok) {
-        for (int j = 0; j < nadds; j++)
-            FreeResource(adds[j]->resource, X11_RESTYPE_NONE);
-        for (int j = 0; j < nups; j++)
-            free(details[j]);
+      for (int j = 0; j < nadds; j++) {
+        FreeResource(adds[j]->resource, X11_RESTYPE_NONE);
+      }
+      for (int j = 0; j < nups; j++) {
+        free(details[j]);
+      }
     }
     else {
-        for (int j = 0; j < ndels; j++)
-            FreeResource(deletes[j]->resource, X11_RESTYPE_NONE);
+      for (int j = 0; j < ndels; j++) {
+        FreeResource(deletes[j]->resource, X11_RESTYPE_NONE);
+      }
         for (int j = 0; j < nadds; j++) {
             GrabPtr grab = adds[j];
             grab->next = grab->window->optional->passiveGrabs;

@@ -86,10 +86,12 @@ shadowUpdateRotatePacked(ScreenPtr pScreen, shadowBufPtr pBuf)
      */
     o_x_dir = LEFT_TO_RIGHT;
     o_y_dir = TOP_TO_BOTTOM;
-    if (pBuf->randr & SHADOW_REFLECT_X)
-        o_x_dir = -o_x_dir;
-    if (pBuf->randr & SHADOW_REFLECT_Y)
-        o_y_dir = -o_y_dir;
+    if (pBuf->randr & SHADOW_REFLECT_X) {
+      o_x_dir = -o_x_dir;
+    }
+    if (pBuf->randr & SHADOW_REFLECT_Y) {
+      o_y_dir = -o_y_dir;
+    }
     switch (pBuf->randr & (SHADOW_ROTATE_ALL)) {
     case SHADOW_ROTATE_0:      /* upper left shadow -> upper left screen */
     default:
@@ -245,8 +247,9 @@ shadowUpdateRotatePacked(ScreenPtr pScreen, shadowBufPtr pBuf)
                                                   SHADOW_WINDOW_WRITE,
                                                   &winSize, pBuf->closure);
                 i = (winSize >> 2);
-                if (i > w)
-                    i = w;
+                if (i > w) {
+                  i = w;
+                }
                 w -= i;
                 scr_x += i;
                 /*

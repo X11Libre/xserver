@@ -204,24 +204,15 @@ xorg_backtrace(void)
             continue;
         }
         mod = (info.dli_fname && *info.dli_fname) ? info.dli_fname : "(vdso)";
-        if (info.dli_saddr)
-            ErrorF(
-                "%u: %s (%s+0x%x) [%p]\n",
-                i,
-                mod,
-                info.dli_sname,
-                (unsigned int)((char *) array[i] -
-                               (char *) info.dli_saddr),
-                array[i]);
-        else
-            ErrorF(
-                "%u: %s (%p+0x%x) [%p]\n",
-                i,
-                mod,
-                info.dli_fbase,
-                (unsigned int)((char *) array[i] -
-                               (char *) info.dli_fbase),
-                array[i]);
+        if (info.dli_saddr) {
+          ErrorF("%u: %s (%s+0x%x) [%p]\n", i, mod, info.dli_sname,
+                 (unsigned int)((char *)array[i] - (char *)info.dli_saddr),
+                 array[i]);
+        } else {
+          ErrorF("%u: %s (%p+0x%x) [%p]\n", i, mod, info.dli_fbase,
+                 (unsigned int)((char *)array[i] - (char *)info.dli_fbase),
+                 array[i]);
+        }
     }
     ErrorF("\n");
 }

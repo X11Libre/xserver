@@ -87,8 +87,9 @@ ServerBitsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm,
 
     ScreenPtr masterScreen = dixGetMasterScreen();
     pbits = calloc(BitmapBytePad(cm->width), cm->height);
-    if (!pbits)
-        return BadAlloc;
+    if (!pbits) {
+      return BadAlloc;
+    }
 
     PixmapPtr ppix = masterScreen->CreatePixmap(masterScreen, cm->width,
                                                 cm->height, 1,
@@ -96,8 +97,9 @@ ServerBitsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm,
     pGC = GetScratchGC(1, masterScreen);
     if (!ppix || !pGC) {
         dixDestroyPixmap(ppix, 0);
-        if (pGC)
-            FreeScratchGC(pGC);
+        if (pGC) {
+          FreeScratchGC(pGC);
+        }
         free(pbits);
         return BadAlloc;
     }
@@ -141,18 +143,22 @@ CursorMetricsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm)
     chs[1] = ch;
     encoding = (FONTLASTROW(pfont) == 0) ? Linear16Bit : TwoD16Bit;
     if (encoding == Linear16Bit) {
-        if (ch < pfont->info.firstCol || pfont->info.lastCol < ch)
-            return FALSE;
+      if (ch < pfont->info.firstCol || pfont->info.lastCol < ch) {
+        return FALSE;
+      }
     }
     else {
-        if (chs[0] < pfont->info.firstRow || pfont->info.lastRow < chs[0])
-            return FALSE;
-        if (chs[1] < pfont->info.firstCol || pfont->info.lastCol < chs[1])
-            return FALSE;
+      if (chs[0] < pfont->info.firstRow || pfont->info.lastRow < chs[0]) {
+        return FALSE;
+      }
+      if (chs[1] < pfont->info.firstCol || pfont->info.lastCol < chs[1]) {
+        return FALSE;
+      }
     }
     (*pfont->get_glyphs) (pfont, 1, chs, encoding, &nglyphs, &pci);
-    if (nglyphs == 0)
-        return FALSE;
+    if (nglyphs == 0) {
+      return FALSE;
+    }
     cm->width = pci->metrics.rightSideBearing - pci->metrics.leftSideBearing;
     cm->height = pci->metrics.descent + pci->metrics.ascent;
     if (pci->metrics.leftSideBearing > 0) {
@@ -161,8 +167,9 @@ CursorMetricsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm)
     }
     else {
         cm->xhot = -pci->metrics.leftSideBearing;
-        if (pci->metrics.rightSideBearing < 0)
-            cm->width -= pci->metrics.rightSideBearing;
+        if (pci->metrics.rightSideBearing < 0) {
+          cm->width -= pci->metrics.rightSideBearing;
+        }
     }
     if (pci->metrics.ascent < 0) {
         cm->height -= pci->metrics.ascent;
@@ -170,8 +177,9 @@ CursorMetricsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm)
     }
     else {
         cm->yhot = pci->metrics.ascent;
-        if (pci->metrics.descent < 0)
-            cm->height -= pci->metrics.descent;
+        if (pci->metrics.descent < 0) {
+          cm->height -= pci->metrics.descent;
+        }
     }
     return TRUE;
 }

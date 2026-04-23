@@ -35,8 +35,9 @@ DECLARE_HOOK_PROC(PostCreateResources, hookPostCreateResources,
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
-    if (!pWin)
-        return Success;
+  if (!pWin) {
+    return Success;
+  }
 
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
@@ -47,8 +48,9 @@ int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 
 void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y)
 {
-    if (!pWin)
-        return;
+  if (!pWin) {
+    return;
+  }
 
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
@@ -60,26 +62,30 @@ void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y)
 
     CallCallbacks(&pScreen->hookWindowPosition, &param);
 
-    if (pScreen->PositionWindow)
-        pScreen->PositionWindow(pWin, x, y);
+    if (pScreen->PositionWindow) {
+      pScreen->PositionWindow(pWin, x, y);
+    }
 }
 
 void dixScreenRaiseClose(ScreenPtr pScreen) {
-    if (!pScreen)
-        return;
+  if (!pScreen) {
+    return;
+  }
 
     CallCallbacks(&pScreen->hookClose, NULL);
 
-    if (pScreen->CloseScreen)
-        pScreen->CloseScreen(pScreen);
+    if (pScreen->CloseScreen) {
+      pScreen->CloseScreen(pScreen);
+    }
 
     CallCallbacks(&pScreen->hookPostClose, NULL);
 }
 
 void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap)
 {
-    if (!pPixmap)
-        return;
+  if (!pPixmap) {
+    return;
+  }
 
     ScreenPtr pScreen = pPixmap->drawable.pScreen;
     CallCallbacks(&pScreen->hookPixmapDestroy, pPixmap);
@@ -88,12 +94,14 @@ void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap)
 
 Bool dixScreenRaiseCreateResources(ScreenPtr pScreen)
 {
-    if (!pScreen)
-        return FALSE;
+  if (!pScreen) {
+    return FALSE;
+  }
 
     if (pScreen->CreateScreenResources) {
-        if (!pScreen->CreateScreenResources(pScreen))
-            return FALSE;
+      if (!pScreen->CreateScreenResources(pScreen)) {
+        return FALSE;
+      }
     }
 
     Bool ret = TRUE;
@@ -103,10 +111,12 @@ Bool dixScreenRaiseCreateResources(ScreenPtr pScreen)
 
 void dixScreenRaiseUnrealizeWindow(WindowPtr pWin)
 {
-    if (!pWin)
-        return;
+  if (!pWin) {
+    return;
+  }
 
     pWin->realized = FALSE;
-    if (pWin->drawable.pScreen->UnrealizeWindow)
-        pWin->drawable.pScreen->UnrealizeWindow(pWin);
+    if (pWin->drawable.pScreen->UnrealizeWindow) {
+      pWin->drawable.pScreen->UnrealizeWindow(pWin);
+    }
 }

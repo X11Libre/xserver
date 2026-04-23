@@ -88,8 +88,9 @@ glamor_set_destination_pixmap_priv(glamor_screen_private *glamor_priv,
                                    PixmapPtr pixmap,
                                    glamor_pixmap_private *pixmap_priv)
 {
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        return -1;
+  if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+    return -1;
+  }
 
     glamor_set_destination_pixmap_priv_nc(glamor_priv, pixmap, pixmap_priv);
     return 0;
@@ -125,10 +126,11 @@ glamor_set_alu(DrawablePtr drawable, unsigned char alu)
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
 
     if (glamor_priv->is_gles) {
-        if (alu != GXcopy)
-            return FALSE;
-        else
-            return TRUE;
+      if (alu != GXcopy) {
+        return FALSE;
+      } else {
+        return TRUE;
+      }
     }
 
     if (alu == GXcopy) {

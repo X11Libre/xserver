@@ -110,8 +110,9 @@ SwapFont(xQueryFontReply * pr, Bool hasGlyphs)
     }
     if (hasGlyphs) {
         pxci = (xCharInfo *) pby;
-        for (unsigned i = 0; i < nchars; i++, pxci++)
-            SwapCharInfo(pxci);
+        for (unsigned i = 0; i < nchars; i++, pxci++) {
+          SwapCharInfo(pxci);
+        }
     }
 }
 

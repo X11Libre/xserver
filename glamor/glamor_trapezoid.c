@@ -50,20 +50,23 @@ glamor_create_mask_picture(ScreenPtr screen,
     int error;
 
     if (!pict_format) {
-        if (dst->polyEdge == PolyEdgeSharp)
-            pict_format = PictureMatchFormat(screen, 1, PIXMAN_a1);
-        else
-            pict_format = PictureMatchFormat(screen, 8, PIXMAN_a8);
-        if (!pict_format)
-            return 0;
+      if (dst->polyEdge == PolyEdgeSharp) {
+        pict_format = PictureMatchFormat(screen, 1, PIXMAN_a1);
+      } else {
+        pict_format = PictureMatchFormat(screen, 8, PIXMAN_a8);
+      }
+      if (!pict_format) {
+        return 0;
+      }
     }
 
     pixmap = glamor_create_pixmap(screen, 0, 0,
                                   pict_format->depth,
                                   GLAMOR_CREATE_PIXMAP_CPU);
 
-    if (!pixmap)
-        return 0;
+    if (!pixmap) {
+      return 0;
+    }
     picture = CreatePicture(0, &pixmap->drawable, pict_format,
                             0, 0, serverClient, &error);
     glamor_destroy_pixmap(pixmap);
@@ -93,20 +96,22 @@ glamor_trapezoids(CARD8 op,
      * be as if there was no temporary mask the traps were accumulated into.
      */
     if (!mask_format) {
-        if (dst->polyEdge == PolyEdgeSharp)
-            mask_format = PictureMatchFormat(screen, 1, PIXMAN_a1);
-        else
-            mask_format = PictureMatchFormat(screen, 8, PIXMAN_a8);
-        for (; ntrap; ntrap--, traps++)
-            glamor_trapezoids(op, src, dst, mask_format, x_src,
-                              y_src, 1, traps);
+      if (dst->polyEdge == PolyEdgeSharp) {
+        mask_format = PictureMatchFormat(screen, 1, PIXMAN_a1);
+      } else {
+        mask_format = PictureMatchFormat(screen, 8, PIXMAN_a8);
+      }
+      for (; ntrap; ntrap--, traps++) {
+        glamor_trapezoids(op, src, dst, mask_format, x_src, y_src, 1, traps);
+      }
         return;
     }
 
     miTrapezoidBounds(ntrap, traps, &bounds);
 
-    if (bounds.y1 >= bounds.y2 || bounds.x1 >= bounds.x2)
-        return;
+    if (bounds.y1 >= bounds.y2 || bounds.x1 >= bounds.x2) {
+      return;
+    }
 
     x_dst = traps[0].left.p1.x >> 16;
     y_dst = traps[0].left.p1.y >> 16;
@@ -117,8 +122,9 @@ glamor_trapezoids(CARD8 op,
 
     picture = glamor_create_mask_picture(screen, dst, mask_format,
                                          width, height);
-    if (!picture)
-        return;
+    if (!picture) {
+      return;
+    }
 
     image = pixman_image_create_bits(picture->format,
                                      width, height, NULL, stride);
@@ -127,10 +133,10 @@ glamor_trapezoids(CARD8 op,
         return;
     }
 
-    for (; ntrap; ntrap--, traps++)
-        pixman_rasterize_trapezoid(image,
-                                   (pixman_trapezoid_t *) traps,
-                                   -bounds.x1, -bounds.y1);
+    for (; ntrap; ntrap--, traps++) {
+      pixman_rasterize_trapezoid(image, (pixman_trapezoid_t *)traps, -bounds.x1,
+                                 -bounds.y1);
+    }
 
     pixmap = glamor_get_drawable_pixmap(picture->pDrawable);
 
@@ -150,8 +156,9 @@ glamor_trapezoids(CARD8 op,
                      bounds.x1, bounds.y1,
                      bounds.x2 - bounds.x1, bounds.y2 - bounds.y1);
 
-    if (image)
-        pixman_image_unref(image);
+    if (image) {
+      pixman_image_unref(image);
+    }
 
     FreePicture(picture, 0);
 }

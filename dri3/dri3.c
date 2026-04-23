@@ -53,21 +53,24 @@ dri3_screen_init(ScreenPtr screen, const dri3_screen_info_rec *info)
 {
     dri3_screen_generation = serverGeneration;
 
-    if (!dixRegisterPrivateKey(&dri3_screen_private_key, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&dri3_screen_private_key, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
 
     if (!dri3_screen_priv(screen)) {
         dri3_screen_priv_ptr screen_priv = calloc(1, sizeof (dri3_screen_priv_rec));
-        if (!screen_priv)
-            return FALSE;
+        if (!screen_priv) {
+          return FALSE;
+        }
 
         dixScreenHookClose(screen, dri3_screen_close);
 
         dixSetPrivate(&screen->devPrivates, &dri3_screen_private_key, screen_priv);
     }
 
-    if (info)
-        dri3_screen_priv(screen)->info = info;
+    if (info) {
+      dri3_screen_priv(screen)->info = info;
+    }
 
     return TRUE;
 }
@@ -77,8 +80,9 @@ RESTYPE dri3_syncobj_type;
 static int dri3_syncobj_free(void *data, XID id)
 {
     struct dri3_syncobj *syncobj = data;
-    if (--syncobj->refcount == 0)
-        syncobj->free(syncobj);
+    if (--syncobj->refcount == 0) {
+      syncobj->free(syncobj);
+    }
     return 0;
 }
 
@@ -90,19 +94,22 @@ dri3_extension_init(void)
     /* If no screens support DRI3, there's no point offering the
      * extension at all
      */
-    if (dri3_screen_generation != serverGeneration)
-        return;
+    if (dri3_screen_generation != serverGeneration) {
+      return;
+    }
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return;
+    if (!noPanoramiXExtension) {
+      return;
+    }
 #endif /* XINERAMA */
 
     extension = AddExtension(DRI3_NAME, DRI3NumberEvents, DRI3NumberErrors,
                              proc_dri3_dispatch, proc_dri3_dispatch,
                              NULL, StandardMinorOpcode);
-    if (!extension)
-        goto bail;
+    if (!extension) {
+      goto bail;
+    }
 
     dri3_request = extension->base;
 
@@ -112,8 +119,9 @@ dri3_extension_init(void)
     });
 
     dri3_syncobj_type = CreateNewResourceType(dri3_syncobj_free, "DRI3Syncobj");
-    if (!dri3_syncobj_type)
-        goto bail;
+    if (!dri3_syncobj_type) {
+      goto bail;
+    }
 
     return;
 

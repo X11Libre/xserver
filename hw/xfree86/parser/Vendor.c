@@ -99,10 +99,12 @@ xf86parseVendorSubSection(void)
             xf86_lex_val.str = NULL;
             break;
         case IDENTIFIER:
-            if (xf86getSubToken(&(ptr->vs_comment)))
-                Error(QUOTE_MSG, "Identifier");
-            if (has_ident == TRUE)
-                Error(MULTIPLE_MSG, "Identifier");
+          if (xf86getSubToken(&(ptr->vs_comment))) {
+            Error(QUOTE_MSG, "Identifier");
+          }
+          if (has_ident == TRUE) {
+            Error(MULTIPLE_MSG, "Identifier");
+          }
             ptr->vs_identifier = xf86_lex_val.str;
             has_ident = TRUE;
             break;
@@ -154,10 +156,12 @@ xf86parseVendorSection(void)
             xf86_lex_val.str = NULL;
             break;
         case IDENTIFIER:
-            if (xf86getSubToken(&(ptr->vnd_comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "Identifier");
-            if (has_ident == TRUE)
-                Error(MULTIPLE_MSG, "Identifier");
+          if (xf86getSubToken(&(ptr->vnd_comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "Identifier");
+          }
+          if (has_ident == TRUE) {
+            Error(MULTIPLE_MSG, "Identifier");
+          }
             ptr->vnd_identifier = xf86_lex_val.str;
             has_ident = TRUE;
             break;
@@ -165,8 +169,9 @@ xf86parseVendorSection(void)
             ptr->vnd_option_lst = xf86parseOption(ptr->vnd_option_lst);
             break;
         case SUBSECTION:
-            if (xf86getSubToken(&(ptr->vnd_comment)) != XF86_TOKEN_STRING)
-                Error(QUOTE_MSG, "SubSection");
+          if (xf86getSubToken(&(ptr->vnd_comment)) != XF86_TOKEN_STRING) {
+            Error(QUOTE_MSG, "SubSection");
+          }
             {
                 HANDLE_LIST(vnd_sub_lst, xf86parseVendorSubSection,
                             XF86ConfVendSubPtr);
@@ -182,8 +187,9 @@ xf86parseVendorSection(void)
 
     }
 
-    if (!has_ident)
-        Error(NO_IDENT_MSG);
+    if (!has_ident) {
+      Error(NO_IDENT_MSG);
+    }
 
 #ifdef DEBUG
     printf("Vendor section parsed\n");
@@ -201,18 +207,22 @@ xf86printVendorSection(FILE * cf, XF86ConfVendorPtr ptr)
 
     while (ptr) {
         fprintf(cf, "Section \"Vendor\"\n");
-        if (ptr->vnd_comment)
-            fprintf(cf, "%s", ptr->vnd_comment);
-        if (ptr->vnd_identifier)
-            fprintf(cf, "\tIdentifier     \"%s\"\n", ptr->vnd_identifier);
+        if (ptr->vnd_comment) {
+          fprintf(cf, "%s", ptr->vnd_comment);
+        }
+        if (ptr->vnd_identifier) {
+          fprintf(cf, "\tIdentifier     \"%s\"\n", ptr->vnd_identifier);
+        }
 
         xf86printOptionList(cf, ptr->vnd_option_lst, 1);
         for (pptr = ptr->vnd_sub_lst; pptr; pptr = pptr->list.next) {
             fprintf(cf, "\tSubSection \"Vendor\"\n");
-            if (pptr->vs_comment)
-                fprintf(cf, "%s", pptr->vs_comment);
-            if (pptr->vs_identifier)
-                fprintf(cf, "\t\tIdentifier \"%s\"\n", pptr->vs_identifier);
+            if (pptr->vs_comment) {
+              fprintf(cf, "%s", pptr->vs_comment);
+            }
+            if (pptr->vs_identifier) {
+              fprintf(cf, "\t\tIdentifier \"%s\"\n", pptr->vs_identifier);
+            }
             xf86printOptionList(cf, pptr->vs_option_lst, 2);
             fprintf(cf, "\tEndSubSection\n");
         }
@@ -224,8 +234,9 @@ xf86printVendorSection(FILE * cf, XF86ConfVendorPtr ptr)
 void
 xf86freeVendorList(XF86ConfVendorPtr p)
 {
-    if (p == NULL)
-        return;
+  if (p == NULL) {
+    return;
+  }
     xf86freeVendorSubList(p->vnd_sub_lst);
     TestFree(p->vnd_identifier);
     TestFree(p->vnd_comment);

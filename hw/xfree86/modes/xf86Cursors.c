@@ -49,8 +49,9 @@
 static Rotation
 xf86_crtc_cursor_rotation(xf86CrtcPtr crtc)
 {
-    if (crtc->driverIsPerformingTransform & XF86DriverTransformCursorImage)
-        return RR_Rotate_0;
+  if (crtc->driverIsPerformingTransform & XF86DriverTransformCursorImage) {
+    return RR_Rotate_0;
+  }
     return crtc->rotation;
 }
 
@@ -82,10 +83,12 @@ xf86_crtc_rotate_coord(Rotation rotation,
         y_dst = height - t - 1;
         break;
     }
-    if (rotation & RR_Reflect_X)
-        x_dst = width - x_dst - 1;
-    if (rotation & RR_Reflect_Y)
-        y_dst = height - y_dst - 1;
+    if (rotation & RR_Reflect_X) {
+      x_dst = width - x_dst - 1;
+    }
+    if (rotation & RR_Reflect_Y) {
+      y_dst = height - y_dst - 1;
+    }
     *x_src = x_dst;
     *y_src = y_dst;
 }
@@ -101,10 +104,12 @@ xf86_crtc_rotate_coord_back(Rotation rotation,
 {
     int t;
 
-    if (rotation & RR_Reflect_X)
-        x_dst = width - x_dst - 1;
-    if (rotation & RR_Reflect_Y)
-        y_dst = height - y_dst - 1;
+    if (rotation & RR_Reflect_X) {
+      x_dst = width - x_dst - 1;
+    }
+    if (rotation & RR_Reflect_Y) {
+      y_dst = height - y_dst - 1;
+    }
 
     switch (rotation & 0xf) {
     case RR_Rotate_0:
@@ -155,25 +160,29 @@ cursor_bitpos(CARD8 *image, xf86CursorInfoPtr cursor_info, int x, int y,
 
     image += y * stride;
 
-    if (flags & HARDWARE_CURSOR_SWAP_SOURCE_AND_MASK)
-        mask = !mask;
-    if (flags & HARDWARE_CURSOR_NIBBLE_SWAPPED)
-        x = (x & ~3) | (3 - (x & 3));
+    if (flags & HARDWARE_CURSOR_SWAP_SOURCE_AND_MASK) {
+      mask = !mask;
+    }
+    if (flags & HARDWARE_CURSOR_NIBBLE_SWAPPED) {
+      x = (x & ~3) | (3 - (x & 3));
+    }
     if (((flags & HARDWARE_CURSOR_BIT_ORDER_MSBFIRST) == 0) ==
-        (X_BYTE_ORDER == X_BIG_ENDIAN))
-        x = (x & ~7) | (7 - (x & 7));
-    if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1)
-        x = (x << 1) + mask;
-    else if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_8)
-        x = ((x & ~7) << 1) | (mask << 3) | (x & 7);
-    else if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_16)
-        x = ((x & ~15) << 1) | (mask << 4) | (x & 15);
-    else if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32)
-        x = ((x & ~31) << 1) | (mask << 5) | (x & 31);
-    else if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64)
-        x = ((x & ~63) << 1) | (mask << 6) | (x & 63);
-    else if (mask)
-        image += stride * height;
+        (X_BYTE_ORDER == X_BIG_ENDIAN)) {
+      x = (x & ~7) | (7 - (x & 7));
+    }
+    if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1) {
+      x = (x << 1) + mask;
+    } else if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_8) {
+      x = ((x & ~7) << 1) | (mask << 3) | (x & 7);
+    } else if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_16) {
+      x = ((x & ~15) << 1) | (mask << 4) | (x & 15);
+    } else if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32) {
+      x = ((x & ~31) << 1) | (mask << 5) | (x & 31);
+    } else if (flags & HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64) {
+      x = ((x & ~63) << 1) | (mask << 6) | (x & 63);
+    } else if (mask) {
+      image += stride * height;
+    }
 
     ret.byte = image + (x / 8);
     ret.bitpos = x & 7;
@@ -222,8 +231,9 @@ xf86_driver_has_load_cursor_argb(xf86CrtcPtr crtc)
 static inline Bool
 xf86_driver_show_cursor(xf86CrtcPtr crtc)
 {
-    if (crtc->funcs->show_cursor_check)
-        return crtc->funcs->show_cursor_check(crtc);
+  if (crtc->funcs->show_cursor_check) {
+    return crtc->funcs->show_cursor_check(crtc);
+  }
     crtc->funcs->show_cursor(crtc);
     return TRUE;
 }
@@ -231,8 +241,9 @@ xf86_driver_show_cursor(xf86CrtcPtr crtc)
 static inline Bool
 xf86_driver_load_cursor_image(xf86CrtcPtr crtc, CARD8 *cursor_image)
 {
-    if (crtc->funcs->load_cursor_image_check)
-        return crtc->funcs->load_cursor_image_check(crtc, cursor_image);
+  if (crtc->funcs->load_cursor_image_check) {
+    return crtc->funcs->load_cursor_image_check(crtc, cursor_image);
+  }
     crtc->funcs->load_cursor_image(crtc, cursor_image);
     return TRUE;
 }
@@ -240,8 +251,9 @@ xf86_driver_load_cursor_image(xf86CrtcPtr crtc, CARD8 *cursor_image)
 static inline Bool
 xf86_driver_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *cursor_argb)
 {
-    if (crtc->funcs->load_cursor_argb_check)
-        return crtc->funcs->load_cursor_argb_check(crtc, cursor_argb);
+  if (crtc->funcs->load_cursor_argb_check) {
+    return crtc->funcs->load_cursor_argb_check(crtc, cursor_argb);
+  }
     crtc->funcs->load_cursor_argb(crtc, cursor_argb);
     return TRUE;
 }
@@ -264,22 +276,23 @@ xf86_crtc_convert_cursor_to_argb(xf86CrtcPtr crtc, unsigned char *src)
 
     crtc->cursor_argb = FALSE;
 
-    for (y = 0; y < cursor_info->MaxHeight; y++)
-        for (x = 0; x < cursor_info->MaxWidth; x++) {
-            xf86_crtc_rotate_coord(rotation,
-                                   cursor_info->MaxWidth,
-                                   cursor_info->MaxHeight, x, y, &xin, &yin);
-            if (get_bit(src, cursor_info, xin, yin, TRUE) ==
-                ((flags & HARDWARE_CURSOR_INVERT_MASK) == 0)) {
-                if (get_bit(src, cursor_info, xin, yin, FALSE))
-                    bits = xf86_config->cursor_fg;
-                else
-                    bits = xf86_config->cursor_bg;
-            }
-            else
-                bits = 0;
-            cursor_image[y * cursor_info->MaxWidth + x] = bits;
+    for (y = 0; y < cursor_info->MaxHeight; y++) {
+      for (x = 0; x < cursor_info->MaxWidth; x++) {
+        xf86_crtc_rotate_coord(rotation, cursor_info->MaxWidth,
+                               cursor_info->MaxHeight, x, y, &xin, &yin);
+        if (get_bit(src, cursor_info, xin, yin, TRUE) ==
+            ((flags & HARDWARE_CURSOR_INVERT_MASK) == 0)) {
+          if (get_bit(src, cursor_info, xin, yin, FALSE)) {
+            bits = xf86_config->cursor_fg;
+          } else {
+            bits = xf86_config->cursor_bg;
+          }
+        } else {
+          bits = 0;
         }
+        cursor_image[y * cursor_info->MaxWidth + x] = bits;
+      }
+    }
     return xf86_driver_load_cursor_argb(crtc, cursor_image);
 }
 
@@ -306,10 +319,11 @@ xf86_set_cursor_colors(ScrnInfoPtr scrn, int bg, int fg)
         xf86CrtcPtr crtc = xf86_config->crtc[c];
 
         if (crtc->enabled && !crtc->cursor_argb) {
-            if (xf86_driver_has_load_cursor_image(crtc))
-                crtc->funcs->set_cursor_colors(crtc, bg, fg);
-            else if (bits)
-                xf86_crtc_convert_cursor_to_argb(crtc, bits);
+          if (xf86_driver_has_load_cursor_image(crtc)) {
+            crtc->funcs->set_cursor_colors(crtc, bg, fg);
+          } else if (bits) {
+            xf86_crtc_convert_cursor_to_argb(crtc, bits);
+          }
         }
     }
 }
@@ -333,8 +347,9 @@ xf86_hide_cursors(ScrnInfoPtr scrn)
     for (c = 0; c < xf86_config->num_crtc; c++) {
         xf86CrtcPtr crtc = xf86_config->crtc[c];
 
-        if (crtc->enabled)
-            xf86_crtc_hide_cursor(crtc);
+        if (crtc->enabled) {
+          xf86_crtc_hide_cursor(crtc);
+        }
     }
 }
 
@@ -346,8 +361,9 @@ xf86_crtc_show_cursor(xf86CrtcPtr crtc)
         return TRUE;
     }
 
-    if (!crtc->cursor_shown)
-        crtc->cursor_shown = xf86_driver_show_cursor(crtc);
+    if (!crtc->cursor_shown) {
+      crtc->cursor_shown = xf86_driver_show_cursor(crtc);
+    }
 
     return crtc->cursor_shown;
 }
@@ -362,8 +378,9 @@ xf86_show_cursors(ScrnInfoPtr scrn)
     for (c = 0; c < xf86_config->num_crtc; c++) {
         xf86CrtcPtr crtc = xf86_config->crtc[c];
 
-        if (crtc->enabled && !xf86_crtc_show_cursor(crtc))
-            return FALSE;
+        if (crtc->enabled && !xf86_crtc_show_cursor(crtc)) {
+          return FALSE;
+        }
     }
 
     return TRUE;
@@ -407,15 +424,19 @@ xf86_crtc_transform_cursor_position(xf86CrtcPtr crtc, int *x, int *y)
     }
 
     if (swap_reflection) {
-        if (crtc->rotation & RR_Reflect_Y)
-            *x = crtc->mode.HDisplay - *x - 1;
-        if (crtc->rotation & RR_Reflect_X)
-            *y = crtc->mode.VDisplay - *y - 1;
+      if (crtc->rotation & RR_Reflect_Y) {
+        *x = crtc->mode.HDisplay - *x - 1;
+      }
+      if (crtc->rotation & RR_Reflect_X) {
+        *y = crtc->mode.VDisplay - *y - 1;
+      }
     } else {
-        if (crtc->rotation & RR_Reflect_X)
-            *x = crtc->mode.HDisplay - *x - 1;
-        if (crtc->rotation & RR_Reflect_Y)
-            *y = crtc->mode.VDisplay - *y - 1;
+      if (crtc->rotation & RR_Reflect_X) {
+        *x = crtc->mode.HDisplay - *x - 1;
+      }
+      if (crtc->rotation & RR_Reflect_Y) {
+        *y = crtc->mode.VDisplay - *y - 1;
+      }
     }
 
     /*
@@ -440,11 +461,11 @@ xf86_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
     /*
      * Transform position of cursor on screen
      */
-    if (crtc->rotation != RR_Rotate_0)
-        xf86_crtc_transform_cursor_position(crtc, &crtc_x, &crtc_y);
-    else {
-        crtc_x -= crtc->x;
-        crtc_y -= crtc->y;
+    if (crtc->rotation != RR_Rotate_0) {
+      xf86_crtc_transform_cursor_position(crtc, &crtc_x, &crtc_y);
+    } else {
+      crtc_x -= crtc->x;
+      crtc_y -= crtc->y;
     }
 
     /*
@@ -456,10 +477,12 @@ xf86_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
         xf86_crtc_hide_cursor(crtc);
     } else {
         crtc->cursor_in_range = TRUE;
-        if (crtc->driverIsPerformingTransform & XF86DriverTransformCursorPosition)
-            crtc->funcs->set_cursor_position(crtc, x, y);
-        else
-            crtc->funcs->set_cursor_position(crtc, crtc_x, crtc_y);
+        if (crtc->driverIsPerformingTransform &
+            XF86DriverTransformCursorPosition) {
+          crtc->funcs->set_cursor_position(crtc, x, y);
+        } else {
+          crtc->funcs->set_cursor_position(crtc, crtc_x, crtc_y);
+        }
         xf86_crtc_show_cursor(crtc);
     }
 }
@@ -476,8 +499,9 @@ xf86_set_cursor_position(ScrnInfoPtr scrn, int x, int y)
     for (c = 0; c < xf86_config->num_crtc; c++) {
         xf86CrtcPtr crtc = xf86_config->crtc[c];
 
-        if (crtc->enabled)
-            xf86_crtc_set_cursor_position(crtc, x, y);
+        if (crtc->enabled) {
+          xf86_crtc_set_cursor_position(crtc, x, y);
+        }
     }
 }
 
@@ -495,27 +519,28 @@ xf86_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
 
     crtc->cursor_argb = FALSE;
 
-    if (rotation == RR_Rotate_0)
-        cursor_image = src;
-    else {
-        int x, y;
-        int xin, yin;
-        int stride = cursor_info->MaxWidth >> 2;
+    if (rotation == RR_Rotate_0) {
+      cursor_image = src;
+    } else {
+      int x, y;
+      int xin, yin;
+      int stride = cursor_info->MaxWidth >> 2;
 
-        cursor_image = xf86_config->cursor_image;
-        memset(cursor_image, 0, cursor_info->MaxHeight * stride);
+      cursor_image = xf86_config->cursor_image;
+      memset(cursor_image, 0, cursor_info->MaxHeight * stride);
 
-        for (y = 0; y < cursor_info->MaxHeight; y++)
-            for (x = 0; x < cursor_info->MaxWidth; x++) {
-                xf86_crtc_rotate_coord(rotation,
-                                       cursor_info->MaxWidth,
-                                       cursor_info->MaxHeight,
-                                       x, y, &xin, &yin);
-                if (get_bit(src, cursor_info, xin, yin, FALSE))
-                    set_bit(cursor_image, cursor_info, x, y, FALSE);
-                if (get_bit(src, cursor_info, xin, yin, TRUE))
-                    set_bit(cursor_image, cursor_info, x, y, TRUE);
-            }
+      for (y = 0; y < cursor_info->MaxHeight; y++) {
+        for (x = 0; x < cursor_info->MaxWidth; x++) {
+          xf86_crtc_rotate_coord(rotation, cursor_info->MaxWidth,
+                                 cursor_info->MaxHeight, x, y, &xin, &yin);
+          if (get_bit(src, cursor_info, xin, yin, FALSE)) {
+            set_bit(cursor_image, cursor_info, x, y, FALSE);
+          }
+          if (get_bit(src, cursor_info, xin, yin, TRUE)) {
+            set_bit(cursor_image, cursor_info, x, y, TRUE);
+          }
+        }
+      }
     }
     return xf86_driver_load_cursor_image(crtc, cursor_image);
 }
@@ -535,13 +560,16 @@ xf86_load_cursor_image(ScrnInfoPtr scrn, unsigned char *src)
 
         if (crtc->enabled) {
             if (xf86_driver_has_load_cursor_image(crtc)) {
-                if (!xf86_crtc_load_cursor_image(crtc, src))
-                    return FALSE;
-            } else if (xf86_driver_has_load_cursor_argb(crtc)) {
-                if (!xf86_crtc_convert_cursor_to_argb(crtc, src))
-                    return FALSE;
-            } else
+              if (!xf86_crtc_load_cursor_image(crtc, src)) {
                 return FALSE;
+              }
+            } else if (xf86_driver_has_load_cursor_argb(crtc)) {
+              if (!xf86_crtc_convert_cursor_to_argb(crtc, src)) {
+                return FALSE;
+              }
+            } else {
+              return FALSE;
+            }
         }
     }
     return TRUE;
@@ -556,17 +584,20 @@ xf86_use_hw_cursor(ScreenPtr screen, CursorPtr cursor)
     int c;
 
     if (cursor->bits->width > cursor_info->MaxWidth ||
-        cursor->bits->height > cursor_info->MaxHeight)
-        return FALSE;
+        cursor->bits->height > cursor_info->MaxHeight) {
+      return FALSE;
+    }
 
     for (c = 0; c < xf86_config->num_crtc; c++) {
         xf86CrtcPtr crtc = xf86_config->crtc[c];
 
-        if (!crtc->enabled)
-            continue;
+        if (!crtc->enabled) {
+          continue;
+        }
 
-        if (crtc->transformPresent)
-            return FALSE;
+        if (crtc->transformPresent) {
+          return FALSE;
+        }
     }
 
     return TRUE;
@@ -579,12 +610,14 @@ xf86_use_hw_cursor_argb(ScreenPtr screen, CursorPtr cursor)
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
     xf86CursorInfoPtr cursor_info = xf86_config->cursor_info;
 
-    if (!xf86_use_hw_cursor(screen, cursor))
-        return FALSE;
+    if (!xf86_use_hw_cursor(screen, cursor)) {
+      return FALSE;
+    }
 
     /* Make sure ARGB support is available */
-    if ((cursor_info->Flags & HARDWARE_CURSOR_ARGB) == 0)
-        return FALSE;
+    if ((cursor_info->Flags & HARDWARE_CURSOR_ARGB) == 0) {
+      return FALSE;
+    }
 
     return TRUE;
 }
@@ -606,16 +639,18 @@ xf86_crtc_load_cursor_argb(xf86CrtcPtr crtc, CursorPtr cursor)
     int image_height = cursor_info->MaxHeight;
     const Rotation rotation = xf86_crtc_cursor_rotation(crtc);
 
-    for (y = 0; y < image_height; y++)
-        for (x = 0; x < image_width; x++) {
-            xf86_crtc_rotate_coord(rotation, image_width, image_height, x, y,
-                                   &xin, &yin);
-            if (xin < source_width && yin < source_height)
-                bits = cursor_source[yin * source_width + xin];
-            else
-                bits = 0;
-            cursor_image[y * image_width + x] = bits;
+    for (y = 0; y < image_height; y++) {
+      for (x = 0; x < image_width; x++) {
+        xf86_crtc_rotate_coord(rotation, image_width, image_height, x, y, &xin,
+                               &yin);
+        if (xin < source_width && yin < source_height) {
+          bits = cursor_source[yin * source_width + xin];
+        } else {
+          bits = 0;
         }
+        cursor_image[y * image_width + x] = bits;
+      }
+    }
 
     return xf86_driver_load_cursor_argb(crtc, cursor_image);
 }
@@ -630,9 +665,11 @@ xf86_load_cursor_argb(ScrnInfoPtr scrn, CursorPtr cursor)
     for (c = 0; c < xf86_config->num_crtc; c++) {
         xf86CrtcPtr crtc = xf86_config->crtc[c];
 
-        if (crtc->enabled)
-            if (!xf86_crtc_load_cursor_argb(crtc, cursor))
-                return FALSE;
+        if (crtc->enabled) {
+          if (!xf86_crtc_load_cursor_argb(crtc, cursor)) {
+            return FALSE;
+          }
+        }
     }
     return TRUE;
 }
@@ -645,8 +682,9 @@ xf86_cursors_init(ScreenPtr screen, int max_width, int max_height, int flags)
     xf86CursorInfoPtr cursor_info;
 
     cursor_info = xf86CreateCursorInfoRec();
-    if (!cursor_info)
-        return FALSE;
+    if (!cursor_info) {
+      return FALSE;
+    }
 
     xf86_config->cursor_image = calloc(max_width * max_height, 4);
 

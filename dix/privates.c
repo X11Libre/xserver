@@ -138,8 +138,9 @@ dixReallocPrivates(PrivatePtr *privates, int old_offset, unsigned bytes)
     void *new_privates;
 
     new_privates = realloc(*privates, old_offset + bytes);
-    if (!new_privates)
-        return FALSE;
+    if (!new_privates) {
+      return FALSE;
+    }
     memset((char *) new_privates + old_offset, '\0', bytes);
     *privates = new_privates;
     return TRUE;
@@ -162,8 +163,9 @@ fixupOneScreen(ScreenPtr pScreen, FixupFunc fixup, unsigned bytes)
 
     old = (uintptr_t) pScreen->devPrivates;
     size = global_keys[PRIVATE_SCREEN].offset;
-    if (!fixup (&pScreen->devPrivates, size, bytes))
-        return FALSE;
+    if (!fixup(&pScreen->devPrivates, size, bytes)) {
+      return FALSE;
+    }
 
     /* Screen privates can contain screen-specific private keys
      * for other types. When they move, the linked list we use to
@@ -177,34 +179,35 @@ fixupOneScreen(ScreenPtr pScreen, FixupFunc fixup, unsigned bytes)
     /* Moving means everyone shifts up in the privates by 'bytes' amount,
      * realloc means the base pointer moves
      */
-    if (fixup == dixMovePrivates)
-        new += bytes;
+    if (fixup == dixMovePrivates) {
+      new += bytes;
+    }
 
     if ((uintptr_t) new != old) {
-        for (DevPrivateType type = PRIVATE_XSELINUX; type < PRIVATE_LAST; type++)
+      for (DevPrivateType type = PRIVATE_XSELINUX; type < PRIVATE_LAST;
+           type++) {
 
-            /* Walk the privates list, being careful as the
-             * pointers are scrambled before we patch them.
-             */
-            for (DevPrivateKey key, *keyp = &pScreen->screenSpecificPrivates[type].key;
-                 (key = *keyp) != NULL;
-                 keyp = &key->next)
-            {
+        /* Walk the privates list, being careful as the
+         * pointers are scrambled before we patch them.
+         */
+        for (DevPrivateKey key,
+             *keyp = &pScreen->screenSpecificPrivates[type].key;
+             (key = *keyp) != NULL; keyp = &key->next) {
 
-                /* Only mangle things if the private structure
-                 * is contained within the allocation. Privates
-                 * stored elsewhere will be left alone
-                 */
-                if (old <= (uintptr_t) key && (uintptr_t) key < old + size)
-                {
-                    /* Compute new location of key (deriving from the new
-                     * allocation to avoid UB) */
-                    key = (DevPrivateKey) (new + ((uintptr_t) key - old));
+          /* Only mangle things if the private structure
+           * is contained within the allocation. Privates
+           * stored elsewhere will be left alone
+           */
+          if (old <= (uintptr_t)key && (uintptr_t)key < old + size) {
+            /* Compute new location of key (deriving from the new
+             * allocation to avoid UB) */
+            key = (DevPrivateKey)(new + ((uintptr_t)key - old));
 
-                    /* Patch the list */
-                    *keyp = key;
-                }
-            }
+            /* Patch the list */
+            *keyp = key;
+          }
+        }
+      }
     }
     return TRUE;
 }
@@ -226,9 +229,10 @@ fixupScreens(FixupFunc fixup, unsigned bytes)
 static Bool
 fixupServerClient(FixupFunc fixup, unsigned bytes)
 {
-    if (serverClient)
-        return fixup(&serverClient->devPrivates, global_keys[PRIVATE_CLIENT].offset,
-                     bytes);
+  if (serverClient) {
+    return fixup(&serverClient->devPrivates, global_keys[PRIVATE_CLIENT].offset,
+                 bytes);
+  }
     return TRUE;
 }
 
@@ -237,11 +241,13 @@ fixupExtensions(FixupFunc fixup, unsigned bytes)
 {
     ExtensionEntry *extension;
 
-    for (unsigned char major = EXTENSION_BASE; (extension = GetExtensionEntry(major));
-         major++)
-        if (!fixup
-            (&extension->devPrivates, global_keys[PRIVATE_EXTENSION].offset, bytes))
-            return FALSE;
+    for (unsigned char major = EXTENSION_BASE;
+         (extension = GetExtensionEntry(major)); major++) {
+      if (!fixup(&extension->devPrivates, global_keys[PRIVATE_EXTENSION].offset,
+                 bytes)) {
+        return FALSE;
+      }
+    }
     return TRUE;
 }
 
@@ -264,8 +270,10 @@ static Bool
 fixupDeviceList(DeviceIntPtr device, FixupFunc fixup, unsigned bytes)
 {
     while (device) {
-        if (!fixup(&device->devPrivates, global_keys[PRIVATE_DEVICE].offset, bytes))
-            return FALSE;
+      if (!fixup(&device->devPrivates, global_keys[PRIVATE_DEVICE].offset,
+                 bytes)) {
+        return FALSE;
+      }
         device = device->next;
     }
     return TRUE;
@@ -289,8 +297,9 @@ static Bool (*const allocated_early[PRIVATE_LAST]) (FixupFunc, unsigned) = {
 static void
 grow_private_set(DevPrivateSetPtr set, unsigned bytes)
 {
-    for (DevPrivateKey k = set->key; k; k = k->next)
-        k->offset += bytes;
+  for (DevPrivateKey k = set->key; k; k = k->next) {
+    k->offset += bytes;
+  }
     set->offset += bytes;
 }
 
@@ -319,8 +328,9 @@ dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
 
     /* Compute required space */
     bytes = size;
-    if (size == 0)
-        bytes = sizeof(void *);
+    if (size == 0) {
+      bytes = sizeof(void *);
+    }
 
     /* align to pointer size */
     bytes = (bytes + sizeof(void *) - 1) & ~(sizeof(void *) - 1);
@@ -333,13 +343,15 @@ dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
          * special magic for PRIVATE_XSELINUX type keys - those are registered
          * at the same offset in several object types.
          */
-        for (DevPrivateType t = PRIVATE_XSELINUX; t < PRIVATE_LAST; t++)
-            if (xselinux_private[t]) {
-                if (!allocated_early[t])
-                    assert(!global_keys[t].created);
-                else if (!allocated_early[t] (dixReallocPrivates, bytes))
-                    return FALSE;
+        for (DevPrivateType t = PRIVATE_XSELINUX; t < PRIVATE_LAST; t++) {
+          if (xselinux_private[t]) {
+            if (!allocated_early[t]) {
+              assert(!global_keys[t].created);
+            } else if (!allocated_early[t](dixReallocPrivates, bytes)) {
+              return FALSE;
             }
+          }
+        }
 
         /* Move all existing keys up in the privates space to make
          * room for this new global key
@@ -348,8 +360,9 @@ dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
             if (xselinux_private[t]) {
                 grow_private_set(&global_keys[t], bytes);
                 grow_screen_specific_set(t, bytes);
-                if (allocated_early[t])
-                    allocated_early[t] (dixMovePrivates, bytes);
+                if (allocated_early[t]) {
+                  allocated_early[t](dixMovePrivates, bytes);
+                }
             }
 
         }
@@ -358,10 +371,11 @@ dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
     }
     else {
         /* Resize if we can, or make sure nothing's allocated if we can't */
-        if (!allocated_early[type])
-            assert(!global_keys[type].created);
-        else if (!allocated_early[type] (dixReallocPrivates, bytes))
-            return FALSE;
+        if (!allocated_early[type]) {
+          assert(!global_keys[type].created);
+        } else if (!allocated_early[type](dixReallocPrivates, bytes)) {
+          return FALSE;
+        }
         offset = global_keys[type].offset;
         global_keys[type].offset += bytes;
         grow_screen_specific_set(type, bytes);
@@ -385,8 +399,9 @@ dixRegisterScreenPrivateKey(DevScreenPrivateKeyPtr screenKey, ScreenPtr pScreen,
 {
     DevPrivateKey key;
 
-    if (!dixRegisterPrivateKey(&screenKey->screenKey, PRIVATE_SCREEN, 0))
-        return FALSE;
+    if (!dixRegisterPrivateKey(&screenKey->screenKey, PRIVATE_SCREEN, 0)) {
+      return FALSE;
+    }
     key = dixGetPrivate(&pScreen->devPrivates, &screenKey->screenKey);
     if (key != NULL) {
         assert(key->size == size);
@@ -394,8 +409,9 @@ dixRegisterScreenPrivateKey(DevScreenPrivateKeyPtr screenKey, ScreenPtr pScreen,
         return TRUE;
     }
     key = calloc(1, sizeof(DevPrivateKeyRec));
-    if (!key)
-        return FALSE;
+    if (!key) {
+      return FALSE;
+    }
     if (!dixRegisterPrivateKey(key, type, size)) {
         free(key);
         return FALSE;
@@ -420,13 +436,16 @@ _dixInitPrivates(PrivatePtr *privates, void *addr, DevPrivateType type)
     assert (!screen_specific_private[type]);
 
     global_keys[type].created++;
-    if (xselinux_private[type])
-        global_keys[PRIVATE_XSELINUX].created++;
-    if (global_keys[type].offset == 0)
-        addr = 0;
+    if (xselinux_private[type]) {
+      global_keys[PRIVATE_XSELINUX].created++;
+    }
+    if (global_keys[type].offset == 0) {
+      addr = 0;
+    }
     *privates = addr;
-    if (addr)
-        memset(addr, '\0', global_keys[type].offset);
+    if (addr) {
+      memset(addr, '\0', global_keys[type].offset);
+    }
 }
 
 /*
@@ -436,8 +455,9 @@ void
 _dixFiniPrivates(PrivatePtr privates, DevPrivateType type)
 {
     global_keys[type].created--;
-    if (xselinux_private[type])
-        global_keys[PRIVATE_XSELINUX].created--;
+    if (xselinux_private[type]) {
+      global_keys[PRIVATE_XSELINUX].created--;
+    }
 }
 
 /*
@@ -462,8 +482,9 @@ _dixAllocateObjectWithPrivates(unsigned baseSize, unsigned clear,
     baseSize = (baseSize + sizeof(void *) - 1) & ~(sizeof(void *) - 1);
     totalSize = baseSize + global_keys[type].offset;
     void *object = calloc(1, totalSize);
-    if (!object)
-        return NULL;
+    if (!object) {
+      return NULL;
+    }
 
     memset(object, '\0', clear);
     privates = (PrivatePtr) (((char *) object) + baseSize);
@@ -493,8 +514,9 @@ dixAllocatePrivates(PrivatePtr *privates, DevPrivateType type)
         p = NULL;
     }
     else {
-        if (!(p = calloc(1, size)))
-            return FALSE;
+      if (!(p = calloc(1, size))) {
+        return FALSE;
+      }
     }
 
     _dixInitPrivates(privates, p, type);
@@ -523,8 +545,9 @@ _dixFreeObjectWithPrivates(void *object, PrivatePtr privates,
 void
 dixFreePrivates(PrivatePtr privates, DevPrivateType type)
 {
-    if (!privates)
-        return;
+  if (!privates) {
+    return;
+  }
 
     _dixFiniPrivates(privates, type);
     --global_keys[type].allocated;
@@ -563,14 +586,16 @@ dixLookupPrivateOffset(RESTYPE type)
      * points at pixmaps (thanks, DBE)
      */
     if (type & RC_DRAWABLE) {
-        if (type == X11_RESTYPE_WINDOW)
-            return offsets[X11_RESTYPE_WINDOW & TypeMask];
-        else
-            return offsets[X11_RESTYPE_PIXMAP & TypeMask];
+      if (type == X11_RESTYPE_WINDOW) {
+        return offsets[X11_RESTYPE_WINDOW & TypeMask];
+      } else {
+        return offsets[X11_RESTYPE_PIXMAP & TypeMask];
+      }
     }
     type = type & TypeMask;
-    if (type < ARRAY_SIZE(offsets))
-        return offsets[type];
+    if (type < ARRAY_SIZE(offsets)) {
+      return offsets[type];
+    }
     return -1;
 }
 
@@ -585,9 +610,11 @@ dixRegisterScreenSpecificPrivateKey(ScreenPtr pScreen, DevPrivateKey key,
     int offset;
     unsigned bytes;
 
-    if (!screen_specific_private[type])
-        FatalError("Attempt to allocate screen-specific private storage for type %s\n",
-                   key_names[type]);
+    if (!screen_specific_private[type]) {
+      FatalError(
+          "Attempt to allocate screen-specific private storage for type %s\n",
+          key_names[type]);
+    }
 
     if (key->initialized) {
         assert(size == key->size);
@@ -596,8 +623,9 @@ dixRegisterScreenSpecificPrivateKey(ScreenPtr pScreen, DevPrivateKey key,
 
     /* Compute required space */
     bytes = size;
-    if (size == 0)
-        bytes = sizeof(void *);
+    if (size == 0) {
+      bytes = sizeof(void *);
+    }
 
     /* align to void * size */
     bytes = (bytes + sizeof(void *) - 1) & ~(sizeof(void *) - 1);
@@ -634,8 +662,9 @@ dixFreeScreenSpecificPrivates(ScreenPtr pScreen)
 void
 dixInitScreenSpecificPrivates(ScreenPtr pScreen)
 {
-    for (DevPrivateType t = PRIVATE_XSELINUX; t < PRIVATE_LAST; t++)
-        pScreen->screenSpecificPrivates[t].offset = global_keys[t].offset;
+  for (DevPrivateType t = PRIVATE_XSELINUX; t < PRIVATE_LAST; t++) {
+    pScreen->screenSpecificPrivates[t].offset = global_keys[t].offset;
+  }
 }
 
 /* Initialize screen-specific privates in AddScreen */
@@ -648,18 +677,21 @@ _dixInitScreenPrivates(ScreenPtr pScreen, PrivatePtr *privates, void *addr, DevP
     if (pScreen) {
         privates_size = pScreen->screenSpecificPrivates[type].offset;
         pScreen->screenSpecificPrivates[type].created++;
+    } else {
+      privates_size = global_keys[type].offset;
     }
-    else
-        privates_size = global_keys[type].offset;
 
     global_keys[type].created++;
-    if (xselinux_private[type])
-        global_keys[PRIVATE_XSELINUX].created++;
-    if (privates_size == 0)
-        addr = 0;
+    if (xselinux_private[type]) {
+      global_keys[PRIVATE_XSELINUX].created++;
+    }
+    if (privates_size == 0) {
+      addr = 0;
+    }
     *privates = addr;
-    if (addr)
-        memset(addr, '\0', privates_size);
+    if (addr) {
+      memset(addr, '\0', privates_size);
+    }
 }
 
 void *
@@ -677,16 +709,18 @@ _dixAllocateScreenObjectWithPrivates(ScreenPtr pScreen,
     assert(type < PRIVATE_LAST);
     assert (screen_specific_private[type]);
 
-    if (pScreen)
-        privates_size = pScreen->screenSpecificPrivates[type].offset;
-    else
-        privates_size = global_keys[type].offset;
+    if (pScreen) {
+      privates_size = pScreen->screenSpecificPrivates[type].offset;
+    } else {
+      privates_size = global_keys[type].offset;
+    }
     /* round up so that pointer is aligned */
     baseSize = (baseSize + sizeof(void *) - 1) & ~(sizeof(void *) - 1);
     totalSize = baseSize + privates_size;
     void *object = calloc(1, totalSize);
-    if (!object)
-        return NULL;
+    if (!object) {
+      return NULL;
+    }
 
     privates = (PrivatePtr) (((char *) object) + baseSize);
     devPrivates = (PrivatePtr *) ((char *) object + offset);
@@ -702,10 +736,11 @@ dixScreenSpecificPrivatesSize(ScreenPtr pScreen, DevPrivateType type)
     assert(type >= PRIVATE_SCREEN);
     assert(type < PRIVATE_LAST);
 
-    if (screen_specific_private[type])
-        return pScreen->screenSpecificPrivates[type].offset;
-    else
-        return global_keys[type].offset;
+    if (screen_specific_private[type]) {
+      return pScreen->screenSpecificPrivates[type].offset;
+    } else {
+      return global_keys[type].offset;
+    }
 }
 
 void
@@ -739,8 +774,9 @@ dixResetPrivates(void)
             key->initialized = FALSE;
             key->size = 0;
             key->type = 0;
-            if (key->allocated)
-                free(key);
+            if (key->allocated) {
+              free(key);
+            }
         }
         if (global_keys[t].created) {
             ErrorF("%d %ss still allocated at reset\n",
@@ -757,8 +793,9 @@ dixResetPrivates(void)
 Bool
 dixPrivatesCreated(DevPrivateType type)
 {
-    if (global_keys[type].created)
-        return TRUE;
-    else
-        return FALSE;
+  if (global_keys[type].created) {
+    return TRUE;
+  } else {
+    return FALSE;
+  }
 }

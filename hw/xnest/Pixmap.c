@@ -40,8 +40,9 @@ xnestCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     PixmapPtr pPixmap;
 
     pPixmap = AllocatePixmap(pScreen, 0);
-    if (!pPixmap)
-        return NullPixmap;
+    if (!pPixmap) {
+      return NullPixmap;
+    }
     pPixmap->drawable.type = DRAWABLE_PIXMAP;
     pPixmap->drawable.depth = depth;
     pPixmap->drawable.bitsPerPixel = depth;
@@ -57,9 +58,9 @@ xnestCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
         xcb_create_pixmap(xnestUpstreamInfo.conn, depth, pixmap,
                           xnestDefaultWindows[pScreen->myNum], width, height);
         xnestPixmapPriv(pPixmap)->pixmap = pixmap;
+    } else {
+      xnestPixmapPriv(pPixmap)->pixmap = 0;
     }
-    else
-        xnestPixmapPriv(pPixmap)->pixmap = 0;
 
     return pPixmap;
 }
@@ -67,8 +68,9 @@ xnestCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
 Bool
 xnestDestroyPixmap(PixmapPtr pPixmap)
 {
-    if (--pPixmap->refcnt)
-        return TRUE;
+  if (--pPixmap->refcnt) {
+    return TRUE;
+  }
     xcb_free_pixmap(xnestUpstreamInfo.conn, xnestPixmap(pPixmap));
     FreePixmap(pPixmap);
     return TRUE;
@@ -120,8 +122,9 @@ xnestPixmapToRegion(PixmapPtr pPixmap)
 
     if (err) {
         //  badMatch may happeen if the upstream window is currently minimized
-        if (err->error_code != BadMatch)
-            ErrorF("xnestGetImage: received error %d\n", err->error_code);
+        if (err->error_code != BadMatch) {
+          ErrorF("xnestGetImage: received error %d\n", err->error_code);
+        }
         free(err);
         return NULL;
     }

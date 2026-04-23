@@ -88,11 +88,11 @@ int main(int argc, char **argv)
     xcb_generic_error_t error;
     int r = read(fd, &error, sizeof(error));
 
-    if (r == sizeof(error) &&
-        error.error_code == 2 /* BadValue */  &&
+    if (r == sizeof(error) && error.error_code == 2 /* BadValue */ &&
         error.major_code == xise_req.extension &&
-        error.minor_code == XCB_INPUT_XI_SELECT_EVENTS)
-        return 1; /* Our request was processed, which shouldn't happen */
+        error.minor_code == XCB_INPUT_XI_SELECT_EVENTS) {
+      return 1; /* Our request was processed, which shouldn't happen */
+    }
 
     /* Something else bad happened. We got something back but it's not the
      * error we expected. If this happens, it needs to be investigated. */

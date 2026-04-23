@@ -38,11 +38,13 @@ present_get_window_priv(WindowPtr window, Bool create)
 {
     present_window_priv_ptr window_priv = present_window_priv(window);
 
-    if (!create || window_priv != NULL)
-        return window_priv;
+    if (!create || window_priv != NULL) {
+      return window_priv;
+    }
     window_priv = calloc (1, sizeof (present_window_priv_rec));
-    if (!window_priv)
-        return NULL;
+    if (!window_priv) {
+      return NULL;
+    }
     xorg_list_init(&window_priv->vblank);
     xorg_list_init(&window_priv->notifies);
 
@@ -58,11 +60,13 @@ present_get_window_priv(WindowPtr window, Bool create)
 static void present_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
-    if (!screen_priv)
-        return;
+    if (!screen_priv) {
+      return;
+    }
 
-    if (screen_priv->flip_destroy)
-        screen_priv->flip_destroy(screen);
+    if (screen_priv->flip_destroy) {
+      screen_priv->flip_destroy(screen);
+    }
 
     dixScreenUnhookClose(screen, present_close_screen);
     dixSetPrivate(&screen->devPrivates, &present_screen_private_key, NULL);
@@ -131,10 +135,11 @@ present_config_notify(WindowPtr window,
     present_send_config_notify(window, x, y, w, h, bw, sibling, 0);
 
     unwrap(screen_priv, screen, ConfigNotify);
-    if (screen->ConfigNotify)
-        ret = screen->ConfigNotify (window, x, y, w, h, bw, sibling);
-    else
-        ret = 0;
+    if (screen->ConfigNotify) {
+      ret = screen->ConfigNotify(window, x, y, w, h, bw, sibling);
+    } else {
+      ret = 0;
+    }
     wrap(screen_priv, screen, ConfigNotify, present_config_notify);
     return ret;
 }
@@ -150,20 +155,22 @@ present_clip_notify(WindowPtr window, int dx, int dy)
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
 
     screen_priv->check_flip_window(window);
-    unwrap(screen_priv, screen, ClipNotify)
-    if (screen->ClipNotify)
-        screen->ClipNotify (window, dx, dy);
+    unwrap(screen_priv, screen, ClipNotify) if (screen->ClipNotify) {
+      screen->ClipNotify(window, dx, dy);
+    }
     wrap(screen_priv, screen, ClipNotify, present_clip_notify);
 }
 
 Bool
 present_screen_register_priv_keys(void)
 {
-    if (!dixRegisterPrivateKey(&present_screen_private_key, PRIVATE_SCREEN, 0))
-        return FALSE;
+  if (!dixRegisterPrivateKey(&present_screen_private_key, PRIVATE_SCREEN, 0)) {
+    return FALSE;
+  }
 
-    if (!dixRegisterPrivateKey(&present_window_private_key, PRIVATE_WINDOW, 0))
-        return FALSE;
+  if (!dixRegisterPrivateKey(&present_window_private_key, PRIVATE_WINDOW, 0)) {
+    return FALSE;
+  }
 
     return TRUE;
 }
@@ -174,8 +181,9 @@ present_screen_priv_init(ScreenPtr screen)
     present_screen_priv_ptr screen_priv;
 
     screen_priv = calloc(1, sizeof (present_screen_priv_rec));
-    if (!screen_priv)
-        return NULL;
+    if (!screen_priv) {
+      return NULL;
+    }
 
     dixScreenHookWindowDestroy(screen, present_destroy_window);
     dixScreenHookClose(screen, present_close_screen);
@@ -195,8 +203,9 @@ check_flip_visit(WindowPtr window, void *data)
     ScreenPtr screen = window->drawable.pScreen;
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
 
-    if (!screen_priv)
-        return WT_DONTWALKCHILDREN;
+    if (!screen_priv) {
+      return WT_DONTWALKCHILDREN;
+    }
 
     screen_priv->check_flip_window(window);
 
@@ -215,13 +224,15 @@ present_check_flips(WindowPtr window)
 int
 present_screen_init(ScreenPtr screen, present_screen_info_ptr info)
 {
-    if (!present_screen_register_priv_keys())
-        return FALSE;
+  if (!present_screen_register_priv_keys()) {
+    return FALSE;
+  }
 
     if (!present_screen_priv(screen)) {
         present_screen_priv_ptr screen_priv = present_screen_priv_init(screen);
-        if (!screen_priv)
-            return FALSE;
+        if (!screen_priv) {
+          return FALSE;
+        }
 
         screen_priv->info = info;
         present_scmd_init_mode_hooks(screen_priv);
@@ -241,23 +252,27 @@ present_extension_init(void)
     ExtensionEntry *extension;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return;
+    if (!noPanoramiXExtension) {
+      return;
+    }
 #endif /* XINERAMA */
 
     extension = AddExtension(PRESENT_NAME, PresentNumberEvents, PresentNumberErrors,
                              proc_present_dispatch, sproc_present_dispatch,
                              NULL, StandardMinorOpcode);
-    if (!extension)
-        goto bail;
+    if (!extension) {
+      goto bail;
+    }
 
     present_request = extension->base;
 
-    if (!present_init())
-        goto bail;
+    if (!present_init()) {
+      goto bail;
+    }
 
-    if (!present_event_init())
-        goto bail;
+    if (!present_event_init()) {
+      goto bail;
+    }
 
     DIX_FOR_EACH_SCREEN({
         if (!present_screen_init(walkScreen, NULL))

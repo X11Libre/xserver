@@ -148,8 +148,9 @@ DamageExtNotify(DamageExtPtr pDamageExt, BoxPtr pBoxes, int nBoxes)
     if (pBoxes) {
         for (i = 0; i < nBoxes; i++) {
             ev.level = pDamageExt->level;
-            if (i < nBoxes - 1)
-                ev.level |= DamageNotifyMore;
+            if (i < nBoxes - 1) {
+              ev.level |= DamageNotifyMore;
+            }
             ev.area.x = pBoxes[i].x1;
             ev.area.y = pBoxes[i].y1;
             ev.area.width = pBoxes[i].x2 - pBoxes[i].x1;
@@ -196,8 +197,9 @@ DamageExtDestroy(DamagePtr pDamage, void *closure)
     DamageExtPtr pDamageExt = closure;
 
     pDamageExt->pDamage = 0;
-    if (pDamageExt->id)
-        FreeResource(pDamageExt->id, X11_RESTYPE_NONE);
+    if (pDamageExt->id) {
+      FreeResource(pDamageExt->id, X11_RESTYPE_NONE);
+    }
 }
 
 void
@@ -205,8 +207,9 @@ DamageExtSetCritical(ClientPtr pClient, bool critical)
 {
     DamageClientPtr pDamageClient = GetDamageClient(pClient);
 
-    if (pDamageClient)
-        pDamageClient->critical += critical ? 1 : -1;
+    if (pDamageClient) {
+      pDamageClient->critical += critical ? 1 : -1;
+    }
 }
 
 static int
@@ -226,10 +229,11 @@ ProcDamageQueryVersion(ClientPtr client)
     else {
         reply.majorVersion = SERVER_DAMAGE_MAJOR_VERSION;
         if (stuff->majorVersion == SERVER_DAMAGE_MAJOR_VERSION &&
-            stuff->minorVersion < SERVER_DAMAGE_MINOR_VERSION)
-            reply.minorVersion = stuff->minorVersion;
-        else
-            reply.minorVersion = SERVER_DAMAGE_MINOR_VERSION;
+            stuff->minorVersion < SERVER_DAMAGE_MINOR_VERSION) {
+          reply.minorVersion = stuff->minorVersion;
+        } else {
+          reply.minorVersion = SERVER_DAMAGE_MINOR_VERSION;
+        }
     }
 
     pDamageClient->major_version = reply.majorVersion;
@@ -260,8 +264,9 @@ DamageExtCreate(DrawablePtr pDrawable, DamageReportLevel level,
                 ClientPtr client, XID id, XID drawable)
 {
     DamageExtPtr pDamageExt = calloc(1, sizeof(DamageExtRec));
-    if (!pDamageExt)
-        return NULL;
+    if (!pDamageExt) {
+      return NULL;
+    }
 
     pDamageExt->id = id;
     pDamageExt->drawable = drawable;
@@ -275,8 +280,9 @@ DamageExtCreate(DrawablePtr pDrawable, DamageReportLevel level,
         return NULL;
     }
 
-    if (!AddResource(id, DamageExtType, (void *) pDamageExt))
-        return NULL;
+    if (!AddResource(id, DamageExtType, (void *)pDamageExt)) {
+      return NULL;
+    }
 
     DamageExtRegister(pDrawable, pDamageExt->pDamage,
                       pDrawable->type == DRAWABLE_WINDOW);
@@ -292,8 +298,9 @@ static int doDamageCreate(ClientPtr client, DamageExtPtr *ext, xDamageCreateReq 
 
     int rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                             DixGetAttrAccess | DixReadAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     switch (stuff->level) {
     case XDamageReportRawRectangles:
@@ -315,8 +322,9 @@ static int doDamageCreate(ClientPtr client, DamageExtPtr *ext, xDamageCreateReq 
 
     pDamageExt = DamageExtCreate(pDrawable, level, client, stuff->damage,
                                  stuff->drawable);
-    if (!pDamageExt)
+    if (!pDamageExt) {
         return BadAlloc;
+    }
 
     if (ext) {
         *ext = pDamageExt;
@@ -333,8 +341,9 @@ ProcDamageCreate(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drawable);
 
 #ifdef XINERAMA
-    if (damageUseXinerama)
-        return PanoramiXDamageCreate(client, stuff);
+    if (damageUseXinerama) {
+      return PanoramiXDamageCreate(client, stuff);
+    }
 #endif
 
     LEGAL_NEW_RESOURCE(stuff->damage, client);
@@ -361,17 +370,20 @@ DamageExtSubtractWindowClip(DamageExtPtr pDamageExt)
     PanoramiXRes *res = NULL;
     RegionPtr ret;
 
-    if (!win->parent)
-        return &PanoramiXScreenRegion;
+    if (!win->parent) {
+      return &PanoramiXScreenRegion;
+    }
 
     dixLookupResourceByType((void **)&res, win->drawable.id, XRT_WINDOW,
                             serverClient, DixReadAccess);
-    if (!res)
-        return NULL;
+    if (!res) {
+      return NULL;
+    }
 
     ret = RegionCreate(NULL, 0);
-    if (!ret)
-        return NULL;
+    if (!ret) {
+      return NULL;
+    }
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
         if (Success != dixLookupWindow(&win, res->info[walkScreenIdx].id, serverClient,
@@ -396,8 +408,9 @@ out:
 static void
 DamageExtFreeWindowClip(RegionPtr reg)
 {
-    if (reg != &PanoramiXScreenRegion)
-        RegionDestroy(reg);
+  if (reg != &PanoramiXScreenRegion) {
+    RegionDestroy(reg);
+  }
 }
 #endif /* XINERAMA */
 
@@ -453,15 +466,17 @@ ProcDamageSubtract(ClientPtr client)
         DamagePtr pDamage = pDamageExt->pDamage;
 
         if (pRepair) {
-            if (pParts)
-                RegionIntersect(pParts, DamageRegion(pDamage), pRepair);
-            if (DamageExtSubtract(pDamageExt, pRepair))
-                DamageExtReport(pDamage, DamageRegion(pDamage),
-                                (void *) pDamageExt);
+          if (pParts) {
+            RegionIntersect(pParts, DamageRegion(pDamage), pRepair);
+          }
+          if (DamageExtSubtract(pDamageExt, pRepair)) {
+            DamageExtReport(pDamage, DamageRegion(pDamage), (void *)pDamageExt);
+          }
         }
         else {
-            if (pParts)
-                RegionCopy(pParts, DamageRegion(pDamage));
+          if (pParts) {
+            RegionCopy(pParts, DamageRegion(pDamage));
+          }
             DamageEmpty(pDamage);
         }
     }
@@ -482,8 +497,9 @@ ProcDamageAdd(ClientPtr client)
     VERIFY_REGION(pRegion, stuff->region, client, DixWriteAccess);
     int rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixWriteAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     /* The region is relative to the drawable origin, so translate it out to
      * screen coordinates like damage expects.
@@ -561,12 +577,14 @@ PanoramiXDamageReport(DamagePtr pDamage, RegionPtr pRegion, void *closure)
     ScreenPtr pScreen = pDamage->pScreen;
 
     /* happens on unmap? sigh xinerama */
-    if (RegionNil(pRegion))
-        return;
+    if (RegionNil(pRegion)) {
+      return;
+    }
 
     /* translate root windows if necessary */
-    if (!pWin->parent)
-        RegionTranslate(pRegion, pScreen->x, pScreen->y);
+    if (!pWin->parent) {
+      RegionTranslate(pRegion, pScreen->x, pScreen->y);
+    }
 
     /* add our damage to the protocol view */
     DamageReportDamage(pDamageExt->pDamage, pRegion);
@@ -591,14 +609,17 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     LEGAL_NEW_RESOURCE(stuff->damage, client);
     int rc = dixLookupResourceByClass((void **)&draw, stuff->drawable, XRC_DRAWABLE,
                                   client, DixGetAttrAccess | DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
-    if (!(damage = calloc(1, sizeof(PanoramiXDamageRes))))
-        return BadAlloc;
+    if (!(damage = calloc(1, sizeof(PanoramiXDamageRes)))) {
+      return BadAlloc;
+    }
 
-    if (!AddResource(stuff->damage, XRT_DAMAGE, damage))
-        return BadAlloc;
+    if (!AddResource(stuff->damage, XRT_DAMAGE, damage)) {
+      return BadAlloc;
+    }
 
     rc = doDamageCreate(client, &(damage->ext), stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
@@ -625,8 +646,9 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
         });
     }
 
-    if (rc != Success)
-        FreeResource(stuff->damage, X11_RESTYPE_NONE);
+    if (rc != Success) {
+      FreeResource(stuff->damage, X11_RESTYPE_NONE);
+    }
 
     return rc;
 }
@@ -651,8 +673,9 @@ void
 PanoramiXDamageInit(void)
 {
     XRT_DAMAGE = CreateNewResourceType(PanoramiXDamageDelete, "XineramaDamage");
-    if (!XRT_DAMAGE)
-        FatalError("Couldn't Xineramify Damage extension\n");
+    if (!XRT_DAMAGE) {
+      FatalError("Couldn't Xineramify Damage extension\n");
+    }
 
     damageUseXinerama = 1;
 }
@@ -675,12 +698,14 @@ DamageExtensionInit(void)
     });
 
     DamageExtType = CreateNewResourceType(FreeDamageExt, "DamageExt");
-    if (!DamageExtType)
-        return;
+    if (!DamageExtType) {
+      return;
+    }
 
-    if (!dixRegisterPrivateKey
-        (&DamageClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(DamageClientRec)))
-        return;
+    if (!dixRegisterPrivateKey(&DamageClientPrivateKeyRec, PRIVATE_CLIENT,
+                               sizeof(DamageClientRec))) {
+      return;
+    }
 
     if ((extEntry = AddExtension(DAMAGE_NAME, XDamageNumberEvents,
                                  XDamageNumberErrors,
@@ -693,9 +718,10 @@ DamageExtensionInit(void)
         SetResourceTypeErrorValue(DamageExtType,
                                   extEntry->errorBase + BadDamage);
 #ifdef XINERAMA
-        if (XRT_DAMAGE)
-            SetResourceTypeErrorValue(XRT_DAMAGE,
-                                      extEntry->errorBase + BadDamage);
+        if (XRT_DAMAGE) {
+          SetResourceTypeErrorValue(XRT_DAMAGE,
+                                    extEntry->errorBase + BadDamage);
+        }
 #endif /* XINERAMA */
     }
 }

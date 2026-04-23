@@ -50,8 +50,9 @@ fbComposite(CARD8 op,
     int dst_xoff, dst_yoff;
 
     miCompositeSourceValidate(pSrc);
-    if (pMask)
-        miCompositeSourceValidate(pMask);
+    if (pMask) {
+      miCompositeSourceValidate(pMask);
+    }
 
     src = image_from_pict(pSrc, FALSE, &src_xoff, &src_yoff);
     mask = image_from_pict(pMask, FALSE, &msk_xoff, &msk_yoff);
@@ -85,8 +86,9 @@ static void
 fbUnrealizeGlyph(ScreenPtr pScreen,
 		 GlyphPtr pGlyph)
 {
-    if (glyphCache)
-	pixman_glyph_cache_remove (glyphCache, pGlyph, NULL);
+  if (glyphCache) {
+    pixman_glyph_cache_remove(glyphCache, pGlyph, NULL);
+  }
 }
 
 static void
@@ -114,17 +116,20 @@ fbGlyphs(CARD8 op,
     miCompositeSourceValidate(pSrc);
 
     n_glyphs = 0;
-    for (i = 0; i < nlist; ++i)
-	n_glyphs += list[i].len;
+    for (i = 0; i < nlist; ++i) {
+      n_glyphs += list[i].len;
+    }
 
-    if (!glyphCache)
-	glyphCache = pixman_glyph_cache_create();
+    if (!glyphCache) {
+      glyphCache = pixman_glyph_cache_create();
+    }
 
     pixman_glyph_cache_freeze (glyphCache);
 
     if (n_glyphs > N_STACK_GLYPHS) {
-	if (!(pglyphs = calloc(n_glyphs, sizeof(pixman_glyph_t))))
-	    goto out;
+      if (!(pglyphs = calloc(n_glyphs, sizeof(pixman_glyph_t)))) {
+        goto out;
+      }
     }
 
     i = 0;
@@ -149,19 +154,22 @@ fbGlyphs(CARD8 op,
 		    goto next;
 		}
 
-		if (!(glyphImage = image_from_pict(pPicture, FALSE, &xoff, &yoff)))
-		    goto out;
+                if (!(glyphImage =
+                          image_from_pict(pPicture, FALSE, &xoff, &yoff))) {
+                  goto out;
+                }
 
-		g = pixman_glyph_cache_insert(glyphCache, glyph, NULL,
+                g = pixman_glyph_cache_insert(glyphCache, glyph, NULL,
 					      glyph->info.x,
 					      glyph->info.y,
 					      glyphImage);
 
 		free_pixman_pict(pPicture, glyphImage);
 
-		if (!g)
-		    goto out;
-	    }
+                if (!g) {
+                  goto out;
+                }
+            }
 
 	    pglyphs[i].x = x;
 	    pglyphs[i].y = y;
@@ -175,11 +183,13 @@ fbGlyphs(CARD8 op,
 	list++;
     }
 
-    if (!(srcImage = image_from_pict(pSrc, FALSE, &srcXoff, &srcYoff)))
-	goto out;
+    if (!(srcImage = image_from_pict(pSrc, FALSE, &srcXoff, &srcYoff))) {
+      goto out;
+    }
 
-    if (!(dstImage = image_from_pict(pDst, TRUE, &dstXoff, &dstYoff)))
-	goto out_free_src;
+    if (!(dstImage = image_from_pict(pDst, TRUE, &dstXoff, &dstYoff))) {
+      goto out_free_src;
+    }
 
     if (maskFormat) {
 	pixman_format_code_t format;
@@ -211,8 +221,9 @@ out_free_src:
 
 out:
     pixman_glyph_cache_thaw(glyphCache);
-    if (pglyphs != stack_glyphs)
-	free(pglyphs);
+    if (pglyphs != stack_glyphs) {
+      free(pglyphs);
+    }
 }
 
 static pixman_image_t *
@@ -294,8 +305,9 @@ create_bits_picture(PicturePtr pict, Bool has_clip, int *xoff, int *yoff)
                                      pixmap->drawable.height, (uint32_t *) bits,
                                      stride * sizeof(FbStride));
 
-    if (!image)
-        return NULL;
+    if (!image) {
+      return NULL;
+    }
 
 #ifdef FB_ACCESS_WRAPPER
     pixman_image_set_accessors(image,
@@ -307,21 +319,25 @@ create_bits_picture(PicturePtr pict, Bool has_clip, int *xoff, int *yoff)
      * only set the clip region for pictures with drawables
      */
     if (has_clip) {
-        if (pict->clientClip)
-            pixman_image_set_has_client_clip(image, TRUE);
+      if (pict->clientClip) {
+        pixman_image_set_has_client_clip(image, TRUE);
+      }
 
-        if (*xoff || *yoff)
-            pixman_region_translate(pict->pCompositeClip, *xoff, *yoff);
+      if (*xoff || *yoff) {
+        pixman_region_translate(pict->pCompositeClip, *xoff, *yoff);
+      }
 
         pixman_image_set_clip_region(image, pict->pCompositeClip);
 
-        if (*xoff || *yoff)
-            pixman_region_translate(pict->pCompositeClip, -*xoff, -*yoff);
+        if (*xoff || *yoff) {
+          pixman_region_translate(pict->pCompositeClip, -*xoff, -*yoff);
+        }
     }
 
     /* Indexed table */
-    if (pict->pFormat->index.devPrivate)
-        pixman_image_set_indexed(image, pict->pFormat->index.devPrivate);
+    if (pict->pFormat->index.devPrivate) {
+      pixman_image_set_indexed(image, pict->pFormat->index.devPrivate);
+    }
 
     /* Add in drawable origin to position within the image */
     *xoff += pict->pDrawable->x;
@@ -363,9 +379,9 @@ set_image_properties(pixman_image_t * image, PicturePtr pict, Bool has_clip,
             pixman_image_set_transform(image, &adjusted);
             *xoff = 0;
             *yoff = 0;
+        } else {
+          pixman_image_set_transform(image, pict->transform);
         }
-        else
-            pixman_image_set_transform(image, pict->transform);
     }
 
     switch (pict->repeatType) {
@@ -423,9 +439,9 @@ set_image_properties(pixman_image_t * image, PicturePtr pict, Bool has_clip,
         break;
     }
 
-    if (pict->pDrawable)
-        pixman_image_set_destroy_function(image, &image_destroy,
-                                          pict->pDrawable);
+    if (pict->pDrawable) {
+      pixman_image_set_destroy_function(image, &image_destroy, pict->pDrawable);
+    }
 
     pixman_image_set_filter(image, filter,
                             (pixman_fixed_t *) pict->filter_params,
@@ -439,8 +455,9 @@ image_from_pict_internal(PicturePtr pict, Bool has_clip, int *xoff, int *yoff,
 {
     pixman_image_t *image = NULL;
 
-    if (!pict)
-        return NULL;
+    if (!pict) {
+      return NULL;
+    }
 
     if (pict->pDrawable) {
         image = create_bits_picture(pict, has_clip, xoff, yoff);
@@ -454,18 +471,20 @@ image_from_pict_internal(PicturePtr pict, Bool has_clip, int *xoff, int *yoff,
         else {
             PictGradient *gradient = &pict->pSourcePict->gradient;
 
-            if (sp->type == SourcePictTypeLinear)
-                image = create_linear_gradient_image(gradient);
-            else if (sp->type == SourcePictTypeRadial)
-                image = create_radial_gradient_image(gradient);
-            else if (sp->type == SourcePictTypeConical)
-                image = create_conical_gradient_image(gradient);
+            if (sp->type == SourcePictTypeLinear) {
+              image = create_linear_gradient_image(gradient);
+            } else if (sp->type == SourcePictTypeRadial) {
+              image = create_radial_gradient_image(gradient);
+            } else if (sp->type == SourcePictTypeConical) {
+              image = create_conical_gradient_image(gradient);
+            }
         }
         *xoff = *yoff = 0;
     }
 
-    if (image)
-        set_image_properties(image, pict, has_clip, xoff, yoff, is_alpha_map);
+    if (image) {
+      set_image_properties(image, pict, has_clip, xoff, yoff, is_alpha_map);
+    }
 
     return image;
 }
@@ -479,8 +498,9 @@ image_from_pict(PicturePtr pict, Bool has_clip, int *xoff, int *yoff)
 void
 free_pixman_pict(PicturePtr pict, pixman_image_t * image)
 {
-    if (image)
-        pixman_image_unref(image);
+  if (image) {
+    pixman_image_unref(image);
+  }
 }
 
 Bool
@@ -489,8 +509,9 @@ fbPictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
 
     PictureScreenPtr ps;
 
-    if (!miPictureInit(pScreen, formats, nformats))
-        return FALSE;
+    if (!miPictureInit(pScreen, formats, nformats)) {
+      return FALSE;
+    }
     ps = GetPictureScreen(pScreen);
     ps->Composite = fbComposite;
     ps->Glyphs = fbGlyphs;

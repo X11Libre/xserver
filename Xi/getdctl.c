@@ -68,12 +68,15 @@ _writeDeviceResolution(ClientPtr client, ValuatorClassPtr v, x_rpcbuf_t *rpcbuf)
         sizeof(xDeviceResolutionState) + (3*sizeof(CARD32)*v->numAxes));
     x_rpcbuf_write_CARD32(rpcbuf, v->numAxes);
 
-    for (i = 0, a = v->axes; i < v->numAxes; i++, a++)
-        x_rpcbuf_write_CARD32(rpcbuf, a->resolution);
-    for (i = 0, a = v->axes; i < v->numAxes; i++, a++)
-        x_rpcbuf_write_CARD32(rpcbuf, a->min_resolution);
-    for (i = 0, a = v->axes; i < v->numAxes; i++, a++)
-        x_rpcbuf_write_CARD32(rpcbuf, a->max_resolution);
+    for (i = 0, a = v->axes; i < v->numAxes; i++, a++) {
+      x_rpcbuf_write_CARD32(rpcbuf, a->resolution);
+    }
+    for (i = 0, a = v->axes; i < v->numAxes; i++, a++) {
+      x_rpcbuf_write_CARD32(rpcbuf, a->min_resolution);
+    }
+    for (i = 0, a = v->axes; i < v->numAxes; i++, a++) {
+      x_rpcbuf_write_CARD32(rpcbuf, a->max_resolution);
+    }
 }
 
 static void
@@ -113,15 +116,17 @@ ProcXGetDeviceControl(ClientPtr client)
     X_REQUEST_FIELD_CARD16(control);
 
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
-        if (!dev->valuator)
-            return BadMatch;
+      if (!dev->valuator) {
+        return BadMatch;
+      }
         _writeDeviceResolution(client, dev->valuator, &rpcbuf);
         break;
     case DEVICE_CORE:

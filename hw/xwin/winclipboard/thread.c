@@ -145,8 +145,9 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
 
     const xcb_query_extension_reply_t *xfixes_query;
     xfixes_query = xcb_get_extension_data(conn, &xcb_xfixes_id);
-    if (!xfixes_query->present)
-      ErrorF ("winClipboardProc - XFixes extension not present\n");
+    if (!xfixes_query->present) {
+      ErrorF("winClipboardProc - XFixes extension not present\n");
+    }
     xfixes_event_base = xfixes_query->first_event;
     xfixes_error_base = xfixes_query->first_error;
     /* Must advise server of XFIXES version we require */
@@ -282,8 +283,9 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
             );
 
         if (iReturn < 0) {
-            if (ossock_eintr(ossock_errno()))
-                continue;
+          if (ossock_eintr(ossock_errno())) {
+            continue;
+          }
 
             ErrorF("winClipboardProc - Call to select () failed: %d.  "
                    "Bailing.\n", iReturn);
@@ -326,10 +328,11 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
     /* Close our X window */
     if (!xcb_connection_has_error(conn) && iWindow) {
         cookie = xcb_destroy_window_checked(conn, iWindow);
-        if ((error = xcb_request_check(conn, cookie)))
-            ErrorF("winClipboardProc - XDestroyWindow failed.\n");
-        else
-            ErrorF("winClipboardProc - XDestroyWindow succeeded.\n");
+        if ((error = xcb_request_check(conn, cookie))) {
+          ErrorF("winClipboardProc - XDestroyWindow failed.\n");
+        } else {
+          ErrorF("winClipboardProc - XDestroyWindow succeeded.\n");
+        }
         free(error);
     }
 

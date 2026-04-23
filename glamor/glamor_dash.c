@@ -88,20 +88,24 @@ glamor_get_dash_pixmap(GCPtr gc)
     uint32_t    pixel;
     GCPtr       scratch_gc;
 
-    if (gc_priv->dash)
-        return gc_priv->dash;
+    if (gc_priv->dash) {
+      return gc_priv->dash;
+    }
 
     offset = 0;
-    for (d = 0; d < gc->numInDashList; d++)
-        offset += gc->dash[d];
+    for (d = 0; d < gc->numInDashList; d++) {
+      offset += gc->dash[d];
+    }
 
     pixmap = glamor_create_pixmap(screen, offset, 1, 8, 0);
-    if (!pixmap)
-        goto bail;
+    if (!pixmap) {
+      goto bail;
+    }
 
     scratch_gc = GetScratchGC(8, screen);
-    if (!scratch_gc)
-        goto bail_pixmap;
+    if (!scratch_gc) {
+      goto bail_pixmap;
+    }
 
     pixel = 0xffffffff;
     offset = 0;
@@ -142,17 +146,20 @@ glamor_dash_setup(DrawablePtr drawable, GCPtr gc)
     glamor_pixmap_private *dash_priv;
     glamor_program *prog;
 
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
-    if (gc->lineWidth != 0)
-        goto bail;
+    if (gc->lineWidth != 0) {
+      goto bail;
+    }
 
     dash_pixmap = glamor_get_dash_pixmap(gc);
     dash_priv = glamor_get_pixmap_private(dash_pixmap);
 
-    if (!dash_priv || !GLAMOR_PIXMAP_PRIV_HAS_FBO(dash_priv))
-        goto bail;
+    if (!dash_priv || !GLAMOR_PIXMAP_PRIV_HAS_FBO(dash_priv)) {
+      goto bail;
+    }
 
     glamor_make_current(glamor_priv);
 
@@ -161,24 +168,28 @@ glamor_dash_setup(DrawablePtr drawable, GCPtr gc)
         prog = glamor_use_program_fill(drawable, gc,
                                        &glamor_priv->on_off_dash_line_progs,
                                        &glamor_facet_on_off_dash_lines);
-        if (!prog)
-            goto bail;
+        if (!prog) {
+          goto bail;
+        }
         break;
     case LineDoubleDash:
-        if (gc->fillStyle != FillSolid)
-            goto bail;
+      if (gc->fillStyle != FillSolid) {
+        goto bail;
+      }
 
         prog = &glamor_priv->double_dash_line_prog;
 
         if (!prog->prog) {
-            if (!glamor_build_program(screen, prog,
-                                      &glamor_facet_double_dash_lines,
-                                      NULL, NULL, NULL))
-                goto bail;
+          if (!glamor_build_program(screen, prog,
+                                    &glamor_facet_double_dash_lines, NULL, NULL,
+                                    NULL)) {
+            goto bail;
+          }
         }
 
-        if (!glamor_use_program(drawable, gc, prog, NULL))
-            goto bail;
+        if (!glamor_use_program(drawable, gc, prog, NULL)) {
+          goto bail;
+        }
 
         glamor_set_color(drawable, gc->fgPixel, prog->fg_uniform);
         glamor_set_color(drawable, gc->bgPixel, prog->bg_uniform);
@@ -254,15 +265,18 @@ glamor_poly_lines_dash_gl(DrawablePtr drawable, GCPtr gc,
     int prev_x, prev_y;
     int i;
 
-    if (n < 2)
-        return TRUE;
+    if (n < 2) {
+      return TRUE;
+    }
 
-    if (!(prog = glamor_dash_setup(drawable, gc)))
-        return FALSE;
+    if (!(prog = glamor_dash_setup(drawable, gc))) {
+      return FALSE;
+    }
 
     add_last = 0;
-    if (gc->capStyle != CapNotLast)
-        add_last = 1;
+    if (gc->capStyle != CapNotLast) {
+      add_last = 1;
+    }
 
     /* Set up the vertex buffers for the points */
 
@@ -332,12 +346,14 @@ glamor_poly_segment_dash_gl(DrawablePtr drawable, GCPtr gc,
     int add_last;
     int i;
 
-    if (!(prog = glamor_dash_setup(drawable, gc)))
-        return FALSE;
+    if (!(prog = glamor_dash_setup(drawable, gc))) {
+      return FALSE;
+    }
 
     add_last = 0;
-    if (gc->capStyle != CapNotLast)
-        add_last = 1;
+    if (gc->capStyle != CapNotLast) {
+      add_last = 1;
+    }
 
     /* Set up the vertex buffers for the points */
 
@@ -356,11 +372,10 @@ glamor_poly_segment_dash_gl(DrawablePtr drawable, GCPtr gc,
                                segs[i].x1, segs[i].y1,
                                segs[i].x2, segs[i].y2,
                                dash_start, dash_end);
-        if (add_last)
-            v = glamor_add_segment(v,
-                                   segs[i].x2, segs[i].y2,
-                                   segs[i].x2 + 1, segs[i].y2,
-                                   dash_end, dash_end + 1);
+        if (add_last) {
+          v = glamor_add_segment(v, segs[i].x2, segs[i].y2, segs[i].x2 + 1,
+                                 segs[i].y2, dash_end, dash_end + 1);
+        }
     }
 
     glamor_put_vbo_space(screen);

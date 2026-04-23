@@ -145,7 +145,8 @@ winInstallKeyboardHookLL(void)
 void
 winRemoveKeyboardHookLL(void)
 {
-    if (g_hhookKeyboardLL)
-        UnhookWindowsHookEx(g_hhookKeyboardLL);
+  if (g_hhookKeyboardLL) {
+    UnhookWindowsHookEx(g_hhookKeyboardLL);
+  }
     g_hhookKeyboardLL = NULL;
 }

@@ -86,8 +86,9 @@ int XaceHookReceiveAccess(ClientPtr client, WindowPtr win,
 int
 XaceHookIsSet(int hook)
 {
-    if (hook < 0 || hook >= XACE_NUM_HOOKS)
-        return 0;
+  if (hook < 0 || hook >= XACE_NUM_HOOKS) {
+    return 0;
+  }
     return XaceHooks[hook] != NULL;
 }
 
@@ -189,10 +190,12 @@ XaceCensorImage(ClientPtr client,
             memset(pBuf, 0, (int) (widthBytesLine * h));
         }
         free(pRects);
-        if (pScratchGC)
-            FreeScratchGC(pScratchGC);
-        if (pPix)
-            FreeScratchPixmapHeader(pPix);
+        if (pScratchGC) {
+          FreeScratchGC(pScratchGC);
+        }
+        if (pPix) {
+          FreeScratchPixmapHeader(pPix);
+        }
     }
     RegionUninit(&imageRegion);
     RegionUninit(&censorRegion);

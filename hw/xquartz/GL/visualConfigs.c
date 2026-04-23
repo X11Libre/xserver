@@ -95,8 +95,9 @@ __GLXconfig *__glXAquaCreateVisualConfigs(int *numConfigsPtr, int screenNumber) 
     numConfigs = 0;
 
     for(conf = caps.configurations; conf; conf = conf->next) {
-        if(conf->total_color_buffers <= 0)
-            continue;
+      if (conf->total_color_buffers <= 0) {
+        continue;
+      }
 
         numConfigs += (conf->stereo ? 2 : 1)
 	    * (conf->aux_buffers ? 2 : 1)
@@ -108,8 +109,9 @@ __GLXconfig *__glXAquaCreateVisualConfigs(int *numConfigsPtr, int screenNumber) 
 	    * (conf->multisample_buffers + 1);
     }
 
-    if(numConfigsPtr)
-        *numConfigsPtr = numConfigs;
+    if (numConfigsPtr) {
+      *numConfigsPtr = numConfigs;
+    }
 
     /* Note that as of 1.20.0, we cannot allocate all the configs at once.
      * __glXScreenDestroy now walks all the fbconfigs and frees them one at a time.

@@ -53,13 +53,15 @@ ms_flush_drm_events_timeout(ScreenPtr screen, int timeout)
     /* If there was an error, r will be < 0.  Return that.  If there was
      * nothing to process, r == 0.  Return that.
      */
-    if (r <= 0)
-        return r;
+    if (r <= 0) {
+      return r;
+    }
 
     /* Try to handle the event.  If there was an error, return it. */
     r = drmHandleEvent(ms->fd, &ms->event_context);
-    if (r < 0)
-        return r;
+    if (r < 0) {
+      return r;
+    }
 
     /* Otherwise return 1 to indicate that we handled an event. */
     return 1;
@@ -74,8 +76,9 @@ ms_flush_drm_events(ScreenPtr screen)
 void
 ms_drain_drm_events(ScreenPtr screen)
 {
-    while (!ms_drm_queue_is_empty())
-        ms_flush_drm_events_timeout(screen, -1);
+  while (!ms_drm_queue_is_empty()) {
+    ms_flush_drm_events_timeout(screen, -1);
+  }
 }
 
 #ifdef GLAMOR
@@ -123,8 +126,9 @@ ms_pageflip_free(struct ms_crtc_pageflip *flip)
     struct ms_flipdata *flipdata = flip->flipdata;
 
     free(flip);
-    if (--flipdata->flip_count > 0)
-        return;
+    if (--flipdata->flip_count > 0) {
+      return;
+    }
     free(flipdata);
 }
 
@@ -153,8 +157,9 @@ ms_pageflip_handler(uint64_t msc, uint64_t ust, void *data)
                                 flipdata->fe_usec,
                                 flipdata->event);
 
-        if (flipdata->old_fb_id)
-            drmModeRmFB(ms->fd, flipdata->old_fb_id);
+        if (flipdata->old_fb_id) {
+          drmModeRmFB(ms->fd, flipdata->old_fb_id);
+        }
     }
     ms_pageflip_free(flip);
 }
@@ -171,8 +176,9 @@ ms_pageflip_abort(void *data)
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
 
-    if (flipdata->flip_count == 1)
-        flipdata->abort_handler(ms, flipdata->event);
+    if (flipdata->flip_count == 1) {
+      flipdata->abort_handler(ms, flipdata->event);
+    }
 
     ms_pageflip_free(flip);
 }
@@ -244,8 +250,9 @@ queue_flip_on_crtc(ScreenPtr screen, xf86CrtcPtr crtc,
     flipdata->flip_count++;
 
     if (do_queue_flip_on_crtc(screen, crtc, flags, seq, ms->drmmode.fb_id,
-                              crtc->x, crtc->y))
-        return QUEUE_FLIP_DRM_FLUSH_FAILED;
+                              crtc->x, crtc->y)) {
+      return QUEUE_FLIP_DRM_FLUSH_FAILED;
+    }
 
     /* The page flip succeeded. */
     return QUEUE_FLIP_SUCCESS;
@@ -333,13 +340,15 @@ ms_tearfree_dri_flip(modesettingPtr ms, xf86CrtcPtr crtc, void *event,
     RegionRec region;
     RegionPtr dirty;
 
-    if (!ms_tearfree_is_active_on_crtc(crtc))
-        return FALSE;
+    if (!ms_tearfree_is_active_on_crtc(crtc)) {
+      return FALSE;
+    }
 
     /* Check for damage on the primary scanout to know if TearFree will flip */
     dirty = DamageRegion(ms->damage);
-    if (RegionNil(dirty))
-        return FALSE;
+    if (RegionNil(dirty)) {
+      return FALSE;
+    }
 
     /* Compute how much of the current damage intersects with this CRTC */
     RegionInit(&region, &crtc->bounds, 0);
@@ -349,12 +358,14 @@ ms_tearfree_dri_flip(modesettingPtr ms, xf86CrtcPtr crtc, void *event,
      * didn't change this CRTC's contents at all with its presentation, possibly
      * because its window is fully occluded by another window on this CRTC.
      */
-    if (RegionNil(&region))
-        return FALSE;
+    if (RegionNil(&region)) {
+      return FALSE;
+    }
 
     flip = calloc(1, sizeof(*flip));
-    if (!flip)
-        return FALSE;
+    if (!flip) {
+      return FALSE;
+    }
 
     flipdata = calloc(1, sizeof(*flipdata));
     if (!flipdata) {
@@ -407,9 +418,10 @@ ms_do_pageflip(ScreenPtr screen,
      * TearFree is enabled.
      */
     if (!new_front) {
-        if (!ms_tearfree_dri_flip(ms, ref_crtc, event, pageflip_handler,
-                                  pageflip_abort))
-            goto error_free_event;
+      if (!ms_tearfree_dri_flip(ms, ref_crtc, event, pageflip_handler,
+                                pageflip_abort)) {
+        goto error_free_event;
+      }
         return TRUE;
     }
 
@@ -458,9 +470,10 @@ ms_do_pageflip(ScreenPtr screen,
         }
         goto error_out;
     } else {
-        if (ms->drmmode.flip_bo_import_failed &&
-            new_front != screen->GetScreenPixmap(screen))
-            ms->drmmode.flip_bo_import_failed = FALSE;
+      if (ms->drmmode.flip_bo_import_failed &&
+          new_front != screen->GetScreenPixmap(screen)) {
+        ms->drmmode.flip_bo_import_failed = FALSE;
+      }
     }
 
     /* Queue flips on all enabled CRTCs.
@@ -476,12 +489,14 @@ ms_do_pageflip(ScreenPtr screen,
         enum queue_flip_status flip_status;
         xf86CrtcPtr crtc = config->crtc[i];
 
-        if (!xf86_crtc_on(crtc))
-            continue;
+        if (!xf86_crtc_on(crtc)) {
+          continue;
+        }
 
         flags = DRM_MODE_PAGE_FLIP_EVENT;
-        if (ms->drmmode.can_async_flip && async)
-            flags |= DRM_MODE_PAGE_FLIP_ASYNC;
+        if (ms->drmmode.can_async_flip && async) {
+          flags |= DRM_MODE_PAGE_FLIP_ASYNC;
+        }
 
         /*
          * If this is not the reference crtc used for flip timing and flip event
@@ -495,8 +510,9 @@ ms_do_pageflip(ScreenPtr screen,
          * outputs in a "clone-mode" or "mirror-mode" configuration.
          */
         if (ms->drmmode.can_async_flip && ms->drmmode.async_flip_secondaries &&
-            ref_crtc && crtc != ref_crtc)
-            flags |= DRM_MODE_PAGE_FLIP_ASYNC;
+            ref_crtc && crtc != ref_crtc) {
+          flags |= DRM_MODE_PAGE_FLIP_ASYNC;
+        }
 
         flip_status = queue_flip_on_crtc(screen, crtc, flipdata,
                                          ref_crtc, flags);
@@ -591,8 +607,9 @@ ms_tearfree_dri_abort_all(xf86CrtcPtr crtc)
     uint64_t usec = 0, msc = 0;
 
     /* Nothing to abort if there aren't any DRI clients waiting for a flip */
-    if (xorg_list_is_empty(&trf->dri_flip_list))
-        return;
+    if (xorg_list_is_empty(&trf->dri_flip_list)) {
+      return;
+    }
 
     /* Even though we're aborting, these clients' pixmaps were actually blitted,
      * so technically the presentation isn't aborted. That's why the normal
@@ -670,9 +687,10 @@ ms_do_tearfree_flip(ScreenPtr screen, xf86CrtcPtr crtc)
 
     /* Copy the damage to the back buffer and then flip it at the vblank */
     drmmode_copy_damage(crtc, trf->buf[idx].px, &trf->buf[idx].dmg, TRUE);
-    if (do_queue_flip_on_crtc(screen, crtc, DRM_MODE_PAGE_FLIP_EVENT,
-                              seq, trf->buf[idx].fb_id, 0, 0))
-        goto no_flip;
+    if (do_queue_flip_on_crtc(screen, crtc, DRM_MODE_PAGE_FLIP_EVENT, seq,
+                              trf->buf[idx].fb_id, 0, 0)) {
+      goto no_flip;
+    }
 
     trf->flip_seq = seq;
     return FALSE;

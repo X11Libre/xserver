@@ -82,10 +82,12 @@ ProcXGetDeviceKeyMapping(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xGetDeviceKeyMappingReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
-    if (dev->key == NULL)
-        return BadMatch;
+    if (rc != Success) {
+      return rc;
+    }
+    if (dev->key == NULL) {
+      return BadMatch;
+    }
     xkb = dev->key->xkbInfo->desc;
 
     if (stuff->firstKeyCode < xkb->min_key_code ||
@@ -100,8 +102,9 @@ ProcXGetDeviceKeyMapping(ClientPtr client)
     }
 
     syms = XkbGetCoreMap(dev);
-    if (!syms)
-        return BadAlloc;
+    if (!syms) {
+      return BadAlloc;
+    }
 
     const size_t mapWidth = syms->mapWidth;
     const size_t numKeySyms = (mapWidth * stuff->count);

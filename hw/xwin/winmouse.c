@@ -90,8 +90,9 @@ winMouseProc(DeviceIntPtr pDeviceInt, int iState)
         /*
          * To map scroll wheel correctly we need at least the 3 normal buttons
          */
-        if (lngMouseButtons < 3)
-            lngMouseButtons = 3;
+        if (lngMouseButtons < 3) {
+          lngMouseButtons = 3;
+        }
 
         /* allocate memory:
          * number of buttons + 4 x mouse wheel event + 1 extra (offset for map)
@@ -100,8 +101,9 @@ winMouseProc(DeviceIntPtr pDeviceInt, int iState)
 
         /* initialize button map */
         map[0] = 0;
-        for (i = 1; i <= lngMouseButtons + lngWheelEvents; i++)
-            map[i] = i;
+        for (i = 1; i <= lngMouseButtons + lngWheelEvents; i++) {
+          map[i] = i;
+        }
 
         btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
         btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
@@ -222,8 +224,9 @@ winMouseButtonsSendEvent(int iEventType, int iButton)
 {
     ValuatorMask mask;
 
-    if (g_winMouseButtonMap)
-        iButton = g_winMouseButtonMap[iButton];
+    if (g_winMouseButtonMap) {
+      iButton = g_winMouseButtonMap[iButton];
+    }
 
     valuator_mask_zero(&mask);
     QueuePointerEvents(g_pwinPointer, iEventType, iButton,

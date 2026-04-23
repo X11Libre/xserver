@@ -33,8 +33,9 @@ static struct Xnamespace* select_ns(const char* name)
 {
     struct Xnamespace *walk;
     xorg_list_for_each_entry(walk, &ns_list, entry) {
-        if (strcmp(walk->name, name)==0)
-            return walk;
+      if (strcmp(walk->name, name) == 0) {
+        return walk;
+      }
     }
 
     struct Xnamespace *newns = calloc(1, sizeof(struct Xnamespace));
@@ -52,11 +53,13 @@ static int hex2bin(const char *in, char *out)
 {
     while (in[0] && in[1]) {
         int top = atox(in[0]);
-        if (top == -1)
-            return 0;
+        if (top == -1) {
+          return 0;
+        }
         int bottom = atox(in[1]);
-        if (bottom == -1)
-            return 0;
+        if (bottom == -1) {
+          return 0;
+        }
         *out++ = (top << 4) | bottom;
         in += 2;
     }
@@ -71,17 +74,20 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 {
     // trim newline and comments
     char *c1 = strchr(line, '\n');
-    if (c1 != NULL)
-        *c1 = 0;
+    if (c1 != NULL) {
+      *c1 = 0;
+    }
     c1 = strchr(line, '#');
-    if (c1 != NULL)
-        *c1 = 0;
+    if (c1 != NULL) {
+      *c1 = 0;
+    }
 
     /* get the first token */
     char *token = strtok(line, " \t");
 
-    if (token == NULL)
-        return;
+    if (token == NULL) {
+      return;
+    }
 
     /* if no "namespace" statement hasn't been issued yet, use root NS */
     struct Xnamespace * curr = (*walk_ns ? *walk_ns : &ns_root);
@@ -102,12 +108,14 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
     if (strcmp(token, "auth") == 0)
     {
         token = strtok(NULL, " \t");
-        if (token == NULL)
-            return;
+        if (token == NULL) {
+          return;
+        }
 
         struct auth_token *new_token = calloc(1, sizeof(struct auth_token));
-        if (new_token == NULL)
-            FatalError("Xnamespace: failed allocating token\n");
+        if (new_token == NULL) {
+          FatalError("Xnamespace: failed allocating token\n");
+        }
 
         new_token->authProto = strdup(token);
         token = strtok(NULL, " ");
@@ -134,18 +142,19 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
     {
         while ((token = strtok(NULL, " \t")) != NULL)
         {
-            if (strcmp(token, "mouse-motion") == 0)
-                curr->allowMouseMotion = TRUE;
-            else if (strcmp(token, "shape") == 0)
-                curr->allowShape = TRUE;
-            else if (strcmp(token, "transparency") == 0)
-                curr->allowTransparency = TRUE;
-            else if (strcmp(token, "xinput") == 0)
-                curr->allowXInput = TRUE;
-            else if (strcmp(token, "xkeyboard") == 0)
-                curr->allowXKeyboard = TRUE;
-            else
-                XNS_LOG("unknown allow: %s\n", token);
+          if (strcmp(token, "mouse-motion") == 0) {
+            curr->allowMouseMotion = TRUE;
+          } else if (strcmp(token, "shape") == 0) {
+            curr->allowShape = TRUE;
+          } else if (strcmp(token, "transparency") == 0) {
+            curr->allowTransparency = TRUE;
+          } else if (strcmp(token, "xinput") == 0) {
+            curr->allowXInput = TRUE;
+          } else if (strcmp(token, "xkeyboard") == 0) {
+            curr->allowXKeyboard = TRUE;
+          } else {
+            XNS_LOG("unknown allow: %s\n", token);
+          }
         }
         return;
     }
@@ -177,8 +186,9 @@ Bool XnsLoadConfig(void)
 
     struct Xnamespace *walk_ns = NULL;
     char linebuf[1024];
-    while (fgets(linebuf, sizeof(linebuf), fp) != NULL)
-        parseLine(linebuf, &walk_ns);
+    while (fgets(linebuf, sizeof(linebuf), fp) != NULL) {
+      parseLine(linebuf, &walk_ns);
+    }
 
     fclose(fp);
 
@@ -190,8 +200,9 @@ Bool XnsLoadConfig(void)
         struct auth_token *at;
         xorg_list_for_each_entry(at, &ns->auth_tokens, entry) {
             XNS_LOG("      auth: \"%s\" \"", at->authProto);
-            for (int i=0; i<at->authTokenLen; i++)
-                printf("%02X", (unsigned char)at->authTokenData[i]);
+            for (int i = 0; i < at->authTokenLen; i++) {
+              printf("%02X", (unsigned char)at->authTokenData[i]);
+            }
             printf("\"\n");
         }
     }
@@ -202,8 +213,9 @@ Bool XnsLoadConfig(void)
 struct Xnamespace *XnsFindByName(const char* name) {
     struct Xnamespace *walk;
     xorg_list_for_each_entry(walk, &ns_list, entry) {
-        if (strcmp(walk->name, name)==0)
-            return walk;
+      if (strcmp(walk->name, name) == 0) {
+        return walk;
+      }
     }
     return NULL;
 }

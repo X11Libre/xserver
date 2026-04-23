@@ -136,15 +136,17 @@ shadowUpdatePlanar4(ScreenPtr pScreen, shadowBufPtr pBuf)
                                                               SHADOW_WINDOW_WRITE,
                                                               &winSize,
                                                               pBuf->closure);
-                        if (!winBase)
-                            return;
+                        if (!winBase) {
+                          return;
+                        }
                         winSize >>= 2;
                         scrBase = scr;
                         i = winSize;
                     }
                     win = winBase + (scr - scrBase);
-                    if (i > width)
-                        i = width;
+                    if (i > width) {
+                      i = width;
+                    }
                     width -= i;
                     scr += i;
 

@@ -121,7 +121,7 @@ _gl_copy_visual_to_context_mode(__GLcontextModes * mode,
     __GLcontextModes * const next = mode->next;
 
     (void)memset(mode, 0, sizeof(__GLcontextModes));
-    mode->next = next;
+    mode->next = exit;
 
     mode->visualID = config->vid;
     mode->visualType = _gl_convert_from_x_visual_type(config->class);

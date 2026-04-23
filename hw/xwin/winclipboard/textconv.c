@@ -54,8 +54,9 @@ winClipboardDOStoUNIX(char *pszSrc, int iLength)
         pszSrc++;
 
         /* Don't advance the destination character if we need to drop an \r */
-        if (*pszDest != '\r' || *pszSrc != '\n')
-            pszDest++;
+        if (*pszDest != '\r' || *pszSrc != '\n') {
+          pszDest++;
+        }
     }
 
     /* Move the terminating null */
@@ -93,8 +94,9 @@ winClipboardUNIXtoDOS(char **ppszData, int iLength)
     }
 
     /* Return if no naked \n's */
-    if (iNewlineCount == 0)
-        return;
+    if (iNewlineCount == 0) {
+      return;
+    }
 
     /* Allocate a new string */
     pszDestBegin = pszDest = calloc(1, iLength + iNewlineCount + 1);

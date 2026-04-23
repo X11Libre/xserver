@@ -16,8 +16,9 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     XNS_HOOK_HEAD(ExtensionAccessCallbackParam);
 
     /* root NS has super powers */
-    if (subj->ns->superPower)
-        goto pass;
+    if (subj->ns->superPower) {
+      goto pass;
+    }
 
     switch (param->ext->index + EXTENSION_BASE) {
         /* unrestricted access */
@@ -43,14 +44,16 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         /* only allowed if namespace has flag set */
         case EXTENSION_MAJOR_SHAPE:
-            if (subj->ns->allowShape)
-                goto pass;
+          if (subj->ns->allowShape) {
+            goto pass;
+          }
             goto reject;
 
         /* only allowed if namespace has flag set */
         case EXTENSION_MAJOR_XINPUT:
-            if (subj->ns->allowXInput)
-                goto pass;
+          if (subj->ns->allowXInput) {
+            goto pass;
+          }
             goto reject;
     }
 

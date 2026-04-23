@@ -40,9 +40,11 @@ isEveryScreenExplicit(void)
 {
     int i;
 
-    for (i = 0; i < g_iNumScreens; i++)
-        if (!g_ScreenInfo[i].fExplicitScreen)
-            return FALSE;
+    for (i = 0; i < g_iNumScreens; i++) {
+      if (!g_ScreenInfo[i].fExplicitScreen) {
+        return FALSE;
+      }
+    }
 
     return TRUE;
 }
@@ -84,15 +86,18 @@ winValidateArgs(void)
             int iCount = 0;
 
             /* Count conflicting options */
-            if (g_ScreenInfo[i].fMultiWindow)
-                ++iCount;
+            if (g_ScreenInfo[i].fMultiWindow) {
+              ++iCount;
+            }
 
-            if (g_ScreenInfo[i].fRootless)
-                ++iCount;
+            if (g_ScreenInfo[i].fRootless) {
+              ++iCount;
+            }
 
             /* Check if the first screen is without rootless and multiwindow */
-            if (iCount == 0 && i == 0)
-                fHasNormalScreen0 = TRUE;
+            if (iCount == 0 && i == 0) {
+              fHasNormalScreen0 = TRUE;
+            }
 
             /* Fail if two or more conflicting options */
             if (iCount > 1) {

@@ -206,10 +206,12 @@ XdmcpRegisterManufacturerDisplayID(const char *name, int length)
     int i;
 
     XdmcpDisposeARRAY8(&ManufacturerDisplayID);
-    if (!XdmcpAllocARRAY8(&ManufacturerDisplayID, length))
-        return;
-    for (i = 0; i < length; i++)
-        ManufacturerDisplayID.data[i] = (CARD8) name[i];
+    if (!XdmcpAllocARRAY8(&ManufacturerDisplayID, length)) {
+      return;
+    }
+    for (i = 0; i < length; i++) {
+      ManufacturerDisplayID.data[i] = (CARD8)name[i];
+    }
 }
 
 static unsigned short xdm_udp_port = XDM_UDP_PORT;
@@ -333,8 +335,9 @@ XdmcpRegisterBroadcastAddress(const struct sockaddr_in *addr)
 {
     struct sockaddr_in *bcast;
 
-    if (NumBroadcastAddresses >= MAX_BROADCAST)
-        return;
+    if (NumBroadcastAddresses >= MAX_BROADCAST) {
+      return;
+    }
     bcast = &BroadcastAddresses[NumBroadcastAddresses++];
     memset(bcast, 0, sizeof(struct sockaddr_in));
 #ifdef BSD44SOCKETS
@@ -372,16 +375,19 @@ XdmcpRegisterAuthentication(const char *name,
     ARRAY8 AuthenticationName, AuthenticationData;
     static AuthenticationFuncsPtr newFuncs;
 
-    if (!XdmcpAllocARRAY8(&AuthenticationName, namelen))
-        return;
+    if (!XdmcpAllocARRAY8(&AuthenticationName, namelen)) {
+      return;
+    }
     if (!XdmcpAllocARRAY8(&AuthenticationData, datalen)) {
         XdmcpDisposeARRAY8(&AuthenticationName);
         return;
     }
-    for (i = 0; i < namelen; i++)
-        AuthenticationName.data[i] = name[i];
-    for (i = 0; i < datalen; i++)
-        AuthenticationData.data[i] = data[i];
+    for (i = 0; i < namelen; i++) {
+      AuthenticationName.data[i] = name[i];
+    }
+    for (i = 0; i < datalen; i++) {
+      AuthenticationData.data[i] = data[i];
+    }
     if (!(XdmcpReallocARRAYofARRAY8(&AuthenticationNames,
                                     AuthenticationNames.length + 1) &&
           XdmcpReallocARRAYofARRAY8(&AuthenticationDatas,
@@ -393,8 +399,9 @@ XdmcpRegisterAuthentication(const char *name,
         XdmcpDisposeARRAY8(&AuthenticationData);
         return;
     }
-    for (i = 0; i < AuthenticationNames.length - 1; i++)
-        newFuncs[i] = AuthenticationFuncsList[i];
+    for (i = 0; i < AuthenticationNames.length - 1; i++) {
+      newFuncs[i] = AuthenticationFuncsList[i];
+    }
     newFuncs[AuthenticationNames.length - 1].Validator = Validator;
     newFuncs[AuthenticationNames.length - 1].Generator = Generator;
     newFuncs[AuthenticationNames.length - 1].AddAuth = AddAuth;
@@ -423,13 +430,14 @@ XdmcpSetAuthentication(const ARRAY8Ptr name)
 {
     int i;
 
-    for (i = 0; i < AuthenticationNames.length; i++)
-        if (XdmcpARRAY8Equal(&AuthenticationNames.data[i], name)) {
-            AuthenticationName = &AuthenticationNames.data[i];
-            AuthenticationData = &AuthenticationDatas.data[i];
-            AuthenticationFuncs = &AuthenticationFuncsList[i];
-            break;
-        }
+    for (i = 0; i < AuthenticationNames.length; i++) {
+      if (XdmcpARRAY8Equal(&AuthenticationNames.data[i], name)) {
+        AuthenticationName = &AuthenticationNames.data[i];
+        AuthenticationData = &AuthenticationDatas.data[i];
+        AuthenticationFuncs = &AuthenticationFuncsList[i];
+        break;
+      }
+    }
 }
 
 /*
@@ -486,11 +494,13 @@ XdmcpRegisterConnection(int type, const char *address, int addrlen)
             return;
         }
     }
-    if (ConnectionAddresses.length + 1 == 256)
-        return;
+    if (ConnectionAddresses.length + 1 == 256) {
+      return;
+    }
     newAddress = calloc(addrlen, sizeof(CARD8));
-    if (!newAddress)
-        return;
+    if (!newAddress) {
+      return;
+    }
     if (!XdmcpReallocARRAY16(&ConnectionTypes, ConnectionTypes.length + 1)) {
         free(newAddress);
         return;
@@ -501,8 +511,9 @@ XdmcpRegisterConnection(int type, const char *address, int addrlen)
         return;
     }
     ConnectionTypes.data[ConnectionTypes.length - 1] = (CARD16) type;
-    for (i = 0; i < addrlen; i++)
-        newAddress[i] = address[i];
+    for (i = 0; i < addrlen; i++) {
+      newAddress[i] = address[i];
+    }
     ConnectionAddresses.data[ConnectionAddresses.length - 1].data = newAddress;
     ConnectionAddresses.data[ConnectionAddresses.length - 1].length = addrlen;
 }
@@ -529,15 +540,17 @@ XdmcpRegisterAuthorization(const char *name)
 
     size_t namelen = strlen(name);
     authName.data = calloc(namelen, sizeof(CARD8));
-    if (!authName.data)
-        return;
+    if (!authName.data) {
+      return;
+    }
     if (!XdmcpReallocARRAYofARRAY8
         (&AuthorizationNames, AuthorizationNames.length + 1)) {
         free(authName.data);
         return;
     }
-    for (i = 0; i < namelen; i++)
-        authName.data[i] = (CARD8) name[i];
+    for (i = 0; i < namelen; i++) {
+      authName.data[i] = (CARD8)name[i];
+    }
     authName.length = namelen;
     AuthorizationNames.data[AuthorizationNames.length - 1] = authName;
 }
@@ -554,21 +567,25 @@ XdmcpRegisterDisplayClass(const char *name, int length)
     int i;
 
     XdmcpDisposeARRAY8(&DisplayClass);
-    if (!XdmcpAllocARRAY8(&DisplayClass, length))
-        return;
-    for (i = 0; i < length; i++)
-        DisplayClass.data[i] = (CARD8) name[i];
+    if (!XdmcpAllocARRAY8(&DisplayClass, length)) {
+      return;
+    }
+    for (i = 0; i < length; i++) {
+      DisplayClass.data[i] = (CARD8)name[i];
+    }
 }
 
 static void
 xdmcp_reset(void)
 {
     timeOutRtx = 0;
-    if (xdmcpSocket >= 0)
-        SetNotifyFd(xdmcpSocket, XdmcpSocketNotify, X_NOTIFY_READ, NULL);
+    if (xdmcpSocket >= 0) {
+      SetNotifyFd(xdmcpSocket, XdmcpSocketNotify, X_NOTIFY_READ, NULL);
+    }
 #if defined(IPv6)
-    if (xdmcpSocket6 >= 0)
-        SetNotifyFd(xdmcpSocket6, XdmcpSocketNotify, X_NOTIFY_READ, NULL);
+    if (xdmcpSocket6 >= 0) {
+      SetNotifyFd(xdmcpSocket6, XdmcpSocketNotify, X_NOTIFY_READ, NULL);
+    }
 #endif
     xdmcp_timer = TimerSet(NULL, 0, 0, XdmcpTimerNotify, NULL);
     send_packet();
@@ -591,8 +608,9 @@ XdmcpInit(void)
 {
     state = XDM_INIT_STATE;
 #ifdef HASXDMAUTH
-    if (xdmAuthCookie)
-        XdmAuthenticationInit(xdmAuthCookie, strlen(xdmAuthCookie));
+    if (xdmAuthCookie) {
+      XdmAuthenticationInit(xdmAuthCookie, strlen(xdmAuthCookie));
+    }
 #endif
     if (state != XDM_OFF) {
         XdmcpRegisterAuthorizations();
@@ -613,8 +631,9 @@ XdmcpInit(void)
 void
 XdmcpOpenDisplay(int sock)
 {
-    if (state != XDM_AWAIT_MANAGE_RESPONSE)
-        return;
+  if (state != XDM_AWAIT_MANAGE_RESPONSE) {
+    return;
+  }
     state = XDM_RUN_SESSION;
     TimerSet(xdmcp_timer, 0, XDM_DEF_DORMANCY * 1000, XdmcpTimerNotify, NULL);
     sessionSocket = sock;
@@ -623,9 +642,10 @@ XdmcpOpenDisplay(int sock)
 void
 XdmcpCloseDisplay(int sock)
 {
-    if ((state != XDM_RUN_SESSION && state != XDM_AWAIT_ALIVE_RESPONSE)
-        || sessionSocket != sock)
-        return;
+  if ((state != XDM_RUN_SESSION && state != XDM_AWAIT_ALIVE_RESPONSE) ||
+      sessionSocket != sock) {
+    return;
+  }
     state = XDM_INIT_STATE;
     dispatchException |= DE_TERMINATE;
     isItTimeToYield = TRUE;
@@ -634,8 +654,9 @@ XdmcpCloseDisplay(int sock)
 static void
 XdmcpSocketNotify(int fd, int ready, void *data)
 {
-    if (state == XDM_OFF)
-        return;
+  if (state == XDM_OFF) {
+    return;
+  }
     receive_packet(fd);
 }
 
@@ -645,9 +666,9 @@ XdmcpTimerNotify(OsTimerPtr timer, CARD32 time, void *arg)
     if (state == XDM_RUN_SESSION) {
         state = XDM_KEEPALIVE;
         send_packet();
+    } else {
+      timeout();
     }
-    else
-        timeout();
     return 0;
 }
 
@@ -700,17 +721,20 @@ receive_packet(int socketfd)
     XdmcpHeader header;
 
     /* read message off socket */
-    if (!XdmcpFill(socketfd, &buffer, (XdmcpNetaddr) &from, &fromlen))
-        return;
+    if (!XdmcpFill(socketfd, &buffer, (XdmcpNetaddr)&from, &fromlen)) {
+      return;
+    }
 
     /* reset retransmission backoff */
     timeOutRtx = 0;
 
-    if (!XdmcpReadHeader(&buffer, &header))
-        return;
+    if (!XdmcpReadHeader(&buffer, &header)) {
+      return;
+    }
 
-    if (header.version != XDM_PROTOCOL_VERSION)
-        return;
+    if (header.version != XDM_PROTOCOL_VERSION) {
+      return;
+    }
 
     switch (header.opcode) {
     case WILLING:
@@ -768,8 +792,9 @@ send_packet(void)
         break;
     }
     rtx = (XDM_MIN_RTX << timeOutRtx);
-    if (rtx > XDM_MAX_RTX)
-        rtx = XDM_MAX_RTX;
+    if (rtx > XDM_MAX_RTX) {
+      rtx = XDM_MAX_RTX;
+    }
     TimerSet(xdmcp_timer, 0, rtx * 1000, XdmcpTimerNotify, NULL);
 }
 
@@ -815,11 +840,13 @@ timeout(void)
             if (mgrAddr == NULL) {
                 mgrAddr = mgrAddrFirst;
             }
-            if (mgrAddr->ai_family == AF_INET)
-                break;
+            if (mgrAddr->ai_family == AF_INET) {
+              break;
+            }
 #if defined(IPv6)
-            if (mgrAddr->ai_family == AF_INET6)
-                break;
+            if (mgrAddr->ai_family == AF_INET6) {
+              break;
+            }
 #endif
         }
 #ifndef SIN6_LEN
@@ -871,16 +898,14 @@ XdmcpCheckAuthentication(ARRAY8Ptr Name, ARRAY8Ptr Data, int packet_type)
 static int
 XdmcpAddAuthorization(ARRAY8Ptr name, ARRAY8Ptr data)
 {
-    if (AuthenticationFuncs && AuthenticationFuncs->AddAuth)
-        return AuthenticationFuncs->AddAuth(
-                       (unsigned short) name->length,
-                       (char *) name->data,
-                       (unsigned short) data->length, (char *) data->data);
-    else
-        return AddAuthorization(
-                       (unsigned short) name->length,
-                       (char *) name->data,
-                       (unsigned short) data->length, (char *) data->data);
+  if (AuthenticationFuncs && AuthenticationFuncs->AddAuth) {
+    return AuthenticationFuncs->AddAuth(
+        (unsigned short)name->length, (char *)name->data,
+        (unsigned short)data->length, (char *)data->data);
+  } else {
+    return AddAuthorization((unsigned short)name->length, (char *)name->data,
+                            (unsigned short)data->length, (char *)data->data);
+  }
 }
 
 /*
@@ -895,25 +920,29 @@ get_xdmcp_sock(void)
     int socketfd = -1;
 
 #if defined(IPv6)
-    if ((xdmcpSocket6 = socket(AF_INET6, SOCK_DGRAM, 0)) < 0)
-        XdmcpWarning("INET6 UDP socket creation failed");
+    if ((xdmcpSocket6 = socket(AF_INET6, SOCK_DGRAM, 0)) < 0) {
+      XdmcpWarning("INET6 UDP socket creation failed");
+    }
 #endif
-    if ((xdmcpSocket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-        XdmcpWarning("UDP socket creation failed");
+    if ((xdmcpSocket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+      XdmcpWarning("UDP socket creation failed");
 #ifdef SO_BROADCAST
-    else if (setsockopt(xdmcpSocket, SOL_SOCKET, SO_BROADCAST, (char *) &soopts,
-                        sizeof(soopts)) < 0)
-        XdmcpWarning("UDP set broadcast socket-option failed");
+    } else if (setsockopt(xdmcpSocket, SOL_SOCKET, SO_BROADCAST,
+                          (char *)&soopts, sizeof(soopts)) < 0) {
+      XdmcpWarning("UDP set broadcast socket-option failed");
+    }
 #endif                          /* SO_BROADCAST */
 
-    if (xdm_from == NULL)
-        return;
+    if (xdm_from == NULL) {
+      return;
+    }
 
-    if (SOCKADDR_FAMILY(FromAddress) == AF_INET)
-        socketfd = xdmcpSocket;
+    if (SOCKADDR_FAMILY(FromAddress) == AF_INET) {
+      socketfd = xdmcpSocket;
 #if defined(IPv6)
-    else if (SOCKADDR_FAMILY(FromAddress) == AF_INET6)
-        socketfd = xdmcpSocket6;
+    } else if (SOCKADDR_FAMILY(FromAddress) == AF_INET6) {
+      socketfd = xdmcpSocket6;
+    }
 #endif
     if (socketfd >= 0) {
         if (bind(socketfd, (struct sockaddr *) &FromAddress,
@@ -962,16 +991,17 @@ send_query_msg(void)
         break;
     }
     header.length = 1;
-    for (i = 0; i < AuthenticationNames.length; i++)
-        header.length += 2 + AuthenticationNames.data[i].length;
+    for (i = 0; i < AuthenticationNames.length; i++) {
+      header.length += 2 + AuthenticationNames.data[i].length;
+    }
 
     XdmcpWriteHeader(&buffer, &header);
     XdmcpWriteARRAYofARRAY8(&buffer, &AuthenticationNames);
     if (broadcast) {
-        for (i = 0; i < NumBroadcastAddresses; i++)
-            XdmcpFlush(xdmcpSocket, &buffer,
-                       (XdmcpNetaddr) &BroadcastAddresses[i],
-                       sizeof(struct sockaddr_in));
+      for (i = 0; i < NumBroadcastAddresses; i++) {
+        XdmcpFlush(xdmcpSocket, &buffer, (XdmcpNetaddr)&BroadcastAddresses[i],
+                   sizeof(struct sockaddr_in));
+      }
     }
 #if defined(IPv6)
     else if (multicast) {
@@ -1006,8 +1036,9 @@ send_query_msg(void)
 #endif
     else {
 #if defined(IPv6)
-        if (SOCKADDR_FAMILY(ManagerAddress) == AF_INET6)
-            socketfd = xdmcpSocket6;
+      if (SOCKADDR_FAMILY(ManagerAddress) == AF_INET6) {
+        socketfd = xdmcpSocket6;
+      }
 #endif
         XdmcpFlush(socketfd, &buffer, (XdmcpNetaddr) &ManagerAddress,
                    ManagerAddressLen);
@@ -1081,8 +1112,9 @@ send_request_msg(void)
     length = 2;                 /* display number */
     length += 1 + 2 * ConnectionTypes.length;   /* connection types */
     length += 1;                /* connection addresses */
-    for (i = 0; i < ConnectionAddresses.length; i++)
-        length += 2 + ConnectionAddresses.data[i].length;
+    for (i = 0; i < ConnectionAddresses.length; i++) {
+      length += 2 + ConnectionAddresses.data[i].length;
+    }
     authenticationData.length = 0;
     authenticationData.data = 0;
     if (AuthenticationFuncs) {
@@ -1092,8 +1124,9 @@ send_request_msg(void)
     length += 2 + AuthenticationName->length;   /* authentication name */
     length += 2 + authenticationData.length;    /* authentication data */
     length += 1;                /* authorization names */
-    for (i = 0; i < AuthorizationNames.length; i++)
-        length += 2 + AuthorizationNames.data[i].length;
+    for (i = 0; i < AuthorizationNames.length; i++) {
+      length += 2 + AuthorizationNames.data[i].length;
+    }
     length += 2 + ManufacturerDisplayID.length; /* display ID */
     header.length = length;
 
@@ -1107,22 +1140,30 @@ send_request_msg(void)
     /* The connection array is send reordered, so that connections of   */
     /* the same address type as the XDMCP manager connection are send   */
     /* first. This works around a bug in xdm. mario@klebsch.de          */
-    for (i = 0; i < (int) ConnectionTypes.length; i++)
-        if (ConnectionTypes.data[i] == XdmcpConnectionType)
-            XdmcpWriteCARD16(&buffer, ConnectionTypes.data[i]);
-    for (i = 0; i < (int) ConnectionTypes.length; i++)
-        if (ConnectionTypes.data[i] != XdmcpConnectionType)
-            XdmcpWriteCARD16(&buffer, ConnectionTypes.data[i]);
+    for (i = 0; i < (int)ConnectionTypes.length; i++) {
+      if (ConnectionTypes.data[i] == XdmcpConnectionType) {
+        XdmcpWriteCARD16(&buffer, ConnectionTypes.data[i]);
+      }
+    }
+    for (i = 0; i < (int)ConnectionTypes.length; i++) {
+      if (ConnectionTypes.data[i] != XdmcpConnectionType) {
+        XdmcpWriteCARD16(&buffer, ConnectionTypes.data[i]);
+      }
+    }
 
     XdmcpWriteCARD8(&buffer, ConnectionAddresses.length);
-    for (i = 0; i < (int) ConnectionAddresses.length; i++)
-        if ((i < ConnectionTypes.length) &&
-            (ConnectionTypes.data[i] == XdmcpConnectionType))
-            XdmcpWriteARRAY8(&buffer, &ConnectionAddresses.data[i]);
-    for (i = 0; i < (int) ConnectionAddresses.length; i++)
-        if ((i >= ConnectionTypes.length) ||
-            (ConnectionTypes.data[i] != XdmcpConnectionType))
-            XdmcpWriteARRAY8(&buffer, &ConnectionAddresses.data[i]);
+    for (i = 0; i < (int)ConnectionAddresses.length; i++) {
+      if ((i < ConnectionTypes.length) &&
+          (ConnectionTypes.data[i] == XdmcpConnectionType)) {
+        XdmcpWriteARRAY8(&buffer, &ConnectionAddresses.data[i]);
+      }
+    }
+    for (i = 0; i < (int)ConnectionAddresses.length; i++) {
+      if ((i >= ConnectionTypes.length) ||
+          (ConnectionTypes.data[i] != XdmcpConnectionType)) {
+        XdmcpWriteARRAY8(&buffer, &ConnectionAddresses.data[i]);
+      }
+    }
 
     XdmcpWriteARRAY8(&buffer, AuthenticationName);
     XdmcpWriteARRAY8(&buffer, &authenticationData);
@@ -1130,12 +1171,14 @@ send_request_msg(void)
     XdmcpWriteARRAYofARRAY8(&buffer, &AuthorizationNames);
     XdmcpWriteARRAY8(&buffer, &ManufacturerDisplayID);
 #if defined(IPv6)
-    if (SOCKADDR_FAMILY(req_sockaddr) == AF_INET6)
-        socketfd = xdmcpSocket6;
+    if (SOCKADDR_FAMILY(req_sockaddr) == AF_INET6) {
+      socketfd = xdmcpSocket6;
+    }
 #endif
-    if (XdmcpFlush(socketfd, &buffer,
-                   (XdmcpNetaddr) &req_sockaddr, req_socklen))
-        state = XDM_AWAIT_REQUEST_RESPONSE;
+    if (XdmcpFlush(socketfd, &buffer, (XdmcpNetaddr)&req_sockaddr,
+                   req_socklen)) {
+      state = XDM_AWAIT_REQUEST_RESPONSE;
+    }
 }
 
 static void
@@ -1145,8 +1188,9 @@ recv_accept_msg(unsigned length)
     ARRAY8 AcceptAuthenticationName, AcceptAuthenticationData;
     ARRAY8 AcceptAuthorizationName, AcceptAuthorizationData;
 
-    if (state != XDM_AWAIT_REQUEST_RESPONSE)
-        return;
+    if (state != XDM_AWAIT_REQUEST_RESPONSE) {
+      return;
+    }
     AcceptAuthenticationName.data = 0;
     AcceptAuthenticationData.data = 0;
     AcceptAuthorizationName.data = 0;
@@ -1217,15 +1261,17 @@ send_manage_msg(void)
     header.opcode = (CARD16) MANAGE;
     header.length = 8 + DisplayClass.length;
 
-    if (!XdmcpWriteHeader(&buffer, &header))
-        return;
+    if (!XdmcpWriteHeader(&buffer, &header)) {
+      return;
+    }
     XdmcpWriteCARD32(&buffer, SessionID);
     XdmcpWriteCARD16(&buffer, DisplayNumber);
     XdmcpWriteARRAY8(&buffer, &DisplayClass);
     state = XDM_AWAIT_MANAGE_RESPONSE;
 #if defined(IPv6)
-    if (SOCKADDR_FAMILY(req_sockaddr) == AF_INET6)
-        socketfd = xdmcpSocket6;
+    if (SOCKADDR_FAMILY(req_sockaddr) == AF_INET6) {
+      socketfd = xdmcpSocket6;
+    }
 #endif
     XdmcpFlush(socketfd, &buffer, (XdmcpNetaddr) &req_sockaddr, req_socklen);
 }
@@ -1235,10 +1281,12 @@ recv_refuse_msg(unsigned length)
 {
     CARD32 RefusedSessionID;
 
-    if (state != XDM_AWAIT_MANAGE_RESPONSE)
-        return;
-    if (length != 4)
-        return;
+    if (state != XDM_AWAIT_MANAGE_RESPONSE) {
+      return;
+    }
+    if (length != 4) {
+      return;
+    }
     if (XdmcpReadCARD32(&buffer, &RefusedSessionID)) {
         if (RefusedSessionID == SessionID) {
             state = XDM_START_CONNECTION;
@@ -1253,8 +1301,9 @@ recv_failed_msg(unsigned length)
     CARD32 FailedSessionID;
     ARRAY8 status;
 
-    if (state != XDM_AWAIT_MANAGE_RESPONSE)
-        return;
+    if (state != XDM_AWAIT_MANAGE_RESPONSE) {
+      return;
+    }
     status.data = 0;
     if (XdmcpReadCARD32(&buffer, &FailedSessionID) &&
         XdmcpReadARRAY8(&buffer, &status)) {
@@ -1281,8 +1330,9 @@ send_keepalive_msg(void)
 
     state = XDM_AWAIT_ALIVE_RESPONSE;
 #if defined(IPv6)
-    if (SOCKADDR_FAMILY(req_sockaddr) == AF_INET6)
-        socketfd = xdmcpSocket6;
+    if (SOCKADDR_FAMILY(req_sockaddr) == AF_INET6) {
+      socketfd = xdmcpSocket6;
+    }
 #endif
     XdmcpFlush(socketfd, &buffer, (XdmcpNetaddr) &req_sockaddr, req_socklen);
 }
@@ -1293,10 +1343,12 @@ recv_alive_msg(unsigned length)
     CARD8 SessionRunning;
     CARD32 AliveSessionID;
 
-    if (state != XDM_AWAIT_ALIVE_RESPONSE)
-        return;
-    if (length != 5)
-        return;
+    if (state != XDM_AWAIT_ALIVE_RESPONSE) {
+      return;
+    }
+    if (length != 5) {
+      return;
+    }
     if (XdmcpReadCARD8(&buffer, &SessionRunning) &&
         XdmcpReadCARD32(&buffer, &AliveSessionID)) {
         if (SessionRunning && AliveSessionID == SessionID) {
@@ -1360,11 +1412,13 @@ get_addr_by_name(const char *argtype,
 
     if ((gaierr = getaddrinfo(namestr, pport, &hints, aifirstp)) == 0) {
         for (ai = *aifirstp; ai != NULL; ai = ai->ai_next) {
-            if (ai->ai_family == AF_INET)
-                break;
+          if (ai->ai_family == AF_INET) {
+            break;
+          }
 #if defined(IPv6)
-            if (ai->ai_family == AF_INET6)
-                break;
+          if (ai->ai_family == AF_INET6) {
+            break;
+          }
 #endif
         }
         if ((ai == NULL) || (ai->ai_addrlen > sizeof(SOCKADDR_TYPE))) {
@@ -1436,8 +1490,9 @@ get_fromaddr_by_name(int argc, char **argv, int i)
 #endif
         );
 #if defined(HAVE_GETADDRINFO)
-    if (aifirst != NULL)
-        freeaddrinfo(aifirst);
+    if (aifirst != NULL) {
+      freeaddrinfo(aifirst);
+    }
 #endif
     xdm_from = argv[i];
 }
@@ -1475,13 +1530,14 @@ get_mcast_options(int argc, char **argv, int i)
 
     if ((gaierr = getaddrinfo(address, portstr, &hints, &firstai)) == 0) {
         for (ai = firstai; ai != NULL; ai = ai->ai_next) {
-            if (((ai->ai_family == AF_INET) &&
-                 IN_MULTICAST(((struct sockaddr_in *) ai->ai_addr)
-                              ->sin_addr.s_addr))
-                || ((ai->ai_family == AF_INET6) &&
-                    IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6 *) ai->ai_addr)
-                                          ->sin6_addr)))
-                break;
+          if (((ai->ai_family == AF_INET) &&
+               IN_MULTICAST(
+                   ((struct sockaddr_in *)ai->ai_addr)->sin_addr.s_addr)) ||
+              ((ai->ai_family == AF_INET6) &&
+               IN6_IS_ADDR_MULTICAST(
+                   &((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr))) {
+            break;
+          }
         }
         if (ai == NULL) {
             FatalError("Xserver: address not supported multicast type %s\n",
@@ -1491,8 +1547,9 @@ get_mcast_options(int argc, char **argv, int i)
             struct multicastinfo *mcastinfo, *mcl;
 
             mcastinfo = calloc(1, sizeof(struct multicastinfo));
-            if (!mcastinfo)
-                FatalError("Xserver: failed to allocate mcastinfo\n");
+            if (!mcastinfo) {
+              FatalError("Xserver: failed to allocate mcastinfo\n");
+            }
 
             mcastinfo->ai = firstai;
             mcastinfo->hops = hopcount;

@@ -209,8 +209,9 @@ xf86AutoConfig(void)
                 builtinLines);
 
     LogMessageVerb(X_DEFAULT, 3, "--- Start of built-in configuration ---\n");
-    for (cp = builtinConfig; *cp; cp++)
-        xf86ErrorFVerb(3, "\t%s", *cp);
+    for (cp = builtinConfig; *cp; cp++) {
+      xf86ErrorFVerb(3, "\t%s", *cp);
+    }
     LogMessageVerb(X_DEFAULT, 3, "--- End of built-in configuration ---\n");
 
     xf86initConfigFiles();
@@ -218,8 +219,10 @@ xf86AutoConfig(void)
     ret = xf86HandleConfigFile(TRUE);
     FreeConfig();
 
-    if (ret != CONFIG_OK)
-        LogMessageVerb(X_ERROR, 1, "Error parsing the built-in default configuration.\n");
+    if (ret != CONFIG_OK) {
+      LogMessageVerb(X_ERROR, 1,
+                     "Error parsing the built-in default configuration.\n");
+    }
 
     return ret == CONFIG_OK;
 }
@@ -326,8 +329,9 @@ copyScreen(confScreenPtr oscreen, GDevPtr odev, int i, char *driver)
     char *identifier;
 
     confScreenPtr nscreen = calloc(1, sizeof(confScreenRec));
-    if (!nscreen)
-        return FALSE;
+    if (!nscreen) {
+      return FALSE;
+    }
     memcpy(nscreen, oscreen, sizeof(confScreenRec));
 
     GDevPtr cptr = calloc(1, sizeof(GDevRec));
@@ -399,7 +403,9 @@ autoConfigDevice(GDevPtr preconf_device)
              * a new screen for each additional possible driver
              * minus one for the already existing first one
              * plus one for the terminating NULL */
-            for (; slp[num_screens].screen; num_screens++);
+            for (; slp[num_screens].screen; num_screens++) {
+              ;
+            }
             xf86ConfigLayout.screens = XNFcallocarray(num_screens + md.nmatches,
                                                  sizeof(screenLayoutRec));
             xf86ConfigLayout.screens[0] = slp[0];
@@ -414,8 +420,9 @@ autoConfigDevice(GDevPtr preconf_device)
             /* for each other driver found, copy the first screen, insert it
              * into the list of screens and set the driver */
             for (i = 1; i < md.nmatches; i++) {
-                if (!copyScreen(slp[0].screen, ptr, i, md.matches[i]))
-                    return NULL;
+              if (!copyScreen(slp[0].screen, ptr, i, md.matches[i])) {
+                return NULL;
+              }
             }
 
             /* shift the rest of the original screen list

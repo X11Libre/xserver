@@ -39,8 +39,9 @@ fbSolid(FbBits * dst,
     dstX &= FB_MASK;
     FbMaskBitsBytes(dstX, width, and == 0, startmask, startbyte,
                     nmiddle, endmask, endbyte);
-    if (startmask)
-        dstStride--;
+    if (startmask) {
+      dstStride--;
+    }
     dstStride -= nmiddle;
     while (height--) {
         if (startmask) {
@@ -48,14 +49,16 @@ fbSolid(FbBits * dst,
             dst++;
         }
         n = nmiddle;
-        if (!and)
-            while (n--)
-                WRITE(dst++, xor);
-        else
-            while (n--) {
-                WRITE(dst, FbDoRRop(READ(dst), and, xor));
-                dst++;
-            }
+        if (!and) {
+          while (n--) {
+            WRITE(dst++, xor);
+          }
+        } else {
+          while (n--) {
+            WRITE(dst, FbDoRRop(READ(dst), and, xor));
+            dst++;
+          }
+        }
         if (endmask)
             FbDoRightMaskByteRRop(dst, endbyte, endmask, and, xor);
         dst += dstStride;

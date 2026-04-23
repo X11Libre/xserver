@@ -65,12 +65,14 @@ TopLevelParent(WindowPtr pWindow)
 {
     WindowPtr top;
 
-    if (IsRoot(pWindow))
-        return pWindow;
+    if (IsRoot(pWindow)) {
+      return pWindow;
+    }
 
     top = pWindow;
-    while (top && !IsTopLevel(top))
-        top = top->parent;
+    while (top && !IsTopLevel(top)) {
+      top = top->parent;
+    }
 
     return top;
 }
@@ -85,11 +87,13 @@ IsFramedWindow(WindowPtr pWin)
 {
     WindowPtr top;
 
-    if (!dixPrivateKeyRegistered(&rootlessWindowPrivateKeyRec))
-        return FALSE;
+    if (!dixPrivateKeyRegistered(&rootlessWindowPrivateKeyRec)) {
+      return FALSE;
+    }
 
-    if (!pWin->realized)
-        return FALSE;
+    if (!pWin->realized) {
+      return FALSE;
+    }
     top = TopLevelParent(pWin);
 
     return (top && WINREC(top));
@@ -103,16 +107,18 @@ RootlessResolveColormap(ScreenPtr pScreen, int first_color,
     ColormapPtr map;
 
     map = RootlessGetColormap(pScreen);
-    if (map == NULL || map->class != PseudoColor)
-        return FALSE;
+    if (map == NULL || map->class != PseudoColor) {
+      return FALSE;
+    }
 
     last = min(map->pVisual->ColormapEntries, first_color + n_colors);
     for (i = max(0, first_color); i < last; i++) {
         Entry *ent = map->red + i;
         uint16_t red, green, blue;
 
-        if (!ent->refcnt)
-            continue;
+        if (!ent->refcnt) {
+          continue;
+        }
         if (ent->fShared) {
             red = ent->co.shco.red->color;
             green = ent->co.shco.green->color;
@@ -217,13 +223,14 @@ RootlessStartDrawing(WindowPtr pWindow)
         RL_DEBUG_MSG("oldPixmap is %p %p for wid=%lu\n", oldPixmap, oldPixmap ? oldPixmap->devPrivate.ptr : NULL, RootlessWID(pWindow));
 
         if (oldPixmap != NULL) {
-            if (oldPixmap == curPixmap)
-                RL_DEBUG_MSG
-                    ("Window %p's curPixmap %p is the same as its oldPixmap; strange\n",
-                     pWindow, curPixmap);
-            else
-                RL_DEBUG_MSG("Window %p's existing oldPixmap %p being lost!\n",
-                             pWindow, oldPixmap);
+          if (oldPixmap == curPixmap) {
+            RL_DEBUG_MSG("Window %p's curPixmap %p is the same as its "
+                         "oldPixmap; strange\n",
+                         pWindow, curPixmap);
+          } else {
+            RL_DEBUG_MSG("Window %p's existing oldPixmap %p being lost!\n",
+                         pWindow, oldPixmap);
+          }
         }
         dixSetPrivate(&pWindow->devPrivates, rootlessWindowOldPixmapPrivateKey,
                       curPixmap);
@@ -246,20 +253,24 @@ RestorePreDrawingPixmapVisitor(WindowPtr pWindow, void *data)
         dixLookupPrivate(&pWindow->devPrivates,
                          rootlessWindowOldPixmapPrivateKey);
     if (oldPixmap == NULL) {
-        if (exPixmap == winRec->pixmap)
-            RL_DEBUG_MSG
-                ("Window %p appears to be in drawing mode (ex-pixmap %p equals winRec->pixmap, which is being freed) but has no oldPixmap!\n",
-                 pWindow, exPixmap);
+      if (exPixmap == winRec->pixmap) {
+        RL_DEBUG_MSG(
+            "Window %p appears to be in drawing mode (ex-pixmap %p equals "
+            "winRec->pixmap, which is being freed) but has no oldPixmap!\n",
+            pWindow, exPixmap);
+      }
     }
     else {
-        if (exPixmap != winRec->pixmap)
-            RL_DEBUG_MSG
-                ("Window %p appears to be in drawing mode (oldPixmap %p) but ex-pixmap %p not winRec->pixmap %p!\n",
-                 pWindow, oldPixmap, exPixmap, winRec->pixmap);
-        if (oldPixmap == winRec->pixmap)
-            RL_DEBUG_MSG
-                ("Window %p's oldPixmap %p is winRec->pixmap, which has just been freed!\n",
-                 pWindow, oldPixmap);
+      if (exPixmap != winRec->pixmap) {
+        RL_DEBUG_MSG("Window %p appears to be in drawing mode (oldPixmap %p) "
+                     "but ex-pixmap %p not winRec->pixmap %p!\n",
+                     pWindow, oldPixmap, exPixmap, winRec->pixmap);
+      }
+      if (oldPixmap == winRec->pixmap) {
+        RL_DEBUG_MSG("Window %p's oldPixmap %p is winRec->pixmap, which has "
+                     "just been freed!\n",
+                     pWindow, oldPixmap);
+      }
         pScreen->SetWindowPixmap(pWindow, oldPixmap);
         dixSetPrivate(&pWindow->devPrivates, rootlessWindowOldPixmapPrivateKey,
                       NULL);
@@ -274,11 +285,13 @@ RootlessStopDrawing(WindowPtr pWindow, Bool flush)
     WindowPtr top = TopLevelParent(pWindow);
     RootlessWindowRec *winRec;
 
-    if (top == NULL)
-        return;
+    if (top == NULL) {
+      return;
+    }
     winRec = WINREC(top);
-    if (winRec == NULL)
-        return;
+    if (winRec == NULL) {
+      return;
+    }
 
     if (winRec->is_drawing) {
         SCREENREC(pScreen)->imp->StopDrawing(winRec->wid, flush);
@@ -315,12 +328,14 @@ RootlessDamageRegion(WindowPtr pWindow, RegionPtr pRegion)
     RL_DEBUG_MSG("Damaged win %p\n", pWindow);
 
     pTop = TopLevelParent(pWindow);
-    if (pTop == NULL)
-        return;
+    if (pTop == NULL) {
+      return;
+    }
 
     winRec = WINREC(pTop);
-    if (winRec == NULL)
-        return;
+    if (winRec == NULL) {
+      return;
+    }
 
     /* We need to intersect the drawn region with the clip of the window
        to avoid marking places we didn't actually draw (which can cause
@@ -467,8 +482,9 @@ RootlessRepositionWindows(ScreenPtr pScreen)
         RootlessRepositionWindow(root);
 
         for (win = root->firstChild; win; win = win->nextSib) {
-            if (WINREC(win) != NULL)
-                RootlessRepositionWindow(win);
+          if (WINREC(win) != NULL) {
+            RootlessRepositionWindow(win);
+          }
         }
     }
 }

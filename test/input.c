@@ -1131,37 +1131,37 @@ cmp_attr_fields(InputAttributes * attr1, InputAttributes * attr2)
     if (attr1->product != NULL) {
         assert(attr1->product != attr2->product);
         assert(strcmp(attr1->product, attr2->product) == 0);
+    } else {
+      assert(attr2->product == NULL);
     }
-    else
-        assert(attr2->product == NULL);
 
     if (attr1->vendor != NULL) {
         assert(attr1->vendor != attr2->vendor);
         assert(strcmp(attr1->vendor, attr2->vendor) == 0);
+    } else {
+      assert(attr2->vendor == NULL);
     }
-    else
-        assert(attr2->vendor == NULL);
 
     if (attr1->device != NULL) {
         assert(attr1->device != attr2->device);
         assert(strcmp(attr1->device, attr2->device) == 0);
+    } else {
+      assert(attr2->device == NULL);
     }
-    else
-        assert(attr2->device == NULL);
 
     if (attr1->pnp_id != NULL) {
         assert(attr1->pnp_id != attr2->pnp_id);
         assert(strcmp(attr1->pnp_id, attr2->pnp_id) == 0);
+    } else {
+      assert(attr2->pnp_id == NULL);
     }
-    else
-        assert(attr2->pnp_id == NULL);
 
     if (attr1->usb_id != NULL) {
         assert(attr1->usb_id != attr2->usb_id);
         assert(strcmp(attr1->usb_id, attr2->usb_id) == 0);
+    } else {
+      assert(attr2->usb_id == NULL);
     }
-    else
-        assert(attr2->usb_id == NULL);
 
     tags1 = attr1->tags;
     tags2 = attr2->tags;
@@ -1191,8 +1191,9 @@ cmp_attr_fields(InputAttributes * attr1, InputAttributes * attr2)
     tags1 = attr1->tags;
     while (*tags1) {
         tags2 = attr2->tags;
-        while (*tags2)
-            assert(*tags1 != *tags2++);
+        while (*tags2) {
+          assert(*tags1 != *tags2++);
+        }
 
         tags1++;
     }
@@ -1286,8 +1287,9 @@ dix_input_valuator_masks(void)
         valuator_mask_unset(mask, i);
         /* we're removing valuators from the front, so size should stay the
          * same until the last bit is removed */
-        if (i < MAX_VALUATORS - 1)
-            assert(valuator_mask_size(mask) == MAX_VALUATORS);
+        if (i < MAX_VALUATORS - 1) {
+          assert(valuator_mask_size(mask) == MAX_VALUATORS);
+        }
         assert(!valuator_mask_isset(mask, i));
     }
 
@@ -1295,8 +1297,9 @@ dix_input_valuator_masks(void)
     valuator_mask_zero(mask);
     assert(valuator_mask_size(mask) == 0);
     assert(valuator_mask_num_valuators(mask) == 0);
-    for (i = 0; i < MAX_VALUATORS; i++)
-        assert(!valuator_mask_isset(mask, i));
+    for (i = 0; i < MAX_VALUATORS; i++) {
+      assert(!valuator_mask_isset(mask, i));
+    }
 
     first_val = 5;
     num_vals = 6;
@@ -1333,8 +1336,9 @@ dix_input_valuator_masks(void)
 
         assert(valuator_mask_isset(mask, i) == valuator_mask_isset(copy, i));
 
-        if (!valuator_mask_isset(mask, i))
-            continue;
+        if (!valuator_mask_isset(mask, i)) {
+          continue;
+        }
 
         assert(valuator_mask_get(mask, i) == valuator_mask_get(copy, i));
         assert(valuator_mask_get_double(mask, i) ==
@@ -1371,12 +1375,14 @@ dix_valuator_mode(void)
     }
 
     valuator_set_mode(&dev, VALUATOR_MODE_ALL_AXES, Absolute);
-    for (i = 0; i < num_axes; i++)
-        assert(valuator_get_mode(&dev, i) == Absolute);
+    for (i = 0; i < num_axes; i++) {
+      assert(valuator_get_mode(&dev, i) == Absolute);
+    }
 
     valuator_set_mode(&dev, VALUATOR_MODE_ALL_AXES, Relative);
-    for (i = 0; i < num_axes; i++)
-        assert(valuator_get_mode(&dev, i) == Relative);
+    for (i = 0; i < num_axes; i++) {
+      assert(valuator_get_mode(&dev, i) == Relative);
+    }
 
     FreeDeviceClass(ValuatorClass, (void**)&dev.valuator);
     free(dev.last.scroll); /* sigh, allocated but not freed by the valuator functions */
@@ -1680,8 +1686,9 @@ _test_double_fp16_values(double orig_d)
 
     assert(memcmp(&first_fp16, &final_fp16, sizeof(FP1616)) == 0);
 
-    if (orig_d > 0)
-        _test_double_fp16_values(-orig_d);
+    if (orig_d > 0) {
+      _test_double_fp16_values(-orig_d);
+    }
 }
 
 static void
@@ -1715,8 +1722,9 @@ _test_double_fp32_values(double orig_d)
 
     assert(memcmp(&first_fp32, &final_fp32, sizeof(FP3232)) == 0);
 
-    if (orig_d > 0)
-        _test_double_fp32_values(-orig_d);
+    if (orig_d > 0) {
+      _test_double_fp32_values(-orig_d);
+    }
 }
 
 static void
@@ -1870,8 +1878,9 @@ process_input_proc(InternalEvent *ev, DeviceIntPtr device)
 {
     static int last_evtype = -1;
 
-    if (ev->any.header == 0xac)
-        last_evtype = -1;
+    if (ev->any.header == 0xac) {
+      last_evtype = -1;
+    }
 
     assert(ev->any.type == ++last_evtype);
 }

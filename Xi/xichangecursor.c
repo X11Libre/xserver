@@ -69,29 +69,34 @@ ProcXIChangeCursor(ClientPtr client)
     CursorPtr pCursor = NULL;
 
     rc = dixLookupDevice(&pDev, stuff->deviceid, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
-    if (!InputDevIsMaster(pDev) || !IsPointerDevice(pDev))
-        return BadDevice;
+    if (!InputDevIsMaster(pDev) || !IsPointerDevice(pDev)) {
+      return BadDevice;
+    }
 
     if (stuff->win != None) {
         rc = dixLookupWindow(&pWin, stuff->win, client, DixSetAttrAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
     }
 
     if (stuff->cursor == None) {
-        if (pWin == pWin->drawable.pScreen->root)
-            pCursor = rootCursor;
-        else
-            pCursor = (CursorPtr) None;
+      if (pWin == pWin->drawable.pScreen->root) {
+        pCursor = rootCursor;
+      } else {
+        pCursor = (CursorPtr)None;
+      }
     }
     else {
         rc = dixLookupResourceByType((void **) &pCursor, stuff->cursor,
                                      X11_RESTYPE_CURSOR, client, DixUseAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
     }
 
     ChangeWindowDeviceCursor(pWin, pDev, pCursor);

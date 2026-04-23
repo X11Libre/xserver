@@ -49,23 +49,22 @@ XkbDDXUpdateIndicators(DeviceIntPtr dev, CARD32 new)
 void
 XkbDDXUpdateDeviceIndicators(DeviceIntPtr dev, XkbSrvLedInfoPtr sli, CARD32 new)
 {
-    if (sli->fb.kf == dev->kbdfeed)
-        XkbDDXUpdateIndicators(dev, new);
-    else if (sli->class == KbdFeedbackClass) {
-        KbdFeedbackPtr kf;
+  if (sli->fb.kf == dev->kbdfeed) {
+    XkbDDXUpdateIndicators(dev, new);
+  } else if (sli->class == KbdFeedbackClass) {
+    KbdFeedbackPtr kf;
 
-        kf = sli->fb.kf;
-        if (kf && kf->CtrlProc) {
-            (*kf->CtrlProc) (dev, &kf->ctrl);
-        }
+    kf = sli->fb.kf;
+    if (kf && kf->CtrlProc) {
+      (*kf->CtrlProc)(dev, &kf->ctrl);
     }
-    else if (sli->class == LedFeedbackClass) {
-        LedFeedbackPtr lf;
+  } else if (sli->class == LedFeedbackClass) {
+    LedFeedbackPtr lf;
 
-        lf = sli->fb.lf;
-        if (lf && lf->CtrlProc) {
-            (*lf->CtrlProc) (dev, &lf->ctrl);
-        }
+    lf = sli->fb.lf;
+    if (lf && lf->CtrlProc) {
+      (*lf->CtrlProc)(dev, &lf->ctrl);
     }
+  }
     return;
 }

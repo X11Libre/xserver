@@ -70,11 +70,12 @@ request_XIWarpPointer(ClientPtr client, xXIWarpPointerReq * req, int error)
     rc = ProcXIWarpPointer(client);
     assert(rc == error);
 
-    if (rc == BadDevice)
-        assert(client->errorValue == req->deviceid);
-    else if (rc == BadWindow)
-        assert(client->errorValue == req->dst_win ||
-               client->errorValue == req->src_win);
+    if (rc == BadDevice) {
+      assert(client->errorValue == req->deviceid);
+    } else if (rc == BadWindow) {
+      assert(client->errorValue == req->dst_win ||
+             client->errorValue == req->src_win);
+    }
 
     client->swapped = TRUE;
 
@@ -91,11 +92,12 @@ request_XIWarpPointer(ClientPtr client, xXIWarpPointerReq * req, int error)
     rc = ProcXIWarpPointer(client);
     assert(rc == error);
 
-    if (rc == BadDevice)
-        assert(client->errorValue == req->deviceid);
-    else if (rc == BadWindow)
-        assert(client->errorValue == req->dst_win ||
-               client->errorValue == req->src_win);
+    if (rc == BadDevice) {
+      assert(client->errorValue == req->deviceid);
+    } else if (rc == BadWindow) {
+      assert(client->errorValue == req->dst_win ||
+             client->errorValue == req->src_win);
+    }
 }
 
 /* Invalid coordinate marker for XIWarpPointer */

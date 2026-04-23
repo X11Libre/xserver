@@ -23,8 +23,9 @@
 void
 xf86SlowBcopy(unsigned char *src, unsigned char *dst, int len)
 {
-    while (len--)
-        *dst++ = *src++;
+  while (len--) {
+    *dst++ = *src++;
+  }
 }
 
 #ifdef __alpha__

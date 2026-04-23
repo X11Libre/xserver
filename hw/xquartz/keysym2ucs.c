@@ -837,23 +837,25 @@ keysym2ucs(int keysym)
 
     /* first check for Latin-1 characters (1:1 mapping) */
     if ((keysym >= 0x0020 && keysym <= 0x007e) ||
-        (keysym >= 0x00a0 && keysym <= 0x00ff))
-        return keysym;
+        (keysym >= 0x00a0 && keysym <= 0x00ff)) {
+      return keysym;
+    }
 
     /* also check for directly encoded 24-bit UCS characters */
-    if ((keysym & 0xff000000) == 0x01000000)
-        return keysym & 0x00ffffff;
+    if ((keysym & 0xff000000) == 0x01000000) {
+      return keysym & 0x00ffffff;
+    }
 
     /* binary search in table */
     while (max >= min) {
         mid = (min + max) / 2;
-        if (keysymtab[mid].keysym < keysym)
-            min = mid + 1;
-        else if (keysymtab[mid].keysym > keysym)
-            max = mid - 1;
-        else {
-            /* found it */
-            return keysymtab[mid].ucs;
+        if (keysymtab[mid].keysym < keysym) {
+          min = mid + 1;
+        } else if (keysymtab[mid].keysym > keysym) {
+          max = mid - 1;
+        } else {
+          /* found it */
+          return keysymtab[mid].ucs;
         }
     }
 
@@ -889,20 +891,20 @@ ucs2keysym(long ucs)
     }
 
     /* first check for Latin-1 characters (1:1 mapping) */
-    if ((ucs >= 0x0020 && ucs <= 0x007e) ||
-        (ucs >= 0x00a0 && ucs <= 0x00ff))
-        return ucs;
+    if ((ucs >= 0x0020 && ucs <= 0x007e) || (ucs >= 0x00a0 && ucs <= 0x00ff)) {
+      return ucs;
+    }
 
     /* binary search in table */
     while (max >= min) {
         mid = (min + max) / 2;
-        if (reverse_keysymtab[mid].ucs < ucs)
-            min = mid + 1;
-        else if (reverse_keysymtab[mid].ucs > ucs)
-            max = mid - 1;
-        else {
-            /* found it */
-            return reverse_keysymtab[mid].keysym;
+        if (reverse_keysymtab[mid].ucs < ucs) {
+          min = mid + 1;
+        } else if (reverse_keysymtab[mid].ucs > ucs) {
+          max = mid - 1;
+        } else {
+          /* found it */
+          return reverse_keysymtab[mid].keysym;
         }
     }
 

@@ -99,8 +99,9 @@ LockServer(void)
     int len;
     char port[20];
 
-    if (nolock || NoListenAll)
-        return;
+    if (nolock || NoListenAll) {
+      return;
+    }
     /*
      * Path names
      */
@@ -108,8 +109,9 @@ LockServer(void)
     len = strlen(LOCK_PREFIX) > strlen(LOCK_TMP_PREFIX) ? strlen(LOCK_PREFIX) :
         strlen(LOCK_TMP_PREFIX);
     len += strlen(tmppath) + strlen(port) + strlen(LOCK_SUFFIX) + 1;
-    if (len > sizeof(LockFile))
-        FatalError("Display name `%s' is too long\n", port);
+    if (len > sizeof(LockFile)) {
+      FatalError("Display name `%s' is too long\n", port);
+    }
     (void) sprintf(tmp, "%s" LOCK_TMP_PREFIX "%s" LOCK_SUFFIX, tmppath, port);
     (void) sprintf(LockFile, "%s" LOCK_PREFIX "%s" LOCK_SUFFIX, tmppath, port);
 
@@ -122,10 +124,11 @@ LockServer(void)
     do {
         i++;
         lfd = open(tmp, O_CREAT | O_EXCL | O_WRONLY, 0644);
-        if (lfd < 0)
-            sleep(2);
-        else
-            break;
+        if (lfd < 0) {
+          sleep(2);
+        } else {
+          break;
+        }
     } while (i < 3);
     if (lfd < 0) {
         unlink(tmp);
@@ -133,17 +136,20 @@ LockServer(void)
         do {
             i++;
             lfd = open(tmp, O_CREAT | O_EXCL | O_WRONLY, 0644);
-            if (lfd < 0)
-                sleep(2);
-            else
-                break;
+            if (lfd < 0) {
+              sleep(2);
+            } else {
+              break;
+            }
         } while (i < 3);
     }
-    if (lfd < 0)
-        FatalError("Could not create lock file in %s\n", tmp);
+    if (lfd < 0) {
+      FatalError("Could not create lock file in %s\n", tmp);
+    }
     snprintf(pid_str, sizeof(pid_str), "%10lu\n", (unsigned long) getpid());
-    if (write(lfd, pid_str, 11) != 11)
-        FatalError("Could not write pid to lock file in %s\n", tmp);
+    if (write(lfd, pid_str, 11) != 11) {
+      FatalError("Could not write pid to lock file in %s\n", tmp);
+    }
     (void) fchmod(lfd, 0444);
     (void) close(lfd);
 
@@ -214,8 +220,9 @@ LockServer(void)
         }
     }
     unlink(tmp);
-    if (!haslock)
-        FatalError("Could not create server lock file: %s\n", LockFile);
+    if (!haslock) {
+      FatalError("Could not create server lock file: %s\n", LockFile);
+    }
     StillLocking = FALSE;
 }
 
@@ -226,8 +233,9 @@ LockServer(void)
 void
 UnlockServer(void)
 {
-    if (nolock || NoListenAll)
-        return;
+  if (nolock || NoListenAll) {
+    return;
+  }
 
     if (!StillLocking) {
 

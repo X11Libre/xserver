@@ -15,8 +15,9 @@
 static inline GlxServerVendor *vendorForScreen(ClientPtr pClient, CARD32 screen)
 {
     ScreenPtr pScreen = dixGetScreenPtr(screen);
-    if (!pScreen)
-        return NULL;
+    if (!pScreen) {
+      return NULL;
+    }
 
     return glxServer.getVendorForScreen(pClient, pScreen);
 }

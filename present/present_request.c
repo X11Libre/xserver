@@ -115,14 +115,17 @@ proc_present_pixmap_common(ClientPtr client,
     int ret;
 
     ret = dixLookupWindow(&window, req_window, client, DixWriteAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
     ret = dixLookupResourceByType((void **) &pixmap, req_pixmap, X11_RESTYPE_PIXMAP, client, DixReadAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
-    if (window->drawable.depth != pixmap->drawable.depth)
-        return BadMatch;
+    if (window->drawable.depth != pixmap->drawable.depth) {
+      return BadMatch;
+    }
 
     VERIFY_REGION_OR_NONE(valid, req_valid, client, DixReadAccess);
     VERIFY_REGION_OR_NONE(update, req_update, client, DixReadAccess);
@@ -153,14 +156,16 @@ proc_present_pixmap_common(ClientPtr client,
     }
 
     nnotifies = (client->req_len << 2) - base_req_size;
-    if (nnotifies % sizeof (xPresentNotify))
-        return BadLength;
+    if (nnotifies % sizeof(xPresentNotify)) {
+      return BadLength;
+    }
 
     nnotifies /= sizeof (xPresentNotify);
     if (nnotifies) {
         ret = present_create_notifies(client, nnotifies, req_notifies, &notifies);
-        if (ret != Success)
-            return ret;
+        if (ret != Success) {
+          return ret;
+        }
     }
 
     ret = present_pixmap(window, pixmap, req_serial,
@@ -173,8 +178,9 @@ proc_present_pixmap_common(ClientPtr client,
                          req_options, req_target_msc, req_divisor, req_remainder,
                          notifies, nnotifies);
 
-    if (ret != Success)
-        present_destroy_notifies(notifies, nnotifies);
+    if (ret != Success) {
+      present_destroy_notifies(notifies, nnotifies);
+    }
     return ret;
 }
 
@@ -205,8 +211,9 @@ proc_present_notify_msc(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xPresentNotifyMSCReq);
     rc = dixLookupWindow(&window, stuff->window, client, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     /*
      * Check to see if remainder is sane
@@ -237,8 +244,9 @@ proc_present_select_input (ClientPtr client)
     REQUEST_SIZE_MATCH(xPresentSelectInputReq);
 
     rc = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    if (rc != Success) {
+      return rc;
+    }
 
     if (stuff->eventMask & ~PresentAllEvents) {
         client->errorValue = stuff->eventMask;
@@ -292,8 +300,9 @@ proc_present_pixmap_synced (ClientPtr client)
 
     if (stuff->acquire_point == 0 || stuff->release_point == 0 ||
         (stuff->acquire_syncobj == stuff->release_syncobj &&
-         stuff->acquire_point >= stuff->release_point))
-        return BadValue;
+         stuff->acquire_point >= stuff->release_point)) {
+      return BadValue;
+    }
 
     return proc_present_pixmap_common(client, stuff->window, stuff->pixmap, stuff->serial,
                                       stuff->valid, stuff->update, stuff->x_off, stuff->y_off,

@@ -39,8 +39,9 @@ edidSize(const xf86MonPtr DDC)
 {
     int ret = 128;
 
-    if (DDC->flags & EDID_COMPLETE_RAWDATA)
-       ret += DDC->no_sections * 128;
+    if (DDC->flags & EDID_COMPLETE_RAWDATA) {
+      ret += DDC->no_sections * 128;
+    }
 
     return ret;
 }
@@ -60,22 +61,25 @@ addEDIDProp(CallbackListPtr *pcbl, void *scrn, void *screen)
     ScreenPtr pScreen = screen;
     ScrnInfoPtr pScrn = scrn;
 
-    if (xf86ScreenToScrn(pScreen) == pScrn)
-        setRootWindowEDID(pScreen, pScrn->monitor->DDC);
+    if (xf86ScreenToScrn(pScreen) == pScrn) {
+      setRootWindowEDID(pScreen, pScrn->monitor->DDC);
+    }
 }
 
 Bool
 xf86SetDDCproperties(ScrnInfoPtr pScrn, xf86MonPtr DDC)
 {
-    if (!pScrn || !pScrn->monitor || !DDC)
-        return FALSE;
+  if (!pScrn || !pScrn->monitor || !DDC) {
+    return FALSE;
+  }
 
     xf86EdidMonitorSet(pScrn->scrnIndex, pScrn->monitor, DDC);
 
-    if (xf86Initialising)
-        AddCallback(&RootWindowFinalizeCallback, addEDIDProp, pScrn);
-    else
-        setRootWindowEDID(pScrn->pScreen, DDC);
+    if (xf86Initialising) {
+      AddCallback(&RootWindowFinalizeCallback, addEDIDProp, pScrn);
+    } else {
+      setRootWindowEDID(pScrn->pScreen, DDC);
+    }
 
     return TRUE;
 }

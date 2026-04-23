@@ -80,17 +80,20 @@ teardown(void)
     /* We should really have pre-disconnect hooks and run them here, for
      * completeness.  But then it gets awkward, given that you can't
      * guarantee that they'll be called ... */
-    if (bus_info.connection)
-        dbus_connection_unref(bus_info.connection);
+    if (bus_info.connection) {
+      dbus_connection_unref(bus_info.connection);
+    }
 
-    if (bus_info.fd != -1)
-        RemoveNotifyFd(bus_info.fd);
+    if (bus_info.fd != -1) {
+      RemoveNotifyFd(bus_info.fd);
+    }
     bus_info.fd = -1;
     bus_info.connection = NULL;
 
     for (hook = bus_info.hooks; hook; hook = hook->next) {
-        if (hook->disconnect)
-            hook->disconnect(hook->data);
+      if (hook->disconnect) {
+        hook->disconnect(hook->data);
+      }
     }
 }
 
@@ -111,8 +114,9 @@ message_filter(DBusConnection * connection, DBusMessage * message, void *data)
         bus_info.connection = NULL;
         teardown();
 
-        if (bus_info.timer)
-            TimerFree(bus_info.timer);
+        if (bus_info.timer) {
+          TimerFree(bus_info.timer);
+        }
         bus_info.timer = TimerSet(NULL, 0, 1, reconnect_timer, NULL);
 
         return DBUS_HANDLER_RESULT_HANDLED;
@@ -160,8 +164,9 @@ connect_to_bus(void)
     SetNotifyFd(bus_info.fd, socket_handler, X_NOTIFY_READ, &bus_info);
 
     for (hook = bus_info.hooks; hook; hook = hook->next) {
-        if (hook->connect)
-            hook->connect(bus_info.connection, hook->data);
+      if (hook->connect) {
+        hook->connect(bus_info.connection, hook->data);
+      }
     }
 
     return 1;
@@ -195,14 +200,17 @@ dbus_core_add_hook(struct dbus_core_hook *hook)
 {
     struct dbus_core_hook **prev;
 
-    for (prev = &bus_info.hooks; *prev; prev = &(*prev)->next);
+    for (prev = &bus_info.hooks; *prev; prev = &(*prev)->next) {
+      ;
+    }
 
     hook->next = NULL;
     *prev = hook;
 
     /* If we're already connected, call the connect hook. */
-    if (bus_info.connection)
-        hook->connect(bus_info.connection, hook->data);
+    if (bus_info.connection) {
+      hook->connect(bus_info.connection, hook->data);
+    }
 
     return 1;
 }

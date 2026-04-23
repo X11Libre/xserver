@@ -88,16 +88,19 @@ winReshapeMultiWindow(WindowPtr pWin)
 #endif
 
     /* Bail if the window is the root window */
-    if (pWin->parent == NULL)
-        return;
+    if (pWin->parent == NULL) {
+      return;
+    }
 
     /* Bail if the window is not top level */
-    if (pWin->parent->parent != NULL)
-        return;
+    if (pWin->parent->parent != NULL) {
+      return;
+    }
 
     /* Bail if Windows window handle is invalid */
-    if (pWinPriv->hWnd == NULL)
-        return;
+    if (pWinPriv->hWnd == NULL) {
+      return;
+    }
 
     /* Free any existing window region stored in the window privates */
     if (pWinPriv->hRgn != NULL) {
@@ -106,8 +109,9 @@ winReshapeMultiWindow(WindowPtr pWin)
     }
 
     /* Bail if the window has no bounding region defined */
-    if (!wBoundingShape(pWin))
-        return;
+    if (!wBoundingShape(pWin)) {
+      return;
+    }
 
     RegionNull(&rrNewShape);
     RegionCopy(&rrNewShape, wBoundingShape(pWin));

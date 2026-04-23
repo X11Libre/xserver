@@ -41,10 +41,11 @@ xf86ModeHSync(const DisplayModeRec * mode)
 {
     double hsync = 0.0;
 
-    if (mode->HSync > 0.0)
-        hsync = mode->HSync;
-    else if (mode->HTotal > 0)
-        hsync = (float) mode->Clock / (float) mode->HTotal;
+    if (mode->HSync > 0.0) {
+      hsync = mode->HSync;
+    } else if (mode->HTotal > 0) {
+      hsync = (float)mode->Clock / (float)mode->HTotal;
+    }
 
     return hsync;
 }
@@ -57,16 +58,19 @@ xf86ModeVRefresh(const DisplayModeRec * mode)
 {
     double refresh = 0.0;
 
-    if (mode->VRefresh > 0.0)
-        refresh = mode->VRefresh;
-    else if (mode->HTotal > 0 && mode->VTotal > 0) {
-        refresh = mode->Clock * 1000.0 / mode->HTotal / mode->VTotal;
-        if (mode->Flags & V_INTERLACE)
-            refresh *= 2.0;
-        if (mode->Flags & V_DBLSCAN)
-            refresh /= 2.0;
-        if (mode->VScan > 1)
-            refresh /= (float) (mode->VScan);
+    if (mode->VRefresh > 0.0) {
+      refresh = mode->VRefresh;
+    } else if (mode->HTotal > 0 && mode->VTotal > 0) {
+      refresh = mode->Clock * 1000.0 / mode->HTotal / mode->VTotal;
+      if (mode->Flags & V_INTERLACE) {
+        refresh *= 2.0;
+      }
+      if (mode->Flags & V_DBLSCAN) {
+        refresh /= 2.0;
+      }
+      if (mode->VScan > 1) {
+        refresh /= (float)(mode->VScan);
+      }
     }
     return refresh;
 }
@@ -108,8 +112,9 @@ xf86ModeBandwidth(DisplayModePtr mode, int depth)
     float a_active, a_total, active_percent, pixels_per_second;
     int bytes_per_pixel = bits_to_bytes(depth);
 
-    if (!mode->HTotal || !mode->VTotal || !mode->Clock)
-        return 0;
+    if (!mode->HTotal || !mode->VTotal || !mode->Clock) {
+      return 0;
+    }
 
     a_active = mode->HDisplay * mode->VDisplay;
     a_total = mode->HTotal * mode->VTotal;
@@ -129,8 +134,10 @@ xf86SetModeDefaultName(DisplayModePtr mode)
     free((void *) mode->name);
 
     if (asprintf(&tmp, "%dx%d%s", mode->HDisplay, mode->VDisplay,
-                   interlaced ? "i" : "") == -1)
-        LogMessage(X_ERROR, "xf86SetModeDefaultName() failed to allocate memory\n");
+                 interlaced ? "i" : "") == -1) {
+      LogMessage(X_ERROR,
+                 "xf86SetModeDefaultName() failed to allocate memory\n");
+    }
 
     mode->name = tmp;
 }
@@ -144,8 +151,9 @@ xf86SetModeDefaultName(DisplayModePtr mode)
 void
 xf86SetModeCrtc(DisplayModePtr p, int adjustFlags)
 {
-    if ((p == NULL) || ((p->type & M_T_CRTC_C) == M_T_BUILTIN))
-        return;
+  if ((p == NULL) || ((p->type & M_T_CRTC_C) == M_T_BUILTIN)) {
+    return;
+  }
 
     p->CrtcHDisplay = p->HDisplay;
     p->CrtcHSyncStart = p->HSyncStart;
@@ -217,10 +225,11 @@ xf86DuplicateMode(const DisplayModeRec * pMode)
     pNew->next = NULL;
     pNew->prev = NULL;
 
-    if (pMode->name == NULL)
-        xf86SetModeDefaultName(pNew);
-    else
-        pNew->name = XNFstrdup(pMode->name);
+    if (pMode->name == NULL) {
+      xf86SetModeDefaultName(pNew);
+    } else {
+      pNew->name = XNFstrdup(pMode->name);
+    }
 
     return pNew;
 }
@@ -340,9 +349,11 @@ xf86PrintModeline(int scrnIndex, DisplayModePtr mode)
         int i;
 
         type[tlen++] = ' ';
-        for (i = 0; tchar[i]; i++)
-            if (mode->type & tbit[i])
-                type[tlen++] = tchar[i];
+        for (i = 0; tchar[i]; i++) {
+          if (mode->type & tbit[i]) {
+            type[tlen++] = tchar[i];
+          }
+        }
     }
     type[tlen] = '\0';
 
@@ -354,26 +365,36 @@ xf86PrintModeline(int scrnIndex, DisplayModePtr mode)
         snprintf(tmp, 256, "vscan %i", mode->VScan);
         add(&flags, tmp);
     }
-    if (mode->Flags & V_INTERLACE)
-        add(&flags, "interlace");
-    if (mode->Flags & V_CSYNC)
-        add(&flags, "composite");
-    if (mode->Flags & V_DBLSCAN)
-        add(&flags, "doublescan");
-    if (mode->Flags & V_BCAST)
-        add(&flags, "bcast");
-    if (mode->Flags & V_PHSYNC)
-        add(&flags, "+hsync");
-    if (mode->Flags & V_NHSYNC)
-        add(&flags, "-hsync");
-    if (mode->Flags & V_PVSYNC)
-        add(&flags, "+vsync");
-    if (mode->Flags & V_NVSYNC)
-        add(&flags, "-vsync");
-    if (mode->Flags & V_PCSYNC)
-        add(&flags, "+csync");
-    if (mode->Flags & V_NCSYNC)
-        add(&flags, "-csync");
+    if (mode->Flags & V_INTERLACE) {
+      add(&flags, "interlace");
+    }
+    if (mode->Flags & V_CSYNC) {
+      add(&flags, "composite");
+    }
+    if (mode->Flags & V_DBLSCAN) {
+      add(&flags, "doublescan");
+    }
+    if (mode->Flags & V_BCAST) {
+      add(&flags, "bcast");
+    }
+    if (mode->Flags & V_PHSYNC) {
+      add(&flags, "+hsync");
+    }
+    if (mode->Flags & V_NHSYNC) {
+      add(&flags, "-hsync");
+    }
+    if (mode->Flags & V_PVSYNC) {
+      add(&flags, "+vsync");
+    }
+    if (mode->Flags & V_NVSYNC) {
+      add(&flags, "-vsync");
+    }
+    if (mode->Flags & V_PCSYNC) {
+      add(&flags, "+csync");
+    }
+    if (mode->Flags & V_NCSYNC) {
+      add(&flags, "-csync");
+    }
 #if 0
     if (mode->Flags & V_CLKDIV2)
         add(&flags, "vclk/2");
@@ -401,14 +422,17 @@ xf86ValidateModesFlags(ScrnInfoPtr pScrn, DisplayModePtr modeList, int flags)
 {
     DisplayModePtr mode;
 
-    if (flags == (V_INTERLACE | V_DBLSCAN))
-        return;
+    if (flags == (V_INTERLACE | V_DBLSCAN)) {
+      return;
+    }
 
     for (mode = modeList; mode != NULL; mode = mode->next) {
-        if (mode->Flags & V_INTERLACE && !(flags & V_INTERLACE))
-            mode->status = MODE_NO_INTERLACE;
-        if (mode->Flags & V_DBLSCAN && !(flags & V_DBLSCAN))
-            mode->status = MODE_NO_DBLESCAN;
+      if (mode->Flags & V_INTERLACE && !(flags & V_INTERLACE)) {
+        mode->status = MODE_NO_INTERLACE;
+      }
+      if (mode->Flags & V_DBLSCAN && !(flags & V_DBLSCAN)) {
+        mode->status = MODE_NO_DBLESCAN;
+      }
     }
 }
 
@@ -423,12 +447,15 @@ xf86ValidateModesSize(ScrnInfoPtr pScrn, DisplayModePtr modeList,
 {
     DisplayModePtr mode;
 
-    if (maxPitch <= 0)
-        maxPitch = MAXINT;
-    if (maxX <= 0)
-        maxX = MAXINT;
-    if (maxY <= 0)
-        maxY = MAXINT;
+    if (maxPitch <= 0) {
+      maxPitch = MAXINT;
+    }
+    if (maxX <= 0) {
+      maxX = MAXINT;
+    }
+    if (maxY <= 0) {
+      maxY = MAXINT;
+    }
 
     for (mode = modeList; mode != NULL; mode = mode->next) {
         if ((xf86ModeWidth(mode, RR_Rotate_0) > maxPitch ||
@@ -437,21 +464,25 @@ xf86ValidateModesSize(ScrnInfoPtr pScrn, DisplayModePtr modeList,
             (xf86ModeWidth(mode, RR_Rotate_90) > maxPitch ||
              xf86ModeWidth(mode, RR_Rotate_90) > maxX ||
              xf86ModeHeight(mode, RR_Rotate_90) > maxY)) {
-            if (xf86ModeWidth(mode, RR_Rotate_0) > maxPitch ||
-                xf86ModeWidth(mode, RR_Rotate_90) > maxPitch)
-                mode->status = MODE_BAD_WIDTH;
+          if (xf86ModeWidth(mode, RR_Rotate_0) > maxPitch ||
+              xf86ModeWidth(mode, RR_Rotate_90) > maxPitch) {
+            mode->status = MODE_BAD_WIDTH;
+          }
 
-            if (xf86ModeWidth(mode, RR_Rotate_0) > maxX ||
-                xf86ModeWidth(mode, RR_Rotate_90) > maxX)
-                mode->status = MODE_VIRTUAL_X;
+          if (xf86ModeWidth(mode, RR_Rotate_0) > maxX ||
+              xf86ModeWidth(mode, RR_Rotate_90) > maxX) {
+            mode->status = MODE_VIRTUAL_X;
+          }
 
-            if (xf86ModeHeight(mode, RR_Rotate_0) > maxY ||
-                xf86ModeHeight(mode, RR_Rotate_90) > maxY)
-                mode->status = MODE_VIRTUAL_Y;
+          if (xf86ModeHeight(mode, RR_Rotate_0) > maxY ||
+              xf86ModeHeight(mode, RR_Rotate_90) > maxY) {
+            mode->status = MODE_VIRTUAL_Y;
+          }
         }
 
-        if (mode->next == modeList)
-            break;
+        if (mode->next == modeList) {
+          break;
+        }
     }
 }
 
@@ -478,8 +509,9 @@ xf86ValidateModesSync(ScrnInfoPtr pScrn, DisplayModePtr modeList, MonPtr mon)
                 bad = FALSE;
             }
         }
-        if (bad)
-            mode->status = MODE_HSYNC;
+        if (bad) {
+          mode->status = MODE_HSYNC;
+        }
 
         bad = TRUE;
         for (i = 0; i < mon->nVrefresh; i++) {
@@ -490,11 +522,13 @@ xf86ValidateModesSync(ScrnInfoPtr pScrn, DisplayModePtr modeList, MonPtr mon)
                 bad = FALSE;
             }
         }
-        if (bad)
-            mode->status = MODE_VSYNC;
+        if (bad) {
+          mode->status = MODE_VSYNC;
+        }
 
-        if (mode->next == modeList)
-            break;
+        if (mode->next == modeList) {
+          break;
+        }
     }
 }
 
@@ -523,8 +557,9 @@ xf86ValidateModesClocks(ScrnInfoPtr pScrn, DisplayModePtr modeList,
                 break;
             }
         }
-        if (!good)
-            mode->status = MODE_CLOCK_RANGE;
+        if (!good) {
+          mode->status = MODE_CLOCK_RANGE;
+        }
     }
 }
 
@@ -545,8 +580,9 @@ xf86ValidateModesUserConfig(ScrnInfoPtr pScrn, DisplayModePtr modeList)
 {
     DisplayModePtr mode;
 
-    if (pScrn->display->modes[0] == NULL)
-        return;
+    if (pScrn->display->modes[0] == NULL) {
+      return;
+    }
 
     for (mode = modeList; mode != NULL; mode = mode->next) {
         int i;
@@ -559,8 +595,9 @@ xf86ValidateModesUserConfig(ScrnInfoPtr pScrn, DisplayModePtr modeList)
                 break;
             }
         }
-        if (!good)
-            mode->status = MODE_BAD;
+        if (!good) {
+          mode->status = MODE_BAD;
+        }
     }
 }
 
@@ -578,20 +615,22 @@ xf86ValidateModesBandwidth(ScrnInfoPtr pScrn, DisplayModePtr modeList,
     DisplayModePtr mode;
 
     for (mode = modeList; mode != NULL; mode = mode->next) {
-        if (xf86ModeBandwidth(mode, depth) > bandwidth)
-            mode->status = MODE_BANDWIDTH;
+      if (xf86ModeBandwidth(mode, depth) > bandwidth) {
+        mode->status = MODE_BANDWIDTH;
+      }
     }
 }
 
 Bool
 xf86ModeIsReduced(const DisplayModeRec * mode)
 {
-    if ((((mode->HDisplay * 5 / 4) & ~0x07) > mode->HTotal) &&
-        ((mode->HTotal - mode->HDisplay) == 160) &&
-        ((mode->HSyncEnd - mode->HDisplay) == 80) &&
-        ((mode->HSyncEnd - mode->HSyncStart) == 32) &&
-        ((mode->VSyncStart - mode->VDisplay) == 3))
-        return TRUE;
+  if ((((mode->HDisplay * 5 / 4) & ~0x07) > mode->HTotal) &&
+      ((mode->HTotal - mode->HDisplay) == 160) &&
+      ((mode->HSyncEnd - mode->HDisplay) == 80) &&
+      ((mode->HSyncEnd - mode->HSyncStart) == 32) &&
+      ((mode->VSyncStart - mode->VDisplay) == 3)) {
+    return TRUE;
+  }
     return FALSE;
 }
 
@@ -603,9 +642,11 @@ xf86ModeIsReduced(const DisplayModeRec * mode)
 void
 xf86ValidateModesReducedBlanking(ScrnInfoPtr pScrn, DisplayModePtr modeList)
 {
-    for (; modeList != NULL; modeList = modeList->next)
-        if (xf86ModeIsReduced(modeList))
-            modeList->status = MODE_NO_REDUCED;
+  for (; modeList != NULL; modeList = modeList->next) {
+    if (xf86ModeIsReduced(modeList)) {
+      modeList->status = MODE_NO_REDUCED;
+    }
+  }
 }
 
 /**
@@ -628,10 +669,11 @@ xf86PruneInvalidModes(ScrnInfoPtr pScrn, DisplayModePtr * modeList,
             if (verbose) {
                 const char *type = "";
 
-                if (mode->type & M_T_BUILTIN)
-                    type = "built-in ";
-                else if (mode->type & M_T_DEFAULT)
-                    type = "default ";
+                if (mode->type & M_T_BUILTIN) {
+                  type = "built-in ";
+                } else if (mode->type & M_T_DEFAULT) {
+                  type = "default ";
+                }
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                            "Not using %smode \"%s\" (%s)\n", type, mode->name,
                            xf86ModeStatusToString(mode->status));
@@ -639,8 +681,9 @@ xf86PruneInvalidModes(ScrnInfoPtr pScrn, DisplayModePtr * modeList,
             xf86DeleteMode(modeList, mode);
         }
 
-        if (next == first)
-            break;
+        if (next == first) {
+          break;
+        }
         mode = next;
     }
 }
@@ -653,14 +696,16 @@ xf86PruneInvalidModes(ScrnInfoPtr pScrn, DisplayModePtr * modeList,
 DisplayModePtr
 xf86ModesAdd(DisplayModePtr modes, DisplayModePtr new)
 {
-    if (modes == NULL)
-        return new;
+  if (modes == NULL) {
+    return new;
+  }
 
     if (new) {
         DisplayModePtr mode = modes;
 
-        while (mode->next)
-            mode = mode->next;
+        while (mode->next) {
+          mode = mode->next;
+        }
 
         mode->next = new;
         new->prev = mode;
@@ -679,8 +724,9 @@ xf86GetConfigModes(XF86ConfModeLinePtr conf_mode)
 
     for (; conf_mode; conf_mode = (XF86ConfModeLinePtr) conf_mode->list.next) {
         mode = calloc(1, sizeof(DisplayModeRec));
-        if (!mode)
-            continue;
+        if (!mode) {
+          continue;
+        }
         mode->name = Xstrdup(conf_mode->ml_identifier);
         if (!mode->name) {
             free(mode);
@@ -702,10 +748,11 @@ xf86GetConfigModes(XF86ConfModeLinePtr conf_mode)
 
         mode->prev = prev;
         mode->next = NULL;
-        if (prev)
-            prev->next = mode;
-        else
-            head = mode;
+        if (prev) {
+          prev->next = mode;
+        } else {
+          head = mode;
+        }
         prev = mode;
     }
     return head;
@@ -720,8 +767,9 @@ xf86GetMonitorModes(ScrnInfoPtr pScrn, XF86ConfMonitorPtr conf_monitor)
     DisplayModePtr modes = NULL;
     XF86ConfModesLinkPtr modes_link;
 
-    if (!conf_monitor)
-        return NULL;
+    if (!conf_monitor) {
+      return NULL;
+    }
 
     /*
      * first we collect the mode lines from the UseModes directive
@@ -729,13 +777,15 @@ xf86GetMonitorModes(ScrnInfoPtr pScrn, XF86ConfMonitorPtr conf_monitor)
     for (modes_link = conf_monitor->mon_modes_sect_lst;
          modes_link; modes_link = modes_link->list.next) {
         /* If this modes link hasn't been resolved, go look it up now */
-        if (!modes_link->ml_modes)
-            modes_link->ml_modes = xf86findModes(modes_link->ml_modes_str,
-                                                 xf86configptr->conf_modes_lst);
-        if (modes_link->ml_modes)
-            modes = xf86ModesAdd(modes,
-                                 xf86GetConfigModes(modes_link->ml_modes->
-                                                    mon_modeline_lst));
+        if (!modes_link->ml_modes) {
+          modes_link->ml_modes = xf86findModes(modes_link->ml_modes_str,
+                                               xf86configptr->conf_modes_lst);
+        }
+        if (modes_link->ml_modes) {
+          modes = xf86ModesAdd(
+              modes,
+              xf86GetConfigModes(modes_link->ml_modes->mon_modeline_lst));
+        }
     }
 
     return xf86ModesAdd(modes,
@@ -784,9 +834,9 @@ xf86PruneDuplicateModes(DisplayModePtr modes)
                 if (n->type & M_T_PREFERRED) {
                     xf86DeleteMode(&modes, m);
                     goto top;
+                } else {
+                  xf86DeleteMode(&modes, n);
                 }
-                else
-                    xf86DeleteMode(&modes, n);
             }
         }
     }
@@ -808,8 +858,9 @@ xf86CVTMode(int HDisplay, int VDisplay, float VRefresh, Bool Reduced,
     libxcvt_mode_info =
         libxcvt_gen_mode_info(HDisplay, VDisplay, VRefresh, Reduced, Interlaced);
 
-    if (asprintf(&tmp, "%dx%d", HDisplay, VDisplay) == -1)
-        return NULL;
+    if (asprintf(&tmp, "%dx%d", HDisplay, VDisplay) == -1) {
+      return NULL;
+    }
     Mode->name = tmp;
 
     Mode->VDisplay   = libxcvt_mode_info->vdisplay;

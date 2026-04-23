@@ -100,11 +100,11 @@ InitInput(int argc, char *argv[])
         InitialVector[2] = winProcEstablishConnection;
     }
 
-    if (AllocDevicePair(serverClient, "Windows",
-                        &g_pwinPointer, &g_pwinKeyboard,
-                        winMouseProc, winKeybdProc,
-                        FALSE) != Success)
-        FatalError("InitInput - Failed to allocate slave devices.\n");
+    if (AllocDevicePair(serverClient, "Windows", &g_pwinPointer,
+                        &g_pwinKeyboard, winMouseProc, winKeybdProc,
+                        FALSE) != Success) {
+      FatalError("InitInput - Failed to allocate slave devices.\n");
+    }
 
     mieqInit();
 

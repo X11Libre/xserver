@@ -60,9 +60,10 @@ GetScratchPixmapHeader(ScreenPtr pScreen, int width, int height, int depth,
 {
     PixmapPtr pPixmap = (*pScreen->CreatePixmap) (pScreen, 0, 0, depth, 0);
     if (pPixmap) {
-        if ((*pScreen->ModifyPixmapHeader) (pPixmap, width, height, depth,
-                                            bitsPerPixel, devKind, pPixData))
-            return pPixmap;
+      if ((*pScreen->ModifyPixmapHeader)(pPixmap, width, height, depth,
+                                         bitsPerPixel, devKind, pPixData)) {
+        return pPixmap;
+      }
         dixDestroyPixmap(pPixmap, 0);
     }
     return NullPixmap;
@@ -102,12 +103,14 @@ AllocatePixmap(ScreenPtr pScreen, int pixDataSize)
 
     assert(pScreen->totalPixmapSize > 0);
 
-    if (pScreen->totalPixmapSize > ((size_t) - 1) - pixDataSize)
-        return NullPixmap;
+    if (pScreen->totalPixmapSize > ((size_t)-1) - pixDataSize) {
+      return NullPixmap;
+    }
 
     pPixmap = calloc(1, pScreen->totalPixmapSize + pixDataSize);
-    if (!pPixmap)
-        return NullPixmap;
+    if (!pPixmap) {
+      return NullPixmap;
+    }
 
     dixInitScreenPrivates(pScreen, pPixmap, pPixmap + 1, PRIVATE_PIXMAP);
     return pPixmap;
@@ -137,8 +140,9 @@ PixmapPtr PixmapShareToSecondary(PixmapPtr pixmap, ScreenPtr secondary)
     int depth = pixmap->drawable.depth;
 
     ret = primary->SharePixmapBacking(pixmap, secondary, &handle);
-    if (ret == FALSE)
-        return NULL;
+    if (ret == FALSE) {
+      return NULL;
+    }
 
     spix = secondary->CreatePixmap(secondary, 0, 0, depth,
                                CREATE_PIXMAP_USAGE_SHARED);
@@ -182,8 +186,9 @@ PixmapStartDirtyTracking(DrawablePtr src,
     BoxRec box;
 
     dirty_update = calloc(1, sizeof(PixmapDirtyUpdateRec));
-    if (!dirty_update)
-        return FALSE;
+    if (!dirty_update) {
+      return FALSE;
+    }
 
     dirty_update->src = src;
     dirty_update->secondary_dst = secondary_dst;
@@ -242,8 +247,9 @@ PixmapStopDirtyTracking(DrawablePtr src, PixmapPtr secondary_dst)
 
     xorg_list_for_each_entry_safe(ent, safe, &screen->pixmap_dirty_list, ent) {
         if (ent->src == src && ent->secondary_dst == secondary_dst) {
-            if (ent->damage)
-                DamageDestroy(ent->damage);
+          if (ent->damage) {
+            DamageDestroy(ent->damage);
+          }
             xorg_list_del(&ent->ent);
             free(ent);
         }
@@ -313,18 +319,21 @@ PixmapDirtyCompositeRotate(PixmapPtr dst_pixmap,
                         format,
                         CPSubwindowMode,
                         &include_inferiors, serverClient, &error);
-    if (!src)
-        return;
+    if (!src) {
+      return;
+    }
 
     dst = CreatePicture(None,
                         &dst_pixmap->drawable,
                         format, 0L, NULL, serverClient, &error);
-    if (!dst)
-        return;
+    if (!dst) {
+      return;
+    }
 
     error = SetPictureTransform(src, &dirty->transform);
-    if (error)
-        return;
+    if (error) {
+      return;
+    }
     while (n--) {
         BoxRec dst_box;
 
@@ -366,8 +375,9 @@ Bool PixmapSyncDirtyHelper(PixmapDirtyUpdatePtr dirty)
     BoxRec box;
 
     dst = dirty->secondary_dst->primary_pixmap;
-    if (!dst)
-        dst = dirty->secondary_dst;
+    if (!dst) {
+      dst = dirty->secondary_dst;
+    }
 
     box.x1 = 0;
     box.y1 = 0;
@@ -400,11 +410,12 @@ Bool PixmapSyncDirtyHelper(PixmapDirtyUpdatePtr dirty)
 
     RegionTranslate(&pixregion, -dirty->x, -dirty->y);
 
-    if (!pScreen->root || dirty->rotation == RR_Rotate_0)
-        PixmapDirtyCopyArea(dst, dirty->src, dirty->x, dirty->y,
-                            dirty->dst_x, dirty->dst_y, &pixregion);
-    else
-        PixmapDirtyCompositeRotate(dst, dirty, &pixregion);
+    if (!pScreen->root || dirty->rotation == RR_Rotate_0) {
+      PixmapDirtyCopyArea(dst, dirty->src, dirty->x, dirty->y, dirty->dst_x,
+                          dirty->dst_y, &pixregion);
+    } else {
+      PixmapDirtyCompositeRotate(dst, dirty, &pixregion);
+    }
     pScreen->SourceValidate = SourceValidate;
     return TRUE;
 }

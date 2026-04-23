@@ -82,9 +82,10 @@ ProcXIQueryPointer(ClientPtr client)
      * button presses in the reply. */
     XIClientPtr xi_client = XIClientPriv(client);
 
-    if (version_compare(xi_client->major_version,
-                        xi_client->minor_version, 2, 2) >= 0)
-        have_xi22 = TRUE;
+    if (version_compare(xi_client->major_version, xi_client->minor_version, 2,
+                        2) >= 0) {
+      have_xi22 = TRUE;
+    }
 
     rc = dixLookupDevice(&pDev, stuff->deviceid, client, DixReadAccess);
     if (rc != Success) {
@@ -104,13 +105,15 @@ ProcXIQueryPointer(ClientPtr client)
         return rc;
     }
 
-    if (pDev->valuator->motionHintWindow)
-        MaybeStopHint(pDev, client);
+    if (pDev->valuator->motionHintWindow) {
+      MaybeStopHint(pDev, client);
+    }
 
-    if (InputDevIsMaster(pDev))
-        kbd = GetMaster(pDev, MASTER_KEYBOARD);
-    else
-        kbd = (pDev->key) ? pDev : NULL;
+    if (InputDevIsMaster(pDev)) {
+      kbd = GetMaster(pDev, MASTER_KEYBOARD);
+    } else {
+      kbd = (pDev->key) ? pDev : NULL;
+    }
 
     pSprite = pDev->spriteInfo->sprite;
 
@@ -140,26 +143,31 @@ ProcXIQueryPointer(ClientPtr client)
         const int buttons_size = bits_to_bytes(256); /* button map up to 255 */
         reply.buttons_len = bytes_to_int32(buttons_size);
         char *buttons = x_rpcbuf_reserve(&rpcbuf, buttons_size);
-        if (!buttons)
-            return BadAlloc;
+        if (!buttons) {
+          return BadAlloc;
+        }
 
-        for (i = 1; i < pDev->button->numButtons; i++)
-            if (BitIsOn(pDev->button->down, i))
-                SetBit(buttons, pDev->button->map[i]);
+        for (i = 1; i < pDev->button->numButtons; i++) {
+          if (BitIsOn(pDev->button->down, i)) {
+            SetBit(buttons, pDev->button->map[i]);
+          }
+        }
 
-        if (!have_xi22 && pDev->touch && pDev->touch->buttonsDown > 0)
-            SetBit(buttons, pDev->button->map[1]);
+        if (!have_xi22 && pDev->touch && pDev->touch->buttonsDown > 0) {
+          SetBit(buttons, pDev->button->map[1]);
+        }
     }
 
     if (pSprite->hot.pScreen == pWin->drawable.pScreen) {
         reply.same_screen = xTrue;
         reply.win_x = double_to_fp1616(pSprite->hot.x - pWin->drawable.x);
         reply.win_y = double_to_fp1616(pSprite->hot.y - pWin->drawable.y);
-        for (t = pSprite->win; t; t = t->parent)
-            if (t->parent == pWin) {
-                reply.child = t->drawable.id;
-                break;
-            }
+        for (t = pSprite->win; t; t = t->parent) {
+          if (t->parent == pWin) {
+            reply.child = t->drawable.id;
+            break;
+          }
+        }
     }
 
 #ifdef XINERAMA

@@ -74,29 +74,33 @@ hash_table_total_buckets(x_hash_table *h)
 static inline void
 hash_table_destroy_item(x_hash_table *h, void *k, void *v)
 {
-    if (h->destroy_key != 0)
-        (*h->destroy_key)(k);
+  if (h->destroy_key != 0) {
+    (*h->destroy_key)(k);
+  }
 
-    if (h->destroy_value != 0)
-        (*h->destroy_value)(v);
+  if (h->destroy_value != 0) {
+    (*h->destroy_value)(v);
+  }
 }
 
 static inline size_t
 hash_table_hash_key(x_hash_table *h, void *k)
 {
-    if (h->hash_key != 0)
-        return (*h->hash_key)(k);
-    else
-        return (size_t)k;
+  if (h->hash_key != 0) {
+    return (*h->hash_key)(k);
+  } else {
+    return (size_t)k;
+  }
 }
 
 static inline int
 hash_table_compare_keys(x_hash_table *h, void *k1, void *k2)
 {
-    if (h->compare_keys == 0)
-        return k1 == k2;
-    else
-        return (*h->compare_keys)(k1, k2) == 0;
+  if (h->compare_keys == 0) {
+    return k1 == k2;
+  } else {
+    return (*h->compare_keys)(k1, k2) == 0;
+  }
 }
 
 static void
@@ -108,8 +112,9 @@ hash_table_split(x_hash_table *h)
     size_t b;
     int i;
 
-    if (h->bucket_index == ARRAY_SIZE(bucket_sizes) - 1)
-        return;
+    if (h->bucket_index == ARRAY_SIZE(bucket_sizes) - 1) {
+      return;
+    }
 
     old_size = hash_table_total_buckets(h);
     old = h->buckets;
@@ -148,8 +153,9 @@ X_PFX(hash_table_new) (x_hash_fun * hash,
     x_hash_table *h;
 
     h = calloc(1, sizeof(x_hash_table));
-    if (h == 0)
-        return 0;
+    if (h == 0) {
+      return 0;
+    }
 
     h->bucket_index = 0;
     h->buckets = calloc(hash_table_total_buckets(h), sizeof(x_list *));
@@ -287,15 +293,17 @@ X_PFX(hash_table_lookup) (x_hash_table * h, void *k, void **k_ret) {
         item = node->data;
 
         if (hash_table_compare_keys(h, ITEM_KEY(item), k)) {
-            if (k_ret != 0)
-                *k_ret = ITEM_KEY(item);
+          if (k_ret != 0) {
+            *k_ret = ITEM_KEY(item);
+          }
 
             return ITEM_VALUE(item);
         }
     }
 
-    if (k_ret != 0)
-        *k_ret = 0;
+    if (k_ret != 0) {
+      *k_ret = 0;
+    }
 
     return 0;
 }

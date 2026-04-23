@@ -473,19 +473,21 @@ miZeroClipLine(int xmin, int ymin, int xmax, int ymax,
                 negslope = IsYDecreasingOctant(octant);
                 utmp = xmin - x1_orig;
                 if (utmp <= 32767) {    /* clip based on near endpt */
-                    if (xmajor)
-                        eqn = (swapped) ? EQN2 : EQN1;
-                    else
-                        eqn = (swapped) ? EQN4 : EQN3;
+                  if (xmajor) {
+                    eqn = (swapped) ? EQN2 : EQN1;
+                  } else {
+                    eqn = (swapped) ? EQN4 : EQN3;
+                  }
                     anchorval = y1_orig;
                 }
                 else {          /* clip based on far endpt */
 
                     utmp = x2_orig - xmin;
-                    if (xmajor)
-                        eqn = (swapped) ? EQN1B : EQN2B;
-                    else
-                        eqn = (swapped) ? EQN3B : EQN4B;
+                    if (xmajor) {
+                      eqn = (swapped) ? EQN1B : EQN2B;
+                    } else {
+                      eqn = (swapped) ? EQN3B : EQN4B;
+                    }
                     anchorval = y2_orig;
                     negslope = !negslope;
                 }
@@ -495,19 +497,21 @@ miZeroClipLine(int xmin, int ymin, int xmax, int ymax,
                 negslope = IsXDecreasingOctant(octant);
                 utmp = ymin - y1_orig;
                 if (utmp <= 32767) {    /* clip based on near endpt */
-                    if (xmajor)
-                        eqn = (swapped) ? EQN6 : EQN5;
-                    else
-                        eqn = (swapped) ? EQN8 : EQN7;
+                  if (xmajor) {
+                    eqn = (swapped) ? EQN6 : EQN5;
+                  } else {
+                    eqn = (swapped) ? EQN8 : EQN7;
+                  }
                     anchorval = x1_orig;
                 }
                 else {          /* clip based on far endpt */
 
                     utmp = y2_orig - ymin;
-                    if (xmajor)
-                        eqn = (swapped) ? EQN5B : EQN6B;
-                    else
-                        eqn = (swapped) ? EQN7B : EQN8B;
+                    if (xmajor) {
+                      eqn = (swapped) ? EQN5B : EQN6B;
+                    } else {
+                      eqn = (swapped) ? EQN7B : EQN8B;
+                    }
                     anchorval = x2_orig;
                     negslope = !negslope;
                 }
@@ -517,10 +521,11 @@ miZeroClipLine(int xmin, int ymin, int xmax, int ymax,
                 negslope = IsYDecreasingOctant(octant);
                 utmp = x1_orig - xmax;
                 if (utmp <= 32767) {    /* clip based on near endpt */
-                    if (xmajor)
-                        eqn = (swapped) ? EQN2 : EQN1;
-                    else
-                        eqn = (swapped) ? EQN4 : EQN3;
+                  if (xmajor) {
+                    eqn = (swapped) ? EQN2 : EQN1;
+                  } else {
+                    eqn = (swapped) ? EQN4 : EQN3;
+                  }
                     anchorval = y1_orig;
                 }
                 else {          /* clip based on far endpt */
@@ -533,10 +538,11 @@ miZeroClipLine(int xmin, int ymin, int xmax, int ymax,
                      * to the right of a clip rectangle.
                      */
                     utmp = xmax - x2_orig;
-                    if (xmajor)
-                        eqn = (swapped) ? EQN1B : EQN2B;
-                    else
-                        eqn = (swapped) ? EQN3B : EQN4B;
+                    if (xmajor) {
+                      eqn = (swapped) ? EQN1B : EQN2B;
+                    } else {
+                      eqn = (swapped) ? EQN3B : EQN4B;
+                    }
                     anchorval = y2_orig;
                     negslope = !negslope;
                 }
@@ -546,10 +552,11 @@ miZeroClipLine(int xmin, int ymin, int xmax, int ymax,
                 negslope = IsXDecreasingOctant(octant);
                 utmp = y1_orig - ymax;
                 if (utmp <= 32767) {    /* clip based on near endpt */
-                    if (xmajor)
-                        eqn = (swapped) ? EQN6 : EQN5;
-                    else
-                        eqn = (swapped) ? EQN8 : EQN7;
+                  if (xmajor) {
+                    eqn = (swapped) ? EQN6 : EQN5;
+                  } else {
+                    eqn = (swapped) ? EQN8 : EQN7;
+                  }
                     anchorval = x1_orig;
                 }
                 else {          /* clip based on far endpt */
@@ -562,51 +569,62 @@ miZeroClipLine(int xmin, int ymin, int xmax, int ymax,
                      * below the bottom of a clip rectangle.
                      */
                     utmp = ymax - y2_orig;
-                    if (xmajor)
-                        eqn = (swapped) ? EQN5B : EQN6B;
-                    else
-                        eqn = (swapped) ? EQN7B : EQN8B;
+                    if (xmajor) {
+                      eqn = (swapped) ? EQN5B : EQN6B;
+                    } else {
+                      eqn = (swapped) ? EQN7B : EQN8B;
+                    }
                     anchorval = x2_orig;
                     negslope = !negslope;
                 }
                 y1 = ymax;
             }
 
-            if (swapped)
-                negslope = !negslope;
+            if (swapped) {
+              negslope = !negslope;
+            }
 
             utmp <<= 1;         /* utmp = 2N or 2M */
-            if (eqn & T_2NDX)
-                utmp = (utmp * adx);
-            else                /* (eqn & T_2MDY) */
-                utmp = (utmp * ady);
-            if (eqn & T_DXNOTY)
-                if (eqn & T_SUBDXORY)
-                    utmp -= adx;
-                else
-                    utmp += adx;
-            else /* (eqn & T_DYNOTX) */ if (eqn & T_SUBDXORY)
+            if (eqn & T_2NDX) {
+              utmp = (utmp * adx);
+            } else { /* (eqn & T_2MDY) */
+              utmp = (utmp * ady);
+            }
+            if (eqn & T_DXNOTY) {
+              if (eqn & T_SUBDXORY) {
+                utmp -= adx;
+              } else {
+                utmp += adx;
+              }
+            } else /* (eqn & T_DYNOTX) */
+              if (eqn & T_SUBDXORY) {
                 utmp -= ady;
-            else
+              } else {
                 utmp += ady;
-            if (eqn & T_BIASSUBONE)
-                utmp += bias - 1;
-            else                /* (eqn & T_SUBBIAS) */
-                utmp -= bias;
-            if (eqn & T_DIV2DX)
-                utmp /= (adx << 1);
-            else                /* (eqn & T_DIV2DY) */
-                utmp /= (ady << 1);
-            if (eqn & T_ADDONE)
-                utmp++;
+              }
+            if (eqn & T_BIASSUBONE) {
+              utmp += bias - 1;
+            } else { /* (eqn & T_SUBBIAS) */
+              utmp -= bias;
+            }
+            if (eqn & T_DIV2DX) {
+              utmp /= (adx << 1);
+            } else { /* (eqn & T_DIV2DY) */
+              utmp /= (ady << 1);
+            }
+            if (eqn & T_ADDONE) {
+              utmp++;
+            }
 
-            if (negslope)
-                utmp = -utmp;
+            if (negslope) {
+              utmp = -utmp;
+            }
 
-            if (eqn & T_2NDX)   /* We are calculating X steps */
-                x1 = anchorval + utmp;
-            else                /* else, Y steps */
-                y1 = anchorval + utmp;
+            if (eqn & T_2NDX) { /* We are calculating X steps */
+              x1 = anchorval + utmp;
+            } else { /* else, Y steps */
+              y1 = anchorval + utmp;
+            }
 
             oc1 = 0;
             MIOUTCODES(oc1, x1, y1, xmin, ymin, xmax, ymax);

@@ -52,15 +52,18 @@ glamor_poly_lines_solid_gl(DrawablePtr drawable, GCPtr gc,
     Bool ret = FALSE;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
-    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
-        goto bail;
+    if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)) {
+      goto bail;
+    }
 
     add_last = 0;
-    if (gc->capStyle != CapNotLast)
-        add_last = 1;
+    if (gc->capStyle != CapNotLast) {
+      add_last = 1;
+    }
 
-    if (n < 2)
-        return TRUE;
+    if (n < 2) {
+      return TRUE;
+    }
 
     glamor_make_current(glamor_priv);
 
@@ -68,8 +71,9 @@ glamor_poly_lines_solid_gl(DrawablePtr drawable, GCPtr gc,
                                    &glamor_priv->poly_line_program,
                                    &glamor_facet_poly_lines);
 
-    if (!prog)
-        goto bail;
+    if (!prog) {
+      goto bail;
+    }
 
     /* Set up the vertex buffers for the points */
 
@@ -110,8 +114,10 @@ glamor_poly_lines_solid_gl(DrawablePtr drawable, GCPtr gc,
         BoxPtr box = RegionRects(gc->pCompositeClip);
 
         if (!glamor_set_destination_drawable(drawable, box_index, TRUE, TRUE,
-                                             prog->matrix_uniform, &off_x, &off_y))
-            goto bail;
+                                             prog->matrix_uniform, &off_x,
+                                             &off_y)) {
+          goto bail;
+        }
 
         while (nbox--) {
             glScissor(box->x1 + off_x,
@@ -136,8 +142,9 @@ static Bool
 glamor_poly_lines_gl(DrawablePtr drawable, GCPtr gc,
                      int mode, int n, DDXPointPtr points)
 {
-    if (gc->lineWidth != 0)
-        return FALSE;
+  if (gc->lineWidth != 0) {
+    return FALSE;
+  }
 
     switch (gc->lineStyle) {
     case LineSolid:
@@ -145,10 +152,11 @@ glamor_poly_lines_gl(DrawablePtr drawable, GCPtr gc,
     case LineOnOffDash:
         return glamor_poly_lines_dash_gl(drawable, gc, mode, n, points);
     case LineDoubleDash:
-        if (gc->fillStyle == FillTiled)
-            return glamor_poly_lines_solid_gl(drawable, gc, mode, n, points);
-        else
-            return glamor_poly_lines_dash_gl(drawable, gc, mode, n, points);
+      if (gc->fillStyle == FillTiled) {
+        return glamor_poly_lines_solid_gl(drawable, gc, mode, n, points);
+      } else {
+        return glamor_poly_lines_dash_gl(drawable, gc, mode, n, points);
+      }
     default:
         return FALSE;
     }
@@ -168,7 +176,8 @@ void
 glamor_poly_lines(DrawablePtr drawable, GCPtr gc,
                   int mode, int n, DDXPointPtr points)
 {
-    if (glamor_poly_lines_gl(drawable, gc, mode, n, points))
-        return;
+  if (glamor_poly_lines_gl(drawable, gc, mode, n, points)) {
+    return;
+  }
     glamor_poly_lines_bail(drawable, gc, mode, n, points);
 }

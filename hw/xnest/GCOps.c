@@ -126,8 +126,10 @@ xnestGetImage(DrawablePtr pDrawable, int x, int y, int w, int h,
 
     if (err) {
         //  badMatch may happeen if the upstream window is currently minimized
-        if (err->error_code != BadMatch)
-            LogMessage(X_WARNING, "xnestGetImage: received error %d\n", err->error_code);
+        if (err->error_code != BadMatch) {
+          LogMessage(X_WARNING, "xnestGetImage: received error %d\n",
+                     err->error_code);
+        }
         free(err);
         return;
     }
@@ -144,61 +146,61 @@ xnestGetImage(DrawablePtr pDrawable, int x, int y, int w, int h,
 static RegionPtr
 xnestBitBlitHelper(GCPtr pGC)
 {
-    if (!pGC->graphicsExposures)
-        return NullRegion;
-    else {
-        RegionPtr pReg, pTmpReg;
-        Bool pending, overlap;
+  if (!pGC->graphicsExposures) {
+    return NullRegion;
+  } else {
+    RegionPtr pReg, pTmpReg;
+    Bool pending, overlap;
 
-        pReg = RegionCreate(NULL, 1);
-        pTmpReg = RegionCreate(NULL, 1);
-        if (!pReg || !pTmpReg)
-            return NullRegion;
-
-        xcb_flush(xnestUpstreamInfo.conn);
-
-        pending = TRUE;
-        while (pending) {
-            xcb_generic_event_t *event = xcb_wait_for_event(xnestUpstreamInfo.conn);
-            if (!event) {
-                pending = FALSE;
-                break;
-            }
-
-            switch (event->response_type & ~0x80) {
-                case NoExpose:
-                    pending = FALSE;
-                    free(event);
-                    break;
-
-                case GraphicsExpose:
-                {
-                    xcb_graphics_exposure_event_t* ev = (xcb_graphics_exposure_event_t*)event;
-                    BoxRec Box = {
-                        .x1 = ev->x,
-                        .y1 = ev->y,
-                        .x2 = ev->x + ev->width,
-                        .y2 = ev->y + ev->height,
-                    };
-                    RegionReset(pTmpReg, &Box);
-                    RegionAppend(pReg, pTmpReg);
-                    pending = ev->count;
-                    free(event);
-                    break;
-                }
-                default:
-                {
-                    struct xnest_event_queue *q = malloc(sizeof(struct xnest_event_queue));
-                    q->event = event;
-                    xorg_list_add(&q->entry, &xnestUpstreamInfo.eventQueue.entry);
-                }
-            }
-        }
-
-        RegionDestroy(pTmpReg);
-        RegionValidate(pReg, &overlap);
-        return pReg;
+    pReg = RegionCreate(NULL, 1);
+    pTmpReg = RegionCreate(NULL, 1);
+    if (!pReg || !pTmpReg) {
+      return NullRegion;
     }
+
+    xcb_flush(xnestUpstreamInfo.conn);
+
+    pending = TRUE;
+    while (pending) {
+      xcb_generic_event_t *event = xcb_wait_for_event(xnestUpstreamInfo.conn);
+      if (!event) {
+        pending = FALSE;
+        break;
+      }
+
+      switch (event->response_type & ~0x80) {
+      case NoExpose:
+        pending = FALSE;
+        free(event);
+        break;
+
+      case GraphicsExpose: {
+        xcb_graphics_exposure_event_t *ev =
+            (xcb_graphics_exposure_event_t *)event;
+        BoxRec Box = {
+            .x1 = ev->x,
+            .y1 = ev->y,
+            .x2 = ev->x + ev->width,
+            .y2 = ev->y + ev->height,
+        };
+        RegionReset(pTmpReg, &Box);
+        RegionAppend(pReg, pTmpReg);
+        pending = ev->count;
+        free(event);
+        break;
+      }
+      default: {
+        struct xnest_event_queue *q = malloc(sizeof(struct xnest_event_queue));
+        q->event = event;
+        xorg_list_add(&q->entry, &xnestUpstreamInfo.eventQueue.entry);
+      }
+      }
+    }
+
+    RegionDestroy(pTmpReg);
+    RegionValidate(pReg, &overlap);
+    return pReg;
+  }
 }
 
 RegionPtr
@@ -460,7 +462,7 @@ xnestPushPixels(GCPtr pGC, PixmapPtr pBitmap, DrawablePtr pDst,
                           xnest_upstream_gc(pGC),
                           XCB_GC_FILL_STYLE,
                           &params);
+    } else {
+      ErrorF("xnest warning: function xnestPushPixels not implemented\n");
     }
-    else
-        ErrorF("xnest warning: function xnestPushPixels not implemented\n");
 }

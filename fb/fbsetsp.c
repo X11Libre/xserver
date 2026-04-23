@@ -49,24 +49,23 @@ fbSetSpans(DrawablePtr pDrawable,
         n = RegionNumRects(pClip);
         pbox = RegionRects(pClip);
         while (n--) {
-            if (pbox->y1 > ppt->y)
-                break;
+          if (pbox->y1 > ppt->y) {
+            break;
+          }
             if (pbox->y2 > ppt->y) {
                 x1 = ppt->x;
                 x2 = x1 + *pwidth;
-                if (pbox->x1 > x1)
-                    x1 = pbox->x1;
-                if (pbox->x2 < x2)
-                    x2 = pbox->x2;
-                if (x1 < x2)
-                    fbBlt((FbBits *) s,
-                          0,
-                          (x1 - ppt->x) * dstBpp + xoff,
-                          d,
-                          dstStride,
-                          (x1 + dstXoff) * dstBpp,
-                          (x2 - x1) * dstBpp,
-                          1, pGC->alu, pPriv->pm, dstBpp, FALSE, FALSE);
+                if (pbox->x1 > x1) {
+                  x1 = pbox->x1;
+                }
+                if (pbox->x2 < x2) {
+                  x2 = pbox->x2;
+                }
+                if (x1 < x2) {
+                  fbBlt((FbBits *)s, 0, (x1 - ppt->x) * dstBpp + xoff, d,
+                        dstStride, (x1 + dstXoff) * dstBpp, (x2 - x1) * dstBpp,
+                        1, pGC->alu, pPriv->pm, dstBpp, FALSE, FALSE);
+                }
             }
         }
         src += PixmapBytePad(*pwidth, pDrawable->depth);

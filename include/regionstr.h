@@ -127,10 +127,11 @@ RegionEnd(RegionPtr reg)
 static inline size_t
 RegionSizeof(size_t n)
 {
-    if (n < ((INT_MAX - sizeof(RegDataRec)) / sizeof(BoxRec)))
-        return (sizeof(RegDataRec) + ((n) * sizeof(BoxRec)));
-    else
-        return 0;
+  if (n < ((INT_MAX - sizeof(RegDataRec)) / sizeof(BoxRec))) {
+    return (sizeof(RegDataRec) + ((n) * sizeof(BoxRec)));
+  } else {
+    return 0;
+  }
 }
 
 static inline void
@@ -147,9 +148,9 @@ RegionInit(RegionPtr _pReg, BoxPtr _rect, size_t _size)
             (((_pReg)->data = (RegDataPtr) calloc(1, rgnSize)) != NULL)) {
             (_pReg)->data->size = (long)(_size);
             (_pReg)->data->numRects = 0;
+        } else {
+          (_pReg)->data = &RegionEmptyData;
         }
-        else
-            (_pReg)->data = &RegionEmptyData;
     }
 }
 
@@ -163,8 +164,9 @@ static inline void
 RegionUninit(RegionPtr _pReg)
 {
     if ((_pReg)->data && (_pReg)->data->size) {
-        if ((_pReg)->data != &RegionEmptyData)
-            free((_pReg)->data);
+      if ((_pReg)->data != &RegionEmptyData) {
+        free((_pReg)->data);
+      }
         (_pReg)->data = NULL;
     }
 }

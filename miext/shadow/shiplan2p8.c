@@ -118,8 +118,9 @@ shadowUpdateIplan2p8(ScreenPtr pScreen, shadowBufPtr pBuf)
                                               SHADOW_WINDOW_WRITE,
                                               &winSize,
                                               pBuf->closure);
-            if (!win)
-                return;
+            if (!win) {
+              return;
+            }
             for (i = 0; i < n; i++) {
                 memcpy(d.bytes, sha, sizeof(d.bytes));
                 c2p_16x8(d.words);

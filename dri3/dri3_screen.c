@@ -38,13 +38,16 @@ dri3_open(ClientPtr client, ScreenPtr screen, RRProviderPtr provider, int *fd)
     dri3_screen_priv_ptr        ds = dri3_screen_priv(screen);
     const dri3_screen_info_rec *info = ds->info;
 
-    if (info == NULL)
-        return BadMatch;
+    if (info == NULL) {
+      return BadMatch;
+    }
 
-    if (info->version >= 1 && info->open_client != NULL)
-        return (*info->open_client) (client, screen, provider, fd);
-    if (info->open != NULL)
-        return (*info->open) (screen, provider, fd);
+    if (info->version >= 1 && info->open_client != NULL) {
+      return (*info->open_client)(client, screen, provider, fd);
+    }
+    if (info->open != NULL) {
+      return (*info->open)(screen, provider, fd);
+    }
 
     return BadMatch;
 }
@@ -60,8 +63,9 @@ dri3_pixmap_from_fds(PixmapPtr *ppixmap, ScreenPtr screen,
     const dri3_screen_info_rec *info = ds->info;
     PixmapPtr                   pixmap;
 
-    if (!info)
-        return BadImplementation;
+    if (!info) {
+      return BadImplementation;
+    }
 
     if (info->version >= 2 && info->pixmap_from_fds != NULL) {
         pixmap = (*info->pixmap_from_fds) (screen, num_fds, fds, width, height,
@@ -73,8 +77,9 @@ dri3_pixmap_from_fds(PixmapPtr *ppixmap, ScreenPtr screen,
         return BadImplementation;
     }
 
-    if (!pixmap)
-        return BadAlloc;
+    if (!pixmap) {
+      return BadAlloc;
+    }
 
     *ppixmap = pixmap;
     return Success;
@@ -89,8 +94,9 @@ dri3_fds_from_pixmap(PixmapPtr pixmap, int *fds,
     dri3_screen_priv_ptr        ds = dri3_screen_priv(screen);
     const dri3_screen_info_rec *info = ds->info;
 
-    if (!info)
-        return 0;
+    if (!info) {
+      return 0;
+    }
 
     if (info->version >= 2 && info->fds_from_pixmap != NULL) {
         return (*info->fds_from_pixmap)(screen, pixmap, fds, strides, offsets,
@@ -100,8 +106,9 @@ dri3_fds_from_pixmap(PixmapPtr pixmap, int *fds,
         CARD32 size;
 
         fds[0] = (*info->fd_from_pixmap)(screen, pixmap, &stride, &size);
-        if (fds[0] < 0)
-            return 0;
+        if (fds[0] < 0) {
+          return 0;
+        }
 
         strides[0] = stride;
         offsets[0] = 0;
@@ -124,17 +131,20 @@ dri3_fd_from_pixmap(PixmapPtr pixmap, CARD16 *stride, CARD32 *size)
     int                         fds[4];
     int                         num_fds;
 
-    if (!info)
-        return -1;
+    if (!info) {
+      return -1;
+    }
 
     /* Preferentially use the old interface, allowing the implementation to
      * ensure the buffer is in a single-plane format which doesn't need
      * modifiers. */
-    if (info->fd_from_pixmap != NULL)
-        return (*info->fd_from_pixmap)(screen, pixmap, stride, size);
+    if (info->fd_from_pixmap != NULL) {
+      return (*info->fd_from_pixmap)(screen, pixmap, stride, size);
+    }
 
-    if (info->version < 2 || info->fds_from_pixmap == NULL)
-        return -1;
+    if (info->version < 2 || info->fds_from_pixmap == NULL) {
+      return -1;
+    }
 
     /* If using the new interface, make sure that it's a single plane starting
      * at 0 within the BO. We don't check the modifier, as the client may
@@ -143,8 +153,9 @@ dri3_fd_from_pixmap(PixmapPtr pixmap, CARD16 *stride, CARD32 *size)
                                     &modifier);
     if (num_fds != 1 || offsets[0] != 0) {
         assert(num_fds <= 4);
-        for (int i = 0; i < num_fds; i++)
-            close(fds[i]);
+        for (int i = 0; i < num_fds; i++) {
+          close(fds[i]);
+        }
         return -1;
     }
 
@@ -164,11 +175,13 @@ cache_formats_and_modifiers(ScreenPtr screen)
     uint64_t                   *modifiers;
     int                         i;
 
-    if (ds->formats_cached)
-        return Success;
+    if (ds->formats_cached) {
+      return Success;
+    }
 
-    if (!info)
-        return BadImplementation;
+    if (!info) {
+      return BadImplementation;
+    }
 
     if (info->version < 2 || !info->get_formats || !info->get_modifiers) {
         ds->formats = NULL;
@@ -177,8 +190,9 @@ cache_formats_and_modifiers(ScreenPtr screen)
         return Success;
     }
 
-    if (!info->get_formats(screen, &num_formats, &formats))
-        return BadAlloc;
+    if (!info->get_formats(screen, &num_formats, &formats)) {
+      return BadAlloc;
+    }
 
     if (!num_formats) {
         ds->num_formats = 0;
@@ -195,13 +209,14 @@ cache_formats_and_modifiers(ScreenPtr screen)
     for (i = 0; i < num_formats; i++) {
         dri3_dmabuf_format_ptr iter = &ds->formats[i];
 
-        if (!info->get_modifiers(screen, formats[i],
-                                 &num_modifiers,
-                                 &modifiers))
-            continue;
+        if (!info->get_modifiers(screen, formats[i], &num_modifiers,
+                                 &modifiers)) {
+          continue;
+        }
 
-        if (!num_modifiers)
-            continue;
+        if (!num_modifiers) {
+          continue;
+        }
 
         iter->format = formats[i];
         iter->num_modifiers = num_modifiers;
@@ -234,12 +249,14 @@ dri3_get_supported_modifiers(ScreenPtr screen, DrawablePtr drawable,
     dri3_dmabuf_format_ptr      screen_format = NULL;
 
     ret = cache_formats_and_modifiers(screen);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     format = drm_format_for_depth(depth, bpp);
-    if (format == 0)
-        return BadValue;
+    if (format == 0) {
+      return BadValue;
+    }
 
     /* Find screen-global modifiers from cache
      */
@@ -249,8 +266,9 @@ dri3_get_supported_modifiers(ScreenPtr screen, DrawablePtr drawable,
             break;
         }
     }
-    if (screen_format == NULL)
-        return BadMatch;
+    if (screen_format == NULL) {
+      return BadMatch;
+    }
 
     if (screen_format->num_modifiers == 0) {
         *num_screen_modifiers = 0;
@@ -285,17 +303,20 @@ int dri3_import_syncobj(ClientPtr client, ScreenPtr screen, XID id, int fd)
     const dri3_screen_info_rec *info = dri3_screen_priv(screen)->info;
     struct dri3_syncobj *syncobj = NULL;
 
-    if (info->version < 4 || !info->import_syncobj)
-        return BadImplementation;
+    if (info->version < 4 || !info->import_syncobj) {
+      return BadImplementation;
+    }
 
     syncobj = info->import_syncobj(client, screen, id, fd);
     close(fd);
 
-    if (!syncobj)
-        return BadAlloc;
+    if (!syncobj) {
+      return BadAlloc;
+    }
 
-    if (!AddResource(id, dri3_syncobj_type, syncobj))
-        return BadAlloc;
+    if (!AddResource(id, dri3_syncobj_type, syncobj)) {
+      return BadAlloc;
+    }
 
     return Success;
 }

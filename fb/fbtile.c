@@ -51,8 +51,9 @@ fbEvenTile(FbBits * dst,
     dstX &= FB_MASK;
     FbMaskBitsBytes(dstX, width, FbDestInvarientRop(alu, pm),
                     startmask, startbyte, nmiddle, endmask, endbyte);
-    if (startmask)
-        dstStride--;
+    if (startmask) {
+      dstStride--;
+    }
     dstStride -= nmiddle;
 
     /*
@@ -71,8 +72,9 @@ fbEvenTile(FbBits * dst,
          */
         bits = READ(t);
         t += tileStride;
-        if (t >= tileEnd)
-            t = tile;
+        if (t >= tileEnd) {
+          t = tile;
+        }
         bits = FbRotLeft(bits, rot);
         and = fbAnd(alu, bits, pm);
         xor = fbXor(alu, bits, pm);
@@ -82,14 +84,16 @@ fbEvenTile(FbBits * dst,
             dst++;
         }
         n = nmiddle;
-        if (!and)
-            while (n--)
-                WRITE(dst++, xor);
-        else
-            while (n--) {
-                WRITE(dst, FbDoRRop(READ(dst), and, xor));
-                dst++;
-            }
+        if (!and) {
+          while (n--) {
+            WRITE(dst++, xor);
+          }
+        } else {
+          while (n--) {
+            WRITE(dst, FbDoRRop(READ(dst), and, xor));
+            dst++;
+          }
+        }
         if (endmask)
             FbDoRightMaskByteRRop(dst, endbyte, endmask, and, xor);
         dst += dstStride;
@@ -116,16 +120,18 @@ fbOddTile(FbBits * dst,
     y = 0;
     while (height) {
         h = tileHeight - tileY;
-        if (h > height)
-            h = height;
+        if (h > height) {
+          h = height;
+        }
         height -= h;
         widthTmp = width;
         x = dstX;
         modulus(dstX - xRot, tileWidth, tileX);
         while (widthTmp) {
             w = tileWidth - tileX;
-            if (w > widthTmp)
-                w = widthTmp;
+            if (w > widthTmp) {
+              w = widthTmp;
+            }
             widthTmp -= w;
             fbBlt(tile + tileY * tileStride,
                   tileStride,
@@ -151,11 +157,11 @@ fbTile(FbBits * dst,
        int tileWidth,
        int tileHeight, int alu, FbBits pm, int bpp, int xRot, int yRot)
 {
-    if (FbEvenTile(tileWidth))
-        fbEvenTile(dst, dstStride, dstX, width, height,
-                   tile, tileStride, tileHeight, alu, pm, xRot, yRot);
-    else
-        fbOddTile(dst, dstStride, dstX, width, height,
-                  tile, tileStride, tileWidth, tileHeight,
-                  alu, pm, bpp, xRot, yRot);
+  if (FbEvenTile(tileWidth)) {
+    fbEvenTile(dst, dstStride, dstX, width, height, tile, tileStride,
+               tileHeight, alu, pm, xRot, yRot);
+  } else {
+    fbOddTile(dst, dstStride, dstX, width, height, tile, tileStride, tileWidth,
+              tileHeight, alu, pm, bpp, xRot, yRot);
+  }
 }

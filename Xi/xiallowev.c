@@ -58,8 +58,9 @@ ProcXIAllowEvents(ClientPtr client)
     uint32_t touchId = 0;
 
     XIClientPtr xi_client = XIClientPriv(client);
-    if (!xi_client)
-        return BadImplementation;
+    if (!xi_client) {
+      return BadImplementation;
+    }
 
     if (version_compare(xi_client->major_version,
                         xi_client->minor_version, 2, 2) >= 0) {
@@ -90,8 +91,9 @@ ProcXIAllowEvents(ClientPtr client)
 
     DeviceIntPtr dev;
     int ret = dixLookupDevice(&dev, deviceId, client, DixGetAttrAccess);
-    if (ret != Success)
-        return ret;
+    if (ret != Success) {
+      return ret;
+    }
 
     TimeStamp time = ClientTimeToServerTime(clientTime);
 
@@ -106,16 +108,19 @@ ProcXIAllowEvents(ClientPtr client)
         AllowSome(client, time, dev, GRAB_STATE_THAWED);
         break;
     case XIAsyncPairedDevice:
-        if (InputDevIsMaster(dev))
-            AllowSome(client, time, dev, GRAB_STATE_THAW_OTHERS);
+      if (InputDevIsMaster(dev)) {
+        AllowSome(client, time, dev, GRAB_STATE_THAW_OTHERS);
+      }
         break;
     case XISyncPair:
-        if (InputDevIsMaster(dev))
-            AllowSome(client, time, dev, GRAB_STATE_FREEZE_BOTH_NEXT_EVENT);
+      if (InputDevIsMaster(dev)) {
+        AllowSome(client, time, dev, GRAB_STATE_FREEZE_BOTH_NEXT_EVENT);
+      }
         break;
     case XIAsyncPair:
-        if (InputDevIsMaster(dev))
-            AllowSome(client, time, dev, GRAB_STATE_THAWED_BOTH);
+      if (InputDevIsMaster(dev)) {
+        AllowSome(client, time, dev, GRAB_STATE_THAWED_BOTH);
+      }
         break;
     case XIRejectTouch:
     case XIAcceptTouch:
@@ -123,12 +128,14 @@ ProcXIAllowEvents(ClientPtr client)
         int rc;
         WindowPtr win;
 
-        if (!have_xi22)
-            return BadValue;
+        if (!have_xi22) {
+          return BadValue;
+        }
 
         rc = dixLookupWindow(&win, grabWindow, client, DixReadAccess);
-        if (rc != Success)
-            return rc;
+        if (rc != Success) {
+          return rc;
+        }
 
         ret = TouchAcceptReject(client, dev, mode, touchId,
                                 grabWindow, &client->errorValue);

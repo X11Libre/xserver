@@ -131,20 +131,23 @@ sunPMConfirmEventToOs(int fd, pmEvent event)
 /* XXX: NOT CURRENTLY RETURNED FROM OS */
     case XF86_APM_SYS_STANDBY:
     case XF86_APM_USER_STANDBY:
-        if (ioctl(fd, SRN_IOC_STANDBY, NULL) == 0)
-            return PM_WAIT;     /* should we stop the Xserver in standby, too? */
-        else
-            return PM_NONE;
+      if (ioctl(fd, SRN_IOC_STANDBY, NULL) == 0) {
+        return PM_WAIT; /* should we stop the Xserver in standby, too? */
+      } else {
+        return PM_NONE;
+      }
     case XF86_APM_SYS_SUSPEND:
     case XF86_APM_CRITICAL_SUSPEND:
     case XF86_APM_USER_SUSPEND:
         LogMessageVerb(X_WARNING, 1, "Got SUSPENDED\n");
-        if (ioctl(fd, SRN_IOC_SUSPEND, NULL) == 0)
-            return PM_CONTINUE;
-        else {
-            LogMessageVerb(X_WARNING, 1, "sunPMConfirmEventToOs: SRN_IOC_SUSPEND"
-                    " %s\n", strerror(errno));
-            return PM_FAILED;
+        if (ioctl(fd, SRN_IOC_SUSPEND, NULL) == 0) {
+          return PM_CONTINUE;
+        } else {
+          LogMessageVerb(X_WARNING, 1,
+                         "sunPMConfirmEventToOs: SRN_IOC_SUSPEND"
+                         " %s\n",
+                         strerror(errno));
+          return PM_FAILED;
         }
     case XF86_APM_STANDBY_RESUME:
     case XF86_APM_NORMAL_RESUME:
@@ -152,12 +155,14 @@ sunPMConfirmEventToOs(int fd, pmEvent event)
     case XF86_APM_STANDBY_FAILED:
     case XF86_APM_SUSPEND_FAILED:
         LogMessageVerb(X_WARNING, 1, "Got RESUME\n");
-        if (ioctl(fd, SRN_IOC_RESUME, NULL) == 0)
-            return PM_CONTINUE;
-        else {
-            LogMessageVerb(X_WARNING, 1, "sunPMConfirmEventToOs: SRN_IOC_RESUME"
-                    " %s\n", strerror(errno));
-            return PM_FAILED;
+        if (ioctl(fd, SRN_IOC_RESUME, NULL) == 0) {
+          return PM_CONTINUE;
+        } else {
+          LogMessageVerb(X_WARNING, 1,
+                         "sunPMConfirmEventToOs: SRN_IOC_RESUME"
+                         " %s\n",
+                         strerror(errno));
+          return PM_FAILED;
         }
     default:
         return PM_NONE;

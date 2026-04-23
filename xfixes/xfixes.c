@@ -112,10 +112,12 @@ ProcXFixesDispatch(ClientPtr client)
     REQUEST(xReq);
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
 
-    if (pXFixesClient->major_version >= ARRAY_SIZE(version_requests))
-        return BadRequest;
-    if (stuff->data > version_requests[pXFixesClient->major_version])
-        return BadRequest;
+    if (pXFixesClient->major_version >= ARRAY_SIZE(version_requests)) {
+      return BadRequest;
+    }
+    if (stuff->data > version_requests[pXFixesClient->major_version]) {
+      return BadRequest;
+    }
 
     switch (stuff->data) {
         /*************** Version 1 ******************/
@@ -206,9 +208,10 @@ XFixesExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    if (!dixRegisterPrivateKey
-        (&XFixesClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(XFixesClientRec)))
-        return;
+    if (!dixRegisterPrivateKey(&XFixesClientPrivateKeyRec, PRIVATE_CLIENT,
+                               sizeof(XFixesClientRec))) {
+      return;
+    }
 
     if (XFixesSelectionInit() &&
         XFixesCursorInit() &&

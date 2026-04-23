@@ -202,36 +202,38 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
     if (pCursor->bits->emptyMask) {
         int x, y, xmax = bits_to_bytes(nCX);
 
-        for (y = 0; y < nCY; ++y)
-            for (x = 0; x < xmax; ++x) {
-                int nWinPix = bits_to_bytes(pScreenPriv->cursor.sm_cx) * y + x;
-                int nXPix = BitmapBytePad(pCursor->bits->width) * y + x;
+        for (y = 0; y < nCY; ++y) {
+          for (x = 0; x < xmax; ++x) {
+            int nWinPix = bits_to_bytes(pScreenPriv->cursor.sm_cx) * y + x;
+            int nXPix = BitmapBytePad(pCursor->bits->width) * y + x;
 
-                pAnd[nWinPix] = 0;
-                if (fReverse)
-                    pXor[nWinPix] = reverse(~pCursor->bits->source[nXPix]);
-                else
-                    pXor[nWinPix] = reverse(pCursor->bits->source[nXPix]);
+            pAnd[nWinPix] = 0;
+            if (fReverse) {
+              pXor[nWinPix] = reverse(~pCursor->bits->source[nXPix]);
+            } else {
+              pXor[nWinPix] = reverse(pCursor->bits->source[nXPix]);
             }
+          }
+        }
     }
     else {
         int x, y, xmax = bits_to_bytes(nCX);
 
-        for (y = 0; y < nCY; ++y)
-            for (x = 0; x < xmax; ++x) {
-                int nWinPix = bits_to_bytes(pScreenPriv->cursor.sm_cx) * y + x;
-                int nXPix = BitmapBytePad(pCursor->bits->width) * y + x;
+        for (y = 0; y < nCY; ++y) {
+          for (x = 0; x < xmax; ++x) {
+            int nWinPix = bits_to_bytes(pScreenPriv->cursor.sm_cx) * y + x;
+            int nXPix = BitmapBytePad(pCursor->bits->width) * y + x;
 
-                unsigned char mask = pCursor->bits->mask[nXPix];
+            unsigned char mask = pCursor->bits->mask[nXPix];
 
-                pAnd[nWinPix] = reverse(~mask);
-                if (fReverse)
-                    pXor[nWinPix] =
-                        reverse(~pCursor->bits->source[nXPix] & mask);
-                else
-                    pXor[nWinPix] =
-                        reverse(pCursor->bits->source[nXPix] & mask);
+            pAnd[nWinPix] = reverse(~mask);
+            if (fReverse) {
+              pXor[nWinPix] = reverse(~pCursor->bits->source[nXPix] & mask);
+            } else {
+              pXor[nWinPix] = reverse(pCursor->bits->source[nXPix] & mask);
             }
+          }
+        }
     }
 
     /* prepare the pointers */
@@ -305,33 +307,30 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
 	    int x, y;
             for (y = 0; y < pScreenPriv->cursor.sm_cy; y++) {
                 for (x = 0; x < pScreenPriv->cursor.sm_cx; x++) {
-                    if (x >= nCX || y >= nCY)   /* Outside of X11 icon bounds */
-                        (*pCur++) = 0;
-                    else {      /* Within X11 icon bounds */
+                  if (x >= nCX || y >= nCY) { /* Outside of X11 icon bounds */
+                    (*pCur++) = 0;
+                  } else { /* Within X11 icon bounds */
 
-                        int nWinPix =
-                            bits_to_bytes(pScreenPriv->cursor.sm_cx) * y +
-                            (x / 8);
+                    int nWinPix =
+                        bits_to_bytes(pScreenPriv->cursor.sm_cx) * y + (x / 8);
 
-                        bit = pAnd[nWinPix];
-                        bit = bit & (1 << (7 - (x & 7)));
-                        if (!bit) {     /* Within the cursor mask? */
-                            int nXPix =
-                                BitmapBytePad(pCursor->bits->width) * y +
-                                (x / 8);
-                            bit =
-                                ~reverse(~pCursor->bits->
-                                         source[nXPix] & pCursor->bits->
-                                         mask[nXPix]);
-                            bit = bit & (1 << (7 - (x & 7)));
-                            if (bit)    /* Draw foreground */
-                                (*pCur++) = 2;
-                            else        /* Draw background */
-                                (*pCur++) = 1;
-                        }
-                        else    /* Outside the cursor mask */
-                            (*pCur++) = 0;
+                    bit = pAnd[nWinPix];
+                    bit = bit & (1 << (7 - (x & 7)));
+                    if (!bit) { /* Within the cursor mask? */
+                      int nXPix =
+                          BitmapBytePad(pCursor->bits->width) * y + (x / 8);
+                      bit = ~reverse(~pCursor->bits->source[nXPix] &
+                                     pCursor->bits->mask[nXPix]);
+                      bit = bit & (1 << (7 - (x & 7)));
+                      if (bit) { /* Draw foreground */
+                        (*pCur++) = 2;
+                      } else { /* Draw background */
+                        (*pCur++) = 1;
+                      }
+                    } else { /* Outside the cursor mask */
+                      (*pCur++) = 0;
                     }
+                  }
                 }               /* end for (x) */
             }                   /* end for (y) */
         }                       /* end if (lpbits) */
@@ -368,31 +367,32 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
             ii.hbmColor = hXor;
             hCursor = (HCURSOR) CreateIconIndirect(&ii);
 
-            if (hCursor == NULL)
-                winW32Error(2, "winLoadCursor - CreateIconIndirect failed:");
-            else {
-                if (GetIconInfo(hCursor, &ii)) {
-                    if (ii.fIcon) {
-                        WIN_DEBUG_MSG
-                            ("winLoadCursor: CreateIconIndirect returned  no cursor. Trying again.\n");
+            if (hCursor == NULL) {
+              winW32Error(2, "winLoadCursor - CreateIconIndirect failed:");
+            } else {
+              if (GetIconInfo(hCursor, &ii)) {
+                if (ii.fIcon) {
+                  WIN_DEBUG_MSG("winLoadCursor: CreateIconIndirect returned  "
+                                "no cursor. Trying again.\n");
 
-                        DestroyCursor(hCursor);
+                  DestroyCursor(hCursor);
 
-                        ii.fIcon = FALSE;
-                        ii.xHotspot = pCursor->bits->xhot;
-                        ii.yHotspot = pCursor->bits->yhot;
-                        hCursor = (HCURSOR) CreateIconIndirect(&ii);
+                  ii.fIcon = FALSE;
+                  ii.xHotspot = pCursor->bits->xhot;
+                  ii.yHotspot = pCursor->bits->yhot;
+                  hCursor = (HCURSOR)CreateIconIndirect(&ii);
 
-                        if (hCursor == NULL)
-                            winW32Error(2,
-                                        "winLoadCursor - CreateIconIndirect failed:");
-                    }
-                    /* GetIconInfo creates new bitmaps. Destroy them again */
-                    if (ii.hbmMask)
-                        DeleteObject(ii.hbmMask);
-                    if (ii.hbmColor)
-                        DeleteObject(ii.hbmColor);
+                  if (hCursor == NULL) {
+                    winW32Error(2,
+                                "winLoadCursor - CreateIconIndirect failed:");
+                  }
                 }
+                /* GetIconInfo creates new bitmaps. Destroy them again */
+                if (ii.hbmMask)
+                  DeleteObject(ii.hbmMask);
+                if (ii.hbmColor)
+                  DeleteObject(ii.hbmColor);
+              }
             }
         }
 
@@ -409,8 +409,9 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
                                pCursor->bits->xhot, pCursor->bits->yhot,
                                pScreenPriv->cursor.sm_cx,
                                pScreenPriv->cursor.sm_cy, pAnd, pXor);
-        if (hCursor == NULL)
-            winW32Error(2, "winLoadCursor - CreateCursor failed:");
+        if (hCursor == NULL) {
+          winW32Error(2, "winLoadCursor - CreateCursor failed:");
+        }
     }
     free(pAnd);
     free(pXor);
@@ -433,8 +434,9 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
 static Bool
 winRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    if (pCursor == NULL || pCursor->bits == NULL)
-        return FALSE;
+  if (pCursor == NULL || pCursor->bits == NULL) {
+    return FALSE;
+  }
 
     /* FIXME: cache ARGB8888 representation? */
 
@@ -483,8 +485,9 @@ winSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor, int x,
                     if (ClientToScreen(hwnd, &ptTemp)) {
                         rcClient.right = ptTemp.x;
                         rcClient.bottom = ptTemp.y;
-                        if (!PtInRect(&rcClient, ptCurPos))
-                            bInhibit = TRUE;
+                        if (!PtInRect(&rcClient, ptCurPos)) {
+                          bInhibit = TRUE;
+                        }
                     }
                 }
             }
@@ -493,15 +496,17 @@ winSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor, int x,
 
     if (pCursor == NULL) {
         if (pScreenPriv->cursor.visible) {
-            if (!bInhibit && g_fSoftwareCursor)
-                ShowCursor(FALSE);
+          if (!bInhibit && g_fSoftwareCursor) {
+            ShowCursor(FALSE);
+          }
             pScreenPriv->cursor.visible = FALSE;
         }
     }
     else {
         if (pScreenPriv->cursor.handle) {
-            if (!bInhibit)
-                SetCursor(NULL);
+          if (!bInhibit) {
+            SetCursor(NULL);
+          }
             DestroyCursor(pScreenPriv->cursor.handle);
             pScreenPriv->cursor.handle = NULL;
         }
@@ -509,12 +514,14 @@ winSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor, int x,
             winLoadCursor(pScreen, pCursor, pScreen->myNum);
         WIN_DEBUG_MSG("winSetCursor: handle=%p\n", pScreenPriv->cursor.handle);
 
-        if (!bInhibit)
-            SetCursor(pScreenPriv->cursor.handle);
+        if (!bInhibit) {
+          SetCursor(pScreenPriv->cursor.handle);
+        }
 
         if (!pScreenPriv->cursor.visible) {
-            if (!bInhibit && g_fSoftwareCursor)
-                ShowCursor(TRUE);
+          if (!bInhibit && g_fSoftwareCursor) {
+            ShowCursor(TRUE);
+          }
             pScreenPriv->cursor.visible = TRUE;
         }
     }
@@ -575,9 +582,9 @@ winCursorQueryBestSize(int class, unsigned short *width,
         *height = pScreenPriv->cursor.sm_cy;
     }
     else {
-        if (pScreenPriv->cursor.QueryBestSize)
-            (*pScreenPriv->cursor.QueryBestSize) (class, width, height,
-                                                  pScreen);
+      if (pScreenPriv->cursor.QueryBestSize) {
+        (*pScreenPriv->cursor.QueryBestSize)(class, width, height, pScreen);
+      }
     }
 }
 

@@ -64,8 +64,9 @@ winInitNotifyIcon(winPrivScreenPtr pScreenPriv)
              display, (int) pScreenInfo->dwScreen);
 
     /* Add the tray icon */
-    if (!Shell_NotifyIcon(NIM_ADD, &nid))
-        ErrorF("winInitNotifyIcon - Shell_NotifyIcon Failed\n");
+    if (!Shell_NotifyIcon(NIM_ADD, &nid)) {
+      ErrorF("winInitNotifyIcon - Shell_NotifyIcon Failed\n");
+    }
 }
 
 /*
@@ -132,8 +133,9 @@ winHandleIconMessage(HWND hwnd, UINT message,
 
         /* Load tray icon menu resource */
         hmenuPopup = LoadMenu(g_hInstance, MAKEINTRESOURCE(IDM_TRAYICON_MENU));
-        if (!hmenuPopup)
-            ErrorF("winHandleIconMessage - LoadMenu failed\n");
+        if (!hmenuPopup) {
+          ErrorF("winHandleIconMessage - LoadMenu failed\n");
+        }
 
         /* Get actual tray icon menu */
         hmenuTray = GetSubMenu(hmenuPopup, 0);

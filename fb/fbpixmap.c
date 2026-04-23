@@ -42,20 +42,23 @@ fbCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     int bpp = BitsPerPixel(depth);
 
     paddedWidth = ((width * bpp + FB_MASK) >> FB_SHIFT) * sizeof(FbBits);
-    if (paddedWidth / 4 > 32767 || height > 32767)
-        return NullPixmap;
+    if (paddedWidth / 4 > 32767 || height > 32767) {
+      return NullPixmap;
+    }
     datasize = height * paddedWidth;
     base = pScreen->totalPixmapSize;
     adjust = 0;
-    if (base & 7)
-        adjust = 8 - (base & 7);
+    if (base & 7) {
+      adjust = 8 - (base & 7);
+    }
     datasize += adjust;
 #ifdef FB_DEBUG
     datasize += 2 * paddedWidth;
 #endif
     pPixmap = AllocatePixmap(pScreen, datasize);
-    if (!pPixmap)
-        return NullPixmap;
+    if (!pPixmap) {
+      return NullPixmap;
+    }
     pPixmap->drawable.type = DRAWABLE_PIXMAP;
     pPixmap->drawable.pScreen = pScreen;
     pPixmap->drawable.depth = depth;
@@ -82,8 +85,9 @@ fbCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
 Bool
 fbDestroyPixmap(PixmapPtr pPixmap)
 {
-    if (--pPixmap->refcnt)
-        return TRUE;
+  if (--pPixmap->refcnt) {
+    return TRUE;
+  }
     FreePixmap(pPixmap);
     return TRUE;
 }
@@ -137,8 +141,9 @@ fbPixmapToRegion(PixmapPtr pPix)
     int nWidth;
 
     pReg = RegionCreate(NULL, 1);
-    if (!pReg)
-        return NullRegion;
+    if (!pReg) {
+      return NullRegion;
+    }
     FirstRect = RegionBoxptr(pReg);
     rects = FirstRect;
 
@@ -160,20 +165,22 @@ fbPixmapToRegion(PixmapPtr pPix)
         if (READ(pw) & mask0) {
             fInBox = TRUE;
             rx1 = 0;
+        } else {
+          fInBox = FALSE;
         }
-        else
-            fInBox = FALSE;
         /* Process all words which are fully in the pixmap */
         pwLineEnd = pw + (width >> FB_SHIFT);
         for (base = 0; pw < pwLineEnd; base += FB_UNIT) {
             w = READ(pw++);
             if (fInBox) {
-                if (!~w)
-                    continue;
+              if (!~w) {
+                continue;
+              }
             }
             else {
-                if (!w)
-                    continue;
+              if (!w) {
+                continue;
+              }
             }
             for (ib = 0; ib < FB_UNIT; ib++) {
                 /* If the Screen left most bit of the word is set, we're
@@ -258,18 +265,19 @@ fbPixmapToRegion(PixmapPtr pPix)
                 }
             }
         }
-        if (!fSame)
-            irectPrevStart = irectLineStart;
-    }
-    if (!pReg->data->numRects)
-        pReg->extents.x1 = pReg->extents.x2 = 0;
-    else {
-        pReg->extents.y1 = RegionBoxptr(pReg)->y1;
-        pReg->extents.y2 = RegionEnd(pReg)->y2;
-        if (pReg->data->numRects == 1) {
-            free(pReg->data);
-            pReg->data = (RegDataPtr) NULL;
+        if (!fSame) {
+          irectPrevStart = irectLineStart;
         }
+    }
+    if (!pReg->data->numRects) {
+      pReg->extents.x1 = pReg->extents.x2 = 0;
+    } else {
+      pReg->extents.y1 = RegionBoxptr(pReg)->y1;
+      pReg->extents.y2 = RegionEnd(pReg)->y2;
+      if (pReg->data->numRects == 1) {
+        free(pReg->data);
+        pReg->data = (RegDataPtr)NULL;
+      }
     }
 
     fbFinishAccess(&pPix->drawable);

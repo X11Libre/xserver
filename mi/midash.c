@@ -69,17 +69,21 @@ miStepDash(int dist,            /* distance to step */
         return;
     }
     dist -= pDash[dashIndex] - dashOffset;
-    if (++dashIndex == numInDashList)
-        dashIndex = 0;
+    if (++dashIndex == numInDashList) {
+      dashIndex = 0;
+    }
     totallen = 0;
-    for (i = 0; i < numInDashList; i++)
-        totallen += pDash[i];
-    if (totallen <= dist)
-        dist = dist % totallen;
+    for (i = 0; i < numInDashList; i++) {
+      totallen += pDash[i];
+    }
+    if (totallen <= dist) {
+      dist = dist % totallen;
+    }
     while (dist >= pDash[dashIndex]) {
         dist -= pDash[dashIndex];
-        if (++dashIndex == numInDashList)
-            dashIndex = 0;
+        if (++dashIndex == numInDashList) {
+          dashIndex = 0;
+        }
     }
     *pDashIndex = dashIndex;
     *pDashOffset = dist;

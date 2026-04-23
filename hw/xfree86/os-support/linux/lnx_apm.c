@@ -76,19 +76,23 @@ lnxPMGetEventFromOs(int fd, pmEvent * events, int num)
     int i, j, n;
     apm_event_t linuxEvents[8];
 
-    if ((n = read(fd, linuxEvents, num * sizeof(apm_event_t))) == -1)
-        return 0;
+    if ((n = read(fd, linuxEvents, num * sizeof(apm_event_t))) == -1) {
+      return 0;
+    }
     n /= sizeof(apm_event_t);
-    if (n > num)
-        n = num;
+    if (n > num) {
+      n = num;
+    }
     for (i = 0; i < n; i++) {
-        for (j = 0; j < ARRAY_SIZE(LinuxToXF86); j++)
-            if (LinuxToXF86[j].apmLinux == linuxEvents[i]) {
-                events[i] = LinuxToXF86[j].xf86;
-                break;
-            }
-        if (j == ARRAY_SIZE(LinuxToXF86))
-            events[i] = XF86_APM_UNKNOWN;
+      for (j = 0; j < ARRAY_SIZE(LinuxToXF86); j++) {
+        if (LinuxToXF86[j].apmLinux == linuxEvents[i]) {
+          events[i] = LinuxToXF86[j].xf86;
+          break;
+        }
+      }
+      if (j == ARRAY_SIZE(LinuxToXF86)) {
+        events[i] = XF86_APM_UNKNOWN;
+      }
     }
     return n;
 }
@@ -99,8 +103,9 @@ lnxPMConfirmEventToOs(int fd, pmEvent event)
     switch (event) {
     case XF86_APM_SYS_STANDBY:
     case XF86_APM_USER_STANDBY:
-        if (ioctl(fd, APM_IOC_STANDBY, NULL))
-            return PM_FAILED;
+      if (ioctl(fd, APM_IOC_STANDBY, NULL)) {
+        return PM_FAILED;
+      }
         return PM_CONTINUE;
     case XF86_APM_SYS_SUSPEND:
     case XF86_APM_CRITICAL_SUSPEND:
@@ -111,10 +116,11 @@ lnxPMConfirmEventToOs(int fd, pmEvent event)
                In this case we still need to undo everything we have
                done to suspend ourselves or we will stay in suspended
                state forever. */
-            if (errno == EBUSY)
-                return PM_CONTINUE;
-            else
-                return PM_FAILED;
+            if (errno == EBUSY) {
+              return PM_CONTINUE;
+            } else {
+              return PM_FAILED;
+            }
         }
         return PM_CONTINUE;
     case XF86_APM_STANDBY_RESUME:
@@ -140,8 +146,9 @@ xf86OSPMOpen(void)
 
     if (!xf86acpiDisableFlag) {
         ret = lnxACPIOpen();
-        if (ret)
-            return ret;
+        if (ret) {
+          return ret;
+        }
     }
 #endif
 #ifdef HAVE_APM
@@ -159,8 +166,9 @@ lnxAPMOpen(void)
     int fd, pfd;
 
     DebugF("APM: OSPMOpen called\n");
-    if (APMihPtr || !xf86Info.pmFlag)
-        return NULL;
+    if (APMihPtr || !xf86Info.pmFlag) {
+      return NULL;
+    }
 
     DebugF("APM: Opening device\n");
     if ((fd = open(APM_DEVICE, O_RDWR)) > -1) {
@@ -169,9 +177,9 @@ lnxAPMOpen(void)
                         APM_PROC, strerror(errno));
             close(fd);
             return NULL;
+        } else {
+          close(pfd);
         }
-        else
-            close(pfd);
         xf86PMGetEventFromOs = lnxPMGetEventFromOs;
         xf86PMConfirmEventToOs = lnxPMConfirmEventToOs;
         APMihPtr = xf86AddGeneralHandler(fd, xf86HandlePMEvents, NULL);

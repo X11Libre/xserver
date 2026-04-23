@@ -91,8 +91,9 @@ I2CRaiseSCL(I2CBusPtr b, int sda, int timeout)
 
     for (i = timeout; i > 0; i -= b->RiseFallTime) {
         b->I2CGetBits(b, &scl, &sda);
-        if (scl)
-            break;
+        if (scl) {
+          break;
+        }
         b->I2CUDelay(b, b->RiseFallTime);
     }
 
@@ -128,8 +129,9 @@ I2CRaiseSCL(I2CBusPtr b, int sda, int timeout)
 static Bool
 I2CStart(I2CBusPtr b, int timeout)
 {
-    if (!I2CRaiseSCL(b, 1, timeout))
-        return FALSE;
+  if (!I2CRaiseSCL(b, 1, timeout)) {
+    return FALSE;
+  }
 
     b->I2CPutBits(b, 1, 0);
     b->I2CUDelay(b, b->HoldTime);
@@ -225,12 +227,15 @@ I2CPutByte(I2CDevPtr d, I2CByte data)
     int i, scl, sda;
     I2CBusPtr b = d->pI2CBus;
 
-    if (!I2CWriteBit(b, (data >> 7) & 1, d->ByteTimeout))
-        return FALSE;
+    if (!I2CWriteBit(b, (data >> 7) & 1, d->ByteTimeout)) {
+      return FALSE;
+    }
 
-    for (i = 6; i >= 0; i--)
-        if (!I2CWriteBit(b, (data >> i) & 1, d->BitTimeout))
-            return FALSE;
+    for (i = 6; i >= 0; i--) {
+      if (!I2CWriteBit(b, (data >> i) & 1, d->BitTimeout)) {
+        return FALSE;
+      }
+    }
 
     b->I2CPutBits(b, 0, 1);
     b->I2CUDelay(b, b->RiseFallTime);
@@ -241,8 +246,9 @@ I2CPutByte(I2CDevPtr d, I2CByte data)
         for (i = d->AcknTimeout; i > 0; i -= b->HoldTime) {
             b->I2CUDelay(b, b->HoldTime);
             b->I2CGetBits(b, &scl, &sda);
-            if (sda == 0)
-                break;
+            if (sda == 0) {
+              break;
+            }
         }
 
         if (i <= 0) {
@@ -287,19 +293,23 @@ I2CGetByte(I2CDevPtr d, I2CByte * data, Bool last)
     b->I2CPutBits(b, 0, 1);
     b->I2CUDelay(b, b->RiseFallTime);
 
-    if (!I2CReadBit(b, &sda, d->ByteTimeout))
-        return FALSE;
+    if (!I2CReadBit(b, &sda, d->ByteTimeout)) {
+      return FALSE;
+    }
 
     *data = (sda > 0) << 7;
 
-    for (i = 6; i >= 0; i--)
-        if (!I2CReadBit(b, &sda, d->BitTimeout))
-            return FALSE;
-        else
-            *data |= (sda > 0) << i;
-
-    if (!I2CWriteBit(b, last ? 1 : 0, d->BitTimeout))
+    for (i = 6; i >= 0; i--) {
+      if (!I2CReadBit(b, &sda, d->BitTimeout)) {
         return FALSE;
+      } else {
+        *data |= (sda > 0) << i;
+      }
+    }
+
+    if (!I2CWriteBit(b, last ? 1 : 0, d->BitTimeout)) {
+      return FALSE;
+    }
 
     I2C_TRACE(ErrorF("R%02x%c ", (int) *data, last ? '+' : '-'));
 
@@ -336,11 +346,13 @@ I2CAddress(I2CDevPtr d, I2CSlaveAddr addr)
 {
     if (I2CStart(d->pI2CBus, d->StartTimeout)) {
         if (I2CPutByte(d, addr & 0xFF)) {
-            if ((addr & 0xF8) != 0xF0 && (addr & 0xFE) != 0x00)
-                return TRUE;
+          if ((addr & 0xF8) != 0xF0 && (addr & 0xFE) != 0x00) {
+            return TRUE;
+          }
 
-            if (I2CPutByte(d, (addr >> 8) & 0xFF))
-                return TRUE;
+          if (I2CPutByte(d, (addr >> 8) & 0xFF)) {
+            return TRUE;
+          }
         }
 
         I2CStop(d);
@@ -376,8 +388,9 @@ xf86I2CProbeAddress(I2CBusPtr b, I2CSlaveAddr addr)
 
     r = b->I2CAddress(&d, addr);
 
-    if (r)
-        b->I2CStop(&d);
+    if (r) {
+      b->I2CStop(&d);
+    }
 
     return r;
 }
@@ -416,9 +429,11 @@ I2CWriteRead(I2CDevPtr d,
     if (r && nWrite > 0) {
         r = b->I2CAddress(d, d->SlaveAddr & ~1);
         if (r) {
-            for (; nWrite > 0; WriteBuffer++, nWrite--)
-                if (!(r = b->I2CPutByte(d, *WriteBuffer)))
-                    break;
+          for (; nWrite > 0; WriteBuffer++, nWrite--) {
+            if (!(r = b->I2CPutByte(d, *WriteBuffer))) {
+              break;
+            }
+          }
             s++;
         }
     }
@@ -426,15 +441,18 @@ I2CWriteRead(I2CDevPtr d,
     if (r && nRead > 0) {
         r = b->I2CAddress(d, d->SlaveAddr | 1);
         if (r) {
-            for (; nRead > 0; ReadBuffer++, nRead--)
-                if (!(r = b->I2CGetByte(d, ReadBuffer, nRead == 1)))
-                    break;
+          for (; nRead > 0; ReadBuffer++, nRead--) {
+            if (!(r = b->I2CGetByte(d, ReadBuffer, nRead == 1))) {
+              break;
+            }
+          }
             s++;
         }
     }
 
-    if (s)
-        b->I2CStop(d);
+    if (s) {
+      b->I2CStop(d);
+    }
 
     return r;
 }
@@ -500,20 +518,24 @@ xf86I2CWriteVec(I2CDevPtr d, I2CByte * vec, int nValues)
 
     if (nValues > 0) {
         for (; nValues > 0; nValues--, vec += 2) {
-            if (!(r = b->I2CAddress(d, d->SlaveAddr & ~1)))
-                break;
+          if (!(r = b->I2CAddress(d, d->SlaveAddr & ~1))) {
+            break;
+          }
 
             s++;
 
-            if (!(r = b->I2CPutByte(d, vec[0])))
-                break;
+            if (!(r = b->I2CPutByte(d, vec[0]))) {
+              break;
+            }
 
-            if (!(r = b->I2CPutByte(d, vec[1])))
-                break;
+            if (!(r = b->I2CPutByte(d, vec[1]))) {
+              break;
+            }
         }
 
-        if (s > 0)
-            b->I2CStop(d);
+        if (s > 0) {
+          b->I2CStop(d);
+        }
     }
 
     return r;
@@ -550,19 +572,21 @@ xf86DestroyI2CDevRec(I2CDevPtr d, Bool unalloc)
 
         /* Remove this from the list of active I2C devices. */
 
-        for (p = &d->pI2CBus->FirstDev; *p != NULL; p = &(*p)->NextDev)
-            if (*p == d) {
-                *p = (*p)->NextDev;
-                break;
-            }
+        for (p = &d->pI2CBus->FirstDev; *p != NULL; p = &(*p)->NextDev) {
+          if (*p == d) {
+            *p = (*p)->NextDev;
+            break;
+          }
+        }
 
         xf86DrvMsg(d->pI2CBus->scrnIndex, X_INFO,
                    "I2C device \"%s:%s\" removed.\n",
                    d->pI2CBus->BusName, d->DevName);
     }
 
-    if (unalloc)
-        free(d);
+    if (unalloc) {
+      free(d);
+    }
 }
 
 /* I2C transmissions are related to an I2CDevRec you must link to a
@@ -583,19 +607,23 @@ xf86I2CDevInit(I2CDevPtr d)
 {
     I2CBusPtr b;
 
-    if (d == NULL ||
-        (b = d->pI2CBus) == NULL ||
-        (d->SlaveAddr & 1) || xf86I2CFindDev(b, d->SlaveAddr) != NULL)
-        return FALSE;
+    if (d == NULL || (b = d->pI2CBus) == NULL || (d->SlaveAddr & 1) ||
+        xf86I2CFindDev(b, d->SlaveAddr) != NULL) {
+      return FALSE;
+    }
 
-    if (d->BitTimeout <= 0)
-        d->BitTimeout = b->BitTimeout;
-    if (d->ByteTimeout <= 0)
-        d->ByteTimeout = b->ByteTimeout;
-    if (d->AcknTimeout <= 0)
-        d->AcknTimeout = b->AcknTimeout;
-    if (d->StartTimeout <= 0)
-        d->StartTimeout = b->StartTimeout;
+    if (d->BitTimeout <= 0) {
+      d->BitTimeout = b->BitTimeout;
+    }
+    if (d->ByteTimeout <= 0) {
+      d->ByteTimeout = b->ByteTimeout;
+    }
+    if (d->AcknTimeout <= 0) {
+      d->AcknTimeout = b->AcknTimeout;
+    }
+    if (d->StartTimeout <= 0) {
+      d->StartTimeout = b->StartTimeout;
+    }
 
     d->NextDev = b->FirstDev;
     b->FirstDev = d;
@@ -613,9 +641,11 @@ xf86I2CFindDev(I2CBusPtr b, I2CSlaveAddr addr)
     I2CDevPtr d;
 
     if (b) {
-        for (d = b->FirstDev; d != NULL; d = d->NextDev)
-            if (d->SlaveAddr == addr)
-                return d;
+      for (d = b->FirstDev; d != NULL; d = d->NextDev) {
+        if (d->SlaveAddr == addr) {
+          return d;
+        }
+      }
     }
 
     return NULL;
@@ -666,11 +696,12 @@ xf86DestroyI2CBusRec(I2CBusPtr b, Bool unalloc, Bool devs_too)
 
         /* Remove this from the list of active I2C buses */
 
-        for (p = &I2CBusList; *p != NULL; p = &(*p)->NextBus)
-            if (*p == b) {
-                *p = (*p)->NextBus;
-                break;
-            }
+        for (p = &I2CBusList; *p != NULL; p = &(*p)->NextBus) {
+          if (*p == b) {
+            *p = (*p)->NextBus;
+            break;
+          }
+        }
 
         if (b->FirstDev != NULL) {
             if (devs_too) {
@@ -694,8 +725,9 @@ xf86DestroyI2CBusRec(I2CBusPtr b, Bool unalloc, Bool devs_too)
         xf86DrvMsg(b->scrnIndex, X_INFO, "I2C bus \"%s\" removed.\n",
                    b->BusName);
 
-        if (unalloc)
-            free(b);
+        if (unalloc) {
+          free(b);
+        }
     }
 }
 
@@ -715,8 +747,10 @@ xf86I2CBusInit(I2CBusPtr b)
      * then the name must be unique throughout the server.
      */
 
-    if (b->BusName == NULL || xf86I2CFindBus(b->scrnIndex, b->BusName) != NULL)
-        return FALSE;
+    if (b->BusName == NULL ||
+        xf86I2CFindBus(b->scrnIndex, b->BusName) != NULL) {
+      return FALSE;
+    }
 
     /* If the high level functions are not
      * supplied, use the generic functions.
@@ -727,11 +761,11 @@ xf86I2CBusInit(I2CBusPtr b)
         b->I2CWriteRead = I2CWriteRead;
 
         if (b->I2CPutBits == NULL || b->I2CGetBits == NULL) {
-            if (b->I2CPutByte == NULL ||
-                b->I2CGetByte == NULL ||
-                b->I2CAddress == NULL ||
-                b->I2CStart == NULL || b->I2CStop == NULL)
-                return FALSE;
+          if (b->I2CPutByte == NULL || b->I2CGetByte == NULL ||
+              b->I2CAddress == NULL || b->I2CStart == NULL ||
+              b->I2CStop == NULL) {
+            return FALSE;
+          }
         }
         else {
             b->I2CPutByte = I2CPutByte;
@@ -742,19 +776,25 @@ xf86I2CBusInit(I2CBusPtr b)
         }
     }
 
-    if (b->I2CUDelay == NULL)
-        b->I2CUDelay = I2CUDelay;
+    if (b->I2CUDelay == NULL) {
+      b->I2CUDelay = I2CUDelay;
+    }
 
-    if (b->HoldTime < 2)
-        b->HoldTime = 5;
-    if (b->BitTimeout <= 0)
-        b->BitTimeout = b->HoldTime;
-    if (b->ByteTimeout <= 0)
-        b->ByteTimeout = b->HoldTime;
-    if (b->AcknTimeout <= 0)
-        b->AcknTimeout = b->HoldTime;
-    if (b->StartTimeout <= 0)
-        b->StartTimeout = b->HoldTime;
+    if (b->HoldTime < 2) {
+      b->HoldTime = 5;
+    }
+    if (b->BitTimeout <= 0) {
+      b->BitTimeout = b->HoldTime;
+    }
+    if (b->ByteTimeout <= 0) {
+      b->ByteTimeout = b->HoldTime;
+    }
+    if (b->AcknTimeout <= 0) {
+      b->AcknTimeout = b->HoldTime;
+    }
+    if (b->StartTimeout <= 0) {
+      b->StartTimeout = b->HoldTime;
+    }
 
     /* Put new bus on list. */
 
@@ -772,11 +812,15 @@ xf86I2CFindBus(int scrnIndex, const char *name)
 {
     I2CBusPtr p;
 
-    if (name != NULL)
-        for (p = I2CBusList; p != NULL; p = p->NextBus)
-            if (scrnIndex < 0 || p->scrnIndex == scrnIndex)
-                if (!strcmp(p->BusName, name))
-                    return p;
+    if (name != NULL) {
+      for (p = I2CBusList; p != NULL; p = p->NextBus) {
+        if (scrnIndex < 0 || p->scrnIndex == scrnIndex) {
+          if (!strcmp(p->BusName, name)) {
+            return p;
+          }
+        }
+      }
+    }
 
     return NULL;
 }
@@ -791,17 +835,20 @@ xf86I2CGetScreenBuses(int scrnIndex, I2CBusPtr ** pppI2CBus)
     I2CBusPtr pI2CBus;
     int n = 0;
 
-    if (pppI2CBus)
-        *pppI2CBus = NULL;
+    if (pppI2CBus) {
+      *pppI2CBus = NULL;
+    }
 
     for (pI2CBus = I2CBusList; pI2CBus; pI2CBus = pI2CBus->NextBus) {
-        if ((pI2CBus->scrnIndex >= 0) && (pI2CBus->scrnIndex != scrnIndex))
-            continue;
+      if ((pI2CBus->scrnIndex >= 0) && (pI2CBus->scrnIndex != scrnIndex)) {
+        continue;
+      }
 
         n++;
 
-        if (!pppI2CBus)
-            continue;
+        if (!pppI2CBus) {
+          continue;
+        }
 
         *pppI2CBus = XNFreallocarray(*pppI2CBus, n, sizeof(I2CBusPtr));
         (*pppI2CBus)[n - 1] = pI2CBus;
