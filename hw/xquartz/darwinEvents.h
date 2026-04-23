@@ -31,8 +31,7 @@
 /* For extra precision of our cursor and other valuators */
 #define XQUARTZ_VALUATOR_LIMIT (1 << 16)
 
-Bool
-DarwinEQInit(void);
+void DarwinEQInit(void);
 void
 DarwinEQFini(void);
 void
