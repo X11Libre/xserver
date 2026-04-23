@@ -32,6 +32,8 @@
 #if !defined(_WINWINDOW_H_)
 #define _WINWINDOW_H_
 
+#include <stdbool.h>
+
 #ifndef NO
 #define NO			0
 #endif
@@ -71,7 +73,7 @@ typedef struct {
     HRGN hRgn;
     HWND hWnd;
     winPrivScreenPtr pScreenPriv;
-    Bool fXKilled;
+    bool fXKilled;
     HDWP hDwp;
 #ifdef XWIN_GLX_WINDOWS
     Bool fWglUsed;
