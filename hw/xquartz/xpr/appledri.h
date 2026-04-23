@@ -47,8 +47,6 @@
 #define X_AppleDRICreateSurface               2
 #define X_AppleDRIDestroySurface              3
 #define X_AppleDRIAuthConnection              4
-#define X_AppleDRICreateSharedBuffer          5
-#define X_AppleDRISwapBuffers                 6
 #define X_AppleDRICreatePixmap                7
 #define X_AppleDRIDestroyPixmap               8
 
@@ -56,8 +54,6 @@
 
 /* Events */
 #define AppleDRIObsoleteEvent1 0
-#define AppleDRIObsoleteEvent2 1
-#define AppleDRIObsoleteEvent3 2
 #define AppleDRISurfaceNotify  3
 #define AppleDRINumberEvents   4
 
@@ -70,68 +66,4 @@
 #define AppleDRISurfaceNotifyChanged   0
 #define AppleDRISurfaceNotifyDestroyed 1
 
-#ifndef _APPLEDRI_SERVER_
-
-typedef struct {
-    int type;               /* of event */
-    unsigned long serial;   /* # of last request processed by server */
-    Bool send_event;        /* true if this came from a SendEvent request */
-    Display *display;       /* Display the event was read from */
-    Window window;          /* window of event */
-    Time time;              /* server timestamp when event happened */
-    int kind;               /* subtype of event */
-    int arg;
-} XAppleDRINotifyEvent;
-
-_XFUNCPROTOBEGIN
-
-Bool
-XAppleDRIQueryExtension(Display *dpy, int *event_base, int *error_base);
-
-Bool
-XAppleDRIQueryVersion(Display *dpy, int *majorVersion, int *minorVersion,
-                      int *patchVersion);
-
-Bool
-XAppleDRIQueryDirectRenderingCapable(Display *dpy, int screen,
-                                     Bool *isCapable);
-
-void *
-XAppleDRISetSurfaceNotifyHandler(void (*fun)(Display *dpy, unsigned uid,
-                                             int kind));
-
-Bool
-XAppleDRIAuthConnection(Display *dpy, int screen, unsigned int magic);
-
-Bool XAppleDRICreateSurface(Display * dpy, int screen, Drawable drawable,
-                            unsigned int client_id, unsigned int key[2],
-                            unsigned int* uid);
-
-Bool
-XAppleDRIDestroySurface(Display *dpy, int screen, Drawable drawable);
-
-Bool
-XAppleDRISynchronizeSurfaces(Display *dpy);
-
-Bool
-XAppleDRICreateSharedBuffer(Display *dpy, int screen, Drawable drawable,
-                            Bool doubleSwap, char *path, size_t pathlen,
-                            int *width,
-                            int *height);
-
-Bool
-XAppleDRISwapBuffers(Display *dpy, int screen, Drawable drawable);
-
-Bool
-XAppleDRICreatePixmap(Display *dpy, int screen, Drawable drawable, int *width,
-                      int *height, int *pitch, int *bpp, size_t *size,
-                      char *bufname,
-                      size_t bufnamesize);
-
-Bool
-XAppleDRIDestroyPixmap(Display *dpy, Pixmap pixmap);
-
-_XFUNCPROTOEND
-
-#endif /* _APPLEDRI_SERVER_ */
 #endif /* _APPLEDRI_H_ */
