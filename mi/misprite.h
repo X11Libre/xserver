@@ -30,22 +30,23 @@ in this Software without prior written authorization from The Open Group.
  *
  * mi versions of these routines exist.
  */
-
 #ifndef XSERVER_MISPRITE_H
 #define XSERVER_MISPRITE_H
 
-Bool miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs);
+#include <stdio.h>
 
-Bool miDCRealizeCursor(ScreenPtr pScreen, CursorPtr pCursor);
-Bool miDCUnrealizeCursor(ScreenPtr pScreen, CursorPtr pCursor);
-Bool miDCPutUpCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+bool miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs);
+
+bool miDCRealizeCursor(ScreenPtr pScreen, CursorPtr pCursor);
+bool miDCUnrealizeCursor(ScreenPtr pScreen, CursorPtr pCursor);
+bool miDCPutUpCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
                      CursorPtr pCursor, int x, int y,
                      unsigned long source, unsigned long mask);
-Bool miDCSaveUnderCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+bool miDCSaveUnderCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
                          int x, int y, int w, int h);
-Bool miDCRestoreUnderCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+bool miDCRestoreUnderCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
                             int x, int y, int w, int h);
-Bool miDCDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen);
+bool miDCDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen);
 void miDCDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen);
 
 #endif /* XSERVER_MISPRITE_H */

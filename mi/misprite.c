@@ -275,9 +275,7 @@ miSpriteReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
  * initialization proc after all of the function pointers have
  * been stored in the screen structure.
  */
-
-Bool
-miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
+bool miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
 {
     VisualPtr pVisual;
 
@@ -615,13 +613,13 @@ miSpriteRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     if (pCursor == pCursorInfo->pCursor)
         pCursorInfo->checkPixels = TRUE;
 
-    return miDCRealizeCursor(pScreen, pCursor);
+    return (!!miDCRealizeCursor(pScreen, pCursor));
 }
 
 static Bool
 miSpriteUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    return miDCUnrealizeCursor(pScreen, pCursor);
+    return (!!miDCUnrealizeCursor(pScreen, pCursor));
 }
 
 static void
