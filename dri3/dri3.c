@@ -26,7 +26,6 @@
 #include "miext/extinit_priv.h"
 
 #include "dri3_priv.h"
-#include "dri3_util_priv.h"
 #include <drm_fourcc.h>
 
 static int dri3_request;
