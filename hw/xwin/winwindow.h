@@ -134,13 +134,13 @@ typedef struct MwmHints {
 void
  winSendMessageToWM(void *pWMInfo, winWMMessagePtr msg);
 
-Bool
-
-winInitWM(void **ppWMInfo,
-          pthread_t * ptWMProc,
-          pthread_t * ptXMsgProc,
-          pthread_mutex_t * ppmServerStarted,
-          int dwScreen, HWND hwndScreen, Bool compositeWM);
+bool winInitWM(void **ppWMInfo,
+               pthread_t *ptWMProc,
+               pthread_t *ptXMsgProc,
+               pthread_mutex_t *ppmServerStarted,
+               int dwScreen,
+               HWND hwndScreen,
+               Bool compositeWM);
 
 void
  winDeinitMultiWindowWM(void);

@@ -31,6 +31,7 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -1391,13 +1392,13 @@ winMultiWindowXMsgProc(void *pArg)
  * the Window Manager thread.  Called from
  * winscrinit.c/winFinishScreenInitFB ().
  */
-
-Bool
-winInitWM(void **ppWMInfo,
-          pthread_t * ptWMProc,
-          pthread_t * ptXMsgProc,
-          pthread_mutex_t * ppmServerStarted,
-          int dwScreen, HWND hwndScreen, Bool compositeWM)
+bool winInitWM(void **ppWMInfo,
+               pthread_t *ptWMProc,
+               pthread_t *ptXMsgProc,
+               pthread_mutex_t *ppmServerStarted,
+               int dwScreen,
+               HWND hwndScreen,
+               Bool compositeWM)
 {
     WMProcArgPtr pArg = calloc(1, sizeof(WMProcArgRec));
     WMInfoPtr pWMInfo = calloc(1, sizeof(WMInfoRec));
