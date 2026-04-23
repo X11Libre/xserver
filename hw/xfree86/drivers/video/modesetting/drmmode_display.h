@@ -29,6 +29,8 @@
 #ifndef DRMMODE_DISPLAY_H
 #define DRMMODE_DISPLAY_H
 
+#include <X11/Xdefs.h>
+
 #include "xf86drmMode.h"
 #ifdef CONFIG_UDEV_KMS
 #include "libudev.h"
