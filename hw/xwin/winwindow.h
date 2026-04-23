@@ -154,7 +154,6 @@ void
 void
  winSetAppUserModelID(HWND hWnd, const char *AppID);
 
-void
- winShowWindowOnTaskbar(HWND hWnd, Bool show);
+void winShowWindowOnTaskbar(HWND hWnd, bool show);
 
 #endif
