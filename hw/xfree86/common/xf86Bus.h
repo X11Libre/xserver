@@ -33,6 +33,8 @@
 #ifndef _XF86_BUS_H
 #define _XF86_BUS_H
 
+#include <X11/Xdefs.h>
+
 #include "xf86pciBus.h"
 #if defined(__sparc__) || defined(__sparc)
 #include "xf86sbusBus.h"
