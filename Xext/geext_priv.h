@@ -7,6 +7,7 @@
 #define _XORG_GEEXT_PRIV_H
 
 #include <X11/Xproto.h>
+#include <X11/Xfuncproto.h>
 
 typedef void (*XorgGESwapProcPtr) (xGenericEvent *from, xGenericEvent *to);
 

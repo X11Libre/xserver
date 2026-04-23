@@ -28,6 +28,7 @@ in this Software without prior written authorization from The Open Group.
 #define XSERVER_MIZERARC_H
 
 #include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
 
 typedef struct {
     int x;

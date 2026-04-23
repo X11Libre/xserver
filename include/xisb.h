@@ -29,6 +29,7 @@
 #define _xisb_H_
 
 #include <unistd.h>
+#include <X11/Xfuncproto.h>
 
 /******************************************************************************
  *		Definitions

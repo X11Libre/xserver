@@ -24,6 +24,7 @@
 #define _MISYNCSHM_H_
 
 #include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
 
 extern _X_EXPORT Bool miSyncShmScreenInit(ScreenPtr pScreen);
 

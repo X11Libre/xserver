@@ -31,6 +31,7 @@
 #define _VBE_MODES_H
 
 #include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
 
 /*
  * This is intended to be stored in the DisplayModeRec's private area.

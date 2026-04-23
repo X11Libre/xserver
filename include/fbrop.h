@@ -23,6 +23,8 @@
 #ifndef _FBROP_H_
 #define _FBROP_H_
 
+#include <X11/Xfuncproto.h>
+
 typedef struct _mergeRopBits {
     FbBits ca1, cx1, ca2, cx2;
 } FbMergeRopRec, *FbMergeRopPtr;
