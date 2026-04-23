@@ -1398,7 +1398,7 @@ bool winInitWM(void **ppWMInfo,
                pthread_mutex_t *ppmServerStarted,
                int dwScreen,
                HWND hwndScreen,
-               Bool compositeWM)
+               bool compositeWM)
 {
     WMProcArgPtr pArg = calloc(1, sizeof(WMProcArgRec));
     WMInfoPtr pWMInfo = calloc(1, sizeof(WMInfoRec));
@@ -1415,7 +1415,7 @@ bool winInitWM(void **ppWMInfo,
 
     /* Set a return pointer to the Window Manager info structure */
     *ppWMInfo = pWMInfo;
-    pWMInfo->fCompositeWM = compositeWM;
+    pWMInfo->fCompositeWM = (!!compositeWM);
 
     /* Setup the argument structure for the thread function */
     pArg->dwScreen = dwScreen;

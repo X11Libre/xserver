@@ -140,7 +140,7 @@ bool winInitWM(void **ppWMInfo,
                pthread_mutex_t *ppmServerStarted,
                int dwScreen,
                HWND hwndScreen,
-               Bool compositeWM);
+               bool compositeWM);
 
 void
  winDeinitMultiWindowWM(void);
