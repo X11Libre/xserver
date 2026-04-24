@@ -24,6 +24,8 @@
 
 #include <X11/Xdefs.h>
 
+#include "include/pixmap.h"
+
 Bool
 glamor_set_destination_drawable(DrawablePtr     drawable,
                                 int             box_index,

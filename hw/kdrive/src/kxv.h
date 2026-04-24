@@ -38,6 +38,8 @@ of the copyright holder.
 #ifndef _XVDIX_H_
 #define _XVDIX_H_
 
+#include "kdrive.h"
+
 #include "include/xvdix.h"
 
 #include "scrnintstr.h"

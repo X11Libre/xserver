@@ -26,7 +26,11 @@
 #ifndef _GLX_dri_common_h
 #define _GLX_dri_common_h
 
+#include "include/glx_extinit.h"
+
+typedef struct __GLXconfig __GLXconfig;
 typedef struct __GLXDRIconfig __GLXDRIconfig;
+
 struct __GLXDRIconfig {
     __GLXconfig config;
     const __DRIconfig *driConfig;

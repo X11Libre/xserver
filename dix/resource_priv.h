@@ -5,6 +5,8 @@
 #ifndef _XSERVER_DIX_RESOURCE_PRIV_H
 #define _XSERVER_DIX_RESOURCE_PRIV_H
 
+#include <dix-config.h>
+
 #include <X11/Xdefs.h>
 
 #include "include/callback.h"

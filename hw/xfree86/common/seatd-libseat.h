@@ -27,6 +27,7 @@
 #ifndef SEATD_LIBSEAT_H
 #define SEATD_LIBSEAT_H
 
+#include <stdbool.h>
 #include <X11/Xdefs.h>
 
 #ifdef SEATD_LIBSEAT

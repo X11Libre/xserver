@@ -26,6 +26,10 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SWAPREQ_H
 #define SWAPREQ_H 1
 
+#include <X11/Xproto.h>
+
+#include "include/xlibre_ptrtypes.h"
+
 extern void SwapColorItem(xColorItem * /* pItem */ );
 
 extern void SwapConnClientPrefix(xConnClientPrefix * /* pCCP */ );

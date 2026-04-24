@@ -23,6 +23,8 @@
 #ifndef _GLAMOR_TRANSFER_H_
 #define _GLAMOR_TRANSFER_H_
 
+#include "pixmap.h"
+
 void
 glamor_upload_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
                     int dx_src, int dy_src,

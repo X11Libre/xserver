@@ -27,6 +27,8 @@
 #ifndef _xf86InPriv_h
 #define _xf86InPriv_h
 
+#include "include/xf86Xinput.h"
+
 /* xf86Globals.c */
 extern InputDriverPtr *xf86InputDriverList;
 extern int xf86NumInputDrivers;

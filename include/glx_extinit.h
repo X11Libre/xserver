@@ -30,6 +30,8 @@
 /* XXX this comment no longer makes sense i think */
 #ifdef GLXEXT
 
+#include "screenint.h"
+
 typedef struct __GLXprovider __GLXprovider;
 typedef struct __GLXscreen __GLXscreen;
 typedef struct __GLXconfig __GLXconfig;

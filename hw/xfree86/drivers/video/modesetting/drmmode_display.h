@@ -31,6 +31,7 @@
 
 #include <X11/Xdefs.h>
 
+#include "include/xlibre_ptrtypes.h"
 #include "xf86drmMode.h"
 #ifdef CONFIG_UDEV_KMS
 #include "libudev.h"

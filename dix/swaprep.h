@@ -27,6 +27,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define SWAPREP_H 1
 
 #include <X11/Xdefs.h>
+#include <X11/Xproto.h>
+
+#include "include/xlibre_ptrtypes.h"
 
 void SwapFont(xQueryFontReply * pr, Bool hasGlyphs);
 

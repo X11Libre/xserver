@@ -24,6 +24,8 @@
 
 #include <X11/Xdefs.h>
 
+#include "include/gcstruct.h"
+
 typedef struct {
     Bool        realized;
     CharInfoPtr default_char;

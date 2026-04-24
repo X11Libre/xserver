@@ -28,6 +28,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include "include/xlibre_ptrtypes.h"
+
 /*
  * This prototypes the dispatch.c module (except for functions declared in
  * global headers), plus related dispatch procedures from devices.c, events.c,
