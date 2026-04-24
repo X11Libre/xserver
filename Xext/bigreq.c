@@ -47,8 +47,10 @@ ProcBigReqDispatch(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xBigReqEnableReq);
 
-    if (stuff->brReqType != X_BigReqEnable)
+    if (stuff->brReqType != X_BigReqEnable) {
         return BadRequest;
+    }
+
     client->big_requests = TRUE;
 
     xBigReqEnableReply reply = {
