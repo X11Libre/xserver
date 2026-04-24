@@ -88,7 +88,6 @@ SOFTWARE.
 #define MAX_REQUEST_SIZE 65535
 #endif
 
-typedef struct _FontPathRec *FontPathPtr;
 typedef struct _NewClientRec *NewClientPtr;
 
 #ifndef xnfalloc

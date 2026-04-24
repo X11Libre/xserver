@@ -435,7 +435,6 @@ if build_xorg_sdk
         [
             'Xprintf.h',
             'callback.h',
-            'closure.h',
             'colormap.h',
             'colormapst.h',
             'compiler.h',
