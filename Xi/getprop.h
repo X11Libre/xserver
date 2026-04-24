@@ -25,6 +25,10 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETPROP_H
 #define GETPROP_H 1
 
+#include <X11/X.h>
+#include <X11/Xmd.h>
+#include <X11/extensions/XI.h>
+
 XEventClass *ClassFromMask(XEventClass * /* buf */ ,
                            Mask /* mask */ ,
                            int /* maskndx */ ,

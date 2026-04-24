@@ -25,6 +25,10 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GRABDEV_H
 #define GRABDEV_H 1
 
+#include <X11/extensions/XI.h>
+
+#include "include/dix.h"
+
 int CreateMaskFromList(ClientPtr /* client */ ,
                        XEventClass * /* list */ ,
                        int /* count */ ,

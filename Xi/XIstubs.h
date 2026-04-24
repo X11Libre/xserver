@@ -26,6 +26,10 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef XI_STUBS_H
 #define XI_STUBS_H 1
 
+#include <X11/extensions/XIproto.h>
+
+#include "include/dix.h"
+
 int SetDeviceMode(ClientPtr client,
                   DeviceIntPtr dev,
                   int mode);
