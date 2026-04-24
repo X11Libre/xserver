@@ -209,7 +209,6 @@ cat > sdksyms.c << EOF
 
 /* include/Makefile.am */
 #include "Xprintf.h"
-#include "closure.h"
 #include "colormap.h"
 #include "colormapst.h"
 #include "cursor.h"
