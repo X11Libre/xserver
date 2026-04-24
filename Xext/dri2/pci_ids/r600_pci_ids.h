@@ -1,3 +1,5 @@
+#include "Xext/dri2/pci_ids/pci_id_util.h"
+
 CHIPSET(0x9400, R600_9400, R600)
 CHIPSET(0x9401, R600_9401, R600)
 CHIPSET(0x9402, R600_9402, R600)

@@ -1,3 +1,5 @@
+#include "Xext/dri2/pci_ids/pci_id_util.h"
+
 CHIPSET(0x7121, I810, i8xx)
 CHIPSET(0x7123, I810_DC100, i8xx)
 CHIPSET(0x7125, I810_E, i8xx)
