@@ -24,6 +24,8 @@
 
 #include <X11/Xdefs.h>
 
+#include "pixmap.h"
+
 Bool
 glamor_prepare_access(DrawablePtr drawable, glamor_access_t access);
 

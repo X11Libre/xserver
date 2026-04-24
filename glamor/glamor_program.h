@@ -23,6 +23,9 @@
 #ifndef _GLAMOR_PROGRAM_H_
 #define _GLAMOR_PROGRAM_H_
 
+#include "include/picture.h"
+#include "include/pixmap.h"
+
 typedef enum {
     glamor_program_location_none = 0,
     glamor_program_location_fg = 1,

@@ -31,6 +31,8 @@
 
 #include "xf86MatchDrivers.h"
 
+#include "include/xf86str.h"
+
 void xf86PciProbe(void);
 Bool xf86PciAddMatchingDev(DriverPtr drvp);
 Bool xf86PciProbeDev(DriverPtr drvp);
