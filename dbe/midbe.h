@@ -33,6 +33,7 @@
 
 #include <dix-config.h>
 
+#include "dbe/dbestruct.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/privates.h"
 

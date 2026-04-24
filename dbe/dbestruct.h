@@ -33,9 +33,9 @@
 #ifndef DBE_STRUCT_H
 #define DBE_STRUCT_H
 
-/* INCLUDES */
-
+#include <X11/Xmd.h>
 #include <X11/extensions/dbeproto.h>
+
 #include "windowstr.h"
 #include "privates.h"
 
