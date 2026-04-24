@@ -84,6 +84,8 @@ ddxUseMsg(void)
         ("-force-es        Force glamor to only use GLES contexts\n");
     ErrorF
         ("-noxv            Disable X-Video support\n");
+    ErrorF
+        ("-noTearFree      Disable TearFree X-Video PutImage\n");
     ErrorF("\n");
 }
 
@@ -137,6 +139,11 @@ ddxProcessArgument(int argc, char **argv, int i)
 #ifdef XV
     if (!strcmp(argv[i], "-noxv")) {
         fbXVAllowed = FALSE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-noTearFree")) {
+        fbTearFree = FALSE;
         return 1;
     }
 #endif
