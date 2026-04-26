@@ -11,6 +11,8 @@
 #include "include/window.h"
 #include "include/windowstr.h"
 
+extern Mask DontPropagateMasks[];
+
 #define wTrackParent(w,field)   ((w)->optional ? \
                                     (w)->optional->field \
                                  : FindWindowWithOptional(w)->optional->field)
