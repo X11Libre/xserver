@@ -29,6 +29,7 @@
 #include "dix/rpcbuf_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
+#include "render/picturestr_priv.h"
 #include "os/bug_priv.h"
 #include "os/osdep.h"
 
