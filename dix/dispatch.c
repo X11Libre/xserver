@@ -638,6 +638,15 @@ CreateConnectionBlock(void)
         pad_to_int32(setup.nbytesVendor) +
         (setup.numFormats * sizeof(xPixmapFormat)) +
         (setup.numRoots * sizeof(xWindowRoot));
+
+    DIX_FOR_EACH_SCREEN({
+        DepthPtr pDepth = walkScreen->allowedDepths;
+        for (int j = 0; j < walkScreen->numDepths; j++, pDepth++) {
+            lenofblock += sizeof(xDepth) +
+                (pDepth->numVids * sizeof(xVisualType));
+        }
+    });
+
     ConnectionInfo = calloc(1, lenofblock);
     if (!ConnectionInfo)
         return FALSE;
@@ -694,15 +703,6 @@ CreateConnectionBlock(void)
 
         pDepth = walkScreen->allowedDepths;
         for (int j = 0; j < walkScreen->numDepths; j++, pDepth++) {
-            lenofblock += sizeof(xDepth) +
-                (pDepth->numVids * sizeof(xVisualType));
-            pBuf = (char *) realloc(ConnectionInfo, lenofblock);
-            if (!pBuf) {
-                free(ConnectionInfo);
-                return FALSE;
-            }
-            ConnectionInfo = pBuf;
-            pBuf += sizesofar;
             depth.depth = pDepth->depth;
             depth.nVisuals = pDepth->numVids;
             memcpy(pBuf, &depth, sizeof(xDepth));
@@ -1381,7 +1381,7 @@ ProcQueryFont(ClientPtr client)
         rlength = sizeof(xQueryFontReply) +
             FONTINFONPROPS(FONTCHARSET(pFont)) * sizeof(xFontProp) +
             nprotoxcistructs * sizeof(xCharInfo);
-        reply = calloc(1, rlength);
+        reply = alloca(rlength);
         if (!reply) {
             return BadAlloc;
         }
@@ -1396,7 +1396,6 @@ ProcQueryFont(ClientPtr client)
         }
 
         WriteToClient(client, rlength, reply);
-        free(reply);
         return Success;
     }
 }
@@ -1765,8 +1764,7 @@ SendGraphicsExpose(ClientPtr client, RegionPtr pRgn, XID drawable,
 
         numRects = RegionNumRects(pRgn);
         pBox = RegionRects(pRgn);
-        if (!(pEvent = calloc(numRects, sizeof(xEvent))))
-            return;
+        pEvent = alloca(numRects * sizeof(xEvent));
         pe = pEvent;
 
         for (int i = 1; i <= numRects; i++, pe++, pBox++) {
@@ -1784,7 +1782,6 @@ SendGraphicsExpose(ClientPtr client, RegionPtr pRgn, XID drawable,
          * handles specially. */
         TryClientEvents(client, NULL, pEvent, numRects,
                         (Mask) 0, NoEventMask, NullGrab);
-        free(pEvent);
     }
     else {
         xEvent event = {
@@ -2666,7 +2663,7 @@ ProcListInstalledColormaps(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    Colormap *cm = calloc(pWin->drawable.pScreen->maxInstalledCmaps,
+    Colormap *cm = alloca(pWin->drawable.pScreen->maxInstalledCmaps *
                           sizeof(Colormap));
     if (!cm)
         return BadAlloc;
@@ -2676,7 +2673,6 @@ ProcListInstalledColormaps(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_CARD32s(&rpcbuf, cm, nummaps); /* Colormap is an XID, thus CARD32  */
-    free(cm);
 
     xListInstalledColormapsReply reply = {
         .nColormaps = nummaps,
@@ -3118,6 +3114,7 @@ ProcCreateCursor(ClientPtr client)
     PixmapPtr src;
     PixmapPtr msk;
     unsigned char *srcbits;
+    unsigned char *mskbits;
     unsigned short width, height;
     long n;
     CursorMetricRec cm;
@@ -3161,24 +3158,14 @@ ProcCreateCursor(ClientPtr client)
     if (stuff->x > width || stuff->y > height)
         return BadMatch;
 
-    srcbits = calloc(BitmapBytePad(width), height);
-    if (!srcbits)
-        return BadAlloc;
     n = BitmapBytePad(width) * height;
-
-    unsigned char *mskbits = calloc(1, n);
-    if (!mskbits) {
-        free(srcbits);
-        return BadAlloc;
-    }
+    srcbits = alloca(n);
+    mskbits = alloca(n);
 
     (*src->drawable.pScreen->GetImage) ((DrawablePtr) src, 0, 0, width, height,
                                         XYPixmap, 1, (void *) srcbits);
     if (msk == (PixmapPtr) NULL) {
-        unsigned char *bits = mskbits;
-
-        while (--n >= 0)
-            *bits++ = ~0;
+        memset(mskbits, 0xff, n);
     }
     else {
         /* zeroing the (pad) bits helps some ddx cursor handling */
@@ -3197,17 +3184,12 @@ ProcCreateCursor(ClientPtr client)
                          &pCursor, client, stuff->cid);
 
     if (rc != Success)
-        goto bail;
+        return rc;
     if (!AddResource(stuff->cid, X11_RESTYPE_CURSOR, (void *) pCursor)) {
-        rc = BadAlloc;
-        goto bail;
+        return BadAlloc;
     }
 
     return Success;
- bail:
-    free(srcbits);
-    free(mskbits);
-    return rc;
 }
 
 int

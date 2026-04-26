@@ -725,7 +725,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
         goto bail;
     }
 
- finish:
+ finish: ;
 
     names = c->names;
     client = c->client;
@@ -1733,11 +1733,12 @@ SetDefaultFontPath(const char *path)
 
     /* get enough for string, plus values -- use up commas */
     len = strlen(temp_path) + 1;
-    nump = cp = newpath = calloc(1, len);
+    nump = cp = newpath = alloca(len);
     if (!newpath) {
         free(temp_path);
         return BadAlloc;
     }
+    memset(newpath, 0, len);
     pp = (unsigned char *) temp_path;
     cp++;
     while (*pp) {
@@ -1757,7 +1758,6 @@ SetDefaultFontPath(const char *path)
 
     err = SetFontPathElements(num, newpath, &bad, TRUE);
 
-    free(newpath);
     free(temp_path);
 
     return err;
