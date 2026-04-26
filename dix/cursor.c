@@ -156,7 +156,7 @@ static void
 CheckForEmptyMask(CursorBitsPtr bits)
 {
     unsigned char *msk = bits->mask;
-    int n = BitmapBytePad(bits->width) * bits->height;
+    size_t n = BitmapBytePad(bits->width) * bits->height;
 
     bits->emptyMask = FALSE;
     while (n--)
