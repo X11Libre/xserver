@@ -272,9 +272,9 @@ ProcRRSetScreenSize(ClientPtr client)
 
         if (!RRCrtcIsLeased(crtc) && mode) {
             struct pixman_box16 display_box = {
-                crtc->x, crtc->y,
-                crtc->x + mode->mode.width,
-                crtc->y + mode->mode.height
+                0, 0,
+                mode->mode.width,
+                mode->mode.height
             };
             pixman_f_transform_bounds(&crtc->f_transform, &display_box);
 
