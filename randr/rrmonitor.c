@@ -670,6 +670,8 @@ ProcRRSetMonitor(ClientPtr client)
         swaps(&stuff->monitor.y);
         swaps(&stuff->monitor.width);
         swaps(&stuff->monitor.height);
+        swapl(&stuff->monitor.widthInMillimeters);
+        swapl(&stuff->monitor.heightInMillimeters);
         SwapRestL(stuff);
     }
 
