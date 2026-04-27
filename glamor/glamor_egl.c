@@ -373,24 +373,12 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
         (modifiers_ok || !pixmap_priv->used_modifiers))
         return TRUE;
 
-    switch (pixmap->drawable.depth) {
-    case 30:
-        format = GBM_FORMAT_ARGB2101010;
-        break;
-    case 32:
-    case 24:
-        format = GBM_FORMAT_ARGB8888;
-        break;
-    case 16:
-        format = GBM_FORMAT_RGB565;
-        break;
-    case 15:
-        format = GBM_FORMAT_ARGB1555;
-        break;
-    case 8:
-        format = GBM_FORMAT_R8;
-        break;
-    default:
+    format = dri3_gbm_format_for_depth(pixmap->drawable.depth, 
+                                       pixmap->drawable.bitsPerPixel, 
+                                       TRUE);
+
+    /* Check for failure (if the helper returned 0) */
+    if (!format) {
         LogMessage(X_ERROR,
                    "Failed to make %d depth, %dbpp pixmap exportable\n",
                    pixmap->drawable.depth, pixmap->drawable.bitsPerPixel);
@@ -667,26 +655,16 @@ glamor_egl_fd_name_from_pixmap(ScreenPtr screen,
 static bool
 gbm_format_for_depth(CARD8 depth, uint32_t *format)
 {
-    switch (depth) {
-    case 15:
-        *format = GBM_FORMAT_ARGB1555;
+    /* Glamor usually wants alpha if the depth is 32 or 30 */
+    uint32_t f = dri3_gbm_format_for_depth(depth, (depth + 7) & ~7, depth == 32 || depth == 30);
+    
+    if (f) {
+        *format = f;
         return true;
-    case 16:
-        *format = GBM_FORMAT_RGB565;
-        return true;
-    case 24:
-        *format = GBM_FORMAT_XRGB8888;
-        return true;
-    case 30:
-        *format = GBM_FORMAT_ARGB2101010;
-        return true;
-    case 32:
-        *format = GBM_FORMAT_ARGB8888;
-        return true;
-    default:
-        ErrorF("unexpected depth: %d\n", depth);
-        return false;
     }
+
+    ErrorF("unexpected depth: %d\n", depth);
+    return false;
 }
 #endif
 

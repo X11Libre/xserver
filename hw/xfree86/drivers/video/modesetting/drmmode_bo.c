@@ -18,6 +18,8 @@
 #include <xf86drm.h>
 #include "xf86Crtc.h"
 
+#include "dri3_util_priv.h"
+
 #include "driver.h"
 #include "drmmode_bo.h"
 
@@ -60,14 +62,14 @@ typedef struct {
 static inline uint32_t
 get_opaque_format(uint32_t format)
 {
-    switch (format) {
-    case DRM_FORMAT_ARGB8888:
-        return DRM_FORMAT_XRGB8888;
-    case DRM_FORMAT_ARGB2101010:
-        return DRM_FORMAT_XRGB2101010;
-    default:
-        return format;
-    }
+    /**
+     * We use the helper to find the depth
+     * & then re-query a non-alpha version of the result
+     */
+    int bpp = dri3_bpp_for_fourcc(format);
+    int depth = (format == DRM_FORMAT_ARGB2101010) ? 30 : (bpp == 32 ? 24 : bpp);
+    
+    return dri3_fourcc_for_depth(depth, bpp, FALSE);
 }
 
 static void
