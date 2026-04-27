@@ -1,0 +1,98 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "clang-tidy (current file)",
+            "type": "shell",
+            "command": "clang-tidy",
+            "args": [
+                "-p",
+                "build",
+                "${file}"
+            ],
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "meson setup (clang)",
+            "type": "shell",
+            "command": "meson",
+            "args": [
+                "setup",
+                "build",
+                "--reconfigure"
+            ],
+            "options": {
+                "env": {
+                    "CC": "clang",
+                    "CXX": "clang++"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ninja (build, clang)",
+            "type": "shell",
+            "command": "ninja",
+            "args": [
+                "-C",
+                "build"
+            ],
+            "dependsOn": [
+                "meson setup (clang)"
+            ],
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "meson setup (gcc)",
+            "type": "shell",
+            "command": "meson",
+            "args": [
+                "setup",
+                "build",
+                "--reconfigure"
+            ],
+            "options": {
+                "env": {
+                    "CC": "gcc",
+                    "CXX": "g++"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ninja (build, gcc)",
+            "type": "shell",
+            "command": "ninja",
+            "args": [
+                "-C",
+                "build"
+            ],
+            "dependsOn": [
+                "meson setup (gcc)"
+            ],
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "clang-tidy (all files)",
+            "type": "shell",
+            "command": "sh",
+            "args": [
+                "-c",
+                "run-clang-tidy -p build -j \"$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)\""
+            ],
+            "problemMatcher": "$gcc"
+        }
+    ]
+}
