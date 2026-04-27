@@ -1887,6 +1887,7 @@ ProcSyncQueryAlarm(ClientPtr client)
 
     if (client->swapped) {
         swapl(&reply.counter);
+        swapl(&reply.value_type);
         swapl(&reply.wait_value_hi);
         swapl(&reply.wait_value_lo);
         swapl(&reply.test_type);
