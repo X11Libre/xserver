@@ -54,6 +54,7 @@ Equipment Corporation.
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
+#include <X11/fonts/font.h>
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
@@ -65,6 +66,7 @@ Equipment Corporation.
 #include "dix/server_priv.h"
 #include "dix/swaprep.h"
 #include "include/extinit.h"
+#include "include/gcstruct.h"
 #include "os/auth.h"
 #include "os/log_priv.h"
 
@@ -75,7 +77,6 @@ Equipment Corporation.
 #include "misc.h"
 #include "opaque.h"
 #include "dixfontstr.h"
-#include "closestr.h"
 #include "dixfont.h"
 #include "xace.h"
 
@@ -83,7 +84,83 @@ Equipment Corporation.
 #include "xf86bigfontsrv.h"
 #endif
 
-extern void *fosNaturalParams;
+#define XLFDMAXFONTNAMELEN      256
+struct list_font_state {
+    char pattern[XLFDMAXFONTNAMELEN];
+    int patlen;
+    int current_fpe;
+    int max_names;
+    Bool list_started;
+    void *private;
+};
+
+struct open_font_closure {
+    ClientPtr client;
+    short current_fpe;
+    short num_fpes;
+    FontPathElementPtr *fpe_list;
+    Mask flags;
+
+    /* XXX -- get these from request buffer instead? */
+    const char *origFontName;
+    int origFontNameLen;
+    XID fontid;
+    char *fontname;
+    int fnamelen;
+    FontPtr non_cachable_font;
+};
+
+struct list_fonts_with_info_closure {
+    ClientPtr client;
+    int num_fpes;
+    FontPathElementPtr *fpe_list;
+    xListFontsWithInfoReply *reply;
+    int length;
+    struct list_font_state current;
+    struct list_font_state saved;
+    int savedNumFonts;
+    Bool haveSaved;
+    char *savedName;
+};
+
+struct list_fonts_closure {
+    ClientPtr client;
+    int num_fpes;
+    FontPathElementPtr *fpe_list;
+    FontNamesPtr names;
+    struct list_font_state current;
+    struct list_font_state saved;
+    Bool haveSaved;
+    char *savedName;
+    int savedNameLen;
+};
+
+struct poly_text_closure {
+    ClientPtr client;
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    unsigned char *pElt;
+    unsigned char *endReq;
+    unsigned char *data;
+    int xorg;
+    int yorg;
+    CARD8 reqType;
+    XID did;
+    int err;
+};
+
+struct image_text_closure {
+    ClientPtr client;
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    BYTE nChars;
+    unsigned char *data;
+    int xorg;
+    int yorg;
+    CARD8 reqType;
+    XID did;
+};
+
 extern FontPtr defaultFont;
 
 static FontPathElementPtr *font_path_elements = (FontPathElementPtr *) 0;
@@ -236,7 +313,7 @@ FreeFPE(FontPathElementPtr fpe)
 }
 
 static Bool
-doOpenFont(ClientPtr client, OFclosurePtr c)
+doOpenFont(ClientPtr client, struct open_font_closure *c)
 {
     FontPtr pfont = NullFont;
     FontPathElementPtr fpe = NULL;
@@ -408,7 +485,7 @@ OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
             return Success;
         }
     }
-    OFclosurePtr c = calloc(1, sizeof(OFclosureRec));
+    struct open_font_closure *c = calloc(1, sizeof(*c));
     if (!c)
         return BadAlloc;
     c->fontname = calloc(1, lenfname);
@@ -547,7 +624,7 @@ QueryFont(FontPtr pFont, xQueryFontReply * pReply, int nProtoCCIStructs)
 }
 
 static Bool
-doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
+doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
 {
     FontPathElementPtr fpe;
     int err = Successful;
@@ -773,7 +850,7 @@ ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
           unsigned max_names)
 {
     int access;
-    LFclosurePtr c;
+    struct list_fonts_closure *c;
 
     /*
      * The right error to return here would be BadName, however the
@@ -820,7 +897,7 @@ ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
 }
 
 static int
-doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
+doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
 {
     FontPathElementPtr fpe;
     int err = Successful;
@@ -1049,7 +1126,7 @@ StartListFontsWithInfo(ClientPtr client, int length, unsigned char *pattern,
                        int max_names)
 {
     int access;
-    LFWIclosurePtr c;
+    struct list_fonts_with_info_closure *c;
 
     /*
      * The right error to return here would be BadName, however the
@@ -1101,7 +1178,7 @@ static ChangeGCVal clearGC[] = { {.ptr = NullPixmap} };
 #define clearGCmask (GCClipMask)
 
 static int
-doPolyText(ClientPtr client, PTclosurePtr c)
+doPolyText(ClientPtr client, struct poly_text_closure *c)
 {
     FontPtr pFont = c->pGC->font, oldpFont;
     int err = Success, lgerr;   /* err is in X error, not font error, space */
@@ -1218,7 +1295,6 @@ doPolyText(ClientPtr client, PTclosurePtr c)
                 if (!ClientIsAsleep(client)) {
                     int len;
                     GCPtr pGC;
-                    PTclosurePtr new_closure;
 
                     /*  We're putting the client to sleep.  We need to do a few things
                        to ensure successful and atomic-appearing execution of the
@@ -1237,7 +1313,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
                     /* Step 1 */
                     /* Allocate a calloc'd closure structure to replace
                        the local one we were passed */
-                    new_closure = calloc(1, sizeof(PTclosureRec));
+                    struct poly_text_closure *new_closure = calloc(1, sizeof(*new_closure));
                     if (!new_closure) {
                         err = BadAlloc;
                         goto bail;
@@ -1365,7 +1441,7 @@ int
 PolyText(ClientPtr client, DrawablePtr pDraw, GCPtr pGC, unsigned char *pElt,
          unsigned char *endReq, int xorg, int yorg, int reqType, XID did)
 {
-    PTclosureRec local_closure = {
+    struct poly_text_closure local_closure = {
         .client = client,
         .pDraw = pDraw,
         .pGC = pGC,
@@ -1386,7 +1462,7 @@ PolyText(ClientPtr client, DrawablePtr pDraw, GCPtr pGC, unsigned char *pElt,
 #undef FontShiftSize
 
 static int
-doImageText(ClientPtr client, ITclosurePtr c)
+doImageText(ClientPtr client, struct image_text_closure *c)
 {
     int err = Success, lgerr;   /* err is in X error, not font error, space */
     FontPathElementPtr fpe;
@@ -1419,14 +1495,14 @@ doImageText(ClientPtr client, ITclosurePtr c)
         if (!ClientIsAsleep(client)) {
             GCPtr pGC;
             unsigned char *data;
-            ITclosurePtr old_closure;
+            struct image_text_closure *old_closure = NULL;
 
             /* We're putting the client to sleep.  We need to
                save some state.  Similar problem to that handled
                in doPolyText, but much simpler because the
                request structure is much simpler. */
 
-            ITclosurePtr new_closure = calloc(1, sizeof(ITclosureRec));
+            struct image_text_closure *new_closure = calloc(1, sizeof(*new_closure));
             if (!new_closure) {
                 err = BadAlloc;
                 goto bail;
@@ -1513,7 +1589,7 @@ int
 ImageText(ClientPtr client, DrawablePtr pDraw, GCPtr pGC, int nChars,
           unsigned char *data, int xorg, int yorg, int reqType, XID did)
 {
-    ITclosureRec local_closure;
+    struct image_text_closure local_closure;
 
     local_closure.client = client;
     local_closure.pDraw = pDraw;
