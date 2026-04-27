@@ -58,6 +58,12 @@
 
 #include "driver.h"
 
+#if X_BYTE_ORDER == X_BIG_ENDIAN
+#define cpu_to_le32(x) bswap_32(x)
+#else
+#define cpu_to_le32(x) (x)
+#endif
+
 static Bool drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height);
 static PixmapPtr drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int height,
                                               int depth, int bitsPerPixel, int devKind,
@@ -1875,7 +1881,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     i = 0;
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++)
-            ptr[i++] = image[y * ms->max_cursor_width + x];      // cpu_to_le32(image[i]);
+            ptr[i++] = cpu_to_le32(image[y * ms->max_cursor_width + x]);
     }
     /* clear the remainder for good measure */
     for (; i < ms->max_cursor_width * ms->max_cursor_height; i++)
