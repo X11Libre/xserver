@@ -60,6 +60,7 @@ SProcRRSetScreenConfig(ClientPtr client)
 
     swapl(&stuff->drawable);
     swapl(&stuff->timestamp);
+    swapl(&stuff->configTimestamp);
     swaps(&stuff->sizeID);
     swaps(&stuff->rotation);
     return ProcRRSetScreenConfig(client);
@@ -116,7 +117,6 @@ SProcRRGetScreenResourcesCurrent(ClientPtr client)
     REQUEST(xRRGetScreenResourcesCurrentReq);
 
     REQUEST_SIZE_MATCH(xRRGetScreenResourcesCurrentReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     return ProcRRGetScreenResourcesCurrent(client);
 }
@@ -234,6 +234,7 @@ SProcRRCreateMode(ClientPtr client)
     swaps(&modeinfo->hSyncStart);
     swaps(&modeinfo->hSyncEnd);
     swaps(&modeinfo->hTotal);
+    swaps(&modeinfo->hSkew);
     swaps(&modeinfo->vSyncStart);
     swaps(&modeinfo->vSyncEnd);
     swaps(&modeinfo->vTotal);
@@ -562,7 +563,7 @@ static int _X_COLD
 SProcRRSetMonitor(ClientPtr client) {
     REQUEST(xRRSetMonitorReq);
 
-    REQUEST_AT_LEAST_SIZE(xRRGetMonitorsReq);
+    REQUEST_AT_LEAST_SIZE(xRRSetMonitorReq);
     swapl(&stuff->window);
     swapl(&stuff->monitor.name);
     swaps(&stuff->monitor.noutput);
@@ -570,6 +571,8 @@ SProcRRSetMonitor(ClientPtr client) {
     swaps(&stuff->monitor.y);
     swaps(&stuff->monitor.width);
     swaps(&stuff->monitor.height);
+    swapl(&stuff->monitor.widthInMillimeters);
+    swapl(&stuff->monitor.heightInMillimeters);
     SwapRestL(stuff);
     return ProcRRSetMonitor(client);
 }
@@ -590,6 +593,7 @@ SProcRRCreateLease(ClientPtr client) {
 
     REQUEST_AT_LEAST_SIZE(xRRCreateLeaseReq);
     swapl(&stuff->window);
+    swapl(&stuff->lid);
     swaps(&stuff->nCrtcs);
     swaps(&stuff->nOutputs);
     SwapRestL(stuff);

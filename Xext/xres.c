@@ -441,7 +441,7 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
         .spec.client = client->clientAsMask,
     };
 
-    if (client->swapped) {
+    if (sendClient->swapped) {
         swapl (&rep.spec.client);
     }
 
@@ -468,11 +468,13 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
         if (pid != -1) {
             void *ptr = AddFragment(&ctx->response,
                                     sizeof(rep) + sizeof(CARD32));
-            CARD32 *value = (void*) ((char*) ptr + sizeof(rep));
+            CARD32 *value;
 
             if (!ptr) {
                 return FALSE;
             }
+
+            value = (void*) ((char*) ptr + sizeof(rep));
 
             rep.spec.mask = X_XResLocalClientPIDMask;
             rep.length = 4;
@@ -1036,10 +1038,22 @@ SProcXResQueryClientPixmapBytes(ClientPtr client)
 static int _X_COLD
 SProcXResQueryClientIds (ClientPtr client)
 {
+    int i;
+    xXResClientIdSpec *specs;
+
     REQUEST(xXResQueryClientIdsReq);
 
     REQUEST_AT_LEAST_SIZE (xXResQueryClientIdsReq);
     swapl(&stuff->numSpecs);
+    REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
+                       stuff->numSpecs * sizeof(xXResClientIdSpec));
+
+    specs = (xXResClientIdSpec *) (stuff + 1);
+    for (i = 0; i < stuff->numSpecs; i++) {
+        swapl(&specs[i].client);
+        swapl(&specs[i].mask);
+    }
+
     return ProcXResQueryClientIds(client);
 }
 

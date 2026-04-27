@@ -249,10 +249,14 @@ ProcRRGetProviderInfo (ClientPtr client)
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
+        swapl(&rep.timestamp);
         swapl(&rep.capabilities);
         swaps(&rep.nCrtcs);
         swaps(&rep.nOutputs);
+        swaps(&rep.nAssociatedProviders);
         swaps(&rep.nameLength);
+        swapl(&reply.timestamp);
+        swaps(&reply.nAssociatedProviders);
     }
     WriteToClient(client, sizeof(xRRGetProviderInfoReply), (char *)&rep);
     if (extraLen)

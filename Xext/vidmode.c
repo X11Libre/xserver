@@ -1790,6 +1790,7 @@ SProcVidModeAddModeLine(ClientPtr client)
     if (ver < 2) {
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeAddModeLineReq);
         swapl(&oldstuff->screen);
+        swapl(&oldstuff->dotclock);
         swaps(&oldstuff->hdisplay);
         swaps(&oldstuff->hsyncstart);
         swaps(&oldstuff->hsyncend);
@@ -1800,11 +1801,22 @@ SProcVidModeAddModeLine(ClientPtr client)
         swaps(&oldstuff->vtotal);
         swapl(&oldstuff->flags);
         swapl(&oldstuff->privsize);
+        swapl(&oldstuff->after_dotclock);
+        swaps(&oldstuff->after_hdisplay);
+        swaps(&oldstuff->after_hsyncstart);
+        swaps(&oldstuff->after_hsyncend);
+        swaps(&oldstuff->after_htotal);
+        swaps(&oldstuff->after_vdisplay);
+        swaps(&oldstuff->after_vsyncstart);
+        swaps(&oldstuff->after_vsyncend);
+        swaps(&oldstuff->after_vtotal);
+        swapl(&oldstuff->after_flags);
         SwapRestL(oldstuff);
     }
     else {
         REQUEST_AT_LEAST_SIZE(xXF86VidModeAddModeLineReq);
         swapl(&stuff->screen);
+        swapl(&stuff->dotclock);
         swaps(&stuff->hdisplay);
         swaps(&stuff->hsyncstart);
         swaps(&stuff->hsyncend);
@@ -1816,6 +1828,17 @@ SProcVidModeAddModeLine(ClientPtr client)
         swaps(&stuff->vtotal);
         swapl(&stuff->flags);
         swapl(&stuff->privsize);
+        swapl(&stuff->after_dotclock);
+        swaps(&stuff->after_hdisplay);
+        swaps(&stuff->after_hsyncstart);
+        swaps(&stuff->after_hsyncend);
+        swaps(&stuff->after_htotal);
+        swaps(&stuff->after_hskew);
+        swaps(&stuff->after_vdisplay);
+        swaps(&stuff->after_vsyncstart);
+        swaps(&stuff->after_vsyncend);
+        swaps(&stuff->after_vtotal);
+        swapl(&stuff->after_flags);
         SwapRestL(stuff);
     }
     return ProcVidModeAddModeLine(client);
@@ -1833,6 +1856,7 @@ SProcVidModeDeleteModeLine(ClientPtr client)
     if (ver < 2) {
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeDeleteModeLineReq);
         swapl(&oldstuff->screen);
+        swapl(&oldstuff->dotclock);
         swaps(&oldstuff->hdisplay);
         swaps(&oldstuff->hsyncstart);
         swaps(&oldstuff->hsyncend);
@@ -1848,6 +1872,7 @@ SProcVidModeDeleteModeLine(ClientPtr client)
     else {
         REQUEST_AT_LEAST_SIZE(xXF86VidModeDeleteModeLineReq);
         swapl(&stuff->screen);
+        swapl(&stuff->dotclock);
         swaps(&stuff->hdisplay);
         swaps(&stuff->hsyncstart);
         swaps(&stuff->hsyncend);
@@ -1919,6 +1944,7 @@ SProcVidModeValidateModeLine(ClientPtr client)
     if (ver < 2) {
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeValidateModeLineReq);
         swapl(&oldstuff->screen);
+        swapl(&oldstuff->dotclock);
         swaps(&oldstuff->hdisplay);
         swaps(&oldstuff->hsyncstart);
         swaps(&oldstuff->hsyncend);
@@ -1934,6 +1960,7 @@ SProcVidModeValidateModeLine(ClientPtr client)
     else {
         REQUEST_AT_LEAST_SIZE(xXF86VidModeValidateModeLineReq);
         swapl(&stuff->screen);
+        swapl(&stuff->dotclock);
         swaps(&stuff->hdisplay);
         swaps(&stuff->hsyncstart);
         swaps(&stuff->hsyncend);
@@ -1963,9 +1990,45 @@ SProcVidModeSwitchMode(ClientPtr client)
 static int _X_COLD
 SProcVidModeSwitchToMode(ClientPtr client)
 {
+    xXF86OldVidModeSwitchToModeReq *oldstuff =
+        (xXF86OldVidModeSwitchToModeReq *) client->requestBuffer;
+    int ver;
+
     REQUEST(xXF86VidModeSwitchToModeReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeSwitchToModeReq);
-    swapl(&stuff->screen);
+    ver = ClientMajorVersion(client);
+    if (ver < 2) {
+        REQUEST_AT_LEAST_SIZE(xXF86OldVidModeSwitchToModeReq);
+        swapl(&oldstuff->screen);
+        swapl(&oldstuff->dotclock);
+        swaps(&oldstuff->hdisplay);
+        swaps(&oldstuff->hsyncstart);
+        swaps(&oldstuff->hsyncend);
+        swaps(&oldstuff->htotal);
+        swaps(&oldstuff->vdisplay);
+        swaps(&oldstuff->vsyncstart);
+        swaps(&oldstuff->vsyncend);
+        swaps(&oldstuff->vtotal);
+        swapl(&oldstuff->flags);
+        swapl(&oldstuff->privsize);
+        SwapRestL(oldstuff);
+    }
+    else {
+        REQUEST_AT_LEAST_SIZE(xXF86VidModeSwitchToModeReq);
+        swapl(&stuff->screen);
+        swapl(&stuff->dotclock);
+        swaps(&stuff->hdisplay);
+        swaps(&stuff->hsyncstart);
+        swaps(&stuff->hsyncend);
+        swaps(&stuff->htotal);
+        swaps(&stuff->hskew);
+        swaps(&stuff->vdisplay);
+        swaps(&stuff->vsyncstart);
+        swaps(&stuff->vsyncend);
+        swaps(&stuff->vtotal);
+        swapl(&stuff->flags);
+        swapl(&stuff->privsize);
+        SwapRestL(stuff);
+    }
     return ProcVidModeSwitchToMode(client);
 }
 

@@ -87,10 +87,16 @@ SProcXChangeDeviceControl(ClientPtr client)
     case DEVICE_ABS_AREA:
     case DEVICE_CORE:
     case DEVICE_ENABLE:
-    case DEVICE_RESOLUTION:
-        /* hmm. beer. *drool* */
         break;
-
+    case DEVICE_RESOLUTION:
+    {
+        xDeviceResolutionCtl *r = (xDeviceResolutionCtl *) &stuff[1];
+        if (client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq))
+            < bytes_to_int32(sizeof(xDeviceResolutionCtl)))
+            return BadLength;
+        SwapLongs((CARD32 *) (r + 1), r->num_valuators);
+        break;
+    }
     }
     return (ProcXChangeDeviceControl(client));
 }
@@ -154,6 +160,9 @@ ProcXChangeDeviceControl(ClientPtr client)
         if (r->first_valuator + r->num_valuators > dev->valuator->numAxes) {
             ret = BadValue;
             goto out;
+        }
+        if (client->swapped) {
+            SwapLongs((CARD32 *) (r + 1), r->num_valuators);
         }
         status = ChangeDeviceControl(client, dev, (xDeviceCtl *) r);
         if (status == Success) {

@@ -199,6 +199,7 @@ __glXDispSwap_CopyContext(__GLXclientState * cl, GLbyte * pc)
     __GLX_SWAP_INT(&req->source);
     __GLX_SWAP_INT(&req->dest);
     __GLX_SWAP_INT(&req->mask);
+    __GLX_SWAP_INT(&req->contextTag);
 
     return __glXDisp_CopyContext(cl, pc);
 }
@@ -637,7 +638,7 @@ __glXDispSwap_BindTexImageEXT(__GLXclientState * cl, GLbyte * pc)
     __GLX_SWAP_INT(buffer);
     __GLX_SWAP_INT(num_attribs);
 
-    return __glXDisp_BindTexImageEXT(cl, (GLbyte *) pc);
+    return __glXDisp_BindTexImageEXT(cl, (GLbyte *) req);
 }
 
 int
@@ -662,7 +663,7 @@ __glXDispSwap_ReleaseTexImageEXT(__GLXclientState * cl, GLbyte * pc)
     __GLX_SWAP_INT(drawId);
     __GLX_SWAP_INT(buffer);
 
-    return __glXDisp_ReleaseTexImageEXT(cl, (GLbyte *) pc);
+    return __glXDisp_ReleaseTexImageEXT(cl, (GLbyte *) req);
 }
 
 int
@@ -690,7 +691,7 @@ __glXDispSwap_CopySubBufferMESA(__GLXclientState * cl, GLbyte * pc)
     __GLX_SWAP_INT(pc + 12);
     __GLX_SWAP_INT(pc + 16);
 
-    return __glXDisp_CopySubBufferMESA(cl, pc);
+    return __glXDisp_CopySubBufferMESA(cl, (GLbyte *) req);
 
 }
 

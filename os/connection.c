@@ -720,7 +720,7 @@ ConnMaxNotify(int fd, int events, void *data)
     /* try to read the byte-order of the connection */
     (void) _XSERVTransRead(trans_conn, &order, 1);
     if (order == 'l' || order == 'B' || order == 'r' || order == 'R') {
-        xConnSetupPrefix csp;
+        xConnSetupPrefix csp = { 0 };
         char pad[3] = { 0, 0, 0 };
         int whichbyte = 1;
         struct iovec iov[3];

@@ -1335,6 +1335,10 @@ ProcShmCreateSegment(ClientPtr client)
         close(fd);
         return BadAlloc;
     }
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
     WriteToClient(client, sizeof (xShmCreateSegmentReply), &rep);
     return Success;
 }
