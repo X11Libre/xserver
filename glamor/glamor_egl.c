@@ -53,8 +53,30 @@
 #include "glamor.h"
 #include "glamor_egl.h"
 #include "glamor_egl_ext.h"
+#include "glamor_egl_priv.h"
 #include "glamor_glx_provider.h"
 #include "dri3.h"
+
+static DevPrivateKeyRec glamor_egl_screen_private_key;
+
+static inline Bool
+glamor_egl_init_screen_private(ScreenPtr screen)
+{
+    if (!dixRegisterPrivateKey(&glamor_egl_screen_private_key, PRIVATE_SCREEN, sizeof(glamor_egl_priv_t))) {
+        LogMessage(X_ERROR,
+                   "glamor%d: Failed to allocate screen private\n",
+                   screen->myNum);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static glamor_egl_priv_t*
+_glamor_egl_get_screen_private(ScreenPtr screen)
+{
+    return dixLookupPrivate(&screen->devPrivates, &glamor_egl_screen_private_key);
+}
 
 /**
  * Hack to not break xf86 drivers.
@@ -68,7 +90,7 @@
  */
 
 static glamor_egl_priv_t*
-(*glamor_egl_get_screen_private)(ScreenPtr screen) = NULL;
+(*glamor_egl_get_screen_private)(ScreenPtr screen) = _glamor_egl_get_screen_private;
 
 static void
 glamor_egl_make_current(struct glamor_context *glamor_ctx)
@@ -999,8 +1021,10 @@ static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, 
 
     BUG_RETURN(!pixmap_priv);
 
-    if (pixmap_priv->image)
+    if (pixmap_priv->image) {
         eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
+        pixmap_priv->image = NULL;
+    }
 }
 #endif
 
@@ -1035,7 +1059,8 @@ glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
 
 static void glamor_egl_pre_close_screen_cleanup(glamor_egl_priv_t *glamor_egl);
 
-static void glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
+static void
+glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     glamor_egl_priv_t *glamor_egl;
 #ifdef GLAMOR_HAS_GBM
@@ -1048,10 +1073,11 @@ static void glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, voi
     screen_pixmap = screen->GetScreenPixmap(screen);
 
     pixmap_priv = glamor_get_pixmap_private(screen_pixmap);
-    BUG_RETURN(!pixmap_priv);
 
-    eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
-    pixmap_priv->image = NULL;
+    if (pixmap_priv && pixmap_priv->image) {
+        eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
+        pixmap_priv->image = NULL;
+    }
 #endif
 
     glamor_egl_pre_close_screen_cleanup(glamor_egl);
@@ -1488,6 +1514,10 @@ void glamor_egl_cleanup(glamor_egl_priv_t *glamor_egl)
 #endif
 }
 
+void glamor_egl_cleanup_screen(ScreenPtr screen)
+{
+    glamor_egl_cleanup(glamor_egl_get_screen_private(screen));
+}
 
 static void
 glamor_egl_chose_configs(EGLDisplay display, const EGLint *attrib_list,
@@ -1682,7 +1712,7 @@ gbm_create_device_by_name(int fd, const char* name)
 #endif
 
 static Bool
-glamor_egl_init_display(struct glamor_egl_screen_private *glamor_egl)
+glamor_egl_init_display(glamor_egl_priv_t *glamor_egl)
 {
     EGLDeviceEXT *devices = NULL;
     EGLint num_devices = 0;
@@ -1781,15 +1811,33 @@ glamor_egl_init_display(struct glamor_egl_screen_private *glamor_egl)
 }
 
 Bool
-glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
+glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, Bool *compat_ret)
 {
     const GLubyte *renderer;
+    glamor_egl_priv_t* glamor_egl = NULL;
 
     if (compat_ret) {
         *compat_ret = TRUE;
     }
 
-    glamor_egl_get_screen_private = glamor_egl->GLAMOR_EGL_PRIV_PROC;
+    if (glamor_egl_conf->GLAMOR_EGL_PRIV_PROC) {
+        glamor_egl_get_screen_private = glamor_egl_conf->GLAMOR_EGL_PRIV_PROC;
+        glamor_egl = glamor_egl_conf->glamor_egl_priv;
+    } else {
+        if (!glamor_egl_conf->screen ||
+            !glamor_egl_init_screen_private(glamor_egl_conf->screen)) {
+            goto error;
+        }
+        glamor_egl = glamor_egl_get_screen_private(glamor_egl_conf->screen);
+    }
+
+    memset(glamor_egl, 0, sizeof(*glamor_egl));
+
+    if (glamor_egl_conf->glvnd_vendor) {
+        glamor_egl->glvnd_vendor = glamor_egl_conf->glvnd_vendor;
+        glamor_egl->exact_glvnd_vendor = TRUE;
+    }
+    glamor_egl->fd = glamor_egl_conf->fd;
 
 #ifdef GLAMOR_HAS_GBM
     if (glamor_egl->fd >= 0) {
@@ -1826,41 +1874,44 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
 
     GLAMOR_CHECK_EGL_EXTENSION(KHR_surfaceless_context);
 
-    if (!glamor_egl->force_es) {
+    if (!glamor_egl_conf->force_es) {
         if(!glamor_egl_try_big_gl_api(glamor_egl))
             goto error;
     }
 
-    if (glamor_egl->context == EGL_NO_CONTEXT && !glamor_egl->es_disallowed) {
+    if (glamor_egl->context == EGL_NO_CONTEXT && !glamor_egl_conf->es_disallowed) {
         if(!glamor_egl_try_gles_api(glamor_egl))
             goto error;
     }
 
     if (glamor_egl->context == EGL_NO_CONTEXT) {
         LogMessage(X_ERROR,
-                    "glamor: Failed to create GL or GLES2 contexts\n");
+                   "glamor: Failed to create GL or GLES2 contexts\n");
         goto error;
     }
 
     renderer = glGetString(GL_RENDERER);
-    if (!renderer) {
-        LogMessage(X_ERROR,
-                   "glGetString() returned NULL, your GL is broken\n");
-        goto error;
-    }
-    if (strstr((const char *)renderer, "softpipe")) {
-        LogMessage(X_INFO,
-                   "Refusing to try glamor on softpipe\n");
-        goto error;
-    }
-    if (!strncmp("llvmpipe", (const char *)renderer, strlen("llvmpipe"))) {
-        if (glamor_egl->llvmpipe_allowed)
-            LogMessage(X_INFO,
-                       "Allowing glamor on llvmpipe for PRIME\n");
-        else {
-            LogMessage(X_INFO,
-                       "Refusing to try glamor on llvmpipe\n");
+
+    if (!glamor_egl_conf->force_glamor) {
+        if (!renderer) {
+            LogMessage(X_ERROR,
+                       "glGetString() returned NULL, your GL is broken\n");
             goto error;
+        }
+       if (strstr((const char *)renderer, "softpipe")) {
+            LogMessage(X_INFO,
+                       "Refusing to try glamor on softpipe\n");
+            goto error;
+        }
+        if (!strncmp("llvmpipe", (const char *)renderer, sizeof("llvmpipe") - 1)) {
+            if (glamor_egl_conf->llvmpipe_allowed)
+                LogMessage(X_INFO,
+                           "Allowing glamor on llvmpipe for PRIME\n");
+            else {
+                LogMessage(X_INFO,
+                           "Refusing to try glamor on llvmpipe\n");
+                 goto error;
+            }
         }
     }
 
@@ -1870,14 +1921,17 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
      */
     lastGLContext = NULL;
 
-    if (!epoxy_has_gl_extension("GL_OES_EGL_image")) {
-        LogMessage(X_ERROR,
-                   "glamor acceleration requires GL_OES_EGL_image\n");
-        goto error;
+    /* XXX From here on, glamor initalization should not fail completely XXX */
+
+    if (glamor_egl->fd < 0) {
+        goto glamor_no_dri;
     }
 
-    LogMessage(X_INFO, "glamor X acceleration enabled on %s\n",
-               renderer);
+    if (!epoxy_has_gl_extension("GL_OES_EGL_image")) {
+        LogMessage(X_ERROR,
+                   "glamor dri acceleration requires GL_OES_EGL_image\n");
+        goto glamor_no_dri;
+    }
 
 #ifdef GBM_BO_WITH_MODIFIERS
     if (epoxy_has_egl_extension(glamor_egl->display,
@@ -1885,7 +1939,11 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
         epoxy_has_egl_extension(glamor_egl->display,
                                 "EGL_EXT_image_dma_buf_import_modifiers")) {
 
-        if (strstr((const char *)renderer, "Intel"))
+        if (glamor_egl_conf->dmabuf_forced)
+            glamor_egl->dmabuf_capable = glamor_egl_conf->dmabuf_capable;
+        else if (!renderer)
+            glamor_egl->dmabuf_capable = FALSE;
+        else if (strstr((const char *)renderer, "Intel"))
             glamor_egl->dmabuf_capable = TRUE;
         else if (strstr((const char *)renderer, "zink"))
             glamor_egl->dmabuf_capable = TRUE;
@@ -1894,7 +1952,7 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
         else if (strstr((const char *)renderer, "radeonsi"))
             glamor_egl->dmabuf_capable = TRUE;
         else
-            glamor_egl->dmabuf_capable = (glamor_egl->dmabuf_capable == TRUE);
+            glamor_egl->dmabuf_capable = FALSE;
     }
 #endif
 
@@ -1903,11 +1961,11 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
     CARD32 num_formats = 0;
     Bool found = FALSE;
     if (!glamor_get_formats_internal(glamor_egl, &num_formats, &formats)) {
-        goto error;
+        goto glamor_no_dri;
     }
 
     if (num_formats == 0) {
-        return TRUE;
+        found = TRUE;
     }
 
     for (uint32_t i = 0; i < num_formats; i++) {
@@ -1925,12 +1983,27 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret)
     if (!found) {
         LogMessage(X_ERROR,
                    "glamor: No combination of format + modifier is supported\n");
-        goto error;
+        goto glamor_no_dri;
     }
 
+    LogMessage(X_INFO, "glamor dri X acceleration enabled on %s\n",
+               renderer);
     return TRUE;
 
 error:
-    glamor_egl_cleanup(glamor_egl);
+    LogMessage(X_ERROR, "glamor X acceleration failed to initialize\n");
+    if (glamor_egl) {
+        glamor_egl_cleanup(glamor_egl);
+    }
     return FALSE;
+
+glamor_no_dri:
+    glamor_egl->fd = -1;
+
+    if (compat_ret) {
+        *compat_ret = FALSE;
+    }
+    LogMessage(X_WARNING, "glamor X acceleration enabled without dri support on %s\n",
+               renderer);
+    return TRUE;
 }
