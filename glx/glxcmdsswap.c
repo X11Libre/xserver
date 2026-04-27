@@ -199,6 +199,7 @@ __glXDispSwap_CopyContext(__GLXclientState * cl, GLbyte * pc)
     __GLX_SWAP_INT(&req->source);
     __GLX_SWAP_INT(&req->dest);
     __GLX_SWAP_INT(&req->mask);
+    __GLX_SWAP_INT(&req->contextTag);
 
     return __glXDisp_CopyContext(cl, pc);
 }
