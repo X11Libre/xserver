@@ -300,6 +300,7 @@ ProcRRCreateMode(ClientPtr client)
         swaps(&modeinfo->hSyncStart);
         swaps(&modeinfo->hSyncEnd);
         swaps(&modeinfo->hTotal);
+        swaps(&modeinfo->hSkew);
         swaps(&modeinfo->vSyncStart);
         swaps(&modeinfo->vSyncEnd);
         swaps(&modeinfo->vTotal);
