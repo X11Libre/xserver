@@ -20,10 +20,17 @@ xorg_compat = static_library('xorg_compat',
 install_data('10-quirks.conf',
              install_dir: join_paths(get_option('datadir'), 'X11/xorg.conf.d'))
 nvidia_conf = configuration_data()
-nvidia_conf.set('libdir', join_paths(get_option('prefix'),get_option('libdir')))
+
 configure_file(
     input: '10-nvidia.conf.in',
     output: '10-nvidia.conf',
+    configuration: nvidia_conf,
+    install_dir: join_paths(get_option('datadir'), 'X11/xorg.conf.d'),
+)
+
+configure_file(
+    input: '10-nvidia-modules.conf.in',
+    output: '10-nvidia-modules.conf',
     configuration: nvidia_conf,
     install_dir: join_paths(get_option('datadir'), 'X11/xorg.conf.d'),
 )
