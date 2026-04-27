@@ -161,6 +161,9 @@ ProcXChangeDeviceControl(ClientPtr client)
             ret = BadValue;
             goto out;
         }
+        if (client->swapped) {
+            SwapLongs((CARD32 *) (r + 1), r->num_valuators);
+        }
         status = ChangeDeviceControl(client, dev, (xDeviceCtl *) r);
         if (status == Success) {
             a = &dev->valuator->axes[r->first_valuator];
