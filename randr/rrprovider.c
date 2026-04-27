@@ -255,6 +255,8 @@ ProcRRGetProviderInfo (ClientPtr client)
         swaps(&rep.nOutputs);
         swaps(&rep.nAssociatedProviders);
         swaps(&rep.nameLength);
+        swapl(&rep.timestamp);
+        swaps(&rep.nAssociatedProviders);
     }
     WriteToClient(client, sizeof(xRRGetProviderInfoReply), (char *)&rep);
     if (extraLen)
