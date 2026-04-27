@@ -176,7 +176,7 @@
         XvTopToBottom \
    }
 
-#define FOURCC_RGBA32 0x34325241
+#define FOURCC_RGBA32 0x41424752
 #define XVIMAGE_RGB32 \
    { \
         FOURCC_RGBA32, \

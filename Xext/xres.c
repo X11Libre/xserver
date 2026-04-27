@@ -476,6 +476,11 @@ ProcXResQueryClientIds (ClientPtr client)
 
     xXResClientIdSpec        *specs = (void*) ((char*) stuff + sizeof(xXResQueryClientIdsReq));
 
+    if (client->swapped) {
+        /* each spec is made of two CARD32's */
+        SwapLongs((CARD32*)specs, stuff->numSpecs * 2);
+    }
+
     ConstructClientIdCtx      ctx = {
         .rpcbuf.swapped = client->swapped,
         .rpcbuf.err_clear = TRUE

@@ -221,6 +221,7 @@ ProcRRCreateLease(ClientPtr client)
         swapl(&stuff->window);
         swaps(&stuff->nCrtcs);
         swaps(&stuff->nOutputs);
+        swaps(&stuff->lid);
         SwapRestL(stuff);
     }
 
