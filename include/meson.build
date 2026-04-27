@@ -108,6 +108,8 @@ conf_data.set('GLAMOR', build_glamor ? '1' : false)
 conf_data.set('GLAMOR_HAS_GBM', gbm_dep.found() ? '1' : false)
 conf_data.set('GBM_BO_WITH_MODIFIERS',
               build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 17.1') ? '1' : false)
+conf_data.set('GBM_BO_FD',
+              build_glamor and gbm_dep.found() and cc.has_header_symbol('gbm.h', 'gbm_bo_get_fd', dependencies : gbm_dep )  ? '1' : false)
 conf_data.set('GBM_BO_FD_FOR_PLANE',
               build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 21.1') ? '1' : false)
 conf_data.set('GBM_BO_WITH_MODIFIERS2',
