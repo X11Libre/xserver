@@ -879,6 +879,7 @@ ProcRRSetScreenConfig(ClientPtr client)
         swapl(&stuff->timestamp);
         swaps(&stuff->sizeID);
         swaps(&stuff->rotation);
+        swapl(&stuff->configTimestamp);
     }
 
     DrawablePtr pDraw;
