@@ -1890,6 +1890,7 @@ ProcSyncQueryAlarm(ClientPtr client)
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.counter);
+        swapl(&rep.value_type);
         swapl(&rep.wait_value_hi);
         swapl(&rep.wait_value_lo);
         swapl(&rep.test_type);
