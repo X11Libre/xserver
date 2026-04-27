@@ -2890,6 +2890,22 @@ ProcRenderSetPictureFilter(ClientPtr client)
         swaps(&stuff->nbytes);
     }
 
+    const size_t namelen = pad_to_int32(stuff->nbytes);
+    REQUEST_AT_LEAST_EXTRA_SIZE(xRenderSetPictureFilterReq, namelen);
+
+    const size_t packet_len = stuff->length * 4;
+    const size_t remaining =
+        (packet_len - sizeof(xRenderSetPictureFilterReq) - namelen);
+    const size_t nparams = remaining / 4;
+    if ((nparams * 4) != remaining) {
+        return BadLength;
+    }
+
+    if (client->swapped) {
+        CARD32 *params = ((char*)(stuff + 1) + namelen);
+        SwapLongs(params, nparams);
+    }
+
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderSetPictureFilter(client, stuff)
                          : SingleRenderSetPictureFilter(client, stuff));

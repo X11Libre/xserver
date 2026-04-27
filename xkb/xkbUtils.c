@@ -523,7 +523,7 @@ void
 XkbSetRepeatKeys(DeviceIntPtr pXDev, int key, int onoff)
 {
     if (pXDev && pXDev->key && pXDev->key->xkbInfo) {
-        xkbControlsNotify cn;
+        xkbControlsNotify cn = { 0 };
         XkbControlsPtr ctrls = pXDev->key->xkbInfo->desc->ctrls;
         XkbControlsRec old;
 
@@ -775,7 +775,7 @@ XkbEnableDisableControls(XkbSrvInfoPtr xkbi,
     if (old == ctrls->enabled_ctrls)
         return FALSE;
     if (cause != NULL) {
-        xkbControlsNotify cn;
+        xkbControlsNotify cn = { 0 };
 
         cn.numGroups = ctrls->num_groups;
         cn.changedControls = XkbControlsEnabledMask;

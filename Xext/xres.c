@@ -400,7 +400,7 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
         .spec.client = client->clientAsMask,
     };
 
-    if (client->swapped) {
+    if (sendClient->swapped) {
         swapl (&reply.spec.client);
     }
 
@@ -427,11 +427,11 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
         if (pid != -1) {
             void *ptr = AddFragment(&ctx->response,
                                     sizeof(reply) + sizeof(CARD32));
-            CARD32 *value = (void*) ((char*) ptr + sizeof(reply));
-
             if (!ptr) {
                 return FALSE;
             }
+
+            CARD32 *value = (void*) ((char*) ptr + sizeof(reply));
 
             reply.spec.mask = X_XResLocalClientPIDMask;
             reply.length = 4;
@@ -518,6 +518,11 @@ ProcXResQueryClientIds (ClientPtr client)
 
     xXResClientIdSpec        *specs = (void*) ((char*) stuff + sizeof(xXResQueryClientIdsReq));
     ConstructClientIdCtx      ctx;
+
+    if (client->swapped) {
+        /* each spec is made of two CARD32's */
+        SwapLongs((CARD32*)specs, stuff->numSpecs * 2);
+    }
 
     InitConstructClientIdCtx(&ctx);
 
