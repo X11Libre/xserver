@@ -284,17 +284,16 @@ DamageExtCreate(DrawablePtr pDrawable, DamageReportLevel level,
     return pDamageExt;
 }
 
-static DamageExtPtr
-doDamageCreate(ClientPtr client, int *rc, xDamageCreateReq *stuff)
+static int doDamageCreate(ClientPtr client, DamageExtPtr *ext, xDamageCreateReq *stuff)
 {
     DrawablePtr pDrawable;
     DamageExtPtr pDamageExt;
     DamageReportLevel level;
 
-    *rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
+    int rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                             DixGetAttrAccess | DixReadAccess);
-    if (*rc != Success)
-        return NULL;
+    if (rc != Success)
+        return rc;
 
     switch (stuff->level) {
     case XDamageReportRawRectangles:
@@ -311,16 +310,19 @@ doDamageCreate(ClientPtr client, int *rc, xDamageCreateReq *stuff)
         break;
     default:
         client->errorValue = stuff->level;
-        *rc = BadValue;
-        return NULL;
+        return BadValue;
     }
 
     pDamageExt = DamageExtCreate(pDrawable, level, client, stuff->damage,
                                  stuff->drawable);
     if (!pDamageExt)
-        *rc = BadAlloc;
+        return BadAlloc;
 
-    return pDamageExt;
+    if (ext) {
+        *ext = pDamageExt;
+    }
+
+    return Success;
 }
 
 static int
@@ -330,16 +332,13 @@ ProcDamageCreate(ClientPtr client)
     X_REQUEST_FIELD_CARD32(damage);
     X_REQUEST_FIELD_CARD32(drawable);
 
-    int rc;
-
 #ifdef XINERAMA
     if (damageUseXinerama)
         return PanoramiXDamageCreate(client, stuff);
 #endif
 
     LEGAL_NEW_RESOURCE(stuff->damage, client);
-    doDamageCreate(client, &rc, stuff);
-    return rc;
+    return doDamageCreate(client, NULL, stuff);
 }
 
 static int
@@ -603,7 +602,7 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     if (!AddResource(stuff->damage, XRT_DAMAGE, damage))
         return BadAlloc;
 
-    damage->ext = doDamageCreate(client, &rc, stuff);
+    rc = doDamageCreate(client, &(damage->ext), stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
         XINERAMA_FOR_EACH_SCREEN_FORWARD({
             DrawablePtr pDrawable;
