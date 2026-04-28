@@ -48,6 +48,14 @@
 #define DRM_FORMAT_XBGR16161616  0x38344258
 #define DRM_FORMAT_ARGB16161616  0x38345241
 #define DRM_FORMAT_ABGR16161616  0x38344241
+
+/* Modifiers */
+#ifndef DRM_FORMAT_MOD_LINEAR
+#define DRM_FORMAT_MOD_LINEAR  0ULL
+#endif
+#ifndef DRM_FORMAT_MOD_INVALID
+#define DRM_FORMAT_MOD_INVALID 0x00ffffffffffffffULL
+#endif
 #endif
 
 static inline uint32_t 
@@ -130,6 +138,24 @@ dri3_bpp_for_fourcc(uint32_t format)
 
     default:
         return 0;
+    }
+}
+
+static inline int 
+dri3_depth_for_fourcc(uint32_t format)
+{
+    switch (format) {
+    case DRM_FORMAT_ARGB2101010:
+    case DRM_FORMAT_ABGR2101010:
+        return 30;
+    case DRM_FORMAT_ARGB8888:
+    case DRM_FORMAT_ABGR8888:
+        return 32;
+    case DRM_FORMAT_XRGB8888:
+    case DRM_FORMAT_XBGR8888:
+        return 24;
+    default:
+        return dri3_bpp_for_fourcc(format);
     }
 }
 

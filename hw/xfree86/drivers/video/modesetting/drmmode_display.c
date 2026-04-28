@@ -4925,24 +4925,24 @@ drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     }
 }
 
-/* XXX Do we really need to do this? XXX */
 static struct gbm_bo*
 drmmode_create_bpp_probe_bo(drmmode_ptr drmmode,
                             unsigned width, unsigned height, unsigned depth,
                             unsigned bpp, struct gbm_device **out_gbm_dev)
 {
-    uint32_t format = drmmode_gbm_format_for_depth(depth);
+    uint32_t format = dri3_fourcc_for_depth(depth, bpp, (depth == 32));
     struct gbm_device *gbm_dev = drmmode->gbm;
 
     *out_gbm_dev = NULL;
     if (!gbm_dev) {
         gbm_dev = gbm_create_device(drmmode->fd);
-        if (!gbm_dev) {
+        if (!gbm_dev)
             return NULL;
-        }
-
         *out_gbm_dev = gbm_dev;
     }
+
+    if (!format)
+        return NULL;
 
     return gbm_bo_create(gbm_dev, width, height,
                          format, GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);

@@ -62,13 +62,10 @@ typedef struct {
 static inline uint32_t
 get_opaque_format(uint32_t format)
 {
-    /**
-     * We use the helper to find the depth
-     * & then re-query a non-alpha version of the result
-     */
     int bpp = dri3_bpp_for_fourcc(format);
-    int depth = (format == DRM_FORMAT_ARGB2101010) ? 30 : (bpp == 32 ? 24 : bpp);
+    int depth = dri3_depth_for_fourcc(format);
     
+    /* Re query the format with explicit_alpha set to FALSE */
     return dri3_fourcc_for_depth(depth, bpp, FALSE);
 }
 

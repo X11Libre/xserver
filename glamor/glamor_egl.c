@@ -653,8 +653,9 @@ glamor_egl_fd_name_from_pixmap(ScreenPtr screen,
 static bool
 gbm_format_for_depth(CARD8 depth, uint32_t *format)
 {
-    /* Glamor usually wants alpha if the depth is 32 or 30 */
-    uint32_t f = dri3_gbm_format_for_depth(depth, (depth + 7) & ~7, depth == 32 || depth == 30);
+    /* Glamor usually wants alpha if depth is 30 or 32*/
+    uint32_t f = dri3_gbm_format_for_depth(depth, (depth + 7) & ~7, 
+                                           (depth == 32 || depth == 30));
     
     if (f) {
         *format = f;
