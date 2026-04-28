@@ -582,7 +582,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
     DrawablePtr pDraw;
     long lenPer = 0, length;
     Mask plane = 0;
-    xShmGetImageReply xgi;
     ShmDescPtr shmdesc;
     VisualID visual = None;
     RegionPtr pVisibleRegion = NULL;
@@ -627,10 +626,7 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
             return BadMatch;
         visual = None;
     }
-    xgi = (xShmGetImageReply) {
-        .visual = visual,
-        .depth = pDraw->depth
-    };
+
     if (stuff->format == ZPixmap) {
         length = PixmapBytePad(stuff->width, pDraw->depth) * stuff->height;
     }
@@ -642,7 +638,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
     }
 
     VERIFY_SHMSIZE(shmdesc, stuff->offset, length, client);
-    xgi.size = length;
 
     if (length == 0) {
         /* nothing to do */
@@ -659,7 +654,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
                     stuff->format, shmdesc->addr + stuff->offset);
     }
     else {
-
         length = stuff->offset;
         for (; plane; plane >>= 1) {
             if (stuff->planeMask & plane) {
@@ -678,12 +672,18 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
         }
     }
 
+    xShmGetImageReply reply = {
+        .depth = pDraw->depth,
+        .size = length,
+        .visual = visual,
+    };
+
     if (client->swapped) {
-        swapl(&xgi.visual);
-        swapl(&xgi.size);
+        swapl(&reply.visual);
+        swapl(&reply.size);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, xgi);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
