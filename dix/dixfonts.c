@@ -826,7 +826,7 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     FontPathElementPtr fpe;
     int err = Successful;
     char *name;
-    int namelen;
+    int namelen = 0;
     int numFonts;
     FontInfoRec fontInfo, *pFontInfo;
     int length;
