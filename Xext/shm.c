@@ -770,7 +770,6 @@ ProcShmGetImage(ClientPtr client)
 #ifdef XINERAMA
     PanoramiXRes *draw;
     DrawablePtr pDraw;
-    xShmGetImageReply xgi;
     ShmDescPtr shmdesc;
     int x, y, w, h, format, rc;
     Mask plane = 0, planemask;
@@ -865,11 +864,6 @@ ProcShmGetImage(ClientPtr client)
                                               IncludeInferiors);
     });
 
-    xgi = (xShmGetImageReply) {
-        .visual = wVisual(((WindowPtr) pDraw)),
-        .depth = pDraw->depth,
-        .size = length
-    };
 
     if (length == 0) {          /* nothing to do */
     }
@@ -891,12 +885,18 @@ ProcShmGetImage(ClientPtr client)
     }
     free(drawables);
 
+    xShmGetImageReply reply = {
+        .visual = wVisual(((WindowPtr) pDraw)),
+        .depth = pDraw->depth,
+        .size = length
+    };
+
     if (client->swapped) {
-        swapl(&xgi.visual);
-        swapl(&xgi.size);
+        swapl(&reply.visual);
+        swapl(&reply.size);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, xgi);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 #else
     return ShmGetImage(client, stuff);
 #endif /* XINERAMA */
