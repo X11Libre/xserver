@@ -436,8 +436,6 @@ ProcXFixesFetchRegion(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swaps(&reply.x);
         swaps(&reply.y);
         swaps(&reply.width);
