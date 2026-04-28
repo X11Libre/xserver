@@ -1140,6 +1140,9 @@ static const dri3_screen_info_rec glamor_dri3_info = {
 static inline void
 glamor_egl_set_glvnd_vendor(ScreenPtr screen)
 {
+    const char *vendor;
+    const char *renderer;
+
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
 
@@ -1156,16 +1159,18 @@ glamor_egl_set_glvnd_vendor(ScreenPtr screen)
         if (gbm_backend_name) {
             if (!strncmp(gbm_backend_name, "nvidia", sizeof("nvidia") - 1)) {
                  glamor_set_glvnd_vendor(screen, "nvidia");
-            } else {
+                 return;
+            } else if (!strcmp(gbm_backend_name, "drm")) {
+                 /* Mesa uses "drm" as the gbm backend name */
                  glamor_set_glvnd_vendor(screen, "mesa");
+                 return;
             }
-            return;
         }
     }
 #endif
 
-    const char *vendor = (const char*)glGetString(GL_VENDOR);
-    const char *renderer = (const char*)glGetString(GL_RENDERER);
+    vendor = (const char*)glGetString(GL_VENDOR);
+    renderer = (const char*)glGetString(GL_RENDERER);
 
     if (!glamor_egl->glvnd_vendor) {
         if (renderer && strstr(renderer, "NVIDIA")) {
