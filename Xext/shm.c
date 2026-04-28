@@ -654,20 +654,20 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
                     stuff->format, shmdesc->addr + stuff->offset);
     }
     else {
-        length = stuff->offset;
+        long len2 = stuff->offset;
         for (; plane; plane >>= 1) {
             if (stuff->planeMask & plane) {
                 (*pDraw->pScreen->GetImage) (pDraw,
                                              stuff->x, stuff->y,
                                              stuff->width, stuff->height,
                                              stuff->format, plane,
-                                             shmdesc->addr + length);
+                                             shmdesc->addr + len2);
                 if (pVisibleRegion)
                     XaceCensorImage(client, pVisibleRegion,
                             BitmapBytePad(stuff->width), pDraw,
                             stuff->x, stuff->y, stuff->width, stuff->height,
-                            stuff->format, shmdesc->addr + length);
-                length += lenPer;
+                            stuff->format, shmdesc->addr + len2);
+                len2 += lenPer;
             }
         }
     }
