@@ -579,9 +579,8 @@ ProcSecurityRevokeAuthorization(ClientPtr client)
     X_REQUEST_FIELD_CARD32(authId);
 
     SecurityAuthorizationPtr pAuth;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pAuth, stuff->authId,
+    int rc = dixLookupResourceByType((void **) &pAuth, stuff->authId,
                                  SecurityAuthorizationResType, client,
                                  DixDestroyAccess);
     if (rc != Success)
@@ -891,7 +890,6 @@ SecurityClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
     NewClientInfoRec *pci = calldata;
     SecurityStateRec *state;
     SecurityAuthorizationPtr pAuth;
-    int rc;
 
     state = dixLookupPrivate(&pci->client->devPrivates, stateKey);
 
@@ -904,8 +902,9 @@ SecurityClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         break;
 
     case ClientStateRunning:
+    {
         state->authId = AuthorizationIDOfClient(pci->client);
-        rc = dixLookupResourceByType((void **) &pAuth, state->authId,
+        int rc = dixLookupResourceByType((void **) &pAuth, state->authId,
                                      SecurityAuthorizationResType, serverClient,
                                      DixGetAttrAccess);
         if (rc == Success) {
@@ -918,10 +917,11 @@ SecurityClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
             state->trustLevel = pAuth->trustLevel;
         }
         break;
-
+    }
     case ClientStateGone:
     case ClientStateRetained:
-        rc = dixLookupResourceByType((void **) &pAuth, state->authId,
+    {
+        int rc = dixLookupResourceByType((void **) &pAuth, state->authId,
                                      SecurityAuthorizationResType, serverClient,
                                      DixGetAttrAccess);
         if (rc == Success && state->live) {
@@ -932,7 +932,7 @@ SecurityClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
                 SecurityStartAuthorizationTimer(pAuth);
         }
         break;
-
+    }
     default:
         break;
     }

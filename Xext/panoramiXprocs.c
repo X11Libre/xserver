@@ -569,12 +569,11 @@ int
 PanoramiXGetGeometry(ClientPtr client)
 {
     DrawablePtr pDraw;
-    int rc;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
-    rc = dixLookupDrawable(&pDraw, stuff->id, client, M_ANY, DixGetAttrAccess);
+
+    int rc = dixLookupDrawable(&pDraw, stuff->id, client, M_ANY, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -628,11 +627,11 @@ PanoramiXTranslateCoords(ClientPtr client)
     INT16 x, y;
 
     REQUEST(xTranslateCoordsReq);
-    int rc;
     WindowPtr pWin, pDst;
 
     REQUEST_SIZE_MATCH(xTranslateCoordsReq);
-    rc = dixLookupWindow(&pWin, stuff->srcWid, client, DixReadAccess);
+
+    int rc = dixLookupWindow(&pWin, stuff->srcWid, client, DixReadAccess);
     if (rc != Success)
         return rc;
     rc = dixLookupWindow(&pDst, stuff->dstWid, client, DixReadAccess);
@@ -1218,7 +1217,6 @@ PanoramiXCopyArea(ClientPtr client)
         DrawablePtr pDst = NULL, pSrc = NULL;
         GCPtr pGC = NULL;
         RegionRec totalReg;
-        int rc;
 
         RegionNull(&totalReg);
 
@@ -1240,8 +1238,8 @@ PanoramiXCopyArea(ClientPtr client)
             VALIDATE_DRAWABLE_AND_GC(stuff->dstDrawable, pDst, DixWriteAccess);
 
             if (stuff->dstDrawable != stuff->srcDrawable) {
-                rc = dixLookupDrawable(&pSrc, stuff->srcDrawable, client, 0,
-                                       DixReadAccess);
+                int rc = dixLookupDrawable(&pSrc, stuff->srcDrawable, client, 0,
+                                           DixReadAccess);
                 if (rc != Success)
                     return rc;
 
@@ -1286,7 +1284,7 @@ PanoramiXCopyArea(ClientPtr client)
 int
 PanoramiXCopyPlane(ClientPtr client)
 {
-    int srcx, srcy, dstx, dsty, rc;
+    int srcx, srcy, dstx, dsty;
     PanoramiXRes *gc, *src, *dst;
     Bool srcIsRoot = FALSE;
     Bool dstIsRoot = FALSE;
@@ -1299,8 +1297,8 @@ PanoramiXCopyPlane(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xCopyPlaneReq);
 
-    rc = dixLookupResourceByClass((void **) &src, stuff->srcDrawable,
-                                  XRC_DRAWABLE, client, DixReadAccess);
+    int rc = dixLookupResourceByClass((void **) &src, stuff->srcDrawable,
+                                      XRC_DRAWABLE, client, DixReadAccess);
     if (rc != Success)
         return (rc == BadValue) ? BadDrawable : rc;
 
@@ -1991,7 +1989,7 @@ PanoramiXGetImage(ClientPtr client)
     DrawablePtr pDraw;
     PanoramiXRes *draw;
     Bool isRoot;
-    int x, y, w, h, format, rc;
+    int x, y, w, h, format;
     Mask plane = 0, planemask;
     int linesDone, nlines, linesPerBuf;
     long widthBytesLine;
@@ -2005,8 +2003,8 @@ PanoramiXGetImage(ClientPtr client)
         return BadValue;
     }
 
-    rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
-                                  XRC_DRAWABLE, client, DixReadAccess);
+    int rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
+                                      XRC_DRAWABLE, client, DixReadAccess);
     if (rc != Success)
         return (rc == BadValue) ? BadDrawable : rc;
 

@@ -344,18 +344,18 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
 {
     SyncObject *pSync = pTrigger->pSync;
     SyncCounter *pCounter = NULL;
-    int rc;
     Bool newSyncObject = FALSE;
 
     if (changes & XSyncCACounter) {
-        if (syncObject == None)
+        if (syncObject == None) {
             pSync = NULL;
-        else if (Success != (rc = dixLookupResourceByType((void **) &pSync,
-                                                          syncObject, resType,
-                                                          client,
-                                                          DixReadAccess))) {
-            client->errorValue = syncObject;
-            return rc;
+        } else {
+            int rc = dixLookupResourceByType((void **) &pSync, syncObject,
+                                              resType, client, DixReadAccess);
+            if (rc != Success) {
+                client->errorValue = syncObject;
+                return rc;
+            }
         }
     }
 
@@ -1329,12 +1329,11 @@ ProcSyncSetPriority(ClientPtr client)
     X_REQUEST_FIELD_CARD32(priority);
 
     ClientPtr priorityclient;
-    int rc;
 
     if (stuff->id == None)
         priorityclient = client;
     else {
-        rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
+        int rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
                              DixSetAttrAccess);
         if (rc != Success)
             return rc;
@@ -1420,9 +1419,8 @@ ProcSyncSetCounter(ClientPtr client)
 
     SyncCounter *pCounter;
     int64_t newvalue;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
+    int rc = dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
                                  client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -1451,9 +1449,8 @@ ProcSyncChangeCounter(ClientPtr client)
     SyncCounter *pCounter;
     int64_t newvalue;
     Bool overflow;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
+    int rc = dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
                                  client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -1484,9 +1481,8 @@ ProcSyncDestroyCounter(ClientPtr client)
     X_REQUEST_FIELD_CARD32(counter);
 
     SyncCounter *pCounter;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pCounter, stuff->counter,
+    int rc = dixLookupResourceByType((void **) &pCounter, stuff->counter,
                                  RTCounter, client, DixDestroyAccess);
     if (rc != Success)
         return rc;
@@ -1645,9 +1641,8 @@ ProcSyncQueryCounter(ClientPtr client)
     X_REQUEST_FIELD_CARD32(counter);
 
     SyncCounter *pCounter;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pCounter, stuff->counter,
+    int rc = dixLookupResourceByType((void **) &pCounter, stuff->counter,
                                  RTCounter, client, DixReadAccess);
     if (rc != Success)
         return rc;
@@ -1808,9 +1803,8 @@ ProcSyncQueryAlarm(ClientPtr client)
 
     SyncAlarm *pAlarm;
     SyncTrigger *pTrigger;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
+    int rc = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
                                  client, DixReadAccess);
     if (rc != Success)
         return rc;
@@ -1858,9 +1852,8 @@ ProcSyncDestroyAlarm(ClientPtr client)
     X_REQUEST_FIELD_CARD32(alarm);
 
     SyncAlarm *pAlarm;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
+    int rc = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
                                  client, DixDestroyAccess);
     if (rc != Success)
         return rc;
@@ -1878,9 +1871,8 @@ ProcSyncCreateFence(ClientPtr client)
 
     DrawablePtr pDraw;
     SyncFence *pFence;
-    int rc;
 
-    rc = dixLookupDrawable(&pDraw, stuff->d, client, M_ANY, DixGetAttrAccess);
+    int rc = dixLookupDrawable(&pDraw, stuff->d, client, M_ANY, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -1923,9 +1915,8 @@ ProcSyncTriggerFence(ClientPtr client)
     X_REQUEST_FIELD_CARD32(fid);
 
     SyncFence *pFence;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
+    int rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
                                  client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -1942,9 +1933,8 @@ ProcSyncResetFence(ClientPtr client)
     X_REQUEST_FIELD_CARD32(fid);
 
     SyncFence *pFence;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
+    int rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
                                  client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -1964,9 +1954,8 @@ ProcSyncDestroyFence(ClientPtr client)
     X_REQUEST_FIELD_CARD32(fid);
 
     SyncFence *pFence;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
+    int rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
                                  client, DixDestroyAccess);
     if (rc != Success)
         return rc;
@@ -1982,9 +1971,8 @@ ProcSyncQueryFence(ClientPtr client)
     X_REQUEST_FIELD_CARD32(fid);
 
     SyncFence *pFence;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pFence, stuff->fid,
+    int rc = dixLookupResourceByType((void **) &pFence, stuff->fid,
                                  RTFence, client, DixReadAccess);
     if (rc != Success)
         return rc;

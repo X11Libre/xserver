@@ -114,10 +114,9 @@ ProcXTestCompareCursor(ClientPtr client)
 
     WindowPtr pWin;
     CursorPtr pCursor;
-    int rc;
     DeviceIntPtr ptr = PickPointer(client);
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -184,7 +183,7 @@ ProcXTestFakeInput(ClientPtr client)
             return n;
     }
 
-    int nev, n, type, rc;
+    int nev, n, type;
     xEvent *ev;
     DeviceIntPtr dev = NULL;
     WindowPtr root;
@@ -209,7 +208,7 @@ ProcXTestFakeInput(ClientPtr client)
         extension = TRUE;
 
         /* check device */
-        rc = dixLookupDevice(&dev, stuff->deviceid & 0177, client,
+        int rc = dixLookupDevice(&dev, stuff->deviceid & 0177, client,
                              DixWriteAccess);
         if (rc != Success) {
             client->errorValue = stuff->deviceid & 0177;
@@ -402,7 +401,7 @@ ProcXTestFakeInput(ClientPtr client)
             return BadDevice;
 
         if (!(extension || ev->u.keyButtonPointer.root == None)) {
-            rc = dixLookupWindow(&root, ev->u.keyButtonPointer.root,
+            int rc = dixLookupWindow(&root, ev->u.keyButtonPointer.root,
                                  client, DixGetAttrAccess);
             if (rc != Success)
                 return rc;

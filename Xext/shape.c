@@ -346,10 +346,9 @@ ShapeMask(ClientPtr client, xShapeMaskReq *stuff)
     RegionPtr *destRgn;
     PixmapPtr pPixmap;
     CreateDftPtr createDefault;
-    int rc;
 
     UpdateCurrentTime();
-    rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
     switch (stuff->destKind) {
@@ -458,10 +457,9 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
     CreateDftPtr createDefault;
     CreateDftPtr createSrc;
     RegionPtr tmp;
-    int rc;
 
     UpdateCurrentTime();
-    rc = dixLookupWindow(&pDestWin, stuff->dest, client, DixSetAttrAccess);
+    int rc = dixLookupWindow(&pDestWin, stuff->dest, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
     if (!MakeWindowOptional(pDestWin))
@@ -581,10 +579,9 @@ ShapeOffset(ClientPtr client, xShapeOffsetReq *stuff)
 {
     WindowPtr pWin;
     RegionPtr srcRgn;
-    int rc;
 
     UpdateCurrentTime();
-    rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
     switch (stuff->destKind) {
@@ -714,13 +711,12 @@ ProcShapeSelectInput(ClientPtr client)
 
     WindowPtr pWin;
     ShapeEventPtr pNewShapeEvent;
-    int rc;
 
     REQUEST_SIZE_MATCH(xShapeSelectInputReq);
 
     if (client->swapped)
         swapl(&stuff->window);
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (rc != Success)
         return rc;
     ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
@@ -838,9 +834,9 @@ ProcShapeInputSelected(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    int enabled, rc;
+    int enabled;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -869,10 +865,10 @@ ProcShapeGetRectangles(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    int nrects, rc;
+    int nrects;
     RegionPtr region;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
     switch (stuff->kind) {

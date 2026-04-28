@@ -362,7 +362,6 @@ SELinuxDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client,.dev = rec->dev };
     security_class_t cls;
-    int rc;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
     obj = dixLookupPrivate(&rec->dev->devPrivates, objectKey);
@@ -386,7 +385,7 @@ SELinuxDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
     }
 
     cls = IsPointerDevice(rec->dev) ? SECCLASS_X_POINTER : SECCLASS_X_KEYBOARD;
-    rc = SELinuxDoCheck(subj, obj, cls, rec->access_mode, &auditdata);
+    int rc = SELinuxDoCheck(subj, obj, cls, rec->access_mode, &auditdata);
     if (rc != Success)
         rec->status = rc;
 }
@@ -399,7 +398,7 @@ SELinuxSend(CallbackListPtr *pcbl, void *unused, void *calldata)
     SELinuxObjectRec *obj, ev_sid;
     SELinuxAuditRec auditdata = {.client = rec->client,.dev = rec->dev };
     security_class_t class;
-    int rc, i, type;
+    int i, type;
 
     if (rec->dev)
         subj = dixLookupPrivate(&rec->dev->devPrivates, subjectKey);
@@ -409,7 +408,7 @@ SELinuxSend(CallbackListPtr *pcbl, void *unused, void *calldata)
     obj = dixLookupPrivate(&rec->pWin->devPrivates, objectKey);
 
     /* Check send permission on window */
-    rc = SELinuxDoCheck(subj, obj, SECCLASS_X_DRAWABLE, DixSendAccess,
+    int rc = SELinuxDoCheck(subj, obj, SECCLASS_X_DRAWABLE, DixSendAccess,
                         &auditdata);
     if (rc != Success)
         goto err;
@@ -441,13 +440,13 @@ SELinuxReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
     SELinuxObjectRec *obj, ev_sid;
     SELinuxAuditRec auditdata = {.client = NULL };
     security_class_t class;
-    int rc, i, type;
+    int i, type;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
     obj = dixLookupPrivate(&rec->pWin->devPrivates, objectKey);
 
     /* Check receive permission on window */
-    rc = SELinuxDoCheck(subj, obj, SECCLASS_X_DRAWABLE, DixReceiveAccess,
+    int rc = SELinuxDoCheck(subj, obj, SECCLASS_X_DRAWABLE, DixReceiveAccess,
                         &auditdata);
     if (rc != Success)
         goto err;
@@ -478,7 +477,6 @@ SELinuxExtension(CallbackListPtr *pcbl, void *unused, void *calldata)
     SELinuxSubjectRec *subj, *serv;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
-    int rc;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
     obj = dixLookupPrivate(&rec->ext->devPrivates, objectKey);
@@ -489,7 +487,7 @@ SELinuxExtension(CallbackListPtr *pcbl, void *unused, void *calldata)
         security_id_t sid;
 
         serv = dixLookupPrivate(&serverClient->devPrivates, subjectKey);
-        rc = SELinuxExtensionToSID(rec->ext->name, &sid);
+        int rc = SELinuxExtensionToSID(rec->ext->name, &sid);
         if (rc != Success) {
             rec->status = rc;
             return;
@@ -506,7 +504,7 @@ SELinuxExtension(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     /* Perform the security check */
     auditdata.extension = (char *) rec->ext->name;
-    rc = SELinuxDoCheck(subj, obj, SECCLASS_X_EXTENSION, rec->access_mode,
+    int rc = SELinuxDoCheck(subj, obj, SECCLASS_X_EXTENSION, rec->access_mode,
                         &auditdata);
     if (rc != Success)
         rec->status = rc;
@@ -523,21 +521,20 @@ SELinuxSelection(CallbackListPtr *pcbl, void *unused, void *calldata)
     Mask access_mode = rec->access_mode;
     SELinuxAuditRec auditdata = {.client = rec->client,.selection = name };
     security_id_t tsid;
-    int rc;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
     obj = dixLookupPrivate(&pSel->devPrivates, objectKey);
 
     /* If this is a new object that needs labeling, do it now */
     if (access_mode & DixCreateAccess) {
-        rc = SELinuxSelectionToSID(name, subj, &obj->sid, &obj->poly);
+        int rc = SELinuxSelectionToSID(name, subj, &obj->sid, &obj->poly);
         if (rc != Success)
             obj->sid = unlabeled_sid;
         access_mode = DixSetAttrAccess;
     }
     /* If this is a polyinstantiated object, find the right instance */
     else if (obj->poly) {
-        rc = SELinuxSelectionToSID(name, subj, &tsid, NULL);
+        int rc = SELinuxSelectionToSID(name, subj, &tsid, NULL);
         if (rc != Success) {
             rec->status = rc;
             return;
@@ -557,7 +554,7 @@ SELinuxSelection(CallbackListPtr *pcbl, void *unused, void *calldata)
     }
 
     /* Perform the security check */
-    rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SELECTION, access_mode,
+    int rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SELECTION, access_mode,
                         &auditdata);
     if (rc != Success)
         rec->status = rc;
@@ -582,7 +579,6 @@ SELinuxProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
     Atom name = pProp->propertyName;
     SELinuxAuditRec auditdata = {.client = rec->client,.property = name };
     security_id_t tsid;
-    int rc;
 
     /* Don't care about the new content check */
     if (rec->access_mode & DixPostAccess)
@@ -593,7 +589,7 @@ SELinuxProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     /* If this is a new object that needs labeling, do it now */
     if (rec->access_mode & DixCreateAccess) {
-        rc = SELinuxPropertyToSID(name, subj, &obj->sid, &obj->poly);
+        int rc = SELinuxPropertyToSID(name, subj, &obj->sid, &obj->poly);
         if (rc != Success) {
             rec->status = rc;
             return;
@@ -601,7 +597,7 @@ SELinuxProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
     }
     /* If this is a polyinstantiated object, find the right instance */
     else if (obj->poly) {
-        rc = SELinuxPropertyToSID(name, subj, &tsid, NULL);
+        int rc = SELinuxPropertyToSID(name, subj, &tsid, NULL);
         if (rc != Success) {
             rec->status = rc;
             return;
@@ -621,7 +617,7 @@ SELinuxProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
     }
 
     /* Perform the security check */
-    rc = SELinuxDoCheck(subj, obj, SECCLASS_X_PROPERTY, rec->access_mode,
+    int rc = SELinuxDoCheck(subj, obj, SECCLASS_X_PROPERTY, rec->access_mode,
                         &auditdata);
     if (rc != Success)
         rec->status = rc;
@@ -646,7 +642,7 @@ SELinuxResource(CallbackListPtr *pcbl, void *unused, void *calldata)
     Mask access_mode = rec->access_mode;
     PrivateRec **privatePtr;
     security_class_t class;
-    int rc, offset;
+    int offset;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
 
@@ -670,7 +666,7 @@ SELinuxResource(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     /* If this is a new object that needs labeling, do it now */
     if (access_mode & DixCreateAccess && offset >= 0) {
-        rc = SELinuxLabelResource(rec, subj, obj, class);
+        int rc = SELinuxLabelResource(rec, subj, obj, class);
         if (rc != Success) {
             rec->status = rc;
             return;
@@ -686,7 +682,7 @@ SELinuxResource(CallbackListPtr *pcbl, void *unused, void *calldata)
     /* Perform the security check */
     auditdata.restype = rec->rtype;
     auditdata.id = rec->id;
-    rc = SELinuxDoCheck(subj, obj, class, access_mode, &auditdata);
+    int rc = SELinuxDoCheck(subj, obj, class, access_mode, &auditdata);
     if (rc != Success)
         rec->status = rc;
 
@@ -706,7 +702,6 @@ SELinuxScreen(CallbackListPtr *pcbl, void *is_saver, void *calldata)
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
     Mask access_mode = rec->access_mode;
-    int rc;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
     obj = dixLookupPrivate(&rec->screen->devPrivates, objectKey);
@@ -725,7 +720,7 @@ SELinuxScreen(CallbackListPtr *pcbl, void *is_saver, void *calldata)
     if (is_saver)
         access_mode <<= 2;
 
-    rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SCREEN, access_mode, &auditdata);
+    int rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SCREEN, access_mode, &auditdata);
     if (rc != Success)
         rec->status = rc;
 }
@@ -737,12 +732,11 @@ SELinuxClient(CallbackListPtr *pcbl, void *unused, void *calldata)
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
-    int rc;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
     obj = dixLookupPrivate(&rec->target->devPrivates, objectKey);
 
-    rc = SELinuxDoCheck(subj, obj, SECCLASS_X_CLIENT, rec->access_mode,
+    int rc = SELinuxDoCheck(subj, obj, SECCLASS_X_CLIENT, rec->access_mode,
                         &auditdata);
     if (rc != Success)
         rec->status = rc;
@@ -755,12 +749,11 @@ SELinuxServer(CallbackListPtr *pcbl, void *unused, void *calldata)
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
-    int rc;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, subjectKey);
     obj = dixLookupPrivate(&serverClient->devPrivates, objectKey);
 
-    rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SERVER, rec->access_mode,
+    int rc = SELinuxDoCheck(subj, obj, SECCLASS_X_SERVER, rec->access_mode,
                         &auditdata);
     if (rc != Success)
         rec->status = rc;
