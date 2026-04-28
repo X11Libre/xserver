@@ -1,3 +1,5 @@
+#include "Xext/dri2/pci_ids/pci_id_util.h"
+
 CHIPSET(0x4C57, RADEON_LW, RV200)
 CHIPSET(0x4C58, RADEON_LX, RV200)
 CHIPSET(0x4C59, RADEON_LY, RV100)

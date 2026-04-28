@@ -8,53 +8,37 @@
 #endif
 
 static const int i915_chip_ids[] = {
-#define CHIPSET(chip, desc, name) chip,
 #include "pci_ids/i915_pci_ids.h"
-#undef CHIPSET
 };
 
 static const int i965_chip_ids[] = {
-#define CHIPSET(chip, family, name) chip,
 #include "pci_ids/i965_pci_ids.h"
-#undef CHIPSET
 };
 
 #ifndef DRIVER_MAP_GALLIUM_ONLY
 static const int r100_chip_ids[] = {
-#define CHIPSET(chip, name, family) chip,
 #include "pci_ids/radeon_pci_ids.h"
-#undef CHIPSET
 };
 
 static const int r200_chip_ids[] = {
-#define CHIPSET(chip, name, family) chip,
 #include "pci_ids/r200_pci_ids.h"
-#undef CHIPSET
 };
 #endif
 
 static const int r300_chip_ids[] = {
-#define CHIPSET(chip, name, family) chip,
 #include "pci_ids/r300_pci_ids.h"
-#undef CHIPSET
 };
 
 static const int r600_chip_ids[] = {
-#define CHIPSET(chip, name, family) chip,
 #include "pci_ids/r600_pci_ids.h"
-#undef CHIPSET
 };
 
 static const int virtio_gpu_chip_ids[] = {
-#define CHIPSET(chip, name, family) chip,
 #include "pci_ids/virtio_gpu_pci_ids.h"
-#undef CHIPSET
 };
 
 static const int vmwgfx_chip_ids[] = {
-#define CHIPSET(chip, name, family) chip,
 #include "pci_ids/vmwgfx_pci_ids.h"
-#undef CHIPSET
 };
 
 static const struct {

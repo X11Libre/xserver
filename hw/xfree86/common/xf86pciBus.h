@@ -27,6 +27,8 @@
 #ifndef _XF86_PCI_BUS_H
 #define _XF86_PCI_BUS_H
 
+#include <X11/Xdefs.h>
+
 #include "xf86MatchDrivers.h"
 
 void xf86PciProbe(void);

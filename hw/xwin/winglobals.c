@@ -31,6 +31,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "win.h"
 
 /*
@@ -55,9 +57,9 @@ HWND g_hDlgDepthChange = NULL;
 HWND g_hDlgExit = NULL;
 HWND g_hDlgAbout = NULL;
 const char *g_pszQueryHost = NULL;
-Bool g_fXdmcpEnabled = FALSE;
-Bool g_fAuthEnabled = FALSE;
-Bool g_fCompositeAlpha = FALSE;
+bool g_fXdmcpEnabled = FALSE;
+bool g_fAuthEnabled = FALSE;
+bool g_fCompositeAlpha = FALSE;
 HICON g_hIconX = NULL;
 HICON g_hSmallIconX = NULL;
 
@@ -65,18 +67,18 @@ HICON g_hSmallIconX = NULL;
 const char *g_pszLogFile = DEFAULT_LOGDIR "/XWin.%s.log";
 #else
 const char *g_pszLogFile = "XWin.log";
-Bool g_fLogFileChanged = FALSE;
+bool g_fLogFileChanged = FALSE;
 #endif
 int g_iLogVerbose = 2;
-Bool g_fLogInited = FALSE;
+bool g_fLogInited = FALSE;
 char *g_pszCommandLine = NULL;
-Bool g_fSilentFatalError = FALSE;
+bool g_fSilentFatalError = FALSE;
 DWORD g_dwCurrentThreadID = 0;
-Bool g_fKeyboardHookLL = FALSE;
-Bool g_fNoHelpMessageBox = FALSE;
-Bool g_fSoftwareCursor = FALSE;
-Bool g_fNativeGl = TRUE;
-Bool g_fHostInTitle = TRUE;
+bool g_fKeyboardHookLL = FALSE;
+bool g_fNoHelpMessageBox = FALSE;
+bool g_fSoftwareCursor = FALSE;
+bool g_fNativeGl = TRUE;
+bool g_fHostInTitle = TRUE;
 pthread_mutex_t g_pmTerminating = PTHREAD_MUTEX_INITIALIZER;
 
 /*
@@ -88,8 +90,8 @@ winDispatchProcPtr winProcEstablishConnectionOrig = NULL;
  * Clipboard variables
  */
 
-Bool g_fClipboard = TRUE;
-Bool g_fClipboardStarted = FALSE;
+bool g_fClipboard = TRUE;
+bool g_fClipboardStarted = FALSE;
 
 /*
  * Re-initialize global variables that are invalidated

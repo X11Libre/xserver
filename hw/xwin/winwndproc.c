@@ -33,6 +33,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "win.h"
 #include <commctrl.h>
 
@@ -49,8 +51,8 @@
  * Global variables
  */
 
-Bool g_fCursor = TRUE;
-Bool g_fButton[3] = { FALSE, FALSE, FALSE };
+bool g_fCursor = TRUE;
+bool g_fButton[3] = { FALSE, FALSE, FALSE };
 
 /*
  * Called by winWakeupHandler

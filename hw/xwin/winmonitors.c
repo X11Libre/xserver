@@ -28,6 +28,8 @@ from The Open Group.
 */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "win.h"
 #include "winmonitors.h"
 
@@ -55,8 +57,7 @@ getMonitorInfo(HMONITOR hMonitor, HDC hdc, LPRECT rect, LPARAM _data)
     return TRUE;
 }
 
-Bool
-QueryMonitor(int i, struct GetMonitorInfoData *data)
+bool QueryMonitor(int i, struct GetMonitorInfoData *data)
 {
     /* prepare data */
     if (data == NULL)

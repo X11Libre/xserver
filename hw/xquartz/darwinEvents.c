@@ -356,8 +356,7 @@ DarwinProcessFDAdditionQueue_thread(void *args)
     return NULL;
 }
 
-Bool
-DarwinEQInit(void)
+void DarwinEQInit(void)
 {
     int *p;
 
@@ -377,8 +376,6 @@ DarwinEQInit(void)
         fd_add_tid = create_thread(DarwinProcessFDAdditionQueue_thread, NULL);
 
     signal_mieq_init();
-
-    return TRUE;
 }
 
 void

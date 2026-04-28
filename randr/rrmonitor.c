@@ -660,7 +660,7 @@ int
 ProcRRSetMonitor(ClientPtr client)
 {
     REQUEST(xRRSetMonitorReq);
-    REQUEST_AT_LEAST_SIZE(xRRGetMonitorsReq);
+    REQUEST_AT_LEAST_SIZE(xRRSetMonitorReq);
 
     if (client->swapped) {
         swapl(&stuff->window);
@@ -670,6 +670,8 @@ ProcRRSetMonitor(ClientPtr client)
         swaps(&stuff->monitor.y);
         swaps(&stuff->monitor.width);
         swaps(&stuff->monitor.height);
+        swapl(&stuff->monitor.widthInMillimeters);
+        swapl(&stuff->monitor.heightInMillimeters);
         SwapRestL(stuff);
     }
 

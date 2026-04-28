@@ -27,6 +27,8 @@ in this Software without prior written authorization from The Open Group.
 #ifndef __MIFILLARC_H__
 #define __MIFILLARC_H__
 
+#include <X11/Xdefs.h>
+
 #define FULLCIRCLE (360 * 64)
 
 typedef struct _miFillArc {

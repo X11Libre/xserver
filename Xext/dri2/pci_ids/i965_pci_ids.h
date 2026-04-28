@@ -1,3 +1,5 @@
+#include "Xext/dri2/pci_ids/pci_id_util.h"
+
 CHIPSET(0x29A2, i965,    "Intel(R) 965G")
 CHIPSET(0x2992, i965,    "Intel(R) 965Q")
 CHIPSET(0x2982, i965,    "Intel(R) 965G")

@@ -553,10 +553,9 @@ xorgGlxServerInit(CallbackListPtr *pcbl, void *param, void *ext)
     });
 }
 
-Bool
-xorgGlxCreateVendor(void)
+void xorgGlxCreateVendor(void)
 {
-    return AddCallback(glxServer.extensionInitCallback, xorgGlxServerInit, NULL);
+    AddCallback(glxServer.extensionInitCallback, xorgGlxServerInit, NULL);
 }
 
 /************************************************************************/

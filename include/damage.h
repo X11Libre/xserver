@@ -22,6 +22,8 @@
 #ifndef _DAMAGE_H_
 #define _DAMAGE_H_
 
+#include <X11/Xfuncproto.h>
+
 typedef struct _damage *DamagePtr;
 
 typedef enum _damageReportLevel {

@@ -27,6 +27,8 @@
 #ifndef SEATD_LIBSEAT_H
 #define SEATD_LIBSEAT_H
 
+#include <X11/Xdefs.h>
+
 #ifdef SEATD_LIBSEAT
 #include <xf86Xinput.h>
 extern int seatd_libseat_init(Bool KeepTty_state);

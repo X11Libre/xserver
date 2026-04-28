@@ -1,3 +1,5 @@
+#include "Xext/dri2/pci_ids/pci_id_util.h"
+
 CHIPSET(0x4144, R300_AD, R300)
 CHIPSET(0x4145, R300_AE, R300)
 CHIPSET(0x4146, R300_AF, R300)

@@ -26,6 +26,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SWAPREP_H
 #define SWAPREP_H 1
 
+#include <X11/Xdefs.h>
+
 void SwapFont(xQueryFontReply * pr, Bool hasGlyphs);
 
 extern void SErrorEvent(xError * /* from */ ,

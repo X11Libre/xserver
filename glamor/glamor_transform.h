@@ -19,9 +19,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-
 #ifndef _GLAMOR_TRANSFORM_H_
 #define _GLAMOR_TRANSFORM_H_
+
+#include <X11/Xdefs.h>
 
 Bool
 glamor_set_destination_drawable(DrawablePtr     drawable,

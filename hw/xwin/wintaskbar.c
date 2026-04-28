@@ -63,7 +63,7 @@ DECLARE_INTERFACE_(ITaskbarList, IUnknown)
    seem to be the case
 */
 
-void winShowWindowOnTaskbar(HWND hWnd, Bool show)
+void winShowWindowOnTaskbar(HWND hWnd, bool show)
 {
   ITaskbarList* pTaskbarList = NULL;
 

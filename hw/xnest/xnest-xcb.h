@@ -5,6 +5,7 @@
 #ifndef __XNEST__XCB_H
 #define __XNEST__XCB_H
 
+#include <stdbool.h>
 #include <xcb/xcb.h>
 
 #include "include/list.h"
@@ -25,7 +26,7 @@ struct xnest_upstream_info {
 extern struct xnest_upstream_info xnestUpstreamInfo;
 
 /* connect to upstream X server */
-Bool xnest_upstream_setup(const char* displayName);
+bool xnest_upstream_setup(const char* displayName);
 
 /* retrieve upstream GC XID for our xserver GC */
 uint32_t xnest_upstream_gc(GCPtr pGC);

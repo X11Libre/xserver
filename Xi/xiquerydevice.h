@@ -26,7 +26,10 @@
 #ifndef QUERYDEV_H
 #define QUERYDEV_H 1
 
+#include <X11/Xdefs.h>
 #include <X11/extensions/XI2proto.h>
+
+#include "include/input.h"
 
 int SizeDeviceClasses(DeviceIntPtr dev);
 int GetDeviceUse(DeviceIntPtr dev, uint16_t * attachment);

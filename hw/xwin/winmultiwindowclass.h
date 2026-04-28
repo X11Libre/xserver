@@ -1,5 +1,6 @@
-#if !defined(WINMULTIWINDOWCLASS_H)
+#ifndef WINMULTIWINDOWCLASS_H
 #define WINMULTIWINDOWCLASS_H
+
 /*
  *Copyright (C) 1994-2000 The XFree86 Project, Inc. All Rights Reserved.
  *
@@ -30,6 +31,8 @@
  * Authors:     Earle F. Philhower, III
  */
 
+#include <stdbool.h>
+
 /*
  * The next block of definitions are for window manager properties that
  * clients and applications use for communication.
@@ -49,7 +52,7 @@
 
 typedef struct {
     int flags;                  /* marks which fields in this structure are defined */
-    Bool input;                 /* does this application rely on the window manager to
+    bool input;                 /* does this application rely on the window manager to
                                    get keyboard input? */
     int initial_state;          /* see below */
     Pixmap icon_pixmap;         /* pixmap to be used as icon */

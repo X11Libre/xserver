@@ -27,9 +27,11 @@
  * Authors: David Dawes <dawes@xfree86.org>
  *
  */
-
 #ifndef _VBE_MODES_H
 #define _VBE_MODES_H
+
+#include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
 
 /*
  * This is intended to be stored in the DisplayModeRec's private area.

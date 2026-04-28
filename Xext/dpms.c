@@ -83,13 +83,15 @@ DPMSFreeClient(void *data, XID id)
                             NULL, DixUnknownAccess);
     if (pHead) {
         pPrev = 0;
-        for (pCur = *pHead; pCur && pCur != pEvent; pCur = pCur->next)
+        for (pCur = *pHead; pCur && pCur != pEvent; pCur = pCur->next) {
             pPrev = pCur;
+        }
         if (pCur) {
-            if (pPrev)
+            if (pPrev) {
                 pPrev->next = pEvent->next;
-            else
+            } else {
                 *pHead = pEvent->next;
+            }
         }
     }
     free((void *) pEvent);
@@ -185,16 +187,18 @@ ProcDPMSSelectInput(register ClientPtr client)
         if (i == Success && pHead) {
             pNewEvent = 0;
             for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
-                if (pEvent->client == client)
+                if (pEvent->client == client) {
                     break;
+                }
                 pNewEvent = pEvent;
             }
             if (pEvent) {
                 FreeResource(pEvent->clientResource, ClientType);
-                if (pNewEvent)
+                if (pNewEvent) {
                     pNewEvent->next = pEvent->next;
-                else
+                } else {
                     *pHead = pEvent->next;
+                }
                 free(pEvent);
             }
         }
@@ -216,11 +220,14 @@ SendDPMSInfoNotify(void)
     i = dixLookupResourceByType((void **)&pHead, eventResource, DPMSEventType,
                                 serverClient,
                                 DixReadAccess);
-    if (i != Success || !pHead)
+    if (i != Success || !pHead) {
         return;
+    }
+
     for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
-        if ((pEvent->mask & DPMSInfoNotifyMask) == 0)
+        if ((pEvent->mask & DPMSInfoNotifyMask) == 0) {
             continue;
+        }
         se.type = GenericEvent;
         se.extension = DPMSReqCode;
         se.length = (sizeof(xDPMSInfoNotifyEvent) - 32) >> 2;
@@ -237,13 +244,15 @@ DPMSSupported(void)
 {
     /* For each screen, check if DPMS is supported */
     DIX_FOR_EACH_SCREEN({
-        if (walkScreen->DPMS != NULL)
+        if (walkScreen->DPMS != NULL) {
             return TRUE;
+        }
     });
 
     DIX_FOR_EACH_GPU_SCREEN({
-        if (walkScreen->DPMS != NULL)
+        if (walkScreen->DPMS != NULL) {
             return TRUE;
+        }
     });
 
     return FALSE;
@@ -267,35 +276,39 @@ isUnblank(int mode)
 int
 DPMSSet(ClientPtr client, int level)
 {
-    int rc;
     int old_level = DPMSPowerLevel;
 
     DPMSPowerLevel = level;
 
     if (level != DPMSModeOn) {
         if (isUnblank(screenIsSaved)) {
-            rc = dixSaveScreens(client, SCREEN_SAVER_FORCER, ScreenSaverActive);
-            if (rc != Success)
+            int rc = dixSaveScreens(client, SCREEN_SAVER_FORCER, ScreenSaverActive);
+            if (rc != Success) {
                 return rc;
+            }
         }
     } else if (!isUnblank(screenIsSaved)) {
-        rc = dixSaveScreens(client, SCREEN_SAVER_OFF, ScreenSaverReset);
-        if (rc != Success)
+        int rc = dixSaveScreens(client, SCREEN_SAVER_OFF, ScreenSaverReset);
+        if (rc != Success) {
             return rc;
+        }
     }
 
     DIX_FOR_EACH_SCREEN({
-        if (walkScreen->DPMS != NULL)
+        if (walkScreen->DPMS != NULL) {
             walkScreen->DPMS(walkScreen, level);
+        }
     });
 
     DIX_FOR_EACH_GPU_SCREEN({
-        if (walkScreen->DPMS != NULL)
+        if (walkScreen->DPMS != NULL) {
             walkScreen->DPMS(walkScreen, level);
+        }
     });
 
-    if (DPMSPowerLevel != old_level)
+    if (DPMSPowerLevel != old_level) {
         SendDPMSInfoNotify();
+    }
 
     return Success;
 }
@@ -403,8 +416,9 @@ ProcDPMSDisable(ClientPtr client)
     DPMSSet(client, DPMSModeOn);
 
     DPMSEnabled = FALSE;
-    if (was_enabled)
+    if (was_enabled) {
         SendDPMSInfoNotify();
+    }
 
     return Success;
 }
@@ -415,8 +429,9 @@ ProcDPMSForceLevel(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDPMSForceLevelReq);
     X_REQUEST_FIELD_CARD16(level);
 
-    if (!DPMSEnabled)
+    if (!DPMSEnabled) {
         return BadMatch;
+    }
 
     if (stuff->level != DPMSModeOn &&
         stuff->level != DPMSModeStandby &&

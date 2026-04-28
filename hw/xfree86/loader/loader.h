@@ -50,6 +50,7 @@
 
 #include <xorg-config.h>
 
+#include <X11/Xdefs.h>
 #include <X11/Xosdefs.h>
 #include <X11/Xfuncproto.h>
 #include <X11/Xmd.h>
