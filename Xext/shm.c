@@ -879,14 +879,13 @@ ProcShmGetImage(ClientPtr client)
                              widthBytesLine, isRoot);
     }
     else {
-
-        length = stuff->offset;
+        long len2 = stuff->offset;
         for (; plane; plane >>= 1) {
             if (planemask & plane) {
                 XineramaGetImageData(drawables, x, y, w, h,
-                                     format, plane, shmdesc->addr + length,
+                                     format, plane, shmdesc->addr + len2,
                                      widthBytesLine, isRoot);
-                length += lenPer;
+                len2 += lenPer;
             }
         }
     }
