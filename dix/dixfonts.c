@@ -902,7 +902,7 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
     FontPathElementPtr fpe;
     int err = Successful;
     char *name;
-    int namelen;
+    int namelen = 0;
     int numFonts;
     FontInfoRec fontInfo, *pFontInfo;
     int length;
