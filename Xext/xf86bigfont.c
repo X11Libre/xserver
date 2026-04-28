@@ -567,8 +567,6 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             swapCharInfo(&reply.maxBounds);
         }
 
-        int rc = Success;
-
         x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
         for (int i = 0; i < nfontprops; i++) {
@@ -582,7 +580,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             x_rpcbuf_write_CARD16s(&rpcbuf, pIndex2UniqIndex, nCharInfos);
         }
 
-        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
+        int rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
         if (nCharInfos > 0) {
             if (shmid == -1)

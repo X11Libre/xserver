@@ -461,10 +461,9 @@ UninstallSaverColormap(ScreenPtr pScreen)
 {
     SetupScreen(pScreen);
     ColormapPtr pCmap;
-    int rc;
 
     if (pPriv && pPriv->installedMap != None) {
-        rc = dixLookupResourceByType((void **) &pCmap, pPriv->installedMap,
+        int rc = dixLookupResourceByType((void **) &pCmap, pPriv->installedMap,
                                      X11_RESTYPE_COLORMAP, serverClient,
                                      DixUninstallAccess);
         if (rc == Success) {
@@ -656,13 +655,12 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xScreenSaverQueryInfoReq);
     X_REQUEST_FIELD_CARD32(drawable);
 
-    int rc;
     ScreenSaverStuffPtr pSaver;
     DrawablePtr pDraw;
     CARD32 lastInput;
     ScreenSaverScreenPrivatePtr pPriv;
 
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
+    int rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success) {
         return rc;
@@ -722,8 +720,7 @@ ProcScreenSaverSelectInput(ClientPtr client)
     X_REQUEST_FIELD_CARD32(eventMask);
 
     DrawablePtr pDraw;
-    int rc;
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
+    int rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success) {
         return rc;
@@ -1100,9 +1097,8 @@ ScreenSaverUnsetAttributes(ClientPtr client, Drawable drawable)
 {
     DrawablePtr pDraw;
     ScreenSaverScreenPrivatePtr pPriv;
-    int rc;
 
-    rc = dixLookupDrawable(&pDraw, drawable, client, 0, DixGetAttrAccess);
+    int rc = dixLookupDrawable(&pDraw, drawable, client, 0, DixGetAttrAccess);
     if (rc != Success)
         return rc;
     pPriv = GetScreenPrivate(pDraw->pScreen);
@@ -1221,10 +1217,9 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
         PanoramiXRes *draw;
-        int rc, i;
+        int i;
 
-
-        rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
+        int rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
         if (rc != Success)
             return (rc == BadValue) ? BadDrawable : rc;

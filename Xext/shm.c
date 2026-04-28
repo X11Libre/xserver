@@ -583,13 +583,13 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
     ShmDescPtr shmdesc;
     VisualID visual = None;
     RegionPtr pVisibleRegion = NULL;
-    int rc;
 
     if ((stuff->format != XYPixmap) && (stuff->format != ZPixmap)) {
         client->errorValue = stuff->format;
         return BadValue;
     }
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess);
+
+    int rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess);
     if (rc != Success)
         return rc;
     VERIFY_SHMPTR(stuff->shmseg, stuff->offset, TRUE, shmdesc, client);

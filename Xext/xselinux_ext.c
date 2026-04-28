@@ -114,7 +114,6 @@ ProcSELinuxSetCreateContext(ClientPtr client, unsigned offset)
     security_id_t *pSid;
     char *ctx = NULL;
     char *ptr;
-    int rc;
 
     if (stuff->context_len > 0) {
         ctx = SELinuxCopyContext((char *) (stuff + 1), stuff->context_len);
@@ -126,7 +125,7 @@ ProcSELinuxSetCreateContext(ClientPtr client, unsigned offset)
     pSid = (security_id_t *) (ptr + offset);
     *pSid = NULL;
 
-    rc = Success;
+    int rc = Success;
     if (stuff->context_len > 0) {
         if (security_check_context_raw(ctx) < 0 ||
             avc_context_to_sid_raw(ctx, pSid) < 0)
@@ -168,7 +167,6 @@ ProcSELinuxSetDeviceContext(ClientPtr client)
     DeviceIntPtr dev;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
-    int rc;
 
     if (stuff->context_len < 1)
         return BadLength;
@@ -176,7 +174,7 @@ ProcSELinuxSetDeviceContext(ClientPtr client)
     if (!ctx)
         return BadAlloc;
 
-    rc = dixLookupDevice(&dev, stuff->id, client, DixManageAccess);
+    int rc = dixLookupDevice(&dev, stuff->id, client, DixManageAccess);
     if (rc != Success)
         goto out;
 
@@ -205,9 +203,8 @@ ProcSELinuxGetDeviceContext(ClientPtr client)
 
     DeviceIntPtr dev;
     SELinuxSubjectRec *subj;
-    int rc;
 
-    rc = dixLookupDevice(&dev, stuff->id, client, DixGetAttrAccess);
+    int rc = dixLookupDevice(&dev, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -224,9 +221,8 @@ ProcSELinuxGetDrawableContext(ClientPtr client)
     DrawablePtr pDraw;
     PrivateRec **privatePtr;
     SELinuxObjectRec *obj;
-    int rc;
 
-    rc = dixLookupDrawable(&pDraw, stuff->id, client, 0, DixGetAttrAccess);
+    int rc = dixLookupDrawable(&pDraw, stuff->id, client, 0, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -249,9 +245,8 @@ ProcSELinuxGetPropertyContext(ClientPtr client, void *privKey)
     WindowPtr pWin;
     PropertyPtr pProp;
     SELinuxObjectRec *obj;
-    int rc;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetPropAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetPropAccess);
     if (rc != Success)
         return rc;
 
@@ -272,9 +267,8 @@ ProcSELinuxGetSelectionContext(ClientPtr client, void *privKey)
 
     Selection *pSel;
     SELinuxObjectRec *obj;
-    int rc;
 
-    rc = dixLookupSelection(&pSel, stuff->id, client, DixGetAttrAccess);
+    int rc = dixLookupSelection(&pSel, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -290,9 +284,8 @@ ProcSELinuxGetClientContext(ClientPtr client)
 
     ClientPtr target;
     SELinuxSubjectRec *subj;
-    int rc;
 
-    rc = dixLookupResourceOwner(&target, stuff->id, client, DixGetAttrAccess);
+    int rc = dixLookupResourceOwner(&target, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -372,10 +365,10 @@ ProcSELinuxListProperties(ClientPtr client)
     WindowPtr pWin;
     PropertyPtr pProp;
     SELinuxListItemRec *items;
-    int rc, count, size, i;
+    int count, size, i;
     CARD32 id;
 
-    rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
+    int rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
     if (rc != Success)
         return rc;
 
@@ -410,7 +403,7 @@ ProcSELinuxListSelections(ClientPtr client)
 
     Selection *pSel;
     SELinuxListItemRec *items;
-    int rc, count, size, i;
+    int count, size, i;
     CARD32 id;
 
     /* Count the number of selections and allocate items */
@@ -428,7 +421,7 @@ ProcSELinuxListSelections(ClientPtr client)
     size = 0;
     for (pSel = CurrentSelections; pSel; pSel = pSel->next) {
         id = pSel->selection;
-        rc = SELinuxPopulateItem(items + i, &pSel->devPrivates, id, &size);
+        int rc = SELinuxPopulateItem(items + i, &pSel->devPrivates, id, &size);
         if (rc != Success) {
             SELinuxFreeItems(items, count);
             return rc;

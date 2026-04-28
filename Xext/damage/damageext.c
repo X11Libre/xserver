@@ -479,10 +479,9 @@ ProcDamageAdd(ClientPtr client)
 
     DrawablePtr pDrawable;
     RegionPtr pRegion;
-    int rc;
 
     VERIFY_REGION(pRegion, stuff->region, client, DixWriteAccess);
-    rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
+    int rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -589,10 +588,9 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
 {
     PanoramiXDamageRes *damage;
     PanoramiXRes *draw;
-    int rc;
 
     LEGAL_NEW_RESOURCE(stuff->damage, client);
-    rc = dixLookupResourceByClass((void **)&draw, stuff->drawable, XRC_DRAWABLE,
+    int rc = dixLookupResourceByClass((void **)&draw, stuff->drawable, XRC_DRAWABLE,
                                   client, DixGetAttrAccess | DixReadAccess);
     if (rc != Success)
         return rc;

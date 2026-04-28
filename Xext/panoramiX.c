@@ -901,9 +901,8 @@ ProcPanoramiXGetState(ClientPtr client)
         swapl(&stuff->window);
 
     WindowPtr pWin;
-    int rc;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -927,9 +926,8 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
         swapl(&stuff->window);
 
     WindowPtr pWin;
-    int rc;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -955,12 +953,11 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     }
 
     WindowPtr pWin;
-    int rc;
 
     if (stuff->screen >= PanoramiXNumScreens)
         return BadMatch;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
