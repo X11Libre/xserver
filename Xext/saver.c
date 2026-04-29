@@ -28,6 +28,7 @@ in this Software without prior written authorization from the X Consortium.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -743,20 +744,10 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
     ScreenSaverAttrPtr pAttr = 0;
     int ret, len, class, bw, depth;
     unsigned long visual;
-    int idepth, ivisual;
-    Bool fOK;
-    DepthPtr pDepth;
     WindowOptPtr ancwopt;
     unsigned int *pVlist;
     unsigned long *values = 0;
-    unsigned long tmask, imask;
-    unsigned long val;
-    Pixmap pixID;
-    PixmapPtr pPixmap;
-    Cursor cursorID;
-    CursorPtr pCursor;
-    Colormap cmap;
-    ColormapPtr pCmap;
+    unsigned long tmask;
 
     ret = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                             DixGetAttrAccess);
@@ -824,11 +815,11 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
 
     /* Find out if the depth and visual are acceptable for this Screen */
     if ((visual != ancwopt->visual) || (depth != pParent->drawable.depth)) {
-        fOK = FALSE;
-        for (idepth = 0; idepth < pScreen->numDepths; idepth++) {
-            pDepth = (DepthPtr) &pScreen->allowedDepths[idepth];
+        bool fOK = FALSE;
+        for (int idepth = 0; idepth < pScreen->numDepths; idepth++) {
+            DepthPtr pDepth = (DepthPtr) &pScreen->allowedDepths[idepth];
             if ((depth == pDepth->depth) || (depth == 0)) {
-                for (ivisual = 0; ivisual < pDepth->numVids; ivisual++) {
+                for (int ivisual = 0; ivisual < pDepth->numVids; ivisual++) {
                     if (visual == pDepth->vids[ivisual]) {
                         fOK = TRUE;
                         break;
@@ -899,11 +890,12 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
     pAttr->mask = tmask = stuff->mask | CWOverrideRedirect;
     pVlist = (unsigned int *) (stuff + 1);
     while (tmask) {
-        imask = lowbit(tmask);
+        unsigned long imask = lowbit(tmask);
         tmask &= ~imask;
         switch (imask) {
         case CWBackPixmap:
-            pixID = (Pixmap) * pVlist;
+        {
+            Pixmap pixID = (Pixmap) * pVlist;
             if (pixID == None) {
                 *values++ = None;
             }
@@ -915,6 +907,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
                 *values++ = ParentRelative;
             }
             else {
+                PixmapPtr pPixmap;
                 ret =
                     dixLookupResourceByType((void **) &pPixmap, pixID,
                                             X11_RESTYPE_PIXMAP, client, DixReadAccess);
@@ -934,11 +927,13 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
                 }
             }
             break;
+        }
         case CWBackPixel:
             *values++ = (CARD32) *pVlist;
             break;
         case CWBorderPixmap:
-            pixID = (Pixmap) * pVlist;
+        {
+            Pixmap pixID = (Pixmap) * pVlist;
             if (pixID == CopyFromParent) {
                 if (depth != pParent->drawable.depth) {
                     ret = BadMatch;
@@ -947,6 +942,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
                 *values++ = CopyFromParent;
             }
             else {
+                PixmapPtr pPixmap;
                 ret =
                     dixLookupResourceByType((void **) &pPixmap, pixID,
                                             X11_RESTYPE_PIXMAP, client, DixReadAccess);
@@ -966,11 +962,13 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
                 }
             }
             break;
+        }
         case CWBorderPixel:
             *values++ = (CARD32) *pVlist;
             break;
         case CWBitGravity:
-            val = (CARD8) *pVlist;
+        {
+            unsigned long val = (CARD8) *pVlist;
             if (val > StaticGravity) {
                 ret = BadValue;
                 client->errorValue = val;
@@ -978,8 +976,10 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             }
             *values++ = val;
             break;
+        }
         case CWWinGravity:
-            val = (CARD8) *pVlist;
+        {
+            unsigned long val = (CARD8) *pVlist;
             if (val > StaticGravity) {
                 ret = BadValue;
                 client->errorValue = val;
@@ -987,8 +987,10 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             }
             *values++ = val;
             break;
+        }
         case CWBackingStore:
-            val = (CARD8) *pVlist;
+        {
+            unsigned long val = (CARD8) *pVlist;
             if ((val != NotUseful) && (val != WhenMapped) && (val != Always)) {
                 ret = BadValue;
                 client->errorValue = val;
@@ -996,6 +998,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             }
             *values++ = val;
             break;
+        }
         case CWBackingPlanes:
             *values++ = (CARD32) *pVlist;
             break;
@@ -1003,7 +1006,8 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             *values++ = (CARD32) *pVlist;
             break;
         case CWSaveUnder:
-            val = (BOOL) * pVlist;
+        {
+            unsigned long val = (BOOL) * pVlist;
             if ((val != xTrue) && (val != xFalse)) {
                 ret = BadValue;
                 client->errorValue = val;
@@ -1011,6 +1015,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             }
             *values++ = val;
             break;
+        }
         case CWEventMask:
             *values++ = (CARD32) *pVlist;
             break;
@@ -1021,7 +1026,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             if (!(stuff->mask & CWOverrideRedirect))
                 pVlist--;
             else {
-                val = (BOOL) * pVlist;
+                unsigned long val = (BOOL) * pVlist;
                 if ((val != xTrue) && (val != xFalse)) {
                     ret = BadValue;
                     client->errorValue = val;
@@ -1031,7 +1036,9 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             *values++ = xTrue;
             break;
         case CWColormap:
-            cmap = (Colormap) * pVlist;
+        {
+            Colormap cmap = (Colormap) * pVlist;
+            ColormapPtr pCmap;
             ret = dixLookupResourceByType((void **) &pCmap, cmap, X11_RESTYPE_COLORMAP,
                                           client, DixUseAccess);
             if (ret != Success) {
@@ -1045,12 +1052,15 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             pAttr->colormap = cmap;
             pAttr->mask &= ~CWColormap;
             break;
+        }
         case CWCursor:
-            cursorID = (Cursor) * pVlist;
+        {
+            Cursor cursorID = (Cursor) * pVlist;
             if (cursorID == None) {
                 *values++ = None;
             }
             else {
+                CursorPtr pCursor;
                 ret = dixLookupResourceByType((void **) &pCursor, cursorID,
                                               X11_RESTYPE_CURSOR, client, DixUseAccess);
                 if (ret != Success) {
@@ -1061,6 +1071,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
                 pAttr->mask &= ~CWCursor;
             }
             break;
+        }
         default:
             ret = BadValue;
             client->errorValue = stuff->mask;
