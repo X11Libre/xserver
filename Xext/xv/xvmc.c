@@ -271,10 +271,8 @@ ProcXvMCDestroyContext(ClientPtr client)
 
     void *val;
 
-    int rc = dixLookupResourceByType(&val, stuff->context_id, XvMCRTContext,
-                                 client, DixDestroyAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupResourceByType(&val, stuff->context_id, XvMCRTContext,
+                                 client, DixDestroyAccess));
 
     FreeResource(stuff->context_id, X11_RESTYPE_NONE);
 
@@ -342,10 +340,8 @@ ProcXvMCDestroySurface(ClientPtr client)
 
     void *val;
 
-    int rc = dixLookupResourceByType(&val, stuff->surface_id, XvMCRTSurface,
-                                 client, DixDestroyAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupResourceByType(&val, stuff->surface_id, XvMCRTSurface,
+                                 client, DixDestroyAccess));
 
     FreeResource(stuff->surface_id, X11_RESTYPE_NONE);
 
@@ -472,10 +468,8 @@ ProcXvMCDestroySubpicture(ClientPtr client)
 
     void *val;
 
-    int rc = dixLookupResourceByType(&val, stuff->subpicture_id, XvMCRTSubpicture,
-                                 client, DixDestroyAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupResourceByType(&val, stuff->subpicture_id, XvMCRTSubpicture,
+                                 client, DixDestroyAccess));
 
     FreeResource(stuff->subpicture_id, X11_RESTYPE_NONE);
 

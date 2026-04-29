@@ -22,6 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <selinux/label.h>
 
 #include "dix/registry_priv.h"
+#include "dix/request_priv.h"
 
 #include "xselinuxint.h"
 
@@ -178,15 +179,11 @@ int
 SELinuxSelectionToSID(Atom selection, SELinuxSubjectRec * subj,
                       security_id_t * sid_rtn, int *poly_rtn)
 {
-    int rc;
     SELinuxObjectRec *obj;
     security_id_t tsid;
 
     /* Get the default context and polyinstantiation bit */
-    rc = SELinuxAtomToSID(selection, 0, &obj);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(SELinuxAtomToSID(selection, 0, &obj));
 
     /* Check for an override context next */
     if (subj->sel_use_sid) {
@@ -217,15 +214,11 @@ int
 SELinuxPropertyToSID(Atom property, SELinuxSubjectRec * subj,
                      security_id_t * sid_rtn, int *poly_rtn)
 {
-    int rc;
     SELinuxObjectRec *obj;
     security_id_t tsid, tsid2;
 
     /* Get the default context and polyinstantiation bit */
-    rc = SELinuxAtomToSID(property, 1, &obj);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(SELinuxAtomToSID(property, 1, &obj));
 
     /* Check for an override context next */
     if (subj->prp_use_sid) {

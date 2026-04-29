@@ -590,9 +590,8 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
         return BadValue;
     }
 
-    int rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess));
+
     VERIFY_SHMPTR(stuff->shmseg, stuff->offset, TRUE, shmdesc, client);
     if (pDraw->type == DRAWABLE_WINDOW) {
         if (   /* check for being viewable */
@@ -788,9 +787,7 @@ ProcShmGetImage(ClientPtr client)
     if (draw->type == XRT_PIXMAP)
         return ShmGetImage(client, stuff);
 
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess));
 
     VERIFY_SHMPTR(stuff->shmseg, stuff->offset, TRUE, shmdesc, client);
 
@@ -917,7 +914,7 @@ ProcShmCreatePixmap(ClientPtr client)
     PixmapPtr pMap = NULL;
     DrawablePtr pDraw;
     DepthPtr pDepth;
-    int i, result, rc;
+    int i, result;
     ShmDescPtr shmdesc;
     unsigned int width, height, depth;
     unsigned long size;
@@ -927,10 +924,9 @@ ProcShmCreatePixmap(ClientPtr client)
     if (!sharedPixmaps)
         return BadImplementation;
     LEGAL_NEW_RESOURCE(stuff->pid, client);
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, M_ANY,
-                           DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->drawable, client, M_ANY,
+                           DixGetAttrAccess));
 
     VERIFY_SHMPTR(stuff->shmseg, stuff->offset, TRUE, shmdesc, client);
 
@@ -1049,7 +1045,7 @@ ShmCreatePixmap(ClientPtr client, xShmCreatePixmapReq *stuff)
     PixmapPtr pMap;
     DrawablePtr pDraw;
     DepthPtr pDepth;
-    int i, rc;
+    int i;
     ShmDescPtr shmdesc;
     ShmScrPrivateRec *screen_priv;
     unsigned int width, height, depth;
@@ -1059,10 +1055,9 @@ ShmCreatePixmap(ClientPtr client, xShmCreatePixmapReq *stuff)
     if (!sharedPixmaps)
         return BadImplementation;
     LEGAL_NEW_RESOURCE(stuff->pid, client);
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, M_ANY,
-                           DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->drawable, client, M_ANY,
+                           DixGetAttrAccess));
 
     VERIFY_SHMPTR(stuff->shmseg, stuff->offset, TRUE, shmdesc, client);
 
@@ -1102,7 +1097,7 @@ ShmCreatePixmap(ClientPtr client, xShmCreatePixmapReq *stuff)
                                                    shmdesc->addr +
                                                    stuff->offset);
     if (pMap) {
-        rc = XaceHookResourceAccess(client, stuff->pid, X11_RESTYPE_PIXMAP,
+        int rc = XaceHookResourceAccess(client, stuff->pid, X11_RESTYPE_PIXMAP,
                       pMap, X11_RESTYPE_NONE, NULL, DixCreateAccess);
         if (rc != Success) {
             dixDestroyPixmap(pMap, 0);
