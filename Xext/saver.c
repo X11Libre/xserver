@@ -124,9 +124,6 @@ static Bool setEventMask(ScreenPtr      pScreen,
                          ClientPtr      client,
                          unsigned long  mask);
 
-static unsigned long getEventMask(ScreenPtr     pScreen,
-                                  ClientPtr     client);
-
 /*
  * when a client sets the screen saver attributes, a resource is
  * kept to be freed when the client exits
@@ -225,13 +222,12 @@ static unsigned long
 getEventMask(ScreenPtr pScreen, ClientPtr client)
 {
     SetupScreen(pScreen);
-    ScreenSaverEventPtr pEv;
 
     if (!pPriv) {
         return 0;
     }
 
-    for (pEv = pPriv->events; pEv; pEv = pEv->next) {
+    for (ScreenSaverEventPtr pEv = pPriv->events; pEv; pEv = pEv->next) {
         if (pEv->client == client) {
             return pEv->mask;
         }
