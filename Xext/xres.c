@@ -218,11 +218,10 @@ resourceTypeAtom(int i)
     CARD32 ret;
 
     const char *name = LookupResourceName(i);
-    if (strcmp(name, XREGISTRY_UNKNOWN))
+    if (strcmp(name, XREGISTRY_UNKNOWN)) {
         ret = dixAddAtom(name);
-    else {
+    } else {
         char buf[40];
-
         snprintf(buf, sizeof(buf), "Unregistered resource %i", i + 1);
         ret = dixAddAtom(buf);
     }
@@ -256,8 +255,9 @@ ProcXResQueryClientResources(ClientPtr client)
     int num_types = 0;
     for (int i = 0; i <= lastResourceType; i++) {
         /* dont report currently unused resource types */
-        if (!(counts[i]))
+        if (!(counts[i])) {
             continue;
+        }
 
         /* write xXResType */
         x_rpcbuf_write_CARD32(&rpcbuf, resourceTypeAtom(i + 1));
@@ -383,8 +383,9 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
     if (WillConstructMask(client, mask, ctx, X_XResLocalClientPIDMask)) {
         pid_t pid = GetClientPid(client);
 
-        if (pid == -1)
+        if (pid == -1) {
             return TRUE;
+        }
 
         xXResClientIdValue reply = {
             .spec.client = client->clientAsMask,
@@ -424,8 +425,7 @@ ConstructClientIds(ClientPtr client,
 {
     for (int specIdx = 0; specIdx < numSpecs; ++specIdx) {
         if (specs[specIdx].client == 0) {
-            int c;
-            for (c = 0; c < currentMaxClients; ++c) {
+            for (int c = 0; c < currentMaxClients; ++c) {
                 if (clients[c] &&
                     (dixCallClientAccessCallback(client, clients[c], DixReadAccess)
                                           == Success)) {
@@ -468,7 +468,7 @@ ProcXResQueryClientIds (ClientPtr client)
     REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
                        (uint64_t)stuff->numSpecs * sizeof(xXResClientIdSpec));
 
-    xXResClientIdSpec        *specs = (void*) ((char*) stuff + sizeof(xXResQueryClientIdsReq));
+    xXResClientIdSpec *specs = (void*) ((char*) stuff + sizeof(xXResQueryClientIdsReq));
 
     if (client->swapped) {
         /* each spec is made of two CARD32's */
