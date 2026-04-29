@@ -738,7 +738,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
     ScreenPtr pScreen;
     ScreenSaverScreenPrivatePtr pPriv = 0;
     ScreenSaverAttrPtr pAttr = 0;
-    int ret, len, class, bw, depth;
+    int ret, len, class, depth;
     unsigned long visual;
     WindowOptPtr ancwopt;
     unsigned int *pVlist;
@@ -775,7 +775,6 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
         client->errorValue = class;
         return BadValue;
     }
-    bw = stuff->borderWidth;
     depth = stuff->depth;
     visual = stuff->visualID;
 
@@ -794,7 +793,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
         return BadMatch;
     }
 
-    if ((class == InputOnly) && ((bw != 0) || (depth != 0))) {
+    if ((class == InputOnly) && ((stuff->borderWidth != 0) || (depth != 0))) {
         return BadMatch;
     }
 
