@@ -57,9 +57,9 @@ static char *
 SELinuxCopyContext(char *ptr, unsigned len)
 {
     char *copy = calloc(1, len + 1);
-
-    if (!copy)
+    if (!copy) {
         return NULL;
+    }
     strncpy(copy, ptr, len);
     copy[len] = '\0';
     return copy;
@@ -87,8 +87,9 @@ SELinuxSendContextReply(ClientPtr client, security_id_t sid)
     int len = 0;
     if (sid) {
         char *ctx;
-        if (avc_sid_to_context_raw(sid, &ctx) < 0)
+        if (avc_sid_to_context_raw(sid, &ctx) < 0) {
             return BadValue;
+        }
         len = strlen(ctx) + 1;
         x_rpcbuf_write_string_0t_pad(&rpcbuf, ctx);
         free(ctx);
@@ -117,8 +118,9 @@ ProcSELinuxSetCreateContext(ClientPtr client, unsigned offset)
 
     if (stuff->context_len > 0) {
         ctx = SELinuxCopyContext((char *) (stuff + 1), stuff->context_len);
-        if (!ctx)
+        if (!ctx) {
             return BadAlloc;
+        }
     }
 
     ptr = dixLookupPrivate(privPtr, subjectKey);
@@ -129,7 +131,9 @@ ProcSELinuxSetCreateContext(ClientPtr client, unsigned offset)
     if (stuff->context_len > 0) {
         if (security_check_context_raw(ctx) < 0 ||
             avc_context_to_sid_raw(ctx, pSid) < 0)
+        {
             rc = BadValue;
+        }
     }
 
     free(ctx);
@@ -144,10 +148,11 @@ ProcSELinuxGetCreateContext(ClientPtr client, unsigned offset)
 
     X_REQUEST_HEAD_STRUCT(SELinuxGetCreateContextReq);
 
-    if (offset == CTX_DEV)
+    if (offset == CTX_DEV) {
         ptr = dixLookupPrivate(&serverClient->devPrivates, subjectKey);
-    else
+    } else {
         ptr = dixLookupPrivate(&client->devPrivates, subjectKey);
+    }
 
     pSid = (security_id_t *) (ptr + offset);
     return SELinuxSendContextReply(client, *pSid);
@@ -168,15 +173,19 @@ ProcSELinuxSetDeviceContext(ClientPtr client)
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
 
-    if (stuff->context_len < 1)
+    if (stuff->context_len < 1) {
         return BadLength;
+    }
+
     ctx = SELinuxCopyContext((char *) (stuff + 1), stuff->context_len);
-    if (!ctx)
+    if (!ctx) {
         return BadAlloc;
+    }
 
     int rc = dixLookupDevice(&dev, stuff->id, client, DixManageAccess);
-    if (rc != Success)
+    if (rc != Success) {
         goto out;
+    }
 
     if (security_check_context_raw(ctx) < 0 ||
         avc_context_to_sid_raw(ctx, &sid) < 0) {
@@ -205,8 +214,9 @@ ProcSELinuxGetDeviceContext(ClientPtr client)
     SELinuxSubjectRec *subj;
 
     int rc = dixLookupDevice(&dev, stuff->id, client, DixGetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     subj = dixLookupPrivate(&dev->devPrivates, subjectKey);
     return SELinuxSendContextReply(client, subj->sid);
@@ -223,13 +233,15 @@ ProcSELinuxGetDrawableContext(ClientPtr client)
     SELinuxObjectRec *obj;
 
     int rc = dixLookupDrawable(&pDraw, stuff->id, client, 0, DixGetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
-    if (pDraw->type == DRAWABLE_PIXMAP)
+    if (pDraw->type == DRAWABLE_PIXMAP) {
         privatePtr = &((PixmapPtr) pDraw)->devPrivates;
-    else
+    } else {
         privatePtr = &((WindowPtr) pDraw)->devPrivates;
+    }
 
     obj = dixLookupPrivate(privatePtr, objectKey);
     return SELinuxSendContextReply(client, obj->sid);
@@ -247,13 +259,15 @@ ProcSELinuxGetPropertyContext(ClientPtr client, void *privKey)
     SELinuxObjectRec *obj;
 
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetPropAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     rc = dixLookupProperty(&pProp, pWin, stuff->property, client,
                            DixGetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     obj = dixLookupPrivate(&pProp->devPrivates, privKey);
     return SELinuxSendContextReply(client, obj->sid);
@@ -269,8 +283,9 @@ ProcSELinuxGetSelectionContext(ClientPtr client, void *privKey)
     SELinuxObjectRec *obj;
 
     int rc = dixLookupSelection(&pSel, stuff->id, client, DixGetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     obj = dixLookupPrivate(&pSel->devPrivates, privKey);
     return SELinuxSendContextReply(client, obj->sid);
@@ -286,8 +301,9 @@ ProcSELinuxGetClientContext(ClientPtr client)
     SELinuxSubjectRec *subj;
 
     int rc = dixLookupResourceOwner(&target, stuff->id, client, DixGetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     subj = dixLookupPrivate(&target->devPrivates, subjectKey);
     return SELinuxSendContextReply(client, subj->sid);
@@ -300,12 +316,15 @@ SELinuxPopulateItem(SELinuxListItemRec * i, PrivateRec ** privPtr, CARD32 id,
     SELinuxObjectRec *obj = dixLookupPrivate(privPtr, objectKey);
     SELinuxObjectRec *data = dixLookupPrivate(privPtr, dataKey);
 
-    if (!i)
+    if (!i) {
         return BadValue;
-    if (avc_sid_to_context_raw(obj->sid, &i->octx) < 0)
+    }
+    if (avc_sid_to_context_raw(obj->sid, &i->octx) < 0) {
         return BadValue;
-    if (avc_sid_to_context_raw(data->sid, &i->dctx) < 0)
+    }
+    if (avc_sid_to_context_raw(data->sid, &i->dctx) < 0) {
         return BadValue;
+    }
 
     i->id = id;
     i->octx_len = bytes_to_int32(strlen(i->octx) + 1);
@@ -320,8 +339,9 @@ SELinuxFreeItems(SELinuxListItemRec * items, int count)
 {
     int k;
 
-    if (!items)
+    if (!items) {
         return;
+    }
 
     for (k = 0; k < count; k++) {
         freecon(items[k].octx);
@@ -369,16 +389,19 @@ ProcSELinuxListProperties(ClientPtr client)
     CARD32 id;
 
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     /* Count the number of properties and allocate items */
     count = 0;
-    for (pProp = pWin->properties; pProp; pProp = pProp->next)
+    for (pProp = pWin->properties; pProp; pProp = pProp->next) {
         count++;
+    }
     items = calloc(count, sizeof(SELinuxListItemRec));
-    if (count && !items)
+    if (count && !items) {
         return BadAlloc;
+    }
 
     /* Fill in the items and calculate size */
     i = 0;
@@ -408,13 +431,16 @@ ProcSELinuxListSelections(ClientPtr client)
 
     /* Count the number of selections and allocate items */
     count = 0;
-    for (pSel = CurrentSelections; pSel; pSel = pSel->next)
+    for (pSel = CurrentSelections; pSel; pSel = pSel->next) {
         count++;
-    if (count == 0)
+    }
+    if (count == 0) {
         return SELinuxSendItemsToClient(client, NULL, 0, 0);
+    }
     items = calloc(count, sizeof(SELinuxListItemRec));
-    if (!items)
+    if (!items) {
         return BadAlloc;
+    }
 
     /* Fill in the items and calculate size */
     i = 0;
