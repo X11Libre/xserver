@@ -282,16 +282,10 @@ DPMSSet(ClientPtr client, int level)
 
     if (level != DPMSModeOn) {
         if (isUnblank(screenIsSaved)) {
-            int rc = dixSaveScreens(client, SCREEN_SAVER_FORCER, ScreenSaverActive);
-            if (rc != Success) {
-                return rc;
-            }
+            X_CALL_CHECK_ERR(dixSaveScreens(client, SCREEN_SAVER_FORCER, ScreenSaverActive));
         }
     } else if (!isUnblank(screenIsSaved)) {
-        int rc = dixSaveScreens(client, SCREEN_SAVER_OFF, ScreenSaverReset);
-        if (rc != Success) {
-            return rc;
-        }
+        X_CALL_CHECK_ERR(dixSaveScreens(client, SCREEN_SAVER_OFF, ScreenSaverReset));
     }
 
     DIX_FOR_EACH_SCREEN({

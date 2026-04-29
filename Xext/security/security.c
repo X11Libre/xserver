@@ -580,11 +580,9 @@ ProcSecurityRevokeAuthorization(ClientPtr client)
 
     SecurityAuthorizationPtr pAuth;
 
-    int rc = dixLookupResourceByType((void **) &pAuth, stuff->authId,
+    X_CALL_CHECK_ERR(dixLookupResourceByType((void **) &pAuth, stuff->authId,
                                  SecurityAuthorizationResType, client,
-                                 DixDestroyAccess);
-    if (rc != Success)
-        return rc;
+                                 DixDestroyAccess));
 
     FreeResource(stuff->authId, X11_RESTYPE_NONE);
     return Success;

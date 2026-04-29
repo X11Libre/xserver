@@ -291,10 +291,8 @@ static int doDamageCreate(ClientPtr client, DamageExtPtr *ext, xDamageCreateReq 
     DamageExtPtr pDamageExt;
     DamageReportLevel level;
 
-    int rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
-                            DixGetAttrAccess | DixReadAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
+                            DixGetAttrAccess | DixReadAccess));
 
     switch (stuff->level) {
     case XDamageReportRawRectangles:
@@ -481,10 +479,8 @@ ProcDamageAdd(ClientPtr client)
     RegionPtr pRegion;
 
     VERIFY_REGION(pRegion, stuff->region, client, DixWriteAccess);
-    int rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
-                           DixWriteAccess);
-    if (rc != Success)
-        return rc;
+
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDrawable, stuff->drawable, client, 0, DixWriteAccess));
 
     /* The region is relative to the drawable origin, so translate it out to
      * screen coordinates like damage expects.
@@ -590,10 +586,8 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     PanoramiXRes *draw;
 
     LEGAL_NEW_RESOURCE(stuff->damage, client);
-    int rc = dixLookupResourceByClass((void **)&draw, stuff->drawable, XRC_DRAWABLE,
-                                  client, DixGetAttrAccess | DixReadAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupResourceByClass((void **)&draw, stuff->drawable, XRC_DRAWABLE,
+                                  client, DixGetAttrAccess | DixReadAccess));
 
     if (!(damage = calloc(1, sizeof(PanoramiXDamageRes))))
         return BadAlloc;
@@ -601,7 +595,7 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     if (!AddResource(stuff->damage, XRT_DAMAGE, damage))
         return BadAlloc;
 
-    rc = doDamageCreate(client, &(damage->ext), stuff);
+    int rc = doDamageCreate(client, &(damage->ext), stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
         XINERAMA_FOR_EACH_SCREEN_FORWARD({
             DrawablePtr pDrawable;

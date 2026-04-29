@@ -573,9 +573,7 @@ PanoramiXGetGeometry(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
-    int rc = dixLookupDrawable(&pDraw, stuff->id, client, M_ANY, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->id, client, M_ANY, DixGetAttrAccess));
 
     ScreenPtr masterScreen = dixGetMasterScreen();
 
@@ -631,12 +629,8 @@ PanoramiXTranslateCoords(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xTranslateCoordsReq);
 
-    int rc = dixLookupWindow(&pWin, stuff->srcWid, client, DixReadAccess);
-    if (rc != Success)
-        return rc;
-    rc = dixLookupWindow(&pDst, stuff->dstWid, client, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->srcWid, client, DixReadAccess));
+    X_CALL_CHECK_ERR(dixLookupWindow(&pDst, stuff->dstWid, client, DixReadAccess));
 
     ScreenPtr masterScreen = dixGetMasterScreen();
 
@@ -1125,13 +1119,11 @@ PanoramiXCopyArea(ClientPtr client)
         DrawablePtr pDst;
         GCPtr pGC = NULL;
         char *data;
-        int pitch, rc;
+        int pitch;
 
         XINERAMA_FOR_EACH_SCREEN_BACKWARD({
-            rc = dixLookupDrawable(drawables + walkScreenIdx, src->info[walkScreenIdx].id, client, 0,
-                                   DixGetAttrAccess);
-            if (rc != Success)
-                return rc;
+            X_CALL_CHECK_ERR(dixLookupDrawable(drawables + walkScreenIdx, src->info[walkScreenIdx].id, client, 0,
+                                   DixGetAttrAccess));
             drawables[walkScreenIdx]->pScreen->SourceValidate(drawables[walkScreenIdx], 0, 0,
                                                   drawables[walkScreenIdx]->width,
                                                   drawables[walkScreenIdx]->height,
@@ -1238,11 +1230,8 @@ PanoramiXCopyArea(ClientPtr client)
             VALIDATE_DRAWABLE_AND_GC(stuff->dstDrawable, pDst, DixWriteAccess);
 
             if (stuff->dstDrawable != stuff->srcDrawable) {
-                int rc = dixLookupDrawable(&pSrc, stuff->srcDrawable, client, 0,
-                                           DixReadAccess);
-                if (rc != Success)
-                    return rc;
-
+                X_CALL_CHECK_ERR(dixLookupDrawable(&pSrc, stuff->srcDrawable, client, 0,
+                                           DixReadAccess));
                 if ((pDst->pScreen != pSrc->pScreen) ||
                     (pDst->depth != pSrc->depth)) {
                     client->errorValue = stuff->dstDrawable;
@@ -1314,10 +1303,8 @@ PanoramiXCopyPlane(ClientPtr client)
     if (dstShared && srcShared)
         return (*SavedProcVector[X_CopyPlane]) (client);
 
-    rc = dixLookupResourceByType((void **) &gc, stuff->gc, XRT_GC,
-                                 client, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupResourceByType((void **) &gc, stuff->gc, XRT_GC,
+                                 client, DixReadAccess));
 
     if ((dst->type == XRT_WINDOW) && dst->u.win.root)
         dstIsRoot = TRUE;
@@ -1348,11 +1335,8 @@ PanoramiXCopyPlane(ClientPtr client)
 
         VALIDATE_DRAWABLE_AND_GC(stuff->dstDrawable, pdstDraw, DixWriteAccess);
         if (stuff->dstDrawable != stuff->srcDrawable) {
-            rc = dixLookupDrawable(&psrcDraw, stuff->srcDrawable, client, 0,
-                                   DixReadAccess);
-            if (rc != Success)
-                return rc;
-
+            X_CALL_CHECK_ERR(dixLookupDrawable(&psrcDraw, stuff->srcDrawable, client, 0,
+                                   DixReadAccess));
             if (pdstDraw->pScreen != psrcDraw->pScreen) {
                 client->errorValue = stuff->dstDrawable;
                 return BadMatch;
@@ -2011,9 +1995,7 @@ PanoramiXGetImage(ClientPtr client)
     if (draw->type == XRT_PIXMAP)
         return (*SavedProcVector[X_GetImage]) (client);
 
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess));
 
     if (!((WindowPtr) pDraw)->realized)
         return BadMatch;
@@ -2050,12 +2032,10 @@ PanoramiXGetImage(ClientPtr client)
     drawables[0] = pDraw;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
-        rc = dixLookupDrawable(drawables + walkScreenIdx,
+        X_CALL_CHECK_ERR(dixLookupDrawable(drawables + walkScreenIdx,
                                draw->info[walkScreenIdx].id,
                                client, 0,
-                               DixGetAttrAccess);
-        if (rc != Success)
-            return rc;
+                               DixGetAttrAccess));
     });
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
