@@ -302,12 +302,12 @@ ScreenSaverFreeEvents(void *value, XID id)
     ScreenPtr pScreen = pOld->pScreen;
 
     SetupScreen(pScreen);
-    ScreenSaverEventPtr pEv, *pPrev;
 
     if (!pPriv) {
         return TRUE;
     }
 
+    ScreenSaverEventPtr pEv, *pPrev;
     for (pPrev = &pPriv->events; (pEv = *pPrev) != 0; pPrev = &pEv->next) {
         if (pEv == pOld) {
             break;
@@ -392,20 +392,19 @@ ScreenSaverFreeSuspend(void *value, XID id)
 static void
 SendScreenSaverNotify(ScreenPtr pScreen, int state, Bool forced)
 {
-    ScreenSaverScreenPrivatePtr pPriv;
-    ScreenSaverEventPtr pEv;
-    unsigned long mask;
-    int kind;
-
     UpdateCurrentTimeIf();
-    mask = ScreenSaverNotifyMask;
+
+    unsigned long mask = ScreenSaverNotifyMask;
     if (state == ScreenSaverCycle) {
         mask = ScreenSaverCycleMask;
     }
-    pPriv = GetScreenPrivate(pScreen);
+
+    ScreenSaverScreenPrivatePtr pPriv = GetScreenPrivate(pScreen);
     if (!pPriv) {
         return;
     }
+
+    int kind;
     if (pPriv->attr) {
         kind = ScreenSaverExternal;
     } else if (ScreenSaverBlanking != DontPreferBlanking) {
@@ -413,7 +412,8 @@ SendScreenSaverNotify(ScreenPtr pScreen, int state, Bool forced)
     } else {
         kind = ScreenSaverInternal;
     }
-    for (pEv = pPriv->events; pEv; pEv = pEv->next) {
+
+    for (ScreenSaverEventPtr pEv = pPriv->events; pEv; pEv = pEv->next) {
         if (pEv->mask & mask) {
             xScreenSaverNotifyEvent ev = {
                 .type = ScreenSaverNotify + ScreenSaverEventBase,
@@ -465,15 +465,8 @@ static Bool
 CreateSaverWindow(ScreenPtr pScreen)
 {
     SetupScreen(pScreen);
-    ScreenSaverStuffPtr pSaver;
-    ScreenSaverAttrPtr pAttr;
-    WindowPtr pWin;
-    int result;
-    unsigned long mask;
-    Colormap wantMap;
-    ColormapPtr pCmap;
 
-    pSaver = &pScreen->screensaver;
+    ScreenSaverStuffPtr pSaver = &pScreen->screensaver;
     if (pSaver->pWindow) {
         pSaver->pWindow = NullWindow;
         FreeResource(pSaver->wid, X11_RESTYPE_NONE);
@@ -486,6 +479,7 @@ CreateSaverWindow(ScreenPtr pScreen)
         }
     }
 
+    ScreenSaverAttrPtr pAttr;
     if (!pPriv || !(pAttr = pPriv->attr)) {
         return FALSE;
     }
@@ -496,7 +490,8 @@ CreateSaverWindow(ScreenPtr pScreen)
         return FALSE;
     }
 
-    pWin = dixCreateWindow(pSaver->wid, pScreen->root,
+    int result;
+    WindowPtr pWin = dixCreateWindow(pSaver->wid, pScreen->root,
                         pAttr->x, pAttr->y, pAttr->width, pAttr->height,
                         pAttr->borderWidth, pAttr->class,
                         pAttr->mask, (XID *) pAttr->values,
@@ -509,7 +504,7 @@ CreateSaverWindow(ScreenPtr pScreen)
         return FALSE;
     }
 
-    mask = 0;
+    unsigned long mask = 0;
     if (pAttr->pBackgroundPixmap) {
         pWin->backgroundState = BackgroundPixmap;
         pWin->background.pixmap = pAttr->pBackgroundPixmap;
@@ -549,11 +544,12 @@ CreateSaverWindow(ScreenPtr pScreen)
     pSaver->pWindow = pWin;
 
     /* check and install our own colormap if it isn't installed now */
-    wantMap = wColormap(pWin);
+    Colormap wantMap = wColormap(pWin);
     if (wantMap == None || IsMapInstalled(wantMap, pWin)) {
         return TRUE;
     }
 
+    ColormapPtr pCmap;
     result = dixLookupResourceByType((void **) &pCmap, wantMap, X11_RESTYPE_COLORMAP,
                                      serverClient, DixInstallAccess);
     if (result != Success) {
@@ -571,13 +567,12 @@ static Bool
 DestroySaverWindow(ScreenPtr pScreen)
 {
     SetupScreen(pScreen);
-    ScreenSaverStuffPtr pSaver;
 
     if (!pPriv || !pPriv->hasWindow) {
         return FALSE;
     }
 
-    pSaver = &pScreen->screensaver;
+    ScreenSaverStuffPtr pSaver = &pScreen->screensaver;
     if (pSaver->pWindow) {
         pSaver->pWindow = NullWindow;
         FreeResource(pSaver->wid, X11_RESTYPE_NONE);
@@ -593,7 +588,6 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 {
     int state = 0;
     Bool ret = FALSE;
-    ScreenSaverScreenPrivatePtr pPriv;
 
     switch (xstate) {
     case SCREEN_SAVER_ON:
@@ -606,7 +600,7 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
         break;
     case SCREEN_SAVER_CYCLE:
         state = ScreenSaverCycle;
-        pPriv = GetScreenPrivate(pScreen);
+        ScreenSaverScreenPrivatePtr pPriv = GetScreenPrivate(pScreen);
         if (pPriv && pPriv->hasWindow)
             ret = TRUE;
 
@@ -713,31 +707,20 @@ static int
 ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
 {
     DrawablePtr pDraw;
-    WindowPtr pParent;
-    ScreenPtr pScreen;
-    ScreenSaverScreenPrivatePtr pPriv = 0;
-    ScreenSaverAttrPtr pAttr = 0;
-    int ret, len, class, depth;
-    unsigned long visual;
-    WindowOptPtr ancwopt;
-    unsigned int *pVlist;
-    unsigned long *values = 0;
-    unsigned long tmask;
-
-    ret = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
+    int ret = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                             DixGetAttrAccess);
     if (ret != Success) {
         return ret;
     }
-    pScreen = pDraw->pScreen;
-    pParent = pScreen->root;
+    ScreenPtr pScreen = pDraw->pScreen;
+    WindowPtr pParent = pScreen->root;
 
     ret = dixCallScreensaverAccessCallback(client, pScreen, DixSetAttrAccess);
     if (ret != Success) {
         return ret;
     }
 
-    len = client->req_len - bytes_to_int32(sizeof(xScreenSaverSetAttributesReq));
+    int len = client->req_len - bytes_to_int32(sizeof(xScreenSaverSetAttributesReq));
     if (Ones(stuff->mask) != len) {
         return BadLength;
     }
@@ -745,7 +728,8 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
         client->errorValue = 0;
         return BadValue;
     }
-    switch (class = stuff->c_class) {
+    int class = stuff->c_class;
+    switch (class) {
     case CopyFromParent:
     case InputOnly:
     case InputOutput:
@@ -754,8 +738,9 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
         client->errorValue = class;
         return BadValue;
     }
-    depth = stuff->depth;
-    visual = stuff->visualID;
+
+    int depth = stuff->depth;
+    unsigned long visual = stuff->visualID;
 
     /* copied directly from dixCreateWindow */
 
@@ -779,7 +764,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
     if ((class == InputOutput) && (depth == 0)) {
         depth = pParent->drawable.depth;
     }
-    ancwopt = pParent->optional;
+    WindowOptPtr ancwopt = pParent->optional;
     if (!ancwopt) {
         ancwopt = FindWindowWithOptional(pParent)->optional;
     }
@@ -819,7 +804,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
 
     /* end of errors from dixCreateWindow */
 
-    pPriv = GetScreenPrivate(pScreen);
+    ScreenSaverScreenPrivatePtr pPriv = GetScreenPrivate(pScreen);
     if (pPriv && pPriv->attr) {
         if (pPriv->attr->client != client) {
             return BadAccess;
@@ -831,17 +816,18 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
             return FALSE;
         }
     }
-    pAttr = calloc(1, sizeof(ScreenSaverAttrRec));
+
+    ScreenSaverAttrPtr pAttr = calloc(1, sizeof(ScreenSaverAttrRec));
     if (!pAttr) {
         ret = BadAlloc;
         goto bail;
     }
     /* over allocate for override redirect */
-    pAttr->values = values = calloc(len + 1, sizeof(unsigned long));
-    if (!values) {
+    if (!(pAttr->values = calloc(len + 1, sizeof(unsigned long)))) {
         ret = BadAlloc;
         goto bail;
     }
+
     pAttr->pScreen = pScreen;
     pAttr->client = client;
     pAttr->x = stuff->x;
@@ -861,8 +847,10 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
      * looking up pixmaps and cursors and hold a reference
      * to them.
      */
-    pAttr->mask = tmask = stuff->mask | CWOverrideRedirect;
-    pVlist = (unsigned int *) (stuff + 1);
+    unsigned long tmask = stuff->mask | CWOverrideRedirect;
+    pAttr->mask = tmask;
+    unsigned int *pVlist = (unsigned int *) (stuff + 1);
+    unsigned long *values = pAttr->values;
     while (tmask) {
         unsigned long imask = lowbit(tmask);
         tmask &= ~imask;
