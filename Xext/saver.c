@@ -1099,12 +1099,11 @@ static int
 ScreenSaverUnsetAttributes(ClientPtr client, Drawable drawable)
 {
     DrawablePtr pDraw;
-    ScreenSaverScreenPrivatePtr pPriv;
-
     int rc = dixLookupDrawable(&pDraw, drawable, client, 0, DixGetAttrAccess);
     if (rc != Success)
         return rc;
-    pPriv = GetScreenPrivate(pDraw->pScreen);
+
+    ScreenSaverScreenPrivatePtr pPriv = GetScreenPrivate(pDraw->pScreen);
     if (pPriv && pPriv->attr && pPriv->attr->client == client) {
         FreeResource(pPriv->attr->resource, AttrType);
         FreeScreenAttr(pPriv->attr);
