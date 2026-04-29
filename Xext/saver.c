@@ -146,8 +146,6 @@ typedef struct _ScreenSaverAttr {
 
 static int ScreenSaverFreeAttr(void *value, XID id);
 
-static void FreeAttrs(ScreenSaverAttrPtr pAttr);
-
 static void FreeScreenAttr(ScreenSaverAttrPtr pAttr);
 
 static void
@@ -283,13 +281,9 @@ setEventMask(ScreenPtr pScreen, ClientPtr client, unsigned long mask)
 static void
 FreeAttrs(ScreenSaverAttrPtr pAttr)
 {
-    CursorPtr pCursor;
-
     dixDestroyPixmap(pAttr->pBackgroundPixmap, 0);
     dixDestroyPixmap(pAttr->pBorderPixmap, 0);
-    if ((pCursor = pAttr->pCursor) != 0) {
-        FreeCursor(pCursor, (Cursor) 0);
-    }
+    FreeCursor(pAttr->pCursor, (Cursor) 0);
 }
 
 static void
@@ -531,9 +525,7 @@ CreateSaverWindow(ScreenPtr pScreen)
             return FALSE;
         }
         CursorPtr cursor = RefCursor(pAttr->pCursor);
-        if (pWin->optional->cursor) {
-            FreeCursor(pWin->optional->cursor, (Cursor) 0);
-        }
+        FreeCursor(pWin->optional->cursor, (Cursor) 0);
         pWin->optional->cursor = cursor;
         pWin->cursorIsNone = FALSE;
         CheckWindowOptionalNeed(pWin);

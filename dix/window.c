@@ -953,8 +953,7 @@ DisposeWindowOptional(WindowPtr pWin)
 
         pList = pWin->optional->deviceCursors;
         while (pList) {
-            if (pList->cursor)
-                FreeCursor(pList->cursor, (XID) 0);
+            FreeCursor(pList->cursor, (XID) 0);
             pPrev = pList;
             pList = pList->next;
             free(pPrev);
@@ -1527,8 +1526,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                 /* Can't free cursor until here - old cursor
                  * is needed in WindowHasNewCursor
                  */
-                if (pOldCursor)
-                    FreeCursor(pOldCursor, (Cursor) 0);
+                FreeCursor(pOldCursor, (Cursor) 0);
             }
             break;
         default:
@@ -3494,8 +3492,7 @@ ChangeWindowDeviceCursor(WindowPtr pWin, DeviceIntPtr pDev, CursorPtr pCursor)
     if (pWin->realized)
         WindowHasNewCursor(pWin);
 
-    if (pOldCursor)
-        FreeCursor(pOldCursor, (Cursor) 0);
+    FreeCursor(pOldCursor, (Cursor) 0);
 
     /* FIXME: We SHOULD check for an error value here XXX
        (comment taken from ChangeWindowAttributes) */

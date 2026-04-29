@@ -106,6 +106,9 @@ FreeCursorBits(CursorBitsPtr bits)
 int
 FreeCursor(void *value, XID cid)
 {
+    if (!value)
+        return Success;
+
     CursorPtr pCurs = (CursorPtr) value;
     DeviceIntPtr pDev = NULL;   /* unused anyway */
 
