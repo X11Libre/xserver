@@ -877,13 +877,12 @@ PanoramiXResetProc(ExtensionEntry * extEntry)
 int
 ProcPanoramiXQueryVersion(ClientPtr client)
 {
-    /* REQUEST(xPanoramiXQueryVersionReq); */
+    X_REQUEST_HEAD_STRUCT(xPanoramiXQueryVersionReq);
+
     xPanoramiXQueryVersionReply reply = {
         .majorVersion = SERVER_PANORAMIX_MAJOR_VERSION,
         .minorVersion = SERVER_PANORAMIX_MINOR_VERSION
     };
-
-    REQUEST_SIZE_MATCH(xPanoramiXQueryVersionReq);
 
     X_REPLY_FIELD_CARD16(majorVersion);
     X_REPLY_FIELD_CARD16(minorVersion);
@@ -894,14 +893,10 @@ ProcPanoramiXQueryVersion(ClientPtr client)
 int
 ProcPanoramiXGetState(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetStateReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetStateReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -919,14 +914,10 @@ ProcPanoramiXGetState(ClientPtr client)
 int
 ProcPanoramiXGetScreenCount(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetScreenCountReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetScreenCountReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -944,19 +935,14 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
 int
 ProcPanoramiXGetScreenSize(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetScreenSizeReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->screen);
-    }
-
-    WindowPtr pWin;
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetScreenSizeReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(screen);
 
     if (stuff->screen >= PanoramiXNumScreens)
         return BadMatch;
 
+    WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -982,8 +968,7 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
 int
 ProcXineramaIsActive(ClientPtr client)
 {
-    /* REQUEST(xXineramaIsActiveReq); */
-    REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
+    X_REQUEST_HEAD_STRUCT(xXineramaIsActiveReq);
 
     xXineramaIsActiveReply reply = {
 #if 1
@@ -1003,13 +988,12 @@ ProcXineramaIsActive(ClientPtr client)
 int
 ProcXineramaQueryScreens(ClientPtr client)
 {
-    /* REQUEST(xXineramaQueryScreensReq); */
+    X_REQUEST_HEAD_STRUCT(xXineramaQueryScreensReq);
+
     CARD32 number = (noPanoramiXExtension) ? 0 : PanoramiXNumScreens;
     xXineramaQueryScreensReply reply = {
         .number = number
     };
-
-    REQUEST_SIZE_MATCH(xXineramaQueryScreensReq);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
