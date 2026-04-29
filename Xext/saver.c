@@ -120,10 +120,6 @@ typedef struct _ScreenSaverEvent {
 
 static int ScreenSaverFreeEvents(void * value, XID id);
 
-static Bool setEventMask(ScreenPtr      pScreen,
-                         ClientPtr      client,
-                         unsigned long  mask);
-
 /*
  * when a client sets the screen saver attributes, a resource is
  * kept to be freed when the client exits
@@ -240,7 +236,6 @@ static Bool
 setEventMask(ScreenPtr pScreen, ClientPtr client, unsigned long mask)
 {
     SetupScreen(pScreen);
-    ScreenSaverEventPtr pEv, *pPrev;
 
     if (getEventMask(pScreen, client) == mask) {
         return TRUE;
@@ -251,8 +246,9 @@ setEventMask(ScreenPtr pScreen, ClientPtr client, unsigned long mask)
         if (!pPriv) {
             return FALSE;
         }
-    }
+     }
 
+    ScreenSaverEventPtr pEv, *pPrev;
     for (pPrev = &pPriv->events; (pEv = *pPrev) != 0; pPrev = &pEv->next) {
         if (pEv->client == client) {
             break;
