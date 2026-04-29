@@ -897,9 +897,7 @@ ProcPanoramiXGetState(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     xPanoramiXGetStateReply reply = {
         .state = !noPanoramiXExtension,
@@ -918,9 +916,7 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     xPanoramiXGetScreenCountReply reply = {
         .ScreenCount = PanoramiXNumScreens,
@@ -943,9 +939,7 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
         return BadMatch;
 
     WindowPtr pWin;
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
 

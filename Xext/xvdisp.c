@@ -79,16 +79,14 @@ ProcXvQueryAdaptors(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xvQueryAdaptorsReq);
     X_REQUEST_FIELD_CARD32(window);
 
-    int na, nf, rc;
+    int na, nf;
     XvAdaptorPtr pa;
     XvFormatPtr pf;
     WindowPtr pWin;
     ScreenPtr pScreen;
     XvScreenPtr pxvs;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     pScreen = pWin->drawable.pScreen;
     pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
@@ -367,15 +365,12 @@ static int
 ProcXvSelectVideoNotify(ClientPtr client)
 {
     DrawablePtr pDraw;
-    int rc;
 
     X_REQUEST_HEAD_STRUCT(xvSelectVideoNotifyReq);
     X_REQUEST_FIELD_CARD32(drawable);
 
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
-                           DixReceiveAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
+                           DixReceiveAccess));
 
     return XvdiSelectVideoNotify(client, pDraw, stuff->onoff);
 }

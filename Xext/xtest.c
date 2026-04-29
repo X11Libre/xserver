@@ -116,10 +116,7 @@ ProcXTestCompareCursor(ClientPtr client)
     CursorPtr pCursor;
     DeviceIntPtr ptr = PickPointer(client);
 
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     if (!ptr) {
         return BadAccess;
@@ -129,13 +126,12 @@ ProcXTestCompareCursor(ClientPtr client)
         pCursor = NullCursor;
     } else if (stuff->cursor == XTestCurrentCursor) {
         pCursor = InputDevGetSpriteCursor(ptr);
-    } else {
-        rc = dixLookupResourceByType((void **) &pCursor, stuff->cursor,
-                                     X11_RESTYPE_CURSOR, client, DixReadAccess);
-        if (rc != Success) {
-            client->errorValue = stuff->cursor;
-            return rc;
-        }
+    }
+    else {
+        X_CALL_CHECK_ERR_VAL(
+            dixLookupResourceByType((void **) &pCursor, stuff->cursor,
+                                     X11_RESTYPE_CURSOR, client, DixReadAccess),
+            stuff->cursor);
     }
 
     xXTestCompareCursorReply reply = {
@@ -211,12 +207,9 @@ ProcXTestFakeInput(ClientPtr client)
         extension = TRUE;
 
         /* check device */
-        int rc = dixLookupDevice(&dev, stuff->deviceid & 0177, client,
-                             DixWriteAccess);
-        if (rc != Success) {
-            client->errorValue = stuff->deviceid & 0177;
-            return rc;
-        }
+        X_CALL_CHECK_ERR_VAL(
+            dixLookupDevice(&dev, stuff->deviceid & 0177, client, DixWriteAccess),
+            stuff->deviceid & 0177);
 
         /* check type */
         type -= DeviceValuator;
@@ -410,11 +403,8 @@ ProcXTestFakeInput(ClientPtr client)
         }
 
         if (!(extension || ev->u.keyButtonPointer.root == None)) {
-            int rc = dixLookupWindow(&root, ev->u.keyButtonPointer.root,
-                                 client, DixGetAttrAccess);
-            if (rc != Success) {
-                return rc;
-            }
+            X_CALL_CHECK_ERR(dixLookupWindow(&root, ev->u.keyButtonPointer.root,
+                                 client, DixGetAttrAccess));
             if (root->parent) {
                 client->errorValue = ev->u.keyButtonPointer.root;
                 return BadValue;

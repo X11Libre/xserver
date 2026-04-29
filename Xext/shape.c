@@ -243,15 +243,14 @@ ShapeRectangles(ClientPtr client, xShapeRectanglesReq *stuff)
 {
     WindowPtr pWin;
     xRectangle *prects;
-    int nrects, ctype, rc;
+    int nrects, ctype;
     RegionPtr srcRgn;
     RegionPtr *destRgn;
     CreateDftPtr createDefault;
 
     UpdateCurrentTime();
-    rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess));
+
     switch (stuff->destKind) {
     case ShapeBounding:
         createDefault = CreateBoundingShape;
@@ -348,9 +347,9 @@ ShapeMask(ClientPtr client, xShapeMaskReq *stuff)
     CreateDftPtr createDefault;
 
     UpdateCurrentTime();
-    int rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess));
+
     switch (stuff->destKind) {
     case ShapeBounding:
         createDefault = CreateBoundingShape;
@@ -369,10 +368,8 @@ ShapeMask(ClientPtr client, xShapeMaskReq *stuff)
     if (stuff->src == None)
         srcRgn = 0;
     else {
-        rc = dixLookupResourceByType((void **) &pPixmap, stuff->src,
-                                     X11_RESTYPE_PIXMAP, client, DixReadAccess);
-        if (rc != Success)
-            return rc;
+        X_CALL_CHECK_ERR(dixLookupResourceByType((void **) &pPixmap, stuff->src,
+                                     X11_RESTYPE_PIXMAP, client, DixReadAccess));
         if (pPixmap->drawable.pScreen != pScreen ||
             pPixmap->drawable.depth != 1)
             return BadMatch;
@@ -459,9 +456,9 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
     RegionPtr tmp;
 
     UpdateCurrentTime();
-    int rc = dixLookupWindow(&pDestWin, stuff->dest, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+
+    X_CALL_CHECK_ERR(dixLookupWindow(&pDestWin, stuff->dest, client, DixSetAttrAccess));
+
     if (!MakeWindowOptional(pDestWin))
         return BadAlloc;
 
@@ -480,9 +477,8 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
         return BadValue;
     }
 
-    rc = dixLookupWindow(&pSrcWin, stuff->src, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pSrcWin, stuff->src, client, DixGetAttrAccess));
+
     switch (stuff->srcKind) {
     case ShapeBounding:
         srcRgn = wBoundingShape(pSrcWin);
@@ -581,9 +577,9 @@ ShapeOffset(ClientPtr client, xShapeOffsetReq *stuff)
     RegionPtr srcRgn;
 
     UpdateCurrentTime();
-    int rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
-    if (rc != Success)
-        return rc;
+
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess));
+
     switch (stuff->destKind) {
     case ShapeBounding:
         srcRgn = wBoundingShape(pWin);
@@ -646,9 +642,7 @@ ProcShapeQueryExtents(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     RegionPtr boundRegion;
     BoxRec boundBox;
@@ -716,9 +710,9 @@ ProcShapeSelectInput(ClientPtr client)
 
     if (client->swapped)
         swapl(&stuff->window);
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
-    if (rc != Success)
-        return rc;
+
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess));
+
     ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
     switch (stuff->enable) {
     case xTrue:
@@ -836,9 +830,7 @@ ProcShapeInputSelected(ClientPtr client)
     WindowPtr pWin;
     int enabled;
 
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
     enabled = xFalse;
@@ -868,9 +860,8 @@ ProcShapeGetRectangles(ClientPtr client)
     int nrects;
     RegionPtr region;
 
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
+
     switch (stuff->kind) {
     case ShapeBounding:
         region = wBoundingShape(pWin);

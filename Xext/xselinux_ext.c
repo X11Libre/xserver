@@ -213,10 +213,7 @@ ProcSELinuxGetDeviceContext(ClientPtr client)
     DeviceIntPtr dev;
     SELinuxSubjectRec *subj;
 
-    int rc = dixLookupDevice(&dev, stuff->id, client, DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupDevice(&dev, stuff->id, client, DixGetAttrAccess));
 
     subj = dixLookupPrivate(&dev->devPrivates, subjectKey);
     return SELinuxSendContextReply(client, subj->sid);
@@ -232,10 +229,7 @@ ProcSELinuxGetDrawableContext(ClientPtr client)
     PrivateRec **privatePtr;
     SELinuxObjectRec *obj;
 
-    int rc = dixLookupDrawable(&pDraw, stuff->id, client, 0, DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->id, client, 0, DixGetAttrAccess));
 
     if (pDraw->type == DRAWABLE_PIXMAP) {
         privatePtr = &((PixmapPtr) pDraw)->devPrivates;
@@ -258,16 +252,10 @@ ProcSELinuxGetPropertyContext(ClientPtr client, void *privKey)
     PropertyPtr pProp;
     SELinuxObjectRec *obj;
 
-    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetPropAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetPropAccess));
 
-    rc = dixLookupProperty(&pProp, pWin, stuff->property, client,
-                           DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupProperty(&pProp, pWin, stuff->property, client,
+                           DixGetAttrAccess));
 
     obj = dixLookupPrivate(&pProp->devPrivates, privKey);
     return SELinuxSendContextReply(client, obj->sid);
@@ -282,10 +270,7 @@ ProcSELinuxGetSelectionContext(ClientPtr client, void *privKey)
     Selection *pSel;
     SELinuxObjectRec *obj;
 
-    int rc = dixLookupSelection(&pSel, stuff->id, client, DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupSelection(&pSel, stuff->id, client, DixGetAttrAccess));
 
     obj = dixLookupPrivate(&pSel->devPrivates, privKey);
     return SELinuxSendContextReply(client, obj->sid);
@@ -300,10 +285,7 @@ ProcSELinuxGetClientContext(ClientPtr client)
     ClientPtr target;
     SELinuxSubjectRec *subj;
 
-    int rc = dixLookupResourceOwner(&target, stuff->id, client, DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupResourceOwner(&target, stuff->id, client, DixGetAttrAccess));
 
     subj = dixLookupPrivate(&target->devPrivates, subjectKey);
     return SELinuxSendContextReply(client, subj->sid);
@@ -388,10 +370,7 @@ ProcSELinuxListProperties(ClientPtr client)
     int count, size, i;
     CARD32 id;
 
-    int rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess));
 
     /* Count the number of properties and allocate items */
     count = 0;
@@ -408,7 +387,7 @@ ProcSELinuxListProperties(ClientPtr client)
     size = 0;
     for (pProp = pWin->properties; pProp; pProp = pProp->next) {
         id = pProp->propertyName;
-        rc = SELinuxPopulateItem(items + i, &pProp->devPrivates, id, &size);
+        int rc = SELinuxPopulateItem(items + i, &pProp->devPrivates, id, &size);
         if (rc != Success) {
             SELinuxFreeItems(items, count);
             return rc;
