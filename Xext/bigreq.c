@@ -34,13 +34,8 @@ from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "include/extnsionst.h"
 #include "miext/extinit_priv.h"
-
-#include "misc.h"
-#include "os.h"
-#include "dixstruct.h"
-#include "extnsionst.h"
-#include "opaque.h"
 
 static int
 ProcBigReqDispatch(ClientPtr client)
