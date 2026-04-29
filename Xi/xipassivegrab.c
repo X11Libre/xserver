@@ -319,7 +319,9 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
 
     if ((stuff->grab_type == XIGrabtypeEnter ||
          stuff->grab_type == XIGrabtypeFocusIn ||
-         stuff->grab_type == XIGrabtypeTouchBegin) && stuff->detail != 0) {
+         stuff->grab_type == XIGrabtypeTouchBegin ||
+         stuff->grab_type == XIGrabtypeGesturePinchBegin ||
+         stuff->grab_type == XIGrabtypeGestureSwipeBegin) && stuff->detail != 0) {
         client->errorValue = stuff->detail;
         return BadValue;
     }
