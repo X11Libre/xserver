@@ -703,14 +703,13 @@ ProcShmPutImage(ClientPtr client)
         return BadRequest;
 
 #ifdef XINERAMA
-    int result, orig_x, orig_y;
     PanoramiXRes *draw, *gc;
-    Bool sendEvent, isRoot;
+    Bool sendEvent;
 
     if (noPanoramiXExtension)
         return ShmPutImage(client, stuff);
 
-    result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
+    int result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
     if (result != Success)
         return (result == BadValue) ? BadDrawable : result;
@@ -720,10 +719,10 @@ ProcShmPutImage(ClientPtr client)
     if (result != Success)
         return result;
 
-    isRoot = (draw->type == XRT_WINDOW) && draw->u.win.root;
+    bool isRoot = (draw->type == XRT_WINDOW) && draw->u.win.root;
 
-    orig_x = stuff->dstX;
-    orig_y = stuff->dstY;
+    int orig_x = stuff->dstX;
+    int orig_y = stuff->dstY;
     sendEvent = stuff->sendEvent;
     stuff->sendEvent = 0;
 
