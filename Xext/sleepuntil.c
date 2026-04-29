@@ -29,9 +29,12 @@ in this Software without prior written authorization from The Open Group.
 
 #include <dix-config.h>
 
-#include "sleepuntil.h"
 #include <X11/X.h>
 #include <X11/Xmd.h>
+
+#include "include/list.h"
+
+#include "sleepuntil.h"
 #include "misc.h"
 #include "windowstr.h"
 #include "dixstruct.h"
@@ -39,7 +42,7 @@ in this Software without prior written authorization from The Open Group.
 #include "scrnintstr.h"
 
 typedef struct _Sertafied {
-    struct _Sertafied *next;
+    struct xorg_list list;
     TimeStamp revive;
     ClientPtr pClient;
     XID id;
@@ -50,7 +53,7 @@ typedef struct _Sertafied {
     void *closure;
 } SertafiedRec, *SertafiedPtr;
 
-static SertafiedPtr pending;
+static struct xorg_list pending;
 static RESTYPE SertafiedResType;
 static Bool BlockHandlerRegistered;
 
@@ -99,19 +102,21 @@ ClientSleepUntil(ClientPtr client,
     if (!notifyFunc)
         notifyFunc = ClientAwaken;
     pRequest->notifyFunc = notifyFunc;
-    /* Insert into time-ordered queue, with earliest activation time coming first. */
 
-    SertafiedPtr walk, pPrev = NULL;
-    for (walk = pending; walk; walk = walk->next) {
-        if (CompareTimeStamps(walk->revive, *revive) == LATER)
-            break;
-        pPrev = walk;
+    /* Insert into time-ordered queue, with earliest activation time coming first. */
+    /* scan the list for first entry that's later and add prior it,
+       note: on the first entry, it's `prev` points to the list head */
+    SertafiedPtr walk;
+    xorg_list_for_each_entry(walk, &pending, list) {
+        if (CompareTimeStamps(walk->revive, *revive) == LATER) {
+            xorg_list_add(&pRequest->list, walk->list.prev);
+            goto done;
+        }
     }
-    if (pPrev)
-        pPrev->next = pRequest;
-    else
-        pending = pRequest;
-    pRequest->next = walk;
+    /* either empty or all are before, so just append to the end */
+    xorg_list_append(&pRequest->list, &pending);
+
+done:
     IgnoreClient(client);
     return TRUE;
 }
@@ -127,15 +132,13 @@ SertafiedDelete(void *value, XID id)
 {
     SertafiedPtr pRequest = (SertafiedPtr) value;
 
-    SertafiedPtr walk, pPrev = NULL;
-    for (walk = pending; walk; pPrev = walk, walk = walk->next)
+    SertafiedPtr walk, tmp;
+    xorg_list_for_each_entry_safe(walk, tmp, &pending, list) {
         if (walk == pRequest) {
-            if (pPrev)
-                pPrev->next = walk->next;
-            else
-                pending = walk->next;
-            break;
+            xorg_list_del(&walk->list);
         }
+    }
+
     if (pRequest->notifyFunc)
         (*pRequest->notifyFunc) (pRequest->pClient, pRequest->closure);
     free(pRequest);
@@ -148,16 +151,17 @@ SertafiedBlockHandler(void *data, void *wt)
     unsigned long delay;
     TimeStamp now;
 
-    if (!pending)
+    if (xorg_list_is_empty(&pending)) {
         return;
+    }
+
     now.milliseconds = GetTimeInMillis();
     now.months = currentTime.months;
     if ((int) (now.milliseconds - currentTime.milliseconds) < 0)
         now.months++;
 
-    SertafiedPtr walk, pNext;
-    for (walk = pending; walk; walk = pNext) {
-        pNext = walk->next;
+    SertafiedPtr walk;
+    xorg_list_for_each_entry(walk, &pending, list) {
         if (CompareTimeStamps(walk->revive, now) == LATER)
             break;
         FreeResource(walk->id, X11_RESTYPE_NONE);
@@ -169,8 +173,9 @@ SertafiedBlockHandler(void *data, void *wt)
         AdjustWaitForDelay(wt, 0);
     }
 
-    if (pending) {
-        delay = pending->revive.milliseconds - now.milliseconds;
+    if (!xorg_list_is_empty(&pending)) {
+        walk = xorg_list_first_entry(&pending, SertafiedRec, list);
+        delay = walk->revive.milliseconds - now.milliseconds;
         AdjustWaitForDelay(wt, delay);
     }
 }
@@ -185,14 +190,14 @@ SertafiedWakeupHandler(void *data, int i)
     if ((int) (now.milliseconds - currentTime.milliseconds) < 0)
         now.months++;
 
-    SertafiedPtr walk, pNext;
-    for (walk = pending; walk; walk = pNext) {
-        pNext = walk->next;
+    SertafiedPtr walk;
+    xorg_list_for_each_entry(walk, &pending, list) {
         if (CompareTimeStamps(walk->revive, now) == LATER)
             break;
         FreeResource(walk->id, X11_RESTYPE_NONE);
     }
-    if (!pending) {
+
+    if (xorg_list_is_empty(&pending)) {
         RemoveBlockAndWakeupHandlers(SertafiedBlockHandler,
                                      SertafiedWakeupHandler, (void *) 0);
         BlockHandlerRegistered = FALSE;
