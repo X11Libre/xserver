@@ -3357,8 +3357,7 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
         pSprite->pDequeueScreen = pSprite->pEnqueueScreen;
     }
     pCursor = RefCursor(pCursor);
-    if (pSprite->current)
-        FreeCursor(pSprite->current, None);
+    FreeCursor(pSprite->current, None);
     pSprite->current = pCursor;
 
     if (pScreen) {
@@ -3393,8 +3392,7 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
 void FreeSprite(DeviceIntPtr dev)
 {
     if (DevHasCursor(dev) && dev->spriteInfo->sprite) {
-        if (dev->spriteInfo->sprite->current)
-            FreeCursor(dev->spriteInfo->sprite->current, None);
+        FreeCursor(dev->spriteInfo->sprite->current, None);
         free(dev->spriteInfo->sprite->spriteTrace);
         free(dev->spriteInfo->sprite);
     }
@@ -3440,8 +3438,7 @@ UpdateSpriteForScreen(DeviceIntPtr pDev, ScreenPtr pScreen)
     pSprite->hotLimits.y2 = pScreen->height;
     pSprite->win = win;
     pCursor = RefCursor(wCursor(win));
-    if (pSprite->current)
-        FreeCursor(pSprite->current, 0);
+    FreeCursor(pSprite->current, 0);
     pSprite->current = pCursor;
     pSprite->spriteTraceGood = 1;
     pSprite->spriteTrace[0] = win;
@@ -5109,8 +5106,7 @@ ProcChangeActivePointerGrab(ClientPtr client)
     oldCursor = grab->cursor;
     grab->cursor = RefCursor(newCursor);
     PostNewCursor(device);
-    if (oldCursor)
-        FreeCursor(oldCursor, (Cursor) 0);
+    FreeCursor(oldCursor, (Cursor) 0);
     grab->eventMask = stuff->eventMask;
     return Success;
 }
