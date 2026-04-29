@@ -152,8 +152,9 @@ shmalloc(unsigned int size)
     char *addr;
 
 #ifdef MUST_CHECK_FOR_SHM_SYSCALL
-    if (pagesize == 0)
+    if (pagesize == 0) {
         return (ShmDescPtr) NULL;
+    }
 #endif
 
     /* On some older Linux systems, the number of shared memory segments
@@ -162,12 +163,14 @@ shmalloc(unsigned int size)
        shared memory segment on one hand, and allocating memory and piping
        the glyph metrics on the other hand. If the glyph metrics size is
        small, we prefer the traditional way. */
-    if (size < 3500)
+    if (size < 3500) {
         return (ShmDescPtr) NULL;
+    }
 
     ShmDescPtr pDesc = calloc(1, sizeof(ShmDescRec));
-    if (!pDesc)
+    if (!pDesc) {
         return (ShmDescPtr) NULL;
+    }
 
     size = (size + pagesize - 1) & -pagesize;
     shmid = shmget(IPC_PRIVATE, size, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
@@ -192,8 +195,9 @@ shmalloc(unsigned int size)
 
     pDesc->shmid = shmid;
     pDesc->attach_addr = addr;
-    if (ShmList)
+    if (ShmList) {
         ShmList->prev = &pDesc->next;
+    }
     pDesc->next = ShmList;
     pDesc->prev = &ShmList;
     ShmList = pDesc;
@@ -209,8 +213,9 @@ shmdealloc(ShmDescPtr pDesc)
 #endif
     shmdt(pDesc->attach_addr);
 
-    if (pDesc->next)
+    if (pDesc->next) {
         pDesc->next->prev = pDesc->prev;
+    }
     *pDesc->prev = pDesc->next;
     free(pDesc);
 }
@@ -228,16 +233,18 @@ XF86BigfontFreeFontShm(FontPtr pFont)
         return;
 
     pDesc = (ShmDescPtr) FontGetPrivate(pFont, FontShmdescIndex);
-    if (pDesc)
+    if (pDesc) {
         shmdealloc(pDesc);
+    }
 }
 
 /* Called upon fatal signal. */
 void
 XF86BigfontCleanup(void)
 {
-    while (ShmList)
+    while (ShmList) {
         shmdealloc(ShmList);
+    }
 }
 
 #else /* CONFIG_MITSHM */
@@ -374,26 +381,28 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
     if (nCharInfos > 0) {
 #ifdef CONFIG_MITSHM
-        if (!badSysCall)
+        if (!badSysCall) {
             pDesc = (ShmDescPtr) FontGetPrivate(pFont, FontShmdescIndex);
+        }
         if (pDesc) {
             pCI = (xCharInfo *) pDesc->attach_addr;
-            if (stuff_flags & XF86Bigfont_FLAGS_Shm)
+            if (stuff_flags & XF86Bigfont_FLAGS_Shm) {
                 shmid = pDesc->shmid;
-        }
-        else {
-            if (stuff_flags & XF86Bigfont_FLAGS_Shm && !badSysCall)
+            }
+        } else {
+            if (stuff_flags & XF86Bigfont_FLAGS_Shm && !badSysCall) {
                 pDesc = shmalloc(nCharInfos * sizeof(xCharInfo)
                                  + sizeof(CARD32));
+            }
             if (pDesc) {
                 pCI = (xCharInfo *) pDesc->attach_addr;
                 shmid = pDesc->shmid;
-            }
-            else {
+            } else {
 #endif /* CONFIG_MITSHM */
                 pCI = calloc(nCharInfos, sizeof(xCharInfo));
-                if (!pCI)
+                if (!pCI) {
                     return BadAlloc;
+                }
 #ifdef CONFIG_MITSHM
             }
 #endif /* CONFIG_MITSHM */
@@ -455,8 +464,9 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
             tmp = calloc(4 * nCharInfos + 1, sizeof(CARD16));
             if (!tmp) {
-                if (!pDesc)
+                if (!pDesc) {
                     free(pCI);
+                }
                 return BadAlloc;
             }
             pIndex2UniqIndex = tmp;
@@ -473,8 +483,9 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                entry before the last element has been inserted. And once the
                last element has been inserted, we don't need the hash table
                any more. */
-            for (j = 0; j < hashModulus; j++)
+            for (j = 0; j < hashModulus; j++) {
                 pHash2UniqIndex[j] = (CARD16) (-1);
+            }
 
             NextUniqIndex = 0;
             for (NextIndex = 0; NextIndex < nCharInfos; NextIndex++) {
@@ -502,18 +513,20 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                         && hashModulus < nCharInfos + 1) {
                         /* Time to increate hash table size */
                         hashModulus = 2 * hashModulus + 1;
-                        if (hashModulus > nCharInfos + 1)
+                        if (hashModulus > nCharInfos + 1) {
                             hashModulus = nCharInfos + 1;
-                        for (j = 0; j < hashModulus; j++)
+                        }
+                        for (j = 0; j < hashModulus; j++) {
                             pHash2UniqIndex[j] = (CARD16) (-1);
-                        for (i = 0; i < NextUniqIndex; i++)
+                        }
+                        for (i = 0; i < NextUniqIndex; i++) {
                             pUniqIndex2NextUniqIndex[i] = (CARD16) (-1);
+                        }
                         for (i = 0; i < NextUniqIndex; i++) {
                             j = pUniqIndex2Index[i];
                             p = &pCI[j];
                             hashCode = hashCI(p) % hashModulus;
-                            pUniqIndex2NextUniqIndex[i] =
-                                pHash2UniqIndex[hashCode];
+                            pUniqIndex2NextUniqIndex[i] = pHash2UniqIndex[hashCode];
                             pHash2UniqIndex[hashCode] = i;
                         }
                         p = &pCI[NextIndex];
@@ -575,18 +588,21 @@ ProcXF86BigfontQueryFont(ClientPtr client)
         }
 
         if (nCharInfos > 0 && shmid == -1) {
-            for (int i = 0; i < nUniqCharInfos; i++)
+            for (int i = 0; i < nUniqCharInfos; i++) {
                 writeCharInfo(&rpcbuf, pCI[pUniqIndex2Index[i]]);
+            }
             x_rpcbuf_write_CARD16s(&rpcbuf, pIndex2UniqIndex, nCharInfos);
         }
 
         int rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
         if (nCharInfos > 0) {
-            if (shmid == -1)
+            if (shmid == -1) {
                 free(pIndex2UniqIndex);
-            if (!pDesc)
+            }
+            if (!pDesc) {
                 free(pCI);
+            }
         }
         return rc;
     }
