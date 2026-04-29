@@ -80,8 +80,9 @@ SELinuxArrayFree(SELinuxArrayRec * rec, int free_elements)
     if (free_elements) {
         unsigned i = rec->size;
 
-        while (i)
+        while (i) {
             free(rec->array[--i]);
+        }
     }
 
     free(rec->array);
@@ -137,8 +138,9 @@ SELinuxAtomToSID(Atom atom, int prop, SELinuxObjectRec ** obj_rtn)
     rec = SELinuxArrayGet(&arr_atoms, atom);
     if (!rec) {
         rec = calloc(1, sizeof(SELinuxAtomRec));
-        if (!rec)
+        if (!rec) {
             return BadAlloc;
+        }
         if (!SELinuxArraySet(&arr_atoms, atom, rec)) {
             free(rec);
             return BadAlloc;
@@ -158,8 +160,9 @@ SELinuxAtomToSID(Atom atom, int prop, SELinuxObjectRec ** obj_rtn)
 
     if (!obj->sid) {
         rc = SELinuxAtomToSIDLookup(atom, obj, map, polymap);
-        if (rc != Success)
+        if (rc != Success) {
             goto out;
+        }
     }
 
     *obj_rtn = obj;
@@ -181,8 +184,9 @@ SELinuxSelectionToSID(Atom selection, SELinuxSubjectRec * subj,
 
     /* Get the default context and polyinstantiation bit */
     rc = SELinuxAtomToSID(selection, 0, &obj);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     /* Check for an override context next */
     if (subj->sel_use_sid) {
@@ -200,8 +204,9 @@ SELinuxSelectionToSID(Atom selection, SELinuxSubjectRec * subj,
     }
  out:
     *sid_rtn = tsid;
-    if (poly_rtn)
+    if (poly_rtn) {
         *poly_rtn = obj->poly;
+    }
     return Success;
 }
 
@@ -218,8 +223,9 @@ SELinuxPropertyToSID(Atom property, SELinuxSubjectRec * subj,
 
     /* Get the default context and polyinstantiation bit */
     rc = SELinuxAtomToSID(property, 1, &obj);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
     /* Check for an override context next */
     if (subj->prp_use_sid) {
@@ -244,8 +250,9 @@ SELinuxPropertyToSID(Atom property, SELinuxSubjectRec * subj,
     }
  out:
     *sid_rtn = tsid;
-    if (poly_rtn)
+    if (poly_rtn) {
         *poly_rtn = obj->poly;
+    }
     return Success;
 }
 
@@ -277,8 +284,9 @@ SELinuxEventToSID(unsigned type, security_id_t sid_of_window,
         }
         freecon(ctx);
         /* Cache the SID value */
-        if (!SELinuxArraySet(&arr_events, type, sid))
+        if (!SELinuxArraySet(&arr_events, type, sid)) {
             return BadAlloc;
+        }
     }
 
     /* Perform a transition to obtain the final SID */
@@ -323,24 +331,25 @@ SELinuxTypeToClass(RESTYPE type)
     if (!tmp) {
         unsigned long class = SECCLASS_X_RESOURCE;
 
-        if (type & RC_DRAWABLE)
+        if (type & RC_DRAWABLE) {
             class = SECCLASS_X_DRAWABLE;
-        else if (type == X11_RESTYPE_GC)
+        } else if (type == X11_RESTYPE_GC) {
             class = SECCLASS_X_GC;
-        else if (type == X11_RESTYPE_FONT)
+        } else if (type == X11_RESTYPE_FONT) {
             class = SECCLASS_X_FONT;
-        else if (type == X11_RESTYPE_CURSOR)
+        } else if (type == X11_RESTYPE_CURSOR) {
             class = SECCLASS_X_CURSOR;
-        else if (type == X11_RESTYPE_COLORMAP)
+        } else if (type == X11_RESTYPE_COLORMAP) {
             class = SECCLASS_X_COLORMAP;
-        else {
+        } else {
             /* Need to do a string lookup */
             const char *str = LookupResourceName(type);
 
-            if (!strcmp(str, "PICTURE"))
+            if (!strcmp(str, "PICTURE")) {
                 class = SECCLASS_X_DRAWABLE;
-            else if (!strcmp(str, "GLYPHSET"))
+            } else if (!strcmp(str, "GLYPHSET")) {
                 class = SECCLASS_X_FONT;
+            }
         }
 
         tmp = (void *) class;
@@ -355,8 +364,9 @@ SELinuxDefaultClientLabel(void)
 {
     char *ctx;
 
-    if (selabel_lookup_raw(label_hnd, &ctx, "remote", SELABEL_X_CLIENT) < 0)
+    if (selabel_lookup_raw(label_hnd, &ctx, "remote", SELABEL_X_CLIENT) < 0) {
         FatalError("SELinux: failed to look up remote-client context\n");
+    }
 
     return ctx;
 }
@@ -367,8 +377,9 @@ SELinuxLabelInit(void)
     struct selinux_opt selabel_option = { SELABEL_OPT_VALIDATE, (char *) 1 };
 
     label_hnd = selabel_open(SELABEL_CTX_X, &selabel_option, 1);
-    if (!label_hnd)
+    if (!label_hnd) {
         FatalError("SELinux: Failed to open x_contexts mapping in policy\n");
+    }
 }
 
 void
