@@ -84,7 +84,7 @@ Equipment Corporation.
 #include "xf86bigfontsrv.h"
 #endif
 
-#define XLFDMAXFONTNAMELEN      256
+#define XLFDMAXFONTNAMELEN      1024
 struct list_font_state {
     char pattern[XLFDMAXFONTNAMELEN];
     int patlen;
@@ -738,6 +738,10 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
                  * is BadFontName, indicating the alias resolution
                  * is complete.
                  */
+                if (resolvedlen > XLFDMAXFONTNAMELEN) {
+                    err = BadFontName;
+                    goto ContBadFontName;
+                }
                 memcpy(tmp_pattern, resolved, resolvedlen);
                 if (c->haveSaved) {
                     char *tmpname;
@@ -984,6 +988,10 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
                 c->savedName = XNFalloc(namelen + 1);
                 memcpy(c->savedName, name, namelen + 1);
                 aliascount = 20;
+            }
+            if (namelen > XLFDMAXFONTNAMELEN) {
+                err = BadFontName;
+                goto ContBadFontName;
             }
             memmove(c->current.pattern, name, namelen);
             c->current.patlen = namelen;
