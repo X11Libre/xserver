@@ -120,3 +120,50 @@ class TestCreateSaverWindow:
         assert xserver.is_alive, (
             "Server crashed - CreateSaverWindow UAF (ZDI-CAN-30168)"
         )
+
+
+class TestScreenSaverFreeAttr:
+    """Tests for ScreenSaverFreeAttr stale pPriv after CheckScreenPrivate."""
+
+    @pytest.mark.valgrind
+    def test_free_attr_with_active_saver(self, xserver, screensaver_xclient):
+        """
+        ScreenSaverFreeAttr calls CheckScreenPrivate() which may free
+        pPriv. While the function currently returns immediately after
+        and does not dereference pPriv, this exercises the code path
+        to verify the pattern is safe.
+
+        This test triggers ScreenSaverFreeAttr by closing the client
+        that called SetAttributes (resource cleanup frees the attr).
+
+        1. Client A: SetAttributes (creates pPriv with attr)
+        2. Client A: ForceScreenSaver(Active) (creates saver window,
+           pPriv->hasWindow=TRUE)
+        3. Close Client A → ScreenSaverFreeAttr frees attr, calls
+           CheckScreenPrivate with pPriv->hasWindow still TRUE.
+        """
+        conn, opcode = screensaver_xclient
+
+        # SetAttributes on root
+        req = screensaver.SetAttributesRequest(
+            opcode=opcode,
+            drawable=conn.root_window,
+            width=100,
+            height=100,
+            mask=0,
+        )
+        conn.send_request(req.to_bytes())
+        conn.flush_responses(timeout=0.5)
+
+        # ForceScreenSaver(Active) to create the saver window
+        req = x11.ForceScreenSaver(mode=x11.ScreenSaverActive)
+        conn.send_request(req.to_bytes())
+        conn.flush_responses(timeout=0.5)
+        time.sleep(0.2)
+
+        # Close the connection - triggers ScreenSaverFreeAttr via
+        # resource cleanup of the SetAttributes resource
+        conn.close()
+        time.sleep(0.5)
+
+        assert xserver.is_alive, "Server crashed - ScreenSaverFreeAttr stale pPriv"
