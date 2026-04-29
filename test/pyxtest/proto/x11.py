@@ -9,6 +9,9 @@ from dataclasses import dataclass
 CreateWindow = 1
 CreatePixmap = 53
 InternAtom = 16
+ListFonts = 49
+SetFontPath = 51
+GetFontPath = 52
 QueryExtension = 98
 ChangeKeyboardMapping = 100
 ForceScreenSaverOpcode = 115
@@ -154,6 +157,110 @@ class ChangeKeyboardMappingRequest:
         )
         sym_data = b"".join(struct.pack(f"{byte_order}I", s) for s in syms)
         return header + sym_data
+
+
+@dataclass
+class ListFontsRequest:
+    """X11 ListFonts request (opcode 49).
+
+    xListFontsReq (8 bytes header):
+      reqType(1) + pad(1) + length(2) + maxNames(2) + nbytes(2)
+      followed by the pattern string (padded to 4-byte boundary).
+    """
+
+    pattern: str
+    max_names: int = 65535
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        pat_bytes = self.pattern.encode("ascii")
+        padded = _pad(pat_bytes)
+        req_len = (8 + len(padded)) // 4
+        header = struct.pack(
+            f"{byte_order}BBH HH",
+            ListFonts,
+            0,  # pad
+            req_len,
+            self.max_names,
+            len(pat_bytes),
+        )
+        return header + padded
+
+
+@dataclass
+class SetFontPathRequest:
+    """X11 SetFontPath request (opcode 51).
+
+    xSetFontPathReq (8 bytes header):
+      reqType(1) + pad(1) + length(2) + nFonts(2) + pad(2)
+      followed by LISTofSTR8 (length-prefixed strings).
+    """
+
+    paths: list[str]
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        # Build LISTofSTR8: each string is preceded by a 1-byte length
+        payload = b""
+        for p in self.paths:
+            p_bytes = p.encode("ascii")
+            payload += bytes([len(p_bytes)]) + p_bytes
+        padded = _pad(payload)
+        req_len = (8 + len(padded)) // 4
+        header = struct.pack(
+            f"{byte_order}BBH Hxx",
+            SetFontPath,
+            0,  # pad
+            req_len,
+            len(self.paths),
+        )
+        return header + padded
+
+
+@dataclass
+class GetFontPathRequest:
+    """X11 GetFontPath request (opcode 52).
+
+    Simple 4-byte request with no parameters.
+    """
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH",
+            GetFontPath,
+            0,  # pad
+            1,  # length = 1 word
+        )
+
+
+@dataclass
+class GetFontPathReply:
+    """Parsed xGetFontPathReply.
+
+    xGetFontPathReply layout:
+      type(1) + pad(1) + sequenceNumber(2) + length(4)
+      nPaths(2) + pad(22)
+      LISTofSTR8 (each entry: length-byte + string)
+    """
+
+    paths: list[str]
+
+    @classmethod
+    def from_reply(cls, data: bytes) -> "GetFontPathReply":
+        """Parse an X11Reply's raw data into a GetFontPathReply."""
+        paths: list[str] = []
+        if len(data) < 32:
+            return cls(paths)
+        n_paths = struct.unpack_from("<H", data, 8)[0]
+        offset = 32
+        for _ in range(n_paths):
+            if offset >= len(data):
+                break
+            slen = data[offset]
+            offset += 1
+            if offset + slen > len(data):
+                break
+            paths.append(data[offset : offset + slen].decode("ascii", errors="replace"))
+            offset += slen
+        return cls(paths)
 
 
 @dataclass
