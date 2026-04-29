@@ -466,7 +466,7 @@ UninstallSaverColormap(ScreenPtr pScreen)
         int rc = dixLookupResourceByType((void **) &pCmap, pPriv->installedMap,
                                      X11_RESTYPE_COLORMAP, serverClient,
                                      DixUninstallAccess);
-        if (rc == Success) {
+        if ((rc == Success) && (pCmap->pScreen) && (pCmap->pScreen->UninstallColormap)) {
             (*pCmap->pScreen->UninstallColormap) (pCmap);
         }
         pPriv->installedMap = None;
