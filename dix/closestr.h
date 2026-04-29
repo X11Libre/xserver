@@ -57,7 +57,12 @@ typedef struct _OFclosure {
 
 /* ListFontsWithInfo */
 
-#define XLFDMAXFONTNAMELEN	256
+/* libXfont2 allows font names/aliases up to MAXFONTNAMELEN (1024) bytes in
+ * fonts.alias files.  The server's pattern buffers must be large enough to
+ * hold resolved alias targets returned by the font library.
+ * ZDI-CAN-30136
+ */
+#define XLFDMAXFONTNAMELEN	1024
 typedef struct _LFWIstate {
     char pattern[XLFDMAXFONTNAMELEN];
     int patlen;
