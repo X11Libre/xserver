@@ -117,17 +117,19 @@ ProcXTestCompareCursor(ClientPtr client)
     DeviceIntPtr ptr = PickPointer(client);
 
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
         return rc;
+    }
 
-    if (!ptr)
+    if (!ptr) {
         return BadAccess;
+    }
 
-    if (stuff->cursor == None)
+    if (stuff->cursor == None) {
         pCursor = NullCursor;
-    else if (stuff->cursor == XTestCurrentCursor)
+    } else if (stuff->cursor == XTestCurrentCursor) {
         pCursor = InputDevGetSpriteCursor(ptr);
-    else {
+    } else {
         rc = dixLookupResourceByType((void **) &pCursor, stuff->cursor,
                                      X11_RESTYPE_CURSOR, client, DixReadAccess);
         if (rc != Success) {
@@ -179,8 +181,9 @@ ProcXTestFakeInput(ClientPtr client)
 
     if (client->swapped) {
         int n = XTestSwapFakeInput(client, (xReq *)stuff);
-        if (n != Success)
+        if (n != Success) {
             return n;
+        }
     }
 
     int nev, n, type;
@@ -251,8 +254,9 @@ ProcXTestFakeInput(ClientPtr client)
         }
 
         /* check validity */
-        if (nev == 1 && type == XI_DeviceMotionNotify)
+        if (nev == 1 && type == XI_DeviceMotionNotify) {
             return BadLength;   /* DevMotion must be followed by DevValuator */
+        }
 
         if (type == XI_DeviceMotionNotify) {
             firstValuator = ((deviceValuator *) (ev + 1))->first_valuator;
@@ -261,10 +265,10 @@ ProcXTestFakeInput(ClientPtr client)
                 return BadValue;
             }
 
-            if (ev->u.u.detail == xFalse)
+            if (ev->u.u.detail == xFalse) {
                 flags |= POINTER_ABSOLUTE;
-        }
-        else {
+            }
+        } else {
             firstValuator = 0;
             flags |= POINTER_ABSOLUTE;
         }
@@ -344,14 +348,16 @@ ProcXTestFakeInput(ClientPtr client)
 
         /* Technically the protocol doesn't allow for BadAccess here but
          * this can only happen when all MDs are disabled.  */
-        if (!dev)
+        if (!dev) {
             return BadAccess;
+        }
 
         dev = GetXTestDevice(dev);
 
         /* This can only happen if we passed a slave to GetXTestDevice() */
-        if (!dev)
+        if (!dev) {
             return BadAccess;
+        }
     }
 
 
@@ -362,8 +368,9 @@ ProcXTestFakeInput(ClientPtr client)
 
         activateTime = currentTime;
         ms = activateTime.milliseconds + ev->u.keyButtonPointer.time;
-        if (ms < activateTime.milliseconds)
+        if (ms < activateTime.milliseconds) {
             activateTime.months++;
+        }
         activateTime.milliseconds = ms;
         ev->u.keyButtonPointer.time = 0;
 
@@ -385,8 +392,9 @@ ProcXTestFakeInput(ClientPtr client)
     switch (type) {
     case KeyPress:
     case KeyRelease:
-        if ((!dev) || (!dev->key))
+        if ((!dev) || (!dev->key)) {
             return BadDevice;
+        }
 
         if (ev->u.u.detail < dev->key->xkbInfo->desc->min_key_code ||
             ev->u.u.detail > dev->key->xkbInfo->desc->max_key_code) {
@@ -397,14 +405,16 @@ ProcXTestFakeInput(ClientPtr client)
         need_ptr_update = 0;
         break;
     case MotionNotify:
-        if (!dev || !dev->valuator)
+        if (!dev || !dev->valuator) {
             return BadDevice;
+        }
 
         if (!(extension || ev->u.keyButtonPointer.root == None)) {
             int rc = dixLookupWindow(&root, ev->u.keyButtonPointer.root,
                                  client, DixGetAttrAccess);
-            if (rc != Success)
+            if (rc != Success) {
                 return rc;
+            }
             if (root->parent) {
                 client->errorValue = ev->u.keyButtonPointer.root;
                 return BadValue;
@@ -412,10 +422,12 @@ ProcXTestFakeInput(ClientPtr client)
 
             /* Add the root window's offset to the valuators */
             if ((flags & POINTER_ABSOLUTE) && firstValuator <= 1 && numValuators > 0) {
-                if (firstValuator == 0)
+                if (firstValuator == 0) {
                     valuators[0] += root->drawable.pScreen->x;
-                if (firstValuator + numValuators > 1)
+                }
+                if (firstValuator + numValuators > 1) {
                     valuators[1 - firstValuator] += root->drawable.pScreen->y;
+                }
             }
         }
         if (ev->u.u.detail != xTrue && ev->u.u.detail != xFalse) {
@@ -428,8 +440,9 @@ ProcXTestFakeInput(ClientPtr client)
         break;
     case ButtonPress:
     case ButtonRelease:
-        if (!dev || !dev->button)
+        if (!dev || !dev->button) {
             return BadDevice;
+        }
 
         if (!ev->u.u.detail || ev->u.u.detail > dev->button->numButtons) {
             client->errorValue = ev->u.u.detail;
@@ -442,11 +455,13 @@ ProcXTestFakeInput(ClientPtr client)
 
     valuator_mask_set_range(&mask, firstValuator, numValuators, valuators);
 
-    if (dev && dev->sendEventsProc)
+    if (dev && dev->sendEventsProc) {
         (*dev->sendEventsProc) (dev, type, ev->u.u.detail, flags, &mask);
+    }
 
-    if (need_ptr_update)
+    if (need_ptr_update) {
         miPointerUpdateSprite(dev);
+    }
     return Success;
 }
 
@@ -459,10 +474,11 @@ ProcXTestGrabControl(ClientPtr client)
         client->errorValue = stuff->impervious;
         return BadValue;
     }
-    if (stuff->impervious)
+    if (stuff->impervious) {
         MakeClientGrabImpervious(client);
-    else
+    } else {
         MakeClientGrabPervious(client);
+    }
     return Success;
 }
 
@@ -517,17 +533,20 @@ InitXTestDevices(void)
 {
     if (AllocXTestDevice(serverClient, "Virtual core",
                          &xtestpointer, &xtestkeyboard,
-                         inputInfo.pointer, inputInfo.keyboard) != Success)
+                         inputInfo.pointer, inputInfo.keyboard) != Success) {
          FatalError("Failed to allocate XTest devices");
+    }
 
     if (ActivateDevice(xtestpointer, TRUE) != Success ||
-        ActivateDevice(xtestkeyboard, TRUE) != Success)
+        ActivateDevice(xtestkeyboard, TRUE) != Success) {
         FatalError("Failed to activate XTest core devices.");
-    if (!EnableDevice(xtestpointer, TRUE) || !EnableDevice(xtestkeyboard, TRUE))
+    }
+
+    if (!EnableDevice(xtestpointer, TRUE) || !EnableDevice(xtestkeyboard, TRUE)) {
         FatalError("Failed to enable XTest core devices.");
+    }
 
     AttachDevice(NULL, xtestpointer, inputInfo.pointer);
-
     AttachDevice(NULL, xtestkeyboard, inputInfo.keyboard);
 }
 
@@ -538,8 +557,9 @@ static int
 DeviceSetXTestProperty(DeviceIntPtr dev, Atom property,
                        XIPropertyValuePtr prop, BOOL checkonly)
 {
-    if (property == XIGetKnownProperty(XI_PROP_XTEST_DEVICE))
+    if (property == XIGetKnownProperty(XI_PROP_XTEST_DEVICE)) {
         return BadAccess;
+    }
 
     return Success;
 }
@@ -560,8 +580,9 @@ AllocXTestDevice(ClientPtr client, const char *name,
     char *xtestname;
     char dummy = 1;
 
-    if (asprintf(&xtestname, "%s XTEST", name) == -1)
+    if (asprintf(&xtestname, "%s XTEST", name) == -1) {
         return BadAlloc;
+    }
 
     retval =
         AllocDevicePair(client, xtestname, ptr, keybd, CorePointerProc,
@@ -600,13 +621,15 @@ AllocXTestDevice(ClientPtr client, const char *name,
 BOOL
 IsXTestDevice(DeviceIntPtr dev, DeviceIntPtr master)
 {
-    if (InputDevIsMaster(dev))
+    if (InputDevIsMaster(dev)) {
         return FALSE;
+    }
 
     /* deviceid 0 is reserved for XIAllDevices, non-zero mid means XTest
      * device */
-    if (master)
+    if (master) {
         return dev->xtest_master_id == master->id;
+    }
 
     return dev->xtest_master_id != 0;
 }
@@ -620,8 +643,9 @@ GetXTestDevice(DeviceIntPtr master)
     DeviceIntPtr it;
 
     for (it = inputInfo.devices; it; it = it->next) {
-        if (IsXTestDevice(it, master))
+        if (IsXTestDevice(it, master)) {
             return it;
+        }
     }
 
     /* This only happens if master is a slave device. don't do that */
