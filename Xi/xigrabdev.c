@@ -73,8 +73,10 @@ ProcXIGrabDevice(ClientPtr client)
     if (ret != Success)
         return ret;
 
-    if (!dev->enabled)
-        return AlreadyGrabbed;
+    if (!dev->enabled) {
+        status = XIAlreadyGrabbed;
+        goto reply;
+    }
 
     if (!InputDevIsMaster(dev))
         stuff->paired_device_mode = GrabModeAsync;
@@ -114,6 +116,7 @@ ProcXIGrabDevice(ClientPtr client)
     if (ret != Success)
         return ret;
 
+reply:
     xXIGrabDeviceReply reply = {
         .RepType = X_XIGrabDevice,
         .status = status
