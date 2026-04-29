@@ -41,6 +41,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/request_priv.h"
 #include "dix/screensaver_priv.h"
 #include "dix/window_priv.h"
+#include "include/list.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
@@ -80,9 +81,6 @@ static RESTYPE SuspendType;     /* resource type for suspension records */
 
 typedef struct _ScreenSaverSuspension *ScreenSaverSuspensionPtr;
 
-/* List of clients that are suspending the screensaver. */
-static ScreenSaverSuspensionPtr suspendingClients = NULL;
-
 /*
  * clientResource is a resource ID that's added when the record is
  * allocated, so the record is freed and the screensaver resumed when
@@ -90,11 +88,14 @@ static ScreenSaverSuspensionPtr suspendingClients = NULL;
  * requested the screensaver be suspended.
  */
 typedef struct _ScreenSaverSuspension {
-    ScreenSaverSuspensionPtr next;
+    struct xorg_list entry;
     ClientPtr pClient;
     XID clientResource;
     int count;
 } ScreenSaverSuspensionRec;
+
+/* List of clients that are suspending the screensaver. */
+struct xorg_list suspendingClients = { 0 };
 
 static int ScreenSaverFreeSuspend(void *value, XID id);
 
@@ -358,20 +359,17 @@ ScreenSaverFreeAttr(void *value, XID id)
 static int
 ScreenSaverFreeSuspend(void *value, XID id)
 {
-    ScreenSaverSuspensionPtr data = (ScreenSaverSuspensionPtr) value;
-    ScreenSaverSuspensionPtr *prev, this;
-
     /* Unlink and free the suspension record for the client */
-    for (prev = &suspendingClients; (this = *prev); prev = &this->next) {
-        if (this == data) {
-            *prev = this->next;
-            free(this);
-            break;
+    ScreenSaverSuspensionPtr walk, tmp;
+    xorg_list_for_each_entry_safe(walk, tmp, &suspendingClients, entry) {
+        if (walk == (ScreenSaverSuspensionPtr) value) {
+            xorg_list_del(&walk->entry);
+            free(walk);
         }
     }
 
     /* Re-enable the screensaver if this was the last client suspending it. */
-    if (screenSaverSuspended && suspendingClients == NULL) {
+    if (screenSaverSuspended && xorg_list_is_empty(&suspendingClients)) {
         screenSaverSuspended = FALSE;
 
         /* The screensaver could be active, since suspending it (by design)
@@ -1238,30 +1236,27 @@ ProcScreenSaverSuspend(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xScreenSaverSuspendReq);
     X_REQUEST_FIELD_CARD32(suspend);
 
-    ScreenSaverSuspensionPtr *prev, this;
-    BOOL suspend;
     /*
      * Old versions of XCB encode suspend as 1 byte followed by three
      * pad bytes (which are always cleared), instead of a 4 byte
      * value. Be compatible by just checking for a non-zero value in
      * all 32-bits.
      */
-    suspend = stuff->suspend != 0;
+    bool suspend = stuff->suspend != 0;
 
     /* Check if this client is suspending the screensaver */
-    for (prev = &suspendingClients; (this = *prev); prev = &this->next) {
-        if (this->pClient == client) {
-            break;
+    {
+        ScreenSaverSuspensionPtr walk;
+        xorg_list_for_each_entry(walk, &suspendingClients, entry) {
+            if (walk->pClient == client) {
+                if (suspend) {
+                    walk->count++;
+                } else if (--walk->count == 0) {
+                    FreeResource(walk->clientResource, X11_RESTYPE_NONE);
+                }
+                return Success;
+            }
         }
-    }
-
-    if (this) {
-        if (suspend == TRUE) {
-            this->count++;
-        } else if (--this->count == 0) {
-            FreeResource(this->clientResource, X11_RESTYPE_NONE);
-        }
-        return Success;
     }
 
     /* If we get to this point, this client isn't suspending the screensaver */
@@ -1275,13 +1270,12 @@ ProcScreenSaverSuspend(ClientPtr client)
      * to the record, so the screensaver will be re-enabled and the record freed
      * if the client disconnects without reenabling it first.
      */
-    this = calloc(1, sizeof(ScreenSaverSuspensionRec));
+    ScreenSaverSuspensionPtr this = calloc(1, sizeof(ScreenSaverSuspensionRec));
 
     if (!this) {
         return BadAlloc;
     }
 
-    this->next = NULL;
     this->pClient = client;
     this->count = 1;
     this->clientResource = FakeClientID(client->index);
@@ -1291,7 +1285,8 @@ ProcScreenSaverSuspend(ClientPtr client)
         return BadAlloc;
     }
 
-    *prev = this;
+    xorg_list_append(&this->entry, &suspendingClients);
+
     if (!screenSaverSuspended) {
         screenSaverSuspended = TRUE;
         FreeScreenSaverTimer();
