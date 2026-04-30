@@ -1035,7 +1035,12 @@ SyncCreateSystemCounter(const char *name,
         }
         pCounter->pSysCounterInfo = psci;
         psci->pCounter = pCounter;
-        psci->name = strdup(name);
+        if (!(psci->name = strdup(name))) {
+            free(psci);
+            pCounter->pSysCounterInfo = NULL;
+            FreeResource(pCounter->sync.id, X11_RESTYPE_NONE);
+            return NULL;
+        }
         psci->resolution = resolution;
         psci->counterType = counterType;
         psci->QueryValue = QueryValue;
