@@ -208,7 +208,7 @@ ReadXkmKeycodes(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
     register int i;
     unsigned minKC, maxKC, nAl;
     int nRead = 0;
-    char name[100];
+    char name[100] = { 0 };
     XkbKeyNamePtr pN;
 
     name[0] = '\0';
@@ -277,10 +277,10 @@ ReadXkmKeyTypes(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
     int nRead = 0;
     int tmp;
     XkbKeyTypePtr type;
-    xkmKeyTypeDesc wire;
+    xkmKeyTypeDesc wire = { 0 };
     XkbKTMapEntryPtr entry;
-    xkmKTMapEntryDesc wire_entry;
-    char buf[100];
+    xkmKTMapEntryDesc wire_entry = { 0 };
+    char buf[100] = { 0 };
 
     if ((tmp = XkmGetCountedString(file, buf, 100)) < 1) {
         _XkbLibError(_XkbErrBadLength, "ReadXkmKeyTypes", 0);
@@ -416,9 +416,9 @@ ReadXkmCompatMap(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 {
     register int i;
     unsigned num_si, groups;
-    char name[100];
+    char name[100] = { 0 };
     XkbSymInterpretPtr interp;
-    xkmSymInterpretDesc wire;
+    xkmSymInterpretDesc wire = { 0 };
     unsigned tmp;
     int nRead = 0;
     XkbCompatMapPtr compat;
@@ -609,8 +609,8 @@ static int
 ReadXkmIndicators(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 {
     register unsigned nLEDs;
-    xkmIndicatorMapDesc wire;
-    char buf[100];
+    xkmIndicatorMapDesc wire = { 0 };
+    char buf[100] = { 0 };
     unsigned tmp;
     int nRead = 0;
 
@@ -693,8 +693,8 @@ static int
 ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
 {
     register int i, g, s, totalVModMaps;
-    xkmKeySymMapDesc wireMap;
-    char buf[100];
+    xkmKeySymMapDesc wireMap = { 0 };
+    char buf[100] = { 0 };
     unsigned minKC, maxKC, groupNames, tmp;
     int nRead = 0;
 
@@ -861,8 +861,8 @@ static int
 ReadXkmGeomDoodad(FILE * file, XkbGeometryPtr geom, XkbSectionPtr section)
 {
     XkbDoodadPtr doodad;
-    xkmDoodadDesc doodadWire;
-    char buf[100];
+    xkmDoodadDesc doodadWire = { 0 };
+    char buf[100] = { 0 };
     unsigned tmp;
     int nRead = 0;
 
@@ -915,13 +915,13 @@ ReadXkmGeomDoodad(FILE * file, XkbGeometryPtr geom, XkbSectionPtr section)
 static int
 ReadXkmGeomOverlay(FILE * file, XkbGeometryPtr geom, XkbSectionPtr section)
 {
-    char buf[100];
+    char buf[100] = { 0 };
     unsigned tmp;
     int nRead = 0;
     XkbOverlayPtr ol;
     XkbOverlayRowPtr row;
-    xkmOverlayDesc olWire;
-    xkmOverlayRowDesc rowWire;
+    xkmOverlayDesc olWire = { 0 };
+    xkmOverlayRowDesc rowWire = { 0 };
     register int r;
 
     nRead += XkmGetCountedString(file, buf, 100);
@@ -957,10 +957,10 @@ ReadXkmGeomSection(FILE * file, XkbGeometryPtr geom)
 {
     register int i;
     XkbSectionPtr section;
-    xkmSectionDesc sectionWire;
+    xkmSectionDesc sectionWire = { 0 };
     unsigned tmp;
     int nRead = 0;
-    char buf[100];
+    char buf[100] = { 0 };
     Atom nameAtom;
 
     nRead += XkmGetCountedString(file, buf, 100);
@@ -983,9 +983,9 @@ ReadXkmGeomSection(FILE * file, XkbGeometryPtr geom)
     if (sectionWire.num_rows > 0) {
         register int k;
         XkbRowPtr row;
-        xkmRowDesc rowWire;
+        xkmRowDesc rowWire = { 0 };
         XkbKeyPtr key;
-        xkmKeyDesc keyWire;
+        xkmKeyDesc keyWire = { 0 };
 
         for (i = 0; i < sectionWire.num_rows; i++) {
             tmp = fread(&rowWire, SIZEOF(xkmRowDesc), 1, file);
@@ -1036,12 +1036,12 @@ static int
 ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
 {
     register int i;
-    char buf[100];
+    char buf[100] = { 0 };
     unsigned tmp;
     int nRead = 0;
-    xkmGeometryDesc wireGeom;
+    xkmGeometryDesc wireGeom = { 0 };
     XkbGeometryPtr geom;
-    XkbGeometrySizesRec sizes;
+    XkbGeometrySizesRec sizes = { 0 };
 
     nRead += XkmGetCountedString(file, buf, 100);
     tmp = fread(&wireGeom, SIZEOF(xkmGeometryDesc), 1, file);
@@ -1211,7 +1211,7 @@ XkmReadFile(FILE * file, unsigned need, unsigned want, XkbDescPtr *xkb)
 {
     register unsigned i;
     xkmSectionInfo toc[MAX_TOC] = { 0 }, tmpTOC = { 0 };
-    xkmFileInfo fileInfo;
+    xkmFileInfo fileInfo = { 0 };
     unsigned tmp, nRead = 0;
     unsigned which = need | want;
 
