@@ -610,7 +610,7 @@ _XkbFilterPointerBtn(XkbSrvInfoPtr xkbi,
         case XkbSA_SetPtrDflt:
         {
             XkbControlsPtr ctrls = xkbi->desc->ctrls;
-            XkbControlsRec old;
+            XkbControlsRec old = { 0 };
             xkbControlsNotify cn = { 0 };
 
             old = *ctrls;
@@ -680,11 +680,11 @@ static int
 _XkbFilterControls(XkbSrvInfoPtr xkbi,
                    XkbFilterPtr filter, unsigned keycode, XkbAction *pAction)
 {
-    XkbControlsRec old;
+    XkbControlsRec old = { 0 };
     XkbControlsPtr ctrls;
     DeviceIntPtr kbd;
     unsigned int change;
-    XkbEventCauseRec cause;
+    XkbEventCauseRec cause = { 0 };
 
     kbd = xkbi->device;
     ctrls = xkbi->desc->ctrls;
@@ -836,9 +836,10 @@ static int
 _XkbFilterRedirectKey(XkbSrvInfoPtr xkbi,
                       XkbFilterPtr filter, unsigned keycode, XkbAction *pAction)
 {
-    DeviceEvent ev;
+    DeviceEvent ev = { 0 };
     int x, y;
-    XkbStateRec old, old_prev;
+    XkbStateRec old = { 0 };
+    XkbStateRec old_prev = { 0 };
     unsigned mods, mask;
     xkbDeviceInfoPtr xkbPrivPtr = XKBDEVICEINFO(xkbi->device);
     ProcessInputProc backupproc;
@@ -1206,12 +1207,11 @@ _XkbApplyState(DeviceIntPtr dev, Bool genStateNotify, int evtype, int key)
     changed = XkbStateChangedFlags(&xkbi->prev_state, &xkbi->state);
     if (genStateNotify) {
         if (changed) {
-            xkbStateNotify sn;
-
-            sn.keycode = key;
-            sn.eventType = evtype;
-            sn.requestMajor = sn.requestMinor = 0;
-            sn.changed = changed;
+            xkbStateNotify sn = {
+                sn.keycode = key,
+                sn.eventType = evtype,
+                sn.changed = changed,
+            };
             XkbSendStateNotify(dev, &sn);
         }
         xkbi->flags &= ~_XkbStateNotifyInProgress;
@@ -1352,7 +1352,7 @@ XkbHandleActions(DeviceIntPtr dev, DeviceIntPtr kbd, DeviceEvent *event)
     KeyClassPtr keyc;
     int sendEvent;
     Bool genStateNotify;
-    XkbAction act;
+    XkbAction act = { 0 };
     Bool keyEvent;
     Bool pressEvent;
     ProcessInputProc backupproc;
@@ -1444,7 +1444,7 @@ XkbLatchModifiers(DeviceIntPtr pXDev, CARD8 mask, CARD8 latches)
 {
     XkbSrvInfoPtr xkbi;
     XkbFilterPtr filter;
-    XkbAction act;
+    XkbAction act = { 0 };
     unsigned clear;
 
     if (pXDev && pXDev->key && pXDev->key->xkbInfo) {
@@ -1472,7 +1472,7 @@ XkbLatchGroup(DeviceIntPtr pXDev, int group)
 {
     XkbSrvInfoPtr xkbi;
     XkbFilterPtr filter;
-    XkbAction act;
+    XkbAction act = { 0 };
 
     if (pXDev && pXDev->key && pXDev->key->xkbInfo) {
         xkbi = pXDev->key->xkbInfo;
@@ -1495,10 +1495,9 @@ XkbClearAllLatchesAndLocks(DeviceIntPtr dev,
                            XkbSrvInfoPtr xkbi,
                            Bool genEv, XkbEventCausePtr cause)
 {
-    XkbStateRec os;
-    xkbStateNotify sn;
+    XkbStateRec os = { 0 };
+    xkbStateNotify sn = { 0 };
 
-    sn.changed = 0;
     os = xkbi->state;
     if (os.latched_mods) {      /* clear all latches */
         XkbLatchModifiers(dev, ~0, 0);

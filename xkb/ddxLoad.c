@@ -112,7 +112,9 @@ static char *
 RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
 {
     FILE *out;
-    char *buf = NULL, keymap[PATH_MAX], xkm_output_dir[PATH_MAX];
+    char *buf = NULL;
+    char keymap[PATH_MAX] = { 0 };
+    char xkm_output_dir[PATH_MAX] = { 0 };
 
     const char *emptystring = "";
     char *xkbbasedirflag = NULL;
@@ -122,7 +124,7 @@ RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
 #ifdef WIN32
     /* WIN32 has no popen. The input must be stored in a file which is
        used as input for xkbcomp. xkbcomp does not read from stdin. */
-    char tmpname[PATH_MAX];
+    char tmpname[PATH_MAX] = { 0 };
     const char *xkmfile = tmpname;
 #else
     const char *xkmfile = "-";
@@ -309,7 +311,8 @@ XkbDDXLoadKeymapFromString(DeviceIntPtr keybd,
 static FILE *
 XkbDDXOpenConfigFile(const char *mapName, char *fileNameRtrn, int fileNameRtrnLen)
 {
-    char buf[PATH_MAX], xkm_output_dir[PATH_MAX];
+    char buf[PATH_MAX] = { 0 };
+    char xkm_output_dir[PATH_MAX] = { 0 };
     FILE *file;
 
     buf[0] = '\0';
@@ -346,7 +349,7 @@ static unsigned
 LoadXKM(unsigned want, unsigned need, const char *keymap, XkbDescPtr *xkbRtrn)
 {
     FILE *file;
-    char fileName[PATH_MAX];
+    char fileName[PATH_MAX] = { 0 };
     unsigned missing;
 
     file = XkbDDXOpenConfigFile(keymap, fileName, PATH_MAX);
@@ -407,7 +410,7 @@ XkbDDXNamesFromRules(DeviceIntPtr keybd,
                      const char *rules_name,
                      XkbRF_VarDefsPtr defs, XkbComponentNamesPtr names)
 {
-    char buf[PATH_MAX];
+    char buf[PATH_MAX] = { 0 };
     FILE *file;
     Bool complete;
     XkbRF_RulesPtr rules;
@@ -456,7 +459,7 @@ static Bool
 XkbRMLVOtoKcCGST(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
                  XkbComponentNamesPtr kccgst)
 {
-    XkbRF_VarDefsRec mlvo;
+    XkbRF_VarDefsRec mlvo = { 0 };
 
     mlvo.model = rmlvo->model;
     mlvo.layout = rmlvo->layout;
@@ -477,7 +480,7 @@ XkbCompileKeymapForDevice(DeviceIntPtr dev, XkbRMLVOSet * rmlvo, int need)
     XkbDescPtr xkb = NULL;
     unsigned int provided;
     XkbComponentNamesRec kccgst = { 0 };
-    char name[PATH_MAX];
+    char name[PATH_MAX] = { 0 };
 
     if (XkbRMLVOtoKcCGST(dev, rmlvo, &kccgst)) {
         provided =

@@ -51,7 +51,7 @@ XkbKeyTypesForCoreSymbols(XkbDescPtr xkb,
 {
     register int i;
     unsigned int empty;
-    int nSyms[XkbNumKbdGroups];
+    int nSyms[XkbNumKbdGroups] = { 0 };
     int nGroups, tmp, groupsWidth;
     BOOL replicated = FALSE;
 
@@ -376,7 +376,7 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
 {
     KeySym *syms;
     unsigned char explicit, mods;
-    XkbSymInterpretPtr *interps, ibuf[IBUF_SIZE];
+    XkbSymInterpretPtr *interps, ibuf[IBUF_SIZE] = { 0 };
     int n, nSyms, found;
     unsigned changed, tmp;
 
@@ -538,7 +538,7 @@ XkbChangeTypesOfKey(XkbDescPtr xkb,
 {
     XkbKeyTypePtr pOldType, pNewType;
     register int i;
-    int width, nOldGroups, oldWidth, newTypes[XkbNumKbdGroups];
+    int width, nOldGroups, oldWidth;
 
     if ((!xkb) || (!XkbKeycodeInRange(xkb, key)) || (!xkb->map) ||
         (!xkb->map->types) || (!newTypesIn) ||
@@ -559,6 +559,8 @@ XkbChangeTypesOfKey(XkbDescPtr xkb,
 
     nOldGroups = XkbKeyNumGroups(xkb, key);
     oldWidth = XkbKeyGroupsWidth(xkb, key);
+
+    int newTypes[XkbNumKbdGroups] = { 0 };
     for (width = i = 0; i < nGroups; i++) {
         if (groups & (1 << i))
             newTypes[i] = newTypesIn[i];

@@ -516,8 +516,8 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     XkbSrvInfoPtr xkbi;
     XkbDescPtr xkb;
     XkbSrvLedInfoPtr sli;
-    XkbChangesRec changes;
-    XkbEventCauseRec cause;
+    XkbChangesRec changes = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbRMLVOSet rmlvo_dflts = { NULL };
 
     BUG_RETURN_VAL(dev == NULL, FALSE);
