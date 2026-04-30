@@ -165,6 +165,15 @@ ProcessVelocityConfiguration(DeviceIntPtr pDev, const char *devname, void *list,
                                PropModeReplace, 1, &tempf, FALSE);
     }
 
+    tempf = xf86SetRealOption(list, "MicemouseProtection", 0.0);
+    if (tempf > 0.0) {
+        LogMessageVerb(X_CONFIG, 1, "%s: (accel) Mic-E-Mouse protection threshold set to %.2f\n",
+                       devname, tempf);
+        prop = XIGetKnownProperty(ACCEL_PROP_MICEMOUSE_PROTECTION);
+        XIChangeDeviceProperty(pDev, prop, float_prop, 32,
+                               PropModeReplace, 1, &tempf, FALSE);
+    }
+
     /* select profile by number */
     tempi = xf86SetIntOption(list, "AccelerationProfile",
                              s->statistics.profile_number);
