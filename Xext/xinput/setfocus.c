@@ -85,6 +85,6 @@ ProcXSetDeviceFocus(ClientPtr client)
     if (!dev->focus)
         return BadDevice;
 
-    return = SetInputFocus(client, dev, stuff->focus, stuff->revertTo,
+    return SetInputFocus(client, dev, stuff->focus, stuff->revertTo,
                            stuff->time, TRUE);
 }
