@@ -77,11 +77,8 @@ SOFTWARE.
 int
 ProcXGetSelectedExtensionEvents(ClientPtr client)
 {
-    REQUEST(xGetSelectedExtensionEventsReq);
-    REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xGetSelectedExtensionEventsReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     int i, rc = 0;
     WindowPtr pWin;
