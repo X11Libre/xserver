@@ -23,6 +23,8 @@
 
 #include <dix-config.h>
 
+#include "include/mipict.h"
+
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
@@ -30,7 +32,6 @@
 #include "servermd.h"
 #include "mi.h"
 #include "picturestr.h"
-#include "mipict.h"
 
 static xFixed
 miLineFixedX(xLineFixed * l, xFixed y, Bool ceil)

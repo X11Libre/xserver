@@ -28,11 +28,11 @@
 #include <string.h>
 
 #include "fb/fbpict_priv.h"
+#include "include/mipict.h"
 
 #include "fb.h"
 #include "glyphstr_priv.h"
 #include "picturestr.h"
-#include "mipict.h"
 
 void
 fbComposite(CARD8 op,

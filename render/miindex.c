@@ -24,6 +24,7 @@
 #include <dix-config.h>
 
 #include "dix/colormap_priv.h"
+#include "include/mipict.h"
 
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -31,7 +32,6 @@
 #include "windowstr.h"
 #include "mi.h"
 #include "picturestr.h"
-#include "mipict.h"
 
 #define NUM_CUBE_LEVELS	4
 #define NUM_GRAY_LEVELS	13

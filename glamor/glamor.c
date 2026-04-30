@@ -37,10 +37,10 @@
 #include <unistd.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "include/mipict.h"
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
-#include "mipict.h"
 
 DevPrivateKeyRec glamor_screen_private_key;
 DevPrivateKeyRec glamor_pixmap_private_key;

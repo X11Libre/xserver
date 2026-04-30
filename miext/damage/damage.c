@@ -25,6 +25,7 @@
 #include <stdlib.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "include/mipict.h"
 #include "os/osdep.h"
 
 #include    <X11/X.h>
@@ -35,7 +36,6 @@
 #include    <X11/fonts/fontstruct.h>
 #include    <X11/fonts/libxfont2.h>
 #include    "mi.h"
-#include    "mipict.h"
 #include    "regionstr.h"
 #include    "globals.h"
 #include    "gcstruct.h"
