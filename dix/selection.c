@@ -153,19 +153,15 @@ DeleteClientFromAnySelections(ClientPtr client)
 int
 ProcSetSelectionOwner(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xSetSelectionOwnerReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(selection);
+    X_REQUEST_FIELD_CARD32(time);
+
     WindowPtr pWin = NULL;
     TimeStamp time;
     Selection *pSel;
     int rc;
-
-    REQUEST(xSetSelectionOwnerReq);
-    REQUEST_SIZE_MATCH(xSetSelectionOwnerReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->selection);
-        swapl(&stuff->time);
-    }
 
     UpdateCurrentTime();
     time = ClientTimeToServerTime(stuff->time);
