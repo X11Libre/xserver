@@ -2757,9 +2757,7 @@ AllocDevicePair(ClientPtr client, const char *name,
         return BadAlloc;
 
     if (asprintf(&dev_name, "%s pointer", name) == -1) {
-        RemoveDevice(pointer, FALSE);
-
-        return BadAlloc;
+        goto remove_pointer;
     }
     pointer->name = dev_name;
 
@@ -2777,16 +2775,11 @@ AllocDevicePair(ClientPtr client, const char *name,
 
     keyboard = AddInputDevice(client, keybd_proc, TRUE);
     if (!keyboard) {
-        RemoveDevice(pointer, FALSE);
-
-        return BadAlloc;
+        goto remove_pointer;
     }
 
     if (asprintf(&dev_name, "%s keyboard", name) == -1) {
-        RemoveDevice(keyboard, FALSE);
-        RemoveDevice(pointer, FALSE);
-
-        return BadAlloc;
+        goto remove_both_devices;
     }
     keyboard->name = dev_name;
 
@@ -2809,15 +2802,23 @@ AllocDevicePair(ClientPtr client, const char *name,
         if (!pointer->unused_classes || !keyboard->unused_classes) {
             free(keyboard->unused_classes);
             free(pointer->unused_classes);
-            return BadAlloc;
+            pointer->unused_classes = NULL;
+            keyboard->unused_classes = NULL;
+            goto remove_both_devices;
         }
     }
 
     *ptr = pointer;
-
     *keybd = keyboard;
 
     return Success;
+
+remove_both_devices:
+    RemoveDevice(keyboard, FALSE);
+
+remove_pointer:
+    RemoveDevice(pointer, FALSE);
+    return BadAlloc;
 }
 
 /**
