@@ -1712,6 +1712,8 @@ InitTouchClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches,
     free(touch->touches);
     free(touch);
 
+    device->touch = NULL;
+
     return FALSE;
 }
 
