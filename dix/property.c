@@ -173,15 +173,11 @@ deliverPropertyNotifyEvent(WindowPtr pWin, int state, PropertyPtr pProp)
 int
 ProcRotateProperties(ClientPtr client)
 {
-    REQUEST(xRotatePropertiesReq);
-    REQUEST_AT_LEAST_SIZE(xRotatePropertiesReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swaps(&stuff->nAtoms);
-        swaps(&stuff->nPositions);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRotatePropertiesReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(nAtoms);
+    X_REQUEST_FIELD_CARD16(nPositions);
+    X_REQUEST_REST_CARD32();
 
     int delta, rc;
     PropertyPtr *props;         /* array of pointer */
