@@ -2208,11 +2208,9 @@ ProcGetKeyboardControl(ClientPtr client)
     for (int i = 0; i < 32; i++)
         reply.map[i] = ctrl->autoRepeats[i];
 
-    if (client->swapped) {
-        swapl(&reply.ledMask);
-        swaps(&reply.bellPitch);
-        swaps(&reply.bellDuration);
-    }
+    X_REPLY_FIELD_CARD32(ledMask);
+    X_REPLY_FIELD_CARD16(bellPitch);
+    X_REPLY_FIELD_CARD16(bellDuration);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -2358,11 +2356,9 @@ ProcGetPointerControl(ClientPtr client)
         .threshold = ctrl->threshold
     };
 
-    if (client->swapped) {
-        swaps(&reply.accelNumerator);
-        swaps(&reply.accelDenominator);
-        swaps(&reply.threshold);
-    }
+    X_REPLY_FIELD_CARD16(accelNumerator);
+    X_REPLY_FIELD_CARD16(accelDenominator);
+    X_REPLY_FIELD_CARD16(threshold);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -2446,9 +2442,7 @@ ProcGetMotionEvents(ClientPtr client)
         .nEvents = nEvents,
     };
 
-    if (client->swapped) {
-        swapl(&reply.nEvents);
-    }
+    X_REPLY_FIELD_CARD32(nEvents);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
