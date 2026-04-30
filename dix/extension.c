@@ -291,12 +291,8 @@ ExtensionAvailable(ClientPtr client, ExtensionEntry *ext)
 int
 ProcQueryExtension(ClientPtr client)
 {
-    REQUEST(xQueryExtensionReq);
-    REQUEST_AT_LEAST_SIZE(xQueryExtensionReq);
-
-    if (client->swapped)
-        swaps(&stuff->nbytes);
-
+    X_REQUEST_HEAD_AT_LEAST(xQueryExtensionReq);
+    X_REQUEST_FIELD_CARD16(nbytes);
     REQUEST_FIXED_SIZE(xQueryExtensionReq, stuff->nbytes);
 
     xQueryExtensionReply reply = { 0 };
