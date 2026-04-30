@@ -73,14 +73,12 @@ ProcXAllowDeviceEvents(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xAllowDeviceEventsReq);
     X_REQUEST_FIELD_CARD32(time);
 
-    TimeStamp time;
     DeviceIntPtr thisdev;
-    int rc;
-
-    rc = dixLookupDevice(&thisdev, stuff->deviceid, client, DixGetAttrAccess);
+    int rc = dixLookupDevice(&thisdev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
-    time = ClientTimeToServerTime(stuff->time);
+
+    TimeStamp time = ClientTimeToServerTime(stuff->time);
 
     switch (stuff->mode) {
     case ReplayThisDevice:
