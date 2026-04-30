@@ -78,11 +78,8 @@ extern int ExtEventIndex;
 int
 ProcXGetDeviceDontPropagateList(ClientPtr client)
 {
-    REQUEST(xGetDeviceDontPropagateListReq);
-    REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xGetDeviceDontPropagateListReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     CARD16 count = 0;
     int i, rc;
