@@ -160,8 +160,8 @@ AccessXKRGTurnOn(DeviceIntPtr dev, CARD16 KRGControl, xkbControlsNotify * pCN)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     old = *ctrls;
@@ -192,8 +192,8 @@ AccessXKRGTurnOff(DeviceIntPtr dev, xkbControlsNotify * pCN)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     old = *ctrls;
@@ -227,8 +227,8 @@ AccessXStickyKeysTurnOn(DeviceIntPtr dev, xkbControlsNotify * pCN)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     old = *ctrls;
@@ -261,8 +261,8 @@ AccessXStickyKeysTurnOff(DeviceIntPtr dev, xkbControlsNotify * pCN)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     old = *ctrls;
@@ -401,9 +401,9 @@ AccessXTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
     DeviceIntPtr dev = (DeviceIntPtr) arg;
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
+    XkbControlsRec old = { 0 };
     xkbControlsNotify cn = { 0 };
-    XkbEventCauseRec cause;
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     if (xkbi->lastPtrEventTime) {
@@ -771,7 +771,7 @@ ProcessPointerEvent(InternalEvent *ev, DeviceIntPtr mouse)
     /* clear any latched modifiers */
     if (xkbi->state.latched_mods && (event->type == ET_ButtonRelease)) {
         unsigned changed_leds;
-        XkbStateRec oldState;
+        XkbStateRec oldState = { 0 };
         XkbSrvLedInfoPtr sli;
 
         sli = XkbFindSrvLedInfo(dev, XkbDfltXIClass, XkbDfltXIId, 0);
@@ -783,8 +783,7 @@ ProcessPointerEvent(InternalEvent *ev, DeviceIntPtr mouse)
         if (changed & sli->usedComponents) {
             changed_leds = XkbIndicatorsToUpdate(dev, changed, FALSE);
             if (changed_leds) {
-                XkbEventCauseRec cause;
-
+                XkbEventCauseRec cause = { 0 };
                 XkbSetCauseKey(&cause, (event->detail.key & 0x7), event->type);
                 XkbUpdateIndicators(dev, changed_leds, TRUE, NULL, &cause);
             }
@@ -792,12 +791,11 @@ ProcessPointerEvent(InternalEvent *ev, DeviceIntPtr mouse)
     }
 
     if (((xkbi->flags & _XkbStateNotifyInProgress) == 0) && (changed != 0)) {
-        xkbStateNotify sn;
-
-        sn.keycode = event->detail.key;
-        sn.eventType = event->type;
-        sn.requestMajor = sn.requestMinor = 0;
-        sn.changed = changed;
+        xkbStateNotify sn = {
+            .keycode = event->detail.key,
+            .eventType = event->type,
+            .changed = changed,
+        };
         XkbSendStateNotify(dev, &sn);
     }
 

@@ -203,7 +203,7 @@ void
 XkbSendStateNotify(DeviceIntPtr kbd, xkbStateNotify * pSN)
 {
     XkbSrvInfoPtr xkbi;
-    XkbStatePtr state;
+    XkbStatePtr state = { 0 };
     XkbInterestPtr interest;
     Time time;
     register CARD16 changed, bState;
@@ -779,13 +779,13 @@ XkbSendNotification(DeviceIntPtr kbd,
 
     sli = NULL;
     if (pChanges->state_changes) {
-        xkbStateNotify sn;
-
-        sn.changed = pChanges->state_changes;
-        sn.keycode = cause->kc;
-        sn.eventType = cause->event;
-        sn.requestMajor = cause->mjr;
-        sn.requestMinor = cause->mnr;
+        xkbStateNotify sn = {
+            sn.changed = pChanges->state_changes,
+            sn.keycode = cause->kc,
+            sn.eventType = cause->event,
+            sn.requestMajor = cause->mjr,
+            sn.requestMinor = cause->mnr,
+        };
         XkbSendStateNotify(kbd, &sn);
     }
     if (pChanges->map.changed) {
@@ -1050,7 +1050,7 @@ XkbRemoveResourceClient(DevicePtr inDev, XID id)
         }
     }
     if (found && autoCtrls && dev->key && dev->key->xkbInfo) {
-        XkbEventCauseRec cause;
+        XkbEventCauseRec cause = { 0 };
 
         xkbi = dev->key->xkbInfo;
         XkbSetCauseXkbReq(&cause, X_kbPerClientFlags, client);
