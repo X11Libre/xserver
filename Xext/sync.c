@@ -1194,7 +1194,7 @@ FreeCounter(void *env, XID id)
             pnext = ptl->next;
             free(ptl); /* destroy the trigger list as we go */
         }
-        if (IsSystemCounter(pCounter)) {
+        if (IsSystemCounter(pCounter) && pCounter->pSysCounterInfo) {
             xorg_list_del(&pCounter->pSysCounterInfo->entry);
             free(pCounter->pSysCounterInfo->name);
             free(pCounter->pSysCounterInfo->private);
