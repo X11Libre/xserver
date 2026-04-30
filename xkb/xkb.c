@@ -623,10 +623,10 @@ ProcXkbLatchLockState(ClientPtr client)
 {
     int status;
     DeviceIntPtr dev, tmpd;
-    XkbStateRec oldState, *newState;
+    XkbStateRec oldState = { 0 }, *newState;
     CARD16 changed;
-    xkbStateNotify sn;
-    XkbEventCauseRec cause;
+    xkbStateNotify sn = { 0 };
+    XkbEventCauseRec cause = { 0 };
 
     REQUEST(xkbLatchLockStateReq);
     REQUEST_SIZE_MATCH(xkbLatchLockStateReq);
@@ -769,9 +769,10 @@ ProcXkbSetControls(ClientPtr client)
     DeviceIntPtr dev, tmpd;
     XkbSrvInfoPtr xkbi;
     XkbControlsPtr ctrl;
-    XkbControlsRec new, old;
-    xkbControlsNotify cn;
-    XkbEventCauseRec cause;
+    XkbControlsRec new = { 0 };
+    XkbControlsRec old = { 0 };
+    xkbControlsNotify cn = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     REQUEST(xkbSetControlsReq);
@@ -2624,8 +2625,8 @@ _XkbSetMapChecks(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req,
 static int
 _XkbSetMap(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req, char *values)
 {
-    XkbEventCauseRec cause;
-    XkbChangesRec change;
+    XkbEventCauseRec cause = { 0 };
+    XkbChangesRec change = { 0 };
     Bool sentNKN;
     XkbSrvInfoPtr xkbi;
     XkbDescPtr xkb;
@@ -3091,7 +3092,7 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
     }
 
     if (dev->xkb_interest) {
-        xkbCompatMapNotify ev;
+        xkbCompatMapNotify ev = { 0 };
 
         ev.deviceID = dev->id;
         ev.changedGroups = req->groups;
@@ -3104,7 +3105,7 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
     if (req->recomputeActions) {
         XkbChangesRec change = { 0 };
         unsigned check;
-        XkbEventCauseRec cause;
+        XkbEventCauseRec cause = { 0 };
 
         XkbSetCauseXkbReq(&cause, X_kbSetCompatMap, client);
         XkbUpdateActions(dev, xkb->min_key_code, XkbNumKeys(xkb), &change,
@@ -3321,7 +3322,7 @@ _XkbSetIndicatorMap(ClientPtr client, DeviceIntPtr dev,
 {
     XkbSrvInfoPtr xkbi;
     XkbSrvLedInfoPtr sli;
-    XkbEventCauseRec cause;
+    XkbEventCauseRec cause = { 0 };
     int i, bit;
 
     xkbi = dev->key->xkbInfo;
@@ -3568,7 +3569,7 @@ _XkbSetNamedIndicator(ClientPtr client, DeviceIntPtr dev,
     int led = 0;
     XkbIndicatorMapPtr map;
     DeviceIntPtr kbd;
-    XkbEventCauseRec cause;
+    XkbEventCauseRec cause = { 0 };
     xkbExtensionDeviceNotify ed = { 0 };
     XkbChangesRec changes = { 0 };
     int rc;
@@ -4240,7 +4241,7 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
     XkbDescRec *xkb;
     XkbNamesRec *names;
     CARD32 *tmp;
-    xkbNamesNotify nn;
+    xkbNamesNotify nn = { 0 };
 
     tmp = (CARD32 *) &stuff[1];
     xkb = dev->key->xkbInfo->desc;
@@ -4366,7 +4367,7 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
         XkbSendNamesNotify(dev, &nn);
         if (needExtEvent) {
             XkbSrvLedInfoPtr sli;
-            xkbExtensionDeviceNotify edev;
+            xkbExtensionDeviceNotify edev = { 0 };
             register int i;
             register unsigned bit;
 
@@ -5882,7 +5883,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     DeviceIntPtr tmpd;
     DeviceIntPtr master;
     XkbDescPtr xkb, new;
-    XkbEventCauseRec cause;
+    XkbEventCauseRec cause = { 0 };
     unsigned char *str;
     char mapFile[PATH_MAX] = { 0 };
     unsigned len;
@@ -6734,10 +6735,10 @@ SetDeviceIndicators(char *wire,
 {
     xkbDeviceLedsWireDesc *ledWire;
     int i;
-    XkbEventCauseRec cause;
+    XkbEventCauseRec cause = { 0 };
     unsigned namec, mapc, statec;
-    xkbExtensionDeviceNotify ed;
-    XkbChangesRec changes;
+    xkbExtensionDeviceNotify ed = { 0 };
+    XkbChangesRec changes = { 0 };
     DeviceIntPtr kbd;
 
     memset((char *) &ed, 0, sizeof(xkbExtensionDeviceNotify));

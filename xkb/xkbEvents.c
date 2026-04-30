@@ -204,7 +204,7 @@ void
 XkbSendStateNotify(DeviceIntPtr kbd, xkbStateNotify * pSN)
 {
     XkbSrvInfoPtr xkbi;
-    XkbStatePtr state;
+    XkbStatePtr state = { 0 };
     XkbInterestPtr interest;
     Time time;
     register CARD16 changed, bState;
@@ -800,19 +800,18 @@ XkbSendNotification(DeviceIntPtr kbd,
 
     sli = NULL;
     if (pChanges->state_changes) {
-        xkbStateNotify sn;
-
-        sn.changed = pChanges->state_changes;
-        sn.keycode = cause->kc;
-        sn.eventType = cause->event;
-        sn.requestMajor = cause->mjr;
-        sn.requestMinor = cause->mnr;
+        xkbStateNotify sn = {
+            sn.changed = pChanges->state_changes,
+            sn.keycode = cause->kc,
+            sn.eventType = cause->event,
+            sn.requestMajor = cause->mjr,
+            sn.requestMinor = cause->mnr,
+        };
         XkbSendStateNotify(kbd, &sn);
     }
     if (pChanges->map.changed) {
-        xkbMapNotify mn;
+        xkbMapNotify mn = { 0 };
 
-        memset(&mn, 0, sizeof(xkbMapNotify));
         mn.changed = pChanges->map.changed;
         mn.firstType = pChanges->map.first_type;
         mn.nTypes = pChanges->map.num_types;
@@ -833,9 +832,8 @@ XkbSendNotification(DeviceIntPtr kbd,
     }
     if ((pChanges->ctrls.changed_ctrls) ||
         (pChanges->ctrls.enabled_ctrls_changes)) {
-        xkbControlsNotify cn;
+        xkbControlsNotify cn = { 0 };
 
-        memset(&cn, 0, sizeof(xkbControlsNotify));
         cn.changedControls = pChanges->ctrls.changed_ctrls;
         cn.enabledControlChanges = pChanges->ctrls.enabled_ctrls_changes;
         cn.keycode = cause->kc;
@@ -845,29 +843,26 @@ XkbSendNotification(DeviceIntPtr kbd,
         XkbSendControlsNotify(kbd, &cn);
     }
     if (pChanges->indicators.map_changes) {
-        xkbIndicatorNotify in;
+        xkbIndicatorNotify in = { 0 };
 
         if (sli == NULL)
             sli = XkbFindSrvLedInfo(kbd, XkbDfltXIClass, XkbDfltXIId, 0);
-        memset(&in, 0, sizeof(xkbIndicatorNotify));
         in.state = sli->effectiveState;
         in.changed = pChanges->indicators.map_changes;
         XkbSendIndicatorNotify(kbd, XkbIndicatorMapNotify, &in);
     }
     if (pChanges->indicators.state_changes) {
-        xkbIndicatorNotify in;
+        xkbIndicatorNotify in = { 0 };
 
         if (sli == NULL)
             sli = XkbFindSrvLedInfo(kbd, XkbDfltXIClass, XkbDfltXIId, 0);
-        memset(&in, 0, sizeof(xkbIndicatorNotify));
         in.state = sli->effectiveState;
         in.changed = pChanges->indicators.state_changes;
         XkbSendIndicatorNotify(kbd, XkbIndicatorStateNotify, &in);
     }
     if (pChanges->names.changed) {
-        xkbNamesNotify nn;
+        xkbNamesNotify nn = { 0 };
 
-        memset(&nn, 0, sizeof(xkbNamesNotify));
         nn.changed = pChanges->names.changed;
         nn.firstType = pChanges->names.first_type;
         nn.nTypes = pChanges->names.num_types;
@@ -879,9 +874,8 @@ XkbSendNotification(DeviceIntPtr kbd,
         XkbSendNamesNotify(kbd, &nn);
     }
     if ((pChanges->compat.changed_groups) || (pChanges->compat.num_si > 0)) {
-        xkbCompatMapNotify cmn;
+        xkbCompatMapNotify cmn = { 0 };
 
-        memset(&cmn, 0, sizeof(xkbCompatMapNotify));
         cmn.changedGroups = pChanges->compat.changed_groups;
         cmn.firstSI = pChanges->compat.first_si;
         cmn.nSI = pChanges->compat.num_si;
@@ -1077,7 +1071,7 @@ XkbRemoveResourceClient(DevicePtr inDev, XID id)
         }
     }
     if (found && autoCtrls && dev->key && dev->key->xkbInfo) {
-        XkbEventCauseRec cause;
+        XkbEventCauseRec cause = { 0 };
 
         xkbi = dev->key->xkbInfo;
         XkbSetCauseXkbReq(&cause, X_kbPerClientFlags, client);
