@@ -821,9 +821,13 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         /* Remove our keyboard hook if it is installed */
         winRemoveKeyboardHookLL();
 
-        /* Revert the X focus as well, but only if the Windows focus is going to another window */
-        if (!wParam && pWin)
-            DeleteWindowFromAnyEvents(pWin, FALSE);
+        /* Revert the X focus as well */
+        if (fWMMsgInitialized)
+            {
+                wmMsg.msg = WM_WM_ACTIVATE;
+                wmMsg.iWindow = 0;
+                winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
+            }
 
         return 0;
 
@@ -907,11 +911,8 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         /* Pass the message to the root window */
         SendMessage(hwndScreen, message, wParam, lParam);
 
-        /* Prevent the mouse wheel from stalling when another window is minimized */
-        if (HIWORD(wParam) == 0 && LOWORD(wParam) == WA_ACTIVE &&
-            (HWND) lParam != NULL && (HWND) lParam != GetParent(hwnd))
-            SetFocus(hwnd);
-        return 0;
+        /* Allow DefWindowProc to SetFocus() as needed */
+        break;
 
     case WM_ACTIVATEAPP:
         /*
