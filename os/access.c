@@ -589,7 +589,9 @@ DefineSelf(int fd)
         ErrorF("Getting interface count: %s\n", strerror(errno));
     if (len < (ifn.lifn_count * sizeof(struct lifreq))) {
         len = ifn.lifn_count * sizeof(struct lifreq);
-        bufptr = calloc(1, len);
+        if (!(bufptr = calloc(1, len))) {
+            FatalError("DefineSelf: failed to allocate memory\n");
+        }
     }
 #endif
 
@@ -1066,6 +1068,9 @@ ComputeLocalClient(ClientPtr client)
      */
     if (cmdname) {
         char *cmd = strdup(cmdname);
+        if (!cmd)
+            return FALSE;
+
         Bool ret;
 
         /* Cut off any colon and whatever comes after it, see
