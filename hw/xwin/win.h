@@ -140,6 +140,7 @@
 
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
+#include "include/mipict.h"
 
 #include "scrnintstr.h"
 #include "pixmapstr.h"
@@ -161,7 +162,6 @@
 #include "shadow.h"
 #include "fb.h"
 
-#include "mipict.h"
 #include "picturestr.h"
 
 #ifdef RANDR

@@ -14,7 +14,7 @@ cat > sdksyms.c << EOF
 
 /* render/Makefile.am */
 #include "picture.h"
-#include "mipict.h"
+#include "include/mipict.h"
 #include "glyphstr.h"
 #include "picturestr.h"
 

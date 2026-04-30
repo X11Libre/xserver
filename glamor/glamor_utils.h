@@ -32,10 +32,10 @@
 #error This file can only be included by glamor_priv.h
 #endif
 
+#include "include/mipict.h"
 #include "os/bug_priv.h"
 
 #include "glamor_prepare.h"
-#include "mipict.h"
 
 #define v_from_x_coord_x(_xscale_, _x_)          ( 2 * (_x_) * (_xscale_) - 1.0)
 #define v_from_x_coord_y(_yscale_, _y_)          (2 * (_y_) * (_yscale_) - 1.0)

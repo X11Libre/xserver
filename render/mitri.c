@@ -23,13 +23,14 @@
 
 #include <dix-config.h>
 
+#include "include/mipict.h"
+
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "mi.h"
 #include "picturestr.h"
-#include "mipict.h"
 
 void
 miPointFixedBounds(int npoint, xPointFixed * points, BoxPtr bounds)

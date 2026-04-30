@@ -23,6 +23,7 @@
 
 #include <dix-config.h>
 
+#include "include/mipict.h"
 #include "os/osdep.h"
 
 #include "scrnintstr.h"
@@ -31,7 +32,6 @@
 #include "windowstr.h"
 #include "mi.h"
 #include "picturestr.h"
-#include "mipict.h"
 
 int
 miCreatePicture(PicturePtr pPicture)

@@ -40,8 +40,9 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "include/mipict.h"
+
 #include "glamor_priv.h"
-#include "mipict.h"
 
 static void byte_swap_swizzle(GLenum *swizzle)
 {
