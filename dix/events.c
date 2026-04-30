@@ -4937,9 +4937,12 @@ SetInputFocus(ClientPtr client,
         for (pWin = focusWin; pWin; pWin = pWin->parent)
             depth++;
         if (depth > focus->traceSize) {
-            focus->traceSize = depth + 1;
-            focus->trace = reallocarray(focus->trace, focus->traceSize,
-                                        sizeof(WindowPtr));
+            const size_t num = depth+1;
+            WindowPtr *wins = reallocarray(focus->trace, num, sizeof(WindowPtr));
+            if (!num)
+                return BadAlloc;
+            focus->traceSize = num;
+            focus->trace = wins;
         }
         focus->traceGood = depth;
         for (pWin = focusWin, depth--; pWin; pWin = pWin->parent, depth--)
