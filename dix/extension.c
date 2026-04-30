@@ -53,8 +53,8 @@ SOFTWARE.
 #include "dix/extension_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/request_priv.h"
+#include "os/mathx_priv.h"
 
-#include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "gcstruct.h"
@@ -303,7 +303,7 @@ ProcQueryExtension(ClientPtr client)
 
     if (NumExtensions && extensions) {
         char extname[PATH_MAX] = { 0 };
-        strncpy(extname, (char *) &stuff[1], min(stuff->nbytes, sizeof(extname)-1));
+        strncpy(extname, (char *) &stuff[1], MIN(stuff->nbytes, sizeof(extname)-1));
         ExtensionEntry *extEntry = CheckExtension(extname);
 
         if (extEntry && ExtensionAvailable(client, extEntry)) {
