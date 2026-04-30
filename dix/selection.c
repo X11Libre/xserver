@@ -247,13 +247,10 @@ ProcSetSelectionOwner(ClientPtr client)
 int
 ProcGetSelectionOwner(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
+
     Selection *pSel;
-
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
 
     /* allow extensions to intercept */
     SelectionFilterParamRec param = {
