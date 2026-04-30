@@ -303,6 +303,7 @@ AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
      */
     if (dixCallDeviceAccessCallback(client, dev, DixCreateAccess)) {
         dixFreePrivates(dev->devPrivates, PRIVATE_DEVICE);
+        free(dev->deviceGrab.sync.event);
         free(dev);
         return NULL;
     }
