@@ -238,7 +238,7 @@ typedef struct {
 static char *
 get_index(char *str, int *ndx)
 {
-    char ndx_buf[NDX_BUFF_SIZE];
+    char ndx_buf[NDX_BUFF_SIZE] = { 0 };
     char *end;
 
     if (*str != '[') {
@@ -864,7 +864,7 @@ Bool
 XkbRF_GetComponents(XkbRF_RulesPtr rules,
                     XkbRF_VarDefsPtr defs, XkbComponentNamesPtr names)
 {
-    XkbRF_MultiDefsRec mdefs;
+    XkbRF_MultiDefsRec mdefs = { 0 };
 
     MakeMultiDefs(&mdefs, defs);
 
