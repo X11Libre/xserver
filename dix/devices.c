@@ -286,6 +286,7 @@ AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
     dev->deviceGrab.ActivateGrab = ActivateKeyboardGrab;
     dev->deviceGrab.DeactivateGrab = DeactivateKeyboardGrab;
     if (!(dev->deviceGrab.sync.event = calloc(1, sizeof(InternalEvent)))) {
+        dixFreePrivates(dev->devPrivates, PRIVATE_DEVICE);
         free(dev);
         return NULL;
     }
