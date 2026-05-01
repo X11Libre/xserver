@@ -1228,9 +1228,8 @@ typedef struct _bignum {
 static void
 BigNumAdd(BigNumPtr x, BigNumPtr y, BigNumPtr r)
 {
-    BigNumLower lower, carry = 0;
-
-    lower = x->lower + y->lower;
+    BigNumLower carry = 0;
+    BigNumLower lower = x->lower + y->lower;
     if (lower >= BIGNUMLOWER) {
         lower -= BIGNUMLOWER;
         carry = 1;
