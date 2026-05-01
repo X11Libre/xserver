@@ -705,18 +705,14 @@ FreeCell(ColormapPtr pmap, Pixel i, int channel)
 static void
 doUpdateColors(ColormapPtr pmap)
 {
-    xColorItem *defs;
-    xColorItem *pdef;
-    VisualPtr pVisual;
-    int n, size;
-
-    pVisual = pmap->pVisual;
-    size = pVisual->ColormapEntries;
-    defs = calloc(size, sizeof(xColorItem));
+    VisualPtr pVisual = pmap->pVisual;
+    int size = pVisual->ColormapEntries;
+    xColorItem *defs = calloc(size, sizeof(xColorItem));
     if (!defs)
         return;
-    n = 0;
-    pdef = defs;
+
+    int n = 0;
+    xColorItem *pdef = defs;
     if (pmap->class == DirectColor) {
         for (int i = 0; i < size; i++) {
             if (!pmap->red[i].refcnt &&
