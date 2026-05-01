@@ -1177,9 +1177,6 @@ FakeAllocColor(ColormapPtr pmap, xColorItem * item)
 void
 FakeFreeColor(ColormapPtr pmap, Pixel pixel)
 {
-    VisualPtr pVisual;
-    Pixel pixR, pixG, pixB;
-
     switch (pmap->class) {
     case GrayScale:
     case PseudoColor:
@@ -1187,10 +1184,11 @@ FakeFreeColor(ColormapPtr pmap, Pixel pixel)
             pmap->red[pixel].refcnt = 0;
         break;
     case DirectColor:
-        pVisual = pmap->pVisual;
-        pixR = (pixel & pVisual->redMask) >> pVisual->offsetRed;
-        pixG = (pixel & pVisual->greenMask) >> pVisual->offsetGreen;
-        pixB = (pixel & pVisual->blueMask) >> pVisual->offsetBlue;
+    {
+        VisualPtr pVisual = pmap->pVisual;
+        Pixel pixR = (pixel & pVisual->redMask) >> pVisual->offsetRed;
+        Pixel pixG = (pixel & pVisual->greenMask) >> pVisual->offsetGreen;
+        Pixel pixB = (pixel & pVisual->blueMask) >> pVisual->offsetBlue;
         if (pmap->red[pixR].refcnt == AllocTemporary)
             pmap->red[pixR].refcnt = 0;
         if (pmap->green[pixG].refcnt == AllocTemporary)
@@ -1198,6 +1196,7 @@ FakeFreeColor(ColormapPtr pmap, Pixel pixel)
         if (pmap->blue[pixB].refcnt == AllocTemporary)
             pmap->blue[pixB].refcnt = 0;
         break;
+    }
     }
 }
 
