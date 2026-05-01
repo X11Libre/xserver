@@ -48,6 +48,7 @@ SOFTWARE.
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -244,28 +245,24 @@ int
 dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
                   ColormapPtr *ppcmap, int alloc, ClientPtr pClient)
 {
-    int class, size;
-    unsigned long sizebytes;
-    ColormapPtr pmap;
-    int access;
-    Pixel *ppix;
-
     if (!pClient)
         return BadMatch;
 
     const int clientIndex = pClient->index;
+    const int class = pVisual->class;
 
-    class = pVisual->class;
     if (!(class & DynamicClass) && (alloc != AllocNone) &&
         (pClient != serverClient))
         return BadMatch;
 
-    size = pVisual->ColormapEntries;
-    sizebytes = (size * sizeof(Entry)) +
+    int size = pVisual->ColormapEntries;
+    unsigned long sizebytes = (size * sizeof(Entry)) +
         (LimitClients * sizeof(Pixel *)) + (LimitClients * sizeof(int));
     if ((class | DynamicClass) == DirectColor)
         sizebytes *= 3;
     sizebytes += sizeof(ColormapRec);
+
+    ColormapPtr pmap;
     if (mid == pScreen->defColormap) {
         pmap = calloc(1, sizebytes);
         if (!pmap)
@@ -309,7 +306,7 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
         for (EntryPtr pent = &pmap->red[size - 1]; pent >= pmap->red; pent--)
             pent->refcnt = AllocPrivate;
         pmap->freeRed = 0;
-        ppix = calloc(size, sizeof(Pixel));
+        Pixel *ppix = calloc(size, sizeof(Pixel));
         if (!ppix) {
             free(pmap);
             return BadAlloc;
@@ -350,7 +347,7 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
             for (EntryPtr pent = &pmap->green[size - 1]; pent >= pmap->green; pent--)
                 pent->refcnt = AllocPrivate;
             pmap->freeGreen = 0;
-            ppix = calloc(size, sizeof(Pixel));
+            Pixel *ppix = calloc(size, sizeof(Pixel));
             if (!ppix) {
                 free(pmap->clientPixelsRed[clientIndex]);
                 free(pmap);
@@ -386,11 +383,13 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
     /*
      * Security creation/labeling check
      */
-    access = XaceHookResourceAccess(pClient, mid, X11_RESTYPE_COLORMAP,
+    {
+        int access = XaceHookResourceAccess(pClient, mid, X11_RESTYPE_COLORMAP,
                  pmap, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (access != Success) {
-        FreeResource(mid, X11_RESTYPE_NONE);
-        return access;
+        if (access != Success) {
+            FreeResource(mid, X11_RESTYPE_NONE);
+            return access;
+        }
     }
 
     /* If the device wants a chance to initialize the colormap in any way,
