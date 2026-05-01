@@ -1243,16 +1243,16 @@ static Pixel
 FindBestPixel(EntryPtr pentFirst, int size, xrgb * prgb, int channel)
 {
     EntryPtr pent;
-    Pixel pixel, final;
-    long dr, dg, db;
-    unsigned long sq;
-    BigNumRec minval, sum, temp;
+    Pixel pixel;
+    Pixel final = 0;
 
-    final = 0;
+    BigNumRec minval;
     MaxBigNum(&minval);
     /* look for the minimal difference */
     for (pent = pentFirst, pixel = 0; pixel < size; pent++, pixel++) {
-        dr = dg = db = 0;
+        long dr = 0;
+        long dg = 0;
+        long db = 0;
         switch (channel) {
         case PSEUDOMAP:
             dg = (long) pent->co.local.green - prgb->green;
@@ -1268,9 +1268,11 @@ FindBestPixel(EntryPtr pentFirst, int size, xrgb * prgb, int channel)
             db = (long) pent->co.local.blue - prgb->blue;
             break;
         }
-        sq = dr * dr;
+        unsigned long sq = dr * dr;
+        BigNumRec sum;
         UnsignedToBigNum(sq, &sum);
         sq = dg * dg;
+        BigNumRec temp;
         UnsignedToBigNum(sq, &temp);
         BigNumAdd(&sum, &temp, &sum);
         sq = db * db;
