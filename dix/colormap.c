@@ -1104,25 +1104,23 @@ AllocColor(ColormapPtr pmap,
 void
 FakeAllocColor(ColormapPtr pmap, xColorItem * item)
 {
-    Pixel pixR, pixG, pixB;
-    Pixel temp;
-    int entries;
-    xrgb rgb;
-    int class;
-    VisualPtr pVisual;
+    VisualPtr pVisual = pmap->pVisual;
 
-    pVisual = pmap->pVisual;
-    rgb.red = item->red;
-    rgb.green = item->green;
-    rgb.blue = item->blue;
+    xrgb rgb = {
+        .red = item->red,
+        .green = item->green,
+        .blue = item->blue
+    };
     (*pmap->pScreen->ResolveColor) (&rgb.red, &rgb.green, &rgb.blue, pVisual);
-    class = pmap->class;
-    entries = pVisual->ColormapEntries;
+
+    int class = pmap->class;
+    int entries = pVisual->ColormapEntries;
 
     switch (class) {
     case GrayScale:
     case PseudoColor:
-        temp = 0;
+    {
+        Pixel temp = 0;
         item->pixel = 0;
         if (FindColor(pmap, pmap->red, entries, &rgb, &temp, PSEUDOMAP,
                       -1, AllComp) == Success) {
@@ -1130,16 +1128,18 @@ FakeAllocColor(ColormapPtr pmap, xColorItem * item)
             break;
         }
         /* fall through ... */
+    }
     case StaticColor:
     case StaticGray:
         item->pixel = FindBestPixel(pmap->red, entries, &rgb, PSEUDOMAP);
         break;
 
     case DirectColor:
+    {
         /* Look up each component in its own map, then OR them together */
-        pixR = (item->pixel & pVisual->redMask) >> pVisual->offsetRed;
-        pixG = (item->pixel & pVisual->greenMask) >> pVisual->offsetGreen;
-        pixB = (item->pixel & pVisual->blueMask) >> pVisual->offsetBlue;
+        Pixel pixR = (item->pixel & pVisual->redMask) >> pVisual->offsetRed;
+        Pixel pixG = (item->pixel & pVisual->greenMask) >> pVisual->offsetGreen;
+        Pixel pixB = (item->pixel & pVisual->blueMask) >> pVisual->offsetBlue;
         if (FindColor(pmap, pmap->red, NUMRED(pVisual), &rgb, &pixR, REDMAP,
                       -1, RedComp) != Success)
             pixR = FindBestPixel(pmap->red, NUMRED(pVisual), &rgb, REDMAP)
@@ -1154,15 +1154,18 @@ FakeAllocColor(ColormapPtr pmap, xColorItem * item)
                 << pVisual->offsetBlue;
         item->pixel = pixR | pixG | pixB;
         break;
+    }
 
     case TrueColor:
+    {
         /* Look up each component in its own map, then OR them together */
-        pixR = FindBestPixel(pmap->red, NUMRED(pVisual), &rgb, REDMAP);
-        pixG = FindBestPixel(pmap->green, NUMGREEN(pVisual), &rgb, GREENMAP);
-        pixB = FindBestPixel(pmap->blue, NUMBLUE(pVisual), &rgb, BLUEMAP);
+        Pixel pixR = FindBestPixel(pmap->red, NUMRED(pVisual), &rgb, REDMAP);
+        Pixel pixG = FindBestPixel(pmap->green, NUMGREEN(pVisual), &rgb, GREENMAP);
+        Pixel pixB = FindBestPixel(pmap->blue, NUMBLUE(pVisual), &rgb, BLUEMAP);
         item->pixel = (pixR << pVisual->offsetRed) |
             (pixG << pVisual->offsetGreen) | (pixB << pVisual->offsetBlue);
         break;
+    }
     }
 }
 
