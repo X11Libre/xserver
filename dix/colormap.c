@@ -934,21 +934,16 @@ AllocColor(ColormapPtr pmap,
            unsigned short *pred, unsigned short *pgreen, unsigned short *pblue,
            Pixel * pPix, int client)
 {
-    Pixel pixR, pixG, pixB;
-    int entries;
-    xrgb rgb;
-    int class;
-    VisualPtr pVisual;
-    int npix;
-    Pixel *ppix;
-
-    pVisual = pmap->pVisual;
+    VisualPtr pVisual = pmap->pVisual;
     (*pmap->pScreen->ResolveColor) (pred, pgreen, pblue, pVisual);
-    rgb.red = *pred;
-    rgb.green = *pgreen;
-    rgb.blue = *pblue;
-    class = pmap->class;
-    entries = pVisual->ColormapEntries;
+    xrgb rgb = {
+        rgb.red = *pred,
+        rgb.green = *pgreen,
+        rgb.blue = *pblue,
+    };
+
+    int class = pmap->class;
+    int entries = pVisual->ColormapEntries;
 
     /* If the colormap is being created, then we want to be able to change
      * the colormap, even if it's a static type. Otherwise, we'd never be
@@ -961,6 +956,9 @@ AllocColor(ColormapPtr pmap,
      * it, the best we can do is to find the closest color entry to the
      * requested one and return that.
      */
+    int npix;
+    Pixel pixR, pixG, pixB;
+    Pixel *ppix;
     switch (class) {
     case StaticColor:
     case StaticGray:
