@@ -584,9 +584,7 @@ CopyFree(int channel, int client, ColormapPtr pmapSrc, ColormapPtr pmapDst)
 {
     int npix;
     EntryPtr pentSrcFirst, pentDstFirst;
-    EntryPtr pentSrc, pentDst;
     Pixel *ppix;
-    int nalloc;
 
     switch (channel) {
     default:         /* so compiler can see that everything gets initialized */
@@ -609,12 +607,13 @@ CopyFree(int channel, int client, ColormapPtr pmapSrc, ColormapPtr pmapDst)
         pentDstFirst = pmapDst->blue;
         break;
     }
-    nalloc = 0;
+
+    int nalloc = 0;
     if (pmapSrc->class & DynamicClass) {
         for (int z = npix; --z >= 0; ppix++) {
             /* Copy entries */
-            pentSrc = pentSrcFirst + *ppix;
-            pentDst = pentDstFirst + *ppix;
+            EntryPtr pentSrc = pentSrcFirst + *ppix;
+            EntryPtr pentDst = pentDstFirst + *ppix;
             if (pentDst->refcnt > 0) {
                 pentDst->refcnt++;
             }
