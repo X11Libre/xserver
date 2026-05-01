@@ -60,6 +60,7 @@ class XServerProcess:
             )
         else:
             self.valgrind_suppressions = valgrind_suppressions
+        self._builddir = None
         self.server_path = server_path or self._find_server()
         self.extra_args = extra_args or []
         self.log_file = log_file
@@ -109,6 +110,7 @@ class XServerProcess:
             }
             path = build_paths.get(self.server_type)
             if path and path.is_file() and os.access(path, os.X_OK):
+                self._builddir = Path(builddir)
                 return path
 
         # Fall back to system PATH
@@ -120,11 +122,17 @@ class XServerProcess:
         name = binary_names.get(self.server_type)
         server_in_path = shutil.which(name)
         if server_in_path:
-            warnings.warn(
-                f"Using system {self.server_type} server from PATH: {server_in_path}. "
-                f"Set {env_var} or XSERVER_BUILDDIR to use a specific build.",
-                stacklevel=2,
-            )
+            if builddir:
+                msg = (
+                    f"Using system {self.server_type} server from PATH: {server_in_path}. "
+                    f"{name} was not found in XSERVER_BUILDDIR ({builddir})."
+                )
+            else:
+                msg = (
+                    f"Using system {self.server_type} server from PATH: {server_in_path}. "
+                    f"Set {env_var} or XSERVER_BUILDDIR to use a specific build."
+                )
+            warnings.warn(msg, stacklevel=2)
             return server_in_path
 
         raise FileNotFoundError(
@@ -217,6 +225,58 @@ class XServerProcess:
 
         return self._display_num
 
+    def _setup_xorg_modules(self):
+        """Create a module directory layout for Xorg from a meson build tree.
+
+        Xorg's module loader expects drivers in a ``drivers/``
+        subdirectory, extensions in ``extensions/``, etc.  The meson
+        build tree puts them in separate build directories, so we
+        create a temporary directory with the right structure using
+        symlinks.
+
+        Returns the path to the module directory, or None if the build
+        directory doesn't contain the expected modules.
+        """
+        xfree86 = self._builddir / "hw" / "xfree86"
+        if not xfree86.is_dir():
+            return None
+
+        moddir = Path(tempfile.mkdtemp(prefix="xorg-modules-"))
+
+        # Map of build subdirectories to module layout subdirectories.
+        # Entries are (build_subdir, module_subdir, glob_pattern).
+        module_dirs = [
+            ("drivers/modesetting", "drivers", "*_drv.so"),
+            ("drivers/inputtest", "input", "*_drv.so"),
+            ("dixmods", "extensions", "libglx.so"),
+        ]
+        for build_sub, mod_sub, pattern in module_dirs:
+            src = xfree86 / build_sub
+            if not src.is_dir():
+                continue
+            dst = moddir / mod_sub
+            dst.mkdir(exist_ok=True)
+            for f in src.glob(pattern):
+                (dst / f.name).symlink_to(f.resolve())
+
+        # Other modules go at the top level
+        top_level_modules = [
+            "dixmods/libwfb.so",
+            "dixmods/libshadow.so",
+            "glamor_egl/libglamoregl.so",
+            "exa/libexa.so",
+            "fbdevhw/libfbdevhw.so",
+            "int10/libint10.so",
+            "shadowfb/libshadowfb.so",
+            "vgahw/libvgahw.so",
+        ]
+        for rel in top_level_modules:
+            src = xfree86 / rel
+            if src.is_file():
+                (moddir / src.name).symlink_to(src.resolve())
+
+        return moddir
+
     def _build_command(self, displayfd):
         """Build the full command line including optional valgrind wrapper."""
         server_args = [self.server_path]
@@ -235,6 +295,15 @@ class XServerProcess:
             # -logfile is only permitted if we're running as root
             if self.log_file and os.geteuid() == 0:
                 server_args.extend(["-logfile", str(self.log_file)])
+
+            # When running Xorg from a build directory, set up the
+            # module path and use an empty config so it auto-detects
+            # the GPU via modesetting.
+            if self._builddir:
+                modpath = self._setup_xorg_modules()
+                if modpath:
+                    server_args.extend(["-modulepath", str(modpath)])
+                server_args.extend(["-config", "/dev/null", "-configdir", "/dev/null"])
 
         server_args.extend(["-noreset", "+byteswappedclients"])
 
