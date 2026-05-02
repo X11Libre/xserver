@@ -1,0 +1,16 @@
+# This xorg.conf.d configuration snippet is a Debian version of a supplement to
+# /etc/X11/xorg.conf.d/10-nvidia.conf that sets module paths for nvidia GLX libraries
+# when it detects a device driven by the nvidia-drm kernel driver.
+# Please note that this works on Linux kernels version 6.12 or higher
+# with CONFIG_DRM enabled, and only if the nvidia-drm.ko kernel module
+# for the versions 390 and later of the nvidia driver or the nvidia.ko
+# kernel module for the version 340 is loaded before the X server is started.
+
+Section "OutputClass"
+        Identifier "NVidia-modules"
+        MatchDriver "nvidia-drm"
+        Module "glx"
+        Module "glxserver_nvidia"
+        # Debian specific directories
+        ModulePath "/usr/lib/x86_64-linux-gnu/nvidia/xorg,/usr/lib/nvidia/nvidia"
+EndSection
