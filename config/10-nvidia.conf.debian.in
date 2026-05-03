@@ -1,4 +1,4 @@
-# This xorg.conf.d configuration snippet configures the X server to
+# This xorg.conf.d configuration snippet for Debian configures the X server to
 # automatically load the nvidia X driver when it detects a device
 # driven by the nvidia-drm kernel driver.
 # Please note that this works on Linux kernels version 6.12 or higher
@@ -11,5 +11,6 @@ Section "OutputClass"
         MatchDriver "nvidia-drm"
         Driver "nvidia"
         Option "AllowEmptyInitialConfiguration"
-        ModulePath "@libdir@/nvidia/xorg"
+        # Debian specific directories
+        ModulePath "/usr/lib/x86_64-linux-gnu/nvidia/xorg,/usr/lib/nvidia/nvidia"
 EndSection
