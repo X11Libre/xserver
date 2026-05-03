@@ -58,6 +58,7 @@
 #include "dri3.h"
 
 static DevPrivateKeyRec glamor_egl_screen_private_key;
+
 static inline Bool
 glamor_egl_init_screen_private(ScreenPtr screen)
 {
@@ -67,8 +68,10 @@ glamor_egl_init_screen_private(ScreenPtr screen)
                    screen->myNum);
         return FALSE;
     }
+
     return TRUE;
 }
+
 static glamor_egl_priv_t*
 _glamor_egl_get_screen_private(ScreenPtr screen)
 {
@@ -1018,8 +1021,10 @@ static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, 
 
     BUG_RETURN(!pixmap_priv);
 
-    if (pixmap_priv->image)
+    if (pixmap_priv->image) {
         eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
+        pixmap_priv->image = NULL;
+    }
 }
 #endif
 
@@ -1068,10 +1073,11 @@ glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
     screen_pixmap = screen->GetScreenPixmap(screen);
 
     pixmap_priv = glamor_get_pixmap_private(screen_pixmap);
-    BUG_RETURN(!pixmap_priv);
 
-    eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
-    pixmap_priv->image = NULL;
+    if (pixmap_priv && pixmap_priv->image) {
+        eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
+        pixmap_priv->image = NULL;
+    }
 #endif
 
     glamor_egl_pre_close_screen_cleanup(glamor_egl);
@@ -1516,7 +1522,6 @@ void glamor_egl_cleanup(glamor_egl_priv_t *glamor_egl)
         gbm_device_destroy(glamor_egl->gbm);
 #endif
 }
-
 
 void glamor_egl_cleanup_screen(ScreenPtr screen)
 {
