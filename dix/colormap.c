@@ -1357,30 +1357,24 @@ int
 QueryColors(ColormapPtr pmap, int count, Pixel * ppixIn, xrgb * prgbList,
             ClientPtr client)
 {
-    Pixel *ppix, pixel;
-    xrgb *prgb;
-    VisualPtr pVisual;
-    EntryPtr pent;
-    Pixel i;
     int errVal = Success;
 
-    pVisual = pmap->pVisual;
+    VisualPtr pVisual = pmap->pVisual;
     if ((pmap->class | DynamicClass) == DirectColor) {
-        int numred, numgreen, numblue;
-        Pixel rgbbad;
-
-        numred = NUMRED(pVisual);
-        numgreen = NUMGREEN(pVisual);
-        numblue = NUMBLUE(pVisual);
-        rgbbad = ~RGBMASK(pVisual);
+        int numred = NUMRED(pVisual);
+        int numgreen = NUMGREEN(pVisual);
+        int numblue = NUMBLUE(pVisual);
+        Pixel rgbbad = ~RGBMASK(pVisual);
+        Pixel *ppix;
+        xrgb *prgb;
         for (ppix = ppixIn, prgb = prgbList; --count >= 0; ppix++, prgb++) {
-            pixel = *ppix;
+            Pixel pixel = *ppix;
             if (pixel & rgbbad) {
                 client->errorValue = pixel;
                 errVal = BadValue;
                 continue;
             }
-            i = (pixel & pVisual->redMask) >> pVisual->offsetRed;
+            Pixel i = (pixel & pVisual->redMask) >> pVisual->offsetRed;
             if (i >= numred) {
                 client->errorValue = pixel;
                 errVal = BadValue;
@@ -1404,14 +1398,16 @@ QueryColors(ColormapPtr pmap, int count, Pixel * ppixIn, xrgb * prgbList,
         }
     }
     else {
+        Pixel *ppix;
+        xrgb *prgb;
         for (ppix = ppixIn, prgb = prgbList; --count >= 0; ppix++, prgb++) {
-            pixel = *ppix;
+            Pixel pixel = *ppix;
             if (pixel >= pVisual->ColormapEntries) {
                 client->errorValue = pixel;
                 errVal = BadValue;
             }
             else {
-                pent = (EntryPtr) &pmap->red[pixel];
+                EntryPtr pent = (EntryPtr) &pmap->red[pixel];
                 if (pent->fShared) {
                     prgb->red = pent->co.shco.red->color;
                     prgb->green = pent->co.shco.green->color;
