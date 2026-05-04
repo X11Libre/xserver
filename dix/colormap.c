@@ -1431,11 +1431,8 @@ QueryColors(ColormapPtr pmap, int count, Pixel * ppixIn, xrgb * prgbList,
 static void
 FreePixels(ColormapPtr pmap, int client)
 {
-    Pixel *ppixStart;
-    int class;
-
-    class = pmap->class;
-    ppixStart = pmap->clientPixelsRed[client];
+    int class = pmap->class;
+    Pixel *ppixStart = pmap->clientPixelsRed[client];
     if (class & DynamicClass) {
         int n = pmap->numPixelsRed[client];
         for (Pixel *ppix = ppixStart; --n >= 0;) {
