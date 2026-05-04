@@ -1963,17 +1963,14 @@ static Bool
 AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
             Pixel rmask, Pixel gmask, Pixel bmask, Pixel * ppixFirst)
 {
-    Pixel *pptr;
-    int npix,  npixClientNew, npixShared;
-    Pixel basemask, base, bits, common;
-    SHAREDCOLOR *pshared, **ppshared, **psharedList;
+    int npixClientNew = c << (r + g + b);
+    int npixShared = (c << r) + (c << g) + (c << b);
 
-    npixClientNew = c << (r + g + b);
-    npixShared = (c << r) + (c << g) + (c << b);
-    psharedList = calloc(npixShared, sizeof(SHAREDCOLOR *));
+    SHAREDCOLOR **psharedList = calloc(npixShared, sizeof(SHAREDCOLOR *));
     if (!psharedList)
         return FALSE;
-    ppshared = psharedList;
+
+    SHAREDCOLOR **ppshared = psharedList;
     for (int z = npixShared; --z >= 0;) {
         if (!(ppshared[z] = calloc(1, sizeof(SHAREDCOLOR)))) {
             for (z++; z < npixShared; z++)
@@ -1982,12 +1979,16 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
             return FALSE;
         }
     }
+
+    int npix;
+    Pixel *pptr;
     for (pptr = ppix, npix = c; --npix >= 0; pptr++) {
-        basemask = ~(gmask | bmask);
-        common = *pptr & basemask;
+        Pixel basemask = ~(gmask | bmask);
+        Pixel common = *pptr & basemask;
+        SHAREDCOLOR *pshared = NULL;
         if (rmask) {
-            bits = 0;
-            base = lowbit(rmask);
+            Pixel bits = 0;
+            Pixel base = lowbit(rmask);
             while (1) {
                 pshared = *ppshared++;
                 pshared->refcnt = 1 << (g + b);
@@ -2015,8 +2016,8 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
         basemask = ~(rmask | bmask);
         common = *pptr & basemask;
         if (gmask) {
-            bits = 0;
-            base = lowbit(gmask);
+            Pixel bits = 0;
+            Pixel base = lowbit(gmask);
             while (1) {
                 pshared = *ppshared++;
                 pshared->refcnt = 1 << (r + b);
@@ -2042,8 +2043,8 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
         basemask = ~(rmask | gmask);
         common = *pptr & basemask;
         if (bmask) {
-            bits = 0;
-            base = lowbit(bmask);
+            Pixel bits = 0;
+            Pixel base = lowbit(bmask);
             while (1) {
                 pshared = *ppshared++;
                 pshared->refcnt = 1 << (r + g);
