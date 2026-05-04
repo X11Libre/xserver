@@ -116,7 +116,7 @@ typedef struct _XvVideoNotifyRec {
 
 static DevPrivateKeyRec XvScreenKeyRec;
 
-Bool noXvExtension = FALSE;
+Bool noXvExtension = TRUE;
 
 static x_server_generation_t XvExtensionGeneration = 0;
 static x_server_generation_t XvScreenGeneration = 0;
