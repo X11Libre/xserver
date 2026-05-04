@@ -1485,26 +1485,26 @@ int
 AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
                 Bool contig, Pixel * ppix, Pixel * masks)
 {
-    Pixel rmask, gmask, bmask, *ppixFirst;
-    int class;
-    int ok;
-    int oldcount;
     const int client = pClient->index;
-    colorResource *pcr = (colorResource *) NULL;
 
-    class = pmap->class;
+    int class = pmap->class;
     if (!(class & DynamicClass))
         return BadAlloc;        /* Shouldn't try on this type */
-    oldcount = pmap->numPixelsRed[client];
+
+    int oldcount = pmap->numPixelsRed[client];
     if (pmap->class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
+
+    colorResource *pcr = (colorResource *) NULL;
     if (!oldcount && (dixClientIdForXID(pmap->mid) != client)) {
         pcr = calloc(1, sizeof(colorResource));
         if (!pcr)
             return BadAlloc;
     }
 
+    int ok;
     if (pmap->class == DirectColor) {
+        Pixel rmask, gmask, bmask;
         ok = AllocDirect(client, pmap, colors, planes, planes, planes,
                          contig, ppix, &rmask, &gmask, &bmask);
         if (ok == Success) {
@@ -1520,6 +1520,7 @@ AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
         }
     }
     else {
+        Pixel rmask, *ppixFirst;
         ok = AllocPseudo(client, pmap, colors, planes, contig, ppix, &rmask,
                          &ppixFirst);
         if (ok == Success) {
