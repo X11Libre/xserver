@@ -5,6 +5,7 @@
 #ifndef _XSERVER_DIX_COLORMAP_PRIV_H
 #define _XSERVER_DIX_COLORMAP_PRIV_H
 
+#include <stdbool.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 
@@ -107,7 +108,7 @@ int FreeColors(ColormapPtr pmap, int client, int count, Pixel *pixels, Pixel mas
 
 int StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client);
 
-int IsMapInstalled(Colormap map, WindowPtr pWin);
+bool IsMapInstalled(Colormap map, WindowPtr pWin);
 
 /* only exported for glx, but should not be used by external drivers */
 _X_EXPORT Bool ResizeVisualArray(ScreenPtr pScreen, int new_vis_count, DepthPtr depth);
