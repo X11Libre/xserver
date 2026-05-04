@@ -1794,21 +1794,14 @@ static Bool
 AllocCP(ColormapPtr pmap, EntryPtr pentFirst, int count, int planes,
         Bool contig, Pixel * pixels, Pixel * pMask)
 {
-    EntryPtr ent;
-    Pixel pixel, base, entries, maxp, save;
-    int dplanes, found;
-    Pixel *ppix;
-    Pixel mask;
-    Pixel finalmask;
-
-    dplanes = pmap->pVisual->nplanes;
+    int dplanes = pmap->pVisual->nplanes;
 
     /* Easy case.  Allocate pixels only */
     if (planes == 0) {
         /* allocate writable entries */
-        ppix = pixels;
-        ent = pentFirst;
-        pixel = 0;
+        Pixel *ppix = pixels;
+        EntryPtr ent = pentFirst;
+        Pixel pixel = 0;
         while (--count >= 0) {
             /* Just find count unallocated cells */
             while (ent->refcnt) {
@@ -1829,18 +1822,19 @@ AllocCP(ColormapPtr pmap, EntryPtr pentFirst, int count, int planes,
     /* General case count pixels * 2 ^ planes cells to be allocated */
 
     /* make room for new pixels */
-    ent = pentFirst;
+    EntryPtr ent = pentFirst;
 
     /* first try for contiguous planes, since it's fastest */
+    Pixel base, mask;
     for (mask = (((Pixel) 1) << planes) - 1, base = 1, dplanes -= (planes - 1);
          --dplanes >= 0; mask += mask, base += base) {
-        ppix = pixels;
-        found = 0;
-        pixel = 0;
-        entries = pmap->pVisual->ColormapEntries - mask;
+        Pixel *ppix = pixels;
+        int found = 0;
+        Pixel pixel = 0;
+        Pixel entries = pmap->pVisual->ColormapEntries - mask;
         while (pixel < entries) {
-            save = pixel;
-            maxp = pixel + mask + base;
+            Pixel save = pixel;
+            Pixel maxp = pixel + mask + base;
             /* check if all are free */
             while (pixel != maxp && ent[pixel].refcnt == 0)
                 pixel += base;
@@ -1898,23 +1892,23 @@ AllocCP(ColormapPtr pmap, EntryPtr pentFirst, int count, int planes,
 
      */
 
-    finalmask =
+    Pixel finalmask =
         (((((Pixel) 1) << (planes - 1)) - 1) << (dplanes - planes + 1)) +
         (((Pixel) 1) << (dplanes - planes - 1));
     for (mask = (((Pixel) 3) << (planes - 1)) - 1; mask <= finalmask; mask++) {
         /* next 3 magic statements count number of ones (HAKMEM #169) */
-        pixel = (mask >> 1) & 033333333333;
+        Pixel pixel = (mask >> 1) & 033333333333;
         pixel = mask - pixel - ((pixel >> 1) & 033333333333);
         if ((((pixel + (pixel >> 3)) & 030707070707) % 077) != planes)
             continue;
-        ppix = pixels;
-        found = 0;
-        entries = pmap->pVisual->ColormapEntries - mask;
+        Pixel *ppix = pixels;
+        int found = 0;
+        Pixel entries = pmap->pVisual->ColormapEntries - mask;
         base = lowbit(mask);
         for (pixel = 0; pixel < entries; pixel++) {
             if (pixel & mask)
                 continue;
-            maxp = 0;
+            Pixel maxp = 0;
             /* check if all are free */
             while (ent[pixel + maxp].refcnt == 0) {
                 GetNextBitsOrBreak(maxp, mask, base);
