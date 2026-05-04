@@ -35,6 +35,7 @@
 #include <errno.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "os/client_priv.h"
 
 #ifdef WITH_LIBDRM
@@ -353,9 +354,8 @@ DRI2CreateDrawable2(ClientPtr client, DrawablePtr pDraw, XID id,
     pPriv->prime_id = dri2_client->prime_id;
 
     XID dri2_id = FakeClientID(client->index);
-    int rc = DRI2AddDrawableRef(pPriv, id, dri2_id, invalidate, priv);
-    if (rc != Success)
-        return rc;
+
+    X_CALL_CHECK_ERR(DRI2AddDrawableRef(pPriv, id, dri2_id, invalidate, priv));
 
     if (dri2_id_out)
         *dri2_id_out = dri2_id;

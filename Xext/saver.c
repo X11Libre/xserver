@@ -640,15 +640,9 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drawable);
 
     DrawablePtr pDraw;
-    int rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
-                           DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
-    rc = dixCallScreensaverAccessCallback(client, pDraw->pScreen, DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
+                           DixGetAttrAccess));
+    X_CALL_CHECK_ERR(dixCallScreensaverAccessCallback(client, pDraw->pScreen, DixGetAttrAccess));
 
     ScreenSaverStuffPtr pSaver = &pDraw->pScreen->screensaver;
     ScreenSaverScreenPrivatePtr pPriv = GetScreenPrivate(pDraw->pScreen);
@@ -701,16 +695,10 @@ ProcScreenSaverSelectInput(ClientPtr client)
     X_REQUEST_FIELD_CARD32(eventMask);
 
     DrawablePtr pDraw;
-    int rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
-                           DixGetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
+                           DixGetAttrAccess));
 
-    rc = dixCallScreensaverAccessCallback(client, pDraw->pScreen, DixSetAttrAccess);
-    if (rc != Success) {
-        return rc;
-    }
+    X_CALL_CHECK_ERR(dixCallScreensaverAccessCallback(client, pDraw->pScreen, DixSetAttrAccess));
 
     if (!setEventMask(pDraw->pScreen, client, stuff->eventMask)) {
         return BadAlloc;
@@ -1086,11 +1074,10 @@ static int
 ScreenSaverUnsetAttributes(ClientPtr client, Drawable drawable)
 {
     DrawablePtr pDraw;
-    int rc = dixLookupDrawable(&pDraw, drawable, client, 0, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    X_CALL_CHECK_ERR(dixLookupDrawable(&pDraw, drawable, client, 0, DixGetAttrAccess));
 
     ScreenSaverScreenPrivatePtr pPriv = GetScreenPrivate(pDraw->pScreen);
+
     if (pPriv && pPriv->attr && pPriv->attr->client == client) {
         FreeResource(pPriv->attr->resource, AttrType);
         FreeScreenAttr(pPriv->attr);
