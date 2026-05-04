@@ -1751,22 +1751,20 @@ static int
 AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
             Pixel * pixels, Pixel * pmask, Pixel ** pppixFirst)
 {
-    Pixel *ppix, *pDst, *ppixTemp;
-    int npix;
-    Bool ok;
-
-    npix = c << r;
+    int npix = c << r;
     if ((r >= 32) || (npix > pmap->freeRed) || (npix < c))
         return BadAlloc;
+
+    Pixel *ppixTemp;
     if (!(ppixTemp = calloc(npix, sizeof(Pixel))))
         return BadAlloc;
-    ok = AllocCP(pmap, pmap->red, c, r, contig, ppixTemp, pmask);
 
+    Bool ok = AllocCP(pmap, pmap->red, c, r, contig, ppixTemp, pmask);
     if (ok) {
 
         /* all the allocated pixels are added to the client pixel list,
          * but only the unique ones are returned to the client */
-        ppix = reallocarray(pmap->clientPixelsRed[client],
+        Pixel *ppix = reallocarray(pmap->clientPixelsRed[client],
                             pmap->numPixelsRed[client] + npix, sizeof(Pixel));
         if (!ppix) {
             for (Pixel *p = ppixTemp; p < ppixTemp + npix; p++)
@@ -1777,7 +1775,7 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         pmap->clientPixelsRed[client] = ppix;
         ppix += pmap->numPixelsRed[client];
         *pppixFirst = ppix;
-        pDst = pixels;
+        Pixel *pDst = pixels;
         for (Pixel *p = ppixTemp; p < ppixTemp + npix; p++) {
             *ppix++ = *p;
             if (p < ppixTemp + c)
