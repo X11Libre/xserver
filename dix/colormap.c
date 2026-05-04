@@ -1481,9 +1481,8 @@ FreeClientPixels(void *value, XID fakeid)
     (void) fakeid;
     void *pmap;
     colorResource *pcr = value;
-    int rc;
 
-    rc = dixLookupResourceByType(&pmap, pcr->mid, X11_RESTYPE_COLORMAP, serverClient,
+    int rc = dixLookupResourceByType(&pmap, pcr->mid, X11_RESTYPE_COLORMAP, serverClient,
                                  DixRemoveAccess);
     if (rc == Success)
         FreePixels((ColormapPtr) pmap, pcr->client);
