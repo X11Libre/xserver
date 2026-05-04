@@ -2111,19 +2111,18 @@ static int
 FreeCo(ColormapPtr pmap, int client, int color, int npixIn, Pixel * ppixIn,
        Pixel mask)
 {
-    Pixel *ppixClient, pixTest;
-    int npixClient, npixNew, npix;
-    Pixel bits, base, cmask, rgbbad;
-    Pixel *pptr, *cptr;
-    int zapped;
+    Pixel *ppixClient;
+    int npixClient;
+    Pixel cmask, rgbbad;
     int errVal = Success;
     int offset, numents;
 
     if (npixIn == 0)
         return errVal;
-    bits = 0;
-    zapped = 0;
-    base = lowbit(mask);
+
+    Pixel bits = 0;
+    int zapped = 0;
+    Pixel base = lowbit(mask);
 
     switch (color) {
     case REDMAP:
@@ -2164,9 +2163,9 @@ FreeCo(ColormapPtr pmap, int client, int color, int npixIn, Pixel * ppixIn,
     /* zap all pixels which match */
     while (1) {
         /* go through pixel list */
-        pptr = ppixIn;
+        Pixel *pptr = ppixIn;
         for (int n = npixIn; --n >= 0; pptr++) {
-            pixTest = ((*pptr | bits) & cmask) >> offset;
+            Pixel pixTest = ((*pptr | bits) & cmask) >> offset;
             if ((pixTest >= numents) || (*pptr & rgbbad)) {
                 clients[client]->errorValue = *pptr | bits;
                 errVal = BadValue;
@@ -2174,6 +2173,8 @@ FreeCo(ColormapPtr pmap, int client, int color, int npixIn, Pixel * ppixIn,
             }
 
             /* find match in client list */
+            int npix;
+            Pixel *cptr;
             for (cptr = ppixClient, npix = npixClient;
                  --npix >= 0 && *cptr != pixTest; cptr++);
 
@@ -2193,15 +2194,16 @@ FreeCo(ColormapPtr pmap, int client, int color, int npixIn, Pixel * ppixIn,
 
     /* delete freed pixels from client pixel list */
     if (zapped) {
-        npixNew = npixClient - zapped;
+        int npixNew = npixClient - zapped;
         if (npixNew) {
             /* Since the list can only get smaller, we can do a copy in
              * place and then realloc to a smaller size */
-            pptr = cptr = ppixClient;
+            Pixel *pptr = ppixClient;
+            Pixel *cptr = ppixClient;
 
             /* If we have all the new pixels, we don't have to examine the
              * rest of the old ones */
-            for (npix = 0; npix < npixNew; cptr++) {
+            for (int npix = 0; npix < npixNew; cptr++) {
                 if (*cptr != ~((Pixel) 0)) {
                     *pptr++ = *cptr;
                     npix++;
