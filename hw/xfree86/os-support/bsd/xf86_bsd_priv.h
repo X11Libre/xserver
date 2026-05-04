@@ -5,6 +5,8 @@
 #ifndef _XSERVER_XFREE86_OS_SUPPORT_BSD_PRIV_H
 #define _XSERVER_XFREE86_OS_SUPPORT_BSD_PRIV_H
 
+#include <stdbool.h>
+
 #ifdef __OpenBSD__
 #define DEV_MEM "/dev/xf86"
 #else
@@ -18,5 +20,23 @@
 #endif
 
 #define DEV_APERTURE "/dev/xf86"
+
+void xf86_bsd_acquire_vt(void);
+
+/* PCVT console driver */
+void xf86_console_pcvt_close(void);
+bool xf86_console_pcvt_open(void);
+void xf86_console_pcvt_reactivate(void);
+
+/* SYSCONS console driver */
+void xf86_console_syscons_close(void);
+bool xf86_console_syscons_open(void);
+void xf86_console_syscons_reactivate(void);
+
+/* WSCONS console driver */
+void xf86_console_wscons_close(void);
+bool xf86_console_wscons_open(void);
+
+extern int initialVT;
 
 #endif /* _XSERVER_XFREE86_OS_SUPPORT_BSD_PRIV_H */
