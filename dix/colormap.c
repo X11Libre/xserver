@@ -768,18 +768,15 @@ static int
 FindColor(ColormapPtr pmap, EntryPtr pentFirst, int size, xrgb * prgb,
           Pixel * pPixel, int channel, int client, ColorCompareProcPtr comp)
 {
-    EntryPtr pent;
-    Bool foundFree;
-    Pixel pixel, Free = 0;
-    int npix, count, *nump = NULL;
-    Pixel **pixp = NULL, *ppix;
-    xColorItem def;
-
-    foundFree = FALSE;
-
-    if ((pixel = *pPixel) >= size)
+    Pixel pixel = *pPixel;
+    if (pixel >= size)
         pixel = 0;
+
+    Pixel Free = 0;
     /* see if there is a match, and also look for a free entry */
+    bool foundFree = FALSE;
+    int count;
+    EntryPtr pent;
     for (pent = pentFirst + pixel, count = size; --count >= 0;) {
         if (pent->refcnt > 0) {
             if ((*comp) (pent, prgb)) {
@@ -828,6 +825,7 @@ FindColor(ColormapPtr pmap, EntryPtr pentFirst, int size, xrgb * prgb,
     pent->fShared = FALSE;
     pent->refcnt = (client >= 0) ? 1 : AllocTemporary;
 
+    xColorItem def;
     switch (channel) {
     case PSEUDOMAP:
         pent->co.local.red = prgb->red;
@@ -882,7 +880,10 @@ FindColor(ColormapPtr pmap, EntryPtr pentFirst, int size, xrgb * prgb,
  gotit:
     if (pmap->flags & CM_BeingCreated || client == -1)
         return Success;
+
     /* Now remember the pixel, for freeing later */
+    int *nump;
+    Pixel **pixp = NULL;
     switch (channel) {
     case PSEUDOMAP:
     case REDMAP:
@@ -900,8 +901,9 @@ FindColor(ColormapPtr pmap, EntryPtr pentFirst, int size, xrgb * prgb,
         pixp = pmap->clientPixelsBlue;
         break;
     }
-    npix = nump[client];
-    ppix = reallocarray(pixp[client], npix + 1, sizeof(Pixel));
+
+    int npix = nump[client];
+    Pixel *ppix = reallocarray(pixp[client], npix + 1, sizeof(Pixel));
     if (!ppix) {
         pent->refcnt--;
         if (!pent->fShared)
