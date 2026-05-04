@@ -2242,32 +2242,25 @@ FreeCo(ColormapPtr pmap, int client, int color, int npixIn, Pixel * ppixIn,
 int
 StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
 {
-    Pixel pix;
-    EntryPtr pent, pentT, pentLast;
-    VisualPtr pVisual;
-    SHAREDCOLOR *pred, *pgreen, *pblue;
-    int ChgRed, ChgGreen, ChgBlue, idef;
-    int class, errVal = Success;
-    int ok;
+    int errVal = Success;
 
-    class = pmap->class;
+    int class = pmap->class;
     if (!(class & DynamicClass) && !(pmap->flags & CM_BeingCreated)) {
         return BadAccess;
     }
-    pVisual = pmap->pVisual;
 
-    idef = 0;
+    VisualPtr pVisual = pmap->pVisual;
+
+    int idef = 0;
     if ((class | DynamicClass) == DirectColor) {
-        int numred, numgreen, numblue;
-        Pixel rgbbad;
-
-        numred = NUMRED(pVisual);
-        numgreen = NUMGREEN(pVisual);
-        numblue = NUMBLUE(pVisual);
-        rgbbad = ~RGBMASK(pVisual);
+        int numred = NUMRED(pVisual);
+        int numgreen = NUMGREEN(pVisual);
+        int numblue = NUMBLUE(pVisual);
+        Pixel rgbbad = ~RGBMASK(pVisual);
         int n = 0;
         for (xColorItem *pdef = defs; n < count; pdef++, n++) {
-            ok = TRUE;
+            bool ok = TRUE;
+
             (*pmap->pScreen->ResolveColor)
                 (&pdef->red, &pdef->green, &pdef->blue, pmap->pVisual);
 
@@ -2276,7 +2269,7 @@ StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
                 client->errorValue = pdef->pixel;
                 continue;
             }
-            pix = (pdef->pixel & pVisual->redMask) >> pVisual->offsetRed;
+            Pixel pix = (pdef->pixel & pVisual->redMask) >> pVisual->offsetRed;
             if (pix >= numred) {
                 errVal = BadValue;
                 ok = FALSE;
@@ -2339,8 +2332,8 @@ StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
     else {
         int n = 0;
         for (xColorItem *pdef = defs; n < count; pdef++, n++) {
+            bool ok = TRUE;
 
-            ok = TRUE;
             if (pdef->pixel >= pVisual->ColormapEntries) {
                 client->errorValue = pdef->pixel;
                 errVal = BadValue;
@@ -2366,7 +2359,7 @@ StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
             (*pmap->pScreen->ResolveColor)
                 (&pdef->red, &pdef->green, &pdef->blue, pmap->pVisual);
 
-            pent = &pmap->red[pdef->pixel];
+            EntryPtr pent = &pmap->red[pdef->pixel];
 
             if (pdef->flags & DoRed) {
                 if (pent->fShared) {
@@ -2417,15 +2410,15 @@ StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
             if (!ok) {
                 /* have to run through the colormap and change anybody who
                  * shares this value */
-                pred = pent->co.shco.red;
-                pgreen = pent->co.shco.green;
-                pblue = pent->co.shco.blue;
-                ChgRed = pdef->flags & DoRed;
-                ChgGreen = pdef->flags & DoGreen;
-                ChgBlue = pdef->flags & DoBlue;
-                pentLast = pmap->red + pVisual->ColormapEntries;
+                SHAREDCOLOR *pred = pent->co.shco.red;
+                SHAREDCOLOR *pgreen = pent->co.shco.green;
+                SHAREDCOLOR *pblue = pent->co.shco.blue;
+                int ChgRed = pdef->flags & DoRed;
+                int ChgGreen = pdef->flags & DoGreen;
+                int ChgBlue = pdef->flags & DoBlue;
+                EntryPtr pentLast = pmap->red + pVisual->ColormapEntries;
 
-                for (pentT = pmap->red; pentT < pentLast; pentT++) {
+                for (EntryPtr pentT = pmap->red; pentT < pentLast; pentT++) {
                     if (pentT->fShared && (pentT != pent)) {
                         xColorItem defChg;
 
