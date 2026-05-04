@@ -1443,7 +1443,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                     .u.colormap.window = pWin->drawable.id,
                     .u.colormap.colormap = cmap,
                     .u.colormap.new = xTrue,
-                    .u.colormap.state = IsMapInstalled(cmap, pWin)
+                    .u.colormap.state = (!!IsMapInstalled(cmap, pWin))
                 };
                 xE.u.u.type = ColormapNotify;
                 DeliverEvents(pWin, &xE, 1, NullWindow);
@@ -1586,7 +1586,7 @@ ProcGetWindowAttributes(ClientPtr client)
                      (pWin->realized ? IsViewable : IsUnviewable)),
         .colormap = wColormap(pWin),
         .mapInstalled = (wColormap(pWin) == None) ? xFalse
-            : IsMapInstalled(wColormap(pWin), pWin),
+            : (!!IsMapInstalled(wColormap(pWin), pWin)),
         .yourEventMask = EventMaskForClient(pWin, client),
         .allEventMasks = pWin->eventMask | wOtherEventMasks(pWin),
         .doNotPropagateMask = wDontPropagateMask(pWin),
