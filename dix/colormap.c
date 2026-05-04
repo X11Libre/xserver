@@ -1628,15 +1628,10 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
             Bool contig, Pixel * pixels, Pixel * prmask, Pixel * pgmask,
             Pixel * pbmask)
 {
-    Pixel *ppixRed, *ppixGreen, *ppixBlue;
-    Pixel *ppix;
-    int npixR, npixG, npixB;
-    Bool okR, okG, okB;
-    Pixel *rpix = 0, *gpix = 0, *bpix = 0;
 
-    npixR = c << r;
-    npixG = c << g;
-    npixB = c << b;
+    int npixR = c << r;
+    int npixG = c << g;
+    int npixB = c << b;
     if ((r >= 32) || (g >= 32) || (b >= 32) ||
         (npixR > pmap->freeRed) || (npixR < c) ||
         (npixG > pmap->freeGreen) || (npixG < c) ||
@@ -1647,9 +1642,9 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     for (Pixel *p = pixels; p < pixels + c; p++)
         *p = 0;
 
-    ppixRed = calloc(npixR, sizeof(Pixel));
-    ppixGreen = calloc(npixG, sizeof(Pixel));
-    ppixBlue = calloc(npixB, sizeof(Pixel));
+    Pixel *ppixRed = calloc(npixR, sizeof(Pixel));
+    Pixel *ppixGreen = calloc(npixG, sizeof(Pixel));
+    Pixel *ppixBlue = calloc(npixB, sizeof(Pixel));
     if (!ppixRed || !ppixGreen || !ppixBlue) {
         free(ppixBlue);
         free(ppixGreen);
@@ -1657,9 +1652,11 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
         return BadAlloc;
     }
 
-    okR = AllocCP(pmap, pmap->red, c, r, contig, ppixRed, prmask);
-    okG = AllocCP(pmap, pmap->green, c, g, contig, ppixGreen, pgmask);
-    okB = AllocCP(pmap, pmap->blue, c, b, contig, ppixBlue, pbmask);
+    Bool okR = AllocCP(pmap, pmap->red, c, r, contig, ppixRed, prmask);
+    Bool okG = AllocCP(pmap, pmap->green, c, g, contig, ppixGreen, pgmask);
+    Bool okB = AllocCP(pmap, pmap->blue, c, b, contig, ppixBlue, pbmask);
+
+    Pixel *rpix = 0, *gpix = 0, *bpix = 0;
 
     if (okR && okG && okB) {
         rpix = reallocarray(pmap->clientPixelsRed[client],
@@ -1681,17 +1678,17 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
 
     if (!okR || !okG || !okB || !rpix || !gpix || !bpix) {
         if (okR) {
-            ppix = ppixRed;
+            Pixel *ppix = ppixRed;
             for (int npix = npixR; --npix >= 0; ppix++)
                 pmap->red[*ppix].refcnt = 0;
         }
         if (okG) {
-            ppix = ppixGreen;
+            Pixel *ppix = ppixGreen;
             for (int npix = npixG; --npix >= 0; ppix++)
                 pmap->green[*ppix].refcnt = 0;
         }
         if (okB) {
-            ppix = ppixBlue;
+            Pixel *ppix = ppixBlue;
             for (int npix = npixB; --npix >= 0; ppix++)
                 pmap->blue[*ppix].refcnt = 0;
         }
@@ -1705,7 +1702,7 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     *pgmask <<= pmap->pVisual->offsetGreen;
     *pbmask <<= pmap->pVisual->offsetBlue;
 
-    ppix = rpix + pmap->numPixelsRed[client];
+    Pixel *ppix = rpix + pmap->numPixelsRed[client];
     for (Pixel *pDst = pixels, *p = ppixRed; p < ppixRed + npixR; p++) {
         *ppix++ = *p;
         if (p < ppixRed + c)
