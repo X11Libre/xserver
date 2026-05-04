@@ -2077,19 +2077,20 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
 int
 FreeColors(ColormapPtr pmap, int client, int count, Pixel * pixels, Pixel mask)
 {
-    int rval, result, class;
-    Pixel rmask;
+    int result = Success;
+    int class = pmap->class;
 
-    class = pmap->class;
     if (pmap->flags & CM_AllAllocated)
         return BadAccess;
+
+    Pixel rmask = 0;
     if ((class | DynamicClass) == DirectColor) {
         rmask = mask & RGBMASK(pmap->pVisual);
         result = FreeCo(pmap, client, REDMAP, count, pixels,
                         mask & pmap->pVisual->redMask);
         /* If any of the three calls fails, we must report that, if more
          * than one fails, it's ok that we report the last one */
-        rval = FreeCo(pmap, client, GREENMAP, count, pixels,
+        int rval = FreeCo(pmap, client, GREENMAP, count, pixels,
                       mask & pmap->pVisual->greenMask);
         if (rval != Success)
             result = rval;
