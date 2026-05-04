@@ -1550,17 +1550,12 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
                  int r, int g, int b, Bool contig, Pixel * pixels,
                  Pixel * prmask, Pixel * pgmask, Pixel * pbmask)
 {
-    int ok;
-    Pixel mask, *ppixFirst;
-    Pixel shift;
-    int class;
-    int oldcount;
     colorResource *pcr = (colorResource *) NULL;
 
-    class = pmap->class;
+    int class = pmap->class;
     if (!(class & DynamicClass))
         return BadAlloc;        /* Shouldn't try on this type */
-    oldcount = pmap->numPixelsRed[client];
+    int oldcount = pmap->numPixelsRed[client];
     if (class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
     if (!oldcount && (dixClientIdForXID(pmap->mid) != client)) {
@@ -1569,6 +1564,7 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
             return BadAlloc;
     }
 
+    int ok;
     if (class == DirectColor) {
         ok = AllocDirect(client, pmap, colors, r, g, b, contig, pixels,
                          prmask, pgmask, pbmask);
@@ -1579,13 +1575,14 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
          * r + g + b bits to be contiguous.  Should only force contiguity
          * per mask
          */
+        Pixel mask, *ppixFirst;
         ok = AllocPseudo(client, pmap, colors, r + g + b, contig, pixels,
                          &mask, &ppixFirst);
 
         if (ok == Success) {
             /* now split that mask into three */
             *prmask = *pgmask = *pbmask = 0;
-            shift = 1;
+            Pixel shift = 1;
             for (int i = r; --i >= 0; shift += shift) {
                 while (!(mask & shift))
                     shift += shift;
