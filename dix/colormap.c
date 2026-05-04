@@ -537,22 +537,20 @@ int
 CopyColormapAndFree(Colormap mid, ColormapPtr pSrc, int client)
 {
     ColormapPtr pmap = (ColormapPtr) NULL;
-    int result, alloc, size;
-    Colormap midSrc;
-    ScreenPtr pScreen;
-    VisualPtr pVisual;
 
-    pScreen = pSrc->pScreen;
-    pVisual = pSrc->pVisual;
-    midSrc = pSrc->mid;
-    alloc = ((pSrc->flags & CM_AllAllocated) && dixClientIdForXID(midSrc) == client) ?
+    ScreenPtr pScreen = pSrc->pScreen;
+    VisualPtr pVisual = pSrc->pVisual;
+
+    const int alloc = ((pSrc->flags & CM_AllAllocated) && dixClientIdForXID(pSrc->mid) == client) ?
         AllocAll : AllocNone;
-    size = pVisual->ColormapEntries;
+    const int size = pVisual->ColormapEntries;
 
     /* If the create returns non-0, it failed */
-    result = dixCreateColormap(mid, pScreen, pVisual, &pmap, alloc, clients[client]);
-    if (result != Success)
-        return result;
+    {
+        const int result = dixCreateColormap(mid, pScreen, pVisual, &pmap, alloc, clients[client]);
+        if (result != Success)
+            return result;
+    }
     if (alloc == AllocAll) {
         memmove((char *) pmap->red, (char *) pSrc->red, size * sizeof(Entry));
         if ((pmap->class | DynamicClass) == DirectColor) {
