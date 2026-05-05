@@ -325,27 +325,23 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
                  unsigned short backRed, unsigned short backGreen, unsigned short backBlue,
                  CursorPtr *ppCurs, ClientPtr client, XID cid)
 {
-    FontPtr sourcefont, maskfont;
-    unsigned char *srcbits;
-    unsigned char *mskbits;
-    CursorMetricRec cm;
-    int rc;
-    CursorBitsPtr bits;
-    CursorPtr pCurs;
-    GlyphSharePtr pShare;
-
-    rc = dixLookupResourceByType((void **) &sourcefont, source, X11_RESTYPE_FONT,
+    FontPtr sourcefont;
+    int rc = dixLookupResourceByType((void **) &sourcefont, source, X11_RESTYPE_FONT,
                                  client, DixUseAccess);
     if ((rc != Success) || (!sourcefont)) {
         client->errorValue = source;
         return rc;
     }
+
+    FontPtr maskfont;
     rc = dixLookupResourceByType((void **) &maskfont, mask, X11_RESTYPE_FONT, client,
                                  DixUseAccess);
     if (rc != Success && mask != None) {
         client->errorValue = mask;
         return rc;
     }
+
+    GlyphSharePtr pShare;
     if (sourcefont != maskfont)
         pShare = (GlyphSharePtr) NULL;
     else {
@@ -355,6 +351,9 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
               (pShare->sourceChar != sourceChar) ||
               (pShare->maskChar != maskChar)); pShare = pShare->next);
     }
+
+    CursorPtr pCurs;
+    CursorBitsPtr bits;
     if (pShare) {
         pCurs = (CursorPtr) calloc(CURSOR_REC_SIZE, 1);
         if (!pCurs)
@@ -364,10 +363,13 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
         bits->refcnt++;
     }
     else {
+        CursorMetricRec cm;
         if (!CursorMetricsFromGlyph(sourcefont, sourceChar, &cm)) {
             client->errorValue = sourceChar;
             return BadValue;
         }
+
+        unsigned char *mskbits;
         if (!maskfont) {
             size_t n = BitmapBytePad(cm.width) * (long) cm.height;
             mskbits = calloc(1, n);
@@ -383,6 +385,8 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
             if ((rc = ServerBitsFromGlyph(maskfont, maskChar, &cm, &mskbits)))
                 return rc;
         }
+
+        unsigned char *srcbits;
         if ((rc = ServerBitsFromGlyph(sourcefont, sourceChar, &cm, &srcbits))) {
             free(mskbits);
             return rc;
