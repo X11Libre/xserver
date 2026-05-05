@@ -336,13 +336,10 @@ static ClientPtr
 SmartScheduleClient(void)
 {
     ClientPtr pClient, best = NULL;
-    int bestRobin, robin;
     long now = SmartScheduleTime;
-    long idle;
     int nready = 0;
-
-    bestRobin = 0;
-    idle = 2 * SmartScheduleSlice;
+    int bestRobin = 0;
+    long idle = 2 * SmartScheduleSlice;
 
     xorg_list_for_each_entry(pClient, &ready_clients, ready) {
         nready++;
@@ -354,7 +351,7 @@ SmartScheduleClient(void)
         }
 
         /* check priority to select best client */
-        robin =
+        int robin =
             (pClient->index -
              SmartLastIndex[pClient->smart_priority -
                             SMART_MIN_PRIORITY]) & 0xff;
