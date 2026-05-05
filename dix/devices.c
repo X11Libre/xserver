@@ -1190,33 +1190,30 @@ CloseOneDevice(const DeviceIntPtr dev, DeviceIntPtr *listHead)
 int
 RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
 {
-    int ret = BadMatch;
-    ScreenPtr masterScreen = dixGetMasterScreen();
-    int deviceid;
-    int initialized;
-    int flags[MAXDEVICES] = { 0 };
-    int flag;
-
     DebugF("(dix) removing device %d\n", dev->id);
 
     if (!dev || dev == inputInfo.keyboard || dev == inputInfo.pointer)
         return BadImplementation;
 
-    initialized = dev->inited;
-    deviceid = dev->id;
+    int initialized = dev->inited;
+    int deviceid = dev->id;
+    int flags[MAXDEVICES] = { 0 };
 
     if (initialized) {
-        if (DevHasCursor(dev))
+        if (DevHasCursor(dev)) {
+            ScreenPtr masterScreen = dixGetMasterScreen();
             masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
+        }
 
         DisableDevice(dev, sendevent);
         flags[dev->id] = XIDeviceDisabled;
     }
 
-    flag = InputDevIsMaster(dev) ? XIMasterRemoved : XISlaveRemoved;
+    int flag = InputDevIsMaster(dev) ? XIMasterRemoved : XISlaveRemoved;
 
     input_lock();
 
+    int ret = BadMatch;
     if ((ret = CloseOneDevice(dev, &inputInfo.devices)) == Success ||
         (ret = CloseOneDevice(dev, &inputInfo.off_devices)) == Success)
         flags[deviceid] = flag;
