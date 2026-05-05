@@ -239,16 +239,13 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
                 unsigned short backRed, unsigned short backGreen, unsigned short backBlue,
                 CursorPtr *ppCurs, ClientPtr client, XID cid)
 {
-    CursorBitsPtr bits;
-    CursorPtr pCurs;
-    int rc;
-
     *ppCurs = NULL;
-    pCurs = (CursorPtr) calloc(CURSOR_REC_SIZE + CURSOR_BITS_SIZE, 1);
+
+    CursorPtr pCurs = (CursorPtr) calloc(CURSOR_REC_SIZE + CURSOR_BITS_SIZE, 1);
     if (!pCurs)
         return BadAlloc;
 
-    bits = (CursorBitsPtr) ((char *) pCurs + CURSOR_REC_SIZE);
+    CursorBitsPtr bits = (CursorBitsPtr) ((char *) pCurs + CURSOR_REC_SIZE);
     dixInitPrivates(pCurs, pCurs + 1, PRIVATE_CURSOR);
     dixInitPrivates(bits, bits + 1, PRIVATE_CURSOR_BITS)
         bits->source = psrcbits;
@@ -276,7 +273,7 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
     pCurs->id = cid;
 
     /* security creation/labeling check */
-    rc = XaceHookResourceAccess(client, cid, X11_RESTYPE_CURSOR,
+    int rc = XaceHookResourceAccess(client, cid, X11_RESTYPE_CURSOR,
                   pCurs, X11_RESTYPE_NONE, NULL, DixCreateAccess);
     if (rc != Success)
         goto error;
