@@ -48,6 +48,7 @@ SOFTWARE.
 
 #include <math.h>
 #include <pixman.h>
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>
@@ -1055,18 +1056,13 @@ CloseDevice(DeviceIntPtr dev)
 static void
 CloseDeviceList(DeviceIntPtr *listHead)
 {
-    /* Used to mark devices that we tried to free */
-    Bool freedIds[MAXDEVICES];
-    DeviceIntPtr dev;
-
     if (listHead == NULL)
         return;
 
-    for (int i = 0; i < MAXDEVICES; i++)
-        freedIds[i] = FALSE;
-
-    dev = *listHead;
+    DeviceIntPtr dev = *listHead;
     while (dev != NULL) {
+        /* Used to mark devices that we tried to free */
+        bool freedIds[MAXDEVICES] = { 0 };
         freedIds[dev->id] = TRUE;
         DeleteInputDeviceRequest(dev);
 
