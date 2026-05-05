@@ -2384,18 +2384,16 @@ MaybeStopHint(DeviceIntPtr dev, ClientPtr client)
 int
 ProcGetMotionEvents(ClientPtr client)
 {
-    WindowPtr pWin;
-    int count, xmin, xmax, ymin, ymax, rc;
-    unsigned long nEvents;
-    DeviceIntPtr mouse = PickPointer(client);
-    TimeStamp start, stop;
-
     REQUEST(xGetMotionEventsReq);
     REQUEST_SIZE_MATCH(xGetMotionEventsReq);
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
+
+    DeviceIntPtr mouse = PickPointer(client);
+
     rc = dixCallDeviceAccessCallback(client, mouse, DixReadAccess);
     if (rc != Success)
         return rc;
@@ -2406,9 +2404,9 @@ ProcGetMotionEvents(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    nEvents = 0;
-    start = ClientTimeToServerTime(stuff->start);
-    stop = ClientTimeToServerTime(stuff->stop);
+    unsigned long nEvents = 0;
+    TimeStamp start = ClientTimeToServerTime(stuff->start);
+    TimeStamp stop = ClientTimeToServerTime(stuff->stop);
     if ((CompareTimeStamps(start, stop) != LATER) &&
         (CompareTimeStamps(start, currentTime) != LATER) &&
         mouse->valuator->numMotionEvents) {
@@ -2417,14 +2415,14 @@ ProcGetMotionEvents(ClientPtr client)
 
         xTimecoord *coords = NULL;
 
-        count = GetMotionHistory(mouse, &coords, start.milliseconds,
+        int count = GetMotionHistory(mouse, &coords, start.milliseconds,
                                  stop.milliseconds, pWin->drawable.pScreen,
                                  TRUE);
-        xmin = pWin->drawable.x - wBorderWidth(pWin);
-        xmax = pWin->drawable.x + (int) pWin->drawable.width +
+        int xmin = pWin->drawable.x - wBorderWidth(pWin);
+        int xmax = pWin->drawable.x + (int) pWin->drawable.width +
             wBorderWidth(pWin);
-        ymin = pWin->drawable.y - wBorderWidth(pWin);
-        ymax = pWin->drawable.y + (int) pWin->drawable.height +
+        int ymin = pWin->drawable.y - wBorderWidth(pWin);
+        int ymax = pWin->drawable.y + (int) pWin->drawable.height +
             wBorderWidth(pWin);
         for (int i = 0; i < count; i++)
             if ((xmin <= coords[i].x) && (coords[i].x < xmax) &&
