@@ -869,15 +869,15 @@ ProcChangeSaveSet(ClientPtr client)
 int
 ProcReparentWindow(ClientPtr client)
 {
-    WindowPtr pWin, pParent;
-
     REQUEST(xReparentWindowReq);
-    int rc;
-
     REQUEST_SIZE_MATCH(xReparentWindowReq);
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
+
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
     if (rc != Success)
         return rc;
+
+    WindowPtr pParent;
     rc = dixLookupWindow(&pParent, stuff->parent, client, DixAddAccess);
     if (rc != Success)
         return rc;
