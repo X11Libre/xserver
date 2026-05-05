@@ -460,14 +460,10 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
 Bool
 DisableDevice(DeviceIntPtr dev, BOOL sendevent)
 {
-    DeviceIntPtr *prev;
-    BOOL enabled;
-    BOOL dev_in_devices_list = FALSE;
-    int flags[MAXDEVICES] = { 0 };
-
     if (!dev->enabled)
         return TRUE;
 
+    BOOL dev_in_devices_list = FALSE;
     for (DeviceIntPtr other = inputInfo.devices; other; other = other->next) {
         if (other == dev) {
             dev_in_devices_list = TRUE;
@@ -485,6 +481,7 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
     dev->idle_counter = NULL;
 
     /* float attached devices */
+    int flags[MAXDEVICES] = { 0 };
     if (InputDevIsMaster(dev)) {
         for (DeviceIntPtr other = inputInfo.devices; other; other = other->next) {
             if (!InputDevIsMaster(other) && GetMaster(other, MASTER_ATTACHED) == dev) {
@@ -533,6 +530,7 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
     LeaveWindow(dev);
     SetFocusOut(dev);
 
+    DeviceIntPtr *prev;
     for (prev = &inputInfo.devices;
          *prev && (*prev != dev); prev = &(*prev)->next);
 
@@ -540,7 +538,7 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
     dev->next = inputInfo.off_devices;
     inputInfo.off_devices = dev;
 
-    enabled = FALSE;
+    BOOL enabled = FALSE;
     XIChangeDeviceProperty(dev, XIGetKnownProperty(XI_PROP_ENABLED),
                            XA_INTEGER, 8, PropModeReplace, 1, &enabled, TRUE);
 
