@@ -2471,14 +2471,12 @@ StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
 
 bool IsMapInstalled(Colormap map, WindowPtr pWin)
 {
-    Colormap *pmaps;
-    int nummaps;
-
-    pmaps = calloc(pWin->drawable.pScreen->maxInstalledCmaps,
+    Colormap *pmaps = calloc(pWin->drawable.pScreen->maxInstalledCmaps,
                    sizeof(Colormap));
     if (!pmaps)
         return FALSE;
-    nummaps = (*pWin->drawable.pScreen->ListInstalledColormaps)
+
+    int nummaps = (*pWin->drawable.pScreen->ListInstalledColormaps)
         (pWin->drawable.pScreen, pmaps);
 
     bool found = FALSE;
