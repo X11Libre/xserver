@@ -2452,19 +2452,17 @@ ProcGetMotionEvents(ClientPtr client)
 int
 ProcQueryKeymap(ClientPtr client)
 {
-    int rc;
-    DeviceIntPtr keybd = PickKeyboard(client);
-    CARD8 *down = keybd->key->down;
-
     REQUEST_SIZE_MATCH(xReq);
 
     xQueryKeymapReply reply = { 0 };
 
-    rc = dixCallDeviceAccessCallback(client, keybd, DixReadAccess);
+    DeviceIntPtr keybd = PickKeyboard(client);
+    int rc = dixCallDeviceAccessCallback(client, keybd, DixReadAccess);
     /* If rc is Success, we're allowed to copy out the keymap.
      * If it's BadAccess, we leave it empty & lie to the client.
      */
     if (rc == Success) {
+        CARD8 *down = keybd->key->down;
         for (int i = 0; i < 32; i++)
             reply.map[i] = down[i];
     }
