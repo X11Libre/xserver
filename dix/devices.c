@@ -2739,19 +2739,16 @@ AllocDevicePair(ClientPtr client, const char *name,
                 DeviceIntPtr *keybd,
                 DeviceProc ptr_proc, DeviceProc keybd_proc, Bool master)
 {
-    DeviceIntPtr pointer;
-    DeviceIntPtr keyboard;
-    char *dev_name;
-
     *ptr = *keybd = NULL;
 
     XkbInitPrivates();
 
-    pointer = AddInputDevice(client, ptr_proc, TRUE);
+    DeviceIntPtr pointer = AddInputDevice(client, ptr_proc, TRUE);
 
     if (!pointer)
         return BadAlloc;
 
+    char *dev_name;
     if (asprintf(&dev_name, "%s pointer", name) == -1) {
         goto remove_pointer;
     }
@@ -2769,7 +2766,7 @@ AllocDevicePair(ClientPtr client, const char *name,
     pointer->last.slave = NULL;
     pointer->type = (master) ? MASTER_POINTER : SLAVE;
 
-    keyboard = AddInputDevice(client, keybd_proc, TRUE);
+    DeviceIntPtr keyboard = AddInputDevice(client, keybd_proc, TRUE);
     if (!keyboard) {
         goto remove_pointer;
     }
