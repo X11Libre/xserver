@@ -2845,15 +2845,14 @@ void
 DeliverDeviceClassesChangedEvent(int sourceid, Time time)
 {
     DeviceIntPtr dev;
-    int num_events = 0;
-    InternalEvent dcce;
-
     dixLookupDevice(&dev, sourceid, serverClient, DixWriteAccess);
 
     if (!dev)
         return;
 
     /* UpdateFromMaster generates at most one event */
+    int num_events = 0;
+    InternalEvent dcce = { 0 };
     UpdateFromMaster(&dcce, dev, DEVCHANGE_POINTER_EVENT, &num_events);
     BUG_WARN(num_events > 1);
 
