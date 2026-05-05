@@ -38,13 +38,16 @@ BOOL device_is_duplicate(const char *config_info);
 int config_udev_pre_init(void);
 int config_udev_init(void);
 void config_udev_fini(void);
-void config_udev_odev_probe(config_odev_probe_proc_ptr probe_callback);
 #elif defined(CONFIG_HAL)
 int config_hal_init(void);
 void config_hal_fini(void);
 #elif defined(CONFIG_WSCONS)
 int config_wscons_init(void);
 void config_wscons_fini(void);
+#endif
+
+#ifdef CONFIG_UDEV_KMS
+void config_udev_odev_probe(config_odev_probe_proc_ptr probe_callback);
 #endif
 
 #endif /* XSERVER_CONFIG_BACKENDS_H */
