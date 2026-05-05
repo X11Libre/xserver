@@ -2482,16 +2482,14 @@ ProcQueryKeymap(ClientPtr client)
 static void
 RecalculateMasterButtons(DeviceIntPtr slave)
 {
-    DeviceIntPtr master;
-    int maxbuttons = 0;
-
     if (!slave->button || InputDevIsMaster(slave))
         return;
 
-    master = GetMaster(slave, MASTER_POINTER);
+    DeviceIntPtr master = GetMaster(slave, MASTER_POINTER);
     if (!master)
         return;
 
+    int maxbuttons = 0;
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
         if (InputDevIsMaster(dev) ||
             GetMaster(dev, MASTER_ATTACHED) != master || !dev->button)
