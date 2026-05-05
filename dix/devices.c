@@ -2258,17 +2258,15 @@ ProcBell(ClientPtr client)
 int
 ProcChangePointerControl(ClientPtr client)
 {
-    DeviceIntPtr mouse = PickPointer(client);
-    PtrCtrl ctrl;               /* might get BadValue part way through */
-    int rc;
-
     REQUEST(xChangePointerControlReq);
     REQUEST_SIZE_MATCH(xChangePointerControlReq);
+
+    DeviceIntPtr mouse = PickPointer(client);
 
     /* If the device has no PtrFeedbackPtr, the xserver has a bug */
     BUG_RETURN_VAL (!mouse->ptrfeed, BadImplementation);
 
-    ctrl = mouse->ptrfeed->ctrl;
+    PtrCtrl ctrl = mouse->ptrfeed->ctrl;
     if ((stuff->doAccel != xTrue) && (stuff->doAccel != xFalse)) {
         client->errorValue = stuff->doAccel;
         return BadValue;
@@ -2317,7 +2315,7 @@ ProcChangePointerControl(ClientPtr client)
         if ((dev == mouse ||
              (!InputDevIsMaster(dev) && GetMaster(dev, MASTER_POINTER) == mouse)) &&
             dev->ptrfeed) {
-            rc = dixCallDeviceAccessCallback(client, dev, DixManageAccess);
+            int rc = dixCallDeviceAccessCallback(client, dev, DixManageAccess);
             if (rc != Success)
                 return rc;
         }
