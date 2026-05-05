@@ -1760,11 +1760,10 @@ ProcSetModifierMapping(ClientPtr client)
 int
 ProcGetModifierMapping(ClientPtr client)
 {
-    int max_keys_per_mod = 0;
-    KeyCode *modkeymap = NULL;
-
     REQUEST_SIZE_MATCH(xReq);
 
+    int max_keys_per_mod = 0;
+    KeyCode *modkeymap = NULL;
     generate_modkeymap(client, PickKeyboard(client), &modkeymap,
                        &max_keys_per_mod);
 
