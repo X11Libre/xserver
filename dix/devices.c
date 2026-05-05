@@ -1784,18 +1784,13 @@ int
 ProcChangeKeyboardMapping(ClientPtr client)
 {
     REQUEST(xChangeKeyboardMappingReq);
-    unsigned len;
-    KeySymsRec keysyms;
-    DeviceIntPtr pDev;
-    int rc;
-
     REQUEST_AT_LEAST_SIZE(xChangeKeyboardMappingReq);
 
-    len = client->req_len - bytes_to_int32(sizeof(xChangeKeyboardMappingReq));
+    unsigned len = client->req_len - bytes_to_int32(sizeof(xChangeKeyboardMappingReq));
     if (len != (stuff->keyCodes * stuff->keySymsPerKeyCode))
         return BadLength;
 
-    pDev = PickKeyboard(client);
+    DeviceIntPtr pDev = PickKeyboard(client);
 
     if ((stuff->firstKeyCode < pDev->key->xkbInfo->desc->min_key_code) ||
         (stuff->firstKeyCode > pDev->key->xkbInfo->desc->max_key_code)) {
@@ -1810,12 +1805,14 @@ ProcChangeKeyboardMapping(ClientPtr client)
         return BadValue;
     }
 
-    keysyms.minKeyCode = stuff->firstKeyCode;
-    keysyms.maxKeyCode = stuff->firstKeyCode + stuff->keyCodes - 1;
-    keysyms.mapWidth = stuff->keySymsPerKeyCode;
-    keysyms.map = (KeySym *) &stuff[1];
+    KeySymsRec keysyms = {
+        .minKeyCode = stuff->firstKeyCode,
+        .maxKeyCode = stuff->firstKeyCode + stuff->keyCodes - 1,
+        .mapWidth = stuff->keySymsPerKeyCode,
+        .map = (KeySym *) &stuff[1],
+    };
 
-    rc = dixCallDeviceAccessCallback(client, pDev, DixManageAccess);
+    int rc = dixCallDeviceAccessCallback(client, pDev, DixManageAccess);
     if (rc != Success)
         return rc;
 
