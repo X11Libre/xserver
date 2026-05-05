@@ -484,22 +484,21 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
 CursorPtr
 CreateRootCursor(void)
 {
-    CursorPtr curs;
-    FontPtr cursorfont;
-    int err;
-    XID fontID;
     const char defaultCursorFont[] = "cursor";
 
-    fontID = dixAllocServerXID();
-    err = OpenFont(serverClient, fontID, FontLoadAll | FontOpenSync,
+    XID fontID = dixAllocServerXID();
+    int err = OpenFont(serverClient, fontID, FontLoadAll | FontOpenSync,
                    (unsigned) strlen(defaultCursorFont), defaultCursorFont);
     if (err != Success)
         return NullCursor;
 
+    FontPtr cursorfont;
     err = dixLookupResourceByType((void **) &cursorfont, fontID, X11_RESTYPE_FONT,
                                   serverClient, DixReadAccess);
     if (err != Success)
         return NullCursor;
+
+    CursorPtr curs;
     if (AllocGlyphCursor(fontID, 0, fontID, 1, 0, 0, 0, (unsigned short)~0U, (unsigned short)~0U, (unsigned short)~0U,
                          &curs, serverClient, (XID) 0) != Success)
         return NullCursor;
