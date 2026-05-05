@@ -1842,10 +1842,6 @@ ProcChangeKeyboardMapping(ClientPtr client)
 int
 ProcSetPointerMapping(ClientPtr client)
 {
-    BYTE *map;
-    int ret;
-    DeviceIntPtr ptr = PickPointer(client);
-
     REQUEST(xSetPointerMappingReq);
     REQUEST_AT_LEAST_SIZE(xSetPointerMappingReq);
 
@@ -1853,7 +1849,8 @@ ProcSetPointerMapping(ClientPtr client)
         bytes_to_int32(sizeof(xSetPointerMappingReq) + stuff->nElts))
         return BadLength;
 
-    map = (BYTE *) &stuff[1];
+    BYTE *map = (BYTE *) &stuff[1];
+    DeviceIntPtr ptr = PickPointer(client);
 
     /* So we're bounded here by the number of core buttons.  This check
      * probably wants disabling through XFixes. */
@@ -1877,7 +1874,7 @@ ProcSetPointerMapping(ClientPtr client)
         }
     }
 
-    ret = ApplyPointerMapping(ptr, map, stuff->nElts, client);
+    int ret = ApplyPointerMapping(ptr, map, stuff->nElts, client);
 
     if (ret == -1)
         return BadValue;
