@@ -1943,21 +1943,17 @@ ProcGetKeyboardMapping(ClientPtr client)
 int
 ProcGetPointerMapping(ClientPtr client)
 {
+    REQUEST_SIZE_MATCH(xReq);
 
     /* Apps may get different values each time they call GetPointerMapping as
      * the ClientPointer could change. */
     DeviceIntPtr ptr = PickPointer(client);
-    ButtonClassPtr butc = ptr->button;
-    int nElts;
-    int rc;
-
-    REQUEST_SIZE_MATCH(xReq);
-
-    rc = dixCallDeviceAccessCallback(client, ptr, DixGetAttrAccess);
+    int rc = dixCallDeviceAccessCallback(client, ptr, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    nElts = (butc) ? butc->numButtons : 0;
+    ButtonClassPtr butc = ptr->button;
+    int nElts = (butc) ? butc->numButtons : 0;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_binary_pad(&rpcbuf, &butc->map[1], nElts);
