@@ -676,10 +676,9 @@ CorePointerProc(DeviceIntPtr pDev, int what)
 {
 #define NBUTTONS 10
 #define NAXES 2
-    BYTE map[NBUTTONS + 1];
+    BYTE map[NBUTTONS + 1] = { 0 };
     Atom btn_labels[NBUTTONS] = { 0 };
     Atom axes_labels[NAXES] = { 0 };
-    ScreenPtr masterScreen = dixGetMasterScreen();
 
     switch (what) {
     case DEVICE_INIT:
@@ -707,6 +706,7 @@ CorePointerProc(DeviceIntPtr pDev, int what)
             return BadAlloc;    /* IPDS only fails on allocs */
         }
         /* axisVal is per-screen, last.valuators is desktop-wide */
+        ScreenPtr masterScreen = dixGetMasterScreen();
         pDev->valuator->axisVal[0] = masterScreen->width / 2;
         pDev->last.valuators[0] = pDev->valuator->axisVal[0] + masterScreen->x;
         pDev->valuator->axisVal[1] = masterScreen->height / 2;
