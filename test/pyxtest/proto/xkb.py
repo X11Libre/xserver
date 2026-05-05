@@ -89,6 +89,68 @@ def use_extension(
 
 
 @dataclass
+class GetMapRequest:
+    """xkbGetMapReq (minor opcode 8). 28 bytes."""
+
+    opcode: int
+    device_spec: int = XkbUseCoreKbd
+    full: int = 0
+    partial: int = 0
+    first_type: int = 0
+    n_types: int = 0
+    first_key_sym: int = 0
+    n_key_syms: int = 0
+    first_key_act: int = 0
+    n_key_acts: int = 0
+    first_key_behavior: int = 0
+    n_key_behaviors: int = 0
+    virtual_mods: int = 0
+    first_key_explicit: int = 0
+    n_key_explicit: int = 0
+    first_mod_map_key: int = 0
+    n_mod_map_keys: int = 0
+    first_vmod_map_key: int = 0
+    n_vmod_map_keys: int = 0
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH"  # reqType, xkbReqType, length
+            f"HHH"  # deviceSpec, full, partial
+            f"BB"  # firstType, nTypes
+            f"BB"  # firstKeySym, nKeySyms
+            f"BB"  # firstKeyAct, nKeyActs
+            f"BB"  # firstKeyBehavior, nKeyBehaviors
+            f"H"  # virtualMods
+            f"BB"  # firstKeyExplicit, nKeyExplicit
+            f"BB"  # firstModMapKey, nModMapKeys
+            f"BB"  # firstVModMapKey, nVModMapKeys
+            f"H",  # pad
+            self.opcode,
+            XkbGetMap,
+            7,  # 28 bytes = 7 words
+            self.device_spec,
+            self.full,
+            self.partial,
+            self.first_type,
+            self.n_types,
+            self.first_key_sym,
+            self.n_key_syms,
+            self.first_key_act,
+            self.n_key_acts,
+            self.first_key_behavior,
+            self.n_key_behaviors,
+            self.virtual_mods,
+            self.first_key_explicit,
+            self.n_key_explicit,
+            self.first_mod_map_key,
+            self.n_mod_map_keys,
+            self.first_vmod_map_key,
+            self.n_vmod_map_keys,
+            0,  # pad
+        )
+
+
+@dataclass
 class SetMapRequest:
     """
     xkbSetMapReq (minor opcode 9).

@@ -2,12 +2,13 @@
 #
 # Security tests for XKB extension vulnerabilities.
 
+import struct
 import time
 
 import pytest
 
 from proto import xkb
-from xclient import X11Error
+from xclient import X11Error, X11Reply
 
 
 @pytest.fixture
@@ -75,6 +76,96 @@ class TestXkbSetMapOverflows:
 
         assert xserver.is_alive, "Server crashed - missing length checks in SetMap"
 
+    def test_setmap_key_actions_totalacts_mismatch(self, xserver, xkb_xclient):
+        """
+        CheckKeyActions() validated per-key action count bytes against
+        symsPerKey but did not verify that the computed total action
+        data region fell within the request buffer. The upstream length
+        check in _XkbSetMapCheckLength() used req->totalActs from the
+        header, not the computed sum.  A crafted request with totalActs=0
+        but nonzero per-key counts would pass the length check and then
+        advance the wire pointer past the buffer.
+
+        The test queries the server's current key map via XkbGetMap to
+        learn the symsPerKey values, then crafts a SetMap with
+        XkbKeyActionsMask where the per-key counts match symsPerKey but
+        totalActs is set to 0.
+
+        Fixed in commit a439a7340ad9 ("xkb: Add bounds check for action
+        data in CheckKeyActions()").
+        """
+        xclient, opcode = xkb_xclient
+
+        # Step 1: Query the server's key sym map to learn symsPerKey
+        get_map = xkb.GetMapRequest(opcode=opcode, full=xkb.XkbKeySymsMask)
+        xclient.send_request(get_map.to_bytes())
+        resp = xclient.recv_response(timeout=5.0)
+        assert isinstance(resp, X11Reply), f"Expected GetMap reply, got {resp}"
+
+        data = resp.data
+        min_key = data[10]
+        max_key = data[11]
+        first_key_sym = data[17]
+        n_key_syms = data[20]
+
+        # Parse xkbSymMapWireDesc entries to extract nSyms per key
+        offset = 40  # variable data starts after 40-byte reply header
+        syms_per_key = {}
+        for i in range(n_key_syms):
+            n_syms = struct.unpack_from("<H", data, offset + 6)[0]
+            syms_per_key[first_key_sym + i] = n_syms
+            offset += 8 + n_syms * 4
+
+        # Step 2: Find a range of keys with nonzero symsPerKey
+        first_key_act = min_key
+        n_key_acts = 5
+        act_counts = []
+        for kc in sorted(syms_per_key.keys()):
+            act_counts = [syms_per_key.get(kc + i, 0) for i in range(n_key_acts)]
+            if sum(act_counts) > 0:
+                first_key_act = kc
+                break
+
+        real_n_acts = sum(act_counts)
+        assert real_n_acts > 0, "No keys with nonzero symsPerKey found"
+
+        # Step 3: Build SetMap with totalActs=0 but matching per-key counts
+        # The length check expects totalActs*8 bytes of action data,
+        # so totalActs=0 means no action data. But CheckKeyActions will
+        # compute nActs = real_n_acts and try to advance past the buffer.
+        act_bytes = bytes(act_counts)
+        pad_len = (4 - len(act_bytes) % 4) % 4
+        payload = act_bytes + b"\x00" * pad_len
+
+        req = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyActionsMask,
+            min_key_code=min_key,
+            max_key_code=max_key,
+            first_key_act=first_key_act,
+            n_key_acts=n_key_acts,
+            total_acts=0,  # Mismatch: real sum is real_n_acts
+            payload=payload,
+        )
+        xclient.send_request(req.to_bytes())
+        resps = xclient.flush_responses(timeout=0.5)
+        errors = [r for r in resps if isinstance(r, X11Error)]
+
+        # With the fix, CheckKeyActions returns BadValue (2) with
+        # error code 0x25 in the resource_id.  Without the fix, the
+        # wire pointer advances past the buffer and a later check
+        # returns BadLength (16).
+        bad_value_errors = [e for e in errors if e.error_code == 2]
+        assert bad_value_errors, (
+            "SetMap with totalActs=0 but nonzero per-key action counts "
+            "was not rejected with BadValue - server is missing the "
+            "CheckKeyActions bounds check"
+        )
+
+        assert xserver.is_alive, (
+            "Server crashed - CheckKeyActions totalActs mismatch OOB"
+        )
+
 
 class TestXkbSetGeometry:
     """Tests for XKB SetGeometry OOB vulnerabilities."""
@@ -82,16 +173,7 @@ class TestXkbSetGeometry:
     def _build_colors(self, n, byte_order="<"):
         """Build n color strings for geometry payload."""
         data = b""
-        colors = [
-            "white",
-            "black",
-            "red",
-            "green",
-            "blue",
-            "yellow",
-            "cyan",
-            "magenta",
-        ]
+        colors = ["white", "black", "red", "green", "blue", "yellow"]
         for i in range(n):
             data += xkb.build_counted_string(
                 colors[i % len(colors)], byte_order=byte_order
@@ -134,6 +216,182 @@ class TestXkbSetGeometry:
         assert resp.error_code == 16, (
             f"Expected BadLength (16), got error code {resp.error_code} - "
             f"missing bounds check in SetGeometry section parsing"
+        )
+
+    @pytest.mark.parametrize("which_ndx", ["primaryNdx", "approxNdx"])
+    def test_primary_approx_ndx_oob(self, xserver, xkb_xclient, which_ndx):
+        """
+        _CheckSetShapes stores shape->primary from a client-controlled
+        primaryNdx without validating it against nOutlines. A client
+        can set primaryNdx to a value >= nOutlines, causing
+        shape->primary to point past the outlines array (OOB pointer).
+
+        Fixed in commit 86a321ad9821 ("xkb: Fix out-of-bounds array
+        access in _CheckSetShapes()").
+        """
+        xclient, opcode = xkb_xclient
+
+        n_colors = 2
+        color_data = self._build_colors(n_colors)
+        name_atom = xclient.intern_atom("TestGeomPrimNdx")
+        shape_atom = xclient.intern_atom("TestShapePrim")
+
+        # Create a label font string (counted string)
+        label_font = xkb.build_counted_string("")
+
+        # Build a shape with 1 outline but primaryNdx=200 (far OOB)
+        shape_data = xkb.ShapeWire(
+            name=shape_atom,
+            n_outlines=1,
+            primary_ndx=200 if which_ndx == "primaryNdx" else xkb.XkbNoShape,
+            approx_ndx=200 if which_ndx == "approxNdx" else xkb.XkbNoShape,
+        ).to_bytes()
+
+        payload = label_font + color_data + shape_data
+
+        req = xkb.SetGeometryRequest(
+            opcode=opcode,
+            n_shapes=1,
+            n_sections=0,
+            n_colors=n_colors,
+            base_color_ndx=0,
+            label_color_ndx=1,
+            name_atom=name_atom,
+            payload=payload,
+        )
+        xclient.send_request(req.to_bytes())
+        resps = xclient.flush_responses(timeout=0.5)
+        errors = [r for r in resps if isinstance(r, X11Error)]
+
+        bad_value_errors = [e for e in errors if e.error_code == 2]
+        assert bad_value_errors, (
+            f"SetGeometry with {which_ndx}=200 nOutlines=1 was not rejected "
+            f"with BadValue - server is missing the {which_ndx} bounds check"
+        )
+
+        assert xserver.is_alive, "Server crashed - SetGeometry primaryNdx OOB"
+
+    @pytest.mark.parametrize("which_color", ["Base", "Label"])
+    def test_base_color_ndx_off_by_one(self, xserver, xkb_xclient, which_color):
+        """
+        _CheckSetGeom validated baseColorNdx with '>' instead of '>='
+        when comparing against nColors. With nColors=2, baseColorNdx=2
+        (which is the count, not a valid 0-based index) would pass the
+        check but access one element past the colors array.
+
+        Fixed in commit 6b6e8020b902 ("xkb: Fix off-by-one in color
+        index validation in _CheckSetGeom()").
+        """
+        xclient, opcode = xkb_xclient
+
+        n_colors = 2
+        color_data = self._build_colors(n_colors)
+        name_atom = xclient.intern_atom(f"TestGeom{which_color}Color")
+        shape_atom = xclient.intern_atom("TestShapeBaseClr")
+
+        # Label font must parse successfully to reach the color index checks
+        label_font = xkb.build_counted_string("")
+
+        # Need at least one shape (nShapes >= 1) so that _CheckSetShapes
+        # doesn't reject the request before the color OOB at line 5682
+        # can be detected by valgrind.
+        shape_data = xkb.ShapeWire(name=shape_atom, n_outlines=1).to_bytes()
+
+        # baseColorNdx=2 with nColors=2: valid indices are 0,1
+        # Old code: 2 > 2 is false, so it passes through to the OOB
+        #           read at geom->colors[2] (detected by valgrind)
+        # Fixed code: 2 >= 2 is true, so it's rejected with BadMatch
+        req = xkb.SetGeometryRequest(
+            opcode=opcode,
+            n_shapes=1,
+            n_sections=0,
+            n_colors=n_colors,
+            base_color_ndx=n_colors
+            if which_color == "Base"
+            else 0,  # Off-by-one: == nColors
+            label_color_ndx=n_colors if which_color == "Label" else 0,
+            name_atom=name_atom,
+            payload=label_font + color_data + shape_data,
+        )
+        xclient.send_request(req.to_bytes())
+        resps = xclient.flush_responses(timeout=0.5)
+        errors = [r for r in resps if isinstance(r, X11Error)]
+
+        # With the fix, we get BadMatch (8) from the color index check.
+        # Without the fix, the OOB access happens silently and the
+        # request succeeds (no error), so valgrind catches it.
+        match_errors = [e for e in errors if e.error_code == 8]
+        assert match_errors, (
+            f"SetGeometry with {which_color}ColorNdx=nColors was not rejected with "
+            f"BadMatch - server is missing the off-by-one check"
+        )
+
+        assert xserver.is_alive, (
+            f"Server crashed - SetGeometry {which_color}ColorNdx off-by-one"
+        )
+
+    def test_overlay_row_under_off_by_one(self, xserver, xkb_xclient):
+        """
+        _CheckSetOverlay validated rWire->rowUnder with '>' instead of
+        '>='. With a section having 1 row, rowUnder=1 (which is the
+        count, not a valid 0-based index) would pass the check but
+        reference an out-of-bounds row.
+
+        Fixed in commit ed19312c4bda ("xkb: Fix off-by-one and NULL
+        dereferences in _CheckSetOverlay()").
+        """
+        xclient, opcode = xkb_xclient
+
+        n_colors = 2
+        color_data = self._build_colors(n_colors)
+        name_atom = xclient.intern_atom("TestGeomOverlay")
+        shape_atom = xclient.intern_atom("TestShapeOvl")
+        section_atom = xclient.intern_atom("TestSection")
+        overlay_atom = xclient.intern_atom("TestOverlay")
+
+        label_font = xkb.build_counted_string("")
+
+        # Build a shape with 1 outline (required: nShapes >= 1)
+        shape_data = xkb.ShapeWire(name=shape_atom, n_outlines=1).to_bytes()
+
+        # Build a section with 1 row and 1 overlay.
+        # The overlay has rowUnder=1 (off-by-one: valid range is 0..0)
+        section_data = xkb.SectionWire(
+            name=section_atom, n_rows=1, n_doodads=0, n_overlays=1
+        ).to_bytes()
+        overlay_data = xkb.OverlayWire(
+            name=overlay_atom,
+            n_rows=1,
+            rows_under=[1],  # 1 is OOB (only row 0 exists)
+        ).to_bytes()
+
+        payload = label_font + color_data + shape_data + section_data + overlay_data
+
+        req = xkb.SetGeometryRequest(
+            opcode=opcode,
+            n_shapes=1,
+            n_sections=1,
+            n_colors=n_colors,
+            base_color_ndx=0,
+            label_color_ndx=1,
+            name_atom=name_atom,
+            payload=payload,
+        )
+        xclient.send_request(req.to_bytes())
+        resps = xclient.flush_responses(timeout=0.5)
+        errors = [r for r in resps if isinstance(r, X11Error)]
+
+        # With the fix, we get BadMatch (8) from the rowUnder >= num_rows check.
+        # Without the fix, rowUnder == num_rows passes the '>' check and
+        # the OOB access happens in XkbAddGeomOverlayRow().
+        match_errors = [e for e in errors if e.error_code == 8]
+        assert match_errors, (
+            "SetGeometry with rowUnder=1 num_rows=1 was not rejected with "
+            "BadMatch - server is missing the off-by-one check"
+        )
+
+        assert xserver.is_alive, (
+            "Server crashed - SetGeometry overlay rowUnder off-by-one"
         )
 
 
