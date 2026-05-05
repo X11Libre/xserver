@@ -342,14 +342,16 @@ AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
 void
 SendDevicePresenceEvent(int deviceid, int type)
 {
-    DeviceIntRec dummyDev = { .id =  XIAllDevices };
-    devicePresenceNotify ev;
-
     UpdateCurrentTimeIf();
-    ev.type = DevicePresenceNotify;
-    ev.time = currentTime.milliseconds;
-    ev.devchange = type;
-    ev.deviceid = deviceid;
+
+    devicePresenceNotify ev = {
+        .type = DevicePresenceNotify,
+        .time = currentTime.milliseconds,
+        .devchange = type,
+        .deviceid = deviceid,
+    };
+
+    DeviceIntRec dummyDev = { .id =  XIAllDevices };
 
     SendEventToAllWindows(&dummyDev, DevicePresenceNotifyMask,
                           (xEvent *) &ev, 1);
