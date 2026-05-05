@@ -734,18 +734,17 @@ CreateConnectionBlock(void)
 
 int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids)
 {
-    WindowPtr pParent, pWin;
-    int rc;
-
     LEGAL_NEW_RESOURCE(stuff->wid, client);
-    rc = dixLookupWindow(&pParent, stuff->parent, client, DixAddAccess);
+
+    WindowPtr pParent;
+    int rc = dixLookupWindow(&pParent, stuff->parent, client, DixAddAccess);
     if (rc != Success)
         return rc;
     if (!stuff->width || !stuff->height) {
         client->errorValue = 0;
         return BadValue;
     }
-    pWin = dixCreateWindow(stuff->wid, pParent, stuff->x,
+    WindowPtr pWin = dixCreateWindow(stuff->wid, pParent, stuff->x,
                         stuff->y, stuff->width, stuff->height,
                         stuff->borderWidth, stuff->class,
                         stuff->mask, (XID *) xids,
