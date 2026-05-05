@@ -1985,21 +1985,18 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
                         BITS32 vmask)
 {
 #define DO_ALL    (-1)
-    KeybdCtrl ctrl;
-    int t;
-    int led = DO_ALL;
     int key = DO_ALL;
-    BITS32 index2;
-    int mask = vmask, i;
-    XkbEventCauseRec cause;
+    int mask = vmask;
+    KeybdCtrl ctrl = keybd->kbdfeed->ctrl;
 
-    ctrl = keybd->kbdfeed->ctrl;
     while (vmask) {
-        index2 = (BITS32) lowbit(vmask);
+        int led = DO_ALL;
+        BITS32 index2 = (BITS32) lowbit(vmask);
         vmask &= ~index2;
         switch (index2) {
         case KBKeyClickPercent:
-            t = (INT8) *vlist;
+        {
+            int t = (INT8) *vlist;
             vlist++;
             if (t == -1) {
                 t = defaultKeyboardControl.click;
@@ -2010,8 +2007,10 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
             }
             ctrl.click = t;
             break;
+        }
         case KBBellPercent:
-            t = (INT8) *vlist;
+        {
+            int t = (INT8) *vlist;
             vlist++;
             if (t == -1) {
                 t = defaultKeyboardControl.bell;
@@ -2022,8 +2021,10 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
             }
             ctrl.bell = t;
             break;
+        }
         case KBBellPitch:
-            t = (INT16) *vlist;
+        {
+            int t = (INT16) *vlist;
             vlist++;
             if (t == -1) {
                 t = defaultKeyboardControl.bell_pitch;
@@ -2034,8 +2035,10 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
             }
             ctrl.bell_pitch = t;
             break;
+        }
         case KBBellDuration:
-            t = (INT16) *vlist;
+        {
+            int t = (INT16) *vlist;
             vlist++;
             if (t == -1)
                 t = defaultKeyboardControl.bell_duration;
@@ -2045,7 +2048,9 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
             }
             ctrl.bell_duration = t;
             break;
+        }
         case KBLed:
+        {
             led = (CARD8) *vlist;
             vlist++;
             if (led < 1 || led > 32) {
@@ -2055,9 +2060,12 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
             if (!(mask & KBLedMode))
                 return BadMatch;
             break;
+        }
         case KBLedMode:
-            t = (CARD8) *vlist;
+        {
+            int t = (CARD8) *vlist;
             vlist++;
+
             if (t == LedModeOff) {
                 if (led == DO_ALL)
                     ctrl.leds = 0x0;
@@ -2075,13 +2083,16 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
                 return BadValue;
             }
 
+            XkbEventCauseRec cause;
             XkbSetCauseCoreReq(&cause, X_ChangeKeyboardControl, client);
             XkbSetIndicators(keybd, ((led == DO_ALL) ? ~0L : (1L << (led - 1))),
                              ctrl.leds, &cause);
             ctrl.leds = keybd->kbdfeed->ctrl.leds;
 
             break;
+        }
         case KBKey:
+        {
             key = (KeyCode) *vlist;
             vlist++;
             if ((KeyCode) key < keybd->key->xkbInfo->desc->min_key_code ||
@@ -2092,10 +2103,12 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
             if (!(mask & KBAutoRepeatMode))
                 return BadMatch;
             break;
+        }
         case KBAutoRepeatMode:
-            i = (key >> 3);
+        {
+            int i = (key >> 3);
             mask = (1 << (key & 7));
-            t = (CARD8) *vlist;
+            int t = (CARD8) *vlist;
             vlist++;
             if (key != DO_ALL)
                 XkbDisableComputedAutoRepeats(keybd, key);
@@ -2124,6 +2137,7 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
                 return BadValue;
             }
             break;
+        }
         default:
             client->errorValue = mask;
             return BadValue;
