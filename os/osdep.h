@@ -87,9 +87,23 @@ extern Bool NewOutputPending;
 #ifndef HAVE_ARC4RANDOM_BUF
 static inline void arc4random_buf(void *buf, size_t nbytes)
 {
+#ifdef HAVE_GETRANDOM
+    ssize_t pos = 0;
+    while (pos < len) {
+        ssize_t ret = getrandom(buf + pos, nbytes - pos, 0);
+        if (ret <= 0) {
+            if (ret < 0 && errno == EINTR)
+                continue;
+            FatalError("Cannot read random data via getrandom(): %s\n",
+                       strerror(errno));
+        }
+        pos += ret;
+    }
+#else
     int fd = open("/dev/urandom", O_RDONLY);
     read(fd, buf, nbytes);
     close(fd);
+#endif
 }
 #endif /* HAVE_ARC4RANDOM_BUF */
 
