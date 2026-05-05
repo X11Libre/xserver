@@ -71,6 +71,17 @@ class QueryCapabilitiesRequest:
 
 
 @dataclass
+class PresentNotify:
+    """xPresentNotify structure (8 bytes): window(4) + serial(4)."""
+
+    window: int
+    serial: int = 0
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(f"{byte_order}II", self.window, self.serial)
+
+
+@dataclass
 class PixmapRequest:
     """PresentPixmap request.
 
@@ -93,10 +104,19 @@ class PixmapRequest:
     target_msc: int = 0
     divisor: int = 0
     remainder: int = 0
-    # notifies follow but we omit them for testing
+    notifies: list[PresentNotify] | None = None
 
     def to_bytes(self, byte_order: str = "<") -> bytes:
-        return struct.pack(
+        notify_data = b""
+        if self.notifies:
+            for n in self.notifies:
+                notify_data += n.to_bytes(byte_order)
+
+        base_size = 72  # 18 words
+        total_size = base_size + len(notify_data)
+        length = total_size // 4
+
+        header = struct.pack(
             f"{byte_order}BBH"  # header: opcode, sub-opcode, length
             f"III"  # window, pixmap, serial
             f"II"  # valid, update
@@ -109,7 +129,7 @@ class PixmapRequest:
             f"Q",  # remainder (CARD64)
             self.opcode,
             PresentPixmap,
-            18,  # 72 bytes = 18 words
+            length,
             self.window,
             self.pixmap,
             self.serial,
@@ -125,6 +145,7 @@ class PixmapRequest:
             self.divisor,
             self.remainder,
         )
+        return header + notify_data
 
 
 @dataclass
