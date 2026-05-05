@@ -896,16 +896,14 @@ ProcReparentWindow(ClientPtr client)
 int
 ProcMapWindow(ClientPtr client)
 {
-    WindowPtr pWin;
-
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
     if (client->swapped)
         swapl(&stuff->id);
 
-    int rc;
-    rc = dixLookupWindow(&pWin, stuff->id, client, DixShowAccess);
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->id, client, DixShowAccess);
     if (rc != Success)
         return rc;
     MapWindow(pWin, client);
