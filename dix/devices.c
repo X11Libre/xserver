@@ -994,9 +994,6 @@ FreePendingFrozenDeviceEvents(DeviceIntPtr dev)
 static void
 CloseDevice(DeviceIntPtr dev)
 {
-    ScreenPtr masterScreen = dixGetMasterScreen();
-    ClassesPtr classes;
-
     if (!dev)
         return;
 
@@ -1007,8 +1004,10 @@ CloseDevice(DeviceIntPtr dev)
 
     FreeSprite(dev);
 
-    if (InputDevIsMaster(dev))
+    if (InputDevIsMaster(dev)) {
+        ScreenPtr masterScreen = dixGetMasterScreen();
         masterScreen->DeviceCursorCleanup(dev, masterScreen);
+    }
 
     /* free acceleration info */
     if (dev->valuator && dev->valuator->accelScheme.AccelCleanupProc)
@@ -1019,7 +1018,7 @@ CloseDevice(DeviceIntPtr dev)
 
     free(dev->name);
 
-    classes = (ClassesPtr) &dev->key;
+    ClassesPtr classes = (ClassesPtr) &dev->key;
     FreeAllDeviceClasses(classes);
 
     if (InputDevIsMaster(dev)) {
