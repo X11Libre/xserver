@@ -2531,16 +2531,10 @@ _colormap_find_resource(void *value, XID id, void *cdata)
 Bool
 ResizeVisualArray(ScreenPtr pScreen, int new_visual_count, DepthPtr depth)
 {
-    struct colormap_lookup_data cdata;
-    int numVisuals;
-    VisualPtr visuals;
-    XID *vids, vid;
-    int first_new_vid, first_new_visual;
+    int first_new_vid = depth->numVids;
+    int first_new_visual = pScreen->numVisuals;
 
-    first_new_vid = depth->numVids;
-    first_new_visual = pScreen->numVisuals;
-
-    vids = reallocarray(depth->vids, depth->numVids + new_visual_count,
+    XID *vids = reallocarray(depth->vids, depth->numVids + new_visual_count,
                         sizeof(XID));
     if (!vids)
         return FALSE;
@@ -2548,21 +2542,23 @@ ResizeVisualArray(ScreenPtr pScreen, int new_visual_count, DepthPtr depth)
     /* its realloced now no going back if we fail the next one */
     depth->vids = vids;
 
-    numVisuals = pScreen->numVisuals + new_visual_count;
-    visuals = reallocarray(pScreen->visuals, numVisuals, sizeof(VisualRec));
+    int numVisuals = pScreen->numVisuals + new_visual_count;
+    VisualPtr visuals = reallocarray(pScreen->visuals, numVisuals, sizeof(VisualRec));
     if (!visuals) {
         return FALSE;
     }
 
-    cdata.visuals = visuals;
-    cdata.pScreen = pScreen;
+    struct colormap_lookup_data cdata = {
+        .visuals = visuals,
+        .pScreen = pScreen,
+    };
     FindClientResourcesByType(serverClient, X11_RESTYPE_COLORMAP,
                               _colormap_find_resource, &cdata);
 
     pScreen->visuals = visuals;
 
     for (int i = 0; i < new_visual_count; i++) {
-        vid = dixAllocServerXID();
+        XID vid = dixAllocServerXID();
         pScreen->visuals[first_new_visual + i].vid = vid;
         vids[first_new_vid + i] = vid;
     }
