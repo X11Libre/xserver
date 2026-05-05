@@ -2554,17 +2554,14 @@ void
 ReleaseButtonsAndKeys(DeviceIntPtr dev)
 {
     InternalEvent *eventlist = InitEventList(GetMaximumEventsNum());
-    ButtonClassPtr b = dev->button;
-    KeyClassPtr k = dev->key;
-    int nevents;
-
     if (!eventlist)             /* no release events for you */
         return;
 
     /* Release all buttons */
+    ButtonClassPtr b = dev->button;
     for (int i = 0; b && i < b->numButtons; i++) {
         if (BitIsOn(b->down, i)) {
-            nevents =
+            int nevents =
                 GetPointerEvents(eventlist, dev, ButtonRelease, i, 0, NULL);
             for (int j = 0; j < nevents; j++)
                 mieqProcessDeviceEvent(dev, &eventlist[j], NULL);
@@ -2572,9 +2569,10 @@ ReleaseButtonsAndKeys(DeviceIntPtr dev)
     }
 
     /* Release all keys */
+    KeyClassPtr k = dev->key;
     for (int i = 0; k && i < MAP_LENGTH; i++) {
         if (BitIsOn(k->down, i)) {
-            nevents = GetKeyboardEvents(eventlist, dev, KeyRelease, i);
+            int nevents = GetKeyboardEvents(eventlist, dev, KeyRelease, i);
             for (int j = 0; j < nevents; j++)
                 mieqProcessDeviceEvent(dev, &eventlist[j], NULL);
         }
