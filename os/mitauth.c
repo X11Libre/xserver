@@ -33,7 +33,13 @@ from The Open Group.
 
 #include <dix-config.h>
 
+#include <errno.h>
 #include <X11/X.h>
+
+#ifdef HAVE_GETRANDOM
+#include <sys/random.h>
+#endif
+
 #include "os.h"
 #include "osdep.h"
 #include "mitauth.h"
@@ -144,7 +150,21 @@ static char cookie[16];         /* 128 bits */
 static void
 GenerateRandomData(int len, char *buf)
 {
-#ifdef HAVE_ARC4RANDOM_BUF
+#ifdef HAVE_GETRANDOM
+    ssize_t ret;
+    int pos = 0;
+
+    while (pos < len) {
+        ret = getrandom(buf + pos, len - pos, 0);
+        if (ret <= 0) {
+            if (ret < 0 && errno == EINTR)
+                continue;
+            FatalError("Cannot read random data via getrandom(): %s\n",
+                       strerror(errno));
+        }
+        pos += ret;
+    }
+#elif defined(HAVE_ARC4RANDOM_BUF)
     arc4random_buf(buf, len);
 #else
     int fd;
