@@ -604,7 +604,6 @@ Bool
 CreateConnectionBlock(void)
 {
     xConnSetup setup;
-    xWindowRoot root;
     xDepth depth;
     xVisualType visual;
     xPixmapFormat format;
@@ -672,23 +671,24 @@ CreateConnectionBlock(void)
         DepthPtr pDepth;
         VisualPtr pVisual;
 
-        root.windowId = walkScreen->root->drawable.id;
-        root.defaultColormap = walkScreen->defColormap;
-        root.whitePixel = walkScreen->whitePixel;
-        root.blackPixel = walkScreen->blackPixel;
-        root.currentInputMask = 0;      /* filled in when sent */
-        root.pixWidth = walkScreen->width;
-        root.pixHeight = walkScreen->height;
-        root.mmWidth = walkScreen->mmWidth;
-        root.mmHeight = walkScreen->mmHeight;
-        root.minInstalledMaps = walkScreen->minInstalledCmaps;
-        root.maxInstalledMaps = walkScreen->maxInstalledCmaps;
-        root.rootVisualID = walkScreen->rootVisual;
-        root.backingStore = walkScreen->backingStoreSupport;
-        root.saveUnders = FALSE;
-        root.rootDepth = walkScreen->rootDepth;
-        root.nDepths = walkScreen->numDepths;
-        memcpy(pBuf, &root, sizeof(xWindowRoot));
+        xWindowRoot *root = (xWindowRoot*)pBuf;
+        root->windowId = walkScreen->root->drawable.id;
+        root->defaultColormap = walkScreen->defColormap;
+        root->whitePixel = walkScreen->whitePixel;
+        root->blackPixel = walkScreen->blackPixel;
+        root->currentInputMask = 0;      /* filled in when sent */
+        root->pixWidth = walkScreen->width;
+        root->pixHeight = walkScreen->height;
+        root->mmWidth = walkScreen->mmWidth;
+        root->mmHeight = walkScreen->mmHeight;
+        root->minInstalledMaps = walkScreen->minInstalledCmaps;
+        root->maxInstalledMaps = walkScreen->maxInstalledCmaps;
+        root->rootVisualID = walkScreen->rootVisual;
+        root->backingStore = walkScreen->backingStoreSupport;
+        root->saveUnders = FALSE;
+        root->rootDepth = walkScreen->rootDepth;
+        root->nDepths = walkScreen->numDepths;
+
         sizesofar += sizeof(xWindowRoot);
         pBuf += sizeof(xWindowRoot);
 
