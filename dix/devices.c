@@ -1295,18 +1295,15 @@ InitButtonClassDeviceStruct(DeviceIntPtr dev, int numButtons, Atom *labels,
 ValuatorClassPtr
 AllocValuatorClass(ValuatorClassPtr src, int numAxes)
 {
-    ValuatorClassPtr v;
-
     /* force alignment with double */
     union align_u {
         ValuatorClassRec valc;
         double d;
-    } *align;
-    int size;
+    };;
 
-    size =
+    int size =
         sizeof(union align_u) + numAxes * (sizeof(double) + sizeof(AxisInfo));
-    align = (union align_u *) realloc(src, size);
+    union align_u *align = (union align_u *) realloc(src, size);
 
     if (!align)
         return NULL;
@@ -1314,7 +1311,7 @@ AllocValuatorClass(ValuatorClassPtr src, int numAxes)
     if (!src)
         memset(align, 0, size);
 
-    v = &align->valc;
+    ValuatorClassPtr v = &align->valc;
     v->numAxes = numAxes;
     v->axisVal = (double *) (align + 1);
     v->axes = (AxisInfoPtr) (v->axisVal + numAxes);
