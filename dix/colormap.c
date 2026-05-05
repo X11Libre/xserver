@@ -2517,12 +2517,11 @@ _colormap_find_resource(void *value, XID id, void *cdata)
     VisualPtr visuals = cmap_data->visuals;
     ScreenPtr pScreen = cmap_data->pScreen;
     ColormapPtr cmap = value;
-    int j;
 
     if (pScreen != cmap->pScreen)
         return;
 
-    j = cmap->pVisual - pScreen->visuals;
+    int j = cmap->pVisual - pScreen->visuals;
     cmap->pVisual = &visuals[j];
 }
 
