@@ -2146,39 +2146,33 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
 int
 ProcChangeKeyboardControl(ClientPtr client)
 {
-    XID *vlist;
-    BITS32 vmask;
-    int ret = Success, error = Success;
-    DeviceIntPtr keyboard;
-
     REQUEST(xChangeKeyboardControlReq);
-
     REQUEST_AT_LEAST_SIZE(xChangeKeyboardControlReq);
 
-    vmask = stuff->mask;
-    vlist = (XID *) &stuff[1];
-
+    BITS32 vmask = stuff->mask;
     if (client->req_len !=
         (sizeof(xChangeKeyboardControlReq) >> 2) + Ones(vmask))
         return BadLength;
 
-    keyboard = PickKeyboard(client);
+    DeviceIntPtr keyboard = PickKeyboard(client);
 
     for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next) {
         if ((pDev == keyboard ||
              (!InputDevIsMaster(pDev) && GetMaster(pDev, MASTER_KEYBOARD) == keyboard))
             && pDev->kbdfeed && pDev->kbdfeed->CtrlProc) {
-            ret = dixCallDeviceAccessCallback(client, pDev, DixManageAccess);
+            int ret = dixCallDeviceAccessCallback(client, pDev, DixManageAccess);
             if (ret != Success)
                 return ret;
         }
     }
 
+    int error = Success;
+    XID *vlist = (XID *) &stuff[1];
     for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next) {
         if ((pDev == keyboard ||
              (!InputDevIsMaster(pDev) && GetMaster(pDev, MASTER_KEYBOARD) == keyboard))
             && pDev->kbdfeed && pDev->kbdfeed->CtrlProc) {
-            ret = DoChangeKeyboardControl(client, pDev, vlist, vmask);
+            int ret = DoChangeKeyboardControl(client, pDev, vlist, vmask);
             if (ret != Success)
                 error = ret;
         }
