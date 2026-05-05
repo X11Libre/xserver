@@ -102,10 +102,6 @@ static void RecalculateMasterButtons(DeviceIntPtr slave);
 static void
 DeviceSetTransform(DeviceIntPtr dev, float *transform_data)
 {
-    struct pixman_f_transform scale;
-    struct pixman_f_transform transform;
-    double sx, sy;
-
     /**
      * calculate combined transformation matrix:
      *
@@ -118,15 +114,17 @@ DeviceSetTransform(DeviceIntPtr dev, float *transform_data)
      *  Transform is the user supplied (affine) transform
      *  InvScale scales coordinates back up into their native range
      */
-    sx = dev->valuator->axes[0].max_value - dev->valuator->axes[0].min_value + 1;
-    sy = dev->valuator->axes[1].max_value - dev->valuator->axes[1].min_value + 1;
+    double sx = dev->valuator->axes[0].max_value - dev->valuator->axes[0].min_value + 1;
+    double sy = dev->valuator->axes[1].max_value - dev->valuator->axes[1].min_value + 1;
 
     /* invscale */
+    struct pixman_f_transform scale = { 0 };
     pixman_f_transform_init_scale(&scale, sx, sy);
     scale.m[0][2] = dev->valuator->axes[0].min_value;
     scale.m[1][2] = dev->valuator->axes[1].min_value;
 
     /* transform */
+    struct pixman_f_transform transform = { 0 };
     for (int y = 0; y < 3; y++)
         for (int x = 0; x < 3; x++)
             transform.m[y][x] = *transform_data++;
