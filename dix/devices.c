@@ -1630,8 +1630,6 @@ Bool
 InitTouchClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches,
                            unsigned int mode, unsigned int num_axes)
 {
-    TouchClassPtr touch;
-
     BUG_RETURN_VAL(device == NULL, FALSE);
     BUG_RETURN_VAL(device->touch != NULL, FALSE);
     BUG_RETURN_VAL(device->valuator == NULL, FALSE);
@@ -1647,7 +1645,7 @@ InitTouchClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches,
         num_axes = MAX_VALUATORS;
     }
 
-    touch = calloc(1, sizeof(*touch));
+    TouchClassPtr touch = calloc(1, sizeof(*touch));
     if (!touch)
         return FALSE;
 
