@@ -1693,12 +1693,10 @@ InitTouchClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches,
 Bool
 InitGestureClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches)
 {
-    GestureClassPtr g;
-
     BUG_RETURN_VAL(device == NULL, FALSE);
     BUG_RETURN_VAL(device->gesture != NULL, FALSE);
 
-    g = calloc(1, sizeof(*g));
+    GestureClassPtr g = calloc(1, sizeof(*g));
     if (!g)
         return FALSE;
 
