@@ -478,10 +478,6 @@ DisableLimitedSchedulingLatency(void)
 void
 Dispatch(void)
 {
-    int result;
-    ClientPtr client;
-    long start_tick;
-
     nextFreeClientID = 1;
     nClients = 0;
 
@@ -503,11 +499,11 @@ Dispatch(void)
          *****************/
 
         if (!dispatchException && clients_are_ready()) {
-            client = SmartScheduleClient();
+            ClientPtr client = SmartScheduleClient();
 
             isItTimeToYield = FALSE;
 
-            start_tick = SmartScheduleTime;
+            long start_tick = SmartScheduleTime;
             while (!isItTimeToYield) {
                 if (InputCheckPending())
                     ProcessInputEvents();
@@ -547,6 +543,7 @@ Dispatch(void)
                                           client->index,
                                           client->requestBuffer);
 #endif
+                int result;
                 if (read_result < 0 || read_result > (maxBigRequestSize << 2))
                     result = BadLength;
                 else {
