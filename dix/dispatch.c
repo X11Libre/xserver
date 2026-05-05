@@ -212,13 +212,13 @@ GetCurrentClient(void)
 void
 UpdateCurrentTime(void)
 {
-    TimeStamp systime;
-
     /* To avoid time running backwards, we must call GetTimeInMillis before
      * calling ProcessInputEvents.
      */
-    systime.months = currentTime.months;
-    systime.milliseconds = GetTimeInMillis();
+    TimeStamp systime = {
+        .months = currentTime.months,
+        .milliseconds = GetTimeInMillis(),
+    };
     if (systime.milliseconds < currentTime.milliseconds)
         systime.months++;
     if (InputCheckPending())
@@ -231,10 +231,10 @@ UpdateCurrentTime(void)
 void
 UpdateCurrentTimeIf(void)
 {
-    TimeStamp systime;
-
-    systime.months = currentTime.months;
-    systime.milliseconds = GetTimeInMillis();
+    TimeStamp systime = {
+        .months = currentTime.months,
+        .milliseconds = GetTimeInMillis(),
+    };
     if (systime.milliseconds < currentTime.milliseconds)
         systime.months++;
     if (CompareTimeStamps(systime, currentTime) == LATER)
