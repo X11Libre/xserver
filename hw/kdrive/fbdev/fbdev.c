@@ -30,10 +30,6 @@
 
 #include "fbdev.h"
 
-#ifndef xallocarray
-#define xallocarray(num, size) reallocarray(NULL, (num), (size))
-#endif
-
 const char *fbdevDevicePath = NULL;
 Bool fbDisableShadow = FALSE;
 
@@ -689,7 +685,7 @@ fbdevCreateColormap(ColormapPtr pmap)
     case FB_VISUAL_STATIC_PSEUDOCOLOR:
         pVisual = pmap->pVisual;
         nent = pVisual->ColormapEntries;
-        pdefs = xallocarray(nent, sizeof(xColorItem));
+        pdefs = calloc(nent, sizeof(xColorItem));
         if (!pdefs)
             return FALSE;
         for (i = 0; i < nent; i++)
