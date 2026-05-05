@@ -243,23 +243,20 @@ NextFreePointerDevice(void)
 DeviceIntPtr
 AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
 {
-    DeviceIntPtr dev, *prev;    /* not a typo */
-    int devid;
-    char devind[MAXDEVICES];
-    BOOL enabled;
-    float transform[9];
-
     /* Find next available id, 0 and 1 are reserved */
-    memset(devind, 0, sizeof(char) * MAXDEVICES);
+    char devind[MAXDEVICES] = { 0 };
     for (DeviceIntPtr devtmp = inputInfo.devices; devtmp; devtmp = devtmp->next)
         devind[devtmp->id]++;
     for (DeviceIntPtr devtmp = inputInfo.off_devices; devtmp; devtmp = devtmp->next)
         devind[devtmp->id]++;
+
+    int devid;
     for (devid = 2; devid < MAXDEVICES && devind[devid]; devid++);
 
     if (devid >= MAXDEVICES)
         return (DeviceIntPtr) NULL;
-    dev = calloc(1,
+
+    DeviceIntPtr dev = calloc(1,
                  sizeof(DeviceIntRec) +
                  sizeof(SpriteInfoRec));
     if (!dev)
@@ -310,18 +307,19 @@ AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
 
     inputInfo.numDevices++;
 
+    DeviceIntPtr *prev;    /* not a typo */
     for (prev = &inputInfo.off_devices; *prev; prev = &(*prev)->next);
     *prev = dev;
     dev->next = NULL;
 
-    enabled = FALSE;
+    BOOL enabled = FALSE;
     XIChangeDeviceProperty(dev, XIGetKnownProperty(XI_PROP_ENABLED),
                            XA_INTEGER, 8, PropModeReplace, 1, &enabled, FALSE);
     XISetDevicePropertyDeletable(dev, XIGetKnownProperty(XI_PROP_ENABLED),
                                  FALSE);
 
     /* unity matrix */
-    memset(transform, 0, sizeof(transform));
+    float transform[9] = { 0 };
     transform[0] = transform[4] = transform[8] = 1.0f;
     dev->relative_transform.m[0][0] = 1.0;
     dev->relative_transform.m[1][1] = 1.0;
