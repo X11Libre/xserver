@@ -1244,11 +1244,9 @@ NumMotionEvents(void)
 int
 dixLookupDevice(DeviceIntPtr *pDev, int id, ClientPtr client, Mask access_mode)
 {
-    DeviceIntPtr dev;
-    int rc;
-
     *pDev = NULL;
 
+    DeviceIntPtr dev;
     for (dev = inputInfo.devices; dev; dev = dev->next) {
         if (dev->id == id)
             goto found;
@@ -1259,11 +1257,13 @@ dixLookupDevice(DeviceIntPtr *pDev, int id, ClientPtr client, Mask access_mode)
     }
     return BadDevice;
 
- found:
-    rc = dixCallDeviceAccessCallback(client, dev, access_mode);
-    if (rc == Success)
-        *pDev = dev;
-    return rc;
+found:
+    {
+        int rc = dixCallDeviceAccessCallback(client, dev, access_mode);
+        if (rc == Success)
+            *pDev = dev;
+        return rc;
+    }
 }
 
 void
