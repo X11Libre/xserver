@@ -2190,15 +2190,14 @@ ProcChangeKeyboardControl(ClientPtr client)
 int
 ProcGetKeyboardControl(ClientPtr client)
 {
-    DeviceIntPtr kbd = PickKeyboard(client);
-    KeybdCtrl *ctrl = &kbd->kbdfeed->ctrl;
-
     REQUEST_SIZE_MATCH(xReq);
 
+    DeviceIntPtr kbd = PickKeyboard(client);
     int rc = dixCallDeviceAccessCallback(client, kbd, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
+    KeybdCtrl *ctrl = &kbd->kbdfeed->ctrl;
     xGetKeyboardControlReply reply = {
         .globalAutoRepeat = ctrl->autoRepeat,
         .ledMask = ctrl->leds,
