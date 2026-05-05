@@ -7,6 +7,8 @@ from dataclasses import dataclass
 
 # XI (v1) minor opcodes
 XChangeDeviceControl = 35
+XChangeDeviceProperty = 37
+XGetDeviceProperty = 39
 
 # XI2 minor opcodes
 XIQueryVersion = 47
@@ -176,7 +178,6 @@ class XIChangePropertyRequest:
     mode: int = PropModeReplace
     data: bytes = b""
     num_items: int | None = None
-    length_override: int | None = None
 
     def to_bytes(self, byte_order: str = "<") -> bytes:
         num_items = (
@@ -188,12 +189,7 @@ class XIChangePropertyRequest:
         total_bytes = 20 + len(self.data)
         pad_len = (4 - total_bytes % 4) % 4
         total_bytes += pad_len
-
-        length = (
-            self.length_override
-            if self.length_override is not None
-            else total_bytes // 4
-        )
+        length = total_bytes // 4
 
         header = struct.pack(
             f"{byte_order}BBH HBB II I",
@@ -234,6 +230,85 @@ class XIGetPropertyRequest:
             self.type_atom,
             self.offset,
             self.length,
+        )
+
+
+@dataclass
+class XChangeDevicePropertyRequest:
+    """XChangeDeviceProperty request (XI v1, minor opcode 37).
+
+    Wire format (xChangeDevicePropertyReq):
+        opcode(1) + ReqType(1) + length(2) + property(4) + type(4) +
+        deviceid(1) + format(1) + mode(1) + pad(1) + nUnits(4)
+    Total header: 20 bytes, followed by property data.
+    """
+
+    opcode: int
+    deviceid: int
+    property_atom: int
+    type_atom: int
+    format: int = 32
+    mode: int = PropModeReplace
+    data: bytes = b""
+    num_items: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        num_items = (
+            self.num_items
+            if self.num_items is not None
+            else (len(self.data) // (self.format // 8) if self.data else 0)
+        )
+
+        total_bytes = 20 + len(self.data)
+        pad_len = (4 - total_bytes % 4) % 4
+        total_bytes += pad_len
+        length = total_bytes // 4
+
+        header = struct.pack(
+            f"{byte_order}BBH II BBBx I",
+            self.opcode,
+            XChangeDeviceProperty,
+            length,
+            self.property_atom,
+            self.type_atom,
+            self.deviceid,
+            self.format,
+            self.mode,
+            num_items,
+        )
+        return header + self.data + b"\x00" * pad_len
+
+
+@dataclass
+class XGetDevicePropertyRequest:
+    """XGetDeviceProperty request (XI v1, minor opcode 39).
+
+    Wire format (xGetDevicePropertyReq):
+        opcode(1) + ReqType(1) + length(2) + property(4) + type(4) +
+        longOffset(4) + longLength(4) + deviceid(1) + delete(1) + pad(2)
+    Total: 24 bytes = 6 words.
+    """
+
+    opcode: int
+    deviceid: int
+    property_atom: int
+    type_atom: int = 0  # AnyPropertyType
+    offset: int = 0
+    req_length: int = 0xFFFF
+    delete: bool = False
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH II II BBxx",
+            self.opcode,
+            XGetDeviceProperty,
+            6,  # 24 bytes = 6 words
+            self.property_atom,
+            self.type_atom,
+            self.offset,
+            self.req_length,
+            self.deviceid,
+            1 if self.delete else 0,
         )
 
 

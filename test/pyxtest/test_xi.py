@@ -23,6 +23,19 @@ def xi_xclient(xclient):
     return xclient
 
 
+@pytest.fixture
+def xi_xclient_swapped(xclient_swapped):
+    """Provide a byte-swapped xclient with XI2 initialized."""
+    ext = xclient_swapped.query_extension(Extension.XI)
+    if not ext:
+        pytest.skip("XInput extension not available")
+
+    req = xi.XIQueryVersionRequest(opcode=ext.opcode)
+    xclient_swapped.send_request(req.to_bytes(">"))
+    xclient_swapped.recv_response(timeout=5.0)
+    return xclient_swapped
+
+
 class TestXIPassiveGrab:
     """Tests for XIPassiveGrabDevice/UngrabDevice vulnerabilities."""
 
@@ -235,6 +248,85 @@ class TestXIChangeProperty:
         values = struct.unpack_from(f"<{num_items}I", resp.data, 32)
         assert values == (1, 2, 10, 20, 30), (
             f"Expected (1, 2, 10, 20, 30), got {values}"
+        )
+
+    @pytest.mark.swapped_client
+    @pytest.mark.parametrize(
+        "change_cls,get_cls",
+        [
+            (xi.XIChangePropertyRequest, xi.XIGetPropertyRequest),
+            (xi.XChangeDevicePropertyRequest, xi.XGetDevicePropertyRequest),
+        ],
+        ids=["xi2", "xi1"],
+    )
+    def test_change_property_data_format32_swapped(
+        self, xserver, xi_xclient_swapped, change_cls, get_cls
+    ):
+        """
+        SProcXIChangeProperty and SProcXChangeDeviceProperty did not
+        byte-swap the property data payload for format=32 properties.
+
+        Set a format=32 property from a byte-swapped client with known
+        values, then read it back. Without the fix, the stored values
+        have the wrong byte order, causing a round-trip mismatch.
+
+        Fixed in commit 243ef9bc2 ("Xi: Swap property data in
+        SProcXChangeDeviceProperty/SProcXIChangeProperty").
+        """
+        conn = xi_xclient_swapped
+        ext = conn.query_extension(Extension.XI)
+
+        prop_atom = conn.intern_atom("_TEST_SWAP_FORMAT32")
+        type_atom = conn.intern_atom("INTEGER")
+
+        test_values = [0x12345678, 0xDEADBEEF, 42]
+        data = b""
+        for v in test_values:
+            data += struct.pack(">I", v)
+
+        req = change_cls(
+            opcode=ext.opcode,
+            deviceid=xi.VirtualCorePointer,
+            property_atom=prop_atom,
+            type_atom=type_atom,
+            format=32,
+            mode=xi.PropModeReplace,
+            data=data,
+        )
+        conn.send_request(req.to_bytes(">"))
+        conn.flush_responses(timeout=0.5)
+
+        assert xserver.is_alive, "Server crashed during ChangeProperty"
+
+        req = get_cls(
+            opcode=ext.opcode,
+            deviceid=xi.VirtualCorePointer,
+            property_atom=prop_atom,
+            type_atom=type_atom,
+        )
+        conn.send_request(req.to_bytes(">"))
+        resp = conn.recv_response(timeout=2.0)
+
+        assert isinstance(resp, X11Reply), f"Expected a reply, got {resp}"
+
+        # Both XI1 and XI2 GetProperty replies share the same layout
+        # for the fields we care about:
+        #   bytes 16-19: num_items (CARD32)
+        #   byte 20:     format   (CARD8)
+        #   bytes 32+:   property data
+        num_items = struct.unpack_from(">I", resp.data, 16)[0]
+        fmt = resp.data[20]
+        assert num_items == len(test_values), (
+            f"Expected {len(test_values)} items, got {num_items}"
+        )
+        assert fmt == 32, f"Expected format 32, got {fmt}"
+
+        values = struct.unpack_from(f">{num_items}I", resp.data, 32)
+        assert values == tuple(test_values), (
+            f"Property data round-trip failed: expected "
+            f"{[hex(v) for v in test_values]}, got "
+            f"{[hex(v) for v in values]} - property data not byte-swapped "
+            f"in SProc handler for {change_cls.__name__}"
         )
 
 
