@@ -2337,20 +2337,15 @@ ProcChangePointerControl(ClientPtr client)
 int
 ProcGetPointerControl(ClientPtr client)
 {
-    DeviceIntPtr ptr = PickPointer(client);
-    PtrCtrl *ctrl;
-    int rc;
-
-    if (ptr->ptrfeed)
-        ctrl = &ptr->ptrfeed->ctrl;
-    else
-        ctrl = &defaultPointerControl;
-
     REQUEST_SIZE_MATCH(xReq);
 
-    rc = dixCallDeviceAccessCallback(client, ptr, DixGetAttrAccess);
+    DeviceIntPtr ptr = PickPointer(client);
+    int rc = dixCallDeviceAccessCallback(client, ptr, DixGetAttrAccess);
     if (rc != Success)
         return rc;
+
+    PtrCtrl *ctrl = ( (ptr->ptrfeed) ? &ptr->ptrfeed->ctrl
+                                     : &defaultPointerControl);
 
     xGetPointerControlReply reply = {
         .accelNumerator = ctrl->num,
