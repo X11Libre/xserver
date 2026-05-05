@@ -372,11 +372,6 @@ Bool
 EnableDevice(DeviceIntPtr dev, BOOL sendevent)
 {
     DeviceIntPtr *prev;
-    int ret;
-    DeviceIntPtr other;
-    BOOL enabled;
-    int flags[MAXDEVICES] = { 0 };
-
     for (prev = &inputInfo.off_devices;
          *prev && (*prev != dev); prev = &(*prev)->next);
 
@@ -390,13 +385,14 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
                 EnterWindow(dev, masterScreen->root, NotifyAncestor);
             }
             else {
-                other = NextFreePointerDevice();
+                DeviceIntPtr other = NextFreePointerDevice();
                 BUG_RETURN_VAL_MSG(other == NULL, FALSE,
                                    "[dix] cannot find pointer to pair with.\n");
                 PairDevices(other, dev);
             }
         }
         else {
+            DeviceIntPtr other;
             if (dev->coreEvents)
                 other = (IsPointerDevice(dev)) ? inputInfo.pointer:
                     inputInfo.keyboard;
@@ -408,7 +404,7 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
 
     input_lock();
     if ((*prev != dev) || !dev->inited ||
-        ((ret = (*dev->deviceProc) (dev, DEVICE_ON)) != Success)) {
+        (((*dev->deviceProc) (dev, DEVICE_ON)) != Success)) {
         ErrorF("[dix] couldn't enable device %d\n", dev->id);
         input_unlock();
         return FALSE;
@@ -421,12 +417,13 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
     dev->next = NULL;
     input_unlock();
 
-    enabled = TRUE;
+    BOOL enabled = TRUE;
     XIChangeDeviceProperty(dev, XIGetKnownProperty(XI_PROP_ENABLED),
                            XA_INTEGER, 8, PropModeReplace, 1, &enabled, TRUE);
 
     SendDevicePresenceEvent(dev->id, DeviceEnabled);
     if (sendevent) {
+        int flags[MAXDEVICES] = { 0 };
         flags[dev->id] |= XIDeviceEnabled;
         XISendDeviceHierarchyEvent(flags);
     }
