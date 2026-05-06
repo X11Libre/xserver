@@ -125,6 +125,7 @@ ProcXIGrabDevice(ClientPtr client)
         return ret;
 
 reply:
+    ;
     xXIGrabDeviceReply rep = {
         .repType = X_Reply,
         .RepType = X_XIGrabDevice,
