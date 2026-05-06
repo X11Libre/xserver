@@ -42,6 +42,14 @@ pytest test/pyxtest/ -v
 
 The normal pytest options work as expected (`-k` for test selection, etc.)
 
+Tests can be run against a manually-started server using the `--display`
+option:
+
+```sh
+./build/hw/vfb/Xvfb :2
+pytest test/pyxtest --display :2
+```
+
 ### Running with AddressSanitizer (ASAN)
 
 ASAN is a compile-time instrumentation that detects memory errors such as

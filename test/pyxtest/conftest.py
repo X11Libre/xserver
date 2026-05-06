@@ -7,7 +7,7 @@ import shutil
 import pytest
 from pathlib import Path
 
-from xserver import XServerProcess
+from xserver import ExternalXServer, XServerProcess
 from xclient import RawX11Connection, X11ConnectionError, XlibConnection
 
 
@@ -33,6 +33,14 @@ def pytest_addoption(parser):
     parser.addoption(
         "--server-path", default=None, help="Explicit path to the X server binary"
     )
+    parser.addoption(
+        "--display",
+        default=None,
+        help="Connect to an existing X server instead of starting one. "
+        "Value is a display number or :N string (e.g. '42' or ':42'). "
+        "Optionally combine with --server-type to declare the server type "
+        "for marker-based test filtering.",
+    )
 
 
 def pytest_configure(config):
@@ -53,10 +61,36 @@ def pytest_configure(config):
         "markers", "swapped_client: mark test as requiring a byte-swapped client"
     )
 
+    # Validate --display against conflicting options
+    display = config.getoption("--display", default=None)
+    if display is not None:
+        if config.getoption("--valgrind"):
+            raise pytest.UsageError("--display and --valgrind are mutually exclusive")
+        if config.getoption("--server-path"):
+            raise pytest.UsageError(
+                "--display and --server-path are mutually exclusive"
+            )
+
+
+def _parse_display(value):
+    """Parse a display string like ':42' or '42' into an integer."""
+    value = value.strip().lstrip(":")
+    try:
+        return int(value)
+    except ValueError:
+        raise pytest.UsageError(f"Invalid display value: {value!r}")
+
 
 def get_server_types(config) -> list[str]:
-    """Get the list of server types to test, default to xvfb."""
-    return config.getoption("--server-type") or ["xvfb"]
+    """Get the list of server types to test.
+
+    With ``--display``, defaults to ``["external"]`` if no explicit
+    ``--server-type`` is given.  Otherwise defaults to ``["xvfb"]``.
+    """
+    types = config.getoption("--server-type") or []
+    if config.getoption("--display", default=None) is not None:
+        return types or ["external"]
+    return types or ["xvfb"]
 
 
 def get_valgrind_suppressions(config) -> Path | None:
@@ -209,6 +243,9 @@ def xserver(request, tmp_path):
     A fresh server per test, killed afterward.  With --valgrind,
     valgrind memory errors cause test failure during teardown.
 
+    When ``--display`` is given, no server is started; an
+    :class:`ExternalXServer` proxy is yielded instead.
+
     For a fixture that targets a specific server type use the xvfb,
     xwayland, or xorg fixtures instead.
     """
@@ -220,6 +257,13 @@ def xserver(request, tmp_path):
     if request.node.get_closest_marker("xorg_only") and server_type != "xorg":
         pytest.skip("Test only applies to Xorg")
 
+    # External server mode: no server lifecycle management
+    display = request.config.getoption("--display")
+    if display is not None:
+        display_num = _parse_display(display)
+        yield ExternalXServer(display_num, server_type=server_type)
+        return
+
     kwargs = {}
     if server_type == "xorg":
         kwargs["log_file"] = tmp_path / f"{server_type}.log"
@@ -230,6 +274,10 @@ def xserver(request, tmp_path):
 @pytest.fixture
 def xvfb(request, tmp_path):
     """Start an Xvfb server for this test."""
+    display = request.config.getoption("--display")
+    if display is not None:
+        yield ExternalXServer(_parse_display(display), server_type="xvfb")
+        return
     if "xvfb" not in get_server_types(request.config):
         pytest.skip("Xvfb not in --server-type list")
     yield from _start_server(request, "xvfb")
@@ -238,6 +286,10 @@ def xvfb(request, tmp_path):
 @pytest.fixture
 def xwayland(request, tmp_path):
     """Start an Xwayland server for this test."""
+    display = request.config.getoption("--display")
+    if display is not None:
+        yield ExternalXServer(_parse_display(display), server_type="xwayland")
+        return
     if "xwayland" not in get_server_types(request.config):
         pytest.skip("Xwayland not in --server-type list")
     yield from _start_server(request, "xwayland")
@@ -246,6 +298,10 @@ def xwayland(request, tmp_path):
 @pytest.fixture
 def xorg(request, tmp_path):
     """Start an Xorg server for this test."""
+    display = request.config.getoption("--display")
+    if display is not None:
+        yield ExternalXServer(_parse_display(display), server_type="xorg")
+        return
     if "xorg" not in get_server_types(request.config):
         pytest.skip("Xorg not in --server-type list")
     yield from _start_server(request, "xorg", log_file=tmp_path / "xorg.log")

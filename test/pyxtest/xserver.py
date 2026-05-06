@@ -427,3 +427,78 @@ class XServerProcess:
         if self.asan:
             flags += " +asan"
         return f"<XServerProcess {self.server_type} {display} [{state}]{flags}>"
+
+
+class ExternalXServer:
+    """Proxy for an externally-managed X server (``--display`` mode).
+
+    Used when the user passes ``--display`` to connect to an already-running
+    server instead of launching one per test.  The server's PID is discovered
+    via ``SO_PEERCRED`` on the Unix socket so that :attr:`is_alive` can
+    report whether the process is still running.
+    """
+
+    def __init__(self, display_num, server_type="external"):
+        self._display_num = display_num
+        self.server_type = server_type
+        self._pid = self._get_server_pid()
+
+    def _get_server_pid(self):
+        """Get the PID of the X server via SO_PEERCRED on the Unix socket."""
+        import socket as _socket
+        import struct as _struct
+
+        path = f"/tmp/.X11-unix/X{self._display_num}"
+        try:
+            sock = _socket.socket(_socket.AF_UNIX, _socket.SOCK_STREAM)
+            sock.connect(path)
+            cred = sock.getsockopt(
+                _socket.SOL_SOCKET, _socket.SO_PEERCRED, _struct.calcsize("iii")
+            )
+            pid, _, _ = _struct.unpack("iii", cred)
+            sock.close()
+            return pid
+        except (OSError, _struct.error):
+            return None
+
+    @property
+    def display_num(self):
+        return self._display_num
+
+    @property
+    def display(self):
+        return f":{self._display_num}"
+
+    @property
+    def is_alive(self) -> bool:
+        """Check if the external server process is still running."""
+        if self._pid is None:
+            return True  # can't check, assume alive
+        try:
+            os.kill(self._pid, 0)
+            return True
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True  # process exists but we can't signal it
+
+    @property
+    def crash_signal(self) -> int | None:
+        """Always None -- we cannot determine this for external servers."""
+        return None
+
+    def stop(self):
+        """No-op -- never stop an external server."""
+        return []
+
+    def get_asan_errors(self):
+        """No ASAN log access for external servers."""
+        return []
+
+    def check_valgrind_errors(self):
+        """No valgrind access for external servers."""
+        return []
+
+    def __repr__(self):
+        state = "running" if self.is_alive else "stopped"
+        return f"<ExternalXServer :{self._display_num} [{state}] pid={self._pid}>"
