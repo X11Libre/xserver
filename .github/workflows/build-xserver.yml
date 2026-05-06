@@ -318,6 +318,29 @@ jobs:
             - run: |
                   bash ./.github/scripts/Cygwin/build.sh
 
+    xserver-build-arch:
+        runs-on: ubuntu-latest
+        container:
+            image: archlinux
+            options: --privileged
+        steps:
+          - run:  pacman -Sy --noconfirm git
+          - uses: actions/checkout@v6
+            with: # needed for `git describe` to work
+                fetch-tags: true
+                fetch-depth: 0
+          - name: build arch package
+            uses: callmetango/archlinux-build-package-action@HEAD
+            with:
+                path: .github/arch
+                flags: -cfse --noconfirm
+          - name: upload-artifacts
+            uses: actions/upload-artifact@v7
+            with:
+                name: arch-binpkg
+                path: |
+                    ./.github/arch/xlibre-xserver-*.tar.zst
+
     check-sign-off:
         name: Check Signed-Off-By
         if: github.event_name == 'pull_request'
@@ -343,6 +366,7 @@ jobs:
             - xserver-build-dragonflybsd
             - xserver-build-netbsd
             - xserver-build-cygwin
+            - xserver-build-arch
             - check-sign-off
         steps:
             - name: Checkout
