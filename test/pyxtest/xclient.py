@@ -8,6 +8,7 @@ import struct
 import time
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import Protocol, runtime_checkable
 
 from proto.bigrequests import BigRequestsEnableRequest
 from proto.x11 import (
@@ -32,6 +33,16 @@ class XExtensionData:
     opcode: int
     first_event: int
     first_error: int
+
+
+@runtime_checkable
+class X11Request(Protocol):
+    """Protocol for X11 request objects that can be serialized to wire format.
+
+    All ``@dataclass`` request builders in ``proto/`` satisfy this protocol.
+    """
+
+    def to_bytes(self, byte_order: str = "<") -> bytes: ...
 
 
 class Extension(StrEnum):
@@ -243,7 +254,16 @@ class RawX11Connection:
         self._next_resource_id += 1
         return xid
 
-    def send_request(self, data: bytes) -> int:
+    def send_request(self, data: bytes | X11Request) -> int:
+        """Send a raw or structured X11 request.
+
+        *data* may be a ``bytes`` object (sent as-is) or any object that
+        implements :class:`X11Request` (i.e. has a ``to_bytes(byte_order)``
+        method).  In the latter case ``to_bytes`` is called automatically
+        with the connection's byte order.
+        """
+        if isinstance(data, X11Request):
+            data = data.to_bytes(self._byte_order)
         self.seq += 1
         assert self.sock
         self.sock.sendall(data)
@@ -325,7 +345,7 @@ class RawX11Connection:
             return self._extensions[name]
 
         req = QueryExtensionRequest(name=name)
-        self.send_request(req.to_bytes(self._byte_order))
+        self.send_request(req)
         resp = self.recv_response(timeout=5.0)
         if resp is None or isinstance(resp, X11Error):
             return None
@@ -345,11 +365,10 @@ class RawX11Connection:
         if not ext:
             raise X11ConnectionError("XKB extension not available")
 
-        req = xkb.use_extension(
-            ext.opcode,
+        req = xkb.UseExtensionRequest(
+            opcode=ext.opcode,
             major=major_version,
             minor=minor_version,
-            byte_order=self._byte_order,
         )
         self.send_request(req)
 
@@ -364,7 +383,7 @@ class RawX11Connection:
             raise X11ConnectionError("BIG-REQUESTS not available")
 
         req = BigRequestsEnableRequest(opcode=ext.opcode)
-        self.send_request(req.to_bytes(self._byte_order))
+        self.send_request(req)
 
         resp = self.recv_response(timeout=5.0)
         if isinstance(resp, X11Error):
@@ -402,7 +421,7 @@ class RawX11Connection:
             height=height,
             depth=depth,
         )
-        self.send_request(req.to_bytes(self._byte_order))
+        self.send_request(req)
         self.flush_responses(timeout=0.2)
         return wid
 
@@ -429,13 +448,13 @@ class RawX11Connection:
             height=height,
             depth=depth,
         )
-        self.send_request(req.to_bytes(self._byte_order))
+        self.send_request(req)
         self.flush_responses(timeout=0.2)
         return pid
 
     def intern_atom(self, name: str, only_if_exists: bool = False) -> int:
         req = InternAtomRequest(name=name, only_if_exists=only_if_exists)
-        self.send_request(req.to_bytes(self._byte_order))
+        self.send_request(req)
 
         resp = self.recv_response(timeout=5.0)
         if isinstance(resp, X11Error) or resp is None:

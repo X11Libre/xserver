@@ -18,7 +18,7 @@ def record_xclient_swapped(xclient_swapped):
         pytest.skip("RECORD extension not available")
 
     req = record.QueryVersionRequest(opcode=ext.opcode)
-    xclient_swapped.send_request(req.to_bytes(">"))
+    xclient_swapped.send_request(req)
     xclient_swapped.recv_response(timeout=5.0)
 
     return xclient_swapped, ext.opcode
@@ -59,7 +59,7 @@ class TestRecordCreateContext:
             n_clients_override=100,  # Claim 100 clients
             n_ranges_override=1,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         time.sleep(0.5)
 
         assert xserver.is_alive, (

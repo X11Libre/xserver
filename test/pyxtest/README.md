@@ -165,7 +165,9 @@ AddressSanitizer. This is set automatically by meson when
        return xclient
    ```
 
-4. Build protocol requests using dataclasses from `proto/`:
+4. Build protocol requests using dataclasses from `proto/` and send them
+   with `send_request()`. The byte order is handled automatically based
+   on the connection type (native or swapped):
 
    ```python
    from proto import xi
@@ -175,7 +177,7 @@ AddressSanitizer. This is set automatically by meson when
        num_changes=1,
        changes_data=change_data,
    )
-   xclient.send_request(req.to_bytes())
+   xclient.send_request(req)
    ```
 
 5. If a new extension module is needed, create `proto/myext.py` with

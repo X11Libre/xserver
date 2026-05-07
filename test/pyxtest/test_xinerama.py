@@ -28,7 +28,7 @@ class TestPseudoramiXGetState:
             opcode=ext.opcode,
             window=conn.root_window,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert xserver.is_alive, "Server crashed"
@@ -58,7 +58,7 @@ class TestPseudoramiXGetScreenCount:
             opcode=ext.opcode,
             window=conn.root_window,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert xserver.is_alive, "Server crashed"
@@ -90,7 +90,7 @@ class TestPseudoramiXGetScreenSize:
             window=conn.root_window,
             screen=0,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert xserver.is_alive, "Server crashed"

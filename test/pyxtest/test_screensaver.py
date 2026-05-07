@@ -38,7 +38,7 @@ class TestScreenSaverSuspend:
             opcode=ext.opcode,
             suspend=1,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         time.sleep(0.5)
 
         assert xserver.is_alive, (

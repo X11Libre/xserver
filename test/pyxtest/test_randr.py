@@ -16,7 +16,7 @@ def _get_first_output(xclient, opcode):
         opcode=opcode,
         window=xclient.root_window,
     )
-    xclient.send_request(req.to_bytes())
+    xclient.send_request(req)
     resp = xclient.recv_response(timeout=5.0)
     if not isinstance(resp, X11Reply) or len(resp.data) < 32:
         pytest.skip("Failed to get RandR screen resources")
@@ -38,7 +38,7 @@ def randr_xclient(xclient):
         pytest.skip("RANDR extension not available")
 
     req = randr.QueryVersionRequest(opcode=ext.opcode)
-    xclient.send_request(req.to_bytes())
+    xclient.send_request(req)
     xclient.recv_response(timeout=5.0)
 
     output_id = _get_first_output(xclient, ext.opcode)
@@ -53,7 +53,7 @@ def randr_xclient_swapped(xclient_swapped):
         pytest.skip("RANDR extension not available")
 
     req = randr.QueryVersionRequest(opcode=ext.opcode)
-    xclient_swapped.send_request(req.to_bytes(">"))
+    xclient_swapped.send_request(req)
     xclient_swapped.recv_response(timeout=5.0)
 
     return xclient_swapped, ext.opcode
@@ -97,7 +97,7 @@ class TestRandROutputProperty:
             mode=randr.PropModeReplace,
             data=initial_data,
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         xclient.flush_responses(timeout=0.5)
 
         # Step 2: Prepend values [1, 2]
@@ -111,7 +111,7 @@ class TestRandROutputProperty:
             mode=randr.PropModePrepend,
             data=prepend_data,
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         xclient.flush_responses(timeout=0.5)
 
         assert xserver.is_alive, (
@@ -125,7 +125,7 @@ class TestRandROutputProperty:
             property_atom=prop_atom,
             type_atom=type_atom,
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         resp = xclient.recv_response(timeout=2.0)
 
         assert isinstance(resp, X11Reply), f"Expected a reply, got {resp}"
@@ -168,7 +168,7 @@ class TestRandROutputProperty:
             num_items=0x40000000,
             data=b"",
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         resp = xclient.recv_response(timeout=2.0)
 
         assert xserver.is_alive, (
@@ -209,7 +209,7 @@ class TestRandRSetScreenConfig:
             opcode=opcode,
             window=conn.root_window,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert isinstance(resp, X11Reply), f"Expected reply, got {resp}"
@@ -228,7 +228,7 @@ class TestRandRSetScreenConfig:
             size_id=0,
             rotation=1,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert xserver.is_alive, "Server crashed"
@@ -275,7 +275,7 @@ class TestRandRCreateLease:
             opcode=opcode,
             window=conn.root_window,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
         assert isinstance(resp, X11Reply), f"Expected reply, got {resp}"
 
@@ -297,7 +297,7 @@ class TestRandRCreateLease:
             crtcs=crtcs,
             outputs=outputs,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert xserver.is_alive, "Server crashed"

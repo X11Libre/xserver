@@ -18,7 +18,7 @@ def xres_xclient_swapped(xclient_swapped):
         pytest.skip("X-Resource extension not available")
 
     req = xres.QueryVersionRequest(opcode=ext.opcode)
-    xclient_swapped.send_request(req.to_bytes(">"))
+    xclient_swapped.send_request(req)
     resp = xclient_swapped.recv_response(timeout=5.0)
     if not isinstance(resp, X11Reply):
         pytest.skip("XRes QueryVersion failed")
@@ -48,7 +48,7 @@ class TestXResQueryClientIds:
             opcode=opcode,
             specs=[(0, 1)],  # mask=1 (XResClientXIDMask)
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert xserver.is_alive, "Server crashed"
@@ -87,7 +87,7 @@ class TestXResQueryClientIds:
 
         # Get the list of clients
         req = xres.QueryClientsRequest(opcode=opcode)
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
         assert isinstance(resp, X11Reply), f"Expected reply, got {resp}"
 
@@ -119,7 +119,7 @@ class TestXResQueryClientIds:
             opcode=opcode,
             specs=[(target_xid, 1)],  # XResClientXIDMask
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert isinstance(resp, X11Reply), f"Expected reply, got {resp}"

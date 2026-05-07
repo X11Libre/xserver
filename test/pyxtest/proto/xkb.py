@@ -77,17 +77,6 @@ class UseExtensionRequest:
         )
 
 
-# Keep as a module-level function for backward compatibility with
-# xclient.py which calls xkb.use_extension() directly.
-def use_extension(
-    opcode: int, *, major: int = 1, minor: int = 0, byte_order: str = "<"
-) -> bytes:
-    """Build XkbUseExtension request (minor opcode 0)."""
-    return UseExtensionRequest(opcode=opcode, major=major, minor=minor).to_bytes(
-        byte_order
-    )
-
-
 @dataclass
 class GetMapRequest:
     """xkbGetMapReq (minor opcode 8). 28 bytes."""

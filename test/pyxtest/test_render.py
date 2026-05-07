@@ -18,7 +18,7 @@ def render_xclient_swapped(xclient_swapped):
         pytest.skip("RENDER extension not available")
 
     req = render.QueryVersionRequest(opcode=ext.opcode)
-    xclient_swapped.send_request(req.to_bytes(">"))
+    xclient_swapped.send_request(req)
     xclient_swapped.recv_response(timeout=5.0)
 
     return xclient_swapped, ext.opcode
@@ -49,7 +49,7 @@ class TestRenderSetPictureFilter:
         # followed by numFormats xPictFormInfo entries (28 bytes each):
         #   [0] id(4)  [4] type(1)  [5] depth(1)  ...
         req = render.QueryPictFormatsRequest(opcode=opcode)
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert isinstance(resp, X11Reply), "QueryPictFormats failed"
@@ -78,7 +78,7 @@ class TestRenderSetPictureFilter:
             drawable=pix,
             format_id=format_id,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         errors = conn.flush_responses(timeout=0.5)
         create_errors = [r for r in errors if isinstance(r, X11Error)]
         assert len(create_errors) == 0, f"CreatePicture failed: {create_errors}"
@@ -98,7 +98,7 @@ class TestRenderSetPictureFilter:
                 0x00010000,
             ],
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         responses = conn.flush_responses(timeout=1.0)
 
         assert xserver.is_alive, "Server crashed"

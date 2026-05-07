@@ -37,7 +37,7 @@ class TestShmCreateSegment:
 
         # Query SHM version
         req = shm.QueryVersionRequest(opcode=ext.opcode)
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         if not isinstance(resp, X11Reply):
@@ -61,7 +61,7 @@ class TestShmCreateSegment:
                 shmseg=shmseg_id,
                 size=4096,
                 read_only=False,
-            ).to_bytes(">")
+            )
         )
 
         # Read the 32-byte reply header.  The fd arrives as

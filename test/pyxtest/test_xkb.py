@@ -71,7 +71,7 @@ class TestXkbSetMapOverflows:
             max_key_code=255,
             payload=b"\x00" * 8,  # Way too little data
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         time.sleep(0.5)
 
         assert xserver.is_alive, "Server crashed - missing length checks in SetMap"
@@ -98,7 +98,7 @@ class TestXkbSetMapOverflows:
 
         # Step 1: Query the server's key sym map to learn symsPerKey
         get_map = xkb.GetMapRequest(opcode=opcode, full=xkb.XkbKeySymsMask)
-        xclient.send_request(get_map.to_bytes())
+        xclient.send_request(get_map)
         resp = xclient.recv_response(timeout=5.0)
         assert isinstance(resp, X11Reply), f"Expected GetMap reply, got {resp}"
 
@@ -147,7 +147,7 @@ class TestXkbSetMapOverflows:
             total_acts=0,  # Mismatch: real sum is real_n_acts
             payload=payload,
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         resps = xclient.flush_responses(timeout=0.5)
         errors = [r for r in resps if isinstance(r, X11Error)]
 
@@ -208,7 +208,7 @@ class TestXkbSetGeometry:
             name_atom=name_atom,
             payload=color_data + shape_data,
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         resp = xclient.recv_response(timeout=2.0)
 
         assert xserver.is_alive, "Server crashed - truncated sections in SetGeometry"
@@ -259,7 +259,7 @@ class TestXkbSetGeometry:
             name_atom=name_atom,
             payload=payload,
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         resps = xclient.flush_responses(timeout=0.5)
         errors = [r for r in resps if isinstance(r, X11Error)]
 
@@ -313,7 +313,7 @@ class TestXkbSetGeometry:
             name_atom=name_atom,
             payload=label_font + color_data + shape_data,
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         resps = xclient.flush_responses(timeout=0.5)
         errors = [r for r in resps if isinstance(r, X11Error)]
 
@@ -377,7 +377,7 @@ class TestXkbSetGeometry:
             name_atom=name_atom,
             payload=payload,
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         resps = xclient.flush_responses(timeout=0.5)
         errors = [r for r in resps if isinstance(r, X11Error)]
 
@@ -422,7 +422,7 @@ class TestXkbSetCompatMap:
             truncate_si=1,
             payload=payload1,
         )
-        xclient.send_request(req1.to_bytes())
+        xclient.send_request(req1)
         xclient.flush_responses(timeout=0.5)
 
         # Step 2: Truncate to 2 (sets num_si=2, size_si stays 10)
@@ -434,7 +434,7 @@ class TestXkbSetCompatMap:
             truncate_si=1,
             payload=payload2,
         )
-        xclient.send_request(req2.to_bytes())
+        xclient.send_request(req2)
         xclient.flush_responses(timeout=0.5)
 
         # Step 3: Write at index 8-11 without truncation.
@@ -448,7 +448,7 @@ class TestXkbSetCompatMap:
             truncate_si=0,
             payload=payload3,
         )
-        xclient.send_request(req3.to_bytes())
+        xclient.send_request(req3)
         time.sleep(0.5)
 
         assert xserver.is_alive, (
@@ -486,7 +486,7 @@ class TestXkbSetNames:
             n_radio_groups=10,  # 10 radio group names expected
             payload=b"\x00" * 12,  # Way too little for all those atoms
         )
-        xclient.send_request(req.to_bytes())
+        xclient.send_request(req)
         time.sleep(0.5)
 
         assert xserver.is_alive, "Server crashed - truncated atoms in SetNames"

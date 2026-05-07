@@ -38,7 +38,7 @@ class TestVidModeSwitchToMode:
             pytest.skip("XF86-VidModeExtension not available")
 
         req = vidmode.QueryVersionRequest(opcode=ext.opcode)
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
         if not isinstance(resp, X11Reply):
             pytest.skip("VidMode QueryVersion failed")
@@ -48,14 +48,14 @@ class TestVidModeSwitchToMode:
                 opcode=ext.opcode,
                 major=vidmode_version,
             )
-            conn.send_request(req.to_bytes(">"))
+            conn.send_request(req)
 
         # Get the current mode line so we can echo it back.
         req = vidmode.GetModeLineRequest(
             opcode=ext.opcode,
             screen=0,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         if isinstance(resp, X11Error):
@@ -141,7 +141,7 @@ class TestVidModeSwitchToMode:
                 flags=flags,
                 privsize=0,
             )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=2.0)
 
         assert xserver.is_alive, "Server crashed"

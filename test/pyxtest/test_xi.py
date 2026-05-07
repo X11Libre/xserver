@@ -18,7 +18,7 @@ def xi_xclient(xclient):
         pytest.skip("XInput extension not available")
 
     req = xi.XIQueryVersionRequest(opcode=ext.opcode)
-    xclient.send_request(req.to_bytes())
+    xclient.send_request(req)
     xclient.recv_response(timeout=5.0)
     return xclient
 
@@ -31,7 +31,7 @@ def xi_xclient_swapped(xclient_swapped):
         pytest.skip("XInput extension not available")
 
     req = xi.XIQueryVersionRequest(opcode=ext.opcode)
-    xclient_swapped.send_request(req.to_bytes(">"))
+    xclient_swapped.send_request(req)
     xclient_swapped.recv_response(timeout=5.0)
     return xclient_swapped
 
@@ -65,7 +65,7 @@ class TestXIPassiveGrab:
             detail=256,  # OOB: valid range is 0-255
             grab_type=xi.XIGrabtypeButton,
         )
-        xi_xclient.send_request(req.to_bytes())
+        xi_xclient.send_request(req)
         resp = xi_xclient.recv_response(timeout=2.0)
 
         assert xserver.is_alive, (
@@ -108,7 +108,7 @@ class TestXIPassiveGrab:
             detail=256,  # OOB: valid range is 0-255
             grab_type=xi.XIGrabtypeButton,
         )
-        xi_xclient.send_request(req.to_bytes())
+        xi_xclient.send_request(req)
         resp = xi_xclient.recv_response(timeout=2.0)
 
         assert xserver.is_alive, (
@@ -157,7 +157,7 @@ class TestXIChangeProperty:
             num_items=0x40000000,
             data=b"",  # no actual data
         )
-        xi_xclient.send_request(req.to_bytes())
+        xi_xclient.send_request(req)
         resp = xi_xclient.recv_response(timeout=2.0)
 
         assert xserver.is_alive, (
@@ -208,7 +208,7 @@ class TestXIChangeProperty:
             mode=xi.PropModeReplace,
             data=initial_data,
         )
-        xi_xclient.send_request(req.to_bytes())
+        xi_xclient.send_request(req)
         xi_xclient.flush_responses(timeout=0.5)
 
         # Step 2: Prepend values [1, 2]
@@ -222,7 +222,7 @@ class TestXIChangeProperty:
             mode=xi.PropModePrepend,
             data=prepend_data,
         )
-        xi_xclient.send_request(req.to_bytes())
+        xi_xclient.send_request(req)
         xi_xclient.flush_responses(timeout=0.5)
 
         assert xserver.is_alive, (
@@ -236,7 +236,7 @@ class TestXIChangeProperty:
             property_atom=prop_atom,
             type_atom=type_atom,
         )
-        xi_xclient.send_request(req.to_bytes())
+        xi_xclient.send_request(req)
         resp = xi_xclient.recv_response(timeout=2.0)
 
         assert isinstance(resp, X11Reply), f"Expected a reply, got {resp}"
@@ -293,7 +293,7 @@ class TestXIChangeProperty:
             mode=xi.PropModeReplace,
             data=data,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         conn.flush_responses(timeout=0.5)
 
         assert xserver.is_alive, "Server crashed during ChangeProperty"
@@ -304,7 +304,7 @@ class TestXIChangeProperty:
             property_atom=prop_atom,
             type_atom=type_atom,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=2.0)
 
         assert isinstance(resp, X11Reply), f"Expected a reply, got {resp}"
@@ -359,7 +359,7 @@ class TestXIChangeDeviceControl:
             pytest.skip("XInput extension not available")
 
         req = xi.XIQueryVersionRequest(opcode=ext.opcode)
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         conn.recv_response(timeout=5.0)
 
         ctl = xi.DeviceResolutionCtl(
@@ -375,7 +375,7 @@ class TestXIChangeDeviceControl:
             deviceid=xi.VirtualCorePointer,
             control_data=ctl_bytes,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         resp = conn.recv_response(timeout=2.0)
 
         assert xserver.is_alive, "Server crashed"

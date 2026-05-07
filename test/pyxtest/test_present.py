@@ -5,7 +5,7 @@
 import pytest
 
 from proto import present
-from xclient import Extension, X11Error
+from xclient import BadWindow, Extension, X11Error
 
 
 class TestPresentSelectInput:
@@ -27,7 +27,7 @@ class TestPresentSelectInput:
             pytest.skip("Present extension not available")
 
         req = present.QueryVersionRequest(opcode=ext.opcode)
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         conn.recv_response(timeout=5.0)
 
         win = conn.create_window()
@@ -43,7 +43,7 @@ class TestPresentSelectInput:
             window=win,
             event_mask=PresentConfigureNotifyMask,
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         responses = conn.flush_responses(timeout=1.0)
 
         assert xserver.is_alive, "Server crashed"
@@ -93,7 +93,7 @@ class TestPresentNotify:
             pytest.skip("Present extension not available")
 
         req = present.QueryVersionRequest(opcode=ext.opcode)
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         conn.recv_response(timeout=5.0)
 
         win = conn.create_window()
@@ -112,7 +112,7 @@ class TestPresentNotify:
             serial=0,
             notifies=[notify],
         )
-        conn.send_request(req.to_bytes(">"))
+        conn.send_request(req)
         responses = conn.flush_responses(timeout=1.0)
 
         assert xserver.is_alive, "Server crashed"
@@ -123,7 +123,9 @@ class TestPresentNotify:
         # Without the fix: BadWindow because the notify's window ID
         # was not byte-swapped.
         bad_window_errors = [
-            r for r in responses if isinstance(r, X11Error) and r.error_code == 3
+            r
+            for r in responses
+            if isinstance(r, X11Error) and r.error_code == BadWindow
         ]
         assert len(bad_window_errors) == 0, (
             f"PresentPixmap returned BadWindow error(s): "
