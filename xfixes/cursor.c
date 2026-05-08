@@ -398,18 +398,15 @@ ProcXFixesGetCursorImage(ClientPtr client)
 int
 ProcXFixesSetCursorName(ClientPtr client)
 {
-    CursorPtr pCursor;
-    char *tchar;
-    Atom atom;
-
     X_REQUEST_HEAD_AT_LEAST(xXFixesSetCursorNameReq);
     X_REQUEST_FIELD_CARD32(cursor);
     X_REQUEST_FIELD_CARD16(nbytes);
     REQUEST_FIXED_SIZE(xXFixesSetCursorNameReq, stuff->nbytes);
 
+    CursorPtr pCursor;
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixSetAttrAccess);
-    tchar = (char *) &stuff[1];
-    atom = MakeAtom(tchar, stuff->nbytes, TRUE);
+    char *tchar = (char *) &stuff[1];
+    Atom atom = MakeAtom(tchar, stuff->nbytes, TRUE);
     if (atom == BAD_RESOURCE)
         return BadAlloc;
 
