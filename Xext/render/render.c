@@ -2660,17 +2660,13 @@ ProcRenderComposite(ClientPtr client)
 static int
 ProcRenderTrapezoids(ClientPtr client)
 {
-    REQUEST(xRenderTrapezoidsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->src);
-        swapl(&stuff->dst);
-        swapl(&stuff->maskFormat);
-        swaps(&stuff->xSrc);
-        swaps(&stuff->ySrc);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderTrapezoidsReq);
+    X_REQUEST_FIELD_CARD32(src);
+    X_REQUEST_FIELD_CARD32(dst);
+    X_REQUEST_FIELD_CARD32(maskFormat);
+    X_REQUEST_FIELD_CARD16(xSrc);
+    X_REQUEST_FIELD_CARD16(ySrc);
+    X_REQUEST_REST_CARD32();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderTrapezoids(client, stuff)
