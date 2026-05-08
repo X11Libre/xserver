@@ -139,15 +139,11 @@ RenderExtensionInit(void)
 static int
 ProcRenderQueryVersion(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xRenderQueryVersionReq);
+    X_REQUEST_FIELD_CARD32(majorVersion);
+    X_REQUEST_FIELD_CARD32(minorVersion);
+
     RenderClientPtr pRenderClient = GetRenderClient(client);
-
-    REQUEST(xRenderQueryVersionReq);
-    REQUEST_SIZE_MATCH(xRenderQueryVersionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->majorVersion);
-        swapl(&stuff->minorVersion);
-    }
 
     pRenderClient->major_version = stuff->majorVersion;
     pRenderClient->minor_version = stuff->minorVersion;
