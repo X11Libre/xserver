@@ -750,16 +750,12 @@ ProcRenderCreateGlyphSet(ClientPtr client)
 static int
 ProcRenderReferenceGlyphSet(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xRenderReferenceGlyphSetReq);
+    X_REQUEST_FIELD_CARD32(gsid);
+    X_REQUEST_FIELD_CARD32(existing);
+
     GlyphSetPtr glyphSet;
     int rc;
-
-    REQUEST(xRenderReferenceGlyphSetReq);
-    REQUEST_SIZE_MATCH(xRenderReferenceGlyphSetReq);
-
-    if (client->swapped) {
-        swapl(&stuff->gsid);
-        swapl(&stuff->existing);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->gsid, client);
 
