@@ -695,17 +695,13 @@ SingleRenderTriFan(ClientPtr client, xRenderTriFanReq *stuff)
 static int
 ProcRenderCreateGlyphSet(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xRenderCreateGlyphSetReq);
+    X_REQUEST_FIELD_CARD32(gsid);
+    X_REQUEST_FIELD_CARD32(format);
+
     GlyphSetPtr glyphSet;
     PictFormatPtr format;
     int rc, f;
-
-    REQUEST(xRenderCreateGlyphSetReq);
-    REQUEST_SIZE_MATCH(xRenderCreateGlyphSetReq);
-
-    if (client->swapped) {
-        swapl(&stuff->gsid);
-        swapl(&stuff->format);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->gsid, client);
     rc = dixLookupResourceByType((void **) &format, stuff->format,
