@@ -2901,15 +2901,11 @@ ProcRenderSetPictureFilter(ClientPtr client)
 static int
 ProcRenderAddTraps(ClientPtr client)
 {
-    REQUEST(xRenderAddTrapsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->picture);
-        swaps(&stuff->xOff);
-        swaps(&stuff->yOff);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderAddTrapsReq);
+    X_REQUEST_FIELD_CARD32(picture);
+    X_REQUEST_FIELD_CARD16(xOff);
+    X_REQUEST_FIELD_CARD16(yOff);
+    X_REQUEST_REST_CARD32();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderAddTraps(client, stuff)
