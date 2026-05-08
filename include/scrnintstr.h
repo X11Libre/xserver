@@ -706,6 +706,12 @@ typedef struct _Screen {
     /* additional screen post-close notify hooks (replaces wrapping CloseScreen)
        should NOT be touched outside of DIX core */
     CallbackListPtr hookPostClose;
+
+    /* xfixes cursor hiding -- this might deserve further optimization */
+    struct {
+        DisplayCursorProcPtr DisplayCursor; /* original proc (for wrapping) */
+        struct _CursorHideCountRec *pCursorHideCounts;
+    } xfixes;
 } ScreenRec;
 
 static inline RegionPtr
