@@ -969,7 +969,7 @@ ChangeToCursor(DeviceIntPtr pDev, CursorPtr cursor)
 #endif /* XINERAMA */
             pScreen = pSprite->hotPhys.pScreen;
 
-        (*pScreen->DisplayCursor) (pDev, pScreen, cursor);
+        dixScreenRaiseDisplayCursor(pDev, pScreen, cursor);
         FreeCursor(pSprite->current, (Cursor) 0);
         pSprite->current = RefCursor(cursor);
     }
@@ -3369,7 +3369,7 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
         (*pScreen->ConstrainCursor) (pDev, pScreen, &pSprite->physLimits);
         (*pScreen->SetCursorPosition) (pDev, pScreen, pSprite->hot.x,
                                        pSprite->hot.y, FALSE);
-        (*pScreen->DisplayCursor) (pDev, pScreen, pSprite->current);
+        dixScreenRaiseDisplayCursor(pDev, pScreen, pSprite->current);
     }
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
@@ -3448,7 +3448,7 @@ UpdateSpriteForScreen(DeviceIntPtr pDev, ScreenPtr pScreen)
                               &pSprite->hotLimits, &pSprite->physLimits);
     pSprite->confined = FALSE;
     (*pScreen->ConstrainCursor) (pDev, pScreen, &pSprite->physLimits);
-    (*pScreen->DisplayCursor) (pDev, pScreen, pSprite->current);
+    dixScreenRaiseDisplayCursor(pDev, pScreen, pSprite->current);
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
