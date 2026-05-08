@@ -2552,16 +2552,12 @@ PanoramiXRenderReset(void)
 static int
 ProcRenderCreatePicture(ClientPtr client)
 {
-    REQUEST(xRenderCreatePictureReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreatePictureReq);
-
-    if (client->swapped) {
-        swapl(&stuff->pid);
-        swapl(&stuff->drawable);
-        swapl(&stuff->format);
-        swapl(&stuff->mask);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderCreatePictureReq);
+    X_REQUEST_FIELD_CARD32(pid);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(format);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_REST_CARD32(stuff);
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderCreatePicture(client, stuff)
