@@ -370,14 +370,11 @@ ProcRenderQueryPictFormats(ClientPtr client)
 static int
 ProcRenderQueryPictIndexValues(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xRenderQueryPictIndexValuesReq);
+    X_REQUEST_FIELD_CARD32(format);
+
     PictFormatPtr pFormat;
     int rc;
-
-    REQUEST(xRenderQueryPictIndexValuesReq);
-    REQUEST_AT_LEAST_SIZE(xRenderQueryPictIndexValuesReq);
-
-    if (client->swapped)
-        swapl(&stuff->format);
 
     rc = dixLookupResourceByType((void **) &pFormat, stuff->format,
                                  PictFormatType, client, DixReadAccess);
@@ -404,9 +401,7 @@ ProcRenderQueryPictIndexValues(ClientPtr client)
         .numIndexValues = pFormat->index.nvalues
     };
 
-    if (client->swapped) {
-        swapl(&reply.numIndexValues);
-    }
+    X_REPLY_FIELD_CARD32(numIndexValues);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
