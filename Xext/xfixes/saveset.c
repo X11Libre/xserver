@@ -34,11 +34,9 @@ ProcXFixesChangeSaveSet(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xXFixesChangeSaveSetReq);
     X_REQUEST_FIELD_CARD32(window);
 
-    Bool toRoot, map;
-    int result;
     WindowPtr pWin;
 
-    result = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
+    int result = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
     if (result != Success)
         return result;
     if (client->clientAsMask == (CLIENT_BITS(pWin->drawable.id)))
@@ -55,7 +53,8 @@ ProcXFixesChangeSaveSet(ClientPtr client)
         client->errorValue = stuff->map;
         return BadValue;
     }
-    toRoot = (stuff->target == SaveSetRoot);
-    map = (stuff->map == SaveSetMap);
+
+    Bool toRoot = (stuff->target == SaveSetRoot);
+    Bool map = (stuff->map == SaveSetMap);
     return AlterSaveSetForClient(client, pWin, stuff->mode, toRoot, map);
 }
