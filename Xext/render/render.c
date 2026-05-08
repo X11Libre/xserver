@@ -2979,19 +2979,17 @@ ProcRenderCreateLinearGradient(ClientPtr client)
 static int
 ProcRenderCreateRadialGradient(ClientPtr client)
 {
-    REQUEST(xRenderCreateRadialGradientReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateRadialGradientReq);
+    X_REQUEST_HEAD_AT_LEAST(xRenderCreateRadialGradientReq);
+    X_REQUEST_FIELD_CARD32(pid);
+    X_REQUEST_FIELD_CARD32(inner.x);
+    X_REQUEST_FIELD_CARD32(inner.y);
+    X_REQUEST_FIELD_CARD32(outer.x);
+    X_REQUEST_FIELD_CARD32(outer.y);
+    X_REQUEST_FIELD_CARD32(inner_radius);
+    X_REQUEST_FIELD_CARD32(outer_radius);
+    X_REQUEST_FIELD_CARD32(nStops);
 
     if (client->swapped) {
-        swapl(&stuff->pid);
-        swapl(&stuff->inner.x);
-        swapl(&stuff->inner.y);
-        swapl(&stuff->outer.x);
-        swapl(&stuff->outer.y);
-        swapl(&stuff->inner_radius);
-        swapl(&stuff->outer_radius);
-        swapl(&stuff->nStops);
-
         int len = (client->req_len << 2) - sizeof(xRenderCreateRadialGradientReq);
         if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
             return BadLength;
