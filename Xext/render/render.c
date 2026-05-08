@@ -202,9 +202,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
     int numScreens;
     int numSubpixel;
 
-/*    REQUEST(xRenderQueryPictFormatsReq); */
-
-    REQUEST_SIZE_MATCH(xRenderQueryPictFormatsReq);
+    X_REQUEST_HEAD_STRUCT(xRenderQueryPictFormatsReq);
 
 #ifdef XINERAMA
     if (noPanoramiXExtension)
@@ -356,13 +354,11 @@ ProcRenderQueryPictFormats(ClientPtr client)
         .numSubpixel = numSubpixel,
     };
 
-    if (client->swapped) {
-        swapl(&reply.numFormats);
-        swapl(&reply.numScreens);
-        swapl(&reply.numDepths);
-        swapl(&reply.numVisuals);
-        swapl(&reply.numSubpixel);
-    }
+    X_REPLY_FIELD_CARD32(numFormats);
+    X_REPLY_FIELD_CARD32(numScreens);
+    X_REPLY_FIELD_CARD32(numDepths);
+    X_REPLY_FIELD_CARD32(numVisuals);
+    X_REPLY_FIELD_CARD32(numSubpixel);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
