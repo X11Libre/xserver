@@ -110,3 +110,12 @@ void dixScreenRaiseUnrealizeWindow(WindowPtr pWin)
     if (pWin->drawable.pScreen->UnrealizeWindow)
         pWin->drawable.pScreen->UnrealizeWindow(pWin);
 }
+
+Bool dixScreenRaiseDisplayCursor(ScreenPtr pScreen, DeviceIntPtr pDev, CursorPtr pCursor)
+{
+    /* for now just calling the screen proc, but in the future we'll also handle hide
+       counters and animations here, so we don't need fragile proc wrapping anymore */
+    if (pScreen && pScreen->DisplayCursor)
+        return pScreen->DisplayCursor(pDev, pScreen, pCursor);
+    return FALSE;
+}

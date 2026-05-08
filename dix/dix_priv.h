@@ -380,6 +380,15 @@ void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap);
 Bool dixScreenRaiseCreateResources(ScreenPtr pScreen);
 
 /*
+ * @brief call screen's DisplayCursor chain
+ * @param pScreen the screen to operate on
+ * @param pDev    device whose cursor to show/hide
+ * @param pCursor cursor object (NullCursor = hide the cursor)
+ * @return TRUE if the cursor was displayed, FALSE otherwise
+ */
+Bool dixScreenRaiseDisplayCursor(ScreenPtr pScreen, DeviceIntPtr pDev, CursorPtr pCursor);
+
+/*
  * @brief mark event ID as critical
  * @param event the event to add to the critical events bitmap
  */
