@@ -451,24 +451,21 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xXFixesGetCursorImageAndNameReq);
 
-    CursorPtr pCursor;
-    int npixels;
-    const char *name;
-    int width, height;
-    int rc, x, y;
-
-    pCursor = CursorForClient(client);
+    CursorPtr pCursor = CursorForClient(client);
     if (!pCursor)
         return BadCursor;
-    rc = XaceHookResourceAccess(client, pCursor->id, X11_RESTYPE_CURSOR,
+    int rc = XaceHookResourceAccess(client, pCursor->id, X11_RESTYPE_CURSOR,
                   pCursor, X11_RESTYPE_NONE, NULL, DixReadAccess | DixGetAttrAccess);
     if (rc != Success)
         return rc;
+
+    int x, y;
     GetSpritePosition(PickPointer(client), &x, &y);
-    width = pCursor->bits->width;
-    height = pCursor->bits->height;
-    npixels = width * height;
-    name = pCursor->name ? NameForAtom(pCursor->name) : "";
+    int width = pCursor->bits->width;
+    int height = pCursor->bits->height;
+    int npixels = width * height;
+
+    const char *name = pCursor->name ? NameForAtom(pCursor->name) : "";
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
