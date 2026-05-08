@@ -1014,7 +1014,7 @@ ProcRenderFreeGlyphs(ClientPtr client)
 {
     X_REQUEST_HEAD_AT_LEAST(xRenderFreeGlyphsReq);
     X_REQUEST_FIELD_CARD32(glyphset);
-    X_REQUEST_REST_CARD32(stuff);
+    X_REQUEST_REST_CARD32();
 
     GlyphSetPtr glyphSet;
     int rc, nglyph;
@@ -1582,7 +1582,7 @@ ProcRenderCreateAnimCursor(ClientPtr client)
 {
     X_REQUEST_HEAD_AT_LEAST(xRenderCreateAnimCursorReq);
     X_REQUEST_FIELD_CARD32(cid);
-    X_REQUEST_REST_CARD32(stuff);
+    X_REQUEST_REST_CARD32();
 
     CARD32 *deltas;
     CursorPtr pCursor;
@@ -2517,7 +2517,7 @@ ProcRenderCreatePicture(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drawable);
     X_REQUEST_FIELD_CARD32(format);
     X_REQUEST_FIELD_CARD32(mask);
-    X_REQUEST_REST_CARD32(stuff);
+    X_REQUEST_REST_CARD32();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderCreatePicture(client, stuff)
@@ -2533,7 +2533,7 @@ ProcRenderChangePicture(ClientPtr client)
     X_REQUEST_HEAD_AT_LEAST(xRenderChangePictureReq);
     X_REQUEST_FIELD_CARD32(picture);
     X_REQUEST_FIELD_CARD32(mask);
-    X_REQUEST_REST_CARD32(stuff);
+    X_REQUEST_REST_CARD32();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderChangePicture(client, stuff, stuff->picture)
@@ -2550,7 +2550,7 @@ ProcRenderSetPictureClipRectangles(ClientPtr client)
     X_REQUEST_FIELD_CARD32(picture);
     X_REQUEST_FIELD_CARD16(xOrigin);
     X_REQUEST_FIELD_CARD16(yOrigin);
-    X_REQUEST_REST_CARD16(stuff);
+    X_REQUEST_REST_CARD16();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderSetPictureClipRectangles(client, stuff, stuff->picture)
@@ -2607,7 +2607,7 @@ ProcRenderTrapezoids(ClientPtr client)
     X_REQUEST_FIELD_CARD32(maskFormat);
     X_REQUEST_FIELD_CARD16(xSrc);
     X_REQUEST_FIELD_CARD16(ySrc);
-    X_REQUEST_REST_CARD32(stuff);
+    X_REQUEST_REST_CARD32();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderTrapezoids(client, stuff)
