@@ -781,14 +781,11 @@ ProcRenderReferenceGlyphSet(ClientPtr client)
 static int
 ProcRenderFreeGlyphSet(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xRenderFreeGlyphSetReq);
+    X_REQUEST_FIELD_CARD32(glyphset);
+
     GlyphSetPtr glyphSet;
     int rc;
-
-    REQUEST(xRenderFreeGlyphSetReq);
-    REQUEST_SIZE_MATCH(xRenderFreeGlyphSetReq);
-
-    if (client->swapped)
-        swapl(&stuff->glyphset);
 
     rc = dixLookupResourceByType((void **) &glyphSet, stuff->glyphset,
                                  GlyphSetType, client, DixDestroyAccess);
