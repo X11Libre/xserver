@@ -1287,15 +1287,11 @@ static CARD32 orderedDither[DITHER_DIM][DITHER_DIM] = {
 static int
 ProcRenderCreateCursor(ClientPtr client)
 {
-    REQUEST(xRenderCreateCursorReq);
-    REQUEST_SIZE_MATCH(xRenderCreateCursorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cid);
-        swapl(&stuff->src);
-        swaps(&stuff->x);
-        swaps(&stuff->y);
-    }
+    X_REQUEST_HEAD_STRUCT(xRenderCreateCursorReq);
+    X_REQUEST_FIELD_CARD32(cid);
+    X_REQUEST_FIELD_CARD32(src);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
 
     PicturePtr pSrc;
     ScreenPtr pScreen;
