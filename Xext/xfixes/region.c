@@ -78,12 +78,10 @@ ProcXFixesCreateRegion(ClientPtr client)
     X_REQUEST_FIELD_CARD32(region);
     X_REQUEST_REST_CARD16();
 
-    int things;
     RegionPtr pRegion;
-
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
-    things = (client->req_len << 2) - sizeof(xXFixesCreateRegionReq);
+    int things = (client->req_len << 2) - sizeof(xXFixesCreateRegionReq);
     if (things & 4)
         return BadLength;
     things >>= 3;
@@ -104,13 +102,10 @@ ProcXFixesCreateRegionFromBitmap(ClientPtr client)
     X_REQUEST_FIELD_CARD32(region);
     X_REQUEST_FIELD_CARD32(bitmap);
 
-    RegionPtr pRegion;
-    PixmapPtr pPixmap;
-    int rc;
-
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
-    rc = dixLookupResourceByType((void **) &pPixmap, stuff->bitmap, X11_RESTYPE_PIXMAP,
+    PixmapPtr pPixmap;
+    int rc = dixLookupResourceByType((void **) &pPixmap, stuff->bitmap, X11_RESTYPE_PIXMAP,
                                  client, DixReadAccess);
     if (rc != Success) {
         client->errorValue = stuff->bitmap;
@@ -119,7 +114,7 @@ ProcXFixesCreateRegionFromBitmap(ClientPtr client)
     if (pPixmap->drawable.depth != 1)
         return BadMatch;
 
-    pRegion = BitmapToRegion(pPixmap->drawable.pScreen, pPixmap);
+    RegionPtr pRegion = BitmapToRegion(pPixmap->drawable.pScreen, pPixmap);
 
     if (!pRegion)
         return BadAlloc;
@@ -137,18 +132,18 @@ ProcXFixesCreateRegionFromWindow(ClientPtr client)
     X_REQUEST_FIELD_CARD32(region);
     X_REQUEST_FIELD_CARD32(window);
 
-    RegionPtr pRegion;
-    Bool copy = TRUE;
-    WindowPtr pWin;
-    int rc;
-
     LEGAL_NEW_RESOURCE(stuff->region, client);
-    rc = dixLookupResourceByType((void **) &pWin, stuff->window, X11_RESTYPE_WINDOW,
+
+    WindowPtr pWin;
+    int rc = dixLookupResourceByType((void **) &pWin, stuff->window, X11_RESTYPE_WINDOW,
                                  client, DixGetAttrAccess);
     if (rc != Success) {
         client->errorValue = stuff->window;
         return rc;
     }
+
+    RegionPtr pRegion;
+    Bool copy = TRUE;
     switch (stuff->kind) {
     case WindowRegionBounding:
         pRegion = wBoundingShape(pWin);
@@ -185,23 +180,20 @@ ProcXFixesCreateRegionFromGC(ClientPtr client)
     X_REQUEST_FIELD_CARD32(region);
     X_REQUEST_FIELD_CARD32(gc);
 
-    RegionPtr pRegion, pClip;
-    GCPtr pGC;
-    int rc;
-
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
-    rc = dixLookupGC(&pGC, stuff->gc, client, DixGetAttrAccess);
+    GCPtr pGC;
+    int rc = dixLookupGC(&pGC, stuff->gc, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    if (pGC->clientClip) {
-        pClip = (RegionPtr) pGC->clientClip;
-        pRegion = XFixesRegionCopy(pClip);
-        if (!pRegion)
-            return BadAlloc;
-    } else {
+    if (!(pGC->clientClip)) {
         return BadMatch;
+    }
+
+    RegionPtr pRegion = XFixesRegionCopy(pGC->clientClip);
+    if (!pRegion) {
+        return BadAlloc;
     }
 
     if (!AddResource(stuff->region, RegionResType, (void *) pRegion))
@@ -217,22 +209,21 @@ ProcXFixesCreateRegionFromPicture(ClientPtr client)
     X_REQUEST_FIELD_CARD32(region);
     X_REQUEST_FIELD_CARD32(picture);
 
-    RegionPtr pRegion;
-    PicturePtr pPicture;
-
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
+    PicturePtr pPicture;
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixGetAttrAccess);
 
     if (!pPicture->pDrawable)
         return RenderErrBase + BadPicture;
 
-    if (pPicture->clientClip) {
-        pRegion = XFixesRegionCopy((RegionPtr) pPicture->clientClip);
-        if (!pRegion)
-            return BadAlloc;
-    } else {
+    if (!(pPicture->clientClip)) {
         return BadMatch;
+    }
+
+    RegionPtr pRegion = XFixesRegionCopy((RegionPtr) pPicture->clientClip);
+    if (!pRegion) {
+        return BadAlloc;
     }
 
     if (!AddResource(stuff->region, RegionResType, (void *) pRegion))
@@ -261,17 +252,15 @@ ProcXFixesSetRegion(ClientPtr client)
     X_REQUEST_FIELD_CARD32(region);
     X_REQUEST_REST_CARD16();
 
-    int things;
-    RegionPtr pRegion, pNew;
-
+    RegionPtr pRegion;
     VERIFY_REGION(pRegion, stuff->region, client, DixWriteAccess);
 
-    things = (client->req_len << 2) - sizeof(xXFixesCreateRegionReq);
+    int things = (client->req_len << 2) - sizeof(xXFixesCreateRegionReq);
     if (things & 4)
         return BadLength;
     things >>= 3;
 
-    pNew = RegionFromRects(things, (xRectangle *) (stuff + 1), CT_UNSORTED);
+    RegionPtr pNew = RegionFromRects(things, (xRectangle *) (stuff + 1), CT_UNSORTED);
     if (!pNew)
         return BadAlloc;
     if (!RegionCopy(pRegion, pNew)) {
@@ -344,14 +333,14 @@ ProcXFixesInvertRegion(ClientPtr client)
     X_REQUEST_FIELD_CARD32(destination);
 
     RegionPtr pSource, pDestination;
-    BoxRec bounds;
-
     VERIFY_REGION(pSource, stuff->source, client, DixReadAccess);
     VERIFY_REGION(pDestination, stuff->destination, client, DixWriteAccess);
 
     /* Compute bounds, limit to 16 bits */
-    bounds.x1 = stuff->x;
-    bounds.y1 = stuff->y;
+    BoxRec bounds = {
+        .x1 = stuff->x,
+        .y1 = stuff->y,
+    };
     if ((int) stuff->x + (int) stuff->width > MAXSHORT)
         bounds.x2 = MAXSHORT;
     else
@@ -693,7 +682,6 @@ PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegion
 {
     int result = Success;
     PanoramiXRes *win;
-    RegionPtr reg = NULL;
 
     if ((result = dixLookupResourceByType((void **) &win, stuff->dest,
                                           XRT_WINDOW, client,
@@ -702,6 +690,7 @@ PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegion
         return result;
     }
 
+    RegionPtr reg = NULL;
     if (win->u.win.root)
         VERIFY_REGION_OR_NONE(reg, stuff->region, client, DixReadAccess);
 
@@ -728,7 +717,6 @@ PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegion
 {
     int result = Success;
     PanoramiXRes *pict;
-    RegionPtr reg = NULL;
 
     if ((result = dixLookupResourceByType((void **) &pict, stuff->picture,
                                           XRT_PICTURE, client,
@@ -737,6 +725,7 @@ PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegion
         return result;
     }
 
+    RegionPtr reg = NULL;
     if (pict->u.pict.root)
         VERIFY_REGION_OR_NONE(reg, stuff->region, client, DixReadAccess);
 
