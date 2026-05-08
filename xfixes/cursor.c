@@ -68,10 +68,6 @@ static RESTYPE CursorClientType;
 static RESTYPE CursorHideCountType;
 static RESTYPE CursorWindowType;
 
-static DevPrivateKeyRec CursorScreenPrivateKeyRec;
-
-#define CursorScreenPrivateKey (&CursorScreenPrivateKeyRec)
-
 static void deleteCursorHideCountsForScreen(ScreenPtr pScreen);
 
 #define VERIFY_CURSOR(pCursor, cursor, client, access)			\
@@ -121,12 +117,6 @@ typedef struct _CursorHideCountRec {
  * Wrap DisplayCursor to catch cursor change events
  */
 
-typedef struct _CursorScreen {
-    DisplayCursorProcPtr DisplayCursor;
-    CursorHideCountPtr pCursorHideCounts;
-} CursorScreenRec, *CursorScreenPtr;
-
-#define GetCursorScreen(s) ((CursorScreenPtr)dixLookupPrivate(&(s)->devPrivates, CursorScreenPrivateKey))
 #define Wrap(as,s,elt,func)	(((as)->elt = (s)->elt), (s)->elt = func)
 #define Unwrap(as,s,elt,backup)	(((backup) = (s)->elt), (s)->elt = (as)->elt)
 
@@ -155,16 +145,15 @@ CursorForClient(ClientPtr client)
 static Bool
 CursorDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    CursorScreenPtr cs = GetCursorScreen(pScreen);
     CursorPtr pOldCursor = CursorForDevice(pDev);
     Bool ret;
     DisplayCursorProcPtr backupProc;
 
-    Unwrap(cs, pScreen, DisplayCursor, backupProc);
+    Unwrap(&(pScreen->xfixes), pScreen, DisplayCursor, backupProc);
 
     CursorVisible = CursorVisible && EnableCursor;
 
-    if (cs->pCursorHideCounts != NULL || !CursorVisible) {
+    if (pScreen->xfixes.pCursorHideCounts != NULL || !CursorVisible) {
         ret = (*pScreen->DisplayCursor) (pDev, pScreen, NullCursor);
     }
     else {
@@ -189,19 +178,17 @@ CursorDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
             }
         }
     }
-    Wrap(cs, pScreen, DisplayCursor, backupProc);
+    Wrap(&(pScreen->xfixes), pScreen, DisplayCursor, backupProc);
 
     return ret;
 }
 
 static void CursorScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    CursorScreenPtr cs = GetCursorScreen(pScreen);
-
     _X_UNUSED DisplayCursorProcPtr display_proc;
 
     dixScreenUnhookClose(pScreen, CursorScreenClose);
-    Unwrap(cs, pScreen, DisplayCursor, display_proc);
+    Unwrap(&(pScreen->xfixes), pScreen, DisplayCursor, display_proc);
     deleteCursorHideCountsForScreen(pScreen);
 }
 
@@ -665,10 +652,9 @@ ProcXFixesChangeCursorByName(ClientPtr client)
 static CursorHideCountPtr
 findCursorHideCount(ClientPtr pClient, ScreenPtr pScreen)
 {
-    CursorScreenPtr cs = GetCursorScreen(pScreen);
     CursorHideCountPtr pChc;
 
-    for (pChc = cs->pCursorHideCounts; pChc != NULL; pChc = pChc->pNext) {
+    for (pChc = pScreen->xfixes.pCursorHideCounts; pChc != NULL; pChc = pChc->pNext) {
         if (pChc->pClient == pClient) {
             return pChc;
         }
@@ -680,7 +666,6 @@ findCursorHideCount(ClientPtr pClient, ScreenPtr pScreen)
 static int
 createCursorHideCount(ClientPtr pClient, ScreenPtr pScreen)
 {
-    CursorScreenPtr cs = GetCursorScreen(pScreen);
     CursorHideCountPtr pChc = calloc(1, sizeof(CursorHideCountRec));
     if (pChc == NULL) {
         return BadAlloc;
@@ -689,8 +674,8 @@ createCursorHideCount(ClientPtr pClient, ScreenPtr pScreen)
     pChc->pScreen = pScreen;
     pChc->hideCount = 1;
     pChc->resource = FakeClientID(pClient->index);
-    pChc->pNext = cs->pCursorHideCounts;
-    cs->pCursorHideCounts = pChc;
+    pChc->pNext = pScreen->xfixes.pCursorHideCounts;
+    pScreen->xfixes.pCursorHideCounts = pChc;
 
     /*
      * Create a resource for this element so it can be deleted
@@ -708,17 +693,16 @@ createCursorHideCount(ClientPtr pClient, ScreenPtr pScreen)
 static void
 deleteCursorHideCount(CursorHideCountPtr pChcToDel, ScreenPtr pScreen)
 {
-    CursorScreenPtr cs = GetCursorScreen(pScreen);
     CursorHideCountPtr pChc, pNext;
     CursorHideCountPtr pChcLast = NULL;
 
-    pChc = cs->pCursorHideCounts;
+    pChc = pScreen->xfixes.pCursorHideCounts;
     while (pChc != NULL) {
         pNext = pChc->pNext;
         if (pChc == pChcToDel) {
             free(pChc);
             if (pChcLast == NULL) {
-                cs->pCursorHideCounts = pNext;
+                pScreen->xfixes.pCursorHideCounts = pNext;
             }
             else {
                 pChcLast->pNext = pNext;
@@ -736,16 +720,15 @@ deleteCursorHideCount(CursorHideCountPtr pChcToDel, ScreenPtr pScreen)
 static void
 deleteCursorHideCountsForScreen(ScreenPtr pScreen)
 {
-    CursorScreenPtr cs = GetCursorScreen(pScreen);
     CursorHideCountPtr pChc, pTmp;
 
-    pChc = cs->pCursorHideCounts;
+    pChc = pScreen->xfixes.pCursorHideCounts;
     while (pChc != NULL) {
         pTmp = pChc->pNext;
         FreeResource(pChc->resource, 0);
         pChc = pTmp;
     }
-    cs->pCursorHideCounts = NULL;
+    pScreen->xfixes.pCursorHideCounts = NULL;
 }
 
 int
@@ -918,14 +901,10 @@ XFixesCursorInit(void)
     else
         CursorVisible = FALSE;
 
-    if (!dixRegisterPrivateKey(&CursorScreenPrivateKeyRec, PRIVATE_SCREEN, sizeof(CursorScreenRec)))
-        return FALSE;
-
     DIX_FOR_EACH_SCREEN({
-        CursorScreenPtr cs = GetCursorScreen(walkScreen);
         dixScreenHookClose(walkScreen, CursorScreenClose);
-        Wrap(cs, walkScreen, DisplayCursor, CursorDisplayCursor);
-        cs->pCursorHideCounts = NULL;
+        Wrap(&(walkScreen->xfixes), walkScreen, DisplayCursor, CursorDisplayCursor);
+        walkScreen->xfixes.pCursorHideCounts = NULL;
     });
 
     CursorClientType = CreateNewResourceType(CursorFreeClient,
