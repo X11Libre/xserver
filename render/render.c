@@ -1038,13 +1038,9 @@ ProcRenderAddGlyphs(ClientPtr client)
 static int
 ProcRenderFreeGlyphs(ClientPtr client)
 {
-    REQUEST(xRenderFreeGlyphsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderFreeGlyphsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->glyphset);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderFreeGlyphsReq);
+    X_REQUEST_FIELD_CARD32(glyphset);
+    X_REQUEST_REST_CARD32(stuff);
 
     GlyphSetPtr glyphSet;
     int rc, nglyph;
