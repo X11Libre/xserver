@@ -1616,13 +1616,9 @@ SingleRenderSetPictureFilter(ClientPtr client, xRenderSetPictureFilterReq *stuff
 static int
 ProcRenderCreateAnimCursor(ClientPtr client)
 {
-    REQUEST(xRenderCreateAnimCursorReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateAnimCursorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cid);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderCreateAnimCursorReq);
+    X_REQUEST_FIELD_CARD32(cid);
+    X_REQUEST_REST_CARD32();
 
     CARD32 *deltas;
     CursorPtr pCursor;
