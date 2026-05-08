@@ -2832,17 +2832,13 @@ ProcRenderCompositeGlyphs(ClientPtr client)
 static int
 ProcRenderFillRectangles(ClientPtr client)
 {
-    REQUEST(xRenderFillRectanglesReq);
-    REQUEST_AT_LEAST_SIZE(xRenderFillRectanglesReq);
-
-    if (client->swapped) {
-        swapl(&stuff->dst);
-        swaps(&stuff->color.red);
-        swaps(&stuff->color.green);
-        swaps(&stuff->color.blue);
-        swaps(&stuff->color.alpha);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderFillRectanglesReq);
+    X_REQUEST_FIELD_CARD32(dst);
+    X_REQUEST_FIELD_CARD16(color.red);
+    X_REQUEST_FIELD_CARD16(color.green);
+    X_REQUEST_FIELD_CARD16(color.blue);
+    X_REQUEST_FIELD_CARD16(color.alpha);
+    X_REQUEST_REST_CARD16();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderFillRectangles(client, stuff)
