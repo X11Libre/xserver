@@ -408,19 +408,15 @@ ProcXFixesFetchRegion(ClientPtr client)
     X_REQUEST_FIELD_CARD32(region);
 
     RegionPtr pRegion;
-    BoxPtr pExtent;
-    BoxPtr pBox;
-    int i, nBox;
-
     VERIFY_REGION(pRegion, stuff->region, client, DixReadAccess);
 
-    pExtent = RegionExtents(pRegion);
-    pBox = RegionRects(pRegion);
-    nBox = RegionNumRects(pRegion);
+    BoxPtr pExtent = RegionExtents(pRegion);
+    BoxPtr pBox = RegionRects(pRegion);
+    int nBox = RegionNumRects(pRegion);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    for (i = 0; i < nBox; i++) {
+    for (int i = 0; i < nBox; i++) {
         x_rpcbuf_write_rect(&rpcbuf,
                             pBox[i].x1,
                             pBox[i].y1,
