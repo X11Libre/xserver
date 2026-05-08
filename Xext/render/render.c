@@ -2948,17 +2948,15 @@ ProcRenderCreateSolidFill(ClientPtr client)
 static int
 ProcRenderCreateLinearGradient(ClientPtr client)
 {
-    REQUEST(xRenderCreateLinearGradientReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
+    X_REQUEST_HEAD_AT_LEAST(xRenderCreateLinearGradientReq);
+    X_REQUEST_FIELD_CARD32(pid);
+    X_REQUEST_FIELD_CARD32(p1.x);
+    X_REQUEST_FIELD_CARD32(p1.y);
+    X_REQUEST_FIELD_CARD32(p2.x);
+    X_REQUEST_FIELD_CARD32(p2.y);
+    X_REQUEST_FIELD_CARD32(nStops);
 
     if (client->swapped) {
-        swapl(&stuff->pid);
-        swapl(&stuff->p1.x);
-        swapl(&stuff->p1.y);
-        swapl(&stuff->p2.x);
-        swapl(&stuff->p2.y);
-        swapl(&stuff->nStops);
-
         int len = (client->req_len << 2) - sizeof(xRenderCreateLinearGradientReq);
         if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
             return BadLength;
