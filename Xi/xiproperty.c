@@ -869,6 +869,17 @@ ProcXChangeDeviceProperty(ClientPtr client)
     X_REQUEST_FIELD_CARD32(type);
     X_REQUEST_FIELD_CARD32(nUnits);
 
+    switch (stuff->format) {
+    case 8:
+        break;
+    case 16:
+        X_REQUEST_REST_CARD16();
+        break;
+    case 32:
+        X_REQUEST_REST_CARD32();
+        break;
+    }
+
     DeviceIntPtr dev;
     unsigned long len;
     uint64_t totalSize;
@@ -1030,6 +1041,17 @@ ProcXIChangeProperty(ClientPtr client)
     X_REQUEST_FIELD_CARD32(property);
     X_REQUEST_FIELD_CARD32(type);
     X_REQUEST_FIELD_CARD32(num_items);
+
+    switch (stuff->format) {
+    case 8:
+        break;
+    case 16:
+        X_REQUEST_REST_CARD16();
+        break;
+    case 32:
+        X_REQUEST_REST_CARD32();
+        break;
+    }
 
     int rc;
     DeviceIntPtr dev;
