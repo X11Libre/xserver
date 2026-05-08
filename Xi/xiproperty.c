@@ -876,6 +876,17 @@ ProcXChangeDeviceProperty(ClientPtr client)
         swapl(&stuff->nUnits);
     }
 
+    switch (stuff->format) {
+    case 8:
+        break;
+    case 16:
+        SwapRestS(stuff);
+        break;
+    case 32:
+        SwapRestL(stuff);
+        break;
+    }
+
     DeviceIntPtr dev;
     unsigned long len;
     uint64_t totalSize;
@@ -1054,6 +1065,17 @@ ProcXIChangeProperty(ClientPtr client)
         swapl(&stuff->property);
         swapl(&stuff->type);
         swapl(&stuff->num_items);
+    }
+
+    switch (stuff->format) {
+    case 8:
+        break;
+    case 16:
+        SwapRestS(stuff);
+        break;
+    case 32:
+        SwapRestL(stuff);
+        break;
     }
 
     int rc;
