@@ -2574,14 +2574,10 @@ ProcRenderCreatePicture(ClientPtr client)
 static int
 ProcRenderChangePicture(ClientPtr client)
 {
-    REQUEST(xRenderChangePictureReq);
-    REQUEST_AT_LEAST_SIZE(xRenderChangePictureReq);
-
-    if (client->swapped) {
-        swapl(&stuff->picture);
-        swapl(&stuff->mask);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderChangePictureReq);
+    X_REQUEST_FIELD_CARD32(picture);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_REST_CARD32(stuff);
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderChangePicture(client, stuff, stuff->picture)
