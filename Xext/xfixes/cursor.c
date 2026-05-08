@@ -51,6 +51,7 @@
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/list.h"
 #include "Xext/xinput/xibarriers.h"
 
 #include "xfixesint.h"
@@ -87,14 +88,14 @@ static void deleteCursorHideCountsForScreen(ScreenPtr pScreen);
 typedef struct _CursorEvent *CursorEventPtr;
 
 typedef struct _CursorEvent {
-    CursorEventPtr next;
+    struct xorg_list entry;
     CARD32 eventMask;
     ClientPtr pClient;
     WindowPtr pWindow;
     XID clientResource;
 } CursorEventRec;
 
-static CursorEventPtr cursorEvents;
+static struct xorg_list cursorListeners;
 
 /*
  * Each screen has a list of clients which have requested
@@ -160,10 +161,10 @@ CursorDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     }
 
     if (pCursor != pOldCursor) {
-        CursorEventPtr e;
-
         UpdateCurrentTimeIf();
-        for (e = cursorEvents; e; e = e->next) {
+
+        CursorEventPtr e;
+        xorg_list_for_each_entry(e, &cursorListeners, entry) {
             if ((e->eventMask & XFixesDisplayCursorNotifyMask)) {
                 xXFixesCursorNotifyEvent ev = {
                     .type = XFixesEventBase + XFixesCursorNotify,
@@ -196,29 +197,39 @@ static void CursorScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *un
 static int
 XFixesSelectCursorInput(ClientPtr pClient, WindowPtr pWindow, CARD32 eventMask)
 {
-    CursorEventPtr *prev, e;
     void *val;
     int rc;
 
-    for (prev = &cursorEvents; (e = *prev); prev = &e->next) {
-        if (e->pClient == pClient && e->pWindow == pWindow) {
-            break;
-        }
-    }
+    /* clear any potentially existing entry */
     if (!eventMask) {
-        if (e) {
-            FreeResource(e->clientResource, 0);
+        CursorEventPtr walk;
+        xorg_list_for_each_entry(walk, &cursorListeners, entry) {
+            if (walk->pClient == pClient && walk->pWindow == pWindow) {
+                FreeResource(walk->clientResource, 0);
+                return Success;
+            }
         }
-        return Success;
     }
-    if (!e) {
-        e = calloc(1, sizeof(CursorEventRec));
+
+    /* update existing entry */
+    CursorEventPtr walk;
+    xorg_list_for_each_entry(walk, &cursorListeners, entry) {
+        if (walk->pClient == pClient && walk->pWindow == pWindow) {
+            walk->eventMask = eventMask;
+            return Success;
+        }
+    }
+
+    /* create new entry */
+    {
+        CursorEventPtr e = calloc(1, sizeof(CursorEventRec));
         if (!e)
             return BadAlloc;
 
         e->pClient = pClient;
         e->pWindow = pWindow;
         e->clientResource = FakeClientID(pClient->index);
+        e->eventMask = eventMask;
 
         /*
          * Add a resource hanging from the window to
@@ -237,9 +248,8 @@ XFixesSelectCursorInput(ClientPtr pClient, WindowPtr pWindow, CARD32 eventMask)
         if (!AddResource(e->clientResource, CursorClientType, (void *) e))
             return BadAlloc;
 
-        *prev = e;
+        xorg_list_append(&e->entry, &cursorListeners);
     }
-    e->eventMask = eventMask;
     return Success;
 }
 
@@ -814,11 +824,11 @@ static int
 CursorFreeClient(void *data, XID id)
 {
     CursorEventPtr old = (CursorEventPtr) data;
-    CursorEventPtr *prev, e;
+    CursorEventPtr e;
 
-    for (prev = &cursorEvents; (e = *prev); prev = &e->next) {
+    xorg_list_for_each_entry(e, &cursorListeners, entry) {
         if (e == old) {
-            *prev = e->next;
+            xorg_list_del(&e->entry);
             free(e);
             break;
         }
@@ -848,8 +858,7 @@ CursorFreeWindow(void *data, XID id)
     WindowPtr pWindow = (WindowPtr) data;
     CursorEventPtr e, next;
 
-    for (e = cursorEvents; e; e = next) {
-        next = e->next;
+    xorg_list_for_each_entry_safe(e, next, &cursorListeners, entry) {
         if (e->pWindow == pWindow) {
             FreeResource(e->clientResource, 0);
         }
@@ -892,6 +901,8 @@ XFixesCursorInit(void)
         CursorVisible = EnableCursor;
     else
         CursorVisible = FALSE;
+
+    xorg_list_init(&cursorListeners);
 
     DIX_FOR_EACH_SCREEN({
         dixScreenHookClose(walkScreen, CursorScreenClose);
