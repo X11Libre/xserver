@@ -55,7 +55,6 @@ static SelectionEventPtr selectionEvents;
 static void
 XFixesSelectionCallback(CallbackListPtr *callbacks, void *data, void *args)
 {
-    SelectionEventPtr e;
     SelectionInfoRec *info = (SelectionInfoRec *) args;
     Selection *selection = info->selection;
     int subtype;
@@ -78,7 +77,7 @@ XFixesSelectionCallback(CallbackListPtr *callbacks, void *data, void *args)
         return;
     }
     UpdateCurrentTimeIf();
-    for (e = selectionEvents; e; e = e->next) {
+    for (SelectionEventPtr e = selectionEvents; e; e = e->next) {
         if (e->selection == selection && (e->eventMask & eventMask)) {
 
             /* allow extensions to intercept */
@@ -161,14 +160,12 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
         return BadValue;
     }
 
-    void *val;
-    SelectionEventPtr *prev, e;
     Selection *selection;
-
     rc = dixLookupSelection(&selection, param.selection, param.client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
+    SelectionEventPtr *prev, e;
     for (prev = &selectionEvents; (e = *prev); prev = &e->next) {
         if (e->selection == selection &&
             e->pClient == param.client && e->pWindow == pWindow) {
@@ -196,6 +193,7 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
          * Add a resource hanging from the window to
          * catch window destroy
          */
+        void *val;
         rc = dixLookupResourceByType(&val, pWindow->drawable.id,
                                      SelectionWindowType, serverClient,
                                      DixGetAttrAccess);
