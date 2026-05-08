@@ -638,13 +638,10 @@ ProcXFixesChangeCursorByName(ClientPtr client)
     REQUEST_FIXED_SIZE(xXFixesChangeCursorByNameReq, stuff->nbytes);
 
     CursorPtr pSource;
-    Atom name;
-    char *tchar;
-
     VERIFY_CURSOR(pSource, stuff->source, client,
                   DixReadAccess | DixGetAttrAccess);
-    tchar = (char *) &stuff[1];
-    name = MakeAtom(tchar, stuff->nbytes, FALSE);
+    char *tchar = (char *) &stuff[1];
+    Atom name = MakeAtom(tchar, stuff->nbytes, FALSE);
     if (name)
         ReplaceCursor(pSource, TestForCursorName, &name);
     return Success;
