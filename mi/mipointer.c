@@ -310,7 +310,7 @@ miRecolorCursor(DeviceIntPtr pDev, ScreenPtr pScr,
     pScr->UnrealizeCursor(pDev, pScr, pCurs);
     pScr->RealizeCursor(pDev, pScr, pCurs);
     if (displayed)
-        pScr->DisplayCursor(pDev, pScr, pCurs);
+        dixScreenRaiseDisplayCursor(pScr, pDev, pCurs);
 }
 
 /**

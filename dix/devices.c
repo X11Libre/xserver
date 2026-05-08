@@ -1139,8 +1139,9 @@ UndisplayDevices(void)
 {
     ScreenPtr masterScreen = dixGetMasterScreen();
 
-    for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next)
-        masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
+    for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
+        dixScreenRaiseDisplayCursor(masterScreen, dev, NullCursor);
+    }
 }
 
 static int
@@ -1190,7 +1191,7 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
     if (initialized) {
         if (DevHasCursor(dev)) {
             ScreenPtr masterScreen = dixGetMasterScreen();
-            masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
+            dixScreenRaiseDisplayCursor(masterScreen, dev, NullCursor);
         }
 
         DisableDevice(dev, sendevent);
