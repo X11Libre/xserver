@@ -2748,8 +2748,13 @@ ProcRenderTriFan(ClientPtr client)
 static int
 ProcRenderCompositeGlyphs(ClientPtr client)
 {
-    REQUEST(xRenderCompositeGlyphsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
+    X_REQUEST_HEAD_AT_LEAST(xRenderCompositeGlyphsReq);
+    X_REQUEST_FIELD_CARD32(src);
+    X_REQUEST_FIELD_CARD32(dst);
+    X_REQUEST_FIELD_CARD32(maskFormat);
+    X_REQUEST_FIELD_CARD32(glyphset);
+    X_REQUEST_FIELD_CARD16(xSrc);
+    X_REQUEST_FIELD_CARD16(ySrc);
 
     if (client->swapped) {
         int size = 0;
@@ -2765,13 +2770,6 @@ ProcRenderCompositeGlyphs(ClientPtr client)
                 size = 4;
             break;
         }
-
-        swapl(&stuff->src);
-        swapl(&stuff->dst);
-        swapl(&stuff->maskFormat);
-        swapl(&stuff->glyphset);
-        swaps(&stuff->xSrc);
-        swaps(&stuff->ySrc);
 
         CARD8 *buffer = (CARD8 *) (stuff + 1);
         CARD8 *end = (CARD8 *) stuff + (client->req_len << 2);
