@@ -163,10 +163,9 @@ ProcRenderQueryVersion(ClientPtr client)
         reply.minorVersion = stuff->minorVersion;
     }
 
-    if (client->swapped) {
-        swapl(&reply.majorVersion);
-        swapl(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD32(majorVersion);
+    X_REPLY_FIELD_CARD32(minorVersion);
+
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
