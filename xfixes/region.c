@@ -642,31 +642,24 @@ ProcXFixesExpandRegion(ClientPtr client)
     X_REQUEST_FIELD_CARD16(bottom);
 
     RegionPtr pSource, pDestination;
-
-    BoxPtr pTmp;
-    BoxPtr pSrc;
-    int nBoxes;
-    int i;
-
     VERIFY_REGION(pSource, stuff->source, client, DixReadAccess);
     VERIFY_REGION(pDestination, stuff->destination, client, DixWriteAccess);
 
-    nBoxes = RegionNumRects(pSource);
-    pSrc = RegionRects(pSource);
+    int nBoxes = RegionNumRects(pSource);
+    BoxPtr pSrc = RegionRects(pSource);
     if (nBoxes) {
-        pTmp = calloc(nBoxes, sizeof(BoxRec));
+        BoxPtr pTmp = calloc(nBoxes, sizeof(BoxRec));
         if (!pTmp)
             return BadAlloc;
-        for (i = 0; i < nBoxes; i++) {
+        for (int i = 0; i < nBoxes; i++) {
             pTmp[i].x1 = pSrc[i].x1 - stuff->left;
             pTmp[i].x2 = pSrc[i].x2 + stuff->right;
             pTmp[i].y1 = pSrc[i].y1 - stuff->top;
             pTmp[i].y2 = pSrc[i].y2 + stuff->bottom;
         }
         RegionEmpty(pDestination);
-        for (i = 0; i < nBoxes; i++) {
+        for (int i = 0; i < nBoxes; i++) {
             RegionRec r;
-
             RegionInit(&r, &pTmp[i], 0);
             RegionUnion(pDestination, pDestination, &r);
         }
