@@ -534,24 +534,26 @@ static Bool
 ReplaceCursorLookup(void *value, XID id, void *closure)
 {
     ReplaceCursorLookupPtr rcl = (ReplaceCursorLookupPtr) closure;
-    WindowPtr pWin;
-    GrabPtr pGrab;
     CursorPtr pCursor = 0, *pCursorRef = 0;
     XID cursor = 0;
 
     switch (rcl->type) {
     case X11_RESTYPE_WINDOW:
-        pWin = (WindowPtr) value;
+    {
+        WindowPtr pWin = (WindowPtr) value;
         if (pWin->optional) {
             pCursorRef = &pWin->optional->cursor;
             pCursor = *pCursorRef;
         }
         break;
+    }
     case X11_RESTYPE_PASSIVEGRAB:
-        pGrab = (GrabPtr) value;
+    {
+        GrabPtr pGrab = (GrabPtr) value;
         pCursorRef = &pGrab->cursor;
         pCursor = *pCursorRef;
         break;
+    }
     case X11_RESTYPE_CURSOR:
         pCursorRef = 0;
         pCursor = (CursorPtr) value;
