@@ -812,12 +812,11 @@ typedef struct _GlyphNew {
 static int
 ProcRenderAddGlyphs(ClientPtr client)
 {
-    REQUEST(xRenderAddGlyphsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderAddGlyphsReq);
+    X_REQUEST_HEAD_AT_LEAST(xRenderAddGlyphsReq);
+    X_REQUEST_FIELD_CARD32(glyphset);
+    X_REQUEST_FIELD_CARD32(nglyphs);
 
     if (client->swapped) {
-        swapl(&stuff->glyphset);
-        swapl(&stuff->nglyphs);
         if (stuff->nglyphs & 0xe0000000)
             return BadLength;
         void *end = (CARD8 *) stuff + (client->req_len << 2);
