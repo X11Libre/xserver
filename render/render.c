@@ -2702,17 +2702,13 @@ ProcRenderTriangles(ClientPtr client)
 static int
 ProcRenderTriStrip(ClientPtr client)
 {
-    REQUEST(xRenderTriStripReq);
-    REQUEST_AT_LEAST_SIZE(xRenderTriStripReq);
-
-    if (client->swapped) {
-        swapl(&stuff->src);
-        swapl(&stuff->dst);
-        swapl(&stuff->maskFormat);
-        swaps(&stuff->xSrc);
-        swaps(&stuff->ySrc);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderTriStripReq);
+    X_REQUEST_FIELD_CARD32(src);
+    X_REQUEST_FIELD_CARD32(dst);
+    X_REQUEST_FIELD_CARD32(maskFormat);
+    X_REQUEST_FIELD_CARD16(xSrc);
+    X_REQUEST_FIELD_CARD16(ySrc);
+    X_REQUEST_REST_CARD32();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderTriStrip(client, stuff)
