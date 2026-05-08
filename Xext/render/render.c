@@ -2876,13 +2876,9 @@ ProcRenderSetPictureTransform(ClientPtr client)
 static int
 ProcRenderSetPictureFilter(ClientPtr client)
 {
-    REQUEST(xRenderSetPictureFilterReq);
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
-
-    if (client->swapped) {
-        swapl(&stuff->picture);
-        swaps(&stuff->nbytes);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderSetPictureFilterReq);
+    X_REQUEST_FIELD_CARD32(picture);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     const size_t namelen = pad_to_int32(stuff->nbytes);
     REQUEST_AT_LEAST_EXTRA_SIZE(xRenderSetPictureFilterReq, namelen);
