@@ -264,11 +264,10 @@ ProcXFixesSelectCursorInput(ClientPtr client)
     X_REQUEST_FIELD_CARD32(eventMask);
 
     WindowPtr pWin;
-    int rc;
-
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
+
     if (stuff->eventMask & ~CursorAllEvents) {
         client->errorValue = stuff->eventMask;
         return BadValue;
