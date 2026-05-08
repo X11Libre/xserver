@@ -424,13 +424,9 @@ ProcXFixesGetCursorName(ClientPtr client)
     X_REQUEST_FIELD_CARD32(cursor);
 
     CursorPtr pCursor;
-    const char *str;
-
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixGetAttrAccess);
-    if (pCursor->name)
-        str = NameForAtom(pCursor->name);
-    else
-        str = "";
+
+    const char *str = ((pCursor->name) ? NameForAtom(pCursor->name) : "");
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_string_pad(&rpcbuf, str);
