@@ -501,17 +501,16 @@ typedef RegionPtr (*CreateDftPtr) (WindowPtr pWin);
 static int
 SingleXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegionReq *stuff)
 {
-    WindowPtr pWin;
-    RegionPtr pRegion;
-    RegionPtr *pDestRegion;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pWin, stuff->dest, X11_RESTYPE_WINDOW,
+    WindowPtr pWin;
+    int rc = dixLookupResourceByType((void **) &pWin, stuff->dest, X11_RESTYPE_WINDOW,
                                  client, DixSetAttrAccess);
     if (rc != Success) {
         client->errorValue = stuff->dest;
         return rc;
     }
+
+    RegionPtr pRegion;
     VERIFY_REGION_OR_NONE(pRegion, stuff->region, client, DixWriteAccess);
     switch (stuff->destKind) {
     case ShapeBounding:
@@ -522,6 +521,9 @@ SingleXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegionRe
         client->errorValue = stuff->destKind;
         return BadValue;
     }
+
+    RegionPtr *pDestRegion = NULL;
+
     if (pRegion) {
         pRegion = XFixesRegionCopy(pRegion);
         if (!pRegion)
