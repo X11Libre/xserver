@@ -471,14 +471,11 @@ static int
 SingleXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff)
 {
     GCPtr pGC;
-    RegionPtr pRegion;
-    ChangeGCVal vals[2];
-    int rc;
-
-    rc = dixLookupGC(&pGC, stuff->gc, client, DixSetAttrAccess);
+    int rc = dixLookupGC(&pGC, stuff->gc, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
 
+    RegionPtr pRegion;
     VERIFY_REGION_OR_NONE(pRegion, stuff->region, client, DixReadAccess);
 
     if (pRegion) {
@@ -487,6 +484,7 @@ SingleXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff)
             return BadAlloc;
     }
 
+    ChangeGCVal vals[2];
     vals[0].val = stuff->xOrigin;
     vals[1].val = stuff->yOrigin;
     ChangeGC(NULL, pGC, GCClipXOrigin | GCClipYOrigin, vals);
