@@ -3008,16 +3008,14 @@ ProcRenderCreateRadialGradient(ClientPtr client)
 static int
 ProcRenderCreateConicalGradient(ClientPtr client)
 {
-    REQUEST(xRenderCreateConicalGradientReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateConicalGradientReq);
+    X_REQUEST_HEAD_AT_LEAST(xRenderCreateConicalGradientReq);
+    X_REQUEST_FIELD_CARD32(pid);
+    X_REQUEST_FIELD_CARD32(center.x);
+    X_REQUEST_FIELD_CARD32(center.y);
+    X_REQUEST_FIELD_CARD32(angle);
+    X_REQUEST_FIELD_CARD32(nStops);
 
     if (client->swapped) {
-        swapl(&stuff->pid);
-        swapl(&stuff->center.x);
-        swapl(&stuff->center.y);
-        swapl(&stuff->angle);
-        swapl(&stuff->nStops);
-
         int len = (client->req_len << 2) - sizeof(xRenderCreateConicalGradientReq);
         if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
             return BadLength;
