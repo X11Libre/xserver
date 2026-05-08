@@ -566,24 +566,22 @@ ReplaceCursorLookup(void *value, XID id, void *closure)
 static void
 ReplaceCursor(CursorPtr pCursor, TestCursorFunc testCursor, void *closure)
 {
-    int clientIndex;
-    int resIndex;
-    ReplaceCursorLookupRec rcl;
-
     /*
      * Cursors exist only in the resource database, windows and grabs.
      * All of these are always pointed at by the resource database.  Walk
      * the whole thing looking for cursors
      */
-    rcl.testCursor = testCursor;
-    rcl.pNew = pCursor;
-    rcl.closure = closure;
+    ReplaceCursorLookupRec rcl = {
+        .testCursor = testCursor,
+        .pNew = pCursor,
+        .closure = closure
+    };
 
     /* for each client */
-    for (clientIndex = 0; clientIndex < currentMaxClients; clientIndex++) {
+    for (int clientIndex = 0; clientIndex < currentMaxClients; clientIndex++) {
         if (!clients[clientIndex])
             continue;
-        for (resIndex = 0; resIndex < ARRAY_SIZE(CursorRestypes); resIndex++) {
+        for (int resIndex = 0; resIndex < ARRAY_SIZE(CursorRestypes); resIndex++) {
             rcl.type = CursorRestypes[resIndex];
             /*
              * This function walks the entire client resource database
