@@ -2632,22 +2632,18 @@ ProcRenderFreePicture(ClientPtr client)
 static int
 ProcRenderComposite(ClientPtr client)
 {
-    REQUEST(xRenderCompositeReq);
-    REQUEST_SIZE_MATCH(xRenderCompositeReq);
-
-    if (client->swapped) {
-        swapl(&stuff->src);
-        swapl(&stuff->mask);
-        swapl(&stuff->dst);
-        swaps(&stuff->xSrc);
-        swaps(&stuff->ySrc);
-        swaps(&stuff->xMask);
-        swaps(&stuff->yMask);
-        swaps(&stuff->xDst);
-        swaps(&stuff->yDst);
-        swaps(&stuff->width);
-        swaps(&stuff->height);
-    }
+    X_REQUEST_HEAD_STRUCT(xRenderCompositeReq);
+    X_REQUEST_FIELD_CARD32(src);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_FIELD_CARD32(dst);
+    X_REQUEST_FIELD_CARD16(xSrc);
+    X_REQUEST_FIELD_CARD16(ySrc);
+    X_REQUEST_FIELD_CARD16(xMask);
+    X_REQUEST_FIELD_CARD16(yMask);
+    X_REQUEST_FIELD_CARD16(xDst);
+    X_REQUEST_FIELD_CARD16(yDst);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderComposite(client, stuff)
