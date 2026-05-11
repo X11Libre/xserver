@@ -13,7 +13,10 @@ from xclient import Extension, X11Error, X11Reply
 class TestVidModeSwitchToMode:
     @pytest.mark.swapped_client
     @pytest.mark.xorg_only
-    def test_switch_to_mode_fields_swapped(self, xserver, xclient_swapped):
+    @pytest.mark.parametrize("vidmode_version", [0, 2])
+    def test_switch_to_mode_fields_swapped(
+        self, xserver, xclient_swapped, vidmode_version
+    ):
         """
         SProcVidModeSwitchToMode previously only swapped stuff->screen.
         All mode-line fields (dotclock, hdisplay, …) were left in
@@ -40,16 +43,14 @@ class TestVidModeSwitchToMode:
         if not isinstance(resp, X11Reply):
             pytest.skip("VidMode QueryVersion failed")
 
+        if vidmode_version >= 2:
+            req = vidmode.SetClientVersionRequest(
+                opcode=ext.opcode,
+                major=vidmode_version,
+            )
+            conn.send_request(req.to_bytes(">"))
+
         # Get the current mode line so we can echo it back.
-        # xXF86VidModeGetModeLineReply (v2, 52 bytes):
-        #   [8]  dotclock(4)
-        #   [12] hdisplay(2)  hsyncstart(2)
-        #   [16] hsyncend(2)  htotal(2)
-        #   [20] hskew(4)
-        #   [24] vdisplay(2)  vsyncstart(2)
-        #   [28] vsyncend(2)  vtotal(2)
-        #   [32] flags(4)
-        #   [36] privsize(4)
         req = vidmode.GetModeLineRequest(
             opcode=ext.opcode,
             screen=0,
@@ -60,37 +61,86 @@ class TestVidModeSwitchToMode:
         if isinstance(resp, X11Error):
             pytest.skip("GetModeLine not supported (VidMode not initialised?)")
         assert isinstance(resp, X11Reply), f"Expected reply, got {resp}"
-        assert len(resp.data) >= 40, f"Reply too short: {len(resp.data)}"
 
-        dotclock = struct.unpack_from(">I", resp.data, 8)[0]
-        hdisplay = struct.unpack_from(">H", resp.data, 12)[0]
-        hsyncstart = struct.unpack_from(">H", resp.data, 14)[0]
-        hsyncend = struct.unpack_from(">H", resp.data, 16)[0]
-        htotal = struct.unpack_from(">H", resp.data, 18)[0]
-        hskew = struct.unpack_from(">I", resp.data, 20)[0]
-        vdisplay = struct.unpack_from(">H", resp.data, 24)[0]
-        vsyncstart = struct.unpack_from(">H", resp.data, 26)[0]
-        vsyncend = struct.unpack_from(">H", resp.data, 28)[0]
-        vtotal = struct.unpack_from(">H", resp.data, 30)[0]
-        flags = struct.unpack_from(">I", resp.data, 32)[0]
+        if vidmode_version >= 2:
+            # v2 xXF86VidModeGetModeLineReply (52 bytes):
+            #   [8]  dotclock(4)
+            #   [12] hdisplay(2)  hsyncstart(2)
+            #   [16] hsyncend(2)  htotal(2)
+            #   [20] hskew(2)     vdisplay(2)
+            #   [24] vsyncstart(2) vsyncend(2)
+            #   [28] vtotal(2)    pad2(2)
+            #   [32] flags(4)
+            #   [36..48] reserved(12)
+            #   [48] privsize(4)
+            assert len(resp.data) >= 52, f"Reply too short: {len(resp.data)}"
+            dotclock = struct.unpack_from(">I", resp.data, 8)[0]
+            hdisplay = struct.unpack_from(">H", resp.data, 12)[0]
+            hsyncstart = struct.unpack_from(">H", resp.data, 14)[0]
+            hsyncend = struct.unpack_from(">H", resp.data, 16)[0]
+            htotal = struct.unpack_from(">H", resp.data, 18)[0]
+            hskew = struct.unpack_from(">H", resp.data, 20)[0]
+            vdisplay = struct.unpack_from(">H", resp.data, 22)[0]
+            vsyncstart = struct.unpack_from(">H", resp.data, 24)[0]
+            vsyncend = struct.unpack_from(">H", resp.data, 26)[0]
+            vtotal = struct.unpack_from(">H", resp.data, 28)[0]
+            flags = struct.unpack_from(">I", resp.data, 32)[0]
+        else:
+            # v0 xXF86OldVidModeGetModeLineReply (36 bytes, no hskew):
+            #   [8]  dotclock(4)
+            #   [12] hdisplay(2)  hsyncstart(2)
+            #   [16] hsyncend(2)  htotal(2)
+            #   [20] vdisplay(2)  vsyncstart(2)
+            #   [24] vsyncend(2)  vtotal(2)
+            #   [28] flags(4)
+            #   [32] privsize(4)
+            assert len(resp.data) >= 36, f"Reply too short: {len(resp.data)}"
+            dotclock = struct.unpack_from(">I", resp.data, 8)[0]
+            hdisplay = struct.unpack_from(">H", resp.data, 12)[0]
+            hsyncstart = struct.unpack_from(">H", resp.data, 14)[0]
+            hsyncend = struct.unpack_from(">H", resp.data, 16)[0]
+            htotal = struct.unpack_from(">H", resp.data, 18)[0]
+            vdisplay = struct.unpack_from(">H", resp.data, 20)[0]
+            vsyncstart = struct.unpack_from(">H", resp.data, 22)[0]
+            vsyncend = struct.unpack_from(">H", resp.data, 24)[0]
+            vtotal = struct.unpack_from(">H", resp.data, 26)[0]
+            flags = struct.unpack_from(">I", resp.data, 28)[0]
 
         # Switch to the same mode — should succeed.
-        req = vidmode.SwitchToModeRequest(
-            opcode=ext.opcode,
-            screen=0,
-            dotclock=dotclock,
-            hdisplay=hdisplay,
-            hsyncstart=hsyncstart,
-            hsyncend=hsyncend,
-            htotal=htotal,
-            hskew=hskew,
-            vdisplay=vdisplay,
-            vsyncstart=vsyncstart,
-            vsyncend=vsyncend,
-            vtotal=vtotal,
-            flags=flags,
-            privsize=0,
-        )
+        # Use the matching request format for the protocol version.
+        if vidmode_version >= 2:
+            req = vidmode.SwitchToModeRequest(
+                opcode=ext.opcode,
+                screen=0,
+                dotclock=dotclock,
+                hdisplay=hdisplay,
+                hsyncstart=hsyncstart,
+                hsyncend=hsyncend,
+                htotal=htotal,
+                hskew=hskew,
+                vdisplay=vdisplay,
+                vsyncstart=vsyncstart,
+                vsyncend=vsyncend,
+                vtotal=vtotal,
+                flags=flags,
+                privsize=0,
+            )
+        else:
+            req = vidmode.OldSwitchToModeRequest(
+                opcode=ext.opcode,
+                screen=0,
+                dotclock=dotclock,
+                hdisplay=hdisplay,
+                hsyncstart=hsyncstart,
+                hsyncend=hsyncend,
+                htotal=htotal,
+                vdisplay=vdisplay,
+                vsyncstart=vsyncstart,
+                vsyncend=vsyncend,
+                vtotal=vtotal,
+                flags=flags,
+                privsize=0,
+            )
         conn.send_request(req.to_bytes(">"))
         resp = conn.recv_response(timeout=2.0)
 

@@ -19,6 +19,7 @@ VidModeValidateModeLine = 9
 VidModeSwitchToMode = 10
 VidModeGetViewPort = 11
 VidModeSetViewPort = 12
+VidModeSetClientVersion = 14
 
 
 @dataclass
@@ -33,6 +34,25 @@ class QueryVersionRequest:
             self.opcode,
             VidModeQueryVersion,
             1,
+        )
+
+
+@dataclass
+class SetClientVersionRequest:
+    """VidModeSetClientVersion request (8 bytes)."""
+
+    opcode: int
+    major: int = 2
+    minor: int = 0
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH HH",
+            self.opcode,
+            VidModeSetClientVersion,
+            2,  # 8 bytes = 2 words
+            self.major,
+            self.minor,
         )
 
 
@@ -130,6 +150,59 @@ class SwitchToModeRequest:
             0,  # reserved1
             0,  # reserved2
             0,  # reserved3
+            self.privsize,
+        )
+
+
+@dataclass
+class OldSwitchToModeRequest:
+    """VidModeSwitchToMode request (v0 format, 36 bytes).
+
+    xXF86OldVidModeSwitchToModeReq:
+      reqType(1) + xf86vidmodeReqType(1) + length(2) +
+      screen(4) + dotclock(4) +
+      hdisplay(2) + hsyncstart(2) + hsyncend(2) + htotal(2) +
+      vdisplay(2) + vsyncstart(2) + vsyncend(2) + vtotal(2) +
+      flags(4) + privsize(4)
+    """
+
+    opcode: int
+    screen: int = 0
+    dotclock: int = 0
+    hdisplay: int = 0
+    hsyncstart: int = 0
+    hsyncend: int = 0
+    htotal: int = 0
+    vdisplay: int = 0
+    vsyncstart: int = 0
+    vsyncend: int = 0
+    vtotal: int = 0
+    flags: int = 0
+    privsize: int = 0
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH"  # header (4)
+            f"I"  # screen (4)
+            f"I"  # dotclock (4)
+            f"HHHH"  # hdisplay, hsyncstart, hsyncend, htotal (8)
+            f"HHHH"  # vdisplay, vsyncstart, vsyncend, vtotal (8)
+            f"I"  # flags (4)
+            f"I",  # privsize (4)
+            self.opcode,
+            VidModeSwitchToMode,
+            9,  # 36 bytes = 9 words
+            self.screen,
+            self.dotclock,
+            self.hdisplay,
+            self.hsyncstart,
+            self.hsyncend,
+            self.htotal,
+            self.vdisplay,
+            self.vsyncstart,
+            self.vsyncend,
+            self.vtotal,
+            self.flags,
             self.privsize,
         )
 
