@@ -1,0 +1,12 @@
+provides: x11/xorgproto
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xlibre_git}/mirror.fdo.${@basename}.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/${ref}:refs/tags/${ref}
+buildsystem: meson
+version: 2024.1
+ref: ${@basename}-${version}

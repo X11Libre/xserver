@@ -1,0 +1,20 @@
+provides:
+    - x11/xserver-sdk
+    - xlibre-xserver
+
+sources:
+    # directly from this source tree instead of cloning
+    local: ${@PROJECT::@rootdir}
+
+source-dir: ${@PROJECT::@rootdir}
+
+buildsystem: meson
+
+depends:
+    - sys/pciaccess
+    - x11/libxcvt
+    - sys/libdrm
+
+build-depends:
+    - x11/xorgproto
+    - x11/xcb-proto
