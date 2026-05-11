@@ -4,8 +4,8 @@ This is a pytest-based test suite that launches X servers and sends crafted
 protocol requests to verify that security vulnerabilities and other bugs
 are properly handled.
 
-It can be run against Xvfb, Xwayland, or Xorg but the latter is potentially
-flaky and requires some setup outside the test suite. The test suite
+It can be run against Xvfb, Xwayland, or Xorg but the latter typically
+requires root and/or some setup outside the test suite. The test suite
 uses both AddressSanitizer (ASAN) and valgrind for detecting
 memory errors such as out-of-bounds reads/writes and use-after-free.
 

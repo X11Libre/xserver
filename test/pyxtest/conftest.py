@@ -173,6 +173,9 @@ def _start_server(request, server_type, log_file=None):
     is set in the environment (typically by meson when the server is
     built with ``-Db_sanitize=address``).
     """
+    if server_type == "xorg" and os.geteuid() != 0:
+        pytest.skip("Xorg requires root to access /dev/tty0 and GPU devices")
+
     use_valgrind = (
         request.config.getoption("--valgrind")
         or request.node.get_closest_marker("valgrind") is not None
