@@ -7,14 +7,14 @@ set -e
 mkdir -p $X11_BUILD_DIR
 cd $X11_BUILD_DIR
 
-build_meson   rendercheck       $(fdo_mirror rendercheck)                  rendercheck-1.6
+build_meson   rendercheck       $(fdo_mirror rendercheck)                  $PKG_RENDERCHECK_REF
 if [ "$X11_OS" = "Linux" ]; then
-build_meson   drm               $(fdo_mirror drm)                          libdrm-2.4.121   -Domap=enabled -Dfreedreno=enabled
+build_meson   drm               $(fdo_mirror drm)                          $PKG_LIBDRM_REF          -Domap=enabled -Dfreedreno=enabled
 fi
-build_meson   libxcvt           $(fdo_mirror libxcvt)                      libxcvt-0.1.0
-build_meson   xorgproto         $(fdo_mirror xorgproto)                    xorgproto-2024.1
+build_meson   libxcvt           $(fdo_mirror libxcvt)                      $PKG_LIBXCVT_REF
+build_meson   xorgproto         $(fdo_mirror xorgproto)                    $PKG_XORGPROTO_REF
 
 # really must be build via autoconf instead of meson, otherwise piglit wont find the test programs
-build_ac_xts  xts               $(fdo_mirror xts)                          6cf94400a09abecd6b86e4eb6441741acecd51f6
+build_ac_xts  xts               $(fdo_mirror xts)                          $PKG_XTS_REF
 
-clone_source piglit             $(fdo_mirror piglit)                       59111996534f875ca88bce51f21fa2e6564895da
+clone_source piglit             $(fdo_mirror piglit)                       $PKG_PIGLIT_REF

@@ -87,7 +87,7 @@ build_fdo 'pixman'                  'pixman-0.38.4'
 build_fdo 'pthread-stubs'           '0.4'
 # we can't use the xorgproto pkgconfig files from /usr/share/pkgconfig, because
 # these would add -I/usr/include to CFLAGS, which breaks cross-compilation
-build_fdo 'xorgproto'               'xorgproto-2024.1' '--datadir=/lib'
+build_fdo 'xorgproto'               $PKG_XORGPROTO_REF '--datadir=/lib'
 build_fdo 'libXau'                  'libXau-1.0.9'
 build_fdo 'xcbproto'                'xcb-proto-1.17.0'
 build_fdo 'libxcb'                  'libxcb-1.17.0'
