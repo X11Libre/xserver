@@ -9,7 +9,6 @@ Darwin) export FDO_CI_CONCURRENT=`sysctl -n hw.logicalcpu` ;;
 Linux) export FDO_CI_CONCURRENT=`nproc` ;;
 esac
 
-export PATH="$X11_PREFIX/bin:$PATH"
 export PKG_CONFIG_PATH="$X11_PREFIX/lib/x86_64-linux-gnu/pkgconfig:$X11_PREFIX/lib/pkgconfig:$X11_PREFIX/share/pkgconfig:$PKG_CONFIG_PATH"
 
 export PKG_PIGLIT_REF=59111996534f875ca88bce51f21fa2e6564895da
