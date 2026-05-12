@@ -19,6 +19,7 @@ apt-get install -y \
 	$EPHEMERAL \
 	autoconf \
 	automake \
+	x11proto-dev \
 	build-essential \
 	ca-certificates \
 	libaudit-dev \
@@ -95,3 +96,5 @@ apt-get install -y \
 	python3-mako \
 	libxcvt-dev \
 	x11proto-dev
+
+apt-get install -y x11proto-dev
