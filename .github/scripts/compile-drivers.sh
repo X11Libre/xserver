@@ -4,7 +4,6 @@ set -e
 
 . .github/scripts/util.sh
 
-export PKG_CONFIG_PATH="/usr/local/lib/x86_64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH"
 export ACLOCAL_PATH="/usr/share/aclocal:/usr/local/share/aclocal"
 
 mkdir -p $DRV_BUILD_DIR
