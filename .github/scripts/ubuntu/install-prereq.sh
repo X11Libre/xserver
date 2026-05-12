@@ -12,7 +12,6 @@ if [ "$X11_OS" = "Linux" ]; then
 build_meson   drm               $(fdo_mirror drm)                          $PKG_LIBDRM_REF          -Domap=enabled -Dfreedreno=enabled
 fi
 build_meson   libxcvt           $(fdo_mirror libxcvt)                      $PKG_LIBXCVT_REF
-build_meson   xorgproto         $(fdo_mirror xorgproto)                    $PKG_XORGPROTO_REF
 
 # really must be build via autoconf instead of meson, otherwise piglit wont find the test programs
 build_ac_xts  xts               $(fdo_mirror xts)                          $PKG_XTS_REF
