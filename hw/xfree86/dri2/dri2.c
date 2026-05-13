@@ -564,9 +564,10 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     DRI2ScreenPtr ds;
     DRI2BufferPtr *buffers;
-    int need_real_front = 0;
-    int need_fake_front = 0;
-    int have_fake_front = 0;
+    Bool need_real_front = FALSE;
+    Bool have_real_front = FALSE;
+    Bool need_fake_front = FALSE;
+    Bool have_fake_front = FALSE;
     int front_format = 0;
     int dimensions_match;
     int buffers_changed = 0;
@@ -599,34 +600,32 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
         if (buffers[i] == NULL)
             goto err_out;
 
-        /* If the drawable is a window and the front-buffer is requested,
-         * silently add the fake front-buffer to the list of requested
-         * attachments.  The counting logic in the loop accounts for the case
-         * where the client requests both the fake and real front-buffer.
+        /* In certain cases the (fake) front buffer is always needed, so return
+         * it even if the client failed to request it.
+         * The logic in & after the loop accounts for the case where the client
+         * does request the (fake) front buffer, to avoid returning it multiple
+         * times.
          */
         if (attachment == DRI2BufferBackLeft) {
-            need_real_front++;
+            need_real_front = TRUE;
             front_format = format;
         }
 
         if (attachment == DRI2BufferFrontLeft) {
-            need_real_front--;
+            have_real_front = TRUE;
             front_format = format;
 
-            if (pDraw->type == DRAWABLE_WINDOW) {
-                need_fake_front++;
-            }
+            if (pDraw->type == DRAWABLE_WINDOW)
+                need_fake_front = TRUE;
         }
 
         if (pDraw->type == DRAWABLE_WINDOW) {
-            if (attachment == DRI2BufferFakeFrontLeft) {
-                need_fake_front--;
-                have_fake_front = 1;
-            }
+            if (attachment == DRI2BufferFakeFrontLeft)
+                have_fake_front = TRUE;
         }
     }
 
-    if (need_real_front > 0) {
+    if (need_real_front && !have_real_front) {
         if (allocate_or_reuse_buffer(pDraw, ds, pPriv, DRI2BufferFrontLeft,
                                      front_format, dimensions_match,
                                      &buffers[i]))
@@ -637,7 +636,7 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
         i++;
     }
 
-    if (need_fake_front > 0) {
+    if (need_fake_front && !have_fake_front) {
         if (allocate_or_reuse_buffer(pDraw, ds, pPriv, DRI2BufferFakeFrontLeft,
                                      front_format, dimensions_match,
                                      &buffers[i]))
@@ -647,7 +646,7 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
             goto err_out;
 
         i++;
-        have_fake_front = 1;
+        have_fake_front = TRUE;
     }
 
     *out_count = i;
