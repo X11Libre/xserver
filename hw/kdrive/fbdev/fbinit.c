@@ -186,9 +186,13 @@ int
 ddxProcessArgument(int argc, char **argv, int i)
 {
     if (!fbCurrScreen || !strcmp(argv[i], "-screen")) {
+        /* xinit adds an implicit :0 arg */
+        int implicit_first_screen = !fbCurrScreen && strcmp(argv[i], "-screen") && (argv[i][0] != ':');
+
         /* Put each screen on a separate card */
-        int implicit_first_screen = !fbCurrScreen;
-        InitCard(NULL);
+        if (argv[i][0] != ':') {
+            InitCard(NULL);
+        }
         if (implicit_first_screen) {
             /* This is what KdInitOutput would have done */
             KdCardInfo *card = KdCardInfoLast();
