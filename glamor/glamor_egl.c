@@ -1132,7 +1132,6 @@ glamor_egl_get_driver_name(ScreenPtr screen)
     return NULL;
 }
 
-#ifdef GLAMOR_HAS_GBM
 static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pixmap)
 {
     ScreenPtr screen = pixmap->drawable.pScreen;
@@ -1149,23 +1148,19 @@ static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, 
         pixmap_priv->image = NULL;
     }
 }
-#endif
 
 void
 glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
 {
-#ifdef GLAMOR_HAS_GBM
     EGLImageKHR temp_img;
     Bool temp_mod;
     struct glamor_pixmap_private *front_priv =
         glamor_get_pixmap_private(front);
     struct glamor_pixmap_private *back_priv =
         glamor_get_pixmap_private(back);
-#endif
 
     glamor_pixmap_exchange_fbos(front, back);
 
-#ifdef GLAMOR_HAS_GBM
     temp_img = back_priv->image;
     temp_mod = back_priv->used_modifiers;
     BUG_RETURN(!back_priv);
@@ -1174,7 +1169,6 @@ glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
     BUG_RETURN(!front_priv);
     front_priv->image = temp_img;
     front_priv->used_modifiers = temp_mod;
-#endif
 
     glamor_set_pixmap_type(front, GLAMOR_TEXTURE_DRM);
     glamor_set_pixmap_type(back, GLAMOR_TEXTURE_DRM);
@@ -1186,13 +1180,12 @@ static void
 glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     glamor_egl_priv_t *glamor_egl;
-#ifdef GLAMOR_HAS_GBM
+
     struct glamor_pixmap_private *pixmap_priv;
     PixmapPtr screen_pixmap;
-#endif
 
     glamor_egl = glamor_egl_get_screen_private(screen);
-#ifdef GLAMOR_HAS_GBM
+
     screen_pixmap = screen->GetScreenPixmap(screen);
 
     pixmap_priv = glamor_get_pixmap_private(screen_pixmap);
@@ -1201,14 +1194,11 @@ glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
         eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
         pixmap_priv->image = NULL;
     }
-#endif
 
     glamor_egl_pre_close_screen_cleanup(glamor_egl);
 
     dixScreenUnhookClose(screen, glamor_egl_close_screen);
-#ifdef GLAMOR_HAS_GBM
     dixScreenUnhookPixmapDestroy(screen, glamor_egl_pixmap_destroy);
-#endif
 }
 
 static void
@@ -1352,9 +1342,7 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 
     dixScreenHookClose(screen, glamor_egl_close_screen);
     dixScreenHookPostClose(screen, glamor_egl_post_close_screen);
-#ifdef GLAMOR_HAS_GBM
     dixScreenHookPixmapDestroy(screen, glamor_egl_pixmap_destroy);
-#endif
 
     glamor_ctx->ctx = glamor_egl->context;
     glamor_ctx->display = glamor_egl->display;
