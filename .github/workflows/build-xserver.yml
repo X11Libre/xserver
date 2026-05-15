@@ -329,11 +329,15 @@ jobs:
             with: # needed for `git describe` to work
                 fetch-tags: true
                 fetch-depth: 0
+          - name: disable git safe.directory for running in chroot
+            run:  git config --global --add safe.directory '*'
+          - name: determine pkg version from git
+            run:  git describe | sed -e 's~^xlibre-xserver-~~; s~-[0-9a-z]*$~~' | tr '-' '.' > .github/arch/GIT_VERSION
           - name: build arch package
-            uses: callmetango/archlinux-build-package-action@HEAD
+            uses: metux/archlinux-build-package-action@HEAD
             with:
                 path: .github/arch
-                flags: -cfse --noconfirm
+                makepkg-opts: -cfse --noconfirm
           - name: upload-artifacts
             uses: actions/upload-artifact@v7
             with:

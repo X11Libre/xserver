@@ -24,14 +24,13 @@ options=('!emptydirs')
 #
 # hacks for building with PKGBUILD under the source tree (CI specific)
 #
-export _sourcedir=$(cd ../../ && pwd)     # the actual xserver source
+export _sourcedir=/github/workspace
 export _builddir="${_sourcedir}/build"    # temporary build directory for meson
 export _pkgsrc="$(pwd)"                   # directory of PKGBUILD file
 
 pkgver() {
     (
-        cd "${_sourcedir}"
-        git describe | sed -e 's~^xlibre-xserver-~~; s~-[0-9a-z]*$~~' | tr '-' '.'
+        cat ../GIT_VERSION
     )
 }
 
