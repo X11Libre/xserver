@@ -109,6 +109,7 @@ pytest test/pyxtest/ -v --server-type=xvfb --server-type=xwayland
 | `--valgrind-suppressions=PATH` | Path to a valgrind suppressions file      |
 | `--server-type=TYPE`           | Server type to test (`xvfb`, `xwayland`, `xorg`). Repeatable. Default: `xvfb` |
 | `--server-path=PATH`           | Explicit path to the X server binary      |
+| `--display=DISPLAY`            | Connect to an existing server instead of starting one. Accepts `:N` or `N`. Mutually exclusive with `--valgrind` and `--server-path` |
 
 ## Environment variables
 
