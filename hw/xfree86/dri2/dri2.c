@@ -564,16 +564,16 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     DRI2ScreenPtr ds;
     DRI2BufferPtr *buffers;
+    unsigned attachments_bitset = 0;
     Bool need_real_front = FALSE;
-    Bool have_real_front = FALSE;
     Bool need_fake_front = FALSE;
-    Bool have_fake_front = FALSE;
     int front_format = 0;
     int dimensions_match;
     int buffers_changed = 0;
     int i;
 
-    if (!pPriv) {
+    if (!pPriv ||
+        count > DRI2BufferHiz + 1) {
         *width = pDraw->width;
         *height = pDraw->height;
         *out_count = 0;
@@ -585,13 +585,24 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
     dimensions_match = (pDraw->width == pPriv->width)
         && (pDraw->height == pPriv->height);
 
-    buffers = calloc((count + 1), sizeof(buffers[0]));
+    /* Since we deduplicate attachments in the buffers array, there cannot be
+     * more entries than there are attachments.
+     */
+    buffers = calloc((min(count, DRI2BufferHiz) + 1), sizeof(buffers[0]));
     if (!buffers)
         goto err_out;
 
     for (i = 0; i < count; i++) {
         const unsigned attachment = *(attachments++);
         const unsigned format = (has_format) ? *(attachments++) : 0;
+
+        if (attachment > DRI2BufferHiz)
+            goto err_out;
+
+        if (attachments_bitset & (1u << attachment))
+            continue;
+
+        attachments_bitset |= 1u << attachment;
 
         if (allocate_or_reuse_buffer(pDraw, ds, pPriv, attachment,
                                      format, dimensions_match, &buffers[i]))
@@ -612,20 +623,15 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
         }
 
         if (attachment == DRI2BufferFrontLeft) {
-            have_real_front = TRUE;
             front_format = format;
 
             if (pDraw->type == DRAWABLE_WINDOW)
                 need_fake_front = TRUE;
         }
-
-        if (pDraw->type == DRAWABLE_WINDOW) {
-            if (attachment == DRI2BufferFakeFrontLeft)
-                have_fake_front = TRUE;
-        }
     }
 
-    if (need_real_front && !have_real_front) {
+    if (need_real_front &&
+        !(attachments_bitset & (1u << DRI2BufferFrontLeft))) {
         if (allocate_or_reuse_buffer(pDraw, ds, pPriv, DRI2BufferFrontLeft,
                                      front_format, dimensions_match,
                                      &buffers[i]))
@@ -636,7 +642,8 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
         i++;
     }
 
-    if (need_fake_front && !have_fake_front) {
+    if (need_fake_front &&
+        !(attachments_bitset & (1u << DRI2BufferFakeFrontLeft))) {
         if (allocate_or_reuse_buffer(pDraw, ds, pPriv, DRI2BufferFakeFrontLeft,
                                      front_format, dimensions_match,
                                      &buffers[i]))
@@ -646,7 +653,7 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
             goto err_out;
 
         i++;
-        have_fake_front = TRUE;
+        attachments_bitset |= 1u << DRI2BufferFakeFrontLeft;
     }
 
     *out_count = i;
@@ -658,7 +665,8 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
      * contents of the real front-buffer.  This ensures correct operation of
      * applications that call glXWaitX before calling glDrawBuffer.
      */
-    if (have_fake_front && buffers_changed) {
+    if (buffers_changed &&
+        (attachments_bitset & (1u << DRI2BufferFakeFrontLeft))) {
         BoxRec box;
         RegionRec region;
 
