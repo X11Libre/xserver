@@ -610,6 +610,8 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 static struct gbm_bo *
 glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
 {
+    struct gbm_bo* ret = NULL;
+
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
     struct glamor_pixmap_private *pixmap_priv =
@@ -620,8 +622,54 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
     if (!pixmap_priv->image)
         return NULL;
 
-    return gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
-                         pixmap_priv->image, GBM_BO_USE_RENDERING);
+    ret = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
+                        pixmap_priv->image, GBM_BO_USE_RENDERING);
+
+#ifdef GLAMOR_HAS_EXPORT_DMABUF_MESA
+    if (ret || !glamor_egl->has_image_dma_buf_export) {
+        return ret;
+    }
+
+#ifndef GBM_MAX_PLANES
+/* This is the actual value, and what the spec says it should be */
+#define GBM_MAX_PLANES 4
+#endif
+    int fourcc = 0;
+    int num_planes = 0;
+    EGLuint64KHR modifiers[GBM_MAX_PLANES] = {0};
+    if (!eglExportDMABUFImageQueryMESA(glamor_egl->display, pixmap_priv->image, &fourcc, &num_planes, modifiers)) {
+        return NULL;
+    }
+    assert(num_planes <= GBM_MAX_PLANES);
+    struct gbm_import_fd_modifier_data fd_modifier_data =
+    {
+        .width = pixmap->drawable.width,
+        .height = pixmap->drawable.height,
+        .format = fourcc, /* GBM and DRM formats are the same */
+        .num_fds = num_planes,
+        .modifier = modifiers[0],
+        .fds = {-1, -1, -1, -1},
+        .strides = {0},
+        .offsets = {0},
+    };
+/* If the spec somehow changes in the future */
+#if GBM_MAX_PLANES != 4
+    memset(fd_modifier_data.fds, -1, sizeof(fd_modifier_data));
+#endif
+    if (eglExportDMABUFImageMESA(glamor_egl->display, pixmap_priv->image,
+                                 fd_modifier_data.fds,
+                                 fd_modifier_data.strides,
+                                 fd_modifier_data.offsets)) {
+        ret = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD_MODIFIER,
+                            &fd_modifier_data, GBM_BO_USE_RENDERING);
+    }
+    for (int i = 0; i < num_planes; i++) {
+        if (fd_modifier_data.fds[i] != -1) {
+            close(fd_modifier_data.fds[i]);
+        }
+    }
+#endif
+    return ret;
 }
 #endif
 
@@ -2114,6 +2162,10 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
                    "glamor dri acceleration requires GL_OES_EGL_image\n");
         goto glamor_no_dri;
     }
+
+#if defined(GLAMOR_HAS_GBM) && defined(GLAMOR_HAS_EXPORT_DMABUF_MESA)
+    glamor_egl->has_image_dma_buf_export = epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export");
+#endif
 
 #ifdef GBM_BO_WITH_MODIFIERS
     if (epoxy_has_egl_extension(glamor_egl->display,

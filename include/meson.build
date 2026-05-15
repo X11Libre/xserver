@@ -103,6 +103,8 @@ conf_data.set('GLAMOR_HAS_EGL_QUERY_DMABUF',
               epoxy_dep.found() and epoxy_dep.version().version_compare('>= 1.4.4') ? '1' : false)
 conf_data.set('GLAMOR_HAS_EGL_QUERY_DRIVER',
               epoxy_dep.found() and epoxy_dep.version().version_compare('>= 1.5.4') ? '1' : false)
+conf_data.set('GLAMOR_HAS_EXPORT_DMABUF_MESA',
+              epoxy_dep.found() and cc.has_header_symbol('epoxy/egl.h','eglExportDMABUFImageQueryMESA', dependencies: epoxy_dep ) ? '1' : false)
 conf_data.set('GLXEXT', build_glx ? '1' : false)
 conf_data.set('GLAMOR', build_glamor ? '1' : false)
 conf_data.set('GLAMOR_HAS_GBM', gbm_dep.found() ? '1' : false)
