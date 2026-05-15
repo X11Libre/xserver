@@ -111,7 +111,7 @@ jobs:
                 sudo chown -R runner /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
 
             - name: compile drivers
-              run: .github/scripts/compile-drivers.sh
+              run: .github/scripts/ubuntu/compile-drivers.sh
 
     xserver-build-mingw32-ubuntu:
         runs-on: ubuntu-latest
