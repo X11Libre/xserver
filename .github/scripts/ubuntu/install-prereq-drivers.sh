@@ -5,9 +5,17 @@ set -e
 . .github/scripts/util.sh
 
 mkdir -p $X11_BUILD_DIR
-cd $X11_BUILD_DIR
+(
+    cd $X11_BUILD_DIR
+    build_meson   drm               $(fdo_mirror drm)                          $PKG_LIBDRM_REF   -Domap=enabled -Dfreedreno=enabled
+    build_meson   xorgproto         $(fdo_mirror xorgproto)                    $PKG_XORGPROTO_REF
+)
 
-if [ "$X11_OS" = "Linux" ]; then
-build_meson   drm               $(fdo_mirror drm)                          $PKG_LIBDRM_REF   -Domap=enabled -Dfreedreno=enabled
-fi
-build_meson   xorgproto         $(fdo_mirror xorgproto)                    $PKG_XORGPROTO_REF
+# build Xserver SDK
+echo -n > .meson_environment
+echo "export MESON_BUILDDIR=$MESON_BUILDDIR" >> .meson_environment
+echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> .meson_environment
+.github/scripts/meson-build.sh --skip-test
+sudo meson install --no-rebuild -C "$MESON_BUILDDIR"
+sudo mkdir -p /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
+sudo chown -R runner /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
