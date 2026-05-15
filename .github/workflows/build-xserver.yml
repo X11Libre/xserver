@@ -13,6 +13,55 @@ on:
     pull_request:
 
 jobs:
+    xserver-build-ubuntu-no-gbm:
+        env:
+            MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dgbm=false -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
+            LIBGL_ALWAYS_SOFTWARE: 1
+            GALLIUM_DRIVER: llvmpipe
+            PIGLIT_PLATFORM: x11_egl
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
+
+            - name: apt cache
+              uses: actions/cache@v4
+              with:
+                path: /var/cache/apt
+                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
+                restore-keys: apt-cache-
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: X11 prereq cache
+              uses: actions/cache@v4
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
+
+            - name: build and test
+              run:  .github/scripts/ubuntu/run-xserver-build-and-test.sh
+
+            - name: archive build logs
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-logs
+                  path: |
+                      __BUILD/meson-logs/*
+                      __BUILD/test/piglit-results/*
+
     xserver-build-ubuntu:
         env:
             MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
