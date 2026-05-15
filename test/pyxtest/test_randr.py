@@ -7,7 +7,7 @@ import struct
 import pytest
 
 from proto import randr
-from xclient import Extension, X11Error, X11Reply
+from xclient import BadIDChoice, BadLength, Extension, X11Error, X11Reply
 
 
 def _get_first_output(xclient, opcode):
@@ -179,8 +179,8 @@ class TestRandROutputProperty:
         # server tries to allocate 4 GB, failing with BadAlloc (11)
         # instead.
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
-        assert resp.error_code == 16, (
-            f"Expected BadLength (16), got error code {resp.error_code} - "
+        assert resp.error_code == BadLength, (
+            f"Expected BadLength ({BadLength}), got error code {resp.error_code} - "
             f"integer truncation not caught by length check"
         )
 
@@ -305,6 +305,6 @@ class TestRandRCreateLease:
         # Without the fix: BadIDChoice (error code 14).
         # With the fix: either success or some other error.
         if isinstance(resp, X11Error):
-            assert resp.error_code != 14, (
-                "CreateLease returned BadIDChoice (error 14) - lid not byte-swapped"
+            assert resp.error_code != BadIDChoice, (
+                "CreateLease returned BadIDChoice - lid not byte-swapped"
             )

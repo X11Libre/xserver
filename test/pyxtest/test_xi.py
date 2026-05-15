@@ -7,7 +7,7 @@ import struct
 import pytest
 
 from proto import xi
-from xclient import Extension, X11Error, X11Reply
+from xclient import BadLength, BadValue, Extension, X11Error, X11Reply
 
 
 @pytest.fixture
@@ -116,8 +116,8 @@ class TestXIPassiveGrab:
         )
         # The fix returns BadValue (error code 2)
         assert isinstance(resp, X11Error), f"Expected an error reply, got {resp}"
-        assert resp.error_code == 2, (
-            f"Expected BadValue (2), got error code {resp.error_code}"
+        assert resp.error_code == BadValue, (
+            f"Expected BadValue ({BadValue}), got error code {resp.error_code}"
         )
 
 
@@ -168,8 +168,8 @@ class TestXIChangeProperty:
         # server tries to allocate 4 GB, failing with BadAlloc (11)
         # instead.
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
-        assert resp.error_code == 16, (
-            f"Expected BadLength (16), got error code {resp.error_code} - "
+        assert resp.error_code == BadLength, (
+            f"Expected BadLength ({BadLength}), got error code {resp.error_code} - "
             f"integer truncation not caught by length check"
         )
 
@@ -385,7 +385,7 @@ class TestXIChangeDeviceControl:
         # With the fix: either a reply (success) or BadMatch (device
         # doesn't support resolution control), but NOT BadValue.
         if isinstance(resp, X11Error):
-            assert resp.error_code != 2, (
-                "ChangeDeviceControl returned BadValue (error 2) - "
+            assert resp.error_code != BadValue, (
+                "ChangeDeviceControl returned BadValue - "
                 "resolution values not byte-swapped"
             )
