@@ -107,17 +107,17 @@ conf_data.set('GLAMOR_HAS_EXPORT_DMABUF_MESA',
               epoxy_dep.found() and cc.has_header_symbol('epoxy/egl.h','eglExportDMABUFImageQueryMESA', dependencies: epoxy_dep ) ? '1' : false)
 conf_data.set('GLXEXT', build_glx ? '1' : false)
 conf_data.set('GLAMOR', build_glamor ? '1' : false)
-conf_data.set('GLAMOR_HAS_GBM', gbm_dep.found() ? '1' : false)
+conf_data.set('GLAMOR_HAS_GBM', build_gbm ? '1' : false)
 conf_data.set('GBM_BO_WITH_MODIFIERS',
-              build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 17.1') ? '1' : false)
+              build_glamor and build_gbm and gbm_dep.version().version_compare('>= 17.1') ? '1' : false)
 conf_data.set('GBM_BO_FD_FOR_PLANE',
-              build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 21.1') ? '1' : false)
+              build_glamor and build_gbm and gbm_dep.version().version_compare('>= 21.1') ? '1' : false)
 conf_data.set('GBM_BO_WITH_MODIFIERS2',
-              build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 21.3') ? '1' : false)
+              build_glamor and build_gbm and gbm_dep.version().version_compare('>= 21.3') ? '1' : false)
 conf_data.set('GBM_HAVE_BO_USE_LINEAR',
-              build_glamor and gbm_dep.found() and cc.has_header_symbol('gbm.h', 'GBM_BO_USE_LINEAR', dependencies : gbm_dep )  ? '1' : false)
+              build_glamor and build_gbm and cc.has_header_symbol('gbm.h', 'GBM_BO_USE_LINEAR', dependencies : gbm_dep )  ? '1' : false)
 conf_data.set('GBM_HAVE_BO_USE_FRONT_RENDERING',
-              build_glamor and gbm_dep.found() and cc.has_header_symbol('gbm.h','GBM_BO_USE_FRONT_RENDERING', dependencies: gbm_dep ) ? '1' : false)
+              build_glamor and build_gbm and cc.has_header_symbol('gbm.h','GBM_BO_USE_FRONT_RENDERING', dependencies: gbm_dep ) ? '1' : false)
 
 conf_data.set_quoted('SERVER_MISC_CONFIG_PATH', serverconfigdir)
 conf_data.set_quoted('PROJECTROOT', get_option('prefix'))
