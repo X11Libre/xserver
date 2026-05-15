@@ -53,7 +53,7 @@ jobs:
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
 
-    drivers-build-ubuntu:
+    drivers-prepare-ubuntu:
         env:
             MESON_ARGS: -Dprefix=/home/runner/x11 -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
@@ -76,14 +76,96 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
-                restore-keys: ${{ runner.name }}-x11-deps-
+                key:          drivers-deps-${{ github.sha }}
+                restore-keys: drivers-deps-${{ github.sha }}
 
             - name: generic prereq and xserver
               run:  .github/scripts/ubuntu/install-prereq-drivers.sh
 
-            - name: compile drivers
-              run: .github/scripts/ubuntu/compile-drivers.sh
+    drivers-build-ubuntu:
+        needs:
+            - drivers-prepare-ubuntu
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                driver:
+                    - input-elographics:25.0.0
+                    - input-evdev:25.0.0
+                    - input-joystick:25.0.0
+                    - input-keyboard:25.0.0
+                    - input-libinput:25.0.0
+                    - input-mouse:25.0.0
+                    - input-synaptics:25.0.0
+                    - input-vmmouse:25.0.0
+                    - input-void:25.0.0
+                    - input-wacom:25.0.0
+                    - video-amdgpu:25.0.0
+                    - video-apm:25.0.0
+                    - video-ark:25.0.0
+                    - video-ast:25.0.0
+                    - video-ati:25.0.0
+                    - video-chips:25.0.0
+                    - video-cirrus:25.0.0
+                    - video-dummy:25.0.0
+                    - video-fbdev:25.0.0
+                    - video-freedreno:25.0.0
+                    - video-geode:25.0.0
+                    - video-i128:25.0.0
+                    - video-i740:25.0.0
+                    - video-intel:25.0.1
+                    - video-mach64:25.0.0
+                    - video-mga:25.0.0
+                    - video-neomagic:25.0.0
+                    - video-nested:25.0.0
+                    - video-nouveau:25.0.0
+                    - video-nv:25.0.0
+                    - video-omap:25.0.0
+                    - video-qxl:25.0.0
+                    - video-r128:25.0.0
+                    - video-rendition:25.0.0
+                    - video-s3virge:25.0.0
+                    - video-savage:25.0.0
+                    - video-siliconmotion:25.0.0
+                    - video-sis:25.0.0
+                    - video-sisusb:25.0.0
+                    - video-suncg14:25.0.0
+                    - video-suncg3:25.0.0
+                    - video-suncg6:25.0.0
+                    - video-sunffb:25.0.0
+                    - video-suntcx:25.0.0
+                    - video-sunleo:25.0.0
+                    - video-tdfx:25.0.0
+                    - video-trident:25.0.0
+                    - video-vesa:25.0.0
+                    - video-vmware:25.0.0
+                    - video-v4l:25.0.1
+                    - video-vbox:25.0.0
+                    - video-voodoo:25.0.0
+                    - video-xgi:25.0.0
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - uses: ./.github/actions/ubuntu-install-pkg
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+
+            - name: X11 prereq cache
+              uses: actions/cache/restore@v4
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key:          drivers-deps-${{ github.sha }}
+                fail-on-cache-miss: true
+
+            - name: compile driver ${{ matrix.driver }}
+              run: .github/scripts/ubuntu/compile-driver-single.sh ${{ matrix.driver }}
 
     xserver-build-mingw32-ubuntu:
         runs-on: ubuntu-latest
