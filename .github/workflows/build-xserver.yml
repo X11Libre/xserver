@@ -98,7 +98,7 @@ jobs:
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: generic prereq
-              run:  .github/scripts/install-prereq-drivers.sh
+              run:  .github/scripts/ubuntu/install-prereq-drivers.sh
 
             - name: build xserver sdk
               run:  |
