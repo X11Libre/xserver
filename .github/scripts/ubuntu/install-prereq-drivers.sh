@@ -19,3 +19,6 @@ echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> .meson_environment
 sudo meson install --no-rebuild -C "$MESON_BUILDDIR"
 sudo mkdir -p /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
 sudo chown -R runner /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
+
+# copy over xserver SDK autoconf .m4 file so drivers can find it
+cp $X11_PREFIX/share/aclocal/xorg-server.m4 /usr/share/aclocal

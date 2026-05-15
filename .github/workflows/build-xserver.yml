@@ -63,7 +63,7 @@ jobs:
 
     drivers-build-ubuntu:
         env:
-            MESON_ARGS: -Dprefix=/usr -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/home/runner/x11 -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
