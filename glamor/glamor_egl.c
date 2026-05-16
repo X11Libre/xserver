@@ -88,48 +88,41 @@ static FreeDisplayList *freeDisplayList = NULL;
 static void
 glamor_egl_add_display_to_list(EGLDisplay dpy)
 {
+    FreeDisplayList *new;
     if (dpy == EGL_NO_DISPLAY) {
         return;
     }
 
-    FreeDisplayList **ptr = &freeDisplayList;
-    while (*ptr) {
-        ptr = &(*ptr)->next;
-    }
-
-    *ptr = XNFalloc(sizeof(**ptr));
-    (*ptr)->dpy = dpy;
-    (*ptr)->next = NULL;
+    new = XNFalloc(sizeof(*new));
+    new->dpy = dpy;
+    new->next = freeDisplayList;
+    freeDisplayList = new;
 }
 
 static void
 glamor_egl_destroy_display(EGLDisplay dpy)
 {
-    int num_found = 0;
+    FreeDisplayList **ptr = &freeDisplayList;
+    void *free_me;
 
     if (dpy == EGL_NO_DISPLAY) {
         return;
     }
 
-    FreeDisplayList **ptr = &freeDisplayList;
-    while (*ptr) {
-        if ((*ptr)->dpy == dpy) {
-            num_found++;
-            if (num_found == 1) {
-                /* We found it once, remove it from the list */
-                void *free_me = *ptr;
-                *ptr = (*ptr)->next;
-                free(free_me);
-                continue;
-            } else {
-                /* We found it more than once, stop searching */
-                break;
-            }
-        }
-        ptr = &(*ptr)->next;
+    for (; *ptr && ((*ptr)->dpy != dpy); ptr = &(*ptr)->next);
+    if (*ptr == NULL) {
+        /* Display is not in freelist, should not happen */
+        return;
     }
 
-    if (num_found == 1) {
+    /* Remove the display from the list */
+    free_me = *ptr;
+    *ptr = (*ptr)->next;
+    free(free_me);
+
+    /* Check if the display is still in use */
+    for (; *ptr && ((*ptr)->dpy != dpy); ptr = &(*ptr)->next);
+    if (*ptr == NULL) {
         eglTerminate(dpy);
     }
 }
