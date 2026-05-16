@@ -22,7 +22,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: prepare build environment
               run: |
@@ -68,7 +68,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: prepare build environment
               run: |
@@ -109,7 +109,7 @@ jobs:
             MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dwerror=true -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false
         steps:
             - name: Check out repository code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: prepare build environment
               run: |
@@ -155,7 +155,7 @@ jobs:
         runs-on: macos-latest
         steps:
             - name: Check out repository code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: prepare build environment
               run: |
@@ -211,7 +211,7 @@ jobs:
             MYTOKEN : ${{ secrets.MYTOKEN }}
             MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - name: run in freebsd VM
               id: xserver-build
               uses: vmactions/freebsd-vm@v1
@@ -226,7 +226,7 @@ jobs:
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - name: run in DragonFlyBSD VM
               id: xserver-build
               uses: vmactions/dragonflybsd-vm@v1.1.4
@@ -241,7 +241,7 @@ jobs:
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - uses: vmactions/netbsd-vm@v1.2.3
               id: vm
               with:
@@ -298,7 +298,7 @@ jobs:
                 key: ${{ runner.os }}-ccache
                 restore-keys: ${{ runner.os }}-ccache
             - run: git config --global --add safe.directory /cygdrive/d/a/xserver/xserver
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
               with:
                   # Done above as the builtin would use a path for Windows git.
                   set-safe-directory: false
@@ -364,7 +364,7 @@ jobs:
             - check-sign-off
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Create release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

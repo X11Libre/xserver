@@ -32,7 +32,7 @@ jobs:
             contents: read
         steps:
             - name: Check out repository code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: purge workflows on deleted branches
               run: .github/scripts/github/gh-purge-deleted-branch-workflows.sh X11Libre/xserver
               env:
@@ -110,7 +110,7 @@ jobs:
                     - wip/xnest-rootless
                     - wip/xnest-shm
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - name: purge older runs on ${{ github.event.repository.name }} branch
               run: |
                 .github/scripts/gh-purge-pipelines.sh \
