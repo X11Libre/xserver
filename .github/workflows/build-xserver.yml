@@ -29,7 +29,6 @@ jobs:
                 MACHINE=`gcc -dumpmachine`
                 echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
-                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
 
             - name: apt cache
               uses: actions/cache@v4
@@ -75,7 +74,6 @@ jobs:
                 MACHINE=`gcc -dumpmachine`
                 echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
-                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
 
             - name: apt cache
               uses: actions/cache@v4
@@ -116,7 +114,6 @@ jobs:
                 MACHINE=`gcc -dumpmachine`
                 echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
-                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
 
             - name: apt cache
               uses: actions/cache@v4
