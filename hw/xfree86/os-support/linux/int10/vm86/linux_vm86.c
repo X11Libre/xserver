@@ -293,6 +293,7 @@ vm86_rep(struct vm86_struct *ptr)
 {
     int __res;
 
+    /* NOLINTBEGIN(hicpp-no-assembler) */
 #ifdef __PIC__
     /* When compiling with -fPIC, we can't use asm constraint "b" because
        %ebx is already taken by gcc. */
@@ -308,6 +309,7 @@ vm86_rep(struct vm86_struct *ptr)
                          "pop %%gs":"=a"(__res):"a"((int) 113),
                          "b"((struct vm86_struct *) ptr));
 #endif
+    /* NOLINTEND(hicpp-no-assembler) */
 
     if (__res < 0) {
         errno = -__res;

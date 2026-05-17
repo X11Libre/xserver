@@ -136,7 +136,9 @@ static char __crashreporter_info_buff__[4096] = { 0 };
 
 static const char *__crashreporter_info__ __attribute__ ((__used__)) =
     &__crashreporter_info_buff__[0];
+/* NOLINTBEGIN(hicpp-no-assembler) */
 asm(".desc ___crashreporter_info__, 0x10");
+/* NOLINTEND(hicpp-no-assembler) */
 #endif
 
 /* Prefix strings for log messages. */

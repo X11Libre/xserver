@@ -57,6 +57,8 @@
 
 #include <pixman.h>             /* for uint*_t types */
 
+/* NOLINTBEGIN(hicpp-no-assembler) */
+
 /* Allow drivers to use the GCC-supported __inline__ and/or __inline. */
 #ifndef __inline__
 #if defined(__GNUC__)
@@ -1029,5 +1031,7 @@ extern _X_EXPORT void xf86SlowBCopyToBus(unsigned char *, unsigned char *, int);
 #define slowbcopy_tobus(src,dst,count) xf86SlowBcopy(src,dst,count)
 #define slowbcopy_frombus(src,dst,count) xf86SlowBcopy(src,dst,count)
 #endif                          /* __alpha__ */
+
+/* NOLINTEND(hicpp-no-assembler) */
 
 #endif                          /* _COMPILER_H */
