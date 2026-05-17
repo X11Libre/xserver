@@ -75,6 +75,7 @@ SOFTWARE.
 
 #include "dix.h"
 #include "ospoll.h"
+#include <errno.h>
 
 extern struct ospoll    *server_poll;
 
@@ -88,7 +89,16 @@ extern Bool NewOutputPending;
 static inline void arc4random_buf(void *buf, size_t nbytes)
 {
     int fd = open("/dev/urandom", O_RDONLY);
-    read(fd, buf, nbytes);
+    if (fd < 0) {
+        perror("open /dev/urandom");
+        abort();
+    }
+    ssize_t r = read(fd, buf, nbytes);
+    if (r < 0 || (size_t)r != nbytes) {
+        perror("read /dev/urandom");
+        close(fd);
+        abort();
+    }
     close(fd);
 }
 #endif /* HAVE_ARC4RANDOM_BUF */
