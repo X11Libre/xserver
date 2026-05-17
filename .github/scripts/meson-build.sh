@@ -5,6 +5,8 @@
 #
 # SPDX-License-Identifier: MIT
 #
+# shellcheck disable=SC1091,SC2086
+#
 # Usage:
 #     meson-build.sh
 #       [-C directory]			... change to directory before doing anything
@@ -39,47 +41,47 @@ MESON_RUN_DIST="$MESON_DIST_ARGS"
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
-		-C)
-			directory=$2
-			shift 2
-			pushd "$directory" || exit 1
-			;;
-		--skip-setup)
-			shift
-			MESON_SKIP_SETUP="1"
-			;;
-		--skip-build)
-			shift
-			MESON_SKIP_BUILD="1"
-			;;
-		--skip-test)
-			shift
-			MESON_RUN_TEST=""
-			;;
-		--run-test)
-			shift
-			MESON_RUN_TEST="1"
-			;;
-		--skip-dist)
-			shift
-			MESON_RUN_DIST=""
-			;;
-		--run-dist)
-			shift
-			MESON_RUN_DIST="1"
-			;;
-		--skip-install)
-			shift
-			MESON_RUN_INSTALL=""
-			;;
-		--run-install)
-			shift
-			MESON_RUN_INSTALL="1"
-			;;
-		*)
-			echo "Unknow commandline argument $1"
-			exit 1
-			;;
+	-C)
+		directory=$2
+		shift 2
+		pushd "$directory" || exit 1
+		;;
+	--skip-setup)
+		shift
+		MESON_SKIP_SETUP="1"
+		;;
+	--skip-build)
+		shift
+		MESON_SKIP_BUILD="1"
+		;;
+	--skip-test)
+		shift
+		MESON_RUN_TEST=""
+		;;
+	--run-test)
+		shift
+		MESON_RUN_TEST="1"
+		;;
+	--skip-dist)
+		shift
+		MESON_RUN_DIST=""
+		;;
+	--run-dist)
+		shift
+		MESON_RUN_DIST="1"
+		;;
+	--skip-install)
+		shift
+		MESON_RUN_INSTALL=""
+		;;
+	--run-install)
+		shift
+		MESON_RUN_INSTALL="1"
+		;;
+	*)
+		echo "Unknow commandline argument $1"
+		exit 1
+		;;
 	esac
 done
 
@@ -124,6 +126,7 @@ if [[ -z "$MESON_SKIP_SETUP" ]]; then
 	meson setup "$MESON_BUILDDIR" $MESON_ARGS
 fi
 meson configure "$MESON_BUILDDIR"
+.github/scripts/link-compile-commands.sh "$MESON_BUILDDIR"
 
 if [[ -z "$MESON_SKIP_BUILD" ]]; then
 	if [[ -n "$NINJA_ARGS" ]]; then
@@ -137,7 +140,7 @@ if [[ -n "$MESON_RUN_TEST" ]]; then
 fi
 
 if [[ -n "$MESON_RUN_INSTALL" ]]; then
-	meson install --no-rebuild  -C "$MESON_BUILDDIR" $MESON_INSTALL_ARGS
+	meson install --no-rebuild -C "$MESON_BUILDDIR" $MESON_INSTALL_ARGS
 fi
 
 if [[ -n "$MESON_RUN_DIST" ]]; then

@@ -1,0 +1,18 @@
+Checks: >
+  clang-analyzer-*,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-reserved-identifier,
+  hicpp-no-assembler,
+  misc-include-cleaner,
+  performance-*,
+  portability-*,
+  readability-redundant-control-flow
+
+HeaderFilterRegex: '.*'
+WarningsAsErrors: ''
+
+CheckOptions:
+  misc-include-cleaner.UnusedIncludes: 'true'
+  misc-include-cleaner.MissingIncludes: 'false'
