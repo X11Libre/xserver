@@ -208,6 +208,8 @@ ospoll_create(void)
 {
 #if POLLSET
     struct ospoll *ospoll = calloc(1, sizeof (struct ospoll));
+    if (!ospoll)
+        return NULL;
 
     ospoll->ps = pollset_create(-1);
     if (ospoll->ps < 0) {
@@ -218,6 +220,8 @@ ospoll_create(void)
 #endif
 #if PORT
     struct ospoll *ospoll = calloc(1, sizeof (struct ospoll));
+    if (!ospoll)
+        return NULL;
 
     ospoll->epoll_fd = port_create();
     if (ospoll->epoll_fd < 0) {
