@@ -5964,7 +5964,7 @@ ProcXkbGetKbdByName(ClientPtr client)
             return BadAlloc;
 
         if (childbuf.wpos != (mrep.length * 4))
-            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch mrep size (%ld // %ld units)\n",
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch after XkbAssembleMap(): mrep size (%ld // %ld units)\n",
                        (unsigned long)childbuf.wpos, (unsigned long)mrep.length * 4, (unsigned long)mrep.length);
 
         if (client->swapped) {
@@ -5985,7 +5985,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         XkbAssembleCompatMap(client, new->compat, crep, &childbuf);
 
         if (childbuf.wpos != (crep.length * 4))
-            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch crep size (%ld // %ld units)\n",
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch after XkbAssembleCompatMap(): crep size (%ld // %ld units)\n",
                        (unsigned long)childbuf.wpos, (unsigned long)crep.length * 4, (unsigned long)crep.length);
 
         if (client->swapped) {
@@ -6009,7 +6009,7 @@ ProcXkbGetKbdByName(ClientPtr client)
             return BadAlloc;
 
         if (childbuf.wpos != (irep.length * 4))
-            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch irep size (%ld // %ld units)\n",
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch after XkbAssembleIndicatorMap(): irep size (%ld // %ld units)\n",
                        (unsigned long)childbuf.wpos, (unsigned long)irep.length * 4, (unsigned long)irep.length);
 
         if (client->swapped) {
@@ -6029,7 +6029,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         XkbAssembleNames(client, new, nrep, &childbuf);
 
         if (childbuf.wpos != (nrep.length * 4))
-            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch nrep size (%ld // %ld units)\n",
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch after XkbAssembleNames(): nrep size (%ld // %ld units)\n",
                        (unsigned long)childbuf.wpos, (unsigned long)nrep.length * 4, (unsigned long)nrep.length);
 
         if (client->swapped) {
