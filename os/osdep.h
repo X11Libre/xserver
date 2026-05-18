@@ -101,7 +101,19 @@ static inline void arc4random_buf(void *buf, size_t nbytes)
     }
 #else
     int fd = open("/dev/urandom", O_RDONLY);
-    read(fd, buf, nbytes);
+    if (fd < 0)
+        FatalError("Cannot open /dev/urandom for random data generation\n");
+    ssize_t pos = 0;
+    while (pos < nbytes) {
+        ssize_t ret = read(fd, (unsigned char*)buf + pos, nbytes - pos);
+        if (ret <= 0) {
+            if (ret < 0 && errno == EINTR)
+                continue;
+            close(fd);
+            FatalError("Cannot read random data from /dev/urandom\n");
+        }
+        pos += ret;
+    }
     close(fd);
 #endif
 }
