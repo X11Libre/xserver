@@ -88,7 +88,19 @@ extern Bool NewOutputPending;
 static inline void arc4random_buf(void *buf, size_t nbytes)
 {
     int fd = open("/dev/urandom", O_RDONLY);
-    read(fd, buf, nbytes);
+    if (fd < 0)
+        FatalError("Cannot open /dev/urandom for random data generation\n");
+    int pos = 0;
+    while (pos < nbytes) {
+        int ret = read(fd, (unsigned char*)buf + pos, nbytes - pos);
+        if (ret <= 0) {
+            if (ret < 0 && errno == EINTR)
+                continue;
+            close(fd);
+            FatalError("Cannot read random data from /dev/urandom\n");
+        }
+        pos += ret;
+    }
     close(fd);
 }
 #endif /* HAVE_ARC4RANDOM_BUF */
