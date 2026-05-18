@@ -61,21 +61,13 @@ jobs:
             - name: Check out repository code
               uses: actions/checkout@v6
 
+            - uses: ./.github/actions/ubuntu-install-pkg
+
             - name: prepare build environment
               run: |
                 MACHINE=`gcc -dumpmachine`
                 echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
-
-            - name: apt cache
-              uses: actions/cache@v4
-              with:
-                path: /var/cache/apt
-                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
-                restore-keys: apt-cache-
-
-            - name: pkg install
-              run:  sudo .github/scripts/ubuntu/install-pkg.sh
 
             - name: X11 prereq cache
               uses: actions/cache@v4
@@ -101,21 +93,13 @@ jobs:
             - name: Check out repository code
               uses: actions/checkout@v6
 
+            - uses: ./.github/actions/ubuntu-install-pkg
+
             - name: prepare build environment
               run: |
                 MACHINE=`gcc -dumpmachine`
                 echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
-
-            - name: apt cache
-              uses: actions/cache@v4
-              with:
-                path: /var/cache/apt
-                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
-                restore-keys: apt-cache-
-
-            - name: pkg install
-              run:  sudo .github/scripts/ubuntu/install-pkg.sh
 
             - name: X11 prereq cache
               uses: actions/cache@v4
