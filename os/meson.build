@@ -112,5 +112,5 @@ libxserver_os = static_library('xserver_os',
         dependency('xau')
     ],
     c_args: os_c_args,
-    link_with: libxlibc,
+    link_with: [ libxlibc, libinox ],
 )

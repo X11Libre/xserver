@@ -34,6 +34,8 @@ from The Open Group.
 #include <dix-config.h>
 
 #include <X11/X.h>
+#include <libinox/inox_random.h>
+
 #include "os.h"
 #include "osdep.h"
 #include "mitauth.h"
