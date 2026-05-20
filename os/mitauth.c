@@ -33,6 +33,7 @@ from The Open Group.
 
 #include <dix-config.h>
 
+#include <errno.h>
 #include <unistd.h>
 #include <X11/X.h>
 
@@ -155,7 +156,12 @@ MitGenerateCookie(unsigned data_length,
         if (i >= sizeof(cookie))
             i = 0;
     }
-    getentropy(cookie, sizeof(cookie));
+
+    if (getentropy(cookie, sizeof(cookie))) {
+        LogMessage(X_ERROR, "MitGenerateCookie: failed to get entropy: %s\n", strerror(errno));
+        return 0;
+    }
+
     XID id = MitAddCookie(sizeof(cookie), cookie);
     if (!id)
         return 0;
