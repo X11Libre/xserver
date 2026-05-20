@@ -153,7 +153,11 @@ MitGenerateCookie(unsigned data_length,
         if (i >= sizeof(cookie))
             i = 0;
     }
-    arc4random_buf(cookie, sizeof(cookie));
+
+    if (inox_random(cookie, sizeof(cookie))) {
+        return 0;
+    }
+
     XID id = MitAddCookie(sizeof(cookie), cookie);
     if (!id)
         return 0;

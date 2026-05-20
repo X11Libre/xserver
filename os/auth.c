@@ -44,10 +44,6 @@ from The Open Group.
 #ifdef WIN32
 #include    <X11/Xw32defs.h>
 #endif
-#include   <stdlib.h>       /* for arc4random_buf() */
-#ifdef HAVE_GETRANDOM
-#include   <sys/random.h>   /* for getrandom() */
-#endif
 
 #include "os/auth.h"
 
