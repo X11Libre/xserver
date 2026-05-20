@@ -33,7 +33,9 @@ from The Open Group.
 
 #include <dix-config.h>
 
+#include <sys/random.h>
 #include <X11/X.h>
+
 #include "os.h"
 #include "osdep.h"
 #include "mitauth.h"
@@ -139,7 +141,7 @@ MitRemoveCookie(unsigned short data_length, const char *data)
     return 0;
 }
 
-static char cookie[16];         /* 128 bits */
+static char cookie[16] = { 0 };         /* 128 bits */
 
 XID
 MitGenerateCookie(unsigned data_length,
@@ -153,7 +155,7 @@ MitGenerateCookie(unsigned data_length,
         if (i >= sizeof(cookie))
             i = 0;
     }
-    arc4random_buf(cookie, sizeof(cookie));
+    getrandom(cookie, sizeof(cookie), 0);
     XID id = MitAddCookie(sizeof(cookie), cookie);
     if (!id)
         return 0;
