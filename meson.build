@@ -141,6 +141,8 @@ endif
 
 build_hashtable = false
 
+subdir('libinox')
+
 # Resolve default values of some options
 xkb_dir = get_option('xkb_dir')
 if xkb_dir == ''
