@@ -33,7 +33,7 @@ from The Open Group.
 
 #include <dix-config.h>
 
-#include <sys/random.h>
+#include <unistd.h>
 #include <X11/X.h>
 
 #include "os.h"
@@ -155,7 +155,7 @@ MitGenerateCookie(unsigned data_length,
         if (i >= sizeof(cookie))
             i = 0;
     }
-    getrandom(cookie, sizeof(cookie), 0);
+    getentropy(cookie, sizeof(cookie));
     XID id = MitAddCookie(sizeof(cookie), cookie);
     if (!id)
         return 0;
