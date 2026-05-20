@@ -4,11 +4,21 @@
 
 #include <windows.h>
 #include <bcrypt.h>
+#include <stddef.h>   // for size_t
 
 #include "inox_random.h"
 
-int secure_random(void *buf, size_t len)
+int inox_random(void *buf, size_t len)
 {
-    NTSTATUS status = BCryptGenRandom(NULL, buf, len, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
-    return (status == STATUS_SUCCESS) ? 0 : -1;
+    if (buf == NULL || len == 0)
+        return -1;
+
+    NTSTATUS status = BCryptGenRandom(
+        NULL,                          // Use system default RNG
+        (PUCHAR)buf,                   // Buffer
+        (ULONG)len,                    // Length
+        BCRYPT_USE_SYSTEM_PREFERRED_RNG
+    );
+
+    return BCRYPT_SUCCESS(status) ? 0 : -1;
 }
