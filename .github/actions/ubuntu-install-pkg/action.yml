@@ -10,16 +10,10 @@ runs:
         - name: apt cache pull
           uses: actions/cache/restore@v5
           with:
+            fail-on-cache-miss: true
             path: /var/cache/apt
-            key:          xserver-apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}-v2
-            restore-keys: xserver-apt-cache-
+            key:  ${{ runner.os }}-apt-cache-v3
 
         - name: pkg install
           run:  sudo .github/scripts/ubuntu/install-pkg.sh
           shell: bash
-
-        - name: apt cache push
-          uses: actions/cache/save@v5
-          with:
-            path: /var/cache/apt
-            key:          xserver-apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}-v2-${{ github.run_id }}

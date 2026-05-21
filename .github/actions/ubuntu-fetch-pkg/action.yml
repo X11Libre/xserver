@@ -1,0 +1,15 @@
+name: ubuntu fetch packages
+runs:
+    using: "composite"
+    steps:
+        - run:  sudo chmod u+s /bin/tar
+          shell: bash
+
+        - uses: actions/cache@v5
+          id:   apt-cache-restore
+          with:
+            path: /var/cache/apt
+            key:  ${{ runner.os }}-apt-cache-v3
+
+        - run:  sudo .github/scripts/ubuntu/fetch-pkg.sh
+          shell: bash

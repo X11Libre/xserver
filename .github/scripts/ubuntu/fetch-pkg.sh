@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# NOTE: don't forget to update both fetch-pkg and install-pkg and change cache name
+
 set -e
 
 # Packages which are needed by this script, but not for the xserver build
@@ -13,7 +15,9 @@ EPHEMERAL="
 	xvfb
 "
 
-apt-get install -y \
+apt-get update
+
+apt-get install -d -y \
 	$EPHEMERAL \
 	autoconf \
 	automake \
@@ -94,3 +98,6 @@ apt-get install -y \
 	libxcvt-dev \
 	git \
 	sudo
+
+# only pull them into apt cache -- for mingw32 build
+apt-get install -d -y mingw-w64-tools gcc-mingw-w64 gcc-mingw-w64-i686 libz-mingw-w64-dev
