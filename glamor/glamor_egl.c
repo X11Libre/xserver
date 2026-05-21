@@ -111,7 +111,8 @@ glamor_egl_destroy_display(EGLDisplay dpy)
 
     for (; *ptr && ((*ptr)->dpy != dpy); ptr = &(*ptr)->next) {}
     if (*ptr == NULL) {
-        /* Display is not in usedlist, should not happen */
+        LogMessage(X_ERROR, "glamor: EGLDisplay: %p not in usedlist\n", dpy);
+        LogMessage(X_ERROR, "glamor: This is an X server bug, please report it\n");
         return;
     }
 
