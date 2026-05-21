@@ -76,8 +76,8 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key:          drivers-deps-${{ github.sha }}
-                restore-keys: drivers-deps-${{ github.sha }}
+                key:          drivers-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq-drivers.sh') }}
+                restore-keys: drivers-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq-drivers.sh') }}
 
             - name: generic prereq and xserver
               run:  .github/scripts/ubuntu/install-prereq-drivers.sh
@@ -161,7 +161,7 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key:          drivers-deps-${{ github.sha }}
+                key:          drivers-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq-drivers.sh') }}
                 fail-on-cache-miss: true
 
             - name: compile driver ${{ matrix.driver }}
