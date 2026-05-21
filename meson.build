@@ -381,6 +381,15 @@ endif
 
 module_dir = join_paths(get_option('libdir'), get_option('module_dir'))
 
+paths_summary = {
+    'Log directory': log_dir,
+    'XKB data directory': xkb_dir,
+    'XKB binary directory': xkb_bin_dir,
+    'Default font path': default_font_path,
+    'Module directory': module_dir,
+}
+summary(paths_summary, section: 'Paths')
+
 if glamor_option == 'auto'
     build_glamor = build_xorg
 else
