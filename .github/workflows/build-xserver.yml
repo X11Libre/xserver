@@ -206,7 +206,7 @@ jobs:
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
 
             - name: X11 prereq cache
-              uses: actions/cache/restore@v4
+              uses: actions/cache/restore@v5
               with:
                 path: |
                     ${{ env.X11_PREFIX }}
