@@ -56,7 +56,7 @@ typedef struct _fbScreenConf {
 const char *fbdevDevicePath;
 Bool fbDisableShadow;
 bool fbNoAccel;
-#ifdef GLAMOR
+
 char *fbdev_glvnd_provider;
 
 char *fbdev_dri_path;
@@ -68,10 +68,8 @@ bool force_es;
 
 bool fbGlamorAllowed;
 bool fbForceGlamor;
-#ifdef XV
+
 bool fbXVAllowed;
-#endif
-#endif
 } FbScreenConf;
 
 extern KdCardFuncs fbdevFuncs;

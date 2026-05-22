@@ -66,7 +66,7 @@ InitCard(char *name)
     *fbCurrScreen = (FbScreenConf) {
                                     .fbdevDevicePath = NULL,
                                     .fbDisableShadow = FALSE,
-#ifdef GLAMOR
+
                                     .fbdev_glvnd_provider = NULL,
 
                                     .fbdev_dri_path = NULL,
@@ -78,10 +78,8 @@ InitCard(char *name)
 
                                     .fbGlamorAllowed = TRUE,
                                     .fbForceGlamor = FALSE,
-#ifdef XV
+
                                     .fbXVAllowed = TRUE,
-#endif
-#endif
                                    };
 
     KdCardInfoAdd(&fbdevFuncs, fbCurrScreen);
@@ -98,7 +96,7 @@ fbdevLogScreenInfo(FbScreenConf *config, int screen_num)
                config->fbDisableShadow ? "disabled" : "enabled");
     LogMessage(X_INFO, "Xfbdev(%d): HW Acceleration %s\n", screen_num,
                config->fbNoAccel ? "disabled" : "enabled");
-#ifdef GLAMOR
+
     LogMessage(X_INFO, "Xfbdev(%d): glvnd library: %s\n", screen_num,
                config->fbdev_glvnd_provider ? config->fbdev_glvnd_provider : "not passed");
 
@@ -119,11 +117,9 @@ fbdevLogScreenInfo(FbScreenConf *config, int screen_num)
                config->fbGlamorAllowed ? "enabled" : "disabled");
     LogMessage(X_INFO, "Xfbdev(%d): glamor render acceleration %s on software renderers\n", screen_num,
                config->fbForceGlamor ? "allowed" : "forbidden");
-#ifdef XV
+
     LogMessage(X_INFO, "Xfbdev(%d): glamor X-Video support %s\n", screen_num,
                config->fbXVAllowed ? "allowed" : "forbidden");
-#endif
-#endif
     LogMessage(X_INFO, "\n");
 }
 
@@ -224,7 +220,6 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
-#ifdef GLAMOR
     if (!strcmp(argv[i], "-glamor")) {
         fbCurrScreen->fbForceGlamor = TRUE;
         return 1;
@@ -273,13 +268,10 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
-#ifdef XV
     if (!strcmp(argv[i], "-noxv")) {
         fbCurrScreen->fbXVAllowed = FALSE;
         return 1;
     }
-#endif
-#endif
 
     return KdProcessArgument(argc, argv, i);
 }
