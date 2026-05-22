@@ -12,7 +12,7 @@ runs:
           with:
             fail-on-cache-miss: true
             path: /var/cache/apt
-            key:  ${{ runner.os }}-apt-cache-v3
+            key:  ${{ runner.os }}-apt-cache-v4
 
         - name: pkg install
           run:  sudo .github/scripts/ubuntu/install-pkg.sh

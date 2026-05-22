@@ -9,7 +9,7 @@ runs:
           id:   apt-cache-restore
           with:
             path: /var/cache/apt
-            key:  ${{ runner.os }}-apt-cache-v3
+            key:  ${{ runner.os }}-apt-cache-v4
 
         - run:  sudo .github/scripts/ubuntu/fetch-pkg.sh
           shell: bash
