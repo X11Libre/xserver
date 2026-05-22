@@ -1,0 +1,14 @@
+name: deploy ubuntu package cache
+runs:
+    using: "composite"
+    steps:
+        - name: root suid tar for apt caching
+          run:  sudo chmod u+s /bin/tar
+          shell: bash
+
+        - name: apt cache pull
+          uses: actions/cache/restore@v5
+          with:
+            fail-on-cache-miss: true
+            path: /var/cache/apt
+            key:  ${{ runner.os }}-apt-cache-v4

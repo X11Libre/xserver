@@ -314,11 +314,13 @@ jobs:
 
     xserver-build-freebsd:
         runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
         env:
             MYTOKEN : ${{ secrets.MYTOKEN }}
             MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v6
+            - uses: ./.github/actions/ubuntu-pkg-cache
             - name: run in freebsd VM
               id: xserver-build
               uses: vmactions/freebsd-vm@v1
@@ -330,10 +332,12 @@ jobs:
 
     xserver-build-dragonflybsd:
         runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v6
+            - uses: ./.github/actions/ubuntu-pkg-cache
             - name: run in DragonFlyBSD VM
               id: xserver-build
               uses: vmactions/dragonflybsd-vm@v1.1.4
@@ -345,10 +349,12 @@ jobs:
 
     xserver-build-netbsd:
         runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v6
+            - uses: ./.github/actions/ubuntu-pkg-cache
             - uses: vmactions/netbsd-vm@v1.2.3
               id: vm
               with:
