@@ -96,6 +96,8 @@ fbdevLogScreenInfo(FbScreenConf *config, int screen_num)
                config->fbdevDevicePath ? config->fbdevDevicePath : "not passed");
     LogMessage(X_INFO, "Xfbdev(%d): ShadowFB %s\n", screen_num,
                config->fbDisableShadow ? "disabled" : "enabled");
+    LogMessage(X_INFO, "Xfbdev(%d): HW Acceleration %s\n", screen_num,
+               config->fbNoAccel ? "disabled" : "enabled");
 #ifdef GLAMOR
     LogMessage(X_INFO, "Xfbdev(%d): glvnd library: %s\n", screen_num,
                config->fbdev_glvnd_provider ? config->fbdev_glvnd_provider : "not passed");
@@ -168,6 +170,8 @@ ddxUseMsg(void)
     ErrorF
         ("-noshadow            Disable the ShadowFB layer if possible\n");
     ErrorF
+        ("-noaccel             Disable hw acceleration (per screen)\n");
+    ErrorF
         ("-glamor              Force enable glamor render acceleration if possible\n");
     ErrorF
         ("-noglamor            Force disable glamor render acceleration\n");
@@ -212,6 +216,11 @@ ddxProcessArgument(int argc, char **argv, int i)
 
     if (!strcmp(argv[i], "-noshadow")) {
         fbCurrScreen->fbDisableShadow = TRUE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-noaccel")) {
+        fbCurrScreen->fbNoAccel = TRUE;
         return 1;
     }
 
