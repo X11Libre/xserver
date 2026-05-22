@@ -36,7 +36,6 @@ apt-get install -y \
 	libglx-mesa0 \
 	libinput10 \
 	libinput-dev \
-	libnvidia-egl-wayland-dev \
 	libpciaccess-dev \
 	libpixman-1-dev \
 	libspice-protocol-dev \
