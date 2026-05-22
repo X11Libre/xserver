@@ -41,7 +41,7 @@ jobs:
                 sudo chown root /bin/tar && sudo chmod u+s /bin/tar
 
             - name: X11 prereq cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                 path: |
                     ${{ env.X11_PREFIX }}
@@ -82,7 +82,7 @@ jobs:
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
 
             - name: X11 prereq cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                 path: |
                     ${{ env.X11_PREFIX }}
@@ -120,7 +120,7 @@ jobs:
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
 
             - name: X11 prereq cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                 path: |
                     ${{ env.X11_PREFIX }}
@@ -236,7 +236,7 @@ jobs:
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
 
             - name: X11 prereq cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                 path: |
                     ${{ env.X11_PREFIX }}
@@ -269,7 +269,7 @@ jobs:
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
 
             - name: homebrew cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                 path: /Users/runner/Library/Caches/Homebrew
                 key: ${{ runner.os }}-homebrew-cache-${{ hashFiles('.github/scripts/macos/install-pkg.sh') }}
@@ -279,7 +279,7 @@ jobs:
               run:  .github/scripts/macos/install-pkg.sh
 
             - name: X11 prereq cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                 path: |
                     ${{ env.X11_PREFIX }}
@@ -361,7 +361,7 @@ jobs:
         runs-on: windows-latest
         steps:
             - name: Cygwin packages cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                 path: D:\cygwin-packages
                 key: ${{ runner.os }}-packages
@@ -399,7 +399,7 @@ jobs:
                    xkeyboard-config, git
 
             - name: Cygwin ccache cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                 path: D:\cygwin\home\runneradmin\.ccache
                 key: ${{ runner.os }}-ccache
