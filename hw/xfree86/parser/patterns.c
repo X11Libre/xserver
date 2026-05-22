@@ -93,7 +93,7 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
         pattern->mode = MATCH_REGEX;
         str ++;
         if (*str) {
-            char *last;
+            const char *last;
             last = strchr(str+1, *str);
             if (last)
                 n = last-str-1;

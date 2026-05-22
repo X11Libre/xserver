@@ -28,8 +28,9 @@
  */
 #include <dix-config.h>
 
+#include "include/mipict.h"
+
 #include "glamor_priv.h"
-#include "mipict.h"
 #include "damage.h"
 
 /** @file glamor_compositerects.

@@ -117,12 +117,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         return BadValue;
     }
 
-    /* XI2 allows 32-bit keycodes but thanks to XKB we can never
-     * implement this. Just return an error for all keycodes that
-     * cannot work anyway, same for buttons > 255. */
-    if (stuff->detail > 255)
-        return XIAlreadyGrabbed;
-
     if (XICheckInvalidMaskBits(client, (unsigned char *) &stuff[1],
                                stuff->mask_len * 4) != Success)
         return BadValue;
@@ -177,6 +171,14 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     for (i = 0; i < stuff->num_modifiers; i++, modifiers++) {
         uint8_t status = Success;
 
+        /* XI2 allows 32-bit keycodes but thanks to XKB we can never
+         * implement this. Pretend that all keycodes above 255 are
+         * already grabbed, same for buttons > 255. */
+        if (stuff->detail > 255) {
+            status = XIAlreadyGrabbed;
+            goto modifier_done;
+        }
+
         param.modifiers = *modifiers;
         ret = CheckGrabValues(client, &param);
         if (ret != Success)
@@ -209,6 +211,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
             break;
         }
 
+modifier_done:
         if (status != GrabSuccess) {
             /* write xXIGrabModifierInfo */
             x_rpcbuf_write_CARD32(&rpcbuf, *modifiers);
@@ -222,9 +225,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
 
     xi2mask_free(&mask.xi2mask);
 
-    if (client->swapped) {
-        swaps(&reply.num_modifiers);
-    }
+    X_REPLY_FIELD_CARD16(num_modifiers);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
@@ -275,7 +276,9 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
 
     if ((stuff->grab_type == XIGrabtypeEnter ||
          stuff->grab_type == XIGrabtypeFocusIn ||
-         stuff->grab_type == XIGrabtypeTouchBegin) && stuff->detail != 0) {
+         stuff->grab_type == XIGrabtypeTouchBegin ||
+         stuff->grab_type == XIGrabtypeGesturePinchBegin ||
+         stuff->grab_type == XIGrabtypeGestureSwipeBegin) && stuff->detail != 0) {
         client->errorValue = stuff->detail;
         return BadValue;
     }

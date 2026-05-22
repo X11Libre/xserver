@@ -123,10 +123,8 @@ ProcCompositeQueryVersion(ClientPtr client)
     pCompositeClient->major_version = reply.majorVersion;
     pCompositeClient->minor_version = reply.minorVersion;
 
-    if (client->swapped) {
-        swapl(&reply.majorVersion);
-        swapl(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD32(majorVersion);
+    X_REPLY_FIELD_CARD32(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -303,9 +301,7 @@ SingleCompositeGetOverlayWindow(ClientPtr client, xCompositeGetOverlayWindowReq 
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
-    if (client->swapped) {
-        swapl(&reply.overlayWin);
-    }
+    X_REPLY_FIELD_CARD32(overlayWin);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -745,9 +741,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
-    if (client->swapped) {
-        swapl(&reply.overlayWin);
-    }
+    X_REPLY_FIELD_CARD32(overlayWin);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 #else

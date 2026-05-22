@@ -740,8 +740,10 @@ ProcRenderCreateGlyphSet(ClientPtr client)
     /* security creation/labeling check */
     rc = XaceHookResourceAccess(client, stuff->gsid, GlyphSetType,
                   glyphSet, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (rc != Success)
+    if (rc != Success) {
+        FreeGlyphSet(glyphSet, (XID) 0);
         return rc;
+    }
     if (!AddResource(stuff->gsid, GlyphSetType, (void *) glyphSet))
         return BadAlloc;
     return Success;
@@ -1474,17 +1476,11 @@ ProcRenderCreateCursor(ClientPtr client)
                          GetColor(twocolor[1], 0),
                          &pCursor, client, stuff->cid);
     if (rc != Success)
-        goto bail;
-    if (!AddResource(stuff->cid, X11_RESTYPE_CURSOR, (void *) pCursor)) {
-        rc = BadAlloc;
-        goto bail;
-    }
+        return rc;
+    if (!AddResource(stuff->cid, X11_RESTYPE_CURSOR, (void *) pCursor))
+        return BadAlloc;
 
     return Success;
- bail:
-    free(srcbits);
-    free(mskbits);
-    return rc;
 }
 
 static int
@@ -1703,8 +1699,10 @@ SingleRenderCreateSolidFill(ClientPtr client, xRenderCreateSolidFillReq *stuff)
     /* security creation/labeling check */
     error = XaceHookResourceAccess(client, stuff->pid, PictureType,
                      pPicture, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (error != Success)
+    if (error != Success) {
+        FreePicture(pPicture, (XID) 0);
         return error;
+    }
     if (!AddResource(stuff->pid, PictureType, (void *) pPicture))
         return BadAlloc;
     return Success;
@@ -1738,8 +1736,10 @@ SingleRenderCreateLinearGradient(ClientPtr client, xRenderCreateLinearGradientRe
     /* security creation/labeling check */
     error = XaceHookResourceAccess(client, stuff->pid, PictureType,
                      pPicture, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (error != Success)
+    if (error != Success) {
+        FreePicture(pPicture, (XID) 0);
         return error;
+    }
     if (!AddResource(stuff->pid, PictureType, (void *) pPicture))
         return BadAlloc;
     return Success;
@@ -1775,8 +1775,10 @@ SingleRenderCreateRadialGradient(ClientPtr client,
     /* security creation/labeling check */
     error = XaceHookResourceAccess(client, stuff->pid, PictureType,
                      pPicture, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (error != Success)
+    if (error != Success) {
+        FreePicture(pPicture, (XID) 0);
         return error;
+    }
     if (!AddResource(stuff->pid, PictureType, (void *) pPicture))
         return BadAlloc;
     return Success;
@@ -1811,8 +1813,10 @@ SingleRenderCreateConicalGradient(ClientPtr client,
     /* security creation/labeling check */
     error = XaceHookResourceAccess(client, stuff->pid, PictureType,
                      pPicture, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (error != Success)
+    if (error != Success) {
+        FreePicture(pPicture, (XID) 0);
         return error;
+    }
     if (!AddResource(stuff->pid, PictureType, (void *) pPicture))
         return BadAlloc;
     return Success;

@@ -31,9 +31,9 @@
  */
 #include <dix-config.h>
 
-#include "glamor_priv.h"
+#include "include/mipict.h"
 
-#include "mipict.h"
+#include "glamor_priv.h"
 #include "fbpict.h"
 
 /**

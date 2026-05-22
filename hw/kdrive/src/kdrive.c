@@ -150,7 +150,7 @@ KdDoSwitchCmd(const char *reason)
     }
 }
 
-void KdSuspend(void)
+void KdSuspend(int ddxAbort)
 {
     KdCardInfo *card;
     KdScreenInfo *screen;
@@ -163,14 +163,16 @@ void KdSuspend(void)
             if (card->driver && card->cfuncs->restore)
                 (*card->cfuncs->restore) (card);
         }
-        KdDisableInput();
+        if (!ddxAbort) {
+            KdDisableInput();
+        }
         KdDoSwitchCmd("suspend");
     }
 }
 
-void KdDisableScreens(void)
+void KdDisableScreens(int ddxAbort)
 {
-    KdSuspend();
+    KdSuspend(ddxAbort);
     if (kdEnabled && (kdOsFuncs->Disable))
         kdOsFuncs->Disable();
     kdEnabled = FALSE;
@@ -236,7 +238,7 @@ void
 KdProcessSwitch(void)
 {
     if (kdEnabled)
-        KdDisableScreens();
+        KdDisableScreens(FALSE);
     else
         KdEnableScreens();
 }
@@ -244,7 +246,7 @@ KdProcessSwitch(void)
 static void
 AbortDDX(enum ExitCode error)
 {
-    KdDisableScreens();
+    KdDisableScreens(TRUE);
     if (kdOsFuncs) {
         if (kdEnabled && kdOsFuncs->Disable)
             (*kdOsFuncs->Disable) ();
@@ -476,22 +478,19 @@ KdProcessArgument(int argc, char **argv, int i)
     KdScreenInfo *screen;
 
     if (!strcmp(argv[i], "-screen")) {
-        if ((i + 1) < argc) {
+        char *screen_arg = ((i + 1) < argc && argv[i + 1][0] != '-') ? argv[i + 1] : NULL;
+        card = KdCardInfoLast();
+        if (!card) {
+            InitCard(0);
             card = KdCardInfoLast();
-            if (!card) {
-                InitCard(0);
-                card = KdCardInfoLast();
-            }
-            if (card) {
-                screen = KdScreenInfoAdd(card);
-                KdParseScreen(screen, argv[i + 1]);
-            }
-            else
-                ErrorF("No matching card found!\n");
         }
-        else
-            UseMsg();
-        return 2;
+        if (card) {
+            screen = KdScreenInfoAdd(card);
+            KdParseScreen(screen, screen_arg);
+        } else {
+            ErrorF("No matching card found!\n");
+        }
+        return screen_arg ? 2 : 1;
     }
     if (!strcmp(argv[i], "-zaphod")) {
         kdDisableZaphod = TRUE;

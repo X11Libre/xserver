@@ -3357,8 +3357,7 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
         pSprite->pDequeueScreen = pSprite->pEnqueueScreen;
     }
     pCursor = RefCursor(pCursor);
-    if (pSprite->current)
-        FreeCursor(pSprite->current, None);
+    FreeCursor(pSprite->current, None);
     pSprite->current = pCursor;
 
     if (pScreen) {
@@ -3393,8 +3392,7 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
 void FreeSprite(DeviceIntPtr dev)
 {
     if (DevHasCursor(dev) && dev->spriteInfo->sprite) {
-        if (dev->spriteInfo->sprite->current)
-            FreeCursor(dev->spriteInfo->sprite->current, None);
+        FreeCursor(dev->spriteInfo->sprite->current, None);
         free(dev->spriteInfo->sprite->spriteTrace);
         free(dev->spriteInfo->sprite);
     }
@@ -3440,8 +3438,7 @@ UpdateSpriteForScreen(DeviceIntPtr pDev, ScreenPtr pScreen)
     pSprite->hotLimits.y2 = pScreen->height;
     pSprite->win = win;
     pCursor = RefCursor(wCursor(win));
-    if (pSprite->current)
-        FreeCursor(pSprite->current, 0);
+    FreeCursor(pSprite->current, 0);
     pSprite->current = pCursor;
     pSprite->spriteTraceGood = 1;
     pSprite->spriteTrace[0] = win;
@@ -4930,9 +4927,12 @@ SetInputFocus(ClientPtr client,
         for (WindowPtr pWin = focusWin; pWin; pWin = pWin->parent)
             depth++;
         if (depth > focus->traceSize) {
-            focus->traceSize = depth + 1;
-            focus->trace = reallocarray(focus->trace, focus->traceSize,
-                                        sizeof(WindowPtr));
+            const size_t num = depth+1;
+            WindowPtr *wins = reallocarray(focus->trace, num, sizeof(WindowPtr));
+            if (!wins)
+                return BadAlloc;
+            focus->traceSize = num;
+            focus->trace = wins;
         }
         focus->traceGood = depth;
         depth--;
@@ -5109,8 +5109,7 @@ ProcChangeActivePointerGrab(ClientPtr client)
     oldCursor = grab->cursor;
     grab->cursor = RefCursor(newCursor);
     PostNewCursor(device);
-    if (oldCursor)
-        FreeCursor(oldCursor, (Cursor) 0);
+    FreeCursor(oldCursor, (Cursor) 0);
     grab->eventMask = stuff->eventMask;
     return Success;
 }

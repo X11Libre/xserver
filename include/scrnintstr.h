@@ -681,6 +681,8 @@ typedef struct _Screen {
     XYToWindowProcPtr XYToWindow;
     DPMSProcPtr DPMS;
 
+    /* ===== below here is PRIVATE ==== drivers MUST NEVER touch it ===== */
+
     /* additional window destructors (replaces wrapping DestroyWindow).
        should NOT be touched outside of DIX core */
     CallbackListPtr hookWindowDestroy;

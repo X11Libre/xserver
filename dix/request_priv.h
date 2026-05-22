@@ -157,4 +157,22 @@ static inline int __write_reply_hdr_simple(
     CARD32 *request_rest = (CARD32 *) (&stuff[1]); \
     do { if (client->swapped) SwapLongs(request_rest, count); } while (0) \
 
+/*
+ * macros for request handlers
+ *
+ * these are handling reply struct field byte-swapping if necessary
+ */
+
+/* swap a CARD16 field (if necessary) in reply struct */
+#define X_REPLY_FIELD_CARD16(field) \
+    do { if (client->swapped) swaps(&reply.field); } while (0)
+
+/* swap a CARD32 field (if necessary) in reply struct */
+#define X_REPLY_FIELD_CARD32(field) \
+    do { if (client->swapped) swapl(&reply.field); } while (0)
+
+/* swap a CARD64 field (if necessary) in reply struct */
+#define X_REPLY_FIELD_CARD64(field) \
+    do { if (client->swapped) swapll(&reply.field); } while (0)
+
 #endif /* _XSERVER_DIX_REQUEST_PRIV_H */

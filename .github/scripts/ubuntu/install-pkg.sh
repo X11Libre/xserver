@@ -13,8 +13,6 @@ EPHEMERAL="
 	xvfb
 "
 
-apt-get update
-
 apt-get install -y \
 	$EPHEMERAL \
 	autoconf \
@@ -38,7 +36,6 @@ apt-get install -y \
 	libglx-mesa0 \
 	libinput10 \
 	libinput-dev \
-	libnvidia-egl-wayland-dev \
 	libpciaccess-dev \
 	libpixman-1-dev \
 	libspice-protocol-dev \
@@ -93,4 +90,6 @@ apt-get install -y \
 	xutils-dev \
 	libxaw7-dev \
 	python3-mako \
-	libxcvt-dev
+	libxcvt-dev \
+	git \
+	sudo

@@ -14,7 +14,7 @@ cat > sdksyms.c << EOF
 
 /* render/Makefile.am */
 #include "picture.h"
-#include "mipict.h"
+#include "include/mipict.h"
 #include "glyphstr.h"
 #include "picturestr.h"
 
@@ -209,7 +209,6 @@ cat > sdksyms.c << EOF
 
 /* include/Makefile.am */
 #include "Xprintf.h"
-#include "closure.h"
 #include "colormap.h"
 #include "colormapst.h"
 #include "cursor.h"

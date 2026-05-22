@@ -12,7 +12,10 @@
 #define _XLIBRE_SDK_PTRTYPES_H
 
 struct _Client;
+#ifndef _XTYPEDEF_CLIENTPTR
 typedef struct _Client *ClientPtr;
+#  define _XTYPEDEF_CLIENTPTR
+#endif
 typedef struct _Client ClientRec;
 
 struct _ClientId;

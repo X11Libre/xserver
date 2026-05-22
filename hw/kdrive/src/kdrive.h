@@ -63,6 +63,7 @@ typedef struct _KdCardInfo {
     void *driver;
     struct _KdScreenInfo *screenList;
     int selected;
+    int mynum;
     struct _KdCardInfo *next;
 } KdCardInfo;
 
@@ -380,14 +381,14 @@ void KdSetColormap(ScreenPtr pScreen);
 /* kdrive.c */
 extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
-void KdSuspend(void);
+void KdSuspend(int ddxAbort);
 
 void KdInitScreen(KdScreenInfo * screen, int argc, char **argv);
 
 void
  KdDisableScreen(ScreenPtr pScreen);
 
-void KdDisableScreens(void);
+void KdDisableScreens(int ddxAbort);
 
 Bool
  KdEnableScreen(ScreenPtr pScreen);

@@ -327,7 +327,6 @@ _X_EXPORT Bool glamor_get_drawable_modifiers(DrawablePtr draw,
 extern _X_EXPORT void glamor_set_drawable_modifiers_func(ScreenPtr screen,
                                                          GetDrawableModifiersFuncPtr func);
 
-#ifdef GLAMOR_FOR_XORG
 
 #define GLAMOR_EGL_MODULE_NAME  "glamoregl"
 
@@ -341,6 +340,35 @@ extern _X_EXPORT void glamor_set_drawable_modifiers_func(ScreenPtr screen,
  * Return TRUE if success, otherwise return FALSE.
  * */
 extern _X_EXPORT Bool glamor_egl_init(ScrnInfoPtr scrn, int fd);
+
+enum {
+    GLAMOR_EGL_CAP_NONE = 0,
+    GLAMOR_EGL_CAP_DRI3 = 1 << 0,
+    GLAMOR_EGL_CAP_DRI3_IMPORT = 1 << 1,
+    GLAMOR_EGL_CAP_DRI3_EXPORT = 1 << 2,
+    GLAMOR_EGL_CAP_DRI3_SYNCOBJ = 1 << 3,
+    GLAMOR_EGL_CAP_TEXTURE_GBM_BO = 1 << 4,
+};
+
+#define GLAMOR_EGL_DEFAULT_CAPS (GLAMOR_EGL_CAP_DRI3 | GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT | GLAMOR_EGL_CAP_TEXTURE_GBM_BO)
+
+/* @glamor_egl_init2: Initialize EGL environment.
+ *
+ * @scrn:        Current screen info pointer.
+ * @fd:          Current drm fd.
+ * @caps:        Some capabilities that glamor can have
+ *
+ * This function creates and initializes EGL contexts.
+ * Should be called from DDX's preInit function.
+ * Return TRUE if success, otherwise return FALSE.
+ *
+ * Unlike glamor_egl_init, this function returns true
+ * even if some capabilities are missing.
+ *
+ * If caps is not NULL, it is set to a bitmask
+ * describing what glamor capabilites are available.
+ * */
+extern _X_EXPORT Bool glamor_egl_init2(ScrnInfoPtr scrn, int fd, int *caps, int flags);
 
 extern _X_EXPORT Bool glamor_egl_init_textured_pixmap(ScreenPtr screen);
 
@@ -375,7 +403,6 @@ extern _X_EXPORT Bool
 
 extern _X_EXPORT const char *glamor_egl_get_driver_name(ScreenPtr screen);
 
-#endif
 
 extern _X_EXPORT int glamor_create_gc(GCPtr gc);
 

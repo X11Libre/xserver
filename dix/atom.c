@@ -75,11 +75,8 @@ static NodePtr *nodeTable;
 Atom
 MakeAtom(const char *string, unsigned len, Bool makeit)
 {
-    NodePtr *np;
-    int comp;
+    NodePtr *np = &atomRoot;
     unsigned int fp = 0;
-
-    np = &atomRoot;
     for (unsigned int i = 0; i < (len + 1) / 2; i++) {
         fp = fp * 27 + (unsigned int)string[i];
         fp = fp * 27 + (unsigned int)string[len - 1 - i];
@@ -90,7 +87,7 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         else if (fp > (*np)->fingerPrint)
             np = &((*np)->right);
         else {                  /* now start testing the strings */
-            comp = strncmp(string, (*np)->string, len);
+            int comp = strncmp(string, (*np)->string, len);
             if ((comp < 0) || ((comp == 0) && (len < strlen((*np)->string))))
                 np = &((*np)->left);
             else if (comp > 0)
@@ -148,13 +145,13 @@ ValidAtom(Atom atom)
 const char *
 NameForAtom(Atom atom)
 {
-    NodePtr node;
-
     if (atom > lastAtom)
         return 0;
-    if ((node = nodeTable[atom]) == NULL)
+
+    if (nodeTable[atom] == NULL)
         return 0;
-    return node->string;
+
+    return nodeTable[atom]->string;
 }
 
 static void

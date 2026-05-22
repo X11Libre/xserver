@@ -1,0 +1,282 @@
+.\" $Id: xvfb-run.1 2138 2005-01-17 23:40:27Z branden $
+.\"
+.\" Copyright 1998-2004 Branden Robinson <branden@debian.org>.
+.\"
+.\" This is free software; you may redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2,
+.\" or (at your option) any later version.
+.\"
+.\" This is distributed in the hope that it will be useful, but
+.\" WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License with
+.\" the Debian operating system, in /usr/share/common-licenses/GPL;  if
+.\" not, write to the Free Software Foundation, Inc., 59 Temple Place,
+.\" Suite 330, Boston, MA 02111-1307 USA
+.\"
+.\" We need the URL macro from groff's www macro package, but also want
+.\" things to work all right for people who don't have it.  So we define
+.\" our own URL macro and let the www macro package override it if it's
+.\" available.
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+.if \n[.g] .mso www.tmac
+.TH xvfb\-run 1 "2004\-11\-12" "Debian Project"
+.SH NAME
+xvfb\-run \- run specified X client or command in a virtual X server environment
+.SH SYNOPSIS
+.B xvfb\-run
+[
+.I options
+]
+.I command
+.SH DESCRIPTION
+.B xvfb\-run
+is a wrapper for the
+.BR Xvfb (1x)
+command which simplifies the task of running commands (typically an X
+client, or a script containing a list of clients to be run) within a virtual
+X server environment.
+.PP
+.B xvfb\-run
+sets up an X authority file (or uses an existing user\-specified one),
+writes a cookie to it (see
+.BR xauth (1x))
+and then starts the
+.B Xvfb
+X server as a background process.
+The process ID of
+.B Xvfb
+is stored for later use.
+The specified
+.I command
+is then run using the X display corresponding to the
+.B Xvfb
+server
+just started and the X authority file created earlier.
+.PP
+When the
+.I command
+exits, its status is saved, the
+.B Xvfb
+server is killed (using the process ID stored earlier), the X authority
+cookie removed, and the authority file deleted (if the user did not specify
+one to use).
+.B xvfb\-run
+then exits with the exit status of
+.IR command .
+.PP
+.B xvfb\-run
+requires the
+.B xauth
+command to function.
+.SH OPTIONS
+.TP
+.B \-a\fR,\fB \-\-auto\-servernum
+Try to get a free server number, starting at 99, or the argument to
+.BR \-\-server\-num .
+.TP
+.BI \-e\  file \fR,\fB\ \-\-error\-file= file
+Store output from
+.B xauth
+and
+.B Xvfb
+in
+.IR file .
+The default is
+.IR /dev/null .
+.TP
+.BI \-f\  file \fR,\fB\ \-\-auth\-file= file
+Store X authentication data in
+.IR file .
+By default, a temporary directory called
+.IR xvfb\-run. PID
+(where PID is the process ID of
+.B xvfb\-run
+itself) is created in the directory specified by the environment variable
+.B TMPDIR
+(or
+.I /tmp
+if that variable is null or unset), and the
+.BR tempfile (1)
+command is used to create a file in that temporary directory called
+.IR Xauthority .
+.TP
+.B \-h\fR,\fB \-\-help
+Display a usage message and exit.
+.TP
+.BI \-n\  servernumber \fR,\fB\ \-\-server\-num= servernumber
+Use
+.I servernumber
+as the server number (but see the
+.B \-a\fR,\fB \-\-auto\-servernum
+option above).
+The default is 99.
+.TP
+.B \-l\fR,\fB \-\-listen\-tcp
+Enable TCP port listening in the X server.
+For security reasons (to avoid denial\-of\-service attacks or exploits),
+TCP port listening is disabled by default.
+.TP
+.BI \-p\  protocolname \fR,\fB\ \-\-xauth\-protocol= protocolname
+Use
+.I protocolname
+as the X authority protocol to use.
+The default is \(oq.\(cq, which
+.B xauth
+interprets as its own default protocol, which is MIT\-MAGIC\-COOKIE\-1.
+.TP
+.BI \-s\  arguments \fR,\fB\ \-\-server\-args= arguments
+Pass
+.I arguments
+to the
+.B Xvfb
+server.
+Be careful to quote any whitespace characters that may occur within
+.I arguments
+to prevent them from regarded as separators for
+.BR xvfb\-run 's
+own arguments.
+Also, note that specification of \(oq\-nolisten tcp\(cq in
+.I arguments
+may override the function of
+.BR xvfb\-run 's
+own
+.B \-l\fR,\fB \-\-listen\-tcp
+option, and that specification of the server number (e.g., \(oq:1\(cq) may
+be ignored because of the way the X server parses its argument list.
+Use the
+.B xvfb\-run
+option
+.BI \-n\  servernumber \fR,\fB\ \-\-server\-num= servernumber
+to achieve the latter function.
+The default is \(oq\-screen 0 640x480x8\(cq.
+.TP
+.BI \-w\  delay \fR,\fB\ \-\-wait= delay
+Wait
+.I delay
+seconds after launching
+.B Xvfb
+before attempting to start the specified command.
+The default is 3.
+.SH ENVIRONMENT
+.TP
+.B COLUMNS
+indicates the width of the terminal device in character cells.
+This value is used for formatting diagnostic messages.
+If not set, the terminal is queried using
+.BR stty (1)
+to determine its width.
+If that fails, a value of \(oq80\(cq is assumed.
+.TP
+.B TMPDIR
+specifies the directory in which to place
+.BR xvfb\-run 's
+temporary directory for storage of the X authority file; only used if the
+.B \-f
+or
+.B \-\-auth\-file
+options are not specified.
+.SH "OUTPUT FILES"
+.PP
+Unless the
+.B \-f
+or
+.B \-\-auth\-file
+options are specified, a temporary
+directory and file within it are created (and deleted) to store the X
+authority cookies used by the
+.B Xvfb
+server and client(s) run under it.
+See
+.BR tempfile (1).
+If \-f or \-\-auth\-file are used, then the specified X authority file is
+only written to, not created or deleted (though
+.B xauth
+creates an authority file itself if told to use use that does not already
+exist).
+.PP
+An error file with a user\-specified name is also created if the
+.B \-e
+or
+.B \-\-error\-file
+options are specifed; see above.
+.SH "EXIT STATUS"
+.B xvfb\-run
+uses its exit status as well as output to standard error to communicate
+diagnostics.
+The exit status of \(oq1\(cq is not used, and should be interpreted as failure
+of the specified command.
+.TP
+0
+.B xvfb\-run
+only uses this exit status if the
+.B \-h\fR,\fB \-\-help
+option is given.
+In all other situations, this may be interpreted as success of the specified
+command.
+.TP
+2
+No command to run was specified.
+.TP
+3
+The
+.B xauth
+command is not available.
+.TP
+4
+The temporary directory that was going to be used already exists; since
+.B xvfb\-run
+produces a uniquely named directory, this may indicate an attempt by another
+process on the system to exploit a temporary file race condition.
+.TP
+5
+A problem was encountered while cleaning up the temporary directory.
+.TP
+6
+A problem was encountered while using
+.BR getopt (1)
+to parse the command\-line arguments.
+.SH EXAMPLES
+.TP
+.B xvfb\-run \-\-auto\-servernum \-\-server\-num=1 xlogo
+runs the
+.BR xlogo (1x)
+demonstration client inside the
+.B Xvfb
+X server on the first available server number greater than or equal to 1.
+.TP
+.B xvfb\-run \-\-server\-args="\-screen 0 1024x768x24" ico \-faces
+runs the
+.BR ico (1x)
+demonstration client (and passes it the
+.B \-faces
+argument) inside the
+.B Xvfb
+X server, configured with a root window of 1024 by 768 pixels and a color
+depth of 24 bits.
+.PP
+Note that the demo X clients used in the above examples will not exit on
+their own, so they will have to be killed before
+.B xvfb\-run
+will exit.
+.SH BUGS
+See
+.URL "http://bugs.debian.org/xvfb" "the Debian Bug Tracking System" .
+If you wish to report a bug in
+.BR xvfb\-run ,
+please use the 
+.BR reportbug (1)
+command.
+.SH AUTHOR
+.B xfvb\-run
+was written by Branden Robinson and Jeff Licquia with sponsorship from
+Progeny Linux Systems.
+.SH "SEE ALSO"
+.BR Xvfb (1x),
+.BR xauth (1x)
+.\" vim:set et tw=80:

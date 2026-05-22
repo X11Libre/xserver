@@ -1916,6 +1916,7 @@ KdKeyCodeToKeySym(KdKeyboardInfo *ki, int type, unsigned char key_code)
      * return kbd->key->xkbInfo->desc->map->modmap[key_code];
      *
      * Scancodes are taken from https://aeb.win.tue.nl/linux/kbd/scancodes-1.html
+     * These scancodes can be also found at https://wiki.osdev.org/PS/2_Keyboard
      *
      * Only a few keys we are interested in are listed here.
      * If we ever need more keys, we can add them later.
@@ -1932,6 +1933,8 @@ KdKeyCodeToKeySym(KdKeyboardInfo *ki, int type, unsigned char key_code)
 #define KEY_F8 0x42
 #define KEY_F9 0x43
 #define KEY_F10 0x44
+#define KEY_F11 0x57
+#define KEY_F12 0x58
 
 /**
  * The driver doesn't differentiate between E0 53 and 53,
@@ -1962,6 +1965,10 @@ KdKeyCodeToKeySym(KdKeyboardInfo *ki, int type, unsigned char key_code)
             return XK_F9;
         case KEY_F10:
             return XK_F10;
+        case KEY_F11:
+            return XK_F11;
+        case KEY_F12:
+            return XK_F12;
 #if 0 /* Doesn't work from my testing */
         case KEY_DEL:
             return XK_Delete;

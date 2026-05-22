@@ -34,13 +34,8 @@ from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "include/extnsionst.h"
 #include "miext/extinit_priv.h"
-
-#include "misc.h"
-#include "os.h"
-#include "dixstruct.h"
-#include "extnsionst.h"
-#include "opaque.h"
 
 static int
 ProcBigReqDispatch(ClientPtr client)
@@ -56,9 +51,8 @@ ProcBigReqDispatch(ClientPtr client)
     xBigReqEnableReply reply = {
         .max_request_size = maxBigRequestSize
     };
-    if (client->swapped) {
-        swapl(&reply.max_request_size);
-    }
+
+    X_REPLY_FIELD_CARD32(max_request_size);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }

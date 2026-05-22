@@ -262,9 +262,7 @@ FreeGrab(GrabPtr pGrab)
 
     free(pGrab->modifiersDetail.pMask);
     free(pGrab->detail.pMask);
-
-    if (pGrab->cursor)
-        FreeCursor(pGrab->cursor, (Cursor) 0);
+    FreeCursor(pGrab->cursor, (Cursor) 0);
 
     xi2mask_free(&pGrab->xi2mask);
     free(pGrab);

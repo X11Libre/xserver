@@ -311,8 +311,7 @@ ProcXGetFeedbackControl(ClientPtr client)
     for (b = dev->bell; b; b = b->next)
         CopySwapBellFeedback(client, b, &buf);
 
-    if (client->swapped) {
-        swaps(&reply.num_feedbacks);
-    }
+    X_REPLY_FIELD_CARD16(num_feedbacks);
+
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

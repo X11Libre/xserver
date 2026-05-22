@@ -118,7 +118,7 @@ XkbVModIndexText(XkbDescPtr xkb, unsigned ndx, unsigned format)
     register Atom *vmodNames;
     char *rtrn;
     const char *tmp;
-    char numBuf[20];
+    char numBuf[20] = { 0 };
 
     if (xkb && xkb->names)
         vmodNames = xkb->names->vmods;
@@ -157,7 +157,7 @@ XkbVModMaskText(XkbDescPtr xkb,
     register int i, bit;
     int len;
     char *mm, *rtrn;
-    char *str, buf[VMOD_BUFFER_SIZE];
+    char *str, buf[VMOD_BUFFER_SIZE] = { 0 };
 
     if ((modMask == 0) && (mask == 0)) {
         const int rtrnsize = 5;
@@ -242,7 +242,7 @@ static const char *modNames[XkbNumModifiers] = {
 char *
 XkbModIndexText(unsigned ndx, unsigned format)
 {
-    char buf[100];
+    char buf[100] = { 0 };
 
     if (format == XkbCFile) {
         if (ndx < XkbNumModifiers)
@@ -267,7 +267,8 @@ char *
 XkbModMaskText(unsigned mask, unsigned format)
 {
     register int i, bit;
-    char buf[64], *rtrn;
+    char buf[64] = { 0 };
+    char *rtrn;
 
     if ((mask & 0xff) == 0xff) {
         if (format == XkbCFile)
@@ -359,7 +360,7 @@ XkbConfigText(unsigned config, unsigned format)
 char *
 XkbKeysymText(KeySym sym, unsigned format)
 {
-    static char buf[32];
+    static char buf[32] = { 0 };
 
     if (sym == NoSymbol)
         strcpy(buf, "NoSymbol");
@@ -401,7 +402,7 @@ static const char *siMatchText[5] = {
 const char *
 XkbSIMatchText(unsigned type, unsigned format)
 {
-    static char buf[40];
+    static char buf[40] = { 0 };
     const char *rtrn;
 
     switch (type & XkbSI_OpMask) {
@@ -711,7 +712,7 @@ static const char *actionTypeNames[XkbSA_NumActions] = {
 const char *
 XkbActionTypeText(unsigned type, unsigned format)
 {
-    static char buf[32];
+    static char buf[32] = { 0 };
     const char *rtrn;
 
     if (type <= XkbSA_LastAction) {
@@ -781,7 +782,7 @@ CopyModActionArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 CopyGroupActionArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbGroupAction *act;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->group;
     TryCopyStr(buf, "group=", sz);
@@ -806,7 +807,7 @@ CopyMovePtrArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbPtrAction *act;
     int x, y;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->ptr;
     x = XkbPtrActionX(act);
@@ -831,7 +832,7 @@ CopyMovePtrArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 CopyPtrBtnArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbPtrBtnAction *act;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->btn;
     TryCopyStr(buf, "button=", sz);
@@ -868,7 +869,7 @@ CopyPtrBtnArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 CopySetPtrDfltArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbPtrDfltAction *act;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->dflt;
     if (act->affect == XkbSA_AffectDfltBtn) {
@@ -887,9 +888,8 @@ static Bool
 CopyISOLockArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbISOAction *act;
-    char tbuf[64];
+    char tbuf[64] = { 0 };
 
-    memset(tbuf, 0, sizeof(tbuf));
     act = &action->iso;
     if (act->flags & XkbSA_ISODfltIsGroup) {
         TryCopyStr(tbuf, "group=", sz);
@@ -953,7 +953,7 @@ CopyISOLockArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 CopySwitchScreenArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbSwitchScreenAction *act;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->screen;
     if ((act->flags & XkbSA_SwitchAbsolute) || (XkbSAScreen(act) < 0))
@@ -973,7 +973,7 @@ CopySetLockControlsArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbCtrlsAction *act;
     unsigned tmp;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->ctrls;
     tmp = XkbActionCtrls(act);
@@ -1064,7 +1064,7 @@ CopyActionMessageArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbMessageAction *act;
     unsigned all;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->msg;
     all = XkbSA_MessageOnPress | XkbSA_MessageOnRelease;
@@ -1096,7 +1096,8 @@ static Bool
 CopyRedirectKeyArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbRedirectKeyAction *act;
-    char tbuf[32], *tmp;
+    char tbuf[32] = { 0 };
+    char *tmp;
     unsigned kc;
     unsigned vmods, vmods_mask;
 
@@ -1143,7 +1144,7 @@ CopyRedirectKeyArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 CopyDeviceBtnArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbDeviceBtnAction *act;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->devbtn;
     snprintf(tbuf, sizeof(tbuf), "device= %d", act->device);
@@ -1178,7 +1179,7 @@ CopyDeviceBtnArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 CopyOtherArgs(XkbDescPtr xkb, XkbAction *action, char *buf, int *sz)
 {
     XkbAnyAction *act;
-    char tbuf[32];
+    char tbuf[32] = { 0 };
 
     act = &action->any;
     snprintf(tbuf, sizeof(tbuf), "type=0x%02x", act->type);
@@ -1234,7 +1235,7 @@ static actionCopy copyActionArgs[XkbSA_NumActions] = {
 char *
 XkbActionText(XkbDescPtr xkb, XkbAction *action, unsigned format)
 {
-    char buf[ACTION_SZ];
+    char buf[ACTION_SZ] = { 0 };
     int sz;
 
     if (format == XkbCFile) {
@@ -1261,7 +1262,7 @@ XkbActionText(XkbDescPtr xkb, XkbAction *action, unsigned format)
 char *
 XkbBehaviorText(XkbDescPtr xkb, XkbBehavior * behavior, unsigned format)
 {
-    char buf[256];
+    char buf[256] = { 0 };
 
     if (format == XkbCFile) {
         if (behavior->type == XkbKB_Default)
@@ -1326,7 +1327,7 @@ XkbBehaviorText(XkbDescPtr xkb, XkbBehavior * behavior, unsigned format)
 char *
 XkbIndentText(unsigned size)
 {
-    static char buf[32];
+    static char buf[32] = { 0 };
     register int i;
 
     if (size > 31)

@@ -21,14 +21,13 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-
 #include <dix-config.h>
 
 #include <stdlib.h>
 
-#include "exa_priv.h"
+#include "include/mipict.h"
 
-#include "mipict.h"
+#include "exa_priv.h"
 
 #if DEBUG_TRACE_FALL
 static void

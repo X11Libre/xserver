@@ -388,6 +388,22 @@ if build_glamor
     epoxy_dep = dependency('epoxy', required: false)
 endif
 
+gbm_option = get_option('gbm')
+if gbm_option == 'auto'
+    build_gbm = gbm_dep.found()
+else
+    build_gbm = (gbm_option == 'true')
+endif
+
+if build_gbm and not gbm_dep.found()
+    error('libgbm support requested, but libgbm is not available')
+endif
+
+# Don't even link to libgbm
+if not build_gbm
+    gbm_dep = dependency('', required: false)
+endif
+
 # Lots of sha1 options, because Linux is about choice :)
 
 # The idea behind the ordering here is that we should first prefer system
@@ -548,7 +564,7 @@ if not libdrm_dep.found() and libdrm_required
     error('DRI requested, but LIBDRM not found')
 endif
 
-build_modesetting = libdrm_dep.found() and dri2proto_dep.found() and gbm_dep.found()
+build_modesetting = libdrm_dep.found() and dri2proto_dep.found() and build_gbm
 
 build_vgahw = false
 if get_option('vgahw') == 'auto'

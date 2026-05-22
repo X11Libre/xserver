@@ -212,13 +212,13 @@ GetCurrentClient(void)
 void
 UpdateCurrentTime(void)
 {
-    TimeStamp systime;
-
     /* To avoid time running backwards, we must call GetTimeInMillis before
      * calling ProcessInputEvents.
      */
-    systime.months = currentTime.months;
-    systime.milliseconds = GetTimeInMillis();
+    TimeStamp systime = {
+        .months = currentTime.months,
+        .milliseconds = GetTimeInMillis(),
+    };
     if (systime.milliseconds < currentTime.milliseconds)
         systime.months++;
     if (InputCheckPending())
@@ -231,10 +231,10 @@ UpdateCurrentTime(void)
 void
 UpdateCurrentTimeIf(void)
 {
-    TimeStamp systime;
-
-    systime.months = currentTime.months;
-    systime.milliseconds = GetTimeInMillis();
+    TimeStamp systime = {
+        .months = currentTime.months,
+        .milliseconds = GetTimeInMillis(),
+    };
     if (systime.milliseconds < currentTime.milliseconds)
         systime.months++;
     if (CompareTimeStamps(systime, currentTime) == LATER)
@@ -336,13 +336,10 @@ static ClientPtr
 SmartScheduleClient(void)
 {
     ClientPtr pClient, best = NULL;
-    int bestRobin, robin;
     long now = SmartScheduleTime;
-    long idle;
     int nready = 0;
-
-    bestRobin = 0;
-    idle = 2 * SmartScheduleSlice;
+    int bestRobin = 0;
+    long idle = 2 * SmartScheduleSlice;
 
     xorg_list_for_each_entry(pClient, &ready_clients, ready) {
         nready++;
@@ -354,7 +351,7 @@ SmartScheduleClient(void)
         }
 
         /* check priority to select best client */
-        robin =
+        int robin =
             (pClient->index -
              SmartLastIndex[pClient->smart_priority -
                             SMART_MIN_PRIORITY]) & 0xff;
@@ -478,10 +475,6 @@ DisableLimitedSchedulingLatency(void)
 void
 Dispatch(void)
 {
-    int result;
-    ClientPtr client;
-    long start_tick;
-
     nextFreeClientID = 1;
     nClients = 0;
 
@@ -503,11 +496,11 @@ Dispatch(void)
          *****************/
 
         if (!dispatchException && clients_are_ready()) {
-            client = SmartScheduleClient();
+            ClientPtr client = SmartScheduleClient();
 
             isItTimeToYield = FALSE;
 
-            start_tick = SmartScheduleTime;
+            long start_tick = SmartScheduleTime;
             while (!isItTimeToYield) {
                 if (InputCheckPending())
                     ProcessInputEvents();
@@ -547,6 +540,7 @@ Dispatch(void)
                                           client->index,
                                           client->requestBuffer);
 #endif
+                int result;
                 if (read_result < 0 || read_result > (maxBigRequestSize << 2))
                     result = BadLength;
                 else {
@@ -734,18 +728,17 @@ CreateConnectionBlock(void)
 
 int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids)
 {
-    WindowPtr pParent, pWin;
-    int rc;
-
     LEGAL_NEW_RESOURCE(stuff->wid, client);
-    rc = dixLookupWindow(&pParent, stuff->parent, client, DixAddAccess);
+
+    WindowPtr pParent;
+    int rc = dixLookupWindow(&pParent, stuff->parent, client, DixAddAccess);
     if (rc != Success)
         return rc;
     if (!stuff->width || !stuff->height) {
         client->errorValue = 0;
         return BadValue;
     }
-    pWin = dixCreateWindow(stuff->wid, pParent, stuff->x,
+    WindowPtr pWin = dixCreateWindow(stuff->wid, pParent, stuff->x,
                         stuff->y, stuff->width, stuff->height,
                         stuff->borderWidth, stuff->class,
                         stuff->mask, (XID *) xids,
@@ -777,19 +770,16 @@ ProcCreateWindow(ClientPtr client)
 int
 ProcChangeWindowAttributes(ClientPtr client)
 {
-    WindowPtr pWin;
-
     REQUEST(xChangeWindowAttributesReq);
-    int len, rc;
-    Mask access_mode = 0;
-
     REQUEST_AT_LEAST_SIZE(xChangeWindowAttributesReq);
-    access_mode |= (stuff->valueMask & CWEventMask) ? DixReceiveAccess : 0;
+    Mask access_mode = (stuff->valueMask & CWEventMask) ? DixReceiveAccess : 0;
     access_mode |= (stuff->valueMask & ~CWEventMask) ? DixSetAttrAccess : 0;
-    rc = dixLookupWindow(&pWin, stuff->window, client, access_mode);
+
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->window, client, access_mode);
     if (rc != Success)
         return rc;
-    len = client->req_len - bytes_to_int32(sizeof(xChangeWindowAttributesReq));
+    int len = client->req_len - bytes_to_int32(sizeof(xChangeWindowAttributesReq));
     if (len != Ones(stuff->valueMask))
         return BadLength;
     return ChangeWindowAttributes(pWin,
@@ -869,15 +859,15 @@ ProcChangeSaveSet(ClientPtr client)
 int
 ProcReparentWindow(ClientPtr client)
 {
-    WindowPtr pWin, pParent;
-
     REQUEST(xReparentWindowReq);
-    int rc;
-
     REQUEST_SIZE_MATCH(xReparentWindowReq);
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
+
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
     if (rc != Success)
         return rc;
+
+    WindowPtr pParent;
     rc = dixLookupWindow(&pParent, stuff->parent, client, DixAddAccess);
     if (rc != Success)
         return rc;
@@ -896,16 +886,14 @@ ProcReparentWindow(ClientPtr client)
 int
 ProcMapWindow(ClientPtr client)
 {
-    WindowPtr pWin;
-
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
     if (client->swapped)
         swapl(&stuff->id);
 
-    int rc;
-    rc = dixLookupWindow(&pWin, stuff->id, client, DixShowAccess);
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->id, client, DixShowAccess);
     if (rc != Success)
         return rc;
     MapWindow(pWin, client);
@@ -916,17 +904,14 @@ ProcMapWindow(ClientPtr client)
 int
 ProcMapSubwindows(ClientPtr client)
 {
-    WindowPtr pWin;
-
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
     if (client->swapped)
         swapl(&stuff->id);
 
-    int rc;
-
-    rc = dixLookupWindow(&pWin, stuff->id, client, DixListAccess);
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->id, client, DixListAccess);
     if (rc != Success)
         return rc;
     MapSubwindows(pWin, client);
@@ -3197,17 +3182,11 @@ ProcCreateCursor(ClientPtr client)
                          &pCursor, client, stuff->cid);
 
     if (rc != Success)
-        goto bail;
-    if (!AddResource(stuff->cid, X11_RESTYPE_CURSOR, (void *) pCursor)) {
-        rc = BadAlloc;
-        goto bail;
-    }
+        return rc;
+    if (!AddResource(stuff->cid, X11_RESTYPE_CURSOR, (void *) pCursor))
+        return BadAlloc;
 
     return Success;
- bail:
-    free(srcbits);
-    free(mskbits);
-    return rc;
 }
 
 int

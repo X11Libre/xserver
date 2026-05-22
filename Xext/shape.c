@@ -232,10 +232,8 @@ ProcShapeQueryVersion(ClientPtr client)
         .minorVersion = SERVER_SHAPE_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -348,10 +346,9 @@ ShapeMask(ClientPtr client, xShapeMaskReq *stuff)
     RegionPtr *destRgn;
     PixmapPtr pPixmap;
     CreateDftPtr createDefault;
-    int rc;
 
     UpdateCurrentTime();
-    rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
     switch (stuff->destKind) {
@@ -460,10 +457,9 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
     CreateDftPtr createDefault;
     CreateDftPtr createSrc;
     RegionPtr tmp;
-    int rc;
 
     UpdateCurrentTime();
-    rc = dixLookupWindow(&pDestWin, stuff->dest, client, DixSetAttrAccess);
+    int rc = dixLookupWindow(&pDestWin, stuff->dest, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
     if (!MakeWindowOptional(pDestWin))
@@ -583,10 +579,9 @@ ShapeOffset(ClientPtr client, xShapeOffsetReq *stuff)
 {
     WindowPtr pWin;
     RegionPtr srcRgn;
-    int rc;
 
     UpdateCurrentTime();
-    rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->dest, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
     switch (stuff->destKind) {
@@ -696,16 +691,14 @@ ProcShapeQueryExtents(ClientPtr client)
         .heightClipShape = shapeBox.y2 - shapeBox.y1,
     };
 
-    if (client->swapped) {
-        swaps(&reply.xBoundingShape);
-        swaps(&reply.yBoundingShape);
-        swaps(&reply.widthBoundingShape);
-        swaps(&reply.heightBoundingShape);
-        swaps(&reply.xClipShape);
-        swaps(&reply.yClipShape);
-        swaps(&reply.widthClipShape);
-        swaps(&reply.heightClipShape);
-    }
+    X_REPLY_FIELD_CARD16(xBoundingShape);
+    X_REPLY_FIELD_CARD16(yBoundingShape);
+    X_REPLY_FIELD_CARD16(widthBoundingShape);
+    X_REPLY_FIELD_CARD16(heightBoundingShape);
+    X_REPLY_FIELD_CARD16(xClipShape);
+    X_REPLY_FIELD_CARD16(yClipShape);
+    X_REPLY_FIELD_CARD16(widthClipShape);
+    X_REPLY_FIELD_CARD16(heightClipShape);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -718,13 +711,12 @@ ProcShapeSelectInput(ClientPtr client)
 
     WindowPtr pWin;
     ShapeEventPtr pNewShapeEvent;
-    int rc;
 
     REQUEST_SIZE_MATCH(xShapeSelectInputReq);
 
     if (client->swapped)
         swapl(&stuff->window);
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (rc != Success)
         return rc;
     ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
@@ -842,9 +834,9 @@ ProcShapeInputSelected(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    int enabled, rc;
+    int enabled;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -873,10 +865,10 @@ ProcShapeGetRectangles(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    int nrects, rc;
+    int nrects;
     RegionPtr region;
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
     switch (stuff->kind) {
@@ -940,9 +932,7 @@ ProcShapeGetRectangles(ClientPtr client)
         .nrects = nrects
     };
 
-    if (client->swapped) {
-        swapl(&reply.nrects);
-    }
+    X_REPLY_FIELD_CARD32(nrects);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

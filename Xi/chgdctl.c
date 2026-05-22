@@ -85,16 +85,10 @@ ProcXChangeDeviceControl(ClientPtr client)
         swaps(&ctl->length);
     }
 
-    unsigned len;
-    int i, status, ret = BadValue;
-    DeviceIntPtr dev;
-    xDeviceResolutionCtl *r;
-    AxisInfoPtr a;
-    CARD32 *resolution;
-    xDeviceEnableCtl *e;
+    unsigned len = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
 
-    len = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
-    ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
+    DeviceIntPtr dev;
+    int ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
     if (ret != Success)
         goto out;
 
@@ -111,7 +105,8 @@ ProcXChangeDeviceControl(ClientPtr client)
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
-        r = (xDeviceResolutionCtl *) &stuff[1];
+    {
+        xDeviceResolutionCtl *r = (xDeviceResolutionCtl *) &stuff[1];
         if ((len < bytes_to_int32(sizeof(xDeviceResolutionCtl))) ||
             (len !=
              bytes_to_int32(sizeof(xDeviceResolutionCtl)) + r->num_valuators)) {
@@ -127,7 +122,7 @@ ProcXChangeDeviceControl(ClientPtr client)
             ret = Success;
             goto out;
         }
-        resolution = (CARD32 *) (r + 1);
+        CARD32 *resolution = (CARD32 *) (r + 1);
         if (r->first_valuator + r->num_valuators > dev->valuator->numAxes) {
             ret = BadValue;
             goto out;
@@ -135,14 +130,14 @@ ProcXChangeDeviceControl(ClientPtr client)
         if (client->swapped) {
             SwapLongs((CARD32 *) (r + 1), r->num_valuators);
         }
-        status = ChangeDeviceControl(client, dev, (xDeviceCtl *) r);
+        int status = ChangeDeviceControl(client, dev, (xDeviceCtl *) r);
         if (status == Success) {
-            a = &dev->valuator->axes[r->first_valuator];
-            for (i = 0; i < r->num_valuators; i++)
+            AxisInfoPtr a = &dev->valuator->axes[r->first_valuator];
+            for (int i = 0; i < r->num_valuators; i++)
                 if (*(resolution + i) < (a + i)->min_resolution ||
                     *(resolution + i) > (a + i)->max_resolution)
                     return BadValue;
-            for (i = 0; i < r->num_valuators; i++)
+            for (int i = 0; i < r->num_valuators; i++)
                 (a++)->resolution = *resolution++;
 
             ret = Success;
@@ -155,6 +150,7 @@ ProcXChangeDeviceControl(ClientPtr client)
             ret = BadMatch;
         }
         break;
+    }
     case DEVICE_ABS_CALIB:
     case DEVICE_ABS_AREA:
         /* Calibration is now done through properties, and never had any effect
@@ -167,16 +163,15 @@ ProcXChangeDeviceControl(ClientPtr client)
         ret = BadMatch;
         break;
     case DEVICE_ENABLE:
-        e = (xDeviceEnableCtl *) &stuff[1];
+    {
+        xDeviceEnableCtl *e = (xDeviceEnableCtl *) &stuff[1];
         if ((len != bytes_to_int32(sizeof(xDeviceEnableCtl)))) {
             ret = BadLength;
             goto out;
         }
 
-        if (IsXTestDevice(dev, NULL))
-            status = !Success;
-        else
-            status = ChangeDeviceControl(client, dev, (xDeviceCtl *) e);
+        int status = (IsXTestDevice(dev, NULL) ?
+                      (!Success) : ChangeDeviceControl(client, dev, (xDeviceCtl *) e));
 
         if (status == Success) {
             if (e->enable)
@@ -194,6 +189,7 @@ ProcXChangeDeviceControl(ClientPtr client)
         }
 
         break;
+    }
     default:
         ret = BadValue;
     }

@@ -22,9 +22,9 @@
  */
 #include <dix-config.h>
 
-#include "exa_priv.h"
+#include "include/mipict.h"
 
-#include "mipict.h"
+#include "exa_priv.h"
 
 /*
  * These functions wrap the low-level fb rendering functions and

@@ -227,6 +227,8 @@ ProcRRGetProviderInfo (ClientPtr client)
         swaps(&reply.nCrtcs);
         swaps(&reply.nOutputs);
         swaps(&reply.nameLength);
+        swapl(&reply.timestamp);
+        swaps(&reply.nAssociatedProviders);
     }
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);

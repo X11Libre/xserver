@@ -72,7 +72,6 @@ struct _DeviceIntRec;
 struct _Cursor;
 
 typedef struct _BackingStore *BackingStorePtr;
-typedef struct _Window *WindowPtr;
 typedef struct _Property *PropertyPtr;
 
 enum RootClipMode {

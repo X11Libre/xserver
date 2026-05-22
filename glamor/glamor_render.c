@@ -35,10 +35,10 @@
 
 #include <assert.h>
 
+#include "include/mipict.h"
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
-#include "mipict.h"
 #include "fbpict.h"
 #if 0
 //#define DEBUGF(str, ...)  do {} while(0)

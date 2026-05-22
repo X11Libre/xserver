@@ -81,11 +81,10 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
         .patchVersion = SERVER_XF86DRI_PATCH_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-        swapl(&reply.patchVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
+    X_REPLY_FIELD_CARD32(patchVersion);
+
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 

@@ -23,15 +23,106 @@
 #include <kdrive-config.h>
 #include "fbdev.h"
 
+#include "dix/dix_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 
 #include <string.h>
+
+static FbScreenConf *fbCurrScreen = NULL;
+
+static void fbdevLogScreenInfo(FbScreenConf *config, int screen_num);
+
+void LinuxLogInit(void);
+
+void
+LinuxLogInit(void)
+{
+    KdCardInfo *curr_card = kdCardInfo;
+    char *log_file = NULL;
+    const char *display_name = display ? display : "";
+    if (asprintf(&log_file, DEFAULT_LOGDIR "/Xfbdev.%s.log", display_name) < 0) {
+        LogInit(DEFAULT_LOGDIR "/Xkdrive.log", ".old");
+    } else {
+        LogInit(log_file, ".old");
+        free(log_file);
+    }
+
+    LogMessage(X_INFO, "Xfbdev: X11 server for linux framebuffer devices\n");
+    LogMessage(X_INFO, "\n");
+    LogMessage(X_INFO, "Xfbdev: Configured screens info:\n");
+    LogMessage(X_INFO, "\n");
+    while(curr_card) {
+        fbdevLogScreenInfo(curr_card->closure, curr_card->mynum);
+        curr_card = curr_card->next;
+    }
+}
 
 void
 InitCard(char *name)
 {
-    KdCardInfoAdd(&fbdevFuncs, 0);
+    fbCurrScreen = XNFalloc(sizeof(*fbCurrScreen));
+    *fbCurrScreen = (FbScreenConf) {
+                                    .fbdevDevicePath = NULL,
+                                    .fbDisableShadow = FALSE,
+#ifdef GLAMOR
+                                    .fbdev_glvnd_provider = NULL,
+
+                                    .fbdev_dri_path = NULL,
+                                    .fbdev_auto_dri3 = FALSE,
+                                    .fbdev_drm_master = FALSE,
+
+                                    .es_allowed = TRUE,
+                                    .force_es = FALSE,
+
+                                    .fbGlamorAllowed = TRUE,
+                                    .fbForceGlamor = FALSE,
+#ifdef XV
+                                    .fbXVAllowed = TRUE,
+#endif
+#endif
+                                   };
+
+    KdCardInfoAdd(&fbdevFuncs, fbCurrScreen);
+}
+
+static void
+fbdevLogScreenInfo(FbScreenConf *config, int screen_num)
+{
+    LogMessage(X_INFO, "Xfbdev(%d): Screen %d:\n", screen_num, screen_num);
+
+    LogMessage(X_INFO, "Xfbdev(%d): framebuffer device: %s\n", screen_num,
+               config->fbdevDevicePath ? config->fbdevDevicePath : "not passed");
+    LogMessage(X_INFO, "Xfbdev(%d): ShadowFB %s\n", screen_num,
+               config->fbDisableShadow ? "disabled" : "enabled");
+#ifdef GLAMOR
+    LogMessage(X_INFO, "Xfbdev(%d): glvnd library: %s\n", screen_num,
+               config->fbdev_glvnd_provider ? config->fbdev_glvnd_provider : "not passed");
+
+    LogMessage(X_INFO, "Xfbdev(%d): dri device: %s\n", screen_num,
+               config->fbdev_dri_path ? config->fbdev_dri_path : "none");
+    LogMessage(X_INFO, "Xfbdev(%d): automatic DRI3 %s\n", screen_num,
+               config->fbdev_auto_dri3 ? "enabled" : "disabled");
+    LogMessage(X_INFO, "Xfbdev(%d): drm master %s\n", screen_num,
+               config->fbdev_drm_master ? "enabled" : "disabled");
+
+
+    LogMessage(X_INFO, "Xfbdev(%d): glamor OpenGL contexts %s\n", screen_num,
+               !config->force_es ? "allowed" : "forbidden");
+    LogMessage(X_INFO, "Xfbdev(%d): glamor GLES contexts %s\n", screen_num,
+               config->es_allowed ? "allowed" : "forbidden");
+
+    LogMessage(X_INFO, "Xfbdev(%d): glamor render acceleration %s\n", screen_num,
+               config->fbGlamorAllowed ? "enabled" : "disabled");
+    LogMessage(X_INFO, "Xfbdev(%d): glamor render acceleration %s on software renderers\n", screen_num,
+               config->fbForceGlamor ? "allowed" : "forbidden");
+#ifdef XV
+    LogMessage(X_INFO, "Xfbdev(%d): glamor X-Video support %s\n", screen_num,
+               config->fbXVAllowed ? "allowed" : "forbidden");
+#endif
+#endif
+    LogMessage(X_INFO, "\n");
 }
 
 #if INPUTTHREAD
@@ -69,30 +160,50 @@ ddxUseMsg(void)
     KdUseMsg();
     ErrorF("\nXfbdev Device Usage:\n");
     ErrorF
-        ("-fb path         Framebuffer device to use. Defaults to /dev/fb0\n");
+        ("-fb <path>           Framebuffer device to use. Defaults to /dev/fb0\n");
     ErrorF
-        ("-noshadow        Disable the ShadowFB layer if possible\n");
+        ("-dri [path|auto]     Optional drm device path to use\n");
     ErrorF
-        ("-glamor          Force enable glamor render acceleration if possible\n");
+        ("-drm-master          Enable master permissions on the fd used for dri\n");
     ErrorF
-        ("-noglamor        Force disable glamor render acceleration\n");
+        ("-noshadow            Disable the ShadowFB layer if possible\n");
     ErrorF
-        ("-glvendor        Suggest what glvnd vendor library should be used\n");
+        ("-glamor              Force enable glamor render acceleration if possible\n");
     ErrorF
-        ("-force-gl        Force glamor to only use GL contexts\n");
+        ("-noglamor            Force disable glamor render acceleration\n");
     ErrorF
-        ("-force-es        Force glamor to only use GLES contexts\n");
+        ("-glvendor <string>   Suggest what glvnd vendor library should be used\n");
     ErrorF
-        ("-noxv            Disable X-Video support\n");
+        ("-force-gl            Force glamor to only use GL contexts\n");
+    ErrorF
+        ("-force-es            Force glamor to only use GLES contexts\n");
+    ErrorF
+        ("-noxv                Disable X-Video support\n");
     ErrorF("\n");
 }
 
 int
 ddxProcessArgument(int argc, char **argv, int i)
 {
+    if (!fbCurrScreen || !strcmp(argv[i], "-screen")) {
+        /* xinit adds an implicit :0 arg */
+        int implicit_first_screen = !fbCurrScreen && strcmp(argv[i], "-screen") && (argv[i][0] != ':');
+
+        /* Put each screen on a separate card */
+        if (argv[i][0] != ':') {
+            InitCard(NULL);
+        }
+        if (implicit_first_screen) {
+            /* This is what KdInitOutput would have done */
+            KdCardInfo *card = KdCardInfoLast();
+            KdScreenInfo *screen = KdScreenInfoAdd(card);
+            KdParseScreen(screen, NULL);
+        }
+    }
+
     if (!strcmp(argv[i], "-fb")) {
         if (i + 1 < argc) {
-            fbdevDevicePath = argv[i + 1];
+            fbCurrScreen->fbdevDevicePath = argv[i + 1];
             return 2;
         }
         UseMsg();
@@ -100,43 +211,62 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
 
     if (!strcmp(argv[i], "-noshadow")) {
-        fbDisableShadow = TRUE;
+        fbCurrScreen->fbDisableShadow = TRUE;
         return 1;
     }
 
 #ifdef GLAMOR
     if (!strcmp(argv[i], "-glamor")) {
-        fbForceGlamor = TRUE;
+        fbCurrScreen->fbForceGlamor = TRUE;
         return 1;
     }
 
     if (!strcmp(argv[i], "-noglamor")) {
-        fbGlamorAllowed = FALSE;
+        fbCurrScreen->fbGlamorAllowed = FALSE;
         return 1;
     }
 
     if (!strcmp(argv[i], "-glvendor")) {
         if (i + 1 < argc) {
-            fbdev_glvnd_provider = strdup(argv[i + 1]);
+            fbCurrScreen->fbdev_glvnd_provider = strdup(argv[i + 1]);
             return 2;
         }
         UseMsg();
         exit(1);
     }
 
+    if (!strcmp(argv[i], "-dri")) {
+        if (i + 1 < argc) {
+            if (argv[i + 1][0] == '-' || !strcmp(argv[i + 1], "auto")) {
+                fbCurrScreen->fbdev_auto_dri3 = TRUE;
+            } else {
+                fbCurrScreen->fbdev_dri_path = strdup(argv[i + 1]);
+            }
+            return 2;
+        } else {
+            fbCurrScreen->fbdev_auto_dri3 = TRUE;
+            return 1;
+        }
+    }
+
+    if (!strcmp(argv[i], "-drm-master")) {
+        fbCurrScreen->fbdev_drm_master = TRUE;
+        return 1;
+    }
+
     if (!strcmp(argv[i], "-force-gl")) {
-        es_allowed = FALSE;
+        fbCurrScreen->es_allowed = FALSE;
         return 1;
     }
 
     if (!strcmp(argv[i], "-force-es")) {
-        force_es = TRUE;
+        fbCurrScreen->force_es = TRUE;
         return 1;
     }
 
 #ifdef XV
     if (!strcmp(argv[i], "-noxv")) {
-        fbXVAllowed = FALSE;
+        fbCurrScreen->fbXVAllowed = FALSE;
         return 1;
     }
 #endif

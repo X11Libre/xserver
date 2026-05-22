@@ -234,8 +234,8 @@ XkbUpdateLedAutoState(DeviceIntPtr dev,
     DeviceIntPtr kbd;
     XkbStatePtr state;
     XkbControlsPtr ctrls;
-    XkbChangesRec my_changes;
-    xkbExtensionDeviceNotify my_ed;
+    XkbChangesRec my_changes = { 0 };
+    xkbExtensionDeviceNotify my_ed = { 0 };
     register unsigned i, bit, affected;
     register XkbIndicatorMapPtr map;
     unsigned oldState;
@@ -365,8 +365,8 @@ XkbSetIndicators(DeviceIntPtr dev,
                  CARD32 affect, CARD32 values, XkbEventCausePtr cause)
 {
     XkbSrvLedInfoPtr sli;
-    XkbChangesRec changes;
-    xkbExtensionDeviceNotify ed;
+    XkbChangesRec changes = { 0 };
+    xkbExtensionDeviceNotify ed = { 0 };
     unsigned side_affected;
 
     memset((char *) &changes, 0, sizeof(XkbChangesRec));
@@ -821,8 +821,8 @@ XkbApplyLedNameChanges(DeviceIntPtr dev,
                        XkbChangesPtr changes, XkbEventCausePtr cause)
 {
     DeviceIntPtr kbd;
-    XkbChangesRec my_changes;
-    xkbExtensionDeviceNotify my_ed;
+    XkbChangesRec my_changes = { 0 };
+    xkbExtensionDeviceNotify my_ed = { 0 };
 
     if (changed_names == 0)
         return;
@@ -901,8 +901,8 @@ XkbApplyLedMapChanges(DeviceIntPtr dev,
                       XkbChangesPtr changes, XkbEventCausePtr cause)
 {
     DeviceIntPtr kbd;
-    XkbChangesRec my_changes;
-    xkbExtensionDeviceNotify my_ed;
+    XkbChangesRec my_changes = { 0 };
+    xkbExtensionDeviceNotify my_ed = { 0 };
 
     if (changed_maps == 0)
         return;
@@ -960,8 +960,8 @@ XkbApplyLedStateChanges(DeviceIntPtr dev,
 {
     XkbSrvInfoPtr xkbi;
     DeviceIntPtr kbd;
-    XkbChangesRec my_changes;
-    xkbExtensionDeviceNotify my_ed;
+    XkbChangesRec my_changes = { 0 };
+    xkbExtensionDeviceNotify my_ed = { 0 };
     register unsigned i, bit, affected;
     XkbIndicatorMapPtr map;
     unsigned oldState;

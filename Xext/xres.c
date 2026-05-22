@@ -171,10 +171,8 @@ ProcXResQueryVersion(ClientPtr client)
         .server_minor = SERVER_XRES_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.server_major);
-        swaps(&reply.server_minor);
-    }
+    X_REPLY_FIELD_CARD16(server_major);
+    X_REPLY_FIELD_CARD16(server_minor);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -201,9 +199,7 @@ ProcXResQueryClients(ClientPtr client)
         .num_clients = num_clients
     };
 
-    if (client->swapped) {
-        swapl(&reply.num_clients);
-    }
+    X_REPLY_FIELD_CARD32(num_clients);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -222,11 +218,10 @@ resourceTypeAtom(int i)
     CARD32 ret;
 
     const char *name = LookupResourceName(i);
-    if (strcmp(name, XREGISTRY_UNKNOWN))
+    if (strcmp(name, XREGISTRY_UNKNOWN)) {
         ret = dixAddAtom(name);
-    else {
+    } else {
         char buf[40];
-
         snprintf(buf, sizeof(buf), "Unregistered resource %i", i + 1);
         ret = dixAddAtom(buf);
     }
@@ -260,8 +255,9 @@ ProcXResQueryClientResources(ClientPtr client)
     int num_types = 0;
     for (int i = 0; i <= lastResourceType; i++) {
         /* dont report currently unused resource types */
-        if (!(counts[i]))
+        if (!(counts[i])) {
             continue;
+        }
 
         /* write xXResType */
         x_rpcbuf_write_CARD32(&rpcbuf, resourceTypeAtom(i + 1));
@@ -276,9 +272,7 @@ ProcXResQueryClientResources(ClientPtr client)
         .num_types = num_types
     };
 
-    if (client->swapped) {
-        swapl(&reply.num_types);
-    }
+    X_REPLY_FIELD_CARD32(num_types);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -318,10 +312,9 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
         .bytes_overflow = bytes >> 32
 #endif
     };
-    if (client->swapped) {
-        swapl(&reply.bytes);
-        swapl(&reply.bytes_overflow);
-    }
+
+    X_REPLY_FIELD_CARD32(bytes);
+    X_REPLY_FIELD_CARD32(bytes_overflow);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -377,6 +370,7 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
             .spec.mask = X_XResClientXIDMask
         };
 
+        /* can't used REPLY_FIELD_*() here, because we're looking at sendClient */
         if (sendClient->swapped) {
             swapl (&reply.spec.mask);
             swapl (&reply.spec.client);
@@ -389,8 +383,9 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
     if (WillConstructMask(client, mask, ctx, X_XResLocalClientPIDMask)) {
         pid_t pid = GetClientPid(client);
 
-        if (pid == -1)
+        if (pid == -1) {
             return TRUE;
+        }
 
         xXResClientIdValue reply = {
             .spec.client = client->clientAsMask,
@@ -430,8 +425,7 @@ ConstructClientIds(ClientPtr client,
 {
     for (int specIdx = 0; specIdx < numSpecs; ++specIdx) {
         if (specs[specIdx].client == 0) {
-            int c;
-            for (c = 0; c < currentMaxClients; ++c) {
+            for (int c = 0; c < currentMaxClients; ++c) {
                 if (clients[c] &&
                     (dixCallClientAccessCallback(client, clients[c], DixReadAccess)
                                           == Success)) {
@@ -474,7 +468,7 @@ ProcXResQueryClientIds (ClientPtr client)
     REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
                        (uint64_t)stuff->numSpecs * sizeof(xXResClientIdSpec));
 
-    xXResClientIdSpec        *specs = (void*) ((char*) stuff + sizeof(xXResQueryClientIdsReq));
+    xXResClientIdSpec *specs = (void*) ((char*) stuff + sizeof(xXResQueryClientIdsReq));
 
     if (client->swapped) {
         /* each spec is made of two CARD32's */
@@ -492,9 +486,7 @@ ProcXResQueryClientIds (ClientPtr client)
             .numIds = ctx.numIds
         };
 
-        if (client->swapped) {
-            swapl (&reply.numIds);
-        }
+        X_REPLY_FIELD_CARD32(numIds);
 
         rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, ctx.rpcbuf);
     }
@@ -861,8 +853,9 @@ ProcXResQueryResourceBytes (ClientPtr client)
             .numSizes = ctx.numSizes
         };
 
+        X_REPLY_FIELD_CARD32(numSizes);
+
         if (client->swapped) {
-            swapl (&reply.numSizes);
             SwapXResQueryResourceBytes(&ctx.response);
         }
 

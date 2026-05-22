@@ -33,10 +33,6 @@
 #include "randrstr.h"
 #endif
 
-#ifdef GLAMOR
-#include <epoxy/egl.h>
-#endif
-
 typedef struct _fbdevPriv {
     struct fb_var_screeninfo var;
     struct fb_fix_screeninfo fix;
@@ -52,26 +48,33 @@ typedef struct _fbdevScrPriv {
     Rotation randr;
     Bool shadow;
 #ifdef GLAMOR
-    EGLDisplay display;
-    EGLContext ctx;
-    void* glamor_make_current;
+    int dri_fd;
 #endif
 } FbdevScrPriv;
 
-extern KdCardFuncs fbdevFuncs;
-extern const char *fbdevDevicePath;
-extern Bool fbDisableShadow;
+typedef struct _fbScreenConf {
+const char *fbdevDevicePath;
+Bool fbDisableShadow;
 
 #ifdef GLAMOR
-extern char *fbdev_glvnd_provider;
-extern bool es_allowed;
-extern bool force_es;
-extern bool fbGlamorAllowed;
-extern bool fbForceGlamor;
+char *fbdev_glvnd_provider;
+
+char *fbdev_dri_path;
+bool fbdev_auto_dri3;
+bool fbdev_drm_master;
+
+bool es_allowed;
+bool force_es;
+
+bool fbGlamorAllowed;
+bool fbForceGlamor;
 #ifdef XV
-extern bool fbXVAllowed;
+bool fbXVAllowed;
 #endif
 #endif
+} FbScreenConf;
+
+extern KdCardFuncs fbdevFuncs;
 
 Bool fbdevCardInit(KdCardInfo * card);
 

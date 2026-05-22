@@ -361,10 +361,8 @@ ProcSecurityQueryVersion(ClientPtr client)
         .minorVersion = SERVER_SECURITY_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }                               /* ProcSecurityQueryVersion */
@@ -554,15 +552,13 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
         .dataLength = authdata_len
     };
 
-    if (client->swapped) {
-        swapl(&reply.authId);
-        swaps(&reply.dataLength);
-    }
-
     SecurityAudit
         ("client %d generated authorization %lu trust %d timeout %lu group %lu events %lu\n",
          client->index, (unsigned long)pAuth->id, pAuth->trustLevel, (unsigned long)pAuth->timeout,
          (unsigned long)pAuth->group, (unsigned long)eventMask);
+
+    X_REPLY_FIELD_CARD32(authId);
+    X_REPLY_FIELD_CARD16(dataLength);
 
     /* the request succeeded; don't call RemoveAuthorization or free pAuth */
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
@@ -583,9 +579,8 @@ ProcSecurityRevokeAuthorization(ClientPtr client)
     X_REQUEST_FIELD_CARD32(authId);
 
     SecurityAuthorizationPtr pAuth;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pAuth, stuff->authId,
+    int rc = dixLookupResourceByType((void **) &pAuth, stuff->authId,
                                  SecurityAuthorizationResType, client,
                                  DixDestroyAccess);
     if (rc != Success)
@@ -895,7 +890,6 @@ SecurityClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
     NewClientInfoRec *pci = calldata;
     SecurityStateRec *state;
     SecurityAuthorizationPtr pAuth;
-    int rc;
 
     state = dixLookupPrivate(&pci->client->devPrivates, stateKey);
 
@@ -908,8 +902,9 @@ SecurityClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         break;
 
     case ClientStateRunning:
+    {
         state->authId = AuthorizationIDOfClient(pci->client);
-        rc = dixLookupResourceByType((void **) &pAuth, state->authId,
+        int rc = dixLookupResourceByType((void **) &pAuth, state->authId,
                                      SecurityAuthorizationResType, serverClient,
                                      DixGetAttrAccess);
         if (rc == Success) {
@@ -922,10 +917,11 @@ SecurityClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
             state->trustLevel = pAuth->trustLevel;
         }
         break;
-
+    }
     case ClientStateGone:
     case ClientStateRetained:
-        rc = dixLookupResourceByType((void **) &pAuth, state->authId,
+    {
+        int rc = dixLookupResourceByType((void **) &pAuth, state->authId,
                                      SecurityAuthorizationResType, serverClient,
                                      DixGetAttrAccess);
         if (rc == Success && state->live) {
@@ -936,7 +932,7 @@ SecurityClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
                 SecurityStartAuthorizationTimer(pAuth);
         }
         break;
-
+    }
     default:
         break;
     }

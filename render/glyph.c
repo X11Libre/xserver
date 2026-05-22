@@ -25,6 +25,7 @@
 #include <dix-config.h>
 
 #include "dix/screenint_priv.h"
+#include "include/mipict.h"
 #include "os/bug_priv.h"
 #include "os/xsha1.h"
 
@@ -42,7 +43,6 @@
 #include "servermd.h"
 #include "picturestr.h"
 #include "glyphstr_priv.h"
-#include "mipict.h"
 
 /*
  * From Knuth -- a good choice for hash/rehash values is p, p-2 where

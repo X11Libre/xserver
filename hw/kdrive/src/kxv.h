@@ -147,6 +147,10 @@ typedef struct {
 Bool
  KdXVScreenInit(ScreenPtr pScreen, KdVideoAdaptorPtr Adaptors, int num);
 
+/* Must be called from KdCardInfo functions, can be called without Xv enabled */
+Bool KdXVEnable(ScreenPtr);
+void KdXVDisable(ScreenPtr);
+
 /*** These are DDX layer privates ***/
 
 typedef struct {

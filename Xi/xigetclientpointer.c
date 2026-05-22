@@ -70,9 +70,7 @@ ProcXIGetClientPointer(ClientPtr client)
         .deviceid = (winclient->clientPtr) ? winclient->clientPtr->id : 0
     };
 
-    if (client->swapped) {
-        swaps(&reply.deviceid);
-    }
+    X_REPLY_FIELD_CARD16(deviceid);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }

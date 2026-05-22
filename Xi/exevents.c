@@ -910,7 +910,7 @@ UpdateDeviceState(DeviceIntPtr device, DeviceEvent *event)
                        "Ignoring event.\n", device->name);
                 return DONT_PROCESS;
             }
-            else if (v->numAxes < i) {
+            else if (v->numAxes <= i) {
                 ErrorF("[Xi] Too many valuators reported for device '%s'. "
                        "Ignoring event.\n", device->name);
                 return DONT_PROCESS;
@@ -1063,6 +1063,9 @@ TouchSendOwnershipEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, int reason,
 {
     int nev, i;
     InternalEvent *tel = InitEventList(GetMaximumEventsNum());
+
+    if (!tel)
+        return;
 
     nev = GetTouchOwnershipEvents(tel, dev, ti, reason, resource, 0);
     for (i = 0; i < nev; i++)

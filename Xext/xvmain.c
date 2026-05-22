@@ -733,11 +733,10 @@ int
 XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
 {
     XvVideoNotifyPtr pn, tpn, fpn;
-    int rc;
 
     /* FIND VideoNotify LIST */
 
-    rc = dixLookupResourceByType((void **) &pn, pDraw->id,
+    int rc = dixLookupResourceByType((void **) &pn, pDraw->id,
                                  XvRTVideoNotifyList, client, DixWriteAccess);
     if (rc != Success && rc != BadValue)
         return rc;

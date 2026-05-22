@@ -140,8 +140,7 @@ static void xf86CursorCloseScreen(CallbackListPtr *pcbl,
     if (ScreenPriv->isUp && pScrn->vtSema)
         xf86SetCursor(pScreen, NullCursor, ScreenPriv->x, ScreenPriv->y);
 
-    if (ScreenPriv->CurrentCursor)
-        FreeCursor(ScreenPriv->CurrentCursor, None);
+    FreeCursor(ScreenPriv->CurrentCursor, None);
 
     pScreen->QueryBestSize = ScreenPriv->QueryBestSize;
     pScreen->RecolorCursor = ScreenPriv->RecolorCursor;
@@ -322,8 +321,7 @@ xf86CursorSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCurs,
             xf86SetCursor(pScreen, NullCursor, x, y);
             ScreenPriv->isUp = FALSE;
         }
-        if (ScreenPriv->CurrentCursor)
-            FreeCursor(ScreenPriv->CurrentCursor, None);
+        FreeCursor(ScreenPriv->CurrentCursor, None);
         ScreenPriv->CurrentCursor = NullCursor;
         return;
     }
@@ -332,8 +330,7 @@ xf86CursorSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCurs,
        sprite. The second cursor is never HW rendered anyway. */
     if (GetMaster(pDev, MASTER_POINTER) == inputInfo.pointer) {
         CursorPtr cursor = RefCursor(pCurs);
-        if (ScreenPriv->CurrentCursor)
-            FreeCursor(ScreenPriv->CurrentCursor, None);
+        FreeCursor(ScreenPriv->CurrentCursor, None);
         ScreenPriv->CurrentCursor = cursor;
         ScreenPriv->x = x;
         ScreenPriv->y = y;
@@ -343,8 +340,7 @@ xf86CursorSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCurs,
 
         if (!infoPtr->pScrn->vtSema) {
             cursor = RefCursor(cursor);
-            if (ScreenPriv->SavedCursor)
-                FreeCursor(ScreenPriv->SavedCursor, None);
+            FreeCursor(ScreenPriv->SavedCursor, None);
             ScreenPriv->SavedCursor = cursor;
             return;
         }

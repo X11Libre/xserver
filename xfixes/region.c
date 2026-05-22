@@ -408,19 +408,15 @@ ProcXFixesFetchRegion(ClientPtr client)
     X_REQUEST_FIELD_CARD32(region);
 
     RegionPtr pRegion;
-    BoxPtr pExtent;
-    BoxPtr pBox;
-    int i, nBox;
-
     VERIFY_REGION(pRegion, stuff->region, client, DixReadAccess);
 
-    pExtent = RegionExtents(pRegion);
-    pBox = RegionRects(pRegion);
-    nBox = RegionNumRects(pRegion);
+    BoxPtr pExtent = RegionExtents(pRegion);
+    BoxPtr pBox = RegionRects(pRegion);
+    int nBox = RegionNumRects(pRegion);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    for (i = 0; i < nBox; i++) {
+    for (int i = 0; i < nBox; i++) {
         x_rpcbuf_write_rect(&rpcbuf,
                             pBox[i].x1,
                             pBox[i].y1,
@@ -435,14 +431,10 @@ ProcXFixesFetchRegion(ClientPtr client)
         .height = pExtent->y2 - pExtent->y1,
     };
 
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swaps(&reply.x);
-        swaps(&reply.y);
-        swaps(&reply.width);
-        swaps(&reply.height);
-    }
+    X_REPLY_FIELD_CARD16(x);
+    X_REPLY_FIELD_CARD16(y);
+    X_REPLY_FIELD_CARD16(width);
+    X_REPLY_FIELD_CARD16(height);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -475,14 +467,11 @@ static int
 SingleXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff)
 {
     GCPtr pGC;
-    RegionPtr pRegion;
-    ChangeGCVal vals[2];
-    int rc;
-
-    rc = dixLookupGC(&pGC, stuff->gc, client, DixSetAttrAccess);
+    int rc = dixLookupGC(&pGC, stuff->gc, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
 
+    RegionPtr pRegion;
     VERIFY_REGION_OR_NONE(pRegion, stuff->region, client, DixReadAccess);
 
     if (pRegion) {
@@ -491,6 +480,7 @@ SingleXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff)
             return BadAlloc;
     }
 
+    ChangeGCVal vals[2];
     vals[0].val = stuff->xOrigin;
     vals[1].val = stuff->yOrigin;
     ChangeGC(NULL, pGC, GCClipXOrigin | GCClipYOrigin, vals);
@@ -505,17 +495,16 @@ typedef RegionPtr (*CreateDftPtr) (WindowPtr pWin);
 static int
 SingleXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegionReq *stuff)
 {
-    WindowPtr pWin;
-    RegionPtr pRegion;
-    RegionPtr *pDestRegion;
-    int rc;
 
-    rc = dixLookupResourceByType((void **) &pWin, stuff->dest, X11_RESTYPE_WINDOW,
+    WindowPtr pWin;
+    int rc = dixLookupResourceByType((void **) &pWin, stuff->dest, X11_RESTYPE_WINDOW,
                                  client, DixSetAttrAccess);
     if (rc != Success) {
         client->errorValue = stuff->dest;
         return rc;
     }
+
+    RegionPtr pRegion;
     VERIFY_REGION_OR_NONE(pRegion, stuff->region, client, DixWriteAccess);
     switch (stuff->destKind) {
     case ShapeBounding:
@@ -526,6 +515,9 @@ SingleXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegionRe
         client->errorValue = stuff->destKind;
         return BadValue;
     }
+
+    RegionPtr *pDestRegion = NULL;
+
     if (pRegion) {
         pRegion = XFixesRegionCopy(pRegion);
         if (!pRegion)
@@ -646,31 +638,24 @@ ProcXFixesExpandRegion(ClientPtr client)
     X_REQUEST_FIELD_CARD16(bottom);
 
     RegionPtr pSource, pDestination;
-
-    BoxPtr pTmp;
-    BoxPtr pSrc;
-    int nBoxes;
-    int i;
-
     VERIFY_REGION(pSource, stuff->source, client, DixReadAccess);
     VERIFY_REGION(pDestination, stuff->destination, client, DixWriteAccess);
 
-    nBoxes = RegionNumRects(pSource);
-    pSrc = RegionRects(pSource);
+    int nBoxes = RegionNumRects(pSource);
+    BoxPtr pSrc = RegionRects(pSource);
     if (nBoxes) {
-        pTmp = calloc(nBoxes, sizeof(BoxRec));
+        BoxPtr pTmp = calloc(nBoxes, sizeof(BoxRec));
         if (!pTmp)
             return BadAlloc;
-        for (i = 0; i < nBoxes; i++) {
+        for (int i = 0; i < nBoxes; i++) {
             pTmp[i].x1 = pSrc[i].x1 - stuff->left;
             pTmp[i].x2 = pSrc[i].x2 + stuff->right;
             pTmp[i].y1 = pSrc[i].y1 - stuff->top;
             pTmp[i].y2 = pSrc[i].y2 + stuff->bottom;
         }
         RegionEmpty(pDestination);
-        for (i = 0; i < nBoxes; i++) {
+        for (int i = 0; i < nBoxes; i++) {
             RegionRec r;
-
             RegionInit(&r, &pTmp[i], 0);
             RegionUnion(pDestination, pDestination, &r);
         }

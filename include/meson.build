@@ -103,19 +103,21 @@ conf_data.set('GLAMOR_HAS_EGL_QUERY_DMABUF',
               epoxy_dep.found() and epoxy_dep.version().version_compare('>= 1.4.4') ? '1' : false)
 conf_data.set('GLAMOR_HAS_EGL_QUERY_DRIVER',
               epoxy_dep.found() and epoxy_dep.version().version_compare('>= 1.5.4') ? '1' : false)
+conf_data.set('GLAMOR_HAS_EXPORT_DMABUF_MESA',
+              epoxy_dep.found() and cc.has_header_symbol('epoxy/egl.h','eglExportDMABUFImageQueryMESA', dependencies: epoxy_dep ) ? '1' : false)
 conf_data.set('GLXEXT', build_glx ? '1' : false)
 conf_data.set('GLAMOR', build_glamor ? '1' : false)
-conf_data.set('GLAMOR_HAS_GBM', gbm_dep.found() ? '1' : false)
+conf_data.set('GLAMOR_HAS_GBM', build_gbm ? '1' : false)
 conf_data.set('GBM_BO_WITH_MODIFIERS',
-              build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 17.1') ? '1' : false)
+              build_glamor and build_gbm and gbm_dep.version().version_compare('>= 17.1') ? '1' : false)
 conf_data.set('GBM_BO_FD_FOR_PLANE',
-              build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 21.1') ? '1' : false)
+              build_glamor and build_gbm and gbm_dep.version().version_compare('>= 21.1') ? '1' : false)
 conf_data.set('GBM_BO_WITH_MODIFIERS2',
-              build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 21.3') ? '1' : false)
+              build_glamor and build_gbm and gbm_dep.version().version_compare('>= 21.3') ? '1' : false)
 conf_data.set('GBM_HAVE_BO_USE_LINEAR',
-              build_glamor and gbm_dep.found() and cc.has_header_symbol('gbm.h', 'GBM_BO_USE_LINEAR', dependencies : gbm_dep )  ? '1' : false)
+              build_glamor and build_gbm and cc.has_header_symbol('gbm.h', 'GBM_BO_USE_LINEAR', dependencies : gbm_dep )  ? '1' : false)
 conf_data.set('GBM_HAVE_BO_USE_FRONT_RENDERING',
-              build_glamor and gbm_dep.found() and cc.has_header_symbol('gbm.h','GBM_BO_USE_FRONT_RENDERING', dependencies: gbm_dep ) ? '1' : false)
+              build_glamor and build_gbm and cc.has_header_symbol('gbm.h','GBM_BO_USE_FRONT_RENDERING', dependencies: gbm_dep ) ? '1' : false)
 
 conf_data.set_quoted('SERVER_MISC_CONFIG_PATH', serverconfigdir)
 conf_data.set_quoted('PROJECTROOT', get_option('prefix'))
@@ -139,6 +141,7 @@ conf_data.set('HAVE_SYS_UTSNAME_H', cc.has_header('sys/utsname.h') ? '1' : false
 conf_data.set('HAVE_SYS_SYSMACROS_H', cc.has_header('sys/sysmacros.h') ? '1' : false)
 
 conf_data.set('HAVE_ARC4RANDOM_BUF', cc.has_function('arc4random_buf', dependencies: libbsd_dep) ? '1' : false)
+conf_data.set('HAVE_GETRANDOM', cc.has_function('getrandom', prefix: '#include <sys/random.h>') ? '1' : false)
 conf_data.set('HAVE_BACKTRACE', cc.has_function('backtrace') ? '1' : false)
 conf_data.set('HAVE_CBRT', cc.has_function('cbrt') ? '1' : false)
 conf_data.set('HAVE_EPOLL_CREATE1', cc.has_function('epoll_create1',dependencies:epoll_dep, prefix:'#include<sys/epoll.h>') ? '1' : false)
@@ -435,7 +438,6 @@ if build_xorg_sdk
         [
             'Xprintf.h',
             'callback.h',
-            'closure.h',
             'colormap.h',
             'colormapst.h',
             'compiler.h',
