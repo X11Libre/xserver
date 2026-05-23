@@ -64,6 +64,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <AvailabilityMacros.h>
 #include <IOKit/pwr_mgt/IOPMLib.h>
 #include <libkern/OSAtomic.h>
 #include <signal.h>
@@ -77,8 +78,10 @@
 // in the OS without major bincompat ramifications.
 //
 // These were added in macOS 10.7.
+#if defined(__clang__) && (MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
 void * _Nonnull objc_autoreleasePoolPush(void);
 void objc_autoreleasePoolPop(void * _Nonnull context);
+#endif
 
 DevPrivateKeyRec quartzScreenKeyRec;
 int aquaMenuBarHeight = 0;
@@ -160,12 +163,14 @@ QuartzSetupScreen(int index,
 static void
 QuartzBlockHandler(void *blockData, void *pTimeout)
 {
+#if defined(__clang__) && (MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
     static void *poolToken = NULL;
 
     if (poolToken) {
         objc_autoreleasePoolPop(poolToken);
     }
     poolToken = objc_autoreleasePoolPush();
+#endif
 }
 
 /*
