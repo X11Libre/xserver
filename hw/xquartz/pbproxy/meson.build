@@ -20,13 +20,19 @@ libxpbproxy = static_library('xpbproxy',
     objc_args: pbproxy_defs,
 )
 
-cocoa = dependency('Cocoa', method: 'extraframework')
+if cc.get_id() == 'clang'
+  cocoa = dependency('Cocoa', method: 'extraframework')
+  xpbproxy_linkargs = []
+else
+  xpbproxy_linkargs = ['-framework Cocoa']
+endif
 
 # standalone xpbproxy
 if build_standalone_pbproxy
     executable('xpbproxy',
         'app-main.m',
         link_with: libxpbproxy,
+        link_args: xpbproxy_linkargs,
         dependencies: [cocoa, dependency('x11')],
         objc_args: pbproxy_defs,
         install: true,
