@@ -12,9 +12,7 @@ cc = meson.get_compiler('c')
 
 add_project_arguments('-fno-strict-aliasing', language : 'c')
 add_project_arguments('-fvisibility=hidden', language : 'c')
-add_project_arguments('-Wvla', language: 'c')
 add_project_arguments('-fno-common', language: 'c')
-add_project_arguments('-Wshift-negative-value', language: 'c')
 add_project_arguments('-Wchar-subscripts', language: 'c')
 
 # workaround for mesa bug causing GLsync to be typedef'ed multiple times
@@ -67,6 +65,7 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         '-Werror=int-to-pointer-cast',
         '-Werror=pointer-to-int-cast',
         '-Woverride-init',
+        '-Wshift-negative-value',
         '-Wvla',
         '-Wincompatible-pointer-types',
     ]
