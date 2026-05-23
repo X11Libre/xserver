@@ -59,19 +59,60 @@ extern aslclient aslc;
 extern char *bundle_id_prefix;
 
 @interface X11Controller ()
-#ifdef XQUARTZ_SPARKLE
-@property (nonatomic, readwrite, strong) NSMenuItem *check_for_updates_item; // Programmatically enabled
-#endif
 
-@property (nonatomic, readwrite, strong) NSArray <NSArray <NSString *> *> *apps;
-@property (nonatomic, readwrite, strong) NSMutableArray <NSMutableArray <NSString *> *> *table_apps;
+@property (nonatomic, readwrite, strong) NSArray *apps;
+@property (nonatomic, readwrite, strong) NSMutableArray *table_apps;
 @property (nonatomic, readwrite, assign) NSInteger windows_menu_nitems;
 @property (nonatomic, readwrite, assign) int checked_window_item;
 @property (nonatomic, readwrite, assign) x_list *pending_apps;
 @property (nonatomic, readwrite, assign) OSX_BOOL finished_launching;
+#ifdef XQUARTZ_SPARKLE
+@property (nonatomic, readwrite, strong) NSMenuItem *check_for_updates_item; // Programmatically enabled
+#endif
 @end
 
 @implementation X11Controller
+
+@synthesize apps = _apps;
+@synthesize table_apps = _table_apps;
+@synthesize windows_menu_nitems = _windows_menu_nitems;
+@synthesize checked_window_item = _checked_window_item;
+@synthesize pending_apps = _pending_apps;
+@synthesize finished_launching = _finished_launching;
+#ifdef XQUARTZ_SPARKLE
+@synthesize check_for_updates_item = _check_for_updates_item;
+#endif
+
+@synthesize prefs_panel = _prefs_panel;
+@synthesize fake_buttons = _fake_buttons;
+@synthesize enable_fullscreen = _enable_fullscreen;
+@synthesize enable_fullscreen_menu = _enable_fullscreen_menu;
+@synthesize enable_fullscreen_menu_text = _enable_fullscreen_menu_text;
+@synthesize enable_keyequivs = _enable_keyequivs;
+@synthesize sync_keymap = _sync_keymap;
+@synthesize option_sends_alt = _option_sends_alt;
+@synthesize scroll_in_device_direction = _scroll_in_device_direction;
+@synthesize click_through = _click_through;
+@synthesize focus_follows_mouse = _focus_follows_mouse;
+@synthesize focus_on_new_window = _focus_on_new_window;
+@synthesize enable_auth = _enable_auth;
+@synthesize enable_tcp = _enable_tcp;
+@synthesize sync_pasteboard = _sync_pasteboard;
+@synthesize sync_pasteboard_to_clipboard = _sync_pasteboard_to_clipboard;
+@synthesize sync_pasteboard_to_primary = _sync_pasteboard_to_primary;
+@synthesize sync_clipboard_to_pasteboard = _sync_clipboard_to_pasteboard;
+@synthesize sync_primary_immediately = _sync_primary_immediately;
+@synthesize sync_text1 = _sync_text1;
+@synthesize sync_text2 = _sync_text2;
+@synthesize depth = _depth;
+@synthesize x11_about_item = _x11_about_item;
+@synthesize dock_window_separator = _dock_window_separator;
+@synthesize apps_separator = _apps_separator;
+@synthesize toggle_fullscreen_item = _toggle_fullscreen_item;
+@synthesize copy_menu_item = _copy_menu_item;
+@synthesize dock_apps_menu = _dock_apps_menu;
+@synthesize apps_table = _apps_table;
+@synthesize dock_menu = _dock_menu;
 
 - (void) awakeFromNib
 {
@@ -88,7 +129,7 @@ extern char *bundle_id_prefix;
 
         /* convert from [TITLE1 COMMAND1 TITLE2 COMMAND2 ...]
            to [[TITLE1 COMMAND1] [TITLE2 COMMAND2] ...] format. */
-        if (count > 0 && ![appsMenu[0] isKindOfClass:NSArray.class]) {
+        if (count > 0 && ![[appsMenu objectAtIndex:0] isKindOfClass:[NSArray class]]) {
             int i;
             NSMutableArray *copy, *sub;
 
@@ -96,8 +137,8 @@ extern char *bundle_id_prefix;
 
             for (i = 0; i < count / 2; i++) {
                 sub = [[NSMutableArray alloc] initWithCapacity:3];
-                [sub addObject:appsMenu[i * 2]];
-                [sub addObject:appsMenu[i * 2 + 1]];
+                [sub addObject:[appsMenu objectAtIndex:i * 2]];
+                [sub addObject:[appsMenu objectAtIndex:i * 2 + 1]];
                 [sub addObject:@""];
                 [copy addObject:sub];
                 [sub release];
@@ -110,10 +151,10 @@ extern char *bundle_id_prefix;
         [self set_apps_menu:appsMenu];
     }
 
-    [NSNotificationCenter.defaultCenter addObserver:self
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(apps_table_done:)
                                                name:NSWindowWillCloseNotification
-                                             object:self.apps_table.window];
+                                             object:[self.apps_table window]];
 }
 
 - (void) item_selected:sender
@@ -156,10 +197,10 @@ extern char *bundle_id_prefix;
     self.apps = nil;
 }
 
-- (void) prepend_apps_item:(NSArray <NSArray <NSString *> *> *)list index:(int)i menu:(NSMenu *)menu
+- (void) prepend_apps_item:(NSArray *)list index:(int)i menu:(NSMenu *)menu
 {
     NSString *title, *shortcut = @"";
-    NSArray <NSString *> *group;
+    NSArray *group;
     NSMenuItem *item;
 
     group = [list objectAtIndex:i];
@@ -183,7 +224,7 @@ extern char *bundle_id_prefix;
     [item setTag:i + 1];                  /* can't be zero, so add one */
 }
 
-- (void) install_apps_menu:(NSArray <NSArray <NSString *> *> *)list
+- (void) install_apps_menu:(NSArray *)list
 {
     NSMenu *menu;
     int i, count;
@@ -207,7 +248,7 @@ extern char *bundle_id_prefix;
     self.apps = list;
 }
 
-- (void) set_window_menu:(NSArray <NSArray <NSString *> *> *)list
+- (void) set_window_menu:(NSArray *)list
 {
     NSMenu * const menu = X11App.windowsMenu;
     NSMenu * const dock_menu = self.dock_menu;
@@ -237,9 +278,10 @@ extern char *bundle_id_prefix;
 
         for (NSInteger i = 0; i < itemsToAdd; i++) {
             NSString *name, *shortcut;
+            NSArray *row = [list objectAtIndex:i];
 
-            name = list[i][0];
-            shortcut = list[i][1];
+            name = [row objectAtIndex:0];
+            shortcut = [row objectAtIndex:1];
 
             if (windowItemModMask == 0 || windowItemModMask == -1)
                 shortcut = @"";
@@ -303,7 +345,7 @@ extern char *bundle_id_prefix;
     self.checked_window_item = n;
 }
 
-- (void) set_apps_menu:(NSArray <NSArray <NSString *> *> *)list
+- (void) set_apps_menu:(NSArray *)list
 {
     [self remove_apps_menu];
     [self install_apps_menu:list];
@@ -454,7 +496,7 @@ extern char *bundle_id_prefix;
 {
     int tag;
     NSString *item;
-    NSArray <NSArray <NSString *> *> * const apps = self.apps;
+    NSArray * const apps = self.apps;
 
     tag = [sender tag] - 1;
     if (apps == nil || tag < 0 || tag >= [apps count])
@@ -468,15 +510,15 @@ extern char *bundle_id_prefix;
 - (IBAction) apps_table_show:sender
 {
     NSArray *columns;
-    NSMutableArray <NSMutableArray <NSString *> *> * const oldapps = self.table_apps;
+    NSMutableArray * const oldapps = self.table_apps;
     NSTableView * const apps_table = self.apps_table;
 
-    NSMutableArray <NSMutableArray <NSString *> *> * const table_apps = [[NSMutableArray alloc] initWithCapacity:1];
+    NSMutableArray * const table_apps = [[NSMutableArray alloc] initWithCapacity:1];
     self.table_apps = table_apps;
 
-    NSArray <NSArray <NSString *> *> * const apps = self.apps;
+    NSArray * const apps = self.apps;
     if (apps != nil) {
-        for (NSArray <NSString *> * row in apps) {
+        for (NSArray * row in apps) {
             [table_apps addObject:row.mutableCopy];
         }
     }
@@ -498,7 +540,7 @@ extern char *bundle_id_prefix;
 
 - (IBAction) apps_table_done:sender
 {
-    NSMutableArray <NSMutableArray <NSString *> *> * const table_apps = self.table_apps;
+    NSMutableArray * const table_apps = self.table_apps;
     NSTableView * const apps_table = self.apps_table;
     [apps_table deselectAll:sender];    /* flush edits? */
 
@@ -516,7 +558,7 @@ extern char *bundle_id_prefix;
 - (IBAction) apps_table_new:sender
 {
     NSMutableArray *item;
-    NSMutableArray <NSMutableArray <NSString *> *> * const table_apps = self.table_apps;
+    NSMutableArray * const table_apps = self.table_apps;
     NSTableView * const apps_table = self.apps_table;
 
     int row = [apps_table selectedRow], i;
@@ -545,10 +587,10 @@ extern char *bundle_id_prefix;
 
 - (IBAction) apps_table_duplicate:sender
 {
-    NSMutableArray <NSMutableArray <NSString *> *> * const table_apps = self.table_apps;
+    NSMutableArray * const table_apps = self.table_apps;
     NSTableView * const apps_table = self.apps_table;
     int row = [apps_table selectedRow], i;
-    NSMutableArray <NSString *> *item;
+    NSMutableArray *item;
 
     if (row < 0) {
         [self apps_table_new:sender];
@@ -571,7 +613,7 @@ extern char *bundle_id_prefix;
 
 - (IBAction) apps_table_delete:sender
 {
-    NSMutableArray <NSMutableArray <NSString *> *> * const table_apps = self.table_apps;
+    NSMutableArray * const table_apps = self.table_apps;
     NSTableView * const apps_table = self.apps_table;
     int row = [apps_table selectedRow];
 
@@ -595,7 +637,7 @@ extern char *bundle_id_prefix;
 
 - (NSInteger) numberOfRowsInTableView:(NSTableView *)tableView
 {
-    NSMutableArray <NSMutableArray <NSString *> *> * const table_apps = self.table_apps;
+    NSMutableArray * const table_apps = self.table_apps;
     if (table_apps == nil) return 0;
 
     return [table_apps count];
@@ -604,7 +646,7 @@ extern char *bundle_id_prefix;
 - (id)             tableView:(NSTableView *)tableView
    objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    NSMutableArray <NSMutableArray <NSString *> *> * const table_apps = self.table_apps;
+    NSMutableArray * const table_apps = self.table_apps;
     NSArray *item;
     int col;
 
@@ -622,8 +664,8 @@ extern char *bundle_id_prefix;
 - (void) tableView:(NSTableView *)tableView setObjectValue:(id)object
     forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    NSMutableArray <NSMutableArray <NSString *> *> * const table_apps = self.table_apps;
-    NSMutableArray <NSString *> *item;
+    NSMutableArray * const table_apps = self.table_apps;
+    NSMutableArray *item;
     int col;
 
     if (table_apps == nil) return;
@@ -686,7 +728,7 @@ extern char *bundle_id_prefix;
     XQuartzRootlessDefault = !self.enable_fullscreen.state;
 
     [self.enable_fullscreen_menu setEnabled:!XQuartzRootlessDefault];
-    [self.enable_fullscreen_menu_text setTextColor:XQuartzRootlessDefault ? NSColor.disabledControlTextColor : NSColor.controlTextColor];
+    [self.enable_fullscreen_menu_text setTextColor:XQuartzRootlessDefault ? [NSColor disabledControlTextColor] : [NSColor controlTextColor]];
 
     DarwinSendDDXEvent(kXquartzSetRootless, 1, XQuartzRootlessDefault);
 
@@ -748,8 +790,8 @@ extern char *bundle_id_prefix;
         [self.sync_primary_immediately setEnabled:pbproxy_active];
 
         // setEnabled doesn't do this...
-        [self.sync_text1 setTextColor:pbproxy_active ? NSColor.controlTextColor : NSColor.disabledControlTextColor];
-        [self.sync_text2 setTextColor:pbproxy_active ? NSColor.controlTextColor : NSColor.disabledControlTextColor];
+        [self.sync_text1 setTextColor:pbproxy_active ? [NSColor controlTextColor] : [NSColor disabledControlTextColor]];
+        [self.sync_text2 setTextColor:pbproxy_active ? [NSColor controlTextColor] : [NSColor disabledControlTextColor]];
     } else if (sender == self.sync_pasteboard_to_clipboard) {
         [defaults setBool:!!self.sync_pasteboard_to_clipboard.state forKey:XQuartzPrefKeySyncPasteboardToClipboard];
     } else if (sender == self.sync_pasteboard_to_primary) {
@@ -799,13 +841,13 @@ extern char *bundle_id_prefix;
     [self.sync_primary_immediately setEnabled:pbproxy_active];
 
     // setEnabled doesn't do this...
-    [self.sync_text1 setTextColor:pbproxy_active ? NSColor.controlTextColor : NSColor.disabledControlTextColor];
-    [self.sync_text2 setTextColor:pbproxy_active ? NSColor.controlTextColor : NSColor.disabledControlTextColor];
+    [self.sync_text1 setTextColor:pbproxy_active ? [NSColor controlTextColor] : [NSColor disabledControlTextColor]];
+    [self.sync_text2 setTextColor:pbproxy_active ? [NSColor controlTextColor] : [NSColor disabledControlTextColor]];
 
     [self.enable_fullscreen setIntValue:!XQuartzRootlessDefault];
     [self.enable_fullscreen_menu setIntValue:XQuartzFullscreenMenu];
     [self.enable_fullscreen_menu setEnabled:!XQuartzRootlessDefault];
-    [self.enable_fullscreen_menu_text setTextColor:XQuartzRootlessDefault ? NSColor.disabledControlTextColor : NSColor.controlTextColor];
+    [self.enable_fullscreen_menu_text setTextColor:XQuartzRootlessDefault ? [NSColor disabledControlTextColor] : [NSColor controlTextColor]];
 
     [self.prefs_panel makeKeyAndOrderFront:sender];
 }

@@ -44,6 +44,7 @@
 #include <X11/extensions/applewmconst.h>
 #include "micmap.h"
 #include "exglobals.h"
+#include "osxcompat.h"
 
 #include <mach/mach.h>
 #include <unistd.h>
@@ -156,10 +157,12 @@ X11Application *X11App;
 @end
 
 @interface X11Application ()
-@property (nonatomic, readwrite, assign) OSX_BOOL x_active;
 @end
 
 @implementation X11Application
+
+@synthesize controller = _controller;
+@synthesize x_active = _x_active;
 
 typedef struct message_struct message;
 struct message_struct {
@@ -439,9 +442,9 @@ sendX11NSEvent_fptr(void *e_ptr)
                 [self set_front_process:nil];
 
                 /* Get the Spaces preference for SwitchOnActivate */
-                BOOL const workspaces = [NSUserDefaults.dockDefaults boolForKey:@"workspaces"];
+                BOOL const workspaces = [[NSUserDefaults dockDefaults] boolForKey:@"workspaces"];
                 if (workspaces) {
-                    order_all_windows = [NSUserDefaults.globalDefaults boolForKey:@"AppleSpacesSwitchOnActivate"];
+                    order_all_windows = [[NSUserDefaults globalDefaults] boolForKey:@"AppleSpacesSwitchOnActivate"];
                 }
 
                 /* TODO: In the workspaces && !AppleSpacesSwitchOnActivate case, the windows are ordered
@@ -581,15 +584,15 @@ void
 X11ApplicationSetWindowMenu(int nitems, const char **items,
                             const char *shortcuts)
 {
-    @autoreleasepool {
-        NSMutableArray<NSArray<NSString *> *> *allMenuItems =
+    OBJC_AUTORELEASEPOOL_BEGIN
+        NSMutableArray *allMenuItems =
             [[NSMutableArray alloc] init];
 
         for (int i = 0; i < nitems; i++) {
-            NSMutableArray<NSString *> *menuItem =
+            NSMutableArray *menuItem =
                 [[NSMutableArray alloc] init];
 
-            [menuItem addObject:@(items[i])];
+            [menuItem addObject:[NSString stringWithUTF8String:items[i]]];
 
             if (shortcuts[i] == 0) {
                 [menuItem addObject:@""];
@@ -605,7 +608,7 @@ X11ApplicationSetWindowMenu(int nitems, const char **items,
         dispatch_async_f(dispatch_get_main_queue(),
                          allMenuItems,
                          setWindowMenuOnMain_fptr);
-    }
+    OBJC_AUTORELEASEPOOL_END
 }
 
 static void
@@ -686,12 +689,11 @@ appLaunchClient_fptr(void *string_ptr)
 void
 X11ApplicationLaunchClient(const char *cmd)
 {
-    @autoreleasepool {
+    OBJC_AUTORELEASEPOOL_BEGIN
         NSString *string_alloc = [[NSString alloc] initWithUTF8String:cmd];
         dispatch_async_f(dispatch_get_main_queue(), string_alloc, appLaunchClient_fptr);
-    }
+    OBJC_AUTORELEASEPOOL_END
 }
-
 
 
 /* helper function for X11ApplicationCanEnterRandR(),
@@ -822,12 +824,12 @@ X11ApplicationMain(int argc, char **argv, char **envp)
     while (access("/tmp/x11-block", F_OK) == 0) sleep(1);
 #endif
 
-    @autoreleasepool {
+    OBJC_AUTORELEASEPOOL_BEGIN
         X11App = (X11Application *)[X11Application sharedApplication];
         [X11App read_defaults];
 
         [NSBundle loadNibNamed:@"main" owner:NSApp];
-        [NSNotificationCenter.defaultCenter addObserver:NSApp
+        [[NSNotificationCenter defaultCenter] addObserver:NSApp
                                                selector:@selector (became_key:)
                                                    name:NSWindowDidBecomeKeyNotification
                                                  object:nil];
@@ -839,9 +841,9 @@ X11ApplicationMain(int argc, char **argv, char **envp)
         QuartzModeBundleInit();
 
         /* Calculate the height of the menubar so we can avoid it. */
-        aquaMenuBarHeight = NSApp.mainMenu.menuBarHeight;
+        aquaMenuBarHeight = [[NSApp mainMenu] menuBarHeight];
         if (!aquaMenuBarHeight) {
-            NSScreen* primaryScreen = NSScreen.screens[0];
+            NSScreen* primaryScreen = [[NSScreen screens] objectAtIndex:0];
             aquaMenuBarHeight = NSHeight(primaryScreen.frame) - NSMaxY(primaryScreen.visibleFrame);
         }
 
@@ -874,7 +876,7 @@ X11ApplicationMain(int argc, char **argv, char **envp)
         [[SUUpdater sharedUpdater] resetUpdateCycle];
         //    [[SUUpdater sharedUpdater] checkForUpdates:X11App];
 #endif
-    }
+    OBJC_AUTORELEASEPOOL_END
 
     [NSApp run];
     /* not reached */
