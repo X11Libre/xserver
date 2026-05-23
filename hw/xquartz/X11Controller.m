@@ -53,6 +53,7 @@
 #include <stdlib.h>
 
 #include "dix_priv.h"
+#include "osxcompat.h"
 
 extern aslclient aslc;
 extern char *bundle_id_prefix;
@@ -362,6 +363,7 @@ extern char *bundle_id_prefix;
         setenv("DISPLAY", buf, TRUE);
     }
 
+#ifdef HAS_ASL_LOG_DESCRIPTOR
     if (&asl_log_descriptor) {
         char *asl_sender;
         aslmsg amsg = asl_new(ASL_TYPE_MSG);
@@ -393,6 +395,7 @@ extern char *bundle_id_prefix;
 
         asl_free(amsg);
     }
+#endif
 
     /* Do the fork-twice trick to avoid having to reap zombies */
     child1 = fork();
@@ -410,12 +413,13 @@ extern char *bundle_id_prefix;
             _exit(1);
 
         case 0:                                     /* child2 */
+#ifdef HAS_ASL_LOG_DESCRIPTOR
             if (&asl_log_descriptor) {
                 /* Replace our stdout/stderr */
                 dup2(stdout_pipe[1], STDOUT_FILENO);
                 dup2(stderr_pipe[1], STDERR_FILENO);
             }
-
+#endif
             /* close all open files except for standard streams */
             max_files = sysconf(_SC_OPEN_MAX);
             for (i = 3; i < max_files; i++)
@@ -437,11 +441,13 @@ extern char *bundle_id_prefix;
         waitpid(child1, &status, 0);
     }
 
+#ifdef HAS_ASL_LOG_DESCRIPTOR
     if (&asl_log_descriptor) {
         /* Close the write ends of the pipe */
         close(stdout_pipe[1]);
         close(stderr_pipe[1]);
     }
+#endif
 }
 
 - (void) app_selected:sender
