@@ -45,7 +45,11 @@ struct x_list_struct {
 #endif
 
 #ifndef X_EXTERN
+#ifdef __private_extern__
 #define X_EXTERN __private_extern__
+#else
+#define X_EXTERN __attribute__((visibility("hidden")))
+#endif
 #endif
 
 X_EXTERN void X_PFX(list_free_1) (x_list * node);
