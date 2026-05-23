@@ -42,6 +42,10 @@
 #undef BOOL
 #endif
 
+#ifndef strong
+#define strong retain
+#endif
+
 @interface X11Controller : NSObject <NSTableViewDataSource>
 @property (nonatomic, readwrite, strong) IBOutlet NSPanel *prefs_panel;
 
