@@ -11,18 +11,34 @@ Chroboczek sorts before Intel Corporation sorts before Daniel Stone).
 Copyright © 2025 Enrico Weigelt, metux IT consult
 Copyright © 2011 Dave Airlie
 Copyright © 2000-2001 Juliusz Chroboczek
+Copyright © 2014, 2016-2018 Broadcom
+Copyright © 2012 Canonical, Ltd.
+Copyright © 2011 The Chromium Authors
+Copyright © 2010-2011 Collabora Ltd.
 Copyright © 1998 Egbert Eich
-Copyright © 2006-2007 Intel Corporation
-Copyright © 2006 Nokia Corporation
+Copyright © 2009-2010 Mikhail Gusarov
+Copyright © 2011 Tobias Häußler
+Copyright © 2011 Matthieu Herrb
+Copyright © 2009 Jeremy Huddleston, Julien Cristau, and Matthieu Herrb
 Copyright © 2006-2008 Peter Hutterer
-Copyright © 2009-2010 NVIDIA Corporation
-Copyright © 1987, 2003-2006, 2008-2010, 2025 Oracle and/or its affiliates.
-Copyright © 1999 Keith Packard
-Copyright © 2007-2009 Red Hat, Inc.
-Copyright © 2005-2008 Daniel Stone
-Copyright © 2006-2009 Simon Thum
+Copyright © 2006-2014 Intel Corporation
+Copyright © 2010 Francisco Jerez <currojerez@riseup.net>
+Copyright © 2020 Povilas Kanapickas
+Copyright © 2009 Maarten Maathuis
+Copyright © 2006 Nokia Corporation
+Copyright © 2009-2010, 2019 NVIDIA Corporation
+Copyright © 1987, 2003-2006, 2008-2011, 2014, 2025 Oracle and/or its affiliates.
+Copyright © 1998-1999, 2001 Keith Packard
+Copyright © 2007-2017, 2019, 2021, 2024 Red Hat, Inc.
+Copyright © 2010 Yaakov Selkowitz
+Copyright © 2012 Yaakov Selkowitz and Keith Packard
+Copyright © 2005-2008, 2011 Daniel Stone
+Copyright © 2006-2011 Simon Thum
+Copyright © 2008 Tungsten Graphics, Inc., Cedar Park, Texas.
+Copyright © 2009, 2011-2014 Jon TURNEY
 Copyright © 2003-2008, 2013 Geert Uytterhoeven
 Copyright © 2006 Luc Verhaegen
+Copyright © 2007 Carl Worth
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -52,7 +68,7 @@ licenses.
 
 
 Copyright (C) 1994-2003 The XFree86 Project, Inc.  All Rights Reserved.
-Copyright (C) Colin Harrison 2005-2008
+Copyright (C) Colin Harrison 2005-2009
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -125,6 +141,9 @@ in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 2008 Tungsten Graphics, Inc., Cedar Park, Texas.
+Copyright 2011 Dave Airlie
+Copyright 2019 NVIDIA CORPORATION
+All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -414,8 +433,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 Copyright 1998-2000 Precision Insight, Inc., Cedar Park, Texas.
 Copyright 2000 VA Linux Systems, Inc.
-Copyright (c) 2002, 2008, 2009 Apple Computer, Inc.
-Copyright (c) 2003-2004 Torrey T. Lyons.
+Copyright (c) 2002-2012 Apple Computer, Inc.
 All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -762,6 +780,7 @@ is" without express or implied warranty.
 
 Copyright (C) 2001-2004 Harold L Hunt II All Rights Reserved.
 Copyright (C) Colin Harrison 2005-2008
+Copyright (C) 2009-2010 Jon TURNEY
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -1053,6 +1072,8 @@ PERFORMANCE OF THIS SOFTWARE.
 
 
 Copyright (c) 1994-2003 by The XFree86 Project, Inc.
+Copyright (c) 1995  Jon Tombs
+Copyright (c) 1995, 1996, 1999  XFree86 Inc
 Copyright 1997 by Metro Link, Inc.
 Copyright 2003 by David H. Dawes.
 Copyright 2003 by X-Oz Technologies.
@@ -1087,10 +1108,18 @@ Copyright 1993 by David Wexelblat <dwex@goblin.org>
 Copyright 1999 by David Holland <davidh@iquest.net>
 Copyright © 2000 Compaq Computer Corporation
 Copyright © 2002 Hewlett-Packard Company
-Copyright © 2006 Intel Corporation
-Copyright © 2006-2007 Keith Packard
-Copyright © 2008 Red Hat, Inc
+Copyright © 2006, 2010-2011, 2014 Intel Corporation
+Copyright © 2006-2007, 2010, 2013-2014, 2017 Keith Packard
+Copyright © 2008-2011 Kristian Høgsberg
+Copyright © 2008, 2012, 2020, 2026 Red Hat, Inc.
 Copyright © 2008 George Sapountzis <gsap7@yahoo.gr>
+Copyright © 2010-2011 Aaron Plattner
+Copyright © 2010, Jamey Sharp
+Copyright © 2012 Collabora, Ltd.
+Copyright © 2018 Roman Gilg
+Copyright 2019 DisplayLink (UK) Ltd.
+Copyright © 2020 Drew Devault
+Copyright © 2021 Xaver Hugl
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -1171,8 +1200,9 @@ Copyright (c) 2001-2004 Greg Parker.
 Copyright (c) 2001-2004 Torrey T. Lyons
 Copyright (c) 2002-2003 Apple Computer, Inc.
 Copyright (c) 2004-2005 Alexander Gottwald
-Copyright (c) 2002-2009 Apple Inc.
+Copyright (c) 2002-2012, 2021 Apple Inc.
 Copyright (c) 2007 Jeremy Huddleston
+Copyright (c) 2010 Jan Hauffa
 All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -1198,6 +1228,9 @@ holders shall not be used in advertising or otherwise to promote the sale,
 use or other dealings in this Software without prior written authorization.
 
 
+Copyright (c) 2003-2012 Apple Inc.
+Copyright (c) 2001-2004 Torrey T. Lyons. All Rights Reserved.
+Copyright 2004 Kaleb S. KEITHLEY. All Rights Reserved.
 Copyright (C) 1999,2000 by Eric Sunshine <sunshine@sunshineco.com>
 Copyright (C) 2001-2005 by Thomas Winischhofer, Vienna, Austria.
 
@@ -1276,7 +1309,14 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
 
+Copyright (c) Alexander Gottwald 2004
+Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). All
+rights reserved.
+Copyright (c) 1993, 2010, Oracle and/or its affiliates.
+Copyright (c) Jon TURNEY 2009, 2012
 Copyright 2005-2006 Luc Verhaegen.
+Copyright (c) 2007-2009 Tiago Vignatti
+Copyright (c) 2007 Paulo R. Zanoni, Tiago Vignatti
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -1613,6 +1653,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 SPDX-License-Identifier: ISC
 
+Copyright (c) 2008 Otto Moerbeek <otto@drijf.net>
 Copyright (c) 2014 Google Inc.
 
 Permission to use, copy, modify, and distribute this software for any
