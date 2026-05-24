@@ -4377,6 +4377,40 @@ drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 #endif
 }
 
+/**
+ * Some setups have different requirements for the
+ * cursor pitch compared to intel and nvidia. 
+ *
+ * See: https://github.com/X11Libre/xserver/issues/1816
+ * 
+ * This function detects whether we are running in a vm,
+ * or on bare metal.
+ * 
+ * Driver names are taken from https://drmdb.emersion.fr/drivers
+ */
+static inline Bool
+drmmode_legacy_cursor_probe_allowed(drmmode_ptr drmmode)
+{
+    drmVersionPtr version = drmGetVersion(drmmode->fd);
+    if (!version) {
+        return FALSE;
+    } 
+ 
+    if (!version->name ||
+        strstr(version->name, "bochs-drm") ||
+        strstr(version->name, "evdi") ||
+        strstr(version->name, "vboxvideo") ||
+        strstr(version->name, "virtio_gpu") ||
+        strstr(version->name, "vkms") ||
+        strstr(version->name, "vmwgfx")) {
+        drmFreeVersion(version);
+        return FALSE;
+    }
+
+    drmFreeVersion(version);
+    return TRUE;
+}
+
 static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
 {
     modesettingPtr ms = modesettingPTR(crtc->scrn);
@@ -4388,42 +4422,45 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
     ms->min_cursor_width = ms->max_cursor_width;
     ms->min_cursor_height = ms->max_cursor_height;
 
-    /* probe square min first */
-    for (size = 1; size <= ms->max_cursor_width &&
-             size <= ms->max_cursor_height; size *= 2) {
-        int ret;
+    if (drmmode_legacy_cursor_probe_allowed(drmmode)) {
 
-        ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+      /* probe square min first */
+      for (size = 1; size <= ms->max_cursor_width &&
+               size <= ms->max_cursor_height; size *= 2) {
+          int ret;
+
+          ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
                                 handle, size, size, 0, 0);
-        if (ret == 0)
-            break;
+          if (ret == 0)
+              break;
+      }
+
+      /* check if smaller width works with non-square */
+      for (width = 1; width <= size; width *= 2) {
+          int ret;
+
+          ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                                  handle, width, size, 0, 0);
+          if (ret == 0) {
+              ms->min_cursor_width = width;
+              break;
+          }
+      }
+
+      /* check if smaller height works with non-square */
+      for (height = 1; height <= size; height *= 2) {
+          int ret;
+
+          ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                                  handle, size, height, 0, 0);
+          if (ret == 0) {
+              ms->min_cursor_height = height;
+              break;
+          }
+      }
+
+      drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0, 0, 0, 0, 0);
     }
-
-    /* check if smaller width works with non-square */
-    for (width = 1; width <= size; width *= 2) {
-        int ret;
-
-        ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
-                                handle, width, size, 0, 0);
-        if (ret == 0) {
-            ms->min_cursor_width = width;
-            break;
-        }
-    }
-
-    /* check if smaller height works with non-square */
-    for (height = 1; height <= size; height *= 2) {
-        int ret;
-
-        ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
-                                handle, size, height, 0, 0);
-        if (ret == 0) {
-            ms->min_cursor_height = height;
-            break;
-        }
-    }
-
-    drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0, 0, 0, 0, 0);
 }
 
 /* create front and cursor BOs */
