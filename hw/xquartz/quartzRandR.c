@@ -63,6 +63,155 @@ static Bool ignore_next_fake_mode_update = FALSE;
 typedef int (*QuartzModeCallback)
     (ScreenPtr, QuartzModeInfoPtr, void *);
 
+/* Modern CG APIs may not work on 10.6 ppc */
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 1060 || defined(__ppc__)
+
+static long
+getDictLong(CFDictionaryRef dictRef, CFStringRef key)
+{
+    long value;
+
+    CFNumberRef numRef = (CFNumberRef)CFDictionaryGetValue(dictRef, key);
+    if (!numRef)
+        return 0;
+
+    if (!CFNumberGetValue(numRef, kCFNumberLongType, &value))
+        return 0;
+    return value;
+}
+
+static double
+getDictDouble(CFDictionaryRef dictRef, CFStringRef key)
+{
+    double value;
+
+    CFNumberRef numRef = (CFNumberRef)CFDictionaryGetValue(dictRef, key);
+    if (!numRef)
+        return 0.0;
+
+    if (!CFNumberGetValue(numRef, kCFNumberDoubleType, &value))
+        return 0.0;
+    return value;
+}
+
+static void
+QuartzRandRGetModeInfo(CFDictionaryRef modeRef,
+                       QuartzModeInfoPtr pMode)
+{
+    pMode->width = (size_t)getDictLong(modeRef, kCGDisplayWidth);
+    pMode->height = (size_t)getDictLong(modeRef, kCGDisplayHeight);
+    pMode->refresh =
+        (int)(getDictDouble(modeRef, kCGDisplayRefreshRate) + 0.5);
+    if (pMode->refresh == 0)
+        pMode->refresh = DEFAULT_REFRESH;
+    pMode->ref = NULL;
+    pMode->pSize = NULL;
+}
+
+static Bool
+QuartzRandRCopyCurrentModeInfo(CGDirectDisplayID screenId,
+                               QuartzModeInfoPtr pMode)
+{
+    CFDictionaryRef curModeRef = CGDisplayCurrentMode(screenId);
+    if (!curModeRef)
+        return FALSE;
+
+    QuartzRandRGetModeInfo(curModeRef, pMode);
+    pMode->ref = (void *)curModeRef;
+    CFRetain(pMode->ref);
+    return TRUE;
+}
+
+static Bool
+QuartzRandRSetCGMode(CGDirectDisplayID screenId,
+                     QuartzModeInfoPtr pMode)
+{
+    CFDictionaryRef modeRef = (CFDictionaryRef)pMode->ref;
+    return (CGDisplaySwitchToMode(screenId, modeRef) == kCGErrorSuccess);
+}
+
+static Bool
+QuartzRandREnumerateModes(ScreenPtr pScreen,
+                          QuartzModeCallback callback,
+                          void *data)
+{
+    Bool retval = FALSE;
+    QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(pScreen);
+
+    /* Just an 800x600 fallback if we have no attached heads */
+    if (pQuartzScreen->displayIDs) {
+        CFDictionaryRef curModeRef, modeRef;
+        long curBpp;
+        CFArrayRef modes;
+        QuartzModeInfo modeInfo;
+        int i;
+        CGDirectDisplayID screenId = pQuartzScreen->displayIDs[0];
+
+        curModeRef = CGDisplayCurrentMode(screenId);
+        if (!curModeRef)
+            return FALSE;
+        curBpp = getDictLong(curModeRef, kCGDisplayBitsPerPixel);
+
+        modes = CGDisplayAvailableModes(screenId);
+        if (!modes)
+            return FALSE;
+        for (i = 0; i < CFArrayGetCount(modes); i++) {
+            int cb;
+            modeRef = (CFDictionaryRef)CFArrayGetValueAtIndex(modes, i);
+
+            /* Skip modes that are not usable on the current display or have
+               a different pixel encoding than the current mode. */
+            if (((unsigned long)getDictLong(modeRef, kCGDisplayIOFlags) &
+                 kDisplayModeUsableFlags) != kDisplayModeUsableFlags)
+                continue;
+            if (getDictLong(modeRef, kCGDisplayBitsPerPixel) != curBpp)
+                continue;
+
+            QuartzRandRGetModeInfo(modeRef, &modeInfo);
+            modeInfo.ref = (void *)modeRef;
+            cb = callback(pScreen, &modeInfo, data);
+            if (cb == CALLBACK_CONTINUE)
+                retval = TRUE;
+            else if (cb == CALLBACK_SUCCESS)
+                return TRUE;
+            else if (cb == CALLBACK_ERROR)
+                return FALSE;
+        }
+    }
+
+    switch (callback(pScreen, &pQuartzScreen->rootlessMode, data)) {
+    case CALLBACK_SUCCESS:
+        return TRUE;
+
+    case CALLBACK_ERROR:
+        return FALSE;
+
+    case CALLBACK_CONTINUE:
+        retval = TRUE;
+
+    default:
+        break;
+    }
+
+    switch (callback(pScreen, &pQuartzScreen->fullscreenMode, data)) {
+    case CALLBACK_SUCCESS:
+        return TRUE;
+
+    case CALLBACK_ERROR:
+        return FALSE;
+
+    case CALLBACK_CONTINUE:
+        retval = TRUE;
+
+    default:
+        break;
+    }
+
+    return retval;
+}
+
+#else /* We have the new CG APIs */
+
 static void
 QuartzRandRGetModeInfo(CGDisplayModeRef modeRef,
                        QuartzModeInfoPtr pMode)
@@ -198,6 +347,8 @@ QuartzRandREnumerateModes(ScreenPtr pScreen,
 
     return retval;
 }
+
+#endif  /* Modern CoreGraphics APIs */
 
 static Bool
 QuartzRandRModesEqual(QuartzModeInfoPtr pMode1,
