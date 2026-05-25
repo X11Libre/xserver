@@ -6,8 +6,14 @@
 //  Copyright (c) 2021 Apple Inc. All rights reserved.
 //
 
-#import "NSUserDefaults+XQuartzDefaults.h"
-#import <dispatch/dispatch.h>
+#include "NSUserDefaults+XQuartzDefaults.h"
+#include "osxcompat.h"
+
+#ifdef HAS_LIBDISPATCH
+#include <dispatch/dispatch.h>
+#else
+#include <pthread.h>
+#endif
 
 NSString * const XQuartzPrefKeyAppsMenu = @"apps_menu";
 NSString * const XQuartzPrefKeyFakeButtons = @"enable_fake_buttons";
@@ -128,32 +134,50 @@ xquartzDefaultsOnce(void *arg)
     [*defaults registerDefaults:systemDefaultsDict];
 }
 
+#ifdef HAS_LIBDISPATCH
+    typedef dispatch_once_t compat_once_t;
+    #define COMPAT_ONCE_INIT 0
+    #define compat_once_f dispatch_once_f
+#else
+    typedef pthread_once_t compat_once_t;
+    #define COMPAT_ONCE_INIT PTHREAD_ONCE_INIT
+    static inline void compat_once_f(compat_once_t *once, void *context, void (*func)(void *)) {
+        // pthread_once only takes a void(*)(void), so wrap context in a static
+        static void *compat_context;
+        static void (*compat_func)(void *);
+        compat_context = context;
+        compat_func = func;
+        void wrapper(void) { compat_func(compat_context); }
+        pthread_once(once, wrapper);
+    }
+#endif
+
 @implementation NSUserDefaults (XQuartzDefaults)
 
 + (NSUserDefaults *)globalDefaults
 {
-    static dispatch_once_t once;
+    static compat_once_t once = COMPAT_ONCE_INIT;
     static NSUserDefaults *defaults;
 
-    dispatch_once_f(&once, &defaults, globalDefaultsOnce);
+    compat_once_f(&once, &defaults, globalDefaultsOnce);
     return defaults;
 }
 
 + (NSUserDefaults *)dockDefaults
 {
-    static dispatch_once_t once;
+    static compat_once_t once = COMPAT_ONCE_INIT;
     static NSUserDefaults *defaults;
 
-    dispatch_once_f(&once, &defaults, dockDefaultsOnce);
+    compat_once_f(&once, &defaults, dockDefaultsOnce);
     return defaults;
 }
 
 + (NSUserDefaults *)xquartzDefaults
 {
-    static dispatch_once_t once;
+    static compat_once_t once = COMPAT_ONCE_INIT;
     static NSUserDefaults *defaults;
 
-    dispatch_once_f(&once, &defaults, xquartzDefaultsOnce);
+    compat_once_f(&once, &defaults, xquartzDefaultsOnce);
     return defaults;
 }
 

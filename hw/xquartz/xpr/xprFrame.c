@@ -44,8 +44,13 @@
 #include <X11/Xatom.h>
 #include "windowstr.h"
 #include "quartz.h"
+#include "osxcompat.h"
 
+#ifdef HAS_LIBDISPATCH
 #include <dispatch/dispatch.h>
+#else
+#include <pthread.h>
+#endif
 
 #define DEFINE_ATOM_HELPER(func, atom_name)                      \
     static Atom func(void) {                                       \
@@ -63,7 +68,11 @@ typedef struct _WindowHashInsertCtx {
 static x_hash_table * window_hash;
 
 /* Need to guard window_hash since xprIsX11Window can be called from any thread. */
+#ifdef HAS_LIBDISPATCH
 static dispatch_queue_t window_hash_serial_q;
+#else
+static pthread_rwlock_t window_hash_rwlock;
+#endif
 
 /* Prototypes for static functions */
 static Bool
@@ -206,6 +215,7 @@ xprCreateFrame(RootlessWindowPtr pFrame, ScreenPtr pScreen,
         return FALSE;
     }
 
+#ifdef HAS_LIBDISPATCH
     WindowHashInsertCtx *ctx = malloc(sizeof(WindowHashInsertCtx));
     if (!ctx) return FALSE;
 
@@ -213,6 +223,12 @@ xprCreateFrame(RootlessWindowPtr pFrame, ScreenPtr pScreen,
     ctx->frame = pFrame;
 
     dispatch_async_f(window_hash_serial_q, ctx, windowHashInsert);
+#else
+    pthread_rwlock_wrlock(&window_hash_rwlock);
+    x_hash_table_insert(window_hash, pFrame->wid, pFrame);
+    pthread_rwlock_unlock(&window_hash_rwlock);
+#endif
+
     xprSetNativeProperty(pFrame);
 
     return TRUE;
@@ -248,11 +264,18 @@ static void windowLookup(void *arg) {
 static void
 xprDestroyFrame(RootlessFrameID wid)
 {
+#ifdef HAS_LIBDISPATCH
     WindowHashRemoveCtx *ctx = malloc(sizeof(WindowHashRemoveCtx));
     if (!ctx) FatalError("Could not allocate memory for the hash removal context.");
 
     ctx->wid = wid;
+
     dispatch_async_f(window_hash_serial_q, ctx, windowHashRemove);
+#else
+    pthread_rwlock_wrlock(&window_hash_rwlock);
+    x_hash_table_remove(window_hash, wid);
+    pthread_rwlock_unlock(&window_hash_rwlock);
+#endif
 
     xp_error err = xp_destroy_window(x_cvt_vptr_to_uint(wid));
     if (err != Success)
@@ -324,7 +347,13 @@ xprRestackFrame(RootlessFrameID wid, RootlessFrameID nextWid)
         wc.sibling = x_cvt_vptr_to_uint(nextWid);
     }
 
+#ifdef HAS_LIBDISPATCH
     dispatch_sync_f(window_hash_serial_q, &ctx, windowLookup);
+#else
+    pthread_rwlock_rdlock(&window_hash_rwlock);
+    winRec = x_hash_table_lookup(window_hash, wid, NULL);
+    pthread_rwlock_unlock(&window_hash_rwlock);
+#endif
 
     if (winRec) {
         if (XQuartzIsRootless)
@@ -515,9 +544,13 @@ xprInit(ScreenPtr pScreen)
     rootless_CopyWindow_threshold = xp_scroll_area_threshold;
 
     assert((window_hash = x_hash_table_new(NULL, NULL, NULL, NULL)));
+#ifdef HAS_LIBDISPATCH
     assert((window_hash_serial_q =
                 dispatch_queue_create(BUNDLE_ID_PREFIX ".X11.xpr_window_hash",
                                       NULL)));
+#else
+    assert(0 == pthread_rwlock_init(&window_hash_rwlock, NULL));
+#endif
 
     return TRUE;
 }
@@ -535,12 +568,19 @@ WindowPtr
 xprGetXWindow(xp_window_id wid)
 {
     RootlessWindowRec *winRec;
+#ifdef HAS_LIBDISPATCH
     WindowGetCtx ctx = {
         .wid = x_cvt_uint_to_vptr(wid),
         .winrec = &winRec
     };
 
     dispatch_sync_f(window_hash_serial_q, &ctx, windowGet);
+#else
+    RootlessWindowRec *winRec;
+    pthread_rwlock_rdlock(&window_hash_rwlock);
+    winRec = x_hash_table_lookup(window_hash, x_cvt_uint_to_vptr(wid), NULL);
+    pthread_rwlock_unlock(&window_hash_rwlock);
+#endif
 
     return winRec != NULL ? winRec->win : NULL;
 }

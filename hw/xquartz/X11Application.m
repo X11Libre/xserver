@@ -61,9 +61,14 @@ xpbproxy_run(void);
 #define XSERVER_VERSION "?"
 #endif
 
+#ifdef HAS_LIBDISPATCH
 #include <dispatch/dispatch.h>
 
 static dispatch_queue_t eventTranslationQueue;
+#else
+// aquaMenuBarHeight is just a proxy for initialization
+#define eventTranslationQueue aquaMenuBarHeight
+#endif
 
 #ifndef __has_feature
 #define __has_feature(x) 0
@@ -483,8 +488,12 @@ sendX11NSEvent_fptr(void *e_ptr)
     }
 
     if (for_x) {
+#ifdef HAS_LIBDISPATCH
         NSEvent *event_copy = [e retain];
         dispatch_async_f(eventTranslationQueue, event_copy, sendX11NSEvent_fptr);
+#else
+        [self sendX11NSEvent:e];
+#endif
     }
 }
 
@@ -842,13 +851,20 @@ X11ApplicationMain(int argc, char **argv, char **envp)
 
         /* Calculate the height of the menubar so we can avoid it. */
         aquaMenuBarHeight = [[NSApp mainMenu] menuBarHeight];
+#if ! __LP64__
+        if (!aquaMenuBarHeight) {
+            aquaMenuBarHeight = [NSMenuView menuBarHeight];
+        }
+#endif
         if (!aquaMenuBarHeight) {
             NSScreen* primaryScreen = [[NSScreen screens] objectAtIndex:0];
             aquaMenuBarHeight = NSHeight(primaryScreen.frame) - NSMaxY(primaryScreen.visibleFrame);
         }
 
+#ifdef HAS_LIBDISPATCH
         eventTranslationQueue = dispatch_queue_create(BUNDLE_ID_PREFIX ".X11.NSEventsToX11EventsQueue", NULL);
         assert(eventTranslationQueue != NULL);
+#endif
 
         /* Set the key layout seed before we start the server */
         last_key_layout = TISCopyCurrentKeyboardLayoutInputSource();

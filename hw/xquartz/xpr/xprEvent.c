@@ -52,10 +52,13 @@
 #include "quartzKeyboard.h"
 #include "rootlessWindow.h"
 #include "xprEvent.h"
+#include "osxcompat.h"
+
+#ifdef HAS_LIBDISPATCH
+#include <dispatch/dispatch.h>
+#endif
 
 #if XPLUGIN_VERSION >= 6
-#include <dispatch/dispatch.h>
-
 static void bringAllToFront(void *unused) {
   (void)unused; /* to silence the compiler warning */
   xp_window_bring_all_to_front();
@@ -76,7 +79,7 @@ bool QuartzModeEventHandler(int screenNum, XQuartzEvent *e, DeviceIntPtr dev) {
 
   case kXquartzBringAllToFront:
     DEBUG_LOG("kXquartzBringAllToFront\n");
-#if XPLUGIN_VERSION >= 6
+#if defined(HAS_LIBDISPATCH) && (XPLUGIN_VERSION >= 6)
     dispatch_async_f(
         dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), NULL,
         bringAllToFront);

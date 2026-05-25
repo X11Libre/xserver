@@ -60,6 +60,7 @@
 #include "exevents.h"
 #include "X11/keysym.h"
 #include "keysym2ucs.h"
+#include "osxcompat.h"
 
 extern void
 CopyKeyClass(DeviceIntPtr device, DeviceIntPtr master);
@@ -771,11 +772,15 @@ QuartzReadSystemKeymap(darwinKeyboardInfo *info)
     KeySym *k;
 
     /* This is an ugly ant-pattern, but it is more expedient to address the problem right now. */
+#ifdef HAS_LIBDISPATCH
     if (pthread_main_np()) {
         getKeyboardData(&ctx);
     } else {
         dispatch_sync_f(dispatch_get_main_queue(), &ctx, getKeyboardData);
     }
+#else
+    getKeyboardData(&ctx);
+#endif
 
     if (ctx.chr_data == NULL) {
         ErrorF("Couldn't get uchr or kchr resource\n");
