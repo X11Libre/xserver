@@ -51,8 +51,9 @@ fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
                    card->mynum, config->fbdevDevicePath);
     } else {
         char devbuf[] = "/dev/fbxx";
-        priv->fd = -1;
-        for (int i = 0; i < 32 && priv->fd < 0; i++) {
+        memcpy(devbuf, "/dev/fb", sizeof("/dev/fb"));
+        priv->fd = open("/dev/fb", O_RDWR);
+        for (int i = 0; i < 32 && (priv->fd < 0); i++) {
             snprintf(devbuf, sizeof(devbuf),
                      "/dev/fb%d", i);
             priv->fd = open(devbuf, O_RDWR);
