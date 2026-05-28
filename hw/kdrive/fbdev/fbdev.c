@@ -82,6 +82,9 @@ fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
         close(priv->fd);
         return FALSE;
     }
+
+    LogMessage(X_INFO, "Xfbdev(%d): Framebuffer device id: %s\n", card->mynum, priv->fix.id);
+
     /* quiet valgrind */
     memset(&priv->var, '\0', sizeof(priv->var));
     if (ioctl(priv->fd, FBIOGET_VSCREENINFO, &priv->var) < 0) {
