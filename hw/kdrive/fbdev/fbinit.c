@@ -232,7 +232,7 @@ ddxProcessArgument(int argc, char **argv, int i)
 
     if (!strcmp(argv[i], "-glvendor")) {
         if (i + 1 < argc) {
-            fbCurrScreen->fbdev_glvnd_provider = strdup(argv[i + 1]);
+            fbCurrScreen->fbdev_glvnd_provider = argv[i + 1];
             return 2;
         }
         UseMsg();
@@ -244,7 +244,7 @@ ddxProcessArgument(int argc, char **argv, int i)
             if (argv[i + 1][0] == '-' || !strcmp(argv[i + 1], "auto")) {
                 fbCurrScreen->fbdev_auto_dri3 = TRUE;
             } else {
-                fbCurrScreen->fbdev_dri_path = strdup(argv[i + 1]);
+                fbCurrScreen->fbdev_dri_path = argv[i + 1];
             }
             return 2;
         } else {
