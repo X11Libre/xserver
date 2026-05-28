@@ -82,8 +82,9 @@ X_PFX(cvt_vptr_to_uint) (void * val) {
 
     /* If this assert fails, chances are val actually is a pointer,
        or there's been memory corruption */
+#ifndef __ppc64__
     assert(sv == uv);
-
+#endif
     return uv;
 }
 
