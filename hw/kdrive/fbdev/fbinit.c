@@ -32,7 +32,26 @@
 
 static FbScreenConf *fbCurrScreen = NULL;
 
-static void fbdevLogScreenInfo(FbScreenConf *config, int screen_num);
+static const FbScreenConf fbDefaultConfig = {
+                                             .fbdevDevicePath = NULL,
+                                             .fbDisableShadow = FALSE,
+
+                                             .fbdev_glvnd_provider = NULL,
+
+                                             .fbdev_dri_path = NULL,
+                                             .fbdev_auto_dri3 = FALSE,
+                                             .fbdev_drm_master = FALSE,
+
+                                             .es_allowed = TRUE,
+                                             .force_es = FALSE,
+
+                                             .fbGlamorAllowed = TRUE,
+                                             .fbForceGlamor = FALSE,
+
+                                             .fbXVAllowed = TRUE,
+                                            };
+
+static void fbdevLogScreenInfo(const FbScreenConf *config, int screen_num);
 
 void LinuxLogInit(void);
 
@@ -53,9 +72,14 @@ LinuxLogInit(void)
     LogMessage(X_INFO, "\n");
     LogMessage(X_INFO, "Xfbdev: Configured screens info:\n");
     LogMessage(X_INFO, "\n");
-    while(curr_card) {
-        fbdevLogScreenInfo(curr_card->closure, curr_card->mynum);
-        curr_card = curr_card->next;
+
+    if (curr_card) {
+        while(curr_card) {
+            fbdevLogScreenInfo(curr_card->closure, curr_card->mynum);
+            curr_card = curr_card->next;
+        }
+    } else {
+        fbdevLogScreenInfo(&fbDefaultConfig, 0);
     }
 }
 
@@ -63,30 +87,12 @@ void
 InitCard(char *name)
 {
     fbCurrScreen = XNFalloc(sizeof(*fbCurrScreen));
-    *fbCurrScreen = (FbScreenConf) {
-                                    .fbdevDevicePath = NULL,
-                                    .fbDisableShadow = FALSE,
-
-                                    .fbdev_glvnd_provider = NULL,
-
-                                    .fbdev_dri_path = NULL,
-                                    .fbdev_auto_dri3 = FALSE,
-                                    .fbdev_drm_master = FALSE,
-
-                                    .es_allowed = TRUE,
-                                    .force_es = FALSE,
-
-                                    .fbGlamorAllowed = TRUE,
-                                    .fbForceGlamor = FALSE,
-
-                                    .fbXVAllowed = TRUE,
-                                   };
-
+    *fbCurrScreen = fbDefaultConfig;
     KdCardInfoAdd(&fbdevFuncs, fbCurrScreen);
 }
 
 static void
-fbdevLogScreenInfo(FbScreenConf *config, int screen_num)
+fbdevLogScreenInfo(const FbScreenConf *config, int screen_num)
 {
     LogMessage(X_INFO, "Xfbdev(%d): Screen %d:\n", screen_num, screen_num);
 
