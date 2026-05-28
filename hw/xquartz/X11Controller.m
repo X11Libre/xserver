@@ -113,6 +113,7 @@ extern char *bundle_id_prefix;
 @synthesize dock_apps_menu = _dock_apps_menu;
 @synthesize apps_table = _apps_table;
 @synthesize dock_menu = _dock_menu;
+@synthesize can_quit = _can_quit;
 
 - (void) awakeFromNib
 {
