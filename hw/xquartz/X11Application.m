@@ -204,7 +204,7 @@ QuartzModeBundleInit(void);
     [dict setObject:[NSString stringWithFormat:@"XQuartz %@", tem]
              forKey:@"ApplicationVersion"];
 
-    [dict setObject:[NSString stringWithFormat:@"xorg-server %s",
+    [dict setObject:[NSString stringWithFormat:@"XLibre Xserver %s",
                      XSERVER_VERSION]
      forKey:@"Version"];
 
