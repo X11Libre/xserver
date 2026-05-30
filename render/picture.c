@@ -554,16 +554,15 @@ PictureParseCmapPolicy(const char *name)
 {
     if (strcmp(name, "default") == 0)
         return PictureCmapPolicyDefault;
-    else if (strcmp(name, "mono") == 0)
+    if (strcmp(name, "mono") == 0)
         return PictureCmapPolicyMono;
-    else if (strcmp(name, "gray") == 0)
+    if (strcmp(name, "gray") == 0)
         return PictureCmapPolicyGray;
-    else if (strcmp(name, "color") == 0)
+    if (strcmp(name, "color") == 0)
         return PictureCmapPolicyColor;
-    else if (strcmp(name, "all") == 0)
+    if (strcmp(name, "all") == 0)
         return PictureCmapPolicyAll;
-    else
-        return PictureCmapPolicyInvalid;
+    return PictureCmapPolicyInvalid;
 }
 
 /** @see GetDefaultBytes */
