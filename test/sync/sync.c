@@ -44,7 +44,7 @@ pack_sync_value(xcb_sync_int64_t val)
 }
 
 static int64_t
-counter_value(struct xcb_connection_t *c,
+counter_value(xcb_connection_t *c,
               xcb_sync_query_counter_cookie_t cookie)
 {
     xcb_sync_query_counter_reply_t *reply =
