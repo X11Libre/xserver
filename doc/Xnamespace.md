@@ -60,7 +60,6 @@ touch /tmp/xauth_xclock # create directory
 xauth -f /tmp/xauth_xclock add :1 MIT-MAGIC-COOKIE-1 46F8E62B78E58962DE0CEEFC05AD90B7
 XAUTHORITY=/tmp/xauth_xclock {X_APP2} # run your app with the token to be xclock namespace
 ```
-`XAUTHORITY=/tmp/xauth_xeyes ./anko_xkbcat`
 
 ### MIT_MAGIC-COOKIE-1 Protocol
 
@@ -172,6 +171,15 @@ The biggest difference between anon and the other namespaces is that clients
  - are provided their own virtual namespace to prevent them from accessing resources owned by other client in the anon namespace
  - can't access any of the X Extensions as they will always be denied
 
+## Run an XLibre Server with XNamespace Enabled from beginning to end
+1. Create and populate ns.conf file in a directory
+   - See `Xext/namespace/ns.conf.example` for a configuration file example.
+2. Add the autorization keys from ns.conf to your xauth
+   - `xauth -f <auth_file> add $DISPLAY <authentification_type> <cookie>`
+   - `xauth -f /tmp/xauth_xclock add :1 MIT-MAGIC-COOKIE-1 46F8E62B78E58962DE0CEEFC05AD90B7`
+3. Run `<xserver_path_and_defualt_arguments> -namespace <ns.conf_path>`
+   - `X $DISPLAY -namespace /tmp/ns.conf`
+4. Go to [Xnamespace extension v1.0](#create-a-client-within-a-namespace)
 
 ## Appendix
 
