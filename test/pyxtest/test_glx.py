@@ -2,12 +2,16 @@
 #
 # Security tests for GLX extension vulnerabilities.
 
+import struct
 import time
 
 import pytest
 
 from proto import glx
-from xclient import Extension, X11Error
+from xclient import Extension, X11Error, X11Reply
+
+# The initial context tag array size in GlxAllocContextTag is 16.
+INITIAL_TAG_SLOTS = 16
 
 
 @pytest.fixture
@@ -165,4 +169,100 @@ class TestGLXChangeDrawableAttributesSwap:
 
         assert xserver.is_alive, (
             "Server crashed - GLX ChangeDrawableAttributes swap handler"
+        )
+
+
+class TestGlxMakeCurrent:
+    """Tests for CommonMakeCurrent vulnerabilities."""
+
+    @pytest.mark.asan
+    def test_make_current_context_tag_realloc_uaf(self, xserver, glx_xclient):
+        """
+        ZDI-CAN-30561: Use-after-free in CommonMakeCurrent due to
+        GlxAllocContextTag realloc invalidating oldTag pointer.
+
+        CommonMakeCurrent() stores a pointer oldTag into the
+        cl->contextTags array. In the unfixed code, CommonMakeNewCurrent()
+        is called before GlxFreeContextTag(oldTag). CommonMakeNewCurrent()
+        calls GlxAllocContextTag() which may realloc() the contextTags
+        array if all slots are full, leaving oldTag as a dangling pointer.
+        The subsequent GlxFreeContextTag(oldTag) then writes into freed
+        memory.
+
+        To trigger the realloc, all 16 initial context tag slots must be
+        simultaneously occupied. This is achieved by creating 17 distinct
+        GLX contexts and making each of the first 16 current (with
+        oldContextTag=0) so each gets its own tag slot. The 17th
+        MakeCurrent switches from the first context to the last with a
+        valid oldContextTag, which forces GlxAllocContextTag to grow the
+        array while oldTag still points into the old allocation.
+        """
+        xclient, opcode = glx_xclient
+        num_contexts = INITIAL_TAG_SLOTS + 1
+
+        # Create num_contexts distinct GLX contexts. Each must be a
+        # separate context so that MakeCurrent with oldContextTag=0
+        # doesn't get rejected (a context can only be current once).
+        contexts = []
+        for _ in range(num_contexts):
+            ctx = xclient.alloc_id()
+            contexts.append(ctx)
+            req = glx.CreateContextRequest(
+                opcode=opcode,
+                context_id=ctx,
+                visual=xclient.root_visual,
+                screen=0,
+                is_direct=1,
+            )
+            xclient.send_request(req)
+
+        # CreateContext has no reply on success; errors would be queued.
+        errors = xclient.flush_responses(timeout=2.0)
+        for resp in errors:
+            if isinstance(resp, X11Error):
+                pytest.skip(f"GLX CreateContext failed (error {resp.error_code})")
+
+        # Fill all 16 initial tag slots by making each context current
+        # without releasing the previous one (oldContextTag=0).
+        # In GLX, different contexts can be current simultaneously
+        # from the server's perspective (each gets its own tag slot).
+        tags = []
+        for i in range(INITIAL_TAG_SLOTS):
+            req = glx.MakeCurrentRequest(
+                opcode=opcode,
+                drawable=xclient.root_window,
+                context_id=contexts[i],
+                old_context_tag=0,
+            )
+            xclient.send_request(req)
+            resp = xclient.recv_response(timeout=2.0)
+            if isinstance(resp, X11Reply):
+                tag = struct.unpack_from("<I", resp.data, 8)[0]
+                tags.append(tag)
+            elif isinstance(resp, X11Error):
+                pytest.skip(
+                    f"GLX MakeCurrent failed at context {i} (error {resp.error_code})"
+                )
+
+        assert len(tags) == INITIAL_TAG_SLOTS
+
+        # All 16 tag slots are now occupied. A MakeCurrent that switches
+        # from contexts[0] (tag 1) to contexts[16] will:
+        # 1. CommonLoseCurrent(oldTag) - tell vendor to release context
+        # 2. In the unfixed code: CommonMakeNewCurrent() ->
+        #    GlxAllocContextTag() finds all 16 slots full ->
+        #    realloc(16->32), invalidating oldTag
+        # 3. GlxFreeContextTag(oldTag) writes to freed memory -> UAF
+        req = glx.MakeCurrentRequest(
+            opcode=opcode,
+            drawable=xclient.root_window,
+            context_id=contexts[INITIAL_TAG_SLOTS],
+            old_context_tag=tags[0],
+        )
+        xclient.send_request(req)
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - use-after-free in CommonMakeCurrent "
+            "due to GlxAllocContextTag realloc (ZDI-CAN-30561)"
         )
