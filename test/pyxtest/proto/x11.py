@@ -3,15 +3,22 @@
 # Core X11 protocol request builders
 
 import struct
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # Core protocol opcodes
 CreateWindow = 1
+ChangeWindowAttributes = 2
 CreatePixmap = 53
 InternAtom = 16
 ListFonts = 49
+OpenFont = 45
+CloseFont = 46
 SetFontPath = 51
 GetFontPath = 52
+CreateGC = 55
+ChangeGC = 56
+PolyText8 = 74
+ImageText8 = 76
 QueryExtension = 98
 ChangeKeyboardMapping = 100
 ForceScreenSaverOpcode = 115
@@ -122,6 +129,143 @@ class QueryExtensionRequest:
         return (
             struct.pack(
                 f"{byte_order}BBHHxx", QueryExtension, 0, req_len, len(name_bytes)
+            )
+            + padded
+        )
+
+
+@dataclass
+class OpenFontRequest:
+    """X11 OpenFont request.
+
+    Wire format:
+        CARD8    opcode      (45)
+        CARD8    unused
+        CARD16   length
+        CARD32   fid
+        CARD16   nbytes
+        CARD16   unused
+        STRING8  name        (padded to 4 bytes)
+    """
+
+    fid: int
+    name: str
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        name_bytes = self.name.encode("ascii")
+        padded = _pad(name_bytes)
+        req_len = (12 + len(padded)) // 4
+        return (
+            struct.pack(
+                f"{byte_order}BBH I Hxx",
+                OpenFont,
+                0,
+                req_len,
+                self.fid,
+                len(name_bytes),
+            )
+            + padded
+        )
+
+
+@dataclass
+class CloseFontRequest:
+    """X11 CloseFont request."""
+
+    fid: int
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH I",
+            CloseFont,
+            0,
+            2,
+            self.fid,
+        )
+
+
+@dataclass
+class CreateGCRequest:
+    """X11 CreateGC request.
+
+    Wire format:
+        CARD8    opcode      (55)
+        CARD8    unused
+        CARD16   length
+        CARD32   cid
+        CARD32   drawable
+        CARD32   value_mask
+        LISTofVALUE values
+    """
+
+    cid: int
+    drawable: int
+    values: dict = field(default_factory=dict)
+
+    # GC value mask bits
+    GCFont = 1 << 14
+    GCForeground = 1 << 2
+    GCBackground = 1 << 3
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        # Build value list in mask order
+        mask_bits = sorted(self.values.keys())
+        value_mask = 0
+        value_data = b""
+        for bit in mask_bits:
+            value_mask |= bit
+            value_data += struct.pack(f"{byte_order}I", self.values[bit])
+
+        req_len = (16 + len(value_data)) // 4
+        return (
+            struct.pack(
+                f"{byte_order}BBH III",
+                CreateGC,
+                0,
+                req_len,
+                self.cid,
+                self.drawable,
+                value_mask,
+            )
+            + value_data
+        )
+
+
+@dataclass
+class ImageText8Request:
+    """X11 ImageText8 request.
+
+    Wire format:
+        CARD8    opcode      (76)
+        CARD8    n           (string length)
+        CARD16   length
+        CARD32   drawable
+        CARD32   gc
+        INT16    x
+        INT16    y
+        STRING8  string      (padded to 4 bytes)
+    """
+
+    drawable: int
+    gc: int
+    x: int
+    y: int
+    string: str
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        string_bytes = self.string.encode("latin-1")
+        padded = _pad(string_bytes)
+        req_len = (16 + len(padded)) // 4
+        return (
+            struct.pack(
+                f"{byte_order}BBH II hh",
+                ImageText8,
+                len(string_bytes),
+                req_len,
+                self.drawable,
+                self.gc,
+                self.x,
+                self.y,
             )
             + padded
         )
@@ -261,6 +405,50 @@ class GetFontPathReply:
             paths.append(data[offset : offset + slen].decode("ascii", errors="replace"))
             offset += slen
         return cls(paths)
+
+
+@dataclass
+class PolyText8Request:
+    """X11 PolyText8 request.
+
+    Wire format:
+        CARD8    opcode      (74)
+        CARD8    unused
+        CARD16   length
+        CARD32   drawable
+        CARD32   gc
+        INT16    x
+        INT16    y
+        TEXTITEM8s           (padded to 4 bytes)
+
+    Each TEXTITEM8: CARD8 len + INT8 delta + STRING8[len]
+    """
+
+    drawable: int
+    gc: int
+    x: int
+    y: int
+    string: str
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        string_bytes = self.string.encode("latin-1")
+        # TEXTITEM8: len(1) + delta(1) + string(N)
+        text_item = struct.pack("Bb", len(string_bytes), 0) + string_bytes
+        padded = _pad(text_item)
+        req_len = (16 + len(padded)) // 4
+        return (
+            struct.pack(
+                f"{byte_order}BBH II hh",
+                PolyText8,
+                0,
+                req_len,
+                self.drawable,
+                self.gc,
+                self.x,
+                self.y,
+            )
+            + padded
+        )
 
 
 @dataclass
