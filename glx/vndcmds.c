@@ -255,6 +255,11 @@ static int CommonMakeCurrent(ClientPtr client,
             if (ret != Success) {
                 return ret;
             }
+            // Free the old tag before calling CommonMakeNewCurrent(),
+            // which may call GlxAllocContextTag() and realloc the
+            // contextTags array, invalidating the oldTag pointer.
+            GlxFreeContextTag(oldTag);
+            oldTag = NULL;
         }
 
         if (newVendor != NULL) {
@@ -265,9 +270,6 @@ static int CommonMakeCurrent(ClientPtr client,
         } else {
             reply.contextTag = 0;
         }
-
-        GlxFreeContextTag(oldTag);
-        oldTag = NULL;
     }
 
     reply.contextTag = GlxCheckSwap(client, reply.contextTag);
