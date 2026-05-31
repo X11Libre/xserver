@@ -31,16 +31,9 @@
 /* For extra precision of our cursor and other valuators */
 #define XQUARTZ_VALUATOR_LIMIT (1 << 16)
 
-Bool
-DarwinEQInit(void);
+void DarwinEQInit(void);
 void
 DarwinEQFini(void);
-void
-DarwinEQEnqueue(const xEventPtr e);
-void
-DarwinEQPointerPost(DeviceIntPtr pDev, xEventPtr e);
-void
-DarwinEQSwitchScreen(ScreenPtr pScreen, Bool fromDIX);
 void
 DarwinInputReleaseButtonsAndKeys(DeviceIntPtr pDev);
 void

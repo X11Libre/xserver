@@ -20,10 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -39,7 +36,7 @@
 #include "xf86_OSlib.h"
 
 #include "xf86sbusBus_priv.h"
-#include "xf86Sbus.h"
+#include "xf86Sbus_priv.h"
 
 static int promRootNode;
 
@@ -237,7 +234,7 @@ sparcPromGetBool(sbusPromNodePtr pnode, const char *prop)
     return promGetBool(prop);
 }
 
-static char *
+static const char *
 promWalkGetDriverName(int node, int oldnode)
 {
     int nextnode;
@@ -267,7 +264,7 @@ promWalkGetDriverName(int node, int oldnode)
 
     nextnode = promGetChild(node);
     if (nextnode) {
-        char *name;
+        const char *name;
 
         name = promWalkGetDriverName(nextnode, node);
         if (name)
@@ -280,10 +277,10 @@ promWalkGetDriverName(int node, int oldnode)
     return NULL;
 }
 
-char *
+const char *
 sparcDriverName(void)
 {
-    char *name;
+    const char *name;
 
     if (sparcPromInit() < 0)
         return NULL;
@@ -393,7 +390,7 @@ sparcPromAssignNodes(void)
         int fbNum, devId;
         static struct {
             int devId;
-            char *prefix;
+            const char *prefix;
         } procFbPrefixes[] = {
             {SBUS_DEVICE_CG14, "CGfourteen"},
             {SBUS_DEVICE_CG6, "CGsix"},

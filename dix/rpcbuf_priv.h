@@ -352,7 +352,7 @@ static inline void x_rpcbuf_write_counted_string_pad(
         x_rpcbuf_t *rpcbuf, const char *str)
 {
     if (str) {
-        CARD16 len = strlen(str);
+        CARD16 len = (CARD16)strlen(str); /* 64k should really be enough */
         x_rpcbuf_write_CARD16(rpcbuf, len);
         x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)str, len);
         x_rpcbuf_pad(rpcbuf);

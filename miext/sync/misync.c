@@ -129,16 +129,22 @@ miSyncDestroyFence(SyncFence * pFence)
 void
 miSyncTriggerFence(SyncFence * pFence)
 {
-    SyncTriggerList *ptl, *pNext;
+    SyncTriggerList *ptl;
+    Bool triggered;
 
     pFence->funcs.SetTriggered(pFence);
 
     /* run through triggers to see if any fired */
-    for (ptl = pFence->sync.pTriglist; ptl; ptl = pNext) {
-        pNext = ptl->next;
-        if ((*ptl->pTrigger->CheckTrigger) (ptl->pTrigger, 0))
-            (*ptl->pTrigger->TriggerFired) (ptl->pTrigger);
-    }
+    do {
+        triggered = FALSE;
+        for (ptl = pFence->sync.pTriglist; ptl; ptl = ptl->next) {
+            if ((*ptl->pTrigger->CheckTrigger) (ptl->pTrigger, 0)) {
+                (*ptl->pTrigger->TriggerFired) (ptl->pTrigger);
+                triggered = TRUE;
+                break;
+            }
+        }
+    } while (triggered);
 }
 
 SyncScreenFuncsPtr

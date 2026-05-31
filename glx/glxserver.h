@@ -73,7 +73,7 @@ extern __GLXclientState *glxGetClient(ClientPtr pClient);
 void __glXScreenInitVisuals(__GLXscreen * screen);
 
 /*
-** The last context used (from the server's persective) is cached.
+** The last context used (from the server's perspective) is cached.
 */
 extern __GLXcontext *__glXForceCurrent(__GLXclientState *, GLXContextTag,
                                        int *);

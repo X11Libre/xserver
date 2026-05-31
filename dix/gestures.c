@@ -31,6 +31,8 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 
@@ -52,10 +54,12 @@ GestureInitGestureInfo(GestureInfoPtr gi)
     if (!gi->sprite.spriteTrace) {
         return FALSE;
     }
+    ScreenPtr masterScreen = dixGetMasterScreen();
+
     gi->sprite.spriteTraceSize = 32;
-    gi->sprite.spriteTrace[0] = screenInfo.screens[0]->root;
-    gi->sprite.hot.pScreen = screenInfo.screens[0];
-    gi->sprite.hotPhys.pScreen = screenInfo.screens[0];
+    gi->sprite.spriteTrace[0] = masterScreen->root;
+    gi->sprite.hot.pScreen = masterScreen;
+    gi->sprite.hotPhys.pScreen = masterScreen;
 
     return TRUE;
 }

@@ -7,7 +7,8 @@
 
 #include <stdlib.h>
 
-#include "os.h"
+#include "include/os.h"
+#include "os/osdep.h"
 
 void *
 XNFalloc(unsigned long amount)

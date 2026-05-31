@@ -127,6 +127,7 @@ Equipment Corporation.
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
+#include "include/extinit.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
 #include "Xext/panoramiX.h"

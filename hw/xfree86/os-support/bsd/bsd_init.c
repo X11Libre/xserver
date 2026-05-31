@@ -22,10 +22,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/X.h>
 
@@ -38,12 +35,13 @@
 #include "xf86_OSlib.h"
 #include "xf86_OSproc.h"
 
-#include <sys/utsname.h>
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <errno.h>
 
 #include "os/osdep.h"
+
+#include "seatd-libseat.h"
 
 static Bool KeepTty = FALSE;
 
@@ -81,18 +79,6 @@ static int initialVT = -1;
 #define CHECK_DRIVER_MSG \
   "Check your kernel's console driver configuration and /dev entries"
 
-static const char *supported_drivers[] = {
-#ifdef SYSCONS_SUPPORT
-    "syscons",
-#endif
-#ifdef PCVT_SUPPORT
-    "pcvt",
-#endif
-#ifdef WSCONS_SUPPORT
-    "wscons",
-#endif
-};
-
 /*
  * Functions to probe for the existence of a supported console driver.
  * Any function returns either a valid file descriptor (driver probed
@@ -100,9 +86,6 @@ static const char *supported_drivers[] = {
  * driver was found but proved to not support the required mode to run
  * an X server.
  */
-
-typedef int (*xf86ConsOpen_t) (void);
-
 #ifdef SYSCONS_SUPPORT
 static int xf86OpenSyscons(void);
 #endif                          /* SYSCONS_SUPPORT */
@@ -115,41 +98,56 @@ static int xf86OpenPcvt(void);
 static int xf86OpenWScons(void);
 #endif
 
+typedef struct console_driver {
+    const char *name;
+    int (*open) (void);
+} console_driver_t;
+
 /*
  * The sequence of the driver probes is important; start with the
  * driver that is best distinguishable, and end with the most generic
  * driver.  (Otherwise, pcvt would also probe as syscons, and either
  * pcvt or syscons might successfully probe as pccons.)
  */
-static xf86ConsOpen_t xf86ConsTab[] = {
-#ifdef PCVT_SUPPORT
-    xf86OpenPcvt,
-#endif
+static console_driver_t console_drivers[] = {
 #ifdef SYSCONS_SUPPORT
-    xf86OpenSyscons,
+    {
+        .name = "syscons",
+        .open = xf86OpenSyscons,
+    },
+#endif
+#ifdef PCVT_SUPPORT
+    {
+        .name = "pcvt",
+        .open = xf86OpenPcvt,
+    },
 #endif
 #ifdef WSCONS_SUPPORT
-    xf86OpenWScons,
+    {
+        .name = "wscons",
+        .open = xf86OpenWScons,
+    },
 #endif
-    (xf86ConsOpen_t) NULL
 };
+
+Bool
+xf86VTKeepTtyIsSet(void)
+{
+     return KeepTty;
+}
 
 void
 xf86OpenConsole(void)
 {
-    int i, fd = -1;
-    xf86ConsOpen_t *driver;
-
-#if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-    int result;
-
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-    struct utsname uts;
-#endif
-    vtmode_t vtmode;
-#endif
+    int i;
 
     if (serverGeneration == 1) {
+
+        /* If libseat is in control, it handles VT switching. */
+        if (seatd_libseat_controls_session()) {
+            return;
+        }
+
         /* check if we are run with euid==0 */
         if (geteuid() != 0) {
             FatalError("xf86OpenConsole: Server must be suid root");
@@ -168,42 +166,40 @@ xf86OpenConsole(void)
             }
         }
 
+        xf86Info.consoleFd = -1;
+
         /* detect which driver we are running on */
-        for (driver = xf86ConsTab; *driver; driver++) {
-            if ((fd = (*driver) ()) >= 0)
+        for (unsigned idx=0; idx < ARRAY_SIZE(console_drivers); idx++) {
+            if ((xf86Info.consoleFd = console_drivers[idx].open()) >= 0)
                 break;
         }
 
         /* Check that a supported console driver was found */
-        if (fd < 0) {
+        if (xf86Info.consoleFd < 0) {
             char cons_drivers[80] = { 0, };
-            for (i = 0; i < ARRAY_SIZE(supported_drivers); i++) {
+            for (i = 0; i < ARRAY_SIZE(console_drivers); i++) {
                 if (i) {
                     strcat(cons_drivers, ", ");
                 }
-                strcat(cons_drivers, supported_drivers[i]);
+                strcat(cons_drivers, console_drivers[i].name);
             }
             FatalError
                 ("%s: No console driver found\n\tSupported drivers: %s\n\t%s",
                  "xf86OpenConsole", cons_drivers, CHECK_DRIVER_MSG);
         }
-        xf86Info.consoleFd = fd;
 
         switch (xf86Info.consType) {
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
         case SYSCONS:
-            /* as of FreeBSD 2.2.8, syscons driver does not need the #1 vt
-             * switching anymore. Here we check for FreeBSD 3.1 and up.
-             * Add cases for other *BSD that behave the same.
+            /*
+             * As of FreeBSD 2.2.8, syscons driver does not need the #1 vt
+             * switching anymore.
              */
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-            uname(&uts);
-            i = atof(uts.release) * 100;
-            if (i >= 310)
-                goto acquire_vt;
-#endif
-            /* otherwise fall through */
+            goto acquire_vt;
         case PCVT:
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+            goto acquire_vt;
+#endif
 #if !(defined(__NetBSD__) && (__NetBSD_Version__ >= 200000000))
             /*
              * First activate the #1 VT.  This is a hack to allow a server
@@ -211,17 +207,15 @@ xf86OpenConsole(void)
              * a better way.
              */
             if (initialVT != 1) {
-
                 if (ioctl(xf86Info.consoleFd, VT_ACTIVATE, 1) != 0) {
                     LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_ACTIVATE failed\n");
                 }
                 sleep(1);
             }
 #endif
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
- acquire_vt:
-#endif
+acquire_vt:
             if (!xf86Info.ShareVTs) {
+                int result;
                 /*
                  * now get the VT
                  */
@@ -240,10 +234,13 @@ xf86OpenConsole(void)
 
                 OsSignal(SIGUSR1, xf86VTRequest);
 
-                vtmode.mode = VT_PROCESS;
-                vtmode.relsig = SIGUSR1;
-                vtmode.acqsig = SIGUSR1;
-                vtmode.frsig = SIGUSR1;
+                vtmode_t vtmode = {
+                    .mode   = VT_PROCESS,
+                    .relsig = SIGUSR1,
+                    .acqsig = SIGUSR1,
+                    .frsig  = SIGUSR1
+                };
+
                 if (ioctl(xf86Info.consoleFd, VT_SETMODE, &vtmode) < 0) {
                     FatalError("xf86OpenConsole: VT_SETMODE VT_PROCESS failed");
                 }
@@ -470,23 +467,11 @@ xf86OpenPcvt(void)
             }
             xf86Info.consType = PCVT;
 #ifdef WSCONS_SUPPORT
-#ifdef __NetBSD__
-            LogMessageVerb(X_PROBED, 1,
-                           "Using wscons driver on %s in pcvt compatibility mode "
-                           "(version %d.%d)\n", vtname,
-                           pcvt_version.rmajor, pcvt_version.rminor);
-#else
             LogMessageVerb(X_PROBED, 1,
                            "Using wscons driver on %s in pcvt compatibility mode ",
                            vtname);
-#endif
 #else
-# ifdef __NetBSD__
-            LogMessageVerb(X_PROBED, 1, "Using pcvt driver (version %d.%d)\n",
-                           pcvt_version.rmajor, pcvt_version.rminor);
-# else
             LogMessageVerb(X_PROBED, 1, "Using pcvt driver\n");
-# endif
 #endif
 #ifdef __NetBSD__
         }

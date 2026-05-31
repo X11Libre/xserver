@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 #include "dix/input_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/fmt.h"
 
 #include "misc.h"
@@ -66,7 +67,7 @@ dix_version_compare(void)
 
 static inline void set_screen(unsigned int idx, short x, short y, short w, short h)
 {
-    ScreenPtr pScreen = screenInfo.screens[idx];
+    ScreenPtr pScreen = dixGetScreenPtr(idx);
     pScreen->x = x;
     pScreen->y = y;
     pScreen->width = w;
@@ -168,7 +169,7 @@ dix_request_fixed_size_overflow(ClientRec *client)
     xReq req = { 0 };
 
     client->req_len = req.length = 1;
-    REQUEST_FIXED_SIZE(req, SIZE_MAX);
+    REQUEST_FIXED_SIZE(req, 4096);
     return Success;
 }
 

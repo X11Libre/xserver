@@ -49,7 +49,7 @@ XkbProcessKeyboardEvent(DeviceEvent *event, DeviceIntPtr keybd)
     KeyClassPtr keyc = keybd->key;
     XkbSrvInfoPtr xkbi;
     int key;
-    XkbBehavior behavior;
+    XkbBehavior behavior = { 0 };
     unsigned ndx;
 
     xkbi = keyc->xkbInfo;

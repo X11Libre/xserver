@@ -86,8 +86,10 @@ Author:  Adobe Systems Incorporated
 #include <X11/Xmd.h>
 
 #include "dix/callback_priv.h"
+#include "dix/client_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "misc.h"
 #include "windowstr.h"
@@ -231,7 +233,7 @@ dixLookupResourceOwner(ClientPtr *result, XID id, ClientPtr client, Mask access_
     if (rc != Success)
         goto bad;
 
-    rc = XaceHookClientAccess(client, clients[clientIndex], access_mode);
+    rc = dixCallClientAccessCallback(client, clients[clientIndex], access_mode);
     if (rc != Success)
         goto bad;
 
@@ -248,7 +250,7 @@ XRetCode
 AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
                       Bool toRoot, Bool map)
 {
-    int numnow;
+    unsigned numnow;
     SaveSetElt *pTmp = NULL;
     int j;
 
@@ -326,8 +328,8 @@ typedef struct _BlockHandler {
 } BlockHandlerRec, *BlockHandlerPtr;
 
 static BlockHandlerPtr handlers;
-static int numHandlers;
-static int sizeHandlers;
+static size_t numHandlers;
+static size_t sizeHandlers;
 static Bool inHandler;
 static Bool handlerDeleted;
 
@@ -339,26 +341,24 @@ void
 BlockHandler(void *pTimeout)
 {
     ++inHandler;
-    for (int i = 0; i < numHandlers; i++)
+    for (size_t i = 0; i < numHandlers; i++)
         if (!handlers[i].deleted)
             (*handlers[i].BlockHandler) (handlers[i].blockData, pTimeout);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    DIX_FOR_EACH_GPU_SCREEN({
         if (walkScreen->BlockHandler)
             walkScreen->BlockHandler(walkScreen, pTimeout);
-    }
+    });
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen->BlockHandler)
             walkScreen->BlockHandler(walkScreen, pTimeout);
-    }
+    });
 
     if (handlerDeleted) {
-        for (int i = 0; i < numHandlers;)
+        for (size_t i = 0; i < numHandlers;)
             if (handlers[i].deleted) {
-                for (int j = i; j < numHandlers - 1; j++)
+                for (size_t j = i; j < numHandlers - 1; j++)
                     handlers[j] = handlers[j + 1];
                 numHandlers--;
             }
@@ -378,24 +378,24 @@ void
 WakeupHandler(int result)
 {
     ++inHandler;
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (walkScreen->WakeupHandler)
-            walkScreen->WakeupHandler(walkScreen, result);
-    }
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
-        if (walkScreen->WakeupHandler)
-            walkScreen->WakeupHandler(walkScreen, result);
-    }
 
-    for (int i = numHandlers - 1; i >= 0; i--)
-        if (!handlers[i].deleted)
-            (*handlers[i].WakeupHandler) (handlers[i].blockData, result);
+    DIX_FOR_EACH_SCREEN({
+        if (walkScreen->WakeupHandler)
+            walkScreen->WakeupHandler(walkScreen, result);
+    });
+
+    DIX_FOR_EACH_GPU_SCREEN({
+        if (walkScreen->WakeupHandler)
+            walkScreen->WakeupHandler(walkScreen, result);
+    });
+
+    for (size_t i = numHandlers; i > 0; i--)
+        if (!handlers[i-1].deleted)
+            handlers[i-1].WakeupHandler(handlers[i-1].blockData, result);
     if (handlerDeleted) {
-        for (int i = 0; i < numHandlers;)
+        for (size_t i = 0; i < numHandlers;)
             if (handlers[i].deleted) {
-                for (int j = i; j < numHandlers - 1; j++)
+                for (size_t j = i; j < numHandlers - 1; j++)
                     handlers[j] = handlers[j + 1];
                 numHandlers--;
             }
@@ -438,7 +438,7 @@ RemoveBlockAndWakeupHandlers(ServerBlockHandlerProcPtr blockHandler,
                              ServerWakeupHandlerProcPtr wakeupHandler,
                              void *blockData)
 {
-    for (int i = 0; i < numHandlers; i++)
+    for (size_t i = 0; i < numHandlers; i++)
         if (handlers[i].BlockHandler == blockHandler &&
             handlers[i].WakeupHandler == wakeupHandler &&
             handlers[i].blockData == blockData) {
@@ -468,6 +468,13 @@ InitBlockAndWakeupHandlers(void)
  * A general work queue.  Perform some task before the server
  * sleeps for input.
  */
+
+typedef struct _WorkQueue {
+    struct _WorkQueue *next;
+    Bool (*function) (ClientPtr pClient, void *closure);
+    ClientPtr client;
+    void *closure;
+} *WorkQueuePtr;
 
 WorkQueuePtr workQueue;
 static WorkQueuePtr *workQueueLast = &workQueue;
@@ -645,7 +652,7 @@ ClientIsAsleep(ClientPtr client)
 
 /* ===== Private Procedures ===== */
 
-static int numCallbackListsToCleanup = 0;
+static size_t numCallbackListsToCleanup = 0;
 static CallbackListPtr **listsToCleanup = NULL;
 
 static Bool
@@ -751,7 +758,7 @@ void DeleteCallbackList(CallbackListPtr *pcbl)
         return;
     }
 
-    for (int i = 0; i < numCallbackListsToCleanup; i++) {
+    for (size_t i = 0; i < numCallbackListsToCleanup; i++) {
         if (listsToCleanup[i] == pcbl) {
             listsToCleanup[i] = NULL;
             break;
@@ -781,7 +788,7 @@ CreateCallbackList(CallbackListPtr *pcbl)
     cbl->list = NULL;
     *pcbl = cbl;
 
-    for (int i = 0; i < numCallbackListsToCleanup; i++) {
+    for (size_t i = 0; i < numCallbackListsToCleanup; i++) {
         if (!listsToCleanup[i]) {
             listsToCleanup[i] = pcbl;
             return TRUE;
@@ -822,7 +829,7 @@ DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 void
 DeleteCallbackManager(void)
 {
-    for (int i = 0; i < numCallbackListsToCleanup; i++) {
+    for (size_t i = 0; i < numCallbackListsToCleanup; i++) {
         DeleteCallbackList(listsToCleanup[i]);
     }
     free(listsToCleanup);

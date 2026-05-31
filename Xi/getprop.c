@@ -56,7 +56,10 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/window_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structs    */
@@ -68,21 +71,6 @@ extern int ExtEventIndex;
 
 /***********************************************************************
  *
- * Handle a request from a client with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceDontPropagateList(ClientPtr client)
-{
-    REQUEST(xGetDeviceDontPropagateListReq);
-    REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
-    swapl(&stuff->window);
-    return (ProcXGetDeviceDontPropagateList(client));
-}
-
-/***********************************************************************
- *
  * This procedure lists the input devices available to the server.
  *
  */
@@ -90,16 +78,16 @@ SProcXGetDeviceDontPropagateList(ClientPtr client)
 int
 ProcXGetDeviceDontPropagateList(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xGetDeviceDontPropagateListReq);
+    X_REQUEST_FIELD_CARD32(window);
+
     CARD16 count = 0;
     int i, rc;
     XEventClass *buf = NULL, *tbuf;
     WindowPtr pWin;
     OtherInputMasks *others;
 
-    REQUEST(xGetDeviceDontPropagateListReq);
-    REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
-
-    xGetDeviceDontPropagateListReply rep = {
+    xGetDeviceDontPropagateListReply reply = {
         .RepType = X_GetDeviceDontPropagateList,
     };
 
@@ -113,8 +101,8 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         for (i = 0; i < EMASKSIZE; i++)
             ClassFromMask(NULL, others->dontPropagateMask[i], i, &count, COUNT);
         if (count) {
-            rep.count = count;
-            buf = calloc(rep.count, sizeof(XEventClass));
+            reply.count = count;
+            buf = calloc(count, sizeof(XEventClass));
             if (!buf)
                 return BadAlloc;
 
@@ -128,11 +116,9 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         }
     }
 
-    if (client->swapped) {
-        swaps(&rep.count);
-    }
+    X_REPLY_FIELD_CARD16(count);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 /***********************************************************************

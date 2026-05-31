@@ -33,8 +33,10 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/XIproto.h>
+
+#include "Xi/handlers.h"
+
 #include "inputstr.h"
-#include "chgdctl.h"
 
 #include "protocol-common.h"
 
@@ -46,14 +48,14 @@ static ClientRec client_request;
 static void
 reply_ChangeDeviceControl(ClientPtr client, int len, void *data)
 {
-    xChangeDeviceControlReply *rep = (xChangeDeviceControlReply *) data;
+    xChangeDeviceControlReply *reply = (xChangeDeviceControlReply *) data;
 
     if (client->swapped) {
-        swapl(&rep->length);
-        swaps(&rep->sequenceNumber);
+        swapl(&reply->length);
+        swaps(&reply->sequenceNumber);
     }
 
-    reply_check_defaults(rep, len, ChangeDeviceControl);
+    reply_check_defaults(reply, len, ChangeDeviceControl);
 
     /* XXX: check status code in reply */
 }
@@ -76,7 +78,7 @@ request_ChangeDeviceControl(ClientPtr client, xChangeDeviceControlReq * req,
     swaps(&ctl->length);
     swaps(&ctl->control);
     /* XXX: swap other contents of ctl, depending on type */
-    rc = SProcXChangeDeviceControl(&client_request);
+    rc = ProcXChangeDeviceControl(&client_request);
     assert(rc == error);
 }
 

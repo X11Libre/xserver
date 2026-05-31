@@ -26,10 +26,6 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif                          /* HAVE_DIX_CONFIG_H */
-
 struct _Client;
 typedef struct _ClientId *ClientIdPtr;
 

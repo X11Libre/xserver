@@ -39,7 +39,7 @@
   do {							\
     LogMessageVerb(X_NONE, 0, "Glamor Fatal Error"	\
 		   " at %32s line %d: " _format_ "\n",	\
-		   __FUNCTION__, __LINE__,		\
+		   __func__, __LINE__,			\
 		   ##__VA_ARGS__ );			\
     exit(1);                                            \
   } while(0)
@@ -48,7 +48,7 @@
   LogMessageVerb(X_NONE, 0,				\
 		 "%32s:\t" _format_ ,		\
 		 /*_prefix_,*/				\
-		 __FUNCTION__,				\
+		 __func__,				\
 		 ##__VA_ARGS__)
 
 #define glamor_debug_output(_level_, _format_,...)	\

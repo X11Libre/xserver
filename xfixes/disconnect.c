@@ -45,6 +45,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "xfixesint.h"
 
@@ -63,14 +64,10 @@ typedef struct _ClientDisconnect {
 int
 ProcXFixesSetClientDisconnectMode(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xXFixesSetClientDisconnectModeReq);
+    X_REQUEST_FIELD_CARD32(disconnect_mode);
+
     ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
-
-    REQUEST(xXFixesSetClientDisconnectModeReq);
-    REQUEST_SIZE_MATCH(xXFixesSetClientDisconnectModeReq);
-
-    if (client->swapped)
-        swapl(&stuff->disconnect_mode);
-
     pDisconnect->disconnect_mode = stuff->disconnect_mode;
 
     return Success;
@@ -79,17 +76,15 @@ ProcXFixesSetClientDisconnectMode(ClientPtr client)
 int
 ProcXFixesGetClientDisconnectMode(ClientPtr client)
 {
-    ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
+    X_REQUEST_HEAD_STRUCT(xXFixesGetClientDisconnectModeReq);
 
-    REQUEST_SIZE_MATCH(xXFixesGetClientDisconnectModeReq);
+    ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
 
     xXFixesGetClientDisconnectModeReply reply = {
         .disconnect_mode = pDisconnect->disconnect_mode,
     };
 
-    if (client->swapped) {
-        swapl(&reply.disconnect_mode);
-    }
+    X_REPLY_FIELD_CARD32(disconnect_mode);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }

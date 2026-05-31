@@ -49,7 +49,7 @@ XkbKeyTypesForCoreSymbols(XkbDescPtr xkb,
                           unsigned int protected,
                           int *types_inout, KeySym * xkb_syms_rtrn)
 {
-    int nSyms[XkbNumKbdGroups];
+    int nSyms[XkbNumKbdGroups] = { 0 };
     BOOL replicated = FALSE;
 
     /* Section 12.2 of the protocol describes this process in more detail */
@@ -366,12 +366,6 @@ _XkbSetActionKeyMods(XkbDescPtr xkb, XkbAction *act, unsigned mods)
 Bool
 XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
 {
-    KeySym *syms;
-    unsigned char explicit, mods;
-    XkbSymInterpretPtr *interps, ibuf[IBUF_SIZE];
-    int n, nSyms, found;
-    unsigned changed, tmp;
-
     if ((!xkb) || (!xkb->map) || (!xkb->map->key_sym_map) ||
         (!xkb->compat) || (!xkb->compat->sym_interpret) ||
         (key < xkb->min_key_code) || (key > xkb->max_key_code)) {
@@ -381,13 +375,19 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
         (XkbAllocServerMap(xkb, XkbAllServerInfoMask, 0) != Success)) {
         return FALSE;
     }
-    changed = 0;                /* keeps track of what has changed in _this_ call */
-    explicit = xkb->server->explicit[key];
+
+    unsigned int changed = 0;   /* keeps track of what has changed in _this_ call */
+    unsigned char explicit = xkb->server->explicit[key];
+
     if (explicit & XkbExplicitInterpretMask)    /* nothing to do */
         return TRUE;
-    mods = (xkb->map->modmap ? xkb->map->modmap[key] : 0);
-    nSyms = XkbKeyNumSyms(xkb, key);
-    syms = XkbKeySymsPtr(xkb, key);
+
+    unsigned char mods = (xkb->map->modmap ? xkb->map->modmap[key] : 0);
+    int nSyms = XkbKeyNumSyms(xkb, key);
+    KeySym *syms = XkbKeySymsPtr(xkb, key);
+
+    XkbSymInterpretPtr *interps;
+    XkbSymInterpretPtr ibuf[IBUF_SIZE] = { 0 };
     if (nSyms > IBUF_SIZE) {
         interps = calloc(nSyms, sizeof(XkbSymInterpretPtr));
         if (interps == NULL) {
@@ -398,8 +398,9 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
     else {
         interps = ibuf;
     }
-    found = 0;
-    for (n = 0; n < nSyms; n++) {
+
+    int found = 0;
+    for (int n = 0; n < nSyms; n++) {
         unsigned level = (n % XkbKeyGroupsWidth(xkb, key));
 
         interps[n] = NULL;
@@ -419,20 +420,18 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
         }
     }
     else {
-        XkbAction *pActs;
-        unsigned int new_vmodmask;
+        XkbAction *pActs = XkbResizeKeyActions(xkb, key, nSyms);
+        unsigned int new_vmodmask = 0;
 
         changed |= XkbKeyActionsMask;
-        pActs = XkbResizeKeyActions(xkb, key, nSyms);
         if (!pActs) {
             if (nSyms > IBUF_SIZE)
                 free(interps);
             return FALSE;
         }
-        new_vmodmask = 0;
-        for (n = 0; n < nSyms; n++) {
+        for (int n = 0; n < nSyms; n++) {
             if (interps[n]) {
-                unsigned effMods;
+                unsigned effMods = 0;
 
                 pActs[n] = *((XkbAction *) &interps[n]->act);
                 if ((n == 0) || ((interps[n]->match & XkbSI_LevelOneOnly) == 0)) {
@@ -440,8 +439,6 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
                     if (interps[n]->virtual_mod != XkbNoModifier)
                         new_vmodmask |= (1 << interps[n]->virtual_mod);
                 }
-                else
-                    effMods = 0;
                 _XkbSetActionKeyMods(xkb, &pActs[n], effMods);
             }
             else
@@ -459,9 +456,7 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
                 changed |= XkbKeyBehaviorsMask;
             }
             if (((explicit & XkbExplicitAutoRepeatMask) == 0) && (xkb->ctrls)) {
-                CARD8 old;
-
-                old = BitIsOn(xkb->ctrls->per_key_repeat, key);
+                CARD8 old = BitIsOn(xkb->ctrls->per_key_repeat, key);
                 if (interps[0]->flags & XkbSI_AutoRepeat)
                     SetBit(xkb->ctrls->per_key_repeat, key);
                 else
@@ -473,9 +468,8 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
     }
     if ((!found) || (interps[0] == NULL)) {
         if (((explicit & XkbExplicitAutoRepeatMask) == 0) && (xkb->ctrls)) {
-            CARD8 old;
+            CARD8 old = BitIsOn(xkb->ctrls->per_key_repeat, key);
 
-            old = BitIsOn(xkb->ctrls->per_key_repeat, key);
             SetBit(xkb->ctrls->per_key_repeat, key);
             if (changes && (old != BitIsOn(xkb->ctrls->per_key_repeat, key)))
                 changes->ctrls.changed_ctrls |= XkbPerKeyRepeatMask;
@@ -487,10 +481,9 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
         }
     }
     if (changes) {
-        XkbMapChangesPtr mc;
+        XkbMapChangesPtr mc = &changes->map;
+        unsigned int tmp = (changed & mc->changed);
 
-        mc = &changes->map;
-        tmp = (changed & mc->changed);
         if (tmp & XkbKeyActionsMask)
             _XkbAddKeyChange(&mc->first_key_act, &mc->num_key_acts, key);
         else if (changed & XkbKeyActionsMask) {
@@ -530,7 +523,7 @@ XkbChangeTypesOfKey(XkbDescPtr xkb,
 {
     XkbKeyTypePtr pOldType, pNewType;
     register int i;
-    int width, nOldGroups, oldWidth, newTypes[XkbNumKbdGroups];
+    int width, nOldGroups, oldWidth;
 
     if ((!xkb) || (!XkbKeycodeInRange(xkb, key)) || (!xkb->map) ||
         (!xkb->map->types) || (!newTypesIn) ||
@@ -551,6 +544,8 @@ XkbChangeTypesOfKey(XkbDescPtr xkb,
 
     nOldGroups = XkbKeyNumGroups(xkb, key);
     oldWidth = XkbKeyGroupsWidth(xkb, key);
+
+    int newTypes[XkbNumKbdGroups] = { 0 };
     for (width = i = 0; i < nGroups; i++) {
         if (groups & (1 << i))
             newTypes[i] = newTypesIn[i];
@@ -653,9 +648,6 @@ XkbChangeTypesOfKey(XkbDescPtr xkb,
 Bool
 XkbVirtualModsToReal(XkbDescPtr xkb, unsigned virtual_mask, unsigned *mask_rtrn)
 {
-    register int i, bit;
-    register unsigned mask;
-
     if ((xkb == NULL) || (xkb->server == NULL)) {
         *mask_rtrn = 0;
         return FALSE;
@@ -664,7 +656,10 @@ XkbVirtualModsToReal(XkbDescPtr xkb, unsigned virtual_mask, unsigned *mask_rtrn)
         *mask_rtrn = 0;
         return TRUE;
     }
-    for (i = mask = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
+
+    int bit = 1;
+    unsigned int mask = 0;
+    for (int i = 0; i < XkbNumVirtualMods; i++, bit <<= 1) {
         if (virtual_mask & bit)
             mask |= xkb->server->vmods[i];
     }
@@ -707,15 +702,14 @@ XkbUpdateKeyTypeVirtualMods(XkbDescPtr xkb,
                             XkbKeyTypePtr type,
                             unsigned int changed, XkbChangesPtr changes)
 {
-    register unsigned int i;
     unsigned int mask;
 
     XkbVirtualModsToReal(xkb, type->mods.vmods, &mask);
     type->mods.mask = type->mods.real_mods | mask;
     if ((type->map_count > 0) && (type->mods.vmods != 0)) {
-        XkbKTMapEntryPtr entry;
+        XkbKTMapEntryPtr entry = type->map;
 
-        for (i = 0, entry = type->map; i < type->map_count; i++, entry++) {
+        for (unsigned int i = 0; i < type->map_count; i++, entry++) {
             if (entry->mods.vmods != 0) {
                 XkbVirtualModsToReal(xkb, entry->mods.vmods, &mask);
                 entry->mods.mask = entry->mods.real_mods | mask;
@@ -727,15 +721,12 @@ XkbUpdateKeyTypeVirtualMods(XkbDescPtr xkb,
         }
     }
     if (changes) {
-        int type_ndx;
+        int type_ndx = type - xkb->map->types;
 
-        type_ndx = type - xkb->map->types;
         if ((type_ndx < 0) || (type_ndx > xkb->map->num_types))
             return;
         if (changes->map.changed & XkbKeyTypesMask) {
-            int last;
-
-            last = changes->map.first_type + changes->map.num_types - 1;
+            int last = changes->map.first_type + changes->map.num_types - 1;
             if (type_ndx < changes->map.first_type) {
                 changes->map.first_type = type_ndx;
                 changes->map.num_types = (last - type_ndx) + 1;
@@ -758,12 +749,11 @@ Bool
 XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
                           XkbChangesPtr changes)
 {
-    register int i;
     unsigned int checkState = 0;
 
     if ((!xkb) || (!xkb->map) || (changed == 0))
         return FALSE;
-    for (i = 0; i < xkb->map->num_types; i++) {
+    for (int i = 0; i < xkb->map->num_types; i++) {
         if (xkb->map->types[i].mods.vmods & changed)
             XkbUpdateKeyTypeVirtualMods(xkb, &xkb->map->types[i], changed,
                                         changes);
@@ -795,10 +785,9 @@ XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
         }
     }
     if (xkb->indicators != NULL) {
-        XkbIndicatorMapPtr map;
+        XkbIndicatorMapPtr map = &xkb->indicators->maps[0];
 
-        map = &xkb->indicators->maps[0];
-        for (i = 0; i < XkbNumIndicators; i++, map++) {
+        for (int i = 0; i < XkbNumIndicators; i++, map++) {
             if (map->mods.vmods & changed) {
                 unsigned int newMask;
 
@@ -815,11 +804,10 @@ XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
         }
     }
     if (xkb->compat != NULL) {
-        XkbCompatMapPtr compat;
+        XkbCompatMapPtr compat = xkb->compat;
 
-        compat = xkb->compat;
-        for (i = 0; i < XkbNumKbdGroups; i++) {
-            unsigned int newMask;
+        for (int i = 0; i < XkbNumKbdGroups; i++) {
+            unsigned int newMask; 
 
             XkbVirtualModsToReal(xkb, compat->groups[i].vmods, &newMask);
             newMask |= compat->groups[i].real_mods;
@@ -835,13 +823,10 @@ XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
     if (xkb->map && xkb->server) {
         int highChange = 0, lowChange = -1;
 
-        for (i = xkb->min_key_code; i <= xkb->max_key_code; i++) {
+        for (int i = xkb->min_key_code; i <= xkb->max_key_code; i++) {
             if (XkbKeyHasActions(xkb, i)) {
-                register XkbAction *pAct;
-                register int n;
-
-                pAct = XkbKeyActionsPtr(xkb, i);
-                for (n = XkbKeyNumActions(xkb, i); n > 0; n--, pAct++) {
+                XkbAction *pAct = XkbKeyActionsPtr(xkb, i);
+                for (int n = XkbKeyNumActions(xkb, i); n > 0; n--, pAct++) {
                     if ((pAct->type != XkbSA_NoAction) &&
                         XkbUpdateActionVirtualMods(xkb, pAct, changed)) {
                         if (lowChange < 0)
@@ -853,11 +838,9 @@ XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
         }
         if (changes && (lowChange > 0)) {       /* something changed */
             if (changes->map.changed & XkbKeyActionsMask) {
-                int last;
-
                 if (changes->map.first_key_act < lowChange)
                     lowChange = changes->map.first_key_act;
-                last =
+                int last =
                     changes->map.first_key_act + changes->map.num_key_acts - 1;
                 if (last > highChange)
                     highChange = last;

@@ -5,7 +5,8 @@
 #ifndef _XSERVER_OS_DDX_PRIV_H
 #define _XSERVER_OS_DDX_PRIV_H
 
-#include "os.h"
+#include "include/os.h"
+#include "os/osdep.h"
 
 /* callbacks of the DDX, which are called by DIX or OS layer.
    DDX's need to implement these in order to handle DDX specific things.
@@ -23,5 +24,8 @@ void ddxUseMsg(void);
 void ddxGiveUp(enum ExitCode error);
 
 void ddxInputThreadInit(void);
+
+void OsVendorFatalError(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
+void OsVendorInit(void);
 
 #endif /* _XSERVER_OS_DDX_PRIV_H */

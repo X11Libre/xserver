@@ -50,10 +50,11 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "getdctl.h"
 
 static void
 _writeDeviceResolution(ClientPtr client, ValuatorClassPtr v, x_rpcbuf_t *rpcbuf)
@@ -108,17 +109,14 @@ ProcXGetDeviceControl(ClientPtr client)
 {
     DeviceIntPtr dev;
 
-    REQUEST(xGetDeviceControlReq);
-    REQUEST_SIZE_MATCH(xGetDeviceControlReq);
+    X_REQUEST_HEAD_STRUCT(xGetDeviceControlReq);
+    X_REQUEST_FIELD_CARD16(control);
 
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-
-    if (rpcbuf.swapped)
-        swaps(&stuff->control);
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:

@@ -80,6 +80,12 @@ interface.
 If neither \fB\-shmem\fP nor \fB\-fbdir\fP is specified,
 the framebuffer memory will be allocated with malloc().
 .TP 4
+.B "\-glamor"
+Enable glamor hw acceleration.
+.TP 4
+.B "\-dri \fI/dev/dri/renderDxxx\fP"
+render device node for glamor to use to enable DRI3.
+.TP 4
 .B "\-linebias \fIn\fP"
 This option specifies how to adjust the pixelization of thin lines.
 The value \fIn\fP is a bitmask of octants in which to prefer an axial

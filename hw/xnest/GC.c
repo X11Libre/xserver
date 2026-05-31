@@ -15,6 +15,7 @@ is" without express or implied warranty.
 
 #include <stdint.h>
 
+#include <X11/fonts/fontstruct.h>
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
@@ -22,13 +23,13 @@ is" without express or implied warranty.
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 
+#include "include/regionstr.h"
+
 #include "gcstruct.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
-#include <X11/fonts/fontstruct.h>
 #include "mistruct.h"
-#include "region.h"
 
 #include "xnest-xcb.h"
 

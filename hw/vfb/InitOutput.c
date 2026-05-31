@@ -39,6 +39,7 @@ from The Open Group.
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/extinit.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
@@ -75,6 +76,14 @@ from The Open Group.
 #include "miline.h"
 #include "glx_extinit.h"
 #include "randrstr.h"
+
+#ifdef GLAMOR
+#include "glamor.h"
+#include "glamor_egl.h"
+
+#include <unistd.h>
+#include <fcntl.h>
+#endif
 
 #define VFB_DEFAULT_WIDTH      1280
 #define VFB_DEFAULT_HEIGHT     1024
@@ -120,6 +129,9 @@ typedef struct {
 #ifdef CONFIG_MITSHM
     int shmid;
 #endif /* CONFIG_MITSHM */
+#ifdef GLAMOR
+    int dri_fd;
+#endif
 } vfbScreenInfo, *vfbScreenInfoPtr;
 
 static int vfbNumScreens;
@@ -143,6 +155,10 @@ typedef enum { NORMAL_MEMORY_FB, SHARED_MEMORY_FB, MMAPPED_FILE_FB } fbMemType;
 static fbMemType fbmemtype = NORMAL_MEMORY_FB;
 static char needswap = 0;
 static Bool Render = TRUE;
+#ifdef GLAMOR
+static Bool use_glamor = FALSE;
+static char *render_node = NULL;
+#endif
 
 #define swapcopy16(_dst, _src) \
     if (needswap) { CARD16 _s = _src; cpswaps(_s, _dst); } \
@@ -299,6 +315,11 @@ ddxUseMsg(void)
     ErrorF("-shmem                 put framebuffers in shared memory\n");
 #endif /* CONFIG_MITSHM */
 
+#ifdef GLAMOR
+    ErrorF("-glamor                enable glamor render acceleration\n");
+    ErrorF("-dri </dev/dri/renderDxxx>  render device to use\n");
+#endif
+
     ErrorF("-crtcs n               number of CRTCs per screen (default: %d)\n",
            VFB_DEFAULT_NUM_CRTCS);
 }
@@ -418,6 +439,22 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 #endif /* CONFIG_MITSHM */
+
+#ifdef GLAMOR
+    if (strcmp(argv[i], "-glamor") == 0) {
+        use_glamor = TRUE;
+        return 1;
+    }
+
+    if (strcmp(argv[i], "-dri") == 0) {
+        if (i + 1 < argc) {
+            render_node = strdup(argv[i + 1]);
+            return 2;
+        }
+        UseMsg();
+        exit(1);
+    }
+#endif
 
     if (strcmp(argv[i], "-crtcs") == 0) {       /* -crtcs n */
         int numCrtcs;
@@ -739,8 +776,8 @@ vfbWriteXWDFileHeader(ScreenPtr pScreen)
     struct xhostname hn;
     xhostname(&hn);
     hn.name[XWD_WINDOW_NAME_LEN - 1] = 0;
-    sprintf((char *) (pXWDHeader + 1), "Xvfb %s:%s.%d", hn.name, display,
-            pScreen->myNum);
+    snprintf((char *)(pXWDHeader + 1), XWD_WINDOW_NAME_LEN,
+         "Xvfb %.40s:%.10s.%d", hn.name, display, pScreen->myNum);
 
     /* write colormap pixel slot values */
 
@@ -788,8 +825,63 @@ vfbCloseScreen(ScreenPtr pScreen)
     dixDestroyPixmap(pScreen->devPrivate, 0);
     pScreen->devPrivate = NULL;
 
+#ifdef GLAMOR
+    if (pvfb->dri_fd >= 0) {
+        close(pvfb->dri_fd);
+        pvfb->dri_fd = -1;
+        free(render_node);
+        render_node = NULL;
+    }
+#endif
+
     return pScreen->CloseScreen(pScreen);
 }
+
+#ifdef GLAMOR
+static Bool
+vfbGlamorInit(ScreenPtr pScreen)
+{
+    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+
+    if (!use_glamor && !render_node) {
+        return FALSE;
+    }
+
+    pvfb->dri_fd = render_node ? open(render_node, O_RDWR | O_CLOEXEC) : -1;
+
+    glamor_egl_conf_t glamor_egl_conf = {
+                                         .screen = pScreen,
+                                         .fd = pvfb->dri_fd,
+                                         .llvmpipe_allowed = TRUE,
+                                         .force_glamor = TRUE,
+                                        };
+
+    if (!glamor_egl_init_internal(&glamor_egl_conf, NULL)) {
+        close(pvfb->dri_fd);
+        return FALSE;
+    }
+
+    const char *renderer = (const char*)glGetString(GL_RENDERER);
+
+    int flags = GLAMOR_USE_EGL_SCREEN;
+    if (!renderer ||
+        strstr(renderer, "softpipe") ||
+        strstr(renderer, "llvmpipe")) {
+        flags |= GLAMOR_NO_RENDER_ACCEL;
+    }
+
+    if (pvfb->dri_fd < 0 || flags & GLAMOR_NO_RENDER_ACCEL) {
+        flags |= GLAMOR_NO_DRI3;
+    }
+
+    if (!glamor_init(pScreen, flags)) {
+        close(pvfb->dri_fd);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+#endif
 
 static Bool
 vfbRROutputValidateMode(ScreenPtr           pScreen,
@@ -1015,11 +1107,16 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 
     ret = fbScreenInit(pScreen, pbits, pvfb->width, pvfb->height,
                        dpix, dpiy, pvfb->paddedWidth, pvfb->bitsPerPixel);
-    if (ret && Render)
-        fbPictureInit(pScreen, 0, 0);
 
     if (!ret)
         return FALSE;
+
+    if (Render) {
+        fbPictureInit(pScreen, 0, 0);
+#ifdef GLAMOR
+        vfbGlamorInit(pScreen);
+#endif
+    }
 
     if (!vfbRandRInit(pScreen))
        return FALSE;
@@ -1046,7 +1143,7 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 }                               /* end vfbScreenInit */
 
 void
-InitOutput(ScreenInfo * screen_info, int argc, char **argv)
+InitOutput(int argc, char **argv)
 {
     int i;
     int NumFormats = 0;
@@ -1084,18 +1181,18 @@ InitOutput(ScreenInfo * screen_info, int argc, char **argv)
         if (vfbPixmapDepths[i]) {
             if (NumFormats >= MAXFORMATS)
                 FatalError("MAXFORMATS is too small for this server\n");
-            screen_info->formats[NumFormats].depth = i;
-            screen_info->formats[NumFormats].bitsPerPixel = vfbBitsPerPixel(i);
-            screen_info->formats[NumFormats].scanlinePad = BITMAP_SCANLINE_PAD;
+            screenInfo.formats[NumFormats].depth = i;
+            screenInfo.formats[NumFormats].bitsPerPixel = vfbBitsPerPixel(i);
+            screenInfo.formats[NumFormats].scanlinePad = BITMAP_SCANLINE_PAD;
             NumFormats++;
         }
     }
 
-    screen_info->imageByteOrder = IMAGE_BYTE_ORDER;
-    screen_info->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
-    screen_info->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
-    screen_info->bitmapBitOrder = BITMAP_BIT_ORDER;
-    screen_info->numPixmapFormats = NumFormats;
+    screenInfo.imageByteOrder = IMAGE_BYTE_ORDER;
+    screenInfo.bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
+    screenInfo.bitmapScanlinePad = BITMAP_SCANLINE_PAD;
+    screenInfo.bitmapBitOrder = BITMAP_BIT_ORDER;
+    screenInfo.numPixmapFormats = NumFormats;
 
     /* initialize screens */
 

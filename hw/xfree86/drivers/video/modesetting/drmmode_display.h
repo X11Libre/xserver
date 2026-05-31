@@ -29,19 +29,20 @@
 #ifndef DRMMODE_DISPLAY_H
 #define DRMMODE_DISPLAY_H
 
+#include <X11/Xdefs.h>
+
 #include "xf86drmMode.h"
 #ifdef CONFIG_UDEV_KMS
 #include "libudev.h"
 #endif
 
-#include "dumb_bo.h"
-
-struct gbm_device;
+#include <gbm.h>
 
 enum drmmode_plane_property {
     DRMMODE_PLANE_TYPE = 0,
     DRMMODE_PLANE_FB_ID,
     DRMMODE_PLANE_IN_FORMATS,
+    DRMMODE_PLANE_IN_FORMATS_ASYNC,
     DRMMODE_PLANE_CRTC_ID,
     DRMMODE_PLANE_SRC_X,
     DRMMODE_PLANE_SRC_Y,
@@ -77,16 +78,6 @@ enum drmmode_crtc_property {
 };
 
 typedef struct {
-    uint32_t width;
-    uint32_t height;
-    struct dumb_bo *dumb;
-#ifdef GLAMOR_HAS_GBM
-    Bool used_modifiers;
-    struct gbm_bo *gbm;
-#endif
-} drmmode_bo;
-
-typedef struct {
     int fd;
     unsigned fb_id;
     drmModeFBPtr mode_fb;
@@ -101,13 +92,16 @@ typedef struct {
     InputHandlerProc uevent_handler;
 #endif
     drmEventContext event_context;
-    drmmode_bo front_bo;
+    struct gbm_bo *front_bo;
     Bool sw_cursor;
+    Bool set_cursor_failed;
 
     /* Broken-out options. */
     OptionInfoPtr Options;
 
     Bool glamor;
+    Bool glamor_gbm;
+    Bool glamor_gbm_device;
     Bool shadow_enable;
     Bool shadow_enable2;
     /** Is Option "PageFlip" enabled? */
@@ -171,7 +165,7 @@ typedef struct {
 } drmmode_format_rec, *drmmode_format_ptr;
 
 typedef struct {
-    drmmode_bo bo;
+    struct gbm_bo *bo;
     uint32_t fb_id;
     PixmapPtr px;
     RegionRec dmg;
@@ -193,7 +187,7 @@ typedef struct {
 
     /* Sorted from smallest to largest. */
     drmmode_cursor_dim_rec* dimensions;
-    struct dumb_bo *bo;
+    struct gbm_bo *bo;
 } drmmode_cursor_rec, *drmmode_cursor_ptr;
 
 typedef struct {
@@ -211,8 +205,9 @@ typedef struct {
     drmmode_mode_ptr current_mode;
     uint32_t num_formats;
     drmmode_format_rec *formats;
+    drmmode_format_rec *formats_async;
 
-    drmmode_bo rotate_bo;
+    struct gbm_bo *rotate_bo;
     unsigned rotate_fb_id;
     drmmode_tearfree_rec tearfree;
 
@@ -235,7 +230,8 @@ typedef struct {
 
     uint64_t next_msc;
 
-    int cursor_width, cursor_height;
+    int cursor_width;
+    int cursor_height;
 
     Bool need_modeset;
     struct xorg_list mode_list;
@@ -245,6 +241,19 @@ typedef struct {
 
     Bool vrr_enabled;
     Bool use_gamma_lut;
+
+    /* For damage-like tracking of the cursor buffer */
+    uint32_t cursor_glyph_width;
+    uint32_t cursor_glyph_height;
+    int old_pitch;
+    int cursor_rotation;
+    int cursor_src_x;
+    int cursor_src_y;
+
+    Bool cursor_probed;
+    Bool cursor_dim_fallback_warned;
+
+    int* cursor_pitches;
 } drmmode_crtc_private_rec, *drmmode_crtc_private_ptr;
 
 typedef struct {
@@ -279,7 +288,7 @@ typedef struct {
 
 typedef struct _msPixmapPriv {
     uint32_t fb_id;
-    struct dumb_bo *backing_bo; /* if this pixmap is backed by a dumb bo */
+    struct gbm_bo *backing_bo; /* if this pixmap is backed by a gbm bo */
 
     DamagePtr secondary_damage;
 
@@ -306,12 +315,7 @@ typedef struct _msSpritePriv {
 extern miPointerSpriteFuncRec drmmode_sprite_funcs;
 
 Bool drmmode_is_format_supported(ScrnInfoPtr scrn, uint32_t format,
-                                 uint64_t modifier);
-int drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
-                      uint32_t *fb_id);
-int drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo);
-uint32_t drmmode_bo_get_pitch(drmmode_bo *bo);
-uint32_t drmmode_bo_get_handle(drmmode_bo *bo);
+                                 uint64_t modifier, Bool async_flip);
 Bool drmmode_glamor_handle_new_screen_pixmap(drmmode_ptr drmmode);
 void *drmmode_map_secondary_bo(drmmode_ptr drmmode, msPixmapPrivPtr ppriv);
 Bool drmmode_SetSlaveBO(PixmapPtr ppix,
@@ -338,8 +342,6 @@ extern void drmmode_uevent_init(ScrnInfoPtr scrn, drmmode_ptr drmmode);
 extern void drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode);
 
 Bool drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
-void *drmmode_map_front_bo(drmmode_ptr drmmode);
-Bool drmmode_map_cursor_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
 void drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
 void drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmmode,
                              int *depth, int *bpp);
@@ -356,6 +358,9 @@ Bool drmmode_crtc_get_fb_id(xf86CrtcPtr crtc, uint32_t *fb_id, int *x, int *y);
 void drmmode_set_dpms(ScrnInfoPtr scrn, int PowerManagementMode, int flags);
 void drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled);
 
-Bool drmmode_get_largest_cursor(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor_lim);
-
+#ifdef GBM_BO_WITH_MODIFIERS
+uint32_t
+get_modifiers_set(ScrnInfoPtr scrn, uint32_t format, uint64_t **modifiers,
+                  Bool enabled_crtc_only, Bool exclude_multiplane, Bool async_flip);
+#endif
 #endif

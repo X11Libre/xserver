@@ -58,43 +58,13 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "exglobals.h"
-#include "chgdctl.h"
-
-/***********************************************************************
- *
- * This procedure changes the control attributes for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXChangeDeviceControl(ClientPtr client)
-{
-    xDeviceCtl *ctl;
-
-    REQUEST(xChangeDeviceControlReq);
-    REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
-    swaps(&stuff->control);
-    ctl = (xDeviceCtl *) &stuff[1];
-    swaps(&ctl->control);
-    swaps(&ctl->length);
-    switch (stuff->control) {
-    case DEVICE_ABS_CALIB:
-    case DEVICE_ABS_AREA:
-    case DEVICE_CORE:
-    case DEVICE_ENABLE:
-    case DEVICE_RESOLUTION:
-        /* hmm. beer. *drool* */
-        break;
-
-    }
-    return (ProcXChangeDeviceControl(client));
-}
 
 /***********************************************************************
  *
@@ -105,19 +75,20 @@ SProcXChangeDeviceControl(ClientPtr client)
 int
 ProcXChangeDeviceControl(ClientPtr client)
 {
-    unsigned len;
-    int i, status, ret = BadValue;
-    DeviceIntPtr dev;
-    xDeviceResolutionCtl *r;
-    AxisInfoPtr a;
-    CARD32 *resolution;
-    xDeviceEnableCtl *e;
-
-    REQUEST(xChangeDeviceControlReq);
+    X_REQUEST_HEAD_AT_LEAST(xChangeDeviceControlReq);
     REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
+    X_REQUEST_FIELD_CARD16(control);
 
-    len = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
-    ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
+    if (client->swapped) {
+        xDeviceCtl *ctl = (xDeviceCtl *) &stuff[1];
+        swaps(&ctl->control);
+        swaps(&ctl->length);
+    }
+
+    unsigned len = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
+
+    DeviceIntPtr dev;
+    int ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
     if (ret != Success)
         goto out;
 
@@ -127,14 +98,15 @@ ProcXChangeDeviceControl(ClientPtr client)
         goto out;
     }
 
-    xChangeDeviceControlReply rep = {
+    xChangeDeviceControlReply reply = {
         .RepType = X_ChangeDeviceControl,
         .status = Success,
     };
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
-        r = (xDeviceResolutionCtl *) &stuff[1];
+    {
+        xDeviceResolutionCtl *r = (xDeviceResolutionCtl *) &stuff[1];
         if ((len < bytes_to_int32(sizeof(xDeviceResolutionCtl))) ||
             (len !=
              bytes_to_int32(sizeof(xDeviceResolutionCtl)) + r->num_valuators)) {
@@ -146,35 +118,39 @@ ProcXChangeDeviceControl(ClientPtr client)
             goto out;
         }
         if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client)) {
-            rep.status = AlreadyGrabbed;
+            reply.status = AlreadyGrabbed;
             ret = Success;
             goto out;
         }
-        resolution = (CARD32 *) (r + 1);
+        CARD32 *resolution = (CARD32 *) (r + 1);
         if (r->first_valuator + r->num_valuators > dev->valuator->numAxes) {
             ret = BadValue;
             goto out;
         }
-        status = ChangeDeviceControl(client, dev, (xDeviceCtl *) r);
+        if (client->swapped) {
+            SwapLongs((CARD32 *) (r + 1), r->num_valuators);
+        }
+        int status = ChangeDeviceControl(client, dev, (xDeviceCtl *) r);
         if (status == Success) {
-            a = &dev->valuator->axes[r->first_valuator];
-            for (i = 0; i < r->num_valuators; i++)
+            AxisInfoPtr a = &dev->valuator->axes[r->first_valuator];
+            for (int i = 0; i < r->num_valuators; i++)
                 if (*(resolution + i) < (a + i)->min_resolution ||
                     *(resolution + i) > (a + i)->max_resolution)
                     return BadValue;
-            for (i = 0; i < r->num_valuators; i++)
+            for (int i = 0; i < r->num_valuators; i++)
                 (a++)->resolution = *resolution++;
 
             ret = Success;
         }
         else if (status == DeviceBusy) {
-            rep.status = DeviceBusy;
+            reply.status = DeviceBusy;
             ret = Success;
         }
         else {
             ret = BadMatch;
         }
         break;
+    }
     case DEVICE_ABS_CALIB:
     case DEVICE_ABS_AREA:
         /* Calibration is now done through properties, and never had any effect
@@ -187,16 +163,15 @@ ProcXChangeDeviceControl(ClientPtr client)
         ret = BadMatch;
         break;
     case DEVICE_ENABLE:
-        e = (xDeviceEnableCtl *) &stuff[1];
+    {
+        xDeviceEnableCtl *e = (xDeviceEnableCtl *) &stuff[1];
         if ((len != bytes_to_int32(sizeof(xDeviceEnableCtl)))) {
             ret = BadLength;
             goto out;
         }
 
-        if (IsXTestDevice(dev, NULL))
-            status = !Success;
-        else
-            status = ChangeDeviceControl(client, dev, (xDeviceCtl *) e);
+        int status = (IsXTestDevice(dev, NULL) ?
+                      (!Success) : ChangeDeviceControl(client, dev, (xDeviceCtl *) e));
 
         if (status == Success) {
             if (e->enable)
@@ -206,7 +181,7 @@ ProcXChangeDeviceControl(ClientPtr client)
             ret = Success;
         }
         else if (status == DeviceBusy) {
-            rep.status = DeviceBusy;
+            reply.status = DeviceBusy;
             ret = Success;
         }
         else {
@@ -214,6 +189,7 @@ ProcXChangeDeviceControl(ClientPtr client)
         }
 
         break;
+    }
     default:
         ret = BadValue;
     }
@@ -230,7 +206,7 @@ ProcXChangeDeviceControl(ClientPtr client)
         SendEventToAllWindows(dev, DevicePresenceNotifyMask,
                               (xEvent *) &dpn, 1);
 
-        X_SEND_REPLY_SIMPLE(client, rep);
+        ret = X_SEND_REPLY_SIMPLE(client, reply);
     }
 
     return ret;

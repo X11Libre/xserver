@@ -26,6 +26,7 @@
 
 #include "dix/colormap_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "include/extinit.h"
 #include "os/osdep.h"
 
 #include "misc.h"
@@ -49,7 +50,6 @@
 
 DevPrivateKeyRec PictureScreenPrivateKeyRec;
 DevPrivateKeyRec PictureWindowPrivateKeyRec;
-static x_server_generation_t PictureGeneration;
 RESTYPE PictureType;
 RESTYPE PictFormatType;
 RESTYPE GlyphSetType;
@@ -174,7 +174,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
     formats[nformats].format = PIXMAN_a1;
     formats[nformats].depth = 1;
     nformats++;
-    formats[nformats].format = PICT_FORMAT(BitsPerPixel(8),
+    formats[nformats].format = PIXMAN_FORMAT(BitsPerPixel(8),
                                            PIXMAN_TYPE_A, 8, 0, 0, 0);
     formats[nformats].depth = 8;
     nformats++;
@@ -224,7 +224,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
                 type = PIXMAN_TYPE_BGRA;
             }
             if (type != PIXMAN_TYPE_OTHER) {
-                format = PICT_FORMAT(bpp, type, 0, r, g, b);
+                format = PIXMAN_FORMAT(bpp, type, 0, r, g, b);
                 addFormat(formats, &nformats, format, depth);
             }
             break;
@@ -595,13 +595,16 @@ FreePictFormat(void *pPictFormat, XID pid)
     return Success;
 }
 
+static bool picture_resources_initialized = false;
+
 Bool
 PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
 {
     int n;
     CARD32 type, a, r, g, b;
 
-    if (PictureGeneration != serverGeneration) {
+    if (!picture_resources_initialized)
+    {
         PictureType = CreateNewResourceType(FreePicture, "PICTURE");
         if (!PictureType)
             return FALSE;
@@ -612,7 +615,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
         GlyphSetType = CreateNewResourceType(FreeGlyphSet, "GLYPHSET");
         if (!GlyphSetType)
             return FALSE;
-        PictureGeneration = serverGeneration;
+        picture_resources_initialized = true;
     }
     if (!dixRegisterPrivateKey(&PictureScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
@@ -658,7 +661,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
             g = Ones(formats[n].direct.greenMask);
             b = Ones(formats[n].direct.blueMask);
         }
-        formats[n].format = PICT_FORMAT(0, type, a, r, g, b);
+        formats[n].format = PIXMAN_FORMAT(0, type, a, r, g, b);
     }
     PictureScreenPtr ps = calloc(1, sizeof(PictureScreenRec));
     if (!ps) {
@@ -899,6 +902,7 @@ CreateLinearGradientPicture(Picture pid, xPointFixed * p1, xPointFixed * p2,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
@@ -944,6 +948,7 @@ CreateRadialGradientPicture(Picture pid, xPointFixed * inner,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
@@ -982,6 +987,7 @@ CreateConicalGradientPicture(Picture pid, xPointFixed * center, xFixed angle,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
@@ -1394,7 +1400,7 @@ FreePicture(void *value, XID pid)
                 PicturePtr *pPrev;
 
                 for (pPrev = (PicturePtr *) dixLookupPrivateAddr
-                     (&pWindow->devPrivates, PictureWindowPrivateKey);
+                     (&pWindow->devPrivates, &PictureWindowPrivateKeyRec);
                      *pPrev; pPrev = &(*pPrev)->pNext) {
                     if (*pPrev == pPicture) {
                         *pPrev = pPicture->pNext;

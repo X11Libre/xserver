@@ -5,7 +5,7 @@
 #ifndef __XORG_OS_LOGGING_H
 #define __XORG_OS_LOGGING_H
 
-#include "include/os.h"
+#include "os/osdep.h"
 
 /**
  * @brief initialize logging and open log files
@@ -88,5 +88,10 @@ extern int xorgSyslogVerbosity;
  * this before calling LogInit()
  */
 extern const char *xorgSyslogIdent;
+
+/*
+ * print log markers into the log file
+ */
+void LogPrintMarkers(void);
 
 #endif /* __XORG_OS_LOGGING_H */

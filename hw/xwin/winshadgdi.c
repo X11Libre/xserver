@@ -27,10 +27,8 @@
  *
  * Authors:	Harold L Hunt II
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include "win.h"
 
 #include "dix/colormap_priv.h"
@@ -158,7 +156,7 @@ winQueryRGBBitsAndMasks(ScreenPtr pScreen)
     /* Color masks for 8 bpp are standardized */
     if (GetDeviceCaps(pScreenPriv->hdcScreen, RASTERCAPS) & RC_PALETTE) {
         /*
-         * RGB BPP for 8 bit palletes is always 8
+         * RGB BPP for 8 bit palettes is always 8
          * and the color masks are always 0.
          */
         pScreenPriv->dwBitsPerRGB = 8;
@@ -198,12 +196,12 @@ winQueryRGBBitsAndMasks(ScreenPtr pScreen)
         pdw = (DWORD *) ((CARD8 *) pbmih + sizeof(BITMAPINFOHEADER));
 
 #if ENABLE_DEBUG
-        winDebug("%s - Masks: %08x %08x %08x\n", __FUNCTION__,
+        winDebug("%s - Masks: %08x %08x %08x\n", __func__,
                  (unsigned int)pdw[0], (unsigned int)pdw[1], (unsigned int)pdw[2]);
-        winDebug("%s - Bitmap: %dx%d %d bpp %d planes\n", __FUNCTION__,
+        winDebug("%s - Bitmap: %dx%d %d bpp %d planes\n", __func__,
                  (int)pbmih->biWidth, (int)pbmih->biHeight, pbmih->biBitCount,
                  pbmih->biPlanes);
-        winDebug("%s - Compression: %u %s\n", __FUNCTION__,
+        winDebug("%s - Compression: %u %s\n", __func__,
                  (unsigned int)pbmih->biCompression,
                  (pbmih->biCompression ==
                   BI_RGB ? "(BI_RGB)" : (pbmih->biCompression ==
@@ -582,10 +580,7 @@ winCloseScreenShadowGDI(ScreenPtr pScreen)
     pScreenPriv->fClosed = TRUE;
     pScreenPriv->fActive = FALSE;
 
-    /* Call the wrapped CloseScreen procedure */
-    WIN_UNWRAP(CloseScreen);
-    if (pScreen->CloseScreen)
-        fReturn = (*pScreen->CloseScreen) (pScreen);
+    fReturn = fbCloseScreen(pScreen);
 
     /* Delete the window property */
     RemoveProp(pScreenPriv->hwndScreen, WIN_SCR_PROP);
@@ -926,7 +921,7 @@ winBltExposedWindowRegionShadowGDI(ScreenPtr pScreen, WindowPtr pWin)
 }
 
 /*
- * Do any engine-specific appliation-activation processing
+ * Do any engine-specific application-activation processing
  */
 
 static Bool

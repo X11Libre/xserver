@@ -47,7 +47,6 @@ SOFTWARE.
 #ifndef OS_H
 #define OS_H
 
-#include "misc.h"
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -58,6 +57,10 @@ SOFTWARE.
 
 #include <X11/Xfuncproto.h>
 
+#include "xlibre_ptrtypes.h"
+#include "callback.h"
+#include "misc.h"
+
 /*
  * @brief macro for specifying non-null arguments
  *
@@ -65,6 +68,15 @@ SOFTWARE.
  */
 #ifndef _X_ATTRIBUTE_NONNULL_ARG
 #define _X_ATTRIBUTE_NONNULL_ARG(...) __attribute__((nonnull(__VA_ARGS__)))
+#endif
+
+#ifndef _X_ATTRIBUTE_VPRINTF
+# if defined(__GNUC__) && (__GNUC__ >= 2) && !defined(__clang__)
+#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
+          __attribute__((__format__(gnu_printf, fmt, firstarg)))
+# else
+#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
+# endif
 #endif
 
 #define SCREEN_SAVER_ON   0
@@ -76,7 +88,6 @@ SOFTWARE.
 #define MAX_REQUEST_SIZE 65535
 #endif
 
-typedef struct _FontPathRec *FontPathPtr;
 typedef struct _NewClientRec *NewClientPtr;
 
 #ifndef xnfalloc
@@ -165,13 +176,6 @@ extern _X_EXPORT void *
 XNFrealloc(void * /*ptr */ , unsigned long /*amount */ );
 
 /*
- * This function reallocarray(3)s passed buffer, terminating the server if
- * there is not enough memory or the arguments overflow when multiplied.
- */
-extern _X_EXPORT void *
-XNFreallocarray(void *ptr, size_t nmemb, size_t size);
-
-/*
  * This function strdup(3)s passed string. The only difference from the library
  * function that it is safe to pass NULL, as NULL will be returned.
  */
@@ -199,26 +203,8 @@ PrivsElevated(void);
 extern _X_EXPORT int
 GetClientFd(ClientPtr);
 
-/* stuff for ReplyCallback */
-extern _X_EXPORT CallbackListPtr ReplyCallback;
-typedef struct {
-    ClientPtr client;
-    const void *replyData;
-    unsigned long dataLenBytes; /* actual bytes from replyData + pad bytes */
-    unsigned long bytesRemaining;
-    Bool startOfReply;
-    unsigned long padBytes;     /* pad bytes from zeroed array */
-} ReplyInfoRec;
-
 /* stuff for FlushCallback */
 extern _X_EXPORT CallbackListPtr FlushCallback;
-
-enum ExitCode {
-    EXIT_NO_ERROR = 0,
-    EXIT_ERR_ABORT = 1,
-    EXIT_ERR_CONFIGURE = 2,
-    EXIT_ERR_DRIVERS = 3,
-};
 
 extern _X_EXPORT int
 TimeSinceLastInputEvent(void);
@@ -280,12 +266,6 @@ extern _X_EXPORT void
 LogMessage(MessageType type, const char *format, ...)
 _X_ATTRIBUTE_PRINTF(2, 3);
 
-void
-LogVHdrMessageVerb(MessageType type, int verb,
-                   const char *msg_format, va_list msg_args,
-                   const char *hdr_format, va_list hdr_args)
-_X_ATTRIBUTE_PRINTF(3, 0)
-_X_ATTRIBUTE_PRINTF(5, 0);
 extern _X_EXPORT void
 LogHdrMessageVerb(MessageType type, int verb,
                   const char *msg_format, va_list msg_args,
@@ -302,16 +282,8 @@ extern _X_EXPORT void
 ErrorF(const char *f, ...)
 _X_ATTRIBUTE_PRINTF(1, 2);
 
-void LogPrintMarkers(void);
-
 extern _X_EXPORT void
 xorg_backtrace(void);
-
-#include <signal.h>
-
-#if defined(WIN32)
-typedef _sigset_t sigset_t;
-#endif
 
 /* should not be used anymore, just for backwards compat with drivers */
 #define LogVMessageVerbSigSafe(...) LogVMessageVerb(__VA_ARGS__)

@@ -29,14 +29,6 @@ srcs_fb = [
 	'fbwindow.c',
 ]
 
-hdrs_fb = [
-	'fb.h',
-	'fboverlay.h',
-	'fbpict.h',
-	'fbrop.h',
-	'wfbrename.h'
-]
-
 libxserver_fb = static_library('xserver_fb',
 	srcs_fb,
 	include_directories: inc,
@@ -54,7 +46,3 @@ libxserver_wfb = static_library('xserver_wfb',
 	pic: true,
 	build_by_default: false,
 )
-
-if build_xorg
-    install_data(hdrs_fb, install_dir: xorgsdkdir)
-endif

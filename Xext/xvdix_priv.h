@@ -10,7 +10,7 @@
 
 #include "include/pixmap.h"
 #include "include/regionstr.h"
-#include "Xext/xvdix.h"
+#include "include/xvdix.h"
 
 #define VALIDATE_XV_PORT(portID, pPort, mode)\
     {\
@@ -37,7 +37,6 @@ extern RESTYPE XvRTPort;
 
 /* dispatch functions */
 int ProcXvDispatch(ClientPtr);
-int SProcXvDispatch(ClientPtr);
 
 void XvFreeAdaptor(XvAdaptorPtr pAdaptor);
 

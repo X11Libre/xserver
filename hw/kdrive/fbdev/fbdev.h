@@ -22,6 +22,7 @@
 
 #ifndef _KDRIVE_FBDEV_H_
 #define _KDRIVE_FBDEV_H_
+#include <stdbool.h>
 #include <stdio.h>
 #include <linux/fb.h>
 #include <unistd.h>
@@ -46,10 +47,32 @@ typedef struct _fbdevPriv {
 typedef struct _fbdevScrPriv {
     Rotation randr;
     Bool shadow;
+#ifdef GLAMOR
+    int dri_fd;
+#endif
 } FbdevScrPriv;
 
+typedef struct _fbScreenConf {
+const char *fbdevDevicePath;
+Bool fbDisableShadow;
+bool fbNoAccel;
+
+char *fbdev_glvnd_provider;
+
+char *fbdev_dri_path;
+bool fbdev_auto_dri3;
+bool fbdev_drm_master;
+
+bool es_allowed;
+bool force_es;
+
+bool fbGlamorAllowed;
+bool fbForceGlamor;
+
+bool fbXVAllowed;
+} FbScreenConf;
+
 extern KdCardFuncs fbdevFuncs;
-extern const char *fbdevDevicePath;
 
 Bool fbdevCardInit(KdCardInfo * card);
 
@@ -80,5 +103,15 @@ void fbdevGetColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 void fbdevPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 
 Bool fbdevMapFramebuffer(KdScreenInfo * screen);
+
+#ifdef GLAMOR
+Bool fbdevInitAccel(ScreenPtr screen);
+
+void fbdevEnableAccel(ScreenPtr screen);
+
+void fbdevDisableAccel(ScreenPtr screen);
+
+void fbdevFiniAccel(ScreenPtr screen);
+#endif
 
 #endif                          /* _KDRIVE_FBDEV_H_ */

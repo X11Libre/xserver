@@ -11,20 +11,12 @@ srcs_present = [
     'present_vblank.c',
 ]
 
-hdrs_present = [
-    'present.h',
-]
-
 libxserver_present = static_library('xserver_present',
     srcs_present,
     include_directories: inc,
     dependencies: [
         common_dep,
-	epoll_dep,
+        epoll_dep,
         dependency('presentproto', version: '>= 1.2')
     ],
 )
-
-if build_xorg
-    install_data(hdrs_present, install_dir: xorgsdkdir)
-endif

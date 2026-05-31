@@ -92,6 +92,8 @@ SOFTWARE.
 #include <errno.h>
 #include <sys/types.h>
 
+#include "dix/server_priv.h"
+#include "os/io_priv.h"
 #include "os/xhostname.h"
 
 #ifndef WIN32
@@ -103,9 +105,7 @@ SOFTWARE.
 #include <pwd.h>
 #endif
 
-#if defined(TCPCONN)
 #include <netinet/in.h>
-#endif                          /* TCPCONN */
 
 #ifdef HAVE_GETPEERUCRED
 #include <ucred.h>
@@ -166,7 +166,7 @@ SOFTWARE.
 
 #endif                          /* WIN32 */
 
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
 #include <libgen.h>
 #endif
 
@@ -180,7 +180,10 @@ SOFTWARE.
 #include "dixstruct.h"
 
 #include "xace.h"
+
+#ifdef XDMCP
 #include "xdmcp.h"
+#endif
 
 Bool defeatAccessControl = FALSE;
 
@@ -399,9 +402,6 @@ AccessUsingXdmcp(void)
 void
 DefineSelf(int fd)
 {
-#if !defined(TCPCONN) && !defined(UNIXCONN)
-    return;
-#else
     int len;
     caddr_t addr;
     int family;
@@ -514,7 +514,6 @@ DefineSelf(int fd)
             selfhosts = host;
         }
     }
-#endif                          /* !TCPCONN && !UNIXCONN */
 }
 
 #else
@@ -590,7 +589,9 @@ DefineSelf(int fd)
         ErrorF("Getting interface count: %s\n", strerror(errno));
     if (len < (ifn.lifn_count * sizeof(struct lifreq))) {
         len = ifn.lifn_count * sizeof(struct lifreq);
-        bufptr = calloc(1, len);
+        if (!(bufptr = calloc(1, len))) {
+            FatalError("DefineSelf: failed to allocate memory\n");
+        }
     }
 #endif
 
@@ -895,13 +896,6 @@ ResetHosts(const char *display)
     FILE *fd;
     char *ptr;
     int i, hostlen;
-
-#if defined(TCPCONN) &&  (!defined(IPv6))
-    union {
-        struct sockaddr sa;
-        struct sockaddr_in in;
-    } saddr;
-#endif
     int family = 0;
     void *addr = NULL;
     int len;
@@ -943,7 +937,6 @@ ResetHosts(const char *display)
                 NewHost(family, "", 0, FALSE);
                 LocalHostRequested = TRUE;      /* Fix for XFree86 bug #156 */
             }
-#if defined(TCPCONN)
             else if (!strncmp("inet:", lhostname, 5)) {
                 family = FamilyInternet;
                 hostname = ohostname + 5;
@@ -953,7 +946,6 @@ ResetHosts(const char *display)
                 family = FamilyInternet6;
                 hostname = ohostname + 6;
             }
-#endif
 #endif
             else if (!strncmp("si:", lhostname, 3)) {
                 family = FamilyServerInterpreted;
@@ -968,7 +960,6 @@ ResetHosts(const char *display)
                 }
             }
             else
-#if defined(TCPCONN)
             {
 #if defined(HAVE_GETADDRINFO)
                 if ((family == FamilyInternet) ||
@@ -1003,11 +994,12 @@ ResetHosts(const char *display)
                 if ((family == FamilyInternet &&
                      ((hp = _XGethostbyname(hostname, hparams)) != 0)) ||
                     ((hp = _XGethostbyname(hostname, hparams)) != 0)) {
-                    saddr.sa.sa_family = hp->h_addrtype;
-                    len = sizeof(saddr.sa);
+                    struct sockaddr sa = {
+                        .sa_family = hp->h_addrtype
+                    };
+                    len = sizeof(sa);
                     if ((family =
-                         ConvertAddr(&saddr.sa, &len,
-                                     (void **) &addr)) != -1) {
+                         ConvertAddr(&sa, &len, (void **) &addr)) != -1) {
 #ifdef h_addr                   /* new 4.3bsd version of gethostent */
                         char **list;
 
@@ -1022,7 +1014,6 @@ ResetHosts(const char *display)
                 }
 #endif                          /* HAVE_GETADDRINFO */
             }
-#endif                          /* TCPCONN */
             family = FamilyWild;
         }
         fclose(fd);
@@ -1077,6 +1068,9 @@ ComputeLocalClient(ClientPtr client)
      */
     if (cmdname) {
         char *cmd = strdup(cmdname);
+        if (!cmd)
+            return FALSE;
+
         Bool ret;
 
         /* Cut off any colon and whatever comes after it, see
@@ -1084,7 +1078,7 @@ ComputeLocalClient(ClientPtr client)
          */
         char *tok = strtok(cmd, ":");
 
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
         ret = strcmp(basename(tok), "ssh") != 0;
 #else
         ret = strcmp(tok, "ssh") != 0;
@@ -1259,7 +1253,7 @@ AuthorizedClient(ClientPtr client)
         return Success;
 
     /* untrusted clients can't change host access */
-    rc = XaceHookServerAccess(client, DixManageAccess);
+    rc = dixCallServerAccessCallback(client, DixManageAccess);
     if (rc != Success)
         return rc;
 
@@ -1446,7 +1440,6 @@ CheckAddr(int family, const void *pAddr, unsigned length)
     int len;
 
     switch (family) {
-#if defined(TCPCONN)
     case FamilyInternet:
         if (length == sizeof(struct in_addr))
             len = length;
@@ -1460,7 +1453,6 @@ CheckAddr(int family, const void *pAddr, unsigned length)
         else
             len = -1;
         break;
-#endif
 #endif
     case FamilyServerInterpreted:
         len = siCheckAddr(pAddr, length);
@@ -1525,11 +1517,10 @@ ConvertAddr(register struct sockaddr *saddr, int *len, void **addr)
         return FamilyLocal;
     switch (saddr->sa_family) {
     case AF_UNSPEC:
-#if defined(UNIXCONN) || defined(LOCALCONN)
+#if defined(UNIXCONN)
     case AF_UNIX:
 #endif
         return FamilyLocal;
-#if defined(TCPCONN)
     case AF_INET:
 #ifdef WIN32
         if (16777343 == *(long *) &((struct sockaddr_in *) saddr)->sin_addr)
@@ -1554,7 +1545,6 @@ ConvertAddr(register struct sockaddr *saddr, int *len, void **addr)
             return FamilyInternet6;
         }
     }
-#endif
 #endif
     default:
         return -1;

@@ -70,6 +70,5 @@ int ProcRRQueryVersion(ClientPtr client);
 int ProcRRSelectInput(ClientPtr client);
 
 int ProcRRDispatch(ClientPtr client);
-int SProcRRDispatch(ClientPtr client);
 
 #endif /* _XSERVER_RANDR_RRDISPATCH_H */

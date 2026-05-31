@@ -2,6 +2,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 
 #include <dix.h>
 #include "vndserver.h"
@@ -13,9 +14,11 @@
 
 static inline GlxServerVendor *vendorForScreen(ClientPtr pClient, CARD32 screen)
 {
-    if (screen < screenInfo.numScreens)
-        return glxServer.getVendorForScreen(pClient, screenInfo.screens[screen]);
-    return NULL;
+    ScreenPtr pScreen = dixGetScreenPtr(screen);
+    if (!pScreen)
+        return NULL;
+
+    return glxServer.getVendorForScreen(pClient, pScreen);
 }
 
 static int dispatch_Render(ClientPtr client)

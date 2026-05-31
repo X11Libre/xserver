@@ -39,6 +39,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/Xatom.h>
 #include <X11/extensions/XKMformat.h>
 
+#include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 #include "os/cmdline.h"
 #include "os/log_priv.h"
@@ -49,7 +50,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "opaque.h"
 #include "property.h"
 #include "scrnintstr.h"
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 #define      _XKB_RF_NAMES_PROP_ATOM         "_XKB_RULES_NAMES"
 
@@ -109,11 +110,11 @@ static Bool XkbWantRulesProp = XKB_DFLT_RULES_PROP;
 void
 XkbGetRulesDflts(XkbRMLVOSet * rmlvo)
 {
-    rmlvo->rules = strdup(XkbRulesDflt ? XkbRulesDflt : XKB_DFLT_RULES);
-    rmlvo->model = strdup(XkbModelDflt ? XkbModelDflt : XKB_DFLT_MODEL);
-    rmlvo->layout = strdup(XkbLayoutDflt ? XkbLayoutDflt : XKB_DFLT_LAYOUT);
-    rmlvo->variant = strdup(XkbVariantDflt ? XkbVariantDflt : XKB_DFLT_VARIANT);
-    rmlvo->options = strdup(XkbOptionsDflt ? XkbOptionsDflt : XKB_DFLT_OPTIONS);
+    rmlvo->rules = XNFstrdup(XkbRulesDflt ? XkbRulesDflt : XKB_DFLT_RULES);
+    rmlvo->model = XNFstrdup(XkbModelDflt ? XkbModelDflt : XKB_DFLT_MODEL);
+    rmlvo->layout = XNFstrdup(XkbLayoutDflt ? XkbLayoutDflt : XKB_DFLT_LAYOUT);
+    rmlvo->variant = XNFstrdup(XkbVariantDflt ? XkbVariantDflt : XKB_DFLT_VARIANT);
+    rmlvo->options = XNFstrdup(XkbOptionsDflt ? XkbOptionsDflt : XKB_DFLT_OPTIONS);
 }
 
 void
@@ -192,7 +193,7 @@ XkbWriteRulesProp(void)
         ErrorF("[xkb] Internal Error! bad size (%d!=%d) for _XKB_RULES_NAMES\n",
                out, len);
     }
-    dixChangeWindowProperty(serverClient, screenInfo.screens[0]->root, name,
+    dixChangeWindowProperty(serverClient, dixGetMasterScreen()->root, name,
                             XA_STRING, 8, PropModeReplace, len, pval, TRUE);
     free(pval);
     return TRUE;
@@ -514,8 +515,8 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     XkbSrvInfoPtr xkbi;
     XkbDescPtr xkb;
     XkbSrvLedInfoPtr sli;
-    XkbChangesRec changes;
-    XkbEventCauseRec cause;
+    XkbChangesRec changes = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbRMLVOSet rmlvo_dflts = { NULL };
 
     BUG_RETURN_VAL(dev == NULL, FALSE);
@@ -534,7 +535,7 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     dev->key = calloc(1, sizeof(*dev->key));
     if (!dev->key) {
         ErrorF("XKB: Failed to allocate key class\n");
-        return FALSE;
+        goto unwind_rmlvo;
     }
     dev->key->sourceid = dev->id;
 
@@ -653,6 +654,8 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
  unwind_key:
     free(dev->key);
     dev->key = NULL;
+ unwind_rmlvo:
+    XkbFreeRMLVOSet(&rmlvo_dflts, FALSE);
     return FALSE;
 }
 
@@ -737,7 +740,7 @@ XkbProcessArguments(int argc, char *argv[], int i)
 {
     if (strncmp(argv[i], "-xkbdir", 7) == 0) {
         if (++i < argc) {
-#if !defined(WIN32)
+#if !defined(WIN32) && !defined(__CYGWIN__)
             if (getuid() != geteuid()) {
                 LogMessage(X_WARNING,
                            "-xkbdir is not available for setuid X servers\n");

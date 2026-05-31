@@ -141,20 +141,6 @@ MitRemoveCookie(unsigned short data_length, const char *data)
 
 static char cookie[16];         /* 128 bits */
 
-static void
-GenerateRandomData(int len, char *buf)
-{
-#ifdef HAVE_ARC4RANDOM_BUF
-    arc4random_buf(buf, len);
-#else
-    int fd;
-
-    fd = open("/dev/urandom", O_RDONLY);
-    read(fd, buf, len);
-    close(fd);
-#endif
-}
-
 XID
 MitGenerateCookie(unsigned data_length,
                   const char *data,
@@ -167,7 +153,7 @@ MitGenerateCookie(unsigned data_length,
         if (i >= sizeof(cookie))
             i = 0;
     }
-    GenerateRandomData(sizeof(cookie), cookie);
+    arc4random_buf(cookie, sizeof(cookie));
     XID id = MitAddCookie(sizeof(cookie), cookie);
     if (!id)
         return 0;

@@ -25,11 +25,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GRABDEV_H
 #define GRABDEV_H 1
 
-int SProcXGrabDevice(ClientPtr  /* client */
-    );
+#include <X11/extensions/XI.h>
 
-int ProcXGrabDevice(ClientPtr   /* client */
-    );
+#include "include/dix.h"
 
 int CreateMaskFromList(ClientPtr /* client */ ,
                        XEventClass * /* list */ ,

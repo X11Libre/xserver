@@ -3,10 +3,8 @@
  *
  * Authors: Alexander Gottwald
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include "win.h"
 #include "winpriv.h"
 #include "winwindow.h"
@@ -21,7 +19,7 @@ void
 HWND
 winGetWindowInfo(WindowPtr pWin)
 {
-    winTrace("%s: pWin %p XID 0x%x\n", __FUNCTION__, pWin, (unsigned int)pWin->drawable.id);
+    winTrace("%s: pWin %p XID 0x%x\n", __func__, pWin, (unsigned int)pWin->drawable.id);
 
     /* a real window was requested */
     if (pWin != NULL) {

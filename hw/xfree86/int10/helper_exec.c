@@ -6,17 +6,13 @@
  *   Part of this code was inspired  by the VBIOS POSTing code in DOSEMU
  *   developed by the "DOSEMU-Development-Team"
  */
-
 /*
  * To debug port accesses define PRINT_PORT to 1.
  * Note! You also have to comment out ioperm()
  * in xf86EnableIO(). Otherwise we won't trap
  * on PIO.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #define PRINT_PORT 0
 

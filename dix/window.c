@@ -106,12 +106,18 @@ Equipment Corporation.
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/property_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
+#include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
+#include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
+#include "include/extinit.h"
 #include "mi/mi_priv.h"         /* miPaintWindow */
 #include "os/auth.h"
 #include "os/client_priv.h"
+#include "os/osdep.h"
 #include "os/screensaver.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -129,7 +135,6 @@ Equipment Corporation.
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "servermd.h"
-#include "mivalidate.h"
 #include "globals.h"
 #include "compint.h"
 #include "privates.h"
@@ -149,8 +154,8 @@ Equipment Corporation.
 
 Bool bgNoneRoot = FALSE;
 
-static unsigned char _back_lsb[4] = { 0x88, 0x22, 0x44, 0x11 };
-static unsigned char _back_msb[4] = { 0x11, 0x44, 0x22, 0x88 };
+static const unsigned char _back_lsb[4] = { 0x88, 0x22, 0x44, 0x11 };
+static const unsigned char _back_msb[4] = { 0x11, 0x44, 0x22, 0x88 };
 
 static Bool WindowParentHasDeviceCursor(WindowPtr pWin,
                                         DeviceIntPtr pDev, CursorPtr pCurs);
@@ -393,8 +398,7 @@ PrintPassiveGrabs(void)
 void
 PrintWindowTree(void)
 {
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", walkScreenIdx,
                (unsigned) walkScreen->GetScreenPixmap(walkScreen)->drawable.id);
         WindowPtr pWin = walkScreen->root;
@@ -414,7 +418,7 @@ PrintWindowTree(void)
                 break;
             pWin = pWin->nextSib;
         }
-    }
+    });
 }
 
 int
@@ -500,7 +504,7 @@ MakeRootTile(WindowPtr pWin)
     GCPtr pGC;
     unsigned char back[128];
     int len = BitmapBytePad(sizeof(long));
-    unsigned char *from, *to;
+    unsigned char *to;
 
     pWin->background.pixmap = (*pScreen->CreatePixmap) (pScreen, 4, 4,
                                                         pScreen->rootDepth, 0);
@@ -522,7 +526,8 @@ MakeRootTile(WindowPtr pWin)
 
     ValidateGC((DrawablePtr) pWin->background.pixmap, pGC);
 
-    from = (screenInfo.bitmapBitOrder == LSBFirst) ? _back_lsb : _back_msb;
+    const unsigned char *from
+        = (screenInfo.bitmapBitOrder == LSBFirst) ? _back_lsb : _back_msb;
     to = back;
 
     for (int i = 4; i > 0; i--, from++)
@@ -948,8 +953,7 @@ DisposeWindowOptional(WindowPtr pWin)
 
         pList = pWin->optional->deviceCursors;
         while (pList) {
-            if (pList->cursor)
-                FreeCursor(pList->cursor, (XID) 0);
+            FreeCursor(pList->cursor, (XID) 0);
             pPrev = pList;
             pList = pList->next;
             free(pPrev);
@@ -992,19 +996,18 @@ FreeWindowResources(WindowPtr pWin)
 static void
 CrushTree(WindowPtr pWin)
 {
-    WindowPtr pChild, pSib, pParent;
-    UnrealizeWindowProcPtr UnrealizeWindow;
+    WindowPtr pChild, pSib;
 
     if (!(pChild = pWin->firstChild))
         return;
-    UnrealizeWindow = pWin->drawable.pScreen->UnrealizeWindow;
     while (1) {
-        if (pChild->firstChild) {
+
+        /* go to a leaf node in the window tree */
+        while (pChild->firstChild)
             pChild = pChild->firstChild;
-            continue;
-        }
+
         while (1) {
-            pParent = pChild->parent;
+            WindowPtr pParent = pChild->parent;
             if (SubStrSend(pChild, pParent)) {
                 xEvent event = { .u.u.type = DestroyNotify };
                 event.u.destroyNotify.window = pChild->drawable.id;
@@ -1014,8 +1017,7 @@ CrushTree(WindowPtr pWin)
             pSib = pChild->nextSib;
             pChild->viewable = FALSE;
             if (pChild->realized) {
-                pChild->realized = FALSE;
-                (*UnrealizeWindow) (pChild);
+                dixScreenRaiseUnrealizeWindow(pChild);
             }
             FreeWindowResources(pChild);
             dixFreeObjectWithPrivates(pChild, PRIVATE_WINDOW);
@@ -1524,8 +1526,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                 /* Can't free cursor until here - old cursor
                  * is needed in WindowHasNewCursor
                  */
-                if (pOldCursor)
-                    FreeCursor(pOldCursor, (Cursor) 0);
+                FreeCursor(pOldCursor, (Cursor) 0);
             }
             break;
         default:
@@ -1565,12 +1566,15 @@ ProcGetWindowAttributes(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
+    if (client->swapped)
+        swapl(&stuff->id);
+
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    xGetWindowAttributesReply rep = {
+    xGetWindowAttributesReply reply = {
         .bitGravity = pWin->bitGravity,
         .winGravity = pWin->winGravity,
         .backingStore = pWin->backingStore,
@@ -1591,17 +1595,17 @@ ProcGetWindowAttributes(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.visualID);
-        swaps(&rep.class);
-        swapl(&rep.backingBitPlanes);
-        swapl(&rep.backingPixel);
-        swapl(&rep.colormap);
-        swapl(&rep.allEventMasks);
-        swapl(&rep.yourEventMask);
-        swaps(&rep.doNotPropagateMask);
+        swapl(&reply.visualID);
+        swaps(&reply.class);
+        swapl(&reply.backingBitPlanes);
+        swapl(&reply.backingPixel);
+        swapl(&reply.colormap);
+        swapl(&reply.allEventMasks);
+        swapl(&reply.yourEventMask);
+        swaps(&reply.doNotPropagateMask);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 WindowPtr
@@ -2268,8 +2272,9 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         event.u.u.detail = (mask & CWStackMode) ? smode : Above;
 #ifdef XINERAMA
         if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
-            event.u.configureRequest.x += screenInfo.screens[0]->x;
-            event.u.configureRequest.y += screenInfo.screens[0]->y;
+            ScreenPtr masterScreen = dixGetMasterScreen();
+            event.u.configureRequest.x += masterScreen->x;
+            event.u.configureRequest.y += masterScreen->y;
         }
 #endif /* XINERAMA */
         if (MaybeDeliverEventToClient(pParent, &event,
@@ -2351,8 +2356,9 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         event.u.u.type = ConfigureNotify;
 #ifdef XINERAMA
         if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
-            event.u.configureNotify.x += screenInfo.screens[0]->x;
-            event.u.configureNotify.y += screenInfo.screens[0]->y;
+            ScreenPtr masterScreen = dixGetMasterScreen();
+            event.u.configureNotify.x += masterScreen->x;
+            event.u.configureNotify.y += masterScreen->y;
         }
 #endif /* XINERAMA */
         DeliverEvents(pWin, &event, 1, NullWindow);
@@ -2496,8 +2502,9 @@ ReparentWindow(WindowPtr pWin, WindowPtr pParent,
     event.u.u.type = ReparentNotify;
 #ifdef XINERAMA
     if (!noPanoramiXExtension && !pParent->parent) {
-        event.u.reparent.x += screenInfo.screens[0]->x;
-        event.u.reparent.y += screenInfo.screens[0]->y;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        event.u.reparent.x += masterScreen->x;
+        event.u.reparent.y += masterScreen->y;
     }
 #endif /* XINERAMA */
     DeliverEvents(pWin, &event, 1, pParent);
@@ -2748,15 +2755,12 @@ static void
 UnrealizeTree(WindowPtr pWin, Bool fromConfigure)
 {
     WindowPtr pChild;
-    UnrealizeWindowProcPtr Unrealize;
     MarkUnrealizedWindowProcPtr MarkUnrealizedWindow;
 
-    Unrealize = pWin->drawable.pScreen->UnrealizeWindow;
     MarkUnrealizedWindow = pWin->drawable.pScreen->MarkUnrealizedWindow;
     pChild = pWin;
     while (1) {
         if (pChild->realized) {
-            pChild->realized = FALSE;
             pChild->visibility = VisibilityNotViewable;
 #ifdef XINERAMA
             if (!noPanoramiXExtension && !pChild->drawable.pScreen->myNum) {
@@ -2770,7 +2774,7 @@ UnrealizeTree(WindowPtr pWin, Bool fromConfigure)
                     win->u.win.visibility = VisibilityNotViewable;
             }
 #endif /* XINERAMA */
-            (*Unrealize) (pChild);
+            dixScreenRaiseUnrealizeWindow(pChild);
             DeleteWindowFromAnyEvents(pChild, FALSE);
             if (pChild->viewable) {
                 pChild->viewable = FALSE;
@@ -2914,7 +2918,7 @@ HandleSaveSet(ClientPtr client)
 {
     WindowPtr pParent, pWin;
 
-    for (int j = 0; j < client->numSaved; j++) {
+    for (unsigned j = 0; j < client->numSaved; j++) {
         pWin = SaveSetWindow(client->saveSet[j]);
         if (SaveSetToRoot(client->saveSet[j]))
             pParent = pWin->drawable.pScreen->root;
@@ -3079,16 +3083,14 @@ dixSaveScreens(ClientPtr client, int on, int mode)
             type = SCREEN_SAVER_CYCLE;
     }
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        int rc = XaceHookScreensaverAccess(client, walkScreen,
+    DIX_FOR_EACH_SCREEN({
+        int rc = dixCallScreensaverAccessCallback(client, walkScreen,
                       DixShowAccess | DixHideAccess);
         if (rc != Success)
             return rc;
-    }
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    });
 
+    DIX_FOR_EACH_SCREEN({
         if (on == SCREEN_SAVER_FORCER)
             walkScreen->SaveScreen(walkScreen, on);
         if (walkScreen->screensaver.ExternalScreenSaver) {
@@ -3152,7 +3154,8 @@ dixSaveScreens(ClientPtr client, int on, int mode)
                 walkScreen->screensaver.blanked = SCREEN_ISNT_SAVED;
             break;
         }
-    }
+    });
+
     screenIsSaved = what;
     if (mode == ScreenSaverReset) {
         if (on == SCREEN_SAVER_FORCER) {
@@ -3237,10 +3240,6 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
             }
             else
                 cursor = 0;
-        }
-        else {
-            free(srcbits);
-            free(mskbits);
         }
     }
 
@@ -3489,8 +3488,7 @@ ChangeWindowDeviceCursor(WindowPtr pWin, DeviceIntPtr pDev, CursorPtr pCursor)
     if (pWin->realized)
         WindowHasNewCursor(pWin);
 
-    if (pOldCursor)
-        FreeCursor(pOldCursor, (Cursor) 0);
+    FreeCursor(pOldCursor, (Cursor) 0);
 
     /* FIXME: We SHOULD check for an error value here XXX
        (comment taken from ChangeWindowAttributes) */

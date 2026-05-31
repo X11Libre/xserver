@@ -22,9 +22,10 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dri3/dri3_priv.h"
+#include "present/present_priv.h"
 
-#include "present_priv.h"
 #include "randrstr_priv.h"
 #include <protocol-versions.h>
 
@@ -32,7 +33,7 @@ static int
 proc_present_query_version(ClientPtr client)
 {
     REQUEST(xPresentQueryVersionReq);
-    xPresentQueryVersionReply rep = {
+    xPresentQueryVersionReply reply = {
         .majorVersion = SERVER_PRESENT_MAJOR_VERSION,
         .minorVersion = SERVER_PRESENT_MINOR_VERSION
     };
@@ -45,18 +46,18 @@ proc_present_query_version(ClientPtr client)
      * higher than the requested version.
      */
 
-    if (rep.majorVersion > stuff->majorVersion ||
-        rep.minorVersion > stuff->minorVersion) {
-        rep.majorVersion = stuff->majorVersion;
-        rep.minorVersion = stuff->minorVersion;
+    if (reply.majorVersion > stuff->majorVersion ||
+        reply.minorVersion > stuff->minorVersion) {
+        reply.majorVersion = stuff->majorVersion;
+        reply.minorVersion = stuff->minorVersion;
     }
 
     if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 #define VERIFY_FENCE_OR_NONE(fence_ptr, fence_id, client, access) do {  \
@@ -267,14 +268,14 @@ proc_present_query_capabilities (ClientPtr client)
         return r;
     }
 
-    xPresentQueryCapabilitiesReply rep = {
+    xPresentQueryCapabilitiesReply reply = {
         .capabilities = present_query_capabilities(crtc)
     };
 
     if (client->swapped) {
-        swapl(&rep.capabilities);
+        swapl(&reply.capabilities);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 #ifdef DRI3
@@ -351,10 +352,14 @@ sproc_present_pixmap(ClientPtr client)
 
     swapl(&stuff->window);
     swapl(&stuff->pixmap);
+    swapl(&stuff->serial);
     swapl(&stuff->valid);
     swapl(&stuff->update);
     swaps(&stuff->x_off);
     swaps(&stuff->y_off);
+    swapl(&stuff->target_crtc);
+    swapl(&stuff->wait_fence);
+    swapl(&stuff->options);
     swapll(&stuff->target_msc);
     swapll(&stuff->divisor);
     swapll(&stuff->remainder);
@@ -381,6 +386,7 @@ sproc_present_select_input (ClientPtr client)
     REQUEST(xPresentSelectInputReq);
     REQUEST_SIZE_MATCH(xPresentSelectInputReq);
 
+    swapl(&stuff->eid);
     swapl(&stuff->window);
     swapl(&stuff->eventMask);
     return proc_present_select_input(client);

@@ -21,6 +21,8 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 
+#include "dix/window_priv.h"
+#include "include/regionstr.h"
 #include "mi/mi_priv.h"
 
 #include "gcstruct.h"
@@ -28,7 +30,6 @@ is" without express or implied warranty.
 #include "windowstr.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
-#include "region.h"
 
 #include "xnest-xcb.h"
 

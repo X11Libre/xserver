@@ -385,7 +385,7 @@ exaFinishAccess(DrawablePtr pDrawable, int index)
         return;
 
     if (pExaPixmap == NULL)
-        EXA_FatalErrorDebugWithRet(("EXA bug: exaFinishAccesss was called on a non-exa pixmap.\n"),);
+        EXA_FatalErrorDebugWithRet(("EXA bug: exaFinishAccess was called on a non-exa pixmap.\n"),);
 
     /* Handle repeated / nested calls. */
     for (i = 0; i < EXA_NUM_PREPARE_INDICES; i++) {
@@ -398,7 +398,7 @@ exaFinishAccess(DrawablePtr pDrawable, int index)
 
     /* Catch unbalanced Prepare/FinishAccess calls. */
     if (i == EXA_NUM_PREPARE_INDICES)
-        EXA_FatalErrorDebugWithRet(("EXA bug: FinishAccess called without PrepareAccess for pixmap 0x%p.\n", pPixmap),);
+        EXA_FatalErrorDebugWithRet(("EXA bug: FinishAccess called without PrepareAccess for pixmap %p.\n", (void *)pPixmap),);
 
     pExaScr->access[i].pixmap = NULL;
 

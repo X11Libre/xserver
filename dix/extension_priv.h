@@ -5,7 +5,9 @@
 #ifndef _XSERVER_EXTENSION_PRIV_H
 #define _XSERVER_EXTENSION_PRIV_H
 
-#include "misc.h"
+#include "include/callback.h"
+#include "include/extnsionst.h"
+#include "include/misc.h"
 
 #define EXTENSION_MAJOR_APPLE_WM            (EXTENSION_BASE + 0)
 #define EXTENSION_MAJOR_APPLE_DRI           (EXTENSION_BASE + 1)
@@ -45,5 +47,15 @@
 #define EXTENSION_MAJOR_XVMC                (EXTENSION_BASE + 35)
 
 #define RESERVED_EXTENSIONS                 38
+
+typedef struct {
+    ClientPtr client;
+    ExtensionEntry *ext;
+    Mask access_mode;
+    int status;
+} ExtensionAccessCallbackParam;
+
+extern CallbackListPtr ExtensionAccessCallback;
+extern CallbackListPtr ExtensionDispatchCallback;
 
 #endif /* _XSERVER_EXTENSION_PRIV_H */

@@ -33,6 +33,8 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/log_priv.h"
@@ -221,9 +223,12 @@ TouchInitTouchPoint(TouchClassPtr t, ValuatorClassPtr v, int index)
         return FALSE;
     }
     ti->sprite.spriteTraceSize = 32;
-    ti->sprite.spriteTrace[0] = screenInfo.screens[0]->root;
-    ti->sprite.hot.pScreen = screenInfo.screens[0];
-    ti->sprite.hotPhys.pScreen = screenInfo.screens[0];
+
+    ScreenPtr masterScreen = dixGetMasterScreen();
+
+    ti->sprite.spriteTrace[0] = masterScreen->root;
+    ti->sprite.hot.pScreen = masterScreen;
+    ti->sprite.hotPhys.pScreen = masterScreen;
 
     ti->client_id = -1;
 

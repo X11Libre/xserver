@@ -21,10 +21,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <errno.h>
 #include <sys/stat.h>
@@ -37,6 +34,11 @@
 #include "xf86_OSlib.h"
 #ifdef HAVE_SYS_KD_H
 #include <sys/kd.h>
+#endif
+
+#if !defined(__i386__) && !defined(__i386) && !defined(__x86)
+#include <sys/fbio.h>
+#include <sys/mman.h>
 #endif
 
 #include "os/osdep.h"
@@ -68,6 +70,14 @@ static char consoleDev[PATH_MAX] = "/dev/fb";
 /* Set by -dev argument on CLI
    Used by hw/xfree86/common/xf86AutoConfig.c for VIS_GETIDENTIFIER */
 char xf86SolarisFbDev[PATH_MAX] = "/dev/fb";
+
+
+Bool
+xf86VTKeepTtyIsSet(void)
+{
+     return KeepTty;
+}
+
 
 #ifdef HAS_USL_VTS
 static void

@@ -12,6 +12,12 @@
 #include "input.h"
 #include "cursor.h"
 
+/* @brief tells which client ID currently has a grab
+ *
+ * used by OS layer and screensaver
+ */
+extern int GrabInProgress;
+
 struct _GrabParameters;
 
 /**

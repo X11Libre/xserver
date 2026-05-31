@@ -29,14 +29,15 @@
  * Authors:	Kensuke Matsuzaki
  *              Colin Harrison
  */
-
-/* X headers */
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef __CYGWIN__
+#include <sys/select.h>
+#endif
 #include <fcntl.h>
 #include <setjmp.h>
 #define HANDLE void *
@@ -84,6 +85,9 @@ extern void winUpdateRgnMultiWindow(WindowPtr pWin);
 
 #define WIN_CONNECT_RETRIES	5
 #define WIN_CONNECT_DELAY	5
+#ifdef HAS_DEVWINDOWS
+#define WIN_MSG_QUEUE_FNAME	"/dev/windows"
+#endif
 
 /*
  * Local structures
@@ -902,6 +906,7 @@ winMultiWindowWMProc(void *pArg)
                -- independently, the WM_TAKE_FOCUS protocol determines whether
                the WM should send a WM_TAKE_FOCUS ClientMessage.
             */
+            if (pNode->msg.iWindow)
             {
               Bool neverFocus = FALSE;
               xcb_get_property_cookie_t cookie;
@@ -915,7 +920,7 @@ winMultiWindowWMProc(void *pArg)
               }
 
               if (!neverFocus)
-                xcb_set_input_focus(pWMInfo->conn, XCB_INPUT_FOCUS_POINTER_ROOT,
+                xcb_set_input_focus(pWMInfo->conn, XCB_INPUT_FOCUS_PARENT,
                                     pNode->msg.iWindow, XCB_CURRENT_TIME);
 
               if (IsWmProtocolAvailable(pWMInfo,
@@ -924,6 +929,13 @@ winMultiWindowWMProc(void *pArg)
                 SendXMessage(pWMInfo->conn,
                              pNode->msg.iWindow,
                              pWMInfo->atmWmProtos, pWMInfo->atmWmTakeFocus);
+
+            }
+            else
+            /* Set the input focus to none */
+            {
+              xcb_set_input_focus(pWMInfo->conn, XCB_INPUT_FOCUS_NONE,
+                                  XCB_NONE, XCB_CURRENT_TIME);
 
             }
             break;
@@ -1380,13 +1392,13 @@ winMultiWindowXMsgProc(void *pArg)
  * the Window Manager thread.  Called from
  * winscrinit.c/winFinishScreenInitFB ().
  */
-
-Bool
-winInitWM(void **ppWMInfo,
-          pthread_t * ptWMProc,
-          pthread_t * ptXMsgProc,
-          pthread_mutex_t * ppmServerStarted,
-          int dwScreen, HWND hwndScreen, Bool compositeWM)
+bool winInitWM(void **ppWMInfo,
+               pthread_t *ptWMProc,
+               pthread_t *ptXMsgProc,
+               pthread_mutex_t *ppmServerStarted,
+               int dwScreen,
+               HWND hwndScreen,
+               bool compositeWM)
 {
     WMProcArgPtr pArg = calloc(1, sizeof(WMProcArgRec));
     WMInfoPtr pWMInfo = calloc(1, sizeof(WMInfoRec));
@@ -1403,7 +1415,7 @@ winInitWM(void **ppWMInfo,
 
     /* Set a return pointer to the Window Manager info structure */
     *ppWMInfo = pWMInfo;
-    pWMInfo->fCompositeWM = compositeWM;
+    pWMInfo->fCompositeWM = (!!compositeWM);
 
     /* Setup the argument structure for the thread function */
     pArg->dwScreen = dwScreen;
@@ -1861,11 +1873,11 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
 #define APPLICATION_ID_FORMAT	"%s.xwin.%s"
 #define APPLICATION_ID_UNKNOWN "unknown"
         if (res_class) {
-            asprintf(&application_id, APPLICATION_ID_FORMAT, XVENDORNAME,
+            asprintf(&application_id, APPLICATION_ID_FORMAT, "XLibre",
                      res_class);
         }
         else {
-            asprintf(&application_id, APPLICATION_ID_FORMAT, XVENDORNAME,
+            asprintf(&application_id, APPLICATION_ID_FORMAT, "XLibre",
                      APPLICATION_ID_UNKNOWN);
         }
         winSetAppUserModelID(hWnd, application_id);

@@ -30,11 +30,9 @@
  *		Peter Busch
  *		Harold L Hunt II
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
+#include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
 
 #include "win.h"
@@ -256,8 +254,8 @@ winRestoreModeKeyStates(void)
 
     /* Only process events if the rootwindow is mapped. The keyboard events
      * will cause segfaults otherwise */
-    if (screenInfo.screens[0]->root &&
-        screenInfo.screens[0]->root->mapped == FALSE)
+    ScreenPtr masterScreen = dixGetMasterScreen();
+    if (masterScreen->root && masterScreen->root->mapped == FALSE)
         processEvents = FALSE;
 
     /* Force to process all pending events in the mi event queue */
@@ -469,6 +467,12 @@ void
 winKeybdReleaseKeys(void)
 {
     int i;
+
+#ifdef HAS_DEVWINDOWS
+    /* Verify that the mi input system has been initialized */
+    if (g_fdMessageQueue == WIN_FD_INVALID)
+        return;
+#endif
 
     /* Loop through all keys */
     for (i = 0; i < NUM_KEYCODES; ++i) {

@@ -29,6 +29,9 @@
 #include "include/resource.h"
 #include "include/window.h"
 
+/* pad scanline to a longword */
+#define BITMAP_SCANLINE_UNIT    32
+
 #define LEGAL_NEW_RESOURCE(id,client)           \
     do {                                        \
         if (!LegalNewID((id), (client))) {      \
@@ -59,6 +62,9 @@ extern HWEventQueuePtr checkForInput[2];
 
  /* -retro mode */
 extern Bool party_like_its_1989;
+
+/* needed by libglx and libglamor (server modules) */
+extern _X_EXPORT Bool enableIndirectGLX;
 
 /*
  * @brief callback right after one screen's root window has been initialized
@@ -97,8 +103,7 @@ void InitClient(ClientPtr client, int i, void *ospriv);
 int FillFontPath(x_rpcbuf_t *rpcbuf);
 
 /* lookup builtin color by name */
-Bool dixLookupBuiltinColor(int screen,
-                           char *name,
+Bool dixLookupBuiltinColor(char *name,
                            unsigned len,
                            unsigned short *pred,
                            unsigned short *pgreen,
@@ -282,7 +287,6 @@ extern Bool whiteRoot;
 extern volatile char isItTimeToYield;
 
 /* bit values for dispatchException */
-#define DE_RESET     1
 #define DE_TERMINATE 2
 #define DE_PRIORITYCHANGE 4     /* set when a client's priority changes */
 
@@ -303,6 +307,16 @@ extern Bool enableBackingStore;
 void MakePredeclaredAtoms(void);
 
 void dixFreeScreen(ScreenPtr pScreen);
+
+/*
+ * @brief call the screen's UnrealizeWindow proc
+ *
+ * Calls the Screen's UnrealizeWindow proc and sets pWin->realized
+ * to FALSE.
+ *
+ * @param pWin the window that's being unrealized
+ */
+void dixScreenRaiseUnrealizeWindow(WindowPtr pWin);
 
 /*
  * @brief call screen's window destructors
@@ -701,24 +715,6 @@ static inline ClientPtr dixLookupXIDOwner(XID xid)
 }
 
 /*
- * @brief write rpc buffer to client and then clear it
- *
- * @param pClient the client to write buffer to
- * @param rpcbuf  the buffer whose contents will be written
- * @return the result of WriteToClient() call
- */
-static inline ssize_t WriteRpcbufToClient(ClientPtr pClient,
-                                          x_rpcbuf_t *rpcbuf) {
-    /* explicitly casting between (s)size_t and int - should be safe,
-       since payloads are always small enough to easily fit into int. */
-    ssize_t ret = WriteToClient(pClient,
-                                (int)rpcbuf->wpos,
-                                rpcbuf->buffer);
-    x_rpcbuf_clear(rpcbuf);
-    return ret;
-}
-
-/*
  * @brief make atom from null-terminated string
  *
  * if atom already existing, return the existing Atom ID
@@ -742,76 +738,6 @@ static inline Atom dixGetAtomID(const char *name) {
     return MakeAtom(name, (unsigned int)strlen(name), FALSE);
 }
 
-/* compute the amount of extra units a reply header needs.
- *
- * all reply header structs are at least the size of xGenericReply
- * we have to count how many units the header is bigger than xGenericReply
- *
- */
-#define X_REPLY_HEADER_UNITS(hdrtype) \
-    (bytes_to_int32((sizeof(hdrtype) - sizeof(xGenericReply))))
-
-static inline int __write_reply_hdr_and_rpcbuf(
-    ClientPtr pClient, void *hdrData, size_t hdrLen, x_rpcbuf_t *rpcbuf)
-{
-    if (rpcbuf->error)
-        return BadAlloc;
-
-    xGenericReply *reply = hdrData;
-    reply->type = X_Reply;
-    reply->length = (bytes_to_int32(hdrLen - sizeof(xGenericReply)))
-                  + x_rpcbuf_wsize_units(rpcbuf);
-    reply->sequenceNumber = pClient->sequence;
-
-    if (pClient->swapped) {
-         swaps(&reply->sequenceNumber);
-         swapl(&reply->length);
-    }
-
-    WriteToClient(pClient, hdrLen, hdrData);
-    WriteRpcbufToClient(pClient, rpcbuf);
-
-    return Success;
-}
-
-static inline int __write_reply_hdr_simple(
-    ClientPtr pClient, void *hdrData, size_t hdrLen)
-{
-    xGenericReply *reply = hdrData;
-    reply->type = X_Reply;
-    reply->length = (bytes_to_int32(hdrLen - sizeof(xGenericReply)));
-    reply->sequenceNumber = pClient->sequence;
-
-    if (pClient->swapped) {
-         swaps(&reply->sequenceNumber);
-         swapl(&reply->length);
-    }
-
-    WriteToClient(pClient, hdrLen, hdrData);
-    return Success;
-}
-
-/*
- * send reply with header struct (not pointer!) along with rpcbuf payload
- *
- * @param client      pointer to the client (ClientPtr)
- * @param hdrstruct   the header struct (not pointer, the struct itself!)
- * @param rpcbuf      the rpcbuf to send (not pointer, the struct itself!)
- * return             X11 result code
- */
-#define X_SEND_REPLY_WITH_RPCBUF(client, hdrstruct, rpcbuf) \
-    __write_reply_hdr_and_rpcbuf(client, &(hdrstruct), sizeof(hdrstruct), &(rpcbuf));
-
-/*
- * send reply with header struct (not pointer!) without any payload
- *
- * @param client      pointer to the client (ClientPtr)
- * @param hdrstruct   the header struct (not pointer, the struct itself!)
- * @return            X11 result code (=Success)
- */
-#define X_SEND_REPLY_SIMPLE(client, hdrstruct) \
-    __write_reply_hdr_simple(client, &(hdrstruct), sizeof(hdrstruct));
-
 /*
  * transmit raw event into client's buffer
  * the struct already needs to be filled with all on-wire data, and
@@ -825,12 +751,60 @@ static inline int __write_reply_hdr_simple(
  */
 static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
 {
-    ev.u.u.sequenceNumber = pClient->sequence;
+    ev.u.u.sequenceNumber = (CARD16)pClient->sequence; /* shouldn't go above 64k */
 
     if (pClient->swapped)
         swaps(&ev.u.u.sequenceNumber);
 
     return WriteToClient(pClient, sizeof(xEvent), &ev);
 }
+
+/*
+ * allocate color for given client
+ * the colors channel values need to be filled into the fields pointed
+ * to by the parameters, and the actually allocated ones are returned there
+ *
+ * @param client  pointer to client
+ * @param cmap    XID of the cmap to use
+ * @param red     pointer to red channel value
+ * @param green   pointer to green channel value
+ * @param blue    pointer to blue channel value
+ * @param pixel   pointer to return buffer for pixel value
+ * @return        X11 error code
+ */
+int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
+                  CARD16 *green, CARD16 *blue, CARD32 *pixel);
+
+void ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)  _X_NORETURN;
+
+/*
+ * Byte swap a list of CARD32s
+ *
+ * @param list    pointer to list of clients
+ * @param count   amount of CARD32s to swap
+ */
+static inline void SwapLongs(CARD32 *list, unsigned long count) {
+    while (count >= 8) {
+        swapl(list + 0);
+        swapl(list + 1);
+        swapl(list + 2);
+        swapl(list + 3);
+        swapl(list + 4);
+        swapl(list + 5);
+        swapl(list + 6);
+        swapl(list + 7);
+        list += 8;
+        count -= 8;
+    }
+    if (count != 0) {
+        do {
+            swapl(list);
+            list++;
+        } while (--count != 0);
+    }
+}
+
+#define SwapRestL(stuff) \
+    SwapLongs((CARD32 *)(stuff + 1), (client->req_len - (sizeof(*stuff) >> 2)))
 
 #endif /* _XSERVER_DIX_PRIV_H */

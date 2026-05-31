@@ -23,36 +23,61 @@
  *
  * interpret_edid.c: interpret a primary EDID block
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "edid_priv.h"
 
 #include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#define _PARSE_EDID_
 #include "xf86DDC_priv.h"
-#include <string.h>
 
-static void get_vendor_section(Uchar *, struct vendor *);
-static void get_version_section(Uchar *, struct edid_version *);
-static void get_display_section(Uchar *, struct disp_features *,
+#define EXT_TAG   0x00
+#define EXT_REV   0x01
+#define CEA_EXT   0x02
+#define VTB_EXT   0x10
+#define DI_EXT    0x40
+#define LS_EXT    0x50
+#define MI_EXT    0x60
+
+#define CEA_EXT_MIN_DATA_OFFSET 4
+#define CEA_EXT_MAX_DATA_OFFSET 127
+#define CEA_EXT_DET_TIMING_NUM 6
+
+#define IEEE_ID_HDMI    0x000C03
+#define CEA_VIDEO_BLK   2
+#define CEA_VENDOR_BLK  3
+
+struct cea_ext_body {
+    uint8_t tag;
+    uint8_t rev;
+    uint8_t dt_offset;
+    uint8_t flags;
+    struct cea_data_block data_collection;
+};
+
+static void get_vendor_section(uint8_t *, struct vendor *);
+static void get_version_section(uint8_t *, struct edid_version *);
+static void get_display_section(uint8_t *, struct disp_features *,
                                 struct edid_version *);
-static void get_established_timing_section(Uchar *,
+static void get_established_timing_section(uint8_t *,
                                            struct established_timings *);
-static void get_std_timing_section(Uchar *, struct std_timings *,
+static void get_std_timing_section(uint8_t *, struct std_timings *,
                                    struct edid_version *);
-static void fetch_detailed_block(Uchar * c, struct edid_version *ver,
+static void fetch_detailed_block(uint8_t * c, struct edid_version *ver,
                                  struct detailed_monitor_section *det_mon);
-static void get_dt_md_section(Uchar *, struct edid_version *,
+static void get_dt_md_section(uint8_t *, struct edid_version *,
                               struct detailed_monitor_section *det_mon);
-static void copy_string(Uchar *, Uchar *);
-static void get_dst_timing_section(Uchar *, struct std_timings *,
+static void copy_string(uint8_t *, uint8_t *);
+static void get_dst_timing_section(uint8_t *, struct std_timings *,
                                    struct edid_version *);
-static void get_monitor_ranges(Uchar *, struct monitor_ranges *);
-static void get_whitepoint_section(Uchar *, struct whitePoints *);
-static void get_detailed_timing_section(Uchar *, struct detailed_timings *);
+static void get_monitor_ranges(uint8_t *, struct monitor_ranges *);
+static void get_whitepoint_section(uint8_t *, struct whitePoints *);
+static void get_detailed_timing_section(uint8_t *, struct detailed_timings *);
 static Bool validate_version(int scrnIndex, struct edid_version *);
 
 static void
@@ -164,15 +189,18 @@ encode_aspect_ratio(xf86MonPtr m)
     }
 }
 
-xf86MonPtr
-xf86InterpretEDID(int scrnIndex, Uchar * block)
+static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool copy)
 {
-    xf86MonPtr m;
+    xf86MonPtr m = calloc(1, sizeof(xf86Monitor) + (copy ? size : 0));
+    if (!m)
+        return NULL;
 
-    if (!block)
-        return NULL;
-    if (!(m = XNFcallocarray(1, sizeof(xf86Monitor))))
-        return NULL;
+    /* make a copy of the EDID block for later reference */
+    if (copy) {
+        memcpy(&(m[1]), block, size);
+        block = (uint8_t*)&m[1];
+    }
+
     m->scrnIndex = scrnIndex;
     m->rawData = block;
 
@@ -191,6 +219,11 @@ xf86InterpretEDID(int scrnIndex, Uchar * block)
     handle_edid_quirks(m);
     encode_aspect_ratio(m);
 
+    if (size > 128)
+        m->flags |= EDID_COMPLETE_RAWDATA;
+
+    /* possibly add more extended parsing here, eg. HDR information */
+
     return m;
 
  error:
@@ -198,8 +231,26 @@ xf86InterpretEDID(int scrnIndex, Uchar * block)
     return NULL;
 }
 
+/* new entry point, should be used whenever possible */
+xf86MonPtr xf86ParseEDID(ScrnInfoPtr pScrn, uint8_t *block, size_t size)
+{
+    if (!pScrn || !block || !size)
+        return NULL;
+
+    return parseEDID(pScrn->scrnIndex, block, size, true);
+}
+
+/* old entry point, deprecated but still needed for backwards compat */
+xf86MonPtr xf86InterpretEDID(int scrnIndex, uint8_t *block)
+{
+    if (!block)
+        return NULL;
+
+    return parseEDID(scrnIndex, block, EDID1_LEN, false);
+}
+
 static int
-get_cea_detail_timing(Uchar * blk, xf86MonPtr mon,
+get_cea_detail_timing(uint8_t * blk, xf86MonPtr mon,
                       struct detailed_monitor_section *det_mon)
 {
     int dt_num;
@@ -221,7 +272,7 @@ get_cea_detail_timing(Uchar * blk, xf86MonPtr mon,
 }
 
 static void
-handle_cea_detail_block(Uchar * ext, xf86MonPtr mon,
+handle_cea_detail_block(uint8_t * ext, xf86MonPtr mon,
                         handle_detailed_fn fn, void *data)
 {
     int i;
@@ -238,7 +289,7 @@ void
 xf86ForEachDetailedBlock(xf86MonPtr mon, handle_detailed_fn fn, void *data)
 {
     int i;
-    Uchar *ext;
+    uint8_t *ext;
 
     if (mon == NULL)
         return;
@@ -262,7 +313,7 @@ xf86ForEachDetailedBlock(xf86MonPtr mon, handle_detailed_fn fn, void *data)
 }
 
 static struct cea_data_block *
-extract_cea_data_block(Uchar * ext, int data_type)
+extract_cea_data_block(uint8_t * ext, int data_type)
 {
     struct cea_ext_body *cea;
     struct cea_data_block *data_collection;
@@ -289,7 +340,7 @@ extract_cea_data_block(Uchar * ext, int data_type)
 }
 
 static void
-handle_cea_video_block(Uchar * ext, handle_video_fn fn, void *data)
+handle_cea_video_block(uint8_t * ext, handle_video_fn fn, void *data)
 {
     struct cea_video_block *video;
     struct cea_video_block *video_end;
@@ -301,7 +352,7 @@ handle_cea_video_block(Uchar * ext, handle_video_fn fn, void *data)
 
     video = &data_collection->u.video;
     video_end = (struct cea_video_block *)
-        ((Uchar *) video + data_collection->len);
+        ((uint8_t *) video + data_collection->len);
 
     for (; video < video_end; video = video + 1) {
         fn(video, data);
@@ -312,7 +363,7 @@ void
 xf86ForEachVideoBlock(xf86MonPtr mon, handle_video_fn fn, void *data)
 {
     int i;
-    Uchar *ext;
+    uint8_t *ext;
 
     if (mon == NULL)
         return;
@@ -333,7 +384,7 @@ xf86ForEachVideoBlock(xf86MonPtr mon, handle_video_fn fn, void *data)
 }
 
 static Bool
-cea_db_offsets(Uchar *cea, int *start, int *end)
+cea_db_offsets(uint8_t *cea, int *start, int *end)
 {
     /* Data block offset in CEA extension block */
     *start = CEA_EXT_MIN_DATA_OFFSET;
@@ -346,18 +397,18 @@ cea_db_offsets(Uchar *cea, int *start, int *end)
 }
 
 static int
-cea_db_len(Uchar *db)
+cea_db_len(uint8_t *db)
 {
     return db[0] & 0x1f;
 }
 
 static int
-cea_db_tag(Uchar *db)
+cea_db_tag(uint8_t *db)
 {
     return db[0] >> 5;
 }
 
-typedef void (*handle_cea_db_fn) (Uchar *, void *);
+typedef void (*handle_cea_db_fn) (uint8_t *, void *);
 
 static void
 cea_for_each_db(xf86MonPtr mon, handle_cea_db_fn fn, void *data)
@@ -378,7 +429,7 @@ cea_for_each_db(xf86MonPtr mon, handle_cea_db_fn fn, void *data)
 
     for (i = 0; i < mon->no_sections; i++) {
         int start, end, offset;
-        Uchar *ext;
+        uint8_t *ext;
 
         ext = mon->rawData + EDID1_LEN * (i + 1);
         if (ext[EXT_TAG] != CEA_EXT)
@@ -398,7 +449,7 @@ struct find_hdmi_block_data {
     struct cea_data_block *hdmi;
 };
 
-static void find_hdmi_block(Uchar *db, void *data)
+static void find_hdmi_block(uint8_t *db, void *data)
 {
     struct find_hdmi_block_data *result = data;
     int oui;
@@ -424,82 +475,74 @@ struct cea_data_block *xf86MonitorFindHDMIBlock(xf86MonPtr mon)
 }
 
 xf86MonPtr
-xf86InterpretEEDID(int scrnIndex, Uchar * block)
+xf86InterpretEEDID(int scrnIndex, uint8_t * block)
 {
-    xf86MonPtr m;
-
-    m = xf86InterpretEDID(scrnIndex, block);
-    if (!m)
-        return NULL;
-
-    /* extension parse */
-
-    return m;
+    return xf86InterpretEDID(scrnIndex, block);
 }
 
 static void
-get_vendor_section(Uchar * c, struct vendor *r)
+get_vendor_section(uint8_t * c, struct vendor *r)
 {
-    r->name[0] = L1;
-    r->name[1] = L2;
-    r->name[2] = L3;
+    r->name[0] = _L1(GET_ARRAY(V_MANUFACTURER));
+    r->name[1] = _L2(GET_ARRAY(V_MANUFACTURER));
+    r->name[2] = _L3(GET_ARRAY(V_MANUFACTURER));
     r->name[3] = '\0';
 
-    r->prod_id = PROD_ID;
-    r->serial = SERIAL_NO;
-    r->week = WEEK;
-    r->year = YEAR;
+    r->prod_id = _PROD_ID(GET_ARRAY(V_PROD_ID));
+    r->serial = _SERIAL_NO(GET_ARRAY(V_SERIAL));
+    r->week = _YEAR(GET(V_YEAR));
+    r->year = GET(V_WEEK) & 0xFF;
 }
 
 static void
-get_version_section(Uchar * c, struct edid_version *r)
+get_version_section(uint8_t * c, struct edid_version *r)
 {
-    r->version = VERSION;
-    r->revision = REVISION;
+    r->version = GET(V_VERSION);
+    r->revision = GET(V_REVISION);
 }
 
 static void
-get_display_section(Uchar * c, struct disp_features *r, struct edid_version *v)
+get_display_section(uint8_t * c, struct disp_features *r, struct edid_version *v)
 {
-    r->input_type = INPUT_TYPE;
+    r->input_type = _INPUT_TYPE(GET(D_INPUT));
     if (!DIGITAL(r->input_type)) {
-        r->input_voltage = INPUT_VOLTAGE;
-        r->input_setup = SETUP;
-        r->input_sync = SYNC;
+        r->input_voltage = _INPUT_VOLTAGE(GET(D_INPUT));
+        r->input_setup = _SETUP(GET(D_INPUT));
+        r->input_sync = _SYNC(GET(D_INPUT));
     }
     else if (v->revision == 2 || v->revision == 3) {
-        r->input_dfp = DFP;
+        r->input_dfp = _DFP(GET(D_INPUT));
     }
     else if (v->revision >= 4) {
-        r->input_bpc = BPC;
-        r->input_interface = DIGITAL_INTERFACE;
+        r->input_bpc = _BPC(GET(D_INPUT));
+        r->input_interface = _DIGITAL_INTERFACE(GET(D_INPUT));
     }
-    r->hsize = HSIZE_MAX;
-    r->vsize = VSIZE_MAX;
-    r->gamma = GAMMA;
-    r->dpms = DPMS;
-    r->display_type = DISPLAY_TYPE;
-    r->msc = MSC;
-    r->redx = REDX;
-    r->redy = REDY;
-    r->greenx = GREENX;
-    r->greeny = GREENY;
-    r->bluex = BLUEX;
-    r->bluey = BLUEY;
-    r->whitex = WHITEX;
-    r->whitey = WHITEY;
+    r->hsize = GET(D_HSIZE);
+    r->vsize = GET(D_VSIZE);
+    r->gamma = _GAMMA(GET(D_GAMMA));
+    r->dpms = _DPMS(GET(FEAT_S));
+    r->display_type = _DISPLAY_TYPE(GET(FEAT_S));
+    r->msc = _MSC(GET(FEAT_S));
+    r->redx = F_CC(I_CC((GET(D_RG_LOW)),(GET(D_REDX)),6));
+    r->redy = F_CC(I_CC((GET(D_RG_LOW)),(GET(D_REDY)),4));
+    r->greenx = F_CC(I_CC((GET(D_RG_LOW)),(GET(D_GREENX)),2));
+    r->greeny = F_CC(I_CC((GET(D_RG_LOW)),(GET(D_GREENY)),0));
+    r->bluex = F_CC(I_CC((GET(D_BW_LOW)),(GET(D_BLUEX)),6));
+    r->bluey = F_CC(I_CC((GET(D_BW_LOW)),(GET(D_BLUEY)),4));
+    r->whitex = F_CC(I_CC((GET(D_BW_LOW)),(GET(D_WHITEX)),2));
+    r->whitey = F_CC(I_CC((GET(D_BW_LOW)),(GET(D_WHITEY)),0));
 }
 
 static void
-get_established_timing_section(Uchar * c, struct established_timings *r)
+get_established_timing_section(uint8_t * c, struct established_timings *r)
 {
-    r->t1 = T1;
-    r->t2 = T2;
-    r->t_manu = T_MANU;
+    r->t1 = GET(E_T1);
+    r->t2 = GET(E_T2);
+    r->t_manu = GET(E_TMANU);
 }
 
 static void
-get_cvt_timing_section(Uchar * c, struct cvt_timings *r)
+get_cvt_timing_section(uint8_t * c, struct cvt_timings *r)
 {
     int i;
 
@@ -544,32 +587,32 @@ get_cvt_timing_section(Uchar * c, struct cvt_timings *r)
 }
 
 static void
-get_std_timing_section(Uchar * c, struct std_timings *r, struct edid_version *v)
+get_std_timing_section(uint8_t * c, struct std_timings *r, struct edid_version *v)
 {
     int i;
 
     for (i = 0; i < STD_TIMINGS; i++) {
-        if (VALID_TIMING) {
-            r[i].hsize = HSIZE1;
-            VSIZE1(r[i].vsize);
-            r[i].refresh = REFRESH_R;
+        if (_VALID_TIMING(c)) {
+            r[i].hsize = _HSIZE1(c);
+            _VSIZE1(c,r[i].vsize,v);
+            r[i].refresh = _REFRESH_R(c);
             r[i].id = STD_TIMING_ID;
         }
         else {
             r[i].hsize = r[i].vsize = r[i].refresh = r[i].id = 0;
         }
-        NEXT_STD_TIMING;
+        _NEXT_STD_TIMING(c);
     }
 }
 
 static const unsigned char empty_block[18];
 
 static void
-fetch_detailed_block(Uchar * c, struct edid_version *ver,
+fetch_detailed_block(uint8_t * c, struct edid_version *ver,
                      struct detailed_monitor_section *det_mon)
 {
-    if (ver->version == 1 && ver->revision >= 1 && IS_MONITOR_DESC) {
-        switch (MONITOR_DESC_TYPE) {
+    if (ver->version == 1 && ver->revision >= 1 && _IS_MONITOR_DESC(c)) {
+        switch (_MONITOR_DESC_TYPE(c)) {
         case SERIAL_NUMBER:
             det_mon->type = DS_SERIAL;
             copy_string(c, det_mon->section.serial);
@@ -623,19 +666,19 @@ fetch_detailed_block(Uchar * c, struct edid_version *ver,
 }
 
 static void
-get_dt_md_section(Uchar * c, struct edid_version *ver,
+get_dt_md_section(uint8_t * c, struct edid_version *ver,
                   struct detailed_monitor_section *det_mon)
 {
     int i;
 
     for (i = 0; i < DET_TIMINGS; i++) {
         fetch_detailed_block(c, ver, det_mon + i);
-        NEXT_DT_MD_SECTION;
+        _NEXT_DT_MD_SECTION(c);
     }
 }
 
 static void
-copy_string(Uchar * c, Uchar * s)
+copy_string(uint8_t * c, uint8_t * s)
 {
     int i;
 
@@ -648,22 +691,22 @@ copy_string(Uchar * c, Uchar * s)
 }
 
 static void
-get_dst_timing_section(Uchar * c, struct std_timings *t, struct edid_version *v)
+get_dst_timing_section(uint8_t * c, struct std_timings *t, struct edid_version *v)
 {
     int j;
 
     c = c + 5;
     for (j = 0; j < 5; j++) {
-        t[j].hsize = HSIZE1;
-        VSIZE1(t[j].vsize);
-        t[j].refresh = REFRESH_R;
+        t[j].hsize = _HSIZE1(c);
+        _VSIZE1(c,t[j].vsize,v);
+        t[j].refresh = _REFRESH_R(c);
         t[j].id = STD_TIMING_ID;
-        NEXT_STD_TIMING;
+        _NEXT_STD_TIMING(c);
     }
 }
 
 static void
-get_monitor_ranges(Uchar * c, struct monitor_ranges *r)
+get_monitor_ranges(uint8_t * c, struct monitor_ranges *r)
 {
     r->min_v = MIN_V;
     r->max_v = MAX_V;
@@ -701,7 +744,7 @@ get_monitor_ranges(Uchar * c, struct monitor_ranges *r)
 }
 
 static void
-get_whitepoint_section(Uchar * c, struct whitePoints *wp)
+get_whitepoint_section(uint8_t * c, struct whitePoints *wp)
 {
     wp[0].white_x = WHITEX1;
     wp[0].white_y = WHITEY1;
@@ -714,7 +757,7 @@ get_whitepoint_section(Uchar * c, struct whitePoints *wp)
 }
 
 static void
-get_detailed_timing_section(Uchar * c, struct detailed_timings *r)
+get_detailed_timing_section(uint8_t * c, struct detailed_timings *r)
 {
     r->clock = PIXEL_CLOCK;
     r->h_active = H_ACTIVE;
@@ -764,16 +807,24 @@ gtf_supported(xf86MonPtr mon)
 
     if ((mon->ver.version == 1) && (mon->ver.revision < 4)) {
         if (mon->features.msc & 0x1)
-	    return TRUE;
+            return TRUE;
     } else {
         for (i = 0; i < DET_TIMINGS; i++) {
             struct detailed_monitor_section *det_timing_des = &(mon->det_mon[i]);
             if (det_timing_des && (det_timing_des->type == DS_RANGES) && (mon->features.msc & 0x1) &&
                 (det_timing_des->section.ranges.display_range_timing_flags == DR_DEFAULT_GTF
-		|| det_timing_des->section.ranges.display_range_timing_flags == DR_SECONDARY_GTF))
-		    return TRUE;
-	}
+                || det_timing_des->section.ranges.display_range_timing_flags == DR_SECONDARY_GTF))
+                    return TRUE;
+        }
     }
 
     return FALSE;
+}
+
+bool xf86Monitor_gtf_supported(xf86MonPtr monitor)
+{
+    if (!monitor)
+        return false;
+
+    return GTF_SUPPORTED(monitor->features.msc);
 }

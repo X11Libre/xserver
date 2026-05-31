@@ -46,7 +46,7 @@ SOFTWARE.
 /*****************************************************************
  *  Stuff to create connections --- OS dependent
  *
- *      EstablishNewConnections, CreateWellKnownSockets, ResetWellKnownSockets,
+ *      EstablishNewConnections, CreateWellKnownSockets
  *      CloseDownConnection,
  *	OnlyListToOneClient,
  *      ListenToAllClients,
@@ -79,7 +79,6 @@ SOFTWARE.
 #ifndef WIN32
 #include <sys/socket.h>
 
-#if defined(TCPCONN)
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #ifdef CSRG_BASED
@@ -88,13 +87,17 @@ SOFTWARE.
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #endif
+#ifndef WIN32
 #include <sys/uio.h>
-#endif                          /* WIN32 */
+#endif
 
 #include "dix/dix_priv.h"
-#include "os/audit.h"
+#include "dix/dixgrabs_priv.h"
+#include "dix/server_priv.h"
+#include "os/audit_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
+#include "os/io_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
@@ -115,9 +118,14 @@ SOFTWARE.
 #include <systemd/sd-daemon.h>
 #endif
 
+#ifdef XDMCP
 #include "xdmcp.h"
+#endif
 
 #define MAX_CONNECTIONS (1<<16)
+
+#define OS_COMM_GRAB_IMPERVIOUS 1
+#define OS_COMM_IGNORED         2
 
 struct ospoll   *server_poll;
 
@@ -291,7 +299,6 @@ CreateWellKnownSockets(void)
 
 #if !defined(WIN32)
     OsSignal(SIGPIPE, SIG_IGN);
-    OsSignal(SIGHUP, AutoResetServer);
 #endif
     OsSignal(SIGINT, GiveUp);
     OsSignal(SIGTERM, GiveUp);
@@ -301,54 +308,6 @@ CreateWellKnownSockets(void)
 
 #ifdef XDMCP
     XdmcpInit();
-#endif
-}
-
-void
-ResetWellKnownSockets(void)
-{
-    int i;
-
-    ResetOsBuffers();
-
-    for (i = 0; i < ListenTransCount; i++) {
-        int status = _XSERVTransResetListener(ListenTransConns[i]);
-
-        if (status != TRANS_RESET_NOOP) {
-            if (status == TRANS_RESET_FAILURE) {
-                /*
-                 * ListenTransConns[i] freed by xtrans.
-                 * Remove it from out list.
-                 */
-
-                RemoveNotifyFd(ListenTransFds[i]);
-                ListenTransFds[i] = ListenTransFds[ListenTransCount - 1];
-                ListenTransConns[i] = ListenTransConns[ListenTransCount - 1];
-                ListenTransCount -= 1;
-                i -= 1;
-            }
-            else if (status == TRANS_RESET_NEW_FD) {
-                /*
-                 * A new file descriptor was allocated (the old one was closed)
-                 */
-
-                int newfd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
-
-                ListenTransFds[i] = newfd;
-            }
-        }
-    }
-    for (i = 0; i < ListenTransCount; i++)
-        SetNotifyFd(ListenTransFds[i], EstablishNewConnections, X_NOTIFY_READ,
-                    NULL);
-
-    ResetAuthorization();
-    ResetHosts(display);
-    /*
-     * restart XDMCP
-     */
-#ifdef XDMCP
-    XdmcpReset();
 #endif
 }
 
@@ -387,12 +346,11 @@ AuthAudit(ClientPtr client, Bool letin,
     else
         switch (saddr->sa_family) {
         case AF_UNSPEC:
-#if defined(UNIXCONN) || defined(LOCALCONN)
+#if defined(UNIXCONN)
         case AF_UNIX:
 #endif
             strlcpy(addr, "local host", sizeof(addr));
             break;
-#if defined(TCPCONN)
         case AF_INET:{
 #if defined(HAVE_INET_NTOP)
             char ipaddr[INET_ADDRSTRLEN];
@@ -415,7 +373,6 @@ AuthAudit(ClientPtr client, Bool letin,
             snprintf(addr, sizeof(addr), "IP %s", ipaddr);
         }
             break;
-#endif
 #endif
         default:
             strlcpy(addr, "unknown address", sizeof(addr));
@@ -588,8 +545,6 @@ ClientAuthorized(ClientPtr client,
     XdmcpOpenDisplay(priv->fd);
 #endif                          /* XDMCP */
 
-    XaceHookAuthAvail(client, auth_id);
-
     /* At this point, if the client is authorized to change the access control
      * list, we should getpeername() information, and add the client to
      * the selfhosts list.  It's not really the host machine, but the
@@ -626,11 +581,7 @@ AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
         return NULL;
     oc->trans_conn = trans_conn;
     oc->fd = fd;
-    oc->input = (ConnectionInputPtr) NULL;
-    oc->output = (ConnectionOutputPtr) NULL;
-    oc->auth_id = None;
     oc->conn_time = conn_time;
-    oc->flags = 0;
     if (!(client = NextAvailableClient((void *) oc))) {
         free(oc);
         return NULL;
@@ -668,7 +619,6 @@ EstablishNewConnections(int curconn, int ready, void *data)
     ClientPtr client;
     OsCommPtr oc;
     XtransConnInfo trans_conn, new_trans_conn;
-    int status;
 
     connect_time = GetTimeInMillis();
     /* kill off stragglers */
@@ -685,7 +635,7 @@ EstablishNewConnections(int curconn, int ready, void *data)
     if ((trans_conn = lookup_trans_conn(curconn)) == NULL)
         return;
 
-    if ((new_trans_conn = _XSERVTransAccept(trans_conn, &status)) == NULL)
+    if ((new_trans_conn = _XSERVTransAccept(trans_conn)) == NULL)
         return;
 
     newconn = _XSERVTransGetConnectionNumber(new_trans_conn);
@@ -871,7 +821,7 @@ OnlyListenToOneClient(ClientPtr client)
 {
     int rc;
 
-    rc = XaceHookServerAccess(client, DixGrabAccess);
+    rc = dixCallServerAccessCallback(client, DixGrabAccess);
     if (rc != Success)
         return rc;
 
@@ -885,7 +835,7 @@ OnlyListenToOneClient(ClientPtr client)
 
 /****************
  * ListenToAllClients:
- *    Undoes OnlyListentToOneClient()
+ *    Undoes OnlyListenToOneClient()
  ****************/
 
 void
@@ -1055,7 +1005,6 @@ ListenOnOpenFD(int fd, int noxauth)
     ListenTransCount++;
 }
 
-/* based on _XSERVTransSocketUNIXAccept (XtransConnInfo ciptr, int *status) */
 Bool
 AddClientOnOpenFD(int fd)
 {

@@ -22,10 +22,7 @@
  *
  * Author: Daniel Stone <daniel@fooishbar.org>
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "extension.h"
 #include "globals.h"
@@ -53,7 +50,6 @@
 Bool noXFree86VidModeExtension = FALSE;
 Bool noXFree86DGAExtension = FALSE;
 Bool noXFree86DRIExtension = FALSE;
-Bool noDRI2Extension = FALSE;
 
 /*
  * DDX-specific extensions.
@@ -79,13 +75,6 @@ static const ExtensionModule extensionModules[] = {
         "XFree86-DRI",
         &noXFree86DRIExtension
     },
-#endif
-#ifdef DRI2
-    {
-        DRI2ExtensionInit,
-        DRI2_NAME,
-        &noDRI2Extension
-    }
 #endif
 };
 

@@ -58,7 +58,7 @@
 #define _APPLEDRI_SERVER_
 #include "appledristr.h"
 #include "swaprep.h"
-#include "dri.h"
+#include "xpr_dri.h"
 #include "dristruct.h"
 #include "mi.h"
 #include "mipointer.h"
@@ -265,7 +265,7 @@ CreateSurfaceForWindow(ScreenPtr pScreen, WindowPtr pWin,
         xp_window_changes wc;
 
         /* allocate a DRI Window Private record */
-        if (!(pDRIDrawablePriv = malloc(sizeof(*pDRIDrawablePriv)))) {
+        if (!(pDRIDrawablePriv = calloc(1, sizeof(*pDRIDrawablePriv)))) {
             return NULL;
         }
 
@@ -565,7 +565,7 @@ DRIDrawablePrivDelete(void *pResource, XID id)
 }
 
 void
-DRICopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+DRICopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(pScreen);
@@ -681,7 +681,6 @@ DRICreatePixmap(ScreenPtr pScreen, Drawable id,
                 DrawablePtr pDrawable, char *path,
                 size_t pathmax)
 {
-    DRIPixmapBufferPtr shared;
     PixmapPtr pPix;
 
     if (pDrawable->type != DRAWABLE_PIXMAP)
@@ -689,7 +688,7 @@ DRICreatePixmap(ScreenPtr pScreen, Drawable id,
 
     pPix = (PixmapPtr)pDrawable;
 
-    shared = malloc(sizeof(*shared));
+    DRIPixmapBufferPtr shared = calloc(1, sizeof(*shared));
     if (NULL == shared) {
         FatalError("failed to allocate DRIPixmapBuffer in %s\n", __func__);
     }

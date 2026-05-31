@@ -410,7 +410,7 @@ miFillConvexPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
     dy = ymax - ymin + 1;
     if ((count < 3) || (dy < 0))
         return TRUE;
-    ptsOut = FirstPoint = calloc(dy, sizeof(DDXPointRec));
+    ptsOut = FirstPoint = calloc(dy, sizeof(xPoint));
     width = FirstWidth = calloc(dy, sizeof(int));
     if (!FirstPoint || !FirstWidth) {
         free(FirstWidth);
@@ -530,7 +530,7 @@ miFillGeneralPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
     ScanLineList *pSLL;         /* Current ScanLineList    */
     DDXPointPtr ptsOut;         /* ptr to output buffers   */
     int *width;
-    DDXPointRec FirstPoint[NUMPTSTOBUFFER];     /* the output buffers */
+    xPoint FirstPoint[NUMPTSTOBUFFER];     /* the output buffers */
     int FirstWidth[NUMPTSTOBUFFER];
     EdgeTableEntry *pPrevAET;   /* previous AET entry      */
     EdgeTable ET;               /* Edge Table header node  */

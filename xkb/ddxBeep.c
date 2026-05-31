@@ -57,7 +57,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	HIGH_PITCH	2000
 #define CLICK_PITCH	1500
 
-static x_server_generation_t atomGeneration = 0;
 static Atom featureOn;
 static Atom featureOff;
 static Atom featureChange;
@@ -127,10 +126,8 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
     if ((dev == NULL) || (dev->key == NULL) || (dev->key->xkbInfo == NULL) ||
         (dev->kbdfeed == NULL))
         return 0;
-    if (atomGeneration != serverGeneration) {
-        _XkbDDXBeepInitAtoms();
-        atomGeneration = serverGeneration;
-    }
+
+    _XkbDDXBeepInitAtoms();
 
     feed = dev->kbdfeed;
     ctrl = &feed->ctrl;

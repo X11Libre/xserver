@@ -102,7 +102,7 @@ SOFTWARE.
 #include "xvdisp.h"
 
 #define SCREEN_PROLOGUE(pScreen, field) ((pScreen)->field = ((XvScreenPtr) \
-    dixLookupPrivate(&(pScreen)->devPrivates, XvScreenKey))->field)
+    dixLookupPrivate(&(pScreen)->devPrivates, &XvScreenKeyRec))->field)
 
 #define SCREEN_EPILOGUE(pScreen, field, wrapper)\
     ((pScreen)->field = wrapper)
@@ -118,7 +118,6 @@ static DevPrivateKeyRec XvScreenKeyRec;
 
 Bool noXvExtension = FALSE;
 
-#define XvScreenKey (&XvScreenKeyRec)
 static x_server_generation_t XvExtensionGeneration = 0;
 static x_server_generation_t XvScreenGeneration = 0;
 static x_server_generation_t XvResourceGeneration = 0;
@@ -164,7 +163,7 @@ XvExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, 0))
+    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, sizeof(XvScreenRec)))
         return;
 
     /* Look to see if any screens were initialized; if not then
@@ -184,7 +183,7 @@ XvExtensionInit(void)
         XvExtensionGeneration = serverGeneration;
 
         extEntry = AddExtension(XvName, XvNumEvents, XvNumErrors,
-                                ProcXvDispatch, SProcXvDispatch,
+                                ProcXvDispatch, ProcXvDispatch,
                                 XvResetProc, StandardMinorOpcode);
         if (!extEntry) {
             FatalError("XvExtensionInit: AddExtensions failed\n");
@@ -280,22 +279,8 @@ XvScreenInit(ScreenPtr pScreen)
         XvScreenGeneration = serverGeneration;
     }
 
-    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, 0))
+    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, sizeof(XvScreenRec)))
         return BadAlloc;
-
-    if (dixLookupPrivate(&pScreen->devPrivates, XvScreenKey)) {
-        ErrorF("XvScreenInit: screen devPrivates ptr non-NULL before init\n");
-    }
-
-    /* ALLOCATE SCREEN PRIVATE RECORD */
-
-    XvScreenPtr pxvs = calloc(1, sizeof(XvScreenRec));
-    if (!pxvs) {
-        ErrorF("XvScreenInit: Unable to allocate screen private structure\n");
-        return BadAlloc;
-    }
-
-    dixSetPrivate(&pScreen->devPrivates, XvScreenKey, pxvs);
 
     dixScreenHookWindowDestroy(pScreen, XvWindowDestroy);
     dixScreenHookClose(pScreen, XvScreenClose);
@@ -306,17 +291,9 @@ XvScreenInit(ScreenPtr pScreen)
 
 static void XvScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    XvScreenPtr pxvs;
-
-    pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates, XvScreenKey);
-
     dixScreenUnhookWindowDestroy(pScreen, XvWindowDestroy);
     dixScreenUnhookClose(pScreen, XvScreenClose);
     dixScreenUnhookPixmapDestroy(pScreen, XvPixmapDestroy);
-
-    free(pxvs);
-
-    dixSetPrivate(&pScreen->devPrivates, XvScreenKey, NULL);
 }
 
 static void
@@ -328,7 +305,7 @@ XvResetProc(ExtensionEntry * extEntry)
 DevPrivateKey
 XvGetScreenKey(void)
 {
-    return XvScreenKey;
+    return &XvScreenKeyRec;
 }
 
 unsigned long
@@ -341,7 +318,7 @@ static void
 XvStopAdaptors(DrawablePtr pDrawable)
 {
     ScreenPtr pScreen = pDrawable->pScreen;
-    XvScreenPtr pxvs = dixLookupPrivate(&pScreen->devPrivates, XvScreenKey);
+    XvScreenPtr pxvs = dixLookupPrivate(&pScreen->devPrivates, &XvScreenKeyRec);
     XvAdaptorPtr pa = pxvs->pAdaptors;
     int na = pxvs->nAdaptors;
 
@@ -756,11 +733,10 @@ int
 XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
 {
     XvVideoNotifyPtr pn, tpn, fpn;
-    int rc;
 
     /* FIND VideoNotify LIST */
 
-    rc = dixLookupResourceByType((void **) &pn, pDraw->id,
+    int rc = dixLookupResourceByType((void **) &pn, pDraw->id,
                                  XvRTVideoNotifyList, client, DixWriteAccess);
     if (rc != Success && rc != BadValue)
         return rc;

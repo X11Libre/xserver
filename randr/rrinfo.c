@@ -23,7 +23,6 @@
 
 #include "randr/randrstr_priv.h"
 
-#ifdef RANDR_10_INTERFACE
 static RRModePtr
 RROldModeAdd(RROutputPtr output, RRScreenSizePtr size, int refresh)
 {
@@ -165,7 +164,6 @@ RRScanOldConfig(ScreenPtr pScreen, Rotation rotations)
     if (newMode)
         RRCrtcNotify(crtc, newMode, 0, 0, pScrPriv->rotation, NULL, 1, &output);
 }
-#endif
 
 /*
  * Poll the driver for changed information
@@ -197,10 +195,9 @@ RRGetInfo(ScreenPtr pScreen, Bool force_query)
     if (!(*pScrPriv->rrGetInfo) (pScreen, &rotations))
         return FALSE;
 
-#if RANDR_10_INTERFACE
     if (pScrPriv->nSizes)
         RRScanOldConfig(pScreen, rotations);
-#endif
+
     RRTellChanged(pScreen);
     return TRUE;
 }
@@ -230,7 +227,6 @@ RRScreenSetSizeRange(ScreenPtr pScreen,
     pScrPriv->configChanged = TRUE;
 }
 
-#ifdef RANDR_10_INTERFACE
 static Bool
 RRScreenSizeMatches(RRScreenSizePtr a, RRScreenSizePtr b)
 {
@@ -310,4 +306,3 @@ RRSetCurrentConfig(ScreenPtr pScreen,
     pScrPriv->rotation = rotation;
     pScrPriv->rate = rate;
 }
-#endif

@@ -27,8 +27,6 @@
 #ifndef GLAMOR_PRIV_H
 #define GLAMOR_PRIV_H
 
-#include "dix-config.h"
-
 #include <X11/Xfuncproto.h>
 
 #include "os/bug_priv.h"
@@ -42,11 +40,10 @@
 #endif
 
 #include <epoxy/gl.h>
-#ifdef GLAMOR_HAS_GBM
+
 #define MESA_EGL_NO_X11_HEADERS
 #define EGL_NO_X11
 #include <epoxy/egl.h>
-#endif
 
 #define GLAMOR_DEFAULT_PRECISION  \
     "#ifdef GL_ES\n"              \
@@ -352,6 +349,9 @@ typedef struct glamor_screen_private {
     struct glamor_context ctx;
 } glamor_screen_private;
 
+/* Allow overriding the default glamor screen init proc */
+extern void (*glamor_egl_screen_init2)(ScreenPtr screen, struct glamor_context *glamor_ctx);
+
 typedef enum glamor_access {
     GLAMOR_ACCESS_RO,
     GLAMOR_ACCESS_RW,
@@ -395,10 +395,11 @@ typedef struct glamor_pixmap_private {
     GLuint pbo;
     RegionRec prepare_region;
     Bool prepared;
-#ifdef GLAMOR_HAS_GBM
+
+    /* For DRI3 */
     EGLImageKHR image;
     Bool used_modifiers;
-#endif
+
     /** block width of this large pixmap. */
     int block_w;
     /** block height of this large pixmap. */
@@ -725,12 +726,12 @@ PicturePtr glamor_generate_linear_gradient_picture(ScreenPtr screen,
                                                    PicturePtr src_picture,
                                                    int x_source, int y_source,
                                                    int width, int height,
-                                                   PictFormatShort format);
+                                                   pixman_format_code_t format);
 PicturePtr glamor_generate_radial_gradient_picture(ScreenPtr screen,
                                                    PicturePtr src_picture,
                                                    int x_source, int y_source,
                                                    int width, int height,
-                                                   PictFormatShort format);
+                                                   pixman_format_code_t format);
 
 /* glamor_triangles.c */
 void glamor_triangles(CARD8 op,
@@ -1009,64 +1010,19 @@ int glamor_egl_fd_name_from_pixmap(ScreenPtr pScreen, PixmapPtr pPixmap,
 
 int glamor_egl_fd_from_pixmap(ScreenPtr, PixmapPtr, CARD16 *, CARD32 *);
 
-/* @glamor_fds_from_pixmap: Get a dma-buf fd from a pixmap.
- *
- * @screen: Current screen pointer.
- * @pixmap: The pixmap from which we want the fd.
- * @fds, @strides, @offsets: Pointers to fill info of each plane.
- * @modifier: Pointer to fill the modifier of the buffer.
- *
- * the pixmap and the buffer associated by the fds will share the same
- * content. The caller is responsible to close the returned file descriptors.
- * Returns the number of planes, -1 on error.
- * */
-int glamor_fds_from_pixmap(ScreenPtr screen,  PixmapPtr pixmap, int *fds,
-                           uint32_t *strides, uint32_t *offsets,
-                           uint64_t *modifier);
-
-/* @glamor_pixmap_from_fds: Creates a pixmap to wrap a dma-buf fds.
- *
- * @screen: Current screen pointer.
- * @num_fds: Number of fds to import
- * @fds: The dma-buf fds to import.
- * @width: The width of the buffers.
- * @height: The height of the buffers.
- * @stride: The stride of the buffers.
- * @depth: The depth of the buffers.
- * @bpp: The bpp of the buffers.
- * @modifier: The modifier of the buffers.
- *
- * Returns a valid pixmap if the import succeeded, else NULL.
- * */
-PixmapPtr glamor_pixmap_from_fds(ScreenPtr screen,
-                                 CARD8 num_fds,
-                                 const int *fds,
-                                 CARD16 width,
-                                 CARD16 height,
-                                 const CARD32 *strides,
-                                 const CARD32 *offsets,
-                                 CARD8 depth,
-                                 CARD8 bpp,
-                                 uint64_t modifier);
-
-Bool glamor_get_formats(ScreenPtr screen, CARD32 *num_formats, CARD32 **formats);
-
-Bool glamor_get_modifiers(ScreenPtr screen,
-                          uint32_t format,
-                          uint32_t *num_modifiers,
-                          uint64_t **modifiers);
-
-Bool glamor_get_drawable_modifiers(DrawablePtr draw,
-                                   uint32_t format,
-                                   uint32_t *num_modifiers,
-                                   uint64_t **modifiers);
 
 void glamor_egl_screen_init(ScreenPtr screen,
                             struct glamor_context *glamor_ctx);
 
 Bool glamor_change_window_attributes(WindowPtr pWin, unsigned long mask);
 
-void glamor_copy_window(WindowPtr window, DDXPointRec old_origin, RegionPtr src_region);
+void glamor_copy_window(WindowPtr window, xPoint old_origin, RegionPtr src_region);
+
+/*
+ * unref a glamor pixmap (specialized form of fbPixmap) and free
+ * if refcnt already had reached 1
+ */
+Bool glamor_destroy_pixmap(PixmapPtr pixmap);
 
 #include "glamor_utils.h"
 

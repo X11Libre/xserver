@@ -63,6 +63,7 @@ typedef struct _KdCardInfo {
     void *driver;
     struct _KdScreenInfo *screenList;
     int selected;
+    int mynum;
     struct _KdCardInfo *next;
 } KdCardInfo;
 
@@ -103,7 +104,7 @@ typedef struct _KdScreenInfo {
     Bool dumb;
     Bool softCursor;
     int mynum;
-    DDXPointRec origin;
+    xPoint origin;
     KdFrameBuffer fb;
 } KdScreenInfo;
 
@@ -235,12 +236,6 @@ int KdAddPointer(KdPointerInfo * ki);
 int KdAddConfigPointer(const char *pointer);
 void KdRemovePointer(KdPointerInfo * ki);
 
-#define KD_KEY_COUNT 248
-#define KD_MIN_KEYCODE  8
-#define KD_MAX_KEYCODE  255
-#define KD_MAX_WIDTH    4
-#define KD_MAX_LENGTH   (KD_MAX_KEYCODE - KD_MIN_KEYCODE + 1)
-
 typedef struct {
     KeySym modsym;
     int modbit;
@@ -277,6 +272,9 @@ struct _KdKeyboardInfo {
     int minScanCode;
     int maxScanCode;
 
+    /* Not set by the input driver */
+    int last_scan_code;
+
     int leds;
     int bellPitch;
     int bellDuration;
@@ -295,7 +293,7 @@ int KdAddKeyboard(KdKeyboardInfo * ki);
 void KdRemoveKeyboard(KdKeyboardInfo * ki);
 
 typedef struct _KdOsFuncs {
-    int (*Init) (void); /* Only called when the X server is started, when serverGeneration == 1 */
+    int (*Init) (void);           /* only called when the X server is started */
     void (*Enable) (void);        /* called when screen is enabled */
     void (*Disable) (void);       /* called when screen is disabled */
     Bool (*SpecialKey) (KeySym);
@@ -338,7 +336,6 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 #define kdScreenPrivateKey (&kdScreenPrivateKeyRec)
 
-extern x_server_generation_t kdGeneration;
 extern Bool kdEnabled;
 extern Bool kdSwitchPending;
 extern Bool kdEmulateMiddleButton;
@@ -384,15 +381,14 @@ void KdSetColormap(ScreenPtr pScreen);
 /* kdrive.c */
 extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
-void KdSuspend(void);
+void KdSuspend(int ddxAbort);
 
-void KdInitScreen(ScreenInfo * pScreenInfo,
-                  KdScreenInfo * screen, int argc, char **argv);
+void KdInitScreen(KdScreenInfo * screen, int argc, char **argv);
 
 void
  KdDisableScreen(ScreenPtr pScreen);
 
-void KdDisableScreens(void);
+void KdDisableScreens(int ddxAbort);
 
 Bool
  KdEnableScreen(ScreenPtr pScreen);
@@ -439,8 +435,6 @@ void KdOsInit(const KdOsFuncs * pOsFuncs);
 void
  KdOsAddInputDrivers(void);
 
-Bool KdAllocatePrivates(ScreenPtr pScreen);
-
 Bool KdCreateScreenResources(ScreenPtr pScreen);
 
 Bool KdSaveScreen(ScreenPtr pScreen, int on);
@@ -450,8 +444,7 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv);
 void
  KdInitCard(ScreenInfo * pScreenInfo, KdCardInfo * card, int argc, char **argv);
 
-void
- KdInitOutput(ScreenInfo * pScreenInfo, int argc, char **argv);
+void KdInitOutput(int argc, char **argv);
 
 void
  KdSetSubpixelOrder(ScreenPtr pScreen, Rotation randr);
@@ -475,6 +468,8 @@ void
 /* kinput.c */
 void
  KdInitInput(void);
+ void
+ KdAddConfigInputDrivers(void);
 void
  KdCloseInput(void);
 

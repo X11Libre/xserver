@@ -44,8 +44,6 @@
 #include <stdbool.h>
 #include <signal.h>
 
-#include <dispatch/dispatch.h>
-
 #include <sys/socket.h>
 #include <sys/un.h>
 
@@ -54,8 +52,14 @@
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <servers/bootstrap.h>
+
 #include "mach_startup.h"
 #include "mach_startupServer.h"
+#include "osxcompat.h"
+
+#ifdef HAS_LIBDISPATCH
+#include <dispatch/dispatch.h>
+#endif
 
 #include <asl.h>
 
@@ -89,7 +93,9 @@ static char __crashreporter_info_buff__[4096] = { 0 };
 static const char *__crashreporter_info__ __attribute__((__used__)) =
     &__crashreporter_info_buff__[0];
 // This line just tells the linker to never strip this symbol (such as for space optimization)
+/* NOLINTBEGIN(hicpp-no-assembler) */
 asm (".desc ___crashreporter_info__, 0x10");
+/* NOLINTEND(hicpp-no-assembler) */
 
 static const char *__crashreporter_info__base =
     "XLibre X Server " XSERVER_VERSION;
@@ -112,6 +118,23 @@ static char *pref_app_to_run;
 static char *pref_login_shell;
 static char *pref_startx_script;
 
+#ifndef HAS_LIBDISPATCH
+/*** Pthread Magics ***/
+static pthread_t
+create_thread(void *(*func)(void *), void *arg)
+{
+    pthread_attr_t attr;
+    pthread_t tid;
+
+    pthread_attr_init(&attr);
+    pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_create(&tid, &attr, func, arg);
+    pthread_attr_destroy(&attr);
+
+    return tid;
+}
+#endif
 
 /*** Mach-O IPC Stuffs ***/
 
@@ -219,9 +242,16 @@ typedef struct {
 /* This thread accepts an incoming connection and hands off the file
  * descriptor for the new connection to accept_fd_handoff()
  */
+#ifdef HAS_LIBDISPATCH
 static void
 socket_handoff(socket_handoff_t *handoff_data)
 {
+#else
+static void *
+socket_handoff_thread(void *arg)
+{
+    socket_handoff_t *handoff_data = (socket_handoff_t *)arg;
+#endif
 
     int launchd_fd = -1;
     int connected_fd;
@@ -256,6 +286,9 @@ socket_handoff(socket_handoff_t *handoff_data)
         launchd_fd);
     DarwinListenOnOpenFD(launchd_fd);
 
+#ifndef HAS_LIBDISPATCH
+    return NULL;
+#endif
 }
 
 static int
@@ -318,14 +351,18 @@ create_socket(char *filename_out)
 
 static int launchd_socket_handed_off = 0;
 
+static void socketHandoff_fptr(void *arg) {
+    socket_handoff_t *handoff_data = (socket_handoff_t *)arg;
+    socket_handoff(handoff_data);
+    free(handoff_data);
+}
+
 kern_return_t
 do_request_fd_handoff_socket(mach_port_t port, string_t filename)
 {
-    socket_handoff_t *handoff_data;
-
     launchd_socket_handed_off = 1;
 
-    handoff_data = (socket_handoff_t *)calloc(1, sizeof(socket_handoff_t));
+    socket_handoff_t *handoff_data = calloc(1, sizeof(socket_handoff_t));
     if (!handoff_data) {
         ErrorF("X11.app: Error allocating memory for handoff_data\n");
         return KERN_FAILURE;
@@ -339,10 +376,13 @@ do_request_fd_handoff_socket(mach_port_t port, string_t filename)
 
     strlcpy(filename, handoff_data->filename, STRING_T_SIZE);
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,
-                                             0), ^ {
-                       socket_handoff(handoff_data);
-                   });
+#ifdef HAS_LIBDISPATCH
+    dispatch_async_f(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                     handoff_data,
+                     socketHandoff_fptr);
+#else
+    create_thread(socket_handoff_thread, handoff_data);
+#endif
 
 #ifdef DEBUG
     ErrorF(
@@ -521,14 +561,15 @@ setup_console_redirect(const char *bundle_id)
 
     asl_set_filter(aslc, ASL_FILTER_MASK_UPTO(ASL_LEVEL_WARNING));
 
+#ifdef HAS_ASL_LOG_DESCRIPTOR
     asl_log_descriptor(aslc, NULL, ASL_LEVEL_INFO, STDOUT_FILENO, ASL_LOG_DESCRIPTOR_WRITE);
     asl_log_descriptor(aslc, NULL, ASL_LEVEL_NOTICE, STDERR_FILENO, ASL_LOG_DESCRIPTOR_WRITE);
+#endif
 }
 
 static void
 setup_env(void)
 {
-    char *temp;
     const char *pds = NULL;
     const char *disp = getenv("DISPLAY");
     size_t len;
@@ -559,7 +600,7 @@ setup_env(void)
     setenv("X11_PREFS_DOMAIN", server_bootstrap_name, 1);
 
     len = strlen(server_bootstrap_name);
-    bundle_id_prefix = malloc(sizeof(char) * (len - 3));
+    bundle_id_prefix = calloc((len-3), sizeof(char));
     if (!bundle_id_prefix) {
         ErrorF("X11.app: Memory allocation error.\n");
         exit(1);
@@ -582,7 +623,7 @@ setup_env(void)
                     "X11.app: Detected old style launchd DISPLAY, please update xinit.\n");
             }
             else {
-                temp = (char *)malloc(sizeof(char) * len);
+                char *temp = calloc(len, sizeof(char));
                 if (!temp) {
                     ErrorF(
                         "X11.app: Memory allocation error creating space for socket name test.\n");
@@ -613,7 +654,7 @@ setup_env(void)
     ensure_path(X11BINDIR);
 
     /* cd $HOME */
-    temp = getenv("HOME");
+    char *temp = getenv("HOME");
     if (temp != NULL && temp[0] != '\0')
         chdir(temp);
 }
@@ -781,14 +822,14 @@ command_from_prefs(const char *key, const char *default_value)
         CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
         CFRelease(cfDefaultValue);
 
-        command = (char *)malloc(len * sizeof(char));
+        command = calloc(len, sizeof(char));
         if (!command)
             goto command_from_prefs_out;
         strcpy(command, default_value);
     }
     else {
         int len = CFStringGetLength((CFStringRef)PlistRef) + 1;
-        command = (char *)malloc(len * sizeof(char));
+        command = calloc(len, sizeof(char));
         if (!command)
             goto command_from_prefs_out;
         CFStringGetCString((CFStringRef)PlistRef, command, len,

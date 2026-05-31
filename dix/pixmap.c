@@ -44,7 +44,7 @@ from The Open Group.
 #include "picturestr.h"
 #include "randrstr.h"
 /*
- * Scratch pixmap APIs are provided for source and binary compatability.  In
+ * Scratch pixmap APIs are provided for source and binary compatibility.  In
  * older versions, DIX would store a freed scratch pixmap for future use.  This
  * optimization is not really that impactful on modern systems with decent
  * system heap management and modern CPUs, and it interferes with memory

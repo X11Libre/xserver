@@ -1,5 +1,6 @@
 srcs_dix = [
     'atom.c',
+    'client.c',
     'colormap.c',
     'color.c',
     'cursor.c',
@@ -32,6 +33,7 @@ srcs_dix = [
     'screen_hooks.c',
     'selection.c',
     'screen.c',
+    'settings.c',
     'swaprep.c',
     'swapreq.c',
     'tables.c',

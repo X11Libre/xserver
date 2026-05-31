@@ -33,8 +33,12 @@ Equipment Corporation.
 #include <X11/extensions/dpmsproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
+#include "dix/screenint_priv.h"
+#include "dix/screensaver_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/screensaver.h"
+#include "os/osdep.h"
 #include "Xext/geext_priv.h"
 
 #include "misc.h"
@@ -79,13 +83,15 @@ DPMSFreeClient(void *data, XID id)
                             NULL, DixUnknownAccess);
     if (pHead) {
         pPrev = 0;
-        for (pCur = *pHead; pCur && pCur != pEvent; pCur = pCur->next)
+        for (pCur = *pHead; pCur && pCur != pEvent; pCur = pCur->next) {
             pPrev = pCur;
+        }
         if (pCur) {
-            if (pPrev)
+            if (pPrev) {
                 pPrev->next = pEvent->next;
-            else
+            } else {
                 *pHead = pEvent->next;
+            }
         }
     }
     free((void *) pEvent);
@@ -125,11 +131,8 @@ SDPMSInfoNotifyEvent(xGenericEvent * from,
 static int
 ProcDPMSSelectInput(register ClientPtr client)
 {
-    REQUEST(xDPMSSelectInputReq);
-    REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
-
-    if (client->swapped)
-        swapl(&stuff->eventMask);
+    X_REQUEST_HEAD_STRUCT(xDPMSSelectInputReq);
+    X_REQUEST_FIELD_CARD32(eventMask);
 
     DPMSEventPtr pEvent, pNewEvent, *pHead;
     XID clientResource;
@@ -184,16 +187,18 @@ ProcDPMSSelectInput(register ClientPtr client)
         if (i == Success && pHead) {
             pNewEvent = 0;
             for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
-                if (pEvent->client == client)
+                if (pEvent->client == client) {
                     break;
+                }
                 pNewEvent = pEvent;
             }
             if (pEvent) {
                 FreeResource(pEvent->clientResource, ClientType);
-                if (pNewEvent)
+                if (pNewEvent) {
                     pNewEvent->next = pEvent->next;
-                else
+                } else {
                     *pHead = pEvent->next;
+                }
                 free(pEvent);
             }
         }
@@ -215,11 +220,14 @@ SendDPMSInfoNotify(void)
     i = dixLookupResourceByType((void **)&pHead, eventResource, DPMSEventType,
                                 serverClient,
                                 DixReadAccess);
-    if (i != Success || !pHead)
+    if (i != Success || !pHead) {
         return;
+    }
+
     for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
-        if ((pEvent->mask & DPMSInfoNotifyMask) == 0)
+        if ((pEvent->mask & DPMSInfoNotifyMask) == 0) {
             continue;
+        }
         se.type = GenericEvent;
         se.extension = DPMSReqCode;
         se.length = (sizeof(xDPMSInfoNotifyEvent) - 32) >> 2;
@@ -235,17 +243,17 @@ Bool
 DPMSSupported(void)
 {
     /* For each screen, check if DPMS is supported */
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (walkScreen->DPMS != NULL)
+    DIX_FOR_EACH_SCREEN({
+        if (walkScreen->DPMS != NULL) {
             return TRUE;
-    }
+        }
+    });
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
-        if (walkScreen->DPMS != NULL)
+    DIX_FOR_EACH_GPU_SCREEN({
+        if (walkScreen->DPMS != NULL) {
             return TRUE;
-    }
+        }
+    });
 
     return FALSE;
 }
@@ -268,37 +276,39 @@ isUnblank(int mode)
 int
 DPMSSet(ClientPtr client, int level)
 {
-    int rc;
     int old_level = DPMSPowerLevel;
 
     DPMSPowerLevel = level;
 
     if (level != DPMSModeOn) {
         if (isUnblank(screenIsSaved)) {
-            rc = dixSaveScreens(client, SCREEN_SAVER_FORCER, ScreenSaverActive);
-            if (rc != Success)
+            int rc = dixSaveScreens(client, SCREEN_SAVER_FORCER, ScreenSaverActive);
+            if (rc != Success) {
                 return rc;
+            }
         }
     } else if (!isUnblank(screenIsSaved)) {
-        rc = dixSaveScreens(client, SCREEN_SAVER_OFF, ScreenSaverReset);
-        if (rc != Success)
+        int rc = dixSaveScreens(client, SCREEN_SAVER_OFF, ScreenSaverReset);
+        if (rc != Success) {
             return rc;
+        }
     }
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (walkScreen->DPMS != NULL)
+    DIX_FOR_EACH_SCREEN({
+        if (walkScreen->DPMS != NULL) {
             walkScreen->DPMS(walkScreen, level);
-    }
+        }
+    });
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
-        if (walkScreen->DPMS != NULL)
+    DIX_FOR_EACH_GPU_SCREEN({
+        if (walkScreen->DPMS != NULL) {
             walkScreen->DPMS(walkScreen, level);
-    }
+        }
+    });
 
-    if (DPMSPowerLevel != old_level)
+    if (DPMSPowerLevel != old_level) {
         SendDPMSInfoNotify();
+    }
 
     return Success;
 }
@@ -306,74 +316,58 @@ DPMSSet(ClientPtr client, int level)
 static int
 ProcDPMSGetVersion(ClientPtr client)
 {
-    REQUEST(xDPMSGetVersionReq);
-    REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
+    X_REQUEST_HEAD_STRUCT(xDPMSGetVersionReq);
+    X_REQUEST_FIELD_CARD16(majorVersion);
+    X_REQUEST_FIELD_CARD16(minorVersion);
 
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
-
-    /* REQUEST(xDPMSGetVersionReq); */
     xDPMSGetVersionReply reply = {
         .majorVersion = SERVER_DPMS_MAJOR_VERSION,
         .minorVersion = SERVER_DPMS_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcDPMSCapable(ClientPtr client)
 {
-    /* REQUEST(xDPMSCapableReq); */
+    X_REQUEST_HEAD_STRUCT(xDPMSCapableReq);
+
     xDPMSCapableReply reply = {
         .capable = TRUE
     };
 
-    REQUEST_SIZE_MATCH(xDPMSCapableReq);
-
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcDPMSGetTimeouts(ClientPtr client)
 {
-    /* REQUEST(xDPMSGetTimeoutsReq); */
+    X_REQUEST_HEAD_STRUCT(xDPMSGetTimeoutsReq);
+
     xDPMSGetTimeoutsReply reply = {
         .standby = DPMSStandbyTime / MILLI_PER_SECOND,
         .suspend = DPMSSuspendTime / MILLI_PER_SECOND,
         .off = DPMSOffTime / MILLI_PER_SECOND
     };
 
-    REQUEST_SIZE_MATCH(xDPMSGetTimeoutsReq);
+    X_REPLY_FIELD_CARD16(standby);
+    X_REPLY_FIELD_CARD16(suspend);
+    X_REPLY_FIELD_CARD16(off);
 
-    if (client->swapped) {
-        swaps(&reply.standby);
-        swaps(&reply.suspend);
-        swaps(&reply.off);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcDPMSSetTimeouts(ClientPtr client)
 {
-    REQUEST(xDPMSSetTimeoutsReq);
-    REQUEST_SIZE_MATCH(xDPMSSetTimeoutsReq);
-
-    if (client->swapped) {
-        swaps(&stuff->standby);
-        swaps(&stuff->suspend);
-        swaps(&stuff->off);
-    }
+    X_REQUEST_HEAD_STRUCT(xDPMSSetTimeoutsReq);
+    X_REQUEST_FIELD_CARD16(standby);
+    X_REQUEST_FIELD_CARD16(suspend);
+    X_REQUEST_FIELD_CARD16(off);
 
     if ((stuff->off != 0) && (stuff->off < stuff->suspend)) {
         client->errorValue = stuff->off;
@@ -395,9 +389,9 @@ ProcDPMSSetTimeouts(ClientPtr client)
 static int
 ProcDPMSEnable(ClientPtr client)
 {
-    Bool was_enabled = DPMSEnabled;
+    X_REQUEST_HEAD_STRUCT(xDPMSEnableReq);
 
-    REQUEST_SIZE_MATCH(xDPMSEnableReq);
+    Bool was_enabled = DPMSEnabled;
 
     DPMSEnabled = TRUE;
     if (!was_enabled) {
@@ -411,17 +405,16 @@ ProcDPMSEnable(ClientPtr client)
 static int
 ProcDPMSDisable(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xDPMSDisableReq);
+
     Bool was_enabled = DPMSEnabled;
-
-    /* REQUEST(xDPMSDisableReq); */
-
-    REQUEST_SIZE_MATCH(xDPMSDisableReq);
 
     DPMSSet(client, DPMSModeOn);
 
     DPMSEnabled = FALSE;
-    if (was_enabled)
+    if (was_enabled) {
         SendDPMSInfoNotify();
+    }
 
     return Success;
 }
@@ -429,14 +422,11 @@ ProcDPMSDisable(ClientPtr client)
 static int
 ProcDPMSForceLevel(ClientPtr client)
 {
-    REQUEST(xDPMSForceLevelReq);
-    REQUEST_SIZE_MATCH(xDPMSForceLevelReq);
+    X_REQUEST_HEAD_STRUCT(xDPMSForceLevelReq);
+    X_REQUEST_FIELD_CARD16(level);
 
-    if (!DPMSEnabled)
+    if (!DPMSEnabled) {
         return BadMatch;
-
-    if (client->swapped) {
-        swaps(&stuff->level);
     }
 
     if (stuff->level != DPMSModeOn &&
@@ -454,17 +444,14 @@ ProcDPMSForceLevel(ClientPtr client)
 static int
 ProcDPMSInfo(ClientPtr client)
 {
-    /* REQUEST(xDPMSInfoReq); */
+    X_REQUEST_HEAD_STRUCT(xDPMSInfoReq);
+
     xDPMSInfoReply reply = {
         .power_level = DPMSPowerLevel,
         .state = DPMSEnabled
     };
 
-    REQUEST_SIZE_MATCH(xDPMSInfoReq);
-
-    if (client->swapped) {
-        swaps(&reply.power_level);
-    }
+    X_REPLY_FIELD_CARD16(power_level);
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 

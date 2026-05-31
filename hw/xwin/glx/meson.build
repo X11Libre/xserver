@@ -64,7 +64,6 @@ if build_windowsdri
 endif
 
 xwin_glx_c_args = []
-xwin_glx_c_args += '-DHAVE_XWIN_CONFIG_H'
 xwin_glx_c_args += '-DXWIN_GLX_WINDOWS'
 
 xwin_glx = static_library(

@@ -58,12 +58,13 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"
 #include "grabdev.h"
-#include "selectev.h"
 
 static int
 HandleDevicePresenceMask(ClientPtr client, WindowPtr win,
@@ -113,25 +114,6 @@ HandleDevicePresenceMask(ClientPtr client, WindowPtr win,
 
 /***********************************************************************
  *
- * Handle requests from clients with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXSelectExtensionEvent(ClientPtr client)
-{
-    REQUEST(xSelectExtensionEventReq);
-    REQUEST_AT_LEAST_SIZE(xSelectExtensionEventReq);
-    swapl(&stuff->window);
-    swaps(&stuff->count);
-    REQUEST_FIXED_SIZE(xSelectExtensionEventReq, stuff->count * sizeof(CARD32));
-    SwapLongs((CARD32 *) (&stuff[1]), stuff->count);
-
-    return (ProcXSelectExtensionEvent(client));
-}
-
-/***********************************************************************
- *
  * This procedure selects input from an extension device.
  *
  */
@@ -139,17 +121,15 @@ SProcXSelectExtensionEvent(ClientPtr client)
 int
 ProcXSelectExtensionEvent(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xSelectExtensionEventReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(count);
+    X_REQUEST_REST_COUNT_CARD32(stuff->count);
+
     int ret;
     int i;
     WindowPtr pWin;
     struct tmask tmp[EMASKSIZE];
-
-    REQUEST(xSelectExtensionEventReq);
-    REQUEST_AT_LEAST_SIZE(xSelectExtensionEventReq);
-
-    if (client->req_len !=
-        bytes_to_int32(sizeof(xSelectExtensionEventReq)) + stuff->count)
-        return BadLength;
 
     ret = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (ret != Success)

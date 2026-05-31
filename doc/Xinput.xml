@@ -1013,7 +1013,7 @@ sections describe the contents of these events.
 <title>Device Key Events</title>
 <para>
 <!-- .LP -->
-<function>DeviceKeyPresss</function> events contain all the information that is contained in
+<function>DeviceKeyPress</function> events contain all the information that is contained in
 a core <function>KeyPress</function> event, and also the following additional information:
 </para>
 <para>

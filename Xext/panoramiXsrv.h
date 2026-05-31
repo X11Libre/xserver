@@ -1,8 +1,7 @@
-
-#include <dix-config.h>
-
 #ifndef _PANORAMIXSRV_H_
 #define _PANORAMIXSRV_H_
+
+#include <dix-config.h>
 
 #include "panoramiX.h"
 

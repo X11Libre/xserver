@@ -1,4 +1,3 @@
-
 /*
 
 Copyright 1995, 1998  The Open Group
@@ -43,7 +42,9 @@ and Jim Haggerty of Metheus.
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
@@ -725,12 +726,13 @@ RecordSendProtocolEvents(RecordClientsAndProtocolPtr pRCAP,
                  pev->u.u.type == ButtonRelease ||
                  pev->u.u.type == KeyPress || pev->u.u.type == KeyRelease)) {
                 int scr = inputInfo.pointer->spriteInfo->sprite->screen->myNum;
+                ScreenPtr masterScreen = dixGetMasterScreen();
 
                 memcpy(&shiftedEvent, pev, sizeof(xEvent));
                 shiftedEvent.u.keyButtonPointer.rootX +=
-                    screenInfo.screens[scr]->x - screenInfo.screens[0]->x;
+                    screenInfo.screens[scr]->x - masterScreen->x;
                 shiftedEvent.u.keyButtonPointer.rootY +=
-                    screenInfo.screens[scr]->y - screenInfo.screens[0]->y;
+                    screenInfo.screens[scr]->y - masterScreen->y;
                 pEvToRecord = &shiftedEvent;
             }
 #endif /* XINERAMA */
@@ -1820,29 +1822,45 @@ RecordRegisterClients(RecordContextPtr pContext, ClientPtr client,
 static int
 ProcRecordQueryVersion(ClientPtr client)
 {
-    /* REQUEST(xRecordQueryVersionReq); */
-    xRecordQueryVersionReply rep = {
+    REQUEST(xRecordQueryVersionReq);
+    REQUEST_SIZE_MATCH(xRecordQueryVersionReq);
+
+    if (client->swapped) {
+        swaps(&stuff->majorVersion);
+        swaps(&stuff->minorVersion);
+    }
+
+    xRecordQueryVersionReply reply = {
         .majorVersion = SERVER_RECORD_MAJOR_VERSION,
         .minorVersion = SERVER_RECORD_MINOR_VERSION
     };
 
-    REQUEST_SIZE_MATCH(xRecordQueryVersionReq);
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
+
+static int _X_COLD
+SwapCreateRegister(ClientPtr client, xRecordRegisterClientsReq * stuff);
 
 static int
 ProcRecordCreateContext(ClientPtr client)
 {
     REQUEST(xRecordCreateContextReq);
+    REQUEST_AT_LEAST_SIZE(xRecordCreateContextReq);
+
+    if (client->swapped) {
+        int rc = SwapCreateRegister(client, (void *) stuff);
+        if (rc != Success)
+            return rc;
+    }
+
     RecordContextPtr *ppNewAllContexts = NULL;
     int err = BadAlloc;
 
-    REQUEST_AT_LEAST_SIZE(xRecordCreateContextReq);
     LEGAL_NEW_RESOURCE(stuff->context, client);
 
     RecordContextPtr pContext = calloc(1, sizeof(RecordContextRec));
@@ -1887,11 +1905,16 @@ ProcRecordCreateContext(ClientPtr client)
 static int
 ProcRecordRegisterClients(ClientPtr client)
 {
-    RecordContextPtr pContext;
-
     REQUEST(xRecordRegisterClientsReq);
-
     REQUEST_AT_LEAST_SIZE(xRecordRegisterClientsReq);
+
+    if (client->swapped) {
+        int rc = SwapCreateRegister(client, (void *) stuff);
+        if (rc != Success)
+            return rc;
+    }
+
+    RecordContextPtr pContext;
     VERIFY_CONTEXT(pContext, stuff->context, client);
 
     return RecordRegisterClients(pContext, client, stuff);
@@ -1900,15 +1923,22 @@ ProcRecordRegisterClients(ClientPtr client)
 static int
 ProcRecordUnregisterClients(ClientPtr client)
 {
+    REQUEST(xRecordUnregisterClientsReq);
+    REQUEST_AT_LEAST_SIZE(xRecordUnregisterClientsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->context);
+        swapl(&stuff->nClients);
+        SwapRestL(stuff);
+    }
+
     RecordContextPtr pContext;
     int err;
 
-    REQUEST(xRecordUnregisterClientsReq);
     XID *pCanonClients;
     int nClients;
     int i;
 
-    REQUEST_AT_LEAST_SIZE(xRecordUnregisterClientsReq);
     if (INT_MAX / 4 < stuff->nClients ||
         (client->req_len << 2) - SIZEOF(xRecordUnregisterClientsReq) !=
         4 * stuff->nClients)
@@ -2125,10 +2155,13 @@ RecordSwapRanges(xRecordRange * pRanges, int nRanges)
 static int
 ProcRecordGetContext(ClientPtr client)
 {
-    RecordContextPtr pContext;
-
     REQUEST(xRecordGetContextReq);
-    xRecordGetContextReply rep;
+    REQUEST_SIZE_MATCH(xRecordGetContextReq);
+
+    if (client->swapped)
+        swapl(&stuff->context);
+
+    RecordContextPtr pContext;
     RecordClientsAndProtocolPtr pRCAP;
     int nRCAPs = 0;
     GetContextRangeInfoPtr pRangeInfo;
@@ -2137,7 +2170,6 @@ ProcRecordGetContext(ClientPtr client)
     int err;
     CARD32 nClients, length;
 
-    REQUEST_SIZE_MATCH(xRecordGetContextReq);
     VERIFY_CONTEXT(pContext, stuff->context, client);
 
     /* how many RCAPs are there on this context? */
@@ -2229,7 +2261,7 @@ ProcRecordGetContext(ClientPtr client)
 
     /* write the reply header */
 
-    rep = (xRecordGetContextReply) {
+    xRecordGetContextReply reply = {
         .type = X_Reply,
         .enabled = pContext->pRecordingClient != NULL,
         .sequenceNumber = client->sequence,
@@ -2238,11 +2270,11 @@ ProcRecordGetContext(ClientPtr client)
         .nClients = nClients
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.nClients);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.nClients);
     }
-    WriteToClient(client, sizeof(xRecordGetContextReply), &rep);
+    WriteToClient(client, sizeof(xRecordGetContextReply), &reply);
 
     /* write all the CLIENT_INFOs */
 
@@ -2277,13 +2309,16 @@ ProcRecordGetContext(ClientPtr client)
 static int
 ProcRecordEnableContext(ClientPtr client)
 {
-    RecordContextPtr pContext;
-
     REQUEST(xRecordEnableContextReq);
+    REQUEST_SIZE_MATCH(xRecordEnableContextReq);
+
+    if (client->swapped)
+        swapl(&stuff->context);
+
+    RecordContextPtr pContext;
     int i;
     RecordClientsAndProtocolPtr pRCAP;
 
-    REQUEST_SIZE_MATCH(xRecordGetContextReq);
     VERIFY_CONTEXT(pContext, stuff->context, client);
     if (pContext->pRecordingClient)
         return BadMatch;        /* already enabled */
@@ -2388,11 +2423,13 @@ RecordDisableContext(RecordContextPtr pContext)
 static int
 ProcRecordDisableContext(ClientPtr client)
 {
-    RecordContextPtr pContext;
-
     REQUEST(xRecordDisableContextReq);
-
     REQUEST_SIZE_MATCH(xRecordDisableContextReq);
+
+    if (client->swapped)
+        swapl(&stuff->context);
+
+    RecordContextPtr pContext;
     VERIFY_CONTEXT(pContext, stuff->context, client);
     RecordDisableContext(pContext);
     return Success;
@@ -2449,11 +2486,13 @@ RecordDeleteContext(void *value, XID id)
 static int
 ProcRecordFreeContext(ClientPtr client)
 {
-    RecordContextPtr pContext;
-
     REQUEST(xRecordFreeContextReq);
-
     REQUEST_SIZE_MATCH(xRecordFreeContextReq);
+
+    if (client->swapped)
+        swapl(&stuff->context);
+
+    RecordContextPtr pContext;
     VERIFY_CONTEXT(pContext, stuff->context, client);
     FreeResource(stuff->context, X11_RESTYPE_NONE);
     return Success;
@@ -2487,16 +2526,6 @@ ProcRecordDispatch(ClientPtr client)
 }                               /* ProcRecordDispatch */
 
 static int _X_COLD
-SProcRecordQueryVersion(ClientPtr client)
-{
-    REQUEST(xRecordQueryVersionReq);
-    REQUEST_SIZE_MATCH(xRecordQueryVersionReq);
-    swaps(&stuff->majorVersion);
-    swaps(&stuff->minorVersion);
-    return ProcRecordQueryVersion(client);
-}                               /* SProcRecordQueryVersion */
-
-static int _X_COLD
 SwapCreateRegister(ClientPtr client, xRecordRegisterClientsReq * stuff)
 {
     int i;
@@ -2519,104 +2548,6 @@ SwapCreateRegister(ClientPtr client, xRecordRegisterClientsReq * stuff)
     RecordSwapRanges((xRecordRange *) pClientID, stuff->nRanges);
     return Success;
 }                               /* SwapCreateRegister */
-
-static int _X_COLD
-SProcRecordCreateContext(ClientPtr client)
-{
-    REQUEST(xRecordCreateContextReq);
-    int status;
-
-    REQUEST_AT_LEAST_SIZE(xRecordCreateContextReq);
-    if ((status = SwapCreateRegister(client, (void *) stuff)) != Success)
-        return status;
-    return ProcRecordCreateContext(client);
-}                               /* SProcRecordCreateContext */
-
-static int _X_COLD
-SProcRecordRegisterClients(ClientPtr client)
-{
-    REQUEST(xRecordRegisterClientsReq);
-    int status;
-
-    REQUEST_AT_LEAST_SIZE(xRecordRegisterClientsReq);
-    if ((status = SwapCreateRegister(client, (void *) stuff)) != Success)
-        return status;
-    return ProcRecordRegisterClients(client);
-}                               /* SProcRecordRegisterClients */
-
-static int _X_COLD
-SProcRecordUnregisterClients(ClientPtr client)
-{
-    REQUEST(xRecordUnregisterClientsReq);
-    REQUEST_AT_LEAST_SIZE(xRecordUnregisterClientsReq);
-    swapl(&stuff->context);
-    swapl(&stuff->nClients);
-    SwapRestL(stuff);
-    return ProcRecordUnregisterClients(client);
-}                               /* SProcRecordUnregisterClients */
-
-static int _X_COLD
-SProcRecordGetContext(ClientPtr client)
-{
-    REQUEST(xRecordGetContextReq);
-    REQUEST_SIZE_MATCH(xRecordGetContextReq);
-    swapl(&stuff->context);
-    return ProcRecordGetContext(client);
-}                               /* SProcRecordGetContext */
-
-static int _X_COLD
-SProcRecordEnableContext(ClientPtr client)
-{
-    REQUEST(xRecordEnableContextReq);
-    REQUEST_SIZE_MATCH(xRecordEnableContextReq);
-    swapl(&stuff->context);
-    return ProcRecordEnableContext(client);
-}                               /* SProcRecordEnableContext */
-
-static int _X_COLD
-SProcRecordDisableContext(ClientPtr client)
-{
-    REQUEST(xRecordDisableContextReq);
-    REQUEST_SIZE_MATCH(xRecordDisableContextReq);
-    swapl(&stuff->context);
-    return ProcRecordDisableContext(client);
-}                               /* SProcRecordDisableContext */
-
-static int _X_COLD
-SProcRecordFreeContext(ClientPtr client)
-{
-    REQUEST(xRecordFreeContextReq);
-    REQUEST_SIZE_MATCH(xRecordFreeContextReq);
-    swapl(&stuff->context);
-    return ProcRecordFreeContext(client);
-}                               /* SProcRecordFreeContext */
-
-static int _X_COLD
-SProcRecordDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_RecordQueryVersion:
-        return SProcRecordQueryVersion(client);
-    case X_RecordCreateContext:
-        return SProcRecordCreateContext(client);
-    case X_RecordRegisterClients:
-        return SProcRecordRegisterClients(client);
-    case X_RecordUnregisterClients:
-        return SProcRecordUnregisterClients(client);
-    case X_RecordGetContext:
-        return SProcRecordGetContext(client);
-    case X_RecordEnableContext:
-        return SProcRecordEnableContext(client);
-    case X_RecordDisableContext:
-        return SProcRecordDisableContext(client);
-    case X_RecordFreeContext:
-        return SProcRecordFreeContext(client);
-    default:
-        return BadRequest;
-    }
-}                               /* SProcRecordDispatch */
 
 /* RecordConnectionSetupInfo
  *
@@ -2792,7 +2723,7 @@ RecordExtensionInit(void)
         return;
 
     extentry = AddExtension(RECORD_NAME, RecordNumEvents, RecordNumErrors,
-                            ProcRecordDispatch, SProcRecordDispatch,
+                            ProcRecordDispatch, ProcRecordDispatch,
                             RecordCloseDown, StandardMinorOpcode);
     if (!extentry) {
         DeleteCallback(&ClientStateCallback, RecordAClientStateChange, NULL);

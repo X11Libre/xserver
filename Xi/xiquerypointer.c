@@ -41,9 +41,13 @@
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/screenint_priv.h"
+#include "include/extinit.h"
 #include "os/fmt.h"
 #include "Xext/panoramiXsrv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -52,44 +56,32 @@
 #include "scrnintstr.h"
 #include "xkbsrv.h"
 
-#include "xiquerypointer.h"
-
 /***********************************************************************
  *
  * This procedure allows a client to query the pointer of a device.
  *
  */
 
-int _X_COLD
-SProcXIQueryPointer(ClientPtr client)
-{
-    REQUEST(xXIQueryPointerReq);
-    REQUEST_SIZE_MATCH(xXIQueryPointerReq);
-
-    swaps(&stuff->deviceid);
-    swapl(&stuff->win);
-    return (ProcXIQueryPointer(client));
-}
-
 int
 ProcXIQueryPointer(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xXIQueryPointerReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
+    X_REQUEST_FIELD_CARD32(win);
+
     int rc;
     DeviceIntPtr pDev, kbd;
     WindowPtr pWin, t;
     SpritePtr pSprite;
     XkbStatePtr state;
-    XIClientPtr xi_client;
     Bool have_xi22 = FALSE;
-
-    REQUEST(xXIQueryPointerReq);
-    REQUEST_SIZE_MATCH(xXIQueryPointerReq);
 
     /* Check if client is compliant with XInput 2.2 or later. Earlier clients
      * do not know about touches, so we must report emulated button presses. 2.2
      * and later clients are aware of touches, so we don't include emulated
      * button presses in the reply. */
-    xi_client = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr xi_client = XIClientPriv(client);
+
     if (version_compare(xi_client->major_version,
                         xi_client->minor_version, 2, 2) >= 0)
         have_xi22 = TRUE;
@@ -122,7 +114,7 @@ ProcXIQueryPointer(ClientPtr client)
 
     pSprite = pDev->spriteInfo->sprite;
 
-    xXIQueryPointerReply rep = {
+    xXIQueryPointerReply reply = {
         .RepType = X_XIQueryPointer,
         .root = (InputDevCurrentRootWindow(pDev))->drawable.id,
         .root_x = double_to_fp1616(pSprite->hot.x),
@@ -131,13 +123,13 @@ ProcXIQueryPointer(ClientPtr client)
 
     if (kbd) {
         state = &kbd->key->xkbInfo->state;
-        rep.mods.base_mods = state->base_mods;
-        rep.mods.latched_mods = state->latched_mods;
-        rep.mods.locked_mods = state->locked_mods;
+        reply.mods.base_mods = state->base_mods;
+        reply.mods.latched_mods = state->latched_mods;
+        reply.mods.locked_mods = state->locked_mods;
 
-        rep.group.base_group = state->base_group;
-        rep.group.latched_group = state->latched_group;
-        rep.group.locked_group = state->locked_group;
+        reply.group.base_group = state->base_group;
+        reply.group.latched_group = state->latched_group;
+        reply.group.locked_group = state->locked_group;
     }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
@@ -146,7 +138,7 @@ ProcXIQueryPointer(ClientPtr client)
         int i;
 
         const int buttons_size = bits_to_bytes(256); /* button map up to 255 */
-        rep.buttons_len = bytes_to_int32(buttons_size);
+        reply.buttons_len = bytes_to_int32(buttons_size);
         char *buttons = x_rpcbuf_reserve(&rpcbuf, buttons_size);
         if (!buttons)
             return BadAlloc;
@@ -160,36 +152,35 @@ ProcXIQueryPointer(ClientPtr client)
     }
 
     if (pSprite->hot.pScreen == pWin->drawable.pScreen) {
-        rep.same_screen = xTrue;
-        rep.win_x = double_to_fp1616(pSprite->hot.x - pWin->drawable.x);
-        rep.win_y = double_to_fp1616(pSprite->hot.y - pWin->drawable.y);
+        reply.same_screen = xTrue;
+        reply.win_x = double_to_fp1616(pSprite->hot.x - pWin->drawable.x);
+        reply.win_y = double_to_fp1616(pSprite->hot.y - pWin->drawable.y);
         for (t = pSprite->win; t; t = t->parent)
             if (t->parent == pWin) {
-                rep.child = t->drawable.id;
+                reply.child = t->drawable.id;
                 break;
             }
     }
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
-        rep.root_x += double_to_fp1616(screenInfo.screens[0]->x);
-        rep.root_y += double_to_fp1616(screenInfo.screens[0]->y);
-        if (stuff->win == rep.root) {
-            rep.win_x += double_to_fp1616(screenInfo.screens[0]->x);
-            rep.win_y += double_to_fp1616(screenInfo.screens[0]->y);
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        reply.root_x += double_to_fp1616(masterScreen->x);
+        reply.root_y += double_to_fp1616(masterScreen->y);
+        if (stuff->win == reply.root) {
+            reply.win_x += double_to_fp1616(masterScreen->x);
+            reply.win_y += double_to_fp1616(masterScreen->y);
         }
     }
 #endif /* XINERAMA */
 
-    if (client->swapped) {
-        swapl(&rep.root);
-        swapl(&rep.child);
-        swapl(&rep.root_x);
-        swapl(&rep.root_y);
-        swapl(&rep.win_x);
-        swapl(&rep.win_y);
-        swaps(&rep.buttons_len);
-    }
+    X_REPLY_FIELD_CARD32(root);
+    X_REPLY_FIELD_CARD32(child);
+    X_REPLY_FIELD_CARD32(root_x);
+    X_REPLY_FIELD_CARD32(root_y);
+    X_REPLY_FIELD_CARD32(win_x);
+    X_REPLY_FIELD_CARD32(win_y);
+    X_REPLY_FIELD_CARD16(buttons_len);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

@@ -35,11 +35,11 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/exevents_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
-#include "xipassivegrab.h"
 #include "exglobals.h"
 
 #include "protocol-common.h"
@@ -81,24 +81,24 @@ override_GrabButton(ClientPtr client, DeviceIntPtr dev,
 static void
 reply_XIPassiveGrabDevice(ClientPtr client, int len, void *data)
 {
-    xXIPassiveGrabDeviceReply *reply = (xXIPassiveGrabDeviceReply *) data;
-    xXIPassiveGrabDeviceReply rep = *reply; /* copy so swapping doesn't touch the real reply */
+    xXIPassiveGrabDeviceReply *repptr = (xXIPassiveGrabDeviceReply *) data;
+    xXIPassiveGrabDeviceReply reply = *repptr; /* copy so swapping doesn't touch the real reply */
 
     assert(len < 0xffff); /* suspicious size, swapping bug */
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.num_modifiers);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swaps(&reply.num_modifiers);
 
-        testdata.num_modifiers = rep.num_modifiers;
+        testdata.num_modifiers = reply.num_modifiers;
     }
 
-    reply_check_defaults(&rep, len, XIPassiveGrabDevice);
+    reply_check_defaults(&reply, len, XIPassiveGrabDevice);
 
     /* ProcXIPassiveGrabDevice sends the data in two batches, let the second
      * handler handle the modifier data */
-    if (rep.num_modifiers > 0)
+    if (reply.num_modifiers > 0)
         wrapped_WriteToClient = reply_XIPassiveGrabDevice_data;
 }
 
@@ -151,9 +151,9 @@ request_XIPassiveGrabDevice(ClientPtr client, xXIPassiveGrabDeviceReq * req,
        The handler proc's don't use that field anymore, thus also SProc's
        wont swap it. But this test program uses that field to initialize
        client->req_len (see above). We previously had to swap it here, so
-       that SProcXIPassiveGrabDevice() will swap it back. Since that's gone
+       that ProcXIPassiveGrabDevice() will swap it back. Since that's gone
        now, still swapping itself would break if this function is called
-       again and writing back a errornously swapped value
+       again and writing back a erroneously swapped value
     */
 
     swapl(&req->time);
@@ -172,7 +172,7 @@ request_XIPassiveGrabDevice(ClientPtr client, xXIPassiveGrabDeviceReq * req,
         swapl(mod);
     }
 
-    rc = SProcXIPassiveGrabDevice(&client_request);
+    rc = ProcXIPassiveGrabDevice(&client_request);
     assert(rc == error);
 
     if (rc != Success)

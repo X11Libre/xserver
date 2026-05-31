@@ -46,9 +46,11 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
+#include "Xi/handlers.h"
 
 #include "xibarriers.h"
 #include "scrnintstr.h"
@@ -82,7 +84,7 @@ struct PointerBarrierDevice {
 
 struct PointerBarrierClient {
     XID id;
-    ScreenPtr screen;
+    ScreenPtr pScreen;
     Window window;
     struct PointerBarrier barrier;
     struct xorg_list entry;
@@ -391,14 +393,14 @@ barrier_clamp_to_barrier(struct PointerBarrier *barrier, int dir, int *x,
 }
 
 void
-input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
+input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
                        int current_x, int current_y,
                        int dest_x, int dest_y,
                        int *out_x, int *out_y,
                        int *nevents, InternalEvent* events)
 {
     /* Clamped coordinates here refer to screen edge clamping. */
-    BarrierScreenPtr cs = GetBarrierScreen(screen);
+    BarrierScreenPtr cs = GetBarrierScreen(pScreen);
     int x = dest_x,
         y = dest_y;
     int dir;
@@ -414,7 +416,7 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
         .sourceid = dev->id,
         .dx = dest_x - current_x,
         .dy = dest_y - current_y,
-        .root = screen->root->drawable.id,
+        .root = pScreen->root->drawable.id,
     };
     InternalEvent *barrier_events = events;
     DeviceIntPtr master;
@@ -554,7 +556,6 @@ CreatePointerBarrierClient(ClientPtr client,
                            PointerBarrierClientPtr *client_out)
 {
     WindowPtr pWin;
-    ScreenPtr screen;
     BarrierScreenPtr cs;
     int err;
     int i;
@@ -576,10 +577,10 @@ CreatePointerBarrierClient(ClientPtr client,
         goto error;
     }
 
-    screen = pWin->drawable.pScreen;
-    cs = GetBarrierScreen(screen);
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+    cs = GetBarrierScreen(pScreen);
 
-    ret->screen = screen;
+    ret->pScreen = pScreen;
     ret->window = stuff->window;
     ret->num_devices = stuff->num_devices;
     if (ret->num_devices > 0)
@@ -658,10 +659,9 @@ BarrierFreeBarrier(void *data, XID id)
     struct PointerBarrierClient *c;
     Time ms = GetTimeInMillis();
     DeviceIntPtr dev = NULL;
-    ScreenPtr screen;
 
     c = container_of(data, struct PointerBarrierClient, barrier);
-    screen = c->screen;
+    ScreenPtr pScreen = c->pScreen;
 
     for (dev = inputInfo.devices; dev; dev = dev->next) {
         struct PointerBarrierDevice *pbd;
@@ -675,7 +675,7 @@ BarrierFreeBarrier(void *data, XID id)
             .sourceid = 0,
             .barrierid = c->id,
             .window = c->window,
-            .root = screen->root->drawable.id,
+            .root = pScreen->root->drawable.id,
             .dx = 0,
             .dy = 0,
             /* .root_x */
@@ -765,7 +765,7 @@ static void remove_master_func(void *res, XID id, void *devid)
             .sourceid = 0,
             .dx = 0,
             .dy = 0,
-            .root = barrier->screen->root->drawable.id,
+            .root = barrier->pScreen->root->drawable.id,
             .window = barrier->window,
             .dt = ms - pbd->last_timestamp,
             .flags = XIBarrierPointerReleased,
@@ -849,44 +849,30 @@ XIDestroyPointerBarrier(ClientPtr client,
     return Success;
 }
 
-int _X_COLD
-SProcXIBarrierReleasePointer(ClientPtr client)
+int
+ProcXIBarrierReleasePointer(ClientPtr client)
 {
-    xXIBarrierReleasePointerInfo *info;
-    REQUEST(xXIBarrierReleasePointerReq);
-    int i;
+    X_REQUEST_HEAD_AT_LEAST(xXIBarrierReleasePointerReq);
+    X_REQUEST_FIELD_CARD32(num_barriers);
 
-    REQUEST_AT_LEAST_SIZE(xXIBarrierReleasePointerReq);
-
-    swapl(&stuff->num_barriers);
     if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
         return BadLength;
     REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
 
-    info = (xXIBarrierReleasePointerInfo*) &stuff[1];
-    for (i = 0; i < stuff->num_barriers; i++, info++) {
-        swaps(&info->deviceid);
-        swapl(&info->barrier);
-        swapl(&info->eventid);
+    if (client->swapped) {
+        xXIBarrierReleasePointerInfo *info = (xXIBarrierReleasePointerInfo*) &stuff[1];
+        for (int i = 0; i < stuff->num_barriers; i++, info++) {
+            swaps(&info->deviceid);
+            swapl(&info->barrier);
+            swapl(&info->eventid);
+        }
     }
 
-    return (ProcXIBarrierReleasePointer(client));
-}
-
-int
-ProcXIBarrierReleasePointer(ClientPtr client)
-{
     int i;
     int err;
     struct PointerBarrierClient *barrier;
     struct PointerBarrier *b;
     xXIBarrierReleasePointerInfo *info;
-
-    REQUEST(xXIBarrierReleasePointerReq);
-    REQUEST_AT_LEAST_SIZE(xXIBarrierReleasePointerReq);
-    if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
-        return BadLength;
-    REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
 
     info = (xXIBarrierReleasePointerInfo*) &stuff[1];
     for (i = 0; i < stuff->num_barriers; i++, info++) {
@@ -932,21 +918,17 @@ ProcXIBarrierReleasePointer(ClientPtr client)
 Bool
 XIBarrierInit(void)
 {
-    int i;
-
     if (!dixRegisterPrivateKey(&BarrierScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         BarrierScreenPtr cs;
-
         cs = (BarrierScreenPtr) calloc(1, sizeof(BarrierScreenRec));
         if (!cs)
             return FALSE;
         xorg_list_init(&cs->barriers);
         SetBarrierScreen(walkScreen, cs);
-    }
+    });
 
     PointerBarrierType = CreateNewResourceType(BarrierFreeBarrier,
                                                "XIPointerBarrier");
@@ -957,11 +939,9 @@ XIBarrierInit(void)
 void
 XIBarrierReset(void)
 {
-    int i;
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         BarrierScreenPtr cs = GetBarrierScreen(walkScreen);
         free(cs);
         SetBarrierScreen(walkScreen, NULL);
-    }
+    });
 }

@@ -36,6 +36,7 @@
 #include <GL/glxtokens.h>
 
 #include "dix/colormap_priv.h"
+#include "include/extinit.h"
 
 #include <windowstr.h>
 #include <os.h>
@@ -317,7 +318,7 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
         return;
 
     pGlxScreen->pScreen = pScreen;
-    pGlxScreen->GLextensions = strdup(GLServerExtensions);
+    pGlxScreen->GLextensions = XNFstrdup(GLServerExtensions);
     pGlxScreen->GLXextensions = NULL;
 
     dixScreenHookClose(pScreen, glxCloseScreen);
@@ -331,7 +332,7 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
     pGlxScreen->numFBConfigs = i;
 
     pGlxScreen->visuals =
-        calloc(pGlxScreen->numFBConfigs, sizeof(__GLXconfig *));
+        XNFcallocarray(pGlxScreen->numFBConfigs, sizeof(__GLXconfig *));
 
     /* First, try to choose featureful FBconfigs for the existing X visuals.
      * Note that if multiple X visuals end up with the same FBconfig being

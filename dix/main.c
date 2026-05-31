@@ -92,14 +92,18 @@ Equipment Corporation.
 #include "dix/input_priv.h"
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
-#include "os/audit.h"
+#include "dix/server_priv.h"
+#include "include/extinit.h"
+#include "os/audit_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
+#include "os/serverlock.h"
 #include "Xext/panoramiXsrv.h"
 
 #include "scrnintstr.h"
@@ -130,7 +134,6 @@ CallbackListPtr PostInitRootWindowCallback = NULL;
 int
 dix_main(int argc, char *argv[], char *envp[])
 {
-    HWEventQueueType alwaysCheckForInput[2];
 
     display = "0";
 
@@ -142,10 +145,6 @@ dix_main(int argc, char *argv[], char *envp[])
 
     ProcessCommandLine(argc, argv);
 
-    alwaysCheckForInput[0] = 0;
-    alwaysCheckForInput[1] = 1;
-    while (1) {
-        serverGeneration++;
         ScreenSaverTime = defaultScreenSaverTime;
         ScreenSaverInterval = defaultScreenSaverInterval;
         ScreenSaverBlanking = defaultScreenSaverBlanking;
@@ -154,7 +153,7 @@ dix_main(int argc, char *argv[], char *envp[])
         InitBlockAndWakeupHandlers();
         /* Perform any operating system dependent initializations you'd like */
         OsInit();
-        if (serverGeneration == 1) {
+
             CreateWellKnownSockets();
             for (int i = 1; i < LimitClients; i++)
                 clients[i] = NULL;
@@ -162,9 +161,7 @@ dix_main(int argc, char *argv[], char *envp[])
             if (!serverClient)
                 FatalError("couldn't create server client");
             InitClient(serverClient, 0, (void *) NULL);
-        }
-        else
-            ResetWellKnownSockets();
+
         clients[0] = serverClient;
         currentMaxClients = 1;
 
@@ -183,6 +180,7 @@ dix_main(int argc, char *argv[], char *envp[])
         if (!InitClientResources(serverClient)) /* for root resources */
             FatalError("couldn't init server resources");
 
+        HWEventQueueType alwaysCheckForInput[2] = { 0, 1 };
         SetInputCheck(&alwaysCheckForInput[0], &alwaysCheckForInput[1]);
         screenInfo.numScreens = 0;
 
@@ -192,7 +190,7 @@ dix_main(int argc, char *argv[], char *envp[])
         dixResetRegistry();
         InitFonts();
         InitCallbackManager();
-        InitOutput(&screenInfo, argc, argv);
+        InitOutput(argc, argv);
 
         if (screenInfo.numScreens < 1)
             FatalError("no screens found");
@@ -201,21 +199,25 @@ dix_main(int argc, char *argv[], char *envp[])
         InitExtensions(argc, argv);
         LogMessageVerb(X_INFO, 1, "Extensions initialized\n");
 
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+        DIX_FOR_EACH_GPU_SCREEN({
             if (!PixmapScreenInit(walkScreen))
                 FatalError("failed to create screen pixmap properties");
             if (!dixScreenRaiseCreateResources(walkScreen))
                 FatalError("failed to create screen resources");
-        }
+        });
 
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+        /* Let all screens register the necessary privates */
+    
+        DIX_FOR_EACH_SCREEN({
             if (!PixmapScreenInit(walkScreen))
                 FatalError("failed to create screen pixmap properties");
             if (!dixScreenRaiseCreateResources(walkScreen))
                 FatalError("failed to create screen resources");
+        });
+
+        /* Then use these privates to initialize root windows etc */
+
+        DIX_FOR_EACH_SCREEN({
             if (!CreateGCperDepth(walkScreen))
                 FatalError("failed to create scratch GCs");
             if (!CreateDefaultStipple(walkScreen))
@@ -223,7 +225,7 @@ dix_main(int argc, char *argv[], char *envp[])
             if (!CreateRootWindow(walkScreen))
                 FatalError("failed to create root window");
             CallCallbacks(&RootWindowFinalizeCallback, walkScreen);
-        }
+        });
 
         if (SetDefaultFontPath(defaultFontPath) != Success) {
             ErrorF("[dix] failed to set default font path '%s'",
@@ -247,11 +249,10 @@ dix_main(int argc, char *argv[], char *envp[])
             PanoramiXConsolidate();
 #endif /* XINERAMA */
 
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        DIX_FOR_EACH_SCREEN({
             InitRootWindow(walkScreen->root);
             CallCallbacks(&PostInitRootWindowCallback, walkScreen);
-        }
+        });
 
         LogMessageVerb(X_INFO, 1, "Screen(s) initialized\n");
 
@@ -313,10 +314,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
         InputThreadFini();
 
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-            walkScreen->root = NullWindow;
-        }
+        DIX_FOR_EACH_SCREEN({ walkScreen->root = NullWindow; });
 
         CloseDownDevices();
 
@@ -356,19 +354,13 @@ dix_main(int argc, char *argv[], char *envp[])
 
         ClearWorkQueue();
 
-        if (dispatchException & DE_TERMINATE) {
-            CloseWellKnownConnections();
-        }
+        CloseWellKnownConnections();
+        UnlockServer();
 
-        OsCleanup((dispatchException & DE_TERMINATE) != 0);
-
-        if (dispatchException & DE_TERMINATE) {
-            ddxGiveUp(EXIT_NO_ERROR);
-            break;
-        }
+        ddxGiveUp(EXIT_NO_ERROR);
 
         free(ConnectionInfo);
         ConnectionInfo = NULL;
-    }
+
     return 0;
 }

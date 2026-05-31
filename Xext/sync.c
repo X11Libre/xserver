@@ -59,6 +59,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/syncproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
+#include "dix/screenint_priv.h"
+#include "include/syncsdk.h"
 #include "miext/extinit_priv.h"
 #include "os/bug_priv.h"
 #include "os/osdep.h"
@@ -70,7 +73,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "pixmapstr.h"
 #include "resource.h"
 #include "syncsrv.h"
-#include "syncsdk.h"
 #include "protocol-versions.h"
 #include "inputstr.h"
 #include "misync_priv.h"
@@ -342,18 +344,18 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
 {
     SyncObject *pSync = pTrigger->pSync;
     SyncCounter *pCounter = NULL;
-    int rc;
     Bool newSyncObject = FALSE;
 
     if (changes & XSyncCACounter) {
-        if (syncObject == None)
+        if (syncObject == None) {
             pSync = NULL;
-        else if (Success != (rc = dixLookupResourceByType((void **) &pSync,
-                                                          syncObject, resType,
-                                                          client,
-                                                          DixReadAccess))) {
-            client->errorValue = syncObject;
-            return rc;
+        } else {
+            int rc = dixLookupResourceByType((void **) &pSync, syncObject,
+                                              resType, client, DixReadAccess);
+            if (rc != Success) {
+                client->errorValue = syncObject;
+                return rc;
+            }
         }
     }
 
@@ -436,7 +438,7 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
     if (newSyncObject) {
         SyncAddTriggerToSyncObject(pTrigger);
     }
-    else if (pCounter && IsSystemCounter(pCounter)) {
+    else if (IsSystemCounter(pCounter)) {
         SyncComputeBracketValues(pCounter);
     }
 
@@ -1027,11 +1029,16 @@ SyncCreateSystemCounter(const char *name,
         SysCounterInfo *psci = calloc(1, sizeof(SysCounterInfo));
         if (!psci) {
             FreeResource(pCounter->sync.id, X11_RESTYPE_NONE);
-            return pCounter;
+            return NULL;
         }
         pCounter->pSysCounterInfo = psci;
         psci->pCounter = pCounter;
-        psci->name = strdup(name);
+        if (!(psci->name = strdup(name))) {
+            free(psci);
+            pCounter->pSysCounterInfo = NULL;
+            FreeResource(pCounter->sync.id, X11_RESTYPE_NONE);
+            return NULL;
+        }
         psci->resolution = resolution;
         psci->counterType = counterType;
         psci->QueryValue = QueryValue;
@@ -1190,7 +1197,7 @@ FreeCounter(void *env, XID id)
             pnext = ptl->next;
             free(ptl); /* destroy the trigger list as we go */
         }
-        if (IsSystemCounter(pCounter)) {
+        if (IsSystemCounter(pCounter) && pCounter->pSysCounterInfo) {
             xorg_list_del(&pCounter->pSysCounterInfo->entry);
             free(pCounter->pSysCounterInfo->name);
             free(pCounter->pSysCounterInfo->private);
@@ -1262,15 +1269,14 @@ FreeAlarmClient(void *value, XID id)
 static int
 ProcSyncInitialize(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xSyncInitializeReq);
+
     xSyncInitializeReply reply = {
         .majorVersion = SERVER_SYNC_MAJOR_VERSION,
         .minorVersion = SERVER_SYNC_MINOR_VERSION,
     };
 
-    REQUEST_SIZE_MATCH(xSyncInitializeReq);
-
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /*
@@ -1279,9 +1285,9 @@ ProcSyncInitialize(ClientPtr client)
 static int
 ProcSyncListSystemCounters(ClientPtr client)
 {
-    SysCounterInfo *psci;
+    X_REQUEST_HEAD_STRUCT(xSyncListSystemCountersReq);
 
-    REQUEST_SIZE_MATCH(xSyncListSystemCountersReq);
+    SysCounterInfo *psci;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -1311,9 +1317,7 @@ ProcSyncListSystemCounters(ClientPtr client)
         .nCounters = nCounters
     };
 
-    if (client->swapped) {
-        swapl(&reply.nCounters);
-    }
+    X_REPLY_FIELD_CARD32(nCounters);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1325,21 +1329,16 @@ ProcSyncListSystemCounters(ClientPtr client)
 static int
 ProcSyncSetPriority(ClientPtr client)
 {
-    REQUEST(xSyncSetPriorityReq);
+    X_REQUEST_HEAD_STRUCT(xSyncSetPriorityReq);
+    X_REQUEST_FIELD_CARD32(id);
+    X_REQUEST_FIELD_CARD32(priority);
+
     ClientPtr priorityclient;
-    int rc;
-
-    REQUEST_SIZE_MATCH(xSyncSetPriorityReq);
-
-    if (client->swapped) {
-        swapl(&stuff->id);
-        swapl(&stuff->priority);
-    }
 
     if (stuff->id == None)
         priorityclient = client;
     else {
-        rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
+        int rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
                              DixSetAttrAccess);
         if (rc != Success)
             return rc;
@@ -1365,19 +1364,15 @@ ProcSyncSetPriority(ClientPtr client)
 static int
 ProcSyncGetPriority(ClientPtr client)
 {
-    REQUEST(xSyncGetPriorityReq);
+    X_REQUEST_HEAD_STRUCT(xSyncGetPriorityReq);
+    X_REQUEST_FIELD_CARD32(id);
+
     ClientPtr priorityclient;
-    int rc;
-
-    REQUEST_SIZE_MATCH(xSyncGetPriorityReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
 
     if (stuff->id == None)
         priorityclient = client;
     else {
-        rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
+        int rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
                              DixGetAttrAccess);
         if (rc != Success)
             return rc;
@@ -1387,12 +1382,9 @@ ProcSyncGetPriority(ClientPtr client)
         .priority = priorityclient->priority
     };
 
-    if (client->swapped) {
-        swapl(&reply.priority);
-    }
+    X_REPLY_FIELD_CARD32(priority);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /*
@@ -1401,16 +1393,12 @@ ProcSyncGetPriority(ClientPtr client)
 static int
 ProcSyncCreateCounter(ClientPtr client)
 {
-    REQUEST(xSyncCreateCounterReq);
+    X_REQUEST_HEAD_STRUCT(xSyncCreateCounterReq);
+    X_REQUEST_FIELD_CARD32(cid);
+    X_REQUEST_FIELD_CARD32(initial_value_lo);
+    X_REQUEST_FIELD_CARD32(initial_value_hi);
+
     int64_t initial;
-
-    REQUEST_SIZE_MATCH(xSyncCreateCounterReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cid);
-        swapl(&stuff->initial_value_lo);
-        swapl(&stuff->initial_value_hi);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->cid, client);
 
@@ -1428,20 +1416,15 @@ ProcSyncCreateCounter(ClientPtr client)
 static int
 ProcSyncSetCounter(ClientPtr client)
 {
-    REQUEST(xSyncSetCounterReq);
+    X_REQUEST_HEAD_STRUCT(xSyncSetCounterReq);
+    X_REQUEST_FIELD_CARD32(cid);
+    X_REQUEST_FIELD_CARD32(value_lo);
+    X_REQUEST_FIELD_CARD32(value_hi);
+
     SyncCounter *pCounter;
     int64_t newvalue;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncSetCounterReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cid);
-        swapl(&stuff->value_lo);
-        swapl(&stuff->value_hi);
-    }
-
-    rc = dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
+    int rc = dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
                                  client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -1462,21 +1445,16 @@ ProcSyncSetCounter(ClientPtr client)
 static int
 ProcSyncChangeCounter(ClientPtr client)
 {
-    REQUEST(xSyncChangeCounterReq);
+    X_REQUEST_HEAD_STRUCT(xSyncChangeCounterReq);
+    X_REQUEST_FIELD_CARD32(cid);
+    X_REQUEST_FIELD_CARD32(value_lo);
+    X_REQUEST_FIELD_CARD32(value_hi);
+
     SyncCounter *pCounter;
     int64_t newvalue;
     Bool overflow;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncChangeCounterReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cid);
-        swapl(&stuff->value_lo);
-        swapl(&stuff->value_hi);
-    }
-
-    rc = dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
+    int rc = dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
                                  client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -1503,16 +1481,12 @@ ProcSyncChangeCounter(ClientPtr client)
 static int
 ProcSyncDestroyCounter(ClientPtr client)
 {
-    REQUEST(xSyncDestroyCounterReq);
+    X_REQUEST_HEAD_STRUCT(xSyncDestroyCounterReq);
+    X_REQUEST_FIELD_CARD32(counter);
+
     SyncCounter *pCounter;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncDestroyCounterReq);
-
-    if (client->swapped)
-        swapl(&stuff->counter);
-
-    rc = dixLookupResourceByType((void **) &pCounter, stuff->counter,
+    int rc = dixLookupResourceByType((void **) &pCounter, stuff->counter,
                                  RTCounter, client, DixDestroyAccess);
     if (rc != Success)
         return rc;
@@ -1587,18 +1561,15 @@ SyncAwaitEpilogue(ClientPtr client, int items, SyncAwaitUnion * pAwaitUnion)
 static int
 ProcSyncAwait(ClientPtr client)
 {
-    REQUEST(xSyncAwaitReq);
+    X_REQUEST_HEAD_AT_LEAST(xSyncAwaitReq);
+    X_REQUEST_REST_CARD32();
+
     int len, items;
     int i;
     xSyncWaitCondition *pProtocolWaitConds;
     SyncAwaitUnion *pAwaitUnion;
     SyncAwait *pAwait;
     int status;
-
-    REQUEST_AT_LEAST_SIZE(xSyncAwaitReq);
-
-    if (client->swapped)
-        SwapRestL(stuff);
 
     len = client->req_len << 2;
     len -= sz_xSyncAwaitReq;
@@ -1670,16 +1641,12 @@ ProcSyncAwait(ClientPtr client)
 static int
 ProcSyncQueryCounter(ClientPtr client)
 {
-    REQUEST(xSyncQueryCounterReq);
+    X_REQUEST_HEAD_STRUCT(xSyncQueryCounterReq);
+    X_REQUEST_FIELD_CARD32(counter);
+
     SyncCounter *pCounter;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncQueryCounterReq);
-
-    if (client->swapped)
-        swapl(&stuff->counter);
-
-    rc = dixLookupResourceByType((void **) &pCounter, stuff->counter,
+    int rc = dixLookupResourceByType((void **) &pCounter, stuff->counter,
                                  RTCounter, client, DixReadAccess);
     if (rc != Success)
         return rc;
@@ -1695,12 +1662,10 @@ ProcSyncQueryCounter(ClientPtr client)
         .value_lo = pCounter->value
     };
 
-    if (client->swapped) {
-        swapl(&reply.value_hi);
-        swapl(&reply.value_lo);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    X_REPLY_FIELD_CARD32(value_hi);
+    X_REPLY_FIELD_CARD32(value_lo);
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /*
@@ -1709,19 +1674,15 @@ ProcSyncQueryCounter(ClientPtr client)
 static int
 ProcSyncCreateAlarm(ClientPtr client)
 {
-    REQUEST(xSyncCreateAlarmReq);
+    X_REQUEST_HEAD_AT_LEAST(xSyncCreateAlarmReq);
+    X_REQUEST_FIELD_CARD32(id);
+    X_REQUEST_FIELD_CARD32(valueMask);
+    X_REQUEST_REST_CARD32();
+
     SyncAlarm *pAlarm;
     int status;
     unsigned long len, vmask;
     SyncTrigger *pTrigger;
-
-    REQUEST_AT_LEAST_SIZE(xSyncCreateAlarmReq);
-
-    if (client->swapped) {
-        swapl(&stuff->id);
-        swapl(&stuff->valueMask);
-        SwapRestL(stuff);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->id, client);
 
@@ -1798,19 +1759,15 @@ ProcSyncCreateAlarm(ClientPtr client)
 static int
 ProcSyncChangeAlarm(ClientPtr client)
 {
-    REQUEST(xSyncChangeAlarmReq);
+    X_REQUEST_HEAD_AT_LEAST(xSyncChangeAlarmReq);
+    X_REQUEST_FIELD_CARD32(alarm);
+    X_REQUEST_FIELD_CARD32(valueMask);
+    X_REQUEST_REST_CARD32();
+
     SyncAlarm *pAlarm;
     SyncCounter *pCounter = NULL;
     long vmask;
     int len, status;
-
-    REQUEST_AT_LEAST_SIZE(xSyncChangeAlarmReq);
-
-    if (client->swapped) {
-        swapl(&stuff->alarm);
-        swapl(&stuff->valueMask);
-        SwapRestL(stuff);
-    }
 
     status = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
                                      client, DixWriteAccess);
@@ -1845,17 +1802,13 @@ ProcSyncChangeAlarm(ClientPtr client)
 static int
 ProcSyncQueryAlarm(ClientPtr client)
 {
-    REQUEST(xSyncQueryAlarmReq);
+    X_REQUEST_HEAD_STRUCT(xSyncQueryAlarmReq);
+    X_REQUEST_FIELD_CARD32(alarm);
+
     SyncAlarm *pAlarm;
     SyncTrigger *pTrigger;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncQueryAlarmReq);
-
-    if (client->swapped)
-        swapl(&stuff->alarm);
-
-    rc = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
+    int rc = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
                                  client, DixReadAccess);
     if (rc != Success)
         return rc;
@@ -1885,32 +1838,26 @@ ProcSyncQueryAlarm(ClientPtr client)
         .state = pAlarm->state
     };
 
-    if (client->swapped) {
-        swapl(&reply.counter);
-        swapl(&reply.wait_value_hi);
-        swapl(&reply.wait_value_lo);
-        swapl(&reply.test_type);
-        swapl(&reply.delta_hi);
-        swapl(&reply.delta_lo);
-    }
+    X_REPLY_FIELD_CARD32(counter);
+    X_REPLY_FIELD_CARD32(value_type);
+    X_REPLY_FIELD_CARD32(wait_value_hi);
+    X_REPLY_FIELD_CARD32(wait_value_lo);
+    X_REPLY_FIELD_CARD32(test_type);
+    X_REPLY_FIELD_CARD32(delta_hi);
+    X_REPLY_FIELD_CARD32(delta_lo);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcSyncDestroyAlarm(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xSyncDestroyAlarmReq);
+    X_REQUEST_FIELD_CARD32(alarm);
+
     SyncAlarm *pAlarm;
-    int rc;
 
-    REQUEST(xSyncDestroyAlarmReq);
-    REQUEST_SIZE_MATCH(xSyncDestroyAlarmReq);
-
-    if (client->swapped)
-        swapl(&stuff->alarm);
-
-    rc = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
+    int rc = dixLookupResourceByType((void **) &pAlarm, stuff->alarm, RTAlarm,
                                  client, DixDestroyAccess);
     if (rc != Success)
         return rc;
@@ -1922,19 +1869,14 @@ ProcSyncDestroyAlarm(ClientPtr client)
 static int
 ProcSyncCreateFence(ClientPtr client)
 {
-    REQUEST(xSyncCreateFenceReq);
+    X_REQUEST_HEAD_STRUCT(xSyncCreateFenceReq);
+    X_REQUEST_FIELD_CARD32(d);
+    X_REQUEST_FIELD_CARD32(fid);
+
     DrawablePtr pDraw;
     SyncFence *pFence;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncCreateFenceReq);
-
-    if (client->swapped) {
-        swapl(&stuff->d);
-        swapl(&stuff->fid);
-    }
-
-    rc = dixLookupDrawable(&pDraw, stuff->d, client, M_ANY, DixGetAttrAccess);
+    int rc = dixLookupDrawable(&pDraw, stuff->d, client, M_ANY, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -1973,16 +1915,12 @@ SyncVerifyFence(SyncFence ** ppSyncFence, XID fid, ClientPtr client, Mask mode)
 static int
 ProcSyncTriggerFence(ClientPtr client)
 {
-    REQUEST(xSyncTriggerFenceReq);
+    X_REQUEST_HEAD_STRUCT(xSyncTriggerFenceReq);
+    X_REQUEST_FIELD_CARD32(fid);
+
     SyncFence *pFence;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncTriggerFenceReq);
-
-    if (client->swapped)
-        swapl(&stuff->fid);
-
-    rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
+    int rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
                                  client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -1995,16 +1933,12 @@ ProcSyncTriggerFence(ClientPtr client)
 static int
 ProcSyncResetFence(ClientPtr client)
 {
-    REQUEST(xSyncResetFenceReq);
+    X_REQUEST_HEAD_STRUCT(xSyncResetFenceReq);
+    X_REQUEST_FIELD_CARD32(fid);
+
     SyncFence *pFence;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncResetFenceReq);
-
-    if (client->swapped)
-        swapl(&stuff->fid);
-
-    rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
+    int rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
                                  client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -2020,16 +1954,12 @@ ProcSyncResetFence(ClientPtr client)
 static int
 ProcSyncDestroyFence(ClientPtr client)
 {
-    REQUEST(xSyncDestroyFenceReq);
+    X_REQUEST_HEAD_STRUCT(xSyncDestroyFenceReq);
+    X_REQUEST_FIELD_CARD32(fid);
+
     SyncFence *pFence;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncDestroyFenceReq);
-
-    if (client->swapped)
-        swapl(&stuff->fid);
-
-    rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
+    int rc = dixLookupResourceByType((void **) &pFence, stuff->fid, RTFence,
                                  client, DixDestroyAccess);
     if (rc != Success)
         return rc;
@@ -2041,16 +1971,12 @@ ProcSyncDestroyFence(ClientPtr client)
 static int
 ProcSyncQueryFence(ClientPtr client)
 {
-    REQUEST(xSyncQueryFenceReq);
+    X_REQUEST_HEAD_STRUCT(xSyncQueryFenceReq);
+    X_REQUEST_FIELD_CARD32(fid);
+
     SyncFence *pFence;
-    int rc;
 
-    REQUEST_SIZE_MATCH(xSyncQueryFenceReq);
-
-    if (client->swapped)
-        swapl(&stuff->fid);
-
-    rc = dixLookupResourceByType((void **) &pFence, stuff->fid,
+    int rc = dixLookupResourceByType((void **) &pFence, stuff->fid,
                                  RTFence, client, DixReadAccess);
     if (rc != Success)
         return rc;
@@ -2059,14 +1985,15 @@ ProcSyncQueryFence(ClientPtr client)
         .triggered = pFence->funcs.CheckTriggered(pFence)
     };
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcSyncAwaitFence(ClientPtr client)
 {
-    REQUEST(xSyncAwaitFenceReq);
+    X_REQUEST_HEAD_AT_LEAST(xSyncAwaitFenceReq);
+    X_REQUEST_REST_CARD32();
+
     SyncAwaitUnion *pAwaitUnion;
     SyncAwait *pAwait;
 
@@ -2077,11 +2004,6 @@ ProcSyncAwaitFence(ClientPtr client)
     int len;
     int items;
     int i;
-
-    REQUEST_AT_LEAST_SIZE(xSyncAwaitFenceReq);
-
-    if (client->swapped)
-        SwapRestL(stuff);
 
     len = client->req_len << 2;
     len -= sz_xSyncAwaitFenceReq;
@@ -2251,12 +2173,10 @@ void
 SyncExtensionInit(void)
 {
     ExtensionEntry *extEntry;
-    int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr walkScreen = screenInfo.screens[s];
+    DIX_FOR_EACH_SCREEN({
         miSyncSetup(walkScreen);
-    }
+    });
 
     RTCounter = CreateNewResourceType(FreeCounter, "SyncCounter");
     xorg_list_init(&SysCounterList);
@@ -2428,8 +2348,7 @@ IdleTimeBlockHandler(void *pCounter, void *wt)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
-    if (!priv)
-        return;
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     int64_t idle, old_idle;
@@ -2520,8 +2439,7 @@ IdleTimeWakeupHandler(void *pCounter, int rc)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
-    if (!priv)
-        return;
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     int64_t idle;
@@ -2555,8 +2473,7 @@ IdleTimeBracketValues(void *pCounter, int64_t *pbracket_less,
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
-    if (!priv)
-        return;
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     Bool registered = (less || greater);

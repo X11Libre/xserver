@@ -203,7 +203,7 @@ void
 XkbSendStateNotify(DeviceIntPtr kbd, xkbStateNotify * pSN)
 {
     XkbSrvInfoPtr xkbi;
-    XkbStatePtr state;
+    XkbStatePtr state = { 0 };
     XkbInterestPtr interest;
     Time time;
     register CARD16 changed, bState;
@@ -474,7 +474,7 @@ XkbHandleBell(BOOL force,
               void *pCtrl,
               CARD8 class, Atom name, WindowPtr pWin, ClientPtr pClient)
 {
-    xkbBellNotify bn;
+    xkbBellNotify bn = { 0 };
     int initialized;
     XkbSrvInfoPtr xkbi;
     XkbInterestPtr interest;
@@ -779,13 +779,13 @@ XkbSendNotification(DeviceIntPtr kbd,
 
     sli = NULL;
     if (pChanges->state_changes) {
-        xkbStateNotify sn;
-
-        sn.changed = pChanges->state_changes;
-        sn.keycode = cause->kc;
-        sn.eventType = cause->event;
-        sn.requestMajor = cause->mjr;
-        sn.requestMinor = cause->mnr;
+        xkbStateNotify sn = {
+            sn.changed = pChanges->state_changes,
+            sn.keycode = cause->kc,
+            sn.eventType = cause->event,
+            sn.requestMajor = cause->mjr,
+            sn.requestMinor = cause->mnr,
+        };
         XkbSendStateNotify(kbd, &sn);
     }
     if (pChanges->map.changed) {
@@ -1030,6 +1030,7 @@ XkbRemoveResourceClient(DevicePtr inDev, XID id)
             autoCtrls = interest->autoCtrls;
             autoValues = interest->autoCtrlValues;
             client = interest->client;
+            FreeResource(interest->resource, RT_XKBCLIENT);
             free(interest);
             found = TRUE;
         }
@@ -1041,6 +1042,7 @@ XkbRemoveResourceClient(DevicePtr inDev, XID id)
                 autoCtrls = victim->autoCtrls;
                 autoValues = victim->autoCtrlValues;
                 client = victim->client;
+                FreeResource(victim->resource, RT_XKBCLIENT);
                 free(victim);
                 found = TRUE;
             }
@@ -1048,7 +1050,7 @@ XkbRemoveResourceClient(DevicePtr inDev, XID id)
         }
     }
     if (found && autoCtrls && dev->key && dev->key->xkbInfo) {
-        XkbEventCauseRec cause;
+        XkbEventCauseRec cause = { 0 };
 
         xkbi = dev->key->xkbInfo;
         XkbSetCauseXkbReq(&cause, X_kbPerClientFlags, client);

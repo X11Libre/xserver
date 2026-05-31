@@ -113,13 +113,13 @@ xnestOpenDisplay(int argc, char *argv[])
     xnestIconBitmap =
         xnest_create_bitmap_from_data(xnestUpstreamInfo.conn,
                                       xnestUpstreamInfo.screenInfo->root,
-                                      (char *) icon_bits, icon_width, icon_height);
+                                      (const char *) icon_bits, icon_width, icon_height);
 
     xnestScreenSaverPixmap =
         xnest_create_pixmap_from_bitmap_data(
                                     xnestUpstreamInfo.conn,
                                     xnestUpstreamInfo.screenInfo->root,
-                                    (char *) screensaver_bits,
+                                    (const char *) screensaver_bits,
                                     screensaver_width,
                                     screensaver_height,
                                     xnestUpstreamInfo.screenInfo->white_pixel,

@@ -10,7 +10,7 @@ xwinclip - An X11 and Windows clipboard integration tool
 
 \fIxwinclip\fP watches for updates to either clipboard and copies data between them when either one is updated.
 
-\fIxwinclip\fP monitors the X PRIMARY and CLIBPOARD selections for changes in ownership, and makes
+\fIxwinclip\fP monitors the X PRIMARY and CLIPBOARD selections for changes in ownership, and makes
 the contents of the most recent one to change available to paste from the Windows clipboard.
 
 It also monitors the contents of the Windows clipboard for changes, taking ownership of the PRIMARY and

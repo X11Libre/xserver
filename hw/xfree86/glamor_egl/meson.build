@@ -1,6 +1,6 @@
 glamoregl_src = [
-    '../../../glamor/glamor_egl.c',
-    '../../../glamor/glamor_eglmodule.c',
+    'glamor_xf86_egl.c',
+    'glamor_eglmodule.c',
     'glamor_xf86_xv.c',
 ]
 
@@ -12,7 +12,7 @@ shared_module(
     c_args: xorg_c_args,
     dependencies: [
         common_dep,
-        dependency('libdrm', version: '>= 2.4.46'),
+        libdrm_dep,
         gbm_dep,
     ],
     link_with: [glamor, libxserver_glx],

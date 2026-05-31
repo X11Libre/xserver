@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "dri3_priv.h"
@@ -35,8 +36,16 @@ static x_server_generation_t dri3_screen_generation;
 static void dri3_screen_close(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     dri3_screen_priv_ptr screen_priv = dri3_screen_priv(screen);
-    dixScreenUnhookClose(screen, dri3_screen_close);
+
+    if (screen_priv && screen_priv->formats && screen_priv->formats_cached) {
+        for (int i = 0; i < screen_priv->num_formats; i++) {
+            free(screen_priv->formats[i].modifiers);
+        }
+        free(screen_priv->formats);
+    }
     free(screen_priv);
+
+    dixScreenUnhookClose(screen, dri3_screen_close);
 }
 
 Bool
@@ -54,10 +63,11 @@ dri3_screen_init(ScreenPtr screen, const dri3_screen_info_rec *info)
 
         dixScreenHookClose(screen, dri3_screen_close);
 
-        screen_priv->info = info;
-
         dixSetPrivate(&screen->devPrivates, &dri3_screen_private_key, screen_priv);
     }
+
+    if (info)
+        dri3_screen_priv(screen)->info = info;
 
     return TRUE;
 }
@@ -76,7 +86,6 @@ void
 dri3_extension_init(void)
 {
     ExtensionEntry *extension;
-    int i;
 
     /* If no screens support DRI3, there's no point offering the
      * extension at all
@@ -90,18 +99,17 @@ dri3_extension_init(void)
 #endif /* XINERAMA */
 
     extension = AddExtension(DRI3_NAME, DRI3NumberEvents, DRI3NumberErrors,
-                             proc_dri3_dispatch, sproc_dri3_dispatch,
+                             proc_dri3_dispatch, proc_dri3_dispatch,
                              NULL, StandardMinorOpcode);
     if (!extension)
         goto bail;
 
     dri3_request = extension->base;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         if (!dri3_screen_init(walkScreen, NULL))
             goto bail;
-    }
+    });
 
     dri3_syncobj_type = CreateNewResourceType(dri3_syncobj_free, "DRI3Syncobj");
     if (!dri3_syncobj_type)

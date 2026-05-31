@@ -32,8 +32,8 @@ in this Software without prior written authorization from The Open Group.
 
 typedef enum { VTOther, VTStack, VTMove, VTUnmap, VTMap, VTBroken } VTKind;
 
-/* union _Validate is now device dependent; see mivalidate.h for an example */
-typedef union _Validate *ValidatePtr;
+/* union _MiValidate is now device dependent; see mivalidate.h for an example */
+typedef union _MiValidate *ValidatePtr;
 
 #define UnmapValData ((ValidatePtr)1)
 

@@ -22,6 +22,8 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
+#include "dix/server_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
 
@@ -176,11 +178,9 @@ RRScreenSizeSet(ScreenPtr pScreen,
                                              width, height, mmWidth, mmHeight);
     }
 #endif
-#if RANDR_10_INTERFACE
     if (pScrPriv->rrSetConfig) {
         return TRUE;            /* can't set size separately */
     }
-#endif
     return FALSE;
 }
 
@@ -191,12 +191,15 @@ int
 ProcRRGetScreenSizeRange(ClientPtr client)
 {
     REQUEST(xRRGetScreenSizeRangeReq);
+    REQUEST_SIZE_MATCH(xRRGetScreenSizeRangeReq);
+    if (client->swapped)
+        swapl(&stuff->window);
+
     WindowPtr pWin;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int rc;
 
-    REQUEST_SIZE_MATCH(xRRGetScreenSizeRangeReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -204,39 +207,47 @@ ProcRRGetScreenSizeRange(ClientPtr client)
     pScreen = pWin->drawable.pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
 
-    xRRGetScreenSizeRangeReply rep = { 0 };
+    xRRGetScreenSizeRangeReply reply = { 0 };
 
     if (pScrPriv) {
         if (!RRGetInfo(pScreen, FALSE))
             return BadAlloc;
-        rep.minWidth = pScrPriv->minWidth;
-        rep.minHeight = pScrPriv->minHeight;
-        rep.maxWidth = pScrPriv->maxWidth;
-        rep.maxHeight = pScrPriv->maxHeight;
+        reply.minWidth = pScrPriv->minWidth;
+        reply.minHeight = pScrPriv->minHeight;
+        reply.maxWidth = pScrPriv->maxWidth;
+        reply.maxHeight = pScrPriv->maxHeight;
     }
     else {
-        rep.maxWidth = rep.minWidth = pScreen->width;
-        rep.maxHeight = rep.minHeight = pScreen->height;
+        reply.maxWidth = reply.minWidth = pScreen->width;
+        reply.maxHeight = reply.minHeight = pScreen->height;
     }
     if (client->swapped) {
-        swaps(&rep.minWidth);
-        swaps(&rep.minHeight);
-        swaps(&rep.maxWidth);
-        swaps(&rep.maxHeight);
+        swaps(&reply.minWidth);
+        swaps(&reply.minHeight);
+        swaps(&reply.maxWidth);
+        swaps(&reply.maxHeight);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
 ProcRRSetScreenSize(ClientPtr client)
 {
     REQUEST(xRRSetScreenSizeReq);
+    REQUEST_SIZE_MATCH(xRRSetScreenSizeReq);
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swaps(&stuff->width);
+        swaps(&stuff->height);
+        swapl(&stuff->widthInMillimeters);
+        swapl(&stuff->heightInMillimeters);
+    }
+
     WindowPtr pWin;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int i, rc;
 
-    REQUEST_SIZE_MATCH(xRRSetScreenSizeReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -260,17 +271,14 @@ ProcRRSetScreenSize(ClientPtr client)
         RRModePtr mode = crtc->mode;
 
         if (!RRCrtcIsLeased(crtc) && mode) {
-            int source_width = mode->mode.width;
-            int source_height = mode->mode.height;
-            Rotation rotation = crtc->rotation;
+            struct pixman_box16 display_box = {
+                0, 0,
+                mode->mode.width,
+                mode->mode.height
+            };
+            pixman_f_transform_bounds(&crtc->f_transform, &display_box);
 
-            if (rotation & (RR_Rotate_90 | RR_Rotate_270)) {
-                source_width = mode->mode.height;
-                source_height = mode->mode.width;
-            }
-
-            if (crtc->x + source_width > stuff->width ||
-                crtc->y + source_height > stuff->height)
+            if (display_box.x2 > stuff->width || display_box.y2 > stuff->height)
                 return BadMatch;
         }
     }
@@ -399,7 +407,7 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
 
     pScrPriv = rrGetScrPriv(pScreen);
 
-    xRRGetScreenResourcesReply rep = {
+    xRRGetScreenResourcesReply reply = {
         .timestamp = pScrPriv->lastSetTime.milliseconds,
         .configTimestamp = pScrPriv->lastConfigTime.milliseconds,
         .nCrtcs = total_crtcs,
@@ -408,13 +416,13 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
         .nbytesNames = total_name_len
     };
 
-    rep.length = (total_crtcs + total_outputs +
+    reply.length = (total_crtcs + total_outputs +
                   total_modes * bytes_to_int32(SIZEOF(xRRModeInfo)) +
                   bytes_to_int32(total_name_len));
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    extraLen = rep.length << 2;
+    extraLen = reply.length << 2;
     if (extraLen) {
         extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
         if (!extra) {
@@ -453,25 +461,30 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
         update_arrays(iter, pScrPriv, primary_crtc, has_primary);
     }
 
-    assert(bytes_to_int32((char *) names - (char *) extra) == rep.length);
+    assert(bytes_to_int32((char *) names - (char *) extra) == reply.length);
 
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swapl(&rep.configTimestamp);
-        swaps(&rep.nCrtcs);
-        swaps(&rep.nOutputs);
-        swaps(&rep.nModes);
-        swaps(&rep.nbytesNames);
+        swapl(&reply.timestamp);
+        swapl(&reply.configTimestamp);
+        swaps(&reply.nCrtcs);
+        swaps(&reply.nOutputs);
+        swaps(&reply.nModes);
+        swaps(&reply.nbytesNames);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
 rrGetScreenResources(ClientPtr client, Bool query)
 {
     REQUEST(xRRGetScreenResourcesReq);
-    xRRGetScreenResourcesReply rep;
+    REQUEST_SIZE_MATCH(xRRGetScreenResourcesReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
+    xRRGetScreenResourcesReply reply;
     WindowPtr pWin;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
@@ -479,7 +492,6 @@ rrGetScreenResources(ClientPtr client, Bool query)
     unsigned long extraLen = 0;
     int i, rc, has_primary = 0;
 
-    REQUEST_SIZE_MATCH(xRRGetScreenResourcesReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -497,7 +509,7 @@ rrGetScreenResources(ClientPtr client, Bool query)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!pScrPriv) {
-        rep = (xRRGetScreenResourcesReply) {
+        reply = (xRRGetScreenResourcesReply) {
             .timestamp = currentTime.milliseconds,
             .configTimestamp = currentTime.milliseconds,
         };
@@ -510,7 +522,7 @@ rrGetScreenResources(ClientPtr client, Bool query)
         if (!modes)
             return BadAlloc;
 
-        rep = (xRRGetScreenResourcesReply) {
+        reply = (xRRGetScreenResourcesReply) {
             .timestamp = pScrPriv->lastSetTime.milliseconds,
             .configTimestamp = pScrPriv->lastConfigTime.milliseconds,
             .nCrtcs = pScrPriv->numCrtcs,
@@ -519,14 +531,14 @@ rrGetScreenResources(ClientPtr client, Bool query)
         };
 
         for (i = 0; i < num_modes; i++)
-            rep.nbytesNames += modes[i]->mode.nameLength;
+            reply.nbytesNames += modes[i]->mode.nameLength;
 
-        rep.length = (pScrPriv->numCrtcs +
+        reply.length = (pScrPriv->numCrtcs +
                       pScrPriv->numOutputs +
                       num_modes * bytes_to_int32(SIZEOF(xRRModeInfo)) +
-                      bytes_to_int32(rep.nbytesNames));
+                      bytes_to_int32(reply.nbytesNames));
 
-        extraLen = rep.length << 2;
+        extraLen = reply.length << 2;
         if (!extraLen)
             goto finish;
 
@@ -587,20 +599,20 @@ rrGetScreenResources(ClientPtr client, Bool query)
             memcpy(names, mode->name, mode->mode.nameLength);
             names += mode->mode.nameLength;
         }
-        assert(bytes_to_int32((char *) names - (char *) extra) == rep.length);
+        assert(bytes_to_int32((char *) names - (char *) extra) == reply.length);
 finish:
         free(modes);
     }
 
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swapl(&rep.configTimestamp);
-        swaps(&rep.nCrtcs);
-        swaps(&rep.nOutputs);
-        swaps(&rep.nModes);
-        swaps(&rep.nbytesNames);
+        swapl(&reply.timestamp);
+        swapl(&reply.configTimestamp);
+        swaps(&reply.nCrtcs);
+        swaps(&reply.nOutputs);
+        swaps(&reply.nModes);
+        swaps(&reply.nbytesNames);
     }
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -717,7 +729,11 @@ int
 ProcRRGetScreenInfo(ClientPtr client)
 {
     REQUEST(xRRGetScreenInfoReq);
-    xRRGetScreenInfoReply rep;
+    REQUEST_SIZE_MATCH(xRRGetScreenInfoReq);
+    if (client->swapped)
+        swapl(&stuff->window);
+
+    xRRGetScreenInfoReply reply;
     WindowPtr pWin;
     int rc;
     ScreenPtr pScreen;
@@ -726,7 +742,6 @@ ProcRRGetScreenInfo(ClientPtr client)
     unsigned long extraLen = 0;
     RROutputPtr output;
 
-    REQUEST_SIZE_MATCH(xRRGetScreenInfoReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -743,7 +758,7 @@ ProcRRGetScreenInfo(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!pScrPriv || !output) {
-        rep = (xRRGetScreenInfoReply) {
+        reply = (xRRGetScreenInfoReply) {
             .setOfRotations = RR_Rotate_0,
             .root = pWin->drawable.pScreen->root->drawable.id,
             .timestamp = currentTime.milliseconds,
@@ -762,7 +777,7 @@ ProcRRGetScreenInfo(ClientPtr client)
         if (!pData)
             return BadAlloc;
 
-        rep = (xRRGetScreenInfoReply) {
+        reply = (xRRGetScreenInfoReply) {
             .setOfRotations = output->crtc->rotations,
             .root = pWin->drawable.pScreen->root->drawable.id,
             .timestamp = pScrPriv->lastSetTime.milliseconds,
@@ -774,9 +789,9 @@ ProcRRGetScreenInfo(ClientPtr client)
             .rate = pData->refresh
         };
 
-        extraLen = rep.nSizes * sizeof(xScreenSizes);
+        extraLen = reply.nSizes * sizeof(xScreenSizes);
         if (has_rate)
-            extraLen += rep.nrateEnts * sizeof(CARD16);
+            extraLen += reply.nrateEnts * sizeof(CARD16);
 
         if (!extraLen)
             goto finish; // no extra payload
@@ -791,7 +806,7 @@ ProcRRGetScreenInfo(ClientPtr client)
          * First comes the size information
          */
         xScreenSizes *size = (xScreenSizes *) extra;
-        CARD16 *rates = (CARD16 *) (size + rep.nSizes);
+        CARD16 *rates = (CARD16 *) (size + reply.nSizes);
         for (i = 0; i < pData->nsize; i++) {
             pSize = &pData->sizes[i];
             size->widthInPixels = pSize->width;
@@ -831,21 +846,40 @@ finish:
         free(pData);
     }
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swapl(&rep.configTimestamp);
-        swaps(&rep.rotation);
-        swaps(&rep.nSizes);
-        swaps(&rep.sizeID);
-        swaps(&rep.rate);
-        swaps(&rep.nrateEnts);
+        swapl(&reply.timestamp);
+        swapl(&reply.configTimestamp);
+        swaps(&reply.rotation);
+        swaps(&reply.nSizes);
+        swaps(&reply.sizeID);
+        swaps(&reply.rate);
+        swaps(&reply.nrateEnts);
     }
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
 ProcRRSetScreenConfig(ClientPtr client)
 {
     REQUEST(xRRSetScreenConfigReq);
+
+    int rate = 0;
+    if (RRClientKnowsRates(client)) {
+        REQUEST_SIZE_MATCH(xRRSetScreenConfigReq);
+        if (client->swapped) swaps(&stuff->rate);
+        rate = stuff->rate;
+    }
+    else {
+        REQUEST_SIZE_MATCH(xRR1_0SetScreenConfigReq);
+    }
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->timestamp);
+        swaps(&stuff->sizeID);
+        swaps(&stuff->rotation);
+        swapl(&stuff->configTimestamp);
+    }
+
     DrawablePtr pDraw;
     int rc;
     ScreenPtr pScreen;
@@ -853,8 +887,6 @@ ProcRRSetScreenConfig(ClientPtr client)
     TimeStamp time;
     int i;
     Rotation rotation;
-    int rate;
-    Bool has_rate;
     CARD8 status;
     RROutputPtr output;
     RRCrtcPtr crtc;
@@ -864,15 +896,6 @@ ProcRRSetScreenConfig(ClientPtr client)
     int width, height;
 
     UpdateCurrentTime();
-
-    if (RRClientKnowsRates(client)) {
-        REQUEST_SIZE_MATCH(xRRSetScreenConfigReq);
-        has_rate = TRUE;
-    }
-    else {
-        REQUEST_SIZE_MATCH(xRR1_0SetScreenConfigReq);
-        has_rate = FALSE;
-    }
 
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixWriteAccess);
     if (rc != Success)
@@ -959,14 +982,6 @@ ProcRRSetScreenConfig(ClientPtr client)
         return BadMatch;
     }
 
-    /*
-     * Validate requested refresh
-     */
-    if (has_rate)
-        rate = (int) stuff->rate;
-    else
-        rate = 0;
-
     if (rate) {
         for (i = 0; i < pSize->nRates; i++) {
             if (pSize->pRates[i].rate == rate)
@@ -1050,7 +1065,7 @@ ProcRRSetScreenConfig(ClientPtr client)
 
     free(pData);
 
-    xRRSetScreenConfigReply rep = {
+    xRRSetScreenConfigReply reply = {
         .status = status,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds,
         .newConfigTimestamp = pScrPriv->lastConfigTime.milliseconds,
@@ -1059,11 +1074,11 @@ ProcRRSetScreenConfig(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.newTimestamp);
-        swapl(&rep.newConfigTimestamp);
-        swapl(&rep.root);
+        swapl(&reply.newTimestamp);
+        swapl(&reply.newConfigTimestamp);
+        swapl(&reply.root);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static CARD16

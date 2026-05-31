@@ -50,7 +50,17 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
-#if defined(WIN32)
+#ifdef __CYGWIN__
+#include <stdlib.h>
+#include <signal.h>
+/*
+   Sigh... We really need a prototype for this to know it is stdcall,
+   but #include-ing <windows.h> here is not a good idea...
+*/
+__stdcall unsigned long GetTickCount(void);
+#endif
+
+#if defined(WIN32) && !defined(__CYGWIN__)
 #include <X11/Xwinsock.h>
 #endif
 #include <X11/Xos.h>
@@ -70,7 +80,11 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "dixfont.h"
 #include <X11/fonts/libxfont2.h>
 #include "osdep.h"
+
+#ifdef XDMCP
 #include "xdmcp.h"
+#endif
+
 #include "extension.h"
 #include <signal.h>
 #ifndef WIN32
@@ -84,16 +98,16 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdarg.h>
 #include <stdlib.h>             /* for calloc() */
 
-#if defined(TCPCONN)
 #ifndef WIN32
 #include <netdb.h>
-#endif
 #endif
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/settings_priv.h"
+#include "dix/screensaver_priv.h"
 #include "miext/extinit_priv.h"
-#include "os/audit.h"
+#include "os/audit_priv.h"
 #include "os/auth.h"
 #include "os/bug_priv.h"
 #include "os/cmdline.h"
@@ -103,12 +117,13 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/osdep.h"
 #include "os/serverlock.h"
 #include "os/xhostname.h"
+#include "present/present_priv.h"
 #include "Xext/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
 #include "xkb/xkbsrv_priv.h"
+
 #include "dixstruct.h"
 #include "picture.h"
 #include "miinitext.h"
-#include "present.h"
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
 
@@ -121,13 +136,9 @@ Bool CoreDump;
 
 Bool enableIndirectGLX = FALSE;
 
-Bool AllowByteSwappedClients = FALSE;
-
 #ifdef XINERAMA
 Bool PanoramiXExtensionDisabledHack = FALSE;
 #endif /* XINERAMA */
-
-char *SeatId = NULL;
 
 sig_atomic_t inSignalContext = FALSE;
 
@@ -138,7 +149,7 @@ static clockid_t clockid;
 OsSigHandlerPtr
 OsSignal(int sig, OsSigHandlerPtr handler)
 {
-#if defined(WIN32)
+#if defined(WIN32) && !defined(__CYGWIN__)
     return signal(sig, handler);
 #else
     struct sigaction act, oact;
@@ -152,18 +163,6 @@ OsSignal(int sig, OsSigHandlerPtr handler)
         perror("sigaction");
     return oact.sa_handler;
 #endif
-}
-
-/* Force connections to close on SIGHUP from init */
-
-void
-AutoResetServer(int sig)
-{
-    int olderrno = errno;
-
-    dispatchException |= DE_RESET;
-    isItTimeToYield = TRUE;
-    errno = olderrno;
 }
 
 /* Force connections to close and then exit on SIGTERM, SIGINT */
@@ -196,7 +195,7 @@ ForceClockId(clockid_t forced_clockid)
 }
 #endif
 
-#if (defined WIN32 && defined __MINGW32__)
+#if (defined WIN32 && defined __MINGW32__) || defined(__CYGWIN__)
 CARD32
 GetTimeInMillis(void)
 {
@@ -271,8 +270,8 @@ UseMsg(void)
     ErrorF("-br                    create root window with black background\n");
     ErrorF("+bs                    enable any backing store support\n");
     ErrorF("-bs                    disable any backing store support\n");
-    ErrorF("+byteswappedclients    Allow clients with endianess different to that of the server\n");
-    ErrorF("-byteswappedclients    Prohibit clients with endianess different to that of the server\n");
+    ErrorF("+byteswappedclients    Allow clients with endianness different to that of the server\n");
+    ErrorF("-byteswappedclients    Prohibit clients with endianness different to that of the server\n");
     ErrorF("-c                     turns off key-click\n");
     ErrorF("c #                    key-click volume (0-100)\n");
     ErrorF("-cc int                default color visual class\n");
@@ -299,9 +298,7 @@ UseMsg(void)
     ErrorF("-maxclients n          set maximum number of clients (power of two)\n");
     ErrorF("-nolisten string       don't listen on protocol\n");
     ErrorF("-listen string         listen on protocol\n");
-    ErrorF("-noreset               don't reset after last client exists\n");
     ErrorF("-background [none]     create root window with no background\n");
-    ErrorF("-reset                 reset after last client exists\n");
     ErrorF("-p #                   screen-saver pattern duration (minutes)\n");
     ErrorF("-pn                    accept failure to listen on all ports\n");
     ErrorF("-nopn                  reject failure to listen on all ports\n");
@@ -317,6 +314,7 @@ UseMsg(void)
     ErrorF("ttyxx                  server started from init on /dev/ttyxx\n");
     ErrorF("v                      video blanking for screen-saver\n");
     ErrorF("-v                     screen-saver without video blanking\n");
+    ErrorF("-verbose [n]           verbose startup messages\n");
     ErrorF("-wr                    create root window with white background\n");
     ErrorF("-maxbigreqsize         set maximal bigrequest size \n");
 #ifdef XINERAMA
@@ -345,7 +343,7 @@ UseMsg(void)
 static int
 VerifyDisplayName(const char *d)
 {
-    int i;
+    unsigned int i;
     int period_found = FALSE;
     int after_period = 0;
 
@@ -407,21 +405,18 @@ void
 ProcessCommandLine(int argc, char *argv[])
 {
     int i, skip;
+    int verbosity = 0;
 
     defaultKeyboardControl.autoRepeat = TRUE;
 
-#ifdef NO_PART_NET
-    PartialNetwork = FALSE;
-#else
     PartialNetwork = TRUE;
-#endif
 
     for (i = 0; defaultNoListenList[i] != NULL; i++) {
         if (_XSERVTransNoListen(defaultNoListenList[i]))
                     ErrorF("Failed to disable listen for %s transport",
                            defaultNoListenList[i]);
     }
-    SeatId = getenv("XDG_SEAT");
+    dixSettingSeatId = getenv("XDG_SEAT");
 
 #ifdef CONFIG_SYSLOG
     xorgSyslogIdent = getenv("SYSLOG_IDENT");
@@ -467,9 +462,9 @@ ProcessCommandLine(int argc, char *argv[])
                 UseMsg();
         }
         else if (strcmp(argv[i], "-byteswappedclients") == 0) {
-            AllowByteSwappedClients = FALSE;
+            dixSettingAllowByteSwappedClients = FALSE;
         } else if (strcmp(argv[i], "+byteswappedclients") == 0) {
-            AllowByteSwappedClients = TRUE;
+            dixSettingAllowByteSwappedClients = TRUE;
         }
         else if (strcmp(argv[i], "-br") == 0);  /* default */
         else if (strcmp(argv[i], "+bs") == 0)
@@ -566,7 +561,7 @@ ProcessCommandLine(int argc, char *argv[])
         }
 #ifdef LOCK_SERVER
         else if (strcmp(argv[i], "-nolock") == 0) {
-#if !defined(WIN32)
+#if !defined(WIN32) && !defined(__CYGWIN__)
             if (getuid() != 0)
                 ErrorF
                     ("Warning: the -nolock option can only be used by root\n");
@@ -608,11 +603,11 @@ ProcessCommandLine(int argc, char *argv[])
             else
                 UseMsg();
         }
-        else if (strcmp(argv[i], "-noreset") == 0) {
-            dispatchExceptionAtReset = 0;
+        else if (strcmp(argv[i],"-noreset") == 0){
+            ErrorF("Argument -noreset is removed in XLibre (for more context: https://github.com/orgs/X11Libre/discussions/424 )\n");
         }
-        else if (strcmp(argv[i], "-reset") == 0) {
-            dispatchExceptionAtReset = DE_RESET;
+        else if(strcmp(argv[i],"-reset") == 0){
+            ErrorF("Argument -reset is removed in XLibre (for more context: https://github.com/orgs/X11Libre/discussions/424 )\n");
         }
         else if (strcmp(argv[i], "-p") == 0) {
             if (++i < argc)
@@ -643,7 +638,7 @@ ProcessCommandLine(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "-seat") == 0) {
             if (++i < argc)
-                SeatId = argv[i];
+                dixSettingSeatId = argv[i];
             else
                 UseMsg();
         }
@@ -667,6 +662,21 @@ ProcessCommandLine(int argc, char *argv[])
             defaultScreenSaverBlanking = PreferBlanking;
         else if (strcmp(argv[i], "-v") == 0)
             defaultScreenSaverBlanking = DontPreferBlanking;
+        else if (strcmp(argv[i], "-verbose") == 0) {
+            int n = i + 1; /* next argument */
+            verbosity++;
+            if (n < argc && argv[n] && argv[n][0] != '-') {
+                char *end;
+                long val;
+
+                val = strtol(argv[n], &end, 0);
+                if (*end == '\0') {
+                    verbosity = val;
+                    i = n;
+                }
+            }
+            xorgLogVerbosity = verbosity;
+        }
         else if (strcmp(argv[i], "-wr") == 0)
             whiteRoot = TRUE;
         else if (strcmp(argv[i], "-background") == 0) {
@@ -792,7 +802,6 @@ int
 set_font_authorizations(char **authorizations, int *authlen, void *client)
 {
 #define AUTHORIZATION_NAME "hp-hostname-1"
-#if defined(TCPCONN)
     static char *result = NULL;
     static char *p = NULL;
 
@@ -832,8 +841,14 @@ set_font_authorizations(char **authorizations, int *authlen, void *client)
 
         len = strlen(hnameptr) + 1;
         result = calloc(1, len + sizeof(AUTHORIZATION_NAME) + 4);
-        if (!result)
+        if (result == NULL) {
+#if defined(HAVE_GETADDRINFO)
+            if (ai) {
+                freeaddrinfo(ai);
+            }
+#endif
             return 0;
+        }
 
         p = result;
         *p++ = sizeof(AUTHORIZATION_NAME) >> 8;
@@ -854,9 +869,6 @@ set_font_authorizations(char **authorizations, int *authlen, void *client)
     *authlen = p - result;
     *authorizations = result;
     return 1;
-#else                           /* TCPCONN */
-    return 0;
-#endif                          /* TCPCONN */
 }
 
 void
@@ -1005,7 +1017,7 @@ OsAbort(void)
 #ifndef __APPLE__
     OsBlockSignals();
 #endif
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
     /* abort() raises SIGABRT, so we have to stop handling that to prevent
      * recursion
      */
@@ -1137,7 +1149,9 @@ Fopen(const char *file, const char *type)
     iop = fopen(file, type);
 
     if (seteuid(euid) == -1) {
-        fclose(iop);
+        if (iop) {
+            fclose(iop);
+        }
         return NULL;
     }
     return iop;
@@ -1443,7 +1457,7 @@ CheckUserAuthorization(void)
 #endif
 }
 
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
 /* Move a file descriptor out of the way of our select mask; this
  * is useful for file descriptors which will never appear in the
  * select mask to avoid reducing the number of clients that can
@@ -1476,7 +1490,7 @@ AbortServer(void)
     XF86BigfontCleanup();
 #endif
     CloseWellKnownConnections();
-    OsCleanup(TRUE);
+    UnlockServer();
     AbortDevices();
     ddxGiveUp(EXIT_ERR_ABORT);
     fflush(stderr);

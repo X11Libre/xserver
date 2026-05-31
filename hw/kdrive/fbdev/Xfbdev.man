@@ -17,12 +17,86 @@ provided by the Linux framebuffer device.
 .B Xfbdev
 accepts the common options of the Xkdrive family of servers.  Please
 see Xkdrive(1).
+
+.B Xfbdev
+also accepts the following additional options:
+.TP 8
+.B -fb "</dev/fbxx>"
+sets the framebuffer device path the X server will use.
+.TP 8
+.B -dri "[string]"
+enables DRI3 support for the X server.
+
+If
+.B string
+is a card node (/dev/dri/cardxx), or a render node (/dev/dri/renderDxxx),
+then that device node will be used by glamor for DRI3 support.
+
+If
+.B string
+is either auto or not passed at all, then glamor will
+try to pick a dri card node suitable for direct rendering.
+.TP 8
+.B -drm-master
+tells the X server to enable master permissions on the dri fd it uses
+(if DRI3 is enabled).
+.TP 8
+.B -noshadow
+disables the ShadowFB layer on supported hw, may slightly increase performance.
+May also lead to flickering.
+.TP 8
+.B -noaccel
+disables hw acceleration (similar to -dumb, but only for a single screen).
+.TP 8
+.B -glamor
+force enables glamor render acceleration (even on top of sw renderers like softpipe/llvmpipe).
+.TP 8
+.B -noglamor
+force disables glamor render acceleration.
+Also disables DRI3 and X-Video support. GLX is still enabled.
+.TP 8
+.B -glvendor "<library>"
+tells the X server what gl vendor library to use.
+Particularly useful on multi-card systems.
+.TP 8
+-B -force-gl
+tells the X server to only use desktop OpenGL contexts.
+.TP 8
+-B -force-es
+tells the X server to only use embedded GLES contexts.
+.TP 8
+-B -noxv
+disables X-Video support.
+
 .SH KEYBOARD
-To be written.
+The
+.B Xfbdev
+server is normally configured to recognize various special combinations
+of key presses that instruct the server to perform some action, rather
+than just sending the key press event to a client application.
+Currently, these are implemented using hard-coded ps2 keyboard scancodes,
+and should work regardless of the loaded XKB keymap.
+.PP
+The following key special combinations are recognized by the
+.B Xfbdev
+server.
+.TP 8
+.B Ctrl+Alt+Backspace
+Immediately kills the server -- no questions asked. It can be disabled by
+adding the
+.B -nozap
+command-line argument
+.TP 8
+.B Ctrl+Alt+F1...F12
+For systems with virtual terminal support, these keystroke
+combinations are used to switch to virtual terminals 1 through 12,
+respectively.
+
 .SH SEE ALSO
-X(__miscmansuffix__), Xserver(1), Xkdrive(1), xdm(1), xinit(1).
+X(@miscmansuffix@), Xserver(1), Xkdrive(1), xdm(1), xinit(1).
 .SH AUTHORS
 The
 .B Xfbdev
 server was written by Keith Packard.
 
+HW acceleration support was later added by stefan11111.

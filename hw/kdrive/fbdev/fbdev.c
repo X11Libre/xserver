@@ -21,43 +21,71 @@
  */
 
 #include <kdrive-config.h>
-#include "fbdev.h"
-#include "fb/fb_priv.h"
-#include <sys/ioctl.h>
 
+#include <sys/ioctl.h>
 #include <errno.h>
 
-#ifndef xallocarray
-#define xallocarray(num, size) reallocarray(NULL, (num), (size))
-#endif
+#include "fb/fb_priv.h"
+#include "os/osdep.h"
 
-const char *fbdevDevicePath = NULL;
+#include "fbdev.h"
+
+#ifdef XV
+#include "kxv.h"
+#endif
 
 static Bool
 fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
 {
     unsigned long off;
+    FbScreenConf *config = card->closure;
 
-    if (fbdevDevicePath == NULL)
-        fbdevDevicePath = "/dev/fb0";
+    if (config->fbdevDevicePath) {
+        priv->fd = open(config->fbdevDevicePath, O_RDWR);
+        if (priv->fd < 0) {
+            ErrorF("Error opening framebuffer %s: %s\n",
+                   config->fbdevDevicePath, strerror(errno));
+            return FALSE;
+        }
+        LogMessage(X_INFO, "Xfbdev(%d): Using framebuffer device: %s\n",
+                   card->mynum, config->fbdevDevicePath);
+    } else {
+        char devbuf[] = "/dev/fbxx";
+        priv->fd = -1;
+        for (int i = 0; i < 32 && priv->fd < 0; i++) {
+            snprintf(devbuf, sizeof(devbuf),
+                     "/dev/fb%d", i);
+            priv->fd = open(devbuf, O_RDWR);
 
-    if ((priv->fd = open(fbdevDevicePath, O_RDWR)) < 0) {
-        ErrorF("Error opening framebuffer %s: %s\n",
-               fbdevDevicePath, strerror(errno));
-        return FALSE;
+            if (priv->fd >= 0) {
+                struct fb_fix_screeninfo fix;
+                memset(&fix, 0, sizeof(fix));
+                if (ioctl(priv->fd, FBIOGET_FSCREENINFO, &fix) < 0) {
+                    close(priv->fd);
+                    priv->fd = -1;
+                }
+            }
+        }
+        if (priv->fd < 0) {
+            ErrorF("Error opening framebuffers /dev/fb[0-31]\n");
+            return FALSE;
+        }
+        LogMessage(X_INFO, "Xfbdev(%d): Using framebuffer device: %s\n", card->mynum, devbuf);
     }
 
     /* quiet valgrind */
     memset(&priv->fix, '\0', sizeof(priv->fix));
     if (ioctl(priv->fd, FBIOGET_FSCREENINFO, &priv->fix) < 0) {
-        perror("Error with /dev/fb ioctl FIOGET_FSCREENINFO");
+        LogMessage(X_ERROR, "Xfbdev(%d): FBIOGET_FSCREENINFO: %s\n",
+                   card->mynum, strerror(errno));
         close(priv->fd);
         return FALSE;
     }
     /* quiet valgrind */
     memset(&priv->var, '\0', sizeof(priv->var));
     if (ioctl(priv->fd, FBIOGET_VSCREENINFO, &priv->var) < 0) {
-        perror("Error with /dev/fb ioctl FIOGET_VSCREENINFO");
+        LogMessage(X_ERROR, "Xfbdev(%d): FBIOPUT_VSCREENINFO: %s\n",
+                   card->mynum, strerror(errno));
         close(priv->fd);
         return FALSE;
     }
@@ -68,7 +96,8 @@ fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
                                   MAP_SHARED, priv->fd, 0);
 
     if (priv->fb_base == (char *) -1) {
-        perror("ERROR: mmap framebuffer fails!");
+        LogMessage(X_ERROR, "Xfbdev(%d): Could not mmap the framebuffer: %s\n",
+                   card->mynum, strerror(errno));
         close(priv->fd);
         return FALSE;
     }
@@ -190,22 +219,31 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
     var.nonstd = 0;
     var.grayscale = 0;
 
+    LogMessage(X_INFO, "Xfbdev(%d): Desired screen mode: width = %d, height = %d\n",
+               screen->card->mynum, var.xres, var.yres);
+
     k = ioctl(priv->fd, FBIOPUT_VSCREENINFO, &var);
 
     if (k < 0) {
-        fprintf(stderr, "error: %s\n", strerror(errno));
+        LogMessage(X_ERROR, "Xfbdev(%d): FBIOPUT_VSCREENINFO: %s\n",
+                   screen->card->mynum, strerror(errno));
         return FALSE;
     }
 
     /* Re-get the "fixed" parameters since they might have changed */
     k = ioctl(priv->fd, FBIOGET_FSCREENINFO, &priv->fix);
     if (k < 0)
-        perror("FBIOGET_FSCREENINFO");
+        LogMessage(X_ERROR, "Xfbdev(%d): FBIOGET_FSCREENINFO: %s\n",
+                   screen->card->mynum, strerror(errno));
 
     /* Now get the new screeninfo */
     ioctl(priv->fd, FBIOGET_VSCREENINFO, &priv->var);
     depth = priv->var.bits_per_pixel;
     gray = priv->var.grayscale;
+
+    /* Just because the ioctl didn't fail, it doesn't mean we could set the mode */
+    LogMessage(X_INFO, "Xfbdev(%d): Actual screen mode: width = %d, height = %d\n",
+               screen->card->mynum, priv->var.xres, priv->var.yres);
 
     /* Calculate fix.line_length if it's zero */
     if (!priv->fix.line_length)
@@ -314,8 +352,10 @@ fbdevWindowLinear(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     FbdevPriv *priv = pScreenPriv->card->driver;
 
-    if (!pScreenPriv->enabled)
-        return 0;
+    if (!pScreenPriv->enabled) {
+        *size = 0;
+        return NULL;
+    }
     *size = priv->fix.line_length;
     return (CARD8 *) priv->fb + row * priv->fix.line_length + offset;
 }
@@ -328,8 +368,10 @@ fbdevWindowAfb(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     FbdevPriv *priv = pScreenPriv->card->driver;
 
-    if (!pScreenPriv->enabled)
-        return 0;
+    if (!pScreenPriv->enabled) {
+        *size = 0;
+        return NULL;
+    }
     /* offset to next plane */
     *size = priv->var.yres_virtual * priv->fix.line_length;
     return (CARD8 *) priv->fb + row * priv->fix.line_length + offset;
@@ -341,12 +383,16 @@ fbdevMapFramebuffer(KdScreenInfo * screen)
     FbdevScrPriv *scrpriv = screen->driver;
     KdPointerMatrix m;
     FbdevPriv *priv = screen->card->driver;
+    FbScreenConf *config = screen->card->closure;
 
-    if (scrpriv->randr != RR_Rotate_0 ||
-        priv->fix.type != FB_TYPE_PACKED_PIXELS)
+    if (!config->fbDisableShadow) {
         scrpriv->shadow = TRUE;
-    else
+    } else if (scrpriv->randr != RR_Rotate_0 ||
+        priv->fix.type != FB_TYPE_PACKED_PIXELS) {
+        scrpriv->shadow = TRUE;
+    } else {
         scrpriv->shadow = FALSE;
+    }
 
     KdComputePointerMatrix(&m, scrpriv->randr, screen->width, screen->height);
 
@@ -678,7 +724,7 @@ fbdevCreateColormap(ColormapPtr pmap)
     case FB_VISUAL_STATIC_PSEUDOCOLOR:
         pVisual = pmap->pVisual;
         nent = pVisual->ColormapEntries;
-        pdefs = xallocarray(nent, sizeof(xColorItem));
+        pdefs = calloc(nent, sizeof(xColorItem));
         if (!pdefs)
             return FALSE;
         for (i = 0; i < nent; i++)
@@ -748,6 +794,7 @@ fbdevEnable(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     FbdevPriv *priv = pScreenPriv->card->driver;
+
     int k;
 
     priv->var.activate = FB_ACTIVATE_NOW | FB_CHANGE_CMAP_VBL;
@@ -755,7 +802,8 @@ fbdevEnable(ScreenPtr pScreen)
     /* display it on the LCD */
     k = ioctl(priv->fd, FBIOPUT_VSCREENINFO, &priv->var);
     if (k < 0) {
-        perror("FBIOPUT_VSCREENINFO");
+        LogMessage(X_ERROR, "Xfbdev(%d): FBIOPUT_VSCREENINFO: %s\n",
+                   pScreen->myNum, strerror(errno));
         return FALSE;
     }
 
@@ -773,6 +821,10 @@ fbdevEnable(ScreenPtr pScreen)
 
         fbdevUpdateFbColormap(priv, 0, i);
     }
+
+#ifdef XV
+    KdXVEnable (pScreen);
+#endif
     return TRUE;
 }
 
@@ -803,6 +855,9 @@ fbdevDPMS(ScreenPtr pScreen, int mode)
 void
 fbdevDisable(ScreenPtr pScreen)
 {
+#ifdef XV
+    KdXVDisable (pScreen);
+#endif
 }
 
 void
@@ -823,6 +878,10 @@ fbdevCardFini(KdCardInfo * card)
     munmap(priv->fb_base, priv->fix.smem_len);
     close(priv->fd);
     free(priv);
+    card->driver = NULL;
+
+    free(card->closure);
+    card->closure = NULL;
 }
 
 /*
@@ -854,7 +913,8 @@ fbdevGetColors(ScreenPtr pScreen, int n, xColorItem * pdefs)
     cmap.transp = 0;
     k = ioctl(priv->fd, FBIOGETCMAP, &cmap);
     if (k < 0) {
-        perror("can't get colormap");
+        LogMessage(X_ERROR, "Xfbdev(%d): FBIOGETCMAP: %s\n",
+                   pScreen->myNum, strerror(errno));
         return;
     }
     while (n--) {

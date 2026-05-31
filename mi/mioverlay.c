@@ -8,6 +8,8 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screensaver_priv.h"
+#include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 
 #include "scrnintstr.h"
@@ -16,7 +18,6 @@
 #include "gcstruct.h"
 #include "regionstr.h"
 #include "privates.h"
-#include "mivalidate.h"
 #include "mioverlay.h"
 #include "migc.h"
 
@@ -26,7 +27,7 @@ typedef struct {
     RegionRec exposed;
     RegionRec borderExposed;
     RegionPtr borderVisible;
-    DDXPointRec oldAbsCorner;
+    xPoint oldAbsCorner;
 } miOverlayValDataRec, *miOverlayValDataPtr;
 
 typedef struct _TreeRec {
@@ -918,7 +919,7 @@ miOverlayMoveWindow(WindowPtr pWin,
     Bool WasViewable = (Bool) (pWin->viewable);
     short bw;
     RegionRec overReg, underReg;
-    DDXPointRec oldpt;
+    xPoint oldpt;
 
     if (!(pParent = pWin->parent))
         return;
@@ -1076,7 +1077,7 @@ miOverlayResizeWindow(WindowPtr pWin,
     short oldy = pWin->drawable.y;
     int bw = wBorderWidth(pWin);
     short dw, dh;
-    DDXPointRec oldpt;
+    xPoint oldpt;
     RegionPtr oldRegion = NULL, oldRegion2 = NULL;
     WindowPtr pFirstChange;
     WindowPtr pChild;

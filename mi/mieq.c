@@ -45,6 +45,7 @@ in this Software without prior written authorization from The Open Group.
 #include   "dix/dix_priv.h"
 #include   "dix/input_priv.h"
 #include   "dix/inpututils_priv.h"
+#include   "dix/screensaver_priv.h"
 #include   "mi/mi_priv.h"
 #include   "mi/mipointer_priv.h"
 #include   "os/bug_priv.h"

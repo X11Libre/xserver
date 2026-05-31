@@ -30,10 +30,7 @@
  *   Kevin E. Martin <kem@redhat.com>
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "os.h"
 #include "xf86Parser.h"

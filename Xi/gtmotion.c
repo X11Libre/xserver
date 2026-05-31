@@ -57,26 +57,11 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "gtmotion.h"
-
-/***********************************************************************
- *
- * Swap the request if server and client have different byte ordering.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceMotionEvents(ClientPtr client)
-{
-    REQUEST(xGetDeviceMotionEventsReq);
-    REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
-    swapl(&stuff->start);
-    swapl(&stuff->stop);
-    return (ProcXGetDeviceMotionEvents(client));
-}
 
 /****************************************************************************
  *
@@ -87,8 +72,9 @@ SProcXGetDeviceMotionEvents(ClientPtr client)
 int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
-    REQUEST(xGetDeviceMotionEventsReq);
-    REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
+    X_REQUEST_HEAD_STRUCT(xGetDeviceMotionEventsReq);
+    X_REQUEST_FIELD_CARD32(start);
+    X_REQUEST_FIELD_CARD32(stop);
 
     DeviceIntPtr dev;
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
@@ -102,7 +88,7 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     if (dev->valuator->motionHintWindow)
         MaybeStopDeviceHint(dev, client);
 
-    xGetDeviceMotionEventsReply rep = {
+    xGetDeviceMotionEventsReply reply = {
         .RepType = X_GetDeviceMotionEvents,
         .axes = v->numAxes,
         .mode = Absolute        /* XXX we don't do relative at the moment */
@@ -120,17 +106,15 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
         if (v->numMotionEvents) {
             const int size = sizeof(Time) + (v->numAxes * sizeof(INT32));
             INT32 *coords = NULL;
-            rep.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
+            reply.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
                                            start.milliseconds, stop.milliseconds,
                                            (ScreenPtr) NULL, FALSE);
-            x_rpcbuf_write_INT32s(&rpcbuf, coords, bytes_to_int32(rep.nEvents * size));
+            x_rpcbuf_write_INT32s(&rpcbuf, coords, bytes_to_int32(reply.nEvents * size));
             free(coords);
         }
     }
 
-    if (client->swapped) {
-        swapl(&rep.nEvents);
-    }
+    X_REPLY_FIELD_CARD32(nEvents);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

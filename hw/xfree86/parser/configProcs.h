@@ -148,14 +148,4 @@ void xf86printMatchPattern(FILE * cf,
                            const xf86MatchPattern *pattern,
                            Bool not_first);
 
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
-
-#ifndef HAVE_XORG_CONFIG_H
-/* Externally provided functions */
-void
-ErrorF(const char *f, ...);
-#endif
-
 #endif /* XSERVER_XFREE86_CONFIGPROCS_H */

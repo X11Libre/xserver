@@ -25,15 +25,16 @@
 
 #include "dix-config.h"
 
+#include "dix/devices_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 
 #include "exglobals.h"
 #include "misc.h"
 #include "inputstr.h"
-#include "xace.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
 #include "eventstr.h"
@@ -53,7 +54,7 @@ check_butmap_change(DeviceIntPtr dev, CARD8 *map, int len, CARD32 *errval_out,
         return BadDevice;
     }
 
-    ret = XaceHookDeviceAccess(client, dev, DixManageAccess);
+    ret = dixCallDeviceAccessCallback(client, dev, DixManageAccess);
     if (ret != Success) {
         client->errorValue = dev->id;
         return ret;
@@ -133,7 +134,7 @@ check_modmap_change(ClientPtr client, DeviceIntPtr dev, KeyCode *modmap)
     int ret;
     XkbDescPtr xkb;
 
-    ret = XaceHookDeviceAccess(client, dev, DixManageAccess);
+    ret = dixCallDeviceAccessCallback(client, dev, DixManageAccess);
     if (ret != Success)
         return ret;
 
@@ -287,9 +288,8 @@ generate_modkeymap(ClientPtr client, DeviceIntPtr dev,
     CARD8 keys_per_mod[8];
     int max_keys_per_mod;
     KeyCode *modkeymap = NULL;
-    int ret;
 
-    ret = XaceHookDeviceAccess(client, dev, DixGetAttrAccess);
+    int ret = dixCallDeviceAccessCallback(client, dev, DixGetAttrAccess);
     if (ret != Success)
         return ret;
 
@@ -842,14 +842,12 @@ update_desktop_dimensions(void)
     int x1 = INT_MAX, y1 = INT_MAX;     /* top-left */
     int x2 = INT_MIN, y2 = INT_MIN;     /* bottom-right */
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+    DIX_FOR_EACH_SCREEN({
         x1 = min(x1, walkScreen->x);
         y1 = min(y1, walkScreen->y);
         x2 = max(x2, walkScreen->x + walkScreen->width);
         y2 = max(y2, walkScreen->y + walkScreen->height);
-    }
+    });
 
     screenInfo.x = x1;
     screenInfo.y = y1;

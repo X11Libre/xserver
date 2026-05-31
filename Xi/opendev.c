@@ -57,15 +57,15 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"
 #include "exevents.h"
-
-#include "opendev.h"
 
 extern CARD8 event_base[];
 
@@ -88,8 +88,7 @@ ProcXOpenDevice(ClientPtr client)
     int status = Success;
     DeviceIntPtr dev;
 
-    REQUEST(xOpenDeviceReq);
-    REQUEST_SIZE_MATCH(xOpenDeviceReq);
+    X_REQUEST_HEAD_STRUCT(xOpenDeviceReq);
 
     status = dixLookupDevice(&dev, stuff->deviceid, client, DixUseAccess);
 

@@ -45,10 +45,7 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <string.h>             /* InputClassMatches */
 #include <X11/Xfuncproto.h>
@@ -61,6 +58,7 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/ptrveloc_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "xf86_priv.h"
 #include "xf86Priv.h"
@@ -71,6 +69,8 @@
 #include "mipointer.h"
 #include "loaderProcs.h"
 #include "../os-support/linux/systemd-logind.h"
+#include "seatd-libseat.h"
+
 #include "exevents.h"           /* AddInputDevice */
 #include "exglobals.h"
 #include "eventstr.h"
@@ -113,7 +113,7 @@
 #define XI_VERIFY_VALUATORS(num_valuators) \
     if (num_valuators > MAX_VALUATORS) { \
         LogMessageVerb(X_ERROR, 1, "%s: num_valuator %d is greater than MAX_VALUATORS\n", \
-                       __FUNCTION__, num_valuators); \
+                       __func__, num_valuators); \
         return; \
     }
 
@@ -857,9 +857,10 @@ xf86DeleteInput(InputInfoPtr pInp, int flags)
 
     FreeInputAttributes(pInp->attrs);
 
-    if (pInp->flags & XI86_SERVER_FD)
+    if (pInp->flags & XI86_SERVER_FD){
+        seatd_libseat_close_device(pInp);
         systemd_logind_release_fd(pInp->major, pInp->minor, pInp->fd);
-
+    }
     /* Remove the entry from the list. */
     if (pInp == xf86InputDevs)
         xf86InputDevs = pInp->next;
@@ -986,6 +987,7 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
     if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)){
         int fd = systemd_logind_take_fd(pInfo->major, pInfo->minor,
                                         path, &paused);
+        seatd_libseat_open_device(pInfo,&fd,&paused);
         if (fd != -1) {
             if (paused) {
                 /* Put on new_input_devices list for delayed probe */
@@ -1525,11 +1527,11 @@ void
 xf86InitValuatorDefaults(DeviceIntPtr dev, int axnum)
 {
     if (axnum == 0) {
-        dev->valuator->axisVal[0] = screenInfo.screens[0]->width / 2;
+        dev->valuator->axisVal[0] = dixGetMasterScreen()->width / 2;
         dev->last.valuators[0] = dev->valuator->axisVal[0];
     }
     else if (axnum == 1) {
-        dev->valuator->axisVal[1] = screenInfo.screens[0]->height / 2;
+        dev->valuator->axisVal[1] = dixGetMasterScreen()->height / 2;
         dev->last.valuators[1] = dev->valuator->axisVal[1];
     }
 }

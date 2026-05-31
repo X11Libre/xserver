@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/client_priv.h"
 
 #include "glxserver.h"
@@ -51,7 +52,6 @@
 /*
 ** X resources.
 */
-static x_server_generation_t glxGeneration;
 RESTYPE __glXContextRes;
 RESTYPE __glXDrawableRes;
 
@@ -126,7 +126,7 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
 
     /* drop our reference to any backing pixmap */
     if (glxPriv->type == GLX_DRAWABLE_PIXMAP)
-        glxPriv->pDraw->pScreen->DestroyPixmap((PixmapPtr) glxPriv->pDraw);
+        dixDestroyPixmap((PixmapPtr)glxPriv->pDraw, 0);
 
     glxPriv->destroy(glxPriv);
 
@@ -272,7 +272,12 @@ glxClientCallback(CallbackListPtr *list, void *closure, void *data)
 
 /************************************************************************/
 
-static __GLXprovider *__glXProviderStack = &__glXDRISWRastProvider;
+static __GLXprovider *__glXProviderStack =
+#ifdef BUILD_GLX_DRI
+                                           &__glXDRISWRastProvider;
+#else
+                                           NULL;
+#endif
 
 void
 GlxPushProvider(__GLXprovider * provider)
@@ -284,17 +289,14 @@ GlxPushProvider(__GLXprovider * provider)
 static Bool
 checkScreenVisuals(void)
 {
-    int i, j;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        for (j = 0; j < walkScreen->numVisuals; j++) {
+    DIX_FOR_EACH_SCREEN({
+        for (int j = 0; j < walkScreen->numVisuals; j++) {
             if ((walkScreen->visuals[j].class == TrueColor ||
                  walkScreen->visuals[j].class == DirectColor) &&
                 walkScreen->visuals[j].nplanes > 12)
                 return TRUE;
         }
-    }
+    });
 
     return FALSE;
 }
@@ -332,15 +334,6 @@ xorgGlxHandleRequest(ClientPtr client)
     return __glXDispatch(client);
 }
 
-static ScreenPtr
-screenNumToScreen(int screen)
-{
-    if (screen < 0 || screen >= screenInfo.numScreens)
-        return NULL;
-
-    return screenInfo.screens[screen];
-}
-
 static int
 maybe_swap32(ClientPtr client, int x)
 {
@@ -352,7 +345,7 @@ vendorForScreen(ClientPtr client, int screen)
 {
     screen = maybe_swap32(client, screen);
 
-    return glxServer.getVendorForScreen(client, screenNumToScreen(screen));
+    return glxServer.getVendorForScreen(client, dixGetScreenPtr(screen));
 }
 
 /* this ought to be generated */
@@ -471,7 +464,6 @@ xorgGlxGetDispatchAddress(CARD8 minorOpcode, CARD32 vendorCode)
 static Bool
 xorgGlxServerPreInit(const ExtensionEntry *extEntry)
 {
-    if (glxGeneration != serverGeneration) {
         /* Mesa requires at least one True/DirectColor visual */
         if (!checkScreenVisuals())
             return FALSE;
@@ -497,10 +489,7 @@ xorgGlxServerPreInit(const ExtensionEntry *extEntry)
         __glXregisterPresentCompleteNotify();
 #endif
 
-        glxGeneration = serverGeneration;
-    }
-
-    return glxGeneration == serverGeneration;
+    return TRUE;
 }
 
 static void
@@ -535,8 +524,7 @@ xorgGlxServerInit(CallbackListPtr *pcbl, void *param, void *ext)
         return;
     }
 
-    for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         __GLXprovider *p;
 
         if (glxServer.getVendorForScreen(NULL, walkScreen) != NULL) {
@@ -562,13 +550,12 @@ xorgGlxServerInit(CallbackListPtr *pcbl, void *param, void *ext)
             LogMessage(X_INFO,
                        "GLX: no usable GL providers found for screen %d\n", walkScreenIdx);
         }
-    }
+    });
 }
 
-Bool
-xorgGlxCreateVendor(void)
+void xorgGlxCreateVendor(void)
 {
-    return AddCallback(glxServer.extensionInitCallback, xorgGlxServerInit, NULL);
+    AddCallback(glxServer.extensionInitCallback, xorgGlxServerInit, NULL);
 }
 
 /************************************************************************/

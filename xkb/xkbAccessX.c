@@ -160,8 +160,8 @@ AccessXKRGTurnOn(DeviceIntPtr dev, CARD16 KRGControl, xkbControlsNotify * pCN)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     old = *ctrls;
@@ -192,8 +192,8 @@ AccessXKRGTurnOff(DeviceIntPtr dev, xkbControlsNotify * pCN)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     old = *ctrls;
@@ -227,8 +227,8 @@ AccessXStickyKeysTurnOn(DeviceIntPtr dev, xkbControlsNotify * pCN)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     old = *ctrls;
@@ -261,8 +261,8 @@ AccessXStickyKeysTurnOff(DeviceIntPtr dev, xkbControlsNotify * pCN)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     old = *ctrls;
@@ -289,7 +289,7 @@ AccessXStickyKeysTurnOff(DeviceIntPtr dev, xkbControlsNotify * pCN)
 static CARD32
 AccessXKRGExpire(OsTimerPtr timer, CARD32 now, void *arg)
 {
-    xkbControlsNotify cn;
+    xkbControlsNotify cn = { 0 };
     DeviceIntPtr dev = arg;
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
 
@@ -352,7 +352,7 @@ AccessXSlowKeyExpire(OsTimerPtr timer, CARD32 now, void *arg)
     xkb = xkbi->desc;
     ctrls = xkb->ctrls;
     if (xkbi->slowKey != 0) {
-        xkbAccessXNotify ev;
+        xkbAccessXNotify ev = { 0 };
         KeySym *sym = XkbKeySymsPtr(xkb, xkbi->slowKey);
 
         ev.detail = XkbAXN_SKAccept;
@@ -401,9 +401,9 @@ AccessXTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
     DeviceIntPtr dev = (DeviceIntPtr) arg;
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    XkbControlsRec old;
-    xkbControlsNotify cn;
-    XkbEventCauseRec cause;
+    XkbControlsRec old = { 0 };
+    xkbControlsNotify cn = { 0 };
+    XkbEventCauseRec cause = { 0 };
     XkbSrvLedInfoPtr sli;
 
     if (xkbi->lastPtrEventTime) {
@@ -506,7 +506,7 @@ AccessXFilterPressEvent(DeviceEvent *event, DeviceIntPtr keybd)
      * has held the key long enough.
      */
     if (ctrls->enabled_ctrls & XkbSlowKeysMask) {
-        xkbAccessXNotify ev;
+        xkbAccessXNotify ev = { 0 };
 
         /* If key was already pressed, ignore subsequent press events
          * from the server's autorepeat
@@ -572,7 +572,7 @@ AccessXFilterPressEvent(DeviceEvent *event, DeviceIntPtr keybd)
     if ((ctrls->enabled_ctrls & XkbStickyKeysMask) &&
         (xkbi->state.base_mods != 0) &&
         (XkbAX_NeedOption(ctrls, XkbAX_TwoKeysMask))) {
-        xkbControlsNotify cn;
+        xkbControlsNotify cn = { 0 };
 
         cn.keycode = key;
         cn.eventType = KeyPress;
@@ -622,10 +622,10 @@ AccessXFilterReleaseEvent(DeviceEvent *event, DeviceIntPtr keybd)
 
     /* Don't transmit the KeyRelease if SlowKeys is turned on and
      * the user didn't hold the key long enough.  We know we passed
-     * the key if the down bit was set by CoreProcessKeyboadEvent.
+     * the key if the down bit was set by CoreProcessKeyboardEvent.
      */
     if (ctrls->enabled_ctrls & XkbSlowKeysMask) {
-        xkbAccessXNotify ev;
+        xkbAccessXNotify ev = { 0 };
         unsigned beep_type;
         unsigned mask;
 
@@ -682,7 +682,7 @@ AccessXFilterReleaseEvent(DeviceEvent *event, DeviceIntPtr keybd)
             xkbi->shiftKeyCount = 0;
         }
         else if (xkbi->shiftKeyCount >= 5) {
-            xkbControlsNotify cn;
+            xkbControlsNotify cn = { 0 };
 
             cn.keycode = key;
             cn.eventType = KeyPress;
@@ -771,7 +771,7 @@ ProcessPointerEvent(InternalEvent *ev, DeviceIntPtr mouse)
     /* clear any latched modifiers */
     if (xkbi->state.latched_mods && (event->type == ET_ButtonRelease)) {
         unsigned changed_leds;
-        XkbStateRec oldState;
+        XkbStateRec oldState = { 0 };
         XkbSrvLedInfoPtr sli;
 
         sli = XkbFindSrvLedInfo(dev, XkbDfltXIClass, XkbDfltXIId, 0);
@@ -783,8 +783,7 @@ ProcessPointerEvent(InternalEvent *ev, DeviceIntPtr mouse)
         if (changed & sli->usedComponents) {
             changed_leds = XkbIndicatorsToUpdate(dev, changed, FALSE);
             if (changed_leds) {
-                XkbEventCauseRec cause;
-
+                XkbEventCauseRec cause = { 0 };
                 XkbSetCauseKey(&cause, (event->detail.key & 0x7), event->type);
                 XkbUpdateIndicators(dev, changed_leds, TRUE, NULL, &cause);
             }
@@ -792,12 +791,11 @@ ProcessPointerEvent(InternalEvent *ev, DeviceIntPtr mouse)
     }
 
     if (((xkbi->flags & _XkbStateNotifyInProgress) == 0) && (changed != 0)) {
-        xkbStateNotify sn;
-
-        sn.keycode = event->detail.key;
-        sn.eventType = event->type;
-        sn.requestMajor = sn.requestMinor = 0;
-        sn.changed = changed;
+        xkbStateNotify sn = {
+            .keycode = event->detail.key,
+            .eventType = event->type,
+            .changed = changed,
+        };
         XkbSendStateNotify(dev, &sn);
     }
 

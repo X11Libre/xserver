@@ -49,6 +49,7 @@ SOFTWARE.
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/reqhandlers_priv.h"
 
 #include "windowstr.h"
@@ -58,6 +59,12 @@ SOFTWARE.
 #include "dispatch.h"
 #include "swaprep.h"
 #include "swapreq.h"
+
+static int
+ProcBadRequest(ClientPtr client)
+{
+    return BadRequest;
+}
 
 int (*InitialVector[3]) (ClientPtr /* client */) = {
     0,
@@ -328,123 +335,123 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcBadRequest,
     SProcCreateWindow,
     SProcChangeWindowAttributes,
-    SProcResourceReq,                   /* GetWindowAttributes */
-    SProcResourceReq,                   /* DestroyWindow */
-    SProcResourceReq,                   /* 5 DestroySubwindows */
-    SProcResourceReq,                   /* SProcChangeSaveSet, */
+    ProcGetWindowAttributes,
+    ProcDestroyWindow,
+    ProcDestroySubwindows,              /* 5 */
+    ProcChangeSaveSet,
     SProcReparentWindow,
-    SProcResourceReq,                   /* MapWindow */
-    SProcResourceReq,                   /* MapSubwindows */
-    SProcResourceReq,                   /* 10 UnmapWindow */
-    SProcResourceReq,                   /* UnmapSubwindows */
+    ProcMapWindow,
+    ProcMapSubwindows,
+    ProcUnmapWindow,                    /* 10 */
+    ProcUnmapSubwindows,
     SProcConfigureWindow,
-    SProcResourceReq,                   /* SProcCirculateWindow, */
-    SProcResourceReq,                   /* GetGeometry */
-    SProcResourceReq,                   /* 15 QueryTree */
-    SProcInternAtom,
-    SProcResourceReq,                   /* SProcGetAtomName, */
-    SProcChangeProperty,
-    SProcDeleteProperty,
-    SProcGetProperty,                   /* 20 */
-    SProcResourceReq,                   /* SProcListProperties, */
-    SProcSetSelectionOwner,
-    SProcResourceReq,                   /* SProcGetSelectionOwner, */
+    ProcCirculateWindow,
+    ProcGetGeometry,
+    ProcQueryTree,                      /* 15 */
+    ProcInternAtom,
+    ProcGetAtomName,
+    ProcChangeProperty,
+    ProcDeleteProperty,
+    ProcGetProperty,                    /* 20 */
+    ProcListProperties,
+    ProcSetSelectionOwner,
+    ProcGetSelectionOwner,
     SProcConvertSelection,
     SProcSendEvent,                     /* 25 */
-    SProcGrabPointer,
-    SProcResourceReq,                   /* SProcUngrabPointer, */
-    SProcGrabButton,
+    ProcGrabPointer,
+    ProcUngrabPointer,
+    ProcGrabButton,
     SProcUngrabButton,
     SProcChangeActivePointerGrab,       /* 30 */
     SProcGrabKeyboard,
-    SProcResourceReq,                   /* SProcUngrabKeyboard, */
+    ProcUngrabKeyboard,
     SProcGrabKey,
     SProcUngrabKey,
-    SProcResourceReq,                   /* 35 SProcAllowEvents, */
-    SProcSimpleReq,                     /* SProcGrabServer, */
-    SProcSimpleReq,                     /* SProcUngrabServer, */
-    SProcResourceReq,                   /* SProcQueryPointer, */
+    ProcAllowEvents,
+    ProcGrabServer,
+    ProcUngrabServer,
+    ProcQueryPointer,
     SProcGetMotionEvents,
     SProcTranslateCoords,               /*40 */
     SProcWarpPointer,
     SProcSetInputFocus,
-    SProcSimpleReq,                     /* SProcGetInputFocus, */
-    SProcSimpleReq,                     /* QueryKeymap, */
+    ProcGetInputFocus,
+    ProcQueryKeymap,
     SProcOpenFont,                      /* 45 */
-    SProcResourceReq,                   /* SProcCloseFont, */
-    SProcResourceReq,                   /* SProcQueryFont, */
-    SProcResourceReq,                   /* SProcQueryTextExtents,  */
+    ProcCloseFont,
+    ProcQueryFont,
+    ProcQueryTextExtents,
     SProcListFonts,
     SProcListFontsWithInfo,             /* 50 */
     SProcSetFontPath,
-    SProcSimpleReq,                     /* GetFontPath, */
+    ProcGetFontPath,
     SProcCreatePixmap,
-    SProcResourceReq,                   /* SProcFreePixmap, */
+    ProcFreePixmap,
     SProcCreateGC,                      /* 55 */
     SProcChangeGC,
     SProcCopyGC,
     SProcSetDashes,
     SProcSetClipRectangles,
-    SProcResourceReq,                   /* 60 SProcFreeGC, */
+    ProcFreeGC,                         /* 60 */
     SProcClearToBackground,
     SProcCopyArea,
     SProcCopyPlane,
-    SProcPoly,                          /* PolyPoint, */
-    SProcPoly,                          /* 65 PolyLine */
-    SProcPoly,                          /* PolySegment, */
-    SProcPoly,                          /* PolyRectangle, */
-    SProcPoly,                          /* PolyArc, */
+    ProcPolyPoint,
+    ProcPolyLine,                       /* 65 */
+    ProcPolySegment,
+    ProcPolyRectangle,
+    ProcPolyArc,
     SProcFillPoly,
-    SProcPoly,                          /* 70 PolyFillRectangle */
-    SProcPoly,                          /* PolyFillArc, */
+    ProcPolyFillRectangle,              /* 70 */
+    ProcPolyFillArc,
     SProcPutImage,
     SProcGetImage,
-    SProcPolyText,
-    SProcPolyText,                      /* 75 */
+    ProcPolyText,
+    ProcPolyText,                       /* 75 */
     SProcImageText,
     SProcImageText,
     SProcCreateColormap,
-    SProcResourceReq,                   /* SProcFreeColormap, */
+    ProcFreeColormap,
     SProcCopyColormapAndFree,           /* 80 */
-    SProcResourceReq,                   /* SProcInstallColormap, */
-    SProcResourceReq,                   /* SProcUninstallColormap, */
-    SProcResourceReq,                   /* SProcListInstalledColormaps, */
-    SProcAllocColor,
+    ProcInstallColormap,
+    ProcUninstallColormap,
+    ProcListInstalledColormaps,
+    ProcAllocColor,
     SProcAllocNamedColor,               /* 85 */
     SProcAllocColorCells,
     SProcAllocColorPlanes,
     SProcFreeColors,
     SProcStoreColors,
     SProcStoreNamedColor,               /* 90 */
-    SProcQueryColors,
-    SProcLookupColor,
+    ProcQueryColors,
+    ProcLookupColor,
     SProcCreateCursor,
-    SProcCreateGlyphCursor,
-    SProcResourceReq,                   /* 95 SProcFreeCursor, */
+    ProcCreateGlyphCursor,
+    ProcFreeCursor,                     /* 95 */
     SProcRecolorCursor,
     SProcQueryBestSize,
-    SProcQueryExtension,
-    SProcSimpleReq,                     /* ListExtensions, */
+    ProcQueryExtension,
+    ProcListExtensions,
     SProcChangeKeyboardMapping,         /* 100 */
-    SProcSimpleReq,                     /* GetKeyboardMapping, */
+    ProcGetKeyboardMapping,
     SProcChangeKeyboardControl,
-    SProcSimpleReq,                     /* GetKeyboardControl, */
-    SProcSimpleReq,                     /* Bell, */
+    ProcGetKeyboardControl,
+    ProcBell,
     SProcChangePointerControl,          /* 105 */
-    SProcSimpleReq,                     /* GetPointerControl, */
-    SProcSetScreenSaver,
-    SProcSimpleReq,                     /* GetScreenSaver, */
+    ProcGetPointerControl,
+    ProcSetScreenSaver,
+    ProcGetScreenSaver,
     SProcChangeHosts,
-    SProcSimpleReq,                     /* 110 ListHosts, */
-    SProcSimpleReq,                     /* SProcChangeAccessControl, */
-    SProcSimpleReq,                     /* SProcChangeCloseDownMode, */
-    SProcResourceReq,                   /* SProcKillClient, */
-    SProcRotateProperties,
-    SProcSimpleReq,                     /* 115 ForceScreenSaver */
-    SProcSimpleReq,                     /* SetPointerMapping, */
-    SProcSimpleReq,                     /* GetPointerMapping, */
-    SProcSimpleReq,                     /* SetModifierMapping, */
-    SProcSimpleReq,                     /* GetModifierMapping, */
+    ProcListHosts,                      /* 110 */
+    ProcChangeAccessControl,
+    ProcChangeCloseDownMode,
+    ProcKillClient,
+    ProcRotateProperties,
+    ProcForceScreenSaver,               /* 115 */
+    ProcSetPointerMapping,
+    ProcGetPointerMapping,
+    ProcSetModifierMapping,
+    ProcGetModifierMapping,
     ProcBadRequest,                     /* 120 */
     ProcBadRequest,
     ProcBadRequest,

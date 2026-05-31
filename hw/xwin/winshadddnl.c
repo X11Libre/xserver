@@ -30,10 +30,8 @@
  *		Peter Busch
  *		Harold L Hunt II
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include "win.h"
 
 #include "dix/colormap_priv.h"
@@ -165,7 +163,7 @@ winReleasePrimarySurfaceShadowDDNL(ScreenPtr pScreen)
     if (pScreenPriv->pddsPrimary4) {
         /*
          * Detach the clipper from the primary surface.
-         * NOTE: We do this explicity for clarity.  The Clipper is not released.
+         * NOTE: We do this explicitly for clarity.  The Clipper is not released.
          */
         IDirectDrawSurface4_SetClipper(pScreenPriv->pddsPrimary4, NULL);
 
@@ -663,9 +661,7 @@ winCloseScreenShadowDDNL(ScreenPtr pScreen)
     pScreenPriv->fActive = FALSE;
 
     /* Call the wrapped CloseScreen procedure */
-    WIN_UNWRAP(CloseScreen);
-    if (pScreen->CloseScreen)
-        fReturn = (*pScreen->CloseScreen) (pScreen);
+    fReturn = fbCloseScreen(pScreen);
 
     winFreeFBShadowDDNL(pScreen);
 

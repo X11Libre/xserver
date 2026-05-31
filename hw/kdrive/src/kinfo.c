@@ -29,16 +29,18 @@ KdCardInfo *
 KdCardInfoAdd(KdCardFuncs * funcs, void *closure)
 {
     KdCardInfo *ci, **prev;
+    int n;
 
     ci = calloc(1, sizeof(KdCardInfo));
     if (!ci)
         return 0;
-    for (prev = &kdCardInfo; *prev; prev = &(*prev)->next);
+    for (prev = &kdCardInfo, n = 0; *prev; prev = &(*prev)->next, n++);
     *prev = ci;
     ci->cfuncs = funcs;
     ci->closure = closure;
     ci->screenList = 0;
     ci->selected = 0;
+    ci->mynum = n;
     ci->next = 0;
     return ci;
 }

@@ -15,7 +15,8 @@ if build_kdrive_mouse
 endif
 
 if build_kdrive_evdev
-    srcs_linux += 'evdev.c'
+    srcs_linux += 'evdev/evdev.c'
+    srcs_linux += 'evdev/evdev_autodetect.c'
 endif
 
 if build_kdrive_tslib

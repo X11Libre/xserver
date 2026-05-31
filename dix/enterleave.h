@@ -24,10 +24,10 @@
  *
  */
 
-#include <dix-config.h>
-
 #ifndef ENTERLEAVE_H
 #define ENTERLEAVE_H
+
+#include <dix-config.h>
 
 #include <dix.h> /* DoFocusEvents() */
 

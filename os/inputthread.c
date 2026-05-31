@@ -36,6 +36,7 @@
 #include "dix/input_priv.h"
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
+#include "os/ossock.h"
 
 #include "inputstr.h"
 #include "opaque.h"
@@ -148,7 +149,7 @@ InputThreadFillPipe(int writeHead)
 
     do {
         ret = write(writeHead, &byte, 1);
-    } while (ret < 0 && ETEST(errno));
+    } while (ret < 0 && ossock_wouldblock(errno));
 }
 
 /**

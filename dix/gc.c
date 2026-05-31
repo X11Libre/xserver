@@ -60,7 +60,6 @@ SOFTWARE.
 #include "pixmapstr.h"
 #include "dixfontstr.h"
 #include "scrnintstr.h"
-#include "region.h"
 #include "dixstruct.h"
 #include "privates.h"
 #include "dix.h"
@@ -77,7 +76,7 @@ ValidateGC(DrawablePtr pDraw, GCPtr pGC)
 {
     (*pGC->funcs->ValidateGC) (pGC, pGC->stateChanges, pDraw);
     pGC->stateChanges = 0;
-    pGC->serialNumber = pDraw->serialNumber;
+    pGC->serialNumber = (unsigned)pDraw->serialNumber;
 }
 
 /*
@@ -439,6 +438,7 @@ ChangeGCXIDs(ClientPtr client, GCPtr pGC, BITS32 mask, CARD32 *pC32)
         vals[i].val = pC32[i];
     for (int i = 0; i < ARRAY_SIZE(xidfields); ++i) {
         int offset, rc;
+        XID id;
 
         if (!(mask & xidfields[i].mask))
             continue;
@@ -447,11 +447,13 @@ ChangeGCXIDs(ClientPtr client, GCPtr pGC, BITS32 mask, CARD32 *pC32)
             vals[offset].ptr = NullPixmap;
             continue;
         }
-        rc = dixLookupResourceByType(&vals[offset].ptr, vals[offset].val,
+        /* save the id, since dixLookupResourceByType overwrites &vals[offset] */
+        id = vals[offset].val;
+        rc = dixLookupResourceByType(&vals[offset].ptr, id,
                                      xidfields[i].type, client,
                                      xidfields[i].access_mode);
         if (rc != Success) {
-            client->errorValue = vals[offset].val;
+            client->errorValue = id;
             return rc;
         }
     }
@@ -984,8 +986,8 @@ VerifyRectOrder(int nrects, xRectangle *prects, int ordering)
 }
 
 int
-SetClipRects(GCPtr pGC, int xOrigin, int yOrigin, int nrects,
-             xRectangle *prects, int ordering)
+SetClipRects(GCPtr pGC, INT16 xOrigin, INT16 yOrigin, size_t nrects,
+             xRectangle *prects, BYTE ordering)
 {
     int newct, size;
 

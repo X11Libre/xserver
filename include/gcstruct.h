@@ -47,16 +47,18 @@ SOFTWARE.
 #ifndef GCSTRUCT_H
 #define GCSTRUCT_H
 
-#include "gc.h"
-
-#include "regionstr.h"
-#include "region.h"
-#include "pixmap.h"
-#include "screenint.h"
-#include "privates.h"
 #include <X11/Xprotostr.h>
 
-#define GCAllBits ((1 << (GCLastBit + 1)) - 1)
+#include "gc.h"
+#include "pixmap.h"
+#include "regionstr.h"
+#include "screenint.h"
+#include "privates.h"
+
+#ifndef _XTYPEDEF_CHARINFOPTR
+typedef struct _CharInfo *CharInfoPtr;  /* also in fonts/include/font.h */
+#define _XTYPEDEF_CHARINFOPTR
+#endif
 
 /*
  * functions which modify the state of the GC
@@ -269,8 +271,8 @@ typedef struct _GC {
      */
     PixUnion tile;
     PixmapPtr stipple;
-    DDXPointRec patOrg;         /* origin for (tile, stipple) */
-    DDXPointRec clipOrg;
+    xPoint patOrg;         /* origin for (tile, stipple) */
+    xPoint clipOrg;
     struct _Font *font;
     RegionPtr clientClip;
     unsigned int stateChanges; /* masked with GC_<kind> */

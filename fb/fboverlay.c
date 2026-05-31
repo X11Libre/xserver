@@ -24,13 +24,14 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 
+#include "include/shmint.h"
 #include "mi/mi_priv.h"
 
 #include "fb.h"
 #include "fboverlay.h"
-#include "shmint.h"
 
 static DevPrivateKeyRec fbOverlayScreenPrivateKeyRec;
 
@@ -187,7 +188,7 @@ fbOverlayUpdateLayerRegion(ScreenPtr pScreen, int layer, RegionPtr prgn)
  * Copy only areas in each layer containing real bits
  */
 static void
-fbOverlayCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+fbOverlayCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     FbOverlayScrPrivPtr pScrPriv = fbOverlayGetScrPriv(pScreen);
@@ -210,6 +211,7 @@ fbOverlayCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
     /*
      * Compute the portion of each fb affected by this copy
      */
+    assert(pScrPriv->nlayers <= FB_OVERLAY_MAX);
     for (i = 0; i < pScrPriv->nlayers; i++) {
         RegionNull(&layerRgn[i]);
         RegionIntersect(&layerRgn[i], &rgnDst,

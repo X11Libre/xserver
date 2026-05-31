@@ -21,13 +21,16 @@
  */
 #include <dix-config.h>
 
+#include <assert.h>
+#include <drm_fourcc.h>
+#include <unistd.h>
+
+#include "include/syncsdk.h"
+
 #include "dri3_priv.h"
-#include <syncsdk.h>
 #include <misync.h>
 #include <misyncshm.h>
 #include <randrstr.h>
-#include <drm_fourcc.h>
-#include <unistd.h>
 
 int
 dri3_open(ClientPtr client, ScreenPtr screen, RRProviderPtr provider, int *fd)
@@ -139,8 +142,8 @@ dri3_fd_from_pixmap(PixmapPtr pixmap, CARD16 *stride, CARD32 *size)
     num_fds = info->fds_from_pixmap(screen, pixmap, fds, strides, offsets,
                                     &modifier);
     if (num_fds != 1 || offsets[0] != 0) {
-        int i;
-        for (i = 0; i < num_fds; i++)
+        assert(num_fds <= 4);
+        for (int i = 0; i < num_fds; i++)
             close(fds[i]);
         return -1;
     }

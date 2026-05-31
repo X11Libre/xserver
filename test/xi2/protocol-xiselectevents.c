@@ -40,7 +40,7 @@
  * BadValue for num_masks < 0
  * BadWindow for invalid windows
  * BadDevice for non-existing devices
- * BadImplemenation for devices >= 0xFF
+ * BadImplementation for devices >= 0xFF
  * BadValue if HierarchyChanged bit is set for devices other than
  *          XIAllDevices
  * BadValue for invalid mask bits
@@ -54,12 +54,12 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "miext/extinit_priv.h"            /* for XInputExtensionInit */
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "exglobals.h"
-#include "xiselectev.h"
 
 #include "protocol-common.h"
 
@@ -114,14 +114,14 @@ request_XISelectEvent(xXISelectEventsReq * req, int error)
        The handler proc's don't use that field anymore, thus also SProc's
        wont swap it. But this test program uses that field to initialize
        client->req_len (see above). We previously had to swap it here, so
-       that SProcXIPassiveGrabDevice() will swap it back. Since that's gone
+       that ProcXIPassiveGrabDevice() will swap it back. Since that's gone
        now, still swapping itself would break if this function is called
-       again and writing back a errornously swapped value
+       again and writing back a erroneously swapped value
     */
 
     swapl(&req->win);
     swaps(&req->num_masks);
-    rc = SProcXISelectEvents(&client);
+    rc = ProcXISelectEvents(&client);
     assert(rc == error);
 }
 

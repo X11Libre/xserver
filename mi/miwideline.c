@@ -65,6 +65,7 @@ SOFTWARE.
 #include <X11/X.h>
 
 #include "mi/mi_priv.h"
+#include "os/osdep.h"
 
 #include "windowstr.h"
 #include "gcstruct.h"
@@ -181,7 +182,7 @@ miSubtractSpans(SpanGroup * spanGroup, Spans * sub)
 #define EXTRA 8
                                 newPt = reallocarray(spans->points,
                                                      spans->count + EXTRA,
-                                                     sizeof(DDXPointRec));
+                                                     sizeof(xPoint));
                                 if (!newPt)
                                     break;
                                 spansPt = newPt + (spansPt - spans->points);
@@ -227,8 +228,8 @@ miAppendSpans(SpanGroup * spanGroup, SpanGroup * otherGroup, Spans * spans)
     if (spansCount > 0) {
         if (spanGroup->size == spanGroup->count) {
             spanGroup->size = (spanGroup->size + 8) * 2;
-            spanGroup->group =
-                reallocarray(spanGroup->group, sizeof(Spans), spanGroup->size);
+            spanGroup->group = XNFreallocarray(spanGroup->group,
+                                               sizeof(Spans), spanGroup->size);
         }
 
         spanGroup->group[spanGroup->count] = *spans;
@@ -256,7 +257,7 @@ miFreeSpanGroup(SpanGroup * spanGroup)
 }
 
 static void
-QuickSortSpansX(DDXPointRec points[], int widths[], int numSpans)
+QuickSortSpansX(xPoint points[], int widths[], int numSpans)
 {
     int x;
     int i, j, m;
@@ -267,7 +268,7 @@ QuickSortSpansX(DDXPointRec points[], int widths[], int numSpans)
 
 #define ExchangeSpans(a, b)				    \
 {							    \
-    DDXPointRec 	tpt;				    \
+    xPoint		tpt;				    \
     int    		tw;				    \
 							    \
     tpt = points[a]; points[a] = points[b]; points[b] = tpt;    \
@@ -285,7 +286,7 @@ QuickSortSpansX(DDXPointRec points[], int widths[], int numSpans)
                 x = points[i].x;
                 if (xprev > x) {
                     /* points[i] is out of order.  Move into proper location. */
-                    DDXPointRec tpt;
+                    xPoint tpt;
                     int tw, k;
 
                     for (j = 0; x >= points[j].x; j++) {
@@ -345,10 +346,10 @@ QuickSortSpansX(DDXPointRec points[], int widths[], int numSpans)
 }                               /* QuickSortSpans */
 
 static int
-UniquifySpansX(Spans * spans, DDXPointRec * newPoints, int *newWidths)
+UniquifySpansX(Spans * spans, xPoint* newPoints, int *newWidths)
 {
     int newx1, newx2, oldpt, i, y;
-    DDXPointRec *oldPoints;
+    xPoint *oldPoints;
     int *oldWidths;
     int *startNewWidths;
 
@@ -480,7 +481,7 @@ miFillUniqueSpanGroup(DrawablePtr pDraw, GCPtr pGC, SpanGroup * spanGroup)
                         ysizes[index] = (ysizes[index] + 8) * 2;
                         newpoints = reallocarray(newspans->points,
                                                  ysizes[index],
-                                                 sizeof(DDXPointRec));
+                                                 sizeof(xPoint));
                         newwidths = reallocarray(newspans->widths,
                                                  ysizes[index], sizeof(int));
                         if (!newpoints || !newwidths) {
@@ -511,7 +512,7 @@ miFillUniqueSpanGroup(DrawablePtr pDraw, GCPtr pGC, SpanGroup * spanGroup)
         }                       /* for i thorough Spans */
 
         /* Now sort by x and uniquify each bucket into the final array */
-        points = calloc(count, sizeof(DDXPointRec));
+        points = calloc(count, sizeof(xPoint));
         widths = calloc(count, sizeof(int));
         if (!points || !widths) {
             for (i = 0; i < ylength; i++) {
@@ -935,7 +936,7 @@ miLineOnePoint(DrawablePtr pDrawable,
                GCPtr pGC,
                unsigned long pixel, SpanDataPtr spanData, int x, int y)
 {
-    DDXPointRec pt;
+    xPoint pt;
     int wid;
     unsigned long oldPixel;
 

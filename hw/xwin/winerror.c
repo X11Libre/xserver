@@ -27,15 +27,13 @@
  *
  * Authors:	Harold L Hunt II
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
+#include "os/ddx_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 
-#include <../xfree86/common/xorgVersion.h>
+#include "include/xorgVersion.h"
 #include "win.h"
 
 #include "dix/input_priv.h"
@@ -108,18 +106,18 @@ winMessageBoxF(const char *pszError, UINT uType, ...)
 
 #define MESSAGEBOXF \
 	"%s\n" \
-	"Vendor: %s\n" \
+	"Vendor: XLibre\n" \
 	"Release: %d.%d.%d.%d\n" \
-	"Contact: %s\n" \
-	"%s\n\n" \
+	"Contact: https://www.xlibre.net/\n" \
+	"\n\n" \
 	"XWin was started with the following command-line:\n\n" \
 	"%s\n"
 
     size = asprintf(&pszMsgBox, MESSAGEBOXF,
-                    pszErrorF, XVENDORNAME,
+                    pszErrorF,
                     XORG_VERSION_MAJOR, XORG_VERSION_MINOR, XORG_VERSION_PATCH,
                     XORG_VERSION_SNAP,
-                    BUILDERADDR, BUILDERSTRING, g_pszCommandLine);
+                    g_pszCommandLine);
 
     if (size == -1) {
         pszMsgBox = NULL;

@@ -23,12 +23,7 @@ OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION  WITH
 THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
-
-#include <dix-config.h>
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <stdio.h>
 #include <X11/X.h>
@@ -36,6 +31,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/keysym.h>
 #include <X11/extensions/XI.h>
 
+#include "hw/xfree86/common/action_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
 #include "inputstr.h"

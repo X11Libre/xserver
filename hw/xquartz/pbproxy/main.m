@@ -35,6 +35,8 @@
 #include <unistd.h>
 #include <X11/extensions/applewm.h>
 
+#include "osxcompat.h"
+
 Display *xpbproxy_dpy;
 int xpbproxy_apple_wm_event_base, xpbproxy_apple_wm_error_base;
 int xpbproxy_xfixes_event_base, xpbproxy_xfixes_error_base;
@@ -78,7 +80,7 @@ x_error_handler(Display *dpy, XErrorEvent *errevent)
 int
 xpbproxy_run(void)
 {
-    @autoreleasepool {
+    OBJC_AUTORELEASEPOOL_BEGIN
         size_t i;
 
         for (i = 0, xpbproxy_dpy = NULL; !xpbproxy_dpy && i < 5; i++) {
@@ -97,6 +99,7 @@ xpbproxy_run(void)
 
         if (xpbproxy_dpy == NULL) {
             ErrorF("xpbproxy: can't open default display\n");
+            OBJC_AUTORELEASEPOOL_EXIT
             return EXIT_FAILURE;
         }
 
@@ -106,6 +109,7 @@ xpbproxy_run(void)
         if (!XAppleWMQueryExtension(xpbproxy_dpy, &xpbproxy_apple_wm_event_base,
                                     &xpbproxy_apple_wm_error_base)) {
             ErrorF("xpbproxy: can't open AppleWM server extension\n");
+            OBJC_AUTORELEASEPOOL_EXIT
             return EXIT_FAILURE;
         }
 
@@ -117,9 +121,10 @@ xpbproxy_run(void)
         _selection_object = [x_selection new];
 
         if (!xpbproxy_input_register()) {
+            OBJC_AUTORELEASEPOOL_EXIT
             return EXIT_FAILURE;
         }
-    }
+    OBJC_AUTORELEASEPOOL_END
 
     CFRunLoopRun();
 

@@ -71,10 +71,9 @@ static int hex2bin(const char *in, char *out)
     return 1;
 }
 
-/*
- * loadConfig
- *
- * Load the namespace config
+/**
+ * @brief Parse a single line from the configuration file,
+ * ignoring comments and newlines. Prints a warning if it finds an unknown token.
 */
 static void parseLine(char *line, struct Xnamespace **walk_ns)
 {
@@ -87,7 +86,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         *c1 = 0;
 
     /* get the first token */
-    char *token = strtok(line, " ");
+    char *token = strtok(line, " \t");
 
     if (token == NULL)
         return;
@@ -110,7 +109,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 
     if (strcmp(token, "auth") == 0)
     {
-        token = strtok(NULL, " ");
+        token = strtok(NULL, " \t");
         if (token == NULL)
             return;
 
@@ -141,7 +140,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 
     if (strcmp(token, "allow") == 0)
     {
-        while ((token = strtok(NULL, " ")) != NULL)
+        while ((token = strtok(NULL, " \t")) != NULL)
         {
             if (strcmp(token, "mouse-motion") == 0)
                 curr->allowMouseMotion = TRUE;

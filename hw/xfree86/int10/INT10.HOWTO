@@ -135,7 +135,7 @@ address space.
 1. xf86Int10InfoPtr xf86InitInt10(int entityIndex);
 
 This  function should  first find  the screen  assigned to  the entity
-carrying entitiyIndex and then call
+carrying entityIndex and then call
 
        Bool int10skip(ScrnInfoPtr pScrn)
 

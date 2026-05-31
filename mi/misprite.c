@@ -194,7 +194,7 @@ static void miSpriteSourceValidate(DrawablePtr pDrawable, int x, int y,
                                    int width, int height,
                                    unsigned int subWindowMode);
 static void miSpriteCopyWindow(WindowPtr pWindow,
-                               DDXPointRec ptOldOrg, RegionPtr prgnSrc);
+                               xPoint ptOldOrg, RegionPtr prgnSrc);
 static void miSpriteBlockHandler(ScreenPtr pScreen, void *timeout);
 static void miSpriteInstallColormap(ColormapPtr pMap);
 static void miSpriteStoreColors(ColormapPtr pMap, int ndef, xColorItem * pdef);
@@ -275,9 +275,7 @@ miSpriteReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
  * initialization proc after all of the function pointers have
  * been stored in the screen structure.
  */
-
-Bool
-miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
+bool miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
 {
     VisualPtr pVisual;
 
@@ -393,7 +391,7 @@ miSpriteSourceValidate(DrawablePtr pDrawable, int x, int y, int width,
 }
 
 static void
-miSpriteCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+miSpriteCopyWindow(WindowPtr pWindow, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWindow->drawable.pScreen;
     DeviceIntPtr pDev;
@@ -615,13 +613,13 @@ miSpriteRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     if (pCursor == pCursorInfo->pCursor)
         pCursorInfo->checkPixels = TRUE;
 
-    return miDCRealizeCursor(pScreen, pCursor);
+    return (!!miDCRealizeCursor(pScreen, pCursor));
 }
 
 static Bool
 miSpriteUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    return miDCUnrealizeCursor(pScreen, pCursor);
+    return (!!miDCUnrealizeCursor(pScreen, pCursor));
 }
 
 static void

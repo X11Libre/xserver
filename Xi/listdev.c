@@ -57,18 +57,21 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "extnsionst.h"
 #include "exevents.h"
-#include "xace.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
-#include "listdev.h"
+
+#define VPC        20              /* Max # valuators per chunk */
 
 /***********************************************************************
  *
@@ -297,7 +300,7 @@ ShouldSkipDevice(ClientPtr client, DeviceIntPtr d)
 {
     /* don't send master devices other than VCP/VCK */
     if (!InputDevIsMaster(d) || d == inputInfo.pointer ||d == inputInfo.keyboard) {
-        int rc = XaceHookDeviceAccess(client, d, DixGetAttrAccess);
+        int rc = dixCallDeviceAccessCallback(client, d, DixGetAttrAccess);
 
         if (rc == Success)
             return FALSE;
@@ -327,7 +330,7 @@ ProcXListInputDevices(ClientPtr client)
     xDeviceInfo *dev;
     DeviceIntPtr d;
 
-    REQUEST_SIZE_MATCH(xListInputDevicesReq);
+    X_REQUEST_HEAD_STRUCT(xListInputDevicesReq);
 
     /* allocate space for saving skip value */
     skip = calloc(inputInfo.numDevices, sizeof(Bool));

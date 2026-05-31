@@ -45,14 +45,12 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
-
 #ifndef _LOADER_H
 #define _LOADER_H
 
+#include <xorg-config.h>
+
+#include <X11/Xdefs.h>
 #include <X11/Xosdefs.h>
 #include <X11/Xfuncproto.h>
 #include <X11/Xmd.h>

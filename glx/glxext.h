@@ -30,6 +30,8 @@
  * other dealings in this Software without prior written authorization from
  * Silicon Graphics, Inc.
  */
+#include <GL/gl.h>
+#include <X11/Xdefs.h>
 
 /* doing #include <GL/glx.h> & #include <GL/glxext.h> could cause problems
  * with overlapping definitions, so let's use the easy way

@@ -879,7 +879,7 @@ ucs2keysym(long ucs)
     int mid;
 
     if (reverse_keysymtab == NULL) {
-        reverse_keysymtab = malloc(sizeof(keysymtab));
+        reverse_keysymtab = calloc(1, sizeof(keysymtab));
         memcpy(reverse_keysymtab, keysymtab, sizeof(keysymtab));
 
         qsort(reverse_keysymtab,

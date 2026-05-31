@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2001-2003 by The XFree86 Project, Inc.
  *
@@ -25,10 +24,7 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "misc.h"
 #include "xf86.h"
@@ -38,6 +34,7 @@
 #include <X11/Xproto.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "include/extinit.h"
 
 #include "scrnintstr.h"
 #include "resource.h"
@@ -151,8 +148,7 @@ xf86XvMCScreenInit(ScreenPtr pScreen,
 {
     XvMCAdaptorPtr pAdapt;
     xf86XvMCScreenPtr pScreenPriv;
-    XvScreenPtr pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                                      XF86XvScreenKey);
+    XvScreenPtr pxvs = dixLookupPrivate(&pScreen->devPrivates, XvGetScreenKey());
     int i, j;
 
     if (noXvExtension)

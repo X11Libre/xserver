@@ -33,20 +33,14 @@
 
 #include <dix-config.h>
 
+#include "dbe/dbestruct.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/privates.h"
-
-/* EXTERNS */
 
 extern Bool miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv);
 
 extern DevPrivateKeyRec dbeScreenPrivKeyRec;
-
-#define dbeScreenPrivKey (&dbeScreenPrivKeyRec)
-
 extern DevPrivateKeyRec dbeWindowPrivKeyRec;
-
-#define dbeWindowPrivKey (&dbeWindowPrivKeyRec)
 
 extern RESTYPE dbeDrawableResType;
 extern RESTYPE dbeWindowPrivResType;

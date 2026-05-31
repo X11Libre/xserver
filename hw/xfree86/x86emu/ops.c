@@ -10028,7 +10028,7 @@ x86emuOp_xlat(u8 X86EMU_UNUSED(op1))
     END_OF_INSTR();
 }
 
-/* instuctions  D8 .. DF are in i87_ops.c */
+/* instructions  D8 .. DF are in i87_ops.c */
 
 /****************************************************************************
 REMARKS:

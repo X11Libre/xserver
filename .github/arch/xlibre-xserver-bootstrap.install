@@ -1,0 +1,11 @@
+post_install() {
+  cat <<MSG
+>>> xlibre-xserver-bootstrap is a bootstrap package and is not intended for use in an X session.
+    Its sole purpose is to serve as a makedepend for xlibre-input-libinput.
+    It should be replaced with xlibre-xserver (non-bootstrap version) immediately afterward.
+MSG
+}
+
+post_upgrade() {
+  post_install
+}

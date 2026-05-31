@@ -55,33 +55,16 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
+#include "dix/devices_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include "xace.h"
 #include "grabdev.h"
-#include "grabdevk.h"
-
-/***********************************************************************
- *
- * Handle requests from clients with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXGrabDeviceKey(ClientPtr client)
-{
-    REQUEST(xGrabDeviceKeyReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceKeyReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->modifiers);
-    swaps(&stuff->event_count);
-    REQUEST_FIXED_SIZE(xGrabDeviceKeyReq, stuff->event_count * sizeof(CARD32));
-    SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
-    return (ProcXGrabDeviceKey(client));
-}
 
 /***********************************************************************
  *
@@ -92,19 +75,18 @@ SProcXGrabDeviceKey(ClientPtr client)
 int
 ProcXGrabDeviceKey(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xGrabDeviceKeyReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(modifiers);
+    X_REQUEST_FIELD_CARD16(event_count);
+    X_REQUEST_REST_COUNT_CARD32(stuff->event_count);
+
     int ret;
     DeviceIntPtr dev;
     DeviceIntPtr mdev;
     XEventClass *class;
     struct tmask tmp[EMASKSIZE];
     GrabMask mask;
-
-    REQUEST(xGrabDeviceKeyReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceKeyReq);
-
-    if (client->req_len !=
-        bytes_to_int32(sizeof(xGrabDeviceKeyReq)) + stuff->event_count)
-        return BadLength;
 
     ret = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
     if (ret != Success)
@@ -120,7 +102,7 @@ ProcXGrabDeviceKey(ClientPtr client)
     }
     else {
         mdev = PickKeyboard(client);
-        ret = XaceHookDeviceAccess(client, mdev, DixUseAccess);
+        ret = dixCallDeviceAccessCallback(client, mdev, DixUseAccess);
         if (ret != Success)
             return ret;
     }

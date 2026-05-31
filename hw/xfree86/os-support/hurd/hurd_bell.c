@@ -22,10 +22,7 @@
  *
  * Author: Daniel Stone <daniel@fooishbar.org>
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "xf86.h"
 #include "xf86_os_support.h"

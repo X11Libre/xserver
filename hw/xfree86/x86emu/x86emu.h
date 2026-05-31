@@ -65,7 +65,7 @@ Data structure containing ponters to programmed I/O functions used by the
 emulator. This is used so that the user program can hook all programmed
 I/O for the emulator to handled as necessary by the user program. By
 default the emulator contains simple functions that do not do access the
-hardware in any way. To allow the emualtor access the hardware, you will
+hardware in any way. To allow the emulator access the hardware, you will
 need to override the programmed I/O functions using the X86EMU_setupPioFuncs
 function.
 

@@ -44,11 +44,11 @@
 
 #include "dix/exevents_priv.h"
 #include "miext/extinit_priv.h"            /* for XInputExtensionInit */
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
-#include "xiselectev.h"
 
 #include "protocol-common.h"
 
@@ -76,20 +76,20 @@ override_AddResource(XID id, RESTYPE type, void *value)
 static void
 reply_XIGetSelectedEvents(ClientPtr client, int len, void *data)
 {
-    xXIGetSelectedEventsReply *reply = (xXIGetSelectedEventsReply *) data;
-    xXIGetSelectedEventsReply rep = *reply; /* copy so swapping doesn't touch the real reply */
+    xXIGetSelectedEventsReply *repptr = (xXIGetSelectedEventsReply *) data;
+    xXIGetSelectedEventsReply reply = *repptr; /* copy so swapping doesn't touch the real reply */
 
     assert(len < 0xffff); /* suspicious size, swapping bug */
 
     if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.num_masks);
+        swapl(&reply.length);
+        swaps(&reply.sequenceNumber);
+        swaps(&reply.num_masks);
     }
 
-    reply_check_defaults(&rep, len, XIGetSelectedEvents);
+    reply_check_defaults(&reply, len, XIGetSelectedEvents);
 
-    assert(rep.num_masks == test_data.num_masks_expected);
+    assert(reply.num_masks == test_data.num_masks_expected);
 
     wrapped_WriteToClient = reply_XIGetSelectedEvents_data;
 }
@@ -145,13 +145,13 @@ request_XIGetSelectedEvents(xXIGetSelectedEventsReq * req, int error)
        The handler proc's don't use that field anymore, thus also SProc's
        wont swap it. But this test program uses that field to initialize
        client->req_len (see above). We previously had to swap it here, so
-       that SProcXIPassiveGrabDevice() will swap it back. Since that's gone
+       that ProcXIPassiveGrabDevice() will swap it back. Since that's gone
        now, still swapping itself would break if this function is called
-       again and writing back a errornously swapped value
+       again and writing back a erroneously swapped value
     */
 
     swapl(&req->win);
-    rc = SProcXIGetSelectedEvents(&client);
+    rc = ProcXIGetSelectedEvents(&client);
     assert(rc == error);
 }
 

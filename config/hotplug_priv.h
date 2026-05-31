@@ -31,7 +31,8 @@
 
 #include <X11/Xfuncproto.h>
 
-#include "hotplug.h"
+#include "dix/settings_priv.h"
+
 #include "list.h"
 
 /* Bump this each time you add something to the struct
@@ -77,11 +78,14 @@ void NewGPUDeviceRequest(struct OdevAttributes *attribs);
 void DeleteGPUDeviceRequest(struct OdevAttributes *attribs);
 #endif
 
-#define ServerIsNotSeat0() (SeatId && strcmp(SeatId, "seat0"))
+#define ServerIsNotSeat0() (dixSettingSeatId && strcmp(dixSettingSeatId, "seat0"))
 
 struct xf86_platform_device *
 xf86_find_platform_device_by_devnum(unsigned int major, unsigned int minor);
 
 void config_pre_init(void);
+
+void config_init(void);
+void config_fini(void);
 
 #endif /* _XSERVER_HOTPLUG_PRIV_H */

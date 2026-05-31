@@ -34,7 +34,7 @@
 #define EPHYR_TRACE_DRAW 0
 
 #if EPHYR_TRACE_DRAW
-#define TRACE_DRAW() ErrorF("%s\n", __FUNCTION__);
+#define TRACE_DRAW() ErrorF("%s\n", __func__);
 #else
 #define TRACE_DRAW() do { } while (0)
 #endif
@@ -302,7 +302,7 @@ ephyrDoneComposite(PixmapPtr pDst)
 }
 
 /**
- * Does fake acceleration of DownloadFromScren using memcpy.
+ * Does fake acceleration of DownloadFromScreen using memcpy.
  */
 static Bool
 ephyrDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h, char *dst,

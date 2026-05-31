@@ -5,20 +5,13 @@ srcs_xorg_os_support = [
     'shared/vidmem.c',
 ]
 
-hdrs_xorg_os_support = [
-    'bus/xf86Pci.h',
-    'xf86_OSlib.h',
-    'xf86_OSproc.h'
-]
-
 os_dep = []
 os_c_args = []
 
 if get_option('pciaccess')
     srcs_xorg_os_support += 'bus/Pci.c'
-    if host_machine.cpu() == 'sparc' or host_machine.cpu() == 'sparc64'
+    if host_machine.cpu_family() in ['sparc', 'sparc64']
         srcs_xorg_os_support += 'bus/Sbus.c'
-        install_data('bus/xf86Sbus.h', install_dir: xorgsdkdir)
     endif
 endif
 
@@ -51,6 +44,7 @@ if host_machine.system() == 'linux'
         srcs_xorg_os_support += 'linux/systemd-logind.c'
     endif
 
+
     # this is ugly because the code is also
     if build_apm or build_acpi
         srcs_xorg_os_support += 'linux/lnx_apm.c'
@@ -82,7 +76,7 @@ elif host_machine.system() == 'sunos'
         srcs_xorg_os_support += 'shared/agp_noop.c'
     endif
 
-    if host_machine.cpu_family() == 'sparc'
+    if host_machine.cpu_family() in ['sparc', 'sparc64']
         srcs_xorg_os_support += 'solaris/solaris-sparcv8plus.S'
     elif host_machine.cpu_family() == 'x86_64'
         srcs_xorg_os_support += 'solaris/solaris-amd64.S'
@@ -92,7 +86,7 @@ elif host_machine.system() == 'sunos'
         error('Unknown CPU family for Solaris build')
     endif
 
-elif host_machine.system().endswith('bsd')
+elif host_machine.system().endswith('bsd') or host_machine.system() == 'dragonfly'
     srcs_xorg_os_support += [
         'bsd/bsd_VTsw.c',
         'bsd/bsd_bell.c',
@@ -129,7 +123,7 @@ elif host_machine.system().endswith('bsd')
         endif
     endif
 
-    if host_machine.system() == 'freebsd'
+    if host_machine.system() == 'freebsd' or host_machine.system() == 'dragonfly'
         srcs_xorg_os_support += 'bsd/bsd_kmod.c'
     else
         srcs_xorg_os_support += 'shared/kmod_noop.c'
@@ -154,7 +148,17 @@ else
         'stub/stub_bell.c',
         'stub/stub_init.c',
         'stub/stub_video.c',
+        'misc/SlowBcopy.c',
     ]
+endif
+
+if host_machine.system() == 'linux' or host_machine.system() == 'dragonfly' or host_machine.system().endswith('bsd')
+
+    if build_seatd_libseat
+       srcs_xorg_os_support  += 'shared/seatd-libseat.c'
+       os_dep += seat_libseat_dep
+    endif
+
 endif
 
 xorg_os_support = static_library('xorg_os_support',
@@ -168,5 +172,3 @@ xorg_os_support = static_library('xorg_os_support',
     ],
     c_args: xorg_c_args + os_c_args,
 )
-
-install_data(hdrs_xorg_os_support, install_dir: xorgsdkdir)

@@ -21,8 +21,8 @@
  */
 #include <dix-config.h>
 
-#include "present_priv.h"
-#include "list.h"
+#include "include/list.h"
+#include "present/present_priv.h"
 
 static struct xorg_list fake_vblank_queue;
 

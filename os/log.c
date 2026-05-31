@@ -83,6 +83,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>             /* for calloc() */
+#include <string.h>             /* for strerror*() */
 #include <sys/stat.h>
 #include <time.h>
 #include <X11/Xfuncproto.h>
@@ -94,7 +95,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
-#include "os/audit.h"
+#include "os/audit_priv.h"
 #include "os/bug_priv.h"
 #include "os/ddx_priv.h"
 #include "os/fmt.h"
@@ -135,7 +136,9 @@ static char __crashreporter_info_buff__[4096] = { 0 };
 
 static const char *__crashreporter_info__ __attribute__ ((__used__)) =
     &__crashreporter_info_buff__[0];
+/* NOLINTBEGIN(hicpp-no-assembler) */
 asm(".desc ___crashreporter_info__, 0x10");
+/* NOLINTEND(hicpp-no-assembler) */
 #endif
 
 /* Prefix strings for log messages. */
@@ -217,7 +220,7 @@ static inline void doLogSync(void) {
 
 static void initSyslog(void) {
 #ifdef CONFIG_SYSLOG
-    char buffer[4096];
+    static char buffer[4096];
     strcpy(buffer, xorgSyslogIdent);
 
     snprintf(buffer, sizeof(buffer), "%s :%s", xorgSyslogIdent, (display ? display : "<>"));
@@ -225,6 +228,73 @@ static void initSyslog(void) {
     /* initialize syslog */
     openlog(buffer, LOG_PID, LOG_LOCAL1);
 #endif
+}
+
+static void
+LogFailedWriteStdout(const void * buf, size_t len)
+{
+        if (write(STDOUT_FILENO, buf, len)==-1)
+        {
+	    /* We can't write to the logfile, stderr, and stdout; something
+	     * bad is probably happening, but we can't really do anything */
+            return;
+        }
+}
+static void
+LogFailedWrite(const void * buf, size_t len)
+{
+    if (write(STDERR_FILENO, buf, len)==-1)
+    {
+	/* We can't even write to stderr, let's try stdout as a last resort. */
+        {
+            char error[]="Can't write to stderr: ";
+            LogFailedWriteStdout(error,sizeof(error));
+        }
+#ifndef __MINGW32__
+        char dsc[256]={0};
+        (void) !strerror_r(errno,dsc,sizeof(dsc));
+#else
+        char * dsc;
+        dsc=strerror(errno);
+#endif
+        LogFailedWriteStdout(dsc,strlen(dsc));
+        LogFailedWriteStdout("\n",1);
+        {
+	    char error[]="Intended to write the following to stderr:\n";
+            LogFailedWriteStdout(error,sizeof(error));
+        }
+        LogFailedWriteStdout(buf,len);
+    }
+}
+
+static void
+LogWrite(int fd, const void * buf, size_t len)
+{
+    if (write(fd, buf, len)==-1)
+    {
+	/* If the write() call fails, we can not log this event to the log file,
+	 * but we still have the stderr.
+         */
+        {
+            char error[]="Can't write to log file: ";
+            LogFailedWrite(error,sizeof(error));
+        }
+#ifndef __MINGW32__
+        char dsc[256]={0};
+        (void) !strerror_r(errno,dsc,sizeof(dsc));
+#else
+        char * dsc;
+        dsc=strerror(errno);
+#endif
+        LogFailedWrite(dsc,strlen(dsc));
+        LogFailedWrite("\n",1);
+        {
+            char error[]="Intended to write the following to log file:\n";
+            LogFailedWrite(error,sizeof(error));
+        }
+        LogFailedWrite(buf,len);
+    }
+
 }
 
 /*
@@ -268,7 +338,7 @@ LogInit(const char *fname, const char *backup)
 
         /* Flush saved log information. */
         if (saveBuffer && bufferSize > 0) {
-            write(logFileFd, saveBuffer, bufferPos);
+            LogWrite(logFileFd, saveBuffer, bufferPos);
             doLogSync();
         }
     }
@@ -581,52 +651,55 @@ static void
 LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 {
     static Bool newline = TRUE;
-    int ret;
 
     LogSyslogWrite(verb, buf, len, end_line);
 
-    if (verb < 0 || xorgLogVerbosity >= verb)
-        ret = write(2, buf, len);
+    if (verb < 0 || xorgLogVerbosity >= verb) {
+        LogWrite(2, buf, len);
+    }
 
     if (verb < 0 || xorgLogFileVerbosity >= verb) {
         if (inSignalContext && logFileFd >= 0) {
-            ret = write(logFileFd, buf, len);
-            if (xorgLogSync)
+            LogWrite(logFileFd, buf, len);
+            if (xorgLogSync){
                 doLogSync();
+            }
         }
         else if (!inSignalContext && logFileFd != -1) {
             if (newline) {
                 time_t t = time(NULL);
                 struct tm tm;
                 char fmt_tm[32];
+                size_t fmt_len;
 
                 localtime_r(&t, &tm);
-                strftime(fmt_tm, sizeof(fmt_tm) - 1, "[%Y-%m-%d %H:%M:%S] ", &tm);
-                write(logFileFd, fmt_tm, strlen(fmt_tm));
+                fmt_len = strftime(
+                                fmt_tm,
+                                sizeof(fmt_tm),
+                                "[%Y-%m-%d %H:%M:%S] ",
+                                &tm);
+                LogWrite(logFileFd, fmt_tm, fmt_len);
             }
             newline = end_line;
-            write(logFileFd, buf, len);
-            if (xorgLogSync)
+            LogWrite(logFileFd, buf, len);
+            if (xorgLogSync) {
                 doLogSync();
+            }
         }
         else if (!inSignalContext && needBuffer) {
             if (len > bufferUnused) {
                 bufferSize += 1024;
                 bufferUnused += 1024;
                 saveBuffer = realloc(saveBuffer, bufferSize);
-                if (!saveBuffer)
+                if (!saveBuffer) {
                     FatalError("realloc() failed while saving log messages\n");
+                }
             }
             bufferUnused -= len;
             memcpy(saveBuffer + bufferPos, buf, len);
             bufferPos += len;
         }
     }
-
-    /* There's no place to log an error message if the log write
-     * fails...
-     */
-    (void) ret;
 }
 
 /* Returns the Message Type string to prepend to a logging message, or NULL
@@ -734,7 +807,14 @@ LogMessage(MessageType type, const char *format, ...)
     va_end(ap);
 }
 
-void
+static void
+LogVHdrMessageVerb(MessageType type, int verb,
+                   const char *msg_format, va_list msg_args,
+                   const char *hdr_format, va_list hdr_args)
+_X_ATTRIBUTE_PRINTF(3, 0)
+_X_ATTRIBUTE_PRINTF(5, 0);
+
+static void
 LogVHdrMessageVerb(MessageType type, int verb, const char *msg_format,
                    va_list msg_args, const char *hdr_format, va_list hdr_args)
 {

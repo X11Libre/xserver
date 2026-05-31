@@ -24,6 +24,8 @@
 
 #include <dix-config.h>
 
+#include "dix/screenint_priv.h"
+#include "include/mipict.h"
 #include "os/bug_priv.h"
 #include "os/xsha1.h"
 
@@ -41,7 +43,6 @@
 #include "servermd.h"
 #include "picturestr.h"
 #include "glyphstr_priv.h"
-#include "mipict.h"
 
 /*
  * From Knuth -- a good choice for hash/rehash values is p, p-2 where
@@ -232,16 +233,14 @@ CheckDuplicates(GlyphHashPtr hash, char *where)
 static void
 FreeGlyphPicture(GlyphPtr glyph)
 {
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+    DIX_FOR_EACH_SCREEN({
         if (GetGlyphPicture(glyph, walkScreen))
             FreePicture((void *) GetGlyphPicture(glyph, walkScreen), 0);
 
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps)
             (*ps->UnrealizeGlyph) (walkScreen, glyph);
-    }
+    });
 }
 
 void
@@ -354,25 +353,23 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     glyph->info = *gi;
     dixInitPrivates(glyph, (char *) glyph + head_size, PRIVATE_GLYPH);
 
-    unsigned int i;
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    unsigned int i = 0;
+    DIX_FOR_EACH_SCREEN({
         SetGlyphPicture(glyph, walkScreen, NULL);
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
-
         if (ps) {
             if (!(ps->RealizeGlyph(walkScreen, glyph))) {
                 i = walkScreenIdx;
                 goto bail;
             }
         }
-    }
+    });
 
     return glyph;
 
  bail:
     while (i--) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = dixGetScreenPtr(i);
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps)
             ps->UnrealizeGlyph(walkScreen, glyph);
@@ -385,7 +382,8 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
 static Bool
 AllocateGlyphHash(GlyphHashPtr hash, GlyphHashSetPtr hashSet)
 {
-    assert(hashSet);
+    if (hashSet == NULL)
+        return FALSE;
     hash->table = calloc(hashSet->size, sizeof(GlyphRefRec));
     if (!hash->table)
         return FALSE;

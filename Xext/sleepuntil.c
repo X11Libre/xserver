@@ -50,10 +50,9 @@ typedef struct _Sertafied {
     void *closure;
 } SertafiedRec, *SertafiedPtr;
 
-static SertafiedPtr pPending;
+static SertafiedPtr pending;
 static RESTYPE SertafiedResType;
 static Bool BlockHandlerRegistered;
-static x_server_generation_t SertafiedGeneration;
 
 static void ClientAwaken(ClientPtr /* client */ ,
                          void *    /* closure */
@@ -72,16 +71,11 @@ ClientSleepUntil(ClientPtr client,
                  TimeStamp *revive,
                  void (*notifyFunc) (ClientPtr, void *), void *closure)
 {
-    SertafiedPtr pReq, pPrev;
-
-    if (SertafiedGeneration != serverGeneration) {
-        SertafiedResType = CreateNewResourceType(SertafiedDelete,
-                                                 "ClientSleep");
-        if (!SertafiedResType)
-            return FALSE;
-        SertafiedGeneration = serverGeneration;
-        BlockHandlerRegistered = FALSE;
-    }
+    SertafiedResType = CreateNewResourceType(SertafiedDelete,
+                                             "ClientSleep");
+    if (!SertafiedResType)
+        return FALSE;
+    BlockHandlerRegistered = FALSE;
 
     SertafiedPtr pRequest = calloc(1, sizeof(SertafiedRec));
     if (!pRequest)
@@ -106,17 +100,18 @@ ClientSleepUntil(ClientPtr client,
         notifyFunc = ClientAwaken;
     pRequest->notifyFunc = notifyFunc;
     /* Insert into time-ordered queue, with earliest activation time coming first. */
-    pPrev = 0;
-    for (pReq = pPending; pReq; pReq = pReq->next) {
-        if (CompareTimeStamps(pReq->revive, *revive) == LATER)
+
+    SertafiedPtr walk, pPrev = NULL;
+    for (walk = pending; walk; walk = walk->next) {
+        if (CompareTimeStamps(walk->revive, *revive) == LATER)
             break;
-        pPrev = pReq;
+        pPrev = walk;
     }
     if (pPrev)
         pPrev->next = pRequest;
     else
-        pPending = pRequest;
-    pRequest->next = pReq;
+        pending = pRequest;
+    pRequest->next = walk;
     IgnoreClient(client);
     return TRUE;
 }
@@ -131,15 +126,14 @@ static int
 SertafiedDelete(void *value, XID id)
 {
     SertafiedPtr pRequest = (SertafiedPtr) value;
-    SertafiedPtr pReq, pPrev;
 
-    pPrev = 0;
-    for (pReq = pPending; pReq; pPrev = pReq, pReq = pReq->next)
-        if (pReq == pRequest) {
+    SertafiedPtr walk, pPrev = NULL;
+    for (walk = pending; walk; pPrev = walk, walk = walk->next)
+        if (walk == pRequest) {
             if (pPrev)
-                pPrev->next = pReq->next;
+                pPrev->next = walk->next;
             else
-                pPending = pReq->next;
+                pending = walk->next;
             break;
         }
     if (pRequest->notifyFunc)
@@ -151,21 +145,22 @@ SertafiedDelete(void *value, XID id)
 static void
 SertafiedBlockHandler(void *data, void *wt)
 {
-    SertafiedPtr pReq, pNext;
     unsigned long delay;
     TimeStamp now;
 
-    if (!pPending)
+    if (!pending)
         return;
     now.milliseconds = GetTimeInMillis();
     now.months = currentTime.months;
     if ((int) (now.milliseconds - currentTime.milliseconds) < 0)
         now.months++;
-    for (pReq = pPending; pReq; pReq = pNext) {
-        pNext = pReq->next;
-        if (CompareTimeStamps(pReq->revive, now) == LATER)
+
+    SertafiedPtr walk, pNext;
+    for (walk = pending; walk; walk = pNext) {
+        pNext = walk->next;
+        if (CompareTimeStamps(walk->revive, now) == LATER)
             break;
-        FreeResource(pReq->id, X11_RESTYPE_NONE);
+        FreeResource(walk->id, X11_RESTYPE_NONE);
 
         /* AttendClient() may have been called via the resource delete
          * function so a client may have input to be processed and so
@@ -173,30 +168,31 @@ SertafiedBlockHandler(void *data, void *wt)
          */
         AdjustWaitForDelay(wt, 0);
     }
-    pReq = pPending;
-    if (!pReq)
-        return;
-    delay = pReq->revive.milliseconds - now.milliseconds;
-    AdjustWaitForDelay(wt, delay);
+
+    if (pending) {
+        delay = pending->revive.milliseconds - now.milliseconds;
+        AdjustWaitForDelay(wt, delay);
+    }
 }
 
 static void
 SertafiedWakeupHandler(void *data, int i)
 {
-    SertafiedPtr pReq, pNext;
     TimeStamp now;
 
     now.milliseconds = GetTimeInMillis();
     now.months = currentTime.months;
     if ((int) (now.milliseconds - currentTime.milliseconds) < 0)
         now.months++;
-    for (pReq = pPending; pReq; pReq = pNext) {
-        pNext = pReq->next;
-        if (CompareTimeStamps(pReq->revive, now) == LATER)
+
+    SertafiedPtr walk, pNext;
+    for (walk = pending; walk; walk = pNext) {
+        pNext = walk->next;
+        if (CompareTimeStamps(walk->revive, now) == LATER)
             break;
-        FreeResource(pReq->id, X11_RESTYPE_NONE);
+        FreeResource(walk->id, X11_RESTYPE_NONE);
     }
-    if (!pPending) {
+    if (!pending) {
         RemoveBlockAndWakeupHandlers(SertafiedBlockHandler,
                                      SertafiedWakeupHandler, (void *) 0);
         BlockHandlerRegistered = FALSE;

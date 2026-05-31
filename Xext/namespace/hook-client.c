@@ -2,6 +2,7 @@
 
 #include <dix-config.h>
 
+#include "dix/client_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/registry_priv.h"
@@ -20,7 +21,7 @@
 
 void hookClient(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XNS_HOOK_HEAD(XaceClientAccessRec);
+    XNS_HOOK_HEAD(ClientAccessCallbackParam);
     struct XnamespaceClientPriv *obj = XnsClientPriv(param->target);
 
     if (subj->ns->superPower || XnsClientSameNS(subj, obj))

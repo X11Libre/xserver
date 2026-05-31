@@ -6,6 +6,7 @@
 
 #include <stddef.h>
 
+#include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
 
 static inline Bool __x_rpcbuf_write_bin_pad(
@@ -81,6 +82,7 @@ void *x_rpcbuf_reserve(x_rpcbuf_t *rpcbuf, size_t needed)
     return pos;
 }
 
+_X_EXPORT /* only for GLX, not part of public ABI */
 void *x_rpcbuf_reserve0(x_rpcbuf_t *rpcbuf, size_t needed)
 {
     void *buf = x_rpcbuf_reserve(rpcbuf, needed);
@@ -99,6 +101,7 @@ Bool x_rpcbuf_write_string_pad(x_rpcbuf_t *rpcbuf, const char *str)
     return __x_rpcbuf_write_bin_pad(rpcbuf, str, strlen(str));
 }
 
+_X_EXPORT /* only for GLX, not part of public ABI */
 Bool x_rpcbuf_write_string_0t_pad(x_rpcbuf_t *rpcbuf, const char *str)
 {
     if (!str)
@@ -195,6 +198,7 @@ Bool x_rpcbuf_write_CARD16s(x_rpcbuf_t *rpcbuf, const CARD16 *values,
     return TRUE;
 }
 
+_X_EXPORT /* only for GLX, not part of public ABI */
 Bool x_rpcbuf_write_CARD32s(x_rpcbuf_t *rpcbuf, const CARD32 *values,
                             size_t count)
 {

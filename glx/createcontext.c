@@ -23,6 +23,9 @@
 #include <dix-config.h>
 
 #include <GL/glxtokens.h>
+
+#include "dix/dix_priv.h"
+
 #include "glxserver.h"
 #include "glxext.h"
 #include "indirect_dispatch.h"

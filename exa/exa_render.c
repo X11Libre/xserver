@@ -21,14 +21,13 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-
 #include <dix-config.h>
 
 #include <stdlib.h>
 
-#include "exa_priv.h"
+#include "include/mipict.h"
 
-#include "mipict.h"
+#include "exa_priv.h"
 
 #if DEBUG_TRACE_FALL
 static void
@@ -176,7 +175,8 @@ exaGetRGBAFromPixel(CARD32 pixel,
                     CARD16 *green,
                     CARD16 *blue,
                     CARD16 *alpha,
-                    PictFormatPtr pFormat, PictFormatShort format)
+                    PictFormatPtr pFormat,
+                    pixman_format_code_t format)
 {
     int rshift, bshift, gshift, ashift;
 
@@ -904,7 +904,7 @@ exaComposite(CARD8 op,
                    (pSrc->format == pDst->format ||
                     (PIXMAN_FORMAT_COLOR(pDst->format) &&
                      PIXMAN_FORMAT_COLOR(pSrc->format) &&
-                     pDst->format == PICT_FORMAT(PIXMAN_FORMAT_BPP(pSrc->format),
+                     pDst->format == PIXMAN_FORMAT(PIXMAN_FORMAT_BPP(pSrc->format),
                                                  PIXMAN_FORMAT_TYPE(pSrc->format),
                                                  0,
                                                  PIXMAN_FORMAT_R(pSrc->format),
@@ -947,7 +947,7 @@ exaComposite(CARD8 op,
 
             if (pSrc->repeat && pSrc->repeatType == RepeatNormal &&
                 pSrc->pDrawable->type == DRAWABLE_PIXMAP) {
-                DDXPointRec patOrg;
+                xPoint patOrg;
 
                 /* Let's see if the driver can do the repeat in one go */
                 if (pExaScr->info->PrepareComposite && !pSrc->alphaMap &&

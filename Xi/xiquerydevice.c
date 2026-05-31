@@ -34,18 +34,20 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/XI2proto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/fmt.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "xkbstr.h"
 #include "xkbsrv.h"
 #include "xserver-properties.h"
-#include "xace.h"
 #include "exglobals.h"
 #include "privates.h"
 #include "xiquerydevice.h"
@@ -55,28 +57,18 @@ static int
  ListDeviceInfo(ClientPtr client, DeviceIntPtr dev, xXIDeviceInfo * info);
 static int SizeDeviceInfo(DeviceIntPtr dev);
 static void SwapDeviceInfo(DeviceIntPtr dev, xXIDeviceInfo * info);
-int _X_COLD
-SProcXIQueryDevice(ClientPtr client)
-{
-    REQUEST(xXIQueryDeviceReq);
-    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
-
-    swaps(&stuff->deviceid);
-
-    return ProcXIQueryDevice(client);
-}
 
 int
 ProcXIQueryDevice(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xXIQueryDeviceReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
+
     DeviceIntPtr dev = NULL;
     int rc = Success;
     int i = 0, len = 0;
     char *info;
     Bool *skip = NULL;
-
-    REQUEST(xXIQueryDeviceReq);
-    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
 
     if (stuff->deviceid != XIAllDevices &&
         stuff->deviceid != XIAllMasterDevices) {
@@ -113,7 +105,7 @@ ProcXIQueryDevice(ClientPtr client)
         return BadAlloc;
     }
 
-    xXIQueryDeviceReply rep = {
+    xXIQueryDeviceReply reply = {
         .RepType = X_XIQueryDevice,
     };
 
@@ -122,7 +114,7 @@ ProcXIQueryDevice(ClientPtr client)
         if (client->swapped)
             SwapDeviceInfo(dev, (xXIDeviceInfo *) info);
         info += len;
-        rep.num_devices = 1;
+        reply.num_devices = 1;
     }
     else {
         i = 0;
@@ -132,7 +124,7 @@ ProcXIQueryDevice(ClientPtr client)
                 if (client->swapped)
                     SwapDeviceInfo(dev, (xXIDeviceInfo *) info);
                 info += len;
-                rep.num_devices++;
+                reply.num_devices++;
             }
         }
 
@@ -142,18 +134,16 @@ ProcXIQueryDevice(ClientPtr client)
                 if (client->swapped)
                     SwapDeviceInfo(dev, (xXIDeviceInfo *) info);
                 info += len;
-                rep.num_devices++;
+                reply.num_devices++;
             }
         }
     }
 
     free(skip);
 
-    if (client->swapped) {
-        swaps(&rep.num_devices);
-    }
+    X_REPLY_FIELD_CARD16(num_devices);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 /**
@@ -164,8 +154,7 @@ ShouldSkipDevice(ClientPtr client, int deviceid, DeviceIntPtr dev)
 {
     /* if all devices are not being queried, only master devices are */
     if (deviceid == XIAllDevices || InputDevIsMaster(dev)) {
-        int rc = XaceHookDeviceAccess(client, dev, DixGetAttrAccess);
-
+        int rc = dixCallDeviceAccessCallback(client, dev, DixGetAttrAccess);
         if (rc == Success)
             return FALSE;
     }
@@ -465,7 +454,7 @@ static Bool ShouldListGestureInfo(ClientPtr client)
      * and then a completely separate module within the client uses broken libxcb to call
      * XIQueryDevice.
      */
-    XIClientPtr pXIClient = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr pXIClient = XIClientPriv(client);
     if (pXIClient->major_version) {
         return version_compare(pXIClient->major_version, pXIClient->minor_version, 2, 4) >= 0;
     }
@@ -561,11 +550,9 @@ ListDeviceClasses(ClientPtr client, DeviceIntPtr dev,
     int total_len = 0;
     int len;
     int i;
-    int rc;
 
     /* Check if the current device state should be suppressed */
-    rc = XaceHookDeviceAccess(client, dev, DixReadAccess);
-
+    int rc = dixCallDeviceAccessCallback(client, dev, DixReadAccess);
     if (dev->button) {
         (*nclasses)++;
         len = ListButtonInfo(dev, (xXIButtonInfo *) any, rc == Success);

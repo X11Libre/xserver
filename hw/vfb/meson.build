@@ -6,12 +6,18 @@ srcs = [
     '../stubs/ddxBeforeReset.c',
 ]
 
+vfb_glamor = []
+if build_glamor
+    vfb_glamor += glamor
+endif
+
 xvfb_server = executable(
     'Xvfb',
     srcs,
     include_directories: inc,
     dependencies: common_dep,
     link_with: [
+        vfb_glamor,
         libxserver_main,
         libxserver_fb,
         libxserver,

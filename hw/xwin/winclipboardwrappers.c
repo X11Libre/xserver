@@ -29,10 +29,7 @@
  * Authors:	Harold L Hunt II
  *              Colin Harrison
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "win.h"
 #include "dixstruct_priv.h"

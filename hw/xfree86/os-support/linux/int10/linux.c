@@ -2,9 +2,7 @@
  * linux specific part of the int10 module
  * Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2008 Egbert Eich
  */
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "xf86.h"
 #include "xf86_OSproc.h"

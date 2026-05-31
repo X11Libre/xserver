@@ -52,6 +52,7 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/request_priv.h"
 
 #include "misc.h"
 #include "dixstruct.h"
@@ -63,6 +64,9 @@ SOFTWARE.
 #include "xace.h"
 
 #define LAST_ERROR 255
+
+CallbackListPtr ExtensionAccessCallback = NULL;
+CallbackListPtr ExtensionDispatchCallback = NULL;
 
 static ExtensionEntry **extensions = (ExtensionEntry **) NULL;
 
@@ -273,8 +277,12 @@ ExtensionAvailable(ClientPtr client, ExtensionEntry *ext)
 {
     if (!ext)
         return FALSE;
-    if (XaceHookExtAccess(client, ext) != Success)
+
+    ExtensionAccessCallbackParam rec = { client, ext, DixGetAttrAccess, Success };
+    CallCallbacks(&ExtensionAccessCallback, &rec);
+    if (rec.status != Success)
         return FALSE;
+
     if (!ext->base)
         return FALSE;
     return TRUE;
@@ -283,30 +291,26 @@ ExtensionAvailable(ClientPtr client, ExtensionEntry *ext)
 int
 ProcQueryExtension(ClientPtr client)
 {
-    REQUEST(xQueryExtensionReq);
+    X_REQUEST_HEAD_AT_LEAST(xQueryExtensionReq);
+    X_REQUEST_FIELD_CARD16(nbytes);
     REQUEST_FIXED_SIZE(xQueryExtensionReq, stuff->nbytes);
 
-    xQueryExtensionReply rep = { 0 };
+    xQueryExtensionReply reply = { 0 };
 
-    if (!NumExtensions || !extensions)
-        rep.present = xFalse;
-    else {
+    if (NumExtensions && extensions) {
         char extname[PATH_MAX] = { 0 };
         strncpy(extname, (char *) &stuff[1], min(stuff->nbytes, sizeof(extname)-1));
         ExtensionEntry *extEntry = CheckExtension(extname);
 
-        if (!extEntry || !ExtensionAvailable(client, extEntry))
-            rep.present = xFalse;
-        else {
-            rep.present = xTrue;
-            rep.major_opcode = extEntry->base;
-            rep.first_event = extEntry->eventBase;
-            rep.first_error = extEntry->errorBase;
+        if (extEntry && ExtensionAvailable(client, extEntry)) {
+            reply.present = xTrue;
+            reply.major_opcode = extEntry->base;
+            reply.first_event = extEntry->eventBase;
+            reply.first_error = extEntry->errorBase;
         }
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -314,7 +318,7 @@ ProcListExtensions(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xReq);
 
-    xListExtensionsReply rep = { 0 };
+    xListExtensionsReply reply = { 0 };
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -325,7 +329,7 @@ ProcListExtensions(ClientPtr client)
 
             int len = strlen(extensions[i]->name);
 
-            rep.nExtensions++;
+            reply.nExtensions++;
 
             /* write a pascal string */
             x_rpcbuf_write_CARD8(&rpcbuf, len);
@@ -333,5 +337,5 @@ ProcListExtensions(ClientPtr client)
         }
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

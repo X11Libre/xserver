@@ -4,6 +4,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/server_priv.h"
 #include "Xext/xacestr.h"
 
 #include "namespace.h"
@@ -11,7 +12,7 @@
 
 void hookServerAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XNS_HOOK_HEAD(XaceServerAccessRec);
+    XNS_HOOK_HEAD(ServerAccessCallbackParam);
 
     if (subj->ns->superPower)
         goto pass;

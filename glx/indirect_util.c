@@ -31,6 +31,7 @@
 #include <GL/glxproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 
 #include "indirect_size.h"

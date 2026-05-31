@@ -29,12 +29,18 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>
+#include <X11/extensions/shmproto.h>
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
-#include "Xext/xvdix_priv.h"
+#include "dix/request_priv.h"
+#include "dix/screenint_priv.h"
+#include "include/shmint.h"
+#include "include/xvmcext.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
+#include "Xext/shm_priv.h"
+#include "Xext/xvdix_priv.h"
 
 #include "misc.h"
 #include "scrnintstr.h"
@@ -44,10 +50,6 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"
-#ifdef CONFIG_MITSHM
-#include <X11/extensions/shmproto.h>
-#include "shmint.h"
-#endif
 
 #include "xvdisp.h"
 
@@ -58,35 +60,31 @@ unsigned long XvXRTPort;
 static int
 ProcXvQueryExtension(ClientPtr client)
 {
-    /* REQUEST(xvQueryExtensionReq); */
-    REQUEST_SIZE_MATCH(xvQueryExtensionReq);
+    X_REQUEST_HEAD_STRUCT(xvQueryExtensionReq);
 
     xvQueryExtensionReply reply = {
         .version = XvVersion,
         .revision = XvRevision
     };
 
-    if (client->swapped) {
-        swaps(&reply.version);
-        swaps(&reply.revision);
-    }
+    X_REPLY_FIELD_CARD16(version);
+    X_REPLY_FIELD_CARD16(revision);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcXvQueryAdaptors(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvQueryAdaptorsReq);
+    X_REQUEST_FIELD_CARD32(window);
+
     int na, nf, rc;
     XvAdaptorPtr pa;
     XvFormatPtr pf;
     WindowPtr pWin;
     ScreenPtr pScreen;
     XvScreenPtr pxvs;
-
-    REQUEST(xvQueryAdaptorsReq);
-    REQUEST_SIZE_MATCH(xvQueryAdaptorsReq);
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
@@ -131,9 +129,7 @@ ProcXvQueryAdaptors(ClientPtr client)
         .num_adaptors = numAdaptors,
     };
 
-    if (client->swapped) {
-        swaps(&reply.num_adaptors);
-    }
+    X_REPLY_FIELD_CARD16(num_adaptors);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -141,8 +137,8 @@ ProcXvQueryAdaptors(ClientPtr client)
 static int
 ProcXvQueryEncodings(ClientPtr client)
 {
-    REQUEST(xvQueryEncodingsReq);
-    REQUEST_SIZE_MATCH(xvQueryEncodingsReq);
+    X_REQUEST_HEAD_STRUCT(xvQueryEncodingsReq);
+    X_REQUEST_FIELD_CARD32(port);
 
     XvPortPtr pPort;
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -158,6 +154,7 @@ ProcXvQueryEncodings(ClientPtr client)
         x_rpcbuf_write_CARD16(&rpcbuf, nameSize);
         x_rpcbuf_write_CARD16(&rpcbuf, pe->width);
         x_rpcbuf_write_CARD16(&rpcbuf, pe->height);
+        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* padding */
         x_rpcbuf_write_CARD32(&rpcbuf, pe->rate.numerator);
         x_rpcbuf_write_CARD32(&rpcbuf, pe->rate.denominator);
         x_rpcbuf_write_string_pad(&rpcbuf, pe->name);
@@ -169,9 +166,7 @@ ProcXvQueryEncodings(ClientPtr client)
         .num_encodings = pPort->pAdaptor->nEncodings,
     };
 
-    if (client->swapped) {
-        swaps(&reply.num_encodings);
-    }
+    X_REPLY_FIELD_CARD16(num_encodings);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -185,7 +180,6 @@ SingleXvPutVideo(ClientPtr client)
     int status;
 
     REQUEST(xvPutVideoReq);
-    REQUEST_SIZE_MATCH(xvPutVideoReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -206,11 +200,26 @@ SingleXvPutVideo(ClientPtr client)
                         stuff->drw_w, stuff->drw_h);
 }
 
+#ifdef XINERAMA
 static int XineramaXvPutVideo(ClientPtr client);
+#endif
 
 static int
 ProcXvPutVideo(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvPutVideoReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(vid_x);
+    X_REQUEST_FIELD_CARD16(vid_y);
+    X_REQUEST_FIELD_CARD16(vid_w);
+    X_REQUEST_FIELD_CARD16(vid_h);
+    X_REQUEST_FIELD_CARD16(drw_x);
+    X_REQUEST_FIELD_CARD16(drw_y);
+    X_REQUEST_FIELD_CARD16(drw_w);
+    X_REQUEST_FIELD_CARD16(drw_h);
+
 #ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvPutVideo(client);
@@ -227,7 +236,6 @@ SingleXvPutStill(ClientPtr client)
     int status;
 
     REQUEST(xvPutStillReq);
-    REQUEST_SIZE_MATCH(xvPutStillReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -248,11 +256,26 @@ SingleXvPutStill(ClientPtr client)
                         stuff->drw_w, stuff->drw_h);
 }
 
+#ifdef XINERAMA
 static int XineramaXvPutStill(ClientPtr client);
+#endif
 
 static int
 ProcXvPutStill(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvPutStillReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(vid_x);
+    X_REQUEST_FIELD_CARD16(vid_y);
+    X_REQUEST_FIELD_CARD16(vid_w);
+    X_REQUEST_FIELD_CARD16(vid_h);
+    X_REQUEST_FIELD_CARD16(drw_x);
+    X_REQUEST_FIELD_CARD16(drw_y);
+    X_REQUEST_FIELD_CARD16(drw_w);
+    X_REQUEST_FIELD_CARD16(drw_h);
+
 #ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvPutStill(client);
@@ -263,13 +286,23 @@ ProcXvPutStill(ClientPtr client)
 static int
 ProcXvGetVideo(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvGetVideoReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(vid_x);
+    X_REQUEST_FIELD_CARD16(vid_y);
+    X_REQUEST_FIELD_CARD16(vid_w);
+    X_REQUEST_FIELD_CARD16(vid_h);
+    X_REQUEST_FIELD_CARD16(drw_x);
+    X_REQUEST_FIELD_CARD16(drw_y);
+    X_REQUEST_FIELD_CARD16(drw_w);
+    X_REQUEST_FIELD_CARD16(drw_h);
+
     DrawablePtr pDraw;
     XvPortPtr pPort;
     GCPtr pGC;
     int status;
-
-    REQUEST(xvGetVideoReq);
-    REQUEST_SIZE_MATCH(xvGetVideoReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixReadAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -293,13 +326,23 @@ ProcXvGetVideo(ClientPtr client)
 static int
 ProcXvGetStill(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvGetStillReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(vid_x);
+    X_REQUEST_FIELD_CARD16(vid_y);
+    X_REQUEST_FIELD_CARD16(vid_w);
+    X_REQUEST_FIELD_CARD16(vid_h);
+    X_REQUEST_FIELD_CARD16(drw_x);
+    X_REQUEST_FIELD_CARD16(drw_y);
+    X_REQUEST_FIELD_CARD16(drw_w);
+    X_REQUEST_FIELD_CARD16(drw_h);
+
     DrawablePtr pDraw;
     XvPortPtr pPort;
     GCPtr pGC;
     int status;
-
-    REQUEST(xvGetStillReq);
-    REQUEST_SIZE_MATCH(xvGetStillReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixReadAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -326,8 +369,8 @@ ProcXvSelectVideoNotify(ClientPtr client)
     DrawablePtr pDraw;
     int rc;
 
-    REQUEST(xvSelectVideoNotifyReq);
-    REQUEST_SIZE_MATCH(xvSelectVideoNotifyReq);
+    X_REQUEST_HEAD_STRUCT(xvSelectVideoNotifyReq);
+    X_REQUEST_FIELD_CARD32(drawable);
 
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixReceiveAccess);
@@ -340,11 +383,10 @@ ProcXvSelectVideoNotify(ClientPtr client)
 static int
 ProcXvSelectPortNotify(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvSelectPortNotifyReq);
+    X_REQUEST_FIELD_CARD32(port);
+
     XvPortPtr pPort;
-
-    REQUEST(xvSelectPortNotifyReq);
-    REQUEST_SIZE_MATCH(xvSelectPortNotifyReq);
-
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
     return XvdiSelectPortNotify(client, pPort, stuff->onoff);
@@ -353,11 +395,12 @@ ProcXvSelectPortNotify(ClientPtr client)
 static int
 ProcXvGrabPort(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvGrabPortReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(time);
+
     int result, status;
     XvPortPtr pPort;
-
-    REQUEST(xvGrabPortReq);
-    REQUEST_SIZE_MATCH(xvGrabPortReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -370,18 +413,17 @@ ProcXvGrabPort(ClientPtr client)
         .result = result
     };
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcXvUngrabPort(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvUngrabPortReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(time);
+
     XvPortPtr pPort;
-
-    REQUEST(xvGrabPortReq);
-    REQUEST_SIZE_MATCH(xvGrabPortReq);
-
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
     return XvdiUngrabPort(client, pPort, stuff->time);
@@ -395,7 +437,6 @@ SingleXvStopVideo(ClientPtr client)
     XvPortPtr pPort;
 
     REQUEST(xvStopVideoReq);
-    REQUEST_SIZE_MATCH(xvStopVideoReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -406,11 +447,17 @@ SingleXvStopVideo(ClientPtr client)
     return XvdiStopVideo(client, pPort, pDraw);
 }
 
+#ifdef XINERAMA
 static int XineramaXvStopVideo(ClientPtr client);
+#endif
 
 static int
 ProcXvStopVideo(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvStopVideoReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(drawable);
+
 #ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvStopVideo(client);
@@ -425,7 +472,6 @@ SingleXvSetPortAttribute(ClientPtr client)
     XvPortPtr pPort;
 
     REQUEST(xvSetPortAttributeReq);
-    REQUEST_SIZE_MATCH(xvSetPortAttributeReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixSetAttrAccess);
 
@@ -445,11 +491,18 @@ SingleXvSetPortAttribute(ClientPtr client)
     return status;
 }
 
+#ifdef XINERAMA
 static int XineramaXvSetPortAttribute(ClientPtr client);
+#endif
 
 static int
 ProcXvSetPortAttribute(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvSetPortAttributeReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(attribute);
+    X_REQUEST_FIELD_CARD32(value);
+
 #ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvSetPortAttribute(client);
@@ -464,8 +517,9 @@ ProcXvGetPortAttribute(ClientPtr client)
     int status;
     XvPortPtr pPort;
 
-    REQUEST(xvGetPortAttributeReq);
-    REQUEST_SIZE_MATCH(xvGetPortAttributeReq);
+    X_REQUEST_HEAD_STRUCT(xvGetPortAttributeReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(attribute);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixGetAttrAccess);
 
@@ -484,22 +538,23 @@ ProcXvGetPortAttribute(ClientPtr client)
         .value = value
     };
 
-    if (client->swapped) {
-        swapl(&reply.value);
-    }
+    X_REPLY_FIELD_CARD32(value);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcXvQueryBestSize(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvQueryBestSizeReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD16(vid_w);
+    X_REQUEST_FIELD_CARD16(vid_h);
+    X_REQUEST_FIELD_CARD16(drw_w);
+    X_REQUEST_FIELD_CARD16(drw_h);
+
     unsigned int actual_width, actual_height;
     XvPortPtr pPort;
-
-    REQUEST(xvQueryBestSizeReq);
-    REQUEST_SIZE_MATCH(xvQueryBestSizeReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -513,24 +568,21 @@ ProcXvQueryBestSize(ClientPtr client)
         .actual_height = actual_height
     };
 
-    if (client->swapped) {
-        swaps(&reply.actual_width);
-        swaps(&reply.actual_height);
-    }
+    X_REPLY_FIELD_CARD16(actual_width);
+    X_REPLY_FIELD_CARD16(actual_height);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcXvQueryPortAttributes(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvQueryPortAttributesReq);
+    X_REQUEST_FIELD_CARD32(port);
+
     int i;
     XvPortPtr pPort;
     XvAttributePtr pAtt;
-
-    REQUEST(xvQueryPortAttributesReq);
-    REQUEST_SIZE_MATCH(xvQueryPortAttributesReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixGetAttrAccess);
 
@@ -552,10 +604,8 @@ ProcXvQueryPortAttributes(ClientPtr client)
         .text_size = textSize,
     };
 
-    if (client->swapped) {
-        swapl(&reply.num_attributes);
-        swapl(&reply.text_size);
-    }
+    X_REPLY_FIELD_CARD32(num_attributes);
+    X_REPLY_FIELD_CARD32(text_size);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -571,7 +621,6 @@ SingleXvPutImage(ClientPtr client)
     CARD16 width, height;
 
     REQUEST(xvPutImageReq);
-    REQUEST_AT_LEAST_SIZE(xvPutImageReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -617,12 +666,30 @@ SingleXvPutImage(ClientPtr client)
                         stuff->width, stuff->height);
 }
 
+#ifdef XINERAMA
 static int
 XineramaXvPutImage(ClientPtr client);
+#endif
 
 static int
 ProcXvPutImage(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xvPutImageReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD32(id);
+    X_REQUEST_FIELD_CARD16(src_x);
+    X_REQUEST_FIELD_CARD16(src_y);
+    X_REQUEST_FIELD_CARD16(src_w);
+    X_REQUEST_FIELD_CARD16(src_h);
+    X_REQUEST_FIELD_CARD16(drw_x);
+    X_REQUEST_FIELD_CARD16(drw_y);
+    X_REQUEST_FIELD_CARD16(drw_w);
+    X_REQUEST_FIELD_CARD16(drw_h);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+
 #ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvPutImage(client);
@@ -644,7 +711,6 @@ SingleXvShmPutImage(ClientPtr client)
     CARD16 width, height;
 
     REQUEST(xvShmPutImageReq);
-    REQUEST_SIZE_MATCH(xvShmPutImageReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -707,7 +773,9 @@ SingleXvShmPutImage(ClientPtr client)
     return status;
 }
 
+#ifdef XINERAMA
 static int XineramaXvShmPutImage(ClientPtr client);
+#endif
 
 #endif /* CONFIG_MITSHM */
 
@@ -715,6 +783,24 @@ static int
 ProcXvShmPutImage(ClientPtr client)
 {
 #ifdef CONFIG_MITSHM
+    X_REQUEST_HEAD_STRUCT(xvShmPutImageReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD32(shmseg);
+    X_REQUEST_FIELD_CARD32(id);
+    X_REQUEST_FIELD_CARD32(offset);
+    X_REQUEST_FIELD_CARD16(src_x);
+    X_REQUEST_FIELD_CARD16(src_y);
+    X_REQUEST_FIELD_CARD16(src_w);
+    X_REQUEST_FIELD_CARD16(src_h);
+    X_REQUEST_FIELD_CARD16(drw_x);
+    X_REQUEST_FIELD_CARD16(drw_y);
+    X_REQUEST_FIELD_CARD16(drw_w);
+    X_REQUEST_FIELD_CARD16(drw_h);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+
 #ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvShmPutImage(client);
@@ -725,21 +811,21 @@ ProcXvShmPutImage(ClientPtr client)
 #endif /* CONFIG_MITSHM */
 }
 
-#ifdef XvMCExtension
-#include "xvmcext.h"
-#endif
+__size_assert(int, sizeof(INT32));
 
 static int
 ProcXvQueryImageAttributes(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvQueryImageAttributesReq);
+    X_REQUEST_FIELD_CARD32(port);
+    X_REQUEST_FIELD_CARD32(id);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+
     int size, num_planes, i;
     CARD16 width, height;
     XvImagePtr pImage = NULL;
     XvPortPtr pPort;
-
-    REQUEST(xvQueryImageAttributesReq);
-
-    REQUEST_SIZE_MATCH(xvQueryImageAttributesReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -762,12 +848,12 @@ ProcXvQueryImageAttributes(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    // allocating for `offsets` as well as `pitches` in one block
-    // both having CARD32 * num_planes (actually int32_t put into CARD32)
-    INT32 *offsets = x_rpcbuf_reserve(&rpcbuf, 2 * num_planes * sizeof(INT32));
+    /* allocating for `offsets` as well as `pitches` in one block */
+    /* both having CARD32 * num_planes (actually int32_t put into CARD32) */
+    int *offsets = x_rpcbuf_reserve(&rpcbuf, 2 * num_planes * sizeof(int));
     if (!offsets)
         return BadAlloc;
-    INT32 *pitches = offsets + num_planes;
+    int *pitches = offsets + num_planes;
 
     width = stuff->width;
     height = stuff->height;
@@ -784,14 +870,15 @@ ProcXvQueryImageAttributes(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&reply.num_planes);
-        swapl(&reply.data_size);
-        swaps(&reply.width);
-        swaps(&reply.height);
         /* needed here, because ddQueryImageAttributes() directly wrote into
            our rpcbuf area */
         SwapLongs((CARD32 *) offsets, x_rpcbuf_wsize_units(&rpcbuf));
     }
+
+    X_REPLY_FIELD_CARD32(num_planes);
+    X_REPLY_FIELD_CARD32(data_size);
+    X_REPLY_FIELD_CARD16(width);
+    X_REPLY_FIELD_CARD16(height);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -799,13 +886,12 @@ ProcXvQueryImageAttributes(ClientPtr client)
 static int
 ProcXvListImageFormats(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xvListImageFormatsReq);
+    X_REQUEST_FIELD_CARD32(port);
+
     XvPortPtr pPort;
     XvImagePtr pImage;
     int i;
-
-    REQUEST(xvListImageFormatsReq);
-
-    REQUEST_SIZE_MATCH(xvListImageFormatsReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -846,16 +932,14 @@ ProcXvListImageFormats(ClientPtr client)
 
     /* use rpc.wpos here, in order to get how much we've really written */
     if (rpcbuf.wpos != (pPort->pAdaptor->nImages*sz_xvImageFormatInfo))
-        LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %ld but shoud be %d\n",
-                   rpcbuf.wpos, (pPort->pAdaptor->nImages*sz_xvImageFormatInfo));
+        LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %llu but shoud be %d\n",
+                   (long long unsigned)rpcbuf.wpos, (pPort->pAdaptor->nImages*sz_xvImageFormatInfo));
 
     xvListImageFormatsReply reply = {
         .num_formats = pPort->pAdaptor->nImages,
     };
 
-    if (client->swapped) {
-        swapl(&reply.num_formats);
-    }
+    X_REPLY_FIELD_CARD32(num_formats);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -913,317 +997,6 @@ ProcXvDispatch(ClientPtr client)
     }
 }
 
-/* Swapped Procs */
-
-static int _X_COLD
-SProcXvQueryAdaptors(ClientPtr client)
-{
-    REQUEST(xvQueryAdaptorsReq);
-    REQUEST_SIZE_MATCH(xvQueryAdaptorsReq);
-    swapl(&stuff->window);
-    return ProcXvQueryAdaptors(client);
-}
-
-static int _X_COLD
-SProcXvQueryEncodings(ClientPtr client)
-{
-    REQUEST(xvQueryEncodingsReq);
-    REQUEST_SIZE_MATCH(xvQueryEncodingsReq);
-    swapl(&stuff->port);
-    return ProcXvQueryEncodings(client);
-}
-
-static int _X_COLD
-SProcXvGrabPort(ClientPtr client)
-{
-    REQUEST(xvGrabPortReq);
-    REQUEST_SIZE_MATCH(xvGrabPortReq);
-    swapl(&stuff->port);
-    swapl(&stuff->time);
-    return ProcXvGrabPort(client);
-}
-
-static int _X_COLD
-SProcXvUngrabPort(ClientPtr client)
-{
-    REQUEST(xvUngrabPortReq);
-    REQUEST_SIZE_MATCH(xvUngrabPortReq);
-    swapl(&stuff->port);
-    swapl(&stuff->time);
-    return ProcXvUngrabPort(client);
-}
-
-static int _X_COLD
-SProcXvPutVideo(ClientPtr client)
-{
-    REQUEST(xvPutVideoReq);
-    REQUEST_SIZE_MATCH(xvPutVideoReq);
-    swapl(&stuff->port);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    swaps(&stuff->vid_x);
-    swaps(&stuff->vid_y);
-    swaps(&stuff->vid_w);
-    swaps(&stuff->vid_h);
-    swaps(&stuff->drw_x);
-    swaps(&stuff->drw_y);
-    swaps(&stuff->drw_w);
-    swaps(&stuff->drw_h);
-    return ProcXvPutVideo(client);
-}
-
-static int _X_COLD
-SProcXvPutStill(ClientPtr client)
-{
-    REQUEST(xvPutStillReq);
-    REQUEST_SIZE_MATCH(xvPutStillReq);
-    swapl(&stuff->port);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    swaps(&stuff->vid_x);
-    swaps(&stuff->vid_y);
-    swaps(&stuff->vid_w);
-    swaps(&stuff->vid_h);
-    swaps(&stuff->drw_x);
-    swaps(&stuff->drw_y);
-    swaps(&stuff->drw_w);
-    swaps(&stuff->drw_h);
-    return ProcXvPutStill(client);
-}
-
-static int _X_COLD
-SProcXvGetVideo(ClientPtr client)
-{
-    REQUEST(xvGetVideoReq);
-    REQUEST_SIZE_MATCH(xvGetVideoReq);
-    swapl(&stuff->port);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    swaps(&stuff->vid_x);
-    swaps(&stuff->vid_y);
-    swaps(&stuff->vid_w);
-    swaps(&stuff->vid_h);
-    swaps(&stuff->drw_x);
-    swaps(&stuff->drw_y);
-    swaps(&stuff->drw_w);
-    swaps(&stuff->drw_h);
-    return ProcXvGetVideo(client);
-}
-
-static int _X_COLD
-SProcXvGetStill(ClientPtr client)
-{
-    REQUEST(xvGetStillReq);
-    REQUEST_SIZE_MATCH(xvGetStillReq);
-    swapl(&stuff->port);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    swaps(&stuff->vid_x);
-    swaps(&stuff->vid_y);
-    swaps(&stuff->vid_w);
-    swaps(&stuff->vid_h);
-    swaps(&stuff->drw_x);
-    swaps(&stuff->drw_y);
-    swaps(&stuff->drw_w);
-    swaps(&stuff->drw_h);
-    return ProcXvGetStill(client);
-}
-
-static int _X_COLD
-SProcXvPutImage(ClientPtr client)
-{
-    REQUEST(xvPutImageReq);
-    REQUEST_AT_LEAST_SIZE(xvPutImageReq);
-    swapl(&stuff->port);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    swapl(&stuff->id);
-    swaps(&stuff->src_x);
-    swaps(&stuff->src_y);
-    swaps(&stuff->src_w);
-    swaps(&stuff->src_h);
-    swaps(&stuff->drw_x);
-    swaps(&stuff->drw_y);
-    swaps(&stuff->drw_w);
-    swaps(&stuff->drw_h);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    return ProcXvPutImage(client);
-}
-
-#ifdef CONFIG_MITSHM
-static int _X_COLD
-SProcXvShmPutImage(ClientPtr client)
-{
-    REQUEST(xvShmPutImageReq);
-    REQUEST_SIZE_MATCH(xvShmPutImageReq);
-    swapl(&stuff->port);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    swapl(&stuff->shmseg);
-    swapl(&stuff->id);
-    swapl(&stuff->offset);
-    swaps(&stuff->src_x);
-    swaps(&stuff->src_y);
-    swaps(&stuff->src_w);
-    swaps(&stuff->src_h);
-    swaps(&stuff->drw_x);
-    swaps(&stuff->drw_y);
-    swaps(&stuff->drw_w);
-    swaps(&stuff->drw_h);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    return ProcXvShmPutImage(client);
-}
-#else /* CONFIG_MITSHM */
-#define SProcXvShmPutImage ProcXvShmPutImage
-#endif /* CONFIG_MITSHM */
-
-static int _X_COLD
-SProcXvSelectVideoNotify(ClientPtr client)
-{
-    REQUEST(xvSelectVideoNotifyReq);
-    REQUEST_SIZE_MATCH(xvSelectVideoNotifyReq);
-    swapl(&stuff->drawable);
-    return ProcXvSelectVideoNotify(client);
-}
-
-static int _X_COLD
-SProcXvSelectPortNotify(ClientPtr client)
-{
-    REQUEST(xvSelectPortNotifyReq);
-    REQUEST_SIZE_MATCH(xvSelectPortNotifyReq);
-    swapl(&stuff->port);
-    return ProcXvSelectPortNotify(client);
-}
-
-static int _X_COLD
-SProcXvStopVideo(ClientPtr client)
-{
-    REQUEST(xvStopVideoReq);
-    REQUEST_SIZE_MATCH(xvStopVideoReq);
-    swapl(&stuff->port);
-    swapl(&stuff->drawable);
-    return ProcXvStopVideo(client);
-}
-
-static int _X_COLD
-SProcXvSetPortAttribute(ClientPtr client)
-{
-    REQUEST(xvSetPortAttributeReq);
-    REQUEST_SIZE_MATCH(xvSetPortAttributeReq);
-    swapl(&stuff->port);
-    swapl(&stuff->attribute);
-    swapl(&stuff->value);
-    return ProcXvSetPortAttribute(client);
-}
-
-static int _X_COLD
-SProcXvGetPortAttribute(ClientPtr client)
-{
-    REQUEST(xvGetPortAttributeReq);
-    REQUEST_SIZE_MATCH(xvGetPortAttributeReq);
-    swapl(&stuff->port);
-    swapl(&stuff->attribute);
-    return ProcXvGetPortAttribute(client);
-}
-
-static int _X_COLD
-SProcXvQueryBestSize(ClientPtr client)
-{
-    REQUEST(xvQueryBestSizeReq);
-    REQUEST_SIZE_MATCH(xvQueryBestSizeReq);
-    swapl(&stuff->port);
-    swaps(&stuff->vid_w);
-    swaps(&stuff->vid_h);
-    swaps(&stuff->drw_w);
-    swaps(&stuff->drw_h);
-    return ProcXvQueryBestSize(client);
-}
-
-static int _X_COLD
-SProcXvQueryPortAttributes(ClientPtr client)
-{
-    REQUEST(xvQueryPortAttributesReq);
-    REQUEST_SIZE_MATCH(xvQueryPortAttributesReq);
-    swapl(&stuff->port);
-    return ProcXvQueryPortAttributes(client);
-}
-
-static int _X_COLD
-SProcXvQueryImageAttributes(ClientPtr client)
-{
-    REQUEST(xvQueryImageAttributesReq);
-    REQUEST_SIZE_MATCH(xvQueryImageAttributesReq);
-    swapl(&stuff->port);
-    swapl(&stuff->id);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    return ProcXvQueryImageAttributes(client);
-}
-
-static int _X_COLD
-SProcXvListImageFormats(ClientPtr client)
-{
-    REQUEST(xvListImageFormatsReq);
-    REQUEST_SIZE_MATCH(xvListImageFormatsReq);
-    swapl(&stuff->port);
-    return ProcXvListImageFormats(client);
-}
-
-int _X_COLD
-SProcXvDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    UpdateCurrentTime();
-
-    switch (stuff->data) {
-        case xv_QueryExtension:
-            return ProcXvQueryExtension(client);
-        case xv_QueryAdaptors:
-            return SProcXvQueryAdaptors(client);
-        case xv_QueryEncodings:
-            return SProcXvQueryEncodings(client);
-        case xv_GrabPort:
-            return SProcXvGrabPort(client);
-        case xv_UngrabPort:
-            return SProcXvUngrabPort(client);
-        case xv_PutVideo:
-            return SProcXvPutVideo(client);
-        case xv_PutStill:
-            return SProcXvPutStill(client);
-        case xv_GetVideo:
-            return SProcXvGetVideo(client);
-        case xv_GetStill:
-            return SProcXvGetStill(client);
-        case xv_StopVideo:
-            return SProcXvStopVideo(client);
-        case xv_SelectVideoNotify:
-            return SProcXvSelectVideoNotify(client);
-        case xv_SelectPortNotify:
-            return SProcXvSelectPortNotify(client);
-        case xv_QueryBestSize:
-            return SProcXvQueryBestSize(client);
-        case xv_SetPortAttribute:
-            return SProcXvSetPortAttribute(client);
-        case xv_GetPortAttribute:
-            return SProcXvGetPortAttribute(client);
-        case xv_QueryPortAttributes:
-            return SProcXvQueryPortAttributes(client);
-        case xv_ListImageFormats:
-            return SProcXvListImageFormats(client);
-        case xv_QueryImageAttributes:
-            return SProcXvQueryImageAttributes(client);
-        case xv_PutImage:
-            return SProcXvPutImage(client);
-        case xv_ShmPutImage:
-            return SProcXvShmPutImage(client);
-        default:
-            return BadRequest;
-    }
-}
-
 #ifdef XINERAMA
 static int
 XineramaXvStopVideo(ClientPtr client)
@@ -1232,7 +1005,6 @@ XineramaXvStopVideo(ClientPtr client)
     PanoramiXRes *draw, *port;
 
     REQUEST(xvStopVideoReq);
-    REQUEST_SIZE_MATCH(xvStopVideoReq);
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
@@ -1262,8 +1034,6 @@ XineramaXvSetPortAttribute(ClientPtr client)
     PanoramiXRes *port;
     int result;
 
-    REQUEST_SIZE_MATCH(xvSetPortAttributeReq);
-
     result = dixLookupResourceByType((void **) &port, stuff->port,
                                      XvXRTPort, client, DixReadAccess);
     if (result != Success)
@@ -1288,8 +1058,6 @@ XineramaXvShmPutImage(ClientPtr client)
     Bool send_event;
     Bool isRoot;
     int result, x, y;
-
-    REQUEST_SIZE_MATCH(xvShmPutImageReq);
 
     send_event = stuff->send_event;
 
@@ -1344,8 +1112,6 @@ XineramaXvPutImage(ClientPtr client)
     Bool isRoot;
     int result, x, y;
 
-    REQUEST_AT_LEAST_SIZE(xvPutImageReq);
-
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
     if (result != Success)
@@ -1393,8 +1159,6 @@ XineramaXvPutVideo(ClientPtr client)
     Bool isRoot;
     int result, x, y;
 
-    REQUEST_AT_LEAST_SIZE(xvPutVideoReq);
-
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
     if (result != Success)
@@ -1441,8 +1205,6 @@ XineramaXvPutStill(ClientPtr client)
     PanoramiXRes *draw, *gc, *port;
     Bool isRoot;
     int result, x, y;
-
-    REQUEST_AT_LEAST_SIZE(xvPutImageReq);
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
@@ -1543,7 +1305,7 @@ void
 XineramifyXv(void)
 {
     XvScreenPtr xvsp0 =
-        dixLookupPrivate(&screenInfo.screens[0]->devPrivates, XvGetScreenKey());
+        dixLookupPrivate(&(dixGetMasterScreen()->devPrivates), XvGetScreenKey());
     XvAdaptorPtr MatchingAdaptors[MAXSCREENS];
     int i;
 

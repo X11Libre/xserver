@@ -27,8 +27,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
-int ProcXChangePointerDevice(ClientPtr  /* client */
-    );
+#include "include/input.h"
 
 void DeleteFocusClassDeviceStruct(DeviceIntPtr  /* dev */
     );

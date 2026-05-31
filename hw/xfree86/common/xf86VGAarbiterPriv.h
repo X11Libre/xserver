@@ -23,13 +23,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-
 #ifndef XSERVER_XFREE86_XF86VGAARBITERPRIV_H
 #define XSERVER_XFREE86_XF86VGAARBITERPRIV_H
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #include "misc.h"
 #include "xf86.h"
@@ -51,7 +46,7 @@
 
 #define UNWRAP_SCREEN(x) pScreen->x = pScreenPriv->x
 
-#define SCREEN_PRIV()   ((VGAarbiterScreenPtr) dixLookupPrivate(&(pScreen)->devPrivates, VGAarbiterScreenKey))
+#define SCREEN_PRIV()   ((VGAarbiterScreenPtr) dixLookupPrivate(&(pScreen)->devPrivates, &VGAarbiterScreenKeyRec))
 
 #define SCREEN_PROLOG(x) (pScreen->x = SCREEN_PRIV()->x)
 
@@ -67,7 +62,7 @@
 
 #define PICTURE_PROLOGUE(field) ps->field = \
     ((VGAarbiterScreenPtr)dixLookupPrivate(&(pScreen)->devPrivates, \
-    VGAarbiterScreenKey))->field
+    &VGAarbiterScreenKeyRec))->field
 
 #define PICTURE_EPILOGUE(field, wrap) ps->field = wrap
 
@@ -82,7 +77,7 @@
     PointPriv = dixLookupPrivate(&pScreen->devPrivates,         \
                                  miPointerScreenKey);           \
     pScreenPriv = dixLookupPrivate(&(pScreen)->devPrivates,     \
-                                   VGAarbiterScreenKey);        \
+                                   &VGAarbiterScreenKeyRec);    \
     PointPriv->spriteFuncs = pScreenPriv->miSprite;             \
 
 #define SPRITE_EPILOG                                   \
@@ -101,7 +96,7 @@
     (x)->funcs = &VGAarbiterGCFuncs;
 
 #define GC_UNWRAP(x) VGAarbiterGCPtr  pGCPriv = \
-    (VGAarbiterGCPtr)dixLookupPrivate(&(x)->devPrivates, VGAarbiterGCKey);\
+    (VGAarbiterGCPtr)dixLookupPrivate(&(x)->devPrivates, &VGAarbiterGCKeyRec);\
     (x)->ops = pGCPriv->wrapOps; (x)->funcs = pGCPriv->wrapFuncs;
 
 static inline void
@@ -165,8 +160,7 @@ static void VGAarbiterGetSpans(DrawablePtr pDrawable, int wMax, DDXPointPtr ppt,
 static void VGAarbiterSourceValidate(DrawablePtr pDrawable, int x, int y,
                                      int width, int height,
                                      unsigned int subWindowMode);
-static void VGAarbiterCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg,
-                                 RegionPtr prgnSrc);
+static void VGAarbiterCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 static void VGAarbiterClearToBackground(WindowPtr pWin, int x, int y, int w,
                                         int h, Bool generateExposures);
 static PixmapPtr VGAarbiterCreatePixmap(ScreenPtr pScreen, int w, int h,

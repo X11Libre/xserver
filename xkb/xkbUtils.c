@@ -66,7 +66,7 @@ DEALINGS IN THE SOFTWARE.
 #include "misc.h"
 #include "inputstr.h"
 #include "eventstr.h"
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 /***====================================================================***/
 
@@ -220,7 +220,7 @@ XkbUpdateKeyTypesFromCore(DeviceIntPtr pXDev,
 {
     XkbDescPtr xkb;
     unsigned key, nG, explicit;
-    int types[XkbNumKbdGroups];
+    int types[XkbNumKbdGroups] = { 0 };
     KeySym tsyms[XkbMaxSymsPerKey] = {NoSymbol}, *syms;
     XkbMapChangesPtr mc;
 
@@ -523,9 +523,9 @@ void
 XkbSetRepeatKeys(DeviceIntPtr pXDev, int key, int onoff)
 {
     if (pXDev && pXDev->key && pXDev->key->xkbInfo) {
-        xkbControlsNotify cn;
+        xkbControlsNotify cn = { 0 };
         XkbControlsPtr ctrls = pXDev->key->xkbInfo->desc->ctrls;
-        XkbControlsRec old;
+        XkbControlsRec old = { 0 };
 
         old = *ctrls;
 
@@ -552,12 +552,9 @@ XkbApplyMappingChange(DeviceIntPtr kbd, KeySymsPtr map, KeyCode first_key,
                       CARD8 num_keys, CARD8 *modmap, ClientPtr client)
 {
     XkbDescPtr xkb = kbd->key->xkbInfo->desc;
-    XkbEventCauseRec cause;
-    XkbChangesRec changes;
+    XkbEventCauseRec cause = { 0 };
+    XkbChangesRec changes = { 0 };
     unsigned int check;
-
-    memset(&changes, 0, sizeof(changes));
-    memset(&cause, 0, sizeof(cause));
 
     if (map && first_key && num_keys) {
         check = 0;
@@ -596,10 +593,9 @@ void
 XkbDisableComputedAutoRepeats(DeviceIntPtr dev, unsigned key)
 {
     XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
-    xkbMapNotify mn;
+    xkbMapNotify mn = { 0 };
 
     xkbi->desc->server->explicit[key] |= XkbExplicitAutoRepeatMask;
-    memset(&mn, 0, sizeof(mn));
     mn.changed = XkbExplicitComponentsMask;
     mn.firstKeyExplicit = key;
     mn.nKeyExplicit = 1;
@@ -744,7 +740,7 @@ XkbCheckSecondaryEffects(XkbSrvInfoPtr xkbi,
                          XkbChangesPtr changes, XkbEventCausePtr cause)
 {
     if (which & XkbStateNotifyMask) {
-        XkbStateRec old;
+        XkbStateRec old = { 0 };
 
         old = xkbi->state;
         changes->state_changes |= XkbStateChangedFlags(&old, &xkbi->state);
@@ -775,7 +771,7 @@ XkbEnableDisableControls(XkbSrvInfoPtr xkbi,
     if (old == ctrls->enabled_ctrls)
         return FALSE;
     if (cause != NULL) {
-        xkbControlsNotify cn;
+        xkbControlsNotify cn = { 0 };
 
         cn.numGroups = ctrls->num_groups;
         cn.changedControls = XkbControlsEnabledMask;
@@ -1046,7 +1042,7 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                     if (dtype->num_levels && dtype->level_names &&
                         i < dst->map->num_types)
                         free(dtype->level_names);
-                    dtype->num_levels = 0;
+                    dtype->num_levels = stype->num_levels;
                     dtype->level_names = NULL;
                 }
 
@@ -2025,22 +2021,23 @@ XkbCopyKeymap(XkbDescPtr dst, XkbDescPtr src)
 Bool
 XkbDeviceApplyKeymap(DeviceIntPtr dst, XkbDescPtr desc)
 {
-    xkbNewKeyboardNotify nkn;
     Bool ret;
 
     if (!dst->key || !desc)
         return FALSE;
 
-    memset(&nkn, 0, sizeof(xkbNewKeyboardNotify));
-    nkn.oldMinKeyCode = dst->key->xkbInfo->desc->min_key_code;
-    nkn.oldMaxKeyCode = dst->key->xkbInfo->desc->max_key_code;
-    nkn.deviceID = dst->id;
-    nkn.oldDeviceID = dst->id;
-    nkn.minKeyCode = desc->min_key_code;
-    nkn.maxKeyCode = desc->max_key_code;
-    nkn.requestMajor = XkbReqCode;
-    nkn.requestMinor = X_kbSetMap;      /* Near enough's good enough. */
-    nkn.changed = XkbNKN_KeycodesMask;
+    xkbNewKeyboardNotify nkn = {
+        .oldMinKeyCode = dst->key->xkbInfo->desc->min_key_code,
+        .oldMaxKeyCode = dst->key->xkbInfo->desc->max_key_code,
+        .deviceID = dst->id,
+        .oldDeviceID = dst->id,
+        .minKeyCode = desc->min_key_code,
+        .maxKeyCode = desc->max_key_code,
+        .requestMajor = XkbReqCode,
+        .requestMinor = X_kbSetMap,      /* Near enough's good enough. */
+        .changed = XkbNKN_KeycodesMask,
+    };
+
     if (desc->geom)
         nkn.changed |= XkbNKN_GeometryMask;
 

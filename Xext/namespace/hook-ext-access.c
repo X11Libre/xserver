@@ -13,7 +13,7 @@
 /* called on X_QueryExtension */
 void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XNS_HOOK_HEAD(XaceExtAccessRec);
+    XNS_HOOK_HEAD(ExtensionAccessCallbackParam);
 
     /* root NS has super powers */
     if (subj->ns->superPower)

@@ -28,6 +28,7 @@
 #if !defined( _INDIRECT_REQSIZE_H_ )
 #define _INDIRECT_REQSIZE_H_
 
+#include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
 
 #if defined(__GNUC__)

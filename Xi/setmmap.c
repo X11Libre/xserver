@@ -58,10 +58,11 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exevents.h"
-#include "setmmap.h"
 
 /***********************************************************************
  *
@@ -75,8 +76,7 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     int ret;
     DeviceIntPtr dev;
 
-    REQUEST(xSetDeviceModifierMappingReq);
-    REQUEST_AT_LEAST_SIZE(xSetDeviceModifierMappingReq);
+    X_REQUEST_HEAD_AT_LEAST(xSetDeviceModifierMappingReq);
 
     if (client->req_len != bytes_to_int32(sizeof(xSetDeviceModifierMappingReq)) +
         (stuff->numKeyPerModifier << 1))
@@ -94,11 +94,10 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     if (ret != MappingSuccess && ret != MappingBusy && ret != MappingFailed)
         return ret;
 
-    xSetDeviceModifierMappingReply rep = {
+    xSetDeviceModifierMappingReply reply = {
         .RepType = X_SetDeviceModifierMapping,
         .success = ret,
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

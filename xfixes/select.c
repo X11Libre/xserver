@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/selection_priv.h"
 
 #include "xfixesint.h"
@@ -132,14 +133,10 @@ CheckSelectionCallback(void)
 int
 ProcXFixesSelectSelectionInput(ClientPtr client)
 {
-    REQUEST(xXFixesSelectSelectionInputReq);
-    REQUEST_SIZE_MATCH(xXFixesSelectSelectionInputReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->selection);
-        swapl(&stuff->eventMask);
-    }
+    X_REQUEST_HEAD_STRUCT(xXFixesSelectSelectionInputReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(selection);
+    X_REQUEST_FIELD_CARD32(eventMask);
 
     /* allow extensions to intercept */
     SelectionFilterParamRec param = {

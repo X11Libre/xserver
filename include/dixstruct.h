@@ -24,14 +24,17 @@ SOFTWARE.
 #ifndef DIXSTRUCT_H
 #define DIXSTRUCT_H
 
-#include "client.h"
+#include <X11/Xmd.h>
+
+#include "xlibre_ptrtypes.h"
+
+#include "callback.h"
 #include "dix.h"
 #include "resource.h"
 #include "cursor.h"
 #include "gc.h"
 #include "pixmap.h"
 #include "privates.h"
-#include <X11/Xmd.h>
 
 /*
  * 	direct-mapped hash table, used by resource manager to store
@@ -49,11 +52,6 @@ typedef struct {
 typedef void (*ReplySwapPtr) (ClientPtr /* pClient */ ,
                               int /* size */ ,
                               void * /* pbuf */ );
-
-extern _X_EXPORT void
-ReplyNotSwappd(ClientPtr /* pClient */ ,
-               int /* size */ ,
-               void * /* pbuf */ ) _X_NORETURN;
 
 typedef enum { ClientStateInitial,
     ClientStateRunning,
@@ -73,9 +71,7 @@ typedef struct _saveSet {
 #define SaveSetAssignToRoot(ss,tr)  ((ss).toRoot = (tr))
 #define SaveSetAssignMap(ss,m)      ((ss).map = (m))
 
-struct _ClientId;
-
-typedef struct _Client {
+struct _Client {
     void *requestBuffer;
     void *osPrivate;             /* for OS layer, including scheduler */
     struct xorg_list ready;      /* List of clients ready to run */
@@ -96,7 +92,7 @@ typedef struct _Client {
     XID errorValue;
     int sequence;
     int ignoreCount;            /* count for Attend/IgnoreClient */
-    int numSaved;
+    unsigned numSaved;          /* amount of windows in saveSet */
     SaveSetElt *saveSet;
     int (**requestVector) (ClientPtr /* pClient */ );
     CARD32 req_len;             /* length of current request */
@@ -113,16 +109,7 @@ typedef struct _Client {
     DeviceIntPtr clientPtr;
     struct _ClientId *clientIds;
     int req_fds;
-} ClientRec;
-
-typedef struct _WorkQueue {
-    struct _WorkQueue *next;
-    Bool (*function) (ClientPtr /* pClient */ ,
-                      void *    /* closure */
-        );
-    ClientPtr client;
-    void *closure;
-} WorkQueueRec;
+};
 
 extern _X_EXPORT TimeStamp currentTime;
 
@@ -133,20 +120,6 @@ CompareTimeStamps(TimeStamp /*a */ ,
 extern _X_EXPORT TimeStamp
 ClientTimeToServerTime(CARD32 /*c */ );
 
-typedef struct _CallbackRec {
-    CallbackProcPtr proc;
-    void *data;
-    Bool deleted;
-    struct _CallbackRec *next;
-} CallbackRec, *CallbackPtr;
-
-typedef struct _CallbackList {
-    int inCallback;
-    Bool deleted;
-    int numDeleted;
-    CallbackPtr list;
-} CallbackListRec;
-
 /* proc vectors */
 
 extern _X_EXPORT int (*ProcVector[256]) (ClientPtr /*client */ );
@@ -155,8 +128,5 @@ extern _X_EXPORT int (*SwappedProcVector[256]) (ClientPtr /*client */ );
 
 /* fixme: still needed by (public) dix.h */
 extern ReplySwapPtr ReplySwapVector[256];
-
-extern _X_EXPORT int
-ProcBadRequest(ClientPtr /*client */ );
 
 #endif                          /* DIXSTRUCT_H */

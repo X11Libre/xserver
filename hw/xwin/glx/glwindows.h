@@ -50,8 +50,8 @@ void glAddSwapHintRectWINWrapper(GLint x, GLint y, GLsizei width, GLsizei height
 int glWinSelectImplementation(int native);
 
 #if 1
-#define GLWIN_TRACE_MSG(msg, args...) if (glxWinDebugSettings.enableTrace) ErrorF(msg " [%s:%d]\n" , ##args , __FUNCTION__, __LINE__ )
-#define GLWIN_DEBUG_MSG(msg, args...) if (glxWinDebugSettings.enableDebug) ErrorF(msg " [%s:%d]\n" , ##args , __FUNCTION__, __LINE__ )
+#define GLWIN_TRACE_MSG(msg, args...) if (glxWinDebugSettings.enableTrace) ErrorF(msg " [%s:%d]\n" , ##args , __func__, __LINE__ )
+#define GLWIN_DEBUG_MSG(msg, args...) if (glxWinDebugSettings.enableDebug) ErrorF(msg " [%s:%d]\n" , ##args , __func__, __LINE__ )
 #else
 #define GLWIN_TRACE_MSG(a, ...)
 #define GLWIN_DEBUG_MSG(a, ...)

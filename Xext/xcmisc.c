@@ -34,6 +34,7 @@ from The Open Group.
 #include <X11/extensions/xcmiscproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "miext/extinit_priv.h"
@@ -47,31 +48,25 @@ from The Open Group.
 static int
 ProcXCMiscGetVersion(ClientPtr client)
 {
-    REQUEST(xXCMiscGetVersionReq);
-    REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
-
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
+    X_REQUEST_HEAD_STRUCT(xXCMiscGetVersionReq);
+    X_REQUEST_FIELD_CARD16(majorVersion);
+    X_REQUEST_FIELD_CARD16(minorVersion);
 
     xXCMiscGetVersionReply reply = {
         .majorVersion = XCMiscMajorVersion,
         .minorVersion = XCMiscMinorVersion
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcXCMiscGetXIDRange(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xXCMiscGetXIDRangeReq);
+    X_REQUEST_HEAD_STRUCT(xXCMiscGetXIDRangeReq);
 
     XID min_id, max_id;
     GetXIDRange(client->index, FALSE, &min_id, &max_id);
@@ -80,25 +75,22 @@ ProcXCMiscGetXIDRange(ClientPtr client)
         .start_id = min_id,
         .count = max_id - min_id + 1
     };
-    if (client->swapped) {
-        swapl(&reply.start_id);
-        swapl(&reply.count);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    X_REPLY_FIELD_CARD32(start_id);
+    X_REPLY_FIELD_CARD32(count);
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcXCMiscGetXIDList(ClientPtr client)
 {
-    REQUEST(xXCMiscGetXIDListReq);
-    REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
+    X_REQUEST_HEAD_STRUCT(xXCMiscGetXIDListReq);
+    X_REQUEST_FIELD_CARD32(count);
 
-    if (client->swapped)
-        swapl(&stuff->count);
-
-    if (stuff->count > UINT32_MAX / sizeof(XID))
+    if (stuff->count > UINT32_MAX / sizeof(XID)) {
         return BadAlloc;
+    }
 
     XID *pids = calloc(stuff->count, sizeof(XID));
     if (!pids) {
@@ -115,9 +107,8 @@ ProcXCMiscGetXIDList(ClientPtr client)
     xXCMiscGetXIDListReply reply = {
         .count = count
     };
-    if (client->swapped) {
-        swapl(&reply.count);
-    }
+
+    X_REPLY_FIELD_CARD32(count);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

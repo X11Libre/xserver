@@ -29,6 +29,8 @@
 
 #include <dix-config.h>
 
+#include "dix/request_priv.h"
+
 #include "hashtable.h"
 #include "vndserver_priv.h"
 #include "vndservervendor.h"
@@ -98,8 +100,7 @@ static int dispatch_GLXQueryVersion(ClientPtr client)
     reply.majorVersion = GlxCheckSwap(client, 1);
     reply.minorVersion = GlxCheckSwap(client, 4);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /* broken header workaround */
@@ -228,6 +229,8 @@ static int CommonMakeCurrent(ClientPtr client,
         // TODO: For switching contexts in a single vendor, just make one
         // makeCurrent call?
 
+        // Apparently, the answer is 'no': https://github.com/X11Libre/xserver/issues/1246
+
         // TODO: When changing vendors, would it be better to do the
         // MakeCurrent(new) first, then the LoseCurrent(old)?
         // If the MakeCurrent(new) fails, then the old context will still be current.
@@ -257,8 +260,8 @@ static int CommonMakeCurrent(ClientPtr client,
     }
 
     reply.contextTag = GlxCheckSwap(client, reply.contextTag);
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int dispatch_GLXMakeCurrent(ClientPtr client)

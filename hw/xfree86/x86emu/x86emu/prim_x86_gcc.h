@@ -46,6 +46,8 @@
 #error This file is intended to be used by gcc on i386 or x86-64 system
 #endif
 
+/* NOLINTBEGIN(hicpp-no-assembler) */
+
 #if defined(__PIC__) && defined(__i386__)
 
 #define X86EMU_HAS_HW_CPUID 1
@@ -73,5 +75,7 @@ hw_cpuid(u32 * a, u32 * b, u32 * c, u32 * d)
 }
 
 #endif                          /* __PIC__ && __i386__ */
+
+/* NOLINTEND(hicpp-no-assembler) */
 
 #endif                          /* __X86EMU_PRIM_X86_GCC_H */

@@ -36,6 +36,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
+#include "dix/request_priv.h"
 
 #include "quartz.h"
 
@@ -59,13 +60,7 @@
 
 #define DEFINE_ATOM_HELPER(func, atom_name)                      \
     static Atom func(void) {                                       \
-        static x_server_generation_t generation;                    \
-        static Atom atom;                                           \
-        if (generation != serverGeneration) {                       \
-            generation = serverGeneration;                          \
-            atom = dixAddAtom(atom_name);                           \
-        }                                                           \
-        return atom;                                                \
+        return dixAddAtom(atom_name);                           \
     }
 
 DEFINE_ATOM_HELPER(xa_native_screen_origin, "_NATIVE_SCREEN_ORIGIN")
@@ -219,7 +214,7 @@ static int
 ProcAppleWMSelectInput(register ClientPtr client)
 {
     REQUEST(xAppleWMSelectInputReq);
-    WMEventPtr pEvent, pNewEvent, *pHead;
+    WMEventPtr pEvent, *pHead;
     XID clientResource;
     int i;
 
@@ -241,7 +236,7 @@ ProcAppleWMSelectInput(register ClientPtr client)
         }
 
         /* build the entry */
-        pNewEvent = (WMEventPtr)malloc(sizeof(WMEventRec));
+        WMEventPtr pNewEvent = calloc(1, sizeof(WMEventRec));
         if (!pNewEvent)
             return BadAlloc;
         pNewEvent->next = 0;
@@ -262,7 +257,7 @@ ProcAppleWMSelectInput(register ClientPtr client)
          * done through the resource database.
          */
         if (i != Success || !pHead) {
-            pHead = (WMEventPtr *)malloc(sizeof(WMEventPtr));
+            pHead = calloc(1, sizeof(WMEventPtr));
             if (!pHead ||
                 !AddResource(eventResource, EventType, (void *)pHead)) {
                 FreeResource(clientResource, X11_RESTYPE_NONE);
@@ -277,7 +272,7 @@ ProcAppleWMSelectInput(register ClientPtr client)
     else if (stuff->mask == 0) {
         /* delete the interest */
         if (i == Success && pHead) {
-            pNewEvent = 0;
+            WMEventPtr pNewEvent = 0;
             for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
                 if (pEvent->client == client)
                     break;
@@ -363,16 +358,15 @@ ProcAppleWMReenableUpdate(register ClientPtr client)
 static int
 ProcAppleWMSetWindowMenu(register ClientPtr client)
 {
-    const char *bytes, **items;
-    char *shortcuts;
+    const char *bytes;
     int max_len, nitems, i, j;
     REQUEST(xAppleWMSetWindowMenuReq);
 
     REQUEST_AT_LEAST_SIZE(xAppleWMSetWindowMenuReq);
 
     nitems = stuff->nitems;
-    items = malloc(sizeof(char *) * nitems);
-    shortcuts = malloc(sizeof(char) * nitems);
+    const char **items = calloc(nitems, sizeof(char *));
+    char *shortcuts = calloc(nitems, sizeof(char));
 
     if (!items || !shortcuts) {
         free(items);
@@ -676,31 +670,6 @@ SNotifyEvent(xAppleWMNotifyEvent *from, xAppleWMNotifyEvent *to)
     cpswapl(from->arg, to->arg);
 }
 
-static int
-SProcAppleWMQueryVersion(register ClientPtr client)
-{
-    return ProcAppleWMQueryVersion(client);
-}
-
-static int
-SProcAppleWMDispatch(register ClientPtr client)
-{
-    REQUEST(xReq);
-
-    /* It is bound to be non-local when there is byte swapping */
-    if (!client->local)
-        return WMErrorBase + AppleWMClientNotLocal;
-
-    /* only local clients are allowed WM access */
-    switch (stuff->data) {
-    case X_AppleWMQueryVersion:
-        return SProcAppleWMQueryVersion(client);
-
-    default:
-        return BadRequest;
-    }
-}
-
 void
 AppleWMExtensionInit(AppleWMProcsPtr procsPtr)
 {
@@ -715,7 +684,7 @@ AppleWMExtensionInit(AppleWMProcsPtr procsPtr)
                                  AppleWMNumberEvents,
                                  AppleWMNumberErrors,
                                  ProcAppleWMDispatch,
-                                 SProcAppleWMDispatch,
+                                 ProcAppleWMDispatch,
                                  NULL,
                                  StandardMinorOpcode))) {
         size_t i;

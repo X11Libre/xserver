@@ -28,6 +28,8 @@
 #include <stdarg.h>
 #include <X11/Xfuncproto.h>
 
+#include "os.h"
+
 #ifndef _X_RESTRICT_KYWD
 #if defined(restrict) /* assume autoconf set it correctly */ || \
    (defined(__STDC__) && (__STDC_VERSION__ - 0 >= 199901L))     /* C99 */
@@ -48,23 +50,11 @@
  * argument.   The return value is the size of the allocated buffer, or -1
  * on failure.
  */
-extern _X_EXPORT int
+extern _X_EXPORT int /* deprecated */
 XNFasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, ...)
 _X_ATTRIBUTE_PRINTF(2, 3);
 extern _X_EXPORT int
 XNFvasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, va_list va)
-_X_ATTRIBUTE_PRINTF(2, 0);
-
-/*
- * These functions provide a portable implementation of the linux kernel
- * scnprintf & vscnprintf routines that return the number of bytes actually
- * copied during a snprintf, (excluding the final '\0').
- */
-extern _X_EXPORT int
-Xscnprintf(char *s, int n, const char * _X_RESTRICT_KYWD fmt, ...)
-_X_ATTRIBUTE_PRINTF(3,4);
-extern _X_EXPORT int
-Xvscnprintf(char *s, int n, const char * _X_RESTRICT_KYWD fmt, va_list va)
-_X_ATTRIBUTE_PRINTF(3,0);
+_X_ATTRIBUTE_VPRINTF(2, 0);
 
 #endif                          /* XPRINTF_H */

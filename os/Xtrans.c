@@ -70,21 +70,11 @@ from The Open Group.
  * Always add to the end of the list.
  */
 
-#define TRANS_TLI_INET_INDEX		1
-#define TRANS_TLI_TCP_INDEX		2
-#define TRANS_TLI_TLI_INDEX		3
 #define TRANS_SOCKET_UNIX_INDEX		4
 #define TRANS_SOCKET_LOCAL_INDEX	5
 #define TRANS_SOCKET_INET_INDEX		6
 #define TRANS_SOCKET_TCP_INDEX		7
-#define TRANS_DNET_INDEX		8
-#define TRANS_LOCAL_LOCAL_INDEX		9
-/* 10 used to be PTS, but that's gone. */
-#define TRANS_LOCAL_NAMED_INDEX		11
-/* 12 used to be ISC, but that's gone. */
-/* 13 used to be SCO, but that's gone. */
 #define TRANS_SOCKET_INET6_INDEX	14
-#define TRANS_LOCAL_PIPE_INDEX		15
 
 #if defined(IPv6) && !defined(AF_INET6)
 #error "Cannot build IPv6 support without AF_INET6"
@@ -92,28 +82,15 @@ from The Open Group.
 
 static
 Xtransport_table Xtransports[] = {
-#if defined(TCPCONN)
     { &_XSERVTransSocketTCPFuncs,	TRANS_SOCKET_TCP_INDEX },
 #if defined(IPv6)
     { &_XSERVTransSocketINET6Funcs,	TRANS_SOCKET_INET6_INDEX },
 #endif /* IPv6 */
     { &_XSERVTransSocketINETFuncs,	TRANS_SOCKET_INET_INDEX },
-#endif /* TCPCONN */
 #if defined(UNIXCONN)
-#if !defined(LOCALCONN)
     { &_XSERVTransSocketLocalFuncs,	TRANS_SOCKET_LOCAL_INDEX },
-#endif /* !LOCALCONN */
     { &_XSERVTransSocketUNIXFuncs,	TRANS_SOCKET_UNIX_INDEX },
 #endif /* UNIXCONN */
-#if defined(LOCALCONN)
-    { &_XSERVTransLocalFuncs,		TRANS_LOCAL_LOCAL_INDEX },
-#if defined(SVR4) || defined(__SVR4)
-    { &_XSERVTransNAMEDFuncs,		TRANS_LOCAL_NAMED_INDEX },
-#endif
-#ifdef __sun
-    { &_XSERVTransPIPEFuncs,		TRANS_LOCAL_PIPE_INDEX },
-#endif /* __sun */
-#endif /* LOCALCONN */
 };
 
 #define NUMTRANS	(sizeof(Xtransports)/sizeof(Xtransport_table))
@@ -681,23 +658,18 @@ int _XSERVTransResetListener (XtransConnInfo ciptr)
 	return TRANS_RESET_NOOP;
 }
 
-XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr, int *status)
+XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr)
 {
     XtransConnInfo	newciptr;
 
     prmsg (2,"Accept(%d)\n", ciptr->fd);
 
-    newciptr = ciptr->transptr->Accept (ciptr, status);
+    newciptr = ciptr->transptr->Accept(ciptr);
 
     if (newciptr)
 	newciptr->transptr = ciptr->transptr;
 
     return newciptr;
-}
-
-int _XSERVTransBytesReadable (XtransConnInfo ciptr, BytesReadable_t *pend)
-{
-    return ciptr->transptr->BytesReadable (ciptr, pend);
 }
 
 int _XSERVTransRead (XtransConnInfo ciptr, char *buf, int size)

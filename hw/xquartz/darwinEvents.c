@@ -200,7 +200,7 @@ DarwinUpdateModifiers(int pressed,                    // KeyPress or KeyRelease
         }
 }
 
-/* Generic handler for Xquartz-specifc events.  When possible, these should
+/* Generic handler for Xquartz-specific events.  When possible, these should
    be moved into their own individual functions and set as handlers using
    mieqSetHandler. */
 
@@ -356,8 +356,7 @@ DarwinProcessFDAdditionQueue_thread(void *args)
     return NULL;
 }
 
-Bool
-DarwinEQInit(void)
+void DarwinEQInit(void)
 {
     int *p;
 
@@ -377,8 +376,6 @@ DarwinEQInit(void)
         fd_add_tid = create_thread(DarwinProcessFDAdditionQueue_thread, NULL);
 
     signal_mieq_init();
-
-    return TRUE;
 }
 
 void
@@ -454,7 +451,7 @@ DarwinSendTabletEvents(DeviceIntPtr pDev, int ev_type, int ev_button,
     screen = miPointerGetScreen(pDev);
     if (!screen) {
         DEBUG_LOG("%s called before screen was initialized\n",
-                  __FUNCTION__);
+                  __func__);
         return;
     }
 
@@ -497,7 +494,7 @@ DarwinSendPointerEvents(DeviceIntPtr pDev, int ev_type, int ev_button,
     screen = miPointerGetScreen(pDev);
     if (!screen) {
         DEBUG_LOG("%s called before screen was initialized\n",
-                  __FUNCTION__);
+                  __func__);
         return;
     }
 

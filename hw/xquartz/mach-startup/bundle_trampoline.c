@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-/* We wnt XQuartz.app to inherit a login shell environment.  This is handled by the X11.sh
+/* We want XQuartz.app to inherit a login shell environment.  This is handled by the X11.sh
  * script which re-execs the main binary from a login shell environment.  However, recent
  * versions of macOS require that the main executable of an app be Mach-O for full system
  * fidelity.
@@ -43,7 +43,7 @@
  * Failure to do so results in two problems:
  *    1) bash is seen as the responsible executable for Security & Privacy, and the user doesn't
  *       get prompted to allow filesystem access (https://github.com/XQuartz/XQuartz/issues/6).
- *    2) The process is launched under Rosetta for compatability, which results in
+ *    2) The process is launched under Rosetta for compatibility, which results in
  *       the subsequent spawn of the real executable under Rosetta rather than natively.
  *
  * This trampoline provides the mach-o needed by LaunchServices and TCC to satisfy those

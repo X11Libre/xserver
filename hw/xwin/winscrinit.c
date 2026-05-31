@@ -31,11 +31,9 @@
  *		Harold L Hunt II
  *		Kensuke Matsuzaki
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
+#include "include/extinit.h"
 #include "mi/mi_priv.h"
 
 #include "win.h"
@@ -175,7 +173,7 @@ winScreenInit(ScreenPtr pScreen, int argc, char **argv)
     miClearVisualTypes();
 
     if (!winFinishScreenInitFB(pScreen->myNum, pScreen, argc, argv)) {
-        ErrorF("%s(): winFinishScreenInitFB () failed\n", __FUNCTION__);
+        ErrorF("%s(): winFinishScreenInitFB () failed\n", __func__);
 
         /* call the engine dependent screen close procedure to clean up from a failure */
         pScreenPriv->pwinCloseScreen(pScreen);
@@ -429,7 +427,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
     }
 
     /* Wrap either fb's or shadow's CloseScreen with our CloseScreen */
-    pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = pScreenPriv->pwinCloseScreen;
 
     /* Create a mutex for modules in separate threads to wait for */

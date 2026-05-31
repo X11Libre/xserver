@@ -28,57 +28,68 @@
 
 #include <dix-config.h>
 
-#include "xpr.h"
-
-#include   <X11/X.h>
-#include   <X11/Xmd.h>
-#include   <X11/Xproto.h>
-#include   "misc.h"
-#include   "windowstr.h"
-#include   "pixmapstr.h"
-#include   "inputstr.h"
-#include   "eventstr.h"
-#include   "mi.h"
-#include   "scrnintstr.h"
-#include   "mipointer.h"
-
-#include "quartz.h"
-#include "quartzKeyboard.h"
-#include "darwinEvents.h"
-
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
 
-#include <dispatch/dispatch.h>
+#include "xpr.h"
 
+#include "eventstr.h"
+#include "inputstr.h"
+#include "mi.h"
+#include "mipointer.h"
+#include "misc.h"
+#include "pixmapstr.h"
+#include "scrnintstr.h"
+#include "windowstr.h"
+#include <X11/X.h>
+#include <X11/Xmd.h>
+#include <X11/Xproto.h>
+
+#include "darwinEvents.h"
+#include "quartz.h"
+#include "quartzKeyboard.h"
 #include "rootlessWindow.h"
 #include "xprEvent.h"
+#include "osxcompat.h"
 
-Bool
-QuartzModeEventHandler(int screenNum, XQuartzEvent *e, DeviceIntPtr dev)
-{
-    switch (e->subtype) {
-    case kXquartzWindowState:
-        DEBUG_LOG("kXquartzWindowState\n");
-        RootlessNativeWindowStateChanged(xprGetXWindow(e->data[0]),
-                                         e->data[1]);
-        return TRUE;
+#ifdef HAS_LIBDISPATCH
+#include <dispatch/dispatch.h>
+#endif
 
-    case kXquartzWindowMoved:
-        DEBUG_LOG("kXquartzWindowMoved\n");
-        RootlessNativeWindowMoved(xprGetXWindow(e->data[0]));
-        return TRUE;
+#if XPLUGIN_VERSION >= 6
+static void bringAllToFront(void *unused) {
+  (void)unused; /* to silence the compiler warning */
+  xp_window_bring_all_to_front();
+}
+#endif
 
-    case kXquartzBringAllToFront:
-        DEBUG_LOG("kXquartzBringAllToFront\n");
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            xp_window_bring_all_to_front();
-        });
+bool QuartzModeEventHandler(int screenNum, XQuartzEvent *e, DeviceIntPtr dev) {
+  switch (e->subtype) {
+  case kXquartzWindowState:
+    DEBUG_LOG("kXquartzWindowState\n");
+    RootlessNativeWindowStateChanged(xprGetXWindow(e->data[0]), e->data[1]);
+    return TRUE;
 
-        return TRUE;
+  case kXquartzWindowMoved:
+    DEBUG_LOG("kXquartzWindowMoved\n");
+    RootlessNativeWindowMoved(xprGetXWindow(e->data[0]));
+    return TRUE;
 
-    default:
-        return FALSE;
-    }
+  case kXquartzBringAllToFront:
+    DEBUG_LOG("kXquartzBringAllToFront\n");
+#if defined(HAS_LIBDISPATCH) && (XPLUGIN_VERSION >= 6)
+    dispatch_async_f(
+        dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), NULL,
+        bringAllToFront);
+#else
+        RootlessOrderAllWindows(e->data[0]);
+#endif
+
+    return TRUE;
+
+  default:
+    return FALSE;
+  }
 }

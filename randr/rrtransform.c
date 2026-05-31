@@ -21,8 +21,8 @@
  */
 #include <dix-config.h>
 
+#include "include/rrtransform.h"
 #include "randr/randrstr_priv.h"
-#include "randr/rrtransform.h"
 
 void
 RRTransformInit(RRTransformPtr transform)

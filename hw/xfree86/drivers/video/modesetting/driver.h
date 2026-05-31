@@ -39,11 +39,12 @@
 #include <damage.h>
 #include <X11/extensions/dpmsconst.h>
 #include <shadow.h>
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
 #define GLAMOR_FOR_XORG 1
 #include "glamor.h"
-#include <gbm.h>
 #endif
+
+#include <gbm.h>
 
 #include "drmmode_display.h"
 #define MS_LOGLEVEL_DEBUG 4
@@ -52,8 +53,14 @@ struct ms_vrr_priv {
     Bool variable_refresh;
 };
 
+struct ms_async_flip_priv {
+    Bool async_flip;
+    Bool async_flip_modifiers;
+};
+
 typedef enum {
     OPTION_SW_CURSOR,
+    OPTION_CURSOR_SIZE,
     OPTION_DEVICE_PATH,
     OPTION_SHADOW_FB,
     OPTION_ACCEL_METHOD,
@@ -131,6 +138,9 @@ typedef struct _modesettingRec {
     DamagePtr damage;
     Bool dirty_enabled;
 
+    uint32_t cursor_image_width;
+    uint32_t cursor_image_height;
+
     Bool has_queue_sequence;
     Bool tried_queue_sequence;
 
@@ -153,7 +163,7 @@ typedef struct _modesettingRec {
         void (*UpdatePacked)(ScreenPtr, shadowBufPtr);
     } shadow;
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     /* glamor API */
     struct {
         Bool (*back_pixmap_from_fd)(PixmapPtr, int, CARD16, CARD16, CARD16,
@@ -166,7 +176,7 @@ typedef struct _modesettingRec {
                                                        Bool);
         void (*egl_exchange_buffers)(PixmapPtr, PixmapPtr);
         struct gbm_device *(*egl_get_gbm_device)(ScreenPtr);
-        Bool (*egl_init)(ScrnInfoPtr, int);
+        Bool (*egl_init2)(ScrnInfoPtr, int, int*, int);
         void (*finish)(ScreenPtr);
         struct gbm_bo *(*gbm_bo_from_pixmap)(ScreenPtr, PixmapPtr);
         Bool (*init)(ScreenPtr, unsigned int);
@@ -226,7 +236,7 @@ void ms_vblank_close_screen(ScreenPtr screen);
 
 Bool ms_present_screen_init(ScreenPtr screen);
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
 
 typedef void (*ms_pageflip_handler_proc)(modesettingPtr ms,
                                          uint64_t frame,
@@ -261,5 +271,9 @@ void ms_drain_drm_events(ScreenPtr screen);
 Bool ms_window_has_variable_refresh(modesettingPtr ms, WindowPtr win);
 void ms_present_set_screen_vrr(ScrnInfoPtr scrn, Bool vrr_enabled);
 Bool ms_tearfree_is_active_on_crtc(xf86CrtcPtr crtc);
+Bool ms_window_has_async_flip(WindowPtr win);
+void ms_window_update_async_flip(WindowPtr win, Bool async_flip);
+Bool ms_window_has_async_flip_modifiers(WindowPtr win);
+void ms_window_update_async_flip_modifiers(WindowPtr win, Bool async_flip);
 
 #endif /* XSERVER_XFREE86_DRIVER_H */

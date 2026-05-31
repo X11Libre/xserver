@@ -76,6 +76,7 @@ SOFTWARE.
 
 #include <X11/Xfuncproto.h>
 
+#include "xlibre_ptrtypes.h"
 #include "dixstruct.h"
 
 typedef void (*InitExtension) (void);

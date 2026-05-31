@@ -29,6 +29,7 @@
 #include <X11/extensions/geproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/geext_priv.h"
 
@@ -38,8 +39,6 @@
 #define MAXEXTENSIONS   128
 
 DevPrivateKeyRec GEClientPrivateKeyRec;
-
-#define GEClientPrivateKey (&GEClientPrivateKeyRec)
 
 /** Struct to keep information about registered extensions */
 typedef struct _GEExtension {
@@ -54,7 +53,7 @@ typedef struct _GEClientInfo {
     CARD32 minor_version;
 } GEClientInfoRec, *GEClientInfoPtr;
 
-#define GEGetClient(pClient)    ((GEClientInfoPtr)(dixLookupPrivate(&((pClient)->devPrivates), GEClientPrivateKey)))
+#define GEGetClient(pClient)    ((GEClientInfoPtr)(dixLookupPrivate(&((pClient)->devPrivates), &GEClientPrivateKeyRec)))
 
 /* Forward declarations */
 static void SGEGenericEvent(xEvent *from, xEvent *to);
@@ -68,15 +67,11 @@ static void SGEGenericEvent(xEvent *from, xEvent *to);
 static int
 ProcGEQueryVersion(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xGEQueryVersionReq);
+    X_REQUEST_FIELD_CARD16(majorVersion);
+    X_REQUEST_FIELD_CARD16(minorVersion);
+
     GEClientInfoPtr pGEClient = GEGetClient(client);
-
-    REQUEST(xGEQueryVersionReq);
-    REQUEST_SIZE_MATCH(xGEQueryVersionReq);
-
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
 
     xGEQueryVersionReply reply = {
         .RepType = X_GEQueryVersion,
@@ -89,13 +84,10 @@ ProcGEQueryVersion(ClientPtr client)
     pGEClient->major_version = stuff->majorVersion;
     pGEClient->minor_version = stuff->minorVersion;
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /************************************************************/

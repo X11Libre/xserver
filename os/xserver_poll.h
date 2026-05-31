@@ -34,8 +34,9 @@
 #define xserver_poll(fds, nfds, timeout) poll(fds, nfds, timeout)
 #else
 
-#ifndef WIN32
-
+#ifdef WIN32
+#include <X11/Xwinsock.h>
+#else
 #define POLLIN		0x01
 #define POLLPRI		0x02
 #define POLLOUT		0x04

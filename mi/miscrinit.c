@@ -29,7 +29,9 @@ from The Open Group.
 #include <dix-config.h>
 
 #include <X11/X.h>
+#include <X11/extensions/shm.h>
 
+#include "include/shmint.h"
 #include "mi/mi_priv.h"
 
 #include "servermd.h"
@@ -38,10 +40,6 @@ from The Open Group.
 #include "pixmapstr.h"
 #include "dix.h"
 #include "miline.h"
-#ifdef CONFIG_MITSHM
-#include <X11/extensions/shm.h>
-#include "shmint.h"
-#endif /* CONFIG_MITSHM */
 
 /* We use this structure to propagate some information from miScreenInit to
  * miCreateScreenResources.  miScreenInit allocates the structure, fills it

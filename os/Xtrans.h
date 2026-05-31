@@ -103,12 +103,6 @@ typedef	struct {
 } Xtransaddr;
 #endif
 
-#ifdef LONG64
-typedef int BytesReadable_t;
-#else
-typedef long BytesReadable_t;
-#endif
-
 typedef struct _XtransConnInfo *XtransConnInfo;
 
 /*
@@ -126,15 +120,6 @@ typedef struct _XtransConnInfo *XtransConnInfo;
 
 #define TRANS_CREATE_LISTENER_FAILED 	-1
 #define TRANS_ADDR_IN_USE		-2
-
-
-/*
- * Return values of Accept (0 is success)
- */
-
-#define TRANS_ACCEPT_BAD_MALLOC			-1
-#define TRANS_ACCEPT_FAILED 			-2
-#define TRANS_ACCEPT_MISC_ERROR			-3
 
 
 /*
@@ -198,15 +183,7 @@ int _XSERVTransResetListener (
     XtransConnInfo	/* ciptr */
 );
 
-XtransConnInfo _XSERVTransAccept (
-    XtransConnInfo,	/* ciptr */
-    int *		/* status */
-);
-
-int _XSERVTransBytesReadable (
-    XtransConnInfo,	/* ciptr */
-    BytesReadable_t *	/* pend */
-);
+XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr);
 
 int _XSERVTransRead (
     XtransConnInfo,	/* ciptr */

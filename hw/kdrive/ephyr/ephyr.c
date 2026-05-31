@@ -32,6 +32,7 @@
 #include "mi/mipointer_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
+#include "os/serverlock.h"
 
 #include "ephyr.h"
 #include "inputstr.h"
@@ -249,7 +250,7 @@ ephyrMapFramebuffer(KdScreenInfo * screen)
         /* Rotated/Reflected so we need to use shadow fb */
         scrpriv->shadow = TRUE;
 
-        EPHYR_LOG("allocing shadow");
+        EPHYR_LOG("allocating shadow");
 
         KdShadowFbAlloc(screen,
                         scrpriv->randr & (RR_Rotate_90 | RR_Rotate_270));
@@ -781,9 +782,7 @@ ephyrInitScreen(ScreenPtr pScreen)
 
 #ifdef XV
     if (!ephyrNoXV) {
-        if (ephyr_glamor)
-            ephyr_glamor_xv_init(pScreen);
-        else if (!ephyrInitVideo(pScreen)) {
+        if (!ephyr_glamor && !ephyrInitVideo(pScreen)) {
             EPHYR_LOG_ERROR("failed to initialize xvideo\n");
         }
         else {
@@ -956,10 +955,7 @@ miPointerScreenFuncRec ephyrPointerScreenFuncs = {
 static KdScreenInfo *
 screen_from_window(Window w)
 {
-    int i = 0;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         KdPrivScreenPtr kdscrpriv = KdGetScreenPriv(walkScreen);
         KdScreenInfo *screen = kdscrpriv->screen;
         EphyrScrPriv *scrpriv = screen->driver;
@@ -969,10 +965,13 @@ screen_from_window(Window w)
             || scrpriv->win_pre_existing == w) {
             return screen;
         }
-    }
+    });
 
     return NULL;
 }
+
+static void
+ephyrProcessErrorEvent(xcb_generic_event_t *xev) _X_NORETURN;
 
 static void
 ephyrProcessErrorEvent(xcb_generic_event_t *xev)
@@ -1256,7 +1255,7 @@ ephyrXcbProcessEvents(Bool queued_only)
              */
             if (xcb_connection_has_error(conn)) {
                 CloseWellKnownConnections();
-                OsCleanup(1);
+                UnlockServer();
                 exit(1);
             }
 

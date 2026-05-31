@@ -43,6 +43,9 @@
 #include <errno.h>
 
 #ifdef CONFIG_MITSHM
+# if defined(__CYGWIN__)
+#  include <sys/param.h>
+# endif
 #include <sys/sysmacros.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -52,14 +55,17 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86bigfproto.h>
-#include <X11/fonts/fontstruct.h>
+#include <X11/fonts/fontstruct.h> // libxfont2.h missed to include that
 #include <X11/fonts/libxfont2.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "os.h"
+#include "os/osdep.h"
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "dixfontstr.h"
@@ -86,7 +92,7 @@ static unsigned int pagesize;
 
 static Bool badSysCall = FALSE;
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
 
 static void
 SigSysHandler(int signo)
@@ -146,8 +152,9 @@ shmalloc(unsigned int size)
     char *addr;
 
 #ifdef MUST_CHECK_FOR_SHM_SYSCALL
-    if (pagesize == 0)
+    if (pagesize == 0) {
         return (ShmDescPtr) NULL;
+    }
 #endif
 
     /* On some older Linux systems, the number of shared memory segments
@@ -156,12 +163,14 @@ shmalloc(unsigned int size)
        shared memory segment on one hand, and allocating memory and piping
        the glyph metrics on the other hand. If the glyph metrics size is
        small, we prefer the traditional way. */
-    if (size < 3500)
+    if (size < 3500) {
         return (ShmDescPtr) NULL;
+    }
 
     ShmDescPtr pDesc = calloc(1, sizeof(ShmDescRec));
-    if (!pDesc)
+    if (!pDesc) {
         return (ShmDescPtr) NULL;
+    }
 
     size = (size + pagesize - 1) & -pagesize;
     shmid = shmget(IPC_PRIVATE, size, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
@@ -186,8 +195,9 @@ shmalloc(unsigned int size)
 
     pDesc->shmid = shmid;
     pDesc->attach_addr = addr;
-    if (ShmList)
+    if (ShmList) {
         ShmList->prev = &pDesc->next;
+    }
     pDesc->next = ShmList;
     pDesc->prev = &ShmList;
     ShmList = pDesc;
@@ -203,8 +213,9 @@ shmdealloc(ShmDescPtr pDesc)
 #endif
     shmdt(pDesc->attach_addr);
 
-    if (pDesc->next)
+    if (pDesc->next) {
         pDesc->next->prev = pDesc->prev;
+    }
     *pDesc->prev = pDesc->next;
     free(pDesc);
 }
@@ -222,16 +233,18 @@ XF86BigfontFreeFontShm(FontPtr pFont)
         return;
 
     pDesc = (ShmDescPtr) FontGetPrivate(pFont, FontShmdescIndex);
-    if (pDesc)
+    if (pDesc) {
         shmdealloc(pDesc);
+    }
 }
 
 /* Called upon fatal signal. */
 void
 XF86BigfontCleanup(void)
 {
-    while (ShmList)
+    while (ShmList) {
         shmdealloc(ShmList);
+    }
 }
 
 #else /* CONFIG_MITSHM */
@@ -261,7 +274,7 @@ XF86BigfontResetProc(ExtensionEntry * extEntry)
 static int
 ProcXF86BigfontQueryVersion(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xXF86BigfontQueryVersionReq);
+    X_REQUEST_HEAD_STRUCT(xXF86BigfontQueryVersionReq);
 
     xXF86BigfontQueryVersionReply reply = {
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
@@ -274,15 +287,14 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
                          ? XF86Bigfont_CAP_LocalShm : 0
 #endif /* CONFIG_MITSHM */
     };
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-        swapl(&reply.uid);
-        swapl(&reply.gid);
-        swapl(&reply.signature);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
+    X_REPLY_FIELD_CARD32(uid);
+    X_REPLY_FIELD_CARD32(gid);
+    X_REPLY_FIELD_CARD32(signature);
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void
@@ -315,9 +327,10 @@ static inline void writeCharInfo(x_rpcbuf_t *rpcbuf, xCharInfo CI) {
 static int
 ProcXF86BigfontQueryFont(ClientPtr client)
 {
-    FontPtr pFont;
+    X_REQUEST_HEAD_STRUCT(xXF86BigfontQueryFontReq);
+    X_REQUEST_FIELD_CARD32(id);
 
-    REQUEST(xXF86BigfontQueryFontReq);
+    FontPtr pFont;
     CARD32 stuff_flags;
     xCharInfo *pmax;
     xCharInfo *pmin;
@@ -349,7 +362,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
     if (dixLookupFontable(&pFont, stuff->id, client, DixGetAttrAccess) !=
         Success)
-        return BadFont;         /* procotol spec says only error is BadFont */
+        return BadFont;         /* protocol spec says only error is BadFont */
 
     pmax = FONTINKMAX(pFont);
     pmin = FONTINKMIN(pFont);
@@ -368,26 +381,28 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
     if (nCharInfos > 0) {
 #ifdef CONFIG_MITSHM
-        if (!badSysCall)
+        if (!badSysCall) {
             pDesc = (ShmDescPtr) FontGetPrivate(pFont, FontShmdescIndex);
+        }
         if (pDesc) {
             pCI = (xCharInfo *) pDesc->attach_addr;
-            if (stuff_flags & XF86Bigfont_FLAGS_Shm)
+            if (stuff_flags & XF86Bigfont_FLAGS_Shm) {
                 shmid = pDesc->shmid;
-        }
-        else {
-            if (stuff_flags & XF86Bigfont_FLAGS_Shm && !badSysCall)
+            }
+        } else {
+            if (stuff_flags & XF86Bigfont_FLAGS_Shm && !badSysCall) {
                 pDesc = shmalloc(nCharInfos * sizeof(xCharInfo)
                                  + sizeof(CARD32));
+            }
             if (pDesc) {
                 pCI = (xCharInfo *) pDesc->attach_addr;
                 shmid = pDesc->shmid;
-            }
-            else {
+            } else {
 #endif /* CONFIG_MITSHM */
                 pCI = calloc(nCharInfos, sizeof(xCharInfo));
-                if (!pCI)
+                if (!pCI) {
                     return BadAlloc;
+                }
 #ifdef CONFIG_MITSHM
             }
 #endif /* CONFIG_MITSHM */
@@ -449,8 +464,9 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
             tmp = calloc(4 * nCharInfos + 1, sizeof(CARD16));
             if (!tmp) {
-                if (!pDesc)
+                if (!pDesc) {
                     free(pCI);
+                }
                 return BadAlloc;
             }
             pIndex2UniqIndex = tmp;
@@ -467,8 +483,9 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                entry before the last element has been inserted. And once the
                last element has been inserted, we don't need the hash table
                any more. */
-            for (j = 0; j < hashModulus; j++)
+            for (j = 0; j < hashModulus; j++) {
                 pHash2UniqIndex[j] = (CARD16) (-1);
+            }
 
             NextUniqIndex = 0;
             for (NextIndex = 0; NextIndex < nCharInfos; NextIndex++) {
@@ -496,18 +513,20 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                         && hashModulus < nCharInfos + 1) {
                         /* Time to increate hash table size */
                         hashModulus = 2 * hashModulus + 1;
-                        if (hashModulus > nCharInfos + 1)
+                        if (hashModulus > nCharInfos + 1) {
                             hashModulus = nCharInfos + 1;
-                        for (j = 0; j < hashModulus; j++)
+                        }
+                        for (j = 0; j < hashModulus; j++) {
                             pHash2UniqIndex[j] = (CARD16) (-1);
-                        for (i = 0; i < NextUniqIndex; i++)
+                        }
+                        for (i = 0; i < NextUniqIndex; i++) {
                             pUniqIndex2NextUniqIndex[i] = (CARD16) (-1);
+                        }
                         for (i = 0; i < NextUniqIndex; i++) {
                             j = pUniqIndex2Index[i];
                             p = &pCI[j];
                             hashCode = hashCI(p) % hashModulus;
-                            pUniqIndex2NextUniqIndex[i] =
-                                pHash2UniqIndex[hashCode];
+                            pUniqIndex2NextUniqIndex[i] = pHash2UniqIndex[hashCode];
                             pHash2UniqIndex[hashCode] = i;
                         }
                         p = &pCI[NextIndex];
@@ -545,22 +564,21 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             .shmid = shmid,
         };
 
+        X_REPLY_FIELD_CARD16(minCharOrByte2);
+        X_REPLY_FIELD_CARD16(maxCharOrByte2);
+        X_REPLY_FIELD_CARD16(defaultChar);
+        X_REPLY_FIELD_CARD16(nFontProps);
+        X_REPLY_FIELD_CARD16(fontAscent);
+        X_REPLY_FIELD_CARD16(fontDescent);
+        X_REPLY_FIELD_CARD32(nCharInfos);
+        X_REPLY_FIELD_CARD32(nUniqCharInfos);
+        X_REPLY_FIELD_CARD32(shmid);
+        X_REPLY_FIELD_CARD32(shmsegoffset);
+
         if (client->swapped) {
             swapCharInfo(&reply.minBounds);
             swapCharInfo(&reply.maxBounds);
-            swaps(&reply.minCharOrByte2);
-            swaps(&reply.maxCharOrByte2);
-            swaps(&reply.defaultChar);
-            swaps(&reply.nFontProps);
-            swaps(&reply.fontAscent);
-            swaps(&reply.fontDescent);
-            swapl(&reply.nCharInfos);
-            swapl(&reply.nUniqCharInfos);
-            swapl(&reply.shmid);
-            swapl(&reply.shmsegoffset);
         }
-
-        int rc = Success;
 
         x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -570,18 +588,21 @@ ProcXF86BigfontQueryFont(ClientPtr client)
         }
 
         if (nCharInfos > 0 && shmid == -1) {
-            for (int i = 0; i < nUniqCharInfos; i++)
+            for (int i = 0; i < nUniqCharInfos; i++) {
                 writeCharInfo(&rpcbuf, pCI[pUniqIndex2Index[i]]);
+            }
             x_rpcbuf_write_CARD16s(&rpcbuf, pIndex2UniqIndex, nCharInfos);
         }
 
-        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
+        int rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
         if (nCharInfos > 0) {
-            if (shmid == -1)
+            if (shmid == -1) {
                 free(pIndex2UniqIndex);
-            if (!pDesc)
+            }
+            if (!pDesc) {
                 free(pCI);
+            }
         }
         return rc;
     }
@@ -602,36 +623,6 @@ ProcXF86BigfontDispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcXF86BigfontQueryVersion(ClientPtr client)
-{
-    return ProcXF86BigfontQueryVersion(client);
-}
-
-static int _X_COLD
-SProcXF86BigfontQueryFont(ClientPtr client)
-{
-    REQUEST(xXF86BigfontQueryFontReq);
-    REQUEST_SIZE_MATCH(xXF86BigfontQueryFontReq);
-    swapl(&stuff->id);
-    return ProcXF86BigfontQueryFont(client);
-}
-
-static int _X_COLD
-SProcXF86BigfontDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_XF86BigfontQueryVersion:
-        return SProcXF86BigfontQueryVersion(client);
-    case X_XF86BigfontQueryFont:
-        return SProcXF86BigfontQueryFont(client);
-    default:
-        return BadRequest;
-    }
-}
-
 void
 XFree86BigfontExtensionInit(void)
 {
@@ -639,7 +630,7 @@ XFree86BigfontExtensionInit(void)
                      XF86BigfontNumberEvents,
                      XF86BigfontNumberErrors,
                      ProcXF86BigfontDispatch,
-                     SProcXF86BigfontDispatch,
+                     ProcXF86BigfontDispatch,
                      XF86BigfontResetProc, StandardMinorOpcode)) {
 #ifdef CONFIG_MITSHM
 #ifdef MUST_CHECK_FOR_SHM_SYSCALL
@@ -663,7 +654,7 @@ XFree86BigfontExtensionInit(void)
 
         FontShmdescIndex = xfont2_allocate_font_private_index();
 
-#if !defined(CSRG_BASED)
+#if !defined(CSRG_BASED) && !defined(__CYGWIN__)
         pagesize = SHMLBA;
 #else
 #ifdef _SC_PAGESIZE

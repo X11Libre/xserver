@@ -56,11 +56,11 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-
-#include "getfctl.h"
 
 /***********************************************************************
  *
@@ -83,6 +83,7 @@ CopySwapKbdFeedback(ClientPtr client, KbdFeedbackPtr k, char **buf)
     k2->pitch = k->ctrl.bell_pitch;
     k2->duration = k->ctrl.bell_duration;
     k2->led_mask = k->ctrl.leds;
+    k2->led_values = k->ctrl.leds;
     k2->global_auto_repeat = k->ctrl.autoRepeat;
     for (i = 0; i < 32; i++)
         k2->auto_repeats[i] = k->ctrl.autoRepeats[i];
@@ -255,40 +256,39 @@ ProcXGetFeedbackControl(ClientPtr client)
     BellFeedbackPtr b;
     LedFeedbackPtr l;
 
-    REQUEST(xGetFeedbackControlReq);
-    REQUEST_SIZE_MATCH(xGetFeedbackControlReq);
+    X_REQUEST_HEAD_STRUCT(xGetFeedbackControlReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    xGetFeedbackControlReply rep = {
+    xGetFeedbackControlReply reply = {
         .RepType = X_GetFeedbackControl,
     };
 
     for (k = dev->kbdfeed; k; k = k->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xKbdFeedbackState);
     }
     for (p = dev->ptrfeed; p; p = p->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xPtrFeedbackState);
     }
     for (s = dev->stringfeed; s; s = s->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xStringFeedbackState) +
             (s->ctrl.num_symbols_supported * sizeof(KeySym));
     }
     for (i = dev->intfeed; i; i = i->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xIntegerFeedbackState);
     }
     for (l = dev->leds; l; l = l->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xLedFeedbackState);
     }
     for (b = dev->bell; b; b = b->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xBellFeedbackState);
     }
 
@@ -311,8 +311,7 @@ ProcXGetFeedbackControl(ClientPtr client)
     for (b = dev->bell; b; b = b->next)
         CopySwapBellFeedback(client, b, &buf);
 
-    if (client->swapped) {
-        swaps(&rep.num_feedbacks);
-    }
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_REPLY_FIELD_CARD16(num_feedbacks);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

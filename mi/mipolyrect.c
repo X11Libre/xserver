@@ -57,7 +57,7 @@ miPolyRectangle(DrawablePtr pDraw, GCPtr pGC, int nrects, xRectangle *pRects)
 {
     int i;
     xRectangle *pR = pRects;
-    DDXPointRec rect[5];
+    xPoint rect[5];
     int bound_tmp;
 
 #define MINBOUND(dst,eqn)	bound_tmp = eqn; \

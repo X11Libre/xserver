@@ -24,7 +24,7 @@ void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (!owner) {
         param->status = BadWindow;
         param->skip = TRUE;
-        XNS_HOOK_LOG("owner of window 0x%0" PRIx32 "doesn't exist\n", param->window);
+        XNS_HOOK_LOG("owner of window 0x%0llx doesn't exist\n", (unsigned long long)param->window);
         return;
     }
 

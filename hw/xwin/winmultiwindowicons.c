@@ -27,10 +27,7 @@
  *
  * Authors:	Earle F. Philhower, III
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #ifndef WINVER
 #define WINVER 0x0500
@@ -39,8 +36,6 @@
 #include <limits.h>
 #include <stdbool.h>
 
-#include <X11/Xwindows.h>
-#include <winsock2.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_image.h>

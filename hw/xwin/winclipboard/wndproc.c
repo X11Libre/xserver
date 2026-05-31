@@ -32,9 +32,7 @@
 
 #define WINVER 0x0600
 
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include <sys/types.h>
 #include <sys/time.h>

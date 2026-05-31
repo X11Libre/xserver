@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
 
@@ -582,13 +583,18 @@ int
 ProcRRGetMonitors(ClientPtr client)
 {
     REQUEST(xRRGetMonitorsReq);
+    REQUEST_SIZE_MATCH(xRRGetMonitorsReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     WindowPtr           window;
     ScreenPtr           screen;
     int                 r;
     RRMonitorPtr        monitors;
     int                 nmonitors;
     Bool                get_active;
-    REQUEST_SIZE_MATCH(xRRGetMonitorsReq);
+
     r = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
     if (r != Success)
         return r;
@@ -635,31 +641,44 @@ ProcRRGetMonitors(ClientPtr client)
     }
     RRMonitorFreeList(monitors, nmonitors);
 
-    xRRGetMonitorsReply rep = {
+    xRRGetMonitorsReply reply = {
         .timestamp = RRMonitorTimestamp(screen),
         .nmonitors = nmonitors,
         .noutputs = noutputs,
     };
 
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swapl(&rep.nmonitors);
-        swapl(&rep.noutputs);
+        swapl(&reply.timestamp);
+        swapl(&reply.nmonitors);
+        swapl(&reply.noutputs);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
 ProcRRSetMonitor(ClientPtr client)
 {
     REQUEST(xRRSetMonitorReq);
+    REQUEST_AT_LEAST_SIZE(xRRSetMonitorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->monitor.name);
+        swaps(&stuff->monitor.noutput);
+        swaps(&stuff->monitor.x);
+        swaps(&stuff->monitor.y);
+        swaps(&stuff->monitor.width);
+        swaps(&stuff->monitor.height);
+        swapl(&stuff->monitor.widthInMillimeters);
+        swapl(&stuff->monitor.heightInMillimeters);
+        SwapRestL(stuff);
+    }
+
     WindowPtr           window;
     ScreenPtr           screen;
     RRMonitorPtr        monitor;
     int                 r;
-
-    REQUEST_AT_LEAST_SIZE(xRRSetMonitorReq);
 
     if (stuff->monitor.noutput != client->req_len - (sizeof(xRRSetMonitorReq) >> 2))
         return BadLength;
@@ -702,11 +721,17 @@ int
 ProcRRDeleteMonitor(ClientPtr client)
 {
     REQUEST(xRRDeleteMonitorReq);
+    REQUEST_SIZE_MATCH(xRRDeleteMonitorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->name);
+    }
+
     WindowPtr           window;
     ScreenPtr           screen;
     int                 r;
 
-    REQUEST_SIZE_MATCH(xRRDeleteMonitorReq);
     r = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
     if (r != Success)
         return r;

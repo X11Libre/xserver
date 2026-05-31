@@ -122,6 +122,25 @@ DetermineClientPid(struct _Client * client)
     return pid;
 }
 
+#ifdef __APPLE__ /* only required on macOS */
+static void
+get_argmax_from_kern(void *arg)
+{
+    int *argmax = arg;
+    int mib[2];
+    size_t len;
+
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_ARGMAX;
+
+    len = sizeof(int);
+    if (sysctl(mib, 2, argmax, &len, NULL, 0) == -1) {
+        ErrorF("Unable to dynamically determine kern.argmax, using ARG_MAX (%d)\n", ARG_MAX);
+        *argmax = ARG_MAX;
+    }
+}
+#endif
+
 /**
  * Try to determine a command line string for a client based on its
  * PID. Note that mapping PID to a command hasn't been implemented for
@@ -164,19 +183,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
     {
         static dispatch_once_t once;
         static int argmax;
-        dispatch_once(&once, ^{
-            int mib[2];
-            size_t len;
-
-            mib[0] = CTL_KERN;
-            mib[1] = KERN_ARGMAX;
-
-            len = sizeof(argmax);
-            if (sysctl(mib, 2, &argmax, &len, NULL, 0) == -1) {
-                ErrorF("Unable to dynamically determine kern.argmax, using ARG_MAX (%d)\n", ARG_MAX);
-                argmax = ARG_MAX;
-            }
-        });
+        dispatch_once_f(&once, &argmax, get_argmax_from_kern);
 
         int mib[3];
         size_t len = argmax;
@@ -326,11 +333,13 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
         kp = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc),
                           &n);
         if (n != 1)
-            return;
+            goto done_kvm;
         argv = kvm_getargv(kd, kp, 0);
+        if (argv == NULL)
+            goto done_kvm;
         if (cmdname) {
-            if (argv == NULL || argv[0] == NULL)
-                return;
+            if (argv[0] == NULL)
+                goto done_kvm;
             else
                 *cmdname = strdup(argv[0]);
         }
@@ -341,13 +350,16 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
                 i++;
             }
             *cmdargs = calloc(1, len);
-            i = 1;
-            while (argv[i] != NULL) {
-                strlcat(*(char **)cmdargs, argv[i], len);
-                strlcat(*(char **)cmdargs, " ", len);
-                i++;
+            if (*cmdargs) {
+                i = 1;
+                while (argv[i] != NULL) {
+                    strlcat(*(char **)cmdargs, argv[i], len);
+                    strlcat(*(char **)cmdargs, " ", len);
+                    i++;
+                }
             }
         }
+ done_kvm:
         kvm_close(kd);
     }
 #else                           /* Linux using /proc/pid/cmdline */

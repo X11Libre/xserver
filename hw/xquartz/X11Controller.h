@@ -31,8 +31,6 @@
 #ifndef X11CONTROLLER_H
 #define X11CONTROLLER_H 1
 
-#include <dix-config.h>
-
 #if __OBJC__
 
 #include "sanitizedCocoa.h"
@@ -44,7 +42,54 @@
 #undef BOOL
 #endif
 
-@interface X11Controller : NSObject <NSTableViewDataSource>
+#ifndef strong
+#define strong retain
+#endif
+
+@interface X11Controller : NSObject {
+    NSArray *_apps;
+    NSMutableArray *_table_apps;
+    NSInteger _windows_menu_nitems;
+    int _checked_window_item;
+    x_list *_pending_apps;
+    OSX_BOOL _finished_launching;
+#ifdef XQUARTZ_SPARKLE
+    NSMenuItem *_check_for_updates_item;
+#endif
+
+    NSPanel *_prefs_panel;
+    NSButton *_fake_buttons;
+    NSButton *_enable_fullscreen;
+    NSButton *_enable_fullscreen_menu;
+    NSTextField *_enable_fullscreen_menu_text;
+    NSButton *_enable_keyequivs;
+    NSButton *_sync_keymap;
+    NSButton *_option_sends_alt;
+    NSButton *_scroll_in_device_direction;
+    NSButton *_click_through;
+    NSButton *_focus_follows_mouse;
+    NSButton *_focus_on_new_window;
+    NSButton *_enable_auth;
+    NSButton *_enable_tcp;
+    NSButton *_sync_pasteboard;
+    NSButton *_sync_pasteboard_to_clipboard;
+    NSButton *_sync_pasteboard_to_primary;
+    NSButton *_sync_clipboard_to_pasteboard;
+    NSButton *_sync_primary_immediately;
+    NSTextField *_sync_text1;
+    NSTextField *_sync_text2;
+    NSPopUpButton *_depth;
+    NSMenuItem *_x11_about_item;
+    NSMenuItem *_dock_window_separator;
+    NSMenuItem *_apps_separator;
+    NSMenuItem *_toggle_fullscreen_item;
+    NSMenuItem *_copy_menu_item;
+    NSMenu *_dock_apps_menu;
+    NSTableView *_apps_table;
+    NSMenu *_dock_menu;
+    OSX_BOOL _can_quit;
+}
+
 @property (nonatomic, readwrite, strong) IBOutlet NSPanel *prefs_panel;
 
 @property (nonatomic, readwrite, strong) IBOutlet NSButton *fake_buttons;

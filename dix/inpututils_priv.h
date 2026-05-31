@@ -24,8 +24,6 @@
 #ifndef _XSERVER_DIX_INPUTUTILS_PRIV_H
 #define _XSERVER_DIX_INPUTUTILS_PRIV_H
 
-#include "dix-config.h"
-
 #include "input.h"
 #include "eventstr.h"
 #include <X11/extensions/XI2proto.h>

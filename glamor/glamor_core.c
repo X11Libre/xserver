@@ -93,7 +93,11 @@ glamor_link_glsl_prog(ScreenPtr screen, GLint prog, const char *format, ...)
         va_list va;
 
         va_start(va, format);
-        XNFvasprintf(&label, format, va);
+        if (vasprintf(&label, format, va) == -1) {
+            ErrorF("glamor_link_glsl_prog() memory allocation failed\n");
+            va_end(va);
+            return FALSE;
+        }
         glObjectLabel(GL_PROGRAM, prog, -1, label);
         free(label);
         va_end(va);
@@ -203,6 +207,8 @@ glamor_validate_gc(GCPtr gc, unsigned long changes, DrawablePtr drawable)
      */
     if (changes & GCTile) {
         if (!gc->tileIsPixel) {
+            assert(gc->tile.pixmap != NullPixmap);
+
             glamor_pixmap_private *pixmap_priv =
                 glamor_get_pixmap_private(gc->tile.pixmap);
             if ((!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))

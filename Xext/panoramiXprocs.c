@@ -32,7 +32,11 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/screenint_priv.h"
+#include "dix/server_priv.h"
+#include "dix/window_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -66,7 +70,6 @@ PanoramiXCreateWindow(ClientPtr client)
     int result, len;
     int orig_x, orig_y;
     XID orig_visual, tmp;
-    Bool parentIsRoot;
 
     REQUEST_AT_LEAST_SIZE(xCreateWindowReq);
 
@@ -131,8 +134,11 @@ PanoramiXCreateWindow(ClientPtr client)
     orig_visual = stuff->visual;
     orig_x = stuff->x;
     orig_y = stuff->y;
-    parentIsRoot = (stuff->parent == screenInfo.screens[0]->root->drawable.id)
-        || (stuff->parent == screenInfo.screens[0]->screensaver.wid);
+
+    ScreenPtr masterScreen = dixGetMasterScreen();
+
+    Bool parentIsRoot = (stuff->parent == masterScreen->root->drawable.id)
+                     || (stuff->parent == masterScreen->screensaver.wid);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->wid = newWin->info[walkScreenIdx].id;
@@ -149,7 +155,7 @@ PanoramiXCreateWindow(ClientPtr client)
             *((CARD32 *) &stuff[1] + cmap_offset) = cmap->info[walkScreenIdx].id;
         if (orig_visual != CopyFromParent)
             stuff->visual = PanoramiXTranslateVisualID(walkScreenIdx, orig_visual);
-        result = (*SavedProcVector[X_CreateWindow]) (client);
+        result = DoCreateWindowReq(client, stuff, (XID*)&stuff[1]);
         if (result != Success)
             break;
     });
@@ -323,7 +329,6 @@ PanoramiXReparentWindow(ClientPtr client)
     PanoramiXRes *win, *parent;
     int result;
     int x, y;
-    Bool parentIsRoot;
 
     REQUEST(xReparentWindowReq);
 
@@ -341,8 +346,11 @@ PanoramiXReparentWindow(ClientPtr client)
 
     x = stuff->x;
     y = stuff->y;
-    parentIsRoot = (stuff->parent == screenInfo.screens[0]->root->drawable.id)
-        || (stuff->parent == screenInfo.screens[0]->screensaver.wid);
+
+    ScreenPtr masterScreen = dixGetMasterScreen();
+
+    Bool parentIsRoot = (stuff->parent == masterScreen->root->drawable.id)
+                     || (stuff->parent == masterScreen->screensaver.wid);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->window = win->info[walkScreenIdx].id;
@@ -500,9 +508,10 @@ PanoramiXConfigureWindow(ClientPtr client)
         }
     }
 
-    if (pWin->parent && ((pWin->parent == screenInfo.screens[0]->root) ||
-                         (pWin->parent->drawable.id ==
-                          screenInfo.screens[0]->screensaver.wid))) {
+    ScreenPtr masterScreen = dixGetMasterScreen();
+
+    if (pWin->parent && ((pWin->parent == masterScreen->root) ||
+                         (pWin->parent->drawable.id == masterScreen->screensaver.wid))) {
         if ((Mask) stuff->mask & CWX) {
             x_offset = 0;
             x = *((CARD32 *) &stuff[1]);
@@ -560,17 +569,18 @@ int
 PanoramiXGetGeometry(ClientPtr client)
 {
     DrawablePtr pDraw;
-    int rc;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
-    rc = dixLookupDrawable(&pDraw, stuff->id, client, M_ANY, DixGetAttrAccess);
+
+    int rc = dixLookupDrawable(&pDraw, stuff->id, client, M_ANY, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
+    ScreenPtr masterScreen = dixGetMasterScreen();
+
     xGetGeometryReply reply = {
-        .root = screenInfo.screens[0]->root->drawable.id,
+        .root = masterScreen->root->drawable.id,
         .depth = pDraw->depth,
         .width = pDraw->width,
         .height = pDraw->height,
@@ -591,11 +601,10 @@ PanoramiXGetGeometry(ClientPtr client)
 
         reply.x = pWin->origin.x - wBorderWidth(pWin);
         reply.y = pWin->origin.y - wBorderWidth(pWin);
-        if ((pWin->parent == screenInfo.screens[0]->root) ||
-            (pWin->parent->drawable.id ==
-             screenInfo.screens[0]->screensaver.wid)) {
-            reply.x += screenInfo.screens[0]->x;
-            reply.y += screenInfo.screens[0]->y;
+        if ((pWin->parent == masterScreen->root) ||
+            (pWin->parent->drawable.id == masterScreen->screensaver.wid)) {
+            reply.x += masterScreen->x;
+            reply.y += masterScreen->y;
         }
         reply.borderWidth = pWin->borderWidth;
     }
@@ -608,8 +617,8 @@ PanoramiXGetGeometry(ClientPtr client)
         swaps(&reply.height);
         swaps(&reply.borderWidth);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -618,21 +627,23 @@ PanoramiXTranslateCoords(ClientPtr client)
     INT16 x, y;
 
     REQUEST(xTranslateCoordsReq);
-    int rc;
     WindowPtr pWin, pDst;
 
     REQUEST_SIZE_MATCH(xTranslateCoordsReq);
-    rc = dixLookupWindow(&pWin, stuff->srcWid, client, DixReadAccess);
+
+    int rc = dixLookupWindow(&pWin, stuff->srcWid, client, DixReadAccess);
     if (rc != Success)
         return rc;
     rc = dixLookupWindow(&pDst, stuff->dstWid, client, DixReadAccess);
     if (rc != Success)
         return rc;
 
-    if ((pWin == screenInfo.screens[0]->root) ||
-        (pWin->drawable.id == screenInfo.screens[0]->screensaver.wid)) {
-        x = stuff->srcX - screenInfo.screens[0]->x;
-        y = stuff->srcY - screenInfo.screens[0]->y;
+    ScreenPtr masterScreen = dixGetMasterScreen();
+
+    if ((pWin == masterScreen->root) ||
+        (pWin->drawable.id == masterScreen->screensaver.wid)) {
+        x = stuff->srcX - masterScreen->x;
+        y = stuff->srcY - masterScreen->y;
     }
     else {
         x = pWin->drawable.x + stuff->srcX;
@@ -669,10 +680,10 @@ PanoramiXTranslateCoords(ClientPtr client)
 
     INT16 dstX = x - pDst->drawable.x;
     INT16 dstY = y - pDst->drawable.y;
-    if ((pDst == screenInfo.screens[0]->root) ||
-        (pDst->drawable.id == screenInfo.screens[0]->screensaver.wid)) {
-        dstX += screenInfo.screens[0]->x;
-        dstY += screenInfo.screens[0]->y;
+    if ((pDst == masterScreen->root) ||
+        (pDst->drawable.id == masterScreen->screensaver.wid)) {
+        dstX += masterScreen->x;
+        dstY += masterScreen->y;
     }
 
     xTranslateCoordsReply reply = {
@@ -687,8 +698,8 @@ PanoramiXTranslateCoords(ClientPtr client)
         swaps(&reply.dstX);
         swaps(&reply.dstY);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1158,8 +1169,9 @@ PanoramiXCopyArea(ClientPtr client)
             dx = drawables[0]->x;
             dy = drawables[0]->y;
             if (srcIsRoot) {
-                dx += screenInfo.screens[0]->x;
-                dy += screenInfo.screens[0]->y;
+                ScreenPtr masterScreen = dixGetMasterScreen();
+                dx += masterScreen->x;
+                dy += masterScreen->y;
             }
 
             sourceBox.x1 = min(srcx + dx, 0);
@@ -1205,7 +1217,6 @@ PanoramiXCopyArea(ClientPtr client)
         DrawablePtr pDst = NULL, pSrc = NULL;
         GCPtr pGC = NULL;
         RegionRec totalReg;
-        int rc;
 
         RegionNull(&totalReg);
 
@@ -1227,8 +1238,8 @@ PanoramiXCopyArea(ClientPtr client)
             VALIDATE_DRAWABLE_AND_GC(stuff->dstDrawable, pDst, DixWriteAccess);
 
             if (stuff->dstDrawable != stuff->srcDrawable) {
-                rc = dixLookupDrawable(&pSrc, stuff->srcDrawable, client, 0,
-                                       DixReadAccess);
+                int rc = dixLookupDrawable(&pSrc, stuff->srcDrawable, client, 0,
+                                           DixReadAccess);
                 if (rc != Success)
                     return rc;
 
@@ -1273,7 +1284,7 @@ PanoramiXCopyArea(ClientPtr client)
 int
 PanoramiXCopyPlane(ClientPtr client)
 {
-    int srcx, srcy, dstx, dsty, rc;
+    int srcx, srcy, dstx, dsty;
     PanoramiXRes *gc, *src, *dst;
     Bool srcIsRoot = FALSE;
     Bool dstIsRoot = FALSE;
@@ -1286,8 +1297,8 @@ PanoramiXCopyPlane(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xCopyPlaneReq);
 
-    rc = dixLookupResourceByClass((void **) &src, stuff->srcDrawable,
-                                  XRC_DRAWABLE, client, DixReadAccess);
+    int rc = dixLookupResourceByClass((void **) &src, stuff->srcDrawable,
+                                      XRC_DRAWABLE, client, DixReadAccess);
     if (rc != Success)
         return (rc == BadValue) ? BadDrawable : rc;
 
@@ -1751,15 +1762,15 @@ PanoramiXFillPoly(ClientPtr client)
 
     count = bytes_to_int32((client->req_len << 2) - sizeof(xFillPolyReq));
     if (count > 0) {
-        DDXPointPtr locPts = calloc(count, sizeof(DDXPointRec));
+        DDXPointPtr locPts = calloc(count, sizeof(xPoint));
         if (!locPts)
             return BadAlloc;
         memcpy((char *) locPts, (char *) &stuff[1],
-               count * sizeof(DDXPointRec));
+               count * sizeof(xPoint));
 
         XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip screen #0 */
-                memcpy(&stuff[1], locPts, count * sizeof(DDXPointRec));
+                memcpy(&stuff[1], locPts, count * sizeof(xPoint));
 
             if (isRoot) {
                 int x_off = walkScreen->x;
@@ -1978,7 +1989,7 @@ PanoramiXGetImage(ClientPtr client)
     DrawablePtr pDraw;
     PanoramiXRes *draw;
     Bool isRoot;
-    int x, y, w, h, format, rc;
+    int x, y, w, h, format;
     Mask plane = 0, planemask;
     int linesDone, nlines, linesPerBuf;
     long widthBytesLine;
@@ -1992,8 +2003,8 @@ PanoramiXGetImage(ClientPtr client)
         return BadValue;
     }
 
-    rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
-                                  XRC_DRAWABLE, client, DixReadAccess);
+    int rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
+                                      XRC_DRAWABLE, client, DixReadAccess);
     if (rc != Success)
         return (rc == BadValue) ? BadDrawable : rc;
 
@@ -2023,11 +2034,12 @@ PanoramiXGetImage(ClientPtr client)
             return BadMatch;
     }
     else {
+        ScreenPtr masterScreen = dixGetMasterScreen();
         /* check for being onscreen and inside of border */
-        if (screenInfo.screens[0]->x + pDraw->x + x < 0 ||
-            screenInfo.screens[0]->x + pDraw->x + x + w > PanoramiXPixWidth ||
-            screenInfo.screens[0]->y + pDraw->y + y < 0 ||
-            screenInfo.screens[0]->y + pDraw->y + y + h > PanoramiXPixHeight ||
+        if (masterScreen->x + pDraw->x + x < 0 ||
+            masterScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||
+            masterScreen->y + pDraw->y + y < 0 ||
+            masterScreen->y + pDraw->y + y + h > PanoramiXPixHeight ||
             x < -wBorderWidth((WindowPtr) pDraw) ||
             x + w > wBorderWidth((WindowPtr) pDraw) + (int) pDraw->width ||
             y < -wBorderWidth((WindowPtr) pDraw) ||
@@ -2484,8 +2496,14 @@ PanoramiXAllocColor(ClientPtr client)
     PanoramiXRes *cmap;
 
     REQUEST(xAllocColorReq);
-
     REQUEST_SIZE_MATCH(xAllocColorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cmap);
+        swaps(&stuff->red);
+        swaps(&stuff->green);
+        swaps(&stuff->blue);
+    }
 
     client->errorValue = stuff->cmap;
 
@@ -2495,13 +2513,40 @@ PanoramiXAllocColor(ClientPtr client)
         return result;
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
-        stuff->cmap = cmap->info[walkScreenIdx].id;
-        result = (*SavedProcVector[X_AllocColor]) (client);
+        Colormap childCmap = cmap->info[walkScreenIdx].id;
+
+        CARD16 red = stuff->red;
+        CARD16 green = stuff->green;
+        CARD16 blue = stuff->blue;
+        CARD32 pixel = 0;
+
+        result = dixAllocColor(client, childCmap, &red, &green, &blue, &pixel);
         if (result != Success)
-            break;
+            return result;
+
+        /* only send out reply for on first screen */
+        if (!walkScreenIdx) {
+            xAllocColorReply reply; /* static init would confuse preprocessor */
+            reply.red = red;
+            reply.green = green;
+            reply.blue = blue;
+            reply.pixel = pixel;
+
+            if (client->swapped) {
+                swaps(&reply.red);
+                swaps(&reply.green);
+                swaps(&reply.blue);
+                swapl(&reply.pixel);
+            }
+
+            /* iterating backwards, first screen comes last, so we can return here */
+            return X_SEND_REPLY_SIMPLE(client, reply);
+        }
     });
 
-    return result;
+    /* shouldn't ever reach here, because we already returned from within the loop
+       if this ever happens, PanoramiXNumScreens must be 0 */
+    return BadImplementation;
 }
 
 int

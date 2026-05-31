@@ -32,6 +32,8 @@
 #if !defined(_WINWINDOW_H_)
 #define _WINWINDOW_H_
 
+#include <stdbool.h>
+
 #ifndef NO
 #define NO			0
 #endif
@@ -52,6 +54,9 @@
 #define WINDOW_CLASS_X_MSG      "cygwin/x X msg"
 #define WINDOW_TITLE_X		PROJECT_NAME " X"
 #define WIN_WINDOW_PROP		"cyg_window_prop_rl"
+#ifdef HAS_DEVWINDOWS
+#define WIN_MSG_QUEUE_FNAME	"/dev/windows"
+#endif
 #define WIN_WID_PROP		"cyg_wid_prop_rl"
 #define WIN_NEEDMANAGE_PROP	"cyg_override_redirect_prop_rl"
 
@@ -68,7 +73,7 @@ typedef struct {
     HRGN hRgn;
     HWND hWnd;
     winPrivScreenPtr pScreenPriv;
-    Bool fXKilled;
+    bool fXKilled;
     HDWP hDwp;
 #ifdef XWIN_GLX_WINDOWS
     Bool fWglUsed;
@@ -129,13 +134,13 @@ typedef struct MwmHints {
 void
  winSendMessageToWM(void *pWMInfo, winWMMessagePtr msg);
 
-Bool
-
-winInitWM(void **ppWMInfo,
-          pthread_t * ptWMProc,
-          pthread_t * ptXMsgProc,
-          pthread_mutex_t * ppmServerStarted,
-          int dwScreen, HWND hwndScreen, Bool compositeWM);
+bool winInitWM(void **ppWMInfo,
+               pthread_t *ptWMProc,
+               pthread_t *ptXMsgProc,
+               pthread_mutex_t *ppmServerStarted,
+               int dwScreen,
+               HWND hwndScreen,
+               bool compositeWM);
 
 void
  winDeinitMultiWindowWM(void);
@@ -149,7 +154,6 @@ void
 void
  winSetAppUserModelID(HWND hWnd, const char *AppID);
 
-void
- winShowWindowOnTaskbar(HWND hWnd, Bool show);
+void winShowWindowOnTaskbar(HWND hWnd, bool show);
 
 #endif

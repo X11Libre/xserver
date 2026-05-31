@@ -32,7 +32,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "misc.h"
 #include "inputstr.h"
 #include <xkbsrv.h>
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 /***====================================================================***/
 
@@ -541,7 +541,8 @@ XkbAddGeomProperty(XkbGeometryPtr geom, char *name, char *value)
     for (i = 0, prop = geom->properties; i < geom->num_properties; i++, prop++) {
         if ((prop->name) && (strcmp(name, prop->name) == 0)) {
             free(prop->value);
-            prop->value = strdup(value);
+            if (!(prop->value = strdup(value)))
+                return NULL;
             return prop;
         }
     }
@@ -756,7 +757,7 @@ XkbAddGeomDoodad(XkbGeometryPtr geom, XkbSectionPtr section, Atom name)
             return doodad;
     }
     if (section) {
-        if ((section->num_doodads >= geom->sz_doodads) &&
+        if ((section->num_doodads >= section->sz_doodads) &&
             (_XkbAllocDoodads(section, 1) != Success)) {
             return NULL;
         }

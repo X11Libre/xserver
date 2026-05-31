@@ -24,6 +24,8 @@
  */
 #include <dix-config.h>
 
+#include "dix/request_priv.h"
+
 #include "glxserver.h"
 #include "glxext.h"
 #include "misc.h"

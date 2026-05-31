@@ -7,6 +7,7 @@
 
 #include <X11/Xdefs.h>
 
+#include "include/callback.h"
 #include "include/dix.h"
 #include "include/resource.h"
 
@@ -155,5 +156,20 @@ void GetXIDRange(int client,
                  Bool server,
                  XID *minp,
                  XID *maxp);
+
+/* Resource state callback */
+extern CallbackListPtr ResourceStateCallback;
+
+typedef enum {
+    ResourceStateAdding,
+    ResourceStateFreeing
+} ResourceState;
+
+typedef struct {
+    ResourceState state;
+    XID id;
+    RESTYPE type;
+    void *value;
+} ResourceStateInfoRec;
 
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */

@@ -73,6 +73,9 @@
 #include <X11/extensions/panoramiXproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
+#include "dix/screenint_priv.h"
+#include "include/extinit.h"
 #include "randr/randrstr_priv.h"
 
 #include "swaprep.h"
@@ -87,7 +90,6 @@ static int ProcRRXineramaGetScreenCount(ClientPtr client);
 static int ProcRRXineramaGetScreenSize(ClientPtr client);
 static int ProcRRXineramaIsActive(ClientPtr client);
 static int ProcRRXineramaQueryScreens(ClientPtr client);
-static int _X_COLD SProcRRXineramaDispatch(ClientPtr client);
 
 Bool noRRXineramaExtension = FALSE;
 
@@ -96,30 +98,34 @@ Bool noRRXineramaExtension = FALSE;
 int
 ProcRRXineramaQueryVersion(ClientPtr client)
 {
-    xPanoramiXQueryVersionReply rep = {
+    xPanoramiXQueryVersionReply reply = {
         .majorVersion = SERVER_RRXINERAMA_MAJOR_VERSION,
         .minorVersion = SERVER_RRXINERAMA_MINOR_VERSION
     };
 
     REQUEST_SIZE_MATCH(xPanoramiXQueryVersionReq);
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
 ProcRRXineramaGetState(ClientPtr client)
 {
     REQUEST(xPanoramiXGetStateReq);
+    REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     WindowPtr pWin;
     register int rc;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     Bool active = FALSE;
 
-    REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -131,14 +137,14 @@ ProcRRXineramaGetState(ClientPtr client)
         active = TRUE;
     }
 
-    xPanoramiXGetStateReply rep = {
+    xPanoramiXGetStateReply reply = {
         .state = active,
         .window = stuff->window
     };
     if (client->swapped) {
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -157,33 +163,43 @@ int
 ProcRRXineramaGetScreenCount(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenCountReq);
+    REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     WindowPtr pWin;
     register int rc;
 
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    xPanoramiXGetScreenCountReply rep = {
+    xPanoramiXGetScreenCountReply reply = {
         .ScreenCount = RRXineramaScreenCount(pWin->drawable.pScreen),
         .window = stuff->window
     };
     if (client->swapped) {
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
 ProcRRXineramaGetScreenSize(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenSizeReq);
+    REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->screen);
+    }
+
     WindowPtr pWin, pRoot;
     ScreenPtr pScreen;
     register int rc;
 
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -191,19 +207,19 @@ ProcRRXineramaGetScreenSize(ClientPtr client)
     pScreen = pWin->drawable.pScreen;
     pRoot = pScreen->root;
 
-    xPanoramiXGetScreenSizeReply rep = {
+    xPanoramiXGetScreenSizeReply reply = {
         .width = pRoot->drawable.width,
         .height = pRoot->drawable.height,
         .window = stuff->window,
         .screen = stuff->screen
     };
     if (client->swapped) {
-        swapl(&rep.width);
-        swapl(&rep.height);
-        swapl(&rep.window);
-        swapl(&rep.screen);
+        swapl(&reply.width);
+        swapl(&reply.height);
+        swapl(&reply.window);
+        swapl(&reply.screen);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -211,13 +227,13 @@ ProcRRXineramaIsActive(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
-    xXineramaIsActiveReply rep = {
+    xXineramaIsActiveReply reply = {
         .state = RRXineramaScreenActive(screenInfo.screens[RR_XINERAMA_SCREEN])
     };
     if (client->swapped) {
-        swapl(&rep.state);
+        swapl(&reply.state);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -238,11 +254,11 @@ ProcRRXineramaQueryScreens(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    xXineramaQueryScreensReply rep = {
+    xXineramaQueryScreensReply reply = {
         .number = nmonitors
     };
     if (client->swapped) {
-        swapl(&rep.number);
+        swapl(&reply.number);
     }
 
     for (m = 0; m < nmonitors; m++) {
@@ -258,7 +274,7 @@ ProcRRXineramaQueryScreens(ClientPtr client)
     if (monitors)
         RRMonitorFreeList(monitors, nmonitors);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -274,57 +290,6 @@ ProcRRXineramaDispatch(ClientPtr client)
         return ProcRRXineramaGetScreenCount(client);
     case X_PanoramiXGetScreenSize:
         return ProcRRXineramaGetScreenSize(client);
-    case X_XineramaIsActive:
-        return ProcRRXineramaIsActive(client);
-    case X_XineramaQueryScreens:
-        return ProcRRXineramaQueryScreens(client);
-    }
-    return BadRequest;
-}
-
-/* SProc */
-
-static int _X_COLD
-SProcRRXineramaGetState(ClientPtr client)
-{
-    REQUEST(xPanoramiXGetStateReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
-    swapl(&stuff->window);
-    return ProcRRXineramaGetState(client);
-}
-
-static int _X_COLD
-SProcRRXineramaGetScreenCount(ClientPtr client)
-{
-    REQUEST(xPanoramiXGetScreenCountReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
-    swapl(&stuff->window);
-    return ProcRRXineramaGetScreenCount(client);
-}
-
-static int _X_COLD
-SProcRRXineramaGetScreenSize(ClientPtr client)
-{
-    REQUEST(xPanoramiXGetScreenSizeReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
-    swapl(&stuff->window);
-    swapl(&stuff->screen);
-    return ProcRRXineramaGetScreenSize(client);
-}
-
-int
-SProcRRXineramaDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-    case X_PanoramiXQueryVersion:
-        return ProcRRXineramaQueryVersion(client);
-    case X_PanoramiXGetState:
-        return SProcRRXineramaGetState(client);
-    case X_PanoramiXGetScreenCount:
-        return SProcRRXineramaGetScreenCount(client);
-    case X_PanoramiXGetScreenSize:
-        return SProcRRXineramaGetScreenSize(client);
     case X_XineramaIsActive:
         return ProcRRXineramaIsActive(client);
     case X_XineramaQueryScreens:
@@ -349,10 +314,12 @@ RRXineramaExtensionInit(void)
      * with their own output geometry.  So if there's more than one protocol
      * screen, just don't even try.
      */
-    if (screenInfo.numScreens > 1)
+    if (dixGetScreenPtr(1))
         return;
 
     (void) AddExtension(PANORAMIX_PROTOCOL_NAME, 0, 0,
                         ProcRRXineramaDispatch,
-                        SProcRRXineramaDispatch, NULL, StandardMinorOpcode);
+                        ProcRRXineramaDispatch,
+                        NULL,
+                        StandardMinorOpcode);
 }

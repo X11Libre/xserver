@@ -22,10 +22,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <errno.h>
 #include <sys/mman.h>
@@ -267,31 +264,4 @@ xf86DisableIO(void)
     return;
 }
 
-#endif
-
-#ifdef __NetBSD__
-/***************************************************************************/
-/* Set TV output mode                                                      */
-/***************************************************************************/
-void
-xf86SetTVOut(int mode)
-{
-    switch (xf86Info.consType) {
-    default:
-        FatalError("Xf86SetTVOut: Unsupported console");
-        break;
-    }
-    return;
-}
-
-void
-xf86SetRGBOut(void)
-{
-    switch (xf86Info.consType) {
-    default:
-        FatalError("Xf86SetTVOut: Unsupported console");
-        break;
-    }
-    return;
-}
 #endif

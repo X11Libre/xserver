@@ -25,10 +25,6 @@
  * authorization from the copyright holder(s) and author(s).
  */
 
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
-
 #ifndef _INT10DEFINES_H_
 #define _INT10DEFINES_H_ 1
 

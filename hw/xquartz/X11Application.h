@@ -35,12 +35,15 @@
 
 #if __OBJC__
 
-#import "X11Controller.h"
+#include "X11Controller.h"
 
-@interface X11Application : NSApplication
+@interface X11Application : NSApplication {
+    X11Controller *_controller;
+    OSX_BOOL _x_active;
+}
 
 @property (nonatomic, readwrite, strong) X11Controller *controller;
-@property (nonatomic, readonly, assign) OSX_BOOL x_active;
+@property (nonatomic, readwrite, assign) OSX_BOOL x_active;
 
 @end
 

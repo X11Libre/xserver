@@ -25,6 +25,7 @@
 #include <stdlib.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "include/mipict.h"
 #include "os/osdep.h"
 
 #include    <X11/X.h>
@@ -35,7 +36,6 @@
 #include    <X11/fonts/fontstruct.h>
 #include    <X11/fonts/libxfont2.h>
 #include    "mi.h"
-#include    "mipict.h"
 #include    "regionstr.h"
 #include    "globals.h"
 #include    "gcstruct.h"
@@ -127,7 +127,7 @@ getDrawableDamageRef(DrawablePtr pDrawable)
 static void
 _damageRegionAppend(DrawablePtr pDrawable, RegionPtr pRegion, Bool clip,
                     int subWindowMode, const char *where)
-#define damageRegionAppend(d,r,c,m) _damageRegionAppend(d,r,c,m,__FUNCTION__)
+#define damageRegionAppend(d,r,c,m) _damageRegionAppend(d,r,c,m,__func__)
 #else
 static void
 damageRegionAppend(DrawablePtr pDrawable, RegionPtr pRegion, Bool clip,
@@ -298,7 +298,7 @@ damageRegionProcessPending(DrawablePtr pDrawable)
 }
 
 #if DAMAGE_DEBUG_ENABLE
-#define damageDamageBox(d,b,m) _damageDamageBox(d,b,m,__FUNCTION__)
+#define damageDamageBox(d,b,m) _damageDamageBox(d,b,m,__func__)
 static void
 _damageDamageBox(DrawablePtr pDrawable, BoxPtr pBox, int subWindowMode,
                  const char *where)
@@ -1490,7 +1490,7 @@ static void damagePixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, Pixmap
 }
 
 static void
-damageCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+damageCopyWindow(WindowPtr pWindow, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWindow->drawable.pScreen;
 
@@ -1714,7 +1714,7 @@ DamageCreate(DamageReportFunc damageReport,
     pDamage->damageDestroy = damageDestroy;
     pDamage->pScreen = pScreen;
 
-    if (pScrPriv->funcs.Create)
+    if (pScrPriv && pScrPriv->funcs.Create)
         pScrPriv->funcs.Create (pDamage);
 
     return pDamage;
@@ -1756,7 +1756,7 @@ DamageRegister(DrawablePtr pDrawable, DamagePtr pDamage)
         pDamage->isWindow = FALSE;
     pDamage->pDrawable = pDrawable;
     damageInsertDamage(getDrawableDamageRef(pDrawable), pDamage);
-    if (pScrPriv->funcs.Register)
+    if (pScrPriv && pScrPriv->funcs.Register)
         pScrPriv->funcs.Register (pDrawable, pDamage);
 }
 
@@ -1776,7 +1776,7 @@ DamageUnregister(DamagePtr pDamage)
 
     damageScrPriv(pScreen);
 
-    if (pScrPriv->funcs.Unregister)
+    if (pScrPriv && pScrPriv->funcs.Unregister)
         pScrPriv->funcs.Unregister (pDrawable, pDamage);
 
     if (pDrawable->type == DRAWABLE_WINDOW) {
@@ -1821,7 +1821,7 @@ DamageDestroy(DamagePtr pDamage)
     if (pDamage->damageDestroy)
         (*pDamage->damageDestroy) (pDamage, pDamage->closure);
 
-    if (pScrPriv->funcs.Destroy)
+    if (pScrPriv && pScrPriv->funcs.Destroy)
         pScrPriv->funcs.Destroy (pDamage);
 
     RegionUninit(&pDamage->damage);

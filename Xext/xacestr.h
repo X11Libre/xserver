@@ -42,14 +42,6 @@ typedef struct {
     int status;
 } XaceResourceAccessRec;
 
-/* XACE_DEVICE_ACCESS */
-typedef struct {
-    ClientPtr client;
-    DeviceIntPtr dev;
-    Mask access_mode;
-    int status;
-} XaceDeviceAccessRec;
-
 /* XACE_PROPERTY_ACCESS */
 typedef struct {
     ClientPtr client;
@@ -78,30 +70,6 @@ typedef struct {
     int status;
 } XaceReceiveAccessRec;
 
-/* XACE_CLIENT_ACCESS */
-typedef struct {
-    ClientPtr client;
-    ClientPtr target;
-    Mask access_mode;
-    int status;
-} XaceClientAccessRec;
-
-/* XACE_EXT_DISPATCH */
-/* XACE_EXT_ACCESS */
-typedef struct {
-    ClientPtr client;
-    ExtensionEntry *ext;
-    Mask access_mode;
-    int status;
-} XaceExtAccessRec;
-
-/* XACE_SERVER_ACCESS */
-typedef struct {
-    ClientPtr client;
-    Mask access_mode;
-    int status;
-} XaceServerAccessRec;
-
 /* XACE_SELECTION_ACCESS */
 typedef struct {
     ClientPtr client;
@@ -109,34 +77,5 @@ typedef struct {
     Mask access_mode;
     int status;
 } XaceSelectionAccessRec;
-
-/* XACE_SCREEN_ACCESS */
-/* XACE_SCREENSAVER_ACCESS */
-typedef struct {
-    ClientPtr client;
-    ScreenPtr screen;
-    Mask access_mode;
-    int status;
-} XaceScreenAccessRec;
-
-/* XACE_AUTH_AVAIL */
-typedef struct {
-    ClientPtr client;
-    XID authId;
-} XaceAuthAvailRec;
-
-/* XACE_KEY_AVAIL */
-typedef struct {
-    xEventPtr event;
-    DeviceIntPtr keybd;
-    int count;
-} XaceKeyAvailRec;
-
-/* XACE_AUDIT_BEGIN */
-/* XACE_AUDIT_END */
-typedef struct {
-    ClientPtr client;
-    int requestResult;
-} XaceAuditRec;
 
 #endif                          /* _XACESTR_H */

@@ -60,6 +60,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "os/busfault.h"
+#include "os/ddx_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/serverlock.h"
@@ -93,7 +94,7 @@ OsRegisterSigWrapper(OsSigWrapperPtr newSigWrapper)
  * OsSigHandler --
  *    Catch unexpected signals and exit or continue cleanly.
  */
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
 static void
 #ifdef SA_SIGINFO
 OsSigHandler(int signo, siginfo_t * sip, void *unused)
@@ -143,7 +144,7 @@ OsSigHandler(int signo)
     FatalError("Caught signal %d (%s). Server aborting\n",
                signo, strsignal(signo));
 }
-#endif /* !WIN32 */
+#endif /* !WIN32 || __CYGWIN__ */
 
 void
 OsInit(void)
@@ -151,7 +152,7 @@ OsInit(void)
     static Bool been_here = FALSE;
 
     if (!been_here) {
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
         struct sigaction act, oact;
         int i;
 
@@ -179,7 +180,7 @@ OsInit(void)
                        siglist[i], strerror(errno));
             }
         }
-#endif /* !WIN32 */
+#endif /* !WIN32 || __CYGWIN__ */
         busfault_init();
         server_poll = ospoll_create();
         if (!server_poll)
@@ -209,7 +210,7 @@ OsInit(void)
         }
 #endif
 
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
         if (getpgrp() == 0)
             setpgid(0, 0);
 #endif
@@ -225,12 +226,4 @@ OsInit(void)
      */
     LogInit(NULL, NULL);
     SmartScheduleInit();
-}
-
-void
-OsCleanup(Bool terminating)
-{
-    if (terminating) {
-        UnlockServer();
-    }
 }

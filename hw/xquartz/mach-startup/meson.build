@@ -28,14 +28,32 @@ x11appdir = join_paths(bundle_root, 'Contents/MacOS')
 
 x11_bin_deps = [
      meson.get_compiler('c').find_library('Xplugin'),
+]
+
+# Work around meson bug:
+if cc.get_id() == 'clang'
+  x11_bin_deps += [
      dependency('Carbon', method: 'extraframework'),
      cocoa,
      dependency('CoreAudio', method: 'extraframework'),
      dependency('IOKit', method: 'extraframework')
-]
+  ]
+  binlinkargs = ['-Objc']
+else
+  binlinkargs = [
+    '-framework', 'Carbon',
+    '-framework', 'Cocoa',
+    '-framework', 'CoreAudio',
+    '-framework', 'IOKit'
+  ]
+endif
 
 if build_glx
+  if cc.get_id() == 'clang'
     x11_bin_deps += [dependency('OpenGL', method: 'extraframework')]
+  else
+    binlinkargs += ['-framework', 'OpenGL']
+  endif
 endif
 
 if build_sparkle
@@ -65,10 +83,16 @@ x11_bin = executable('X11.bin',
      dependencies: [xproto_dep, x11_dep, x11_bin_deps, mach_startup_dep],
      include_directories: [inc, '..', top_dir_inc],
      c_args: xquartz_defs,
-     link_args: ['-Objc'],
+     link_args: binlinkargs,
      install: true,
      install_dir: x11appdir,
 )
+
+if cc.get_id() == 'clang'
+     execlinkargs = ['-Objc']
+else
+     execlinkargs = []
+endif
 
 # X11 (Bundle trampoline)
 x11 = executable('X11',
@@ -76,15 +100,21 @@ x11 = executable('X11',
       'bundle_trampoline.c',
      ],
      c_args: xquartz_defs,
-     link_args: ['-Objc'],
+     link_args: execlinkargs,
      install: true,
      install_dir: x11appdir,
 )
 
 # Xquartz
-xquartz_deps = [
+if cc.get_id() == 'clang'
+  xquartz_deps = [
     dependency('CoreServices', method: 'extraframework'),
-]
+  ]
+  xquartz_linkargs = []
+else
+  xquartz_deps = []
+  xquartz_linkargs = ['-framework', 'CoreServices']
+endif
 
 xquartz = executable('Xquartz',
     [
@@ -94,6 +124,7 @@ xquartz = executable('Xquartz',
     ],
     include_directories: inc,
     c_args: xquartz_defs,
+    link_args: xquartz_linkargs,
     dependencies: [xquartz_deps, mach_startup_dep],
     install: true,
 )

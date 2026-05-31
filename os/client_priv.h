@@ -3,12 +3,14 @@
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  * Copyright © 2010 Nokia Corporation and/or its subsidiary(-ies).
  */
-#ifndef _XSERVER_DIX_CLIENT_PRIV_H
-#define _XSERVER_DIX_CLIENT_PRIV_H
+#ifndef _XSERVER_OS_CLIENT_PRIV_H
+#define _XSERVER_OS_CLIENT_PRIV_H
 
 #include <sys/types.h>
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
+
+#include "include/callback.h"
 
 /* Client IDs. Use GetClientPid, GetClientCmdName and GetClientCmdArgs
  * instead of accessing the fields directly. */
@@ -51,7 +53,6 @@ void FlushIfCriticalOutputPending(void);
 void ResetOsBuffers(void);
 void NotifyParentProcess(void);
 void CreateWellKnownSockets(void);
-void ResetWellKnownSockets(void);
 void CloseWellKnownConnections(void);
 
 // exported for nvidia driver
@@ -59,5 +60,16 @@ _X_EXPORT void SetCriticalOutputPending(void);
 
 /* exported only for DRI module, but should not be used by external drivers */
 _X_EXPORT void ResetCurrentRequest(struct _Client *client);
+
+/* stuff for ReplyCallback */
+extern CallbackListPtr ReplyCallback;
+typedef struct {
+    ClientPtr client;
+    const void *replyData;
+    unsigned long dataLenBytes; /* actual bytes from replyData + pad bytes */
+    unsigned long bytesRemaining;
+    Bool startOfReply;
+    unsigned long padBytes;     /* pad bytes from zeroed array */
+} ReplyInfoRec;
 
 #endif /* _XSERVER_DIX_CLIENT_PRIV_H */

@@ -44,6 +44,7 @@
 #include <X11/extensions/applewmconst.h>
 #include "micmap.h"
 #include "exglobals.h"
+#include "osxcompat.h"
 
 #include <mach/mach.h>
 #include <unistd.h>
@@ -60,9 +61,14 @@ xpbproxy_run(void);
 #define XSERVER_VERSION "?"
 #endif
 
+#ifdef HAS_LIBDISPATCH
 #include <dispatch/dispatch.h>
 
 static dispatch_queue_t eventTranslationQueue;
+#else
+// aquaMenuBarHeight is just a proxy for initialization
+#define eventTranslationQueue aquaMenuBarHeight
+#endif
 
 #ifndef __has_feature
 #define __has_feature(x) 0
@@ -156,10 +162,12 @@ X11Application *X11App;
 @end
 
 @interface X11Application ()
-@property (nonatomic, readwrite, assign) OSX_BOOL x_active;
 @end
 
 @implementation X11Application
+
+@synthesize controller = _controller;
+@synthesize x_active = _x_active;
 
 typedef struct message_struct message;
 struct message_struct {
@@ -196,7 +204,7 @@ QuartzModeBundleInit(void);
     [dict setObject:[NSString stringWithFormat:@"XQuartz %@", tem]
              forKey:@"ApplicationVersion"];
 
-    [dict setObject:[NSString stringWithFormat:@"xorg-server %s",
+    [dict setObject:[NSString stringWithFormat:@"XLibre Xserver %s",
                      XSERVER_VERSION]
      forKey:@"Version"];
 
@@ -240,6 +248,14 @@ QuartzModeBundleInit(void);
 - (void) became_key:(NSWindow *)win
 {
     [self activateX:NO];
+}
+
+static void
+sendX11NSEvent_fptr(void *e_ptr)
+{
+    NSEvent *e = e_ptr;
+    [X11App sendX11NSEvent:e];
+    [e release];
 }
 
 - (void) sendEvent:(NSEvent *)e
@@ -431,9 +447,9 @@ QuartzModeBundleInit(void);
                 [self set_front_process:nil];
 
                 /* Get the Spaces preference for SwitchOnActivate */
-                BOOL const workspaces = [NSUserDefaults.dockDefaults boolForKey:@"workspaces"];
+                BOOL const workspaces = [[NSUserDefaults dockDefaults] boolForKey:@"workspaces"];
                 if (workspaces) {
-                    order_all_windows = [NSUserDefaults.globalDefaults boolForKey:@"AppleSpacesSwitchOnActivate"];
+                    order_all_windows = [[NSUserDefaults globalDefaults] boolForKey:@"AppleSpacesSwitchOnActivate"];
                 }
 
                 /* TODO: In the workspaces && !AppleSpacesSwitchOnActivate case, the windows are ordered
@@ -472,9 +488,12 @@ QuartzModeBundleInit(void);
     }
 
     if (for_x) {
-        dispatch_async(eventTranslationQueue, ^{
-            [self sendX11NSEvent:e];
-        });
+#ifdef HAS_LIBDISPATCH
+        NSEvent *event_copy = [e retain];
+        dispatch_async_f(eventTranslationQueue, event_copy, sendX11NSEvent_fptr);
+#else
+        [self sendX11NSEvent:e];
+#endif
     }
 }
 
@@ -561,81 +580,150 @@ QuartzModeBundleInit(void);
 
 @end
 
+/* Helper function for X11ApplicationSetWindowMenu */
+static void
+setWindowMenuOnMain_fptr(void *arg)
+{
+    NSArray *items = arg;
+    [X11App.controller set_window_menu:items];
+    [items release];
+}
+
 void
 X11ApplicationSetWindowMenu(int nitems, const char **items,
                             const char *shortcuts)
 {
-    @autoreleasepool {
-        NSMutableArray <NSArray <NSString *> *> * const allMenuItems = [NSMutableArray array];
+    OBJC_AUTORELEASEPOOL_BEGIN
+        NSMutableArray *allMenuItems =
+            [[NSMutableArray alloc] init];
 
         for (int i = 0; i < nitems; i++) {
-            NSMutableArray <NSString *> * const menuItem = [NSMutableArray array];
-            [menuItem addObject:@(items[i])];
+            NSMutableArray *menuItem =
+                [[NSMutableArray alloc] init];
+
+            [menuItem addObject:[NSString stringWithUTF8String:items[i]]];
 
             if (shortcuts[i] == 0) {
                 [menuItem addObject:@""];
             } else {
-                [menuItem addObject:[NSString stringWithFormat:@"%d", shortcuts[i]]];
+                [menuItem addObject:
+                    [NSString stringWithFormat:@"%d", shortcuts[i]]];
             }
 
             [allMenuItems addObject:menuItem];
+            [menuItem release];
         }
 
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [X11App.controller set_window_menu:allMenuItems];
-        });
-    }
+        dispatch_async_f(dispatch_get_main_queue(),
+                         allMenuItems,
+                         setWindowMenuOnMain_fptr);
+    OBJC_AUTORELEASEPOOL_END
+}
+
+static void
+setWindowMenuCheck_fptr(void *arg)
+{
+    NSNumber *idx = arg;
+    [X11App.controller set_window_menu_check:idx];
+    [idx release];
 }
 
 void
 X11ApplicationSetWindowMenuCheck(int idx)
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [X11App.controller set_window_menu_check:@(idx)];
-    });
+    NSNumber *num = [[NSNumber alloc] initWithInt:idx];
+    dispatch_async_f(dispatch_get_main_queue(), num, setWindowMenuCheck_fptr);
 }
 
+
+static void
+appSetFrontProcess_fptr(void* unused)
+{
+    (void) unused;
+    [X11App set_front_process:nil];
+}
 void
 X11ApplicationSetFrontProcess(void)
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [X11App set_front_process:nil];
-    });
+    dispatch_async_f(dispatch_get_main_queue(), NULL, appSetFrontProcess_fptr);
 }
 
+static void
+appSetCanQuit_fptr(void *__state)
+{
+    NSNumber *state = __state;
+    X11App.controller.can_quit = [state boolValue];
+    [state release];
+}
 void
 X11ApplicationSetCanQuit(int state)
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        X11App.controller.can_quit = !!state;
-    });
+    NSNumber *state_alloc = [[NSNumber alloc] initWithInt:state];
+    dispatch_async_f(dispatch_get_main_queue(), state_alloc, appSetCanQuit_fptr);
 }
 
+static void
+appServerReady_fptr(void* unused)
+{
+    (void) unused;
+    [X11App.controller server_ready];
+}
 void
 X11ApplicationServerReady(void)
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [X11App.controller server_ready];
-    });
+    dispatch_async_f(dispatch_get_main_queue(), NULL, appServerReady_fptr);
 }
 
+static void
+appShowHideMenubar_fptr(void *state_ptr)
+{
+    NSNumber *state = state_ptr;
+    [X11App show_hide_menubar:state];
+    [state release];
+}
 void
 X11ApplicationShowHideMenubar(int state)
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [X11App show_hide_menubar:@(state)];
-    });
+    NSNumber *state_alloc = [[NSNumber alloc] initWithInt:state];
+    dispatch_async_f(dispatch_get_main_queue(), state_alloc, appShowHideMenubar_fptr);
 }
 
+static void
+appLaunchClient_fptr(void *string_ptr)
+{
+    NSString *string = string_ptr;
+    [X11App launch_client:string];
+    [string release];
+}
 void
 X11ApplicationLaunchClient(const char *cmd)
 {
-    @autoreleasepool {
-        NSString *string = @(cmd);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [X11App launch_client:string];
-        });
-    }
+    OBJC_AUTORELEASEPOOL_BEGIN
+        NSString *string_alloc = [[NSString alloc] initWithUTF8String:cmd];
+        dispatch_async_f(dispatch_get_main_queue(), string_alloc, appLaunchClient_fptr);
+    OBJC_AUTORELEASEPOOL_END
+}
+
+
+/* helper function for X11ApplicationCanEnterRandR(),
+ * extracted from previous Apple block */
+static void
+runAlertPanel(void *result_ptr)
+{
+    NSString *title, *msg;
+    NSInteger *result = result_ptr;
+    title = NSLocalizedString(@"Enter RandR mode?",
+                              @"Dialog title when switching to RandR");
+
+    msg = NSLocalizedString(
+        @"An application has requested X11 to change the resolution of your display.  X11 will restore the display to its previous state when the requesting application requests to return to the previous state.  Alternatively, you can use the ⌥⌘A key sequence to force X11 to return to the previous state.",
+        @"Dialog when switching to RandR"
+    );
+
+    *result = NSRunAlertPanel(title, @"%@",
+                              NSLocalizedString(@"Allow", @""),
+                              NSLocalizedString(@"Cancel", @""),
+                              NSLocalizedString(@"Always Allow", @""), msg);
 }
 
 /* This is a special function in that it is run from the *SERVER* thread and
@@ -645,29 +733,18 @@ X11ApplicationLaunchClient(const char *cmd)
 Bool
 X11ApplicationCanEnterRandR(void)
 {
-    NSString *title, *msg;
+    
     NSUserDefaults * const defaults = NSUserDefaults.xquartzDefaults;
 
     if ([defaults boolForKey:XQuartzPrefKeyNoRANDRAlert] ||
         XQuartzShieldingWindowLevel != 0)
         return TRUE;
 
-    title = NSLocalizedString(@"Enter RandR mode?",
-                              @"Dialog title when switching to RandR");
-    msg = NSLocalizedString(
-        @"An application has requested X11 to change the resolution of your display.  X11 will restore the display to its previous state when the requesting application requests to return to the previous state.  Alternatively, you can use the ⌥⌘A key sequence to force X11 to return to the previous state.",
-        @"Dialog when switching to RandR");
-
     if (!XQuartzIsRootless)
         QuartzShowFullscreen(FALSE);
 
-    NSInteger __block alert_result;
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        alert_result = NSRunAlertPanel(title, @"%@",
-                                       NSLocalizedString(@"Allow", @""),
-                                       NSLocalizedString(@"Cancel", @""),
-                                       NSLocalizedString(@"Always Allow", @""), msg);
-    });
+    NSInteger alert_result;
+    dispatch_sync_f(dispatch_get_main_queue(), &alert_result, runAlertPanel);
 
     switch (alert_result) {
     case NSAlertOtherReturn:
@@ -756,12 +833,12 @@ X11ApplicationMain(int argc, char **argv, char **envp)
     while (access("/tmp/x11-block", F_OK) == 0) sleep(1);
 #endif
 
-    @autoreleasepool {
+    OBJC_AUTORELEASEPOOL_BEGIN
         X11App = (X11Application *)[X11Application sharedApplication];
         [X11App read_defaults];
 
         [NSBundle loadNibNamed:@"main" owner:NSApp];
-        [NSNotificationCenter.defaultCenter addObserver:NSApp
+        [[NSNotificationCenter defaultCenter] addObserver:NSApp
                                                selector:@selector (became_key:)
                                                    name:NSWindowDidBecomeKeyNotification
                                                  object:nil];
@@ -773,14 +850,21 @@ X11ApplicationMain(int argc, char **argv, char **envp)
         QuartzModeBundleInit();
 
         /* Calculate the height of the menubar so we can avoid it. */
-        aquaMenuBarHeight = NSApp.mainMenu.menuBarHeight;
+        aquaMenuBarHeight = [[NSApp mainMenu] menuBarHeight];
+#if ! __LP64__
         if (!aquaMenuBarHeight) {
-            NSScreen* primaryScreen = NSScreen.screens[0];
+            aquaMenuBarHeight = [NSMenuView menuBarHeight];
+        }
+#endif
+        if (!aquaMenuBarHeight) {
+            NSScreen* primaryScreen = [[NSScreen screens] objectAtIndex:0];
             aquaMenuBarHeight = NSHeight(primaryScreen.frame) - NSMaxY(primaryScreen.visibleFrame);
         }
 
+#ifdef HAS_LIBDISPATCH
         eventTranslationQueue = dispatch_queue_create(BUNDLE_ID_PREFIX ".X11.NSEventsToX11EventsQueue", NULL);
         assert(eventTranslationQueue != NULL);
+#endif
 
         /* Set the key layout seed before we start the server */
         last_key_layout = TISCopyCurrentKeyboardLayoutInputSource();
@@ -808,7 +892,7 @@ X11ApplicationMain(int argc, char **argv, char **envp)
         [[SUUpdater sharedUpdater] resetUpdateCycle];
         //    [[SUUpdater sharedUpdater] checkForUpdates:X11App];
 #endif
-    }
+    OBJC_AUTORELEASEPOOL_END
 
     [NSApp run];
     /* not reached */
@@ -871,6 +955,17 @@ untrusted_str(NSEvent *e)
 
 extern void
 wait_for_mieq_init(void);
+
+typedef struct _CopyKeyboardLayoutCtx {
+    TISInputSourceRef *key_layout;
+} CopyKeyboardLayoutCtx;
+
+static void
+copyKeyboardLayout_fptr(void *arg)
+{
+    CopyKeyboardLayoutCtx *ctx = arg;
+    *(ctx->key_layout) = TISCopyCurrentKeyboardLayoutInputSource();
+}
 
 - (void) sendX11NSEvent:(NSEvent *)e
 {
@@ -1322,15 +1417,14 @@ handle_mouse:
     }
 
         if (darwinSyncKeymap) {
-            __block TISInputSourceRef key_layout;
-            dispatch_block_t copyCurrentKeyboardLayoutInputSource = ^{
-                key_layout = TISCopyCurrentKeyboardLayoutInputSource();
-            };
+            TISInputSourceRef key_layout;
+            CopyKeyboardLayoutCtx ctx = { .key_layout = &key_layout };
+
             /* This is an ugly ant-pattern, but it is more expedient to address the problem right now. */
             if (pthread_main_np()) {
-                copyCurrentKeyboardLayoutInputSource();
+                copyKeyboardLayout_fptr(&ctx);
             } else {
-                dispatch_sync(dispatch_get_main_queue(), copyCurrentKeyboardLayoutInputSource);
+                dispatch_sync_f(dispatch_get_main_queue(), &ctx, copyKeyboardLayout_fptr);
             }
 
             TISInputSourceRef clear;

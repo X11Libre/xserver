@@ -39,47 +39,32 @@
 #include "dix/exevents_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/request_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "swaprep.h"
 #include "exglobals.h"          /* BadDevice */
-#include "xipassivegrab.h"
 #include "misc.h"
-
-int _X_COLD
-SProcXIPassiveGrabDevice(ClientPtr client)
-{
-    int i;
-    uint32_t *mods;
-
-    REQUEST(xXIPassiveGrabDeviceReq);
-    REQUEST_AT_LEAST_SIZE(xXIPassiveGrabDeviceReq);
-
-    swaps(&stuff->deviceid);
-    swapl(&stuff->grab_window);
-    swapl(&stuff->cursor);
-    swapl(&stuff->time);
-    swapl(&stuff->detail);
-    swaps(&stuff->mask_len);
-    swaps(&stuff->num_modifiers);
-
-    REQUEST_FIXED_SIZE(xXIPassiveGrabDeviceReq,
-        ((uint32_t) stuff->mask_len + stuff->num_modifiers) *4);
-    mods = (uint32_t *) &stuff[1] + stuff->mask_len;
-
-    for (i = 0; i < stuff->num_modifiers; i++, mods++) {
-        swapl(mods);
-    }
-
-    return ProcXIPassiveGrabDevice(client);
-}
 
 int
 ProcXIPassiveGrabDevice(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xXIPassiveGrabDeviceReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
+    X_REQUEST_FIELD_CARD32(grab_window);
+    X_REQUEST_FIELD_CARD32(cursor);
+    X_REQUEST_FIELD_CARD32(time);
+    X_REQUEST_FIELD_CARD32(detail);
+    X_REQUEST_FIELD_CARD16(mask_len);
+    X_REQUEST_FIELD_CARD16(num_modifiers);
+    REQUEST_FIXED_SIZE(xXIPassiveGrabDeviceReq,
+        ((uint32_t) stuff->mask_len + stuff->num_modifiers) *4);
+    X_REQUEST_REST_CARD32(); /* event mask and modifiers list */
+
     DeviceIntPtr dev, mod_dev;
-    xXIPassiveGrabDeviceReply rep = {
+    xXIPassiveGrabDeviceReply reply = {
         .repType = X_Reply,
         .RepType = X_XIPassiveGrabDevice,
         .sequenceNumber = client->sequence,
@@ -92,10 +77,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     GrabParameters param;
     void *tmp;
     int mask_len;
-
-    REQUEST(xXIPassiveGrabDeviceReq);
-    REQUEST_FIXED_SIZE(xXIPassiveGrabDeviceReq,
-        ((uint32_t) stuff->mask_len + stuff->num_modifiers) * 4);
 
     if (stuff->deviceid == XIAllDevices)
         dev = inputInfo.all_devices;
@@ -135,12 +116,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         client->errorValue = stuff->grab_mode;
         return BadValue;
     }
-
-    /* XI2 allows 32-bit keycodes but thanks to XKB we can never
-     * implement this. Just return an error for all keycodes that
-     * cannot work anyway, same for buttons > 255. */
-    if (stuff->detail > 255)
-        return XIAlreadyGrabbed;
 
     if (XICheckInvalidMaskBits(client, (unsigned char *) &stuff[1],
                                stuff->mask_len * 4) != Success)
@@ -196,6 +171,14 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     for (i = 0; i < stuff->num_modifiers; i++, modifiers++) {
         uint8_t status = Success;
 
+        /* XI2 allows 32-bit keycodes but thanks to XKB we can never
+         * implement this. Pretend that all keycodes above 255 are
+         * already grabbed, same for buttons > 255. */
+        if (stuff->detail > 255) {
+            status = XIAlreadyGrabbed;
+            goto modifier_done;
+        }
+
         param.modifiers = *modifiers;
         ret = CheckGrabValues(client, &param);
         if (ret != Success)
@@ -228,6 +211,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
             break;
         }
 
+modifier_done:
         if (status != GrabSuccess) {
             /* write xXIGrabModifierInfo */
             x_rpcbuf_write_CARD32(&rpcbuf, *modifiers);
@@ -235,17 +219,15 @@ ProcXIPassiveGrabDevice(ClientPtr client)
             x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad0 */
             x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad1 */
 
-            rep.num_modifiers++;
+            reply.num_modifiers++;
         }
     }
 
     xi2mask_free(&mask.xi2mask);
 
-    if (client->swapped) {
-        swaps(&rep.num_modifiers);
-    }
+    X_REPLY_FIELD_CARD16(num_modifiers);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
  out:
     xi2mask_free(&mask.xi2mask);
@@ -253,42 +235,23 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     return ret;
 }
 
-int _X_COLD
-SProcXIPassiveUngrabDevice(ClientPtr client)
-{
-    int i;
-    uint32_t *modifiers;
-
-    REQUEST(xXIPassiveUngrabDeviceReq);
-    REQUEST_AT_LEAST_SIZE(xXIPassiveUngrabDeviceReq);
-
-    swapl(&stuff->grab_window);
-    swaps(&stuff->deviceid);
-    swapl(&stuff->detail);
-    swaps(&stuff->num_modifiers);
-
-    REQUEST_FIXED_SIZE(xXIPassiveUngrabDeviceReq,
-                       ((uint32_t) stuff->num_modifiers) << 2);
-    modifiers = (uint32_t *) &stuff[1];
-
-    for (i = 0; i < stuff->num_modifiers; i++, modifiers++)
-        swapl(modifiers);
-
-    return ProcXIPassiveUngrabDevice(client);
-}
-
 int
 ProcXIPassiveUngrabDevice(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xXIPassiveUngrabDeviceReq);
+    X_REQUEST_FIELD_CARD32(grab_window);
+    X_REQUEST_FIELD_CARD16(deviceid);
+    X_REQUEST_FIELD_CARD32(detail);
+    X_REQUEST_FIELD_CARD16(num_modifiers);
+    REQUEST_FIXED_SIZE(xXIPassiveUngrabDeviceReq,
+                       ((uint32_t) stuff->num_modifiers) << 2);
+    X_REQUEST_REST_CARD32(); /* modifiers list */
+
     DeviceIntPtr dev, mod_dev;
     WindowPtr win;
     GrabPtr tempGrab;
     uint32_t *modifiers;
     int i, rc;
-
-    REQUEST(xXIPassiveUngrabDeviceReq);
-    REQUEST_FIXED_SIZE(xXIPassiveUngrabDeviceReq,
-                       ((uint32_t) stuff->num_modifiers) << 2);
 
     if (stuff->deviceid == XIAllDevices)
         dev = inputInfo.all_devices;
@@ -313,7 +276,9 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
 
     if ((stuff->grab_type == XIGrabtypeEnter ||
          stuff->grab_type == XIGrabtypeFocusIn ||
-         stuff->grab_type == XIGrabtypeTouchBegin) && stuff->detail != 0) {
+         stuff->grab_type == XIGrabtypeTouchBegin ||
+         stuff->grab_type == XIGrabtypeGesturePinchBegin ||
+         stuff->grab_type == XIGrabtypeGestureSwipeBegin) && stuff->detail != 0) {
         client->errorValue = stuff->detail;
         return BadValue;
     }

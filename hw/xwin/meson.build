@@ -7,12 +7,22 @@ build_windowsdri = windowsdri_dep.found()
 xwin_sys_libs = []
 xwin_sys_libs += '-ldxguid'
 
-server_name = 'Xming'
-xwin_sys_libs += ['-lpthread', '-lws2_32']
+if host_machine.system() == 'cygwin'
+    server_name = 'XWin'
+else
+    server_name = 'Xming'
+    xwin_sys_libs += ['-lpthread', '-lws2_32']
+endif
 
 xwin_c_args = []
-xwin_c_args += '-DHAVE_XWIN_CONFIG_H'
 xwin_c_args += '-Wno-bad-function-cast'
+
+# mingw lacking setenv(), so we need to do it on our own
+if cc.has_function('setenv',
+                   prefix : '#include <stdlib.h>',
+                   args : ['-D_XOPEN_SOURCE=600'])
+    xwin_c_args += '-DHAVE_SETENV'
+endif
 
 srcs_windows = [
     'winclipboardinit.c',

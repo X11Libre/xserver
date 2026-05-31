@@ -27,11 +27,55 @@
 #ifndef GLAMOR_EGL_H
 #define GLAMOR_EGL_H
 
+#include <stdbool.h>
+
 #define MESA_EGL_NO_X11_HEADERS
 #define EGL_NO_X11
 #include <epoxy/gl.h>
 #include <epoxy/egl.h>
-#include <glamor_egl_ext.h>
+
+#include "scrnintstr.h"
+
+typedef struct glamor_egl_screen_private glamor_egl_priv_t;
+
+typedef struct {
+    void* server_private; /* Data the X server might want to map to a screen */
+
+    /* Either Optional 1 or 2 must be non-NULL */
+
+    /* Optional 1 pointer to a screen */
+    ScreenPtr screen;
+
+    /* Optional 2 pointer to a server-allocated glamor_egl_priv_t, that the server maps to a screen */
+    glamor_egl_priv_t *glamor_egl_priv;
+
+    /* Optional 2 function that maps a glamor_egl_priv_t to each screen*/
+    glamor_egl_priv_t* (*GLAMOR_EGL_PRIV_PROC)(ScreenPtr screen);
+
+    char *glvnd_vendor; /* glvnd vendor library or driver name */
+    int fd; /* /dev/dri/cardxx */
+
+    int auto_dri; /* If glamor should try to automatically enable DRI3 support */
+
+    int dmabuf_forced; /* If glamor should not use dynamic logic and only listen to the config below */
+    int dmabuf_capable; /* If glamor should use dmabufs when using direct rendering (dri) */
+
+    int llvmpipe_allowed; /* If glamor render accel should initialize on llvmpipe */
+    int force_glamor; /* If glamor should initialize even on softpipe/llvmpipe */
+
+    int es_disallowed; /* If using GLES contexts is forbidden */
+    int force_es; /* If glamor should only use GLES contexts */
+} glamor_egl_conf_t;
+
+/**
+ * Initialize an egl context suitable to be used by glamor.
+ *
+ * glamor_egl_conf is a pointer to caller-allocated storage.
+ *
+ * If caps is not NULL, it will be set to a bitmask containing
+ * information about glamor.
+ */
+Bool glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps);
 
 /*
  * Create an EGLDisplay from a native display type. This is a little quirky
@@ -60,7 +104,7 @@
  * like mesa will be able to adverise these (even though it can do EGL 1.5).
  */
 static inline EGLDisplay
-glamor_egl_get_display(EGLint type, void *native)
+glamor_egl_get_display2(EGLint type, void *native, bool platform_fallback)
 {
     /* In practise any EGL 1.5 implementation would support the EXT extension */
     if (epoxy_has_egl_extension(NULL, "EGL_EXT_platform_base")) {
@@ -71,7 +115,16 @@ glamor_egl_get_display(EGLint type, void *native)
     }
 
     /* Welp, everything is awful. */
-    return eglGetDisplay(native);
+    return platform_fallback ? eglGetDisplay(native) : NULL;
 }
+
+/* Used by Xephyr */
+static inline EGLDisplay
+glamor_egl_get_display(EGLint type, void *native)
+{
+    return glamor_egl_get_display2(type, native, true);
+}
+
+int glamor_egl_get_fd(ScreenPtr screen);
 
 #endif

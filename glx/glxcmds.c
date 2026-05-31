@@ -37,8 +37,12 @@
 
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "os/bug_priv.h"
+#include "present/present_priv.h"
 
 #include "glxserver.h"
 #include <unpack.h>
@@ -62,12 +66,13 @@ validGlxScreen(ClientPtr client, int screen, __GLXscreen ** pGlxScreen,
     /*
      ** Check if screen exists.
      */
-    if (screen < 0 || screen >= screenInfo.numScreens) {
+    ScreenPtr pScreen = dixGetScreenPtr(screen);
+    if (!pScreen) {
         client->errorValue = screen;
         *err = BadValue;
         return FALSE;
     }
-    *pGlxScreen = glxGetScreen(screenInfo.screens[screen]);
+    *pGlxScreen = glxGetScreen(pScreen);
 
     return TRUE;
 }
@@ -128,7 +133,8 @@ validGlxFBConfigForWindow(ClientPtr client, __GLXconfig * config,
     BUG_RETURN_VAL(!pVisual, FALSE);
 
     /* FIXME: What exactly should we check here... */
-    if (pVisual->class != glxConvertToXVisualType(config->visualType) ||
+    if (pVisual == NULL ||
+        pVisual->class != glxConvertToXVisualType(config->visualType) ||
         !(config->drawableType & GLX_WINDOW_BIT)) {
         client->errorValue = pDraw->id;
         *err = BadMatch;
@@ -717,8 +723,7 @@ __glXDisp_IsDirect(__GLXclientState * cl, GLbyte * pc)
         .isDirect = glxc->isDirect
     };
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -749,8 +754,7 @@ __glXDisp_QueryVersion(__GLXclientState * cl, GLbyte * pc)
         swapl(&reply.minorVersion);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -895,97 +899,82 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
     ClientPtr client = cl->client;
     __GLXscreen *pGlxScreen;
     __GLXconfig *modes;
-    CARD32 buf[GLX_VIS_CONFIG_TOTAL];
-    int p, i, err;
+    int err;
 
     if (!validGlxScreen(cl->client, req->screen, &pGlxScreen, &err))
         return err;
 
     xGLXGetVisualConfigsReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = (pGlxScreen->numVisuals *
-                   __GLX_SIZE_CARD32 * GLX_VIS_CONFIG_TOTAL) >> 2,
         .numVisuals = pGlxScreen->numVisuals,
         .numProps = GLX_VIS_CONFIG_TOTAL
     };
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.numVisuals);
         swapl(&reply.numProps);
     }
 
-    WriteToClient(client, sizeof(xGLXGetVisualConfigsReply), &reply);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    for (i = 0; i < pGlxScreen->numVisuals; i++) {
+    for (int i = 0; i < pGlxScreen->numVisuals; i++) {
         modes = pGlxScreen->visuals[i];
 
-        p = 0;
-        buf[p++] = modes->visualID;
-        buf[p++] = glxConvertToXVisualType(modes->visualType);
-        buf[p++] = (modes->renderType & GLX_RGBA_BIT) ? GL_TRUE : GL_FALSE;
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->visualID);
+        x_rpcbuf_write_CARD32(&rpcbuf, glxConvertToXVisualType(modes->visualType));
+        x_rpcbuf_write_CARD32(&rpcbuf, (modes->renderType & GLX_RGBA_BIT) ? GL_TRUE : GL_FALSE);
 
-        buf[p++] = modes->redBits;
-        buf[p++] = modes->greenBits;
-        buf[p++] = modes->blueBits;
-        buf[p++] = modes->alphaBits;
-        buf[p++] = modes->accumRedBits;
-        buf[p++] = modes->accumGreenBits;
-        buf[p++] = modes->accumBlueBits;
-        buf[p++] = modes->accumAlphaBits;
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->redBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->greenBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->blueBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->alphaBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->accumRedBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->accumGreenBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->accumBlueBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->accumAlphaBits);
 
-        buf[p++] = modes->doubleBufferMode;
-        buf[p++] = modes->stereoMode;
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->doubleBufferMode);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->stereoMode);
 
-        buf[p++] = modes->rgbBits;
-        buf[p++] = modes->depthBits;
-        buf[p++] = modes->stencilBits;
-        buf[p++] = modes->numAuxBuffers;
-        buf[p++] = modes->level;
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->rgbBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->depthBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->stencilBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->numAuxBuffers);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->level);
 
-        assert(p == GLX_VIS_CONFIG_UNPAIRED);
         /*
          ** Add token/value pairs for extensions.
          */
-        buf[p++] = GLX_VISUAL_CAVEAT_EXT;
-        buf[p++] = modes->visualRating;
-        buf[p++] = GLX_TRANSPARENT_TYPE;
-        buf[p++] = modes->transparentPixel;
-        buf[p++] = GLX_TRANSPARENT_RED_VALUE;
-        buf[p++] = modes->transparentRed;
-        buf[p++] = GLX_TRANSPARENT_GREEN_VALUE;
-        buf[p++] = modes->transparentGreen;
-        buf[p++] = GLX_TRANSPARENT_BLUE_VALUE;
-        buf[p++] = modes->transparentBlue;
-        buf[p++] = GLX_TRANSPARENT_ALPHA_VALUE;
-        buf[p++] = modes->transparentAlpha;
-        buf[p++] = GLX_TRANSPARENT_INDEX_VALUE;
-        buf[p++] = modes->transparentIndex;
-        buf[p++] = GLX_SAMPLES_SGIS;
-        buf[p++] = modes->samples;
-        buf[p++] = GLX_SAMPLE_BUFFERS_SGIS;
-        buf[p++] = modes->sampleBuffers;
-        buf[p++] = GLX_VISUAL_SELECT_GROUP_SGIX;
-        buf[p++] = modes->visualSelectGroup;
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_VISUAL_CAVEAT_EXT);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->visualRating);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_TYPE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentPixel);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_RED_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentRed);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_GREEN_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentGreen);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_BLUE_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentBlue);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_ALPHA_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentAlpha);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_INDEX_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentIndex);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_SAMPLES_SGIS);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->samples);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_SAMPLE_BUFFERS_SGIS);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->sampleBuffers);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_VISUAL_SELECT_GROUP_SGIX);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->visualSelectGroup);
         /* Add attribute only if its value is not default. */
         if (modes->sRGBCapable != GL_FALSE) {
-            buf[p++] = GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT;
-            buf[p++] = modes->sRGBCapable;
+            x_rpcbuf_write_CARD32(&rpcbuf, GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT);
+            x_rpcbuf_write_CARD32(&rpcbuf, modes->sRGBCapable);
+        } else {
+            /* Pad with zeroes, so that attributes count is constant. */
+            x_rpcbuf_reserve0(&rpcbuf, sizeof(CARD32) * 2);
         }
-        /* Pad with zeroes, so that attributes count is constant. */
-        while (p < GLX_VIS_CONFIG_TOTAL) {
-            buf[p++] = 0;
-        }
-
-        assert(p == GLX_VIS_CONFIG_TOTAL);
-        if (client->swapped) {
-            SwapLongs(buf, p);
-        }
-        WriteToClient(client, __GLX_SIZE_CARD32 * p, buf);
     }
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 #define __GLX_TOTAL_FBCONFIG_ATTRIBS (44)
@@ -1887,28 +1876,17 @@ DoGetDrawableAttributes(__GLXclientState * cl, XID drawId)
 #undef ATTRIB
 
     xGLXGetDrawableAttributesReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = num << 1,
         .numAttribs = num
     };
 
     if (client->swapped) {
-        int length = reply.length;
-
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.numAttribs);
-        WriteToClient(client, sizeof(xGLXGetDrawableAttributesReply), &reply);
-        SwapLongs(attributes, length);
-        WriteToClient(client, length << 2, attributes);
-    }
-    else {
-        WriteToClient(client, sizeof(xGLXGetDrawableAttributesReply), &reply);
-        WriteToClient(client, reply.length * sizeof(CARD32), attributes);
     }
 
-    return Success;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(&rpcbuf, attributes, num << 1);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -2327,44 +2305,26 @@ __glXDisp_QueryExtensionsString(__GLXclientState * cl, GLbyte * pc)
     ClientPtr client = cl->client;
     xGLXQueryExtensionsStringReq *req = (xGLXQueryExtensionsStringReq *) pc;
     __GLXscreen *pGlxScreen;
-    size_t n, length;
-    char *buf;
     int err;
 
     if (!validGlxScreen(client, req->screen, &pGlxScreen, &err))
         return err;
 
-    n = strlen(pGlxScreen->GLXextensions) + 1;
-    length = __GLX_PAD(n) >> 2;
-
+    /* client expects payload to contain a null terminated string
+     * and uses this header to determine how many bytes to process */
+    size_t n = strlen(pGlxScreen->GLXextensions) + 1;
     xGLXQueryExtensionsStringReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = length,
         .n = n
     };
 
-    /* Allocate buffer to make sure it's a multiple of 4 bytes big. */
-    buf = calloc(length, 4);
-    if (buf == NULL)
-        return BadAlloc;
-    memcpy(buf, pGlxScreen->GLXextensions, n);
-
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.n);
-        WriteToClient(client, sizeof(xGLXQueryExtensionsStringReply), &reply);
-        SwapLongs((CARD32*)buf, length);
-        WriteToClient(client, length << 2, buf);
-    }
-    else {
-        WriteToClient(client, sizeof(xGLXQueryExtensionsStringReply), &reply);
-        WriteToClient(client, (int) (length << 2), buf);
     }
 
-    free(buf);
-    return Success;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    x_rpcbuf_write_string_0t_pad(&rpcbuf, pGlxScreen->GLXextensions);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 #ifndef GLX_VENDOR_NAMES_EXT
@@ -2453,6 +2413,8 @@ __glXDisp_ClientInfo(__GLXclientState * cl, GLbyte * pc)
 
     free(cl->GLClientextensions);
     cl->GLClientextensions = strdup(buf);
+    if (!cl->GLClientextensions)
+        return BadAlloc;
 
     return Success;
 }
@@ -2513,8 +2475,6 @@ __glXpresentCompleteNotify(WindowPtr window, CARD8 present_kind, CARD8 present_m
 
     __glXsendSwapEvent(drawable, glx_type, ust, msc, serial);
 }
-
-#include <present.h>
 
 void
 __glXregisterPresentCompleteNotify(void)

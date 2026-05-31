@@ -68,10 +68,10 @@ Author:  Bob Scheifler, MIT X Consortium
 typedef struct {
     int skipStart;
     int haveStart;
-    DDXPointRec startPt;
+    xPoint startPt;
     int haveLast;
     int skipLast;
-    DDXPointRec endPt;
+    xPoint endPt;
     int dashIndex;
     int dashOffset;
     int dashIndexInit;
@@ -687,7 +687,7 @@ miZeroPolyArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
                    (unsigned char *) pGC->dash, (int) pGC->numInDashList,
                    &dinfo.dashOffsetInit);
     }
-    points = calloc(numPts, sizeof(DDXPointRec));
+    points = calloc(numPts, sizeof(xPoint));
     if (!points) {
         if (dospans) {
             free(widths);

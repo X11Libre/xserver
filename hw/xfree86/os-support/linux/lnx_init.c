@@ -22,10 +22,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <errno.h>
 #include <X11/X.h>
@@ -40,6 +37,9 @@
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
+
+#include "seatd-libseat.h"
+
 
 #include <sys/stat.h>
 #ifdef HAVE_SYS_SYSMACROS_H
@@ -114,7 +114,7 @@ linux_parse_vt_settings(int may_fail)
         if (fd < 0) {
             if (may_fail)
                 return 0;
-            FatalError("parse_vt_settings: Cannot open /dev/tty0 (%s)\n",
+            FatalError("parse_vt_settings: Cannot open /dev/tty0 (%s), maybe missing for ex. '-seat seat0 -keeptty' parameters? (in case trying to run uid !=0 mode)\n",
                        strerror(errno));
         }
 
@@ -167,8 +167,8 @@ linux_parse_vt_settings(int may_fail)
     return 1;
 }
 
-int
-linux_get_keeptty(void)
+Bool
+xf86VTKeepTtyIsSet(void)
 {
     return KeepTty;
 }
@@ -212,6 +212,11 @@ xf86OpenConsole(void)
                 break;
             i++;
         }
+
+
+        /* If libseat is in control, it handles VT switching. */
+        if (seatd_libseat_controls_session())
+            return;
 
         if (xf86Info.consoleFd < 0)
             FatalError("xf86OpenConsole: Cannot open virtual console"
@@ -306,7 +311,7 @@ xf86CloseConsole(void)
     struct vt_stat vts;
     int ret;
 
-    if (xf86Info.ShareVTs) {
+    if (xf86Info.ShareVTs || seatd_libseat_controls_session()) {
         close(xf86Info.consoleFd);
         return;
     }

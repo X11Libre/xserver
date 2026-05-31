@@ -56,7 +56,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                 case X_QueryTree:
                     goto pass;
             }
-            XNS_HOOK_LOG("unhandled access to NS' virtual root window 0x%0" PRIx32 "\n", pWindow->drawable.id);
+            XNS_HOOK_LOG("unhandled access to NS' virtual root window 0x%0lx\n", (unsigned long)pWindow->drawable.id);
         }
 
         /* white-listed operations on actual root window */
@@ -114,7 +114,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         if (param->rtype == X11_RESTYPE_WINDOW) {
             /* allowed ones should already been catched above */
-            XNS_HOOK_LOG("REJECT server owned window 0x%0" PRIx32 "!\n", ((WindowPtr)param->res)->drawable.id);
+            XNS_HOOK_LOG("REJECT server owned window 0x%0lx!\n", (unsigned long)((WindowPtr)param->res)->drawable.id);
             goto reject;
         }
 

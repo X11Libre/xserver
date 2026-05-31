@@ -81,7 +81,7 @@ create_thread(void *func, void *arg)
 void
 QuartzInitServer(int argc, char **argv, char **envp)
 {
-    struct arg *args = (struct arg *)malloc(sizeof(struct arg));
+    struct arg *args = calloc(1, sizeof(struct arg));
     if (!args)
         FatalError("Could not allocate memory.\n");
 

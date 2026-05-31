@@ -51,57 +51,27 @@ SOFTWARE.
 #include <X11/Xdefs.h>
 
 #include <limits.h>
+#include <signal.h>
 #include <stddef.h>
 #include <X11/Xos.h>
 #include <X11/Xmd.h>
 #include <X11/Xdefs.h>
 
+/*
+ * return the least significant bit in x which is set
+ *
+ * This works on 1's complement and 2's complement machines.
+ * If you care about the extra instruction on 2's complement
+ * machines, change to ((x) & (-(x)))
+ */
+#define lowbit(x) ((x) & (~(x) + 1))
+
 #ifndef __has_builtin
 # define __has_builtin(x) 0     /* Compatibility with older compilers */
 #endif
 
-/* If EAGAIN and EWOULDBLOCK are distinct errno values, then we check errno
- * for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
- * systems are broken and return EWOULDBLOCK when they should return EAGAIN
- */
-#ifndef WIN32
-# if (EAGAIN != EWOULDBLOCK)
-#  define ETEST(err) (err == EAGAIN || err == EWOULDBLOCK)
-# else
-#  define ETEST(err) (err == EAGAIN)
-# endif
-#else   /* WIN32 The socket errorcodes differ from the normal errors */
-#define ETEST(err) (err == EAGAIN || err == WSAEWOULDBLOCK)
-#endif
-
-typedef struct _connectionInput *ConnectionInputPtr;
-typedef struct _connectionOutput *ConnectionOutputPtr;
-
-struct _osComm;
-
-typedef int (*OsFlushFunc) (ClientPtr who, struct _osComm * oc, char *extraBuf,
-                            int extraCount);
-
-typedef struct _osComm {
-    int fd;
-    ConnectionInputPtr input;
-    ConnectionOutputPtr output;
-    XID auth_id;                /* authorization id */
-    CARD32 conn_time;           /* timestamp if not established, else 0  */
-    struct _XtransConnInfo *trans_conn; /* transport connection object */
-    int flags;
-} OsCommRec, *OsCommPtr;
-
-#define OS_COMM_GRAB_IMPERVIOUS 1
-#define OS_COMM_IGNORED         2
-
-int FlushClient(ClientPtr who, OsCommPtr oc);
-
-extern void FreeOsBuffers(OsCommPtr     /*oc */
-    );
-
-void
-CloseDownFileDescriptor(OsCommPtr oc);
+#define MILLI_PER_MIN (1000 * 60)
+#define MILLI_PER_SECOND (1000)
 
 #include "dix.h"
 #include "ospoll.h"
@@ -113,8 +83,41 @@ listen_to_client(ClientPtr client);
 
 extern Bool NewOutputPending;
 
-/* in access.c */
-extern Bool ComputeLocalClient(ClientPtr client);
+/* for platforms lacking arc4random_buf() libc function */
+#ifndef HAVE_ARC4RANDOM_BUF
+static inline void arc4random_buf(void *buf, size_t nbytes)
+{
+#ifdef HAVE_GETRANDOM
+    ssize_t pos = 0;
+    while (pos < len) {
+        ssize_t ret = getrandom(buf + pos, nbytes - pos, 0);
+        if (ret <= 0) {
+            if (ret < 0 && errno == EINTR)
+                continue;
+            FatalError("Cannot read random data via getrandom(): %s\n",
+                       strerror(errno));
+        }
+        pos += ret;
+    }
+#else
+    int fd = open("/dev/urandom", O_RDONLY);
+    if (fd < 0)
+        FatalError("Cannot open /dev/urandom for random data generation\n");
+    ssize_t pos = 0;
+    while (pos < nbytes) {
+        ssize_t ret = read(fd, (unsigned char*)buf + pos, nbytes - pos);
+        if (ret <= 0) {
+            if (ret < 0 && errno == EINTR)
+                continue;
+            close(fd);
+            FatalError("Cannot read random data from /dev/urandom\n");
+        }
+        pos += ret;
+    }
+    close(fd);
+#endif
+}
+#endif /* HAVE_ARC4RANDOM_BUF */
 
 /* OsTimer functions */
 void TimerInit(void);
@@ -124,8 +127,10 @@ void TimerInit(void);
  */
 _X_EXPORT Bool TimerForce(OsTimerPtr);
 
-#ifdef WIN32
+#if defined(WIN32) && ! defined(__CYGWIN__)
 #include <X11/Xwinsock.h>
+
+typedef _sigset_t sigset_t;
 
 #undef CreateWindow
 
@@ -143,8 +148,6 @@ int Pclose(void *f);
 
 #endif /* WIN32 */
 
-void AutoResetServer(int sig);
-
 /* clone fd so it gets out of our select mask */
 int os_move_fd(int fd);
 
@@ -158,9 +161,6 @@ typedef void (*OsSigHandlerPtr) (int sig);
 OsSigHandlerPtr OsSignal(int sig, OsSigHandlerPtr handler);
 
 void OsInit(void);
-void OsCleanup(Bool);
-void OsVendorFatalError(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
-void OsVendorInit(void);
 
 _X_EXPORT /* needed by the int10 module, but should not be used by OOT drivers */
 void OsBlockSignals(void);
@@ -190,7 +190,12 @@ extern Bool PartialNetwork;
 
 extern Bool CoreDump;
 extern Bool NoListenAll;
-extern Bool AllowByteSwappedClients;
+
+/*
+ * This function reallocarray(3)s passed buffer, terminating the server if
+ * there is not enough memory or the arguments overflow when multiplied.
+ */
+void *XNFreallocarray(void *ptr, size_t nmemb, size_t size);
 
 #if __has_builtin(__builtin_popcountl)
 # define Ones __builtin_popcountl
@@ -223,5 +228,17 @@ Ones(unsigned long mask)
 static inline size_t x_safe_strlen(const char *str) {
     return (str ? strlen(str) : 0);
 }
+
+enum ExitCode {
+    EXIT_NO_ERROR = 0,
+    EXIT_ERR_ABORT = 1,
+    EXIT_ERR_CONFIGURE = 2,
+    EXIT_ERR_DRIVERS = 3,
+};
+
+extern sig_atomic_t inSignalContext;
+
+/* run timers that are expired at timestamp `now` */
+void DoTimers(CARD32 now);
 
 #endif                          /* _OSDEP_H_ */

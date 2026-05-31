@@ -21,8 +21,9 @@
  */
 #include <dix-config.h>
 
-#include "present_priv.h"
 #include <unistd.h>
+
+#include "present/present_priv.h"
 
 void
 present_vblank_notify(present_vblank_ptr vblank, CARD8 kind, CARD8 mode, uint64_t ust, uint64_t crtc_msc)
@@ -38,6 +39,20 @@ present_vblank_notify(present_vblank_ptr vblank, CARD8 kind, CARD8 mode, uint64_
         if (window)
             present_send_complete_notify(window, kind, mode, serial, ust, crtc_msc - vblank->msc_offset);
     }
+}
+
+static Bool
+present_want_async_flip(uint32_t options, uint32_t capabilities)
+{
+	if (options & PresentOptionAsync &&
+	    capabilities & PresentCapabilityAsync)
+		return TRUE;
+
+	if (options & PresentOptionAsyncMayTear &&
+	    capabilities & PresentCapabilityAsyncMayTear)
+		return TRUE;
+
+	return FALSE;
 }
 
 /* The memory vblank points to must be 0-initialized before calling this function.
@@ -118,15 +133,14 @@ present_vblank_init(present_vblank_ptr vblank,
     if (pixmap != NULL &&
         !(options & PresentOptionCopy) &&
         screen_priv->check_flip) {
-        if (msc_is_after(target_msc, crtc_msc) &&
-            screen_priv->check_flip (target_crtc, window, pixmap, TRUE, valid, x_off, y_off, &reason))
+
+        Bool sync_flip = !present_want_async_flip(options, capabilities);
+
+        if (screen_priv->check_flip (target_crtc, window, pixmap,
+                                     sync_flip, valid, x_off, y_off, &reason))
         {
             vblank->flip = TRUE;
-            vblank->sync_flip = TRUE;
-        } else if ((capabilities & PresentAllAsyncCapabilities) &&
-            screen_priv->check_flip (target_crtc, window, pixmap, FALSE, valid, x_off, y_off, &reason))
-        {
-            vblank->flip = TRUE;
+            vblank->sync_flip = sync_flip;
         }
     }
     vblank->reason = reason;

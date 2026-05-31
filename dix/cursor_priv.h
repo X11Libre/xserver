@@ -16,6 +16,9 @@
 #include "include/input.h"
 #include "include/window.h"
 
+#define CURSOR_BITS_SIZE (sizeof(CursorBits) + (size_t)dixPrivatesSize(PRIVATE_CURSOR_BITS))
+#define CURSOR_REC_SIZE (sizeof(CursorRec) + (size_t)dixPrivatesSize(PRIVATE_CURSOR))
+
 extern CursorPtr rootCursor;
 
 /* reference counting */
@@ -27,26 +30,26 @@ int AllocARGBCursor(unsigned char *psrcbits,
                     unsigned char *pmaskbits,
                     CARD32 *argb,
                     CursorMetricPtr cm,
-                    unsigned foreRed,
-                    unsigned foreGreen,
-                    unsigned foreBlue,
-                    unsigned backRed,
-                    unsigned backGreen,
-                    unsigned backBlue,
+                    unsigned short foreRed,
+                    unsigned short foreGreen,
+                    unsigned short foreBlue,
+                    unsigned short backRed,
+                    unsigned short backGreen,
+                    unsigned short backBlue,
                     CursorPtr *ppCurs,
                     ClientPtr client,
                     XID cid);
 
 int AllocGlyphCursor(Font source,
-                     unsigned int sourceChar,
+                     unsigned short sourceChar,
                      Font mask,
-                     unsigned int maskChar,
-                     unsigned foreRed,
-                     unsigned foreGreen,
-                     unsigned foreBlue,
-                     unsigned backRed,
-                     unsigned backGreen,
-                     unsigned backBlue,
+                     unsigned short maskChar,
+                     unsigned short foreRed,
+                     unsigned short foreGreen,
+                     unsigned short foreBlue,
+                     unsigned short backRed,
+                     unsigned short backGreen,
+                     unsigned short backBlue,
                      CursorPtr *ppCurs,
                      ClientPtr client,
                      XID cid);

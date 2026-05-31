@@ -157,7 +157,10 @@ void dixScreenUnhookClose(ScreenPtr pScreen,
  * proc had been called.
  *
  * When registration fails, the server aborts.
+ *
+ * NOTE: only exported for libglamoregl, not supposed to be used by drivers.
  **/
+_X_EXPORT
 void dixScreenHookPostClose(ScreenPtr pScreen,
                             XorgScreenCloseProcPtr func);
 
@@ -174,7 +177,10 @@ void dixScreenHookPostClose(ScreenPtr pScreen,
  *
  * In contrast to Close hook, it's called *after* the driver's CloseScreen()
  * proc had been called.
+ *
+ * NOTE: only exported for libglamoregl, not supposed to be used by drivers.
  **/
+_X_EXPORT
 void dixScreenUnhookPostClose(ScreenPtr pScreen,
                               XorgScreenCloseProcPtr func);
 

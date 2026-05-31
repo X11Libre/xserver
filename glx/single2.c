@@ -35,6 +35,7 @@
 #include <stdlib.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 
 #include "glxserver.h"
@@ -62,6 +63,10 @@ __glXDisp_FeedbackBuffer(__GLXclientState * cl, GLbyte * pc)
     pc += __GLX_SINGLE_HDR_SIZE;
     size = *(GLsizei *) (pc + 0);
     type = *(GLenum *) (pc + 4);
+    if (size < 0) {
+        cl->client->errorValue = size;
+        return BadValue;
+    }
     if (cx->feedbackBufSize < size) {
         cx->feedbackBuf = reallocarray(cx->feedbackBuf,
                                        (size_t) size, __GLX_SIZE_FLOAT32);
@@ -92,6 +97,10 @@ __glXDisp_SelectBuffer(__GLXclientState * cl, GLbyte * pc)
 
     pc += __GLX_SINGLE_HDR_SIZE;
     size = *(GLsizei *) (pc + 0);
+    if (size < 0) {
+        cl->client->errorValue = size;
+        return BadValue;
+    }
     if (cx->selectBufSize < size) {
         cx->selectBuf = reallocarray(cx->selectBuf,
                                      (size_t) size, __GLX_SIZE_CARD32);
