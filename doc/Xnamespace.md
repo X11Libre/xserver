@@ -16,7 +16,7 @@ The extension is enabled when a namespace config is passed to the Xserver via th
 `-namespace <fn>` flag.
 If the **namespace** command hasn't appeared in the configuration, the current namespace is **root** for a non-namespace command. 
 Else, the current **namespace** for a non-namespace command is the nearest namespace declared above it.
-As a consequence, the **superpower**and **allow** commands have no effect as the root has access to every resource.
+As a consequence, the **superpower** and **allow** commands have no effect as the root has access to every resource.
 So, only the **auth** command matters before the first **namespace** is declared.
 
 ### Commands
@@ -46,6 +46,21 @@ These two pieces of information are used to find the correct namespace and permi
 
 If a token is generated outside xauth, ensure the tokens are unique.
 For more information, use the command `man xauth`.
+
+### Create a client within a namespace
+```bash
+# Assume you have a namespace called xeyes in your ns.conf
+# It has the auth token 46F8E62B78E58962DE0CEEFC05AD90B8 assigned to it.
+# Populate keys matching your ns.conf 
+touch /tmp/xauth_xeyes # create directory
+xauth -f /tmp/xauth_xeyes add :1 MIT-MAGIC-COOKIE-1 46F8E62B78E58962DE0CEEFC05AD90B8 # add token to xauth
+XAUTHORITY=/tmp/xauth_xeyes {X_APP} # run your app with the token to be xeyes namespace
+
+touch /tmp/xauth_xclock # create directory
+xauth -f /tmp/xauth_xclock add :1 MIT-MAGIC-COOKIE-1 46F8E62B78E58962DE0CEEFC05AD90B7
+XAUTHORITY=/tmp/xauth_xclock {X_APP2} # run your app with the token to be xclock namespace
+```
+`XAUTHORITY=/tmp/xauth_xeyes ./anko_xkbcat`
 
 ### MIT_MAGIC-COOKIE-1 Protocol
 
@@ -146,6 +161,17 @@ Using the example conf file above, the table below represents what each namespac
 | Client2 | seyex     | Succeeds (explicit) | Fails               | Cannot access App1 or App3                |
 | Client3 | kcolcx    | Fails               | Succeeds (explicit) | Cannot access App1 or App2                |
 | Client4 | foobar    | Succeeds (implicit) | Succeeds (implicit) | Can communicate with App2, App3, and App1 |
+
+## Anonymous (anon) namespace
+The anonymous namespace is a special namespace used for clients that don't have an authentification token when the 
+XNamespace extension is enabled. Instead each client is put into a **virtual** namespace to prevent them from accessing 
+resources.
+
+The biggest difference between anon and the other namespaces is that clients 
+ - in the anon namespace can't communicate with each other
+ - are provided their own virtual namespace to prevent them from accessing resources owned by other client in the anon namespace
+ - can't access any of the X Extensions as they will always be denied
+
 
 ## Appendix
 

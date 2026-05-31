@@ -20,7 +20,7 @@
 
 
 # namespace <name>
-# creates the namespace xeyes, and makes all "auths" and "allow" configurations affect seyex namespace only
+# creates the namespace xeyes, and makes all "auths" and "allow" configurations affect xeyes namespace only
 namespace xeyes
 
   # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for xeyes namespace
