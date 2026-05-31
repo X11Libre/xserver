@@ -75,6 +75,9 @@ glamor_font_get(ScreenPtr screen, FontPtr font)
     glyph_width_pixels = font->info.maxbounds.rightSideBearing - font->info.minbounds.leftSideBearing;
     glyph_height = font->info.maxbounds.ascent + font->info.maxbounds.descent;
 
+    if (glyph_width_pixels <= 0 || glyph_height <= 0)
+        return NULL;
+
     glyph_width_bytes = (glyph_width_pixels + 7) >> 3;
 
     glamor_font->glyph_width_pixels = glyph_width_pixels;
@@ -134,7 +137,28 @@ glamor_font_get(ScreenPtr screen, FontPtr font)
             if (count) {
                 char *dst;
                 char *src = glyph->bits;
-                unsigned y;
+                int gw = GLYPHWIDTHBYTES(glyph);
+                int gh = GLYPHHEIGHTPIXELS(glyph);
+
+                /* Reject fonts where any per-glyph metric is negative
+                 * or exceeds the atlas slot size derived from maxbounds.
+                 * The PCF parser in libXfont2 does not recompute
+                 * maxbounds from per-glyph data, so a crafted PCF file
+                 * can violate the maxbounds invariant.
+                 *
+                 * gw is passed as size_t to memcpy and a negative value
+                 * would thus result in OOB access.
+                 *
+                 * Returning NULL makes glamor fall back to software
+                 * rendering.
+                 */
+                if (gw < 0 || gh < 0 ||
+                    gw > glyph_width_bytes || gh > glyph_height) {
+                    glDeleteTextures(1, &glamor_font->texture_id);
+                    glamor_font->texture_id = 0;
+                    free(bits);
+                    return NULL;
+                }
 
                 dst = bits;
                 /* get offset of start of first row */
@@ -143,8 +167,8 @@ glamor_font_get(ScreenPtr screen, FontPtr font)
                 dst += (row & 1) ? glamor_font->row_width : 0;
 
                 dst += col * glyph_width_bytes;
-                for (y = 0; y < GLYPHHEIGHTPIXELS(glyph); y++) {
-                    memcpy(dst, src, GLYPHWIDTHBYTES(glyph));
+                for (int y = 0; y < gh; y++) {
+                    memcpy(dst, src, gw);
                     dst += overall_width;
                     src += GLYPHWIDTHBYTESPADDED(glyph);
                 }
