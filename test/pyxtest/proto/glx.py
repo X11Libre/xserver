@@ -7,11 +7,43 @@ from dataclasses import dataclass
 
 # GLX minor opcodes
 GLXCreateContext = 3
+GLXDestroyContext = 4
 GLXMakeCurrent = 5
+GLXQueryVersion = 7
+GLXMakeContextCurrent = 26
 GLXChangeDrawableAttributes = 30
 
 # GLX drawable attribute keys
 GLX_EVENT_MASK = 0x801F
+
+
+@dataclass
+class QueryVersionRequest:
+    """GLX QueryVersion request (12 bytes).
+
+    Wire format:
+        CARD8    reqType         (GLX major opcode)
+        CARD8    glxCode         (7)
+        CARD16   length          (3)
+        CARD32   majorVersion
+        CARD32   minorVersion
+    """
+
+    opcode: int
+    major_version: int = 1
+    minor_version: int = 4
+    length_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        length = self.length_override if self.length_override is not None else 3
+        return struct.pack(
+            f"{byte_order}BBH II",
+            self.opcode,
+            GLXQueryVersion,
+            length,
+            self.major_version,
+            self.minor_version,
+        )
 
 
 @dataclass
@@ -40,6 +72,32 @@ class CreateContextRequest:
 
 
 @dataclass
+class DestroyContextRequest:
+    """GLX DestroyContext request (8 bytes).
+
+    Wire format:
+        CARD8    reqType         (GLX major opcode)
+        CARD8    glxCode         (4)
+        CARD16   length          (2)
+        CARD32   context
+    """
+
+    opcode: int
+    context: int
+    length_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        length = self.length_override if self.length_override is not None else 2
+        return struct.pack(
+            f"{byte_order}BBH I",
+            self.opcode,
+            GLXDestroyContext,
+            length,
+            self.context,
+        )
+
+
+@dataclass
 class MakeCurrentRequest:
     """glxMakeCurrent request (16 bytes = 4 words)."""
 
@@ -57,6 +115,41 @@ class MakeCurrentRequest:
             self.drawable,
             self.context_id,
             self.old_context_tag,
+        )
+
+
+@dataclass
+class MakeContextCurrentRequest:
+    """GLX MakeContextCurrent request (20 bytes).
+
+    Wire format:
+        CARD8    reqType         (GLX major opcode)
+        CARD8    glxCode         (26)
+        CARD16   length          (5)
+        CARD32   oldContextTag
+        CARD32   drawable
+        CARD32   readdrawable
+        CARD32   context
+    """
+
+    opcode: int
+    old_context_tag: int
+    drawable: int
+    readdrawable: int
+    context: int
+    length_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        length = self.length_override if self.length_override is not None else 5
+        return struct.pack(
+            f"{byte_order}BBH IIII",
+            self.opcode,
+            GLXMakeContextCurrent,
+            length,
+            self.old_context_tag,
+            self.drawable,
+            self.readdrawable,
+            self.context,
         )
 
 
