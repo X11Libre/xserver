@@ -140,7 +140,7 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
         pglyph = FONTGLYPHBITS(pglyphBase, pci);
         gWidth = GLYPHWIDTHPIXELS(pci);
         gHeight = GLYPHHEIGHTPIXELS(pci);
-        if (gWidth && gHeight) {
+        if (gWidth > 0 && gHeight > 0) {
             nbyGlyphWidth = GLYPHWIDTHBYTESPADDED(pci);
             nbyPadGlyph = BitmapBytePad(gWidth);
 
