@@ -220,29 +220,24 @@ KdDisableInput(void)
     KdPointerInfo *pi;
     int found = 0, i = 0;
 
+    /**
+     * When we're doing something that causes a vt switch,
+     * if that action is a key press, the X server doesn't see
+     * the key release event.
+     *
+     * For example, if we start an X server from a terminal
+     * running inside another X server, the "host" server
+     * sees the "enter" key press, but not the key release.
+     *
+     * KdReleaseAllKeys does input_{lock,unlock} by itself.
+     */
+    KdReleaseAllKeys();
+
+    /* TODO: Do the same for any pressed mouse buttons */
+
     input_lock();
 
     for (ki = kdKeyboards; ki; ki = ki->next) {
-        if (ki->last_scan_code != -1) {
-            /**
-             * When we're doing something that causes a vt switch,
-             * if that action is a key press, the X server doesn't see
-             * the key release event.
-             *
-             * For example, if we start an X server from a terminal
-             * running inside another X server, the "host" server
-             * sees the "enter" key press, but not the key release.
-             *
-             * With this, we forge the key release event that the
-             * X server doesn't see, so that it doesn't misinterpret
-             * the missing key release as a long key press.
-             *
-             * Doesn't really matter what the value of the
-             * third argument is, as long as it is non-zero.
-             * This is what the linux keyboard driver sends.
-             */
-            KdEnqueueKeyboardEvent(ki, ki->last_scan_code, 0x80);
-        }
         if (ki->driver && ki->driver->Disable)
             (*ki->driver->Disable) (ki);
     }
@@ -1864,23 +1859,22 @@ KdReceiveTimeout(KdPointerInfo * pi)
 void
 KdReleaseAllKeys(void)
 {
-#if 0
-    int key;
-    KdKeyboardInfo *ki;
-
     input_lock();
 
-    for (ki = kdKeyboards; ki; ki = ki->next) {
-        for (key = ki->keySyms.minKeyCode; key < ki->keySyms.maxKeyCode; key++) {
+    for (KdKeyboardInfo *ki = kdKeyboards; ki; ki = ki->next) {
+        if (!ki->dixdev || !ki->dixdev->key) {
+            continue;
+        }
+
+        for (int key = ki->dixdev->key->xkbInfo->desc->min_key_code;
+             key <= ki->dixdev->key->xkbInfo->desc->max_key_code; key++) {
             if (key_is_down(ki->dixdev, key, KEY_POSTED | KEY_PROCESSED)) {
-                KdHandleKeyboardEvent(ki, KeyRelease, key);
-                QueueGetKeyboardEvents(ki->dixdev, KeyRelease, key, NULL);
+                QueueKeyboardEvents(ki->dixdev, KeyRelease, key);
             }
         }
     }
 
     input_unlock();
-#endif
 }
 
 static void
@@ -1960,9 +1954,10 @@ KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
          * Set the dispatch exception flag so the server will terminate the
          * next time through the dispatch loop.
          */
-        if (kdAllowZap)
+        if (kdAllowZap) {
             dispatchException |= DE_TERMINATE;
-        break;
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -1984,66 +1979,11 @@ KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
         /*
          * Set up this event -- the type may be modified below
          */
-        if (is_up) {
-            type = KeyRelease;
-            ki->last_scan_code = -1;
-        } else {
-            type = KeyPress;
-            ki->last_scan_code = scan_code;
-        }
+        type = is_up ? KeyRelease : KeyPress;
 
-        /**
-         * Right now, the only special keys we have
-         * either terminate the server or switch vt.
-         *
-         * We don't really cares what happens if we terminate,
-         * but we do care if we switch vt.
-         *
-         * If we switch vt, the input driver sees the key press
-         * event, but it does't see the key release event.
-         * As such, when we switch back to the original vt,
-         * the server thinks we are still pressing the F* key.
-         *
-         * To mitigate this, we can do one of two things:
-         *
-         * Forge the key release event that the server
-         * doesn't see, and 2 key release events for
-         * the crtl key and the alt key and enqueue them.
-         *
-         * Not enqueue the key press event at all,
-         * and only forge 2 key release events,
-         * one for the crtl key, another for the alt key.
-         *
-         * Below, the latter option is implemented.
-         */
-
-        /* Scancodes are taken from https://aeb.win.tue.nl/linux/kbd/scancodes-1.html */
-
-        #define KEY_CTRL 0x1D
-        #define KEY_ALT 0x38
-
-#if 0 /* First option */
-        Bool ret = KdCheckSpecialKeys(ki, type, key_code);
-        QueueKeyboardEvents(ki->dixdev, type, key_code);
-        if (ret) {
-            unsigned char ctrl_key_code = KEY_CTRL + KD_MIN_KEYCODE - ki->minScanCode;
-            unsigned char alt_key_code = KEY_ALT + KD_MIN_KEYCODE - ki->minScanCode;
-            QueueKeyboardEvents(ki->dixdev, KeyRelease, key_code);
-            QueueKeyboardEvents(ki->dixdev, KeyRelease, ctrl_key_code);
-            QueueKeyboardEvents(ki->dixdev, KeyRelease, alt_key_code);
-            ki->last_scan_code = -1; /* No need to fix this scancode up again */
-        }
-#else /* Second option */
         if (!KdCheckSpecialKeys(ki, type, key_code)) {
             QueueKeyboardEvents(ki->dixdev, type, key_code);
-        } else {
-            unsigned char ctrl_key_code = KEY_CTRL + KD_MIN_KEYCODE - ki->minScanCode;
-            unsigned char alt_key_code = KEY_ALT + KD_MIN_KEYCODE - ki->minScanCode;
-            QueueKeyboardEvents(ki->dixdev, KeyRelease, ctrl_key_code);
-            QueueKeyboardEvents(ki->dixdev, KeyRelease, alt_key_code);
-            ki->last_scan_code = -1; /* No need to fix this scancode up again */
         }
-#endif
     }
     else {
         ErrorF("driver %s wanted to post scancode %d outside of [%d, %d]!\n",
