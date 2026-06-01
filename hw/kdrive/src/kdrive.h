@@ -296,7 +296,7 @@ typedef struct _KdOsFuncs {
     int (*Init) (void);           /* only called when the X server is started */
     void (*Enable) (void);        /* called when screen is enabled */
     void (*Disable) (void);       /* called when screen is disabled */
-    Bool (*SpecialKey) (KeySym);
+    Bool (*SpecialKey) (KdKeyboardInfo *, unsigned char);
     void (*Fini) (void);
     void (*pollEvents) (void);    /* called when driver shall poll for new events */
     void (*Bell) (int, int, int); /* if not NULL called instead of the keyboard driver's function */

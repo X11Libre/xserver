@@ -30,6 +30,7 @@
 #include <X11/keysym.h>
 #include <linux/apm_bios.h>
 
+#include "dix/dix_priv.h" /* for dispatchException */
 #include "os/osdep.h"
 #include "os/ddx_priv.h"
 
@@ -248,19 +249,93 @@ LinuxEnable(void)
 }
 
 static Bool
-LinuxSpecialKey(KeySym sym)
+LinuxSwitchToVT(int con)
 {
     struct vt_stat vts;
-    int con;
 
-    if (XK_F1 <= sym && sym <= XK_F12) {
-        con = sym - XK_F1 + 1;
-        memset(&vts, '\0', sizeof(vts));    /* valgrind */
-        ioctl(LinuxConsoleFd, VT_GETSTATE, &vts);
-        if (con != vts.v_active && (vts.v_state & (1 << con))) {
-            ioctl(LinuxConsoleFd, VT_ACTIVATE, con);
-            return TRUE;
-        }
+    memset(&vts, '\0', sizeof(vts));    /* valgrind */
+    ioctl(LinuxConsoleFd, VT_GETSTATE, &vts);
+
+    /* Only switch to active vt's */
+    if (con != vts.v_active && (vts.v_state & (1 << con))) {
+        ioctl(LinuxConsoleFd, VT_ACTIVATE, con);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static Bool
+LinuxSpecialKey(KdKeyboardInfo *ki, unsigned char scan_code)
+{
+    const char* driver_name = ki->driver->name;
+
+    /**
+     * Scancodes are taken from https://aeb.win.tue.nl/linux/kbd/scancodes-1.html
+     * These scancodes can be also found at https://wiki.osdev.org/PS/2_Keyboard
+     *
+     * Only a few keys we are interested in are listed here.
+     * If we ever need more keys, we can add them later.
+     */
+
+#define KEY_BACKSPACE 0x0E
+#define KEY_F1 0x3B
+#define KEY_F2 0x3C
+#define KEY_F3 0x3D
+#define KEY_F4 0x3E
+#define KEY_F5 0x3F
+#define KEY_F6 0x40
+#define KEY_F7 0x41
+#define KEY_F8 0x42
+#define KEY_F9 0x43
+#define KEY_F10 0x44
+
+#define KEY_KP_DEL 0x53
+
+#define KEY_F11 0x57
+#define KEY_F12 0x58
+
+/* This one is taken from the linux keyboard driver */
+#define KEY_DEL 0x63
+
+    switch(scan_code) {
+        case KEY_F1:
+            return LinuxSwitchToVT(1);
+        case KEY_F2:
+            return LinuxSwitchToVT(2);
+        case KEY_F3:
+            return LinuxSwitchToVT(3);
+        case KEY_F4:
+            return LinuxSwitchToVT(4);
+        case KEY_F5:
+            return LinuxSwitchToVT(5);
+        case KEY_F6:
+            return LinuxSwitchToVT(6);
+        case KEY_F7:
+            return LinuxSwitchToVT(7);
+        case KEY_F8:
+            return LinuxSwitchToVT(8);
+        case KEY_F9:
+            return LinuxSwitchToVT(9);
+        case KEY_F10:
+            return LinuxSwitchToVT(10);
+        case KEY_F11:
+            return LinuxSwitchToVT(11);
+        case KEY_F12:
+            return LinuxSwitchToVT(12);
+        case KEY_DEL:
+            if (!driver_name || strcmp(driver_name, "keyboard")) {
+                /* Only fallthrough for the non-evdev keyboard driver */
+                return FALSE;
+            }
+        case KEY_BACKSPACE:
+        case KEY_KP_DEL:
+            /*
+             * Set the dispatch exception flag so the server will terminate the
+             * next time through the dispatch loop.
+             */
+            if (kdAllowZap) {
+                dispatchException |= DE_TERMINATE;
+            }
     }
     return FALSE;
 }

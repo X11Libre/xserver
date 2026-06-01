@@ -1903,81 +1903,6 @@ KdCheckLock(void)
     }
 }
 
-static KeySym
-KdKeyCodeToKeySym(KdKeyboardInfo *ki, int type, unsigned char key_code)
-{
-    unsigned char scan_code = key_code - KD_MIN_KEYCODE + ki->minScanCode;
-    (void)type;
-
-    /**
-     * XXX This looks really sketchy XXX
-     * Surely there is a way to query this from xkb?
-     * This doesn't work:
-     * return kbd->key->xkbInfo->desc->map->modmap[key_code];
-     *
-     * Scancodes are taken from https://aeb.win.tue.nl/linux/kbd/scancodes-1.html
-     * These scancodes can be also found at https://wiki.osdev.org/PS/2_Keyboard
-     *
-     * Only a few keys we are interested in are listed here.
-     * If we ever need more keys, we can add them later.
-     */
-
-#define KEY_BACKSPACE 0x0E
-#define KEY_F1 0x3B
-#define KEY_F2 0x3C
-#define KEY_F3 0x3D
-#define KEY_F4 0x3E
-#define KEY_F5 0x3F
-#define KEY_F6 0x40
-#define KEY_F7 0x41
-#define KEY_F8 0x42
-#define KEY_F9 0x43
-#define KEY_F10 0x44
-#define KEY_F11 0x57
-#define KEY_F12 0x58
-
-/**
- * The driver doesn't differentiate between E0 53 and 53,
- * so both are treated as the delete key being pressed
- */
-#define KEY_DEL 0x53
-
-    switch(scan_code) {
-        case KEY_BACKSPACE:
-            return XK_BackSpace;
-        case KEY_F1:
-            return XK_F1;
-        case KEY_F2:
-            return XK_F2;
-        case KEY_F3:
-            return XK_F3;
-        case KEY_F4:
-            return XK_F4;
-        case KEY_F5:
-            return XK_F5;
-        case KEY_F6:
-            return XK_F6;
-        case KEY_F7:
-            return XK_F7;
-        case KEY_F8:
-            return XK_F8;
-        case KEY_F9:
-            return XK_F9;
-        case KEY_F10:
-            return XK_F10;
-        case KEY_F11:
-            return XK_F11;
-        case KEY_F12:
-            return XK_F12;
-#if 0 /* Doesn't work from my testing */
-        case KEY_DEL:
-            return XK_Delete;
-#endif
-    }
-
-    return XK_VoidSymbol;
-}
-
 /**
  * Returns FALSE if we should treat this like a regular keyboard event
  * Returns TRUE if we should fixup the event
@@ -1985,7 +1910,7 @@ KdKeyCodeToKeySym(KdKeyboardInfo *ki, int type, unsigned char key_code)
 static Bool
 KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
 {
-    KeySym sym;
+    unsigned char scan_code = key_code - KD_MIN_KEYCODE + ki->minScanCode;
 
     /*
      * Ignore key releases
@@ -2003,35 +1928,13 @@ KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
         return FALSE;
     }
 
-    sym = KdKeyCodeToKeySym(ki, type, key_code);
-    if (sym == XK_VoidSymbol) {
-        return FALSE;
-    }
-
     /*
-     * Let OS function see keysym first
+     * Let OS function see scancode
      */
 
     if (kdOsFuncs->SpecialKey)
-        if ((*kdOsFuncs->SpecialKey) (sym))
+        if ((*kdOsFuncs->SpecialKey) (ki, scan_code))
             return TRUE;
-
-    /*
-     * Now check for backspace or delete; these signal the
-     * X server to terminate
-     */
-    switch (sym) {
-    case XK_BackSpace:
-    case XK_Delete:
-    case XK_KP_Delete:
-        /*
-         * Set the dispatch exception flag so the server will terminate the
-         * next time through the dispatch loop.
-         */
-        if (kdAllowZap)
-            dispatchException |= DE_TERMINATE;
-        break;
-    }
 
     return FALSE;
 }

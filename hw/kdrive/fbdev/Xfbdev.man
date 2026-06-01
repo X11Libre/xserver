@@ -82,6 +82,10 @@ The following key special combinations are recognized by the
 server.
 .TP 8
 .B Ctrl+Alt+Backspace
+.TP 8
+.B Ctrl+Alt+Delete
+.TP 8
+.B Ctrl+Alt+KeyPadDelete
 Immediately kills the server -- no questions asked. It can be disabled by
 adding the
 .B -nozap
