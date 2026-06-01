@@ -16,7 +16,7 @@ servers; for information on a specific X server, please refer to the
 relevant manual page.
 .SH OPTIONS
 In addition to the standard options accepted by all X servers (see
-.BR Xserver (1)),
+.BR Xserver (@miscmansuffix@),
 all the
 .B Xkdrive
 servers accept the following options:
@@ -44,13 +44,35 @@ enable emulation of a middle mouse button by chording.
 .TP 8
 .B -3button
 disable emulation of a middle mouse button by chording.
+.SH KEYBOARD
+The
+.B Xkdrive
+servers are normally configured to recognize various special combinations
+of key presses that instruct the server to perform some action, rather
+than just sending the key press event to a client application.
+These actions depend on the XKB keymap loaded by a particular keyboard device
+and may or may not be available on a given configuration.
+.PP
+The following key special combinations are recognized by the
+.B Xkdrive
+servers.
+.TP 8
+.B Ctrl+Alt+Backspace
+.TP 8
+.B Ctrl+Alt+Delete
+.TP 8
+.B Ctrl+Alt+KeyPadDelete
+Immediately kills the server -- no questions asked. It can be disabled by
+adding the
+.B -nozap
+command-line argument.
 .SH SEE ALSO
 .BR X (@miscmansuffix@),
-.BR Xserver (1),
-.BR xdm (1),
-.BR xinit (1),
-.BR Xvesa (1),
-.BR Xfbdev (1).
+.BR Xserver (@miscmansuffix@),
+.BR xdm (@miscmansuffix@),
+.BR xinit (@miscmansuffix@),
+.BR Xvesa (@miscmansuffix@),
+.BR Xfbdev (@miscmansuffix@).
 .SH AUTHORS
 The Xkdrive common core was written by Keith Packard,
 and is based on the Sample Implementation of X.
