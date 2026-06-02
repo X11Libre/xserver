@@ -448,7 +448,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     if (strcmp(argv[i], "-dri") == 0) {
         if (i + 1 < argc) {
-            render_node = strdup(argv[i + 1]);
+            render_node = argv[i + 1];
             return 2;
         }
         UseMsg();
@@ -829,8 +829,6 @@ vfbCloseScreen(ScreenPtr pScreen)
     if (pvfb->dri_fd >= 0) {
         close(pvfb->dri_fd);
         pvfb->dri_fd = -1;
-        free(render_node);
-        render_node = NULL;
     }
 #endif
 
