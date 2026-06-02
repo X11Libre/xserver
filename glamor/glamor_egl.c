@@ -217,6 +217,9 @@ glamor_create_texture_from_image(ScreenPtr screen,
     struct glamor_screen_private *glamor_priv =
         glamor_get_screen_private(screen);
 
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
+
     glamor_make_current(glamor_priv);
 
     glGenTextures(1, texture);
@@ -224,9 +227,17 @@ glamor_create_texture_from_image(ScreenPtr screen,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    if (glamor_egl->has_OES_EGL_image) {
+        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+    } else if (glamor_egl->has_EXT_EGL_image_storage) {
+        glEGLImageTargetTexStorageEXT(GL_TEXTURE_2D, image, NULL);
+    } else {
+        glDeleteTextures(1, texture);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return FALSE;
+    }
 
+    glBindTexture(GL_TEXTURE_2D, 0);
     return TRUE;
 }
 
@@ -1149,6 +1160,17 @@ glamor_back_pixmap_from_fd(PixmapPtr pixmap,
 #else
     return FALSE;
 #endif
+}
+
+static PixmapPtr
+glamor_pixmap_from_fds_noop(ScreenPtr screen,
+                            CARD8 num_fds, const int *fds,
+                            CARD16 width, CARD16 height,
+                            const CARD32 *_strides, const CARD32 *_offsets,
+                            CARD8 depth, CARD8 bpp,
+                            uint64_t modifier)
+{
+    return NULL;
 }
 
 PixmapPtr
@@ -2469,10 +2491,15 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         goto glamor_no_dri;
     }
 
-    if (!epoxy_has_gl_extension("GL_OES_EGL_image")) {
+    glamor_egl->has_EXT_EGL_image_storage = epoxy_has_gl_extension("GL_EXT_EGL_image_storage");
+    glamor_egl->has_OES_EGL_image = epoxy_has_gl_extension("GL_OES_EGL_image");
+
+    if (!glamor_egl->has_EXT_EGL_image_storage && !glamor_egl->has_OES_EGL_image) {
         LogMessage(X_ERROR,
-                   "glamor dri acceleration requires GL_OES_EGL_image\n");
-        goto glamor_no_dri;
+                   "glamor: Extensions GL_EXT_EGL_image_storage and GL_OES_EGL_image are both unavailable\n");
+        LogMessage(X_ERROR,
+                   "glamor: DRI3 import will not be available\n");
+        glamor_dri3_info.pixmap_from_fds = NULL;
     }
 
 #if defined(GLAMOR_HAS_GBM) && defined(GLAMOR_HAS_EXPORT_DMABUF_MESA)
@@ -2508,6 +2535,11 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 #endif
 
     *caps |= GLAMOR_EGL_DEFAULT_CAPS;
+    if (!glamor_dri3_info.pixmap_from_fds) {
+        *caps &= ~GLAMOR_EGL_CAP_DRI3_IMPORT;
+        /* Avoid DRI3 returning BadImplementation */
+        glamor_dri3_info.pixmap_from_fds = glamor_pixmap_from_fds_noop;
+    }
 
 #ifdef GLAMOR_HAS_GBM
     if (glamor_egl->can_texture_gbm_bo) {

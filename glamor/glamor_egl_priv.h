@@ -38,6 +38,10 @@ typedef struct glamor_egl_screen_private {
     int has_image_dma_buf_export;
 #endif
 #endif
+
+    int has_EXT_EGL_image_storage;
+    int has_OES_EGL_image;
+
     int fd;
     int dmabuf_capable;
 } glamor_egl_priv_t;
