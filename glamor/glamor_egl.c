@@ -2394,7 +2394,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
     glamor_egl->fd = glamor_egl_conf->fd;
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->fd >= 0) {
+    if (glamor_egl->fd >= 0 && !glamor_egl_conf->gbm_forbidden) {
         glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
         if (!glamor_egl->gbm) {
             glamor_egl->gbm = gbm_create_device_by_name(glamor_egl->fd, "dumb");
@@ -2551,7 +2551,9 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
     if (!glamor_egl->gbm || !glamor_egl->can_texture_gbm_bo)
 #endif
     {
-        LogMessage(X_ERROR, "glamor: Cannot texture gbm buffers\n");
+        if (!glamor_egl_conf->gbm_forbidden) {
+            LogMessage(X_ERROR, "glamor: Cannot texture gbm buffers\n");
+        }
         *caps &= ~GLAMOR_EGL_CAP_TEXTURE_GBM_BO;
         if (epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
             glamor_dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_fast;

@@ -54,6 +54,7 @@ typedef struct {
 
     char *glvnd_vendor; /* glvnd vendor library or driver name */
     int fd; /* /dev/dri/cardxx */
+    int gbm_forbidden; /* If glamor should not use libgbm, even if available */
 
     int auto_dri; /* If glamor should try to automatically enable DRI3 support */
     int partial_dri_allowed; /* If glamor should initialize DRI3, even if only some operations are available */
