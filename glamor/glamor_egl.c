@@ -2308,6 +2308,12 @@ glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int linear_only)
     CARD32 *formats = NULL;
     CARD32 num_formats = 0;
     Bool found = FALSE;
+
+    if (linear_only && !glamor_egl->dmabuf_capable) {
+        /* We can't check reliably */
+        return FALSE;
+    }
+
     if (!glamor_get_formats_internal(glamor_egl, &num_formats, &formats)) {
         return FALSE;
     }
@@ -2359,10 +2365,12 @@ glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int linear_only)
 Bool
 glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 {
-    const GLubyte *renderer;
+    const char *renderer;
+    const char *vendor;
     glamor_egl_priv_t* glamor_egl = NULL;
     int *dri_fd = NULL;
     int _caps;
+    int is_nvidia = FALSE;
 
 #ifdef GLAMOR_HAS_GBM
     int gbm_is_linear_only = FALSE;
@@ -2454,7 +2462,16 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         goto error;
     }
 
-    renderer = glGetString(GL_RENDERER);
+    renderer = (const char*)glGetString(GL_RENDERER);
+    vendor = (const char*)glGetString(GL_VENDOR);
+
+    if (renderer && strstr(renderer, "NVIDIA")) {
+        is_nvidia = TRUE;
+    } else if (vendor && strstr(vendor, "NVIDIA")) {
+        is_nvidia = TRUE;
+    } else {
+        is_nvidia = FALSE;
+    }
 
     if (!glamor_egl_conf->force_glamor) {
         if (!renderer) {
@@ -2462,12 +2479,12 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
                        "glGetString() returned NULL, your GL is broken\n");
             goto error;
         }
-        if (strstr((const char *)renderer, "softpipe")) {
+        if (strstr(renderer, "softpipe")) {
             LogMessage(X_INFO,
                        "Refusing to try glamor on softpipe\n");
             goto error;
         }
-        if (!strncmp("llvmpipe", (const char *)renderer, sizeof("llvmpipe") - 1)) {
+        if (!strncmp("llvmpipe", renderer, sizeof("llvmpipe") - 1)) {
             if (glamor_egl_conf->llvmpipe_allowed)
                 LogMessage(X_INFO,
                            "Allowing glamor on llvmpipe for PRIME\n");
@@ -2515,20 +2532,20 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
             glamor_egl->dmabuf_capable = glamor_egl_conf->dmabuf_capable;
         else if (!renderer)
             glamor_egl->dmabuf_capable = FALSE;
-        else if (strstr((const char *)renderer, "Intel"))
+        else if (strstr(renderer, "Intel"))
             glamor_egl->dmabuf_capable = TRUE;
-        else if (strstr((const char *)renderer, "zink"))
+        else if (strstr(renderer, "zink"))
             glamor_egl->dmabuf_capable = TRUE;
-        else if (strstr((const char *)renderer, "NVIDIA"))
+        else if (is_nvidia)
             glamor_egl->dmabuf_capable = TRUE;
-        else if (strstr((const char *)renderer, "radeonsi"))
+        else if (strstr(renderer, "radeonsi"))
             glamor_egl->dmabuf_capable = TRUE;
         else
             glamor_egl->dmabuf_capable = FALSE;
     }
 
 #ifdef GLAMOR_HAS_GBM
-    glamor_egl->fast_gbm_import = renderer && !strstr((const char *)renderer, "NVIDIA");
+    glamor_egl->fast_gbm_import = renderer && vendor && !is_nvidia;
     if (glamor_egl->gbm) {
         glamor_egl->can_texture_gbm_bo = glamor_egl_can_texture_gbm_bo(glamor_egl, gbm_is_linear_only);
     }
