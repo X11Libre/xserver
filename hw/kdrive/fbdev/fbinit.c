@@ -41,12 +41,14 @@ static const FbScreenConf fbDefaultConfig = {
                                              .fbdev_dri_path = NULL,
                                              .fbdev_auto_dri3 = FALSE,
                                              .fbdev_drm_master = FALSE,
+                                             .partial_dri_allowed = FALSE,
 
                                              .es_allowed = TRUE,
                                              .force_es = FALSE,
 
                                              .fbGlamorAllowed = TRUE,
                                              .fbForceGlamor = FALSE,
+                                             .gbm_allowed = FALSE,
 
                                              .fbXVAllowed = TRUE,
                                             };
@@ -112,6 +114,8 @@ fbdevLogScreenInfo(const FbScreenConf *config, int screen_num)
                config->fbdev_auto_dri3 ? "enabled" : "disabled");
     LogMessage(X_INFO, "Xfbdev(%d): drm master %s\n", screen_num,
                config->fbdev_drm_master ? "enabled" : "disabled");
+    LogMessage(X_INFO, "Xfbdev(%d): partial DRI3 %s\n", screen_num,
+               config->partial_dri_allowed ? "allowed" : "forbidden");
 
 
     LogMessage(X_INFO, "Xfbdev(%d): glamor OpenGL contexts %s\n", screen_num,
@@ -123,6 +127,8 @@ fbdevLogScreenInfo(const FbScreenConf *config, int screen_num)
                config->fbGlamorAllowed ? "enabled" : "disabled");
     LogMessage(X_INFO, "Xfbdev(%d): glamor render acceleration %s on software renderers\n", screen_num,
                config->fbForceGlamor ? "allowed" : "forbidden");
+    LogMessage(X_INFO, "Xfbdev(%d): glamor is %s libgbm \n", screen_num,
+               config->gbm_allowed ? "allowed to use" : "forbidden from using");
 
     LogMessage(X_INFO, "Xfbdev(%d): glamor X-Video support %s\n", screen_num,
                config->fbXVAllowed ? "allowed" : "forbidden");
@@ -168,6 +174,8 @@ ddxUseMsg(void)
     ErrorF
         ("-dri [path|auto]     Optional drm device path to use\n");
     ErrorF
+        ("-partial-dri         Allow glamor to initialize DRI3 only partially\n");
+    ErrorF
         ("-drm-master          Enable master permissions on the fd used for dri\n");
     ErrorF
         ("-noshadow            Disable the ShadowFB layer if possible\n");
@@ -177,6 +185,8 @@ ddxUseMsg(void)
         ("-glamor              Force enable glamor render acceleration if possible\n");
     ErrorF
         ("-noglamor            Force disable glamor render acceleration\n");
+    ErrorF
+        ("-gbm                 Allow glamor to use libgbm\n");
     ErrorF
         ("-glvendor <string>   Suggest what glvnd vendor library should be used\n");
     ErrorF
@@ -236,6 +246,11 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
+    if (!strcmp(argv[i], "-gbm")) {
+        fbCurrScreen->gbm_allowed = TRUE;
+        return 1;
+    }
+
     if (!strcmp(argv[i], "-glvendor")) {
         if (i + 1 < argc) {
             fbCurrScreen->fbdev_glvnd_provider = argv[i + 1];
@@ -257,6 +272,11 @@ ddxProcessArgument(int argc, char **argv, int i)
             fbCurrScreen->fbdev_auto_dri3 = TRUE;
             return 1;
         }
+    }
+
+    if (!strcmp(argv[i], "-partial-dri")) {
+        fbCurrScreen->partial_dri_allowed = TRUE;
+        return 1;
     }
 
     if (!strcmp(argv[i], "-drm-master")) {

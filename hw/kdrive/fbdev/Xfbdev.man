@@ -41,6 +41,11 @@ try to pick a dri card node suitable for direct rendering.
 tells the X server to enable master permissions on the dri fd it uses
 (if DRI3 is enabled).
 .TP 8
+.B -partial-dri
+tells the X server that it is allowed to initialize DRI3 partially,
+if full DRI3 initialization isn't possible
+(if DRI3 is enabled).
+.TP 8
 .B -noshadow
 disables the ShadowFB layer on supported hw, may slightly increase performance.
 May also lead to flickering.
@@ -50,6 +55,9 @@ disables hw acceleration (similar to -dumb, but only for a single screen).
 .TP 8
 .B -glamor
 force enables glamor render acceleration (even on top of sw renderers like softpipe/llvmpipe).
+.TP 8
+.B -gbm
+allows glamor to use libgbm (it is only used for matching EGLDeviceEXT's to dri fd's).
 .TP 8
 .B -noglamor
 force disables glamor render acceleration.
