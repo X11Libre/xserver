@@ -545,12 +545,12 @@ glamor_egl_create_textured_pixmap_from_egl_image(PixmapPtr pixmap,
     ScreenPtr screen = pixmap->drawable.pScreen;
     GLuint texture;
 
-    if (image == EGL_NO_IMAGE_KHR) {
+    if (image == EGL_NO_IMAGE_KHR ||
+        !glamor_create_texture_from_image(screen, image, &texture)) {
         glamor_set_pixmap_type(pixmap, GLAMOR_DRM_ONLY);
         return FALSE;
     }
 
-    glamor_create_texture_from_image(screen, image, &texture);
     glamor_set_pixmap_type(pixmap, GLAMOR_TEXTURE_DRM);
     glamor_set_pixmap_texture(pixmap, texture);
     glamor_egl_set_pixmap_image(pixmap, image, used_modifiers);
