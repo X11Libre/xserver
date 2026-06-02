@@ -750,29 +750,8 @@ SyncChangeCounter(SyncCounter * pCounter, int64_t newval)
     /* run through triggers to see if any become true */
     for (ptl = pCounter->sync.pTriglist; ptl; ptl = pnext) {
         pnext = ptl->next;
-        if ((*ptl->pTrigger->CheckTrigger) (ptl->pTrigger, oldval)) {
+        if ((*ptl->pTrigger->CheckTrigger) (ptl->pTrigger, oldval))
             (*ptl->pTrigger->TriggerFired) (ptl->pTrigger);
-            /* TriggerFired may have called SyncDeleteTriggerFromSyncObject
-             * for sibling triggers in the same Await group, freeing their
-             * trigger list nodes - potentially including pnext. Verify
-             * pnext is still on the counter's trigger list; if not,
-             * restart from the list head.
-             *
-             * Unlike miSyncTriggerFence() we cannot use a do/while
-             * restart loop here: counter trigger lists may contain alarm
-             * triggers which are not removed after firing and would cause
-             * an infinite loop when delta is 0.
-             */
-            if (pnext) {
-                SyncTriggerList *tmp;
-                for (tmp = pCounter->sync.pTriglist; tmp; tmp = tmp->next) {
-                    if (tmp == pnext)
-                        break;
-                }
-                if (!tmp)
-                    pnext = pCounter->sync.pTriglist;
-            }
-        }
     }
 
     if (IsSystemCounter(pCounter)) {
