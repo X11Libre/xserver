@@ -56,6 +56,7 @@ typedef struct {
     int fd; /* /dev/dri/cardxx */
 
     int auto_dri; /* If glamor should try to automatically enable DRI3 support */
+    int partial_dri_allowed; /* If glamor should initialize DRI3, even if only some operations are available */
 
     int dmabuf_forced; /* If glamor should not use dynamic logic and only listen to the config below */
     int dmabuf_capable; /* If glamor should use dmabufs when using direct rendering (dri) */

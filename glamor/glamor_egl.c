@@ -624,6 +624,10 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
         (modifiers_ok || !pixmap_priv->used_modifiers))
         return TRUE;
 
+    if (!glamor_egl->gbm || !glamor_egl->can_texture_gbm_bo) {
+        return FALSE;
+    }
+
     switch (pixmap->drawable.depth) {
     case 30:
         format = GBM_FORMAT_ARGB2101010;
@@ -769,6 +773,10 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
 
     if (!pixmap_priv->image)
         return NULL;
+
+    if (!glamor_egl->gbm) {
+        return NULL;
+    }
 
     ret = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
                         pixmap_priv->image, GBM_BO_USE_RENDERING);
@@ -1287,22 +1295,11 @@ glamor_get_formats(ScreenPtr screen,
 
 static void
 glamor_filter_modifiers(uint32_t *num_modifiers, uint64_t **modifiers,
-                        EGLBoolean *external_only, int linear_only)
+                        EGLBoolean *external_only)
 {
     uint32_t write_pos = 0;
     for (uint32_t i = 0; i < *num_modifiers; i++) {
         if (external_only[i]) {
-            continue;
-        }
-
-        if (linear_only &&
-#ifdef WITH_LIBDRM
-            ((*modifiers)[i] != DRM_FORMAT_MOD_LINEAR) &&
-            ((*modifiers)[i] != DRM_FORMAT_MOD_INVALID))
-#else
-            (*modifiers)[i] != 0) /* DRM_FORMAT_MOD_LINEAR */
-#endif
-        {
             continue;
         }
 
@@ -1367,7 +1364,7 @@ glamor_get_modifiers_internal(glamor_egl_priv_t *glamor_egl, uint32_t format,
     }
 
     *num_modifiers = num;
-    glamor_filter_modifiers(num_modifiers, modifiers, external_only, glamor_egl->linear_only);
+    glamor_filter_modifiers(num_modifiers, modifiers, external_only);
     free(external_only);
 
 
@@ -1540,13 +1537,21 @@ glamor_dri3_open_client(ClientPtr client,
 
 static dri3_screen_info_rec glamor_dri3_info = {
     .version = 2,
-    .open_client = glamor_dri3_open_client,
-    .pixmap_from_fds = glamor_pixmap_from_fds,
+
     .fd_from_pixmap = glamor_egl_fd_from_pixmap,
+
+    /* Version 1 */
+    .open_client = glamor_dri3_open_client,
+
+    /* Version 2 */
+    .pixmap_from_fds = glamor_pixmap_from_fds,
     .fds_from_pixmap = glamor_egl_fds_from_pixmap,
     .get_formats = glamor_get_formats,
     .get_modifiers = glamor_get_modifiers,
     .get_drawable_modifiers = glamor_get_drawable_modifiers,
+
+    /* Version 4 */
+    .import_syncobj = NULL, /* TODO: implement */
 };
 #endif /* DRI3 */
 
@@ -1566,7 +1571,7 @@ glamor_egl_set_glvnd_vendor(ScreenPtr screen)
     }
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->fd >= 0) {
+    if (glamor_egl->gbm) {
         const char *gbm_backend_name;
         gbm_backend_name = gbm_device_get_backend_name(glamor_egl->gbm);
         if (gbm_backend_name) {
@@ -2197,7 +2202,7 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd)
     }
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->fd >= 0) {
+    if (glamor_egl->gbm) {
         GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_KHR, glamor_egl->gbm, FALSE);
         GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_MESA, glamor_egl->gbm, TRUE);
     }
@@ -2273,16 +2278,79 @@ glamor_egl_get_fd(ScreenPtr screen)
     return glamor_egl_get_screen_private(screen)->fd;
 }
 
+#ifdef GLAMOR_HAS_GBM
+static Bool
+glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int linear_only)
+{
+    /* Check if at least one combination of format + modifier is supported */
+    CARD32 *formats = NULL;
+    CARD32 num_formats = 0;
+    Bool found = FALSE;
+    if (!glamor_get_formats_internal(glamor_egl, &num_formats, &formats)) {
+        return FALSE;
+    }
+    if (num_formats == 0) {
+        /* Everything is supported (unlikely) */
+        return TRUE;
+    }
+    for (uint32_t i = 0; i < num_formats; i++) {
+        uint64_t *modifiers = NULL;
+        uint32_t num_modifiers = 0;
+        if (glamor_get_modifiers_internal(glamor_egl, formats[i],
+                                          &num_modifiers, &modifiers)) {
+            if (num_modifiers == 0) {
+                /* Modifiers are implicit */
+                found = TRUE;
+                break;
+            }
+
+            if (linear_only) {
+                for (uint32_t j = 0; j < num_modifiers; j++) {
+                    if (
+#ifdef WITH_LIBDRM
+                        (modifiers[j] == DRM_FORMAT_MOD_LINEAR) ||
+                        (modifiers[j] == DRM_FORMAT_MOD_INVALID))
+#else
+                        modifiers[j] == 0) /* DRM_FORMAT_MOD_LINEAR */
+#endif
+                    {
+                        found = TRUE;
+                        break;
+                    }
+                }
+            } else {
+                /* Nothing to filter */
+                found = TRUE;
+            }
+
+            free(modifiers);
+            if (found) {
+                break;
+            }
+        }
+    }
+    free(formats);
+    return found;
+}
+#endif
+
 Bool
 glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 {
     const GLubyte *renderer;
     glamor_egl_priv_t* glamor_egl = NULL;
     int *dri_fd = NULL;
+    int _caps;
 
-    if (caps) {
-        *caps = GLAMOR_EGL_CAP_NONE;
+#ifdef GLAMOR_HAS_GBM
+    int gbm_is_linear_only = FALSE;
+#endif
+
+    if (!caps) {
+        caps = &_caps;
     }
+
+    *caps = GLAMOR_EGL_CAP_NONE;
 
     if (glamor_egl_conf->GLAMOR_EGL_PRIV_PROC) {
         glamor_egl_get_screen_private = glamor_egl_conf->GLAMOR_EGL_PRIV_PROC;
@@ -2318,7 +2386,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         const char* gbm_backend = glamor_egl->gbm ?
                                   gbm_device_get_backend_name(glamor_egl->gbm) : NULL;
         if (gbm_backend && !strcmp(gbm_backend, "dumb")) {
-            glamor_egl->linear_only = TRUE;
+            gbm_is_linear_only = TRUE;
         }
     }
 #endif
@@ -2331,27 +2399,6 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         goto error;
     }
 
-#ifdef GLAMOR_HAS_GBM
-    if (!glamor_egl->gbm && glamor_egl->fd >= 0 &&
-        glamor_egl_conf->auto_dri) {
-        glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
-        if (!glamor_egl->gbm) {
-            glamor_egl->gbm = gbm_create_device_by_name(glamor_egl->fd, "dumb");
-        }
-
-        if (glamor_egl->gbm == NULL) {
-            ErrorF("couldn't create gbm device\n");
-            glamor_egl->fd = -1;
-        }
-
-        const char* gbm_backend = glamor_egl->gbm ?
-                                  gbm_device_get_backend_name(glamor_egl->gbm) : NULL;
-        if (gbm_backend && !strcmp(gbm_backend, "dumb")) {
-            glamor_egl->linear_only = TRUE;
-        }
-    }
-#endif
-
 #define GLAMOR_CHECK_EGL_EXTENSION(EXT)  \
 	if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_" #EXT)) {  \
 		ErrorF("EGL_" #EXT " required.\n");  \
@@ -2360,12 +2407,14 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 
     GLAMOR_CHECK_EGL_EXTENSION(KHR_surfaceless_context);
 
+#ifdef GLAMOR_HAS_GBM
     if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
-        LogMessage(X_WARNING, "glamor: Egl extension EGL_MESA_image_dma_buf_export not available\n");
+        LogMessage(X_WARNING, "glamor: EGL extension EGL_MESA_image_dma_buf_export not available\n");
         LogMessage(X_WARNING, "glamor: DRI3 dmabuf export will be slower\n");
         glamor_dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_slow;
         glamor_dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_slow;
     }
+#endif
 
     if (!glamor_egl_conf->force_es) {
         if(!glamor_egl_try_big_gl_api(glamor_egl))
@@ -2453,40 +2502,47 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 
 #ifdef GLAMOR_HAS_GBM
     glamor_egl->fast_gbm_import = renderer && !strstr((const char *)renderer, "NVIDIA");
+    if (glamor_egl->gbm) {
+        glamor_egl->can_texture_gbm_bo = glamor_egl_can_texture_gbm_bo(glamor_egl, gbm_is_linear_only);
+    }
 #endif
 
-    /* Check if at least one combination of format + modifier is supported */
-    CARD32 *formats = NULL;
-    CARD32 num_formats = 0;
-    Bool found = FALSE;
-    if (!glamor_get_formats_internal(glamor_egl, &num_formats, &formats)) {
-        goto glamor_no_dri;
-    }
+    *caps |= GLAMOR_EGL_DEFAULT_CAPS;
 
-    if (num_formats == 0) {
-        found = TRUE;
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        LogMessage(X_INFO, "glamor: Can texture gbm buffers\n");
     }
+#endif
 
-    for (uint32_t i = 0; i < num_formats; i++) {
-        uint64_t *modifiers = NULL;
-        uint32_t num_modifiers = 0;
-        if (glamor_get_modifiers_internal(glamor_egl, formats[i],
-                                          &num_modifiers, &modifiers)) {
-            found = TRUE;
-            free(modifiers);
-            break;
+#ifdef GLAMOR_HAS_GBM
+    if (!glamor_egl->gbm || !glamor_egl->can_texture_gbm_bo)
+#endif
+    {
+        LogMessage(X_ERROR, "glamor: Cannot texture gbm buffers\n");
+        *caps &= ~GLAMOR_EGL_CAP_TEXTURE_GBM_BO;
+        if (epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
+            glamor_dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_fast;
+            glamor_dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_fast;
+        } else {
+            LogMessage(X_WARNING, "glamor: EGL extension EGL_MESA_image_dma_buf_export not available\n");
+            LogMessage(X_WARNING, "glamor: DRI3 dmabuf export will be unavailable\n");
+            glamor_dri3_info.fd_from_pixmap = NULL;
+            glamor_dri3_info.fds_from_pixmap = NULL;
+            *caps &= ~GLAMOR_EGL_CAP_DRI3_EXPORT;
         }
     }
-    free(formats);
 
-    if (!found) {
-        LogMessage(X_ERROR,
-                   "glamor: No combination of format + modifier is supported\n");
-        goto glamor_no_dri;
-    }
+#define GLAMOR_EGL_CAP_DRI3_BASE (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
 
-    if (caps) {
-        *caps |= GLAMOR_EGL_DEFAULT_CAPS;
+    /* Some clients can handle DRI3 missing, but not partial support */
+    if ((*caps & GLAMOR_EGL_CAP_DRI3_BASE) != GLAMOR_EGL_CAP_DRI3_BASE) {
+        if (!glamor_egl_conf->partial_dri_allowed) {
+            LogMessage(X_INFO, "glamor: Not enabling partial DRI3 support\n");
+            goto glamor_no_dri;
+        } else {
+            LogMessage(X_INFO, "glamor: Using partial DRI3 support\n");
+        }
     }
 
     LogMessage(X_INFO, "glamor dri X acceleration enabled on %s\n",
