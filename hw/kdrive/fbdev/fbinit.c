@@ -246,8 +246,8 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
 
     if (!strcmp(argv[i], "-dri")) {
-        if (i + 1 < argc) {
-            if (argv[i + 1][0] == '-' || !strcmp(argv[i + 1], "auto")) {
+        if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
+            if (!strcmp(argv[i + 1], "auto")) {
                 fbCurrScreen->fbdev_auto_dri3 = TRUE;
             } else {
                 fbCurrScreen->fbdev_dri_path = argv[i + 1];

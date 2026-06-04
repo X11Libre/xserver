@@ -485,10 +485,12 @@ _Concat(char *str1, const char *str2)
     if ((!str1) || (!str2))
         return str1;
     int len = strlen(str1) + strlen(str2) + 1;
-    str1 = realloc(str1, len * sizeof(char));
-    if (str1)
-        strcat(str1, str2);
-    return str1;
+    char *tmp = realloc(str1, len);
+    if (!tmp)
+        return str1;
+
+    strcat(tmp, str2);
+    return tmp;
 }
 
 static void
