@@ -16,7 +16,7 @@ servers; for information on a specific X server, please refer to the
 relevant manual page.
 .SH OPTIONS
 In addition to the standard options accepted by all X servers (see
-.BR Xserver (@miscmansuffix@),
+.BR Xserver (@appmansuffix@),
 all the
 .B Xkdrive
 servers accept the following options:
@@ -68,11 +68,11 @@ adding the
 command-line argument.
 .SH SEE ALSO
 .BR X (@miscmansuffix@),
-.BR Xserver (@miscmansuffix@),
-.BR xdm (@miscmansuffix@),
-.BR xinit (@miscmansuffix@),
-.BR Xvesa (@miscmansuffix@),
-.BR Xfbdev (@miscmansuffix@).
+.BR Xserver (@appmansuffix@),
+.BR xdm (@appmansuffix@),
+.BR xinit (@appmansuffix@),
+.BR Xvesa (@appmansuffix@),
+.BR Xfbdev (@appmansuffix@).
 .SH AUTHORS
 The Xkdrive common core was written by Keith Packard,
 and is based on the Sample Implementation of X.

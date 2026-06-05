@@ -101,7 +101,7 @@ key is pressed)
 .SH KEYBOARD
 .B Xephyr
 supports the common special key combinations of the Xkdrive family of servers.  Please
-see Xkdrive(@miscmansuffix@).
+see Xkdrive(@appmansuffix@).
 .SH "SIGNALS"
 Send a SIGUSR1 to the server (e.g. pkill \-USR1 Xephyr) to
 toggle the debugging mode.

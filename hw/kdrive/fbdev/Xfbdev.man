@@ -16,7 +16,7 @@ provided by the Linux framebuffer device.
 .SH OPTIONS
 .B Xfbdev
 accepts the common options of the Xkdrive family of servers.  Please
-see Xkdrive(@miscmansuffix@).
+see Xkdrive(@appmansuffix@).
 
 .B Xfbdev
 also accepts the following additional options:
@@ -71,7 +71,7 @@ disables X-Video support.
 .SH KEYBOARD
 .B Xfbdev
 supports the common special key combinations of the Xkdrive family of servers.  Please
-see Xkdrive(@miscmansuffix@).
+see Xkdrive(@appmansuffix@).
 .B Xfbdev
 also accepts the following additional special key combinations:
 .TP 8
@@ -81,7 +81,7 @@ combinations are used to switch to virtual terminals 1 through 12,
 respectively.
 
 .SH SEE ALSO
-X(@miscmansuffix@), Xserver(@miscmansuffix@), Xkdrive(@miscmansuffix@), xdm(@miscmansuffix@), xinit(@miscmansuffix@).
+X(@miscmansuffix@), Xserver(@appmansuffix@), Xkdrive(@appmansuffix@), xdm(@appmansuffix@), xinit(@appmansuffix@).
 .SH AUTHORS
 The
 .B Xfbdev
