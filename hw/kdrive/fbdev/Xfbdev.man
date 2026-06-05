@@ -59,13 +59,13 @@ Also disables DRI3 and X-Video support. GLX is still enabled.
 tells the X server what gl vendor library to use.
 Particularly useful on multi-card systems.
 .TP 8
--B -force-gl
+.B -force-gl
 tells the X server to only use desktop OpenGL contexts.
 .TP 8
--B -force-es
+.B -force-es
 tells the X server to only use embedded GLES contexts.
 .TP 8
--B -noxv
+.B -noxv
 disables X-Video support.
 
 .SH KEYBOARD
