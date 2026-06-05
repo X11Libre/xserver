@@ -1887,7 +1887,14 @@ drmmode_paint_cursor(struct gbm_bo *cursor_bo, int cursor_pitch, int cursor_widt
 
     const CARD32 *src = image + src_y * image_width + src_x;
     for (int i = 0; i < height_todo; i++) {
-        memcpy(cursor + i * cursor_pitch, src + i * image_width, width_todo * sizeof(*cursor));    /* cpu_to_le32(image[i]); */
+#if X_BYTE_ORDER == X_LITTLE_ENDIAN
+        memcpy(cursor + i * cursor_pitch, src + i * image_width, width_todo * sizeof(*cursor));    /* cpu_to_gpu32(image[i]); */
+#else
+        CARD32 *dst = cursor + i * cursor_pitch;
+        for (int j = 0; j < width_todo; j++) {
+            dst[j] = bswap_32(src[i * image_width + j]); /* cpu_to_gpu32(image[i * image_width + j]); */
+        }
+#endif
     }
 }
 
