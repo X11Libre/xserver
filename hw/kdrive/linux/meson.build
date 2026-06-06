@@ -12,6 +12,7 @@ if build_kdrive_mouse
     srcs_linux += 'mouse.c'
     srcs_linux += 'ms.c'
     srcs_linux += 'ps2.c'
+    srcs_linux += 'bus.c'
 endif
 
 if build_kdrive_evdev

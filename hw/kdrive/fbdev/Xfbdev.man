@@ -16,7 +16,7 @@ provided by the Linux framebuffer device.
 .SH OPTIONS
 .B Xfbdev
 accepts the common options of the Xkdrive family of servers.  Please
-see Xkdrive(1).
+see Xkdrive(@miscmansuffix@).
 
 .B Xfbdev
 also accepts the following additional options:
@@ -69,23 +69,11 @@ tells the X server to only use embedded GLES contexts.
 disables X-Video support.
 
 .SH KEYBOARD
-The
 .B Xfbdev
-server is normally configured to recognize various special combinations
-of key presses that instruct the server to perform some action, rather
-than just sending the key press event to a client application.
-Currently, these are implemented using hard-coded ps2 keyboard scancodes,
-and should work regardless of the loaded XKB keymap.
-.PP
-The following key special combinations are recognized by the
+supports the common special key combinations of the Xkdrive family of servers.  Please
+see Xkdrive(@miscmansuffix@).
 .B Xfbdev
-server.
-.TP 8
-.B Ctrl+Alt+Backspace
-Immediately kills the server -- no questions asked. It can be disabled by
-adding the
-.B -nozap
-command-line argument
+also accepts the following additional special key combinations:
 .TP 8
 .B Ctrl+Alt+F1...F12
 For systems with virtual terminal support, these keystroke
@@ -93,7 +81,7 @@ combinations are used to switch to virtual terminals 1 through 12,
 respectively.
 
 .SH SEE ALSO
-X(@miscmansuffix@), Xserver(1), Xkdrive(1), xdm(1), xinit(1).
+X(@miscmansuffix@), Xserver(@miscmansuffix@), Xkdrive(@miscmansuffix@), xdm(@miscmansuffix@), xinit(@miscmansuffix@).
 .SH AUTHORS
 The
 .B Xfbdev

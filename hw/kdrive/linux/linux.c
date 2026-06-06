@@ -37,6 +37,7 @@
 extern KdPointerDriver LinuxMouseDriver;
 extern KdPointerDriver Ps2MouseDriver;
 extern KdPointerDriver MsMouseDriver;
+extern KdPointerDriver BusMouseDriver;
 #endif
 #ifdef KDRIVE_TSLIB
 extern KdPointerDriver TsDriver;
@@ -340,6 +341,7 @@ KdOsAddInputDrivers(void)
     KdAddPointerDriver(&LinuxMouseDriver);
     KdAddPointerDriver(&MsMouseDriver);
     KdAddPointerDriver(&Ps2MouseDriver);
+    KdAddPointerDriver(&BusMouseDriver);
 #endif
 #ifdef KDRIVE_TSLIB
     KdAddPointerDriver(&TsDriver);
