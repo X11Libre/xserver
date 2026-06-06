@@ -2447,13 +2447,11 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 #endif
 
     if (!glamor_egl_conf->force_es) {
-        if(!glamor_egl_try_big_gl_api(glamor_egl))
-            goto error;
+        glamor_egl_try_big_gl_api(glamor_egl);
     }
 
     if (glamor_egl->context == EGL_NO_CONTEXT && !glamor_egl_conf->es_disallowed) {
-        if(!glamor_egl_try_gles_api(glamor_egl))
-            goto error;
+        glamor_egl_try_gles_api(glamor_egl);
     }
 
     if (glamor_egl->context == EGL_NO_CONTEXT) {
