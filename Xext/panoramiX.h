@@ -80,7 +80,7 @@ typedef struct {
         for (unsigned walkScreenIdx = 0; walkScreenIdx < PanoramiXNumScreens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            __LAMBDA__; \
+            (__LAMBDA__); \
         } \
     } while (0);
 
@@ -95,7 +95,7 @@ typedef struct {
         for (unsigned walkScreenIdx = 1; walkScreenIdx < PanoramiXNumScreens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            __LAMBDA__; \
+            (__LAMBDA__); \
         } \
     } while (0);
 
@@ -110,13 +110,13 @@ typedef struct {
             unsigned walkScreenIdx = __walkidx - 1; \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            __LAMBDA__; \
+            (__LAMBDA__); \
         } \
     } while (0);
 
-#define FOR_NSCREENS_FORWARD(j) for(j = 0; j < PanoramiXNumScreens; j++)
-#define FOR_NSCREENS_FORWARD_SKIP(j) for(j = 1; j < PanoramiXNumScreens; j++)
-#define FOR_NSCREENS_BACKWARD(j) for(j = PanoramiXNumScreens - 1; j >= 0; j--)
+#define FOR_NSCREENS_FORWARD(j) for((j) = 0; (j) < PanoramiXNumScreens; (j)++)
+#define FOR_NSCREENS_FORWARD_SKIP(j) for((j) = 1; (j) < PanoramiXNumScreens; (j)++)
+#define FOR_NSCREENS_BACKWARD(j) for((j) = PanoramiXNumScreens - 1; (j) >= 0; (j)--)
 
 #define IS_SHARED_PIXMAP(r) (((r)->type == XRT_PIXMAP) && (r)->u.pix.shared)
 
