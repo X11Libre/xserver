@@ -1496,11 +1496,8 @@ SingleRenderSetPictureTransform(ClientPtr client,
 static int
 ProcRenderQueryFilters(ClientPtr client)
 {
-    REQUEST(xRenderQueryFiltersReq);
-    REQUEST_SIZE_MATCH(xRenderQueryFiltersReq);
-
-    if (client->swapped)
-        swapl(&stuff->drawable);
+    X_REQUEST_HEAD_STRUCT(xRenderQueryFiltersReq);
+    X_REQUEST_FIELD_CARD32(drawable);
 
     DrawablePtr pDrawable;
     int nbytesName;
@@ -1586,9 +1583,10 @@ ProcRenderQueryFilters(ClientPtr client)
         for (i = 0; i < nnames; i++) {
             swaps(&aliases[i]);
         }
-        swapl(&reply.numAliases);
-        swapl(&reply.numFilters);
     }
+
+    X_REPLY_FIELD_CARD32(numAliases);
+    X_REPLY_FIELD_CARD32(numFilters);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
