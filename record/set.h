@@ -102,23 +102,23 @@ int RecordSetMemoryRequirements(RecordSetInterval * /*pIntervals */ ,
     );
 
 #define RecordDestroySet(_pSet) \
-	/* void */ (*_pSet->ops->DestroySet)(/* RecordSetPtr */ _pSet)
+	/* void */ (*(_pSet)->ops->DestroySet)(/* RecordSetPtr */ (_pSet))
 /*
     RecordDestroySet frees all resources used by _pSet.  _pSet should not be
     used after it is destroyed.
 */
 
 #define RecordIsMemberOfSet(_pSet, _m) \
-  /* unsigned long */ (*_pSet->ops->IsMemberOfSet)(/* RecordSetPtr */ _pSet, \
-						   /* int */ _m)
+  /* unsigned long */ (*(_pSet)->ops->IsMemberOfSet)(/* RecordSetPtr */ (_pSet), \
+						   /* int */ (_m))
 /*
     RecordIsMemberOfSet returns a non-zero value if _m is a member of
     _pSet, else it returns zero.
 */
 
 #define RecordIterateSet(_pSet, _pIter, _interval) \
- /* RecordSetIteratePtr */ (*_pSet->ops->IterateSet)(/* RecordSetPtr */ _pSet,\
-	/* RecordSetIteratePtr */ _pIter, /* RecordSetInterval */ _interval)
+ /* RecordSetIteratePtr */ (*(_pSet)->ops->IterateSet)(/* RecordSetPtr */ (_pSet),\
+	/* RecordSetIteratePtr */ (_pIter), /* RecordSetInterval */ (_interval))
 /*
     RecordIterateSet returns successive intervals of members of _pSet.  If
     _pIter is NULL, the first interval of set members is copied into _interval.

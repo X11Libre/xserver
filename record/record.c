@@ -134,8 +134,8 @@ static int numEnabledRCAPs;
  *  returns an error.
  */
 #define VERIFY_CONTEXT(_pContext, _contextid, _client) { \
-    int rc = dixLookupResourceByType((void **)&(_pContext), _contextid, \
-                                     RTContext, _client, DixUseAccess); \
+    int rc = dixLookupResourceByType((void **)&(_pContext), (_contextid), \
+                                     RTContext, (_client), DixUseAccess); \
     if (rc != Success) \
 	return rc; \
 }
@@ -1513,7 +1513,7 @@ RecordConvertRangesToIntervals(SetInfoPtr psi,
 }                               /* end RecordConvertRangesToIntervals */
 
 #define offset_of(_structure, _field) \
-    ((char *)(& (_structure . _field)) - (char *)(&_structure))
+    ((char *)(&(_structure._field)) - (char *)(&(_structure)))
 
 /* RecordRegisterClients
  *
