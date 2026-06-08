@@ -105,7 +105,7 @@ SOFTWARE.
     dixLookupPrivate(&(pScreen)->devPrivates, &XvScreenKeyRec))->field)
 
 #define SCREEN_EPILOGUE(pScreen, field, wrapper)\
-    ((pScreen)->field = wrapper)
+    ((pScreen)->field = (wrapper))
 
 typedef struct _XvVideoNotifyRec {
     struct _XvVideoNotifyRec *next;
@@ -447,9 +447,9 @@ XvdiSendPortNotify(XvPortPtr pPort, Atom attribute, INT32 value)
 }
 
 #define CHECK_SIZE(dw, dh, sw, sh) {                                  \
-  if(!dw || !dh || !sw || !sh)  return Success;                       \
+  if(!(dw) || !(dh) || !(sw) || !(sh))  return Success;               \
   /* The region code will break these if they are too large */        \
-  if((dw > 32767) || (dh > 32767) || (sw > 32767) || (sh > 32767))    \
+  if(((dw) > 32767) || ((dh) > 32767) || ((sw) > 32767) || ((sh) > 32767)) \
         return BadValue;                                              \
 }
 

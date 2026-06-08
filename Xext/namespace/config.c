@@ -43,9 +43,9 @@ static struct Xnamespace* select_ns(const char* name)
     return newns;
 }
 
-#define atox(c) ('0' <= c && c <= '9' ? c - '0' : \
-                 'a' <= c && c <= 'f' ? c - 'a' + 10 : \
-                 'A' <= c && c <= 'F' ? c - 'A' + 10 : -1)
+#define atox(c) ('0' <= (c) && (c) <= '9' ? (c) - '0' : \
+                 'a' <= (c) && (c) <= 'f' ? (c) - 'a' + 10 : \
+                 'A' <= (c) && (c) <= 'F' ? (c) - 'A' + 10 : -1)
 
 // warning: no error checking, no buffer clearing
 static int hex2bin(const char *in, char *out)

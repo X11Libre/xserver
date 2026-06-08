@@ -76,28 +76,28 @@ in this Software without prior written authorization from The Open Group.
 /* Needed for Solaris cross-zone shared memory extension */
 #ifdef HAVE_SHMCTL64
 #include <sys/ipc_impl.h>
-#define SHMSTAT(id, buf)	shmctl64(id, IPC_STAT64, buf)
+#define SHMSTAT(id, buf)	shmctl64((id), IPC_STAT64, (buf))
 #define SHMSTAT_TYPE 		struct shmid_ds64
 #define SHMPERM_TYPE 		struct ipc_perm64
-#define SHM_PERM(buf) 		buf.shmx_perm
-#define SHM_SEGSZ(buf)		buf.shmx_segsz
-#define SHMPERM_UID(p)		p->ipcx_uid
-#define SHMPERM_CUID(p)		p->ipcx_cuid
-#define SHMPERM_GID(p)		p->ipcx_gid
-#define SHMPERM_CGID(p)		p->ipcx_cgid
-#define SHMPERM_MODE(p)		p->ipcx_mode
-#define SHMPERM_ZONEID(p)	p->ipcx_zoneid
+#define SHM_PERM(buf) 		(buf).shmx_perm
+#define SHM_SEGSZ(buf)		(buf).shmx_segsz
+#define SHMPERM_UID(p)		(p)->ipcx_uid
+#define SHMPERM_CUID(p)		(p)->ipcx_cuid
+#define SHMPERM_GID(p)		(p)->ipcx_gid
+#define SHMPERM_CGID(p)		(p)->ipcx_cgid
+#define SHMPERM_MODE(p)		(p)->ipcx_mode
+#define SHMPERM_ZONEID(p)	(p)->ipcx_zoneid
 #else
-#define SHMSTAT(id, buf) 	shmctl(id, IPC_STAT, buf)
+#define SHMSTAT(id, buf) 	shmctl((id), IPC_STAT, (buf))
 #define SHMSTAT_TYPE 		struct shmid_ds
 #define SHMPERM_TYPE 		struct ipc_perm
-#define SHM_PERM(buf) 		buf.shm_perm
-#define SHM_SEGSZ(buf)		buf.shm_segsz
-#define SHMPERM_UID(p)		p->uid
-#define SHMPERM_CUID(p)		p->cuid
-#define SHMPERM_GID(p)		p->gid
-#define SHMPERM_CGID(p)		p->cgid
-#define SHMPERM_MODE(p)		p->mode
+#define SHM_PERM(buf) 		(buf).shm_perm
+#define SHM_SEGSZ(buf)		(buf).shm_segsz
+#define SHMPERM_UID(p)		(p)->uid
+#define SHMPERM_CUID(p)		(p)->cuid
+#define SHMPERM_GID(p)		(p)->gid
+#define SHMPERM_CGID(p)		(p)->cgid
+#define SHMPERM_MODE(p)		(p)->mode
 #endif
 
 
@@ -135,27 +135,27 @@ static ShmFuncs fbFuncs = { fbShmCreatePixmap, NULL };
 #define VERIFY_SHMSEG(shmseg,shmdesc,client) \
 { \
     int tmprc; \
-    tmprc = dixLookupResourceByType((void **)&(shmdesc), shmseg, ShmSegType, \
-                                    client, DixReadAccess); \
+    tmprc = dixLookupResourceByType((void **)&(shmdesc), (shmseg), ShmSegType, \
+                                    (client), DixReadAccess); \
     if (tmprc != Success) \
 	return tmprc; \
 }
 
 #define VERIFY_SHMPTR(shmseg,offset,needwrite,shmdesc,client) \
 { \
-    VERIFY_SHMSEG(shmseg, shmdesc, client); \
-    if ((offset & 3) || (offset > shmdesc->size)) \
+    VERIFY_SHMSEG((shmseg), (shmdesc), (client)); \
+    if (((offset) & 3) || ((offset) > (shmdesc)->size)) \
     { \
-	client->errorValue = offset; \
+	(client)->errorValue = (offset); \
 	return BadValue; \
     } \
-    if (needwrite && !shmdesc->writable) \
+    if ((needwrite) && !(shmdesc)->writable) \
 	return BadAccess; \
 }
 
 #define VERIFY_SHMSIZE(shmdesc,offset,len,client) \
 { \
-    if ((offset + len) > shmdesc->size) \
+    if (((offset) + (len)) > (shmdesc)->size) \
     { \
 	return BadAccess; \
     } \
