@@ -55,11 +55,11 @@ typedef struct tagREF_TRANSFORM {
     float RefBCr;
 } REF_TRANSFORM;
 
-#define RTFSaturation(a)   (1.0 + ((a)*1.0)/1000.0)
-#define RTFBrightness(a)   (((a)*1.0)/2000.0)
-#define RTFIntensity(a)   (((a)*1.0)/2000.0)
-#define RTFContrast(a)   (1.0 + ((a)*1.0)/1000.0)
-#define RTFHue(a)   (((a)*3.1416)/1000.0)
+#define RTFSaturation(a)   (1.0 + (((a))*1.0)/1000.0)
+#define RTFBrightness(a)   ((((a))*1.0)/2000.0)
+#define RTFIntensity(a)   ((((a))*1.0)/2000.0)
+#define RTFContrast(a)   (1.0 + (((a))*1.0)/1000.0)
+#define RTFHue(a)   ((((a))*3.1416)/1000.0)
 
 static const glamor_facet glamor_facet_xv_planar_2 = {
     .name = "xv_planar_2",
@@ -260,7 +260,7 @@ glamor_init_xv_shader(ScreenPtr screen, glamor_port_private *port_priv, int id)
 
 }
 
-#define ClipValue(v,min,max) ((v) < (min) ? (min) : (v) > (max) ? (max) : (v))
+#define ClipValue(v,min,max) (((v) < (min)) ? (min) : ((v) > (max)) ? (max) : (v))
 
 void
 glamor_xv_stop_video(glamor_port_private *port_priv)
