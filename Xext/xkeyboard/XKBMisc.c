@@ -40,7 +40,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /***====================================================================***/
 
-#define	CORE_SYM(i)	(i<map_width?core_syms[i]:NoSymbol)
+#define	CORE_SYM(i)	((i)<map_width?core_syms[(i)]:NoSymbol)
 #define	XKB_OFFSET(g,l)	(((g)*groupsWidth)+(l))
 
 int

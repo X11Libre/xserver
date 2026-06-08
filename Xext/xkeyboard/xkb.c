@@ -60,62 +60,62 @@ RESTYPE RT_XKBCLIENT = 0;
 
 #define	CHK_DEVICE(dev, id, client, access_mode, lf) {\
     int why;\
-    int tmprc = lf(&(dev), id, client, access_mode, &why);\
+    int tmprc = (lf)(&(dev), (id), (client), (access_mode), &why);\
     if (tmprc != Success) {\
-	client->errorValue = _XkbErrCode2(why, id);\
+	(client)->errorValue = _XkbErrCode2(why, (id));\
 	return tmprc;\
     }\
 }
 
 #define	CHK_KBD_DEVICE(dev, id, client, mode) \
-    CHK_DEVICE(dev, id, client, mode, _XkbLookupKeyboard)
+    CHK_DEVICE((dev), (id), (client), (mode), _XkbLookupKeyboard)
 #define	CHK_LED_DEVICE(dev, id, client, mode) \
-    CHK_DEVICE(dev, id, client, mode, _XkbLookupLedDevice)
+    CHK_DEVICE((dev), (id), (client), (mode), _XkbLookupLedDevice)
 #define	CHK_BELL_DEVICE(dev, id, client, mode) \
-    CHK_DEVICE(dev, id, client, mode, _XkbLookupBellDevice)
+    CHK_DEVICE((dev), (id), (client), (mode), _XkbLookupBellDevice)
 #define	CHK_ANY_DEVICE(dev, id, client, mode) \
-    CHK_DEVICE(dev, id, client, mode, _XkbLookupAnyDevice)
+    CHK_DEVICE((dev), (id), (client), (mode), _XkbLookupAnyDevice)
 
 #define	CHK_ATOM_ONLY2(a,ev,er) {\
 	if (((a)==None)||(!ValidAtom((a)))) {\
 	    (ev)= (XID)(a);\
-	    return er;\
+	    return (er);\
 	}\
 }
 #define	CHK_ATOM_ONLY(a) \
-	CHK_ATOM_ONLY2(a,client->errorValue,BadAtom)
+	CHK_ATOM_ONLY2((a),client->errorValue,BadAtom)
 
 #define	CHK_ATOM_OR_NONE3(a,ev,er,ret) {\
 	if (((a)!=None)&&(!ValidAtom((a)))) {\
 	    (ev)= (XID)(a);\
 	    (er)= BadAtom;\
-	    return ret;\
+	    return (ret);\
 	}\
 }
 #define	CHK_ATOM_OR_NONE2(a,ev,er) {\
 	if (((a)!=None)&&(!ValidAtom((a)))) {\
 	    (ev)= (XID)(a);\
-	    return er;\
+	    return (er);\
 	}\
 }
 #define	CHK_ATOM_OR_NONE(a) \
-	CHK_ATOM_OR_NONE2(a,client->errorValue,BadAtom)
+	CHK_ATOM_OR_NONE2((a),client->errorValue,BadAtom)
 
 #define	CHK_MASK_LEGAL3(err,mask,legal,ev,er,ret)	{\
 	if ((mask)&(~(legal))) { \
 	    (ev)= _XkbErrCode2((err),((mask)&(~(legal))));\
 	    (er)= BadValue;\
-	    return ret;\
+	    return (ret);\
 	}\
 }
 #define	CHK_MASK_LEGAL2(err,mask,legal,ev,er)	{\
 	if ((mask)&(~(legal))) { \
 	    (ev)= _XkbErrCode2((err),((mask)&(~(legal))));\
-	    return er;\
+	    return (er);\
 	}\
 }
 #define	CHK_MASK_LEGAL(err,mask,legal) \
-	CHK_MASK_LEGAL2(err,mask,legal,client->errorValue,BadValue)
+	CHK_MASK_LEGAL2((err),(mask),(legal),client->errorValue,BadValue)
 
 #define	CHK_MASK_MATCH(err,affect,value) {\
 	if ((value)&(~(affect))) { \
@@ -130,30 +130,30 @@ RESTYPE RT_XKBCLIENT = 0;
 	}\
 }
 #define	CHK_KEY_RANGE2(err,first,num,x,ev,er) {\
-	if (((unsigned)(first)+(num)-1)>(x)->max_key_code) {\
-	    (ev)=_XkbErrCode4(err,(first),(num),(x)->max_key_code);\
-	    return er;\
+	if (((unsigned)(first)+(num)-1)>(((x)->max_key_code))) {\
+	    (ev)=_XkbErrCode4((err),(first),(num),(x)->max_key_code);\
+	    return (er);\
 	}\
-	else if ( (first)<(x)->min_key_code ) {\
-	    (ev)=_XkbErrCode3(err+1,(first),xkb->min_key_code);\
-	    return er;\
+	else if ( (first)<(((x)->min_key_code)) ) {\
+	    (ev)=_XkbErrCode3((err)+1,(first),xkb->min_key_code);\
+	    return (er);\
 	}\
 }
 #define	CHK_KEY_RANGE(err,first,num,x)  \
-	CHK_KEY_RANGE2(err,first,num,x,client->errorValue,BadValue)
+	CHK_KEY_RANGE2((err),(first),(num),(x),client->errorValue,BadValue)
 
 #define	CHK_REQ_KEY_RANGE2(err,first,num,r,ev,er) {\
-	if (((unsigned)(first)+(num)-1)>(r)->maxKeyCode) {\
-	    (ev)=_XkbErrCode4(err,(first),(num),(r)->maxKeyCode);\
-	    return er;\
+	if (((unsigned)(first)+(num)-1)>(((r)->maxKeyCode))) {\
+	    (ev)=_XkbErrCode4((err),(first),(num),(r)->maxKeyCode);\
+	    return (er);\
 	}\
-	else if ( (first)<(r)->minKeyCode ) {\
-	    (ev)=_XkbErrCode3(err+1,(first),(r)->minKeyCode);\
-	    return er;\
+	else if ( (first)<(((r)->minKeyCode)) ) {\
+	    (ev)=_XkbErrCode3((err)+1,(first),(r)->minKeyCode);\
+	    return (er);\
 	}\
 }
 #define	CHK_REQ_KEY_RANGE(err,first,num,r)  \
-	CHK_REQ_KEY_RANGE2(err,first,num,r,client->errorValue,BadValue)
+	CHK_REQ_KEY_RANGE2((err),(first),(num),(r),client->errorValue,BadValue)
 
 static Bool
 _XkbCheckRequestBounds(ClientPtr client, void *stuff, void *from, void *to) {
@@ -2435,7 +2435,7 @@ SetVirtualModMap(XkbSrvInfoPtr xkbi,
 
 #define _add_check_len(new) \
     if (len > UINT32_MAX - (new) || len > req_len - (new)) goto bad; \
-    else len += new
+    else len += (new)
 
 /**
  * Check the length of the SetMap request
@@ -4460,7 +4460,7 @@ ProcXkbSetNames(ClientPtr client)
 
 #include "xkbgeom_priv.h"
 
-#define	XkbSizeCountedString(s)  ((s)?((((2+strlen(s))+3)/4)*4):4)
+#define	XkbSizeCountedString(s)  ((s)?((((2+strlen((s)))+3)/4)*4):4)
 
 /**
  * Write the zero-terminated string str into wire as a pascal string with a
