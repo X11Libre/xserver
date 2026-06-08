@@ -50,6 +50,7 @@ SOFTWARE.
 
 #include <X11/Xdefs.h>
 
+#include <errno.h>
 #include <limits.h>
 #include <signal.h>
 #include <stddef.h>
