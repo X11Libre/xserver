@@ -51,7 +51,7 @@
     return retval; \
   }
 
-#define RESOLVE(procname, symbol) RESOLVE_RET(procname, symbol,)
+#define RESOLVE(procname, symbol) RESOLVE_RET(procname, (symbol),)
 
 #define RESOLVED_PROC(type) type##proc
 

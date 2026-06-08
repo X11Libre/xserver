@@ -781,8 +781,8 @@ winAdjustXWindow(WindowPtr pWin, HWND hwnd)
     LONG dX, dY, dW, dH, x, y;
     DWORD dwStyle, dwExStyle;
 
-#define WIDTH(rc) (rc.right - rc.left)
-#define HEIGHT(rc) (rc.bottom - rc.top)
+#define WIDTH(rc) ((rc).right - (rc).left)
+#define HEIGHT(rc) ((rc).bottom - (rc).top)
 
 #if ENABLE_DEBUG
     ErrorF("winAdjustXWindow\n");

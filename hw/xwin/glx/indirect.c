@@ -113,8 +113,8 @@ typedef struct  {
 #define GLWIN_DEBUG_HWND(hwnd)  \
     if (glxWinDebugSettings.dumpHWND) { \
         char buffer[1024]; \
-        if (GetWindowText(hwnd, buffer, sizeof(buffer))==0) *buffer=0; \
-        GLWIN_DEBUG_MSG("Got HWND %p for window '%s'", hwnd, buffer); \
+        if (GetWindowText((hwnd), buffer, sizeof(buffer))==0) *buffer=0; \
+        GLWIN_DEBUG_MSG("Got HWND %p for window '%s'", (hwnd), buffer); \
     }
 
 glxWinDebugSettingsRec glxWinDebugSettings = { 0, 0, 0, 0, 0, 0 };
@@ -1639,7 +1639,7 @@ fbConfigToPixelFormat(__GLXconfig * mode, PIXELFORMATDESCRIPTOR * pfdret,
     return 0;
 }
 
-#define SET_ATTR_VALUE(attr, value) { attribList[i++] = attr; attribList[i++] = value; assert(i < ARRAY_SIZE(attribList)); }
+#define SET_ATTR_VALUE(attr, value) { attribList[i++] = (attr); attribList[i++] = (value); assert(i < ARRAY_SIZE(attribList)); }
 
 static int
 fbConfigToPixelFormatIndex(HDC hdc, __GLXconfig * mode,
@@ -2046,7 +2046,7 @@ glxWinCreateConfigsExt(HDC hdc, glxWinScreen * screen, PixelFormatRejectStats * 
 
     n = 0;
 
-#define ADD_ATTR(a) { attrs[num_attrs++] = a; assert(num_attrs < ARRAY_SIZE(attrs)); }
+#define ADD_ATTR(a) { attrs[num_attrs++] = (a); assert(num_attrs < ARRAY_SIZE(attrs)); }
 
     ADD_ATTR(WGL_DRAW_TO_WINDOW_ARB);
     ADD_ATTR(WGL_DRAW_TO_BITMAP_ARB);

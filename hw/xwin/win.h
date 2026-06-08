@@ -196,7 +196,7 @@ if (fDebugProcMsg) \
 { \
   char *pszTemp; \
   int iLength; \
-  if (asprintf (&pszTemp, str, ##__VA_ARGS__) != -1) { \
+  if (asprintf (&pszTemp, (str), ##__VA_ARGS__) != -1) { \
     MessageBox (NULL, pszTemp, szFunctionName, MB_OK); \
     free (pszTemp); \
   } \
@@ -206,7 +206,7 @@ if (fDebugProcMsg) \
 #endif
 
 #if ENABLE_DEBUG
-#define DEBUG_FN_NAME(str) PTSTR szFunctionName = str
+#define DEBUG_FN_NAME(str) PTSTR szFunctionName = (str)
 #else
 #define DEBUG_FN_NAME(str)
 #endif
@@ -231,12 +231,12 @@ ErrorF (#point ": PROFILEPOINT hit %u times\n", PROFPT##point);\
 }
 
 #define DEFINE_ATOM_HELPER(func,atom_name)			\
-static Atom func (void) {					\
+static Atom (func) (void) {					\
     static x_server_generation_t generation;			\
     static Atom atom;						\
     if (generation != serverGeneration) {			\
 	generation = serverGeneration;				\
-	atom = dixAddAtom(atom_name);				\
+	atom = dixAddAtom((atom_name));				\
     }								\
     return atom;						\
 }
@@ -557,10 +557,10 @@ extern FARPROC g_fpDirectDrawCreateClipper;
     dixLookupPrivate(&(pScreen)->devPrivates, g_iScreenPrivateKey))
 
 #define winSetScreenPriv(pScreen,v) \
-    dixSetPrivate(&(pScreen)->devPrivates, g_iScreenPrivateKey, v)
+    dixSetPrivate(&(pScreen)->devPrivates, g_iScreenPrivateKey, (v))
 
 #define winScreenPriv(pScreen) \
-	winPrivScreenPtr pScreenPriv = winGetScreenPriv(pScreen)
+	winPrivScreenPtr pScreenPriv = winGetScreenPriv((pScreen))
 
 /*
  * Colormap privates macros
@@ -570,10 +570,10 @@ extern FARPROC g_fpDirectDrawCreateClipper;
     dixLookupPrivate(&(pCmap)->devPrivates, g_iCmapPrivateKey))
 
 #define winSetCmapPriv(pCmap,v) \
-    dixSetPrivate(&(pCmap)->devPrivates, g_iCmapPrivateKey, v)
+    dixSetPrivate(&(pCmap)->devPrivates, g_iCmapPrivateKey, (v))
 
 #define winCmapPriv(pCmap) \
-	winPrivCmapPtr pCmapPriv = winGetCmapPriv(pCmap)
+	winPrivCmapPtr pCmapPriv = winGetCmapPriv((pCmap))
 
 /*
  * GC privates macros
@@ -583,10 +583,10 @@ extern FARPROC g_fpDirectDrawCreateClipper;
     dixLookupPrivate(&(pGC)->devPrivates, g_iGCPrivateKey))
 
 #define winSetGCPriv(pGC,v) \
-    dixSetPrivate(&(pGC)->devPrivates, g_iGCPrivateKey, v)
+    dixSetPrivate(&(pGC)->devPrivates, g_iGCPrivateKey, (v))
 
 #define winGCPriv(pGC) \
-	winPrivGCPtr pGCPriv = winGetGCPriv(pGC)
+	winPrivGCPtr pGCPriv = winGetGCPriv((pGC))
 
 /*
  * Pixmap privates macros
@@ -596,10 +596,10 @@ extern FARPROC g_fpDirectDrawCreateClipper;
     dixLookupPrivate(&(pPixmap)->devPrivates, g_iPixmapPrivateKey))
 
 #define winSetPixmapPriv(pPixmap,v) \
-    dixLookupPrivate(&(pPixmap)->devPrivates, g_iPixmapPrivateKey, v)
+    dixLookupPrivate(&(pPixmap)->devPrivates, g_iPixmapPrivateKey, (v))
 
 #define winPixmapPriv(pPixmap) \
-	winPrivPixmapPtr pPixmapPriv = winGetPixmapPriv(pPixmap)
+	winPrivPixmapPtr pPixmapPriv = winGetPixmapPriv((pPixmap))
 
 /*
  * Window privates macros
@@ -609,26 +609,26 @@ extern FARPROC g_fpDirectDrawCreateClipper;
     dixLookupPrivate(&(pWin)->devPrivates, g_iWindowPrivateKey))
 
 #define winSetWindowPriv(pWin,v) \
-    dixLookupPrivate(&(pWin)->devPrivates, g_iWindowPrivateKey, v)
+    dixLookupPrivate(&(pWin)->devPrivates, g_iWindowPrivateKey, (v))
 
 #define winWindowPriv(pWin) \
-	winPrivWinPtr pWinPriv = winGetWindowPriv(pWin)
+	winPrivWinPtr pWinPriv = winGetWindowPriv((pWin))
 
 /*
  * wrapper macros
  */
 #define _WIN_WRAP(priv, real, mem, func) {\
-    priv->mem = real->mem; \
-    real->mem = func; \
+    (priv)->mem = (real)->mem; \
+    (real)->mem = (func); \
 }
 
 #define _WIN_UNWRAP(priv, real, mem) {\
-    real->mem = priv->mem; \
+    (real)->mem = (priv)->mem; \
 }
 
-#define WIN_WRAP(mem, func) _WIN_WRAP(pScreenPriv, pScreen, mem, func)
+#define WIN_WRAP(mem, func) _WIN_WRAP(pScreenPriv, pScreen, (mem), (func))
 
-#define WIN_UNWRAP(mem) _WIN_UNWRAP(pScreenPriv, pScreen, mem)
+#define WIN_UNWRAP(mem) _WIN_UNWRAP(pScreenPriv, pScreen, (mem))
 
 /*
  * BEGIN DDX and DIX Function Prototypes
