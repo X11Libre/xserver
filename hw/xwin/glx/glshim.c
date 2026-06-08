@@ -97,10 +97,10 @@ int glWinSelectImplementation(int native)
 }
 
 #define RESOLVE_RET(proctype, symbol, retval) \
-    proctype proc = (proctype)glXGetProcAddressARB(symbol);   \
+    proctype proc = (proctype)glXGetProcAddressARB((symbol));   \
     if (proc == NULL) return retval;
 
-#define RESOLVE(proctype, symbol) RESOLVE_RET(proctype, symbol,)
+#define RESOLVE(proctype, symbol) RESOLVE_RET(proctype, (symbol),)
 #define RESOLVED_PROC proc
 
 /* Include generated shims for direct linkage to GL functions which are in the ABI */

@@ -66,12 +66,12 @@ glWinResolveHelper(PROC * cache, const char *symbol)
 
 #define RESOLVE_RET(proctype, symbol, retval) \
     static PROC cache = NULL; \
-    __stdcall proctype proc = (proctype)glWinResolveHelper(&cache, symbol); \
+    __stdcall proctype proc = (proctype)glWinResolveHelper(&cache, (symbol)); \
     if (proc == NULL) { \
         return retval; \
     }
 
-#define RESOLVE(proctype, symbol) RESOLVE_RET(proctype, symbol,)
+#define RESOLVE(proctype, symbol) RESOLVE_RET(proctype, (symbol),)
 
 #define RESOLVED_PROC(proctype) proc
 

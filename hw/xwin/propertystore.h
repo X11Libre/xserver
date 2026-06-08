@@ -67,9 +67,9 @@ DEFINE_GUID(IID_IPropertyStore, 0x886d8eeb, 0x8cf2, 0x4446, 0x8d, 0x02, 0xcd,
             0xba, 0x1d, 0xbd, 0xcf, 0x99);
 
 #ifdef INITGUID
-#define DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) GUID_EXT const PROPERTYKEY DECLSPEC_SELECTANY name = { { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }, pid }
+#define DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) GUID_EXT const PROPERTYKEY DECLSPEC_SELECTANY (name) = { { (l), (w1), (w2), { (b1), (b2),  (b3),  (b4),  (b5),  (b6),  (b7),  (b8) } }, (pid) }
 #else
-#define DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) GUID_EXT const PROPERTYKEY name
+#define DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) GUID_EXT const PROPERTYKEY (name)
 #endif
 
 DEFINE_PROPERTYKEY(PKEY_AppUserModel_ID, 0x9F4C2855, 0x9F79, 0x4B39, 0xA8, 0xD0,
