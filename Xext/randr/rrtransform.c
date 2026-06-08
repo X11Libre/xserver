@@ -106,7 +106,7 @@ RRTransformCopy(RRTransformPtr dst, RRTransformPtr src)
     return TRUE;
 }
 
-#define F(x)	IntToxFixed(x)
+#define F(x)	IntToxFixed((x))
 
 static void
 RRTransformRescale(struct pixman_f_transform *f_transform, double limit)

@@ -297,9 +297,9 @@ ProcRRSetScreenSize(ClientPtr client)
 
 
 #define update_totals(gpuscreen, pScrPriv) do {       \
-    total_crtcs += pScrPriv->numCrtcs;                \
-    total_outputs += pScrPriv->numOutputs;            \
-    modes = RRModesForScreen(gpuscreen, &num_modes);  \
+    total_crtcs += (pScrPriv)->numCrtcs;                \
+    total_outputs += (pScrPriv)->numOutputs;            \
+    modes = RRModesForScreen((gpuscreen), &num_modes);  \
     if (!modes)                                       \
         return BadAlloc;                              \
     for (j = 0; j < num_modes; j++)                   \
@@ -326,26 +326,26 @@ static inline void swap_modeinfos(xRRModeInfo *modeinfos, int i)
 }
 
 #define update_arrays(gpuscreen, pScrPriv, primary_crtc, has_primary) do {            \
-    for (j = 0; j < pScrPriv->numCrtcs; j++) {             \
-        if (has_primary && \
-            primary_crtc == pScrPriv->crtcs[j]) { \
-            has_primary = 0;   \
+    for (j = 0; j < (pScrPriv)->numCrtcs; j++) {             \
+        if ((has_primary) && \
+            (primary_crtc) == (pScrPriv)->crtcs[j]) { \
+            (has_primary) = 0;   \
             continue; \
         }\
-        crtcs[crtc_count] = pScrPriv->crtcs[j]->id;        \
+        crtcs[crtc_count] = (pScrPriv)->crtcs[j]->id;        \
         if (client->swapped)                               \
             swapl(&crtcs[crtc_count]);                     \
         crtc_count++;                                      \
     }                                                      \
-    for (j = 0; j < pScrPriv->numOutputs; j++) {           \
-        outputs[output_count] = pScrPriv->outputs[j]->id;  \
+    for (j = 0; j < (pScrPriv)->numOutputs; j++) {           \
+        outputs[output_count] = (pScrPriv)->outputs[j]->id;  \
         if (client->swapped)                               \
             swapl(&outputs[output_count]);                 \
         output_count++;                                    \
     }                                                      \
     {                                                      \
         RRModePtr mode;                                    \
-        modes = RRModesForScreen(gpuscreen, &num_modes);   \
+        modes = RRModesForScreen((gpuscreen), &num_modes);   \
         for (j = 0; j < num_modes; j++) {                  \
             mode = modes[j];                               \
             modeinfos[mode_count] = mode->mode;            \
