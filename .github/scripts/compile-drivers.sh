@@ -10,6 +10,13 @@ export ACLOCAL_PATH="/usr/share/aclocal:/usr/local/share/aclocal"
 mkdir -p $DRV_BUILD_DIR
 cd $DRV_BUILD_DIR
 
+build_xf86drv_ac    video-amdgpu            25.1.1
+build_xf86drv_ac    video-vmware            25.0.0
+build_xf86drv_ac    video-qxl               25.0.0
+build_xf86drv_ac    video-ati               25.0.1
+build_xf86drv_ac    video-nouveau           25.0.0
+build_xf86drv_ac    video-intel             25.0.2
+
 build_xf86drv_ac    input-elographics       25.0.0
 build_xf86drv_ac    input-evdev             25.0.0
 build_xf86drv_ac    input-joystick          25.0.0
