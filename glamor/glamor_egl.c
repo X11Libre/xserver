@@ -357,7 +357,7 @@ glamor_egl_image_from_dma_bufs(ScreenPtr screen,
 
 #define ADD_ATTR(attrs, num, attr)                                      \
     do {                                                            \
-        assert(((num) + 1) < (sizeof(attrs) / sizeof((attrs)[0]))); \
+        assert(((num) + 1) < (sizeof((attrs)) / sizeof((attrs)[0]))); \
         (attrs)[(num)++] = (attr);                                  \
     } while (0)
     ADD_ATTR(img_attrs, attr_num, EGL_WIDTH);
@@ -2206,7 +2206,7 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd)
     if (glamor_query_devices_ext(&devices, &num_devices)) {
 #define GLAMOR_EGL_TRY_PLATFORM_DEVICE(strict) \
         for (uint32_t i = 0; i < num_devices; i++) { \
-            if (glamor_egl_device_matches_config(devices[i], glamor_egl, strict, &driver_name)) { \
+            if (glamor_egl_device_matches_config(devices[i], glamor_egl, (strict), &driver_name)) { \
                 GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, devices[i], TRUE); \
             } \
         }
