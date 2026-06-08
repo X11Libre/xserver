@@ -46,56 +46,56 @@ extern RESTYPE RRLeaseType;     /* X resource type: Randr LEASE */
 
 #define VERIFY_RR_OUTPUT(id, ptr, a)\
     {\
-	int rc = dixLookupResourceByType((void **)&(ptr), id,\
-	                                 RROutputType, client, a);\
+	int rc = dixLookupResourceByType((void **)&(ptr), (id),\
+	                                 RROutputType, client, (a));\
 	if (rc != Success) {\
-	    client->errorValue = id;\
+	    client->errorValue = (id);\
 	    return rc;\
 	}\
     }
 
 #define VERIFY_RR_CRTC(id, ptr, a)\
     {\
-	int rc = dixLookupResourceByType((void **)&(ptr), id,\
-	                                 RRCrtcType, client, a);\
+	int rc = dixLookupResourceByType((void **)&(ptr), (id),\
+	                                 RRCrtcType, client, (a));\
 	if (rc != Success) {\
-	    client->errorValue = id;\
+	    client->errorValue = (id);\
 	    return rc;\
 	}\
     }
 
 #define VERIFY_RR_MODE(id, ptr, a)\
     {\
-	int rc = dixLookupResourceByType((void **)&(ptr), id,\
-	                                 RRModeType, client, a);\
+	int rc = dixLookupResourceByType((void **)&(ptr), (id),\
+	                                 RRModeType, client, (a));\
 	if (rc != Success) {\
-	    client->errorValue = id;\
+	    client->errorValue = (id);\
 	    return rc;\
 	}\
     }
 
 #define VERIFY_RR_PROVIDER(id, ptr, a)\
     {\
-        int rc = dixLookupResourceByType((void **)&(ptr), id,\
-                                         RRProviderType, client, a);\
+        int rc = dixLookupResourceByType((void **)&(ptr), (id),\
+                                         RRProviderType, client, (a));\
         if (rc != Success) {\
-            client->errorValue = id;\
+            client->errorValue = (id);\
             return rc;\
         }\
     }
 
 #define VERIFY_RR_LEASE(id, ptr, a)\
     {\
-        int rc = dixLookupResourceByType((void **)&(ptr), id,\
-                                         RRLeaseType, client, a);\
+        int rc = dixLookupResourceByType((void **)&(ptr), (id),\
+                                         RRLeaseType, client, (a));\
         if (rc != Success) {\
-            client->errorValue = id;\
+            client->errorValue = (id);\
             return rc;\
         }\
     }
 
 #define GetRRClient(pClient)    ((RRClientPtr)dixLookupPrivate(&(pClient)->devPrivates, RRClientPrivateKey))
-#define rrClientPriv(pClient)	RRClientPtr pRRClient = GetRRClient(pClient)
+#define rrClientPriv(pClient)	RRClientPtr pRRClient = GetRRClient((pClient))
 
 void RRConstrainCursorHarder(DeviceIntPtr, ScreenPtr, int, int *, int *);
 
