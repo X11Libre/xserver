@@ -56,10 +56,10 @@ typedef struct dri3_screen_priv {
 
 #define VERIFY_DRI3_SYNCOBJ(id, ptr, a)\
     do {\
-        int rc = dixLookupResourceByType((void **)&(ptr), id,\
-                                         dri3_syncobj_type, client, a);\
+        int rc = dixLookupResourceByType((void **)&(ptr), (id),\
+                                         dri3_syncobj_type, client, (a));\
         if (rc != Success) {\
-            client->errorValue = id;\
+            client->errorValue = (id);\
             return rc;\
         }\
     } while (0);
