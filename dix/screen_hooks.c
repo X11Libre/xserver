@@ -17,12 +17,12 @@
 #define DECLARE_HOOK_PROC(NAME, FIELD, TYPE) \
     void dixScreenHook##NAME(ScreenPtr pScreen, TYPE func) \
     { \
-        AddCallback(&pScreen->FIELD, (CallbackProcPtr)func, pScreen); \
+        AddCallback(&pScreen->FIELD, (CallbackProcPtr)(func), pScreen); \
     } \
     \
     void dixScreenUnhook##NAME(ScreenPtr pScreen, TYPE func) \
     { \
-        DeleteCallback(&pScreen->FIELD, (CallbackProcPtr)func, pScreen); \
+        DeleteCallback(&pScreen->FIELD, (CallbackProcPtr)(func), pScreen); \
     }
 
 DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcPtr)

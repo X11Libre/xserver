@@ -150,10 +150,10 @@ Equipment Corporation.
 #define mskcnt ((MAXCLIENTS + 31) / 32)
 #define BITMASK(i) (1U << ((i) & 31))
 #define MASKIDX(i) ((i) >> 5)
-#define MASKWORD(buf, i) buf[MASKIDX(i)]
-#define BITSET(buf, i) MASKWORD(buf, i) |= BITMASK(i)
-#define BITCLEAR(buf, i) MASKWORD(buf, i) &= ~BITMASK(i)
-#define GETBIT(buf, i) (MASKWORD(buf, i) & BITMASK(i))
+#define MASKWORD(buf, i) (buf)[MASKIDX((i))]
+#define BITSET(buf, i) MASKWORD((buf), (i)) |= BITMASK((i))
+#define BITCLEAR(buf, i) MASKWORD((buf), (i)) &= ~BITMASK((i))
+#define GETBIT(buf, i) (MASKWORD((buf), (i)) & BITMASK((i)))
 
 xConnSetupPrefix connSetupPrefix;
 
@@ -191,7 +191,7 @@ volatile char dispatchException = 0;
 volatile char isItTimeToYield;
 
 #define SAME_SCREENS(a, b) (\
-    (a.pScreen == b.pScreen))
+    ((a).pScreen == (b).pScreen))
 
 ClientPtr
 GetCurrentClient(void)

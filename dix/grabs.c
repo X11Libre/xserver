@@ -74,10 +74,10 @@ SOFTWARE.
 
 #define BITMASK(i) (((Mask)1) << ((i) & 31))
 #define MASKIDX(i) ((i) >> 5)
-#define MASKWORD(buf, i) buf[MASKIDX(i)]
-#define BITSET(buf, i) MASKWORD(buf, i) |= BITMASK(i)
-#define BITCLEAR(buf, i) MASKWORD(buf, i) &= ~BITMASK(i)
-#define GETBIT(buf, i) (MASKWORD(buf, i) & BITMASK(i))
+#define MASKWORD(buf, i) (buf)[MASKIDX((i))]
+#define BITSET(buf, i) MASKWORD((buf), (i)) |= BITMASK((i))
+#define BITCLEAR(buf, i) MASKWORD((buf), (i)) &= ~BITMASK((i))
+#define GETBIT(buf, i) (MASKWORD((buf), (i)) & BITMASK((i)))
 
 void
 PrintDeviceGrabInfo(DeviceIntPtr dev)
@@ -581,7 +581,7 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
     unsigned int any_key;
 
 #define UPDATE(mask,exact) \
-	if (!(details[nups] = DeleteDetailFromMask(mask, exact))) \
+	if (!(details[nups] = DeleteDetailFromMask((mask), (exact)))) \
 	  ok = FALSE; \
 	else \
 	  updates[nups++] = &(mask)

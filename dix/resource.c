@@ -148,7 +148,7 @@ Equipment Corporation.
 
 #ifdef XSERVER_DTRACE
 
-#define TypeNameString(t) LookupResourceName(t)
+#define TypeNameString(t) LookupResourceName((t))
 #endif
 
 static void RebuildTable(int    /*client */

@@ -179,15 +179,15 @@ static Bool TileScreenSaver(ScreenPtr pScreen, int kind);
 	( ((b1)->y1 >= (b2)->y2)) ) )
 
 #define RedirectSend(pWin) \
-    ((pWin->eventMask|wOtherEventMasks(pWin)) & SubstructureRedirectMask)
+    (((pWin)->eventMask|wOtherEventMasks((pWin))) & SubstructureRedirectMask)
 
 #define SubSend(pWin) \
-    ((pWin->eventMask|wOtherEventMasks(pWin)) & SubstructureNotifyMask)
+    (((pWin)->eventMask|wOtherEventMasks((pWin))) & SubstructureNotifyMask)
 
 #define StrSend(pWin) \
-    ((pWin->eventMask|wOtherEventMasks(pWin)) & StructureNotifyMask)
+    (((pWin)->eventMask|wOtherEventMasks((pWin))) & StructureNotifyMask)
 
-#define SubStrSend(pWin,pParent) (StrSend(pWin) || SubSend(pParent))
+#define SubStrSend(pWin,pParent) (StrSend((pWin)) || SubSend((pParent)))
 
 static const char *overlay_win_name = "<composite overlay>";
 
@@ -1876,22 +1876,22 @@ ResizeChildrenWinSize(WindowPtr pWin, int dx, int dy, int dw, int dh)
 }
 
 #define GET_INT16(m, f) \
-	if (m & mask) \
+	if ((m) & mask) \
 	  { \
-	     f = (INT16) *pVlist;\
+	     (f) = (INT16) *pVlist;\
 	    pVlist++; \
 	 }
 #define GET_CARD16(m, f) \
-	if (m & mask) \
+	if ((m) & mask) \
 	 { \
-	    f = (CARD16) *pVlist;\
+	    (f) = (CARD16) *pVlist;\
 	    pVlist++;\
 	 }
 
 #define GET_CARD8(m, f) \
-	if (m & mask) \
+	if ((m) & mask) \
 	 { \
-	    f = (CARD8) *pVlist;\
+	    (f) = (CARD8) *pVlist;\
 	    pVlist++;\
 	 }
 
