@@ -2594,15 +2594,11 @@ ProcRenderChangePicture(ClientPtr client)
 static int
 ProcRenderSetPictureClipRectangles(ClientPtr client)
 {
-    REQUEST(xRenderSetPictureClipRectanglesReq);
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureClipRectanglesReq);
-
-    if (client->swapped) {
-        swapl(&stuff->picture);
-        swaps(&stuff->xOrigin);
-        swaps(&stuff->yOrigin);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderSetPictureClipRectanglesReq);
+    X_REQUEST_FIELD_CARD32(picture);
+    X_REQUEST_FIELD_CARD16(xOrigin);
+    X_REQUEST_FIELD_CARD16(yOrigin);
+    X_REQUEST_REST_CARD16();
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderSetPictureClipRectangles(client, stuff, stuff->picture)
