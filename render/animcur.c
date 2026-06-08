@@ -82,7 +82,7 @@ static DevPrivateKeyRec AnimCurScreenPrivateKeyRec;
 #define GetAnimCur(c)	    ((AnimCurPtr) ((((char *)(c) + CURSOR_REC_SIZE))))
 #define GetAnimCurScreen(s) ((AnimCurScreenPtr)dixLookupPrivate(&(s)->devPrivates, &AnimCurScreenPrivateKeyRec))
 
-#define Wrap(as,s,elt,func) (((as)->elt = (s)->elt), (s)->elt = func)
+#define Wrap(as,s,elt,func) (((as)->elt = (s)->elt), (s)->elt = (func))
 #define Unwrap(as,s,elt)    ((s)->elt = (as)->elt)
 
 static void AnimCurScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
