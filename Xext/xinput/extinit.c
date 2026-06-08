@@ -1061,7 +1061,7 @@ MakeDeviceTypeAtoms(void)
  *
  *	Swap any events defined in this extension.
  */
-#define DO_SWAP(func,type) func ((type *)from, (type *)to)
+#define DO_SWAP(func,type) (func) ((type *)from, (type *)to)
 
 static void _X_COLD
 SEventIDispatch(xEvent *from, xEvent *to)

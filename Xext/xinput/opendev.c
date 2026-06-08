@@ -76,8 +76,8 @@ extern CARD8 event_base[];
  */
 
 #define WRITE_ICI(cls) do { \
-        x_rpcbuf_write_CARD8(&rpcbuf, cls); \
-        x_rpcbuf_write_CARD8(&rpcbuf, event_base[cls]); \
+        x_rpcbuf_write_CARD8(&rpcbuf, (cls)); \
+        x_rpcbuf_write_CARD8(&rpcbuf, event_base[(cls)]); \
         num_classes++; \
     } while (0)
 

@@ -101,8 +101,8 @@ typedef struct _BarrierScreen {
 } BarrierScreenRec, *BarrierScreenPtr;
 
 #define GetBarrierScreen(s) ((BarrierScreenPtr)dixLookupPrivate(&(s)->devPrivates, BarrierScreenPrivateKey))
-#define GetBarrierScreenIfSet(s) GetBarrierScreen(s)
-#define SetBarrierScreen(s,p) dixSetPrivate(&(s)->devPrivates, BarrierScreenPrivateKey, p)
+#define GetBarrierScreenIfSet(s) GetBarrierScreen((s))
+#define SetBarrierScreen(s,p) dixSetPrivate(&(s)->devPrivates, BarrierScreenPrivateKey, (p))
 
 static struct PointerBarrierDevice *AllocBarrierDevice(void)
 {
@@ -209,7 +209,7 @@ inside_segment(int v, int v1, int v2)
         return v >= v1 && v <= v2;
 }
 
-#define T(v, a, b) (((float)v) - (a)) / ((b) - (a))
+#define T(v, a, b) (((float)(v)) - (a)) / ((b) - (a))
 #define F(t, a, b) ((t) * ((a) - (b)) + (a))
 
 /**
