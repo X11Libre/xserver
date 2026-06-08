@@ -202,7 +202,7 @@ translate_eglconfig(ScreenPtr pScreen, struct egl_screen *screen, EGLConfig hc,
 
     /* direct-mapped state */
 #define GET(attr, slot) \
-    eglGetConfigAttrib(screen->display, hc, attr, &c->base.slot)
+    eglGetConfigAttrib((screen)->display, (hc), (attr), &(c)->base.slot)
     GET(EGL_RED_SIZE, redBits);
     GET(EGL_GREEN_SIZE, greenBits);
     GET(EGL_BLUE_SIZE, blueBits);
