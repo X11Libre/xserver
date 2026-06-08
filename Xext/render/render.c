@@ -784,7 +784,7 @@ typedef struct _GlyphNew {
     unsigned char sha1[20];
 } GlyphNewRec, *GlyphNewPtr;
 
-#define NeedsComponent(f) (PIXMAN_FORMAT_A(f) != 0 && PIXMAN_FORMAT_RGB(f) != 0)
+#define NeedsComponent(f) (PIXMAN_FORMAT_A((f)) != 0 && PIXMAN_FORMAT_RGB((f)) != 0)
 
 static int
 ProcRenderAddGlyphs(ClientPtr client)
@@ -1427,7 +1427,7 @@ ProcRenderCreateCursor(ClientPtr client)
     }
 
 #define GetByte(p,s)	(((p) >> (s)) & 0xff)
-#define GetColor(p,s)	(GetByte(p,s) | (GetByte(p,s) << 8))
+#define GetColor(p,s)	(GetByte((p),(s)) | (GetByte((p),(s)) << 8))
 
     cm.width = width;
     cm.height = height;
@@ -1857,17 +1857,17 @@ swapStops(void *stuff, int num)
 
 #ifdef XINERAMA
 #define VERIFY_XIN_PICTURE(pPicture, pid, client, mode) {\
-    int rc = dixLookupResourceByType((void **)&(pPicture), pid,\
-                                     XRT_PICTURE, client, mode);\
+    int rc = dixLookupResourceByType((void **)&(pPicture), (pid),\
+                                     XRT_PICTURE, (client), (mode));\
     if (rc != Success)\
 	return rc;\
 }
 
 #define VERIFY_XIN_ALPHA(pPicture, pid, client, mode) {\
-    if (pid == None) \
-	pPicture = 0; \
+    if ((pid) == None) \
+	(pPicture) = 0; \
     else { \
-	VERIFY_XIN_PICTURE(pPicture, pid, client, mode); \
+	VERIFY_XIN_PICTURE((pPicture), (pid), (client), (mode)); \
     } \
 } \
 

@@ -44,10 +44,10 @@ typedef struct {
 } GlyphSetRec, *GlyphSetPtr;
 
 #define GlyphSetGetPrivate(pGlyphSet,k) \
-    dixLookupPrivate(&(pGlyphSet)->devPrivates, k)
+    dixLookupPrivate(&(pGlyphSet)->devPrivates, (k))
 
 #define GlyphSetSetPrivate(pGlyphSet,k,ptr) \
-    dixSetPrivate(&(pGlyphSet)->devPrivates, k, ptr)
+    dixSetPrivate(&(pGlyphSet)->devPrivates, (k), (ptr))
 
 void GlyphUninit(ScreenPtr pScreen);
 GlyphPtr FindGlyphByHash(unsigned char sha1[20], int format);

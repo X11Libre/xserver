@@ -19,17 +19,17 @@ extern RESTYPE PictFormatType;
 extern RESTYPE GlyphSetType;
 
 #define VERIFY_PICTURE(pPicture, pid, client, mode) {\
-    int tmprc = dixLookupResourceByType((void *)&(pPicture), pid,\
-	                                PictureType, client, mode);\
+    int tmprc = dixLookupResourceByType((void *)&(pPicture), (pid),\
+                                        PictureType, (client), (mode));\
     if (tmprc != Success)\
 	return tmprc;\
 }
 
 #define VERIFY_ALPHA(pPicture, pid, client, mode) {\
-    if (pid == None) \
-	pPicture = 0; \
+    if ((pid) == None) \
+	(pPicture) = 0; \
     else { \
-	VERIFY_PICTURE(pPicture, pid, client, mode); \
+	VERIFY_PICTURE((pPicture), (pid), (client), (mode)); \
     } \
 } \
 
