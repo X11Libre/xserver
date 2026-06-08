@@ -211,45 +211,45 @@ extern DevPrivateKeyRec exaScreenPrivateKeyRec;
 #define exaScreenPrivateKey (&exaScreenPrivateKeyRec)
 
 #define ExaGetScreenPriv(s) ((ExaScreenPrivPtr)dixGetPrivate(&(s)->devPrivates, exaScreenPrivateKey))
-#define ExaScreenPriv(s)	ExaScreenPrivPtr    pExaScr = ExaGetScreenPriv(s)
+#define ExaScreenPriv(s)	ExaScreenPrivPtr    pExaScr = ExaGetScreenPriv((s))
 
-#define ExaGetGCPriv(gc) ((ExaGCPrivPtr)dixGetPrivateAddr(&(gc)->devPrivates, &ExaGetScreenPriv(gc->pScreen)->gcPrivateKeyRec))
-#define ExaGCPriv(gc) ExaGCPrivPtr pExaGC = ExaGetGCPriv(gc)
+#define ExaGetGCPriv(gc) ((ExaGCPrivPtr)dixGetPrivateAddr(&(gc)->devPrivates, &ExaGetScreenPriv((gc)->pScreen)->gcPrivateKeyRec))
+#define ExaGCPriv(gc) ExaGCPrivPtr pExaGC = ExaGetGCPriv((gc))
 
 /*
  * Some macros to deal with function wrapping.
  */
 #define wrap(priv, real, mem, func) {\
-    priv->Saved##mem = real->mem; \
-    real->mem = func; \
+    (priv)->Saved##mem = (real)->mem; \
+    (real)->mem = (func); \
 }
 
 #define unwrap(priv, real, mem) {\
-    real->mem = priv->Saved##mem; \
+    (real)->mem = (priv)->Saved##mem; \
 }
 
 #define swap(priv, real, mem) {\
-    typeof(real->mem) tmp = priv->Saved##mem; \
-    priv->Saved##mem = real->mem; \
-    real->mem = tmp; \
+    typeof((real)->mem) tmp = (priv)->Saved##mem; \
+    (priv)->Saved##mem = (real)->mem; \
+    (real)->mem = tmp; \
 }
 
 #define EXA_PRE_FALLBACK(_screen_) \
-    ExaScreenPriv(_screen_); \
+    ExaScreenPriv((_screen_)); \
     pExaScr->fallback_counter++;
 
 #define EXA_POST_FALLBACK(_screen_) \
     pExaScr->fallback_counter--;
 
 #define EXA_PRE_FALLBACK_GC(_gc_) \
-    ExaScreenPriv(_gc_->pScreen); \
-    ExaGCPriv(_gc_); \
+    ExaScreenPriv((_gc_)->pScreen); \
+    ExaGCPriv((_gc_)); \
     pExaScr->fallback_counter++; \
-    swap(pExaGC, _gc_, ops);
+    swap(pExaGC, (_gc_), ops);
 
 #define EXA_POST_FALLBACK_GC(_gc_) \
     pExaScr->fallback_counter--; \
-    swap(pExaGC, _gc_, ops);
+    swap(pExaGC, (_gc_), ops);
 
 /** Align an offset to an arbitrary alignment */
 #define EXA_ALIGN(offset, align) (((offset) + (align) - 1) - \
@@ -265,7 +265,7 @@ extern DevPrivateKeyRec exaScreenPrivateKeyRec;
 #define EXA_PIXMAP_SCORE_INIT	    1001
 
 #define ExaGetPixmapPriv(p) ((ExaPixmapPrivPtr)dixGetPrivateAddr(&(p)->devPrivates, &ExaGetScreenPriv((p)->drawable.pScreen)->pixmapPrivateKeyRec))
-#define ExaPixmapPriv(p)	ExaPixmapPrivPtr pExaPixmap = ExaGetPixmapPriv(p)
+#define ExaPixmapPriv(p)	ExaPixmapPrivPtr pExaPixmap = ExaGetPixmapPriv((p))
 
 #define EXA_RANGE_PITCH (1 << 0)
 #define EXA_RANGE_WIDTH (1 << 1)
