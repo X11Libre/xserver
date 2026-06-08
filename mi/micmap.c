@@ -289,16 +289,16 @@ miCreateDefColormap(ScreenPtr pScreen)
  * driver
  */
 
-#define _RZ(d) ((d + 2) / 3)
+#define _RZ(d) (((d) + 2) / 3)
 #define _RS(d) 0
-#define _RM(d) ((1U << _RZ(d)) - 1)
-#define _GZ(d) ((d - _RZ(d) + 1) / 2)
-#define _GS(d) _RZ(d)
-#define _GM(d) (((1U << _GZ(d)) - 1) << _GS(d))
-#define _BZ(d) (d - _RZ(d) - _GZ(d))
-#define _BS(d) (_RZ(d) + _GZ(d))
-#define _BM(d) (((1U << _BZ(d)) - 1) << _BS(d))
-#define _CE(d) (1U << _RZ(d))
+#define _RM(d) ((1U << _RZ((d))) - 1)
+#define _GZ(d) (((d) - _RZ((d)) + 1) / 2)
+#define _GS(d) _RZ((d))
+#define _GM(d) (((1U << _GZ((d))) - 1) << _GS((d)))
+#define _BZ(d) ((d) - _RZ((d)) - _GZ((d)))
+#define _BS(d) (_RZ((d)) + _GZ((d)))
+#define _BM(d) (((1U << _BZ((d))) - 1) << _BS((d)))
+#define _CE(d) (1U << _RZ((d)))
 
 typedef struct _miVisuals {
     struct _miVisuals *next;

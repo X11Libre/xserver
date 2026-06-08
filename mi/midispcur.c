@@ -72,9 +72,9 @@ typedef struct {
 } miDCBufferRec, *miDCBufferPtr;
 
 #define miGetDCDevice(dev, screen) \
- ((DevHasCursor(dev)) ? \
-  (miDCBufferPtr)dixLookupScreenPrivate(&dev->devPrivates, miDCDeviceKey, screen) : \
-  (miDCBufferPtr)dixLookupScreenPrivate(&GetMaster(dev, MASTER_POINTER)->devPrivates, miDCDeviceKey, screen))
+ ((DevHasCursor((dev))) ? \
+  (miDCBufferPtr)dixLookupScreenPrivate(&(dev)->devPrivates, miDCDeviceKey, (screen)) : \
+  (miDCBufferPtr)dixLookupScreenPrivate(&GetMaster((dev), MASTER_POINTER)->devPrivates, miDCDeviceKey, (screen)))
 
 /*
  * The core pointer buffer will point to the index of the virtual pointer
@@ -151,7 +151,7 @@ bool miDCRealizeCursor(ScreenPtr pScreen, CursorPtr pCursor)
     return TRUE;
 }
 
-#define EnsurePicture(picture,draw,win) (picture || miDCMakePicture(&picture,draw,win))
+#define EnsurePicture(picture,draw,win) ((picture) || miDCMakePicture(&(picture),(draw),(win)))
 
 static PicturePtr
 miDCMakePicture(PicturePtr * ppPicture, DrawablePtr pDraw, WindowPtr pWin)

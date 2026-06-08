@@ -87,14 +87,14 @@ DevPrivateKeyRec miPointerScreenKeyRec;
 
 #define GetScreenPrivate(s) ((miPointerScreenPtr) \
     dixLookupPrivate(&(s)->devPrivates, miPointerScreenKey))
-#define SetupScreen(s)	miPointerScreenPtr  pScreenPriv = GetScreenPrivate(s)
+#define SetupScreen(s)	miPointerScreenPtr  pScreenPriv = GetScreenPrivate((s))
 
 DevPrivateKeyRec miPointerPrivKeyRec;
 
 #define MIPOINTER(dev) \
-    (InputDevIsFloating(dev) ? \
+    (InputDevIsFloating((dev)) ? \
         (miPointerPtr)dixLookupPrivate(&(dev)->devPrivates, miPointerPrivKey): \
-        (miPointerPtr)dixLookupPrivate(&(GetMaster(dev, MASTER_POINTER))->devPrivates, miPointerPrivKey))
+        (miPointerPtr)dixLookupPrivate(&(GetMaster((dev), MASTER_POINTER))->devPrivates, miPointerPrivKey))
 
 static Bool miPointerRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
                                    CursorPtr pCursor);

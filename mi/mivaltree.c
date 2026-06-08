@@ -168,7 +168,7 @@ miShapedWindowIn(RegionPtr universe, RegionPtr bounding,
 #define TreatAsTransparent(w)	((w)->redirectDraw == RedirectDrawManual)
 
 #define HasParentRelativeBorder(w) (!(w)->borderIsPixel && \
-				    HasBorder(w) && \
+				    HasBorder((w)) && \
 				    (w)->backgroundState == ParentRelative)
 
 /*

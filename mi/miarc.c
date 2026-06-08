@@ -66,7 +66,7 @@ SOFTWARE.
 #define EPSILON	0.000001
 #define ISEQUAL(a,b) (fabs((a) - (b)) <= EPSILON)
 #define UNEQUAL(a,b) (fabs((a) - (b)) > EPSILON)
-#define PTISEQUAL(a,b) (ISEQUAL(a.x,b.x) && ISEQUAL(a.y,b.y))
+#define PTISEQUAL(a,b) (ISEQUAL((a).x,(b).x) && ISEQUAL((a).y,(b).y))
 #define SQSECANT 108.856472512142   /* 1/sin^2(11/2) - for 11o miter cutoff */
 
 /* Point with sub-pixel positioning. */
@@ -131,7 +131,7 @@ struct line {
     int valid;
 };
 
-#define intersectLine(y,line) (line.m * (y) + line.b)
+#define intersectLine(y,line) ((line).m * (y) + (line).b)
 
 /*
  * these are all y value bounds
@@ -1540,8 +1540,8 @@ miRoundCap(DrawablePtr pDraw,
 #define M_PI_2	1.57079632679489661923
 #endif
 
-#define Dsin(d)	((d) == 0.0 ? 0.0 : ((d) == 90.0 ? 1.0 : sin(d*M_PI/180.0)))
-#define Dcos(d)	((d) == 0.0 ? 1.0 : ((d) == 90.0 ? 0.0 : cos(d*M_PI/180.0)))
+#define Dsin(d)	((d) == 0.0 ? 0.0 : ((d) == 90.0 ? 1.0 : sin((d)*M_PI/180.0)))
+#define Dcos(d)	((d) == 0.0 ? 1.0 : ((d) == 90.0 ? 0.0 : cos((d)*M_PI/180.0)))
 #define mod(a,b)	((a) >= 0 ? (a) % (b) : (b) - (-(a)) % (b))
 
 static double
@@ -3114,7 +3114,7 @@ fillSpans(DrawablePtr pDrawable, GCPtr pGC)
 
 #define findSpan(y) ((finalMiny <= (y) && (y) <= finalMaxy) ? \
 			  &finalSpans[(y) - finalMiny] : \
-			  realFindSpan (y))
+			  realFindSpan ((y)))
 
 static struct finalSpan **
 realFindSpan(int y)
