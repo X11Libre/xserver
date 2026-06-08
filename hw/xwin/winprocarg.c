@@ -177,8 +177,15 @@ winInitializeScreens(int maxscreens)
 
     if (maxscreens > g_iNumScreens) {
         /* Reallocate the memory for DDX-specific screen info */
-        g_ScreenInfo =
+        winScreenInfo *newScreenInfo =
             realloc(g_ScreenInfo, maxscreens * sizeof(winScreenInfo));
+
+        if (!newScreenInfo) {
+            FatalError("winInitializeScreens: realloc(%p, %d) failed\n",
+                   (void *)g_ScreenInfo, maxscreens * (int)sizeof(winScreenInfo));
+            return;
+        }
+        g_ScreenInfo = newScreenInfo;
 
         /* Set default values for any new screens */
         for (i = g_iNumScreens; i < maxscreens; i++)
