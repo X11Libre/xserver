@@ -109,16 +109,16 @@ void DeleteWindowFromAnySaveSet(WindowPtr pWin);
 
 #define VALIDATE_DRAWABLE_AND_GC(drawID, pDraw, mode)                   \
     do {                                                                \
-        int tmprc = dixLookupDrawable(&(pDraw), drawID, client, M_ANY, mode); \
+        int tmprc = dixLookupDrawable(&(pDraw), (drawID), client, M_ANY, (mode)); \
         if (tmprc != Success)                                           \
             return tmprc;                                               \
         tmprc = dixLookupGC(&(pGC), stuff->gc, client, DixUseAccess);   \
         if (tmprc != Success)                                           \
             return tmprc;                                               \
-        if ((pGC->depth != pDraw->depth) || (pGC->pScreen != pDraw->pScreen)) \
+        if ((pGC->depth != (pDraw)->depth) || (pGC->pScreen != (pDraw)->pScreen)) \
             return BadMatch;                                            \
-        if (pGC->serialNumber != pDraw->serialNumber)                   \
-            ValidateGC(pDraw, pGC);                                     \
+        if (pGC->serialNumber != (pDraw)->serialNumber)                   \
+            ValidateGC((pDraw), pGC);                                     \
     } while (0)
 
 int dixLookupGC(GCPtr *result,
@@ -801,6 +801,6 @@ static inline void SwapLongs(CARD32 *list, unsigned long count) {
 }
 
 #define SwapRestL(stuff) \
-    SwapLongs((CARD32 *)(stuff + 1), (client->req_len - (sizeof(*stuff) >> 2)))
+    SwapLongs((CARD32 *)((stuff) + 1), (client->req_len - (sizeof(*(stuff)) >> 2)))
 
 #endif /* _XSERVER_DIX_PRIV_H */
