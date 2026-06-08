@@ -226,7 +226,7 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 
 #if !defined(S_IFLNK) && !defined(S_ISLNK)
 #undef lstat
-#define lstat(a,b) stat(a,b)
+#define lstat(a,b) stat((a),(b))
 #endif
 
 #define FAIL_IF_NOMODE  1
