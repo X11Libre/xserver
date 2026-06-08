@@ -216,10 +216,10 @@ winInitializeScreens(int maxscreens)
  */
 
 /* Check if enough arguments are given for the option */
-#define CHECK_ARGS(count) if (i + count >= argc) { UseMsg (); return 0; }
+#define CHECK_ARGS(count) if (i + (count) >= argc) { UseMsg (); return 0; }
 
 /* Compare the current option with the string. */
-#define IS_OPTION(name) (strcmp (argv[i], name) == 0)
+#define IS_OPTION(name) (strcmp (argv[i], (name)) == 0)
 
 int
 ddxProcessArgument(int argc, char *argv[], int i)
