@@ -149,8 +149,8 @@ XkbWriteSectionFromName(FILE * file, const char *sectionName, const char *name)
     return TRUE;
 }
 
-#define	NEED_DESC(n) ((!n)||((n)[0]=='+')||((n)[0]=='|')||(strchr((n),'%')))
-#define	COMPLETE(n)  ((n)&&(!NEED_DESC(n)))
+#define	NEED_DESC(n) ((!(n))||((n)[0]=='+')||((n)[0]=='|')||(strchr((n),'%')))
+#define	COMPLETE(n)  ((n)&&(!NEED_DESC((n))))
 
 /* ARGSUSED */
 static void
