@@ -16,7 +16,7 @@
 extern _X_EXPORT DevPrivateKey
 fbGetGCPrivateKey(GCPtr pGC);
 
-#define fbGetGCPrivate(pGC) ((FbGCPrivPtr)dixLookupPrivate(&(pGC)->devPrivates, fbGetGCPrivateKey(pGC)))
+#define fbGetGCPrivate(pGC) ((FbGCPrivPtr)dixLookupPrivate(&(pGC)->devPrivates, fbGetGCPrivateKey((pGC))))
 
 #define fbGetScreenPixmap(s)    ((PixmapPtr) (s)->devPrivate)
 

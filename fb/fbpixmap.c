@@ -91,27 +91,27 @@ fbDestroyPixmap(PixmapPtr pPixmap)
 #define ADDRECT(reg,r,fr,rx1,ry1,rx2,ry2)			\
 if (((rx1) < (rx2)) && ((ry1) < (ry2)) &&			\
     (!((reg)->data->numRects &&					\
-       ((r-1)->y1 == (ry1)) &&					\
-       ((r-1)->y2 == (ry2)) &&					\
-       ((r-1)->x1 <= (rx1)) &&					\
-       ((r-1)->x2 >= (rx2)))))					\
+       (((r)-1)->y1 == (ry1)) &&				\
+       (((r)-1)->y2 == (ry2)) &&				\
+       (((r)-1)->x1 <= (rx1)) &&				\
+       (((r)-1)->x2 >= (rx2)))))				\
 {								\
     if ((reg)->data->numRects == (reg)->data->size)		\
     {								\
-	RegionRectAlloc(reg, 1);					\
-	fr = RegionBoxptr(reg);				\
-	r = fr + (reg)->data->numRects;				\
+	RegionRectAlloc((reg), 1);				\
+	(fr) = RegionBoxptr((reg));				\
+	(r) = (fr) + (reg)->data->numRects;			\
     }								\
-    r->x1 = (rx1);						\
-    r->y1 = (ry1);						\
-    r->x2 = (rx2);						\
-    r->y2 = (ry2);						\
+    (r)->x1 = (rx1);						\
+    (r)->y1 = (ry1);						\
+    (r)->x2 = (rx2);						\
+    (r)->y2 = (ry2);						\
     (reg)->data->numRects++;					\
-    if(r->x1 < (reg)->extents.x1)				\
-	(reg)->extents.x1 = r->x1;				\
-    if(r->x2 > (reg)->extents.x2)				\
-	(reg)->extents.x2 = r->x2;				\
-    r++;							\
+    if((r)->x1 < (reg)->extents.x1)				\
+	(reg)->extents.x1 = (r)->x1;				\
+    if((r)->x2 > (reg)->extents.x2)				\
+	(reg)->extents.x2 = (r)->x2;				\
+    (r)++;							\
 }
 
 /* Convert bitmap clip mask into clipping region.

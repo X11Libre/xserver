@@ -29,9 +29,9 @@
 
 #include "miline.h"
 
-#define fbBresShiftMask(mask,dir,bpp) ((bpp == FB_STIP_UNIT) ? 0 : \
-					((dir < 0) ? FbStipLeft(mask,bpp) : \
-					 FbStipRight(mask,bpp)))
+#define fbBresShiftMask(mask,dir,bpp) (((bpp) == FB_STIP_UNIT) ? 0 : \
+					(((dir) < 0) ? FbStipLeft((mask),(bpp)) : \
+					 FbStipRight((mask),(bpp))))
 
 static void
 fbBresSolid(DrawablePtr pDrawable,

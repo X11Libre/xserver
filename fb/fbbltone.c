@@ -34,30 +34,30 @@
 
 #define Mask(x,w)	BitsMask((x)*(w),(w))
 
-#define SelMask(b,n,w)	((((b) >> n) & 1) * Mask(n,w))
+#define SelMask(b,n,w)	((((b) >> (n)) & 1) * Mask((n),(w)))
 
 #define C1(b,w) \
-    (SelMask(b,0,w))
+    (SelMask((b),0,(w)))
 
 #define C2(b,w) \
-    (SelMask(b,0,w) | \
-     SelMask(b,1,w))
+    (SelMask((b),0,(w)) | \
+     SelMask((b),1,(w)))
 
 #define C4(b,w) \
-    (SelMask(b,0,w) | \
-     SelMask(b,1,w) | \
-     SelMask(b,2,w) | \
-     SelMask(b,3,w))
+    (SelMask((b),0,(w)) | \
+     SelMask((b),1,(w)) | \
+     SelMask((b),2,(w)) | \
+     SelMask((b),3,(w)))
 
 #define C8(b,w) \
-    (SelMask(b,0,w) | \
-     SelMask(b,1,w) | \
-     SelMask(b,2,w) | \
-     SelMask(b,3,w) | \
-     SelMask(b,4,w) | \
-     SelMask(b,5,w) | \
-     SelMask(b,6,w) | \
-     SelMask(b,7,w))
+    (SelMask((b),0,(w)) | \
+     SelMask((b),1,(w)) | \
+     SelMask((b),2,(w)) | \
+     SelMask((b),3,(w)) | \
+     SelMask((b),4,(w)) | \
+     SelMask((b),5,(w)) | \
+     SelMask((b),6,(w)) | \
+     SelMask((b),7,(w)))
 
 static const FbBits fbStipple8Bits[256] = {
     C8(0, 4), C8(1, 4), C8(2, 4), C8(3, 4), C8(4, 4), C8(5, 4),
