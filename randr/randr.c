@@ -47,12 +47,12 @@ Bool noRRExtension = FALSE;
 static int RRNScreens;
 
 #define wrap(priv,real,mem,func) {\
-    priv->mem = real->mem; \
-    real->mem = func; \
+    (priv)->mem = (real)->mem; \
+    (real)->mem = (func); \
 }
 
 #define unwrap(priv,real,mem) {\
-    real->mem = priv->mem; \
+    (real)->mem = (priv)->mem; \
 }
 
 int RREventBase;
