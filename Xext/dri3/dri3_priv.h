@@ -55,12 +55,12 @@ typedef struct dri3_screen_priv {
 } dri3_screen_priv_rec, *dri3_screen_priv_ptr;
 
 #define wrap(priv,real,mem,func) {\
-    priv->mem = real->mem; \
-    real->mem = func; \
+    (priv)->mem = (real)->mem; \
+    (real)->mem = (func); \
 }
 
 #define unwrap(priv,real,mem) {\
-    real->mem = priv->mem; \
+    (real)->mem = (priv)->mem; \
 }
 
 #define VERIFY_DRI3_SYNCOBJ(id, ptr, a)\

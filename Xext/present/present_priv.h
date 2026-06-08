@@ -41,7 +41,7 @@
 #include "dri3.h"
 
 #if 0
-#define DebugPresent(x) ErrorF x
+#define DebugPresent(x) ErrorF (x)
 #else
 #define DebugPresent(x)
 #endif
@@ -204,12 +204,12 @@ struct present_screen_priv {
 };
 
 #define wrap(priv,real,mem,func) {\
-    priv->mem = real->mem; \
-    real->mem = func; \
+    (priv)->mem = (real)->mem; \
+    (real)->mem = (func); \
 }
 
 #define unwrap(priv,real,mem) {\
-    real->mem = priv->mem; \
+    (real)->mem = (priv)->mem; \
 }
 
 static inline present_screen_priv_ptr

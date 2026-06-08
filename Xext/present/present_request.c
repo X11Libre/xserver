@@ -64,7 +64,7 @@ proc_present_query_version(ClientPtr client)
         if ((fence_id) == None)                                         \
             (fence_ptr) = NULL;                                         \
         else {                                                          \
-            int __rc__ = SyncVerifyFence(&fence_ptr, fence_id, client, access); \
+            int __rc__ = SyncVerifyFence(&(fence_ptr), (fence_id), (client), (access)); \
             if (__rc__ != Success)                                      \
                 return __rc__;                                          \
         }                                                               \
@@ -74,7 +74,7 @@ proc_present_query_version(ClientPtr client)
         if ((crtc_id) == None)                                          \
             (crtc_ptr) = NULL;                                          \
         else {                                                          \
-            VERIFY_RR_CRTC(crtc_id, crtc_ptr, access);                  \
+            VERIFY_RR_CRTC((crtc_id), (crtc_ptr), (access));            \
         }                                                               \
     } while (0)
 
