@@ -393,12 +393,12 @@ TimerInit(void)
 #ifdef DPMSExtension
 
 #define DPMS_CHECK_MODE(mode,time)\
-    if (time > 0 && DPMSPowerLevel < mode && timeout >= time)\
-	DPMSSet(serverClient, mode);
+    if ((time) > 0 && DPMSPowerLevel < (mode) && timeout >= (time))\
+	DPMSSet(serverClient, (mode));
 
 #define DPMS_CHECK_TIMEOUT(time)\
-    if (time > 0 && (time - timeout) > 0)\
-	return time - timeout;
+    if ((time) > 0 && ((time) - timeout) > 0)\
+	return (time) - timeout;
 
 static CARD32
 NextDPMSTimeout(INT32 timeout)
