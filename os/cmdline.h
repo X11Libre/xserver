@@ -8,7 +8,7 @@
 #include "include/os.h"
 
 #define CHECK_FOR_REQUIRED_ARGUMENTS(num)  \
-    do if (((i + num) >= argc) || (!argv[i + num])) {                   \
+    do if (((i + (num)) >= argc) || (!argv[i + (num)])) {                   \
         UseMsg();                                                       \
         FatalError("Required argument to %s not specified\n", argv[i]); \
     } while (0)

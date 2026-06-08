@@ -115,9 +115,9 @@ XdmAuthenticationAddAuth(int name_len, const char *name,
     return ret;
 }
 
-#define atox(c)	('0' <= c && c <= '9' ? c - '0' : \
-		 'a' <= c && c <= 'f' ? c - 'a' + 10 : \
-		 'A' <= c && c <= 'F' ? c - 'A' + 10 : -1)
+#define atox(c)	('0' <= (c) && (c) <= '9' ? (c) - '0' : \
+		 'a' <= (c) && (c) <= 'f' ? (c) - 'a' + 10 : \
+		 'A' <= (c) && (c) <= 'F' ? (c) - 'A' + 10 : -1)
 
 static int
 HexToBinary(const char *in, char *out, int len)

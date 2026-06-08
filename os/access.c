@@ -190,7 +190,7 @@ Bool defeatAccessControl = FALSE;
 #define addrEqual(fam, address, length, host) \
 			 ((fam) == (host)->family &&\
 			  (length) == (host)->len &&\
-			  !memcmp (address, (host)->addr, length))
+			  !memcmp ((address), (host)->addr, (length)))
 
 static int ConvertAddr(struct sockaddr * /*saddr */ ,
                        int * /*len */ ,
@@ -221,11 +221,11 @@ typedef struct _host {
 } HOST;
 
 #define MakeHost(h,l)	(h)=calloc(1, sizeof *(h)+(l));\
-			if (h) { \
+			if ((h)) { \
 			   (h)->addr=(unsigned char *) ((h) + 1);\
 			   (h)->requested = FALSE; \
 			}
-#define FreeHost(h)	free(h)
+#define FreeHost(h)	free((h))
 static HOST *selfhosts = NULL;
 static HOST *validhosts = NULL;
 static int AccessEnabled = TRUE;
@@ -526,9 +526,9 @@ DefineSelf(int fd)
 
 #ifdef VARIABLE_IFREQ
 #define ifr_size(p) (sizeof (struct ifreq) + \
-		     (p->ifr_addr.sa_len > sizeof (p->ifr_addr) ? \
-		      p->ifr_addr.sa_len - sizeof (p->ifr_addr) : 0))
-#define ifraddr_size(a) (a.sa_len)
+		     ((p)->ifr_addr.sa_len > sizeof ((p)->ifr_addr) ? \
+		      (p)->ifr_addr.sa_len - sizeof ((p)->ifr_addr) : 0))
+#define ifraddr_size(a) ((a).sa_len)
 #else
 #define ifr_size(p) (sizeof (ifr_type))
 #define ifraddr_size(a) (sizeof (a))

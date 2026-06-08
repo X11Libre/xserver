@@ -31,7 +31,7 @@
 
 #ifdef HAVE_POLL
 #include <poll.h>
-#define xserver_poll(fds, nfds, timeout) poll(fds, nfds, timeout)
+#define xserver_poll(fds, nfds, timeout) poll((fds), (nfds), (timeout))
 #else
 
 #ifdef WIN32
