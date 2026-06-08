@@ -71,8 +71,8 @@ in this Software without prior written authorization from The Open Group.
 #define QUEUE_DROP_BACKTRACE_FREQUENCY     100
 #define QUEUE_DROP_BACKTRACE_MAX            10
 
-#define EnqueueScreen(dev) dev->spriteInfo->sprite->pEnqueueScreen
-#define DequeueScreen(dev) dev->spriteInfo->sprite->pDequeueScreen
+#define EnqueueScreen(dev) (dev)->spriteInfo->sprite->pEnqueueScreen
+#define DequeueScreen(dev) (dev)->spriteInfo->sprite->pDequeueScreen
 
 typedef struct _Event {
     InternalEvent *events;

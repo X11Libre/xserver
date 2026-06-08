@@ -56,7 +56,7 @@ typedef struct _miFillArcD {
 			   (((arc)->width <= 800) && ((arc)->height <= 800)))
 
 #define MIFILLARCSETUP() \
-    x = 0; \
+    (x) = 0; \
     y = info.y; \
     e = info.e; \
     xk = info.xk; \
@@ -78,14 +78,14 @@ typedef struct _miFillArcD {
     } \
     y--; \
     yk -= ym; \
-    slw = (x << 1) + dx; \
-    if ((e == xk) && (slw > 1)) \
-	slw--
+    (slw) = (x << 1) + dx; \
+    if ((e == xk) && ((slw) > 1)) \
+	(slw)--
 
-#define MIFILLCIRCSTEP(slw) MIFILLARCSTEP(slw)
-#define MIFILLELLSTEP(slw) MIFILLARCSTEP(slw)
+#define MIFILLCIRCSTEP(slw) MIFILLARCSTEP((slw))
+#define MIFILLELLSTEP(slw) MIFILLARCSTEP((slw))
 
-#define miFillArcLower(slw) (((y + dy) != 0) && ((slw > 1) || (e != xk)))
+#define miFillArcLower(slw) (((y + dy) != 0) && (((slw) > 1) || (e != xk)))
 
 typedef struct _miSliceEdge {
     int x;
@@ -105,59 +105,59 @@ typedef struct _miArcSlice {
 } miArcSliceRec;
 
 #define MIARCSLICESTEP(edge) \
-    edge.x -= edge.stepx; \
-    edge.e -= edge.dx; \
-    if (edge.e <= 0) \
+    (edge).x -= (edge).stepx; \
+    (edge).e -= (edge).dx; \
+    if ((edge).e <= 0) \
     { \
-	edge.x -= edge.deltax; \
-	edge.e += edge.dy; \
+	(edge).x -= (edge).deltax; \
+	(edge).e += (edge).dy; \
     }
 
 #define miFillSliceUpper(slice) \
-		((y >= slice.min_top_y) && (y <= slice.max_top_y))
+		((y >= (slice).min_top_y) && (y <= (slice).max_top_y))
 
 #define miFillSliceLower(slice) \
-		((y >= slice.min_bot_y) && (y <= slice.max_bot_y))
+		((y >= (slice).min_bot_y) && (y <= (slice).max_bot_y))
 
 #define MIARCSLICEUPPER(xl,xr,slice,slw) \
-    xl = xorg - x; \
-    xr = xl + slw - 1; \
-    if (slice.edge1_top && (slice.edge1.x < xr)) \
-	xr = slice.edge1.x; \
-    if (slice.edge2_top && (slice.edge2.x > xl)) \
-	xl = slice.edge2.x;
+    (xl) = xorg - x; \
+    (xr) = (xl) + (slw) - 1; \
+    if ((slice).edge1_top && ((slice).edge1.x < (xr))) \
+	(xr) = (slice).edge1.x; \
+    if ((slice).edge2_top && ((slice).edge2.x > (xl))) \
+	(xl) = (slice).edge2.x;
 
 #define MIARCSLICELOWER(xl,xr,slice,slw) \
-    xl = xorg - x; \
-    xr = xl + slw - 1; \
-    if (!slice.edge1_top && (slice.edge1.x > xl)) \
-	xl = slice.edge1.x; \
-    if (!slice.edge2_top && (slice.edge2.x < xr)) \
-	xr = slice.edge2.x;
+    (xl) = xorg - x; \
+    (xr) = (xl) + (slw) - 1; \
+    if (!(slice).edge1_top && ((slice).edge1.x > (xl))) \
+	(xl) = (slice).edge1.x; \
+    if (!(slice).edge2_top && ((slice).edge2.x < (xr))) \
+	(xr) = (slice).edge2.x;
 
 #define MIWIDEARCSETUP(x,y,dy,slw,e,xk,xm,yk,ym) \
-    x = 0; \
-    y = slw >> 1; \
-    yk = y << 3; \
-    xm = 8; \
-    ym = 8; \
-    if (dy) \
+    (x) = 0; \
+    (y) = (slw) >> 1; \
+    (yk) = (y) << 3; \
+    (xm) = 8; \
+    (ym) = 8; \
+    if ((dy)) \
     { \
-	xk = 0; \
-	if (slw & 1) \
-	    e = -1; \
+	(xk) = 0; \
+	if ((slw) & 1) \
+	    (e) = -1; \
 	else \
-	    e = -(y << 2) - 2; \
+	    (e) = -((y) << 2) - 2; \
     } \
     else \
     { \
-	y++; \
-	yk += 4; \
-	xk = -4; \
-	if (slw & 1) \
-	    e = -(y << 2) - 3; \
+	(y)++; \
+	(yk) += 4; \
+	(xk) = -4; \
+	if ((slw) & 1) \
+	    (e) = -((y) << 2) - 3; \
 	else \
-	    e = - (y << 3); \
+	    (e) = -((y) << 3); \
     }
 
 #define MIFILLINARCSTEP(slw) \
@@ -170,11 +170,11 @@ typedef struct _miArcSlice {
     } \
     iny--; \
     inyk -= inym; \
-    slw = (inx << 1) + dx; \
-    if ((ine == inxk) && (slw > 1)) \
-	slw--
+    (slw) = (inx << 1) + dx; \
+    if ((ine == inxk) && ((slw) > 1)) \
+	(slw)--
 
 #define miFillInArcLower(slw) (((iny + dy) != 0) && \
-			       ((slw > 1) || (ine != inxk)))
+			       (((slw) > 1) || (ine != inxk)))
 
 #endif                          /* __MIFILLARC_H__ */

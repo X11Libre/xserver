@@ -57,10 +57,10 @@ SOFTWARE.
 
 /* These were stolen from mfb.  They don't really belong here. */
 #define LONG2CHARSSAMEORDER(x) ((MiBits)(x))
-#define LONG2CHARSDIFFORDER( x ) ( ( ( ( x ) & (MiBits)0x000000FF ) << 0x18 ) \
-                        | ( ( ( x ) & (MiBits)0x0000FF00 ) << 0x08 ) \
-                        | ( ( ( x ) & (MiBits)0x00FF0000 ) >> 0x08 ) \
-                        | ( ( ( x ) & (MiBits)0xFF000000 ) >> 0x18 ) )
+#define LONG2CHARSDIFFORDER( x ) ( ( ( ( (x) ) & (MiBits)0x000000FF ) << 0x18 ) \
+                        | ( ( ( (x) ) & (MiBits)0x0000FF00 ) << 0x08 ) \
+                        | ( ( ( (x) ) & (MiBits)0x00FF0000 ) >> 0x08 ) \
+                        | ( ( ( (x) ) & (MiBits)0xFF000000 ) >> 0x18 ) )
 
 #define PGSZB	4
 #define PPW	(PGSZB<<3)      /* assuming 8 bits per byte */

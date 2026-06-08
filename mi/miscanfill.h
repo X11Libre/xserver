@@ -74,42 +74,42 @@ from The Open Group.
      *  and assumed not to be processed.  Otherwise, do this stuff. \
      */ \
     if ((dy) != 0) { \
-        xStart = (x1); \
-        dx = (x2) - xStart; \
+        (xStart) = (x1); \
+        dx = (x2) - (xStart); \
         if (dx < 0) { \
-            m = dx / (dy); \
-            m1 = m - 1; \
-            incr1 = -2 * dx + 2 * (dy) * m1; \
-            incr2 = -2 * dx + 2 * (dy) * m; \
-            d = 2 * m * (dy) - 2 * dx - 2 * (dy); \
+            (m) = dx / (dy); \
+            (m1) = (m) - 1; \
+            (incr1) = -2 * dx + 2 * (dy) * (m1); \
+            (incr2) = -2 * dx + 2 * (dy) * (m); \
+            (d) = 2 * (m) * (dy) - 2 * dx - 2 * (dy); \
         } else { \
-            m = dx / (dy); \
-            m1 = m + 1; \
-            incr1 = 2 * dx - 2 * (dy) * m1; \
-            incr2 = 2 * dx - 2 * (dy) * m; \
-            d = -2 * m * (dy) + 2 * dx; \
+            (m) = dx / (dy); \
+            (m1) = (m) + 1; \
+            (incr1) = 2 * dx - 2 * (dy) * (m1); \
+            (incr2) = 2 * dx - 2 * (dy) * (m); \
+            (d) = -2 * (m) * (dy) + 2 * dx; \
         } \
     } \
 }
 
 #define BRESINCRPGON(d, minval, m, m1, incr1, incr2) { \
-    if (m1 > 0) { \
-        if (d > 0) { \
-            minval += m1; \
-            d += incr1; \
+    if ((m1) > 0) { \
+        if ((d) > 0) { \
+            (minval) += (m1); \
+            (d) += (incr1); \
         } \
         else { \
-            minval += m; \
-            d += incr2; \
+            (minval) += (m); \
+            (d) += (incr2); \
         } \
     } else {\
-        if (d >= 0) { \
-            minval += m1; \
-            d += incr1; \
+        if ((d) >= 0) { \
+            (minval) += (m1); \
+            (d) += (incr1); \
         } \
         else { \
-            minval += m; \
-            d += incr2; \
+            (minval) += (m); \
+            (d) += (incr2); \
         } \
     } \
 }
@@ -129,10 +129,10 @@ typedef struct {
 } BRESINFO;
 
 #define BRESINITPGONSTRUCT(dmaj, min1, min2, bres) \
-	BRESINITPGON(dmaj, min1, min2, bres.minor, bres.d, \
-                     bres.m, bres.m1, bres.incr1, bres.incr2)
+	BRESINITPGON((dmaj), (min1), (min2), (bres).minor, (bres).d, \
+                     (bres).m, (bres).m1, (bres).incr1, (bres).incr2)
 
 #define BRESINCRPGONSTRUCT(bres) \
-        BRESINCRPGON(bres.d, bres.minor, bres.m, bres.m1, bres.incr1, bres.incr2)
+        BRESINCRPGON((bres).d, (bres).minor, (bres).m, (bres).m1, (bres).incr1, (bres).incr2)
 
 #endif

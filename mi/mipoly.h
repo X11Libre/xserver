@@ -140,17 +140,17 @@ typedef struct _ScanLineListBlock {
  *     can reorder the Winding Active Edge Table.
  */
 #define EVALUATEEDGEWINDING(pAET, pPrevAET, y, fixWAET) { \
-   if (pAET->ymax == y) {          /* leaving this edge */ \
-      pPrevAET->next = pAET->next; \
-      pAET = pPrevAET->next; \
-      fixWAET = 1; \
-      if (pAET) \
-         pAET->back = pPrevAET; \
+   if ((pAET)->ymax == (y)) {          /* leaving this edge */ \
+      (pPrevAET)->next = (pAET)->next; \
+      (pAET) = (pPrevAET)->next; \
+      (fixWAET) = 1; \
+      if ((pAET)) \
+         (pAET)->back = (pPrevAET); \
    } \
    else { \
-      BRESINCRPGONSTRUCT(pAET->bres); \
-      pPrevAET = pAET; \
-      pAET = pAET->next; \
+      BRESINCRPGONSTRUCT((pAET)->bres); \
+      (pPrevAET) = (pAET); \
+      (pAET) = (pAET)->next; \
    } \
 }
 
@@ -162,17 +162,17 @@ typedef struct _ScanLineListBlock {
  *     The even-odd rule is in effect.
  */
 #define EVALUATEEDGEEVENODD(pAET, pPrevAET, y) { \
-   assert(pAET); \
-   if (pAET->ymax == y) {          /* leaving this edge */ \
-      pPrevAET->next = pAET->next; \
-      pAET = pPrevAET->next; \
-      if (pAET) \
-         pAET->back = pPrevAET; \
+   assert((pAET)); \
+   if ((pAET)->ymax == (y)) {          /* leaving this edge */ \
+      (pPrevAET)->next = (pAET)->next; \
+      (pAET) = (pPrevAET)->next; \
+      if ((pAET)) \
+         (pAET)->back = (pPrevAET); \
    } \
    else { \
-      BRESINCRPGONSTRUCT(pAET->bres); \
-      pPrevAET = pAET; \
-      pAET = pAET->next; \
+      BRESINCRPGONSTRUCT((pAET)->bres); \
+      (pPrevAET) = (pAET); \
+      (pAET) = (pAET)->next; \
    } \
 }
 

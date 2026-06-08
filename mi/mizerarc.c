@@ -57,11 +57,11 @@ Author:  Bob Scheifler, MIT X Consortium
 
 #define Dsin(d)	((d) == 0 ? 0.0 : ((d) == QUADRANT ? 1.0 : \
 		 ((d) == HALFCIRCLE ? 0.0 : \
-		 ((d) == QUADRANT3 ? -1.0 : sin((double)d*(M_PI/11520.0))))))
+		 ((d) == QUADRANT3 ? -1.0 : sin((double)(d)*(M_PI/11520.0))))))
 
 #define Dcos(d)	((d) == 0 ? 1.0 : ((d) == QUADRANT ? 0.0 : \
 		 ((d) == HALFCIRCLE ? -1.0 : \
-		 ((d) == QUADRANT3 ? 0.0 : cos((double)d*(M_PI/11520.0))))))
+		 ((d) == QUADRANT3 ? 0.0 : cos((double)(d)*(M_PI/11520.0))))))
 
 #define EPSILON45 64
 
@@ -357,12 +357,12 @@ miZeroArcSetup(xArc * arc, miZeroArcRec * info, Bool ok360)
 
 #define Pixelate(xval,yval) \
     { \
-	pts->x = xval; \
-	pts->y = yval; \
+	pts->x = (xval); \
+	pts->y = (yval); \
 	pts++; \
     }
 
-#define DoPix(idx,xval,yval) if (mask & (1 << idx)) Pixelate(xval, yval);
+#define DoPix(idx,xval,yval) if (mask & (1 << (idx))) Pixelate((xval), (yval));
 
 static DDXPointPtr
 miZeroArcPts(xArc * arc, DDXPointPtr pts)
@@ -454,11 +454,11 @@ miZeroArcPts(xArc * arc, DDXPointPtr pts)
 
 #undef DoPix
 #define DoPix(idx,xval,yval) \
-    if (mask & (1 << idx)) \
+    if (mask & (1 << (idx))) \
     { \
-	arcPts[idx]->x = xval; \
-	arcPts[idx]->y = yval; \
-	arcPts[idx]++; \
+	arcPts[(idx)]->x = (xval); \
+	arcPts[(idx)]->y = (yval); \
+	arcPts[(idx)]++; \
     }
 
 static void

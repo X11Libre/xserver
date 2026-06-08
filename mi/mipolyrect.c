@@ -60,20 +60,20 @@ miPolyRectangle(DrawablePtr pDraw, GCPtr pGC, int nrects, xRectangle *pRects)
     xPoint rect[5];
     int bound_tmp;
 
-#define MINBOUND(dst,eqn)	bound_tmp = eqn; \
+#define MINBOUND(dst,eqn)	bound_tmp = (eqn); \
 				if (bound_tmp < -32768) \
 				    bound_tmp = -32768; \
-				dst = bound_tmp;
+				(dst) = bound_tmp;
 
-#define MAXBOUND(dst,eqn)	bound_tmp = eqn; \
+#define MAXBOUND(dst,eqn)	bound_tmp = (eqn); \
 				if (bound_tmp > 32767) \
 				    bound_tmp = 32767; \
-				dst = bound_tmp;
+				(dst) = bound_tmp;
 
-#define MAXUBOUND(dst,eqn)	bound_tmp = eqn; \
+#define MAXUBOUND(dst,eqn)	bound_tmp = (eqn); \
 				if (bound_tmp > 65535) \
 				    bound_tmp = 65535; \
-				dst = bound_tmp;
+				(dst) = bound_tmp;
 
     if (pGC->lineStyle == LineSolid && pGC->joinStyle == JoinMiter &&
         pGC->lineWidth != 0) {
