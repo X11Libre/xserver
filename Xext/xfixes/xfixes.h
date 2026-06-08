@@ -31,17 +31,17 @@ extern int XFixesErrorBase;
 #define VERIFY_REGION(pRegion, rid, client, mode)			\
     do {								\
 	int err;							\
-	err = dixLookupResourceByType((void **) &pRegion, rid,	\
-				      RegionResType, client, mode);	\
+	err = dixLookupResourceByType((void **) &(pRegion), (rid),	\
+				      RegionResType, (client), (mode));	\
 	if (err != Success) {						\
-	    client->errorValue = rid;					\
+	    (client)->errorValue = (rid);				\
 	    return err;							\
 	}								\
     } while (0)
 
 #define VERIFY_REGION_OR_NONE(pRegion, rid, client, mode) { \
-    pRegion = 0; \
-    if (rid) VERIFY_REGION(pRegion, rid, client, mode); \
+    (pRegion) = 0; \
+    if ((rid)) VERIFY_REGION((pRegion), (rid), (client), (mode)); \
 }
 
 extern RegionPtr
