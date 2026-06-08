@@ -38,8 +38,8 @@
 #include "indirect_reqsize.h"
 
 #define SWAPL(a) \
-  (((a & 0xff000000U)>>24) | ((a & 0xff0000U)>>8) | \
-   ((a & 0xff00U)<<8) | ((a & 0xffU)<<24))
+  ((((a) & 0xff000000U)>>24) | (((a) & 0xff0000U)>>8) | \
+   (((a) & 0xff00U)<<8) | (((a) & 0xffU)<<24))
 
 int
 __glXMap1dReqSize(const GLbyte * pc, Bool swap, int reqlen)

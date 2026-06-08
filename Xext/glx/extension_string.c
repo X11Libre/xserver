@@ -39,15 +39,15 @@
 #include "extension_string.h"
 #include "opaque.h"
 
-#define SET_BIT(m,b)    (m[ (b) / 8 ] |=  (1U << ((b) % 8)))
-#define CLR_BIT(m,b)    (m[ (b) / 8 ] &= ~(1U << ((b) % 8)))
-#define IS_SET(m,b)    ((m[ (b) / 8 ] &   (1U << ((b) % 8))) != 0)
+#define SET_BIT(m,b)    ((m)[ (b) / 8 ] |=  (1U << ((b) % 8)))
+#define CLR_BIT(m,b)    ((m)[ (b) / 8 ] &= ~(1U << ((b) % 8)))
+#define IS_SET(m,b)    (((m)[ (b) / 8 ] &   (1U << ((b) % 8))) != 0)
 #define CONCAT(a,b) a ## b
 #define GLX(n) "GLX_" # n, 4 + sizeof( # n ) - 1, CONCAT(n,_bit)
-#define VER(a,b)  a, b
+#define VER(a,b)  (a), (b)
 #define Y  1
 #define N  0
-#define EXT_ENABLED(bit,supported) (IS_SET(supported, bit))
+#define EXT_ENABLED(bit,supported) (IS_SET((supported), (bit)))
 
 struct extension_info {
     const char *const name;

@@ -92,7 +92,7 @@ struct __glXDispatchInfo {
 /**
  * Declare the index \c x as a leaf index.
  */
-#define LEAF(x)            -x
+#define LEAF(x)            -(x)
 
 /**
  * Determine if an index is a leaf index.

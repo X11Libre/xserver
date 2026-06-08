@@ -1022,7 +1022,7 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
         p = 0;
 
 #define WRITE_PAIR(tag,value) \
-    do { buf[p++] = tag ; buf[p++] = value ; } while( 0 )
+    do { buf[p++] = (tag) ; buf[p++] = (value) ; } while( 0 )
 
         WRITE_PAIR(GLX_VISUAL_ID, modes->visualID);
         WRITE_PAIR(GLX_FBCONFIG_ID, modes->fbconfigID);
