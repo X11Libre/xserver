@@ -178,6 +178,9 @@
 /* Use libpciaccess */
 #mesondefine XSERVER_LIBPCIACCESS
 
+/* Have the pci_device_is_boot_display function */
+#mesondefine HAVE_PCI_DEVICE_IS_BOOT_DISPLAY
+
 /* X Access Control Extension */
 #mesondefine XACE
 
