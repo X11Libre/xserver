@@ -2615,11 +2615,8 @@ ProcRenderSetPictureClipRectangles(ClientPtr client)
 static int
 ProcRenderFreePicture(ClientPtr client)
 {
-    REQUEST(xRenderFreePictureReq);
-    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
-
-    if (client->swapped)
-        swapl(&stuff->picture);
+    X_REQUEST_HEAD_STRUCT(xRenderFreePictureReq);
+    X_REQUEST_FIELD_CARD32(picture);
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderFreePicture(client)
