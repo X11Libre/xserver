@@ -44,7 +44,7 @@
 #include <os.h>
 
 #define __ATTRIB(attrib, field) \
-    { attrib, offsetof(__GLXconfig, field) }
+    { (attrib), offsetof(__GLXconfig, field) }
 
 static const struct {
     unsigned int attrib, offset;

@@ -38,21 +38,21 @@
 /*
 ** Fetch the context-id out of a SingleReq request pointed to by pc.
 */
-#define __GLX_GET_SINGLE_CONTEXT_TAG(pc) (((xGLXSingleReq*)pc)->contextTag)
-#define __GLX_GET_VENDPRIV_CONTEXT_TAG(pc) (((xGLXVendorPrivateReq*)pc)->contextTag)
+#define __GLX_GET_SINGLE_CONTEXT_TAG(pc) (((xGLXSingleReq*)(pc))->contextTag)
+#define __GLX_GET_VENDPRIV_CONTEXT_TAG(pc) (((xGLXVendorPrivateReq*)(pc))->contextTag)
 
 /*
 ** Fetch a double from potentially unaligned memory.
 */
 #ifdef __GLX_ALIGN64
-#define __GLX_MEM_COPY(dst,src,n)	memmove(dst,src,n)
-#define __GLX_GET_DOUBLE(dst,src)	__GLX_MEM_COPY(&dst,src,8)
+#define __GLX_MEM_COPY(dst,src,n)	memmove((dst),(src),(n))
+#define __GLX_GET_DOUBLE(dst,src)	__GLX_MEM_COPY(&(dst),(src),8)
 #else
 #define __GLX_GET_DOUBLE(dst,src)	(dst) = *((GLdouble*)(src))
 #endif
 
 #define __GLX_BEGIN_REPLY(size) \
-	reply.length = __GLX_PAD(size) >> 2;	\
+	reply.length = __GLX_PAD((size)) >> 2;	\
 	reply.type = X_Reply; 			\
 	reply.sequenceNumber = client->sequence;
 
@@ -74,7 +74,7 @@
 ** pointer.
 */
 #define __GLX_GET_ANSWER_BUFFER(res,cl,size,align)			 \
-    if (size < 0) return BadLength;                                      \
+    if ((size) < 0) return BadLength;                                    \
     else if ((size) > sizeof(answerBuffer)) {				 \
 	int bump;							 \
 	if ((cl)->returnBufSize < (size)+(align)) {			 \
@@ -85,11 +85,11 @@
 	    }								 \
 	    (cl)->returnBufSize = (size)+(align);			 \
 	}								 \
-	res = (char*)cl->returnBuf;					 \
+	(res) = (char*)(cl)->returnBuf;					 \
 	bump = (long)(res) % (align);					 \
-	if (bump) res += (align) - (bump);				 \
+	if (bump) (res) += (align) - (bump);				 \
     } else {								 \
-	res = (char *)answerBuffer;					 \
+	(res) = (char *)answerBuffer;					 \
     }
 
 #define __GLX_SEND_BYTE_ARRAY(len) \
@@ -107,10 +107,10 @@
 #define __GLX_SEND_DOUBLE_ARRAY(len) \
 	WriteToClient(client, (len)*__GLX_SIZE_FLOAT64, answer)
 
-#define __GLX_SEND_VOID_ARRAY(len)  __GLX_SEND_BYTE_ARRAY(len)
-#define __GLX_SEND_UBYTE_ARRAY(len)  __GLX_SEND_BYTE_ARRAY(len)
-#define __GLX_SEND_USHORT_ARRAY(len) __GLX_SEND_SHORT_ARRAY(len)
-#define __GLX_SEND_UINT_ARRAY(len)  __GLX_SEND_INT_ARRAY(len)
+#define __GLX_SEND_VOID_ARRAY(len)  __GLX_SEND_BYTE_ARRAY((len))
+#define __GLX_SEND_UBYTE_ARRAY(len)  __GLX_SEND_BYTE_ARRAY((len))
+#define __GLX_SEND_USHORT_ARRAY(len) __GLX_SEND_SHORT_ARRAY((len))
+#define __GLX_SEND_UINT_ARRAY(len)  __GLX_SEND_INT_ARRAY((len))
 
 /*
 ** PERFORMANCE NOTE:
