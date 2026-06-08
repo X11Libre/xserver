@@ -58,7 +58,7 @@ from The Open Group.
  * should be a valid assumption on all supported architectures.
  */
 #if defined(__STDC__) && (__STDC_VERSION__ - 0 >= 201112L)
-#define MinSetAlignment(type) max(_Alignof(type), _Alignof(unsigned long))
+#define MinSetAlignment(type) max(_Alignof((type)), _Alignof(unsigned long))
 #else
 #define MinSetAlignment(type) max(sizeof(void*), sizeof(unsigned long))
 #endif
