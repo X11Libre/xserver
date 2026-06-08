@@ -1315,6 +1315,11 @@ glamor_get_formats(ScreenPtr screen,
     return glamor_get_formats_internal(glamor_egl, num_formats, formats);
 }
 
+
+/**
+ * See: https://gitlab.freedesktop.org/xorg/xserver/-/work_items/1444
+ * For an explanation as to why this is needed
+ */
 static void
 glamor_filter_modifiers(uint32_t *num_modifiers, uint64_t **modifiers,
                         EGLBoolean *external_only)
@@ -2302,12 +2307,37 @@ glamor_egl_get_fd(ScreenPtr screen)
 
 #ifdef GLAMOR_HAS_GBM
 static Bool
-glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int linear_only)
+glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int is_nvidia)
 {
+    int backend_is_mesa = FALSE;
+    int linear_only = FALSE;
+    const char *backend_name = gbm_device_get_backend_name(glamor_egl->gbm);
+    if (!backend_name) {
+        linear_only = TRUE;
+    } else if (!strcmp(backend_name, "dumb")) {
+        linear_only = TRUE;
+    } else if (!strcmp(backend_name, "drm")) {
+        backend_is_mesa = TRUE;
+    }
+
+    /**
+     * Nvidia's egl libraries do not allow creating GL_TEXTURE_2D textures from linear buffers.
+     *
+     * See: https://gitlab.freedesktop.org/xorg/xserver/-/work_items/1444
+     */
+    if (is_nvidia) {
+        if (linear_only || backend_is_mesa) {
+            return FALSE;
+        }
+    }
+
+#if 0 /* If there is another vendor that has similar issues, re-enable this code */
     /* Check if at least one combination of format + modifier is supported */
     CARD32 *formats = NULL;
     CARD32 num_formats = 0;
     Bool found = FALSE;
+
+    int linear_only;
 
     if (linear_only && !glamor_egl->dmabuf_capable) {
         /* We can't check reliably */
@@ -2359,6 +2389,9 @@ glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int linear_only)
     }
     free(formats);
     return found;
+#else
+    return TRUE;
+#endif
 }
 #endif
 
@@ -2371,10 +2404,6 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
     int *dri_fd = NULL;
     int _caps;
     int is_nvidia = FALSE;
-
-#ifdef GLAMOR_HAS_GBM
-    int gbm_is_linear_only = FALSE;
-#endif
 
     if (!caps) {
         caps = &_caps;
@@ -2411,12 +2440,6 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         if (glamor_egl->gbm == NULL) {
             ErrorF("couldn't create gbm device\n");
             glamor_egl->fd = -1;
-        }
-
-        const char* gbm_backend = glamor_egl->gbm ?
-                                  gbm_device_get_backend_name(glamor_egl->gbm) : NULL;
-        if (gbm_backend && !strcmp(gbm_backend, "dumb")) {
-            gbm_is_linear_only = TRUE;
         }
     }
 #endif
@@ -2545,7 +2568,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 #ifdef GLAMOR_HAS_GBM
     glamor_egl->fast_gbm_import = renderer && vendor && !is_nvidia;
     if (glamor_egl->gbm) {
-        glamor_egl->can_texture_gbm_bo = glamor_egl_can_texture_gbm_bo(glamor_egl, gbm_is_linear_only);
+        glamor_egl->can_texture_gbm_bo = glamor_egl_can_texture_gbm_bo(glamor_egl, is_nvidia);
     }
 #endif
 
