@@ -180,7 +180,8 @@ glxWinErrorMessage(void)
         (errorbuffer[strlen(errorbuffer) - 1] == '\r'))
         errorbuffer[strlen(errorbuffer) - 1] = 0;
 
-    sprintf(errorbuffer + strlen(errorbuffer), " (%08x)", last_error);
+    size_t len = strlen(errorbuffer);
+    snprintf(errorbuffer + len, sizeof(errorbuffer) - len, " (%08x)", last_error);
 
     return errorbuffer;
 }
