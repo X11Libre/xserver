@@ -319,10 +319,10 @@ static inline void writeCharInfo(x_rpcbuf_t *rpcbuf, xCharInfo CI) {
 
 /* static CARD32 hashCI (xCharInfo *p); */
 #define hashCI(p) \
-	(CARD32)(((p->leftSideBearing << 27) + (p->leftSideBearing >> 5) + \
-	          (p->rightSideBearing << 23) + (p->rightSideBearing >> 9) + \
-	          (p->characterWidth << 16) + \
-	          (p->ascent << 11) + (p->descent << 6)) ^ p->attributes)
+	(CARD32)((((p)->leftSideBearing << 27) + ((p)->leftSideBearing >> 5) + \
+	          ((p)->rightSideBearing << 23) + ((p)->rightSideBearing >> 9) + \
+	          ((p)->characterWidth << 16) + \
+	          ((p)->ascent << 11) + ((p)->descent << 6)) ^ (p)->attributes)
 
 static int
 ProcXF86BigfontQueryFont(ClientPtr client)

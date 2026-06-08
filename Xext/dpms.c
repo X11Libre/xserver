@@ -496,8 +496,8 @@ DPMSExtensionInit(void)
     ExtensionEntry *extEntry;
 
 #define CONDITIONALLY_SET_DPMS_TIMEOUT(_timeout_value_)         \
-    if (_timeout_value_ == -1) { /* not yet set from config */  \
-        _timeout_value_ = ScreenSaverTime;                      \
+    if ((_timeout_value_) == -1) { /* not yet set from config */  \
+        (_timeout_value_) = ScreenSaverTime;                      \
     }
 
     CONDITIONALLY_SET_DPMS_TIMEOUT(DPMSStandbyTime)

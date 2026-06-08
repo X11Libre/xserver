@@ -169,8 +169,8 @@ static DevPrivateKeyRec ScreenPrivateKeyRec;
 #define GetScreenPrivate(s) ((ScreenSaverScreenPrivatePtr) \
     dixLookupPrivate(&(s)->devPrivates, ScreenPrivateKey))
 #define SetScreenPrivate(s,v) \
-    dixSetPrivate(&(s)->devPrivates, ScreenPrivateKey, v);
-#define SetupScreen(s)	ScreenSaverScreenPrivatePtr pPriv = (s ? GetScreenPrivate(s) : NULL)
+    dixSetPrivate(&(s)->devPrivates, ScreenPrivateKey, (v));
+#define SetupScreen(s)	ScreenSaverScreenPrivatePtr pPriv = ((s) ? GetScreenPrivate((s)) : NULL)
 
 static void
 CheckScreenPrivate(ScreenPtr pScreen)
