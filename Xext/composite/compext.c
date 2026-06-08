@@ -132,10 +132,10 @@ ProcCompositeQueryVersion(ClientPtr client)
 #define VERIFY_WINDOW(pWindow, wid, client, mode)                       \
     do {                                                                \
         int err;                                                        \
-        err = dixLookupResourceByType((void **) &pWindow, wid,          \
-                                      X11_RESTYPE_WINDOW, client, mode);\
+        err = dixLookupResourceByType((void **) &(pWindow), (wid),      \
+                                      X11_RESTYPE_WINDOW, (client), (mode));\
         if (err != Success) {                                           \
-            client->errorValue = wid;                                   \
+            (client)->errorValue = (wid);                               \
             return err;                                                 \
         }                                                               \
     } while (0)
