@@ -14,8 +14,8 @@
 
 #define VALIDATE_XV_PORT(portID, pPort, mode)\
     {\
-        int rc = dixLookupResourceByType((void **)&(pPort), portID,\
-                                         XvRTPort, client, mode);\
+        int rc = dixLookupResourceByType((void **)&(pPort), (portID),\
+                                         XvRTPort, client, (mode));\
         if (rc != Success)\
             return rc;\
     }
