@@ -108,9 +108,9 @@ InputLineAddChar(InputLine * line, int ch)
     return ch;
 }
 
-#define	ADD_CHAR(l,c)	((l)->num_line<(l)->sz_line?\
+#define	ADD_CHAR(l,c)	(((l)->num_line<(l)->sz_line?\
 				(int)((l)->line[(l)->num_line++]= (c)):\
-				InputLineAddChar(l,c))
+				InputLineAddChar((l),(c))))
 
 static Bool
 GetInputLine(FILE * file, InputLine * line, Bool checkbang)
