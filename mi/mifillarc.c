@@ -45,8 +45,8 @@ Author:  Bob Scheifler, MIT X Consortium
 #define M_PI	3.14159265358979323846
 #endif
 
-#define Dsin(d)	sin((double)d*(M_PI/11520.0))
-#define Dcos(d)	cos((double)d*(M_PI/11520.0))
+#define Dsin(d)	sin((double)(d)*(M_PI/11520.0))
+#define Dcos(d)	cos((double)(d)*(M_PI/11520.0))
 
 static void
 miFillArcSetup(xArc * arc, miFillArcRec * info)
@@ -524,16 +524,16 @@ miFillEllipseD(DrawablePtr pDraw, GCPtr pGC, xArc * arc, DDXPointPtr points, int
 }
 
 #define ADDSPAN(l,r) \
-    if (r >= l) \
+    if ((r) >= (l)) \
     { \
-	pts->x = l; \
+	pts->x = (l); \
 	pts->y = ya; \
 	pts++; \
-	*wids++ = r - l + 1; \
+	*wids++ = (r) - (l) + 1; \
     }
 
 #define ADDSLICESPANS(flip) \
-    if (!flip) \
+    if (!(flip)) \
     { \
 	ADDSPAN(xl, xr); \
     } \

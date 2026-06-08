@@ -96,16 +96,16 @@ static void miOverlayChangeBorderWidth(WindowPtr, unsigned int);
 #define MIOVERLAY_GET_WINDOW_PRIVATE(pWin) ((miOverlayWindowPtr) \
 	dixLookupPrivate(&(pWin)->devPrivates, miOverlayWindowKey))
 #define MIOVERLAY_GET_WINDOW_TREE(pWin) \
-	(MIOVERLAY_GET_WINDOW_PRIVATE(pWin)->tree)
+	(MIOVERLAY_GET_WINDOW_PRIVATE((pWin))->tree)
 
-#define IN_UNDERLAY(w) MIOVERLAY_GET_WINDOW_TREE(w)
-#define IN_OVERLAY(w) !MIOVERLAY_GET_WINDOW_TREE(w)
+#define IN_UNDERLAY(w) MIOVERLAY_GET_WINDOW_TREE((w))
+#define IN_OVERLAY(w) !MIOVERLAY_GET_WINDOW_TREE((w))
 
-#define MARK_OVERLAY(w) miMarkWindow(w)
-#define MARK_UNDERLAY(w) MarkUnderlayWindow(w)
+#define MARK_OVERLAY(w) miMarkWindow((w))
+#define MARK_UNDERLAY(w) MarkUnderlayWindow((w))
 
 #define HasParentRelativeBorder(w) (!(w)->borderIsPixel && \
-                                    HasBorder(w) && \
+                                    HasBorder((w)) && \
                                     (w)->backgroundState == ParentRelative)
 
 Bool

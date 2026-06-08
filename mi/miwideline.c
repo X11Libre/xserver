@@ -87,7 +87,7 @@ typedef struct {
 
 /* Rops which must use span groups */
 #define miSpansCarefulRop(rop)	(((rop) & 0xc) == 0x8 || ((rop) & 0x3) == 0x2)
-#define miSpansEasyRop(rop)	(!miSpansCarefulRop(rop))
+#define miSpansEasyRop(rop)	(!miSpansCarefulRop((rop)))
 
 /*
 
@@ -108,8 +108,8 @@ miInitSpanGroup(SpanGroup * spanGroup)
     spanGroup->ymax = MINSHORT;
 }                               /* InitSpanGroup */
 
-#define YMIN(spans) (spans->points[0].y)
-#define YMAX(spans)  (spans->points[spans->count-1].y)
+#define YMIN(spans) ((spans)->points[0].y)
+#define YMAX(spans)  ((spans)->points[(spans)->count-1].y)
 
 static void
 miSubtractSpans(SpanGroup * spanGroup, Spans * sub)
@@ -271,8 +271,8 @@ QuickSortSpansX(xPoint points[], int widths[], int numSpans)
     xPoint		tpt;				    \
     int    		tw;				    \
 							    \
-    tpt = points[a]; points[a] = points[b]; points[b] = tpt;    \
-    tw = widths[a]; widths[a] = widths[b]; widths[b] = tw;  \
+    tpt = points[(a)]; points[(a)] = points[(b)]; points[(b)] = tpt;    \
+    tw = widths[(a)]; widths[(a)] = widths[(b)]; widths[(b)] = tw;  \
 }
 
     do {
@@ -828,7 +828,7 @@ miPolyBuildEdge(double x0, double y0, double k, /* x0 * dy - y0 * dx */
     return y + yi;
 }
 
-#define StepAround(v, incr, max) (((v) + (incr) < 0) ? (max - 1) : ((v) + (incr) == max) ? 0 : ((v) + (incr)))
+#define StepAround(v, incr, max) (((v) + (incr) < 0) ? ((max) - 1) : ((v) + (incr) == (max)) ? 0 : ((v) + (incr)))
 
 static int
 miPolyBuildPoly(PolyVertexPtr vertices,
@@ -1155,25 +1155,25 @@ miLineArcI(DrawablePtr pDraw,
 }
 
 #define CLIPSTEPEDGE(edgey,edge,edgeleft) \
-    if (ybase == edgey) \
+    if (ybase == (edgey)) \
     { \
-	if (edgeleft) \
+	if ((edgeleft)) \
 	{ \
-	    if (edge->x > xcl) \
-		xcl = edge->x; \
+	    if ((edge)->x > xcl) \
+		xcl = (edge)->x; \
 	} \
 	else \
 	{ \
-	    if (edge->x < xcr) \
-		xcr = edge->x; \
+	    if ((edge)->x < xcr) \
+		xcr = (edge)->x; \
 	} \
-	edgey++; \
-	edge->x += edge->stepx; \
-	edge->e += edge->dx; \
-	if (edge->e > 0) \
+	(edgey)++; \
+	(edge)->x += (edge)->stepx; \
+	(edge)->e += (edge)->dx; \
+	if ((edge)->e > 0) \
 	{ \
-	    edge->x += edge->signdx; \
-	    edge->e -= edge->dy; \
+	    (edge)->x += (edge)->signdx; \
+	    (edge)->e -= (edge)->dy; \
 	} \
     }
 
