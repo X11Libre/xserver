@@ -1934,7 +1934,7 @@ glamor_egl_device_matches_config(EGLDeviceEXT device,
         return TRUE;
     }
 
-    /* We don't have an exact driver name match, reject this device is strict == 2 */
+    /* We don't have an exact driver name match, reject this device if strict == 2 */
     if (strict >= 2) {
         return FALSE;
     }
@@ -2196,11 +2196,28 @@ gbm_create_device_by_name(int fd, const char* name)
 #endif
 
 static Bool
-glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd)
+glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd, int *out_platform)
 {
     EGLDeviceEXT *devices = NULL;
     EGLint num_devices = 0;
     const char *driver_name = NULL;
+    int try_egl_devices = FALSE;
+
+#ifdef GLAMOR_HAS_GBM
+    int gbm_platform_tried = FALSE;
+#endif
+
+/**
+ * See:
+ * https://registry.khronos.org/EGL/extensions/KHR/EGL_KHR_platform_gbm.txt
+ * https://registry.khronos.org/EGL/extensions/MESA/EGL_MESA_platform_gbm.txt
+ *
+ * For where this is defined
+ */
+#ifndef EGL_PLATFORM_GBM_KHR
+#define EGL_PLATFORM_GBM_KHR 0x31D7
+#endif
+
     /**
      * If the user didn't give us a GL driver/library name,
      * we populate it with what we queried
@@ -2212,6 +2229,9 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd)
         LogMessage(X_ERROR, "glamor: eglGetDisplay(" #platform ", " #native ") failed\n"); \
     } else { \
         if (eglInitialize(glamor_egl->display, NULL, NULL)) { \
+            if (out_platform) { \
+                *out_platform = platform; \
+            } \
             if (!glamor_egl->glvnd_vendor && driver_name) { \
                 glamor_egl->glvnd_vendor = strdup(driver_name); \
             } \
@@ -2227,14 +2247,17 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd)
         glamor_egl->display = EGL_NO_DISPLAY; \
     }
 
+    /* If no gl vendor is passed, we don't gain anything by first trying the device platform */
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->gbm) {
+    if (glamor_egl->gbm && !glamor_egl->glvnd_vendor) {
         GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_KHR, glamor_egl->gbm, FALSE);
-        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_MESA, glamor_egl->gbm, TRUE);
+        gbm_platform_tried = TRUE;
     }
 #endif
 
-    if (glamor_query_devices_ext(&devices, &num_devices)) {
+    try_egl_devices = glamor_query_devices_ext(&devices, &num_devices);
+
+    if (try_egl_devices) {
 #define GLAMOR_EGL_TRY_PLATFORM_DEVICE(strict) \
         for (uint32_t i = 0; i < num_devices; i++) { \
             if (glamor_egl_device_matches_config(devices[i], glamor_egl, strict, &driver_name)) { \
@@ -2242,12 +2265,23 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd)
             } \
         }
 
+        /* These 2 queries are exact matches to our fd and gl library */
         GLAMOR_EGL_TRY_PLATFORM_DEVICE(2);
         GLAMOR_EGL_TRY_PLATFORM_DEVICE(1);
+    }
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->gbm && !gbm_platform_tried) {
+        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_KHR, glamor_egl->gbm, FALSE);
+    }
+#endif
+
+    if (try_egl_devices) {
         GLAMOR_EGL_TRY_PLATFORM_DEVICE(0);
+    }
 
 #undef GLAMOR_EGL_TRY_PLATFORM_DEVICE
-    }
+
     driver_name = NULL;
 
     /**
@@ -2275,7 +2309,6 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd)
          * implementation-chosen GBM device.
          */
         GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_KHR, EGL_DEFAULT_DISPLAY, FALSE);
-        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_MESA, EGL_DEFAULT_DISPLAY, FALSE);
 
         /**
          * According to https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_platform_device.txt :
@@ -2401,6 +2434,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
     const char *vendor;
     glamor_egl_priv_t* glamor_egl = NULL;
     int *dri_fd = NULL;
+    int platform = 0;
     int _caps;
     int is_nvidia = FALSE;
 
@@ -2447,7 +2481,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         dri_fd = &glamor_egl->fd;
     }
 
-    if (!glamor_egl_init_display(glamor_egl, dri_fd)) {
+    if (!glamor_egl_init_display(glamor_egl, dri_fd, &platform)) {
         goto error;
     }
 
@@ -2565,7 +2599,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
     }
 
 #ifdef GLAMOR_HAS_GBM
-    glamor_egl->fast_gbm_import = renderer && vendor && !is_nvidia;
+    glamor_egl->fast_gbm_import = renderer && vendor && !is_nvidia && (platform == EGL_PLATFORM_GBM_KHR);
     if (glamor_egl->gbm) {
         glamor_egl->can_texture_gbm_bo = glamor_egl_can_texture_gbm_bo(glamor_egl, is_nvidia);
     }
