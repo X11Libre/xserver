@@ -20,7 +20,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define FbSelectPart(xor,o,t)    xor
+#define FbSelectPart(xor,o,t)    (xor)
 
 #include <dix-config.h>
 
