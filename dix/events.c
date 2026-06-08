@@ -278,7 +278,7 @@ static struct DeviceEventTime {
 /**
  * The root window the given device is currently on.
  */
-#define RootWindow(sprite) sprite->spriteTrace[0]
+#define RootWindow(sprite) (sprite)->spriteTrace[0]
 
 static xEvent *swapEvent = NULL;
 static int swapEventLen = 0;

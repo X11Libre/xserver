@@ -83,7 +83,7 @@ static inline Bool any_output_pending(void) {
 void SmartScheduleInit(void);
 
 /* This prototype is used pervasively in Xext, dix */
-#define DISPATCH_PROC(func) int func(ClientPtr /* client */)
+#define DISPATCH_PROC(func) int (func)(ClientPtr /* client */)
 
 /* proc vectors */
 
