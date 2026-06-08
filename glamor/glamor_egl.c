@@ -1766,11 +1766,7 @@ static inline int
 glamor_egl_device_get_fd(EGLDeviceEXT device)
 {
     const char *dev_file = eglQueryDeviceStringEXT(device, EGL_DRM_DEVICE_FILE_EXT);
-    if (!dev_file) {
-        return FALSE;
-    }
-
-    return open(dev_file, O_RDWR);
+    return dev_file ? open(dev_file, O_RDWR) : -1;
 }
 
 static inline int
