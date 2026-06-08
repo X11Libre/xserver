@@ -186,12 +186,12 @@ static void FindColorInRootCmap(ColormapPtr /* pmap */ ,
                                 ColorCompareProcPtr     /* comp */
     );
 
-#define NUMRED(vis) ((vis->redMask >> vis->offsetRed) + 1)
-#define NUMGREEN(vis) ((vis->greenMask >> vis->offsetGreen) + 1)
-#define NUMBLUE(vis) ((vis->blueMask >> vis->offsetBlue) + 1)
+#define NUMRED(vis) (((vis)->redMask >> (vis)->offsetRed) + 1)
+#define NUMGREEN(vis) (((vis)->greenMask >> (vis)->offsetGreen) + 1)
+#define NUMBLUE(vis) (((vis)->blueMask >> (vis)->offsetBlue) + 1)
 #define ALPHAMASK(vis)	((vis)->nplanes < 32 ? 0 : \
 			 (CARD32) ~((vis)->redMask|(vis)->greenMask|(vis)->blueMask))
-#define RGBMASK(vis) (vis->redMask | vis->greenMask | vis->blueMask | ALPHAMASK(vis))
+#define RGBMASK(vis) ((vis)->redMask | (vis)->greenMask | (vis)->blueMask | ALPHAMASK((vis)))
 
 /* GetNextBitsOrBreak(bits, mask, base)  --
  * (Suggestion: First read the macro, then read this explanation.
@@ -1213,8 +1213,8 @@ typedef struct _bignum {
 #define BigNumGreater(x,y) (((x)->upper > (y)->upper) ||\
 			    ((x)->upper == (y)->upper && (x)->lower > (y)->lower))
 
-#define UnsignedToBigNum(u,r)	(((r)->upper = UPPERPART(u)), \
-				 ((r)->lower = LOWERPART(u)))
+#define UnsignedToBigNum(u,r)	(((r)->upper = UPPERPART((u))), \
+				 ((r)->lower = LOWERPART((u))))
 
 #define MaxBigNum(r)		(((r)->upper = BIGNUMUPPER-1), \
 				 ((r)->lower = BIGNUMLOWER-1))

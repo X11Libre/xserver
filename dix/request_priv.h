@@ -89,7 +89,7 @@ static inline int __write_reply_hdr_simple(
  * return             X11 result code
  */
 #define X_SEND_REPLY_WITH_RPCBUF(client, hdrstruct, rpcbuf) \
-    __write_reply_hdr_and_rpcbuf(client, &(hdrstruct), sizeof(hdrstruct), &(rpcbuf));
+    __write_reply_hdr_and_rpcbuf((client), &(hdrstruct), sizeof(hdrstruct), &(rpcbuf));
 
 /*
  * send reply with header struct (not pointer!) without any payload
@@ -99,7 +99,7 @@ static inline int __write_reply_hdr_simple(
  * @return            X11 result code (=Success)
  */
 #define X_SEND_REPLY_SIMPLE(client, hdrstruct) \
-    __write_reply_hdr_simple(client, &(hdrstruct), sizeof(hdrstruct));
+    __write_reply_hdr_simple((client), &(hdrstruct), sizeof(hdrstruct));
 
 /*
  * macros for request handlers
@@ -147,15 +147,15 @@ static inline int __write_reply_hdr_simple(
 
 /* swap CARD16 rest of request (after the struct) - check fixed count */
 #define X_REQUEST_REST_COUNT_CARD16(count) \
-    REQUEST_FIXED_SIZE(*stuff, count * sizeof(CARD16)); \
+    REQUEST_FIXED_SIZE(*stuff, (count) * sizeof(CARD16)); \
     CARD16 *request_rest = (CARD16 *) (&stuff[1]); \
-    do { if (client->swapped) SwapShorts((signed short*)request_rest, count); } while (0)
+    do { if (client->swapped) SwapShorts((signed short*)request_rest, (count)); } while (0)
 
 /* swap CARD32 rest of request (after the struct) - check fixed count */
 #define X_REQUEST_REST_COUNT_CARD32(count) \
-    REQUEST_FIXED_SIZE(*stuff, count * sizeof(CARD32)); \
+    REQUEST_FIXED_SIZE(*stuff, (count) * sizeof(CARD32)); \
     CARD32 *request_rest = (CARD32 *) (&stuff[1]); \
-    do { if (client->swapped) SwapLongs(request_rest, count); } while (0) \
+    do { if (client->swapped) SwapLongs(request_rest, (count)); } while (0) \
 
 /*
  * macros for request handlers
