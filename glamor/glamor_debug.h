@@ -53,7 +53,7 @@
 
 #define glamor_debug_output(_level_, _format_,...)	\
   do {							\
-    if (glamor_debug_level >= _level_)			\
+    if (glamor_debug_level >= (_level_))			\
       __debug_output_message(_format_,			\
 			     "Glamor debug",		\
 			     ##__VA_ARGS__);		\

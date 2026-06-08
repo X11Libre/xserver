@@ -548,8 +548,8 @@ glamor_pixmap_hcnt(glamor_pixmap_private *priv)
 }
 
 #define glamor_pixmap_loop(priv, box_index)                            \
-    for (box_index = 0; box_index < glamor_pixmap_hcnt(priv) *         \
-             glamor_pixmap_wcnt(priv); box_index++)                    \
+    for ((box_index) = 0; (box_index) < glamor_pixmap_hcnt((priv)) *         \
+             glamor_pixmap_wcnt((priv)); (box_index)++)                    \
 
 static inline int
 glamor_drawable_effective_depth(DrawablePtr drawable)

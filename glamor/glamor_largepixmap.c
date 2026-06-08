@@ -26,7 +26,7 @@ __glamor_large(glamor_pixmap_private *pixmap_priv) {
  */
 #if 0
 //#define DEBUGF(str, ...)  do {} while(0)
-#define DEBUGF(str, ...) ErrorF(str, ##__VA_ARGS__)
+#define DEBUGF(str, ...) ErrorF((str), ##__VA_ARGS__)
 //#define DEBUGRegionPrint(x) do {} while (0)
 #define DEBUGRegionPrint RegionPrint
 #endif
@@ -948,9 +948,9 @@ glamor_get_transform_block_size(struct pixman_transform *transform,
 }
 
 #define VECTOR_FROM_POINT(p, x, y) do {\
-	p.v[0] = x;  \
-	p.v[1] = y;  \
-	p.v[2] = 1.0; } while (0)
+	(p).v[0] = (x);  \
+	(p).v[1] = (y);  \
+	(p).v[2] = 1.0; } while (0)
 static void
 glamor_get_transform_extent_from_box(struct pixman_box32 *box,
                                      struct pixman_transform *transform)
@@ -1318,7 +1318,7 @@ glamor_composite_largepixmap_region(CARD8 op,
 			 null_mask ? NULL : mask, dest,		\
 			 null_source ? NULL : source_pixmap,    \
 			 null_mask ? NULL : mask_pixmap, 	\
-			 dest_pixmap, region,		        \
+			 dest_pixmap, (region),		        \
 			 x_source, y_source, x_mask, y_mask,	\
 			 x_dest, y_dest)) {			\
 		assert(0);					\
