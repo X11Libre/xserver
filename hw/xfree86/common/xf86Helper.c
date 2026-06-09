@@ -350,8 +350,8 @@ xf86AddPixFormat(ScrnInfoPtr pScrn, int depth, int bpp, int pad)
  */
 
 /* Can the screen handle 32 bpp pixmaps */
-#define DO_PIX32(f) ((f & Support32bppFb) || \
-		     ((f & Support24bppFb) && (f & SupportConvert32to24)))
+#define DO_PIX32(f) (((f) & Support32bppFb) || \
+		     (((f) & Support24bppFb) && ((f) & SupportConvert32to24)))
 
 #ifndef GLOBAL_DEFAULT_DEPTH
 #define GLOBAL_DEFAULT_DEPTH 24

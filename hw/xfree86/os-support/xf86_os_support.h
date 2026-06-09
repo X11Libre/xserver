@@ -21,10 +21,10 @@
 
 #define xf86FatalError(a, b) \
 	if (dispatchException & DE_TERMINATE) { \
-		ErrorF(a, b); \
+		ErrorF((a), (b)); \
 		ErrorF("\n"); \
 		return; \
-	} else FatalError(a, b)
+	} else FatalError((a), (b))
 
 typedef void (*PMClose) (void);
 

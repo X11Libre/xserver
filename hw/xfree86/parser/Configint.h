@@ -89,7 +89,7 @@ extern LexRec xf86_lex_val;
 #include "configProcs.h"
 #include <stdlib.h>
 
-#define TestFree(a) if (a) { free ((void *) a); a = NULL; }
+#define TestFree(a) if (a) { free ((void *) (a)); (a) = NULL; }
 
 #define parsePrologue(typeptr,typerec) typeptr ptr; \
 if( (ptr=calloc(1,sizeof(typerec))) == NULL ) { return NULL; }

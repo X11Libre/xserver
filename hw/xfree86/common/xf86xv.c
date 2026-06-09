@@ -115,7 +115,7 @@ static unsigned long PortResource = 0;
     ((XvScreenPtr)dixLookupPrivate(&(pScreen)->devPrivates, XvGetScreenKey()))
 
 #define GET_XF86XV_SCREEN(pScreen) \
-    ((XF86XVScreenPtr)(dixGetPrivate(&pScreen->devPrivates, &XF86XVScreenPrivateKey)))
+    ((XF86XVScreenPtr)(dixGetPrivate(&(pScreen)->devPrivates, &XF86XVScreenPrivateKey)))
 
 #define GET_XF86XV_WINDOW(pWin) \
     ((XF86XVWindowPtr)dixLookupPrivate(&(pWin)->devPrivates, XF86XVWindowKey))

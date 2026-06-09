@@ -18,7 +18,7 @@
 #include "vbe.h"
 #include "xf86Bus.h"
 
-#define VERSION(x) VBE_VERSION_MAJOR(x),VBE_VERSION_MINOR(x)
+#define VERSION(x) VBE_VERSION_MAJOR((x)),VBE_VERSION_MINOR((x))
 
 #if X_BYTE_ORDER == X_LITTLE_ENDIAN
 #define B_O16(x)  (x)
@@ -28,9 +28,9 @@
 #define B_O32(x)  ((((x) & 0xff) << 24) | (((x) & 0xff00) << 8) \
                   | (((x) & 0xff0000) >> 8) | (((x) & 0xff000000) >> 24))
 #endif
-#define L_ADD(x)  (B_O32(x) & 0xffff) + ((B_O32(x) >> 12) & 0xffff00)
+#define L_ADD(x)  (B_O32((x)) & 0xffff) + ((B_O32((x)) >> 12) & 0xffff00)
 
-#define FARP(p)		(((unsigned)(p & 0xffff0000) >> 12) | (p & 0xffff))
+#define FARP(p)		(((unsigned)((p) & 0xffff0000) >> 12) | ((p) & 0xffff))
 #define R16(v)		((v) & 0xffff)
 
 static unsigned char *vbeReadEDID(vbeInfoPtr pVbe);

@@ -104,9 +104,9 @@
 #ifdef DEBUG
 
 #define DECODE_PRINTF(x)     	if (DEBUG_DECODE()) \
-									x86emu_decode_printf("%s",x)
+									x86emu_decode_printf("%s",(x))
 #define DECODE_PRINTF2(x,y)  	if (DEBUG_DECODE()) \
-									x86emu_decode_printf(x,y)
+									x86emu_decode_printf((x),(y))
 
 /*
  * The following allows us to look at the bytes of an instruction.  The
@@ -116,13 +116,13 @@
  */
 #define INC_DECODED_INST_LEN(x)                    	\
 	if (DEBUG_DECODE())  	                       	\
-		x86emu_inc_decoded_inst_len(x)
+		x86emu_inc_decoded_inst_len((x))
 
 #define SAVE_IP_CS(x,y)                               			\
 	if (DEBUG_DECODE() | DEBUG_TRACECALL() | DEBUG_BREAK() \
               | DEBUG_IO_TRACE() | DEBUG_SAVE_IP_CS()) { \
-		M.x86.saved_cs = x;                          			\
-		M.x86.saved_ip = y;                          			\
+		M.x86.saved_cs = (x);                          			\
+		M.x86.saved_ip = (y);                          			\
 	}
 #else
 #define INC_DECODED_INST_LEN(x)
@@ -167,19 +167,19 @@
 	if (DEBUG_TRACECALLREGS())									\
 		x86emu_dump_regs();                                     \
 	if (DEBUG_TRACECALL())                                     	\
-		printk("%04x:%04x: CALL %s%04x:%04x\n", u , v, s, w, x);
+		printk("%04x:%04x: CALL %s%04x:%04x\n", (u) , (v), (s), (w), (x));
 #define RETURN_TRACE(n,u,v)                                    \
 	if (DEBUG_TRACECALLREGS())									\
 		x86emu_dump_regs();                                     \
 	if (DEBUG_TRACECALL())                                     	\
-		printk("%04x:%04x: %s\n",u,v,n);
+		printk("%04x:%04x: %s\n",(u),(v),(n));
 #else
 #define CALL_TRACE(u,v,w,x,s)
 #define RETURN_TRACE(n,u,v)
 #endif
 
 #ifdef DEBUG
-#define	DB(x)	x
+#define	DB(x)	(x)
 #else
 #define	DB(x)
 #endif

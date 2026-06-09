@@ -192,7 +192,7 @@ typedef struct _modesettingRec {
 #endif
 } modesettingRec, *modesettingPtr;
 
-#define glamor_finish(screen) ms->glamor.finish(screen)
+#define glamor_finish(screen) ms->glamor.finish((screen))
 
 #define modesettingPTR(p) ((modesettingPtr)((p)->driverPrivate))
 modesettingEntPtr ms_ent_priv(ScrnInfoPtr scrn);

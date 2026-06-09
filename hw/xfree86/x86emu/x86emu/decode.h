@@ -43,10 +43,10 @@
 
 /* Instruction Decoding Stuff */
 
-#define FETCH_DECODE_MODRM(mod,rh,rl) 	fetch_decode_modrm(&mod,&rh,&rl)
-#define DECODE_RM_BYTE_REGISTER(r)    	decode_rm_byte_register(r)
-#define DECODE_RM_WORD_REGISTER(r)    	decode_rm_word_register(r)
-#define DECODE_RM_LONG_REGISTER(r)    	decode_rm_long_register(r)
+#define FETCH_DECODE_MODRM(mod,rh,rl) 	fetch_decode_modrm(&(mod),&(rh),&(rl))
+#define DECODE_RM_BYTE_REGISTER(r)    	decode_rm_byte_register((r))
+#define DECODE_RM_WORD_REGISTER(r)    	decode_rm_word_register((r))
+#define DECODE_RM_LONG_REGISTER(r)    	decode_rm_long_register((r))
 #define DECODE_CLEAR_SEGOVR()         	M.x86.mode &= ~SYSMODE_CLRMASK
 
 /*-------------------------- Function Prototypes --------------------------*/

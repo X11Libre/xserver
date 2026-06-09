@@ -551,11 +551,11 @@ xf86pathIsSafe(const char *path)
 						} while (0)
 
 #define APPEND_STR(s)	do {									\
-							if (strlen(s) + l > PATH_MAX) {		\
+							if (strlen((s)) + l > PATH_MAX) {		\
 								BAIL_OUT;						\
 							} else {							\
-								strcpy(result + l, s);			\
-								l += strlen(s);					\
+								strcpy(result + l, (s));			\
+								l += strlen((s));					\
 							}									\
 						} while (0)
 

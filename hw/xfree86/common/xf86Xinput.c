@@ -111,9 +111,9 @@
 
 /* Valuator verification macro */
 #define XI_VERIFY_VALUATORS(num_valuators) \
-    if (num_valuators > MAX_VALUATORS) { \
+    if ((num_valuators) > MAX_VALUATORS) { \
         LogMessageVerb(X_ERROR, 1, "%s: num_valuator %d is greater than MAX_VALUATORS\n", \
-                       __func__, num_valuators); \
+                       __func__, (num_valuators)); \
         return; \
     }
 

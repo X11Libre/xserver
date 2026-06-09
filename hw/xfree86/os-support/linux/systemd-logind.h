@@ -38,7 +38,7 @@ void systemd_logind_drop_master(void);
 #define systemd_logind_init()
 #define systemd_logind_fini()
 #define systemd_logind_take_fd(major, minor, path, paus) -1
-#define systemd_logind_release_fd(major, minor, fd) close(fd)
+#define systemd_logind_release_fd(major, minor, fd) close((fd))
 #define systemd_logind_controls_session() 0
 #define systemd_logind_vtenter()
 #define systemd_logind_drop_master()

@@ -108,9 +108,9 @@ struct x86_fpu_registers {
 
 #ifdef DEBUG
 #define DECODE_PRINTINSTR32(t,mod,rh,rl)     	\
-	DECODE_PRINTF(t[(mod<<3)+(rh)]);
+	DECODE_PRINTF((t)[((mod)<<3)+(rh)]);
 #define DECODE_PRINTINSTR256(t,mod,rh,rl)    	\
-	DECODE_PRINTF(t[(mod<<6)+(rh<<3)+(rl)]);
+	DECODE_PRINTF((t)[((mod)<<6)+((rh)<<3)+(rl)]);
 #else
 #define DECODE_PRINTINSTR32(t,mod,rh,rl)
 #define DECODE_PRINTINSTR256(t,mod,rh,rl)
