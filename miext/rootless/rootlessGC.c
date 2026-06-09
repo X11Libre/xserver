@@ -195,8 +195,8 @@ static GCOps rootlessGCOps = {
             (pGC)->bgPixel = _save_bg;				\
             (pGC)->planemask = _save_pm;			\
             (pDraw)->depth = (pDraw)->bitsPerPixel;		\
-            VALIDATE_GC(pGC, GCForeground | GCBackground |	\
-                        GCPlaneMask, pDraw);			\
+            VALIDATE_GC((pGC), GCForeground | GCBackground |	\
+                        GCPlaneMask, (pDraw));			\
             (pDraw)->depth = depth;				\
         }							\
     } while (0)
@@ -210,8 +210,8 @@ static GCOps rootlessGCOps = {
             (pGC)->bgPixel |= mask;					\
             (pGC)->planemask |= mask;					\
             (pDraw)->depth = (pDraw)->bitsPerPixel;			\
-            VALIDATE_GC(pGC, GCForeground |				\
-                        GCBackground | GCPlaneMask, pDraw);		\
+            VALIDATE_GC((pGC), GCForeground |				\
+                        GCBackground | GCPlaneMask, (pDraw));		\
             (pDraw)->depth = depth;					\
             _changed = TRUE;						\
         }								\
@@ -219,9 +219,9 @@ static GCOps rootlessGCOps = {
 
 #define VALIDATE_GC(pGC, changes, pDrawable)				\
     do {								\
-        pGC->funcs->ValidateGC(pGC, changes, pDrawable);		\
-        if (((WindowPtr) pDrawable)->viewable) {			\
-            gcrec->originalOps = pGC->ops;				\
+        (pGC)->funcs->ValidateGC((pGC), (changes), (pDrawable));		\
+        if (((WindowPtr) (pDrawable))->viewable) {			\
+            gcrec->originalOps = (pGC)->ops;				\
         }								\
     } while(0)
 
@@ -400,7 +400,7 @@ RootlessCopyClip(GCPtr pgcDst, GCPtr pgcSrc)
 #define GCOP_UNWRAP(pGC) \
     RootlessGCRec *gcrec = (RootlessGCRec *) \
         dixLookupPrivate(&(pGC)->devPrivates, rootlessGCPrivateKey); \
-    const GCFuncs *saveFuncs = pGC->funcs; \
+    const GCFuncs *saveFuncs = (pGC)->funcs; \
     (pGC)->funcs = gcrec->originalFuncs; \
     (pGC)->ops = gcrec->originalOps;
 
