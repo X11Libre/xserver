@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+# gh-retry-transient-failed — restart CI jobs that likely failed from infrastructure issues.
+#
+# Reads [make-pr] from .git/config to determine the GitHub remote, then
+# examines every open PR for check-runs that failed.  A failure is
+# considered transient (and therefore worth retrying) if:
+#
+#   1. the job ran for ≥20 minutes (likely a runner timeout / stall); or
+#   2. the job's log contains known transient-infrastructure patterns
+#      (VM boot failures, SSH drops, DNS flakes, test timeouts, …).
+#
+# Failed jobs in transient runs are restarted with `gh run rerun --failed`.
+#
+# Usage:  gh-retry-transient-failed [--dry-run]
+set -euo pipefail
+
+DRY_RUN=false
+if [[ "${1:-}" == "--dry-run" ]]; then
+    DRY_RUN=true
+    shift
+fi
+
+# Patterns that indicate a transient infrastructure failure
+# (case-insensitive grep --extended-regexp).
+TRANSIENT_PATTERNS=(
+    "boot timeout|boot failed"
+    "Connection refused|connection closed|connection.*reset"
+    "Could not resolve host|Temporary failure in name resolution"
+    "Name or service not known|Name does not resolve"
+    "TIMEOUT"
+)
+
+########################################################################
+# 1. Derive owner/repo from git config
+########################################################################
+UPSTREAM_REMOTE=$(git config --local make-pr.upstream-remote || echo "origin")
+REMOTE_URL=$(git config --local remote."$UPSTREAM_REMOTE".url || true)
+
+# Normalise the URL to "owner/repo" form.
+REPO=""
+if [[ "$REMOTE_URL" =~ ^git@github\.com:(.+)/(.+)\.git$ ]]; then
+    REPO="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+elif [[ "$REMOTE_URL" =~ ^https://github\.com/(.+)/(.+)\.git$ ]]; then
+    REPO="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+elif [[ "$REMOTE_URL" =~ ^https://github\.com/(.+)/(.+)$ ]]; then
+    REPO="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+fi
+
+if [[ -z "$REPO" ]]; then
+    echo "ERROR: cannot parse owner/repo from remote '$UPSTREAM_REMOTE' url: $REMOTE_URL" >&2
+    exit 1
+fi
+
+echo "Repo: $REPO  (from remote '$UPSTREAM_REMOTE')"
+echo ""
+
+########################################################################
+# 2. Gather all open PRs
+########################################################################
+PR_LIST=$(gh pr list --repo "$REPO" --state open --json number,headRefName --jq '.[] | "\(.number)|\(.headRefName)"' 2>/dev/null)
+
+if [[ -z "$PR_LIST" ]]; then
+    echo "No open PRs found."
+    exit 0
+fi
+
+########################################################################
+# 3. For each PR, inspect status checks
+########################################################################
+TRIGGERED=0
+
+while IFS='|' read -r PR_NUM BRANCH; do
+    echo "--- PR #$PR_NUM ($BRANCH) ---"
+
+    # Grab all check-runs for this PR.
+    ROLLUP=$(gh pr view "$PR_NUM" --repo "$REPO" --json statusCheckRollup \
+        --jq '.statusCheckRollup[] | select(.__typename == "CheckRun") | {name, status, conclusion, startedAt, completedAt, detailsUrl}' 2>/dev/null)
+
+    if [[ -z "$ROLLUP" ]]; then
+        echo "  (no check runs found)"
+        continue
+    fi
+
+    # Collect all completed failures.
+    FAILED_JOBS=$(echo "$ROLLUP" | jq -s '
+        [.[] | select(.status == "COMPLETED" and .conclusion == "FAILURE")]
+    ' 2>/dev/null) || true
+
+    if [[ "$(echo "$FAILED_JOBS" | jq 'length')" -eq 0 ]]; then
+        echo "  No failures."
+        continue
+    fi
+
+    echo "  Checking failures…"
+
+    # Build a deduplicated list of transient workflow-run IDs.
+    TRANSIENT_RUN_IDS=""
+    SEEN_IDS=""
+
+    while IFS=$'\t' read -r NAME DETAILS_URL STARTED_AT COMPLETED_AT; do
+        # Parse run / job IDs from the detailsUrl.
+        # Format: …/actions/runs/<run_id>/job/<job_id>
+        RUN_ID=$(echo "$DETAILS_URL" | sed 's|.*/runs/||;s|/job/.*||')
+        JOB_ID=$(echo "$DETAILS_URL" | sed 's|.*/job/||')
+
+        # Compute duration in seconds.
+        START_EPOCH=$(date -d "$STARTED_AT" +%s 2>/dev/null || echo 0)
+        END_EPOCH=$(date -d "$COMPLETED_AT" +%s 2>/dev/null || echo 0)
+        DURATION=$(( END_EPOCH - START_EPOCH ))
+
+        IS_TRANSIENT=false
+        REASON=""
+
+        # Rule 1: ≥20 minutes → runner timeout / stall.
+        if [[ $DURATION -ge 1200 ]]; then
+            IS_TRANSIENT=true
+            REASON="$(( DURATION / 60 ))m timeout"
+        fi
+
+        # Rule 2: scan the job log for known transient patterns.
+        # Fetch the first and last 100 KB of the log in a single pass
+        # so we catch VM boot messages (start) and test TIMEOUTs (end).
+        if ! $IS_TRANSIENT; then
+            LOG_DATA=$(gh api "repos/$REPO/actions/jobs/$JOB_ID/logs" 2>/dev/null \
+                | (head -c 100000; tail -c 100000) 2>/dev/null) || true
+            for PATTERN in "${TRANSIENT_PATTERNS[@]}"; do
+                if echo "$LOG_DATA" | grep -qiE "$PATTERN"; then
+                    IS_TRANSIENT=true
+                    REASON="log matched /$PATTERN/"
+                    break
+                fi
+            done
+        fi
+
+        if $IS_TRANSIENT; then
+            echo "    $NAME  ($REASON)"
+            if ! echo "$SEEN_IDS" | grep -qxF "$RUN_ID"; then
+                TRANSIENT_RUN_IDS+="$RUN_ID"$'\n'
+                SEEN_IDS+="$RUN_ID"$'\n'
+            fi
+        else
+            echo "    $NAME  (no transient signal, skipped)"
+        fi
+    done < <(echo "$FAILED_JOBS" | jq -r '.[] | [.name, .detailsUrl, .startedAt, .completedAt] | @tsv')
+
+    if [[ -z "$TRANSIENT_RUN_IDS" ]]; then
+        echo "  No transient failures."
+        continue
+    fi
+
+    for RUN_ID in $TRANSIENT_RUN_IDS; do
+        if $DRY_RUN; then
+            echo "  [DRY RUN] Would rerun failed jobs in run $RUN_ID"
+        else
+            echo "  Rerunning failed jobs in run $RUN_ID …"
+            if gh run rerun "$RUN_ID" --repo "$REPO" --failed 2>&1; then
+                echo "  ✓ Done."
+                TRIGGERED=$((TRIGGERED + 1))
+            else
+                echo "  ✗ gh run rerun failed (workflow file may have changed)."
+            fi
+        fi
+    done
+done <<< "$PR_LIST"
+
+echo ""
+echo "=== done: $TRIGGERED reruns triggered ==="
