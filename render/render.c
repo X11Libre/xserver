@@ -2926,16 +2926,12 @@ ProcRenderAddTraps(ClientPtr client)
 static int
 ProcRenderCreateSolidFill(ClientPtr client)
 {
-    REQUEST(xRenderCreateSolidFillReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
-
-    if (client->swapped) {
-        swapl(&stuff->pid);
-        swaps(&stuff->color.alpha);
-        swaps(&stuff->color.red);
-        swaps(&stuff->color.green);
-        swaps(&stuff->color.blue);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRenderCreateSolidFillReq);
+    X_REQUEST_FIELD_CARD32(pid);
+    X_REQUEST_FIELD_CARD16(color.alpha);
+    X_REQUEST_FIELD_CARD16(color.red);
+    X_REQUEST_FIELD_CARD16(color.green);
+    X_REQUEST_FIELD_CARD16(color.blue);
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderCreateSolidFill(client, stuff)
