@@ -175,4 +175,24 @@ static inline int __write_reply_hdr_simple(
 #define X_REPLY_FIELD_CARD64(field) \
     do { if (client->swapped) swapll(&reply.field); } while (0)
 
+/*
+ * do function call, check it's result and return when it's not Success
+ */
+#define X_CALL_CHECK_ERR(_FOO_) \
+    do { int _rc = _FOO_; \
+      if (_rc != Success) { return _rc; } \
+    } while (0)
+
+/*
+ * do function call, check it's result and return when it's not Success
+ * assign's client->errorValue on failure
+ */
+#define X_CALL_CHECK_ERR_VAL(_FOO_,_ERRVAL_) \
+    do { int _rc = _FOO_; \
+      if (_rc != Success) { \
+        client->errorValue = _ERRVAL_; \
+        return _rc; \
+      } \
+    } while (0)
+
 #endif /* _XSERVER_DIX_REQUEST_PRIV_H */
