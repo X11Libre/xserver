@@ -203,7 +203,7 @@ struct i386_segment_regs {
 #define CLEARALL_FLAG(m)    	(M.x86.R_FLG = 0)
 
 #define CONDITIONAL_SET_FLAG(COND,FLAG) \
-  if (COND) SET_FLAG(FLAG); else CLEAR_FLAG(FLAG)
+  if (COND) SET_FLAG((FLAG)); else CLEAR_FLAG((FLAG))
 
 #define F_PF_CALC 0x010000      /* PARITY flag has been calced    */
 #define F_ZF_CALC 0x020000      /* ZERO flag has been calced      */

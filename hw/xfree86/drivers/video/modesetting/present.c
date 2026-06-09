@@ -45,7 +45,7 @@
 #include "drmmode_display.h"
 
 #if 0
-#define DebugPresent(x) ErrorF x
+#define DebugPresent(x) ErrorF (x)
 #else
 #define DebugPresent(x)
 #endif

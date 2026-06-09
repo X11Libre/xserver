@@ -71,10 +71,10 @@ typedef struct {
 #define VM_GETPRIV(c) ((VidModePrivPtr) \
     dixLookupPrivate(&(c)->devPrivates, VidModeClientPrivateKey))
 #define VM_SETPRIV(c,p) \
-    dixSetPrivate(&(c)->devPrivates, VidModeClientPrivateKey, p)
+    dixSetPrivate(&(c)->devPrivates, VidModeClientPrivateKey, (p))
 
 #ifdef DEBUG
-#define DEBUG_P(x) DebugF(x"\n")
+#define DEBUG_P(x) DebugF((x)"\n")
 #else
 #define DEBUG_P(x) /**/
 #endif
@@ -384,15 +384,15 @@ ProcVidModeGetAllModeLines(ClientPtr client)
 }
 
 #define MODEMATCH(mode,stuff)	  \
-     (VidModeGetModeValue(mode, VIDMODE_H_DISPLAY)  == stuff->hdisplay \
-     && VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART)  == stuff->hsyncstart \
-     && VidModeGetModeValue(mode, VIDMODE_H_SYNCEND)  == stuff->hsyncend \
-     && VidModeGetModeValue(mode, VIDMODE_H_TOTAL)  == stuff->htotal \
-     && VidModeGetModeValue(mode, VIDMODE_V_DISPLAY)  == stuff->vdisplay \
-     && VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART)  == stuff->vsyncstart \
-     && VidModeGetModeValue(mode, VIDMODE_V_SYNCEND)  == stuff->vsyncend \
-     && VidModeGetModeValue(mode, VIDMODE_V_TOTAL)  == stuff->vtotal \
-     && VidModeGetModeValue(mode, VIDMODE_FLAGS)  == stuff->flags )
+     (VidModeGetModeValue((mode), VIDMODE_H_DISPLAY)  == (stuff)->hdisplay \
+     && VidModeGetModeValue((mode), VIDMODE_H_SYNCSTART)  == (stuff)->hsyncstart \
+     && VidModeGetModeValue((mode), VIDMODE_H_SYNCEND)  == (stuff)->hsyncend \
+     && VidModeGetModeValue((mode), VIDMODE_H_TOTAL)  == (stuff)->htotal \
+     && VidModeGetModeValue((mode), VIDMODE_V_DISPLAY)  == (stuff)->vdisplay \
+     && VidModeGetModeValue((mode), VIDMODE_V_SYNCSTART)  == (stuff)->vsyncstart \
+     && VidModeGetModeValue((mode), VIDMODE_V_SYNCEND)  == (stuff)->vsyncend \
+     && VidModeGetModeValue((mode), VIDMODE_V_TOTAL)  == (stuff)->vtotal \
+     && VidModeGetModeValue((mode), VIDMODE_FLAGS)  == (stuff)->flags )
 
 static int VidModeAddModeLine(ClientPtr client, xXF86VidModeAddModeLineReq* stuff);
 

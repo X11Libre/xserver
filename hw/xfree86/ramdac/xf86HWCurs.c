@@ -38,12 +38,12 @@ xf86ReverseBitOrder(CARD32 v)
 #define SCANLINE CARD32
 #define CUR_BITMAP_SCANLINE_PAD 32
 #define CUR_LOG2_BITMAP_PAD 5
-#define REVERSE_BIT_ORDER(w) xf86ReverseBitOrder(w)
+#define REVERSE_BIT_ORDER(w) xf86ReverseBitOrder((w))
 #else
 #define SCANLINE CARD64
 #define CUR_BITMAP_SCANLINE_PAD BITMAP_SCANLINE_PAD
 #define CUR_LOG2_BITMAP_PAD LOG2_BITMAP_PAD
-#define REVERSE_BIT_ORDER(w) xf86CARD64ReverseBits(w)
+#define REVERSE_BIT_ORDER(w) xf86CARD64ReverseBits((w))
 static CARD64 xf86CARD64ReverseBits(CARD64 w);
 
 static CARD64
@@ -69,7 +69,7 @@ xf86CARD64ReverseBits(CARD64 w)
 #define SCANLINE CARD32
 #define CUR_BITMAP_SCANLINE_PAD BITMAP_SCANLINE_PAD
 #define CUR_LOG2_BITMAP_PAD LOG2_BITMAP_PAD
-#define REVERSE_BIT_ORDER(w) xf86ReverseBitOrder(w)
+#define REVERSE_BIT_ORDER(w) xf86ReverseBitOrder((w))
 
 #endif                          /* BITMAP_SCANLINE_PAD == 64 */
 

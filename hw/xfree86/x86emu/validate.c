@@ -57,13 +57,13 @@
 
 #define VAL_START_BINARY(parm_type,res_type,dmax,smax,dincr,sincr)  \
 {                                                                   \
-    parm_type   d,s;                                                \
-    res_type    r,r_asm;                                            \
+    (parm_type)   d,s;                                                \
+    (res_type)    r,r_asm;                                            \
 	ulong     	flags,inflags;                                      \
 	int         f,failed = false;                                   \
     char        buf1[80],buf2[80];                                  \
-    for (d = 0; d < dmax; d += dincr) {                             \
-        for (s = 0; s < smax; s += sincr) {                         \
+    for (d = 0; d < (dmax); d += (dincr)) {                             \
+        for (s = 0; s < (smax); s += (sincr)) {                         \
             M.x86.R_EFLG = inflags = flags = def_flags;             \
             for (f = 0; f < 2; f++) {
 
@@ -187,15 +187,15 @@
 
 #define VAL_START_TERNARY(parm_type,res_type,dmax,smax,dincr,sincr,maxshift)\
 {                                                                   \
-    parm_type   d,s;                                                \
-    res_type    r,r_asm;                                            \
+    (parm_type)   d,s;                                                \
+    (res_type)    r,r_asm;                                            \
     u8          shift;                                              \
 	u32         flags,inflags;                                      \
     int         f,failed = false;                                   \
     char        buf1[80],buf2[80];                                  \
-    for (d = 0; d < dmax; d += dincr) {                             \
-        for (s = 0; s < smax; s += sincr) {                         \
-            for (shift = 0; shift < maxshift; shift += 1) {        \
+    for (d = 0; d < (dmax); d += (dincr)) {                             \
+        for (s = 0; s < (smax); s += (sincr)) {                         \
+            for (shift = 0; shift < (maxshift); shift += 1) {        \
                 M.x86.R_EFLG = inflags = flags = def_flags;         \
                 for (f = 0; f < 2; f++) {
 
@@ -257,11 +257,11 @@
 
 #define VAL_START_UNARY(parm_type,max,incr)                 \
 {                                                           \
-    parm_type   d,r,r_asm;                                  \
+    (parm_type)   d,r,r_asm;                                  \
 	u32         flags,inflags;                              \
     int         f,failed = false;                           \
     char        buf1[80],buf2[80];                          \
-    for (d = 0; d < max; d += incr) {                       \
+    for (d = 0; d < (max); d += (incr)) {                       \
         M.x86.R_EFLG = inflags = flags = def_flags;         \
         for (f = 0; f < 2; f++) {
 
