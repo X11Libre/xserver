@@ -62,8 +62,8 @@
 	ulong     	flags,inflags;                                      \
 	int         f,failed = false;                                   \
     char        buf1[80],buf2[80];                                  \
-    for (d = 0; d < dmax; d += dincr) {                             \
-        for (s = 0; s < smax; s += sincr) {                         \
+    for (d = 0; d < (dmax); d += (dincr)) {                             \
+        for (s = 0; s < (smax); s += (sincr)) {                         \
             M.x86.R_EFLG = inflags = flags = def_flags;             \
             for (f = 0; f < 2; f++) {
 
@@ -193,9 +193,9 @@
 	u32         flags,inflags;                                      \
     int         f,failed = false;                                   \
     char        buf1[80],buf2[80];                                  \
-    for (d = 0; d < dmax; d += dincr) {                             \
-        for (s = 0; s < smax; s += sincr) {                         \
-            for (shift = 0; shift < maxshift; shift += 1) {        \
+    for (d = 0; d < (dmax); d += (dincr)) {                             \
+        for (s = 0; s < (smax); s += (sincr)) {                         \
+            for (shift = 0; shift < (maxshift); shift += 1) {        \
                 M.x86.R_EFLG = inflags = flags = def_flags;         \
                 for (f = 0; f < 2; f++) {
 
@@ -261,7 +261,7 @@
 	u32         flags,inflags;                              \
     int         f,failed = false;                           \
     char        buf1[80],buf2[80];                          \
-    for (d = 0; d < max; d += incr) {                       \
+    for (d = 0; d < (max); d += (incr)) {                       \
         M.x86.R_EFLG = inflags = flags = def_flags;         \
         for (f = 0; f < 2; f++) {
 

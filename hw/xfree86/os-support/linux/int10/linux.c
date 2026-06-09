@@ -15,7 +15,7 @@
 #else
 #define DEV_MEM "/dev/mem"
 #endif
-#define ALLOC_ENTRIES(x) ((V_RAM / x) - 1)
+#define ALLOC_ENTRIES(x) ((V_RAM / (x)) - 1)
 #define SHMERRORPTR (void *)(-1)
 
 #include <fcntl.h>
