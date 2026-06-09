@@ -1,0 +1,22 @@
+name: retry transient CI failures
+on:
+    schedule:
+        - cron: '*/15 * * * *'
+    workflow_dispatch:
+
+permissions:
+    actions: write
+    checks: read
+    pull-requests: read
+
+env:
+    GH_TOKEN: ${{ github.token }}
+
+jobs:
+    retry:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v6
+            - name: Retry transient CI failures
+              run: .github/scripts/gh-retry-transient-failed
