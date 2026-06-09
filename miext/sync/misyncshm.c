@@ -44,7 +44,7 @@ typedef struct _SyncShmFencePrivate {
 } SyncShmFencePrivateRec, *SyncShmFencePrivatePtr;
 
 #define SYNC_FENCE_PRIV(pFence) \
-    (SyncShmFencePrivatePtr) dixLookupPrivate(&pFence->devPrivates, &syncShmFencePrivateKey)
+    (SyncShmFencePrivatePtr) dixLookupPrivate(&(pFence)->devPrivates, &syncShmFencePrivateKey)
 
 static void
 miSyncShmFenceSetTriggered(SyncFence * pFence)
