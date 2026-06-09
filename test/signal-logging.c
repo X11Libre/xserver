@@ -193,12 +193,12 @@ static void logging_format(void)
     free(fname);
 
 #define read_log_msg(msg) do {                                  \
-        msg = fgets(read_buf, sizeof(read_buf), f);             \
-        assert(msg != NULL);                                   \
-        msg = strchr(read_buf, ']');                            \
-        assert(msg != NULL);                                    \
-        assert(strlen(msg) > 2);                                \
-        msg = msg + 2; /* advance past [time.stamp] */          \
+        (msg) = fgets(read_buf, sizeof(read_buf), f);           \
+        assert((msg) != NULL);                                  \
+        (msg) = strchr(read_buf, ']');                          \
+        assert((msg) != NULL);                                  \
+        assert(strlen((msg)) > 2);                              \
+        (msg) = (msg) + 2; /* advance past [time.stamp] */      \
     } while (0)
 
     /* boring test message */

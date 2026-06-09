@@ -1826,7 +1826,7 @@ _mieq_test_generate_events(uint32_t start, uint32_t count)
     }
 }
 
-#define mieq_test_generate_events(c) { _mieq_test_generate_events(next, c); next += c; }
+#define mieq_test_generate_events(c) { _mieq_test_generate_events(next, (c)); next += (c); }
 
 static void
 mieq_test(void)
