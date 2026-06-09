@@ -106,7 +106,7 @@ static unsigned long PortResource = 0;
     dixLookupPrivate(&(pScreen)->devPrivates, KdXvScreenKey))
 
 #define GET_KDXV_SCREEN(pScreen) \
-    ((KdXVScreenPtr)(dixGetPrivate(&pScreen->devPrivates, &KdXVScreenPrivateKey)))
+    ((KdXVScreenPtr)(dixGetPrivate(&(pScreen)->devPrivates, &KdXVScreenPrivateKey)))
 
 #define GET_KDXV_WINDOW(pWin) ((KdXVWindowPtr) \
     dixLookupPrivate(&(pWin)->devPrivates, KdXVWindowKey))

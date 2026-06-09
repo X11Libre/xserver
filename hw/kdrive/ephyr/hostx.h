@@ -36,7 +36,7 @@
 
 #if (EPHYR_WANT_DEBUG)
 #define EPHYR_DBG(x, a...) \
- fprintf(stderr, __FILE__ ":%d,%s() " x "\n", __LINE__, __func__, ##a)
+ fprintf(stderr, __FILE__ ":%d,%s() " (x) "\n", __LINE__, __func__, ##a)
 #else
 #define EPHYR_DBG(x, a...) do {} while (0)
 #endif
