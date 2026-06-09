@@ -79,22 +79,22 @@ typedef struct _damageGCPriv {
     dixLookupPrivate(&(pScr)->devPrivates, damageScrPrivateKey))
 
 #define damageScrPriv(pScr) \
-    DamageScrPrivPtr    pScrPriv = damageGetScrPriv(pScr)
+    DamageScrPrivPtr    pScrPriv = damageGetScrPriv((pScr))
 
 #define damageGetPixPriv(pPix) \
     dixLookupPrivate(&(pPix)->devPrivates, damagePixPrivateKey)
 
 #define damgeSetPixPriv(pPix,v) \
-    dixSetPrivate(&(pPix)->devPrivates, damagePixPrivateKey, v)
+    dixSetPrivate(&(pPix)->devPrivates, damagePixPrivateKey, (v))
 
 #define damagePixPriv(pPix) \
-    DamagePtr	    pDamage = damageGetPixPriv(pPix)
+    DamagePtr	    pDamage = damageGetPixPriv((pPix))
 
 #define damageGetGCPriv(pGC) \
     dixLookupPrivate(&(pGC)->devPrivates, damageGCPrivateKey)
 
 #define damageGCPriv(pGC) \
-    DamageGCPrivPtr  pGCPriv = damageGetGCPriv(pGC)
+    DamageGCPrivPtr  pGCPriv = damageGetGCPriv((pGC))
 
 #define damageGetWinPriv(pWin) \
     ((DamagePtr)dixLookupPrivate(&(pWin)->devPrivates, damageWinPrivateKey))

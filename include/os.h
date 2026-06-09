@@ -95,8 +95,8 @@ typedef struct _NewClientRec *NewClientPtr;
 #define xnfcalloc(_num, _size) XNFcallocarray((_num), (_size))
 #define xnfrealloc(ptr, size) XNFrealloc((void *)(ptr), (unsigned long)(size))
 
-#define xstrdup(s) Xstrdup(s)
-#define xnfstrdup(s) XNFstrdup(s)
+#define xstrdup(s) Xstrdup((s))
+#define xnfstrdup(s) XNFstrdup((s))
 #endif
 
 #include <stdio.h>

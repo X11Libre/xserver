@@ -85,13 +85,13 @@ typedef union _PixUnion {
     ((isPixel) ? (a).pixel == (b).pixel : (a).pixmap == (b).pixmap)
 
 #define EqualPixUnion(as, a, bs, b)				\
-    ((as) == (bs) && (SamePixUnion (a, b, as)))
+    ((as) == (bs) && (SamePixUnion ((a), (b), (as))))
 
 #define OnScreenDrawable(type) \
-	(type == DRAWABLE_WINDOW)
+	((type) == DRAWABLE_WINDOW)
 
 #define WindowDrawable(type) \
-	((type == DRAWABLE_WINDOW) || (type == UNDRAWABLE_WINDOW))
+	(((type) == DRAWABLE_WINDOW) || ((type) == UNDRAWABLE_WINDOW))
 
 extern _X_EXPORT PixmapPtr GetScratchPixmapHeader(ScreenPtr pScreen,
                                                   int width,

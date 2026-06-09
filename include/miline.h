@@ -98,10 +98,10 @@ extern _X_EXPORT void miSetZeroLineBias(ScreenPtr /* pScreen */ ,
 
 #define MIOUTCODES(outcode, x, y, xmin, ymin, xmax, ymax) \
 {\
-     if (x < xmin) outcode |= OUT_LEFT;\
-     if (x > xmax) outcode |= OUT_RIGHT;\
-     if (y < ymin) outcode |= OUT_ABOVE;\
-     if (y > ymax) outcode |= OUT_BELOW;\
+     if ((x) < (xmin)) (outcode) |= OUT_LEFT;\
+     if ((x) > (xmax)) (outcode) |= OUT_RIGHT;\
+     if ((y) < (ymin)) (outcode) |= OUT_ABOVE;\
+     if ((y) > (ymax)) (outcode) |= OUT_BELOW;\
 }
 
 #define miGetZeroLineBias(_pScreen) ((unsigned long) (unsigned long*)\
@@ -112,13 +112,13 @@ extern _X_EXPORT void miSetZeroLineBias(ScreenPtr /* pScreen */ ,
     (_sx) = (_SX);				\
     if (((_adx) = (_x2) - (_x1)) < 0) {		\
 	(_adx) = -(_adx);			\
-	(_sx = -(_sx));				\
+	((_sx) = -(_sx));				\
 	(_octant) |= XDECREASING;		\
     }						\
     (_sy) = (_SY);				\
     if (((_ady) = (_y2) - (_y1)) < 0) {		\
 	(_ady) = -(_ady);			\
-	(_sy = -(_sy));				\
+	((_sy) = -(_sy));				\
 	(_octant) |= YDECREASING;		\
     }
 

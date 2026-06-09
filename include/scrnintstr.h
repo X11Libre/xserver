@@ -507,7 +507,7 @@ typedef void (*DPMSProcPtr)(ScreenPtr pScreen, int level);
     struct { \
         FUNCTYPE func; \
         void *arg; \
-    } NAME[ARRSIZE];
+    } NAME[(ARRSIZE)];
 
 typedef struct _Screen {
     int myNum;                  /* index of this instance in Screens[] */

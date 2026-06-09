@@ -263,6 +263,6 @@
 #define ROP_1		0xFF
 
 #define NO_SRC_ROP(rop) \
-   ((rop == GXnoop) || (rop == GXset) || (rop == GXclear) || (rop == GXinvert))
+   (((rop) == GXnoop) || ((rop) == GXset) || ((rop) == GXclear) || ((rop) == GXinvert))
 
 #endif                          /* _XAAROP_H */

@@ -61,10 +61,10 @@ typedef struct _VbeModeInfoData {
 #define VBE_MODE_LINEAR(m)	(((m)->ModeAttributes & 0x80) != 0 && \
 				 ((m)->PhysBasePtr != 0))
 
-#define VBE_MODE_USABLE(m, f)	(VBE_MODE_SUPPORTED(m) || \
-				 (f & V_MODETYPE_BAD)) && \
-				VBE_MODE_GRAPHICS(m) && \
-				(VBE_MODE_VGA(m) || VBE_MODE_LINEAR(m))
+#define VBE_MODE_USABLE(m, f)	(VBE_MODE_SUPPORTED((m)) || \
+				 ((f) & V_MODETYPE_BAD)) && \
+				VBE_MODE_GRAPHICS((m)) && \
+				(VBE_MODE_VGA((m)) || VBE_MODE_LINEAR((m)))
 
 #define V_MODETYPE_VBE		0x01
 #define V_MODETYPE_VGA		0x02
