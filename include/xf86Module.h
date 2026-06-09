@@ -152,7 +152,7 @@ typedef struct {
 } XF86ModReqInfo;
 
 #define MODULE_VERSION_NUMERIC(maj, min, patch) \
-	((((maj) & 0xFF) << 24) | (((min) & 0xFF) << 16) | (patch & 0xFFFF))
+	((((maj) & 0xFF) << 24) | (((min) & 0xFF) << 16) | ((patch) & 0xFFFF))
 
 /* Prototypes for Loader functions that are exported to modules */
 extern _X_EXPORT void *LoadSubModule(void *, const char *, const char **,
@@ -169,7 +169,7 @@ extern _X_EXPORT int LoaderGetABIVersion(const char *abiclass) _X_DEPRECATED;
 typedef void *(*ModuleSetupProc) (void *, void *, int *, int *);
 typedef void (*ModuleTearDownProc) (void *);
 
-#define MODULESETUPPROTO(func) void *func(void *, void *, int*, int*)
+#define MODULESETUPPROTO(func) void *(func)(void *, void *, int*, int*)
 
 /*
  * Module information header. Every loadable module needs to export a symbol
@@ -190,14 +190,14 @@ typedef struct {
  */
 #define XF86_MODULE_VERSION_INPUT(_name, _major, _minor, _patchlevel)   \
     static XF86ModuleVersionInfo modVersion = { \
-        .modname      = _name,                  \
+        .modname      = (_name),                  \
         .vendor       = MODULEVENDORSTRING,     \
         ._modinfo1_   = MODINFOSTRING1,         \
         ._modinfo2_   = MODINFOSTRING2,         \
         .xf86version  = XORG_VERSION_CURRENT,   \
-        .majorversion = _major,                 \
-        .minorversion = _minor,                 \
-        .patchlevel   = _patchlevel,            \
+        .majorversion = (_major),                 \
+        .minorversion = (_minor),                 \
+        .patchlevel   = (_patchlevel),            \
         .abiclass     = ABI_CLASS_XINPUT,       \
         .abiversion   = ABI_XINPUT_VERSION,     \
         .moduleclass  = MOD_CLASS_XINPUT,       \
@@ -208,14 +208,14 @@ typedef struct {
  */
 #define XF86_MODULE_VERSION_VIDEO(_name, _major, _minor, _patchlevel)   \
     static XF86ModuleVersionInfo modVersion = { \
-        .modname      = _name,                  \
+        .modname      = (_name),                  \
         .vendor       = MODULEVENDORSTRING,     \
         ._modinfo1_   = MODINFOSTRING1,         \
         ._modinfo2_   = MODINFOSTRING2,         \
         .xf86version  = XORG_VERSION_CURRENT,   \
-        .majorversion = _major,                 \
-        .minorversion = _minor,                 \
-        .patchlevel   = _patchlevel,            \
+        .majorversion = (_major),                 \
+        .minorversion = (_minor),                 \
+        .patchlevel   = (_patchlevel),            \
         .abiclass     = ABI_CLASS_VIDEODRV,     \
         .abiversion   = ABI_VIDEODRV_VERSION,   \
         .moduleclass  = MOD_CLASS_VIDEODRV,     \
