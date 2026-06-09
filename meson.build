@@ -2,6 +2,7 @@ project('xserver', 'c',
         default_options: [
             'buildtype=debugoptimized',
             'c_std=gnu99',
+            'warning_level=1',
         ],
         version: '25.1.0',
         meson_version: '>= 0.61.0',
@@ -35,7 +36,6 @@ conf_data.set('_DIX_CONFIG_H_', '1')
 
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     test_wflags = [
-        '-Wall',
         '-Wchar-subscripts',
         '-Wpointer-arith',
         '-Wmissing-declarations',
