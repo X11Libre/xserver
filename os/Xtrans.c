@@ -522,10 +522,33 @@ _XSERVTransReopenCOTSServer (int trans_id, int fd, const char *port)
     return _XSERVTransReopen (XTRANS_OPEN_COTS_SERVER, trans_id, fd, port);
 }
 
-int _XSERVTransNonBlock(XtransConnInfo ciptr)
+int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
+
 {
     int	fd = ciptr->fd;
     int	ret = 0;
+
+    prmsg (2,"SetOption(%d,%d,%d)\n", fd, option, arg);
+
+    /*
+     * For now, all transport type use the same stuff for setting options.
+     * As long as this is true, we can put the common code here. Once a more
+     * complicated transport such as shared memory or an OSI implementation
+     * that uses the session and application libraries is implemented, this
+     * code may have to move to a transport dependent function.
+     *
+     * ret = ciptr->transptr->SetOption (ciptr, option, arg);
+     */
+
+    switch (option)
+    {
+    case TRANS_NONBLOCKING:
+	switch (arg)
+	{
+	case 0:
+	    /* Set to blocking mode */
+	    break;
+	case 1: /* Set to non-blocking mode */
 
 #if defined(O_NONBLOCK)
 	    ret = fcntl (fd, F_GETFL, 0);
@@ -552,6 +575,22 @@ int _XSERVTransNonBlock(XtransConnInfo ciptr)
 #endif /* WIN32 */
 #endif /* FIOSNBIO */
 #endif /* O_NONBLOCK */
+	    break;
+	default:
+	    /* Unknown option */
+	    break;
+	}
+	break;
+    case TRANS_CLOSEONEXEC:
+#ifdef F_SETFD
+#ifdef FD_CLOEXEC
+	ret = fcntl (fd, F_SETFD, FD_CLOEXEC);
+#else
+	ret = fcntl (fd, F_SETFD, 1);
+#endif /* FD_CLOEXEC */
+#endif /* F_SETFD */
+	break;
+    }
 
     return ret;
 }
