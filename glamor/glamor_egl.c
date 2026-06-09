@@ -1597,6 +1597,24 @@ glamor_egl_set_glvnd_vendor(ScreenPtr screen)
         return;
     }
 
+/**
+ * If we're on nvidia and the user didn't request a particular gl vendor, set it to nvidia.
+ * See: https://github.com/X11Libre/xserver/pull/2847
+ */
+#ifdef WITH_LIBDRM
+    if (glamor_egl->fd >= 0) {
+        drmVersionPtr version = drmGetVersion(glamor_egl->fd);
+        if (version) {
+            if (version->name && !strcmp(version->name, "nvidia-drm")) {
+                drmFreeVersion(version);
+                glamor_set_glvnd_vendor(screen, "nvidia");
+                return;
+            }
+            drmFreeVersion(version);
+        }
+    }
+#endif
+
 #ifdef GLAMOR_HAS_GBM
     if (glamor_egl->gbm) {
         const char *gbm_backend_name;
@@ -2216,6 +2234,22 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd, int *out_pla
  */
 #ifndef EGL_PLATFORM_GBM_KHR
 #define EGL_PLATFORM_GBM_KHR 0x31D7
+#endif
+
+/**
+ * If we're on nvidia and the user didn't request a particular gl vendor, set it to nvidia.
+ * See: https://github.com/X11Libre/xserver/pull/2847
+ */
+#ifdef WITH_LIBDRM
+    if (!glamor_egl->glvnd_vendor && (glamor_egl->fd >= 0)) {
+        drmVersionPtr version = drmGetVersion(glamor_egl->fd);
+        if (version) {
+            if (version->name && !strcmp(version->name, "nvidia-drm")) {
+                glamor_egl->glvnd_vendor = strdup("nvidia");
+            }
+            drmFreeVersion(version);
+        }
+    }
 #endif
 
     /**
