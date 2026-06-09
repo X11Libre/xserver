@@ -52,7 +52,7 @@ typedef struct {
 } QuartzScreenRec, *QuartzScreenPtr;
 
 #define QUARTZ_PRIV(pScreen) \
-    ((QuartzScreenPtr)dixLookupPrivate(&pScreen->devPrivates, quartzScreenKey))
+    ((QuartzScreenPtr)dixLookupPrivate(&(pScreen)->devPrivates, quartzScreenKey))
 
 void
 QuartzCopyDisplayIDs(ScreenPtr pScreen, int displayCount,

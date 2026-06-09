@@ -48,7 +48,7 @@ struct x_hash_table_struct {
     x_destroy_fun *destroy_value;
 };
 
-#define ITEM_NEW(k, v) X_PFX(list_prepend) ((x_list *)(k), v)
+#define ITEM_NEW(k, v) X_PFX(list_prepend) ((x_list *)(k), (v))
 #define ITEM_FREE(i)   X_PFX(list_free_1) (i)
 #define ITEM_KEY(i)    ((void *)(i)->next)
 #define ITEM_VALUE(i)  ((i)->data)
