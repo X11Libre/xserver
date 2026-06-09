@@ -45,7 +45,7 @@ static DevPrivateKeyRec cmapScrPrivateKeyRec;
 #define cmapScrPrivateKey (&cmapScrPrivateKeyRec)
 
 #define GetInstalledColormap(s) ((ColormapPtr) dixLookupPrivate(&(s)->devPrivates, cmapScrPrivateKey))
-#define SetInstalledColormap(s,c) (dixSetPrivate(&(s)->devPrivates, cmapScrPrivateKey, c))
+#define SetInstalledColormap(s,c) (dixSetPrivate(&(s)->devPrivates, cmapScrPrivateKey, (c)))
 
 static Bool load_colormap(ColormapPtr pCmap, int ncolors, uint32_t *colors)
 {

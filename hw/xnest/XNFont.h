@@ -22,7 +22,7 @@ is" without express or implied warranty.
 extern int xnestFontPrivateIndex;
 
 #define xnestFontPriv(pFont) \
-  ((xnestPrivFont *)FontGetPrivate(pFont, xnestFontPrivateIndex))
+  ((xnestPrivFont *)FontGetPrivate((pFont), xnestFontPrivateIndex))
 
 Bool xnestRealizeFont(ScreenPtr pScreen, FontPtr pFont);
 Bool xnestUnrealizeFont(ScreenPtr pScreen, FontPtr pFont);

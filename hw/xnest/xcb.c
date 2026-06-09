@@ -495,9 +495,9 @@ do { \
 
 #define XN_CI_GET_DEFAULT_INFO_2D(font,cs) \
 do { \
-    unsigned int r = (font->font_reply->default_char >> 8); \
-    unsigned int c = (font->font_reply->default_char & 0xff); \
-    XN_CI_GET_CHAR_INFO_2D (font, r, c, NULL, cs); \
+    unsigned int r = ((font)->font_reply->default_char >> 8); \
+    unsigned int c = ((font)->font_reply->default_char & 0xff); \
+    XN_CI_GET_CHAR_INFO_2D ((font), r, c, NULL, (cs)); \
 } while (0)
 
 #define XN_CI_GET_ROWZERO_CHAR_INFO_2D(font,col,def,cs) \

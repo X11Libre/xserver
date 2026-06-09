@@ -31,7 +31,7 @@ extern DevPrivateKeyRec xnestGCPrivateKeyRec;
 #define xnestGCPriv(pGC) ((xnestPrivGC *) \
     dixLookupPrivate(&(pGC)->devPrivates, xnestGCPrivateKey))
 
-#define xnestGC(pGC) (xnestGCPriv(pGC)->gc)
+#define xnestGC(pGC) (xnestGCPriv((pGC))->gc)
 
 Bool xnestCreateGC(GCPtr pGC);
 void xnestValidateGC(GCPtr pGC, unsigned long changes, DrawablePtr pDrawable);
