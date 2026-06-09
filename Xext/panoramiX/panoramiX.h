@@ -80,7 +80,7 @@ typedef struct {
         for (unsigned walkScreenIdx = 0; walkScreenIdx < PanoramiXNumScreens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            (__LAMBDA__); \
+            __LAMBDA__; \
         } \
     } while (0);
 
@@ -95,7 +95,7 @@ typedef struct {
         for (unsigned walkScreenIdx = 1; walkScreenIdx < PanoramiXNumScreens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            (__LAMBDA__); \
+            __LAMBDA__; \
         } \
     } while (0);
 
@@ -110,7 +110,7 @@ typedef struct {
             unsigned walkScreenIdx = __walkidx - 1; \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            (__LAMBDA__); \
+            __LAMBDA__; \
         } \
     } while (0);
 
