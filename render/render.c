@@ -2859,21 +2859,17 @@ ProcRenderFillRectangles(ClientPtr client)
 static int
 ProcRenderSetPictureTransform(ClientPtr client)
 {
-    REQUEST(xRenderSetPictureTransformReq);
-    REQUEST_SIZE_MATCH(xRenderSetPictureTransformReq);
-
-    if (client->swapped) {
-        swapl(&stuff->picture);
-        swapl(&stuff->transform.matrix11);
-        swapl(&stuff->transform.matrix12);
-        swapl(&stuff->transform.matrix13);
-        swapl(&stuff->transform.matrix21);
-        swapl(&stuff->transform.matrix22);
-        swapl(&stuff->transform.matrix23);
-        swapl(&stuff->transform.matrix31);
-        swapl(&stuff->transform.matrix32);
-        swapl(&stuff->transform.matrix33);
-    }
+    X_REQUEST_HEAD_STRUCT(xRenderSetPictureTransformReq);
+    X_REQUEST_FIELD_CARD32(picture);
+    X_REQUEST_FIELD_CARD32(transform.matrix11);
+    X_REQUEST_FIELD_CARD32(transform.matrix12);
+    X_REQUEST_FIELD_CARD32(transform.matrix13);
+    X_REQUEST_FIELD_CARD32(transform.matrix21);
+    X_REQUEST_FIELD_CARD32(transform.matrix22);
+    X_REQUEST_FIELD_CARD32(transform.matrix23);
+    X_REQUEST_FIELD_CARD32(transform.matrix31);
+    X_REQUEST_FIELD_CARD32(transform.matrix32);
+    X_REQUEST_FIELD_CARD32(transform.matrix33);
 
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderSetPictureTransform(client, stuff)
