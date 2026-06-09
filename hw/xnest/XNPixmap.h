@@ -28,7 +28,7 @@ typedef struct {
 #define xnestPixmapPriv(pPixmap) ((xnestPrivPixmap *) \
     dixLookupPrivate(&(pPixmap)->devPrivates, xnestPixmapPrivateKey))
 
-#define xnestPixmap(pPixmap) (xnestPixmapPriv(pPixmap)->pixmap)
+#define xnestPixmap(pPixmap) (xnestPixmapPriv((pPixmap))->pixmap)
 
 #define xnestSharePixmap(pPixmap) ((pPixmap)->refcnt++)
 
