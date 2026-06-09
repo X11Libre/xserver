@@ -87,13 +87,13 @@ xq_asl_log(int level, const char *subsystem, const char *file,
            const char *function, int line, const char *fmt,
            ...);
 
-#define ASL_LOG(level, subsystem, msg, args ...) xq_asl_log(level, subsystem, \
+#define ASL_LOG(level, subsystem, msg, args ...) xq_asl_log((level), (subsystem), \
                                                             __FILE__, \
                                                             __func__, \
-                                                            __LINE__, msg, \
+                                                            __LINE__, (msg), \
                                                             ## args)
 #define DebugF(msg, args ...)                    ASL_LOG(ASL_LEVEL_DEBUG, \
-                                                         "xpbproxy", msg, \
+                                                         "xpbproxy", (msg), \
                                                          ## args)
 #define TRACE()                                  DebugF("TRACE")
 
