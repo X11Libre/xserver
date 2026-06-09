@@ -37,14 +37,14 @@ extern DevScreenPrivateKeyRec xnestScreenCursorPrivKeyRec;
 
 #define xnestGetCursorPriv(pCursor, pScreen) ((xnestPrivCursor *) \
     dixLookupScreenPrivate(&(pCursor)->devPrivates, \
-                           &xnestScreenCursorPrivKeyRec, pScreen))
+                           &xnestScreenCursorPrivKeyRec, (pScreen)))
 
 #define xnestSetCursorPriv(pCursor, pScreen, v) \
     dixSetScreenPrivate(&(pCursor)->devPrivates, \
-                        &xnestScreenCursorPrivKeyRec, pScreen, v)
+                        &xnestScreenCursorPrivKeyRec, (pScreen), (v))
 
 #define xnestCursor(pCursor, pScreen) \
-  (xnestGetCursorPriv(pCursor, pScreen)->cursor)
+  (xnestGetCursorPriv((pCursor), (pScreen))->cursor)
 
 Bool xnestRealizeCursor(DeviceIntPtr pDev,
                         ScreenPtr pScreen, CursorPtr pCursor);
