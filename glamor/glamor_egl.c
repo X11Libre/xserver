@@ -1749,14 +1749,17 @@ static inline int
 glamor_egl_render_node_from_fd(int fd)
 {
 #ifdef WITH_LIBDRM
-    const char* render_name;
+    char* render_name;
+    int ret;
 
     render_name = drmGetRenderDeviceNameFromFd(fd);
     if (!render_name) {
         return -1;
     }
 
-    return open(render_name, O_RDWR);
+    ret = open(render_name, O_RDWR);
+    free(render_name);
+    return ret;
 #else
     return -1;
 #endif
