@@ -182,8 +182,12 @@ x86emu_decode_printf(const char *x, ...)
     va_start(ap, x);
     vsnprintf(temp, sizeof(temp), x, ap);
     va_end(ap);
-    sprintf(M.x86.decoded_buf + M.x86.enc_str_pos, "%s", temp);
+    int remaining = sizeof(M.x86.decoded_buf) - M.x86.enc_str_pos;
+    if (remaining > 0)
+        snprintf(M.x86.decoded_buf + M.x86.enc_str_pos, remaining, "%s", temp);
     M.x86.enc_str_pos += strlen(temp);
+    if (M.x86.enc_str_pos >= sizeof(M.x86.decoded_buf))
+        M.x86.enc_str_pos = sizeof(M.x86.decoded_buf) - 1;
 }
 
 void
@@ -198,9 +202,10 @@ print_encoded_bytes(u16 s, u16 o)
 {
     int i;
     char buf1[64];
+    int max_bytes = (sizeof(buf1) / 3); /* 2 hex chars + null terminator */
 
-    for (i = 0; i < M.x86.enc_pos; i++) {
-        sprintf(buf1 + 2 * i, "%02x", fetch_data_byte_abs(s, o + i));
+    for (i = 0; i < M.x86.enc_pos && i < max_bytes; i++) {
+        snprintf(buf1 + 2 * i, 3, "%02x", fetch_data_byte_abs(s, o + i));
     }
     printk("%-20s", buf1);
 }
