@@ -47,7 +47,7 @@
 #include "x-hash.h"
 
 #include "visualConfigs.h"
-#include "dri.h"
+#include "xpr_dri.h"
 #include "extension_string.h"
 
 #include "darwin.h"

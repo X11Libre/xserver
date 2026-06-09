@@ -34,8 +34,8 @@
 
 /* Prototypes for AppleDRI functions */
 
-#ifndef _DRI_H_
-#define _DRI_H_
+#ifndef _XQ_XPR_DRI_H_
+#define _XQ_XPR_DRI_H_
 
 #include <X11/Xdefs.h>
 #include "scrnintstr.h"
