@@ -41,9 +41,9 @@
 #define DISP_YCRCB422 0x02
 
 /* DPMS features */
-#define DPMS_STANDBY(x) (x & 0x04)
-#define DPMS_SUSPEND(x) (x & 0x02)
-#define DPMS_OFF(x) (x & 0x01)
+#define DPMS_STANDBY(x) ((x) & 0x04)
+#define DPMS_SUSPEND(x) ((x) & 0x02)
+#define DPMS_OFF(x) ((x) & 0x01)
 
 /* input voltage level */
 #define V070 0                  /* 0.700V/0.300V */
@@ -51,21 +51,21 @@
 #define V100 2                  /* 1.000V/0.400V */
 #define V007 3                  /* 0.700V/0.000V */
 
-#define STD_COLOR_SPACE(x) (x & 0x4)
-#define GFT_SUPPORTED(x) (x & 0x1)
+#define STD_COLOR_SPACE(x) ((x) & 0x4)
+#define GFT_SUPPORTED(x) ((x) & 0x1)
 
 #define EDID_WIDTH	16
 
 /* detailed timing misc */
-#define IS_RIGHT_STEREO(x) (x & 0x01)
-#define IS_LEFT_STEREO(x) (x & 0x02)
-#define IS_4WAY_STEREO(x) (x & 0x03)
+#define IS_RIGHT_STEREO(x) ((x) & 0x01)
+#define IS_LEFT_STEREO(x) ((x) & 0x02)
+#define IS_4WAY_STEREO(x) ((x) & 0x03)
 
 /* sync characteristics */
-#define SEP_SYNC(x) (x & 0x08)
-#define COMP_SYNC(x) (x & 0x04)
-#define SYNC_O_GREEN(x) (x & 0x02)
-#define SYNC_SERR(x) (x & 0x01)
+#define SEP_SYNC(x) ((x) & 0x08)
+#define COMP_SYNC(x) ((x) & 0x04)
+#define SYNC_O_GREEN(x) ((x) & 0x02)
+#define SYNC_SERR(x) ((x) & 0x01)
 
 static void
 print_vendor(int scrnIndex, struct vendor *c)

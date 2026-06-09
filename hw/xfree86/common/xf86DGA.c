@@ -1144,14 +1144,14 @@ typedef struct {
 } DGAPrivRec, *DGAPrivPtr;
 
 #define DGA_GETCLIENT(idx) ((ClientPtr) \
-    dixLookupPrivate(&screenInfo.screens[idx]->devPrivates, DGAScreenPrivateKey))
+    dixLookupPrivate(&screenInfo.screens[(idx)]->devPrivates, DGAScreenPrivateKey))
 #define DGA_SETCLIENT(idx,p) \
-    dixSetPrivate(&screenInfo.screens[idx]->devPrivates, DGAScreenPrivateKey, p)
+    dixSetPrivate(&screenInfo.screens[(idx)]->devPrivates, DGAScreenPrivateKey, (p))
 
 #define DGA_GETPRIV(c) ((DGAPrivPtr) \
     dixLookupPrivate(&(c)->devPrivates, DGAClientPrivateKey))
 #define DGA_SETPRIV(c,p) \
-    dixSetPrivate(&(c)->devPrivates, DGAClientPrivateKey, p)
+    dixSetPrivate(&(c)->devPrivates, DGAClientPrivateKey, (p))
 
 static void
 XDGAResetProc(ExtensionEntry * extEntry)

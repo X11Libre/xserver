@@ -56,7 +56,7 @@ _X_EXPORT XF86ModuleData fbdevhwModuleData = {
 /* our private data, and two functions to allocate/free this            */
 
 #define FBDEVHWPTRLVAL(p) (p)->privates[fbdevHWPrivateIndex].ptr
-#define FBDEVHWPTR(p) ((fbdevHWPtr)(FBDEVHWPTRLVAL(p)))
+#define FBDEVHWPTR(p) ((fbdevHWPtr)(FBDEVHWPTRLVAL((p))))
 
 static int fbdevHWPrivateIndex = -1;
 
