@@ -31,7 +31,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XKB.h>
 
 #define	XkbCharToInt(v) ((int) ((v) & 0x80 ? ((v) | (~0xff)) : ((v) & 0x7f)))
-#define	XkbIntTo2Chars(i, h, l) ((h) = (i >> 8) & 0xff, (l) = (i) & 0xff)
+#define	XkbIntTo2Chars(i, h, l) ((h) = ((i) >> 8) & 0xff, (l) = (i) & 0xff)
 
 #if defined(WORD64) && defined(UNSIGNEDBITFIELDS)
 #define	Xkb2CharsToInt(h, l) ((int) ((h) & 0x80 ? \
@@ -169,8 +169,8 @@ typedef struct _XkbPtrAction {
 
 #define	XkbPtrActionX(a)      (Xkb2CharsToInt((a)->high_XXX,(a)->low_XXX))
 #define	XkbPtrActionY(a)      (Xkb2CharsToInt((a)->high_YYY,(a)->low_YYY))
-#define	XkbSetPtrActionX(a,x) (XkbIntTo2Chars(x,(a)->high_XXX,(a)->low_XXX))
-#define	XkbSetPtrActionY(a,y) (XkbIntTo2Chars(y,(a)->high_YYY,(a)->low_YYY))
+#define	XkbSetPtrActionX(a,x) (XkbIntTo2Chars((x),(a)->high_XXX,(a)->low_XXX))
+#define	XkbSetPtrActionY(a,y) (XkbIntTo2Chars((y),(a)->high_YYY,(a)->low_YYY))
 
 typedef struct _XkbPtrBtnAction {
     unsigned char type;

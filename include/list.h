@@ -311,7 +311,7 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
  * Alias of container_of
  */
 #define xorg_list_entry(ptr, type, member) \
-    container_of(ptr, type, member)
+    container_of((ptr), type, member)
 
 /**
  * Retrieve the first list entry for the given list pointer.
@@ -344,7 +344,7 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
     xorg_list_entry((ptr)->prev, type, member)
 
 #define __container_of(ptr, sample, member)			\
-    container_of(ptr, typeof(*sample), member)
+    container_of((ptr), typeof(*(sample)), member)
 
 /**
  * Loop through the list given by head and set pos to struct in the list.
@@ -364,10 +364,10 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
  *
  */
 #define xorg_list_for_each_entry(pos, head, member)			\
-    for (pos = NULL,                                                    \
-         pos = __container_of((head)->next, pos, member);		\
-	 (((head)->next != NULL) && &pos->member != (head));		\
-	 pos = __container_of(pos->member.next, pos, member))
+    for ((pos) = NULL,                                                    \
+         (pos) = __container_of((head)->next, (pos), member);		\
+	 (((head)->next != NULL) && &(pos)->member != (head));		\
+	 (pos) = __container_of((pos)->member.next, (pos), member))
 
 /**
  * Loop through the list, keeping a backup pointer to the element. This
@@ -377,11 +377,11 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
  * See xorg_list_for_each_entry for more details.
  */
 #define xorg_list_for_each_entry_safe(pos, tmp, head, member)		\
-    for (pos = NULL,                                                    \
-         pos = __container_of((head)->next, pos, member),		\
-	 tmp = __container_of(pos->member.next, pos, member);		\
-	 (((head)->next != NULL) && (&pos->member != (head)));		\
-	 pos = tmp, tmp = __container_of(pos->member.next, tmp, member))
+    for ((pos) = NULL,                                                    \
+         (pos) = __container_of((head)->next, (pos), member),		\
+	 (tmp) = __container_of((pos)->member.next, (pos), member);		\
+	 (((head)->next != NULL) && (&(pos)->member != (head)));		\
+	 (pos) = (tmp), (tmp) = __container_of((pos)->member.next, (tmp), member))
 
 /* NULL-Terminated List Interface
  *
@@ -442,7 +442,7 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
  * @param member Member name of the field pointing to next struct.
  */
 #define nt_list_for_each_entry(_entry, _list, _member)			\
-	for (_entry = _list; _entry; _entry = (_entry)->_member)
+	for ((_entry) = (_list); (_entry); (_entry) = (_entry)->_member)
 
 /**
  * Iterate through each element in the list, keeping a backup pointer to the
@@ -457,9 +457,9 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
  * @param member Member name of the field pointing to next struct.
  */
 #define nt_list_for_each_entry_safe(_entry, _tmp, _list, _member)	\
-	for (_entry = _list, _tmp = (_entry) ? (_entry)->_member : NULL;\
-		_entry;							\
-		_entry = _tmp, _tmp = (_tmp) ? (_tmp)->_member: NULL)
+	for ((_entry) = (_list), (_tmp) = (_entry) ? (_entry)->_member : NULL;\
+		(_entry);							\
+		(_entry) = (_tmp), (_tmp) = (_tmp) ? (_tmp)->_member: NULL)
 
 /**
  * Append the element to the end of the list. This macro may be used to
@@ -481,9 +481,9 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
  */
 #define nt_list_append(_entry, _list, _type, _member)		        \
     do {								\
-	_type *__iterator = _list;					\
+	_type *__iterator = (_list);					\
 	while (__iterator->_member) { __iterator = __iterator->_member;}\
-	__iterator->_member = _entry;					\
+	__iterator->_member = (_entry);					\
     } while (0)
 
 /**
@@ -505,8 +505,8 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
  */
 #define nt_list_insert(_entry, _list, _type, _member)			\
     do {								\
-	nt_list_append((_list)->_member, _entry, _type, _member);	\
-	(_list)->_member = _entry;					\
+	nt_list_append((_list)->_member, (_entry), _type, _member);	\
+	(_list)->_member = (_entry);					\
     } while (0)
 
 /**
@@ -526,12 +526,12 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
  */
 #define nt_list_del(_entry, _list, _type, _member)		\
 	do {							\
-		_type *__e = _entry;				\
-		if (__e == NULL || _list == NULL) break;        \
+		_type *__e = (_entry);				\
+		if (__e == NULL || (_list) == NULL) break;        \
 		if ((_list) == __e) {				\
-		    _list = __e->_member;			\
+		    (_list) = __e->_member;			\
 		} else {					\
-		    _type *__prev = _list;			\
+		    _type *__prev = (_list);			\
 		    while (__prev->_member && __prev->_member != __e)	\
 			__prev = nt_list_next(__prev, _member);	\
 		    if (__prev->_member)			\

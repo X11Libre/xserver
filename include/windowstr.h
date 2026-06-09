@@ -165,7 +165,7 @@ static inline PropertyPtr wUserProps(WindowPtr pWin) { return pWin->properties; 
 
 /* true when w needs a border drawn. */
 
-#define HasBorder(w)	((w)->borderWidth || wClipShape(w))
+#define HasBorder(w)	((w)->borderWidth || wClipShape((w)))
 
 #define SCREEN_IS_BLANKED   0
 #define SCREEN_ISNT_SAVED   1

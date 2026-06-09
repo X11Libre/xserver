@@ -73,9 +73,9 @@ _xf86_get_platform_device_int_attrib(struct xf86_platform_device *device, int at
                                          (x) == ODEV_ATTRIB_BUSID ||    \
                                          (x) == ODEV_ATTRIB_DRIVER)
 
-#define _ODEV_ATTRIB_STRING_CHECK(x)    ((int (*)[_ODEV_ATTRIB_IS_STRING(x)-1]) 0)
+#define _ODEV_ATTRIB_STRING_CHECK(x)    ((int (*)[_ODEV_ATTRIB_IS_STRING((x))-1]) 0)
 
-#define xf86_get_platform_device_attrib(device, attrib) _xf86_get_platform_device_attrib(device,attrib,_ODEV_ATTRIB_STRING_CHECK(attrib))
+#define xf86_get_platform_device_attrib(device, attrib) _xf86_get_platform_device_attrib((device),(attrib),_ODEV_ATTRIB_STRING_CHECK((attrib)))
 
 #define _ODEV_ATTRIB_IS_INT(x)                  ((x) == ODEV_ATTRIB_FD || (x) == ODEV_ATTRIB_MAJOR || (x) == ODEV_ATTRIB_MINOR)
 #define _ODEV_ATTRIB_INT_DEFAULT(x)             ((x) == ODEV_ATTRIB_FD ? -1 : 0)

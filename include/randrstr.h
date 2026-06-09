@@ -66,7 +66,7 @@ typedef XID RRLease;
  * Modeline for a monitor. Name follows directly after this struct
  */
 
-#define RRModeName(pMode) ((char *) (pMode + 1))
+#define RRModeName(pMode) ((char *) ((pMode) + 1))
 typedef struct _rrMode RRModeRec, *RRModePtr;
 typedef struct _rrPropertyValue RRPropertyValueRec, *RRPropertyValuePtr;
 typedef struct _rrProperty RRPropertyRec, *RRPropertyPtr;
@@ -420,8 +420,8 @@ extern _X_EXPORT DevPrivateKeyRec rrPrivKeyRec;
 #define rrPrivKey (&rrPrivKeyRec)
 
 #define rrGetScrPriv(pScr)  ((rrScrPrivPtr)dixLookupPrivate(&(pScr)->devPrivates, rrPrivKey))
-#define rrScrPriv(pScr)	rrScrPrivPtr    pScrPriv = rrGetScrPriv(pScr)
-#define SetRRScreen(s,p) dixSetPrivate(&(s)->devPrivates, rrPrivKey, p)
+#define rrScrPriv(pScr)	rrScrPrivPtr    pScrPriv = rrGetScrPriv((pScr))
+#define SetRRScreen(s,p) dixSetPrivate(&(s)->devPrivates, rrPrivKey, (p))
 
 /*
  * each window has a list of clients requesting

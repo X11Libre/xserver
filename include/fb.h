@@ -75,7 +75,7 @@
 #define FB_STIP_UNIT	(1 << FB_STIP_SHIFT)
 #define FB_STIP_MASK	(FB_STIP_UNIT - 1)
 #define FB_STIP_ALLONES	((FbStip) -1)
-#define FbFullMask(n)   ((n) == FB_UNIT ? FB_ALLONES : ((((FbBits) 1) << n) - 1))
+#define FbFullMask(n)   ((n) == FB_UNIT ? FB_ALLONES : ((((FbBits) 1) << (n)) - 1))
 
 #if FB_SHIFT == 5
 typedef CARD32 FbBits;
@@ -95,7 +95,7 @@ typedef int FbStride;
 #define FbScrLeft(x,n)	((x) >> (n))
 #define FbScrRight(x,n)	((x) << (n))
 #define FbLeftStipBits(x,n) ((x) & ((((FbStip) 1) << (n)) - 1))
-#define FbStipMoveLsb(x,s,n)	(FbStipRight (x,(s)-(n)))
+#define FbStipMoveLsb(x,s,n)	(FbStipRight ((x),(s)-(n)))
 #define FbPatternOffsetBits	0
 #else
 #define FbScrLeft(x,n)	((x) << (n))
@@ -107,10 +107,10 @@ typedef int FbStride;
 
 #include "micoord.h"
 
-#define FbStipLeft(x,n)	FbScrLeft(x,n)
-#define FbStipRight(x,n) FbScrRight(x,n)
+#define FbStipLeft(x,n)	FbScrLeft((x),(n))
+#define FbStipRight(x,n) FbScrRight((x),(n))
 
-#define FbRotLeft(x,n)	FbScrLeft(x,n) | (n ? FbScrRight(x,FB_UNIT-n) : 0)
+#define FbRotLeft(x,n)	FbScrLeft((x),(n)) | ((n) ? FbScrRight((x),FB_UNIT-(n)) : 0)
 
 #define FbLeftMask(x)	    ( ((x) & FB_MASK) ? \
 			     FbScrRight(FB_ALLONES,(x) & FB_MASK) : 0)
@@ -133,75 +133,75 @@ typedef int FbStride;
 #define FbPatternOffset(o,t)  ((o) ^ (FbPatternOffsetBits & ~(sizeof (t) - 1)))
 
 #define FbPtrOffset(p,o,t)		((t *) ((CARD8 *) (p) + (o)))
-#define FbSelectPatternPart(xor,o,t)	((xor) >> (FbPatternOffset (o,t) << 3))
-#define FbStorePart(dst,off,t,xor)	(WRITE(FbPtrOffset(dst,off,t), \
-					 FbSelectPart(xor,off,t)))
+#define FbSelectPatternPart(xor,o,t)	((xor) >> (FbPatternOffset ((o),t) << 3))
+#define FbStorePart(dst,off,t,xor)	(WRITE(FbPtrOffset((dst),(off),t), \
+					 FbSelectPart((xor),(off),t)))
 #ifndef FbSelectPart
-#define FbSelectPart(x,o,t) FbSelectPatternPart(x,o,t)
+#define FbSelectPart(x,o,t) FbSelectPatternPart((x),(o),t)
 #endif
 
 #define FbMaskBitsBytes(x,w,copy,l,lb,n,r,rb) { \
-    n = (w); \
-    lb = 0; \
-    rb = 0; \
-    r = FbRightMask((x)+n); \
+    (n) = (w); \
+    (lb) = 0; \
+    (rb) = 0; \
+    (r) = FbRightMask((x)+(n)); \
     if (r) { \
 	/* compute right byte length */ \
-	if ((copy) && (((x) + n) & 7) == 0) { \
-	    rb = (((x) + n) & FB_MASK) >> 3; \
+	if ((copy) && (((x) + (n)) & 7) == 0) { \
+	    (rb) = (((x) + (n)) & FB_MASK) >> 3; \
 	} else { \
-	    rb = FbByteMaskInvalid; \
+	    (rb) = FbByteMaskInvalid; \
 	} \
     } \
-    l = FbLeftMask(x); \
+    (l) = FbLeftMask((x)); \
     if (l) { \
 	/* compute left byte length */ \
 	if ((copy) && ((x) & 7) == 0) { \
-	    lb = ((x) & FB_MASK) >> 3; \
+	    (lb) = ((x) & FB_MASK) >> 3; \
 	} else { \
-	    lb = FbByteMaskInvalid; \
+	    (lb) = FbByteMaskInvalid; \
 	} \
 	/* subtract out the portion painted by leftMask */ \
-	n -= FB_UNIT - ((x) & FB_MASK); \
-	if (n < 0) { \
-	    if (lb != FbByteMaskInvalid) { \
-		if (rb == FbByteMaskInvalid) { \
-		    lb = FbByteMaskInvalid; \
+	(n) -= FB_UNIT - ((x) & FB_MASK); \
+	if ((n) < 0) { \
+	    if ((lb) != FbByteMaskInvalid) { \
+		if ((rb) == FbByteMaskInvalid) { \
+		    (lb) = FbByteMaskInvalid; \
 		} else if (rb) { \
-		    lb |= (rb - lb) << (FB_SHIFT - 3); \
-		    rb = 0; \
+		    (lb) |= ((rb) - (lb)) << (FB_SHIFT - 3); \
+		    (rb) = 0; \
 		} \
 	    } \
-	    n = 0; \
-	    l &= r; \
-	    r = 0; \
+	    (n) = 0; \
+	    (l) &= (r); \
+	    (r) = 0; \
 	}\
     } \
-    n >>= FB_SHIFT; \
+    (n) >>= FB_SHIFT; \
 }
 
 #define FbDoLeftMaskByteRRop(dst,lb,l,and,xor) { \
     switch (lb) { \
     case (sizeof (FbBits) - 3) | (1 << (FB_SHIFT - 3)): \
-	FbStorePart(dst,sizeof (FbBits) - 3,CARD8,xor); \
+	FbStorePart((dst),sizeof (FbBits) - 3,CARD8,(xor)); \
 	break; \
     case (sizeof (FbBits) - 3) | (2 << (FB_SHIFT - 3)): \
-	FbStorePart(dst,sizeof (FbBits) - 3,CARD8,xor); \
-	FbStorePart(dst,sizeof (FbBits) - 2,CARD8,xor); \
+	FbStorePart((dst),sizeof (FbBits) - 3,CARD8,(xor)); \
+	FbStorePart((dst),sizeof (FbBits) - 2,CARD8,(xor)); \
 	break; \
     case (sizeof (FbBits) - 2) | (1 << (FB_SHIFT - 3)): \
-	FbStorePart(dst,sizeof (FbBits) - 2,CARD8,xor); \
+	FbStorePart((dst),sizeof (FbBits) - 2,CARD8,(xor)); \
 	break; \
     case sizeof (FbBits) - 3: \
-	FbStorePart(dst,sizeof (FbBits) - 3,CARD8,xor); \
+	FbStorePart((dst),sizeof (FbBits) - 3,CARD8,(xor)); \
     case sizeof (FbBits) - 2: \
-	FbStorePart(dst,sizeof (FbBits) - 2,CARD16,xor); \
+	FbStorePart((dst),sizeof (FbBits) - 2,CARD16,(xor)); \
 	break; \
     case sizeof (FbBits) - 1: \
-	FbStorePart(dst,sizeof (FbBits) - 1,CARD8,xor); \
+	FbStorePart((dst),sizeof (FbBits) - 1,CARD8,(xor)); \
 	break; \
     default: \
-	WRITE(dst, FbDoMaskRRop(READ(dst), and, xor, l)); \
+	WRITE((dst), FbDoMaskRRop(READ((dst)), (and), (xor), (l))); \
 	break; \
     } \
 }
@@ -209,17 +209,17 @@ typedef int FbStride;
 #define FbDoRightMaskByteRRop(dst,rb,r,and,xor) { \
     switch (rb) { \
     case 1: \
-	FbStorePart(dst,0,CARD8,xor); \
+	FbStorePart((dst),0,CARD8,(xor)); \
 	break; \
     case 2: \
-	FbStorePart(dst,0,CARD16,xor); \
+	FbStorePart((dst),0,CARD16,(xor)); \
 	break; \
     case 3: \
-	FbStorePart(dst,0,CARD16,xor); \
-	FbStorePart(dst,2,CARD8,xor); \
+	FbStorePart((dst),0,CARD16,(xor)); \
+	FbStorePart((dst),2,CARD8,(xor)); \
 	break; \
     default: \
-	WRITE(dst, FbDoMaskRRop (READ(dst), and, xor, r)); \
+	WRITE((dst), FbDoMaskRRop (READ((dst)), (and), (xor), (r))); \
     } \
 }
 
@@ -239,7 +239,7 @@ typedef void (*FinishWrapProcPtr) (DrawablePtr pDraw);
 		&wfbWriteMemory, \
 		(pDraw))
 #define fbFinishAccess(pDraw) \
-	fbGetScreenPrivate((pDraw)->pScreen)->finishWrap(pDraw)
+	fbGetScreenPrivate((pDraw)->pScreen)->finishWrap((pDraw))
 
 #else
 
@@ -277,27 +277,27 @@ typedef struct {
 #define fbGetWinPrivateKey(pWin)        (&fbGetScreenPrivate(((DrawablePtr) (pWin))->pScreen)->winPrivateKeyRec)
 
 #define fbGetWindowPixmap(pWin)	((PixmapPtr)\
-				 dixLookupPrivate(&((WindowPtr)(pWin))->devPrivates, fbGetWinPrivateKey(pWin)))
+				 dixLookupPrivate(&((WindowPtr)(pWin))->devPrivates, fbGetWinPrivateKey((pWin))))
 
 #define __fbPixDrawableX(pPix)	((pPix)->drawable.x)
 #define __fbPixDrawableY(pPix)	((pPix)->drawable.y)
 
-#define __fbPixOffXWin(pPix)	(__fbPixDrawableX(pPix) - (pPix)->screen_x)
-#define __fbPixOffYWin(pPix)	(__fbPixDrawableY(pPix) - (pPix)->screen_y)
-#define __fbPixOffXPix(pPix)	(__fbPixDrawableX(pPix))
-#define __fbPixOffYPix(pPix)	(__fbPixDrawableY(pPix))
+#define __fbPixOffXWin(pPix)	(__fbPixDrawableX((pPix)) - (pPix)->screen_x)
+#define __fbPixOffYWin(pPix)	(__fbPixDrawableY((pPix)) - (pPix)->screen_y)
+#define __fbPixOffXPix(pPix)	(__fbPixDrawableX((pPix)))
+#define __fbPixOffYPix(pPix)	(__fbPixDrawableY((pPix)))
 
 #define fbGetDrawablePixmap(pDrawable, pixmap, xoff, yoff) {			\
     if ((pDrawable)->type != DRAWABLE_PIXMAP) { 				\
-	(pixmap) = fbGetWindowPixmap(pDrawable);				\
-	(xoff) = __fbPixOffXWin(pixmap); 					\
-	(yoff) = __fbPixOffYWin(pixmap); 					\
+	(pixmap) = fbGetWindowPixmap((pDrawable));				\
+	(xoff) = __fbPixOffXWin((pixmap)); 					\
+	(yoff) = __fbPixOffYWin((pixmap)); 					\
     } else { 									\
 	(pixmap) = (PixmapPtr) (pDrawable);					\
-	(xoff) = __fbPixOffXPix(pixmap); 					\
-	(yoff) = __fbPixOffYPix(pixmap); 					\
+	(xoff) = __fbPixOffXPix((pixmap)); 					\
+	(yoff) = __fbPixOffYPix((pixmap)); 					\
     } 										\
-    fbPrepareAccess(pDrawable); 						\
+    fbPrepareAccess((pDrawable)); 						\
 }
 
 #define fbGetPixmapBitsData(pixmap, pointer, stride, bpp) {			\
@@ -314,14 +314,14 @@ typedef struct {
 
 #define fbGetDrawable(pDrawable, pointer, stride, bpp, xoff, yoff) { 		\
     PixmapPtr   _pPix; 								\
-    fbGetDrawablePixmap(pDrawable, _pPix, xoff, yoff); 				\
-    fbGetPixmapBitsData(_pPix, pointer, stride, bpp);				\
+    fbGetDrawablePixmap((pDrawable), _pPix, (xoff), (yoff)); 				\
+    fbGetPixmapBitsData(_pPix, (pointer), (stride), (bpp));				\
 }
 
 #define fbGetStipDrawable(pDrawable, pointer, stride, bpp, xoff, yoff) { 	\
     PixmapPtr   _pPix; 								\
-    fbGetDrawablePixmap(pDrawable, _pPix, xoff, yoff);				\
-    fbGetPixmapStipData(_pPix, pointer, stride, bpp);				\
+    fbGetDrawablePixmap((pDrawable), _pPix, (xoff), (yoff));				\
+    fbGetPixmapStipData(_pPix, (pointer), (stride), (bpp));				\
 }
 
 /*
@@ -334,13 +334,13 @@ typedef struct {
 
 #define fbDrawableEnabled(pDrawable) \
     ((pDrawable)->type == DRAWABLE_PIXMAP ? \
-     TRUE : fbWindowEnabled((WindowPtr) pDrawable))
+     TRUE : fbWindowEnabled((WindowPtr) (pDrawable)))
 
 #define FbPowerOfTwo(w)	    (((w) & ((w) - 1)) == 0)
 /*
  * Accelerated tiles are power of 2 width <= FB_UNIT
  */
-#define FbEvenTile(w)	    ((w) <= FB_UNIT && FbPowerOfTwo(w))
+#define FbEvenTile(w)	    ((w) <= FB_UNIT && FbPowerOfTwo((w)))
 
 /*
  * fbarc.c

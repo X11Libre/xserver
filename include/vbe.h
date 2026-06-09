@@ -33,7 +33,7 @@ typedef struct {
     Bool ddc_blank;
 } vbeInfoRec, *vbeInfoPtr;
 
-#define VBE_VERSION_MAJOR(x) *((CARD8*)(&x) + 1)
+#define VBE_VERSION_MAJOR(x) *((CARD8*)(&(x)) + 1)
 #define VBE_VERSION_MINOR(x) (CARD8)(x)
 
 extern _X_EXPORT vbeInfoPtr VBEInit(xf86Int10InfoPtr pInt, int entityIndex);
@@ -244,17 +244,17 @@ typedef enum {
 } vbeScanwidthCommand;
 
 #define VBESetLogicalScanline(pVbe, width)	\
-	VBESetGetLogicalScanlineLength(pVbe, SCANWID_SET, width, \
+	VBESetGetLogicalScanlineLength((pVbe), SCANWID_SET, (width), \
 					NULL, NULL, NULL)
 #define VBESetLogicalScanlineBytes(pVbe, width)	\
-	VBESetGetLogicalScanlineLength(pVbe, SCANWID_SET_BYTES, width, \
+	VBESetGetLogicalScanlineLength((pVbe), SCANWID_SET_BYTES, (width), \
 					NULL, NULL, NULL)
 #define VBEGetLogicalScanline(pVbe, pixels, bytes, max)	\
-	VBESetGetLogicalScanlineLength(pVbe, SCANWID_GET, 0, \
-					pixels, bytes, max)
+	VBESetGetLogicalScanlineLength((pVbe), SCANWID_GET, 0, \
+					(pixels), (bytes), (max))
 #define VBEGetMaxLogicalScanline(pVbe, pixels, bytes, max)	\
-	VBESetGetLogicalScanlineLength(pVbe, SCANWID_GET_MAX, 0, \
-					pixels, bytes, max)
+	VBESetGetLogicalScanlineLength((pVbe), SCANWID_GET_MAX, 0, \
+					(pixels), (bytes), (max))
 extern _X_EXPORT Bool VBESetGetLogicalScanlineLength(vbeInfoPtr pVbe,
                                                      vbeScanwidthCommand
                                                      command, int width,
@@ -290,7 +290,7 @@ extern _X_EXPORT CARD32 *VBESetGetPaletteData(vbeInfoPtr pVbe, Bool set,
                                               int first, int num, CARD32 *data,
                                               Bool secondary,
                                               Bool wait_retrace);
-#define VBEFreePaletteData(data)	free(data)
+#define VBEFreePaletteData(data)	free((data))
 
 /*
  * INT A
@@ -302,7 +302,7 @@ typedef struct _VBEpmi {
     int tbl_len;
 } VBEpmi;
 
-#define VESAFreeVBEpmi(pmi)	free(pmi)
+#define VESAFreeVBEpmi(pmi)	free((pmi))
 
 /* high level helper functions */
 

@@ -38,7 +38,7 @@ typedef struct _Picture *PicturePtr;
  * sample implementation allows only packed RGB and GBR
  * representations for data to simplify software rendering,
  */
-#define PICT_FORMAT(bpp,type,a,r,g,b)	PIXMAN_FORMAT(bpp, type, a, r, g, b)
+#define PICT_FORMAT(bpp,type,a,r,g,b)	PIXMAN_FORMAT((bpp), (type), (a), (r), (g), (b))
 
 /*
  * gray/color formats use a visual index instead of argb
@@ -47,14 +47,14 @@ typedef struct _Picture *PicturePtr;
 					 ((type) << 16) | \
 					 ((vi)))
 
-#define PICT_FORMAT_BPP(f)	PIXMAN_FORMAT_BPP(f)
-#define PICT_FORMAT_TYPE(f)	PIXMAN_FORMAT_TYPE(f)
-#define PICT_FORMAT_A(f)	PIXMAN_FORMAT_A(f)
-#define PICT_FORMAT_R(f)	PIXMAN_FORMAT_R(f)
-#define PICT_FORMAT_G(f)	PIXMAN_FORMAT_G(f)
-#define PICT_FORMAT_B(f)	PIXMAN_FORMAT_B(f)
-#define PICT_FORMAT_RGB(f)	PIXMAN_FORMAT_RGB(f)
-#define PICT_FORMAT_VIS(f)	PIXMAN_FORMAT_VIS(f)
+#define PICT_FORMAT_BPP(f)	PIXMAN_FORMAT_BPP((f))
+#define PICT_FORMAT_TYPE(f)	PIXMAN_FORMAT_TYPE((f))
+#define PICT_FORMAT_A(f)	PIXMAN_FORMAT_A((f))
+#define PICT_FORMAT_R(f)	PIXMAN_FORMAT_R((f))
+#define PICT_FORMAT_G(f)	PIXMAN_FORMAT_G((f))
+#define PICT_FORMAT_B(f)	PIXMAN_FORMAT_B((f))
+#define PICT_FORMAT_RGB(f)	PIXMAN_FORMAT_RGB((f))
+#define PICT_FORMAT_VIS(f)	PIXMAN_FORMAT_VIS((f))
 
 #define PICT_TYPE_OTHER		PIXMAN_TYPE_OTHER
 #define PICT_TYPE_A		PIXMAN_TYPE_A
@@ -64,7 +64,7 @@ typedef struct _Picture *PicturePtr;
 #define PICT_TYPE_GRAY		PIXMAN_TYPE_GRAY
 #define PICT_TYPE_BGRA		PIXMAN_TYPE_BGRA
 
-#define PICT_FORMAT_COLOR(f)	PIXMAN_FORMAT_COLOR(f)
+#define PICT_FORMAT_COLOR(f)	PIXMAN_FORMAT_COLOR((f))
 
 typedef pixman_format_code_t PictFormatShort;
 
@@ -179,17 +179,17 @@ typedef pixman_fixed_t xFixed;
 
 #define XFIXED_BITS	16
 
-#define xFixedToInt(f)	pixman_fixed_to_int(f)
-#define IntToxFixed(i)	pixman_int_to_fixed(i)
+#define xFixedToInt(f)	pixman_fixed_to_int((f))
+#define IntToxFixed(i)	pixman_int_to_fixed((i))
 #define xFixedE		pixman_fixed_e
 #define xFixed1		pixman_fixed_1
 #define xFixed1MinusE	pixman_fixed_1_minus_e
-#define xFixedFrac(f)	pixman_fixed_frac(f)
-#define xFixedFloor(f)	pixman_fixed_floor(f)
-#define xFixedCeil(f)	pixman_fixed_ceil(f)
+#define xFixedFrac(f)	pixman_fixed_frac((f))
+#define xFixedFloor(f)	pixman_fixed_floor((f))
+#define xFixedCeil(f)	pixman_fixed_ceil((f))
 
-#define xFixedFraction(f)	pixman_fixed_fraction(f)
-#define xFixedMod2(f)		pixman_fixed_mod2(f)
+#define xFixedFraction(f)	pixman_fixed_fraction((f))
+#define xFixedMod2(f)		pixman_fixed_mod2((f))
 
 /* whether 't' is a well defined not obviously empty trapezoid */
 #define xTrapezoidValid(t)  ((t)->left.p1.y != (t)->left.p2.y && \

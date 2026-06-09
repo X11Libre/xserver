@@ -206,10 +206,10 @@ padding_for_int32(const int bytes)
 /* some macros to help swap requests, replies, and events */
 
 #define LengthRestS(stuff) \
-    ((client->req_len << 1) - (sizeof(*stuff) >> 1))
+    ((client->req_len << 1) - (sizeof(*(stuff)) >> 1))
 
 #define SwapRestS(stuff) \
-    SwapShorts((short *)(stuff + 1), LengthRestS(stuff))
+    SwapShorts((short *)((stuff) + 1), LengthRestS((stuff)))
 
 #if defined(__GNUC__) && ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))
 void __attribute__ ((error("wrong sized variable passed to swap")))

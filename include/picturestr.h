@@ -345,10 +345,10 @@ extern _X_EXPORT DevPrivateKeyRec PictureScreenPrivateKeyRec;
 extern _X_EXPORT DevPrivateKeyRec PictureWindowPrivateKeyRec;
 
 #define GetPictureScreen(s) ((PictureScreenPtr)dixLookupPrivate(&(s)->devPrivates, &PictureScreenPrivateKeyRec))
-#define GetPictureScreenIfSet(s) (dixPrivateKeyRegistered(&PictureScreenPrivateKeyRec) ? GetPictureScreen(s) : NULL)
-#define SetPictureScreen(s,p) dixSetPrivate(&(s)->devPrivates, &PictureScreenPrivateKeyRec, p)
+#define GetPictureScreenIfSet(s) (dixPrivateKeyRegistered(&PictureScreenPrivateKeyRec) ? GetPictureScreen((s)) : NULL)
+#define SetPictureScreen(s,p) dixSetPrivate(&(s)->devPrivates, &PictureScreenPrivateKeyRec, (p))
 #define GetPictureWindow(w) ((PicturePtr)dixLookupPrivate(&(w)->devPrivates, &PictureWindowPrivateKeyRec))
-#define SetPictureWindow(w,p) dixSetPrivate(&(w)->devPrivates, &PictureWindowPrivateKeyRec, p)
+#define SetPictureWindow(w,p) dixSetPrivate(&(w)->devPrivates, &PictureWindowPrivateKeyRec, (p))
 
 extern _X_EXPORT PictFormatPtr
  PictureWindowFormat(WindowPtr pWindow);

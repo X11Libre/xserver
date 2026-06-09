@@ -36,11 +36,11 @@ extern _X_EXPORT const FbMergeRopRec FbMergeRopBits[16];
 
 #define FbInitializeMergeRop(alu,pm) {\
     const FbMergeRopRec  *_bits; \
-    _bits = &FbMergeRopBits[alu]; \
-    _ca1 = _bits->ca1 &  pm; \
-    _cx1 = _bits->cx1 | ~pm; \
-    _ca2 = _bits->ca2 &  pm; \
-    _cx2 = _bits->cx2 &  pm; \
+    _bits = &FbMergeRopBits[(alu)]; \
+    _ca1 = _bits->ca1 &  (pm); \
+    _cx1 = _bits->cx1 | ~(pm); \
+    _ca2 = _bits->ca2 &  (pm); \
+    _cx2 = _bits->cx2 &  (pm); \
 }
 
 #define FbDestInvarientRop(alu,pm)  ((pm) == FB_ALLONES && \
@@ -60,18 +60,18 @@ extern _X_EXPORT const FbMergeRopRec FbMergeRopBits[16];
 
 #define FbDoLeftMaskByteMergeRop(dst, src, lb, l) { \
     FbBits  __xor = ((src) & _ca2) ^ _cx2; \
-    FbDoLeftMaskByteRRop(dst,lb,l,((src) & _ca1) ^ _cx1,__xor); \
+    FbDoLeftMaskByteRRop((dst),(lb),(l),((src) & _ca1) ^ _cx1,__xor); \
 }
 
 #define FbDoRightMaskByteMergeRop(dst, src, rb, r) { \
     FbBits  __xor = ((src) & _ca2) ^ _cx2; \
-    FbDoRightMaskByteRRop(dst,rb,r,((src) & _ca1) ^ _cx1,__xor); \
+    FbDoRightMaskByteRRop((dst),(rb),(r),((src) & _ca1) ^ _cx1,__xor); \
 }
 
 #define FbDoRRop(dst, and, xor)	(((dst) & (and)) ^ (xor))
 
 #define FbDoMaskRRop(dst, and, xor, mask) \
-    (((dst) & ((and) | ~(mask))) ^ (xor & mask))
+    (((dst) & ((and) | ~(mask))) ^ ((xor) & (mask)))
 
 /*
  * Take a single bit (0 or 1) and generate a full mask
@@ -81,36 +81,36 @@ extern _X_EXPORT const FbMergeRopRec FbMergeRopBits[16];
 #define fbXorT(rop,fg,pm,t) ((((fg) & fbFillFromBit((rop) >> 1,t)) | \
 			      (~(fg) & fbFillFromBit((rop) >> 3,t))) & (pm))
 
-#define fbAndT(rop,fg,pm,t) ((((fg) & fbFillFromBit (rop ^ (rop>>1),t)) | \
-			      (~(fg) & fbFillFromBit((rop>>2) ^ (rop>>3),t))) | \
+#define fbAndT(rop,fg,pm,t) ((((fg) & fbFillFromBit ((rop) ^ ((rop)>>1),t)) | \
+			      (~(fg) & fbFillFromBit(((rop)>>2) ^ ((rop)>>3),t))) | \
 			     ~(pm))
 
-#define fbXor(rop,fg,pm)	fbXorT(rop,fg,pm,FbBits)
+#define fbXor(rop,fg,pm)	fbXorT((rop),(fg),(pm),FbBits)
 
-#define fbAnd(rop,fg,pm)	fbAndT(rop,fg,pm,FbBits)
+#define fbAnd(rop,fg,pm)	fbAndT((rop),(fg),(pm),FbBits)
 
-#define fbXorStip(rop,fg,pm)    fbXorT(rop,fg,pm,FbStip)
+#define fbXorStip(rop,fg,pm)    fbXorT((rop),(fg),(pm),FbStip)
 
-#define fbAndStip(rop,fg,pm)	fbAndT(rop,fg,pm,FbStip)
+#define fbAndStip(rop,fg,pm)	fbAndT((rop),(fg),(pm),FbStip)
 
 /*
  * Stippling operations;
  */
 
 #define FbStippleRRop(dst, b, fa, fx, ba, bx) \
-    (FbDoRRop(dst, fa, fx) & b) | (FbDoRRop(dst, ba, bx) & ~b)
+    (FbDoRRop((dst), (fa), (fx)) & (b)) | (FbDoRRop((dst), (ba), (bx)) & ~(b))
 
 #define FbStippleRRopMask(dst, b, fa, fx, ba, bx, m) \
-    (FbDoMaskRRop(dst, fa, fx, m) & (b)) | (FbDoMaskRRop(dst, ba, bx, m) & ~(b))
+    (FbDoMaskRRop((dst), (fa), (fx), (m)) & (b)) | (FbDoMaskRRop((dst), (ba), (bx), (m)) & ~(b))
 
 #define FbDoLeftMaskByteStippleRRop(dst, b, fa, fx, ba, bx, lb, l) { \
     FbBits  __xor = ((fx) & (b)) | ((bx) & ~(b)); \
-    FbDoLeftMaskByteRRop(dst, lb, l, ((fa) & (b)) | ((ba) & ~(b)), __xor); \
+    FbDoLeftMaskByteRRop((dst), (lb), (l), ((fa) & (b)) | ((ba) & ~(b)), __xor); \
 }
 
 #define FbDoRightMaskByteStippleRRop(dst, b, fa, fx, ba, bx, rb, r) { \
     FbBits  __xor = ((fx) & (b)) | ((bx) & ~(b)); \
-    FbDoRightMaskByteRRop(dst, rb, r, ((fa) & (b)) | ((ba) & ~(b)), __xor); \
+    FbDoRightMaskByteRRop((dst), (rb), (r), ((fa) & (b)) | ((ba) & ~(b)), __xor); \
 }
 
 #define FbOpaqueStipple(b, fg, bg) (((fg) & (b)) | ((bg) & ~(b)))
@@ -121,9 +121,9 @@ extern _X_EXPORT const FbMergeRopRec FbMergeRopBits[16];
  */
 #define FbStipple1RopPick(alu,b)    (((alu) >> (2 - (((b) & 1) << 1))) & 3)
 
-#define FbOpaqueStipple1Rop(alu,fg,bg)    (FbStipple1RopPick(alu,fg) | \
-					   (FbStipple1RopPick(alu,bg) << 2))
+#define FbOpaqueStipple1Rop(alu,fg,bg)    (FbStipple1RopPick((alu),(fg)) | \
+					   (FbStipple1RopPick((alu),(bg)) << 2))
 
-#define FbStipple1Rop(alu,fg)	    (FbStipple1RopPick(alu,fg) | 4)
+#define FbStipple1Rop(alu,fg)	    (FbStipple1RopPick((alu),(fg)) | 4)
 
 #endif

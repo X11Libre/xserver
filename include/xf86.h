@@ -52,7 +52,7 @@ extern _X_EXPORT DevPrivateKeyRec xf86ScreenKeyRec;
 extern _X_EXPORT ScrnInfoPtr *xf86Screens;      /* List of pointers to ScrnInfoRecs */
 extern _X_EXPORT const unsigned char byte_reversed[256];
 
-#define XF86SCRNINFO(p) xf86ScreenToScrn(p)
+#define XF86SCRNINFO(p) xf86ScreenToScrn((p))
 
 /* Compatibility functions for pre-input-thread drivers */
 static inline _X_DEPRECATED int xf86BlockSIGIO(void) { input_lock(); return 0; }
@@ -273,7 +273,7 @@ extern _X_EXPORT ScreenPtr xf86ScrnToScreen(ScrnInfoPtr pScrn);
 
 /* only for backwards (source) compatibility */
 #define xf86MsgVerb LogMessageVerb
-#define xf86Msg(type, ...) LogMessageVerb(type, 1, __VA_ARGS__)
+#define xf86Msg(type, ...) LogMessageVerb((type), 1, __VA_ARGS__)
 
 /*
  * retrieve file descriptor to opened console device.

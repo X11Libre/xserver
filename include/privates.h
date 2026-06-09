@@ -276,7 +276,7 @@ _dixAllocateScreenObjectWithPrivates(ScreenPtr pScreen,
                                      unsigned offset,
                                      DevPrivateType type);
 
-#define dixAllocateScreenObjectWithPrivates(s, t, type) _dixAllocateScreenObjectWithPrivates(s, sizeof(t), offsetof(t, devPrivates), type)
+#define dixAllocateScreenObjectWithPrivates(s, t, type) _dixAllocateScreenObjectWithPrivates((s), sizeof(t), offsetof(t, devPrivates), (type))
 
 extern _X_EXPORT int
 dixScreenSpecificPrivatesSize(ScreenPtr pScreen, DevPrivateType type);
@@ -284,7 +284,7 @@ dixScreenSpecificPrivatesSize(ScreenPtr pScreen, DevPrivateType type);
 extern _X_EXPORT void
 _dixInitScreenPrivates(ScreenPtr pScreen, PrivatePtr *privates, void *addr, DevPrivateType type);
 
-#define dixInitScreenPrivates(s, o, v, type) _dixInitScreenPrivates(s, &(o)->devPrivates, (v), type);
+#define dixInitScreenPrivates(s, o, v, type) _dixInitScreenPrivates((s), &(o)->devPrivates, (v), (type));
 
 /*
  * Allocates private data separately from main object.
@@ -310,7 +310,7 @@ extern _X_EXPORT void
 extern _X_EXPORT void
 _dixInitPrivates(PrivatePtr *privates, void *addr, DevPrivateType type);
 
-#define dixInitPrivates(o, v, type) _dixInitPrivates(&(o)->devPrivates, (v), type);
+#define dixInitPrivates(o, v, type) _dixInitPrivates(&(o)->devPrivates, (v), (type));
 
 /*
  * Clean up privates
@@ -318,7 +318,7 @@ _dixInitPrivates(PrivatePtr *privates, void *addr, DevPrivateType type);
 extern _X_EXPORT void
  _dixFiniPrivates(PrivatePtr privates, DevPrivateType type);
 
-#define dixFiniPrivates(o,t)	_dixFiniPrivates((o)->devPrivates,t)
+#define dixFiniPrivates(o,t)	_dixFiniPrivates((o)->devPrivates,(t))
 
 /*
  * Allocates private data at object creation time. Required
@@ -330,14 +330,14 @@ extern _X_EXPORT void *_dixAllocateObjectWithPrivates(unsigned size,
                                                       unsigned offset,
                                                       DevPrivateType type);
 
-#define dixAllocateObjectWithPrivates(t, type) (t *) _dixAllocateObjectWithPrivates(sizeof(t), sizeof(t), offsetof(t, devPrivates), type)
+#define dixAllocateObjectWithPrivates(t, type) (t *) _dixAllocateObjectWithPrivates(sizeof(t), sizeof(t), offsetof(t, devPrivates), (type))
 
 extern _X_EXPORT void
 
 _dixFreeObjectWithPrivates(void *object, PrivatePtr privates,
                            DevPrivateType type);
 
-#define dixFreeObjectWithPrivates(o,t) _dixFreeObjectWithPrivates(o, (o)->devPrivates, t)
+#define dixFreeObjectWithPrivates(o,t) _dixFreeObjectWithPrivates((o), (o)->devPrivates, (t))
 
 /*
  * Return size of privates for the specified type
@@ -373,6 +373,6 @@ extern _X_EXPORT int
  * Convenience macro for adding an offset to an object pointer
  * when making a call to one of the devPrivates functions
  */
-#define DEVPRIV_AT(ptr, offset) ((PrivatePtr *)((char *)(ptr) + offset))
+#define DEVPRIV_AT(ptr, offset) ((PrivatePtr *)((char *)(ptr) + (offset)))
 
 #endif                          /* PRIVATES_H */
