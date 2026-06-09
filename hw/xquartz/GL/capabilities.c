@@ -321,8 +321,8 @@ handleDepthModes(struct glCapabilitiesConfig *c, GLint dmodes)
 {
     int offset = 0;
 #define DEPTH(flag, value) do { \
-        if (dmodes & flag) { \
-            c->depth_buffers[offset++] = value; \
+        if (dmodes & (flag)) { \
+            c->depth_buffers[offset++] = (value); \
         } \
 } while (0)
 

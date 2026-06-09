@@ -60,7 +60,7 @@ static DevPrivateKeyRec darwinCursorScreenKeyRec;
 #define darwinCursorScreenKey (&darwinCursorScreenKeyRec)
 
 #define CURSOR_PRIV(pScreen) ((QuartzCursorScreenPtr) \
-                              dixLookupPrivate(&pScreen->devPrivates, \
+                              dixLookupPrivate(&(pScreen)->devPrivates, \
                                                darwinCursorScreenKey))
 
 static Bool

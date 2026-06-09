@@ -37,7 +37,7 @@
 #include "darwin.h"
 
 #undef DEBUG_LOG
-#define DEBUG_LOG(msg, args ...) ASL_LOG(ASL_LEVEL_DEBUG, "xpr", msg, ## args)
+#define DEBUG_LOG(msg, args ...) ASL_LOG(ASL_LEVEL_DEBUG, "xpr", (msg), ## args)
 
 Bool
 QuartzModeBundleInit(void);

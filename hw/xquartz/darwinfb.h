@@ -49,7 +49,7 @@ typedef struct {
 
 #define MASK_LH(l, h)       (((1 << (1 + (h) - (l))) - 1) << (l))
 #define BM_ARGB(a, r, g, b) MASK_LH(0, (b) - 1)
-#define GM_ARGB(a, r, g, b) MASK_LH(b, (b) + (g) - 1)
+#define GM_ARGB(a, r, g, b) MASK_LH((b), (b) + (g) - 1)
 #define RM_ARGB(a, r, g, b) MASK_LH((b) + (g), (b) + (g) + (r) - 1)
 #define AM_ARGB(a, r, g, b) MASK_LH((b) + (g) + (r), \
                                     (b) + (g) + (r) + (a) - 1)

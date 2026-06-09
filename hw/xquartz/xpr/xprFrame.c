@@ -54,8 +54,8 @@
 #endif
 
 #define DEFINE_ATOM_HELPER(func, atom_name)                      \
-    static Atom func(void) {                                       \
-        return dixAddAtom(atom_name);                           \
+    static Atom (func)(void) {                                   \
+        return dixAddAtom((atom_name));                          \
     }
 
 DEFINE_ATOM_HELPER(xa_native_window_id, "_NATIVE_WINDOW_ID")

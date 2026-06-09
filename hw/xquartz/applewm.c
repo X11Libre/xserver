@@ -59,8 +59,8 @@
 #include "protocol-versions.h"
 
 #define DEFINE_ATOM_HELPER(func, atom_name)                      \
-    static Atom func(void) {                                       \
-        return dixAddAtom(atom_name);                           \
+    static Atom (func)(void) {                                   \
+        return dixAddAtom((atom_name));                          \
     }
 
 DEFINE_ATOM_HELPER(xa_native_screen_origin, "_NATIVE_SCREEN_ORIGIN")

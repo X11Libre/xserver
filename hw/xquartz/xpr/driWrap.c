@@ -65,12 +65,12 @@ static DevPrivateKeyRec driWrapScreenKeyRec;
 static GCOps driGCOps;
 
 #define wrap(priv, real, member, func) { \
-        priv->member = real->member; \
-        real->member = func; \
+        (priv)->member = (real)->member; \
+        (real)->member = (func); \
 }
 
 #define unwrap(priv, real, member)     { \
-        real->member = priv->member; \
+        (real)->member = (priv)->member; \
 }
 
 static DRIGCRec *

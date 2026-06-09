@@ -69,7 +69,7 @@ typedef struct _DRIDrawablePrivRec {
 #define DRI_SCREEN_PRIV_FROM_INDEX(screenIndex) ((DRIScreenPrivPtr) \
                                                  dixLookupPrivate(&screenInfo \
                                                                   .screens[ \
-                                                                      screenIndex \
+                                                                      (screenIndex) \
                                                                   ]-> \
                                                                   devPrivates, \
                                                                   DRIScreenPrivKey))
