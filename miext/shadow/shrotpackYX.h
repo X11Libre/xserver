@@ -34,14 +34,14 @@
 #if ROTATE == 270
 
 #define WINSTEPX(stride)    (stride)
-#define WINSTART(x,y)       (((pScreen->height - 1) - y) + (x * winStride))
+#define WINSTART(x,y)       (((pScreen->height - 1) - (y)) + (x * winStride))
 #define WINSTEPY()	    -1
 
 #elif ROTATE == 90
 
-#define WINSTEPX(stride)    (-stride)
+#define WINSTEPX(stride)    (-(stride))
 #define WINSTEPY()	    1
-#define WINSTART(x,y)       (((pScreen->width - 1 - x) * winStride) + y)
+#define WINSTART(x,y)       (((pScreen->width - 1 - (x)) * winStride) + (y))
 
 #else
 

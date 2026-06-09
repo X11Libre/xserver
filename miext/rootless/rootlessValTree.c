@@ -106,7 +106,7 @@ Equipment Corporation.
 int RootlessMiValidateTree(WindowPtr pRoot, WindowPtr pChild, VTKind kind);
 
 #define HasParentRelativeBorder(w) (!(w)->borderIsPixel && \
-				    HasBorder(w) && \
+				    HasBorder((w)) && \
 				    (w)->backgroundState == ParentRelative)
 
 /*
