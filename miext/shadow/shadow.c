@@ -41,7 +41,7 @@ static DevPrivateKeyRec shadowScrPrivateKeyRec;
 
 #define shadowGetBuf(pScr) ((shadowBufPtr) \
     dixLookupPrivate(&(pScr)->devPrivates, shadowScrPrivateKey))
-#define shadowBuf(pScr)            shadowBufPtr pBuf = shadowGetBuf(pScr)
+#define shadowBuf(pScr)            shadowBufPtr pBuf = shadowGetBuf((pScr))
 
 #define wrap(priv, real, mem) {\
     priv->mem = real->mem; \
@@ -49,7 +49,7 @@ static DevPrivateKeyRec shadowScrPrivateKeyRec;
 }
 
 #define unwrap(priv, real, mem) {\
-    real->mem = priv->mem; \
+    (real)->mem = (priv)->mem; \
 }
 
 static void

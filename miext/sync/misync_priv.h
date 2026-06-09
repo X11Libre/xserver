@@ -16,7 +16,7 @@ typedef struct _syncScreenPriv {
 } SyncScreenPrivRec, *SyncScreenPrivPtr;
 
 #define SYNC_SCREEN_PRIV(pScreen)                               \
-    (SyncScreenPrivPtr) dixLookupPrivate(&pScreen->devPrivates, \
+    (SyncScreenPrivPtr) dixLookupPrivate(&(pScreen)->devPrivates, \
                                          &miSyncScreenPrivateKey)
 
 Bool miSyncFenceCheckTriggered(SyncFence * pFence);

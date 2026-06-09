@@ -123,7 +123,7 @@ typedef struct _RootlessScreenRec {
 // screen->CreateGC changes after a call to cfbCreateGC.
 
 #define SCREEN_UNWRAP(screen, fn) \
-    screen->fn = SCREENREC(screen)->fn;
+    (screen)->fn = SCREENREC((screen))->fn;
 
 #define SCREEN_WRAP(screen, fn) \
     SCREENREC(screen)->fn = screen->fn; \
@@ -135,13 +135,13 @@ typedef struct _RootlessScreenRec {
     dixLookupPrivate(&(pScreen)->devPrivates, rootlessScreenPrivateKey))
 
 #define SETSCREENREC(pScreen, v) \
-    dixSetPrivate(&(pScreen)->devPrivates, rootlessScreenPrivateKey, v)
+    dixSetPrivate(&(pScreen)->devPrivates, rootlessScreenPrivateKey, (v))
 
 #define WINREC(pWin) ((RootlessWindowRec *) \
     dixLookupPrivate(&(pWin)->devPrivates, rootlessWindowPrivateKey))
 
 #define SETWINREC(pWin, v) \
-    dixSetPrivate(&(pWin)->devPrivates, rootlessWindowPrivateKey, v)
+    dixSetPrivate(&(pWin)->devPrivates, rootlessWindowPrivateKey, (v))
 
 // Call a rootless implementation function.
 // Many rootless implementation functions are allowed to be NULL.
@@ -155,27 +155,27 @@ typedef struct _RootlessScreenRec {
 // Copied from shadowfb
 
 #define TRIM_BOX(box, pGC) { \
-    BoxPtr extents = &pGC->pCompositeClip->extents;\
-    if(box.x1 < extents->x1) box.x1 = extents->x1; \
-    if(box.x2 > extents->x2) box.x2 = extents->x2; \
-    if(box.y1 < extents->y1) box.y1 = extents->y1; \
-    if(box.y2 > extents->y2) box.y2 = extents->y2; \
+    BoxPtr extents = &(pGC)->pCompositeClip->extents;\
+    if((box).x1 < extents->x1) (box).x1 = extents->x1; \
+    if((box).x2 > extents->x2) (box).x2 = extents->x2; \
+    if((box).y1 < extents->y1) (box).y1 = extents->y1; \
+    if((box).y2 > extents->y2) (box).y2 = extents->y2; \
 }
 
 #define TRANSLATE_BOX(box, pDraw) { \
-    box.x1 += pDraw->x; \
-    box.x2 += pDraw->x; \
-    box.y1 += pDraw->y; \
-    box.y2 += pDraw->y; \
+    (box).x1 += (pDraw)->x; \
+    (box).x2 += (pDraw)->x; \
+    (box).y1 += (pDraw)->y; \
+    (box).y2 += (pDraw)->y; \
 }
 
 #define TRIM_AND_TRANSLATE_BOX(box, pDraw, pGC) { \
-    TRANSLATE_BOX(box, pDraw); \
-    TRIM_BOX(box, pGC); \
+    TRANSLATE_BOX((box), (pDraw)); \
+    TRIM_BOX((box), (pGC)); \
 }
 
 #define BOX_NOT_EMPTY(box) \
-    (((box.x2 - box.x1) > 0) && ((box.y2 - box.y1) > 0))
+    ((((box).x2 - (box).x1) > 0) && (((box).y2 - (box).y1) > 0))
 
 // HUGE_ROOT and NORMAL_ROOT
 // We don't want to clip windows to the edge of the screen.
@@ -188,7 +188,7 @@ extern RegionRec rootlessHugeRoot;
 
 #define HUGE_ROOT(pWin)                         \
     do {                                        \
-        WindowPtr _w = pWin;                     \
+        WindowPtr _w = (pWin);                     \
         while (_w->parent)                       \
             _w = _w->parent;                      \
         saveRoot = _w->winSize;                  \
@@ -197,7 +197,7 @@ extern RegionRec rootlessHugeRoot;
 
 #define NORMAL_ROOT(pWin)                       \
     do {                                        \
-        WindowPtr _w = pWin;                     \
+        WindowPtr _w = (pWin);                     \
         while (_w->parent)                       \
             _w = _w->parent;                      \
         _w->winSize = saveRoot;                  \
@@ -220,8 +220,8 @@ extern RegionRec rootlessHugeRoot;
  *  rootless mode, so make sure our base address is always 32-bit aligned.
  */
 #define SetPixmapBaseToScreen(pix, _x, _y) do { \
-    pix->screen_x = _x; \
-    pix->screen_y = _y; \
+    (pix)->screen_x = (_x); \
+    (pix)->screen_y = (_y); \
 } while(0)
 
 // Returns TRUE if this window is visible inside a frame
