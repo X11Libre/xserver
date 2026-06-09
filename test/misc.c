@@ -92,10 +92,10 @@ dix_update_desktop_dimensions(void)
 
 #define assert_dimensions(_x, _y, _w, _h) \
     update_desktop_dimensions();          \
-    assert(screenInfo.x == _x);           \
-    assert(screenInfo.y == _y);           \
-    assert(screenInfo.width == _w);       \
-    assert(screenInfo.height == _h);
+    assert(screenInfo.x == (_x));         \
+    assert(screenInfo.y == (_y));         \
+    assert(screenInfo.width == (_w));     \
+    assert(screenInfo.height == (_h));
 
     /* single screen */
     screenInfo.numScreens = 1;
