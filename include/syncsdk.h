@@ -41,8 +41,8 @@ extern _X_EXPORT SyncObject*
 
 #define VERIFY_SYNC_FENCE_OR_NONE(pFence, fid, client, mode)		\
     do {								\
-        pFence = 0;							\
-        if (None != fid)						\
+        (pFence) = 0;							\
+        if (None != (fid))						\
 	    VERIFY_SYNC_FENCE((pFence), (fid), (client), (mode));	\
     } while (0)
 
