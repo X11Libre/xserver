@@ -29,9 +29,7 @@ export _builddir="${_sourcedir}/build"    # temporary build directory for meson
 export _pkgsrc="$(pwd)"                   # directory of PKGBUILD file
 
 pkgver() {
-    (
-        cat ../GIT_VERSION
-    )
+    cat "${_sourcedir}/.github/arch/GIT_VERSION"
 }
 
 build() {
