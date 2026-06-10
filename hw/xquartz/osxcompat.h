@@ -31,7 +31,9 @@
 #include <AvailabilityMacros.h>
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
+#ifndef HAS_LIBDISPATCH
 #define HAS_LIBDISPATCH
+#endif
 #endif
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080
