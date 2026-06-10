@@ -207,9 +207,9 @@ conf_data.set(
   'BSD44SOCKETS',
   cc.has_member(
      'struct sockaddr_in', 'sin_len',
-     prefix: '#include <sys/types.h>
+     prefix: '''#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>',
+#include <netinet/in.h>''',
   )  ? '1' : false,
   description: 'Define to 1 if `struct sockaddr_in\' has a `sin_len\' member',
 )
