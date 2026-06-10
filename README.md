@@ -125,4 +125,4 @@ Contact
 | --- | --- |
 | Mailing list:                     | https://www.freelists.org/list/xlibre |
 | Telegram channel:                 | https://t.me/x11dev |
-| Matrix room (mirror of tg group): | https://matrix.to/#/#xlibre:matrix.org |
+| Matrix space (mirror of tg group): | https://matrix.to/#/#xlibredev:matrix.org |
