@@ -471,8 +471,6 @@ QuartzShow(void)
 void
 QuartzHide(void)
 {
-    int i;
-
     if (XQuartzServerVisible) {
         DIX_FOR_EACH_SCREEN({ quartzProcs->SuspendScreen(walkScreen); });
     }
