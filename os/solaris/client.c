@@ -35,8 +35,7 @@
 #include <limits.h>
 #include <unistd.h>
 
-static void determine_client_cmd_using_cmdline(char *path, int fd, pid_t pid,
-                                               const char **cmdname,
+static void determine_client_cmd_using_cmdline(char *path, int fd, const char **cmdname,
                                                const char **cmdargs) {
         /* Read the contents of /proc/pid/cmdline. It should contain the
          * process name and arguments. */
@@ -75,8 +74,7 @@ static void determine_client_cmd_using_cmdline(char *path, int fd, pid_t pid,
 /* Solaris prior to 11.3.5 does not support /proc/pid/cmdline, but
  * makes information similar to what ps shows available in a binary
  * structure in the /proc/pid/psinfo file. */
-static void determine_client_cmd_using_psinfo(const char *path, pid_t pid,
-                                              const char **cmdname,
+static void determine_client_cmd_using_psinfo(const char *path, const char **cmdname,
                                               const char **cmdargs) {
         int fd = open(path, O_RDONLY);
         if (fd < 0) {
@@ -125,9 +123,9 @@ void DetermineClientCmdSolaris(pid_t pid, const char **cmdname,
         int fd = open(path, O_RDONLY);
         if (fd < 0) {
                 if (snprintf(path, sizeof(path), "/proc/%d/psinfo", pid) >= 0)
-                        determine_client_cmd_using_psinfo(path, pid, cmdname, cmdargs);
+                        determine_client_cmd_using_psinfo(path, cmdname, cmdargs);
         } else {
-                determine_client_cmd_using_cmdline(path, fd, pid, cmdname, cmdargs);
+                determine_client_cmd_using_cmdline(path, fd, cmdname, cmdargs);
                 close(fd);
         }
 }
