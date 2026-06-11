@@ -643,6 +643,13 @@ ReadXkmIndicators(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
             return -1;
         }
         nRead += tmp * SIZEOF(xkmIndicatorMapDesc);
+        /* wire.indicator is an untrusted CARD8 used as (indicator - 1) to
+         * index the fixed-size indicators[] and maps[] arrays; reject
+         * out-of-range values to avoid an out-of-bounds access. */
+        if (wire.indicator < 1 || wire.indicator > XkbNumIndicators) {
+            _XkbLibError(_XkbErrBadValue, "ReadXkmIndicators", wire.indicator);
+            return -1;
+        }
         if (xkb->names) {
             xkb->names->indicators[wire.indicator - 1] = name;
             if (changes)
