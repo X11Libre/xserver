@@ -258,7 +258,7 @@ ProcXTestFakeInput(ClientPtr client)
 
         if (type == XI_DeviceMotionNotify) {
             firstValuator = ((deviceValuator *) (ev + 1))->first_valuator;
-            if (firstValuator > dev->valuator->numAxes) {
+            if (firstValuator >= dev->valuator->numAxes) {
                 client->errorValue = ev->u.u.type;
                 return BadValue;
             }
@@ -288,6 +288,21 @@ ProcXTestFakeInput(ClientPtr client)
                 client->errorValue = dv->first_valuator;
                 return BadValue;
             }
+            if (dv->num_valuators < 1 || dv->num_valuators > 6) {
+                client->errorValue = dv->num_valuators;
+                return BadValue;
+            }
+
+            /* Validate that the valuators stay within the device's axis
+             * count *before* writing them, otherwise an attacker-controlled
+             * first_valuator/num_valuators combination writes past the end of
+             * the fixed-size valuators[MAX_VALUATORS] stack array. */
+            numValuators += dv->num_valuators;
+            if (firstValuator + numValuators > dev->valuator->numAxes) {
+                client->errorValue = dv->num_valuators;
+                return BadValue;
+            }
+
             switch (dv->num_valuators) {
             case 6:
                 valuators[base + 5] = dv->valuator5;
@@ -302,18 +317,9 @@ ProcXTestFakeInput(ClientPtr client)
             case 1:
                 valuators[base] = dv->valuator0;
                 break;
-            default:
-                client->errorValue = dv->num_valuators;
-                return BadValue;
             }
 
             base += dv->num_valuators;
-            numValuators += dv->num_valuators;
-
-            if (firstValuator + numValuators > dev->valuator->numAxes) {
-                client->errorValue = dv->num_valuators;
-                return BadValue;
-            }
         }
         type = type - XI_DeviceKeyPress + KeyPress;
 
