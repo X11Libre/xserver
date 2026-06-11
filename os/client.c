@@ -63,17 +63,11 @@
 #include "os.h"
 
 #ifdef __sun
-#include <errno.h>
-#include <procfs.h>
+#include "solaris/client_solaris.h"
 #endif
 
 #ifdef __OpenBSD__
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <sys/types.h>
-
-#include <kvm.h>
-#include <limits.h>
+#include "openbsd/client_openbsd.h"
 #endif
 
 #ifdef __APPLE__
