@@ -75,11 +75,12 @@ ProcXIChangeCursor(ClientPtr client)
     if (!InputDevIsMaster(pDev) || !IsPointerDevice(pDev))
         return BadDevice;
 
-    if (stuff->win != None) {
-        rc = dixLookupWindow(&pWin, stuff->win, client, DixSetAttrAccess);
-        if (rc != Success)
-            return rc;
-    }
+    /* A window is required: pWin is dereferenced unconditionally below (and in
+     * ChangeWindowDeviceCursor), so do not allow win == None to leave it NULL.
+     * dixLookupWindow() rejects None with BadWindow. */
+    rc = dixLookupWindow(&pWin, stuff->win, client, DixSetAttrAccess);
+    if (rc != Success)
+        return rc;
 
     if (stuff->cursor == None) {
         if (pWin == pWin->drawable.pScreen->root)
