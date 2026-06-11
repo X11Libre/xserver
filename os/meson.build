@@ -77,6 +77,10 @@ if host_machine.system() == 'sunos'
     os_dep += cc.find_library('nsl')
 endif
 
+if host_machine.system() == 'darwin'
+    srcs_os += 'apple/client.c'
+endif
+
 if get_option('xres')
     # Only the XRes extension cares about the client ID.
     os_c_args += '-DCLIENTIDS'
