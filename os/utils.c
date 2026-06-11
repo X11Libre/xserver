@@ -1111,10 +1111,23 @@ Popen(const char *command, const char *type)
     if (*type == 'r') {
         iop = fdopen(pdes[0], type);
         close(pdes[1]);
+        if (!iop)
+            close(pdes[0]);
     }
     else {
         iop = fdopen(pdes[1], type);
         close(pdes[0]);
+        if (!iop)
+            close(pdes[1]);
+    }
+
+    if (!iop) {
+        free(cur);
+#ifdef HAVE_SETITIMER
+        if (SmartScheduleEnable() < 0)
+            perror("signal");
+#endif
+        return NULL;
     }
 
     cur->fp = iop;
