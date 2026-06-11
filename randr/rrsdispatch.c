@@ -129,7 +129,7 @@ SProcRRGetOutputInfo(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetOutputInfoReq);
     swapl(&stuff->output);
     swapl(&stuff->configTimestamp);
-    return ProcRRGetScreenResources(client);
+    return ProcRRGetOutputInfo(client);
 }
 
 static int _X_COLD
