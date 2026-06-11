@@ -41,9 +41,9 @@
 #define XkbSetCauseReq(c,j,n,cl) { (c)->kc= (c)->event= 0,\
                                   (c)->mjr= (j),(c)->mnr= (n);\
                                   (c)->client= (cl); }
-#define XkbSetCauseCoreReq(c,e,cl) XkbSetCauseReq(c,e,0,cl)
-#define XkbSetCauseXkbReq(c,e,cl)  XkbSetCauseReq(c,XkbReqCode,e,cl)
-#define XkbSetCauseUnknown(c)      XkbSetCauseKey(c,0,0)
+#define XkbSetCauseCoreReq(c,e,cl) XkbSetCauseReq((c),(e),0,(cl))
+#define XkbSetCauseXkbReq(c,e,cl)  XkbSetCauseReq((c),XkbReqCode,(e),(cl))
+#define XkbSetCauseUnknown(c)      XkbSetCauseKey((c),0,0)
 
 #define XkbSLI_IsDefault        (1L<<0)
 #define XkbSLI_HasOwnState      (1L<<1)
@@ -71,32 +71,32 @@
  * statement in this function". lovely.
  */
 #define _XkbErrCode2(a,b) ((XID)((((unsigned int)(a))<<24)|((b)&0xffffff)))
-#define _XkbErrCode3(a,b,c)     _XkbErrCode2(a,(((unsigned int)(b))<<16)|(c))
-#define _XkbErrCode4(a,b,c,d) _XkbErrCode3(a,b,((((unsigned int)(c))<<8)|(d)))
+#define _XkbErrCode3(a,b,c)     _XkbErrCode2((a),(((unsigned int)(b))<<16)|(c))
+#define _XkbErrCode4(a,b,c,d) _XkbErrCode3((a),(b),((((unsigned int)(c))<<8)|(d)))
 
 #define WRAP_PROCESS_INPUT_PROC(device, oldprocs, proc, unwrapproc) \
-        device->public.processInputProc = proc; \
-        oldprocs->processInputProc = \
-        oldprocs->realInputProc = device->public.realInputProc; \
-        device->public.realInputProc = proc; \
-        oldprocs->unwrapProc = device->unwrapProc; \
-        device->unwrapProc = unwrapproc;
+        (device)->public.processInputProc = (proc); \
+        (oldprocs)->processInputProc = \
+        (oldprocs)->realInputProc = (device)->public.realInputProc; \
+        (device)->public.realInputProc = (proc); \
+        (oldprocs)->unwrapProc = (device)->unwrapProc; \
+        (device)->unwrapProc = (unwrapproc);
 
 #define COND_WRAP_PROCESS_INPUT_PROC(device, oldprocs, proc, unwrapproc) \
-        if (device->public.processInputProc == device->public.realInputProc)\
-            device->public.processInputProc = proc; \
-        oldprocs->processInputProc = \
-        oldprocs->realInputProc = device->public.realInputProc; \
-        device->public.realInputProc = proc; \
-        oldprocs->unwrapProc = device->unwrapProc; \
-        device->unwrapProc = unwrapproc;
+        if ((device)->public.processInputProc == (device)->public.realInputProc)\
+            (device)->public.processInputProc = (proc); \
+        (oldprocs)->processInputProc = \
+        (oldprocs)->realInputProc = (device)->public.realInputProc; \
+        (device)->public.realInputProc = (proc); \
+        (oldprocs)->unwrapProc = (device)->unwrapProc; \
+        (device)->unwrapProc = (unwrapproc);
 
 #define UNWRAP_PROCESS_INPUT_PROC(device, oldprocs, backupproc) \
-        backupproc = device->public.realInputProc; \
-        if (device->public.processInputProc == device->public.realInputProc)\
-            device->public.processInputProc = oldprocs->realInputProc; \
-        device->public.realInputProc = oldprocs->realInputProc; \
-        device->unwrapProc = oldprocs->unwrapProc;
+        (backupproc) = (device)->public.realInputProc; \
+        if ((device)->public.processInputProc == (device)->public.realInputProc)\
+            (device)->public.processInputProc = (oldprocs)->realInputProc; \
+        (device)->public.realInputProc = (oldprocs)->realInputProc; \
+        (device)->unwrapProc = (oldprocs)->unwrapProc;
 
 extern RESTYPE RT_XKBCLIENT;
 
