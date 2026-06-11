@@ -83,6 +83,8 @@ elif host_machine.system() == 'freebsd'
 elif host_machine.system() == 'dragonfly'
     # See os/client.c:161
     srcs_os += 'freebsd/client.c'
+elif host_machine.system() == 'openbsd'
+    srcs_os += 'openbsd/client.c'
 endif
 
 if get_option('xres')
