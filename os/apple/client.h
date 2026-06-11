@@ -1,0 +1,11 @@
+#pragma once
+
+#ifndef OS_APPLE_CLIENT_H
+#define OS_APPLE_CLIENT_H 1
+
+#include <sys/types.h> /* pid_t */
+
+/* Implementation of DetermineClientCmd for Apple targets. */
+void DetermineClientCmdApple(pid_t pid, const char **cmdname, const char **cmdargs);
+
+#endif /* OS_APPLE_CLIENT_H */
