@@ -62,17 +62,11 @@
 #include "dixstruct.h"
 
 #ifdef __sun
-#include <errno.h>
-#include <procfs.h>
+#include "solaris/client_solaris.h"
 #endif
 
 #ifdef __OpenBSD__
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <sys/types.h>
-
-#include <kvm.h>
-#include <limits.h>
+#include "openbsd/client_openbsd.h"
 #endif
 
 #ifdef __APPLE__
@@ -152,58 +146,18 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 
     if (pid == -1)
         return;
-#if defined(__APPLE__)
+#if defined(__APPLE__) /* macOS/OSX and any other operating system by Apple where an Xserver can run */
     DetermineClientCmdApple(pid, cmdname, cmdargs);
 /* In this case, the FreeBSD code also works for DragonflyBSD, there's no reason to have two versions of the same function when
  * we can reuse the same one. */
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
     DetermineClientCmdFreeBSD(pid, cmdname, cmdargs);
 #elif defined(__OpenBSD__)
-    /* on OpenBSD use kvm_getargv() */
-    {
-        kvm_t *kd;
-        char errbuf[_POSIX2_LINE_MAX];
-        char **argv;
-        struct kinfo_proc *kp;
-        size_t len = 0;
-        int i, n;
-
-        kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, errbuf);
-        if (kd == NULL)
-            return;
-        kp = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc),
-                          &n);
-        if (n != 1)
-            goto done_kvm;
-        argv = kvm_getargv(kd, kp, 0);
-        if (argv == NULL)
-            goto done_kvm;
-        if (cmdname) {
-            if (argv[0] == NULL)
-                goto done_kvm;
-            else
-                *cmdname = strdup(argv[0]);
-        }
-        if (cmdargs) {
-            i = 1;
-            while (argv[i] != NULL) {
-                len += strlen(argv[i]) + 1;
-                i++;
-            }
-            *cmdargs = calloc(1, len);
-            if (*cmdargs) {
-                i = 1;
-                while (argv[i] != NULL) {
-                    strlcat(*(char **)cmdargs, argv[i], len);
-                    strlcat(*(char **)cmdargs, " ", len);
-                    i++;
-                }
-            }
-        }
- done_kvm:
-        kvm_close(kd);
-    }
-#else                           /* Linux using /proc/pid/cmdline */
+    DetermineClientCmdOpenBSD(pid, cmdname, cmdargs);
+#elif defined(__sun) /* Solaris */
+    DetermineClientCmdSolaris(pid, cmdname, cmdargs);
+#else /* Possibly Linux or another operating system where the /proc filesystem
+       * is available. Use it as a fallback. */
     char path[PATH_MAX + 1];
     /* Check if /proc/pid/cmdline exists. It's not supported on all
      * operating systems. */
@@ -211,11 +165,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
         return;
     int fd = open(path, O_RDONLY);
     if (fd < 0)
-#ifdef __sun
-        goto fallback;
-#else
         return;
-#endif
 
     /* Read the contents of /proc/pid/cmdline. It should contain the
      * process name and arguments. */
@@ -249,47 +199,6 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
             args[argsize - 1] = '\0';
             *cmdargs = args;
         }
-    }
-#endif
-
-#ifdef __sun                    /* Solaris */
-  fallback:
-    /* Solaris prior to 11.3.5 does not support /proc/pid/cmdline, but
-     * makes information similar to what ps shows available in a binary
-     * structure in the /proc/pid/psinfo file. */
-    if (snprintf(path, sizeof(path), "/proc/%d/psinfo", pid) < 0)
-        return;
-    fd = open(path, O_RDONLY);
-    if (fd < 0) {
-        ErrorF("Failed to open %s: %s\n", path, strerror(errno));
-        return;
-    }
-    else {
-        psinfo_t psinfo = { 0 };
-        char *sp;
-
-        totsize = read(fd, &psinfo, sizeof(psinfo_t));
-        close(fd);
-        if (totsize <= 0)
-            return;
-
-        /* pr_psargs is the first PRARGSZ (80) characters of the command
-         * line string - assume up to the first space is the command name,
-         * since it's not delimited.   While there is also pr_fname, that's
-         * more limited, giving only the first 16 chars of the basename of
-         * the file that was exec'ed, thus cutting off many long gnome
-         * command names, or returning "isapython2.6" for all python scripts.
-         */
-        psinfo.pr_psargs[PRARGSZ - 1] = '\0';
-        sp = strchr(psinfo.pr_psargs, ' ');
-        if (sp)
-            *sp++ = '\0';
-
-        if (cmdname)
-            *cmdname = strdup(psinfo.pr_psargs);
-
-        if (cmdargs && sp)
-            *cmdargs = strdup(sp);
     }
 #endif
 }
