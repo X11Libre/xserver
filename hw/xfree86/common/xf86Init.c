@@ -117,6 +117,9 @@ static PixmapFormatRec formats[MAXFORMATS] = {
 static int numFormats = 7;
 static Bool formatsDone = FALSE;
 
+static int xf86Dpi = 0;
+static MessageType xf86DpiFrom = X_DEFAULT;
+
 
 static void
 xf86PrintBanner(void)
@@ -255,6 +258,66 @@ static Bool
 xf86ScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
+    int xdpi = 0, ydpi = 0;
+    MessageType from = X_DEFAULT;
+    DisplayModePtr mode = pScrn->modes; /* Use the first mode as a guess */
+    DisplayModePtr m;
+
+    /* Find preferred mode */
+    for (m = pScrn->modes; m; m = m->next) {
+        if (m->type & M_T_PREFERRED) {
+            mode = m;
+            break;
+        }
+    }
+
+    /* DPI from command line '-dpi' param */
+    if (xf86DpiFrom == X_CMDLINE) {
+        xdpi = ydpi = xf86Dpi;
+        from = X_CMDLINE;
+    }
+
+    if (from == X_DEFAULT && mode) {
+        /* DPI from config file */
+        if (pScrn->monitor->widthmm > 0 && pScrn->monitor->heightmm > 0) {
+            xdpi = (mode->HDisplay * 25.4) / pScrn->monitor->widthmm;
+            ydpi = (mode->VDisplay * 25.4) / pScrn->monitor->heightmm;
+            from = X_CONFIG;
+        }
+
+        /* DPI from EDID */
+        if (from == X_DEFAULT && pScrn->monitor->DDC) {
+            xf86MonPtr ddc = (xf86MonPtr)pScrn->monitor->DDC;
+            if (ddc->features.hsize > 0 && ddc->features.vsize > 0) {
+                /* ddc sizes are in cm */
+                xdpi = (mode->HDisplay * 25.4) / (ddc->features.hsize * 10);
+                ydpi = (mode->VDisplay * 25.4) / (ddc->features.vsize * 10);
+                from = X_PROBED;
+            }
+        }
+    }
+
+    /* Default DPI 96 */
+    if (xdpi <= 0 || ydpi <= 0) {
+        xdpi = ydpi = 96;
+        from = X_DEFAULT;
+    }
+
+    if (pScrn->xDpi == 0) {
+        pScrn->xDpi = xdpi;
+        LogMessageVerb(from, 1, "Setting horizontal DPI to %d.\n", xdpi);
+    }
+    if (pScrn->yDpi == 0) {
+        pScrn->yDpi = ydpi;
+        LogMessageVerb(from, 1, "Setting vertical DPI to %d.\n", ydpi);
+    }
+
+    /* Update screen dimensions in mm based on DPI */
+    if (pScrn->xDpi > 0 && pScrn->yDpi > 0 && mode) {
+        pScreen->mmWidth = (mode->HDisplay * 25.4) / pScrn->xDpi;
+        pScreen->mmHeight = (mode->VDisplay * 25.4) / pScrn->yDpi;
+    }
+
 
     pScrn->pScreen = pScreen;
     return pScrn->ScreenInit (pScreen, argc, argv);
@@ -1057,6 +1120,19 @@ ddxProcessArgument(int argc, char **argv, int i)
             return 0;
         }
     }
+    if (!strcmp(argv[i], "-dpi")) {
+        int dpi;
+        CHECK_FOR_REQUIRED_ARGUMENTS(1);
+        if (sscanf(argv[++i], "%d", &dpi) == 1 && dpi > 0) {
+            xf86Dpi = dpi;
+            xf86DpiFrom = X_CMDLINE;
+            return 2;
+        }
+        else {
+            ErrorF("Invalid dpi value\n");
+            return 0;
+        }
+    }
     if (!strcmp(argv[i], "-weight")) {
         int red, green, blue;
 
@@ -1210,6 +1286,7 @@ ddxUseMsg(void)
     ErrorF("-quiet                 minimal startup messages\n");
     ErrorF("-fbbpp n               set bpp for the framebuffer. Default: 8\n");
     ErrorF("-depth n               set colour depth. Default: 8\n");
+    ErrorF("-dpi n                 set screen resolution in DPI. Default: 96\n");
     ErrorF
         ("-gamma f               set gamma value (0.1 < f < 10.0) Default: 1.0\n");
     ErrorF("-rgamma f              set gamma value for red phase\n");
