@@ -297,7 +297,10 @@ ProcXGetFeedbackControl(ClientPtr client)
         return BadMatch;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
+    /* Use the zeroing variant: the CopySwap* helpers below do not write the
+     * internal pad bytes of the feedback state structs, which would otherwise
+     * leak uninitialized heap memory to the client. */
+    char *buf = x_rpcbuf_reserve0(&rpcbuf, total_length);
 
     for (k = dev->kbdfeed; k; k = k->next)
         CopySwapKbdFeedback(client, k, &buf);
