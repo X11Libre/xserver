@@ -2168,7 +2168,20 @@ __glXDisp_RenderLarge(__GLXclientState * cl, GLbyte * pc)
              ** If it's a variable-size command (a command whose length must
              ** be computed from its parameters), all the parameters needed
              ** will be in the 1st request, so it's okay to do this.
+             **
+             ** The varsize() handlers dereference the fixed-size command
+             ** header at fixed offsets without bounds-checking their reqlen
+             ** argument, so the fixed header (entry.bytes, plus the extra 4
+             ** bytes of the larger RenderLarge header) must actually be
+             ** present in this first request.  Without this check a short
+             ** first request (e.g. dataBytes == __GLX_RENDER_LARGE_HDR_SIZE)
+             ** lets varsize() read past the end of the request buffer.
+             ** The non-large __glXDisp_Render path performs the equivalent
+             ** "cmdlen < entry.bytes" check before calling varsize().
              */
+            if (left < entry.bytes + 4) {
+                return BadLength;
+            }
             extra = (*entry.varsize) (pc + __GLX_RENDER_LARGE_HDR_SIZE,
                                       client->swapped,
                                       left - __GLX_RENDER_LARGE_HDR_SIZE);
