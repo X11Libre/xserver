@@ -76,10 +76,10 @@ static void deleteCursorHideCountsForScreen(ScreenPtr pScreen);
 #define VERIFY_CURSOR(pCursor, cursor, client, access)			\
     do {								\
 	int err;							\
-	err = dixLookupResourceByType((void **) &pCursor, cursor,	\
-				      X11_RESTYPE_CURSOR, client, access);	\
+	err = dixLookupResourceByType((void **) &(pCursor), (cursor),	\
+				      X11_RESTYPE_CURSOR, (client), (access));	\
 	if (err != Success) {						\
-	    client->errorValue = cursor;				\
+	    (client)->errorValue = (cursor);				\
 	    return err;							\
 	}								\
     } while (0)
@@ -126,7 +126,7 @@ typedef struct _CursorScreen {
 } CursorScreenRec, *CursorScreenPtr;
 
 #define GetCursorScreen(s) ((CursorScreenPtr)dixLookupPrivate(&(s)->devPrivates, CursorScreenPrivateKey))
-#define Wrap(as,s,elt,func)	(((as)->elt = (s)->elt), (s)->elt = func)
+#define Wrap(as,s,elt,func)	(((as)->elt = (s)->elt), (s)->elt = (func))
 #define Unwrap(as,s,elt,backup)	(((backup) = (s)->elt), (s)->elt = (as)->elt)
 
 /* The cursor doesn't show up until the first XDefineCursor() */
