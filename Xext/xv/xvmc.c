@@ -607,6 +607,12 @@ ProcXvMCGetDRInfo(ClientPtr client)
     pScreen = pPort->pAdaptor->pScreen;
     pScreenPriv = XVMC_GET_PRIVATE(pScreen);
 
+    /* The port may live on a screen that never initialized XvMC, in which case
+     * the per-screen private is NULL. Match the other port-taking handlers and
+     * reject it instead of dereferencing NULL. */
+    if (!pScreenPriv)
+        return BadMatch;
+
     int nameLen = strlen(pScreenPriv->clientDriverName) + 1;
     int busIDLen = strlen(pScreenPriv->busID) + 1;
 
