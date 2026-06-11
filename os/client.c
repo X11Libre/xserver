@@ -76,12 +76,11 @@
 #endif
 
 #ifdef __APPLE__
-#include "apple/client.h"
+#include "apple/client_apple.h"
 #endif /* __APPLE__ */
 
 #if defined(__DragonFly__) || defined(__FreeBSD__)
-#include <sys/sysctl.h>
-#include <errno.h>
+#include "freebsd/client_freebsd.h"
 #endif
 
 #include "os/auth.h"
@@ -146,16 +145,6 @@ DetermineClientPid(struct _Client * client)
 void
 DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 {
-#ifdef __APPLE__
-    DetermineClientCmdApple(pid, cmdname, cmdargs);
-#endif /* __APPLE__ */
-
-#if !defined(__DragonFly__) && !defined(__FreeBSD__)
-    char path[PATH_MAX + 1];
-    int totsize = 0;
-    int fd = 0;
-#endif
-
     if (cmdname)
         *cmdname = NULL;
     if (cmdargs)
@@ -163,56 +152,12 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 
     if (pid == -1)
         return;
-#if defined(__DragonFly__) || defined(__FreeBSD__)
-    /* on DragonFly and FreeBSD use KERN_PROC_ARGS */
-    {
-        int mib[] = {
-            CTL_KERN,
-            KERN_PROC,
-            KERN_PROC_ARGS,
-            pid,
-        };
-
-        /* Determine exact size instead of relying on kern.argmax */
-        size_t len;
-        if (sysctl(mib, ARRAY_SIZE(mib), NULL, &len, NULL, 0) != 0) {
-            ErrorF("Failed to query KERN_PROC_ARGS length for PID %d: %s\n", pid, strerror(errno));
-            return;
-        }
-
-        /* Read KERN_PROC_ARGS contents. Similar to /proc/pid/cmdline
-         * the process name and each argument are separated by NUL byte. */
-        char *const procargs = calloc(1, len);
-        if (sysctl(mib, ARRAY_SIZE(mib), procargs, &len, NULL, 0) != 0) {
-            ErrorF("Failed to get KERN_PROC_ARGS for PID %d: %s\n", pid, strerror(errno));
-            free(procargs);
-            return;
-        }
-
-        /* Construct the process name without arguments. */
-        if (cmdname) {
-            *cmdname = strdup(procargs);
-        }
-
-        /* Construct the arguments for client process. */
-        if (cmdargs) {
-            size_t cmdsize = strlen(procargs) + 1;
-            size_t argsize = len - cmdsize;
-            char *args = NULL;
-
-            if (argsize > 0)
-                args = procargs + cmdsize;
-            if (args) {
-                /* Replace NUL with space except terminating NUL */
-                for (size_t i = 0; i < (argsize - 1); i++) {
-                    if (args[i] == '\0')
-                        args[i] = ' ';
-                }
-                *cmdargs = strdup(args);
-            }
-        }
-        free(procargs);
-    }
+#if defined(__APPLE__)
+    DetermineClientCmdApple(pid, cmdname, cmdargs);
+/* In this case, the FreeBSD code also works for DragonflyBSD, there's no reason to have two versions of the same function when
+ * we can reuse the same one. */
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
+    DetermineClientCmdFreeBSD(pid, cmdname, cmdargs);
 #elif defined(__OpenBSD__)
     /* on OpenBSD use kvm_getargv() */
     {
@@ -259,12 +204,12 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
         kvm_close(kd);
     }
 #else                           /* Linux using /proc/pid/cmdline */
-
+    char path[PATH_MAX + 1];
     /* Check if /proc/pid/cmdline exists. It's not supported on all
      * operating systems. */
     if (snprintf(path, sizeof(path), "/proc/%d/cmdline", pid) < 0)
         return;
-    fd = open(path, O_RDONLY);
+    int fd = open(path, O_RDONLY);
     if (fd < 0)
 #ifdef __sun
         goto fallback;
@@ -274,7 +219,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 
     /* Read the contents of /proc/pid/cmdline. It should contain the
      * process name and arguments. */
-    totsize = read(fd, path, sizeof(path));
+    ssize_t totsize = read(fd, path, sizeof(path));
     close(fd);
     if (totsize <= 0)
         return;
@@ -287,8 +232,8 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 
     /* Construct the arguments for client process. */
     if (cmdargs) {
-        int cmdsize = strlen(path) + 1;
-        int argsize = totsize - cmdsize;
+        size_t cmdsize = strlen(path) + 1;
+        size_t argsize = totsize - cmdsize;
         char *args = NULL;
 
         if (argsize > 0)
@@ -305,7 +250,6 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
             *cmdargs = args;
         }
     }
-    return;
 #endif
 
 #ifdef __sun                    /* Solaris */
