@@ -101,7 +101,7 @@ static const char *WARN_INVALID_COUNTER_ALARM =
     "         the result of a programming error in the X server.\n";
 
 #define IsSystemCounter(pCounter) \
-    (pCounter && (pCounter->sync.client == NULL))
+    ((pCounter) && ((pCounter)->sync.client == NULL))
 
 /* these are all the alarm attributes that pertain to the alarm's trigger */
 #define XSyncCAAllTrigger \

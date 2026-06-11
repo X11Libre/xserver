@@ -114,9 +114,9 @@ typedef struct {
         } \
     } while (0);
 
-#define FOR_NSCREENS_FORWARD(j) for(j = 0; j < PanoramiXNumScreens; j++)
-#define FOR_NSCREENS_FORWARD_SKIP(j) for(j = 1; j < PanoramiXNumScreens; j++)
-#define FOR_NSCREENS_BACKWARD(j) for(j = PanoramiXNumScreens - 1; j >= 0; j--)
+#define FOR_NSCREENS_FORWARD(j) for((j) = 0; (j) < PanoramiXNumScreens; (j)++)
+#define FOR_NSCREENS_FORWARD_SKIP(j) for((j) = 1; (j) < PanoramiXNumScreens; (j)++)
+#define FOR_NSCREENS_BACKWARD(j) for((j) = PanoramiXNumScreens - 1; (j) >= 0; (j)--)
 
 #define IS_SHARED_PIXMAP(r) (((r)->type == XRT_PIXMAP) && (r)->u.pix.shared)
 
