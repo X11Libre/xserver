@@ -12,7 +12,7 @@
 
 static inline const char *stripNS(const char* name) {
     if ((!name) || (name[0] != '<'))
-        return name; // can this ever happen ?
+        return name; /* can this ever happen ? */
     const char *got = strchr(name, '>');
     if (!got)
         return name;
@@ -48,19 +48,19 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
         case SELECTION_FILTER_SETOWNER:
         case SELECTION_FILTER_CONVERT:
         case SELECTION_FILTER_LISTEN:
-            // TODO: check whether window really belongs to the client
+            /* TODO: check whether window really belongs to the client */
             param->selection = realSelection;
         break;
 
         case SELECTION_FILTER_NOTIFY:
         {
-            // need to translate back, since we're having the ns-prefixed name here
+            /* need to translate back, since we're having the ns-prefixed name here */
             const char *stripped = stripNS(origSelectionName);
             param->selection = dixAddAtom(stripped);
             break;
         }
 
-        // nothing to do here: already having the client visible name
+        /* nothing to do here: already having the client visible name */
         case SELECTION_FILTER_EV_REQUEST:
         case SELECTION_FILTER_EV_CLEAR:
         break;

@@ -18,28 +18,54 @@ struct auth_token {
     XID authId;
 };
 
-struct Xnamespace {
+struct client_token {
     struct xorg_list entry;
-    const char *name;
-    Bool builtin;
+    char *clientName;
+};
+
+struct Xns_perm_list {
+    Bool allowComposite;
+    Bool allowGlobalKeyboard;
     Bool allowMouseMotion;
+    Bool allowRandr;
+    Bool allowRender;
+    Bool allowScreen;
     Bool allowShape;
     Bool allowTransparency;
     Bool allowXInput;
     Bool allowXKeyboard;
+};
+
+struct xns_pid_entry {
+    struct xorg_list entry;
+    int pid;
+};
+
+struct Xnamespace {
+    struct xorg_list entry;
+    Bool builtin;
+    Bool deny;                      /* connection deny flag. should stay unused. */
+    Bool isRoot;                    /* only ever used by root namespace */
     Bool superPower;
-    struct xorg_list auth_tokens;
-    size_t refcnt;
     WindowPtr rootWindow;
+    const char *name;
+    size_t refcnt;
+    struct Xns_perm_list perms;
+    struct xorg_list auth_tokens;
+    struct xorg_list pids;
+    struct xorg_list client_list;
+    struct xorg_list client_path_list;
 };
 
 extern struct xorg_list ns_list;
 extern struct Xnamespace ns_root;
 extern struct Xnamespace ns_anon;
+extern struct Xnamespace *ns_default;
 
 struct XnamespaceClientPriv {
     Bool isServer;
     XID authId;
+    int pid;
     struct Xnamespace* ns;
 };
 
@@ -52,7 +78,19 @@ Bool XnsLoadConfig(void);
 struct Xnamespace *XnsFindByName(const char* name);
 struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken);
 void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *ns);
+
 void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name);
+XID GenerateAuthForXnamespace(struct Xnamespace *curr);
+int RevokeAuthForXnamespace(struct Xnamespace *curr);
+int XnamespaceAssignByClientName(struct XnamespaceClientPriv *subj, const char *clientName);
+struct Xnamespace *GenerateNewXnamespaceForClient(struct Xnamespace *copyfrom, const char* newname);
+void NewVirtualRootWindowForXnamespace(WindowPtr rootWindow, struct Xnamespace *curr);
+int DeleteXnamespace(struct Xnamespace *curr);
+int PruneXnamespaces(void);
+char** GetXnamespacesAsCharr (void);
+void XnsRegisterPid(struct XnamespaceClientPriv *subj);
+void XnsRemovePid(struct XnamespaceClientPriv *subj);
+int XnsAssignByPid(struct XnamespaceClientPriv *subj);
 
 static inline struct XnamespaceClientPriv *XnsClientPriv(ClientPtr client) {
     if (client == NULL) return NULL;
