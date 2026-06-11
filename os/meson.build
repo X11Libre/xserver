@@ -75,10 +75,13 @@ if host_machine.system() == 'sunos'
     os_c_args += '-D__EXTENSIONS__'
     os_dep += cc.find_library('socket')
     os_dep += cc.find_library('nsl')
-endif
-
-if host_machine.system() == 'darwin'
+elif host_machine.system() == 'darwin'
     srcs_os += 'apple/client.c'
+elif host_machine.system() == 'freebsd'
+    srcs_os += 'freebsd/client.c'
+elif host_machine.system() == 'dragonfly'
+    # See os/client.c:161
+    srcs_os += 'freebsd/client.c'
 endif
 
 if get_option('xres')
