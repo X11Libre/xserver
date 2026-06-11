@@ -111,7 +111,16 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
 
     /* Verify that the size of the packet matches the size inferred from the
      * sizes specified for the various fields.
+     *
+     * Clamp numAttribs first: the size computation below multiplies it by 8
+     * in 32-bit arithmetic, so without this guard a value such as 0x20000000
+     * overflows to 0, lets a minimal request pass the length check, and then
+     * the attribute-parsing loop reads far out of bounds.  This mirrors the
+     * UINT32_MAX >> 3 clamp used by the other GLX context handlers.
      */
+    if (req->numAttribs > (UINT32_MAX >> 3))
+        return BadLength;
+
     const unsigned expected_size = (sizeof(xGLXCreateContextAttribsARBReq)
                                     + (req->numAttribs * 8)) / 4;
 
