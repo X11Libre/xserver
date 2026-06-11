@@ -432,6 +432,10 @@ sproc_present_pixmap_synced(ClientPtr client)
     swapll(&stuff->target_msc);
     swapll(&stuff->divisor);
     swapll(&stuff->remainder);
+
+    /* Swap the trailing LISTofPRESENTNOTIFY, like sproc_present_pixmap(). */
+    SwapRestL(stuff);
+
     return proc_present_pixmap_synced(client);
 }
 #endif /* DRI3 */
