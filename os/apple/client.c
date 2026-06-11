@@ -11,7 +11,7 @@
  */
 
 
-#include "client.h"
+#include "client_apple.h"
 #include <dix-config.h>
 
 #include <sys/stat.h>
