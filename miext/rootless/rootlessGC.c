@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Graphics Context support for generic rootless X server
  */

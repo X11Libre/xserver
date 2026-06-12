@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Common rootless definitions and code
  */

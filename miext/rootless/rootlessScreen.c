@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Screen routines for generic rootless X server
  */
