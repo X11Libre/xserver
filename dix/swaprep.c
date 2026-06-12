@@ -51,6 +51,7 @@ SOFTWARE.
 #include <X11/fonts/fontstruct.h>
 
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
 
 #include "misc.h"
 #include "dixstruct.h"

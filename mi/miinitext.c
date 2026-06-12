@@ -88,6 +88,7 @@ SOFTWARE.
 #undef CONFIG_MITSHM
 #endif
 
+#include "dix/extension_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "misc.h"
