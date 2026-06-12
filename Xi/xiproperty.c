@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Copyright © 2006 Keith Packard
  * Copyright © 2008 Peter Hutterer

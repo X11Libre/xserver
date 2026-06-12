@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Copyright 2007-2008 Peter Hutterer
  * Copyright 2009 Red Hat, Inc.
