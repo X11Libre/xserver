@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*****************************************************************
 
 Copyright (c) 1996 Digital Equipment Corporation, Maynard, Massachusetts.

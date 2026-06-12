@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: X11 */
 /*
  *
 Copyright (c) 1992  X Consortium
