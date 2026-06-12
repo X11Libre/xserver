@@ -3015,7 +3015,7 @@ ProcQueryColors(ClientPtr client)
             bytes_to_int32((client->req_len << 2) - sizeof(xQueryColorsReq));
 
         x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-        xrgb *prgbs = x_rpcbuf_reserve(&rpcbuf, count * sizeof(xrgb));
+        xrgb *prgbs = x_rpcbuf_reserve0(&rpcbuf, count * sizeof(xrgb));
         if (!prgbs && count)
             return BadAlloc;
         if ((rc =
