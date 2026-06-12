@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
 
 Copyright 1998, 1998  The Open Group
