@@ -256,7 +256,7 @@ jobs:
 
     xserver-build-macos:
         env:
-            MESON_ARGS: -Dprefix=/tmp -Dglx=false -Dxnest=false -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/tmp -Dxfbdev=false
             X11_PREFIX: /Users/runner/x11
             X11_BUILD_DIR: /Users/runner/build-deps
         runs-on: macos-latest

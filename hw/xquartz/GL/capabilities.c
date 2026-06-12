@@ -28,6 +28,7 @@
 
 #define Cursor Mac_Cursor
 #define BOOL   Mac_BOOL
+#define WindowPtr Mac_WindowPtr
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -35,6 +36,7 @@
 #include <ApplicationServices/ApplicationServices.h>
 #undef Cursor
 #undef BOOL
+#undef WindowPtr
 
 #include "capabilities.h"
 
