@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  *
  * Copyright © 2002 Keith Packard, member of The XFree86 Project, Inc.
