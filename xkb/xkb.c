@@ -1116,7 +1116,7 @@ static void XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
 {
     XkbKeyTypePtr type = &xkb->map->types[firstType];
     for (int i = 0; i < nTypes; i++, type++) {
-        xkbKeyTypeWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbKeyTypeWireDesc));
+        xkbKeyTypeWireDesc *wire = x_rpcbuf_reserve0(rpcbuf, sizeof(xkbKeyTypeWireDesc));
         wire->mask = type->mods.mask;
         wire->realMods = type->mods.real_mods;
         wire->virtualMods = type->mods.vmods;
@@ -1128,7 +1128,7 @@ static void XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
         }
 
         if (type->map_count > 0) {
-            void *space = x_rpcbuf_reserve(
+            void *space = x_rpcbuf_reserve0(
                 rpcbuf, sizeof(xkbKTMapEntryWireDesc) * type->map_count);
             xkbKTMapEntryWireDesc *ewire = space;
             XkbKTMapEntryPtr entry = type->map;
@@ -1260,7 +1260,7 @@ XkbSizeKeyActions(XkbDescPtr xkb, xkbGetMapReply * rep)
 static void XkbWriteKeyActions(XkbDescPtr xkb, KeyCode firstKeyAct,
                                CARD8 nKeyActs, x_rpcbuf_t *rpcbuf)
 {
-    CARD8 *numDesc = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(nKeyActs));
+    CARD8 *numDesc = x_rpcbuf_reserve0(rpcbuf, XkbPaddedSize(nKeyActs));
 
     for (int i = 0; i < nKeyActs; i++) {
         if (xkb->server->key_acts[i + firstKeyAct] == 0)
@@ -1308,7 +1308,7 @@ static void XkbWriteKeyBehaviors(XkbDescPtr xkb, KeyCode firstKeyBehavior,
     XkbBehavior *pBhvr = &xkb->server->behaviors[firstKeyBehavior];
     for (int i = 0; i < nKeyBehaviors; i++, pBhvr++) {
         if (pBhvr->type != XkbKB_Default) {
-            xkbBehaviorWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbBehaviorWireDesc));
+            xkbBehaviorWireDesc *wire = x_rpcbuf_reserve0(rpcbuf, sizeof(xkbBehaviorWireDesc));
             wire->key = i + firstKeyBehavior;
             wire->type = pBhvr->type;
             wire->data = pBhvr->data;
@@ -1351,7 +1351,7 @@ static void XkbWriteExplicit(XkbDescPtr xkb, KeyCode firstKeyExplicit,
     }
 
     /* reserve buffer space (with padding) */
-    char *buf = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(count * 2));
+    char *buf = x_rpcbuf_reserve0(rpcbuf, XkbPaddedSize(count * 2));
 
     /* copy over the active entries */
     for (int i = 0; i < nKeyExplicit; i++) {
@@ -1426,7 +1426,7 @@ static void XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
     unsigned short *pMap = &xkb->server->vmodmap[firstVModMapKey];
     for (int i = 0; i < nVModMapKeys; i++, pMap++) {
         if (*pMap != 0) {
-            xkbVModMapWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbVModMapWireDesc));
+            xkbVModMapWireDesc *wire = x_rpcbuf_reserve0(rpcbuf, sizeof(xkbVModMapWireDesc));
             wire->key = i + firstVModMapKey;
             wire->vmods = *pMap;
         }
