@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: SGI-B-2.0 */
 /*
  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
  * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.

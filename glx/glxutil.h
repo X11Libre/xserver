@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: SGI-B-2.0 */
 #ifndef _glxcmds_h_
 #define _glxcmds_h_
 

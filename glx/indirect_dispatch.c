@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * (C) Copyright IBM Corporation 2005
  * All Rights Reserved.

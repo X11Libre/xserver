@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: LicenseRef-MIT-Khronos-credit */
 /*
  * Copyright (c) 2016, NVIDIA CORPORATION.
  *
