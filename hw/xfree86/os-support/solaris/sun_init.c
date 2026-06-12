@@ -29,6 +29,7 @@
 #include "../../../../os/cmdline.h"
 
 #include "xf86_priv.h"
+#include "xf86_console_priv.h"
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
@@ -59,7 +60,6 @@ static Bool KeepTty = FALSE;
 static Bool UseConsole = FALSE;
 
 #ifdef HAS_USL_VTS
-static int VTnum = -1;
 static int xf86StartVT = -1;
 static int vtEnabled = 0;
 #endif
@@ -169,8 +169,8 @@ xf86OpenConsole(void)
 
         xf86StartVT = vtinfo.v_active;
 
-        if (VTnum != -1) {
-            xf86Info.vtno = VTnum;
+        if (xf86_console_requested_vt != -1) {
+            xf86Info.vtno = xf86_console_requested_vt;
             from = X_CMDLINE;
         }
         else if (xf86Info.ShareVTs) {
@@ -377,12 +377,12 @@ xf86ProcessArgument(int argc, char **argv, int i)
 #ifdef HAS_USL_VTS
 
     if ((argv[i][0] == 'v') && (argv[i][1] == 't')) {
+        int VTnum;
         if (sscanf(argv[i], "vt%d", &VTnum) == 0) {
             UseMsg();
-            VTnum = -1;
             return 0;
         }
-
+        xf86_console_requested_vt = VTnum;
         return 1;
     }
 
