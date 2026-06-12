@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  *
  * Copyright © 2006-2011 Simon Thum             simon dot thum at gmx dot de

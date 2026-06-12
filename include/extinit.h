@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
