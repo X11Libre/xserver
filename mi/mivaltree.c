@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * mivaltree.c --
  *	Functions for recalculating window clip lists. Main function
