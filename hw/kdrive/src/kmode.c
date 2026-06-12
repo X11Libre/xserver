@@ -24,7 +24,16 @@
 #include <kdrive-config.h>
 #include "kdrive.h"
 
-const KdMonitorTiming kdMonitorTimings[] = {
+#include <string.h>
+
+/* If this is ever changed, update the mode list too */
+static const KdMonitorTiming kdDefaultTiming =
+    {800, 600, 72, 50000,       /* VESA */
+     56, 64, 240, KdSyncPositive,       /* 48.077 */
+     37, 23, 66, KdSyncPositive,        /* 72.188 */
+     };
+
+static KdMonitorTiming kdMonitorTimings[] = {
     /*  H       V       Hz      KHz */
     /*  FP      BP      BLANK   POLARITY */
 
@@ -85,8 +94,7 @@ const KdMonitorTiming kdMonitorTimings[] = {
      16, 160, 256, KdSyncPositive,      /* 46.875 */
      1, 21, 25, KdSyncPositive, /* 75.000 */
      },
-    /* DEFAULT */
-#define MONITOR_TIMING_DEFAULT	9
+    /* XXX DEFAULT XXX */
     {800, 600, 72, 50000,       /* VESA */
      56, 64, 240, KdSyncPositive,       /* 48.077 */
      37, 23, 66, KdSyncPositive,        /* 72.188 */
@@ -240,11 +248,34 @@ const KdMonitorTiming kdMonitorTimings[] = {
      128, 244, 680, KdSyncNegative,     /* 90.000 */
      1, 56, 60, KdSyncPositive, /* 60.000 */
      },
+
+    /* Space for extra modes */
+#define NUM_FREE_TIMINGS 4
+    {0}, {0}, {0}, {0},
 };
 
 #define NUM_MONITOR_TIMINGS (sizeof kdMonitorTimings/sizeof kdMonitorTimings[0])
 
-const int kdNumMonitorTimings = NUM_MONITOR_TIMINGS;
+static int kdNumFreeMonitorTimings = NUM_FREE_TIMINGS;
+static int kdNumMonitorTimings = NUM_MONITOR_TIMINGS - NUM_FREE_TIMINGS;
+
+int
+KdFindRate(KdScreenInfo * screen,
+           Bool (*supported) (KdScreenInfo *, const KdMonitorTiming *))
+{
+    int i;
+    const KdMonitorTiming *t;
+
+    for (i = 0, t = kdMonitorTimings; i < kdNumMonitorTimings; i++, t++) {
+        if ((*supported) (screen, t) &&
+            t->horizontal == screen->width &&
+            t->vertical == screen->height) {
+            return t->rate;
+        }
+    }
+
+    return 0;
+}
 
 const KdMonitorTiming *
 KdFindMode(KdScreenInfo * screen,
@@ -253,7 +284,7 @@ KdFindMode(KdScreenInfo * screen,
     int i;
     const KdMonitorTiming *t;
 
-    for (i = 0, t = kdMonitorTimings; i < NUM_MONITOR_TIMINGS; i++, t++) {
+    for (i = 0, t = kdMonitorTimings; i < kdNumMonitorTimings; i++, t++) {
         if ((*supported) (screen, t) &&
             t->horizontal == screen->width &&
             t->vertical == screen->height &&
@@ -262,7 +293,49 @@ KdFindMode(KdScreenInfo * screen,
         }
     }
     ErrorF("Warning: mode not found, using default\n");
-    return &kdMonitorTimings[MONITOR_TIMING_DEFAULT];
+    return &kdDefaultTiming;
+}
+
+Bool
+KdAddMode(const KdMonitorTiming *new)
+{
+    int i;
+    KdMonitorTiming *t;
+
+    for (i = kdNumMonitorTimings, t = kdMonitorTimings; i > 0; i--, t++) {
+        /* Look if the mode already exists */
+        if ((t->horizontal == new->horizontal) &&
+            (t->vertical == new->vertical) &&
+            (t->rate == new->rate)) {
+            return TRUE;
+        }
+
+        if (t->horizontal > new->horizontal) {
+            break;
+        }
+
+        if ((t->horizontal == new->horizontal) &&
+            (t->vertical > new->vertical)) {
+            break;
+        }
+
+        if ((t->horizontal == new->horizontal) &&
+            (t->vertical == new->vertical) &&
+            (t->rate < new->rate)) {
+            break;
+        }
+    }
+
+    if (!kdNumFreeMonitorTimings) {
+        return FALSE;
+    }
+
+    memmove(t + 1, t, i * sizeof(*t));
+    *t = *new;
+
+    kdNumFreeMonitorTimings--;
+    kdNumMonitorTimings++;
+    return TRUE;
 }
 
 static const KdMonitorTiming *
@@ -335,7 +408,7 @@ KdRandRGetInfo(ScreenPtr pScreen,
     int i;
     const KdMonitorTiming *t;
 
-    for (i = 0, t = kdMonitorTimings; i < NUM_MONITOR_TIMINGS; i++, t++) {
+    for (i = 0, t = kdMonitorTimings; i < kdNumMonitorTimings; i++, t++) {
         if ((*supported) (pScreen, t)) {
             RRScreenSizePtr pSize;
 
@@ -365,7 +438,7 @@ KdRandRGetTiming(ScreenPtr pScreen,
     int i;
     const KdMonitorTiming *t;
 
-    for (i = 0, t = kdMonitorTimings; i < NUM_MONITOR_TIMINGS; i++, t++) {
+    for (i = 0, t = kdMonitorTimings; i < kdNumMonitorTimings; i++, t++) {
         if (t->horizontal == pSize->width &&
             t->vertical == pSize->height &&
             t->rate == rate && (*supported) (pScreen, t))
