@@ -83,7 +83,7 @@ extern Bool noCompositeExtension;
 #define DEFAULT_SHELL  "/bin/sh"
 
 #define _STRINGIZE(s) #s
-#define STRINGIZE(s) _STRINGIZE(s)
+#define STRINGIZE(s) _STRINGIZE((s))
 
 #ifndef XSERVER_VERSION
 #define XSERVER_VERSION "?"

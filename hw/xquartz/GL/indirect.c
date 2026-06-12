@@ -52,7 +52,7 @@
 
 #include "darwin.h"
 #define GLAQUA_DEBUG_MSG(msg, args ...) ASL_LOG(ASL_LEVEL_DEBUG, "GLXAqua", \
-                                                msg, \
+                                                (msg), \
                                                 ## args)
 
 __GLXprovider *
