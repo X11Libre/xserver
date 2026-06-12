@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: MIT OR X11
+ *
+ * Copyright © 2025-2026 Enrico Weigelt, metux IT consult <info@metux.net>
+ */
 #include <dix-config.h>
 
 #include <stdio.h>
