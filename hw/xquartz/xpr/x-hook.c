@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* x-hook.c
  *
  * Copyright (c) 2002-2012 Apple Inc. All rights reserved.

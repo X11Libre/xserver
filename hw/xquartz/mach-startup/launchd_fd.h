@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* Copyright (c) 2008-2012 Apple Inc.
  *
  * Permission is hereby granted, free of charge, to any person

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**************************************************************
  *
  * Startup code for the Quartz Darwin X Server

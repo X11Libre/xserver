@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* main.c -- X application launcher
  * Copyright (c) 2007 Jeremy Huddleston
  * Copyright (c) 2007-2012 Apple Inc. All rights reserved.

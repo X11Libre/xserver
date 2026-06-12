@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* External interface for the server's AppleWM support
  *
  * Copyright (c) 2003-2004 Torrey T. Lyons. All Rights Reserved.

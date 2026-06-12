@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**************************************************************************
 
    Copyright 1998-1999 Precision Insight, Inc., Cedar Park, Texas.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* x-hash.h -- basic hash table class
  *
  * Copyright (c) 2002-2012 Apple Inc. All rights reserved.
