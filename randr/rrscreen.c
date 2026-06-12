@@ -424,7 +424,7 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
 
     extraLen = reply.length << 2;
     if (extraLen) {
-        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
+        extra = x_rpcbuf_reserve0(&rpcbuf, extraLen);
         if (!extra) {
             return BadAlloc;
         }
@@ -542,7 +542,7 @@ rrGetScreenResources(ClientPtr client, Bool query)
         if (!extraLen)
             goto finish;
 
-        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
+        extra = x_rpcbuf_reserve0(&rpcbuf, extraLen);
         if (!extra) {
             free(modes);
             return BadAlloc;
