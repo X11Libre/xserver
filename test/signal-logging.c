@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
  * Copyright © 2012 Canonical, Ltd.
  *
