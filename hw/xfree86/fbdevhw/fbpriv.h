@@ -17,7 +17,7 @@
 #define FB_MODES_SHIFT		5       /* 32 modes per framebuffer */
 #define FB_NUM_MINORS		256     /* 256 Minors               */
 #define FB_MAX			(FB_NUM_MINORS / (1 << FB_MODES_SHIFT))
-#define GET_FB_IDX(node)	(MINOR(node) >> FB_MODES_SHIFT)
+#define GET_FB_IDX(node)	(MINOR((node)) >> FB_MODES_SHIFT)
 
 /* ioctls
    0x46 is 'F'								*/

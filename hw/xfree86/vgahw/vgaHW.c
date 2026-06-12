@@ -73,7 +73,7 @@
 /* Use a private definition of this here */
 #undef VGAHWPTR
 #define VGAHWPTRLVAL(p) (p)->privates[vgaHWPrivateIndex].ptr
-#define VGAHWPTR(p) ((vgaHWPtr)(VGAHWPTRLVAL(p)))
+#define VGAHWPTR(p) ((vgaHWPtr)(VGAHWPTRLVAL((p))))
 
 static int vgaHWPrivateIndex = -1;
 
