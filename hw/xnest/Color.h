@@ -42,7 +42,7 @@ extern DevPrivateKeyRec xnestColormapPrivateKeyRec;
 #define xnestColormapPriv(pCmap) \
   ((xnestPrivColormap *) dixLookupPrivate(&(pCmap)->devPrivates, &xnestColormapPrivateKeyRec))
 
-#define xnestColormap(pCmap) (xnestColormapPriv(pCmap)->colormap)
+#define xnestColormap(pCmap) (xnestColormapPriv((pCmap))->colormap)
 
 #define xnestPixel(pixel) (pixel)
 

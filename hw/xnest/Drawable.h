@@ -20,7 +20,7 @@ is" without express or implied warranty.
 
 #define xnestDrawable(pDrawable) \
   (WindowDrawable((pDrawable)->type) ?	\
-   xnestWindow((WindowPtr)pDrawable) : \
-   xnestPixmap((PixmapPtr)pDrawable))
+   xnestWindow((WindowPtr)(pDrawable)) : \
+   xnestPixmap((PixmapPtr)(pDrawable)))
 
 #endif                          /* XNESTDRAWABLE_H */
