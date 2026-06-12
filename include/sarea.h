@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
  * \file sarea.h
  * SAREA definitions.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  *
  * Copyright (C) 2000 Keith Packard
