@@ -98,7 +98,7 @@ ProcXQueryDeviceState(ClientPtr client)
     }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
+    char *buf = x_rpcbuf_reserve0(&rpcbuf, total_length);
     if (!buf)
         return BadAlloc;
 
