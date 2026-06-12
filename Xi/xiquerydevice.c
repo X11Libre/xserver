@@ -102,7 +102,7 @@ ProcXIQueryDevice(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    info = x_rpcbuf_reserve(&rpcbuf, len);
+    info = x_rpcbuf_reserve0(&rpcbuf, len);
     if (!info) {
         free(skip);
         return BadAlloc;
