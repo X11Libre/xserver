@@ -35,6 +35,7 @@
 #include <unistd.h>
 
 #include "config/hotplug_priv.h"
+#include "dix/pixmap_priv.h"
 #include "dix/screenint_priv.h"
 #include "randr/randrstr_priv.h"
 #include "os/osdep.h"
