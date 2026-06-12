@@ -122,8 +122,8 @@ typedef struct {
 
 #define LINE_SORT(x1,y1,x2,y2) \
 { int _t; \
-  if (x1 > x2) { _t = x1; x1 = x2; x2 = _t; } \
-  if (y1 > y2) { _t = y1; y1 = y2; y2 = _t; } }
+  if ((x1) > (x2)) { _t = (x1); (x1) = (x2); (x2) = _t; } \
+  if ((y1) > (y2)) { _t = (y1); (y1) = (y2); (y2) = _t; } }
 
 #define LINE_OVERLAP(pCbox,x1,y1,x2,y2,lw2) \
     BOX_OVERLAP((pCbox), (x1)-(lw2), (y1)-(lw2), (x2)+(lw2), (y2)+(lw2))
@@ -515,8 +515,8 @@ miSpriteStoreColors(ColormapPtr pMap, int ndef, xColorItem * pdef)
 #define MaskMatch(a,b,mask) (((a) & (pVisual->mask)) == ((b) & (pVisual->mask)))
 
 #define UpdateDAC(dev, plane,dac,mask) {\
-    if (MaskMatch (dev->colors[plane].pixel,pdef[i].pixel,mask)) {\
-	dev->colors[plane].dac = pdef[i].dac; \
+    if (MaskMatch ((dev)->colors[(plane)].pixel,pdef[i].pixel,mask)) {\
+	(dev)->colors[(plane)].dac = pdef[i].dac; \
 	updated = 1; \
     } \
 }
