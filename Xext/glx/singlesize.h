@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: SGI-B-2.0 */
 #ifndef _singlesize_h_
 #define _singlesize_h_
 

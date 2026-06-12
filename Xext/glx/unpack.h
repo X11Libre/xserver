@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: SGI-B-2.0 */
 #ifndef __GLX_unpack_h__
 #define __GLX_unpack_h__
 

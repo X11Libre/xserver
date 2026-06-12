@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright © 2008 George Sapountzis <gsap7@yahoo.gr>
  * Copyright © 2008 Red Hat, Inc
