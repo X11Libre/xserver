@@ -62,28 +62,19 @@
 #include "dixstruct.h"
 
 #ifdef __sun
-#include <errno.h>
-#include <procfs.h>
+#include "solaris/client_solaris.h"
 #endif
 
 #ifdef __OpenBSD__
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <sys/types.h>
-
-#include <kvm.h>
-#include <limits.h>
-#endif
-
-#if defined(__DragonFly__) || defined(__FreeBSD__)
-#include <sys/sysctl.h>
-#include <errno.h>
+#include "openbsd/client_openbsd.h"
 #endif
 
 #ifdef __APPLE__
-#include <dispatch/dispatch.h>
-#include <errno.h>
-#include <sys/sysctl.h>
+#include "apple/client_apple.h"
+#endif /* __APPLE__ */
+
+#if defined(__DragonFly__) || defined(__FreeBSD__)
+#include "freebsd/client_freebsd.h"
 #endif
 
 #include "os/auth.h"
@@ -122,24 +113,7 @@ DetermineClientPid(struct _Client * client)
     return pid;
 }
 
-#ifdef __APPLE__ /* only required on macOS */
-static void
-get_argmax_from_kern(void *arg)
-{
-    int *argmax = arg;
-    int mib[2];
-    size_t len;
 
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_ARGMAX;
-
-    len = sizeof(int);
-    if (sysctl(mib, 2, argmax, &len, NULL, 0) == -1) {
-        ErrorF("Unable to dynamically determine kern.argmax, using ARG_MAX (%d)\n", ARG_MAX);
-        *argmax = ARG_MAX;
-    }
-}
-#endif
 
 /**
  * Try to determine a command line string for a client based on its
@@ -165,12 +139,6 @@ get_argmax_from_kern(void *arg)
 void
 DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 {
-#if !defined(__APPLE__) && !defined(__DragonFly__) && !defined(__FreeBSD__)
-    char path[PATH_MAX + 1];
-    int totsize = 0;
-    int fd = 0;
-#endif
-
     if (cmdname)
         *cmdname = NULL;
     if (cmdargs)
@@ -178,207 +146,30 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 
     if (pid == -1)
         return;
-
-#if defined (__APPLE__)
-    {
-        static dispatch_once_t once;
-        static int argmax;
-        dispatch_once_f(&once, &argmax, get_argmax_from_kern);
-
-        int mib[3];
-        size_t len = argmax;
-        int32_t argc = -1;
-
-        char * const procargs = calloc(1, len);
-        if (!procargs) {
-            ErrorF("Failed to allocate memory (%lu bytes) for KERN_PROCARGS2 result for pid %d: %s\n", len, pid, strerror(errno));
-            return;
-        }
-
-        mib[0] = CTL_KERN;
-        mib[1] = KERN_PROCARGS2;
-        mib[2] = pid;
-
-        if (sysctl(mib, 3, procargs, &len, NULL, 0) == -1) {
-            ErrorF("Failed to determine KERN_PROCARGS2 for pid %d: %s\n", pid, strerror(errno));
-            free(procargs);
-            return;
-        }
-
-        if (len < sizeof(argc) || len > argmax) {
-            ErrorF("Erroneous length returned when querying KERN_PROCARGS2 for pid %d: %zu\n", pid, len);
-            free(procargs);
-            return;
-        }
-
-        /* Ensure we have a failsafe NUL termination just in case the last entry
-         * was not actually NUL terminated.
-         */
-        procargs[len-1] = '\0';
-
-        /* Setup our iterator */
-        char *is = procargs;
-
-        /* The first element in the buffer is argc as a 32bit int. When using
-         * the older KERN_PROCARGS, this is omitted, and one needs to guess
-         * (usually by checking for an `=` character) when we start seeing
-         * envvars instead of arguments.
-         */
-        argc = *(int32_t *)is;
-        is += sizeof(argc);
-
-        /* The very next string is the executable path.  Skip over it since
-         * this function wants to return argv[0] and argv[1...n].
-         */
-        is += strlen(is) + 1;
-
-        /* Skip over extra NUL characters to get to the start of argv[0] */
-        for (; (is < &procargs[len]) && !(*is); is++);
-
-        if (! (is < &procargs[len])) {
-            ErrorF("Arguments were not returned when querying KERN_PROCARGS2 for pid %d: %zu\n", pid, len);
-            free(procargs);
-            return;
-        }
-
-        if (cmdname) {
-            *cmdname = strdup(is);
-        }
-
-        /* Jump over argv[0] and point to argv[1] */
-        is += strlen(is) + 1;
-
-        if (cmdargs && is < &procargs[len]) {
-            char *args = is;
-
-            /* Remove the NUL terminators except the last one */
-            for (int i = 1; i < argc - 1; i++) {
-                /* Advance to the NUL terminator */
-                is += strlen(is);
-
-                /* Change the NUL to a space, ensuring we don't accidentally remove the terminal NUL */
-                if (is < &procargs[len-1]) {
-                    *is = ' ';
-                }
-            }
-
-            *cmdargs = strdup(args);
-        }
-
-        free(procargs);
-    }
-#elif defined(__DragonFly__) || defined(__FreeBSD__)
-    /* on DragonFly and FreeBSD use KERN_PROC_ARGS */
-    {
-        int mib[] = {
-            CTL_KERN,
-            KERN_PROC,
-            KERN_PROC_ARGS,
-            pid,
-        };
-
-        /* Determine exact size instead of relying on kern.argmax */
-        size_t len;
-        if (sysctl(mib, ARRAY_SIZE(mib), NULL, &len, NULL, 0) != 0) {
-            ErrorF("Failed to query KERN_PROC_ARGS length for PID %d: %s\n", pid, strerror(errno));
-            return;
-        }
-
-        /* Read KERN_PROC_ARGS contents. Similar to /proc/pid/cmdline
-         * the process name and each argument are separated by NUL byte. */
-        char *const procargs = calloc(1, len);
-        if (sysctl(mib, ARRAY_SIZE(mib), procargs, &len, NULL, 0) != 0) {
-            ErrorF("Failed to get KERN_PROC_ARGS for PID %d: %s\n", pid, strerror(errno));
-            free(procargs);
-            return;
-        }
-
-        /* Construct the process name without arguments. */
-        if (cmdname) {
-            *cmdname = strdup(procargs);
-        }
-
-        /* Construct the arguments for client process. */
-        if (cmdargs) {
-            size_t cmdsize = strlen(procargs) + 1;
-            size_t argsize = len - cmdsize;
-            char *args = NULL;
-
-            if (argsize > 0)
-                args = procargs + cmdsize;
-            if (args) {
-                /* Replace NUL with space except terminating NUL */
-                for (size_t i = 0; i < (argsize - 1); i++) {
-                    if (args[i] == '\0')
-                        args[i] = ' ';
-                }
-                *cmdargs = strdup(args);
-            }
-        }
-        free(procargs);
-    }
+#if defined(__APPLE__) /* macOS/OSX and any other operating system by Apple where an Xserver can run */
+    DetermineClientCmdApple(pid, cmdname, cmdargs);
+/* In this case, the FreeBSD code also works for DragonflyBSD, there's no reason to have two versions of the same function when
+ * we can reuse the same one. */
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
+    DetermineClientCmdFreeBSD(pid, cmdname, cmdargs);
 #elif defined(__OpenBSD__)
-    /* on OpenBSD use kvm_getargv() */
-    {
-        kvm_t *kd;
-        char errbuf[_POSIX2_LINE_MAX];
-        char **argv;
-        struct kinfo_proc *kp;
-        size_t len = 0;
-        int i, n;
-
-        kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, errbuf);
-        if (kd == NULL)
-            return;
-        kp = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc),
-                          &n);
-        if (n != 1)
-            goto done_kvm;
-        argv = kvm_getargv(kd, kp, 0);
-        if (argv == NULL)
-            goto done_kvm;
-        if (cmdname) {
-            if (argv[0] == NULL)
-                goto done_kvm;
-            else
-                *cmdname = strdup(argv[0]);
-        }
-        if (cmdargs) {
-            i = 1;
-            while (argv[i] != NULL) {
-                len += strlen(argv[i]) + 1;
-                i++;
-            }
-            *cmdargs = calloc(1, len);
-            if (*cmdargs) {
-                i = 1;
-                while (argv[i] != NULL) {
-                    strlcat(*(char **)cmdargs, argv[i], len);
-                    strlcat(*(char **)cmdargs, " ", len);
-                    i++;
-                }
-            }
-        }
- done_kvm:
-        kvm_close(kd);
-    }
-#else                           /* Linux using /proc/pid/cmdline */
-
+    DetermineClientCmdOpenBSD(pid, cmdname, cmdargs);
+#elif defined(__sun) /* Solaris */
+    DetermineClientCmdSolaris(pid, cmdname, cmdargs);
+#else /* Possibly Linux or another operating system where the /proc filesystem
+       * is available. Use it as a fallback. */
+    char path[PATH_MAX + 1];
     /* Check if /proc/pid/cmdline exists. It's not supported on all
      * operating systems. */
     if (snprintf(path, sizeof(path), "/proc/%d/cmdline", pid) < 0)
         return;
-    fd = open(path, O_RDONLY);
+    int fd = open(path, O_RDONLY);
     if (fd < 0)
-#ifdef __sun
-        goto fallback;
-#else
         return;
-#endif
 
     /* Read the contents of /proc/pid/cmdline. It should contain the
      * process name and arguments. */
-    totsize = read(fd, path, sizeof(path));
+    ssize_t totsize = read(fd, path, sizeof(path));
     close(fd);
     if (totsize <= 0)
         return;
@@ -391,8 +182,8 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 
     /* Construct the arguments for client process. */
     if (cmdargs) {
-        int cmdsize = strlen(path) + 1;
-        int argsize = totsize - cmdsize;
+        size_t cmdsize = strlen(path) + 1;
+        size_t argsize = totsize - cmdsize;
         char *args = NULL;
 
         if (argsize > 0)
@@ -408,48 +199,6 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
             args[argsize - 1] = '\0';
             *cmdargs = args;
         }
-    }
-    return;
-#endif
-
-#ifdef __sun                    /* Solaris */
-  fallback:
-    /* Solaris prior to 11.3.5 does not support /proc/pid/cmdline, but
-     * makes information similar to what ps shows available in a binary
-     * structure in the /proc/pid/psinfo file. */
-    if (snprintf(path, sizeof(path), "/proc/%d/psinfo", pid) < 0)
-        return;
-    fd = open(path, O_RDONLY);
-    if (fd < 0) {
-        ErrorF("Failed to open %s: %s\n", path, strerror(errno));
-        return;
-    }
-    else {
-        psinfo_t psinfo = { 0 };
-        char *sp;
-
-        totsize = read(fd, &psinfo, sizeof(psinfo_t));
-        close(fd);
-        if (totsize <= 0)
-            return;
-
-        /* pr_psargs is the first PRARGSZ (80) characters of the command
-         * line string - assume up to the first space is the command name,
-         * since it's not delimited.   While there is also pr_fname, that's
-         * more limited, giving only the first 16 chars of the basename of
-         * the file that was exec'ed, thus cutting off many long gnome
-         * command names, or returning "isapython2.6" for all python scripts.
-         */
-        psinfo.pr_psargs[PRARGSZ - 1] = '\0';
-        sp = strchr(psinfo.pr_psargs, ' ');
-        if (sp)
-            *sp++ = '\0';
-
-        if (cmdname)
-            *cmdname = strdup(psinfo.pr_psargs);
-
-        if (cmdargs && sp)
-            *cmdargs = strdup(sp);
     }
 #endif
 }
