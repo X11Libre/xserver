@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright © 2017 Keith Packard
  *
