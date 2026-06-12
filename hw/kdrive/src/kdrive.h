@@ -351,8 +351,8 @@ extern const KdOsFuncs *kdOsFuncs;
 #define KdGetScreenPriv(pScreen) ((KdPrivScreenPtr) \
     dixLookupPrivate(&(pScreen)->devPrivates, kdScreenPrivateKey))
 #define KdSetScreenPriv(pScreen,v) \
-    dixSetPrivate(&(pScreen)->devPrivates, kdScreenPrivateKey, v)
-#define KdScreenPriv(pScreen) KdPrivScreenPtr pScreenPriv = KdGetScreenPriv(pScreen)
+    dixSetPrivate(&(pScreen)->devPrivates, kdScreenPrivateKey, (v))
+#define KdScreenPriv(pScreen) KdPrivScreenPtr pScreenPriv = KdGetScreenPriv((pScreen))
 
 /* kcmap.c */
 void
