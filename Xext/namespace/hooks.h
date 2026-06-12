@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: MIT OR X11
+ *
+ * Copyright © 2025-2026 Enrico Weigelt, metux IT consult <info@metux.net>
+ */
 #ifndef __XSERVER_NAMESPACE_HOOKS_H
 #define __XSERVER_NAMESPACE_HOOKS_H
 

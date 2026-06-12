@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: MIT OR X11
+ *
+ * Copyright © 2025-2026 Enrico Weigelt, metux IT consult <info@metux.net>
+ */
 #define HOOK_NAME "initroot"
 
 #include <dix-config.h>
