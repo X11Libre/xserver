@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /************************************************************
 
 Author: Eamon Walsh <ewalsh@tycho.nsa.gov>
