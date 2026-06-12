@@ -61,7 +61,7 @@ struct _DRIContextPrivRec {
 };
 
 #define DRI_SCREEN_PRIV_FROM_INDEX(screenIndex) ((DRIScreenPrivPtr) \
-    dixLookupPrivate(&screenInfo.screens[screenIndex]->devPrivates, \
+    dixLookupPrivate(&screenInfo.screens[(screenIndex)]->devPrivates, \
 		     DRIScreenPrivKey))
 
 #define DRI_ENT_PRIV(pScrn)  \

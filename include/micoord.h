@@ -36,12 +36,12 @@
 
 #if IMAGE_BYTE_ORDER == MSBFirst
 #define coordToInt(x,y)	(((x) << 16) | ((y) & 0xffff))
-#define intToX(i)	(GetHighWord(i))
-#define intToY(i)	((int) ((short) i))
+#define intToX(i)	(GetHighWord((i)))
+#define intToY(i)	((int) ((short) (i)))
 #else
 #define coordToInt(x,y)	(((y) << 16) | ((x) & 0xffff))
 #define intToX(i)	((int) ((short) (i)))
-#define intToY(i)	(GetHighWord(i))
+#define intToY(i)	(GetHighWord((i)))
 #endif
 
 #endif                          /* _MICOORD_H_ */

@@ -107,12 +107,12 @@ extern _X_EXPORT void xf86ExecX86int10(xf86Int10InfoPtr pInt);
 #define X86_VIP_MASK		0x00100000      /* virtual interrupt pending */
 #define X86_ID_MASK		0x00200000
 
-#define MEM_RB(name, addr)      (*name->mem->rb)(name, addr)
-#define MEM_RW(name, addr)      (*name->mem->rw)(name, addr)
-#define MEM_RL(name, addr)      (*name->mem->rl)(name, addr)
-#define MEM_WB(name, addr, val) (*name->mem->wb)(name, addr, val)
-#define MEM_WW(name, addr, val) (*name->mem->ww)(name, addr, val)
-#define MEM_WL(name, addr, val) (*name->mem->wl)(name, addr, val)
+#define MEM_RB(name, addr)      (*(name)->mem->rb)((name), (addr))
+#define MEM_RW(name, addr)      (*(name)->mem->rw)((name), (addr))
+#define MEM_RL(name, addr)      (*(name)->mem->rl)((name), (addr))
+#define MEM_WB(name, addr, val) (*(name)->mem->wb)((name), (addr), (val))
+#define MEM_WW(name, addr, val) (*(name)->mem->ww)((name), (addr), (val))
+#define MEM_WL(name, addr, val) (*(name)->mem->wl)((name), (addr), (val))
 
 /* OS dependent functions */
 extern _X_EXPORT Bool MapCurrentInt10(xf86Int10InfoPtr pInt);

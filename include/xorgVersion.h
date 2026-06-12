@@ -34,7 +34,7 @@
 #endif
 
 #define XORG_VERSION_NUMERIC(major,minor,patch,snap,dummy) \
-	(((major) * 10000000) + ((minor) * 100000) + ((patch) * 1000) + snap)
+	(((major) * 10000000) + ((minor) * 100000) + ((patch) * 1000) + (snap))
 
 #define XORG_GET_MAJOR_VERSION(vers)	((vers) / 10000000)
 #define XORG_GET_MINOR_VERSION(vers)	(((vers) % 10000000) / 100000)
