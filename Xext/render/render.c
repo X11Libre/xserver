@@ -244,7 +244,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    xPictFormInfo *pictForm = x_rpcbuf_reserve(&rpcbuf, rlength);
+    xPictFormInfo *pictForm = x_rpcbuf_reserve0(&rpcbuf, rlength);
     if (!pictForm)
         return BadAlloc;
 
@@ -1531,7 +1531,7 @@ ProcRenderQueryFilters(ClientPtr client)
     total_bytes = (len << 2);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    aliases = (INT16 *) x_rpcbuf_reserve(&rpcbuf, total_bytes);
+    aliases = (INT16 *) x_rpcbuf_reserve0(&rpcbuf, total_bytes);
     if (!aliases)
         return BadAlloc;
 
