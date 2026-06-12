@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 //
 // Copyright © Jon TURNEY 2013
 //

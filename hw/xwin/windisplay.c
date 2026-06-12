@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * File: windisplay.c
  * Purpose: Retrieve server display name

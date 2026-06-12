@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef __WIN_CONFIG_H__
 #define __WIN_CONFIG_H__
 /*

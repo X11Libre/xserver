@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #if !defined(WINKEYBD_H)
 #define WINKEYBD_H
 /*

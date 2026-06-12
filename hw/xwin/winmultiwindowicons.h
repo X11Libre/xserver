@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * File: winmultiwindowicons.h
  * Purpose: interface for multiwindow mode icon functions

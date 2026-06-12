@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef WINMULTIWINDOWCLASS_H
 #define WINMULTIWINDOWCLASS_H
 

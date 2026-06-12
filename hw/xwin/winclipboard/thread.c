@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  *Copyright (C) 2003-2004 Harold L Hunt II All Rights Reserved.
  *Copyright (C) Colin Harrison 2005-2008

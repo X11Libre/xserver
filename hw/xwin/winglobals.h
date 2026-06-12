@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
   File: winglobals.h
   Purpose: declarations for global variables

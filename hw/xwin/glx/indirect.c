@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * File: indirect.c
  * Purpose: A GLX implementation that uses Windows OpenGL library

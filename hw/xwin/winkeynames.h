@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 #ifndef _WINKEYNAMES_H
 #define _WINKEYNAMES_H
 /*

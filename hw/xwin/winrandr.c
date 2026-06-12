@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  *Copyright (C) 2001-2004 Harold L Hunt II All Rights Reserved.
  *Copyright (C) 2009-2010 Jon TURNEY

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * File: glthunk.c
  * Purpose: cdecl thunk wrapper library for Win32 stdcall OpenGL library
