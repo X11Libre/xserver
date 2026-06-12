@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Xephyr - A kdrive X server that runs in a host X window.
  *          Authored by Matthew Allum <mallum@openedhand.com>

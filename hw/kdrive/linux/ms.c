@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
 Copyright (c) 2001 by Juliusz Chroboczek
 Copyright (c) 1999 by Keith Packard

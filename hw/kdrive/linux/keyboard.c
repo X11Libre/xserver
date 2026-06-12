@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Copyright © 1999 Keith Packard
  * XKB integration © 2006 Nokia Corporation, author: Tomas Frydrych <tf@o-hand.com>

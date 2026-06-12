@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * TSLIB based touchscreen driver for KDrive
  * Porting to new input API and event queueing by Daniel Stone.
