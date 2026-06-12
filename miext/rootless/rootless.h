@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * External interface to generic rootless mode
  */

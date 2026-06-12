@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Platform specific rootless configuration
  */

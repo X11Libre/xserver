@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  *  Fast C2P (Chunky-to-Planar) Conversion
  *
