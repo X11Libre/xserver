@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright (c) 2002, 2025, Oracle and/or its affiliates.
  *

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* inputthread.c -- Threaded generation of input events.
  *
  * Copyright © 2007-2008 Tiago Vignatti <vignatti at freedesktop org>

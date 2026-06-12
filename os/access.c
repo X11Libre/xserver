@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: ICU */
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
