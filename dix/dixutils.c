@@ -89,6 +89,7 @@ Author:  Adobe Systems Incorporated
 #include "dix/client_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/saveset_priv.h"
 #include "dix/screenint_priv.h"
 
 #include "misc.h"
@@ -250,50 +251,35 @@ XRetCode
 AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
                       Bool toRoot, Bool map)
 {
-    unsigned numnow;
-    SaveSetElt *pTmp = NULL;
-    int j;
+    if (mode == SetModeDelete) {
+        SaveSetEntry *walk, *tmp;
+        xorg_list_for_each_entry_safe(walk, tmp, &client->saveSets, entry) {
+            if (walk->windowPtr == pWin) {
+                xorg_list_del(&(walk->entry));
+                free(walk);
+            }
+        }
+        return Success;
+    }
 
-    numnow = client->numSaved;
-    j = 0;
-    if (numnow) {
-        pTmp = client->saveSet;
-        while ((j < numnow) && (SaveSetWindow(pTmp[j]) != (void *) pWin))
-            j++;
-    }
     if (mode == SetModeInsert) {
-        if (j < numnow)         /* duplicate */
-            return Success;
-        numnow++;
-        pTmp = (SaveSetElt *) realloc(client->saveSet, sizeof(*pTmp) * numnow);
-        if (!pTmp)
+        SaveSetEntry *walk;
+        xorg_list_for_each_entry(walk, &client->saveSets, entry) {
+            if (walk->windowPtr == pWin)
+                return Success; /* duplicate */
+        }
+
+        SaveSetEntry *newent = calloc(1, sizeof(SaveSetEntry));
+        if (!newent)
             return BadAlloc;
-        client->saveSet = pTmp;
-        client->numSaved = numnow;
-        SaveSetAssignWindow(client->saveSet[numnow - 1], pWin);
-        SaveSetAssignToRoot(client->saveSet[numnow - 1], toRoot);
-        SaveSetAssignMap(client->saveSet[numnow - 1], map);
+
+        newent->windowPtr = pWin;
+        newent->toRoot = toRoot;
+        newent->map = map;
+        xorg_list_add(&newent->entry, &client->saveSets);
         return Success;
     }
-    else if ((mode == SetModeDelete) && (j < numnow)) {
-        while (j < numnow - 1) {
-            pTmp[j] = pTmp[j + 1];
-            j++;
-        }
-        numnow--;
-        if (numnow) {
-            pTmp =
-                (SaveSetElt *) realloc(client->saveSet, sizeof(*pTmp) * numnow);
-            if (pTmp)
-                client->saveSet = pTmp;
-        }
-        else {
-            free(client->saveSet);
-            client->saveSet = (SaveSetElt *) NULL;
-        }
-        client->numSaved = numnow;
-        return Success;
-    }
+
     return Success;
 }
 
@@ -304,9 +290,7 @@ DeleteWindowFromAnySaveSet(WindowPtr pWin)
 
     for (int i = 0; i < currentMaxClients; i++) {
         client = clients[i];
-        if (client && client->numSaved)
-            (void) AlterSaveSetForClient(client, pWin, SetModeDelete, FALSE,
-                                         TRUE);
+        (void) AlterSaveSetForClient(client, pWin, SetModeDelete, FALSE, TRUE);
     }
 }
 
