@@ -1570,7 +1570,7 @@ ProcVidModeGetGammaRamp(ClientPtr client)
 
     if (stuff->size) {
         size_t ramplen = length * 3 * sizeof(CARD16);
-        CARD16 *ramp = x_rpcbuf_reserve(&rpcbuf, ramplen);
+        CARD16 *ramp = x_rpcbuf_reserve0(&rpcbuf, ramplen);
         if (!ramp)
             return BadAlloc;
 

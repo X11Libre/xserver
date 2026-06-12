@@ -160,7 +160,10 @@ ProcRRGetProviderInfo (ClientPtr client)
 
     extraLen = reply.length << 2;
     if (extraLen) {
-        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
+        /* Use the zeroing variant: the provider name is copied with its exact
+         * length, leaving the trailing alignment padding uninitialized, which
+         * would otherwise leak heap memory to the client. */
+        extra = x_rpcbuf_reserve0(&rpcbuf, extraLen);
         if (!extra)
             return BadAlloc;
     }

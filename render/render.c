@@ -244,7 +244,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    xPictFormInfo *pictForm = x_rpcbuf_reserve(&rpcbuf, rlength);
+    xPictFormInfo *pictForm = x_rpcbuf_reserve0(&rpcbuf, rlength);
     if (!pictForm)
         return BadAlloc;
 
@@ -1531,7 +1531,7 @@ ProcRenderQueryFilters(ClientPtr client)
     total_bytes = (len << 2);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    aliases = (INT16 *) x_rpcbuf_reserve(&rpcbuf, total_bytes);
+    aliases = (INT16 *) x_rpcbuf_reserve0(&rpcbuf, total_bytes);
     if (!aliases)
         return BadAlloc;
 
@@ -2892,6 +2892,22 @@ ProcRenderSetPictureFilter(ClientPtr client)
     if (client->swapped) {
         swapl(&stuff->picture);
         swaps(&stuff->nbytes);
+    }
+
+    const size_t namelen = pad_to_int32(stuff->nbytes);
+    REQUEST_AT_LEAST_EXTRA_SIZE(xRenderSetPictureFilterReq, namelen);
+
+    const size_t packet_len = stuff->length * 4;
+    const size_t remaining =
+        (packet_len - sizeof(xRenderSetPictureFilterReq) - namelen);
+    const size_t nparams = remaining / 4;
+    if ((nparams * 4) != remaining) {
+        return BadLength;
+    }
+
+    if (client->swapped) {
+        CARD32 *params = (CARD32*)((char*)(stuff + 1) + namelen);
+        SwapLongs(params, nparams);
     }
 
 #ifdef XINERAMA
