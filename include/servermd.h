@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef SERVERMD_H
 #define SERVERMD_H 1
 
+#include <stddef.h>
 #include <X11/Xarch.h>		/* for X_LITTLE_ENDIAN/X_BIG_ENDIAN */
 
 #if X_BYTE_ORDER == X_LITTLE_ENDIAN
@@ -103,7 +104,8 @@ extern _X_EXPORT PaddingInfo PixmapWidthPaddingInfo[];
 #define PixmapBytePad(w, d) \
     (PixmapWidthInPadUnits(w, d) << PixmapWidthPaddingInfo[d].padBytesLog2)
 
-#define BitmapBytePad(w) \
-    (((int)((w) + BITMAP_SCANLINE_PAD - 1) >> LOG2_BITMAP_PAD) << LOG2_BYTES_PER_SCANLINE_PAD)
+static inline size_t BitmapBytePad(size_t w) {
+    return ((((w) + BITMAP_SCANLINE_PAD - 1) >> LOG2_BITMAP_PAD) << LOG2_BYTES_PER_SCANLINE_PAD);
+}
 
 #endif                          /* SERVERMD_H */

@@ -205,7 +205,7 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
         for (y = 0; y < nCY; ++y)
             for (x = 0; x < xmax; ++x) {
                 int nWinPix = bits_to_bytes(pScreenPriv->cursor.sm_cx) * y + x;
-                int nXPix = BitmapBytePad(pCursor->bits->width) * y + x;
+                size_t nXPix = BitmapBytePad(pCursor->bits->width) * y + x;
 
                 pAnd[nWinPix] = 0;
                 if (fReverse)
@@ -220,7 +220,7 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
         for (y = 0; y < nCY; ++y)
             for (x = 0; x < xmax; ++x) {
                 int nWinPix = bits_to_bytes(pScreenPriv->cursor.sm_cx) * y + x;
-                int nXPix = BitmapBytePad(pCursor->bits->width) * y + x;
+                size_t nXPix = BitmapBytePad(pCursor->bits->width) * y + x;
 
                 unsigned char mask = pCursor->bits->mask[nXPix];
 
@@ -316,7 +316,7 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
                         bit = pAnd[nWinPix];
                         bit = bit & (1 << (7 - (x & 7)));
                         if (!bit) {     /* Within the cursor mask? */
-                            int nXPix =
+                            size_t nXPix =
                                 BitmapBytePad(pCursor->bits->width) * y +
                                 (x / 8);
                             bit =

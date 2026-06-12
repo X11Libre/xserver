@@ -1303,7 +1303,6 @@ ProcRenderCreateCursor(ClientPtr client)
     CARD32 *argb;
     unsigned char *srcline;
     unsigned char *mskline;
-    int stride;
     int x, y;
     int nbytes_mono;
     CursorMetricRec cm;
@@ -1328,7 +1327,7 @@ ProcRenderCreateCursor(ClientPtr client)
     if (!argbbits)
         return BadAlloc;
 
-    stride = BitmapBytePad(width);
+    size_t stride = BitmapBytePad(width);
     nbytes_mono = stride * height;
 
     unsigned char *srcbits = calloc(1, nbytes_mono);
