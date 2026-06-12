@@ -361,7 +361,7 @@ ProcXListInputDevices(ClientPtr client)
 
     /* allocate space for reply */
     total_length = numdevs * sizeof(xDeviceInfo) + size + namesize;
-    char *devbuf = x_rpcbuf_reserve(&rpcbuf, total_length);
+    char *devbuf = x_rpcbuf_reserve0(&rpcbuf, total_length);
     if (!devbuf) {
         free(skip);
         return BadAlloc;

@@ -77,6 +77,13 @@ ProcXQueryDeviceState(ClientPtr client)
     if (rc != Success && rc != BadAccess)
         return rc;
 
+    /* dixLookupDevice() leaves dev NULL on anything other than Success,
+     * including BadAccess. The code below intentionally continues on
+     * BadAccess to blank out the state, but it cannot do so without a valid
+     * device, so bail out rather than dereferencing NULL. */
+    if (!dev)
+        return rc;
+
     v = dev->valuator;
     if (v != NULL && v->motionHintWindow != NULL)
         MaybeStopDeviceHint(dev, client);
@@ -99,7 +106,7 @@ ProcXQueryDeviceState(ClientPtr client)
     }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
+    char *buf = x_rpcbuf_reserve0(&rpcbuf, total_length);
     if (!buf)
         return BadAlloc;
 

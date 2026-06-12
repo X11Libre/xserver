@@ -410,12 +410,17 @@ ProcXFixesSetCursorName(ClientPtr client)
     REQUEST(xXFixesSetCursorNameReq);
     Atom atom;
 
+    /* nbytes must be swapped before REQUEST_FIXED_SIZE validates the request
+     * length against it, otherwise a swapped client can pass a small wire-order
+     * nbytes that satisfies the length check while MakeAtom() below reads the
+     * large host-order value out of bounds. */
+    if (client->swapped)
+        swaps(&stuff->nbytes);
+
     REQUEST_FIXED_SIZE(xXFixesSetCursorNameReq, stuff->nbytes);
 
-    if (client->swapped) {
+    if (client->swapped)
         swapl(&stuff->cursor);
-        swaps(&stuff->nbytes);
-    }
 
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixSetAttrAccess);
     tchar = (char *) &stuff[1];
@@ -667,12 +672,17 @@ ProcXFixesChangeCursorByName(ClientPtr client)
     char *tchar;
 
     REQUEST(xXFixesChangeCursorByNameReq);
+
+    /* nbytes must be swapped before REQUEST_FIXED_SIZE validates the request
+     * length against it (see ProcXFixesSetCursorName); otherwise MakeAtom()
+     * below reads the host-order value out of bounds for a swapped client. */
+    if (client->swapped)
+        swaps(&stuff->nbytes);
+
     REQUEST_FIXED_SIZE(xXFixesChangeCursorByNameReq, stuff->nbytes);
 
-    if (client->swapped) {
+    if (client->swapped)
         swapl(&stuff->source);
-        swaps(&stuff->nbytes);
-    }
 
     VERIFY_CURSOR(pSource, stuff->source, client,
                   DixReadAccess | DixGetAttrAccess);
