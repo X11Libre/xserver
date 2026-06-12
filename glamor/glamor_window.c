@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright © 2008 Intel Corporation
  * Copyright © 1998 Keith Packard
