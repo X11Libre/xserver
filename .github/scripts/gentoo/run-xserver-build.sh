@@ -6,6 +6,8 @@ set -e
 # .github/docker/gentoo/Dockerfile + .github/workflows/gentoo-image.yml), so we
 # only run meson here. Gentoo uses the standard /usr[/lib64] layout, so no extra
 # PKG_CONFIG_PATH is needed.
+./.github/scripts/gentoo/install-pkg.sh
+
 echo "--> running xserver build ...."
 export MESON_BUILDDIR=_build
 
