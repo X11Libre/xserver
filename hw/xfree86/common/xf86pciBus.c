@@ -507,48 +507,87 @@ xf86PciProbeDev(DriverPtr drvp)
                 && PCI_ID_COMPARE(devices[j].device_id, device_id)
                 && ((devices[j].device_class_mask & pPci->device_class)
                     == devices[j].device_class)) {
-                int entry;
+                int entry = -1;
 
                 /* Allow the same entity to be used more than once for
-                 * devices with multiple screens per entity.  This assumes
-                 * implicitly that there will be a screen == 0 instance.
+                 * devices with multiple screens (CRTs) per entity. A primary
+                 * CRT (screen == 0) must be claimed first.
                  *
-                 * FIXME Need to make sure that two different drivers don't
-                 * FIXME claim the same screen > 0 instance.
+                 * It is checked that two different drivers don't
+                 * claim the same screen.
                  */
-                if ((devList[i]->screen == 0) && !xf86CheckPciSlot(pPci))
-                    continue;
+                LogMessageVerb(X_INFO, 1,
+                    "%s: PCI card screen %d at %d:%d:%d is requested by \"%s\"\n",
+                    drvp->driverName, devList[i]->screen, 
+                    pPci->bus, pPci->dev, pPci->func, devList[i]->identifier);
 
-                DebugF("%s: card at %d:%d:%d is claimed by a Device section\n",
-                       drvp->driverName, pPci->bus, pPci->dev, pPci->func);
+                if (devList[i]->screen == 0) {
+                    /* Allocate an entry in the lists to be returned */
+                    entry = xf86ClaimPciSlot(pPci, drvp, device_id,
+                                             devList[i], devList[i]->active);
+                    if (entry == -1)
+                        continue;
+                    else {
+                        LogMessageVerb(X_INFO, 1,
+                            "Adding %d:%d:%d primary screen to \"%s\"\n",
+                            pPci->bus, pPci->dev, pPci->func,  devList[i]->identifier);
+                    }
+                }
 
-                /* Allocate an entry in the lists to be returned */
-                entry = xf86ClaimPciSlot(pPci, drvp, device_id,
-                                         devList[i], devList[i]->active);
 
-                if ((entry == -1) && (devList[i]->screen > 0)) {
+                if (entry == -1) { /* devList[i]->screen > 0 for multi-CRT cards */
                     unsigned k;
 
                     for (k = 0; k < xf86NumEntities; k++) {
                         EntityPtr pEnt = xf86Entities[k];
+                        int l;
 
+                        if (pEnt->numInstances <= 0) /* Unclaimed */
+                            continue;
                         if (pEnt->bus.type != BUS_PCI)
                             continue;
-                        if (pEnt->bus.id.pci == pPci) {
-                            entry = k;
-                            xf86AddDevToEntity(k, devList[i]);
+                        if (pEnt->bus.id.pci != pPci)
+                            continue;
+                        if (strcasecmp(drvp->driverName, pEnt->driver->driverName)) {
+                            LogMessageVerb(X_INFO, 1,
+                                "\"%s\" requires driver \"%s\" for screen %d"
+                                " but %d:%d:%d is driven by \"%s\", skipping\n",
+                                devList[i]->identifier, drvp->driverName, devList[i]->screen,
+                                pPci->bus, pPci->dev, pPci->func, pEnt->driver->driverName);
                             break;
+                        }
+                        entry = k;
+                        for (l = 0; l < pEnt->numInstances; l++) {
+                            if (pEnt->devices[l]->screen == devList[i]->screen) {
+                                LogMessageVerb(X_INFO, 1,
+                                    "Screen %d for %d:%d:%d has already been claimed by \"%s\", skipping\n",
+                                    devList[i]->screen, pPci->bus, pPci->dev, pPci->func, pEnt->devices[l]->identifier);
+                                entry = -1;
+                                break;
+                            }
+                        }
+                        if (entry == -1)
+                            break;
+                        else {
+                            LogMessageVerb(X_INFO, 1,
+                                "Adding %d:%d:%d screen %d to \"%s\"\n",
+                                pPci->bus, pPci->dev, pPci->func, devList[i]->screen, pEnt->devices[0]->identifier);
+                            xf86AddDevToEntity(k, devList[i]);
                         }
                     }
                 }
 
-                if (entry != -1) {
+                if ((entry != -1) && (devList[i]->screen == 0)) {
                     if ((*drvp->PciProbe) (drvp, entry, pPci,
                                            devices[j].match_data)) {
                         foundScreen = TRUE;
                     }
-                    else
+                    else {
+                        LogMessageVerb(X_INFO, 1,
+                            "Probe for \"%s\" and %d:%d:%d failed, unclaiming PCI slot\n",
+                            drvp->driverName, pPci->bus, pPci->dev, pPci->func);
                         xf86UnclaimPciSlot(pPci, devList[i]);
+                    }
                 }
 
                 break;
