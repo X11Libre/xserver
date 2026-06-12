@@ -393,6 +393,26 @@ jobs:
             - name: build
               run: ./.github/scripts/gentoo/run-xserver-build.sh
 
+    xserver-build-rhel:
+        runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
+        strategy:
+            fail-fast: false
+            matrix:
+                rhelver: ['9', '10']
+        container:
+            # AlmaLinux is an ABI-identical RHEL rebuild; it stands in for
+            # RHEL here since the real UBI images can't enable CRB without
+            # an entitlement on public runners.
+            image: almalinux:${{ matrix.rhelver }}
+        env:
+            MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v6
+            - name: build
+              run: ./.github/scripts/rhel/run-xserver-build.sh
+
     xserver-build-cygwin:
         runs-on: windows-latest
         steps:
@@ -498,6 +518,7 @@ jobs:
             - xserver-build-dragonflybsd
             - xserver-build-netbsd
             - xserver-build-gentoo
+            - xserver-build-rhel
             - xserver-build-cygwin
             - xserver-build-arch
             - check-sign-off
