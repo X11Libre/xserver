@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* x-selection.h -- proxies between NSPasteboard and X11 selections
  *
  * Copyright (c) 2002-2012 Apple Inc. All rights reserved.

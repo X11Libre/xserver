@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  *
  * Quartz-specific support for the Darwin X Server

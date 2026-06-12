@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * GLX implementation that uses Apple's OpenGL.framework
  * (Indirect rendering path -- it's also used for some direct mode code too)

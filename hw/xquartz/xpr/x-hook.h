@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* x-hook.h -- lists of function,data pairs to call.
  *
  * Copyright (c) 2003-2012 Apple Inc. All rights reserved.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* X11Application.h -- subclass of NSApplication to multiplex events
  *
  * Copyright (c) 2002-2012 Apple Inc. All rights reserved.
