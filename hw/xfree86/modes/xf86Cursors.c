@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright © 2007 Keith Packard
  * Copyright © 2010-2011 Aaron Plattner

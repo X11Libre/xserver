@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * SBUS and OpenPROM access functions.
  *

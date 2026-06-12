@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * XFree86 Xv DDX written by Mark Vojkovich (markv@valinux.com)
  */

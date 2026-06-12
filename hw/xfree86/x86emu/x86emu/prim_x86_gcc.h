@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /****************************************************************************
 *
 * Inline helpers for x86emu

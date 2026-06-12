@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright © 2013-2017 Red Hat, Inc.
  * Copyright © 2020 Povilas Kanapickas <povilas@radix.lt>

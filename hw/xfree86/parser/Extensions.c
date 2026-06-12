@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Copyright 2004 Red Hat Inc., Raleigh, North Carolina.
  *

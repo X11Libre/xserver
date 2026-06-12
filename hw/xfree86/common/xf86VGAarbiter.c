@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * This code was stolen from RAC and adapted to control the legacy vga
  * interface.

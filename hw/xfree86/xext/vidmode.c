@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
 
 Copyright 1995  Kaleb S. KEITHLEY
