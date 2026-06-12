@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Copyright (c) 2010-2014 Colin Harrison All Rights Reserved.
  *

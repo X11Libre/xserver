@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * File: glshim.c
  * Purpose: GL shim which redirects to a specified DLL

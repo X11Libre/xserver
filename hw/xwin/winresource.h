@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #if !defined(WINRESOURCE_H)
 #define WINRESOURCE_H
 /*

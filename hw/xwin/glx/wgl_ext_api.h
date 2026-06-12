@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * File: wgl_ext_api.h
  * Purpose: Wrapper functions for Win32 OpenGL wgl extension functions

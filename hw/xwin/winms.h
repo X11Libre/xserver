@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef _WINMS_H_
 #define _WINMS_H_
 /*

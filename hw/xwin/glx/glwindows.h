@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * File: glwindows.h
  * Purpose: Header for GLX implementation using native Windows OpenGL library
