@@ -69,7 +69,7 @@ winInfoRec g_winInfo = {
      50}
 };
 
-#define NULL_IF_EMPTY(x) (winNameCompare(x,"")?x:NULL)
+#define NULL_IF_EMPTY(x) (winNameCompare((x),"")?(x):NULL)
 
 /* load layout definitions */
 #include "winlayouts.h"

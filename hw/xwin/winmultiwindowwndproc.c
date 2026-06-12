@@ -65,7 +65,7 @@ static UINT_PTR g_uipMousePollingTimerID = 0;
 /*
  * ConstrainSize - Taken from TWM sources - Respects hints for sizing
  */
-#define makemult(a,b) ((b==1) ? (a) : (((int)((a)/(b))) * (b)) )
+#define makemult(a,b) (((b)==1) ? (a) : (((int)((a)/(b))) * (b)) )
 static void
 ConstrainSize(WinXSizeHints hints, int *widthp, int *heightp)
 {
