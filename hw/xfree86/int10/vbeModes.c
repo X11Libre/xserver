@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #define DEBUG_VERB 2
 /*
  * Copyright © 2002 David Dawes

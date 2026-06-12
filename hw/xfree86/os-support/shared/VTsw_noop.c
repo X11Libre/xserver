@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright 1993 by David Wexelblat <dwex@XFree86.org>
  *

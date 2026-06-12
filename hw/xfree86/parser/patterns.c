@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT or X11
+/* SPDX-License-Identifier: MIT OR X11
  *
  * Copyright (c) 2025 Oleh Nykyforchyn <oleh.nyk@gmail.com>
  *

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* sigio.c -- Support for SIGIO handler installation and removal
  * Created: Thu Jun  3 15:39:18 1999 by faith@precisioninsight.com
  *

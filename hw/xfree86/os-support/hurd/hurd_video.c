@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright 1997, 1998 by UCHIYAMA Yasushi
  *

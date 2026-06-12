@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* Based on hw/xfree86/os-support/bsd/bsd_apm.c which bore no explicit
  * copyright notice, so is covered by the following notice:
  *

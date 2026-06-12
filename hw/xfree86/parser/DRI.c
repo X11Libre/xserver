@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /* DRI.c -- DRI Section in XF86Config file
  * Created: Fri Mar 19 08:40:22 1999 by faith@precisioninsight.com
  * Revised: Thu Jun 17 16:08:05 1999 by faith@precisioninsight.com

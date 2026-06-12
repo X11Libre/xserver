@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Copyright (c) 1997-2001 by The XFree86 Project, Inc.
  *

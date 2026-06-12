@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Copyright 2003 by David H. Dawes.
  * Copyright 2003 by X-Oz Technologies.

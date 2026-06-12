@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Loosely based on code bearing the following copyright:
  *

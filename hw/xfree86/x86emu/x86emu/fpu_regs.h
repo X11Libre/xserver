@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /****************************************************************************
 *
 *						Realmode X86 Emulator Library

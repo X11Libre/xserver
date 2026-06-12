@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
 /*
  * gtf.c  Generate mode timings using the GTF Timing Standard
  *

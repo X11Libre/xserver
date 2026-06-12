@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Abstraction of the AGP GART interface.
  *

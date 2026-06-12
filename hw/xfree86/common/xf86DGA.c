@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /*
  * Copyright (c) 1995  Jon Tombs
  * Copyright (c) 1995, 1996, 1999  XFree86 Inc
