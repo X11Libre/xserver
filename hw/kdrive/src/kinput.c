@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: HPND-sell-variant */
 /*
  * Copyright © 1999 Keith Packard
  * Copyright © 2006 Nokia Corporation
