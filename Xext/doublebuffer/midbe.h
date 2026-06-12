@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /******************************************************************************
  * Copyright (c) 1994, 1995  Hewlett-Packard Company
  *
