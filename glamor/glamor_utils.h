@@ -45,7 +45,7 @@
 #define pixmap_priv_get_dest_scale(pixmap, _pixmap_priv_, _pxscale_, _pyscale_) \
   do {                                                                   \
     int _w_,_h_;                                                         \
-    PIXMAP_PRIV_GET_ACTUAL_SIZE(pixmap, _pixmap_priv_, _w_, _h_);        \
+    PIXMAP_PRIV_GET_ACTUAL_SIZE((pixmap), (_pixmap_priv_), _w_, _h_);        \
     *(_pxscale_) = 1.0 / _w_;                                            \
     *(_pyscale_) = 1.0 / _h_;                                            \
    } while(0)
@@ -58,28 +58,28 @@
 
 #define PIXMAP_PRIV_GET_ACTUAL_SIZE(pixmap, priv, w, h)          \
   do {								\
-	if (_X_UNLIKELY(glamor_pixmap_priv_is_large(priv))) {	\
-		w = priv->box.x2 - priv->box.x1;	\
-		h = priv->box.y2 - priv->box.y1;	\
+	if (_X_UNLIKELY(glamor_pixmap_priv_is_large((priv)))) {	\
+		(w) = (priv)->box.x2 - (priv)->box.x1;	\
+		(h) = (priv)->box.y2 - (priv)->box.y1;	\
 	} else {						\
-		w = (pixmap)->drawable.width;		\
-		h = (pixmap)->drawable.height;		\
+		(w) = (pixmap)->drawable.width;		\
+		(h) = (pixmap)->drawable.height;		\
 	}							\
   } while(0)
 
 #define glamor_pixmap_fbo_fix_wh_ratio(wh, pixmap, priv)         \
   do {								\
 	int actual_w, actual_h;					\
-	PIXMAP_PRIV_GET_ACTUAL_SIZE(pixmap, priv, actual_w, actual_h);	\
-	wh[0] = (float)priv->fbo->width / actual_w;	\
-	wh[1] = (float)priv->fbo->height / actual_h;	\
-	wh[2] = 1.0 / priv->fbo->width;			\
-	wh[3] = 1.0 / priv->fbo->height;			\
+	PIXMAP_PRIV_GET_ACTUAL_SIZE((pixmap), (priv), actual_w, actual_h);	\
+	(wh)[0] = (float)(priv)->fbo->width / actual_w;	\
+	(wh)[1] = (float)(priv)->fbo->height / actual_h;	\
+	(wh)[2] = 1.0 / (priv)->fbo->width;			\
+	(wh)[3] = 1.0 / (priv)->fbo->height;			\
   } while(0)
 
 #define pixmap_priv_get_fbo_off(_priv_, _xoff_, _yoff_)		\
    do {								\
-        if (_X_UNLIKELY(_priv_ && glamor_pixmap_priv_is_large(_priv_))) { \
+        if (_X_UNLIKELY((_priv_) && glamor_pixmap_priv_is_large((_priv_)))) { \
 		*(_xoff_) = - (_priv_)->box.x1;	\
 		*(_yoff_) = - (_priv_)->box.y1;	\
 	} else {						\
@@ -88,8 +88,8 @@
 	}							\
    } while(0)
 
-#define xFixedToFloat(_val_) ((float)xFixedToInt(_val_)			\
-			      + ((float)xFixedFrac(_val_) / 65536.0))
+#define xFixedToFloat(_val_) ((float)xFixedToInt((_val_))			\
+			      + ((float)xFixedFrac((_val_)) / 65536.0))
 
 #define glamor_picture_get_matrixf(_picture_, _matrix_)			\
   do {									\
@@ -108,10 +108,10 @@
       }									\
   }  while(0)
 
-#define fmod(x, w)		(x - w * floor((float)x/w))
+#define fmod(x, w)		((x) - (w) * floor((float)(x)/(w)))
 
-#define fmodulus(x, w, c)	do {c = fmod(x, w);		\
-				    c = c >= 0 ? c : c + w;}	\
+#define fmodulus(x, w, c)	do {(c) = fmod((x), (w));		\
+				    (c) = (c) >= 0 ? (c) : (c) + (w);}	\
 				while(0)
 /* @x: is current coord
  * @x2: is the right/bottom edge
@@ -122,13 +122,13 @@
 #define fodd_repeat_mod(x, x2, w, odd, c)	\
   do {						\
 	float shift;				\
-	fmodulus((x), w, c); 			\
+	fmodulus((x), (w), (c)); 			\
 	shift = fabs((x) - (c));		\
-	shift = floor(fabs(round(shift)) / w);	\
-	odd = (int)shift & 1;			\
-	if (odd && (((x2 % w) == 0) &&		\
-	    round(fabs(x)) == x2))		\
-		odd = 0;			\
+	shift = floor(fabs(round(shift)) / (w));	\
+	(odd) = (int)shift & 1;			\
+	if ((odd) && ((((x2) % (w)) == 0) &&		\
+	    round(fabs((x))) == (x2)))		\
+		(odd) = 0;			\
   } while(0)
 
 /* @txy: output value, is the corrected coords.
@@ -305,8 +305,8 @@
       _result_[_i_] = (matrix)[_i_ * 3] * (x) + (matrix)[_i_ * 3 + 1] * (y)	\
 	+ (matrix)[_i_ * 3 + 2];					\
     }									\
-    tx = _result_[0] / _result_[2];					\
-    ty = _result_[1] / _result_[2];					\
+    (tx) = _result_[0] / _result_[2];					\
+    (ty) = _result_[1] / _result_[2];					\
   } while(0)
 
 #define _glamor_set_normalize_tpoint(xscale, yscale, _tx_, _ty_,	\
@@ -571,8 +571,8 @@
 #define MAX(a,b)	((a) > (b) ? (a) : (b))
 
 #define glamor_check_fbo_size(_glamor_,_w_, _h_)    ((_w_) > 0 && (_h_) > 0 \
-                                                    && (_w_) <= _glamor_->max_fbo_size  \
-                                                    && (_h_) <= _glamor_->max_fbo_size)
+                                                    && (_w_) <= (_glamor_)->max_fbo_size  \
+                                                    && (_h_) <= (_glamor_)->max_fbo_size)
 
 static inline Bool GLAMOR_PIXMAP_PRIV_HAS_FBO(glamor_pixmap_private *pixmap_priv) {
     BUG_RETURN_VAL(!pixmap_priv, FALSE);
@@ -627,7 +627,7 @@ glamor_get_rgba_from_pixel(CARD32 pixel,
         return FALSE;
     }
 #define COLOR_INT_TO_FLOAT(_fc_, _p_, _s_, _bits_)	\
-  *_fc_ = (((_p_) >> (_s_)) & (( 1 << (_bits_)) - 1))	\
+  *(_fc_) = (((_p_) >> (_s_)) & (( 1 << (_bits_)) - 1))	\
     / (float)((1<<(_bits_)) - 1)
 
     if (rbits)

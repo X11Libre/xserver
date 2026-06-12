@@ -42,7 +42,7 @@
 #include "fbpict.h"
 #if 0
 //#define DEBUGF(str, ...)  do {} while(0)
-#define DEBUGF(str, ...) ErrorF(str, ##__VA_ARGS__)
+#define DEBUGF(str, ...) ErrorF((str), ##__VA_ARGS__)
 //#define DEBUGRegionPrint(x) do {} while (0)
 #define DEBUGRegionPrint RegionPrint
 #endif
