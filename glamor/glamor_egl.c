@@ -1457,14 +1457,17 @@ glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
     struct glamor_pixmap_private *back_priv =
         glamor_get_pixmap_private(back);
 
+    BUG_RETURN(!back_priv);
+    BUG_RETURN(!front_priv);
+
     glamor_pixmap_exchange_fbos(front, back);
 
     temp_img = back_priv->image;
     temp_mod = back_priv->used_modifiers;
-    BUG_RETURN(!back_priv);
+
     back_priv->image = front_priv->image;
     back_priv->used_modifiers = front_priv->used_modifiers;
-    BUG_RETURN(!front_priv);
+
     front_priv->image = temp_img;
     front_priv->used_modifiers = temp_mod;
 
