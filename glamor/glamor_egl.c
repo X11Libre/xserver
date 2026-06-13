@@ -433,6 +433,8 @@ glamor_egl_make_pixmap_exportable2(PixmapPtr pixmap, Bool used_modifiers)
     struct glamor_pixmap_private *pixmap_priv =
         glamor_get_pixmap_private(pixmap);
 
+    BUG_RETURN_VAL(!pixmap_priv, FALSE);
+
     if (pixmap_priv->image != EGL_NO_IMAGE_KHR) {
         return TRUE;
     }
