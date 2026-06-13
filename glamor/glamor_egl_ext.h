@@ -28,6 +28,18 @@
 #ifndef GLAMOR_EGL_EXT_H
 #define GLAMOR_EGL_EXT_H
 
+#if !defined(EGL_EXT_device_base) && \
+    !defined(EGL_EXT_device_enumeration) && \
+    !defined(EGL_EXT_device_query)
+typedef void *EGLDeviceEXT;
+#ifndef EGL_NO_DEVICE_EXT
+#define EGL_NO_DEVICE_EXT                                    ((EGLDeviceEXT)0)
+#endif
+#ifndef EGL_PLATFORM_DEVICE_EXT
+#define EGL_PLATFORM_DEVICE_EXT                              0x313F
+#endif
+#endif
+
 /* Define needed tokens from EGL_EXT_image_dma_buf_import extension
  * here to avoid having to add ifdefs everywhere.*/
 #ifndef EGL_EXT_image_dma_buf_import

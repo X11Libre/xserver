@@ -1738,6 +1738,7 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 static Bool
 glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
 {
+#if defined(EGL_EXT_device_base) || defined(EGL_EXT_device_enumeration)
     EGLint max_devices = 0;
 
     *devices = NULL;
@@ -1774,6 +1775,9 @@ glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
     }
 
     return TRUE;
+#else
+    return FALSE;
+#endif
 }
 
 static inline Bool
@@ -1810,7 +1814,10 @@ glamor_egl_render_node_from_fd(int fd)
 static inline int
 glamor_egl_device_get_fd(EGLDeviceEXT device)
 {
-    const char *dev_file = eglQueryDeviceStringEXT(device, EGL_DRM_DEVICE_FILE_EXT);
+    const char *dev_file = NULL;
+#ifdef EGL_EXT_device_drm
+    dev_file = eglQueryDeviceStringEXT(device, EGL_DRM_DEVICE_FILE_EXT);
+#endif
     return dev_file ? open(dev_file, O_RDWR) : -1;
 }
 
@@ -1880,6 +1887,7 @@ glamor_egl_device_get_name(EGLDeviceEXT device)
 #define EGL_RENDERER_EXT 0x335F
 #endif
 
+#if defined(EGL_EXT_device_base) || defined(EGL_EXT_device_query)
     const char *dev_ext = eglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
 
     const char *driver_name = epoxy_extension_in_string(dev_ext, "EGL_EXT_device_persistent_id") ?
@@ -1900,7 +1908,7 @@ glamor_egl_device_get_name(EGLDeviceEXT device)
             return strstr(egl_vendor, "NVIDIA") ? "nvidia" : "mesa";
         }
     }
-
+#endif
     return NULL;
 }
 
