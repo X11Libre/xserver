@@ -46,7 +46,6 @@
 
 /* Define tokens from EGL_EXT_image_dma_buf_import_modifiers */
 #ifndef EGL_EXT_image_dma_buf_import_modifiers
-#define EGL_EXT_image_dma_buf_import_modifiers 1
 #define EGL_DMA_BUF_PLANE3_FD_EXT         0x3440
 #define EGL_DMA_BUF_PLANE3_OFFSET_EXT     0x3441
 #define EGL_DMA_BUF_PLANE3_PITCH_EXT      0x3442

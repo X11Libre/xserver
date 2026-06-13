@@ -418,7 +418,7 @@ glamor_egl_image_from_dma_bufs(ScreenPtr screen,
                              img_attrs);
 }
 
-#ifdef GLAMOR_HAS_EXPORT_DMABUF_MESA
+#ifdef EGL_MESA_image_dma_buf_export
 static EGLImageKHR
 glamor_egl_image_from_pixmap(PixmapPtr pixmap)
 {
@@ -818,7 +818,7 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
     ret = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
                         pixmap_priv->image, GBM_BO_USE_RENDERING);
 
-#ifdef GLAMOR_HAS_EXPORT_DMABUF_MESA
+#ifdef EGL_MESA_image_dma_buf_export
     if (ret || !glamor_egl->has_image_dma_buf_export) {
         return ret;
     }
@@ -972,7 +972,7 @@ glamor_egl_fds_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap, int *fds,
                                 uint32_t *strides, uint32_t *offsets,
                                 uint64_t *modifier)
 {
-#ifdef GLAMOR_HAS_EXPORT_DMABUF_MESA
+#ifdef EGL_MESA_image_dma_buf_export
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
     struct glamor_pixmap_private *pixmap_priv =
@@ -1293,7 +1293,7 @@ static Bool
 glamor_get_formats_internal(glamor_egl_priv_t *glamor_egl,
                             CARD32 *num_formats, CARD32 **formats)
 {
-#ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
+#ifdef EGL_EXT_image_dma_buf_import_modifiers
     EGLint num;
 #else
     (void)glamor_egl;
@@ -1302,7 +1302,7 @@ glamor_get_formats_internal(glamor_egl_priv_t *glamor_egl,
     /* Explicitly zero the count and formats as the caller may ignore the return value */
     *num_formats = 0;
     *formats = NULL;
-#ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
+#ifdef EGL_EXT_image_dma_buf_import_modifiers
     if (!glamor_egl->dmabuf_capable)
         return TRUE;
 
@@ -1372,7 +1372,7 @@ static Bool
 glamor_get_modifiers_internal(glamor_egl_priv_t *glamor_egl, uint32_t format,
                               uint32_t *num_modifiers, uint64_t **modifiers)
 {
-#ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
+#ifdef EGL_EXT_image_dma_buf_import_modifiers
     EGLBoolean *external_only;
     EGLint num;
 #else
@@ -1382,7 +1382,7 @@ glamor_get_modifiers_internal(glamor_egl_priv_t *glamor_egl, uint32_t format,
     /* Explicitly zero the count and modifiers as the caller may ignore the return value */
     *num_modifiers = 0;
     *modifiers = NULL;
-#ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
+#ifdef EGL_EXT_image_dma_buf_import_modifiers
     if (!glamor_egl->dmabuf_capable)
         return FALSE;
 
@@ -1440,7 +1440,7 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
 const char *
 glamor_egl_get_driver_name(ScreenPtr screen)
 {
-#ifdef GLAMOR_HAS_EGL_QUERY_DRIVER
+#ifdef EGL_MESA_query_driver
     glamor_egl_priv_t *glamor_egl;
 
     glamor_egl = glamor_egl_get_screen_private(screen);
@@ -2634,7 +2634,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         glamor_dri3_info.pixmap_from_fds = NULL;
     }
 
-#if defined(GLAMOR_HAS_GBM) && defined(GLAMOR_HAS_EXPORT_DMABUF_MESA)
+#if defined(GLAMOR_HAS_GBM) && defined(EGL_MESA_image_dma_buf_export)
     glamor_egl->has_image_dma_buf_export = epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export");
 #endif
 

@@ -34,7 +34,7 @@ typedef struct glamor_egl_screen_private {
     struct gbm_device *gbm;
     int fast_gbm_import;
     int can_texture_gbm_bo;
-#ifdef GLAMOR_HAS_EXPORT_DMABUF_MESA
+#ifdef EGL_MESA_image_dma_buf_export
     int has_image_dma_buf_export;
 #endif
 #endif
