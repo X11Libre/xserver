@@ -25,6 +25,16 @@ srcs_os = [
     'log.c',
 ]
 
+os_dep = []
+
+isolate_sockets = false
+if isolate_sockets and cc.has_header('linux/seccomp.h')
+    srcs_os += 'seccomp.c'
+    conf_data.set('HAVE_SECCOMP', 1)
+else
+    conf_data.set('HAVE_SECCOMP', false)
+endif
+
 conf_data.set('CONFIG_SYSLOG', cc.has_header('syslog.h') ? '1' : false)
 
 have_strlcpy = cc.has_function('strlcpy', dependencies: libbsd_dep)
@@ -65,7 +75,6 @@ if build_xdmcp
     srcs_os += 'xdmcp.c'
 endif
 
-os_dep = []
 os_c_args = []
 
 # eg. struct msghdr -> msg_control 
