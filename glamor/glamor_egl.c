@@ -665,6 +665,10 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
         return FALSE;
     }
 
+    /**
+     * Now that DRI3 has been decoupled from glamor, the (indirect) callers of this
+     * (e.g. modesetting's pageflip code) usually expect buffers that can be scanned out.
+     */
 #ifdef GBM_BO_WITH_MODIFIERS
     if (modifiers_ok && glamor_egl->dmabuf_capable) {
         uint32_t num_modifiers;
@@ -676,20 +680,20 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 
         if (num_modifiers > 0) {
 #ifdef GBM_BO_WITH_MODIFIERS2
-            /* TODO: Is scanout ever used? If so, where? */
             bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
                                                format, modifiers, num_modifiers,
                                                GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
             if (!bo) {
-                /* something failed, try again without GBM_BO_USE_SCANOUT */
-                /* maybe scanout does work, but modifiers aren't supported */
-                /* we handle this case on the fallback path */
+                /* Try allocating a buffer that cannot be scanned out */
                 bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
                                                    format, modifiers, num_modifiers,
                                                    GBM_BO_USE_RENDERING);
 #if 0
                 if (bo) {
-                    /* TODO: scanout failed, but regular buffer succeeded, maybe log something? */
+                    /**
+                     * This probably means that the combination of format, modifiers,
+                     * and size cannot be used for scanout.
+                     */
                 }
 #endif
             }
@@ -706,7 +710,6 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 
     if (!bo)
     {
-        /* TODO: Is scanout ever used? If so, where? */
         bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
 #ifdef GBM_BO_USE_LINEAR
                 (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
@@ -714,7 +717,7 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 #endif
                 GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
         if (!bo) {
-            /* something failed, try again without GBM_BO_USE_SCANOUT */
+            /* Try allocating a buffer that cannot be scanned out */
             bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
 #ifdef GBM_BO_USE_LINEAR
                     (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
@@ -723,7 +726,10 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
                      GBM_BO_USE_RENDERING);
 #if 0
             if (bo) {
-                /* TODO: scanout failed, but regular buffer succeeded, maybe log something? */
+                /**
+                 * I don't think we can ever hit this.
+                 * Maybe we're out of video memory that can be scanned out?
+                 */
             }
 #endif
         }
