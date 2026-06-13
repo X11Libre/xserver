@@ -2144,6 +2144,7 @@ glamor_egl_try_big_gl_api(glamor_egl_priv_t *glamor_egl)
     if (epoxy_gl_version() < 21) {
         LogMessage(X_INFO, "glamor: Ignoring GL < 2.1, falling back to GLES.\n");
 
+        eglMakeCurrent(glamor_egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         eglDestroyContext(glamor_egl->display, glamor_egl->context);
         glamor_egl->context = EGL_NO_CONTEXT;
         return FALSE;
