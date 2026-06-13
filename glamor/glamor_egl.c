@@ -68,7 +68,7 @@
 #endif
 
 /**
- * EGLDeviceEXT's are internally stored as a globals.
+ * EGLDeviceEXT's are internally stored as globals.
  * As such, when multiple screens query the same device,
  * they end up with the same exact pointer value for the device.
  *
@@ -76,7 +76,7 @@
  * same EGLDisplay handle.
  *
  * This is a problem, because on teardown, each screen
- * destroys it's EGLDevice, and since it can be shared by
+ * destroys its EGLDisplay, and since it can be shared by
  * multiple screens, we risk destroying the display from under it.
  *
  * See: https://github.com/X11Libre/xserver/pull/2721
@@ -263,8 +263,8 @@ glamor_egl_set_pixmap_image(PixmapPtr pixmap, EGLImageKHR image,
 
     old = pixmap_priv->image;
     if (old) {
-        ScreenPtr                               screen = pixmap->drawable.pScreen;
-        glamor_egl_priv_t        *glamor_egl = glamor_egl_get_screen_private(screen);
+        ScreenPtr screen = pixmap->drawable.pScreen;
+        glamor_egl_priv_t *glamor_egl = glamor_egl_get_screen_private(screen);
 
         eglDestroyImageKHR(glamor_egl->display, old);
     }
@@ -855,7 +855,7 @@ glamor_gbm_bo_from_pixmap(ScreenPtr screen, PixmapPtr pixmap)
  *
  * During normal operation, all pixmaps created by glamor
  * are textured. Unless we've run out of video memory,
- * the only unxtured pixmaps we can have are the root
+ * the only untextured pixmaps we can have are the root
  * pixmaps for each screen.
  * (The root pixmaps can be textured, but they don't have to be)
  *
@@ -1758,7 +1758,7 @@ static inline Bool
 glamor_egl_fd_is_render_node(int fd)
 {
     struct stat buf;
-    if(fstat(fd, &buf) < 0) {
+    if (fstat(fd, &buf) < 0) {
         return FALSE;
     }
 
@@ -1819,14 +1819,14 @@ glamor_egl_device_matches_fd(EGLDeviceEXT device, int fd)
      * The st_ino and st_dev fields taken together uniquely identify the file within the system.
      */
     struct stat stat1, stat2;
-    if(fstat(dev_fd, &stat2) < 0) {
+    if (fstat(dev_fd, &stat2) < 0) {
         close(dev_fd);
         return FALSE;
     }
 
     close(dev_fd);
 
-    if(fstat(fd, &stat1) < 0) {
+    if (fstat(fd, &stat1) < 0) {
         return FALSE;
     }
 
@@ -1920,7 +1920,7 @@ glamor_egl_device_matches_config(EGLDeviceEXT device,
      * If we're trying to do direct rendering,
      * we can't have a mismatch between the gpu and the device we pick
      *
-     * If not, we don't have any strict requirements for out device
+     * If not, we don't have any strict requirements for our device
      */
     if (glamor_egl->fd >= 0 &&
         !glamor_egl_device_matches_fd(device, glamor_egl->fd)) {
@@ -2024,8 +2024,8 @@ void glamor_egl_cleanup_screen(ScreenPtr screen)
 }
 
 static void
-glamor_egl_chose_configs(EGLDisplay display, const EGLint *attrib_list,
-                         EGLConfig **configs, EGLint *num_configs)
+glamor_egl_choose_configs(EGLDisplay display, const EGLint *attrib_list,
+                          EGLConfig **configs, EGLint *num_configs)
 {
     EGLint max_configs = 0;
     *configs = NULL;
@@ -2067,8 +2067,8 @@ glamor_egl_create_context(EGLDisplay display,
             return ctx;
         }
     }
-    glamor_egl_chose_configs(display, config_attrib_list,
-                             &configs, &num_configs);
+    glamor_egl_choose_configs(display, config_attrib_list,
+                              &configs, &num_configs);
     for (int i = 0; i < num_configs; i++) {
         for (int j = 0; j < num_attr_lists; j++) {
             ctx = eglCreateContext(display, configs[i],
@@ -2321,13 +2321,13 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl, int *dri_fd, int *out_pla
     driver_name = NULL;
 
     /**
-     * We only try these falbacks if we don't have an fd passed, since we
+     * We only try these fallbacks if we don't have an fd passed, since we
      * have to do some guessing anyway to find the desired gpu.
      *
      * Trying these in multi-card setups risks a screen driven by one card
-     * being mapped a, EGLDisplay backed by a different card, which can break.
+     * being mapped an EGLDisplay backed by a different card, which can break.
      *
-     * We actualy can specify the device using EGL_EXT_explicit_device:
+     * We actually can specify the device using EGL_EXT_explicit_device:
      * https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_explicit_device.txt
      *
      * However, it doesn't seem worth it to implement this fallback, given
@@ -2592,7 +2592,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
      */
     lastGLContext = NULL;
 
-    /* XXX From here on, glamor initalization should not fail completely XXX */
+    /* XXX From here on, glamor initialization should not fail completely XXX */
 
     if (glamor_egl->fd < 0) {
         goto glamor_no_dri;
