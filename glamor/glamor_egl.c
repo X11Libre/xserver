@@ -320,7 +320,7 @@ glamor_egl_image_from_dma_bufs(ScreenPtr screen,
     struct glamor_screen_private *glamor_priv =
         glamor_get_screen_private(screen);
     glamor_egl_priv_t *glamor_egl =
-        glamor_egl = glamor_egl_get_screen_private(screen);
+        glamor_egl_get_screen_private(screen);
 
     int plane;
     int attr_num = 0;
@@ -455,7 +455,7 @@ static EGLImageKHR
 glamor_egl_image_from_gbm_bo(ScreenPtr screen, struct gbm_bo *bo)
 {
     glamor_egl_priv_t *glamor_egl =
-        glamor_egl = glamor_egl_get_screen_private(screen);
+        glamor_egl_get_screen_private(screen);
 
     Bool tried_fast_import = FALSE;
 
