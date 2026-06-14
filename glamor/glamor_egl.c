@@ -843,7 +843,7 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
     };
 /* If the spec somehow changes in the future */
 #if GBM_MAX_PLANES != 4
-    memset(fd_modifier_data.fds, -1, sizeof(fd_modifier_data));
+    memset(fd_modifier_data.fds, -1, sizeof(fd_modifier_data.fds));
 #endif
     if (eglExportDMABUFImageMESA(glamor_egl->display, pixmap_priv->image,
                                  fd_modifier_data.fds,
