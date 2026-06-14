@@ -382,6 +382,10 @@ glamor_egl_image_from_dma_bufs(ScreenPtr screen,
         },
     };
 
+    if (num_fds > GBM_MAX_PLANES) {
+        return EGL_NO_IMAGE_KHR;
+    }
+
     glamor_make_current(glamor_priv);
 
 #define ADD_ATTR(attrs, num, attr)                                      \
