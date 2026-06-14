@@ -28,6 +28,18 @@
 #ifndef GLAMOR_EGL_EXT_H
 #define GLAMOR_EGL_EXT_H
 
+#if !defined(EGL_EXT_device_base) && \
+    !defined(EGL_EXT_device_enumeration) && \
+    !defined(EGL_EXT_device_query)
+typedef void *EGLDeviceEXT;
+#ifndef EGL_NO_DEVICE_EXT
+#define EGL_NO_DEVICE_EXT                                    ((EGLDeviceEXT)0)
+#endif
+#ifndef EGL_PLATFORM_DEVICE_EXT
+#define EGL_PLATFORM_DEVICE_EXT                              0x313F
+#endif
+#endif
+
 /* Define needed tokens from EGL_EXT_image_dma_buf_import extension
  * here to avoid having to add ifdefs everywhere.*/
 #ifndef EGL_EXT_image_dma_buf_import
@@ -46,7 +58,6 @@
 
 /* Define tokens from EGL_EXT_image_dma_buf_import_modifiers */
 #ifndef EGL_EXT_image_dma_buf_import_modifiers
-#define EGL_EXT_image_dma_buf_import_modifiers 1
 #define EGL_DMA_BUF_PLANE3_FD_EXT         0x3440
 #define EGL_DMA_BUF_PLANE3_OFFSET_EXT     0x3441
 #define EGL_DMA_BUF_PLANE3_PITCH_EXT      0x3442

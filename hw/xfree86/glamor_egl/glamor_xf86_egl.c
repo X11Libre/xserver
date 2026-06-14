@@ -59,8 +59,8 @@ _glamor_egl_init(ScrnInfoPtr scrn, int fd, int *caps)
     glamor_egl_priv_t *glamor_egl;
     OptionInfoPtr options;
     const char *api = NULL;
-    const char *glvnd_vendor = NULL;
     glamor_egl_conf_t glamor_egl_conf = {.fd = fd};
+    Bool ret;
 
     glamor_egl = calloc(1, sizeof(*glamor_egl));
     if (glamor_egl == NULL)
@@ -74,19 +74,12 @@ _glamor_egl_init(ScrnInfoPtr scrn, int fd, int *caps)
     options = XNFalloc(sizeof(GlamorEGLOptions));
     memcpy(options, GlamorEGLOptions, sizeof(GlamorEGLOptions));
     xf86ProcessOptions(scrn->scrnIndex, scrn->options, options);
-    glvnd_vendor = xf86GetOptValString(options, GLAMOREGLOPT_VENDOR_LIBRARY);
-    if (glvnd_vendor) {
-        glamor_egl_conf.glvnd_vendor = strdup(glvnd_vendor);
-        if (!glamor_egl_conf.glvnd_vendor) {
-            LogMessage(X_WARNING, "Couldn't set gl vendor to: %s\n", glvnd_vendor);
-        }
-    }
+    glamor_egl_conf.glvnd_vendor = xf86GetOptValString(options, GLAMOREGLOPT_VENDOR_LIBRARY);
     api = xf86GetOptValString(options, GLAMOREGLOPT_RENDERING_API);
     if (api && !strncasecmp(api, "es", 2))
         glamor_egl_conf.force_es = TRUE;
     else if (api && !strncasecmp(api, "gl", 2))
         glamor_egl_conf.es_disallowed = TRUE;
-    free(options);
 
     glamor_egl_conf.GLAMOR_EGL_PRIV_PROC = glamor_xf86_egl_get_screen_private;
 
@@ -102,7 +95,9 @@ _glamor_egl_init(ScrnInfoPtr scrn, int fd, int *caps)
 
     glamor_egl_conf.server_private = scrn->FreeScreen;
 
-    if (glamor_egl_init_internal(&glamor_egl_conf, caps)) {
+    ret = glamor_egl_init_internal(&glamor_egl_conf, caps);
+    free(options);
+    if (ret) {
         scrn->FreeScreen = glamor_xf86_egl_free_screen;
         return TRUE;
     }

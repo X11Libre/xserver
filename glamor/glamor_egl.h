@@ -52,7 +52,7 @@ typedef struct {
     /* Optional 2 function that maps a glamor_egl_priv_t to each screen*/
     glamor_egl_priv_t* (*GLAMOR_EGL_PRIV_PROC)(ScreenPtr screen);
 
-    char *glvnd_vendor; /* glvnd vendor library or driver name */
+    const char *glvnd_vendor; /* glvnd vendor library or driver name */
     int fd; /* /dev/dri/cardxx */
     int gbm_forbidden; /* If glamor should not use libgbm, even if available */
 
