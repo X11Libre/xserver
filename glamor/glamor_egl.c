@@ -259,6 +259,12 @@ glamor_create_texture_from_image(ScreenPtr screen,
         return FALSE;
     }
 
+    if (glGetError() != GL_NO_ERROR) {
+        glDeleteTextures(1, texture);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return FALSE;
+    }
+
     glBindTexture(GL_TEXTURE_2D, 0);
     return TRUE;
 }
