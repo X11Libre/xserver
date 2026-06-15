@@ -1922,10 +1922,23 @@ SetMaster(ScrnInfoPtr pScrn)
     if (ms->fd_passed)
         return TRUE;
 
+    int n_repeats = 5;
+    useconds_t wait_time = 100000;
+
+    /* drmSetMaster can fail with EBUSY we should repeat few times before giving up */
+    repeat_setmaster:
     ret = drmSetMaster(ms->fd);
-    if (ret)
+    if (ret) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "drmSetMaster failed: %s\n",
                    strerror(errno));
+        if ((errno == EBUSY) && (n_repeats > 0)){ /* here live dragons */
+            xf86DrvMsg(pScrn->scrnIndex,X_ERROR,"repeating drmSetMaster, after %u uS\n",wait_time);
+            usleep(wait_time);
+            wait_time+=100000; /* exponential backoff */
+            n_repeats--;
+            goto repeat_setmaster;
+        }
+    }
 
     return ret == 0;
 }
