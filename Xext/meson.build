@@ -10,7 +10,7 @@ srcs_xext = [
 ]
 
 if build_dpms
-    srcs_xext += 'dpms.c'
+    srcs_xext += 'dpms/dpms.c'
 endif
 
 if build_mitshm

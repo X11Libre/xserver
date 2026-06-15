@@ -14,7 +14,7 @@
  *
  * Timeout variables (DPMSStandbyTime, DPMSSuspendTime, DPMSOffTime)
  * are in milliseconds.  They are initialised to ~0 (UINT32_MAX) in
- * Xext/dpms.c, which the extension treats as "use ScreenSaverTime".
+ * Xext/dpms/dpms.c, which the extension treats as "use ScreenSaverTime".
  * The DDX may override them during InitOutput (e.g. xf86Config.c
  * reads them from the command line / config file and converts from
  * minutes to milliseconds).
