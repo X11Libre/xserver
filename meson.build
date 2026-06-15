@@ -116,7 +116,7 @@ xineramaproto_dep = dependency('xineramaproto', fallback: ['xorgproto', 'ext_xor
 xf86vidmodeproto_dep = dependency('xf86vidmodeproto', version: '>= 2.2.99.1', fallback: ['xorgproto', 'ext_xorgproto'])
 applewmproto_dep = dependency('applewmproto', version: '>= 1.4', fallback: ['xorgproto', 'ext_xorgproto'], required: false)
 xshmfence_dep = dependency('xshmfence', version: xshmfence_req, required: false)
-dpmsproto_dep = dependency('dpmsproto', version: '>= 1.2', required: get_option('dpms'))
+dpmsproto_dep = dependency('dpmsproto', version: '>= 1.2')
 
 pixman_dep = dependency('pixman-1')
 libbsd_dep = dependency('libbsd-overlay', required: false)
@@ -576,11 +576,6 @@ if get_option('vgahw') == 'auto'
     endif
 else
     build_vgahw = get_option('vgahw') == 'true'
-endif
-
-build_dpms = get_option('dpms')
-if build_xquartz
-    build_dpms = false
 endif
 
 build_screensaver = get_option('screensaver')

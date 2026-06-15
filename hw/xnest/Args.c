@@ -57,9 +57,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     noCompositeExtension = TRUE;
 
-#ifdef DPMSExtension
     noDPMSExtension = TRUE;
-#endif
 
     if (!strcmp(argv[i], "-display")) {
         if (++i < argc) {
