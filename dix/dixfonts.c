@@ -627,7 +627,7 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
     int err = Successful;
     FontNamesPtr names = NULL;
     char *name, *resolved = NULL;
-    int namelen, resolvedlen;
+    int namelen, resolvedlen = 0;
     int aliascount = 0;
 
     if (client->clientGone) {
