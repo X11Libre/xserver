@@ -32,6 +32,9 @@
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 
 #include "kdrive.h"
 #include <dixstruct.h>
@@ -47,10 +50,6 @@
 
 #ifdef XV
 #include "kxv.h"
-#endif
-
-#ifdef DPMSExtension
-#include "dpmsproc.h"
 #endif
 
 #ifdef HAVE_EXECINFO_H

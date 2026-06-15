@@ -26,6 +26,9 @@ is" without express or implied warranty.
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 
 #include "screenint.h"
 #include "input.h"
@@ -47,9 +50,6 @@ is" without express or implied warranty.
 #include "Drawable.h"
 #include "XNGC.h"
 #include "XNFont.h"
-#ifdef DPMSExtension
-#include "dpmsproc.h"
-#endif
 
 Bool xnestDoFullGeneration = TRUE;
 

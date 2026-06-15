@@ -104,6 +104,9 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "os/screensaver.h"
 #include "os/serverlock.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 #include "Xext/panoramiXsrv.h"
 
 #include "scrnintstr.h"
@@ -123,7 +126,6 @@ Equipment Corporation.
 
 #ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#include "dpmsproc.h"
 #endif
 
 extern void Dispatch(void);

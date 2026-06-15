@@ -118,6 +118,7 @@ __stdcall unsigned long GetTickCount(void);
 #include "os/serverlock.h"
 #include "os/xhostname.h"
 #include "present/present_priv.h"
+#include "Xext/dpms/dpms_priv.h"
 #include "Xext/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
 #include "xkb/xkbsrv_priv.h"
 
@@ -125,7 +126,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "picture.h"
 #include "miinitext.h"
 #include "dixstruct_priv.h"
-#include "dpmsproc.h"
 
 #define X_INCLUDE_NETDB_H
 #include <X11/Xos_r.h>

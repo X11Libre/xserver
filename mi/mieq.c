@@ -49,9 +49,12 @@ in this Software without prior written authorization from The Open Group.
 #include   "mi/mi_priv.h"
 #include   "mi/mipointer_priv.h"
 #include   "os/bug_priv.h"
-#include   "os/screensaver.h"
+#include "os/screensaver.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 
-#include   "misc.h"
+#include "misc.h"
 #include   "windowstr.h"
 #include   "pixmapstr.h"
 #include   "inputstr.h"
@@ -60,7 +63,6 @@ in this Software without prior written authorization from The Open Group.
 #include   "eventstr.h"
 
 #ifdef DPMSExtension
-#include "dpmsproc.h"
 #include <X11/extensions/dpmsconst.h>
 #endif
 

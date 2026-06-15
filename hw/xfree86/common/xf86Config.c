@@ -55,6 +55,9 @@
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbsrv_priv.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 
 #include "xf86_priv.h"
 #include "xf86Modes.h"
@@ -72,9 +75,6 @@
 #include "xf86Xinput_priv.h"
 
 #include "picture.h"
-#ifdef DPMSExtension
-#include "dpmsproc.h"
-#endif
 
 /*
  * These paths define the way the config file search is done.  The escape

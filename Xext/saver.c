@@ -44,6 +44,9 @@ in this Software without prior written authorization from the X Consortium.
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -61,7 +64,6 @@ in this Software without prior written authorization from the X Consortium.
 #include "inputstr.h"
 #ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#include "dpmsproc.h"
 #endif
 #include "protocol-versions.h"
 

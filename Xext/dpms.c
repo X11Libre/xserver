@@ -39,6 +39,7 @@ Equipment Corporation.
 #include "miext/extinit_priv.h"
 #include "os/screensaver.h"
 #include "os/osdep.h"
+#include "Xext/dpms/dpms_priv.h"
 #include "Xext/geext_priv.h"
 
 #include "misc.h"
@@ -46,7 +47,6 @@ Equipment Corporation.
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "opaque.h"
-#include "dpmsproc.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "protocol-versions.h"

@@ -64,6 +64,9 @@
 #include "hw/xfree86/common/action_priv.h"
 #include "mi/mi_priv.h"
 #include "os/log_priv.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 
 #include "misc.h"
 #include "xf86_priv.h"
@@ -85,7 +88,6 @@
 
 #ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#include "dpmsproc.h"
 #endif
 
 #include "../os-support/linux/systemd-logind.h"

@@ -39,13 +39,13 @@ from The Open Group.
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbsrv_priv.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 
 #include "winmsg.h"
 #include "winconfig.h"
 #include "winprefs.h"
-#ifdef DPMSExtension
-#include "dpmsproc.h"
-#endif
 #ifdef __CYGWIN__
 #include <mntent.h>
 #endif

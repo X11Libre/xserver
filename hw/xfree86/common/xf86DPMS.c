@@ -36,10 +36,15 @@
 #include "xf86.h"
 #include "xf86Priv.h"
 #include "xf86Opt_priv.h"
+
 #ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#include "dpmsproc.h"
 #endif
+
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
+
 #include "xf86VGAarbiter_priv.h"
 
 #ifdef DPMSExtension

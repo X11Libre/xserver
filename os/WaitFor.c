@@ -68,14 +68,14 @@ SOFTWARE.
 #include "os/client_priv.h"
 #include "os/ossock.h"
 #include "os/screensaver.h"
+#ifdef DPMSExtension
+#include "Xext/dpms/dpms_priv.h"
+#endif
 
 #include "misc.h"
 #include "osdep.h"
 #include "dixstruct_priv.h"
 #include "globals.h"
-#ifdef DPMSExtension
-#include "dpmsproc.h"
-#endif
 
 #ifdef WIN32
 /* Error codes from windows sockets differ from fileio error codes  */
