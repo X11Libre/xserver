@@ -238,6 +238,10 @@ glamor_create_texture_from_image(ScreenPtr screen,
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
 
+    if (image == EGL_NO_IMAGE_KHR) {
+        return FALSE;
+    }
+
     glamor_make_current(glamor_priv);
 
     glGenTextures(1, texture);
@@ -569,8 +573,12 @@ glamor_egl_create_textured_pixmap_from_egl_image(PixmapPtr pixmap,
     ScreenPtr screen = pixmap->drawable.pScreen;
     GLuint texture;
 
-    if (image == EGL_NO_IMAGE_KHR ||
-        !glamor_create_texture_from_image(screen, image, &texture)) {
+    if (!glamor_create_texture_from_image(screen, image, &texture)) {
+        if (image != EGL_NO_IMAGE_KHR) {
+            glamor_egl_priv_t *glamor_egl =
+            glamor_egl_get_screen_private(screen);
+            eglDestroyImageKHR(glamor_egl->display, image);
+        }
         glamor_set_pixmap_type(pixmap, GLAMOR_DRM_ONLY);
         return FALSE;
     }
