@@ -37,17 +37,11 @@
 #include "xf86Priv.h"
 #include "xf86Opt_priv.h"
 
-#ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#endif
-
-#ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
-#endif
 
 #include "xf86VGAarbiter_priv.h"
 
-#ifdef DPMSExtension
 static void
 xf86DPMS(ScreenPtr pScreen, int level)
 {
@@ -58,12 +52,10 @@ xf86DPMS(ScreenPtr pScreen, int level)
         xf86VGAarbiterUnlock(pScrn);
     }
 }
-#endif
 
 Bool
 xf86DPMSInit(ScreenPtr pScreen, DPMSSetProcPtr set, int flags)
 {
-#ifdef DPMSExtension
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     void *DPMSOpt;
     MessageType enabled_from = X_DEFAULT;
@@ -85,7 +77,4 @@ xf86DPMSInit(ScreenPtr pScreen, DPMSSetProcPtr set, int flags)
         pScreen->DPMS = xf86DPMS;
     }
     return TRUE;
-#else
-    return FALSE;
-#endif
 }

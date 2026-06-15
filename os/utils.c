@@ -279,9 +279,7 @@ UseMsg(void)
     ErrorF("-core                  generate core dump on fatal error\n");
     ErrorF("-displayfd fd          file descriptor to write display number to when ready to connect\n");
     ErrorF("-dpi int               screen resolution in dots per inch\n");
-#ifdef DPMSExtension
     ErrorF("-dpms                  disables VESA DPMS monitor control\n");
-#endif
     ErrorF
         ("-deferglyphs [none|all|16] defer loading of [no|all|16-bit] glyphs\n");
     ErrorF("-f #                   bell base (0-100)\n");
@@ -513,12 +511,10 @@ ProcessCommandLine(int argc, char *argv[])
             else
                 UseMsg();
         }
-#ifdef DPMSExtension
         else if (strcmp(argv[i], "dpms") == 0)
             /* ignored for compatibility */ ;
         else if (strcmp(argv[i], "-dpms") == 0)
             DPMSDisabledSwitch = TRUE;
-#endif
         else if (strcmp(argv[i], "-deferglyphs") == 0) {
             if (++i >= argc || !xfont2_parse_glyph_caching_mode(argv[i]))
                 UseMsg();

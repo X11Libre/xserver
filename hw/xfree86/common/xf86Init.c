@@ -59,9 +59,7 @@
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
-#ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
-#endif
 #include "Xext/randr/randrstr_priv.h"
 
 #include "servermd.h"
@@ -90,9 +88,7 @@
 #include "globals.h"
 #include "xserver-properties.h"
 
-#ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#endif
 
 #ifdef __linux__
 #include <linux/major.h>
@@ -813,10 +809,9 @@ ddxGiveUp(enum ExitCode error)
         input_lock();
 
         /* try to restore the original video state */
-#ifdef DPMSExtension            /* Turn screens back on */
+        /* Turn screens back on */
         if (DPMSPowerLevel != DPMSModeOn)
             DPMSSet(serverClient, DPMSModeOn);
-#endif
         if (xf86Screens) {
             for (i = 0; i < xf86NumScreens; i++)
                 if (xf86Screens[i]->vtSema) {
