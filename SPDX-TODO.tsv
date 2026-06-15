@@ -1,0 +1,182 @@
+Xext/dpmsproc.h	no recognizable license text
+Xext/dri2/pci_ids/i810_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/i915_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/i965_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/pci_id_driver_map.h	no recognizable license text
+Xext/dri2/pci_ids/pci_id_util.h	no recognizable license text
+Xext/dri2/pci_ids/r200_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/r300_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/r600_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/radeon_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/radeonsi_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/virtio_gpu_pci_ids.h	no recognizable license text
+Xext/dri2/pci_ids/vmwgfx_pci_ids.h	no recognizable license text
+Xext/hashtable.c	no recognizable license text
+Xext/hashtable.h	no recognizable license text
+Xext/panoramiXh.h	no recognizable license text
+Xext/panoramiXsrv.h	no recognizable license text
+Xext/xf86bigfont.c	no recognizable license text
+Xext/xres.c	no recognizable license text
+Xext/xvdisp.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+Xext/xvdisp.h	no recognizable license text
+Xext/xvmain.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+Xext/xvmc.c	no recognizable license text
+Xi/XIstubs.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+Xi/chgptr.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+Xi/exglobals.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+Xi/getprop.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+Xi/grabdev.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+Xi/xibarriers.h	no recognizable license text
+dix/dispatch.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+dix/dixfonts.c	multi-grant (MIT + X11/HPND blocks) — manual
+dix/privates.c	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT Open Group variant and/or NTP License (legal disclaimer)
+dix/swaprep.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+dix/swapreq.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+glamor/glamor_largepixmap.c	no recognizable license text
+glx/vnd_dispatch_stubs.c	no recognizable license text
+hw/xfree86/common/xf86Events.c	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+hw/xfree86/common/xf86Mode.c	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+hw/xfree86/common/xf86Xinput.c	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+hw/xfree86/common/xorgHelper.c	no recognizable license text
+hw/xfree86/compat/clientexception.c	no recognizable license text
+hw/xfree86/compat/geeventinit.c	no recognizable license text
+hw/xfree86/compat/log.c	no recognizable license text
+hw/xfree86/compat/ones.c	no recognizable license text
+hw/xfree86/compat/timercheck.c	no recognizable license text
+hw/xfree86/compat/xf86Helper.c	no recognizable license text
+hw/xfree86/ddc/ddc.c	no recognizable license text
+hw/xfree86/ddc/edid_priv.h	no recognizable license text
+hw/xfree86/fbdevhw/fbdevhw.c	no recognizable license text
+hw/xfree86/fbdevhw/fbdevhwstub.c	no recognizable license text
+hw/xfree86/fbdevhw/fbpriv.h	no recognizable license text
+hw/xfree86/i2c/xf86i2c.c	no recognizable license text
+hw/xfree86/int10/generic.c	no recognizable license text
+hw/xfree86/int10/helper_exec.c	no recognizable license text
+hw/xfree86/int10/helper_mem.c	no recognizable license text
+hw/xfree86/int10/stub.c	no recognizable license text
+hw/xfree86/int10/vbe.c	no recognizable license text
+hw/xfree86/int10/x86emu.c	no recognizable license text
+hw/xfree86/int10/xf86int10.c	no recognizable license text
+hw/xfree86/int10/xf86int10module.c	no recognizable license text
+hw/xfree86/int10/xf86x86emu.c	no recognizable license text
+hw/xfree86/int10/xf86x86emu.h	no recognizable license text
+hw/xfree86/loader/loader.c	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+hw/xfree86/loader/loader.h	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+hw/xfree86/loader/loaderProcs.h	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+hw/xfree86/loader/loadmod.c	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+hw/xfree86/os-support/bsd/bsd_kmod.c	no recognizable license text
+hw/xfree86/os-support/bsd/memrange.h	no recognizable license text
+hw/xfree86/os-support/bus/nobus.c	no recognizable license text
+hw/xfree86/os-support/linux/int10/linux.c	no recognizable license text
+hw/xfree86/os-support/linux/int10/vm86/linux_vm86.c	no recognizable license text
+hw/xfree86/os-support/linux/lnx_acpi.c	no recognizable license text
+hw/xfree86/os-support/linux/lnx_agp.c	no recognizable license text
+hw/xfree86/os-support/linux/lnx_apm.c	no recognizable license text
+hw/xfree86/os-support/linux/lnx_kmod.c	no recognizable license text
+hw/xfree86/os-support/misc/SlowBcopy.c	no recognizable license text
+hw/xfree86/os-support/shared/drm_platform.c	no recognizable license text
+hw/xfree86/os-support/shared/platform_noop.c	no recognizable license text
+hw/xfree86/os-support/stub/stub_bell.c	no recognizable license text
+hw/xfree86/os-support/stub/stub_init.c	no recognizable license text
+hw/xfree86/os-support/stub/stub_video.c	no recognizable license text
+hw/xfree86/ramdac/xf86CursorPriv.h	no recognizable license text
+hw/xfree86/ramdac/xf86CursorRD.c	no recognizable license text
+hw/xfree86/ramdac/xf86HWCurs.c	no recognizable license text
+hw/xfree86/shadowfb/sfbmodule.c	no recognizable license text
+hw/xfree86/shadowfb/shadowfb.c	no recognizable license text
+hw/xfree86/vgahw/vgaHW.c	no recognizable license text
+hw/xfree86/vgahw/vgaHWmodule.c	no recognizable license text
+hw/xfree86/xkb/xkbKillSrv.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+hw/xfree86/xkb/xkbPrivate.c	no recognizable license text
+hw/xfree86/xkb/xkbVT.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+hw/xnest/xkb.c	no recognizable license text
+hw/xquartz/NSUserDefaults+XQuartzDefaults.h	no recognizable license text
+hw/xquartz/keysym2ucs.c	no recognizable license text
+hw/xquartz/keysym2ucs.h	no recognizable license text
+hw/xquartz/mach-startup/mach_startup_types.h	no recognizable license text
+hw/xquartz/pbproxy/trick_autotools.c	no recognizable license text
+hw/xquartz/sanitizedCarbon.h	no recognizable license text
+hw/xquartz/sanitizedCocoa.h	no recognizable license text
+hw/xwin/ddraw.h	no recognizable license text
+hw/xwin/glx/winpriv.c	no recognizable license text
+hw/xwin/glx/winpriv.h	no recognizable license text
+hw/xwin/os-compat.h	no recognizable license text
+hw/xwin/winmessages.h	no recognizable license text
+include/compiler.h	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+include/dgaproc.h	no recognizable license text
+include/displaymode.h	no recognizable license text
+include/dixaccess.h	no recognizable license text
+include/dixfont.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+include/dixfontstr.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+include/dixstruct.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+include/edid.h	no recognizable license text
+include/exevents.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+include/extension.h	multi-license: MIT License and/or MIT Open Group variant
+include/fbdevhw.h	no recognizable license text
+include/globals.h	no recognizable license text
+include/i2c_def.h	no recognizable license text
+include/micmap.h	no recognizable license text
+include/mioverlay.h	no recognizable license text
+include/misc.h	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT Open Group variant and/or NTP License (legal disclaimer)
+include/optionstr.h	no recognizable license text
+include/privates.h	no recognizable license text
+include/shadowfb.h	no recognizable license text
+include/vbe.h	no recognizable license text
+include/vgaHW.h	no recognizable license text
+include/vidmodestr.h	no recognizable license text
+include/wfbrename.h	no recognizable license text
+include/xaarop.h	no recognizable license text
+include/xf86Cursor.h	no recognizable license text
+include/xf86DDC.h	no recognizable license text
+include/xf86Xinput.h	multi-license: Historical Permission Notice and Disclaimer - sell variant and/or MIT License
+include/xf86i2c.h	no recognizable license text
+include/xf86int10.h	no recognizable license text
+include/xkbrules.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+include/xkbsrv.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+include/xkbstr.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+include/xvdix.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+include/xvmcext.h	no recognizable license text
+mi/miinitext.c	multi-license: MIT License and/or MIT Open Group variant
+mi/miinitext.h	multi-license: MIT License and/or MIT Open Group variant
+mi/mioverlay.c	no recognizable license text
+miext/rootless/rootlessValTree.c	multi-grant (MIT + X11/HPND blocks) — manual
+os/auth.h	no recognizable license text
+os/mitauth.h	no recognizable license text
+os/xdmauth.h	no recognizable license text
+os/xdmcp.h	no recognizable license text
+os/xsha1.h	no recognizable license text
+pseudoramiX/pseudoramiX.h	no recognizable license text
+randr/rrxinerama.c	multi-license: BSD 3-Clause License and/or Historical Permission Notice and Disclaimer - sell variant and/or NTP License (legal disclaimer)
+test/bugs/bug1354.c	no recognizable license text
+test/hashtabletest.c	no recognizable license text
+test/tests-common.c	no recognizable license text
+test/tests-common.h	no recognizable license text
+test/tests.c	no recognizable license text
+test/tests.h	no recognizable license text
+xkb/XKBAlloc.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/XKBGAlloc.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/XKBMAlloc.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/XKBMisc.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/ddxBeep.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/ddxCtrls.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/ddxKillSrv.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/ddxLEDs.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/ddxLoad.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/ddxPrivate.c	no recognizable license text
+xkb/ddxVT.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/maprules.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkb-procs.h	no recognizable license text
+xkb/xkb.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbAccessX.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbActions.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbDflts.h	no recognizable license text
+xkb/xkbEvents.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbInit.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbLEDs.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbPrKeyEv.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbUtils.c	multi-grant (MIT + X11/HPND blocks) — manual
+xkb/xkbfmisc.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbgeom_priv.h	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbout.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkbtext.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
+xkb/xkmread.c	X11/HPND no-sell variant — manual (X11 vs HPND vs MIT-open-group)
