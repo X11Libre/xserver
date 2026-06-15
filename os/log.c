@@ -105,7 +105,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "opaque.h"
 
 #ifdef XF86BIGFONT
-#include "xf86bigfontsrv.h"
+#include "Xext/xf86bigfont/xf86bigfontsrv.h"
 #endif
 
 #ifdef __clang__

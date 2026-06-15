@@ -29,10 +29,6 @@ if build_screensaver
     srcs_xext += 'saver.c'
 endif
 
-if build_xf86bigfont
-    srcs_xext += 'xf86bigfont.c'
-endif
-
 if build_xinerama
     srcs_xext += ['panoramiX.c', 'panoramiXprocs.c']
 endif
@@ -57,3 +53,4 @@ libxserver_xext = static_library('xserver_xext',
 
 subdir('damage')
 subdir('dri2')
+subdir('xf86bigfont')

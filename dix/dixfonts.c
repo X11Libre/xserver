@@ -81,7 +81,7 @@ Equipment Corporation.
 #include "xace.h"
 
 #ifdef XF86BIGFONT
-#include "xf86bigfontsrv.h"
+#include "Xext/xf86bigfont/xf86bigfontsrv.h"
 #endif
 
 #define XLFDMAXFONTNAMELEN      1024
