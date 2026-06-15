@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR OR AGPL-3.0-or-later
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
- * Copyright © 1994 by Silicon Graphics Computer Systems, Inc.
  */
 #ifndef _XSERVER_XKB_XKBFILE_PRIV_H
 #define _XSERVER_XKB_XKBFILE_PRIV_H

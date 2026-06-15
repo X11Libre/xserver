@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPL-3.0-or-later
  *
  * Copyright © 1996 Thomas E. Dickey <dickey@clark.net>
- * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  */
 #ifndef _XSERVER_EXTINIT_PRIV_H
 #define _XSERVER_EXTINIT_PRIV_H

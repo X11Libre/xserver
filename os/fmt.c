@@ -1,9 +1,6 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPL-3.0-or-later
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
- * Copyright © 1987, 1998  The Open Group
- * Copyright © 1987 by Digital Equipment Corporation, Maynard, Massachusetts,
- * Copyright © 1994 Quarterdeck Office Systems.
  */
 
 #include <stdint.h>

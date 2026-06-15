@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPL-3.0-or-later
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
- * Copyright © 2010 Nokia Corporation and/or its subsidiary(-ies).
  */
 #ifndef _XSERVER_OS_CLIENT_PRIV_H
 #define _XSERVER_OS_CLIENT_PRIV_H

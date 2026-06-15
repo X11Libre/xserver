@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPL-3.0-or-later
  *
  * Copyright © 2025 Enrico Weigelt, metux IT consult <info@metux.net>
  */

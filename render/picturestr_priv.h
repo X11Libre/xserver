@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR OR AGPL-3.0-or-later
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
- * Copyright © 2000 SuSE, Inc.
  */
 #ifndef _XSERVER_PICTURESTR_PRIV_H_
 #define _XSERVER_PICTURESTR_PRIV_H_

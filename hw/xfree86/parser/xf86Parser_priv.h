@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPL-3.0-or-later
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
- * Copyright © 1997 Metro Link Incorporated
  */
 #ifndef _XSERVER_XF86_PARSER_PRIV
 #define _XSERVER_XF86_PARSER_PRIV
