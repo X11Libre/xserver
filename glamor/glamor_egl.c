@@ -880,21 +880,6 @@ glamor_gbm_bo_from_pixmap(ScreenPtr screen, PixmapPtr pixmap)
 }
 
 /* Used for untextured pixmaps */
-/**
- * XXX Do we even need this? XXX
- *
- * During normal operation, all pixmaps created by glamor
- * are textured. Unless we've run out of video memory,
- * the only untextured pixmaps we can have are the root
- * pixmaps for each screen.
- * (The root pixmaps can be textured, but they don't have to be)
- *
- * I don't see how an X client could request us to export
- * the root pixmap through DRI3. If this ever gets called,
- * it really feels like a bug to me.
- *
- * Same for the gbm fallback single-fd export.
- */
 static int
 glamor_egl_fds_from_pixmap_slow(ScreenPtr screen, PixmapPtr pixmap, int *fds,
                                 uint32_t *strides, uint32_t *offsets,
@@ -970,7 +955,7 @@ glamor_egl_fds_from_pixmap_slow(ScreenPtr screen, PixmapPtr pixmap, int *fds,
 #endif
 }
 
-/* for textured pixmaps */
+/* Used for textured pixmaps */
 static int
 glamor_egl_fds_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap, int *fds,
                                 uint32_t *strides, uint32_t *offsets,
@@ -1032,6 +1017,7 @@ glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
     return ret;
 }
 
+/* Used for untextured pixmaps */
 static int
 glamor_egl_fd_from_pixmap_slow(ScreenPtr screen, PixmapPtr pixmap,
                                CARD16 *stride, CARD32 *size)
@@ -1058,6 +1044,7 @@ glamor_egl_fd_from_pixmap_slow(ScreenPtr screen, PixmapPtr pixmap,
 #endif
 }
 
+/* Used for textured pixmaps */
 static int
 glamor_egl_fd_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap,
                                CARD16 *stride, CARD32 *size)
