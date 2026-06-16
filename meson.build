@@ -842,6 +842,7 @@ if build_xserver
         libxserver_os,
         libxserver_dri2,
         libxserver_dri3,
+        libxserver_xinerama,
         libxserver_xf86bigfont
     ]
 

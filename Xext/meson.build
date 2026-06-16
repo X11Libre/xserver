@@ -29,9 +29,7 @@ if build_screensaver
     srcs_xext += 'saver.c'
 endif
 
-if build_xinerama
-    srcs_xext += ['panoramiX.c', 'panoramiXprocs.c']
-endif
+
 
 if build_xsecurity
     srcs_xext += ['security.c']
@@ -53,4 +51,5 @@ libxserver_xext = static_library('xserver_xext',
 
 subdir('damage')
 subdir('dri2')
+subdir('panoramiX')
 subdir('xf86bigfont')
