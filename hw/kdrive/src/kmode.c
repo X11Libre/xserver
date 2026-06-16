@@ -371,13 +371,18 @@ kdFindPrevSize(const KdMonitorTiming * old)
 }
 
 Bool
-KdTuneMode(KdScreenInfo * screen,
-           Bool (*usable) (KdScreenInfo *),
+KdTuneMode(KdScreenInfo * screen, const KdMonitorTiming *m,
+           Bool (*usable) (KdScreenInfo *, const KdMonitorTiming *),
            Bool (*supported) (KdScreenInfo *, const KdMonitorTiming *))
 {
-    const KdMonitorTiming *t;
+    const KdMonitorTiming *t = m;
+    int depth = screen->fb.depth;
 
-    while (!(*usable) (screen)) {
+    screen->width = t->horizontal;
+    screen->height = t->vertical;
+    screen->rate = t->rate;
+
+    while (!(*usable) (screen, t)) {
         /*
          * Fix requested depth and geometry until it works
          */
@@ -386,6 +391,7 @@ KdTuneMode(KdScreenInfo * screen,
         else if (screen->fb.depth > 8)
             screen->fb.depth = 8;
         else {
+            screen->fb.depth = depth;
             t = kdFindPrevSize(KdFindMode(screen, supported));
             if (!t)
                 return FALSE;
