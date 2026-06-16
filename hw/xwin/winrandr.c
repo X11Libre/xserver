@@ -33,7 +33,7 @@
 
 #include "win.h"
 
-#include "randr/randrstr_priv.h"
+#include "Xext/randr/randrstr_priv.h"
 
 /*
  * Answer queries about the RandR features supported.

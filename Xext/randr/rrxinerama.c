@@ -76,7 +76,7 @@
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/extinit.h"
-#include "randr/randrstr_priv.h"
+#include "Xext/randr/randrstr_priv.h"
 
 #include "swaprep.h"
 #include "protocol-versions.h"

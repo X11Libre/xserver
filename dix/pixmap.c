@@ -31,6 +31,7 @@ from The Open Group.
 #include <X11/X.h>
 #include <X11/extensions/render.h>
 
+#include "include/randrstr.h"
 #include "mi/mi_priv.h"
 
 #include "scrnintstr.h"
@@ -42,7 +43,7 @@ from The Open Group.
 #include "gcstruct.h"
 #include "servermd.h"
 #include "picturestr.h"
-#include "randrstr.h"
+
 /*
  * Scratch pixmap APIs are provided for source and binary compatibility.  In
  * older versions, DIX would store a freed scratch pixmap for future use.  This

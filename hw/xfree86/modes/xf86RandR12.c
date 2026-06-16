@@ -28,6 +28,7 @@
 #include "dix/screenint_priv.h"
 #include "include/extinit.h"
 #include "include/xf86DDC.h"
+#include "Xext/randr/randrstr_priv.h"
 
 #include "xf86.h"
 #include "os.h"
@@ -37,7 +38,6 @@
 #include "mipointer.h"
 #include "windowstr.h"
 #include "inputstr.h"
-#include "randrstr_priv.h"
 
 #include "xf86cmap.h"
 #include "xf86Crtc.h"

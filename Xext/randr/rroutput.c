@@ -26,8 +26,8 @@
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
-#include "randr/randrstr_priv.h"
-#include "randr/rrdispatch_priv.h"
+#include "Xext/randr/randrstr_priv.h"
+#include "Xext/randr/rrdispatch_priv.h"
 
 RESTYPE RROutputType;
 

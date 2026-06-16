@@ -28,7 +28,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
-#include "randr/randrstr_priv.h"
+#include "Xext/randr/randrstr_priv.h"
 
 #include "edid_priv.h"
 #include "xf86_priv.h"

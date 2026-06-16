@@ -33,8 +33,8 @@
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
-#include "randr/randrstr_priv.h"
-#include "randr/rrdispatch_priv.h"
+#include "Xext/randr/randrstr_priv.h"
+#include "Xext/randr/rrdispatch_priv.h"
 
 /* From render.h */
 #ifndef SubPixelUnknown

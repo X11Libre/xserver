@@ -30,15 +30,12 @@
 #include <libgen.h>
 #include <xcb/xcb_image.h>
 
+#include "include/randrstr.h"
+
 #include "os.h"                 /* for OsSignal() */
 #include "kdrive.h"
 #include "hostx.h"
 #include "exa.h"
-
-#ifdef RANDR
-#include "randrstr.h"
-#endif
-
 #include "damage.h"
 
 typedef struct _ephyrPriv {

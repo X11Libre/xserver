@@ -59,10 +59,10 @@
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
-#include "randr/randrstr_priv.h"
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
 #endif
+#include "Xext/randr/randrstr_priv.h"
 
 #include "servermd.h"
 #include "windowstr.h"

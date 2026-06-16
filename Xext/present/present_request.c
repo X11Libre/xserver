@@ -25,8 +25,8 @@
 #include "dix/request_priv.h"
 #include "Xext/present/present_priv.h"
 #include "Xext/dri3/dri3_priv.h"
+#include "Xext/randr/randrstr_priv.h"
 
-#include "randrstr_priv.h"
 #include <protocol-versions.h>
 
 static int

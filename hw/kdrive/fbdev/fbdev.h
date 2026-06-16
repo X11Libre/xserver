@@ -29,9 +29,7 @@
 #include <sys/mman.h>
 #include "kdrive.h"
 
-#ifdef RANDR
-#include "randrstr.h"
-#endif
+#include "include/randrstr.h"
 
 typedef struct _fbdevPriv {
     struct fb_var_screeninfo var;

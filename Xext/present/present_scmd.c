@@ -22,7 +22,7 @@
 #include <dix-config.h>
 
 #include "dix/screenint_priv.h"
-#include "randr/randrstr_priv.h"
+#include "Xext/randr/randrstr_priv.h"
 #include "Xext/present/present_priv.h"
 
 #include <misync.h>

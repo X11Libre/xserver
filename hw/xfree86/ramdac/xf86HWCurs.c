@@ -4,7 +4,7 @@
 #include <X11/X.h>
 
 #include "dix/colormap_priv.h"
-#include "randr/randrstr_priv.h"
+#include "Xext/randr/randrstr_priv.h"
 
 #include "misc.h"
 #include "xf86.h"

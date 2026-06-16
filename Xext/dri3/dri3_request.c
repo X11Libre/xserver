@@ -28,13 +28,13 @@
 #include "dix/screenint_priv.h"
 #include "include/syncsdk.h"
 #include "os/client_priv.h"
+#include "Xext/randr/randrstr_priv.h"
 
 #include "dri3_priv.h"
 #include <syncsrv.h>
 #include <xace.h>
 #include <protocol-versions.h>
 #include <drm_fourcc.h>
-#include "randrstr_priv.h"
 #include "dixstruct_priv.h"
 
 static Bool
