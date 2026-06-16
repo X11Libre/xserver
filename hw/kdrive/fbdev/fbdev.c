@@ -332,7 +332,7 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
     t = KdFindMode(screen, fbdevModeSupported);
 
     /* Sets priv->fix, priv->var */
-    fbdevSetMode(screen, t);
+    KdTuneMode(screen, t, fbdevSetMode, fbdevModeSupported);
 
     depth = priv->var.bits_per_pixel;
     gray = priv->var.grayscale;
