@@ -691,7 +691,6 @@ inc = include_directories(
     'miext/shadow',
     'miext/sync',
     'dix',
-    'dri3',
     'include',
     'present',
     'randr',
@@ -790,7 +789,6 @@ subdir('doc')
 if build_xserver
     subdir('config')
     subdir('dix')
-    subdir('dri3')
     subdir('glx')
     subdir('fb')
     subdir('mi')
