@@ -690,7 +690,6 @@ inc = include_directories(
     'miext/damage',
     'miext/shadow',
     'miext/sync',
-    'dbe',
     'dix',
     'dri3',
     'include',
@@ -797,7 +796,6 @@ if build_xserver
     subdir('mi')
     subdir('os')
     subdir('composite')
-    subdir('dbe')
     subdir('miext/damage')
     subdir('miext/shadow')
     subdir('miext/sync')

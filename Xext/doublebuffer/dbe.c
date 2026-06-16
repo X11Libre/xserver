@@ -44,13 +44,13 @@
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
+#include "Xext/doublebuffer/dbestruct.h"
+#include "Xext/doublebuffer/midbe.h"
 
 #include "scrnintstr.h"
 #include "extnsionst.h"
 #include "gcstruct.h"
 #include "dixstruct.h"
-#include "dbestruct.h"
-#include "midbe.h"
 #include "xace.h"
 
 /* GLOBALS */

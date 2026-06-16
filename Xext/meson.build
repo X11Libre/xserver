@@ -50,6 +50,7 @@ libxserver_xext = static_library('xserver_xext',
 )
 
 subdir('damage')
+subdir('doublebuffer')
 subdir('dri2')
 subdir('panoramiX')
 subdir('xf86bigfont')

@@ -32,8 +32,13 @@
 
 #include <dix-config.h>
 
+#include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
+
+#include "Xext/doublebuffer/dbestruct.h"
+#include "Xext/doublebuffer/midbe.h"
+
 #include "misc.h"
 #include "os.h"
 #include "windowstr.h"
@@ -43,14 +48,10 @@
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"
-#include "dbestruct.h"
 #include "regionstr.h"
 #include "gcstruct.h"
 #include "inputstr.h"
-#include "midbe.h"
 #include "xace.h"
-
-#include <stdio.h>
 
 /******************************************************************************
  *

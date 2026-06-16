@@ -33,9 +33,9 @@
 
 #include <dix-config.h>
 
-#include "dbe/dbestruct.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/privates.h"
+#include "Xext/doublebuffer/dbestruct.h"
 
 extern Bool miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv);
 
