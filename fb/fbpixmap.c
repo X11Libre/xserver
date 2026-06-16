@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include <stdlib.h>
+#include <limits.h>
 
 #include "fb/fb_priv.h"
 
