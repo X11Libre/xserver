@@ -341,7 +341,7 @@ KdAddMode(const KdMonitorTiming *new)
 static const KdMonitorTiming *
 kdFindPrevSize(const KdMonitorTiming * old)
 {
-    const KdMonitorTiming *new, *prev;
+    const KdMonitorTiming *new;
 
     if (old == kdMonitorTimings)
         return 0;
@@ -356,17 +356,19 @@ kdFindPrevSize(const KdMonitorTiming * old)
             break;
         }
     }
+#if 0
     /*
      * Match the refresh rate (<=)
      */
     while (new != kdMonitorTimings) {
-        prev = new - 1;
+        const KdMonitorTiming *prev = new - 1;
         if (prev->horizontal == new->horizontal &&
             prev->vertical == new->vertical && prev->rate > old->rate) {
             break;
         }
         new--;
     }
+#endif
     return new;
 }
 
