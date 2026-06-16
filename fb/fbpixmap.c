@@ -41,14 +41,29 @@ fbCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     int base;
     int bpp = BitsPerPixel(depth);
 
+    /* Check for integer overflow in width * bpp */
+    if (bpp > 0 && width > INT_MAX / (size_t)bpp)
+        return NullPixmap;
+    /* Check for overflow in the calculation of paddedWidth */
+    {
+        size_t width_bytes = (size_t)width * (size_t)bpp;
+        if (width_bytes > (SIZE_MAX - FB_MASK) >> FB_SHIFT)
+            return NullPixmap;
+    }
     paddedWidth = ((width * bpp + FB_MASK) >> FB_SHIFT) * sizeof(FbBits);
     if (paddedWidth / 4 > 32767 || height > 32767)
+        return NullPixmap;
+    /* Check for integer overflow in height * paddedWidth */
+    if (paddedWidth > 0 && (size_t)height > SIZE_MAX / paddedWidth)
         return NullPixmap;
     datasize = height * paddedWidth;
     base = pScreen->totalPixmapSize;
     adjust = 0;
     if (base & 7)
         adjust = 8 - (base & 7);
+    /* Check for overflow in datasize + adjust */
+    if (datasize > SIZE_MAX - (size_t)adjust)
+        return NullPixmap;
     datasize += adjust;
 #ifdef FB_DEBUG
     datasize += 2 * paddedWidth;
