@@ -36,7 +36,7 @@
 
 #include "dix/dix_priv.h"
 #include "os/fmt.h"
-#include "present/present_priv.h"
+#include "Xext/present/present_priv.h"
 
 #include "inputstr.h"
 #include "xf86str.h"

@@ -42,7 +42,7 @@
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
 #include "os/bug_priv.h"
-#include "present/present_priv.h"
+#include "Xext/present/present_priv.h"
 
 #include "glxserver.h"
 #include <unpack.h>

@@ -24,7 +24,7 @@
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
-#include "present/present_priv.h"
+#include "Xext/present/present_priv.h"
 
 int present_request;
 DevPrivateKeyRec present_screen_private_key;

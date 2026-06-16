@@ -23,7 +23,7 @@
 
 #include <unistd.h>
 
-#include "present/present_priv.h"
+#include "Xext/present/present_priv.h"
 
 #ifdef DRI3
 #include <sys/eventfd.h>

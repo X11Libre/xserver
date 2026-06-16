@@ -23,7 +23,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
-#include "present/present_priv.h"
+#include "Xext/present/present_priv.h"
 #include "Xext/dri3/dri3_priv.h"
 
 #include "randrstr_priv.h"

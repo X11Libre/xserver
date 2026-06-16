@@ -22,7 +22,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
-#include "present/present_priv.h"
+#include "Xext/present/present_priv.h"
 
 /*
  * Mark all pending notifies for 'window' as invalid when

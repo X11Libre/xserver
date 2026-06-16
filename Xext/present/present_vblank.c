@@ -23,7 +23,7 @@
 
 #include <unistd.h>
 
-#include "present/present_priv.h"
+#include "Xext/present/present_priv.h"
 
 void
 present_vblank_notify(present_vblank_ptr vblank, CARD8 kind, CARD8 mode, uint64_t ust, uint64_t crtc_msc)

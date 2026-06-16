@@ -692,7 +692,6 @@ inc = include_directories(
     'miext/sync',
     'dix',
     'include',
-    'present',
     'randr',
     'render',
     'xfixes',
@@ -800,7 +799,6 @@ if build_xserver
     if build_rootless
         subdir('miext/rootless')
     endif
-    subdir('present')
     if build_xwin or build_xquartz
         subdir('pseudoramiX')
     endif
