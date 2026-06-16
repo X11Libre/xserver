@@ -38,6 +38,10 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XKM.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include "dix/dix_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
@@ -60,6 +64,32 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #else
 #define PATHSEPARATOR "/"
 #endif
+
+/* Validate that a path contains only safe characters (alphanumeric, /, \, :, ., _, -)
+   to prevent command injection when passed to system() or popen(). */
+static Bool
+safe_path(const char *path)
+{
+    if (!path)
+        return FALSE;
+    for (; *path; path++) {
+        unsigned char c = (unsigned char)*path;
+        if (isalnum(c))
+            continue;
+        switch (c) {
+        case '/':
+        case '\\':
+        case ':':
+        case '.':
+        case '_':
+        case '-':
+            break;
+        default:
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
 
 static unsigned
 LoadXKM(unsigned want, unsigned need, const char *keymap, XkbDescPtr *xkbRtrn);
@@ -121,39 +151,55 @@ RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
     const char *xkbbindir = emptystring;
     const char *xkbbindirsep = emptystring;
 
-#ifdef WIN32
-    /* WIN32 has no popen. The input must be stored in a file which is
-       used as input for xkbcomp. xkbcomp does not read from stdin. */
-    char tmpname[PATH_MAX] = { 0 };
-    const char *xkmfile = tmpname;
-#else
-    const char *xkmfile = "-";
-#endif
+ #ifdef WIN32
+     /* WIN32 has no popen. The input must be stored in a file which is
+        used as input for xkbcomp. xkbcomp does not read from stdin. */
+     char tmpname[PATH_MAX] = { 0 };
+     const char *xkmfile = tmpname;
+ #else
+     const char *xkmfile = "-";
+ #endif
 
-    snprintf(keymap, sizeof(keymap), "server-%s", display);
+     snprintf(keymap, sizeof(keymap), "server-%s", display);
 
-    OutputDirectory(xkm_output_dir, sizeof(xkm_output_dir));
+     OutputDirectory(xkm_output_dir, sizeof(xkm_output_dir));
 
-#ifdef WIN32
-    strcpy(tmpname, Win32TempDir());
-    strcat(tmpname, "\\xkb_XXXXXX");
-    (void) mktemp(tmpname);
-#endif
+ #ifdef WIN32
+     /* Secure temporary file creation: GetTempFileName atomically creates
+        a unique file, avoiding race conditions and symlink attacks. */
+     if (!GetTempFileNameA(Win32TempDir(), "xkb", 0, tmpname)) {
+         LogMessage(X_ERROR, "XKB: Failed to create temporary file\n");
+         free(buf);
+         return NULL;
+     }
+ #endif
 
-    if (XkbBaseDirectory != NULL) {
-        if (asprintf(&xkbbasedirflag, "\"-R%s\"", XkbBaseDirectory) == -1)
-            xkbbasedirflag = NULL;
-    }
+     if (XkbBaseDirectory != NULL) {
+         /* Validate to prevent command injection */
+         if (!safe_path(XkbBaseDirectory)) {
+             LogMessage(X_ERROR, "XKB: XkbBaseDirectory contains unsafe characters\n");
+             free(buf);
+             return NULL;
+         }
+         if (asprintf(&xkbbasedirflag, "\"-R%s\"", XkbBaseDirectory) == -1)
+             xkbbasedirflag = NULL;
+     }
 
-    if (XkbBinDirectory != NULL) {
-        int ld = strlen(XkbBinDirectory);
-        int lps = strlen(PATHSEPARATOR);
+     if (XkbBinDirectory != NULL) {
+         /* Validate to prevent command injection */
+         if (!safe_path(XkbBinDirectory)) {
+             LogMessage(X_ERROR, "XKB: XkbBinDirectory contains unsafe characters\n");
+             free(buf);
+             return NULL;
+         }
+         int ld = strlen(XkbBinDirectory);
+         int lps = strlen(PATHSEPARATOR);
 
-        xkbbindir = XkbBinDirectory;
+         xkbbindir = XkbBinDirectory;
 
-        if ((ld >= lps) && (strcmp(xkbbindir + ld - lps, PATHSEPARATOR) != 0)) {
-            xkbbindirsep = PATHSEPARATOR;
-        }
+         if ((ld >= lps) && (strcmp(xkbbindir + ld - lps, PATHSEPARATOR) != 0)) {
+             xkbbindirsep = PATHSEPARATOR;
+         }
     }
 
     if (asprintf(&buf,
