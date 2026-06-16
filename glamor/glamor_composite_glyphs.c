@@ -31,7 +31,7 @@
 #include "glamor_priv.h"
 #include "glamor_transform.h"
 #include "glamor_transfer.h"
-#include "glyphstr_priv.h"
+#include "Xext/render/glyphstr_priv.h"
 
 #define DEFAULT_ATLAS_DIM       1024
 

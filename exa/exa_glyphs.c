@@ -45,9 +45,9 @@
 #include <stdlib.h>
 
 #include "include/mipict.h"
+#include "Xext/render/glyphstr_priv.h"
 
 #include "exa_priv.h"
-#include "glyphstr_priv.h"
 
 #if DEBUG_GLYPH_CACHE
 #define DBG_GLYPH_CACHE(a) ErrorF a

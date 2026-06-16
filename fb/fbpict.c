@@ -29,9 +29,9 @@
 
 #include "fb/fbpict_priv.h"
 #include "include/mipict.h"
+#include "Xext/render/glyphstr_priv.h"
 
 #include "fb.h"
-#include "glyphstr_priv.h"
 #include "picturestr.h"
 
 void

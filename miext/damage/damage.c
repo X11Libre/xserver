@@ -27,6 +27,7 @@
 #include "dix/screen_hooks_priv.h"
 #include "include/mipict.h"
 #include "os/osdep.h"
+#include "Xext/render/glyphstr_priv.h"
 
 #include    <X11/X.h>
 #include    "scrnintstr.h"
@@ -41,7 +42,6 @@
 #include    "gcstruct.h"
 #include    "damage.h"
 #include    "damagestr.h"
-#include    "glyphstr_priv.h"
 
 #define wrap(priv, real, mem, func) {\
     priv->mem = real->mem; \

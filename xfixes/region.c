@@ -26,9 +26,9 @@
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/window_priv.h"
-#include "render/picturestr_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
+#include "Xext/render/picturestr_priv.h"
 
 #include "xfixesint.h"
 #include "scrnintstr.h"

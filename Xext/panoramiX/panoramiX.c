@@ -44,6 +44,7 @@ Equipment Corporation.
 #include "Xext/damage/damageext_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
+#include "Xext/render/picturestr_priv.h"
 
 #include "misc.h"
 #include "cursor.h"
@@ -59,7 +60,6 @@ Equipment Corporation.
 #include "globals.h"
 #include "servermd.h"
 #include "resource.h"
-#include "picturestr_priv.h"
 #include "xfixesint.h"
 #include "protocol-versions.h"
 

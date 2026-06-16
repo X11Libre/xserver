@@ -55,6 +55,7 @@ subdir('dri2')
 subdir('dri3')
 subdir('panoramiX')
 subdir('present')
+subdir('render')
 subdir('xf86bigfont')
 subdir('composite')
 if build_xwin or build_xquartz
