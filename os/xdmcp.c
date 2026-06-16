@@ -423,6 +423,9 @@ XdmcpSetAuthentication(const ARRAY8Ptr name)
 {
     int i;
 
+    ErrorF("XDMCP warning: authentication data is transmitted over an "
+           "unencrypted connection; use SSH tunneling or VPN to secure "
+           "XDMCP sessions\n");
     for (i = 0; i < AuthenticationNames.length; i++)
         if (XdmcpARRAY8Equal(&AuthenticationNames.data[i], name)) {
             AuthenticationName = &AuthenticationNames.data[i];
