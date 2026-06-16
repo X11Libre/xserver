@@ -301,7 +301,20 @@ create_socket(char *filename_out)
     size_t try, try_max;
 
     for (try = 0, try_max = 5; try < try_max; try++) {
-        tmpnam(filename_out);
+        /* Generate a unique temporary filename using mkstemp to avoid
+           symlink attacks and race conditions. */
+        char template[PATH_MAX];
+        int fd;
+
+        snprintf(template, sizeof(template), "%s/xorg-XXXXXX", P_tmpdir);
+        fd = mkstemp(template);
+        if (fd == -1) {
+            ErrorF("X11.app: mkstemp failed: %s\n", strerror(errno));
+            continue;
+        }
+        close(fd);
+        unlink(template);
+        strlcpy(filename_out, template, PATH_MAX);
 
         /* Setup servaddr_un */
         memset(&servaddr_un, 0, sizeof(struct sockaddr_un));
