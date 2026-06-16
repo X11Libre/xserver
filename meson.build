@@ -637,6 +637,13 @@ endif
 
 legacy_nvidia_padding = get_option('legacy_nvidia_padding')
 
+if get_option('procvector_monitor')
+    add_project_arguments('-DPROC_VECTOR_MONITOR_ENABLED', language: 'c')
+endif
+if get_option('screenrec_monitor')
+    add_project_arguments('-DSCREENREC_MONITOR_ENABLED', language: 'c')
+endif
+
 m_dep = cc.find_library('m', required : false)
 dl_dep = cc.find_library('dl', required : false)
 

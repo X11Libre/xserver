@@ -169,6 +169,12 @@ option('legacy_nvidia_padding', type: 'boolean', value: false,
         description: 'EXPERT ONLY: Add a padding to ScreenRec to match an older ABI for legacy NVidia drivers')
 option('legacy_nvidia_340x', type: 'boolean', value: true,
         description: 'Extra entrypoints for old Nvidia 340x proprietary driver')
+option('procvector_monitor', type: 'boolean', value: false,
+        description: 'Monitor ProcVector for modifications (for compatibility testing)')
+option('screenrec_monitor', type: 'boolean', value: false,
+        description: 'Monitor ScreenRec for modifications (for compatibility testing)')
+option('procvector_monitor', type: 'boolean', value: false,
+        description: 'Monitor ProcVector for modifications (for compatibility testing)')
 
 # testsuite fine tuning - some things might not run everywhere
 option('test_rendercheck_triangles', type: 'boolean', value: false,
