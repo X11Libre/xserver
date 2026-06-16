@@ -40,6 +40,7 @@
 #include "scrnintstr.h"
 #include "regionstr.h"
 #include "xf86fbman.h"
+#include <limits.h>
 
 typedef struct {
     FBAreaPtr(*AllocateOffscreenArea) (ScreenPtr pScreen,
