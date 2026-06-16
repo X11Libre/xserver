@@ -61,6 +61,12 @@
 #include "loader.h"
 #include "xf86Module_priv.h"
 
+#ifdef PROC_VECTOR_MONITOR_ENABLED
+#include "hw/xfree86/compat/procvector_monitor.h"
+#endif
+#ifdef SCREENREC_MONITOR_ENABLED
+#include "hw/xfree86/compat/screenrec_monitor.h"
+#endif
 
 typedef struct _pattern {
     const char *pattern;
@@ -979,7 +985,15 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
     ret = NULL;
 
  LoadModule_exit:
-    FreePatterns(patterns);
+#ifdef PROC_VECTOR_MONITOR_ENABLED
+    if (ret)
+        ProcVectorMonitorCheckAfterModule(m);
+#endif
+#ifdef SCREENREC_MONITOR_ENABLED
+    if (ret)
+        ScreenRecMonitorCheckAfterModule(m);
+#endif
+     FreePatterns(patterns);
     free(found);
     free(name);
     free(p);
