@@ -12,7 +12,7 @@ libXquartzXpr = static_library('XquartzXpr',
      'x-hook.c',
      'x-list.c',
     ],
-    include_directories: [inc, '..', '../../../pseudoramiX', '../../../miext/rootless'],
+    include_directories: [inc, '..', '../../../miext/rootless'],
     c_args: [bundle_id_def, '-DXQUARTZ'],
     dependencies: [xproto_dep, pixman_dep],
 )

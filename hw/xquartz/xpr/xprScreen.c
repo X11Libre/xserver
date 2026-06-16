@@ -33,13 +33,13 @@
 
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
+#include "Xext/pseudoramiX/pseudoramiX.h"
 
 #include "inputstr.h"
 #include "quartz.h"
 #include "quartzRandR.h"
 #include "xpr.h"
 #include "xprEvent.h"
-#include "pseudoramiX.h"
 #include "darwinEvents.h"
 #include "rootless.h"
 #include "xpr_dri.h"

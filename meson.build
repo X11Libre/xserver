@@ -797,9 +797,6 @@ if build_xserver
     if build_rootless
         subdir('miext/rootless')
     endif
-    if build_xwin or build_xquartz
-        subdir('pseudoramiX')
-    endif
     subdir('randr')
     subdir('record')
     subdir('render')

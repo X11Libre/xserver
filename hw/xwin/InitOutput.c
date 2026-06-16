@@ -42,6 +42,7 @@ from The Open Group.
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
 #endif
+#include "Xext/pseudoramiX/pseudoramiX.h"
 
 #include "winmsg.h"
 #include "winconfig.h"
@@ -62,7 +63,6 @@ typedef WINAPI HRESULT(*SHGETFOLDERPATHPROC) (HWND hwndOwner,
 #endif
 
 #include "winmonitors.h"
-#include "pseudoramiX/pseudoramiX.h"
 
 #include "glx_extinit.h"
 #ifdef XWIN_GLX_WINDOWS

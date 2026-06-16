@@ -57,3 +57,6 @@ subdir('panoramiX')
 subdir('present')
 subdir('xf86bigfont')
 subdir('composite')
+if build_xwin or build_xquartz
+    subdir('pseudoramiX')
+endif
