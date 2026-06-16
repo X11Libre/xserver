@@ -47,6 +47,8 @@ typedef struct _fbdevPriv {
 typedef struct _fbdevScrPriv {
     Rotation randr;
     Bool shadow;
+    int max_width;
+    int max_height;
 #ifdef GLAMOR
     int dri_fd;
 #endif
