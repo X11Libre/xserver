@@ -796,7 +796,6 @@ if build_xserver
     if build_rootless
         subdir('miext/rootless')
     endif
-    subdir('record')
     subdir('render')
     subdir('xfixes')
     subdir('xkb')

@@ -61,3 +61,4 @@ if build_xwin or build_xquartz
     subdir('pseudoramiX')
 endif
 subdir('randr')
+subdir('record')
