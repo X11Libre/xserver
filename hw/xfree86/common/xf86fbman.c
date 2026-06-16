@@ -27,12 +27,10 @@
  */
 #include <xorg-config.h>
 
+#include <limits.h>
 #include <X11/X.h>
 
 #include "dix/screen_hooks_priv.h"
-
-#include <X11/X.h>
-
 #include "os/log_priv.h"
 
 #include "misc.h"
@@ -876,6 +874,11 @@ localAllocateOffscreenLinear(ScreenPtr pScreen,
             /* pitch and granularity aren't a perfect match, let's allocate
              * a bit more so we can align later on
              */
+            /* Check for integer overflow before addition */
+            if (length > INT_MAX - (gran - 1)) {
+                free(link);
+                return NULL;
+            }
             length += gran - 1;
         }
     }
@@ -886,7 +889,19 @@ localAllocateOffscreenLinear(ScreenPtr pScreen,
     }
     else {
         w = pitch;
-        h = (length + pitch - 1) / pitch;
+        /* Calculate h = ceil(length / pitch) safely without overflow */
+        if (pitch <= 0) {
+            free(link);
+            return NULL;
+        }
+        /* (length + pitch - 1) can overflow, use alternative */
+        h = (length - 1) / pitch + 1;
+    }
+
+    /* Check for overflow in h * w (both int, result stored in int) */
+    if (h > 0 && w > INT_MAX / h) {
+        free(link);
+        return NULL;
     }
 
     if ((area = localAllocateOffscreenArea(pScreen, w, h, gran,

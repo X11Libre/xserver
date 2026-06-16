@@ -221,6 +221,8 @@ xprAddPseudoramiXScreens(int *x, int *y, int *width, int *height,
     if (CGDisplayIsCaptured(kCGDirectMainDisplay))
         displayCount = 1;
 
+    if (displayCount > SIZE_MAX / sizeof(CGDirectDisplayID))
+        FatalError("Invalid display count for allocation.\n");
     CGDirectDisplayID *displayList = calloc(displayCount, sizeof(CGDirectDisplayID));
     if (!displayList)
         FatalError("Unable to allocate memory for list of displays.\n");

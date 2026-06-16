@@ -3941,7 +3941,28 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     }
 
     if (drmmode->shadow_enable) {
-        uint32_t size = scrn->displayWidth * scrn->virtualY * cpp;
+        size_t size_bytes;
+        uint32_t size;
+
+        /* Check for zero dimensions */
+        if (scrn->displayWidth == 0 || scrn->virtualY == 0 || cpp == 0)
+            goto fail;
+
+        /* Check for overflow in width * height */
+        if ((size_t)scrn->displayWidth > SIZE_MAX / (size_t)scrn->virtualY)
+            goto fail;
+        size_bytes = (size_t)scrn->displayWidth * (size_t)scrn->virtualY;
+
+        /* Check for overflow in size_bytes * cpp */
+        if (size_bytes > SIZE_MAX / (size_t)cpp)
+            goto fail;
+        size_bytes *= (size_t)cpp;
+
+        /* Ensure the result fits in uint32_t */
+        if (size_bytes > UINT32_MAX)
+            goto fail;
+        size = (uint32_t)size_bytes;
+
         new_pixels = calloc(1, size);
         if (new_pixels == NULL)
             goto fail;
@@ -3950,7 +3971,24 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     }
 
     if (drmmode->shadow_enable2) {
-        uint32_t size = scrn->displayWidth * scrn->virtualY * cpp;
+        size_t size_bytes;
+        uint32_t size;
+
+        if (scrn->displayWidth == 0 || scrn->virtualY == 0 || cpp == 0)
+            goto fail;
+
+        if ((size_t)scrn->displayWidth > SIZE_MAX / (size_t)scrn->virtualY)
+            goto fail;
+        size_bytes = (size_t)scrn->displayWidth * (size_t)scrn->virtualY;
+
+        if (size_bytes > SIZE_MAX / (size_t)cpp)
+            goto fail;
+        size_bytes *= (size_t)cpp;
+
+        if (size_bytes > UINT32_MAX)
+            goto fail;
+        size = (uint32_t)size_bytes;
+
         void *fb2 = calloc(1, size);
         free(drmmode->shadow_fb2);
         drmmode->shadow_fb2 = fb2;
