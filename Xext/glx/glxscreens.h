@@ -32,8 +32,9 @@
  */
 
 #include "include/glx_extinit.h"
+#include "Xext/glx/extension_string.h"
+#include "Xext/glx/glxserver.h"
 
-#include "extension_string.h"
 #include "glxvndabi.h"
 
 struct __GLXconfig {

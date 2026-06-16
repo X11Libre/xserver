@@ -722,8 +722,6 @@ if get_option('libunwind')
     common_dep += dependency('libunwind', required: true)
 endif
 
-glx_inc = include_directories('glx')
-
 top_dir_inc = include_directories('.')
 
 serverconfigdir = get_option('serverconfigdir')
@@ -785,7 +783,6 @@ subdir('doc')
 if build_xserver
     subdir('config')
     subdir('dix')
-    subdir('glx')
     subdir('fb')
     subdir('mi')
     subdir('os')

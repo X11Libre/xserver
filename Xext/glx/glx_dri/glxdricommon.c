@@ -35,13 +35,13 @@
 #include <GL/internal/dri_interface.h>
 
 #include "miext/extinit_priv.h"
+#include "Xext/glx/glxscreens.h"
+#include "Xext/glx/glxserver.h"
+#include "Xext/glx/glxext.h"
+#include "Xext/glx/glxcontext.h"
+#include "Xext/glx/glx_dri/glxdricommon.h"
 
 #include <os.h>
-#include "glxserver.h"
-#include "glxext.h"
-#include "glxcontext.h"
-#include "glxscreens.h"
-#include "glxdricommon.h"
 
 #define __ATTRIB(attrib, field) \
     { attrib, offsetof(__GLXconfig, field) }

@@ -63,3 +63,4 @@ if build_xwin or build_xquartz
 endif
 subdir('randr')
 subdir('record')
+subdir('glx')

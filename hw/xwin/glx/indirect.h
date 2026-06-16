@@ -26,7 +26,8 @@
 
 #include <X11/Xwindows.h>
 #include <GL/wglext.h>
-#include <glx/extension_string.h>
+
+#include "Xext/glx/extension_string.h"
 
 /* ---------------------------------------------------------------------- */
 /*

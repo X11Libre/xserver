@@ -45,7 +45,7 @@ epoxy_dep = dependency('epoxy')
 
 glamor = static_library('glamor',
     srcs_glamor,
-    include_directories: [inc, glx_inc],
+    include_directories: [inc],
     dependencies: [
         common_dep,
         libdrm_dep,

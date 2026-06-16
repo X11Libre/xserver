@@ -37,16 +37,15 @@
 #include <GL/internal/dri_interface.h>
 #include <GL/glxtokens.h>
 
+#include "Xext/glx/extension_string.h"
+#include "Xext/glx/glxserver.h"
+#include "Xext/glx/glxutil.h"
+#include "Xext/glx/glx_dri/glxdricommon.h"
+
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "gcstruct.h"
 #include "os.h"
-
-#include "glxserver.h"
-#include "glxutil.h"
-#include "glxdricommon.h"
-
-#include "extension_string.h"
 
 typedef struct __GLXDRIscreen __GLXDRIscreen;
 typedef struct __GLXDRIcontext __GLXDRIcontext;

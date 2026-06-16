@@ -22,9 +22,10 @@
  */
 #include <xwin-config.h>
 
-#include <glx/glxserver.h>
-#include <glx/glxutil.h>
 #include <X11/extensions/windowsdriconst.h>
+
+#include "Xext/glx/glxserver.h"
+#include "Xext/glx/glxutil.h"
 
 #include "indirect.h"
 #include "winpriv.h"

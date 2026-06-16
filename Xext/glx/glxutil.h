@@ -31,6 +31,8 @@
  * Silicon Graphics, Inc.
  */
 
+#include "Xext/glx/glxserver.h"
+
 extern GLboolean __glXDrawableInit(__GLXdrawable * drawable,
                                    __GLXscreen * screen,
                                    DrawablePtr pDraw, int type, XID drawID,

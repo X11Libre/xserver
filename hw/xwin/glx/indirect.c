@@ -76,8 +76,10 @@
 #include <xwin-config.h>
 
 #include "glwindows.h"
-#include <glx/glxserver.h>
-#include <glx/glxutil.h>
+
+#include "Xext/glx/glxserver.h"
+#include "Xext/glx/glxutil.h"
+
 #include <GL/glxtokens.h>
 
 #include <winpriv.h>

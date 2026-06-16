@@ -42,7 +42,8 @@
 #include <X11/Xwindows.h>
 #include <os.h>
 #include "glwindows.h"
-#include <glx/glxserver.h>
+
+#include "Xext/glx/glxserver.h"
 
 extern void *glXGetProcAddressARB(const char *);
 

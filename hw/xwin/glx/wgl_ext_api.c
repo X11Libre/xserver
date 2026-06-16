@@ -30,8 +30,10 @@
 #include <X11/Xwindows.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
-#include <glx/glxserver.h>
-#include <glx/glxext.h>
+
+#include "Xext/glx/glxserver.h"
+#include "Xext/glx/glxext.h"
+
 #include <GL/wglext.h>
 #include <wgl_ext_api.h>
 #include "glwindows.h"

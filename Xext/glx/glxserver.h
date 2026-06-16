@@ -60,10 +60,10 @@ typedef struct __GLXclientStateRec __GLXclientState;
 typedef struct __GLXdrawable __GLXdrawable;
 typedef struct __GLXcontext __GLXcontext;
 
-#include "glxscreens.h"
-#include "glxdrawable.h"
-#include "glxcontext.h"
-#include "glx_extinit.h"
+#include "include/glx_extinit.h"
+#include "Xext/glx/glxscreens.h"
+#include "Xext/glx/glxdrawable.h"
+#include "Xext/glx/glxcontext.h"
 
 extern __GLXscreen *glxGetScreen(ScreenPtr pScreen);
 extern __GLXclientState *glxGetClient(ClientPtr pClient);

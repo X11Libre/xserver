@@ -41,14 +41,14 @@
 #include <X11/Xproto.h>
 #include <GL/glxproto.h>
 
-#include <glxserver.h>
-#include <glxutil.h>
+#include "Xext/glx/glxserver.h"
+#include "Xext/glx/glxutil.h"
+#include "Xext/glx/extension_string.h"
 
 #include "x-hash.h"
 
 #include "visualConfigs.h"
 #include "dri.h"
-#include "extension_string.h"
 
 #include "darwin.h"
 #define GLAQUA_DEBUG_MSG(msg, args ...) ASL_LOG(ASL_LEVEL_DEBUG, "GLXAqua", \
