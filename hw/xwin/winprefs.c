@@ -541,15 +541,23 @@ LoadImageComma(char *fname, char *iconDirectory, int sx, int sy, int flags)
                           MAKEINTRESOURCE(i), IMAGE_ICON, sx, sy, flags);
     }
     else {
-        char *file = calloc(1, PATH_MAX + NAME_MAX + 2);
+        size_t len_icon = 0, len_fname = strlen(fname);
+        size_t needed;
+        char *file;
+
+        if (iconDirectory)
+            len_icon = strlen(iconDirectory);
+        needed = len_icon;
+        if (len_icon > 0 && iconDirectory[len_icon - 1] != '\\')
+            needed++;
+        needed += len_fname + 1;
+        file = malloc(needed);
+        if (!file)
+            return NULL;
+        file[0] = '\0';
 #ifdef  __CYGWIN__
         Bool convert = FALSE;
 #endif
-
-        if (!file)
-            return NULL;
-
-        file[0] = 0;
 
         /* If fname starts 'X:\', it's an absolute Windows path, do nothing */
         if (!(fname[0] && fname[1] == ':' && fname[2] == '\\')) {
@@ -722,11 +730,12 @@ LoadPreferences(void)
     /* Now try and find a ~/.xwinrc file */
     home = getenv("HOME");
     if (home) {
-        strcpy(fname, home);
-        if (fname[strlen(fname) - 1] != '/')
-            strcat(fname, "/");
-        strcat(fname, ".XWinrc");
-        parsed = winPrefsLoadPreferences(fname);
+        int len = snprintf(fname, sizeof(fname), "%s/.XWinrc", home);
+        if (len >= (int)sizeof(fname)) {
+            ErrorF("HOME path too long, ignoring ~/.XWinrc\n");
+        } else {
+            parsed = winPrefsLoadPreferences(fname);
+        }
     }
 
     /* No home file found, check system default */
