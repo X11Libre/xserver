@@ -40,6 +40,7 @@ Equipment Corporation.
 #include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
+#include "Xext/composite/compint.h"
 #include "Xext/damage/damageext_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -60,7 +61,6 @@ Equipment Corporation.
 #include "resource.h"
 #include "picturestr_priv.h"
 #include "xfixesint.h"
-#include "compint.h"
 #include "protocol-versions.h"
 
 /* Xinerama is disabled by default unless enabled via +xinerama */

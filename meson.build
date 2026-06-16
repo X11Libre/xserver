@@ -682,7 +682,6 @@ inc = include_directories(
     'Xext',
     'Xext/dri2',
     'Xi',
-    'composite',
     'exa',
     'fb',
     'glamor',
@@ -792,7 +791,6 @@ if build_xserver
     subdir('fb')
     subdir('mi')
     subdir('os')
-    subdir('composite')
     subdir('miext/damage')
     subdir('miext/shadow')
     subdir('miext/sync')

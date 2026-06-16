@@ -175,7 +175,7 @@ explanation.
 
 ### Extensions
 
-- **composite/**: Composite extension  
+- **Xext/composite/**: Composite extension  
     Supports window redirection and compositing effects (e.g., transparency)
     via files like `compwindow.c`. It interconnects with Render (for drawing)
     and Damage (for efficiency).

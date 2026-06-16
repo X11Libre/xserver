@@ -94,13 +94,13 @@ Equipment Corporation.
 
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
+#include "Xext/composite/compint.h"
 
 #include    "scrnintstr.h"
 #include    "validate.h"
 #include    "windowstr.h"
 #include    "regionstr.h"
 #include    "globals.h"
-#include    "compint.h"
 
 /*
  * Compute the visibility of a shaped window

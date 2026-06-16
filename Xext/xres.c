@@ -19,6 +19,7 @@
 #include "dix/rpcbuf_priv.h"
 #include "os/client_priv.h"
 #include "miext/extinit_priv.h"
+#include "Xext/composite/compint.h"
 #include "Xext/xace.h"
 
 #include "misc.h"
@@ -34,7 +35,6 @@
 #include "misc.h"
 #include "hashtable.h"
 #include "picturestr.h"
-#include "compint.h"
 
 Bool noResExtension = FALSE;
 

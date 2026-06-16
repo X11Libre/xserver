@@ -39,7 +39,7 @@
 #include <epoxy/egl.h>
 #include "glxserver.h"
 #include "glxutil.h"
-#include "compint.h"
+#include "Xext/composite/compint.h"
 #include <X11/extensions/composite.h>
 #include "glamor_priv.h"
 #include "glamor.h"

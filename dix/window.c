@@ -119,6 +119,7 @@ Equipment Corporation.
 #include "os/client_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
+#include "Xext/composite/compint.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -136,7 +137,6 @@ Equipment Corporation.
 #include "gcstruct.h"
 #include "servermd.h"
 #include "globals.h"
-#include "compint.h"
 #include "privates.h"
 #include "xace.h"
 

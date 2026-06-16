@@ -184,7 +184,7 @@ glxConvertToXVisualType(int visualType)
         ? x_visual_types[visualType - GLX_TRUE_COLOR] : -1;
 }
 
-/* This code inspired by composite/compinit.c.  We could move this to
+/* This code inspired by Xext/composite/compinit.c.  We could move this to
  * mi/ and share it with composite.*/
 
 static VisualPtr
