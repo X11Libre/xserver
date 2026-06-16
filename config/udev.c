@@ -595,11 +595,11 @@ config_udev_odev_probe(config_odev_probe_proc_ptr probe_callback)
 
         if (!path || !syspath || !subsys)
             goto no_probe;
-        else if (strcmp(subsys, "drm") != 0)
+        if (strcmp(subsys, "drm") != 0)
             goto no_probe;
-        else if (strncmp(sysname, "card", 4) != 0)
+        if (strncmp(sysname, "card", 4) != 0)
             goto no_probe;
-        else if (!check_seat(udev_device))
+        if (!check_seat(udev_device))
             goto no_probe;
 
         config_udev_odev_setup_attribs(udev_device, path, syspath, major(devnum),
