@@ -23,7 +23,7 @@
 
 #include "dix/dix_priv.h"
 #include "Xext/present/present_priv.h"
-#include "Xext/geext_priv.h"
+#include "Xext/geext/geext_priv.h"
 
 static RESTYPE present_event_type;
 

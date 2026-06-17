@@ -40,7 +40,7 @@ Equipment Corporation.
 #include "os/screensaver.h"
 #include "os/osdep.h"
 #include "Xext/dpms/dpms_priv.h"
-#include "Xext/geext_priv.h"
+#include "Xext/geext/geext_priv.h"
 
 #include "misc.h"
 #include "os.h"
