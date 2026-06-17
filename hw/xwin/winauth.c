@@ -33,7 +33,7 @@
 #include "winmsg.h"
 
 /* Includes for authorization */
-#include "securitysrv.h"
+#include "security/securitysrv.h"
 #include "os/osdep.h"
 #include "os/mitauth.h"
 

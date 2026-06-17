@@ -10,10 +10,6 @@ if build_hashtable
     srcs_xext += 'hashtable.c'
 endif
 
-if build_xsecurity
-    srcs_xext += ['security.c']
-endif
-
 
 libxserver_xext = static_library('xserver_xext',
     srcs_xext,
@@ -31,6 +27,7 @@ if build_xselinux
     subdir('xselinux')
 endif
 
+subdir('security')
 subdir('damage')
 subdir('doublebuffer')
 subdir('dri2')
