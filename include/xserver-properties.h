@@ -62,6 +62,11 @@
 /* FLOAT, format 32 */
 #define ACCEL_PROP_VELOCITY_SCALING "Device Accel Velocity Scaling"
 
+/* XKB lock-key timing quirk
+ * CARD8, 1 value, 0 = standard X11 behaviour, 1 = toggle entirely on press.
+ * Set on master keyboard devices. */
+#define XKB_PROP_LOCK_MODS_ON_PRESS "Toggle Lock Modifiers On Press"
+
 /* Axis labels */
 #define AXIS_LABEL_PROP "Axis Labels"
 
