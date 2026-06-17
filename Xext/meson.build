@@ -9,10 +9,6 @@ srcs_xext = [
     'xtest.c',
 ]
 
-if build_dpms
-    srcs_xext += 'dpms/dpms.c'
-endif
-
 
 if build_hashtable
     srcs_xext += 'hashtable.c'
@@ -56,6 +52,7 @@ subdir('damage')
 subdir('doublebuffer')
 subdir('dri2')
 subdir('dri3')
+subdir('dpms')
 subdir('panoramiX')
 subdir('present')
 subdir('render')

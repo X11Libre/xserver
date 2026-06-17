@@ -820,7 +820,8 @@ if build_xserver
         libxserver_dri3,
         libxserver_xinerama,
         libxserver_xf86bigfont,
-        libxserver_shm
+        libxserver_shm,
+        libxserver_dpms
     ]
 
     if build_xselinux
