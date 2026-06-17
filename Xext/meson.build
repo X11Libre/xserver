@@ -35,9 +35,7 @@ if build_xsecurity
     srcs_xext += ['security.c']
 endif
 
-if build_xselinux
-    srcs_xext += ['xselinux_ext.c', 'xselinux_hooks.c', 'xselinux_label.c']
-endif
+
 
 if build_xv
     srcs_xext += ['xvmain.c', 'xvdisp.c', 'xvmc.c']
@@ -52,6 +50,11 @@ libxserver_xext = static_library('xserver_xext',
 subdir('xfixes')
 subdir('xinput')
 subdir('xkeyboard')
+
+if build_xselinux
+    subdir('xselinux')
+endif
+
 subdir('damage')
 subdir('doublebuffer')
 subdir('dri2')

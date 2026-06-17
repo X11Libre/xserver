@@ -35,7 +35,7 @@
 #include "optionstr.h"
 
 #ifdef XSELINUX
-#include "xselinux.h"
+#include "Xext/xselinux/xselinux.h"
 #endif
 
 #ifdef XFreeXDGA

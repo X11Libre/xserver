@@ -822,6 +822,10 @@ if build_xserver
         libxserver_xf86bigfont
     ]
 
+    if build_xselinux
+        libxserver += libxserver_xselinux
+    endif
+
     if build_namespace
         subdir('Xext/namespace')
         libxserver += libxserver_namespace
