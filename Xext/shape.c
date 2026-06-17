@@ -40,8 +40,8 @@ in this Software without prior written authorization from The Open Group.
 #include "dix/screen_hooks_priv.h"
 #include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"

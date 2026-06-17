@@ -83,8 +83,8 @@ Equipment Corporation.
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "mi/mi_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "misc.h"
 #include "regionstr.h"

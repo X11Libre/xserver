@@ -84,8 +84,8 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/xvdix_priv.h"
 
 #include "misc.h"

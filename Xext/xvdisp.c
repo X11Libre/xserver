@@ -37,8 +37,8 @@ SOFTWARE.
 #include "dix/screenint_priv.h"
 #include "include/shmint.h"
 #include "include/xvmcext.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/shm_priv.h"
 #include "Xext/xvdix_priv.h"
 

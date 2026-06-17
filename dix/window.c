@@ -120,8 +120,8 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "os/screensaver.h"
 #include "Xext/composite/compint.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "misc.h"
 #include "scrnintstr.h"

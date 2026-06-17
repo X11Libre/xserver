@@ -47,8 +47,8 @@
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"

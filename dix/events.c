@@ -138,8 +138,8 @@ Equipment Corporation.
 #include "os/fmt.h"
 #include "os/log_priv.h"
 #include "os/probes_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
 
 #include "misc.h"

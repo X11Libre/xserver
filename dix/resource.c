@@ -130,8 +130,8 @@ Equipment Corporation.
 #include "include/extinit.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"

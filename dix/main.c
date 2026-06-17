@@ -107,7 +107,7 @@ Equipment Corporation.
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
 #endif
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "scrnintstr.h"
 #include "misc.h"

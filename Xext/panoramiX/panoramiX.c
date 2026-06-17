@@ -42,8 +42,8 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "Xext/composite/compint.h"
 #include "Xext/damage/damageext_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "panoramiX.h"
+#include "panoramiXsrv.h"
 #include "Xext/render/picturestr_priv.h"
 #include "Xext/xfixes/xfixesint.h"
 

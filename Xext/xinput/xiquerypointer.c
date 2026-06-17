@@ -46,7 +46,7 @@
 #include "dix/screenint_priv.h"
 #include "include/extinit.h"
 #include "os/fmt.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 #include "handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */

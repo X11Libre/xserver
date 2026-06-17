@@ -34,8 +34,8 @@
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "Xext/damage/damageext_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/xfixes/xfixes.h"
 
 #include "damagestr.h"

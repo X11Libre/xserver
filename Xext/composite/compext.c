@@ -47,7 +47,7 @@
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "compint.h"
 #include "xace.h"

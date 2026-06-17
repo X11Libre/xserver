@@ -47,8 +47,8 @@
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/probes_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "misc.h"
 #include "resource.h"

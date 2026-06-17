@@ -38,8 +38,8 @@ Equipment Corporation.
 #include "dix/server_priv.h"
 #include "dix/window_priv.h"
 #include "os/osdep.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "panoramiX.h"
+#include "panoramiXsrv.h"
 
 #include "windowstr.h"
 #include "dixfontstr.h"

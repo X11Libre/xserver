@@ -49,7 +49,7 @@
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "os/osdep.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "compint.h"
 #include "compositeext_priv.h"

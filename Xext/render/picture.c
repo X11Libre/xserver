@@ -45,7 +45,7 @@
 #include "glyphstr_priv.h"
 #include "xace.h"
 #ifdef XINERAMA
-#include "panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 #endif /* XINERAMA */
 
 DevPrivateKeyRec PictureScreenPrivateKeyRec;

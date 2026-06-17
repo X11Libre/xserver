@@ -47,8 +47,8 @@ in this Software without prior written authorization from the X Consortium.
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
 #endif
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
