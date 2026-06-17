@@ -29,11 +29,6 @@ if build_xsecurity
 endif
 
 
-
-if build_xv
-    srcs_xext += ['xvmain.c', 'xvdisp.c', 'xvmc.c']
-endif
-
 libxserver_xext = static_library('xserver_xext',
     srcs_xext,
     include_directories: inc,
@@ -65,3 +60,4 @@ subdir('randr')
 subdir('record')
 subdir('glx')
 subdir('shm')
+subdir('xv')

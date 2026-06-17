@@ -86,7 +86,7 @@ SOFTWARE.
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
-#include "Xext/xvdix_priv.h"
+#include "xvdix_priv.h"
 
 #include "misc.h"
 #include "os.h"

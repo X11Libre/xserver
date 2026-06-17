@@ -42,7 +42,7 @@ of the copyright holder.
 
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
-#include "Xext/xvdix_priv.h"
+#include "Xext/xv/xvdix_priv.h"
 
 #include "kdrive.h"
 #include "scrnintstr.h"

@@ -14,7 +14,7 @@
 #include "dix/screen_hooks_priv.h"
 #include "include/xvmcext.h"
 #include "miext/extinit_priv.h"
-#include "Xext/xvdix_priv.h"
+#include "xvdix_priv.h"
 
 #include "misc.h"
 #include "os.h"
