@@ -415,7 +415,7 @@ extern Bool
                 XkbGeomClearance        /* clearance */
     );
 
-extern Status XkbAllocGeometry(XkbDescPtr /* xkb */ ,
+extern int XkbAllocGeometry(XkbDescPtr /* xkb */ ,
                                XkbGeometrySizesPtr      /* sizes */
     );
 

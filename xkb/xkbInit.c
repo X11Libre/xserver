@@ -335,7 +335,7 @@ XkbInitRadioGroups(XkbSrvInfoPtr xkbi)
     return;
 }
 
-static Status
+static int
 XkbInitCompatStructs(XkbDescPtr xkb)
 {
     register int i;
@@ -373,14 +373,12 @@ XkbInitSemantics(XkbDescPtr xkb)
     return;
 }
 
-/***====================================================================***/
-
-static Status
+static int
 XkbInitNames(XkbSrvInfoPtr xkbi)
 {
     XkbDescPtr xkb;
     XkbNamesPtr names;
-    Status rtrn;
+    int rtrn;
     Atom unknown;
 
     xkb = xkbi->desc;
@@ -432,7 +430,7 @@ XkbInitNames(XkbSrvInfoPtr xkbi)
     return Success;
 }
 
-static Status
+static int
 XkbInitIndicatorMap(XkbSrvInfoPtr xkbi)
 {
     XkbDescPtr xkb;
@@ -470,7 +468,7 @@ XkbInitIndicatorMap(XkbSrvInfoPtr xkbi)
     return Success;
 }
 
-static Status
+static int
 XkbInitControls(DeviceIntPtr pXDev, XkbSrvInfoPtr xkbi)
 {
     XkbDescPtr xkb;
@@ -498,7 +496,7 @@ XkbInitControls(DeviceIntPtr pXDev, XkbSrvInfoPtr xkbi)
     return Success;
 }
 
-static Status
+static int
 XkbInitOverlayState(XkbSrvInfoPtr xkbi)
 {
     memset(xkbi->overlay_perkey_state, 0, sizeof(xkbi->overlay_perkey_state));

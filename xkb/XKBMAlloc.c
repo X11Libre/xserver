@@ -214,7 +214,7 @@ XkbAllocServerMap(XkbDescPtr xkb, unsigned which, unsigned nNewActions)
 
 /***====================================================================***/
 
-static Status
+static int
 XkbCopyKeyType(XkbKeyTypePtr from, XkbKeyTypePtr into)
 {
     if ((!from) || (!into))

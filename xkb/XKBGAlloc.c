@@ -418,7 +418,7 @@ XkbGeomRealloc(void **buffer, int szItems, int nrItems,
     return TRUE;
 }
 
-static Status
+static int
 _XkbGeomAlloc(void **old,
               unsigned short *num,
               unsigned short *total, int num_new, size_t sz_elem)
@@ -484,11 +484,11 @@ _XkbGeomAlloc(void **old,
 				&(r)->num_keys,&(r)->sz_keys,\
 				(n),sizeof(XkbOverlayKeyRec))
 
-Status
+int
 XkbAllocGeometry(XkbDescPtr xkb, XkbGeometrySizesPtr sizes)
 {
     XkbGeometryPtr geom;
-    Status rtrn;
+    int rtrn;
 
     if (xkb->geom == NULL) {
         xkb->geom = calloc(1, sizeof(XkbGeometryRec));

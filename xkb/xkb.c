@@ -1408,7 +1408,7 @@ static void XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
     }
 }
 
-static Status
+static int
 XkbComputeGetMapReplySize(XkbDescPtr xkb, xkbGetMapReply * rep)
 {
     int len;
@@ -2662,7 +2662,7 @@ _XkbSetMap(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req, char *values)
     sentNKN = FALSE;
     if ((xkb->min_key_code != req->minKeyCode) ||
         (xkb->max_key_code != req->maxKeyCode)) {
-        Status status;
+        int status;
         xkbNewKeyboardNotify nkn = { 0 };
 
         nkn.deviceID = nkn.oldDeviceID = dev->id;
@@ -2861,7 +2861,7 @@ ProcXkbSetMap(ClientPtr client)
     return Success;
 }
 
-static Status
+static int
 XkbComputeGetCompatMapReplySize(XkbCompatMapPtr compat,
                                 xkbGetCompatMapReply * rep)
 {
@@ -3214,7 +3214,7 @@ ProcXkbGetIndicatorState(ClientPtr client)
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
-static Status
+static int
 XkbComputeGetIndicatorMapReplySize(XkbIndicatorPtr indicators,
                                    xkbGetIndicatorMapReply * rep)
 {
@@ -3700,7 +3700,7 @@ static void __rpcbuf_write_atoms(x_rpcbuf_t *rpcbuf, Atom *atoms, size_t maxAtom
     }
 }
 
-static Status
+static int
 XkbComputeGetNamesReplySize(XkbDescPtr xkb, xkbGetNamesReply * rep)
 {
     register unsigned which, length;
@@ -4812,7 +4812,7 @@ static void XkbWriteGeomSections(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
     }
 }
 
-static Status
+static int
 XkbComputeGetGeometryReplySize(XkbGeometryPtr geom,
                                xkbGetGeometryReply * rep, Atom name)
 {
@@ -4894,7 +4894,7 @@ ProcXkbGetGeometry(ClientPtr client)
     DeviceIntPtr dev;
     XkbGeometryPtr geom;
     Bool shouldFree;
-    Status status;
+    int status;
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -4933,7 +4933,7 @@ free_out:
     return status;
 }
 
-static Status
+static int
 _GetCountedString(char **wire_inout, ClientPtr client, char **str)
 {
     char *wire, *next;
@@ -4963,7 +4963,7 @@ _GetCountedString(char **wire_inout, ClientPtr client, char **str)
     return Success;
 }
 
-static Status
+static int
 _CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
                 XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
 {
@@ -4972,7 +4972,7 @@ _CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
     xkbAnyDoodadWireDesc any;
     xkbTextDoodadWireDesc text;
     XkbDoodadPtr doodad;
-    Status status;
+    int status;
 
     dWire = (xkbDoodadWireDesc *) (*wire_inout);
     if (!_XkbCheckRequestBounds(client, req, dWire, dWire + 1))
@@ -5079,7 +5079,7 @@ _CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
     return Success;
 }
 
-static Status
+static int
 _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
                  XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
 {
@@ -5138,11 +5138,11 @@ _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
     return Success;
 }
 
-static Status
+static int
 _CheckSetSections(XkbGeometryPtr geom,
                   xkbSetGeometryReq * req, char **wire_inout, ClientPtr client)
 {
-    Status status;
+    int status;
     register int s;
     char *wire;
     xkbSectionWireDesc *sWire;
@@ -5250,7 +5250,7 @@ _CheckSetSections(XkbGeometryPtr geom,
     return Success;
 }
 
-static Status
+static int
 _CheckSetShapes(XkbGeometryPtr geom,
                 xkbSetGeometryReq * req, char **wire_inout, ClientPtr client)
 {
@@ -5336,11 +5336,11 @@ _CheckSetShapes(XkbGeometryPtr geom,
     return Success;
 }
 
-static Status
+static int
 _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
 {
     register int i;
-    Status status;
+    int status;
     char *wire;
 
     wire = (char *) &req[1];
@@ -5436,7 +5436,7 @@ _XkbSetGeometry(ClientPtr client, DeviceIntPtr dev, xkbSetGeometryReq * stuff)
     XkbDescPtr xkb;
     Bool new_name;
     XkbGeometryPtr geom, old;
-    Status status;
+    int status;
 
     xkb = dev->key->xkbInfo->desc;
     old = xkb->geom;
