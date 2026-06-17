@@ -691,7 +691,6 @@ inc = include_directories(
     'miext/sync',
     'dix',
     'include',
-    'xfixes',
     epoll_inc,
 )
 
@@ -792,7 +791,6 @@ if build_xserver
     if build_rootless
         subdir('miext/rootless')
     endif
-    subdir('xfixes')
     subdir('xkb')
     subdir('Xext')
     subdir('Xi')

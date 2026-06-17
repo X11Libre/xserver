@@ -44,6 +44,7 @@
 #define _COMPINT_H_
 
 #include "dix/screen_hooks_priv.h"
+#include "Xext/xfixes/xfixes.h"
 
 #include "misc.h"
 #include "scrnintstr.h"
@@ -63,7 +64,6 @@
 #include "privates.h"
 #include "mi.h"
 #include "damage.h"
-#include "xfixes.h"
 #include <X11/extensions/compositeproto.h>
 #include "compositeext.h"
 #include <assert.h>

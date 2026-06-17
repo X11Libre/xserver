@@ -50,13 +50,13 @@
 #include <X11/extensions/xfixesproto.h>
 
 #include "dix/selection_priv.h"
+#include "Xext/xfixes/xfixes.h"
 
 #include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "windowstr.h"
-#include "xfixes.h"
 
 extern int XFixesEventBase;
 extern int XFixesUseXinerama;

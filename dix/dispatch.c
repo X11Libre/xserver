@@ -127,6 +127,7 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "os/probes_priv.h"
 #include "os/screensaver.h"
+#include "Xext/xfixes/xfixesint.h"
 
 #include "windowstr.h"
 #include "dixfontstr.h"
@@ -143,7 +144,6 @@ Equipment Corporation.
 #include "xace.h"
 #include "inputstr.h"
 #include "xkbsrv.h"
-#include "xfixesint.h"
 #include "dixstruct_priv.h"
 
 #define mskcnt ((MAXCLIENTS + 31) / 32)

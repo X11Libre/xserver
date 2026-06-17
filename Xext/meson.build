@@ -49,6 +49,7 @@ libxserver_xext = static_library('xserver_xext',
     dependencies: common_dep,
 )
 
+subdir('xfixes')
 subdir('damage')
 subdir('doublebuffer')
 subdir('dri2')

@@ -28,6 +28,7 @@
 
 #include "include/present.h"
 #include "include/syncsdk.h"
+#include "Xext/xfixes/xfixes.h"
 
 #include "scrnintstr.h"
 #include "misc.h"
@@ -35,7 +36,6 @@
 #include "windowstr.h"
 #include "dixstruct.h"
 #include <syncsrv.h>
-#include <xfixes.h>
 #include <randrstr.h>
 #include <inttypes.h>
 #include "dri3.h"

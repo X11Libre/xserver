@@ -45,6 +45,7 @@ Equipment Corporation.
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #include "Xext/render/picturestr_priv.h"
+#include "Xext/xfixes/xfixesint.h"
 
 #include "misc.h"
 #include "cursor.h"
@@ -60,7 +61,6 @@ Equipment Corporation.
 #include "globals.h"
 #include "servermd.h"
 #include "resource.h"
-#include "xfixesint.h"
 #include "protocol-versions.h"
 
 /* Xinerama is disabled by default unless enabled via +xinerama */

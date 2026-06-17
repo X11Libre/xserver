@@ -40,12 +40,12 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "include/extinit.h"
+#include "Xext/xfixes/xfixes.h"
 
 #include "dixstruct.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "extnsionst.h"
-#include "xfixes.h"
 #include "dri2_priv.h"
 #include "dri2int.h"
 #include "protocol-versions.h"

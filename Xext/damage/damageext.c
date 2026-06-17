@@ -35,7 +35,7 @@
 #include "Xext/damage/damageext_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
-#include "xfixes/xfixes.h"
+#include "Xext/xfixes/xfixes.h"
 
 #include "damagestr.h"
 #include "protocol-versions.h"

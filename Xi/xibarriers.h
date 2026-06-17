@@ -1,7 +1,8 @@
 #ifndef _XIBARRIERS_H_
 #define _XIBARRIERS_H_
 
-#include "resource.h"
+#include "include/resource.h"
+#include "Xext/xfixes/xfixesint.h"
 
 extern RESTYPE PointerBarrierType;
 
@@ -20,8 +21,6 @@ barrier_is_blocking_direction(const struct PointerBarrier *, int);
 void
 barrier_clamp_to_barrier(struct PointerBarrier *barrier, int dir, int *x,
                              int *y);
-
-#include <xfixesint.h>
 
 int
 XICreatePointerBarrier(ClientPtr client,

@@ -204,7 +204,7 @@ cat > sdksyms.c << EOF
 #include "compositeext.h"
 
 /* xfixes/Makefile.am */
-#include "xfixes.h"
+#include "Xext/xfixes/xfixes.h"
 
 
 /* include/Makefile.am */
