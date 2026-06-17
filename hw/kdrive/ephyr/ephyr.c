@@ -460,6 +460,14 @@ ephyrRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
                            screen->width,
                            screen->height, screen->width_mm, screen->height_mm);
 
+    if (hostx_want_fullscreen()) {
+        RROutputPtr pOutput = RRFirstOutput(pScreen);
+        if (pOutput)
+            RROutputSetPhysicalSize(pOutput,
+                                    scrpriv->win_width_mm,
+                                    scrpriv->win_height_mm);
+    }
+
     randr = KdSubRotation(scrpriv->randr, screen->randr);
 
     RRSetCurrentConfig(pScreen, randr, 0, pSize);
