@@ -825,7 +825,8 @@ if build_xserver
         libxserver_dpms,
         libxserver_xv,
         libxserver_xtest,
-        libxserver_shape
+        libxserver_shape,
+        libxserver_saver
     ]
 
     if build_xselinux
