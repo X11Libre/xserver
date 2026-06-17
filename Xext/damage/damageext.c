@@ -30,6 +30,7 @@
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/pixmapstr.h"
+#include "include/windowstr.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "Xext/damage/damageext_priv.h"
