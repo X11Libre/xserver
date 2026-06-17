@@ -1,7 +1,6 @@
 srcs_xext = [
     'bigreq.c',
     'geext.c',
-    'shape.c',
     'sleepuntil.c',
     'sync.c',
     'xace.c',
@@ -53,6 +52,7 @@ if build_xwin or build_xquartz
 endif
 subdir('randr')
 subdir('record')
+subdir('shape')
 subdir('glx')
 subdir('shm')
 subdir('xv')
