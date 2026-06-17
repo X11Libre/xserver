@@ -272,11 +272,112 @@ glxClientCallback(CallbackListPtr *list, void *closure, void *data)
 
 /************************************************************************/
 
+#ifndef BUILD_GLX_DRI
+static void
+noop_drawable_destroy(__GLXdrawable *draw)
+{
+    free(draw);
+}
+
+static GLboolean
+noop_drawable_swap_buffers(ClientPtr client, __GLXdrawable *draw)
+{
+    return GL_FALSE;
+}
+
+static void
+noop_drawable_copy_sub_buffer(__GLXdrawable *draw, int x, int y, int w, int h)
+{
+}
+
+static void
+noop_drawable_wait_x(__GLXdrawable *draw)
+{
+}
+
+static void
+noop_drawable_wait_gl(__GLXdrawable *draw)
+{
+}
+
+
+static __GLXdrawable *
+noop_create_glx_drawable(ClientPtr client, __GLXscreen *screen,
+                         DrawablePtr draw, XID drawid, int type,
+                         XID glxdrawid, __GLXconfig *modes)
+{
+    __GLXdrawable *ret;
+
+    ret = calloc(1, sizeof *ret);
+    if (!ret)
+        return NULL;
+
+    if (!__glXDrawableInit(ret, screen, draw, type, glxdrawid, modes)) {
+        free(ret);
+        return NULL;
+    }
+
+    ret->destroy = noop_drawable_destroy;
+    ret->swapBuffers = noop_drawable_swap_buffers;
+    ret->copySubBuffer = noop_drawable_copy_sub_buffer;
+    ret->waitX = noop_drawable_wait_x;
+    ret->waitGL = noop_drawable_wait_gl;
+
+    return ret;
+}
+
+static void
+noop_screen_destroy(__GLXscreen *screen)
+{
+    free(screen);
+}
+
+static glx_func_ptr
+noop_get_proc_address(const char* str)
+{
+    return NULL;
+}
+
+static __GLXscreen *
+noop_screen_probe(ScreenPtr pScreen)
+{
+    __GLXscreen *screen = calloc(1, sizeof (*screen));
+    if (!screen) {
+        return NULL;
+    }
+
+    screen->destroy = noop_screen_destroy;
+    screen->createDrawable = noop_create_glx_drawable;
+    /* screen.swapInterval = NULL; */
+
+    __glXInitExtensionEnableBits(screen->glx_enable_bits);
+
+    /**
+     * For glvnd to work on the screens with actual glx support,
+     * it needs to be supported on all screens
+     *
+     * Set it to something bogus so there are no possible conflicts with actual GL libraries
+     */
+    screen->glvnd = strdup("noop");
+
+    __glXScreenInit(screen, pScreen);
+    __glXsetGetProcAddress(noop_get_proc_address);
+
+    return screen;
+}
+
+static __GLXprovider noop_provider = {
+    noop_screen_probe,
+    "noop",
+    NULL
+};
+#endif
+
 static __GLXprovider *__glXProviderStack =
 #ifdef BUILD_GLX_DRI
                                            &__glXDRISWRastProvider;
 #else
-                                           NULL;
+                                           &noop_provider;
 #endif
 
 void
