@@ -902,7 +902,7 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
 {
     FontPathElementPtr fpe;
     int err = Successful;
-    char *name;
+    char *name = NULL;
     int namelen = 0;
     int numFonts;
     FontInfoRec fontInfo, *pFontInfo;
@@ -962,6 +962,10 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
              * is BadFontName, indicating the alias resolution
              * is complete.
              */
+            if (!name) {
+                err = BadFontName;
+                goto ContBadFontName;
+            }
             if (c->haveSaved) {
                 char *tmpname;
                 int tmpnamelen;
