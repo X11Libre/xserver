@@ -45,6 +45,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/cmdline.h"
 #include "os/log_priv.h"
 #include "xkbsrv_priv.h"
+#include "dix/exevents_priv.h"
+#include <xserver-properties.h>
 
 #include "inputstr.h"
 #include "opaque.h"
@@ -503,6 +505,40 @@ XkbInitOverlayState(XkbSrvInfoPtr xkbi)
     return Success;
 }
 
+static int
+XkbSetLockModsOnPressProperty(DeviceIntPtr dev, Atom atom,
+                              XIPropertyValuePtr val, BOOL checkOnly)
+{
+    int nelem = 1;
+    int v;
+    int *ptr = &v;
+
+    if (atom != XIGetKnownProperty(XKB_PROP_LOCK_MODS_ON_PRESS))
+        return Success;
+
+    if (XIPropToInt(val, &nelem, &ptr))
+        return BadValue;
+    if (v != 0 && v != 1)
+        return BadValue;
+
+    if (!checkOnly)
+        xkbLockModsOnPress = v;
+
+    return Success;
+}
+
+static void
+XkbInitLockModsOnPressProperty(DeviceIntPtr dev)
+{
+    Atom prop = XIGetKnownProperty(XKB_PROP_LOCK_MODS_ON_PRESS);
+    CARD8 val = xkbLockModsOnPress;
+
+    XIChangeDeviceProperty(dev, prop, XA_INTEGER, 8,
+                           PropModeReplace, 1, &val, FALSE);
+    XISetDevicePropertyDeletable(dev, prop, FALSE);
+    XIRegisterPropertyHandler(dev, XkbSetLockModsOnPressProperty, NULL, NULL);
+}
+
 static Bool
 InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
                                  const char *keymap, int keymap_length,
@@ -638,6 +674,9 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
         XkbSetRulesUsed(rmlvo);
     }
     XkbFreeRMLVOSet(&rmlvo_dflts, FALSE);
+
+    if (InputDevIsMaster(dev))
+        XkbInitLockModsOnPressProperty(dev);
 
     return TRUE;
 
