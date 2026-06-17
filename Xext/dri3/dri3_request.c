@@ -31,7 +31,7 @@
 #include "Xext/randr/randrstr_priv.h"
 
 #include "dri3_priv.h"
-#include <syncsrv.h>
+#include "Xext/sync/syncsrv.h"
 #include <xace.h>
 #include <protocol-versions.h>
 #include <drm_fourcc.h>

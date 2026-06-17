@@ -35,7 +35,7 @@
 #include "list.h"
 #include "windowstr.h"
 #include "dixstruct.h"
-#include <syncsrv.h>
+#include "Xext/sync/syncsrv.h"
 #include <randrstr.h>
 #include <inttypes.h>
 #include "dri3.h"

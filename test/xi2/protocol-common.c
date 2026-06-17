@@ -40,7 +40,7 @@
 
 #include "Xext/xinput/exglobals.h"
 #include "xserver-properties.h"
-#include "syncsrv.h"
+#include "Xext/sync/syncsrv.h"
 #include "protocol-common.h"
 
 struct devices devices;

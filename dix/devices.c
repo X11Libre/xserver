@@ -90,7 +90,7 @@ SOFTWARE.
 #include "enterleave.h"         /* for EnterWindow() */
 #include "xserver-properties.h"
 #include "Xext/xinput/xichangehierarchy.h"  /* For XISendDeviceHierarchyEvent */
-#include "syncsrv.h"
+#include "Xext/sync/syncsrv.h"
 
 /** @file
  * This file handles input device-related stuff.

@@ -1,6 +1,5 @@
 srcs_xext = [
     'sleepuntil.c',
-    'sync.c',
     'xace.c',
     'xcmisc.c',
 ]
@@ -45,6 +44,7 @@ subdir('randr')
 subdir('record')
 subdir('shape')
 subdir('saver')
+subdir('sync')
 subdir('glx')
 subdir('shm')
 subdir('xv')
