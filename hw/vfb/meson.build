@@ -21,7 +21,7 @@ xvfb_server = executable(
         libxserver_main,
         libxserver_fb,
         libxserver,
-        libxserver_xkb_stubs,
+        libxserver_xkeyboard_stubs,
         libxserver_xi_stubs,
         libxserver_glx,
         libglxvnd,

@@ -39,8 +39,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
-#include "xkb/xkbfmisc_priv.h"
-#include "xkb/xkbsrv_priv.h"
+#include "xkbfmisc_priv.h"
+#include "xkbsrv_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"

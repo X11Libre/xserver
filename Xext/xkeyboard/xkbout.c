@@ -35,10 +35,10 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/XKMformat.h>
 
-#include "xkb/xkbfmisc_priv.h"
-#include "xkb/xkbout_priv.h"
-#include "xkb/xkbsrv_priv.h"
-#include "xkb/xkbtext_priv.h"
+#include "xkbfmisc_priv.h"
+#include "xkbout_priv.h"
+#include "xkbsrv_priv.h"
+#include "xkbtext_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"

@@ -66,7 +66,7 @@ x11_bin_libs = [
     libxpbproxy,
     libxserver_fb,
     libxserver,
-    libxserver_xkb_stubs,
+    libxserver_xkeyboard_stubs,
 ]
 
 if build_glx

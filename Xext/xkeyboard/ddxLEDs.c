@@ -30,18 +30,42 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/keysym.h>
+#include <X11/extensions/XI.h>
 
-#include "xkb/xkbsrv_priv.h"
+#include "xkbsrv_priv.h"
 
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 
-int
-XkbDDXTerminateServer(DeviceIntPtr dev, KeyCode key, XkbAction *act)
+static void
+XkbDDXUpdateIndicators(DeviceIntPtr dev, CARD32 new)
 {
-    if (dev != inputInfo.keyboard)
-        GiveUp(1);
+    dev->kbdfeed->ctrl.leds = new;
+    (*dev->kbdfeed->CtrlProc) (dev, &dev->kbdfeed->ctrl);
+    return;
+}
 
-    return 0;
+void
+XkbDDXUpdateDeviceIndicators(DeviceIntPtr dev, XkbSrvLedInfoPtr sli, CARD32 new)
+{
+    if (sli->fb.kf == dev->kbdfeed)
+        XkbDDXUpdateIndicators(dev, new);
+    else if (sli->class == KbdFeedbackClass) {
+        KbdFeedbackPtr kf;
+
+        kf = sli->fb.kf;
+        if (kf && kf->CtrlProc) {
+            (*kf->CtrlProc) (dev, &kf->ctrl);
+        }
+    }
+    else if (sli->class == LedFeedbackClass) {
+        LedFeedbackPtr lf;
+
+        lf = sli->fb.lf;
+        if (lf && lf->CtrlProc) {
+            (*lf->CtrlProc) (dev, &lf->ctrl);
+        }
+    }
+    return;
 }

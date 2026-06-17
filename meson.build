@@ -790,7 +790,6 @@ if build_xserver
     if build_rootless
         subdir('miext/rootless')
     endif
-    subdir('xkb')
     subdir('Xext')
     if build_glamor
         subdir('glamor')
@@ -814,7 +813,7 @@ if build_xserver
         libxserver_miext_sync,
         libxserver_xfixes,
         libxserver_xi,
-        libxserver_xkb,
+        libxserver_xkeyboard,
         libxserver_record,
         libxserver_os,
         libxserver_dri2,

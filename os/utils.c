@@ -120,7 +120,7 @@ __stdcall unsigned long GetTickCount(void);
 #include "Xext/dpms/dpms_priv.h"
 #include "Xext/present/present_priv.h"
 #include "Xext/xf86bigfont/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
-#include "xkb/xkbsrv_priv.h"
+#include "Xext/xkeyboard/xkbsrv_priv.h"
 
 #include "dixstruct.h"
 #include "picture.h"

@@ -28,6 +28,7 @@
 
 #include <xkb-config.h>
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -37,16 +38,15 @@
 #include <X11/Xproto.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/XKMformat.h>
 
-#include "xkb/xkbsrv_priv.h"
+#include "Xext/xkeyboard/xkbsrv_priv.h"
+#include "Xext/xkeyboard/xkbgeom_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"
 #include "opaque.h"
 #include "property.h"
-#include "../xkb/xkbgeom_priv.h"
-#include <X11/extensions/XKMformat.h>
-#include <assert.h>
 
 #include "tests-common.h"
 

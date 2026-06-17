@@ -42,7 +42,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
-#include "xkb/xkbsrv_priv.h"
+#include "xkbsrv_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"

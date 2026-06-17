@@ -28,7 +28,7 @@ xfbdev_server = executable(
         libxserver,
         libxserver_glx,
         libxserver_config,
-        libxserver_xkb_stubs,
+        libxserver_xkeyboard_stubs,
         libglxvnd,
     ],
     install: true,

@@ -163,7 +163,7 @@ executable(
         libxserver,
         libxserver_glx,
         libglxvnd,
-        libxserver_xkb_stubs,
+        libxserver_xkeyboard_stubs,
         libxserver_miext_shadow,
         libxserver_pseudoramix,
         libxserver_xi_stubs,

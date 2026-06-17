@@ -31,14 +31,14 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/Xproto.h>
 #include <string.h>
 
-#include "xkb/xkbsrv_priv.h"
+#include "xkbsrv_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"
 #include "xkbgeom_priv.h"
 #include <os.h>
 
-#include "xkb/xkbsrv_priv.h"
+#include "xkbsrv_priv.h"
 
 /***===================================================================***/
 

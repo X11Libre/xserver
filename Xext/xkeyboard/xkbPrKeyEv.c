@@ -35,7 +35,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/input_priv.h"
 #include "os/log_priv.h"
-#include "xkb/xkbsrv_priv.h"
+#include "xkbsrv_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"

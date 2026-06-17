@@ -137,7 +137,7 @@ package_xlibre-xserver-common() {
   find "${pkgdir}" -type f,l ! \( -name 'protocol.txt' -o -name 'Xserver.1' \) -delete
 
   install -vDm644 "${_sourcedir}/COPYING" "${pkgdir}/usr/share/licenses/${pkgbase}/COPYING"
-  install -vDm644 "${_sourcedir}/xkb/README.compiled" "${pkgdir}/var/lib/xkb/README.compiled"
+  install -vDm644 "${_sourcedir}/Xext/xkeyboard/README.compiled" "${pkgdir}/var/lib/xkb/README.compiled"
 }
 
 package_xlibre-xserver-devel() {

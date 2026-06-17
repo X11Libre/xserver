@@ -30,15 +30,54 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/keysym.h>
+#include <X11/extensions/XI.h>
 
-#include "xkb/xkbsrv_priv.h"
+#include "xkbsrv_priv.h"
 
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 
+void
+XkbDDXKeybdCtrlProc(DeviceIntPtr dev, KeybdCtrl * ctrl)
+{
+    int realRepeat;
+
+    realRepeat = ctrl->autoRepeat;
+    if ((dev->kbdfeed) && (XkbDDXUsesSoftRepeat(dev)))
+        ctrl->autoRepeat = 0;
+    if (dev->key && dev->key->xkbInfo && dev->key->xkbInfo->kbdProc)
+        (*dev->key->xkbInfo->kbdProc) (dev, ctrl);
+    ctrl->autoRepeat = realRepeat;
+    return;
+}
+
 int
-XkbDDXSwitchScreen(DeviceIntPtr dev, KeyCode key, XkbAction *act)
+XkbDDXUsesSoftRepeat(DeviceIntPtr pXDev)
 {
     return 1;
+}
+
+void
+XkbDDXChangeControls(DeviceIntPtr dev, XkbControlsPtr old, XkbControlsPtr new)
+{
+    unsigned changed, i;
+    unsigned char *rep_old, *rep_new, *rep_fb;
+
+    changed = new->enabled_ctrls ^ old->enabled_ctrls;
+    for (rep_old = old->per_key_repeat,
+         rep_new = new->per_key_repeat,
+         rep_fb = dev->kbdfeed->ctrl.autoRepeats,
+         i = 0; i < XkbPerKeyBitArraySize; i++) {
+        if (rep_old[i] != rep_new[i]) {
+            rep_fb[i] = rep_new[i];
+            changed &= XkbPerKeyRepeatMask;
+        }
+    }
+
+    if (changed & XkbPerKeyRepeatMask) {
+        if (dev->kbdfeed->CtrlProc)
+            (*dev->kbdfeed->CtrlProc) (dev, &dev->kbdfeed->ctrl);
+    }
+    return;
 }

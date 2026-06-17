@@ -42,7 +42,7 @@
 #include <X11/keysym.h>
 
 #include "os/log_priv.h"
-#include "xkb/xkbrules_priv.h"
+#include "xkbrules_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"

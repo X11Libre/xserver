@@ -35,7 +35,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
-#include "xkb/xkbsrv_priv.h"    /* for XkbInitPrivates */
+#include "Xext/xkeyboard/xkbsrv_priv.h"    /* for XkbInitPrivates */
 
 #include "Xext/xinput/exglobals.h"
 #include "xserver-properties.h"

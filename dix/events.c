@@ -140,7 +140,7 @@ Equipment Corporation.
 #include "os/probes_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
-#include "xkb/xkbsrv_priv.h"
+#include "Xext/xkeyboard/xkbsrv_priv.h"
 
 #include "misc.h"
 #include "resource.h"

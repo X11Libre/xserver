@@ -4,7 +4,7 @@
 #include <X11/X.h>
 
 #include "hw/xfree86/common/action_priv.h"
-#include "xkb/xkbsrv_priv.h"
+#include "Xext/xkeyboard/xkbsrv_priv.h"
 
 #include "windowstr.h"
 #include "os.h"

@@ -3,7 +3,7 @@
 
 #include <X11/X.h>
 
-#include "xkb/xkbsrv_priv.h"
+#include "xkbsrv_priv.h"
 
 #include "windowstr.h"
 
