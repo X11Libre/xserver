@@ -681,7 +681,6 @@ inc = include_directories(
     '.',
     'Xext',
     'Xext/dri2',
-    'Xi',
     'exa',
     'fb',
     'glamor',
@@ -793,7 +792,6 @@ if build_xserver
     endif
     subdir('xkb')
     subdir('Xext')
-    subdir('Xi')
     if build_glamor
         subdir('glamor')
     endif

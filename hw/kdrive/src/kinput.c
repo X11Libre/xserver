@@ -49,9 +49,9 @@
 #include "os/cmdline.h"
 
 #include "xkbsrv.h"
-#include "XIstubs.h"            /* even though we don't use stubs.  cute, no? */
+#include "Xext/xinput/XIstubs.h"            /* even though we don't use stubs.  cute, no? */
 #include "exevents.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "eventstr.h"
 #include "xserver-properties.h"
 #include "optionstr.h"

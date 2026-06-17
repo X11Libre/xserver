@@ -51,6 +51,7 @@
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "Xext/xinput/xibarriers.h"
 
 #include "xfixesint.h"
 #include "scrnintstr.h"
@@ -61,7 +62,6 @@
 #include "windowstr.h"
 #include "xace.h"
 #include "list.h"
-#include "xibarriers.h"
 
 static RESTYPE CursorClientType;
 static RESTYPE CursorHideCountType;

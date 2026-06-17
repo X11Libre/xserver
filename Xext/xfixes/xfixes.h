@@ -47,6 +47,5 @@ extern int XFixesErrorBase;
 extern RegionPtr
  XFixesRegionCopy(RegionPtr pRegion);
 
-#include "xibarriers.h"
 
 #endif                          /* _XFIXES_H_ */

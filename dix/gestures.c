@@ -40,7 +40,7 @@
 #include "scrnintstr.h"
 #include "eventstr.h"
 #include "exevents.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "windowstr.h"
 
 #define GESTURE_HISTORY_SIZE 100

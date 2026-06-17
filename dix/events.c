@@ -151,7 +151,7 @@ Equipment Corporation.
 #include "dixstruct.h"
 #include "globals.h"
 #include "xace.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "extnsionst.h"
 #include "dispatch.h"
 #include "dixstruct_priv.h"

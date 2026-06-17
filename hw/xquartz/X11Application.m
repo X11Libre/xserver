@@ -43,7 +43,7 @@
 #include "quartzKeyboard.h"
 #include <X11/extensions/applewmconst.h>
 #include "micmap.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "osxcompat.h"
 
 #include <mach/mach.h>

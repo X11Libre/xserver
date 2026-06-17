@@ -41,13 +41,13 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "miext/extinit_priv.h"            /* for XInputExtensionInit */
-#include "Xi/handlers.h"
+#include "Xext/xinput/handlers.h"
 
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "exevents.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 
 #include "protocol-common.h"
 

@@ -32,7 +32,7 @@
 #include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "misc.h"
 #include "inputstr.h"
 #include "xkbsrv.h"

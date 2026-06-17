@@ -58,7 +58,7 @@
 #include "scrnintstr.h"
 #include "mipointer.h"
 #include "os.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 
 #include "darwin.h"
 #include "quartz.h"

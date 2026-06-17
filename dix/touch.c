@@ -42,7 +42,7 @@
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "eventstr.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "windowstr.h"
 
 #define TOUCH_HISTORY_SIZE 100

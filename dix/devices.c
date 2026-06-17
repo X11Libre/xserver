@@ -84,12 +84,12 @@ SOFTWARE.
 #include "swaprep.h"
 #include "mipointer.h"
 #include "eventstr.h"
-#include "exglobals.h"
-#include "xiquerydevice.h"      /* for SizeDeviceClasses */
-#include "xiproperty.h"
+#include "Xext/xinput/exglobals.h"
+#include "Xext/xinput/xiquerydevice.h"      /* for SizeDeviceClasses */
+#include "Xext/xinput/xiproperty.h"
 #include "enterleave.h"         /* for EnterWindow() */
 #include "xserver-properties.h"
-#include "xichangehierarchy.h"  /* For XISendDeviceHierarchyEvent */
+#include "Xext/xinput/xichangehierarchy.h"  /* For XISendDeviceHierarchyEvent */
 #include "syncsrv.h"
 
 /** @file

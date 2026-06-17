@@ -48,6 +48,7 @@
 #include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/fmt.h"
+#include "Xext/xinput/xibarriers.h"
 
 #include "xfixesint.h"
 #include "protocol-versions.h"

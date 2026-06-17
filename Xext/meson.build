@@ -50,6 +50,7 @@ libxserver_xext = static_library('xserver_xext',
 )
 
 subdir('xfixes')
+subdir('xinput')
 subdir('damage')
 subdir('doublebuffer')
 subdir('dri2')

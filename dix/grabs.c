@@ -66,7 +66,7 @@ SOFTWARE.
 #include "windowstr.h"
 #include "inputstr.h"
 #include "cursorstr.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 
 #define MasksPerDetailMask 8    /* 256 keycodes and 256 possible
                                    modifier combinations, but only

@@ -32,6 +32,7 @@
 #include <X11/extensions/xfixeswire.h>
 
 #include "Xext/xfixes/xfixesint.h"
+#include "Xext/xinput/xibarriers.h"
 
 #include "tests-common.h"
 

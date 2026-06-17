@@ -58,7 +58,7 @@
 #include "inputstr.h"
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
-#include "XIstubs.h"
+#include "Xext/xinput/XIstubs.h"
 #include "darwin.h"
 
 /****************************************************************************

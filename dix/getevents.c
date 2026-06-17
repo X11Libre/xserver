@@ -62,7 +62,7 @@
 #include "eventconvert.h"
 #include "windowstr.h"
 #include "xkbsrv.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "extnsionst.h"
 
 /* Number of motion history events to store. */

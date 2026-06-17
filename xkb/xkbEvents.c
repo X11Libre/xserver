@@ -40,7 +40,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "xkb/xkbsrv_priv.h"
 
 #include "inputstr.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "windowstr.h"
 
 /***====================================================================***/

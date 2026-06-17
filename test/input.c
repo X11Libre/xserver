@@ -45,7 +45,7 @@
 #include "resource.h"
 #include "windowstr.h"
 #include "inputstr.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "eventstr.h"
 #include "assert.h"
 

@@ -37,7 +37,7 @@
 #include "miext/extinit_priv.h"
 #include "xkb/xkbsrv_priv.h"    /* for XkbInitPrivates */
 
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "xserver-properties.h"
 #include "syncsrv.h"
 #include "protocol-common.h"

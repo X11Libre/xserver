@@ -33,14 +33,14 @@
 #include <X11/Xatom.h>
 
 #include "miext/extinit_priv.h"
-#include "Xi/handlers.h"
+#include "Xext/xinput/handlers.h"
 
 #include "inputstr.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "scrnintstr.h"
 #include "xkbsrv.h"
 
-#include "xiquerydevice.h"
+#include "Xext/xinput/xiquerydevice.h"
 
 #include "protocol-common.h"
 

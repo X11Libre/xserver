@@ -60,7 +60,7 @@
 #include "sleepuntil.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "mipointer.h"
 #include "xserver-properties.h"
 #include "eventstr.h"

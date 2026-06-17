@@ -44,7 +44,7 @@
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
-#include "exglobals.h"
+#include "Xext/xinput/exglobals.h"
 #include "enterleave.h"
 #include "xkbsrv.h"
 
