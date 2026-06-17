@@ -39,7 +39,7 @@ SOFTWARE.
 #include "include/xvmcext.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
-#include "Xext/shm_priv.h"
+#include "Xext/shm/shm_priv.h"
 #include "Xext/xvdix_priv.h"
 
 #include "misc.h"

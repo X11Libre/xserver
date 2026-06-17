@@ -13,9 +13,6 @@ if build_dpms
     srcs_xext += 'dpms/dpms.c'
 endif
 
-if build_mitshm
-    srcs_xext += 'shm.c'
-endif
 
 if build_hashtable
     srcs_xext += 'hashtable.c'
@@ -70,3 +67,4 @@ endif
 subdir('randr')
 subdir('record')
 subdir('glx')
+subdir('shm')

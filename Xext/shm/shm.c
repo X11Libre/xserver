@@ -57,7 +57,7 @@ in this Software without prior written authorization from The Open Group.
 #include "os/osdep.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
-#include "Xext/shm_priv.h"
+#include "shm_priv.h"
 
 #include "misc.h"
 #include "os.h"
