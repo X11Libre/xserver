@@ -14,10 +14,6 @@ if build_hashtable
     srcs_xext += 'hashtable.c'
 endif
 
-if build_res
-    srcs_xext += 'xres.c'
-endif
-
 if build_screensaver
     srcs_xext += 'saver.c'
 endif
@@ -61,3 +57,4 @@ subdir('record')
 subdir('glx')
 subdir('shm')
 subdir('xv')
+subdir('xres')
