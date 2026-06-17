@@ -823,7 +823,8 @@ if build_xserver
         libxserver_xf86bigfont,
         libxserver_shm,
         libxserver_dpms,
-        libxserver_xv
+        libxserver_xv,
+        libxserver_xtest
     ]
 
     if build_xselinux

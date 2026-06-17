@@ -6,7 +6,6 @@ srcs_xext = [
     'sync.c',
     'xace.c',
     'xcmisc.c',
-    'xtest.c',
 ]
 
 
@@ -58,3 +57,4 @@ subdir('glx')
 subdir('shm')
 subdir('xv')
 subdir('xres')
+subdir('xtest')
