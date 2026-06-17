@@ -253,7 +253,8 @@ hostx_want_preexisting_window(KdScreenInfo *screen)
 void
 hostx_get_output_geometry(const char *output,
                           int *x, int *y,
-                          int *width, int *height)
+                          int *width, int *height,
+                          int *width_mm, int *height_mm)
 {
     int i, name_len = 0, output_found = FALSE;
     xcb_generic_error_t *error;
@@ -347,6 +348,8 @@ hostx_get_output_geometry(const char *output,
             *y = crtc_info_r->y;
             *width = crtc_info_r->width;
             *height = crtc_info_r->height;
+            *width_mm = output_info_r->mm_width;
+            *height_mm = output_info_r->mm_height;
 
             free(crtc_info_r);
         }
@@ -649,8 +652,10 @@ hostx_init(void)
                                 "(ctrl+shift grabs mouse and keyboard)");
 
             if (HostX.use_fullscreen) {
-                scrpriv->win_width  = xscreen->width_in_pixels;
-                scrpriv->win_height = xscreen->height_in_pixels;
+                scrpriv->win_width     = xscreen->width_in_pixels;
+                scrpriv->win_height    = xscreen->height_in_pixels;
+                scrpriv->win_width_mm  = xscreen->width_in_millimeters;
+                scrpriv->win_height_mm = xscreen->height_in_millimeters;
 
                 hostx_set_fullscreen_hint();
             }
@@ -659,7 +664,9 @@ hostx_init(void)
                                           &scrpriv->win_x,
                                           &scrpriv->win_y,
                                           &scrpriv->win_width,
-                                          &scrpriv->win_height);
+                                          &scrpriv->win_height,
+                                          &scrpriv->win_width_mm,
+                                          &scrpriv->win_height_mm);
 
                 HostX.use_fullscreen = TRUE;
                 hostx_set_fullscreen_hint();
