@@ -1,5 +1,4 @@
 srcs_xext = [
-    'bigreq.c',
     'geext.c',
     'sleepuntil.c',
     'sync.c',
@@ -23,6 +22,7 @@ libxserver_xext = static_library('xserver_xext',
     dependencies: common_dep,
 )
 
+subdir('bigreq')
 subdir('xfixes')
 subdir('xinput')
 subdir('xkeyboard')
