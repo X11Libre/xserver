@@ -29,6 +29,7 @@
 /*
  * Protocol testing for XIQueryPointer request.
  */
+#include <assert.h>
 #include <stdint.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>

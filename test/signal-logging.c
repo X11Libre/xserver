@@ -26,13 +26,13 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stdint.h>
 #include <unistd.h>
 
 #include "os/fmt.h"
 #include "os/log_priv.h"
 
-#include "assert.h"
 #include "misc.h"
 
 #include "tests-common.h"

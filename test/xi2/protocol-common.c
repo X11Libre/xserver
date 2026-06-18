@@ -26,6 +26,7 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <stdint.h>
 #include <X11/extensions/XI2.h>

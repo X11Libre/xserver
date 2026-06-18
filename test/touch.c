@@ -26,13 +26,13 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stdint.h>
 
 #include "dix/atom_priv.h"
 #include "dix/input_priv.h"
 
 #include "inputstr.h"
-#include "assert.h"
 #include "scrnintstr.h"
 #include "tests-common.h"
 

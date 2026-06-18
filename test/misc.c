@@ -26,6 +26,7 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stdint.h>
 
 #include "dix/input_priv.h"

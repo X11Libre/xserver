@@ -1,8 +1,10 @@
 #include <dix-config.h>
 
-#include <misc.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <misc.h>
 #include "hashtable.h"
 #include "resource.h"
 

@@ -26,6 +26,8 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
+
 /*
  * Protocol testing for ChangeDeviceControl request.
  */

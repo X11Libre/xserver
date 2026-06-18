@@ -26,12 +26,12 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stdint.h>
 
 #include "dix/inpututils_priv.h"
 
 #include "inputstr.h"
-#include "assert.h"
 
 #include "protocol-common.h"
 
