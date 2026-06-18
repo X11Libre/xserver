@@ -260,7 +260,7 @@ ProcXTestFakeInput(ClientPtr client)
 
         if (type == XI_DeviceMotionNotify) {
             firstValuator = ((deviceValuator *) (ev + 1))->first_valuator;
-            if (firstValuator > dev->valuator->numAxes) {
+            if (firstValuator >= dev->valuator->numAxes) {
                 client->errorValue = ev->u.u.type;
                 return BadValue;
             }
@@ -290,6 +290,19 @@ ProcXTestFakeInput(ClientPtr client)
                 client->errorValue = dv->first_valuator;
                 return BadValue;
             }
+
+            /* Bound-check the valuator range *before* writing into the
+             * fixed-size valuators[MAX_VALUATORS] stack array.  numAxes is
+             * never larger than MAX_VALUATORS, so once firstValuator +
+             * numValuators is known to stay within numAxes the writes below
+             * (up to base + 5) cannot leave the array.  num_valuators outside
+             * 1..6 is rejected by the switch default. */
+            numValuators += dv->num_valuators;
+            if (firstValuator + numValuators > dev->valuator->numAxes) {
+                client->errorValue = dv->num_valuators;
+                return BadValue;
+            }
+
             switch (dv->num_valuators) {
             case 6:
                 valuators[base + 5] = dv->valuator5;
@@ -310,12 +323,6 @@ ProcXTestFakeInput(ClientPtr client)
             }
 
             base += dv->num_valuators;
-            numValuators += dv->num_valuators;
-
-            if (firstValuator + numValuators > dev->valuator->numAxes) {
-                client->errorValue = dv->num_valuators;
-                return BadValue;
-            }
         }
         type = type - XI_DeviceKeyPress + KeyPress;
 
