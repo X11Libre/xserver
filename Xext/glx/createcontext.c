@@ -112,6 +112,17 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
      */
     int profile = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
 
+    /* Reject attribute counts large enough to overflow the 32-bit size
+     * computation below.  Without this guard a client-supplied value such as
+     * 0x20000000 makes (numAttribs * 8) wrap to 0, so expected_size collapses
+     * to the bare request header and the req->length check passes; the
+     * attribute loop then reads numAttribs entries far past the end of the
+     * request buffer.  Every other GLX handler that walks an attribute list
+     * applies this same bound (see glxcmds.c / glxcmdsswap.c).
+     */
+    if (req->numAttribs > (UINT32_MAX >> 3))
+        return BadValue;
+
     /* Verify that the size of the packet matches the size inferred from the
      * sizes specified for the various fields.
      */
