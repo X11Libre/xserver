@@ -660,7 +660,6 @@ extern EventSyncInfoRec syncEvents;
 static inline WindowPtr
 DeepestSpriteWin(SpritePtr sprite)
 {
-    assert(sprite->spriteTraceGood > 0);
     return sprite->spriteTrace[sprite->spriteTraceGood - 1];
 }
 
