@@ -36,6 +36,7 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <sys/time.h>
 #include <unistd.h>
 

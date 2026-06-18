@@ -32,7 +32,6 @@
 
 #include "x-hook.h"
 #include <stdlib.h>
-#include <assert.h>
 #include "os.h"
 
 #define CELL_NEW(f, d) X_PFX(list_prepend) ((x_list *)(f), (d))

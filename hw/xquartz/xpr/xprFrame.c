@@ -29,6 +29,7 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
 #include "dix/screenint_priv.h"

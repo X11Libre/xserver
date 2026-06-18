@@ -30,6 +30,7 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include "dri.h"
 
 #include <OpenGL/OpenGL.h>
