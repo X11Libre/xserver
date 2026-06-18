@@ -48,11 +48,7 @@ SOFTWARE.
 #define EXTENSIONSTRUCT_H
 
 #include "xlibre_ptrtypes.h"
-#include "dix.h"
-#include "misc.h"
-#include "screenint.h"
 #include "extension.h"
-#include "gc.h"
 #include "privates.h"
 
 typedef struct _ExtensionEntry {
