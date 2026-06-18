@@ -462,7 +462,6 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 void
 ReserveClientIds(struct _Client *client)
 {
-#ifdef CLIENTIDS
     if (client == NULL)
         return;
 
@@ -482,7 +481,6 @@ ReserveClientIds(struct _Client *client)
            (unsigned long) client->clientAsMask,
            client->clientIds->cmdname ? client->clientIds->cmdname : "NULL",
            client->clientIds->cmdargs ? client->clientIds->cmdargs : "NULL");
-#endif                          /* CLIENTIDS */
 }
 
 /**
@@ -494,7 +492,6 @@ ReserveClientIds(struct _Client *client)
 void
 ReleaseClientIds(struct _Client *client)
 {
-#ifdef CLIENTIDS
     if (client == NULL)
         return;
 
@@ -512,7 +509,6 @@ ReleaseClientIds(struct _Client *client)
     free((void *) client->clientIds->cmdargs);  /* const char * */
     free(client->clientIds);
     client->clientIds = NULL;
-#endif                          /* CLIENTIDS */
 }
 
 /**
