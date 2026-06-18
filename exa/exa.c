@@ -30,6 +30,7 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include "dix/screen_hooks_priv.h"

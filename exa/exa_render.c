@@ -23,6 +23,7 @@
  */
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include "include/mipict.h"
