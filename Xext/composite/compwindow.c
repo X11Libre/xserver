@@ -54,48 +54,6 @@
 #include "compint.h"
 #include "compositeext_priv.h"
 
-#ifdef COMPOSITE_DEBUG
-static int
-compCheckWindow(WindowPtr pWin, void *data)
-{
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    PixmapPtr pWinPixmap = (*pScreen->GetWindowPixmap) (pWin);
-    PixmapPtr pParentPixmap =
-        pWin->parent ? (*pScreen->GetWindowPixmap) (pWin->parent) : 0;
-    PixmapPtr pScreenPixmap = (*pScreen->GetScreenPixmap) (pScreen);
-
-    if (!pWin->parent) {
-        assert(pWin->redirectDraw == RedirectDrawNone);
-        assert(pWinPixmap == pScreenPixmap);
-    }
-    else if (pWin->redirectDraw != RedirectDrawNone) {
-        assert(pWinPixmap != pParentPixmap);
-        assert(pWinPixmap != pScreenPixmap);
-    }
-    else {
-        assert(pWinPixmap == pParentPixmap);
-    }
-
-    assert(0 < pWinPixmap->refcnt)
-    assert(pWinPixmap->refcnt < 3);
-
-    assert(0 < pScreenPixmap->refcnt);
-    assert(pScreenPixmap->refcnt < 3);
-
-    if (pParentPixmap) {
-        assert(0 <= pParentPixmap->refcnt);
-        assert(pParentPixmap->refcnt < 3);
-    }
-    return WT_WALKCHILDREN;
-}
-
-void
-compCheckTree(ScreenPtr pScreen)
-{
-    WalkTree(pScreen, compCheckWindow, 0);
-}
-#endif
-
 typedef struct _compPixmapVisit {
     WindowPtr pWindow;
     PixmapPtr pPixmap;
@@ -152,7 +110,6 @@ compSetPixmap(WindowPtr pWindow, PixmapPtr pPixmap, int bw)
     visitRec.pPixmap = pPixmap;
     visitRec.bw = bw;
     TraverseTree(pWindow, compSetPixmapVisitWindow, (void *) &visitRec);
-    compCheckTree(pWindow->drawable.pScreen);
 }
 
 Bool
@@ -233,11 +190,6 @@ void compWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWind
      *
      compCheckRedirect (pWin);
      */
-#ifdef COMPOSITE_DEBUG
-    if ((pWin->redirectDraw != RedirectDrawNone) !=
-        (pWin->viewable && (GetCompWindow(pWin) != NULL)))
-        OsAbort();
-#endif
     if (pWin->redirectDraw != RedirectDrawNone) {
         PixmapPtr pPixmap = (*pScreen->GetWindowPixmap) (pWin);
         int bw = wBorderWidth(pWin);
@@ -251,7 +203,6 @@ void compWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWind
         }
     }
 
-    compCheckTree(pWin->drawable.pScreen);
     updateOverlayWindow(pScreen);
 }
 
@@ -268,7 +219,6 @@ compRealizeWindow(WindowPtr pWin)
         ret = FALSE;
     cs->RealizeWindow = pScreen->RealizeWindow;
     pScreen->RealizeWindow = compRealizeWindow;
-    compCheckTree(pWin->drawable.pScreen);
     return ret;
 }
 
@@ -285,7 +235,6 @@ compUnrealizeWindow(WindowPtr pWin)
         ret = FALSE;
     cs->UnrealizeWindow = pScreen->UnrealizeWindow;
     pScreen->UnrealizeWindow = compUnrealizeWindow;
-    compCheckTree(pWin->drawable.pScreen);
     return ret;
 }
 
@@ -388,7 +337,6 @@ compMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pSib, VTKind kind)
     pScreen->MoveWindow = compMoveWindow;
 
     compFreeOldPixmap(pWin);
-    compCheckTree(pScreen);
 }
 
 void
@@ -404,7 +352,6 @@ compResizeWindow(WindowPtr pWin, int x, int y,
     pScreen->ResizeWindow = compResizeWindow;
 
     compFreeOldPixmap(pWin);
-    compCheckTree(pWin->drawable.pScreen);
 }
 
 void
@@ -419,7 +366,6 @@ compChangeBorderWidth(WindowPtr pWin, unsigned int bw)
     pScreen->ChangeBorderWidth = compChangeBorderWidth;
 
     compFreeOldPixmap(pWin);
-    compCheckTree(pWin->drawable.pScreen);
 }
 
 void
@@ -469,8 +415,6 @@ compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent)
     cw = GetCompWindow(pWin);
     if (pWin->damagedDescendants || (cw && cw->damaged))
         compMarkAncestors(pWin);
-
-    compCheckTree(pWin->drawable.pScreen);
 }
 
 void
@@ -484,8 +428,6 @@ compCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
         PixmapPtr pPixmap = (*pScreen->GetWindowPixmap) (pWin);
         CompWindowPtr cw = GetCompWindow(pWin);
 
-        assert(cw->oldx != COMP_ORIGIN_INVALID);
-        assert(cw->oldy != COMP_ORIGIN_INVALID);
         if (cw->pOldPixmap) {
             /*
              * Ok, the old bits are available in pOldPixmap and
@@ -551,7 +493,6 @@ compCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
     }
     cs->CopyWindow = pScreen->CopyWindow;
     pScreen->CopyWindow = compCopyWindow;
-    compCheckTree(pWin->drawable.pScreen);
 }
 
 Bool
@@ -579,7 +520,6 @@ compCreateWindow(WindowPtr pWin)
     }
     cs->CreateWindow = pScreen->CreateWindow;
     pScreen->CreateWindow = compCreateWindow;
-    compCheckTree(pWin->drawable.pScreen);
     return ret;
 }
 
@@ -604,8 +544,6 @@ void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
     /* Did we just destroy the overlay window? */
     if (pWin == cs->pOverlayWin)
         cs->pOverlayWin = NULL;
-
-/*    compCheckTree (pWin->drawable.pScreen); can't check -- tree isn't good*/
 }
 
 void
@@ -791,8 +729,6 @@ compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
 
     if (pWin->redirectDraw == RedirectDrawNone)
         return Success;
-
-    compCheckTree(pScreen);
 
     draw_x = pParent->drawable.x + x + bw;
     draw_y = pParent->drawable.y + y + bw;

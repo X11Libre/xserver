@@ -57,7 +57,6 @@ compScreenUpdate(ClientPtr pClient, void *closure)
     ScreenPtr pScreen = closure;
     CompScreenPtr cs = GetCompScreen(pScreen);
 
-    compCheckTree(pScreen);
     compPaintChildrenToWindow(pScreen->root);
 
     /* Next damage will restore the worker */
@@ -693,8 +692,6 @@ compReallocPixmap(WindowPtr pWin, int draw_x, int draw_y,
     int pix_x, pix_y;
     int pix_w, pix_h;
 
-    assert(cw);
-    assert(pWin->redirectDraw != RedirectDrawNone);
     cw->oldx = pOld->screen_x;
     cw->oldy = pOld->screen_y;
     pix_x = draw_x - bw;

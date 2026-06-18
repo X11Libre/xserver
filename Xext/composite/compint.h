@@ -68,12 +68,6 @@
 #include "compositeext.h"
 #include <assert.h>
 
-/*
- *  enable this for debugging
-
-    #define COMPOSITE_DEBUG
- */
-
 typedef struct _CompClientWindow {
     struct _CompClientWindow *next;
     XID id;
@@ -257,13 +251,6 @@ void
 /*
  * compwindow.c
  */
-
-#ifdef COMPOSITE_DEBUG
-void
- compCheckTree(ScreenPtr pScreen);
-#else
-#define compCheckTree(s)
-#endif
 
 void
  compSetPixmap(WindowPtr pWin, PixmapPtr pPixmap, int bw);
