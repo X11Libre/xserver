@@ -714,8 +714,6 @@ ProcShapeSelectInput(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xShapeSelectInputReq);
 
-    if (client->swapped)
-        swapl(&stuff->window);
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (rc != Success)
         return rc;
