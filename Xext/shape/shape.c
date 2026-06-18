@@ -611,7 +611,7 @@ ProcShapeOffset(ClientPtr client)
 {
     X_REQUEST_HEAD_AT_LEAST(xShapeOffsetReq);
     X_REQUEST_FIELD_CARD32(dest);
-    X_REQUEST_FIELD_CARD16(yOff);
+    X_REQUEST_FIELD_CARD16(xOff);
     X_REQUEST_FIELD_CARD16(yOff);
 
 #ifdef XINERAMA
