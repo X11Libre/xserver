@@ -2892,6 +2892,18 @@ ProcRenderSetPictureFilter(ClientPtr client)
     if (client->swapped) {
         swapl(&stuff->picture);
         swaps(&stuff->nbytes);
+
+        /* Byte-swap the trailing convolution parameter array as well.
+         * nbytes has already been swapped above, so the name/params split
+         * matches the one SingleRenderSetPictureFilter() computes. Doing it
+         * here (rather than in the Single handler) swaps the params exactly
+         * once, even on the PanoramiX path which re-dispatches per screen. */
+        char *name = (char *) (stuff + 1);
+        xFixed *params = (xFixed *) (name + pad_to_int32(stuff->nbytes));
+        int nparams = ((xFixed *) stuff + client->req_len) - params;
+
+        if (nparams > 0)
+            SwapLongs((CARD32 *) params, nparams);
     }
 
 #ifdef XINERAMA
