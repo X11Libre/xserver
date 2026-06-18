@@ -30,6 +30,7 @@
 #define MESA_EGL_NO_X11_HEADERS
 #define EGL_NO_X11
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <xcb/xcb.h>

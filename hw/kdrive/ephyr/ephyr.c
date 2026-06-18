@@ -25,6 +25,7 @@
 
 #include <kdrive-config.h>
 
+#include <assert.h>
 #include <xcb/xcb_keysyms.h>
 #include <X11/keysym.h>
 

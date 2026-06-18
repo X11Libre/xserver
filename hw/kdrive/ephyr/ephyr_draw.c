@@ -27,6 +27,8 @@
 
 #include <kdrive-config.h>
 
+#include <assert.h>
+
 #include "ephyr.h"
 #include "exa_priv.h"
 #include "fbpict.h"
