@@ -50,6 +50,7 @@ from The Open Group.
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stddef.h>
 
 #include "dix/colormap_priv.h"

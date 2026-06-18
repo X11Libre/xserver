@@ -103,6 +103,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <X11/X.h>
 #include <X11/extensions/ge.h>
 #include <X11/extensions/XKBproto.h>

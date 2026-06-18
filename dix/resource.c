@@ -144,7 +144,6 @@ Equipment Corporation.
 #include "inputstr.h"
 #include "cursor.h"
 #include "xace.h"
-#include <assert.h>
 #include "gcstruct.h"
 
 #ifdef XSERVER_DTRACE
