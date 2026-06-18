@@ -9,8 +9,8 @@
  */
 #include <xorg-config.h>
 
+#include <assert.h>
 #include <string.h>
-
 #include <X11/extensions/dpmsconst.h>
 
 #include "xf86.h"

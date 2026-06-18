@@ -23,6 +23,7 @@
  */
 #include <xorg-config.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -30,7 +31,6 @@
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <stdbool.h>
-
 #include <X11/Xatom.h>
 
 #include "include/xorgVersion.h"

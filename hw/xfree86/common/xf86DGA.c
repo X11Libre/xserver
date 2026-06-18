@@ -38,6 +38,7 @@
  */
 #include <xorg-config.h>
 
+#include <assert.h>
 #include <string.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>

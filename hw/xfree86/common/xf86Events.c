@@ -50,6 +50,7 @@
 /* [JCH-96/01/21] Extended std reverse map to four buttons. */
 #include <xorg-config.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>

@@ -28,6 +28,7 @@
 #include <xorg-config.h>
 
 #ifdef XSERVER_PLATFORM_BUS
+#include <assert.h>
 #include <errno.h>
 
 #include <pciaccess.h>

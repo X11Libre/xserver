@@ -38,7 +38,6 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <sys/file.h>
-#include <assert.h>
 #include <mach.h>
 #include <hurd.h>
 
