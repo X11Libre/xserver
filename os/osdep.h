@@ -218,10 +218,8 @@ Ones(unsigned long mask)
 #endif
 
 /* static assert for protocol structure sizes */
-#ifndef __size_assert
-#define __size_assert(what, howmuch) \
+#define __SIZE_ASSERT(what, howmuch) \
   typedef char what##_size_wrong_[( !!(sizeof(what) == howmuch) )*2-1 ]
-#endif
 
 /*
  * like strlen(), but checking for NULL and return 0 in this case

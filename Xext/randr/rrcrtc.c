@@ -36,7 +36,7 @@
 #include "mipointer.h"
 
 /* xFixed is just `int`, so better check whether it's really 32bit */
-__size_assert(xFixed, sizeof(CARD32));
+__SIZE_ASSERT(xFixed, sizeof(CARD32));
 
 RESTYPE RRCrtcType = 0;
 

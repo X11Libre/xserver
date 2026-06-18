@@ -93,8 +93,8 @@ xnestChangeKeyboardControl(DeviceIntPtr pDev, KeybdCtrl * ctrl)
 }
 
 /* make sure that KeySym and xcb_keysym_t are both 32 bit */
-__size_assert(KeySym, 4);
-__size_assert(xcb_keysym_t, 4);
+__SIZE_ASSERT(KeySym, 4);
+__SIZE_ASSERT(xcb_keysym_t, 4);
 
 int
 xnestKeyboardProc(DeviceIntPtr pDev, int onoff)

@@ -41,11 +41,7 @@
     } while (0)
 
 /* static assert for protocol structure sizes */
-#ifndef __size_assert
-#define __size_assert(what, howmuch) \
-  typedef char what##_size_wrong_[( !!(sizeof(what) == howmuch) )*2-1 ]
-#endif
-#define XTYPE_SIZE_ASSERT(typename) __size_assert(typename,SIZEOF(typename))
+#define XTYPE_SIZE_ASSERT(typename) __SIZE_ASSERT(typename,SIZEOF(typename))
 
 /* server setting: maximum size for big requests */
 #define MAX_BIG_REQUEST_SIZE 4194303

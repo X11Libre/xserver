@@ -37,6 +37,7 @@ SOFTWARE.
 #include "dix/screenint_priv.h"
 #include "include/shmint.h"
 #include "include/xvmcext.h"
+#include "os/osdep.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/shm/shm_priv.h"
@@ -811,7 +812,7 @@ ProcXvShmPutImage(ClientPtr client)
 #endif /* CONFIG_MITSHM */
 }
 
-__size_assert(int, sizeof(INT32));
+__SIZE_ASSERT(int, sizeof(INT32));
 
 static int
 ProcXvQueryImageAttributes(ClientPtr client)
