@@ -33,6 +33,8 @@
  */
 #include <xwin-config.h>
 
+#include <assert.h>
+
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 

@@ -22,6 +22,7 @@
  */
 #include <xwin-config.h>
 
+#include <assert.h>
 #include <X11/extensions/windowsdriconst.h>
 
 #include "Xext/glx/glxserver.h"

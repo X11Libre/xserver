@@ -29,6 +29,8 @@
  */
 #include <xwin-config.h>
 
+#include <assert.h>
+
 #include "win.h"
 
 #include "dix/colormap_priv.h"
