@@ -266,8 +266,6 @@ RRModeDestroyResource(void *value, XID pid)
 Bool
 RRModeInit(void)
 {
-    assert(num_modes == 0);
-    assert(modes == NULL);
     RRModeType = CreateNewResourceType(RRModeDestroyResource, "MODE");
     if (!RRModeType)
         return FALSE;

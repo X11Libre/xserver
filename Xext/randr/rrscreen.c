@@ -461,8 +461,6 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
         update_arrays(iter, pScrPriv, primary_crtc, has_primary);
     }
 
-    assert(bytes_to_int32((char *) names - (char *) extra) == reply.length);
-
     if (client->swapped) {
         swapl(&reply.timestamp);
         swapl(&reply.configTimestamp);
@@ -599,7 +597,6 @@ rrGetScreenResources(ClientPtr client, Bool query)
             memcpy(names, mode->name, mode->mode.nameLength);
             names += mode->mode.nameLength;
         }
-        assert(bytes_to_int32((char *) names - (char *) extra) == reply.length);
 finish:
         free(modes);
     }

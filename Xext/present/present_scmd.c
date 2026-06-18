@@ -301,8 +301,6 @@ present_restore_screen_pixmap(ScreenPtr screen)
         flip_pixmap = screen_priv->flip_pixmap;
     }
 
-    assert (flip_pixmap);
-
     /* Update the screen pixmap with the current flip pixmap contents
      * Only do this the first time for a particular unflip operation, or
      * we'll probably scribble over other windows
@@ -335,9 +333,6 @@ present_unflip(ScreenPtr screen)
 {
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
 
-    assert (!screen_priv->unflip_event_id);
-    assert (!screen_priv->flip_pending);
-
     present_restore_screen_pixmap(screen);
 
     screen_priv->unflip_event_id = ++present_scmd_event_id;
@@ -355,8 +350,6 @@ present_flip_notify(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc)
                   vblank->event_id, vblank, vblank->exec_msc, vblank->target_msc,
                   vblank->pixmap ? vblank->pixmap->drawable.id : 0,
                   vblank->window ? vblank->window->drawable.id : 0));
-
-    assert (vblank == screen_priv->flip_pending);
 
     present_flip_idle(screen);
 

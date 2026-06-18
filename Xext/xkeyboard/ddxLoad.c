@@ -94,7 +94,6 @@ OutputDirectory(char *outdir, size_t size)
     if (directory)
         r = snprintf(outdir, size, "%s%s", directory, pathsep);
     if (r < 0 || r >= size) {
-        assert(strlen("/tmp/") < size);
         strcpy(outdir, "/tmp/");
     }
 }

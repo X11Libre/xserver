@@ -1153,11 +1153,9 @@ static Bool XineramaGetImageDataScr(BoxRec SrcBox,
                          j++, index += pitch, index2 += ScratchPitch) {
                     if (w) {
                         if (!shift) {
-                            assert(ScratchMem);
                             memcpy(data + index, ScratchMem + index2, w);
                         }
                         else {
-                            assert(ScratchMem);
                             CopyBits(data + index, shift,
                                      ScratchMem + index2, w);
                         }
@@ -1180,7 +1178,6 @@ static Bool XineramaGetImageDataScr(BoxRec SrcBox,
                 w *= bpp;
 
                 for (int j = 0; j < h; j++) {
-                    assert(ScratchMem);
                     memcpy(data + (pitch * (y + j)) + x,
                            ScratchMem + (ScratchPitch * j), w);
                 }

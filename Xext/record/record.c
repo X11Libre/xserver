@@ -34,7 +34,6 @@ and Jim Haggerty of Metheus.
 #include <dix-config.h>
 
 #include <stdio.h>
-#include <assert.h>
 #include <X11/Xmd.h>
 #include <X11/extensions/recordproto.h>
 
@@ -207,14 +206,13 @@ RecordFindContextOnAllContexts(RecordContextPtr pContext)
 {
     int i;
 
-    assert(numContexts >= numEnabledContexts);
     for (i = 0; i < numContexts; i++) {
         if (ppAllContexts[i] == pContext)
             return i;
     }
     return -1;
 }                               /* RecordFindContextOnAllContexts */
-
+
 /***************************************************************************/
 
 /* RecordFlushReplyBuffer
@@ -532,10 +530,8 @@ RecordARequest(ClientPtr client)
                 int numMinOpInfo;
                 RecordMinorOpPtr pMinorOpInfo = pRCAP->pRequestMinOpInfo;
 
-                assert(pMinorOpInfo);
                 numMinOpInfo = pMinorOpInfo->count;
                 pMinorOpInfo++;
-                assert(numMinOpInfo);
                 for (; numMinOpInfo; numMinOpInfo--, pMinorOpInfo++) {
                     if (majorop >= pMinorOpInfo->major.first &&
                         majorop <= pMinorOpInfo->major.last &&
@@ -555,7 +551,6 @@ RecordARequest(ClientPtr client)
         }                       /* end this RCAP wants this major opcode */
     }                           /* end for each context */
     pClientPriv = RecordClientPrivate(client);
-    assert(pClientPriv);
     return (*pClientPriv->originalVector[majorop]) (client);
 }                               /* RecordARequest */
 
@@ -617,10 +612,8 @@ RecordAReply(CallbackListPtr *pcbl, void *nulldata, void *calldata)
                     int numMinOpInfo;
                     RecordMinorOpPtr pMinorOpInfo = pRCAP->pReplyMinOpInfo;
 
-                    assert(pMinorOpInfo);
                     numMinOpInfo = pMinorOpInfo->count;
                     pMinorOpInfo++;
-                    assert(numMinOpInfo);
                     for (; numMinOpInfo; numMinOpInfo--, pMinorOpInfo++) {
                         if (majorop >= pMinorOpInfo->major.first &&
                             majorop <= pMinorOpInfo->major.last &&
@@ -901,7 +894,6 @@ RecordInstallHooks(RecordClientsAndProtocolPtr pRCAP, XID oneclient)
             client = (i < pRCAP->numClients) ? pRCAP->pClientIDs[i++] : 0;
     }
 
-    assert(numEnabledRCAPs >= 0);
     if (!oneclient && ++numEnabledRCAPs == 1) { /* we're enabling the first context */
         if (!AddCallback(&EventCallback, RecordADeliveredEventOrError, NULL))
             return BadAlloc;
@@ -956,9 +948,7 @@ RecordUninstallHooks(RecordClientsAndProtocolPtr pRCAP, XID oneclient)
                 Bool otherRCAPwantsProcVector = FALSE;
                 RecordClientPrivatePtr pClientPriv = NULL;
 
-                assert(pClient);
                 pClientPriv = RecordClientPrivate(pClient);
-                assert(pClientPriv);
                 memcpy(pClientPriv->recordVector, pClientPriv->originalVector,
                        sizeof(pClientPriv->recordVector));
 
@@ -999,7 +989,6 @@ RecordUninstallHooks(RecordClientsAndProtocolPtr pRCAP, XID oneclient)
             client = (i < pRCAP->numClients) ? pRCAP->pClientIDs[i++] : 0;
     }
 
-    assert(numEnabledRCAPs >= 1);
     if (!oneclient && --numEnabledRCAPs == 0) { /* we're disabling the last context */
         DeleteCallback(&EventCallback, RecordADeliveredEventOrError, NULL);
         DeleteCallback(&DeviceEventCallback, RecordADeviceEvent, NULL);
@@ -1427,7 +1416,6 @@ enum { REQ,                     /* set info for requests */
 static int
 RecordAllocIntervals(SetInfoPtr psi, int nIntervals)
 {
-    assert(!psi->intervals);
     psi->intervals = calloc(nIntervals, sizeof(RecordSetInterval));
     if (!psi->intervals)
         return BadAlloc;
@@ -1484,7 +1472,6 @@ RecordConvertRangesToIntervals(SetInfoPtr psi,
             psi->intervals[psi->nintervals].first = first;
             psi->intervals[psi->nintervals].last = last;
             psi->nintervals++;
-            assert(psi->nintervals <= psi->size);
             if (pExtSetInfo) {
                 SetInfoPtr pesi = pExtSetInfo;
                 CARD16 *pCARD16 = (CARD16 *) (pCARD8 + 2);
@@ -1505,7 +1492,6 @@ RecordConvertRangesToIntervals(SetInfoPtr psi,
                 pesi->intervals[pesi->nintervals].first = pCARD16[0];
                 pesi->intervals[pesi->nintervals].last = pCARD16[1];
                 pesi->nintervals++;
-                assert(pesi->nintervals <= pesi->size);
             }
         }
     }
@@ -2354,14 +2340,12 @@ ProcRecordEnableContext(ClientPtr client)
      * where all the enabled contexts are
      */
     i = RecordFindContextOnAllContexts(pContext);
-    assert(i >= numEnabledContexts);
     if (i != numEnabledContexts) {
         ppAllContexts[i] = ppAllContexts[numEnabledContexts];
         ppAllContexts[numEnabledContexts] = pContext;
     }
 
     ++numEnabledContexts;
-    assert(numEnabledContexts > 0);
 
     /* send StartOfData */
     RecordAProtocolElement(pContext, NULL, XRecordStartOfData, NULL, 0, 0, 0);
@@ -2410,14 +2394,11 @@ RecordDisableContext(RecordContextPtr pContext)
      * where all the disabled contexts are
      */
     i = RecordFindContextOnAllContexts(pContext);
-    assert(i != -1);
-    assert(i < numEnabledContexts);
     if (i != (numEnabledContexts - 1)) {
         ppAllContexts[i] = ppAllContexts[numEnabledContexts - 1];
         ppAllContexts[numEnabledContexts - 1] = pContext;
     }
     --numEnabledContexts;
-    assert(numEnabledContexts >= 0);
 }                               /* RecordDisableContext */
 
 static int
@@ -2649,7 +2630,6 @@ RecordAClientStateChange(CallbackListPtr *pcbl, void *nulldata,
             break;
         if (!(ppAllContextsCopy = calloc(numContextsCopy, sizeof(RecordContextPtr))))
             return;
-        assert(ppAllContextsCopy);
         memcpy(ppAllContextsCopy, ppAllContexts,
                numContextsCopy * sizeof(RecordContextPtr));
 

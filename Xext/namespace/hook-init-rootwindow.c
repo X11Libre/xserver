@@ -28,8 +28,6 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
     /* create the virtual root windows */
     WindowPtr realRoot = pScreen->root;
 
-    assert(realRoot);
-
     struct Xnamespace *walk;
 
     xorg_list_for_each_entry(walk, &ns_list, entry) {

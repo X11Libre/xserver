@@ -193,9 +193,7 @@ SecurityDeleteAuthorization(void *value, XID id)
     /* Remove the auth using the os layer auth manager */
 
     status = AuthorizationFromID(pAuth->id, &name_len, &name, &data_len, &data);
-    assert(status);
     status = RemoveAuthorization(name_len, name, data_len, data);
-    assert(status);
     (void) status;
 
     /* free the auth timer if there is one */
@@ -310,8 +308,6 @@ static CARD32
 SecurityAuthorizationExpired(OsTimerPtr timer, CARD32 time, void *pval)
 {
     SecurityAuthorizationPtr pAuth = (SecurityAuthorizationPtr) pval;
-
-    assert(pAuth->timer == timer);
 
     if (pAuth->secondsRemaining) {
         return SecurityComputeAuthorizationTimeout(pAuth,

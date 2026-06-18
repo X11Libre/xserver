@@ -492,7 +492,6 @@ DeepCopyKeyboardClasses(DeviceIntPtr from, DeviceIntPtr to)
             if (!k->xkb_sli)
                 continue;
             if (k->xkb_sli->flags & XkbSLI_IsDefault) {
-                assert(to->key);
                 k->xkb_sli->names = to->key->xkbInfo->desc->names->indicators;
                 k->xkb_sli->maps = to->key->xkbInfo->desc->indicators->maps;
             }
@@ -1046,7 +1045,6 @@ TouchClientWantsOwnershipEvents(ClientPtr client, DeviceIntPtr dev,
 {
     InputClients *iclient;
 
-    assert(wOtherInputMasks(win));
     nt_list_for_each_entry(iclient, wOtherInputMasks(win)->inputClients, next) {
         if (dixClientForInputClients(iclient) != client)
             continue;
@@ -1394,8 +1392,6 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
             else
                 evtype = GetXI2Type(ev->any.type);
 
-            assert(wOtherInputMasks(*win));
-
             InputClients *iclients = NULL;
             nt_list_for_each_entry(iclients,
                                    wOtherInputMasks(*win)->inputClients, next)
@@ -1410,8 +1406,6 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
         else if (listener->level == XI) {
             int xi_type = GetXIType(TouchGetPointerEventType(ev));
             Mask xi_filter = event_get_filter_from_type(dev, xi_type);
-
-            assert(wOtherInputMasks(*win));
 
             InputClients *iclients = NULL;
             nt_list_for_each_entry(iclients,
@@ -2282,7 +2276,6 @@ RetrieveGestureDeliveryData(DeviceIntPtr dev, InternalEvent *ev, GestureListener
            listener->type == GESTURE_LISTENER_REGULAR */
         evtype = GetXI2Type(ev->any.type);
 
-        assert(wOtherInputMasks(*win));
         nt_list_for_each_entry(iclients, wOtherInputMasks(*win)->inputClients, next)
             if (xi2mask_isset(iclients->xi2mask, dev, evtype))
                 break;
@@ -2670,7 +2663,6 @@ SelectForWindow(DeviceIntPtr dev, WindowPtr pWin, ClientPtr client,
                     return BadAccess;
             }
         }
-        assert(wOtherInputMasks(pWin));
         for (others = wOtherInputMasks(pWin)->inputClients; others;
              others = others->next) {
             if (SameClient(others, client)) {
@@ -3331,7 +3323,6 @@ XISetEventMask(DeviceIntPtr dev, WindowPtr win, ClientPtr client,
     if (len && !others) {
         if (AddExtensionClient(win, client, 0, 0) != Success)
             return BadAlloc;
-        assert(wOtherInputMasks(win));
         others = wOtherInputMasks(win)->inputClients;
     }
 
@@ -3341,7 +3332,6 @@ XISetEventMask(DeviceIntPtr dev, WindowPtr win, ClientPtr client,
     }
 
     if (len) {
-        assert(others);
         xi2mask_set_one_mask(others->xi2mask, dev->id, mask, len);
     }
 

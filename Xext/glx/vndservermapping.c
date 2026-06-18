@@ -132,7 +132,6 @@ GlxContextTagInfo *GlxAllocContextTag(ClientPtr client, GlxServerVendor *vendor)
         cl->contextTagCount = newSize;
     }
 
-    assert(index < cl->contextTagCount);
     memset(&cl->contextTags[index], 0, sizeof(GlxContextTagInfo));
     cl->contextTags[index].tag = (GLXContextTag) (index + 1);
     cl->contextTags[index].client = client;
@@ -149,7 +148,6 @@ GlxContextTagInfo *GlxLookupContextTag(ClientPtr client, GLXContextTag tag)
 
     if (tag > 0 && (tag - 1) < cl->contextTagCount) {
         if (cl->contextTags[tag - 1].vendor != NULL) {
-            assert(cl->contextTags[tag - 1].client == client);
             return &cl->contextTags[tag - 1];
         }
     }

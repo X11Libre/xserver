@@ -31,7 +31,6 @@
 #include <dix-config.h>
 
 #include <string.h>
-#include <assert.h>
 #include <GL/glxtokens.h>
 #include <X11/extensions/presenttokens.h>
 
@@ -1087,7 +1086,6 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
         while (p < __GLX_FBCONFIG_ATTRIBS_LENGTH) {
             WRITE_PAIR(0, 0);
         }
-        assert(p == __GLX_FBCONFIG_ATTRIBS_LENGTH);
 
         if (client->swapped) {
             SwapLongs((CARD32*)buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);

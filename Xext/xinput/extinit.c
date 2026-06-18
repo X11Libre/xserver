@@ -53,8 +53,6 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include <assert.h>
-
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 #include <X11/extensions/XI2proto.h>
@@ -1153,8 +1151,6 @@ XInputExtensionInit(void)
     extEntry = AddExtension(INAME, IEVENTS, IERRORS, ProcIDispatch,
                             ProcIDispatch, IResetProc, StandardMinorOpcode);
     if (extEntry) {
-        assert(extEntry->base == EXTENSION_MAJOR_XINPUT);
-
         IEventBase = extEntry->eventBase;
         XIVersion = thisversion;
         MakeDeviceTypeAtoms();

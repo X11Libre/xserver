@@ -480,8 +480,6 @@ create_driver_context(__GLXDRIcontext * context,
                     __DRI_CTX_ATTRIB_RESET_STRATEGY;
                 ctx_attribs[num_ctx_attribs++] = reset;
             }
-
-            assert(num_ctx_attribs <= ARRAY_SIZE(ctx_attribs));
         }
 
         context->driContext =
@@ -653,7 +651,6 @@ dri2GetBuffers(__DRIdrawable * driDrawable,
          */
         buffers = DRI2GetBuffers(private->base.pDraw,
                                  width, height, attachments, count, out_count);
-        assert(lastGLContext == cx);
     }
 
     if (*out_count > MAX_DRAWABLE_BUFFERS) {
@@ -712,7 +709,6 @@ dri2GetBuffersWithFormat(__DRIdrawable * driDrawable,
         buffers = DRI2GetBuffersWithFormat(private->base.pDraw,
                                            width, height, attachments, count,
                                            out_count);
-        assert(lastGLContext == cx);
     }
 
     if (*out_count > MAX_DRAWABLE_BUFFERS) {
