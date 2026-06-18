@@ -83,9 +83,8 @@ Equipment Corporation.
 #include "gc.h"
 #include <pixman.h>
 
-#undef assert
 #ifdef REGION_DEBUG
-#define assert(expr) { \
+#define REGION_ASSERT(expr) { \
             CARD32 *foo = NULL; \
             if (!(expr)) { \
                 ErrorF("Assertion failed file %s, line %d: %s\n", \
@@ -94,10 +93,10 @@ Equipment Corporation.
             } \
         }
 #else
-#define assert(expr)
+#define REGION_ASSERT(expr)
 #endif
 
-#define good(reg) assert(RegionIsValid((reg)))
+#define good(reg) REGION_ASSERT(RegionIsValid((reg)))
 
 /*
  * The functions in this file implement the Region abstraction used extensively
@@ -202,9 +201,9 @@ if (!(pReg)->data || (((pReg)->data->numRects + (n)) > (pReg)->data->size)) \
 	    return FALSE;						\
 	(pNextRect) = RegionTop((pReg));					\
     }									\
-    ADDRECT((pNextRect),(nx1),(ny1),(nx2),(ny2));					\
+    ADDRECT((pNextRect),(nx1),(ny1),(nx2),(ny2));			\
     (pReg)->data->numRects++;						\
-    assert((pReg)->data->numRects<=(pReg)->data->size);			\
+    REGION_ASSERT((pReg)->data->numRects<=(pReg)->data->size);		\
 }
 
 #define DOWNSIZE(reg,numRects)						 \
@@ -419,7 +418,7 @@ RegionCoalesce(RegionPtr pReg,  /* Region to coalesce                */
      * Figure out how many rectangles are in the band.
      */
     numRects = curStart - prevStart;
-    assert(numRects == pReg->data->numRects - curStart);
+    REGION_ASSERT(numRects == pReg->data->numRects - curStart);
 
     if (!numRects)
         return curStart;
@@ -498,15 +497,15 @@ RegionAppendNonO(RegionPtr pReg, BoxPtr r, BoxPtr rEnd, int y1, int y2)
 
     newRects = rEnd - r;
 
-    assert(y1 < y2);
-    assert(newRects != 0);
+    REGION_ASSERT(y1 < y2);
+    REGION_ASSERT(newRects != 0);
 
     /* Make sure we have enough space for all rectangles to be added */
     RECTALLOC(pReg, newRects);
     pNextRect = RegionTop(pReg);
     pReg->data->numRects += newRects;
     do {
-        assert(r->x1 < r->x2);
+        REGION_ASSERT(r->x1 < r->x2);
         ADDRECT(pNextRect, r->x1, y1, r->x2, y2);
         r++;
     } while (r != rEnd);
@@ -622,8 +621,8 @@ RegionOp(RegionPtr newReg,      /* Place to store result         */
     numRects = RegionNumRects(reg2);
     r2 = RegionRects(reg2);
     r2End = r2 + numRects;
-    assert(r1 != r1End);
-    assert(r2 != r2End);
+    REGION_ASSERT(r1 != r1End);
+    REGION_ASSERT(r2 != r2End);
 
     oldData = NULL;
     if (((newReg == reg1) && (newSize > 1)) ||
@@ -678,8 +677,8 @@ RegionOp(RegionPtr newReg,      /* Place to store result         */
          * rectangle after the last one in the current band for their
          * respective regions.
          */
-        assert(r1 != r1End);
-        assert(r2 != r2End);
+        REGION_ASSERT(r1 != r1End);
+        REGION_ASSERT(r2 != r2End);
 
         FindBand(r1, r1BandEnd, r1End, r1y1);
         FindBand(r2, r2BandEnd, r2End, r2y1);
@@ -832,7 +831,7 @@ RegionSetExtents(RegionPtr pReg)
     pReg->extents.x2 = pBoxEnd->x2;
     pReg->extents.y2 = pBoxEnd->y2;
 
-    assert(pReg->extents.y1 < pReg->extents.y2);
+    REGION_ASSERT(pReg->extents.y1 < pReg->extents.y2);
     while (pBox <= pBoxEnd) {
         if (pBox->x1 < pReg->extents.x1)
             pReg->extents.x1 = pBox->x1;
@@ -841,7 +840,7 @@ RegionSetExtents(RegionPtr pReg)
         pBox++;
     };
 
-    assert(pReg->extents.x1 < pReg->extents.x2);
+    REGION_ASSERT(pReg->extents.x1 < pReg->extents.x2);
 }
 
 /*======================================================================
@@ -903,9 +902,9 @@ RegionUnionO(RegionPtr pReg,
     int x1;                     /* left and right side of current union */
     int x2;
 
-    assert(y1 < y2);
-    assert(r1 != r1End);
-    assert(r2 != r2End);
+    REGION_ASSERT(y1 < y2);
+    REGION_ASSERT(r1 != r1End);
+    REGION_ASSERT(r2 != r2End);
 
     pNextRect = RegionTop(pReg);
 

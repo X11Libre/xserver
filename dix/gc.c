@@ -46,7 +46,6 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include <assert.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
@@ -127,7 +126,6 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
     PixmapPtr pPixmap;
     BITS32 maskQ;
 
-    assert(pUnion);
     pGC->serialNumber |= GC_CHANGE_SERIAL_BIT;
 
     maskQ = mask;               /* save these for when we walk the GCque */

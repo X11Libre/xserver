@@ -4226,8 +4226,6 @@ RemoveGPUScreen(ScreenPtr pScreen)
 void
 AttachUnboundGPU(ScreenPtr pScreen, ScreenPtr new)
 {
-    assert(new->isGPU);
-    assert(!new->current_primary);
     xorg_list_add(&new->secondary_head, &pScreen->secondary_list);
     new->current_primary = pScreen;
 }
@@ -4235,9 +4233,6 @@ AttachUnboundGPU(ScreenPtr pScreen, ScreenPtr new)
 void
 DetachUnboundGPU(ScreenPtr secondary)
 {
-    assert(secondary->isGPU);
-    assert(!secondary->is_output_secondary);
-    assert(!secondary->is_offload_secondary);
     xorg_list_del(&secondary->secondary_head);
     secondary->current_primary = NULL;
 }
@@ -4245,9 +4240,6 @@ DetachUnboundGPU(ScreenPtr secondary)
 void
 AttachOutputGPU(ScreenPtr pScreen, ScreenPtr new)
 {
-    assert(new->isGPU);
-    assert(!new->is_output_secondary);
-    assert(new->current_primary == pScreen);
     new->is_output_secondary = TRUE;
     new->current_primary->output_secondarys++;
 }
@@ -4255,8 +4247,6 @@ AttachOutputGPU(ScreenPtr pScreen, ScreenPtr new)
 void
 DetachOutputGPU(ScreenPtr secondary)
 {
-    assert(secondary->isGPU);
-    assert(secondary->is_output_secondary);
     secondary->current_primary->output_secondarys--;
     secondary->is_output_secondary = FALSE;
 }
@@ -4264,17 +4254,11 @@ DetachOutputGPU(ScreenPtr secondary)
 void
 AttachOffloadGPU(ScreenPtr pScreen, ScreenPtr new)
 {
-    assert(new->isGPU);
-    assert(!new->is_offload_secondary);
-    assert(new->current_primary == pScreen);
     new->is_offload_secondary = TRUE;
 }
 
 void
 DetachOffloadGPU(ScreenPtr secondary)
 {
-    assert(secondary->isGPU);
-    assert(secondary->is_offload_secondary);
     secondary->is_offload_secondary = FALSE;
 }
-

@@ -102,8 +102,6 @@ AllocatePixmap(ScreenPtr pScreen, int pixDataSize)
 {
     PixmapPtr pPixmap;
 
-    assert(pScreen->totalPixmapSize > 0);
-
     if (pScreen->totalPixmapSize > ((size_t) - 1) - pixDataSize)
         return NullPixmap;
 

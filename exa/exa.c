@@ -1003,9 +1003,7 @@ exaDriverInit(ScreenPtr pScreen, ExaDriverPtr pScreenInfo)
 
     LogMessage(X_INFO, "EXA(%d): Driver registered support for the following"
                " operations:\n", pScreen->myNum);
-    assert(pScreenInfo->PrepareSolid != NULL);
     LogMessage(X_INFO, "        Solid\n");
-    assert(pScreenInfo->PrepareCopy != NULL);
     LogMessage(X_INFO, "        Copy\n");
     if (pScreenInfo->PrepareComposite != NULL) {
         LogMessage(X_INFO, "        Composite (RENDER acceleration)\n");

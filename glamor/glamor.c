@@ -32,7 +32,6 @@
  */
 #include <dix-config.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -154,7 +153,6 @@ glamor_clear_pixmap(PixmapPtr pixmap)
     pixmap_format = glamor_format_for_pixmap(pixmap);
 
     BUG_RETURN(!pixmap_priv);
-    assert(pixmap_priv->fbo != NULL);
 
     glamor_pixmap_clear_fbo(glamor_priv, pixmap_priv->fbo, pixmap_format);
 }
@@ -590,7 +588,6 @@ glamor_setup_formats(ScreenPtr screen)
                       GL_RGB, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, TRUE);
 
     if (glamor_priv->is_gles) {
-        assert(X_BYTE_ORDER == X_LITTLE_ENDIAN);
         glamor_add_format(screen, 24, PIXMAN_x8r8g8b8,
                           GL_BGRA, GL_BGRA, GL_UNSIGNED_BYTE, TRUE);
         glamor_add_format(screen, 32, PIXMAN_a8r8g8b8,

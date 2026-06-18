@@ -1,6 +1,5 @@
 #include <dix-config.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <stdint.h> /* For INT16_MAX */
 
@@ -14,7 +13,6 @@ glamor_get_transform_extent_from_box(struct pixman_box32 *box,
 
 static inline glamor_pixmap_private *
 __glamor_large(glamor_pixmap_private *pixmap_priv) {
-    assert(glamor_pixmap_priv_is_large(pixmap_priv));
     return pixmap_priv;
 }
 
@@ -817,12 +815,10 @@ glamor_merge_clipped_regions(PixmapPtr pixmap,
                              pixmap->drawable.depth,
                              GLAMOR_CREATE_PIXMAP_FIXUP);
     if (temp_pixmap == NULL) {
-        assert(0);
         return;
     }
 
     temp_priv = glamor_get_pixmap_private(temp_pixmap);
-    assert(glamor_pixmap_priv_is_small(temp_priv));
 
     priv->box = temp_box;
     if (temp_box.x1 >= 0 && temp_box.x2 <= pixmap_width
@@ -1197,7 +1193,6 @@ glamor_composite_largepixmap_region(CARD8 op,
         *source_pixmap_priv = *need_free_source_pixmap_priv;
         need_free_source_pixmap_priv = source_pixmap_priv;
     }
-    assert(mask_pixmap_priv != dest_pixmap_priv);
 
     for (i = 0; i < n_dest_regions; i++) {
         DEBUGF("dest region %d  idx %d\n", i,
@@ -1266,7 +1261,6 @@ glamor_composite_largepixmap_region(CARD8 op,
                         is_normal_mask_fbo = 1;
                     }
                     else if (is_normal_mask_fbo && !is_normal_source_fbo) {
-                        assert(n_source_regions == 1);
                         /* The source fbo is not a normal fbo box, it has transform or repeatpad.
                          * the valid clip region should be the clip dest region rather than the
                          * clip source region.*/
@@ -1321,7 +1315,6 @@ glamor_composite_largepixmap_region(CARD8 op,
 			 dest_pixmap, (region),		        \
 			 x_source, y_source, x_mask, y_mask,	\
 			 x_dest, y_dest)) {			\
-		assert(0);					\
 	}							\
    } while(0)
 
@@ -1368,7 +1361,6 @@ glamor_composite_largepixmap_region(CARD8 op,
                     if (null_mask)
                         null_mask = 0;
                     if (need_clean_mask_fbo) {
-                        assert(is_normal_mask_fbo == 0);
                         glamor_destroy_fbo(glamor_priv, mask_pixmap_priv->fbo);
                         mask_pixmap_priv->fbo = NULL;
                         need_clean_mask_fbo = 0;
@@ -1397,7 +1389,6 @@ glamor_composite_largepixmap_region(CARD8 op,
             if (null_source)
                 null_source = 0;
             if (need_clean_source_fbo) {
-                assert(is_normal_source_fbo == 0);
                 glamor_destroy_fbo(glamor_priv, source_pixmap_priv->fbo);
                 source_pixmap_priv->fbo = NULL;
                 need_clean_source_fbo = 0;

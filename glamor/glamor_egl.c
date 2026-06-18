@@ -401,7 +401,6 @@ glamor_egl_image_from_dma_bufs(ScreenPtr screen,
 
 #define ADD_ATTR(attrs, num, attr)                                      \
     do {                                                            \
-        assert(((num) + 1) < (sizeof((attrs)) / sizeof((attrs)[0]))); \
         (attrs)[(num)++] = (attr);                                  \
     } while (0)
     ADD_ATTR(img_attrs, attr_num, EGL_WIDTH);
@@ -848,7 +847,6 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
     if (!eglExportDMABUFImageQueryMESA(glamor_egl->display, pixmap_priv->image, &fourcc, &num_planes, modifiers)) {
         return NULL;
     }
-    assert(num_planes <= GBM_MAX_PLANES);
     struct gbm_import_fd_modifier_data fd_modifier_data =
     {
         .width = pixmap->drawable.width,

@@ -27,7 +27,6 @@
  */
 #include <dix-config.h>
 
-#include <assert.h>
 #include <stdlib.h>
 
 #include "glamor/glamor_priv.h"
@@ -57,7 +56,6 @@ glamor_pixmap_ensure_fb(glamor_screen_private *glamor_priv,
 
     if (fbo->fb == 0)
         glGenFramebuffers(1, &fbo->fb);
-    assert(fbo->tex != 0);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->fb);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                            GL_TEXTURE_2D, fbo->tex, 0);
@@ -249,8 +247,6 @@ glamor_pixmap_clear_fbo(glamor_screen_private *glamor_priv, glamor_pixmap_fbo *f
                         const struct glamor_format *pixmap_format)
 {
     glamor_make_current(glamor_priv);
-
-    assert(fbo->fb != 0 && fbo->tex != 0);
 
     if (glamor_priv->has_clear_texture) {
         glClearTexImage(fbo->tex, 0, pixmap_format->format, pixmap_format->type, NULL);

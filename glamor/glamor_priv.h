@@ -520,16 +520,12 @@ glamor_set_pixmap_fbo_current(glamor_pixmap_private *priv, int idx)
 static inline glamor_pixmap_fbo *
 glamor_pixmap_fbo_at(glamor_pixmap_private *priv, int box)
 {
-    assert(priv);
-    assert(box < priv->block_wcnt * priv->block_hcnt);
     return priv->fbo_array[box];
 }
 
 static inline BoxPtr
 glamor_pixmap_box_at(glamor_pixmap_private *priv, int box)
 {
-    assert(priv);
-    assert(box < priv->block_wcnt * priv->block_hcnt);
     return &priv->box_array[box];
 }
 

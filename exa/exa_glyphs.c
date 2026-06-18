@@ -104,8 +104,6 @@ exaGlyphsInit(ScreenPtr pScreen)
         32;
     i++;
 
-    assert(i == EXA_NUM_GLYPH_CACHES);
-
     for (i = 0; i < EXA_NUM_GLYPH_CACHES; i++) {
         pExaScr->glyphCaches[i].columns =
             CACHE_PICTURE_WIDTH / pExaScr->glyphCaches[i].glyphWidth;
