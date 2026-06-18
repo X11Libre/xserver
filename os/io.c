@@ -53,6 +53,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <assert.h>
 #undef DEBUG_COMMUNICATION
 
 #include "dixstruct_priv.h"

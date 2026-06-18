@@ -52,6 +52,7 @@
  */
 #include <dix-config.h>
 
+#include <assert.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
