@@ -24,6 +24,7 @@
 /* Test relies on assert() */
 #undef NDEBUG
 
+#include <assert.h>
 #include <dix-config.h>
 
 #include <stdint.h>
