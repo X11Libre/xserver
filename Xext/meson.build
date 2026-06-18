@@ -1,7 +1,6 @@
 srcs_xext = [
     'sleepuntil.c',
     'xace.c',
-    'xcmisc.c',
 ]
 
 
@@ -42,6 +41,7 @@ if build_xwin or build_xquartz
 endif
 subdir('randr')
 subdir('record')
+subdir('xcmisc')
 subdir('shape')
 subdir('saver')
 subdir('sync')

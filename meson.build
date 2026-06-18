@@ -811,6 +811,7 @@ if build_xserver
         libxserver_present,
         libxserver_xres,
         libxserver_xext,
+        libxserver_xcmisc,
         libxserver_sync,
         libxserver_security,
         libxserver_miext_sync,
