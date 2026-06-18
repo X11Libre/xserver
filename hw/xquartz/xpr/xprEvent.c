@@ -32,6 +32,11 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <X11/X.h>
+#include <X11/Xmd.h>
+#include <X11/Xproto.h>
+
+#include "include/misc.h"
 
 #include "xpr.h"
 
@@ -39,13 +44,9 @@
 #include "inputstr.h"
 #include "mi.h"
 #include "mipointer.h"
-#include "misc.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
-#include <X11/X.h>
-#include <X11/Xmd.h>
-#include <X11/Xproto.h>
 
 #include "darwinEvents.h"
 #include "quartz.h"

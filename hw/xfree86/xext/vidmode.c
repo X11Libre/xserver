@@ -41,10 +41,10 @@ from Kaleb S. KEITHLEY
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/misc.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 
-#include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "scrnintstr.h"

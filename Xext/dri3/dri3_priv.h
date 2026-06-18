@@ -24,8 +24,10 @@
 #define _DRI3PRIV_H_
 
 #include <X11/X.h>
+
+#include "include/misc.h"
+
 #include "scrnintstr.h"
-#include "misc.h"
 #include "list.h"
 #include "windowstr.h"
 #include "dixstruct.h"

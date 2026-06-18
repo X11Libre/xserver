@@ -58,10 +58,10 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/window_priv.h"
+#include "include/misc.h"
 #include "os/osdep.h"
 #include "os/bug_priv.h"
 
-#include "misc.h"
 #include "dix.h"
 #include "dixstruct.h"
 #include "os.h"

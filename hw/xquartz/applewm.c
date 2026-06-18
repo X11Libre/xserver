@@ -33,14 +33,15 @@
 #include <dix-config.h>
 
 #include <errno.h>
+#include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
 #include "dix/request_priv.h"
+#include "include/misc.h"
 
 #include "quartz.h"
 
-#include "misc.h"
 #include "dixstruct.h"
 #include "globals.h"
 #include "extnsionst.h"
@@ -50,7 +51,6 @@
 #include "servermd.h"
 #include "swaprep.h"
 #include "propertyst.h"
-#include <X11/Xatom.h>
 #include "darwin.h"
 #define _APPLEWM_SERVER_
 #include <X11/extensions/applewmproto.h>

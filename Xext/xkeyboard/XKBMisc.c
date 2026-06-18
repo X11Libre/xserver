@@ -31,10 +31,11 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/Xproto.h>
 #include <X11/keysym.h>
 
+#include "include/misc.h"
+
 #include "xkbfmisc_priv.h"
 #include "xkbsrv_priv.h"
 
-#include "misc.h"
 #include "inputstr.h"
 
 /***====================================================================***/

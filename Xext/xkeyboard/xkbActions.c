@@ -40,11 +40,11 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/window_priv.h"
+#include "include/misc.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "xkbsrv_priv.h"
 
-#include "misc.h"
 #include "inputstr.h"
 #include "exevents.h"
 #include "eventstr.h"

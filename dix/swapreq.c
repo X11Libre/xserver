@@ -52,8 +52,8 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/reqhandlers_priv.h"
+#include "include/misc.h"
 
-#include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"         /* for SendEvent */
 #include "swapreq.h"

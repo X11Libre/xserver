@@ -128,12 +128,12 @@ Equipment Corporation.
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "include/extinit.h"
+#include "include/misc.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
-#include "misc.h"
 #include "os.h"
 #include "resource.h"
 #include "dixstruct.h"

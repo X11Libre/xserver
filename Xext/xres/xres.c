@@ -17,12 +17,12 @@
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "include/misc.h"
 #include "os/client_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/composite/compint.h"
 #include "Xext/xace.h"
 
-#include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
@@ -32,7 +32,7 @@
 #include "gcstruct.h"
 #include "protocol-versions.h"
 #include "list.h"
-#include "misc.h"
+#include "include/misc.h"
 #include "hashtable.h"
 #include "picturestr.h"
 

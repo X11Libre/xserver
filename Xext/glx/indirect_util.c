@@ -33,6 +33,7 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "include/misc.h"
 
 #include "indirect_size.h"
 #include "indirect_size_get.h"
@@ -42,7 +43,6 @@
 #include "glxext.h"
 #include "indirect_table.h"
 #include "indirect_util.h"
-#include "misc.h"
 
 #define __GLX_PAD(a) (((a)+3)&~3)
 

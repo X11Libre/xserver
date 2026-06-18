@@ -41,16 +41,14 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/request_priv.h"
 #include "dix/screensaver_priv.h"
 #include "dix/window_priv.h"
+#include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
-#ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
-#endif
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
-#include "misc.h"
 #include "os.h"
 #include "windowstr.h"
 #include "scrnintstr.h"

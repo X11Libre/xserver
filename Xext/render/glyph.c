@@ -26,10 +26,10 @@
 
 #include "dix/screenint_priv.h"
 #include "include/mipict.h"
+#include "include/misc.h"
 #include "os/bug_priv.h"
 #include "os/xsha1.h"
 
-#include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
 #include "regionstr.h"

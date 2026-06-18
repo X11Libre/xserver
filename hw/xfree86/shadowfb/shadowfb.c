@@ -13,8 +13,8 @@
 #include <X11/fonts/fontstruct.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "include/misc.h"
 
-#include "misc.h"
 #include "pixmapstr.h"
 #include "input.h"
 #include "mi.h"

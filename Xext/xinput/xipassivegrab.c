@@ -40,13 +40,13 @@
 #include "dix/inpututils_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/request_priv.h"
-#include "handlers.h"
+#include "include/misc.h"
 
+#include "handlers.h"
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "swaprep.h"
 #include "exglobals.h"          /* BadDevice */
-#include "misc.h"
 
 int
 ProcXIPassiveGrabDevice(ClientPtr client)

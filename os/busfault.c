@@ -22,18 +22,18 @@
 
 #include <dix-config.h>
 
-#include <X11/Xos.h>
-#include <X11/Xdefs.h>
-
-#include "os/busfault.h"
-
-#include "misc.h"
-#include <list.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/mman.h>
 #include <signal.h>
+#include <X11/Xos.h>
+#include <X11/Xdefs.h>
+
+#include "include/misc.h"
+#include "os/busfault.h"
+
+#include <list.h>
 
 struct busfault {
     struct xorg_list    list;

@@ -26,8 +26,8 @@
 #include <X11/keysymdef.h>
 
 #include "dix/screenint_priv.h"
+#include "include/misc.h"
 
-#include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
 #include "regionstr.h"

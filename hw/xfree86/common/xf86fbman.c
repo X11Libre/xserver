@@ -33,9 +33,9 @@
 
 #include <X11/X.h>
 
+#include "include/misc.h"
 #include "os/log_priv.h"
 
-#include "misc.h"
 #include "xf86.h"
 #include "scrnintstr.h"
 #include "regionstr.h"

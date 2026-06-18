@@ -40,12 +40,12 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XKMformat.h>
 
 #include "dix/screenint_priv.h"
+#include "include/misc.h"
 #include "os/bug_priv.h"
 #include "os/cmdline.h"
 #include "os/log_priv.h"
 #include "xkbsrv_priv.h"
 
-#include "misc.h"
 #include "inputstr.h"
 #include "opaque.h"
 #include "property.h"

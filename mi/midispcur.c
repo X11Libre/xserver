@@ -31,14 +31,14 @@ in this Software without prior written authorization from The Open Group.
 
 #include <dix-config.h>
 
-#include   <X11/X.h>
+#include <X11/X.h>
 
-#include   "dix/dix_priv.h"
-#include   "dix/gc_priv.h"
-#include   "dix/screen_hooks_priv.h"
-#include   "dix/screenint_priv.h"
+#include "dix/dix_priv.h"
+#include "dix/gc_priv.h"
+#include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
+#include "include/misc.h"
 
-#include   "misc.h"
 #include   "input.h"
 #include   "cursorstr.h"
 #include   "windowstr.h"

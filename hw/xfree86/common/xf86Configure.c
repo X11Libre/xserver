@@ -26,6 +26,7 @@
 
 #include <errno.h>
 
+#include "include/misc.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 #include "os/serverlock.h"
@@ -43,7 +44,6 @@
 #include "xf86Bus.h"
 #include "xf86Sbus_priv.h"
 #endif
-#include "misc.h"
 #include "loaderProcs.h"
 #include "xf86Parser_priv.h"
 

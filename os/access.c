@@ -84,17 +84,17 @@ SOFTWARE.
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "os/Xtrans.h"
+#include <errno.h>
+#include <sys/types.h>
 #include <X11/Xauth.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#include "misc.h"
-#include <errno.h>
-#include <sys/types.h>
 
 #include "dix/server_priv.h"
+#include "include/misc.h"
 #include "os/io_priv.h"
 #include "os/xhostname.h"
+#include "os/Xtrans.h"
 
 #ifndef WIN32
 #include <sys/socket.h>

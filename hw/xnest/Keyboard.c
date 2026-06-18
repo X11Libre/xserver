@@ -25,11 +25,11 @@ is" without express or implied warranty.
 #include <X11/extensions/XKB.h>
 #include <xcb/xkb.h>
 
+#include "include/misc.h"
 #include "os/osdep.h"
 
 #include "screenint.h"
 #include "inputstr.h"
-#include "misc.h"
 #include "scrnintstr.h"
 #include "servermd.h"
 

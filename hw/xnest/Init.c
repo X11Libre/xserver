@@ -21,18 +21,16 @@ is" without express or implied warranty.
 #include <X11/fonts/libxfont2.h>
 
 #include "dix/screenint_priv.h"
+#include "include/misc.h"
 #include "mi/mi_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
-#ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
-#endif
 
 #include "screenint.h"
 #include "input.h"
-#include "misc.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "servermd.h"

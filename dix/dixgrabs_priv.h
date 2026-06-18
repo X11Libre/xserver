@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPLv3
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  */
@@ -7,7 +7,8 @@
 
 #include <X11/extensions/XIproto.h>
 
-#include "misc.h"
+#include "include/misc.h"
+
 #include "window.h"
 #include "input.h"
 #include "cursor.h"

@@ -32,12 +32,11 @@
 
 #include <stdint.h>
 
-#include "misc.h"
+#include "include/misc.h"
+
 #include "rootless.h"
 #include "fb.h"
-
 #include "scrnintstr.h"
-
 #include "picturestr.h"
 
 // Debug output, or not.

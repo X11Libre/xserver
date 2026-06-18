@@ -42,15 +42,22 @@
 
 #include <dix-config.h>
 
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <errno.h>
+#include <time.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
 
 #include "dix/inpututils_priv.h"
+#include "include/misc.h"
 #include "mi/mi_priv.h"
 #include "os/client_priv.h"
+#include "Xext/xinput/exglobals.h"
 
-#include "misc.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
 #include "inputstr.h"
@@ -58,20 +65,12 @@
 #include "scrnintstr.h"
 #include "mipointer.h"
 #include "os.h"
-#include "Xext/xinput/exglobals.h"
 
 #include "darwin.h"
 #include "quartz.h"
 #include "quartzKeyboard.h"
 #include "quartzRandR.h"
 #include "darwinEvents.h"
-
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <errno.h>
-#include <time.h>
 
 #include <IOKit/hidsystem/IOLLEvent.h>
 

@@ -42,13 +42,13 @@
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/inpututils_priv.h"
+#include "include/misc.h"
+#include "Xext/xinput/exglobals.h"
+#include "Xext/xinput/xiquerydevice.h"
 
 #include "dix.h"
 #include "inputstr.h"
-#include "misc.h"
 #include "eventstr.h"
-#include "Xext/xinput/exglobals.h"
-#include "Xext/xinput/xiquerydevice.h"
 #include "xkbsrv.h"
 
 static int countValuators(DeviceEvent *ev, int *first);

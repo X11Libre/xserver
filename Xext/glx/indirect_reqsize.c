@@ -28,10 +28,11 @@
 
 #include <GL/gl.h>
 
+#include "include/misc.h"
+
 #include "glxserver.h"
 #include "indirect_size.h"
 #include "indirect_reqsize.h"
-#include "misc.h"
 
 #ifdef HAVE_ALIAS
 #define ALIAS2(from,to) \

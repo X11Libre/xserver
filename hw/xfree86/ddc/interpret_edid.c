@@ -29,9 +29,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "include/misc.h"
+
 #include "edid_priv.h"
 
-#include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86DDC_priv.h"

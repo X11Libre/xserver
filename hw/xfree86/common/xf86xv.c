@@ -36,9 +36,9 @@
 
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
+#include "include/misc.h"
 #include "Xext/xv/xvdix_priv.h"
 
-#include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "scrnintstr.h"

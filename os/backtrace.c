@@ -23,11 +23,12 @@
 
 #include <dix-config.h>
 
-#include "os.h"
-#include "misc.h"
-
 #include <errno.h>
 #include <string.h>
+
+#include "include/misc.h"
+
+#include "os.h"
 
 #ifndef WIN32
 #include <sys/wait.h>

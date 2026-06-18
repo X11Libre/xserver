@@ -53,8 +53,8 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/server_priv.h"
 #include "dix/settings_priv.h"
+#include "include/misc.h"
 
-#include "misc.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "input.h"

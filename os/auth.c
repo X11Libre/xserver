@@ -33,23 +33,20 @@ from The Open Group.
 
 #include <dix-config.h>
 
-#include   <X11/X.h>
-#include   <X11/Xauth.h>
-#include   "misc.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <X11/X.h>
+#include <X11/Xauth.h>
+
+#include "include/misc.h"
+#include "os/auth.h"
+
 #include   "osdep.h"
 #include   "dixstruct.h"
-#include   <sys/types.h>
-#include   <sys/stat.h>
-#include   <errno.h>
 #ifdef WIN32
 #include    <X11/Xw32defs.h>
 #endif
-#include   <stdlib.h>       /* for arc4random_buf() */
-#ifdef HAVE_GETRANDOM
-#include   <sys/random.h>   /* for getrandom() */
-#endif
-
-#include "os/auth.h"
 
 #ifdef XDMCP
 #include "xdmcp.h"

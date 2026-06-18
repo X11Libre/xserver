@@ -23,21 +23,21 @@
 #ifndef _PRESENT_PRIV_H_
 #define _PRESENT_PRIV_H_
 
+#include <inttypes.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 
 #include "include/present.h"
+#include "include/misc.h"
 #include "include/syncsdk.h"
+#include "Xext/sync/syncsrv.h"
 #include "Xext/xfixes/xfixes.h"
 
 #include "scrnintstr.h"
-#include "misc.h"
 #include "list.h"
 #include "windowstr.h"
 #include "dixstruct.h"
-#include "Xext/sync/syncsrv.h"
 #include <randrstr.h>
-#include <inttypes.h>
 #include "dri3.h"
 
 #if 0

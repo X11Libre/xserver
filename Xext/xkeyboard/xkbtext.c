@@ -34,9 +34,10 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/XKMformat.h>
 
+#include "include/misc.h"
+
 #include "xkbtext_priv.h"
 
-#include "misc.h"
 #include "inputstr.h"
 #include "dix.h"
 #include "xkbstr.h"

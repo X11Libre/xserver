@@ -19,11 +19,11 @@ is" without express or implied warranty.
 
 #include "dix/cursor_priv.h"
 #include "dix/inpututils_priv.h"
+#include "include/misc.h"
 #include "mi/mi_priv.h"
 
 #include "screenint.h"
 #include "input.h"
-#include "misc.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "servermd.h"

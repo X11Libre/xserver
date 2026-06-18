@@ -84,9 +84,9 @@ SOFTWARE.
 #undef CONFIG_MITSHM
 #endif
 
+#include "include/misc.h"
 #include "miext/extinit_priv.h"
 
-#include "misc.h"
 #include "extension.h"
 #include "micmap.h"
 #include "os.h"

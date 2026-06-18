@@ -60,12 +60,11 @@
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 
-#include "misc.h"
 #include "os.h"
-#include "os/osdep.h"
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "dixfontstr.h"

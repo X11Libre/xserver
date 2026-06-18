@@ -35,12 +35,12 @@
 #include "win.h"
 #include "winmsg.h"
 
+#include "include/misc.h"
 #include "mi/mipointer_priv.h"
 
 #include <cursorstr.h>
 #include <mipointrst.h>
 #include <servermd.h>
-#include "misc.h"
 
 #define BRIGHTNESS(x) (x##Red * 0.299 + x##Green * 0.587 + x##Blue * 0.114)
 

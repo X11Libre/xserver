@@ -12,11 +12,11 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "include/misc.h"
 #include "include/xvmcext.h"
 #include "miext/extinit_priv.h"
 #include "xvdix_priv.h"
 
-#include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 #include "resource.h"

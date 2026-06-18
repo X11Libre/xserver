@@ -30,10 +30,10 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/misc.h"
 #include "os/bug_priv.h"
-
 #include "Xext/xinput/exglobals.h"
-#include "misc.h"
+
 #include "inputstr.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"

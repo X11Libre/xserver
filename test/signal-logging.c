@@ -30,10 +30,9 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include "include/misc.h"
 #include "os/fmt.h"
 #include "os/log_priv.h"
-
-#include "misc.h"
 
 #include "tests-common.h"
 

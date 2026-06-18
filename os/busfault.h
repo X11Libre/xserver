@@ -27,7 +27,7 @@
 
 #include <X11/Xdefs.h>
 
-#include "misc.h"                         /* for TRUE/FALSE */
+#include "include/misc.h"                         /* for TRUE/FALSE */
 
 typedef void (*busfault_notify_ptr) (void *context);
 

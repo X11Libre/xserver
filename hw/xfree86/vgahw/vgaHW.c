@@ -15,10 +15,10 @@
 
 #include <X11/X.h>
 
+#include "include/misc.h"
 #include "include/vgaHW.h"
 #include "os/log_priv.h"
 
-#include "misc.h"
 #include "xf86_priv.h"
 #include "xf86_OSproc.h"
 #include "xf86Opt_priv.h"

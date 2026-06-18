@@ -40,13 +40,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/dri/xf86driproto.h>
 
 #include "dix/dix_priv.h"
+#include "include/misc.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/dristruct.h"
 #include "include/sarea.h"
 
 #include "xf86.h"
-#include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "cursorstr.h"

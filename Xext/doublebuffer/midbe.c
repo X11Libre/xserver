@@ -36,10 +36,10 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
+#include "include/misc.h"
 #include "Xext/doublebuffer/dbestruct.h"
 #include "Xext/doublebuffer/midbe.h"
 
-#include "misc.h"
 #include "os.h"
 #include "windowstr.h"
 #include "scrnintstr.h"

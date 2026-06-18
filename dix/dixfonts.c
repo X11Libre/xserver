@@ -66,23 +66,20 @@ Equipment Corporation.
 #include "dix/server_priv.h"
 #include "dix/swaprep.h"
 #include "include/extinit.h"
+#include "include/misc.h"
 #include "include/gcstruct.h"
 #include "os/auth.h"
 #include "os/log_priv.h"
+#include "Xext/xf86bigfont/xf86bigfontsrv.h"
 
 #include "scrnintstr.h"
 #include "resource.h"
 #include "dixstruct.h"
 #include "cursorstr.h"
-#include "misc.h"
 #include "opaque.h"
 #include "dixfontstr.h"
 #include "dixfont.h"
 #include "xace.h"
-
-#ifdef XF86BIGFONT
-#include "Xext/xf86bigfont/xf86bigfontsrv.h"
-#endif
 
 #define XLFDMAXFONTNAMELEN      1024
 struct list_font_state {

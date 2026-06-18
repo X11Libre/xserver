@@ -36,10 +36,10 @@
 #include <X11/Xmd.h>
 
 #include "dix/dix_priv.h"
+#include "include/misc.h"
 #include "os/auth.h"
 #include "os/ossock.h"
 
-#include "misc.h"
 #include "osdep.h"
 #include "xdmcp.h"
 #include "xdmauth.h"

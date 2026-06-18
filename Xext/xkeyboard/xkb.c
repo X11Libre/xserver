@@ -38,11 +38,11 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "dix/rpcbuf_priv.h"
 #include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
+#include "include/misc.h"
 #include "os/osdep.h"
 #include "xkbfmisc_priv.h"
 #include "xkbsrv_priv.h"
 
-#include "misc.h"
 #include "inputstr.h"
 #include "extnsionst.h"
 #include "xkb-procs.h"

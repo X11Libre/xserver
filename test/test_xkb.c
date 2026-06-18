@@ -40,10 +40,10 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/XKMformat.h>
 
+#include "include/misc.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
 #include "Xext/xkeyboard/xkbgeom_priv.h"
 
-#include "misc.h"
 #include "inputstr.h"
 #include "opaque.h"
 #include "property.h"

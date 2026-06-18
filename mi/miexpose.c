@@ -82,11 +82,11 @@ Equipment Corporation.
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
 #include "include/extinit.h"
+#include "include/misc.h"
 #include "mi/mi_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
-#include "misc.h"
 #include "regionstr.h"
 #include "scrnintstr.h"
 #include "gcstruct.h"

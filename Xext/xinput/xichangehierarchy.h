@@ -31,7 +31,7 @@
 #ifndef CHDEVHIER_H
 #define CHDEVHIER_H 1
 
-#include "misc.h"
+#include "include/misc.h"
 
 void XISendDeviceHierarchyEvent(int flags[MAXDEVICES]);
 

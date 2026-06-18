@@ -52,9 +52,9 @@ SOFTWARE.
 #include <X11/Xproto.h>
 
 #include "dix/gc_priv.h"
+#include "include/misc.h"
 #include "os/osdep.h"
 
-#include "misc.h"
 #include "resource.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"

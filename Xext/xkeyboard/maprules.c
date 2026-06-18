@@ -41,10 +41,10 @@
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 
+#include "include/misc.h"
 #include "os/log_priv.h"
-#include "xkbrules_priv.h"
 
-#include "misc.h"
+#include "xkbrules_priv.h"
 #include "inputstr.h"
 #include "dix.h"
 #include "os.h"

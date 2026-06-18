@@ -65,16 +65,14 @@ SOFTWARE.
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #endif
-#include <X11/X.h>
-#include <X11/Xproto.h>
-#include "os/Xtrans.h"
-#include "os/Xtransint.h"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <sys/stat.h>
+#include <X11/X.h>
+#include <X11/Xproto.h>
+
 
 #ifndef WIN32
 #include <sys/socket.h>
@@ -101,8 +99,9 @@ SOFTWARE.
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
+#include "os/Xtrans.h"
+#include "os/Xtransint.h"
 
-#include "misc.h"               /* for typedef of pointer */
 #include "dixstruct_priv.h"
 #include "globals.h"
 #include "xace.h"

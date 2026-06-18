@@ -48,20 +48,20 @@ in this Software without prior written authorization from The Open Group.
 
 #include <dix-config.h>
 
-#include   <X11/X.h>
-#include   <X11/Xmd.h>
-#include   <X11/Xproto.h>
+#include <X11/X.h>
+#include <X11/Xmd.h>
+#include <X11/Xproto.h>
 
-#include   "dix/cursor_priv.h"
-#include   "dix/dix_priv.h"
-#include   "dix/input_priv.h"
-#include   "dix/inpututils_priv.h"
-#include   "dix/screen_hooks_priv.h"
-#include   "include/extinit.h"
-#include   "mi/mi_priv.h"
-#include   "mi/mipointer_priv.h"
+#include "dix/cursor_priv.h"
+#include "dix/dix_priv.h"
+#include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
+#include "dix/screen_hooks_priv.h"
+#include "include/extinit.h"
+#include "include/misc.h"
+#include "mi/mi_priv.h"
+#include "mi/mipointer_priv.h"
 
-#include   "misc.h"
 #include   "windowstr.h"
 #include   "pixmapstr.h"
 #include   "scrnintstr.h"

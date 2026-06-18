@@ -53,9 +53,9 @@ SOFTWARE.
 #include <X11/Xprotostr.h>
 #include <X11/Xfuncproto.h>
 
+#include "include/misc.h"
 #include "mi/mi_priv.h"
 
-#include "misc.h"
 #include "gcstruct.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"

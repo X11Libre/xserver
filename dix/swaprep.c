@@ -51,8 +51,8 @@ SOFTWARE.
 #include <X11/fonts/fontstruct.h>
 
 #include "dix/dix_priv.h"
+#include "include/misc.h"
 
-#include "misc.h"
 #include "dixstruct.h"
 #include "scrnintstr.h"
 #include "swaprep.h"

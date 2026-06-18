@@ -50,6 +50,7 @@
 #include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
+#include "include/misc.h"
 #include "mi/mi_priv.h"
 
 #include "xf86.h"
@@ -66,7 +67,6 @@
 #include "xf86Xinput.h"
 #include "eventstr.h"
 #include "xf86Extensions.h"
-#include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "cursorstr.h"

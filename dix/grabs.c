@@ -59,14 +59,14 @@ SOFTWARE.
 #include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/window_priv.h"
+#include "include/misc.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
+#include "Xext/xinput/exglobals.h"
 
-#include "misc.h"
 #include "windowstr.h"
 #include "inputstr.h"
 #include "cursorstr.h"
-#include "Xext/xinput/exglobals.h"
 
 #define MasksPerDetailMask 8    /* 256 keycodes and 256 possible
                                    modifier combinations, but only

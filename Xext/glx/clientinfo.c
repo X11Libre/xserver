@@ -22,7 +22,8 @@
  */
 #include <dix-config.h>
 
-#include "misc.h"
+#include "include/misc.h"
+
 #include "glxserver.h"
 #include "indirect_dispatch.h"
 #include "unpack.h"

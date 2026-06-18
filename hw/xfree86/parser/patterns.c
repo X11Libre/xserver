@@ -7,7 +7,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "misc.h"
+
+#include "include/misc.h"
+
 #include "xf86Parser_priv.h"
 #include "configProcs.h"
 #include "os.h"

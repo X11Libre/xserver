@@ -60,15 +60,13 @@
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "include/misc.h"
 #include "include/property.h"
 #include "hw/xfree86/common/action_priv.h"
 #include "mi/mi_priv.h"
 #include "os/log_priv.h"
-#ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
-#endif
 
-#include "misc.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
 #include "xf86_os_support.h"

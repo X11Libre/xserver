@@ -9,11 +9,12 @@
 #include <X11/Xdefs.h>
 #include <X11/Xmd.h>
 
+#include "include/misc.h"
+
 #include "xkbrules_priv.h"
 
 #include "dix.h"
 #include "input.h"
-#include "misc.h"
 #include "privates.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"

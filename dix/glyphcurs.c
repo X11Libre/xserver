@@ -46,11 +46,11 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <X11/fonts/fontstruct.h>
+
 #include "dix/cursor_priv.h"
 #include "dix/screenint_priv.h"
-
-#include "misc.h"
-#include <X11/fonts/fontstruct.h>
+#include "include/misc.h"
 #include "dixfontstr.h"
 #include "scrnintstr.h"
 #include "gcstruct.h"

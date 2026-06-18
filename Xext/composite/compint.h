@@ -43,10 +43,12 @@
 #ifndef _COMPINT_H_
 #define _COMPINT_H_
 
+#include <X11/extensions/compositeproto.h>
+
 #include "dix/screen_hooks_priv.h"
+#include "include/misc.h"
 #include "Xext/xfixes/xfixes.h"
 
-#include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
 #include "regionstr.h"
@@ -64,7 +66,6 @@
 #include "privates.h"
 #include "mi.h"
 #include "damage.h"
-#include <X11/extensions/compositeproto.h>
 #include "compositeext.h"
 
 typedef struct _CompClientWindow {

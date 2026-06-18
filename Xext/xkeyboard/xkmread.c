@@ -34,12 +34,13 @@
 #include <X11/keysym.h>
 #include <X11/extensions/XKMformat.h>
 
+#include "include/misc.h"
 #include "os/log_priv.h"
+
 #include "xkbfile_priv.h"
 #include "xkbfmisc_priv.h"
 #include "xkbsrv_priv.h"
 
-#include "misc.h"
 #include "inputstr.h"
 #include "xkbstr.h"
 #include "xkbgeom_priv.h"

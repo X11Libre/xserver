@@ -3,8 +3,8 @@
 #include <stdlib.h>
 
 #include "dix/resource_priv.h"
+#include "include/misc.h"
 
-#include "misc.h"
 #include "hashtable.h"
 
 /* HashResourceID */

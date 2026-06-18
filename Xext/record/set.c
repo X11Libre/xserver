@@ -49,7 +49,8 @@ from The Open Group.
 
 #include <string.h>
 
-#include "misc.h"
+#include "include/misc.h"
+
 #include "set.h"
 
 /*

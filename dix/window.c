@@ -114,6 +114,7 @@ Equipment Corporation.
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
 #include "include/extinit.h"
+#include "include/misc.h"
 #include "mi/mi_priv.h"         /* miPaintWindow */
 #include "os/auth.h"
 #include "os/client_priv.h"
@@ -123,7 +124,6 @@ Equipment Corporation.
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
-#include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
 #include "regionstr.h"

@@ -60,16 +60,14 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <limits.h>
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
-#include <limits.h>
 
+#include "include/misc.h" /* for PATH_MAX */
 #include "os/xhostname.h"
 
 #include "xf86Parser_priv.h"
-
-/* For PATH_MAX */
-#include "misc.h"
 
 #include "Configint.h"
 #include "xf86tokens.h"

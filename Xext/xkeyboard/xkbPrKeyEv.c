@@ -34,10 +34,11 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/keysym.h>
 
 #include "dix/input_priv.h"
+#include "include/misc.h"
 #include "os/log_priv.h"
+
 #include "xkbsrv_priv.h"
 
-#include "misc.h"
 #include "inputstr.h"
 #include "exevents.h"
 #include "eventstr.h"

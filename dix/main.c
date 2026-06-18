@@ -96,6 +96,7 @@ Equipment Corporation.
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
 #include "include/extinit.h"
+#include "include/misc.h"
 #include "os/audit_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
@@ -104,13 +105,10 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "os/screensaver.h"
 #include "os/serverlock.h"
-#ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
-#endif
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "scrnintstr.h"
-#include "misc.h"
 #include "os.h"
 #include "windowstr.h"
 #include "resource.h"

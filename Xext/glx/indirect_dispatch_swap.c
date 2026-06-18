@@ -26,12 +26,13 @@
 
 #include <inttypes.h>
 
+#include "include/misc.h"
+
 #include "glxserver.h"
 #include "indirect_size.h"
 #include "indirect_size_get.h"
 #include "indirect_dispatch.h"
 #include "indirect_util.h"
-#include "misc.h"
 #include "singlesize.h"
 
 #define __GLX_PAD(x)  (((x) + 3) & ~3)

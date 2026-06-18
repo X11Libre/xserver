@@ -22,9 +22,10 @@ is" without express or implied warranty.
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 
+#include "include/misc.h"
+
 #include "screenint.h"
 #include "input.h"
-#include "misc.h"
 #include "cursorstr.h"
 #include "scrnintstr.h"
 #include "servermd.h"

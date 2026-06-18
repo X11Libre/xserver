@@ -59,11 +59,11 @@ DEALINGS IN THE SOFTWARE.
 #include <X11/keysym.h>
 
 #include "dix/input_priv.h"
+#include "include/misc.h"
 #include "os/log_priv.h"
 #include "xkbsrv_priv.h"
 
 #include "os.h"
-#include "misc.h"
 #include "inputstr.h"
 #include "eventstr.h"
 #include "xkbgeom_priv.h"

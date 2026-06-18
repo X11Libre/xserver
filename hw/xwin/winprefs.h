@@ -35,8 +35,9 @@
 
 /* Need Bool */
 #include <X11/Xdefs.h>
+
 /* Need TRUE */
-#include "misc.h"
+#include "include/misc.h"
 
 /* Need to know how long paths can be... */
 #include <limits.h>

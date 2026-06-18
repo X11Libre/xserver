@@ -38,12 +38,13 @@
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/request_priv.h"
+#include "include/misc.h"
 #include "os/fmt.h"
+
 #include "handlers.h"
 
 #include "inputstr.h"
 #include "exglobals.h"
-#include "misc.h"
 
 extern XExtensionVersion XIVersion;     /* defined in getvers.c */
 

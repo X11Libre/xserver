@@ -53,8 +53,8 @@ SOFTWARE.
 
 #include "dix/atom_priv.h"
 #include "dix/dix_priv.h"
+#include "include/misc.h"
 
-#include "misc.h"
 #include "resource.h"
 #include "dix.h"
 

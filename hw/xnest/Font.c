@@ -23,8 +23,8 @@ is" without express or implied warranty.
 #include <X11/fonts/libxfont2.h>
 
 #include "dix/dix_priv.h"
+#include "include/misc.h"
 
-#include "misc.h"
 #include "regionstr.h"
 #include "dixfontstr.h"
 #include "scrnintstr.h"

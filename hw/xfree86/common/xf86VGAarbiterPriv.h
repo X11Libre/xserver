@@ -26,10 +26,12 @@
 #ifndef XSERVER_XFREE86_XF86VGAARBITERPRIV_H
 #define XSERVER_XFREE86_XF86VGAARBITERPRIV_H
 
-#include "misc.h"
+#include <X11/X.h>
+
+#include "include/misc.h"
+
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#include <X11/X.h>
 #include "scrnintstr.h"
 #include "screenint.h"
 #include "gcstruct.h"

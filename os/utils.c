@@ -70,7 +70,6 @@ __stdcall unsigned long GetTickCount(void);
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
-#include "misc.h"
 #include <X11/X.h>
 #include "os/Xtrans.h"
 
@@ -106,6 +105,7 @@ __stdcall unsigned long GetTickCount(void);
 #include "dix/input_priv.h"
 #include "dix/settings_priv.h"
 #include "dix/screensaver_priv.h"
+#include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "os/audit_priv.h"
 #include "os/auth.h"

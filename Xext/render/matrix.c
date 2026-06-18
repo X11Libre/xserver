@@ -22,7 +22,8 @@
 
 #include <dix-config.h>
 
-#include "misc.h"
+#include "include/misc.h"
+
 #include "scrnintstr.h"
 #include "os.h"
 #include "regionstr.h"

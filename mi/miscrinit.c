@@ -32,10 +32,10 @@ from The Open Group.
 #include <X11/extensions/shm.h>
 
 #include "include/shmint.h"
+#include "include/misc.h"
 #include "mi/mi_priv.h"
 
 #include "servermd.h"
-#include "misc.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "dix.h"

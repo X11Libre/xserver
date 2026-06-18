@@ -11,13 +11,14 @@
  */
 #include <xorg-config.h>
 
+#include <string.h>
+
+#include "include/misc.h"
 #include "include/xf86DDC.h"
 #include "os/osdep.h"
 
-#include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#include <string.h>
 #include "edid_priv.h"
 
 #define RETRIES 4
