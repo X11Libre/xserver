@@ -28,6 +28,7 @@
  */
 #include <dix-config.h>
 
+#include <assert.h>
 #include "glamor_priv.h"
 
 /** Default size of the VBO, in bytes.

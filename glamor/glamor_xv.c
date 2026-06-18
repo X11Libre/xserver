@@ -33,8 +33,6 @@
  */
 #include <dix-config.h>
 
-#include <assert.h>
-
 #include "dix/dix_priv.h"
 #include "os/bug_priv.h"
 

@@ -28,6 +28,7 @@
  */
 #include <dix-config.h>
 
+#include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
