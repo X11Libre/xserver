@@ -66,7 +66,6 @@
 #include "damage.h"
 #include <X11/extensions/compositeproto.h>
 #include "compositeext.h"
-#include <assert.h>
 
 typedef struct _CompClientWindow {
     struct _CompClientWindow *next;
