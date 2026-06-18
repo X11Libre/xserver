@@ -10,6 +10,8 @@ RenderQueryVersion = 0
 RenderQueryPictFormats = 1
 RenderCreatePicture = 4
 RenderCreateGlyphSet = 17
+RenderFreeGlyphSet = 19
+RenderAddGlyphs = 20
 RenderCompositeGlyphs8 = 23
 RenderCompositeGlyphs16 = 24
 RenderCompositeGlyphs32 = 25
@@ -244,6 +246,74 @@ class CompositeGlyphs32Request(_CompositeGlyphsRequestBase):
     """RenderCompositeGlyphs32 request (minor opcode 25)."""
 
     _minor_opcode: int = field(default=RenderCompositeGlyphs32, init=False, repr=False)
+
+
+@dataclass
+class FreeGlyphSetRequest:
+    """RenderFreeGlyphSet request."""
+
+    opcode: int
+    glyph_set_id: int
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBHI",
+            self.opcode,
+            RenderFreeGlyphSet,
+            2,
+            self.glyph_set_id,
+        )
+
+
+@dataclass
+class AddGlyphsRequest:
+    """RenderAddGlyphs request.
+
+    Each glyph is described by a (glyph_id, glyph_info, data) tuple.
+    glyph_info is an xGlyphInfo: (width, height, x, y, x_off, y_off).
+    data is the raw pixel data for that glyph.
+    """
+
+    opcode: int
+    glyph_set_id: int
+    glyphs: list[tuple[int, tuple[int, int, int, int, int, int], bytes]] = field(
+        default_factory=list
+    )
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        nglyphs = len(self.glyphs)
+
+        # glyph IDs (CARD32 each)
+        ids_data = b""
+        for gid, _, _ in self.glyphs:
+            ids_data += struct.pack(f"{byte_order}I", gid)
+
+        # xGlyphInfo entries (12 bytes each: HHhhhh)
+        infos_data = b""
+        for _, info, _ in self.glyphs:
+            infos_data += struct.pack(f"{byte_order}HHhhhh", *info)
+
+        # glyph pixel data (concatenated, each padded to 4-byte boundary)
+        pixel_data = b""
+        for _, _, data in self.glyphs:
+            pixel_data += data
+            pad = (4 - len(data) % 4) % 4
+            pixel_data += b"\x00" * pad
+
+        body = ids_data + infos_data + pixel_data
+        total = 12 + len(body)
+        pad_len = (4 - total % 4) % 4
+        length = (total + pad_len) // 4
+
+        header = struct.pack(
+            f"{byte_order}BBHII",
+            self.opcode,
+            RenderAddGlyphs,
+            length,
+            self.glyph_set_id,
+            nglyphs,
+        )
+        return header + body + b"\x00" * pad_len
 
 
 @dataclass
