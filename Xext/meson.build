@@ -1,5 +1,4 @@
 srcs_xext = [
-    'sleepuntil.c',
     'xace.c',
 ]
 
