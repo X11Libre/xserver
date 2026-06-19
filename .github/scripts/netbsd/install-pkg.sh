@@ -6,9 +6,7 @@ set -ex
 
 export PATH="$PATH:/usr/sbin:/sbin:/usr/local/sbin"
 
-# NetBSD release version (matches .github/workflows/build-xserver.yml:363)
 NETBSD_RELEASE="10.1"
-# CPU architecture: NetBSD uses amd64, pkgsrc uses x86_64 for the directory name
 NETBSD_ARCH="amd64"
 PKGSRC_ARCH="x86_64"
 
@@ -36,13 +34,12 @@ if ! command -v pkgin >/dev/null 2>&1; then
     fi
 fi
 
-# Remove default pkgin config that may point to old release
+# Configure pkgin repositories (use .conf extension)
 rm -f /usr/pkg/etc/pkgin/repositories.conf
 rm -f /etc/pkgin/repositories.conf
-
-# Configure pkgin repositories for NetBSD $NETBSD_RELEASE
 mkdir -p /usr/pkg/etc/pkgin
 mkdir -p /etc/pkgin
+
 {
 cat <<EOF
 https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
@@ -51,12 +48,14 @@ https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGS
 https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
 https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
 EOF
-} > /usr/pkg/etc/pkgin/repositories
-cp /usr/pkg/etc/pkgin/repositories /etc/pkgin/repositories
+} > /usr/pkg/etc/pkgin/repositories.conf
+cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
 
-export PKGIN_REPOSITORIES="https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/"
+# Set PKG_REPOS environment variable (colon-separated)
+export PKG_REPOS="https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/"
+echo "PKG_REPOS=$PKG_REPOS"
 
-# Update package database, fallback to 10.0 if necessary
+# Update package database
 echo "Updating pkgin..."
 if ! pkgin update; then
     echo "pkgin update failed, falling back to NetBSD 10.0 repositories..."
@@ -68,17 +67,17 @@ https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGS
 https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
 https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
 EOF
-    } > /usr/pkg/etc/pkgin/repositories
-    cp /usr/pkg/etc/pkgin/repositories /etc/pkgin/repositories
-    export PKGIN_REPOSITORIES="https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/"
+    } > /usr/pkg/etc/pkgin/repositories.conf
+    cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
+    export PKG_REPOS="https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/"
     pkgin update
 fi
 
-# Install curl so we can download sets
-echo "Installing curl for set downloads..."
+# Install curl for downloading sets
+echo "Installing curl..."
 pkgin -y install curl
 
-# X11 binary sets to install
+# X11 binary sets
 SETS_MIRRORS="
 https://ftp.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
 https://ftp.fr.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
