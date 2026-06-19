@@ -25,10 +25,6 @@
 
 #include <dix-config.h>
 
-#include <X11/Xdefs.h>
-
-#include "include/misc.h"                         /* for TRUE/FALSE */
-
 typedef void (*busfault_notify_ptr) (void *context);
 
 #ifdef HAVE_SIGACTION
@@ -44,8 +40,7 @@ busfault_unregister(struct busfault *busfault);
 void
 busfault_check(void);
 
-Bool
-busfault_init(void);
+void busfault_init(void);
 
 #else
 
@@ -68,7 +63,7 @@ busfault_unregister(struct busfault *busfault)
 }
 
 static inline void busfault_check(void) {}
-static inline Bool busfault_init(void) { return FALSE; }
+static inline void busfault_init(void) {}
 
 #endif
 
