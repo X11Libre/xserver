@@ -55,9 +55,11 @@ cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
 unset PKG_REPOS
 
 # Update package database
+# pkgin exits non-zero if ANY mirror fails (e.g. "Connection refused"),
+# even if at least one mirror succeeds. We use || true to tolerate this.
 echo "Updating pkgin..."
 if ! pkgin update; then
-    echo "pkgin update failed, falling back to NetBSD 10.0 repositories..."
+    echo "pkgin update had partial mirror failures, falling back to NetBSD 10.0 repositories..."
     {
     cat <<EOF
 https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
@@ -68,7 +70,7 @@ https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
 EOF
     } > /usr/pkg/etc/pkgin/repositories.conf
     cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
-    pkgin update
+    pkgin update || true
 fi
 
 # Install curl for downloading sets
