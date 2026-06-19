@@ -136,17 +136,17 @@ panic:
         FatalError("bus error\n");
 }
 
-Bool
-busfault_init(void)
+void busfault_init(void)
 {
     struct sigaction    act, old_act;
 
     act.sa_sigaction = busfault_sigaction;
     act.sa_flags = SA_SIGINFO;
     sigemptyset(&act.sa_mask);
-    if (sigaction(SIGBUS, &act, &old_act) < 0)
-        return FALSE;
+    if (sigaction(SIGBUS, &act, &old_act) < 0) {
+        ErrorF("busfault_init: sigaction() failed.\n");
+        return;
+    }
     previous_busfault_sigaction = old_act.sa_sigaction;
     xorg_list_init(&busfaults);
-    return TRUE;
 }
