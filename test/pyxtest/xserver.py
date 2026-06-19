@@ -11,6 +11,7 @@ from typing import Iterator
 import os
 import select
 import shutil
+import sys
 import subprocess
 import tempfile
 import time
@@ -521,10 +522,16 @@ class ExternalXServer:
         try:
             sock = _socket.socket(_socket.AF_UNIX, _socket.SOCK_STREAM)
             sock.connect(path)
-            cred = sock.getsockopt(
-                _socket.SOL_SOCKET, _socket.SO_PEERCRED, _struct.calcsize("iii")
-            )
-            pid, _, _ = _struct.unpack("iii", cred)
+            if sys.platform.startswith("sunos"):
+                import ucred as _ucred
+
+                ucred = _ucred.getpeer(sock.fileno())
+                pid = ucred.getpid()
+            else:
+                cred = sock.getsockopt(
+                    _socket.SOL_SOCKET, _socket.SO_PEERCRED, _struct.calcsize("iii")
+                )
+                pid, _, _ = _struct.unpack("iii", cred)
             sock.close()
             return pid
         except (OSError, _struct.error):
