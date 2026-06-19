@@ -48,12 +48,11 @@ https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGS
 https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
 https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
 EOF
-} > /usr/pkg/etc/pkgin/repositories.conf
+    } > /usr/pkg/etc/pkgin/repositories.conf
 cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
 
-# Set PKG_REPOS environment variable (colon-separated)
-export PKG_REPOS="https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/"
-echo "PKG_REPOS=$PKG_REPOS"
+# Unset PKG_REPOS so pkgin reads repositories.conf (one URL per line)
+unset PKG_REPOS
 
 # Update package database
 echo "Updating pkgin..."
@@ -69,7 +68,6 @@ https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
 EOF
     } > /usr/pkg/etc/pkgin/repositories.conf
     cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
-    export PKG_REPOS="https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/"
     pkgin update
 fi
 
