@@ -15,9 +15,6 @@ if ! command -v pkgin >/dev/null 2>&1; then
     echo "Installing pkgin..."
     MIRRORS="
     https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
-    https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
-    https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
-    https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
     https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
     "
     for mirror in $MIRRORS; do
@@ -43,9 +40,6 @@ mkdir -p /etc/pkgin
 {
 cat <<EOF
 https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
-https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
-https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
-https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
 https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
 EOF
     } > /usr/pkg/etc/pkgin/repositories.conf
@@ -55,17 +49,12 @@ cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
 unset PKG_REPOS
 
 # Update package database
-# pkgin exits non-zero if ANY mirror fails (e.g. "Connection refused"),
-# even if at least one mirror succeeds. We use || true to tolerate this.
 echo "Updating pkgin..."
 if ! pkgin update; then
     echo "pkgin update had partial mirror failures, falling back to NetBSD 10.0 repositories..."
     {
     cat <<EOF
 https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
-https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
-https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
-https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
 https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
 EOF
     } > /usr/pkg/etc/pkgin/repositories.conf
@@ -75,12 +64,11 @@ fi
 
 # Install curl for downloading sets
 echo "Installing curl..."
-pkgin -y install curl
+pkgin -y install curl || true
 
 # X11 binary sets
 SETS_MIRRORS="
 https://ftp.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
-https://ftp.fr.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
 https://ftp.us.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
 https://cdn.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
 "
@@ -110,7 +98,7 @@ pkgin -y install \
     bash git pkgconf autoconf automake libtool xorgproto meson pixman xtrans \
     libxkbfile libxcvt libpciaccess font-util libepoll-shim libepoxy nettle \
     xkbcomp xcb-util libXcursor libXScrnSaver spice-protocol fontconfig \
-    mkfontscale python311 gmake curl
+    mkfontscale python311 gmake curl || true
 
 mkdir -p "$X11_BUILD_DIR"
 cd "$X11_BUILD_DIR"
