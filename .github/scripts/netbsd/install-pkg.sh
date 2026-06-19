@@ -83,8 +83,8 @@ for i in xbase xetc xfont xcomp xserver; do
     for mirror in $SETS_MIRRORS; do
         url="$mirror/$i.tar.xz"
         echo "Attempting to download $url"
-        # Use curl with retries and timeouts
-        if curl --retry 3 --connect-timeout 20 -fSL "$url" -o "/$i.tar.xz"; then
+        # Use fetch (available in NetBSD base) with retries, timeout, and follow redirects
+        if fetch -A -r 3 -T 20 -o "/$i.tar.xz" "$url"; then
             echo "Downloaded $i from $mirror"
             success=1
             break
