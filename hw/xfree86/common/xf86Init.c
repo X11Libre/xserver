@@ -76,6 +76,12 @@
 #include "xf86Module_priv.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
+#ifdef PROC_VECTOR_MONITOR_ENABLED
+#include "hw/xfree86/compat/procvector_monitor.h"
+#endif
+#ifdef SCREENREC_MONITOR_ENABLED
+#include "hw/xfree86/compat/screenrec_monitor.h"
+#endif
 #include "xf86Config.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
@@ -712,6 +718,13 @@ InitOutput(int argc, char **argv)
 
     RegisterBlockAndWakeupHandlers((ServerBlockHandlerProcPtr) NoopDDA, xf86Wakeup,
                                    NULL);
+
+#ifdef PROC_VECTOR_MONITOR_ENABLED
+    ProcVectorMonitorInit();
+#endif
+#ifdef SCREENREC_MONITOR_ENABLED
+    ScreenRecMonitorInit();
+#endif
 }
 
 /**

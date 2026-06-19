@@ -11,6 +11,13 @@ if get_option('legacy_nvidia_340x')
     srcs_xorg_compat += 'geeventinit.c'
 endif
 
+if get_option('procvector_monitor')
+    srcs_xorg_compat += 'procvector_monitor.c'
+endif
+if get_option('screenrec_monitor')
+    srcs_xorg_compat += 'screenrec_monitor.c'
+endif
+
 xorg_compat = static_library('xorg_compat',
     srcs_xorg_compat,
     dependencies: common_dep,
