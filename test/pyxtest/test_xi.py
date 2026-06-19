@@ -7,7 +7,7 @@ import struct
 import pytest
 
 from proto import xi
-from xclient import BadLength, BadValue, Extension, X11Error, X11Reply
+from xclient import BadLength, BadWindow, BadValue, Extension, X11Error, X11Reply
 
 
 @pytest.fixture
@@ -389,3 +389,28 @@ class TestXIChangeDeviceControl:
                 "ChangeDeviceControl returned BadValue - "
                 "resolution values not byte-swapped"
             )
+
+
+class TestXIChangeCursor:
+    def test_change_cursor_null_window(self, xserver, xi_xclient):
+        """
+        XIChangeCursor dereferences pWin even if it's not set
+        """
+        opcode = xi_xclient.query_extension(Extension.XI).opcode
+        req = xi.XIChangeCursorRequest(
+            opcode=opcode,
+            window=0,
+            cursor=0,
+            deviceid=xi.VirtualCorePointer,
+        )
+        xi_xclient.send_request(req)
+        resp = xi_xclient.recv_response(timeout=5.0)
+
+        assert xserver.is_alive, "Server crashed"
+
+        # Without the fix: SegFault on a NULL WindowPtr
+        # With the fix: BadWindow
+        assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
+        assert resp.error_code == BadWindow, (
+            "ChangeCursor didn't return BadWindow for Window 0"
+        )
