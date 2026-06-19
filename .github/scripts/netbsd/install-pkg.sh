@@ -42,11 +42,11 @@ mkdir -p /etc/pkgin
 
 {
 cat <<EOF
-https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
-https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
-https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
-https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
-https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
+https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
+https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
+https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
+https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
+https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
 EOF
     } > /usr/pkg/etc/pkgin/repositories.conf
 cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
@@ -60,11 +60,11 @@ if ! pkgin update; then
     echo "pkgin update failed, falling back to NetBSD 10.0 repositories..."
     {
     cat <<EOF
-https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
-https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
-https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
-https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
-https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
+https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
+https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
+https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
+https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
+https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
 EOF
     } > /usr/pkg/etc/pkgin/repositories.conf
     cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
