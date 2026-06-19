@@ -12,10 +12,9 @@ NETBSD_RELEASE="10.1"
 NETBSD_ARCH="amd64"
 PKGSRC_ARCH="x86_64"
 
-# Install pkgin if not already present
+# Install pkgin if not present
 if ! command -v pkgin >/dev/null 2>&1; then
-    echo "pkgin not found, installing..."
-    # Try multiple mirrors sequentially for pkg_add (PKG_PATH is single path, not colon-separated)
+    echo "Installing pkgin..."
     MIRRORS="
     https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
     https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
@@ -24,32 +23,26 @@ if ! command -v pkgin >/dev/null 2>&1; then
     https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
     "
     for mirror in $MIRRORS; do
-        echo "Trying to install pkgin from $mirror"
+        echo "Trying pkgin from $mirror"
         export PKG_PATH="$mirror"
         if pkg_add -v pkgin; then
-            echo "Successfully installed pkgin from $mirror"
+            echo "pkgin installed from $mirror"
             break
-        else
-            echo "Failed to install pkgin from $mirror"
         fi
     done
     if ! command -v pkgin >/dev/null 2>&1; then
-        echo "ERROR: Could not install pkgin from any mirror"
+        echo "Failed to install pkgin"
         exit 1
     fi
-else
-    echo "pkgin already installed, skipping pkg_add"
 fi
 
-# Remove any default pkgin config that might point to wrong release
+# Remove default pkgin config that may point to old release
 rm -f /usr/pkg/etc/pkgin/repositories.conf
 rm -f /etc/pkgin/repositories.conf
 
-# Ensure pkgin config directories exist
+# Configure pkgin repositories for NetBSD $NETBSD_RELEASE
 mkdir -p /usr/pkg/etc/pkgin
 mkdir -p /etc/pkgin
-
-# Write repositories file in both possible locations (these are for pkgsrc packages)
 {
 cat <<EOF
 https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/
@@ -61,52 +54,12 @@ EOF
 } > /usr/pkg/etc/pkgin/repositories
 cp /usr/pkg/etc/pkgin/repositories /etc/pkgin/repositories
 
-echo "Created pkgin repositories file:"
-cat /usr/pkg/etc/pkgin/repositories
-
-# Also set environment variable to force pkgin to use these mirrors (colon-separated)
 export PKGIN_REPOSITORIES="https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/:https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/"
-echo "PKGIN_REPOSITORIES=$PKGIN_REPOSITORIES"
 
-# Download and install X11 binary sets FIRST (needed for build dependencies)
-# Multiple mirrors for binary sets (cdn.netbsd.org is last as it's frequently failing)
-SETS_MIRRORS="
-https://ftp.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
-https://ftp.fr.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
-https://ftp.us.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
-https://cdn.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
-"
-
-echo "--> Downloading and installing X11 sets (xbase, xetc, xfont, xcomp, xserver)"
-for i in xbase xetc xfont xcomp xserver; do
-    success=0
-    for mirror in $SETS_MIRRORS; do
-        url="$mirror/$i.tar.xz"
-        echo "Attempting to download $url"
-        # Use fetch (available in NetBSD base) with retries, timeout, and follow redirects
-        if fetch -A -r 3 -T 20 -o "/$i.tar.xz" "$url"; then
-            echo "Downloaded $i from $mirror"
-            success=1
-            break
-        else
-            echo "Failed to download from $mirror"
-            rm -f "/$i.tar.xz"
-        fi
-    done
-    if [ $success -ne 1 ]; then
-        echo "ERROR: Could not download $i.tar.xz from any mirror"
-        exit 1
-    fi
-    echo "unpacking /$i.tar.xz"
-    tar --unlink -xJf "/$i.tar.xz" -C /
-    rm -f "/$i.tar.xz"
-done
-
-# Now update package database (pkgsrc) - this may use fallback to 10.0 if 10.1 repos unavailable
-echo "--> Updating pkgin package database"
+# Update package database, fallback to 10.0 if necessary
+echo "Updating pkgin..."
 if ! pkgin update; then
-    echo "pkgin update failed for NetBSD $NETBSD_RELEASE, falling back to 10.0 packages (ABI compatible)..."
-    # Override with 10.0 mirrors
+    echo "pkgin update failed, falling back to NetBSD 10.0 repositories..."
     {
     cat <<EOF
 https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/
@@ -118,20 +71,50 @@ EOF
     } > /usr/pkg/etc/pkgin/repositories
     cp /usr/pkg/etc/pkgin/repositories /etc/pkgin/repositories
     export PKGIN_REPOSITORIES="https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://ftp.fr.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://mirror.planetunix.net/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/:https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/"
-    echo "Using fallback repositories (10.0):"
-    cat /usr/pkg/etc/pkgin/repositories
     pkgin update
 fi
 
-echo "--> installing extra dependencies"
+# Install curl so we can download sets
+echo "Installing curl for set downloads..."
+pkgin -y install curl
+
+# X11 binary sets to install
+SETS_MIRRORS="
+https://ftp.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
+https://ftp.fr.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
+https://ftp.us.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
+https://cdn.netbsd.org/pub/NetBSD/NetBSD-$NETBSD_RELEASE/$NETBSD_ARCH/binary/sets
+"
+
+echo "Downloading and installing X11 sets..."
+for i in xbase xetc xfont xcomp xserver; do
+    ok=0
+    for urlbase in $SETS_MIRRORS; do
+        url="$urlbase/$i.tar.xz"
+        echo "Fetching $url"
+        if curl -L --retry 3 --connect-timeout 20 -f -o "/$i.tar.xz" "$url"; then
+            ok=1
+            break
+        fi
+    done
+    if [ $ok -ne 1 ]; then
+        echo "ERROR: Failed to download $i.tar.xz"
+        exit 1
+    fi
+    tar --unlink -xJf "/$i.tar.xz" -C /
+    rm -f "/$i.tar.xz"
+done
+
+# Install build dependencies
+echo "Installing build dependencies..."
 pkgin -y install \
     bash git pkgconf autoconf automake libtool xorgproto meson pixman xtrans \
     libxkbfile libxcvt libpciaccess font-util libepoll-shim libepoxy nettle \
     xkbcomp xcb-util libXcursor libXScrnSaver spice-protocol fontconfig \
     mkfontscale python311 gmake curl
 
-mkdir -p $X11_BUILD_DIR
-cd $X11_BUILD_DIR
+mkdir -p "$X11_BUILD_DIR"
+cd "$X11_BUILD_DIR"
 
 export X11_INSTALL_PREFIX=/usr/pkg
 
