@@ -11,6 +11,7 @@ XChangeDeviceProperty = 37
 XGetDeviceProperty = 39
 
 # XI2 minor opcodes
+XIChangeCursor = 42
 XIQueryVersion = 47
 XIPassiveGrabDevice = 54
 XIPassiveUngrabDevice = 55
@@ -72,6 +73,28 @@ class XIQueryVersionRequest:
             2,  # 8 bytes = 2 words
             self.major,
             self.minor,
+        )
+
+
+@dataclass
+class XIChangeCursorRequest:
+    """XIChangeCursor request."""
+
+    opcode: int
+    window: int
+    cursor: int
+    deviceid: int = XIAllMasterDevices
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH II HH",
+            self.opcode,
+            XIChangeCursor,
+            4,
+            self.window,
+            self.cursor,
+            self.deviceid,
+            0,  # pad
         )
 
 
