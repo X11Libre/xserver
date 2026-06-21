@@ -380,9 +380,11 @@ KdTuneMode(KdScreenInfo * screen, const KdMonitorTiming *m,
     const KdMonitorTiming *t = m;
     int depth = screen->fb.depth;
 
-    screen->width = t->horizontal;
-    screen->height = t->vertical;
-    screen->rate = t->rate;
+    if (t) {
+        screen->width = t->horizontal;
+        screen->height = t->vertical;
+        screen->rate = t->rate;
+    }
 
     while (!(*usable) (screen, t)) {
         /*
