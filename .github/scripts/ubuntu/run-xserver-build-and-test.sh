@@ -17,6 +17,7 @@ echo "=== MESON_BUILDDIR=$MESON_BUILDDIR"
 
 export XTEST_DIR="$X11_BUILD_DIR/xts"
 export PIGLIT_DIR="$X11_BUILD_DIR/piglit"
+export GOXPROTO_DIR="$X11_BUILD_DIR/goxproto"
 
 .github/scripts/ubuntu/install-prereq.sh
 

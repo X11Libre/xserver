@@ -18,3 +18,5 @@ build_meson   xorgproto         $(fdo_mirror xorgproto)                    $PKG_
 build_ac_xts  xts               $(fdo_mirror xts)                          $PKG_XTS_REF
 
 clone_source piglit             $(fdo_mirror piglit)                       $PKG_PIGLIT_REF
+
+clone_source goxproto           $(xl_mirror go-x11proto)                   $PKG_GOXPROTO_REF
