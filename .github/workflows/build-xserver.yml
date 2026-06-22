@@ -336,13 +336,24 @@ jobs:
     xserver-build-dragonflybsd:
         runs-on: ubuntu-latest
         needs: ubuntu-fetch-pkg
+        timeout-minutes: 90
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v6
             - uses: ./.github/actions/ubuntu-pkg-cache
-            - name: run in DragonFlyBSD VM
-              id: xserver-build
+            - name: run in DragonFlyBSD VM (attempt 1)
+              id: xserver-build-1
+              continue-on-error: true
+              uses: vmactions/dragonflybsd-vm@v1.1.4
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  release: "6.4.2"
+                  run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
+
+            - name: run in DragonFlyBSD VM (attempt 2)
+              if: steps.xserver-build-1.outcome == 'failure'
               uses: vmactions/dragonflybsd-vm@v1.1.4
               with:
                   envs: 'MESON_ARGS'
