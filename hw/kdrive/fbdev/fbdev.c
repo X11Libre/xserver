@@ -337,8 +337,18 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
 
     t = KdFindMode(screen, fbdevModeSupported);
 
-    /* Sets priv->fix, priv->var */
+
+    /**
+     * XXX The only way we can check what modes are supported is by actually setting them.
+     *
+     * We save the video card mode, probe the mode by setting it, and restore the video card mode.
+     * The probed video move will be set by fbdevEnable.
+     */
+
+    /* KdTuneMode calls fbdevSetMode, which sets priv->fix, priv->var */
+    fbdevPreserve(screen->card);
     KdTuneMode(screen, t, fbdevSetMode, fbdevModeSupported);
+    fbdevRestore(screen->card);
 
     if (scrpriv->max_width < screen->width) {
         scrpriv->max_width = screen->width;
@@ -906,6 +916,13 @@ fbdevCreateResources(ScreenPtr pScreen)
 void
 fbdevPreserve(KdCardInfo * card)
 {
+    FbdevPriv *priv = card->driver;
+    memset(&priv->saved_var, 0, sizeof(priv->saved_var));
+    if (ioctl(priv->fd, FBIOGET_VSCREENINFO, &priv->saved_var) < 0) {
+        LogMessage(X_INFO, "Xfbdev(%d): Failed to save the video card mode: %s\n",
+                   card->mynum, strerror(errno));
+        memset(&priv->saved_var, 0, sizeof(priv->saved_var));
+    }
 }
 
 static int
@@ -997,6 +1014,12 @@ fbdevDisable(ScreenPtr pScreen)
 void
 fbdevRestore(KdCardInfo * card)
 {
+    FbdevPriv *priv = card->driver;
+    if (priv->saved_var.xres &&
+        (ioctl(priv->fd, FBIOPUT_VSCREENINFO, &priv->saved_var) < 0)) {
+        LogMessage(X_INFO, "Xfbdev(%d): Failed to restore the video card mode: %s\n",
+                   card->mynum, strerror(errno));
+    }
 }
 
 void
