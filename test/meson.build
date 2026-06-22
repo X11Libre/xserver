@@ -94,6 +94,13 @@ if get_option('xvfb')
         suite: 'xvfb'
     )
 
+    test('go-xts',
+        find_program('scripts/run-xts-go.sh'),
+        env: piglit_env,
+        timeout: 300,
+        suite: 'xvfb'
+    )
+
     if rendercheck.found()
         foreach rctest: rendercheck_tests
             test(rctest[0],
@@ -125,6 +132,13 @@ if get_option('xvfb')
                 find_program('scripts/xephyr-glamor' + testsuite + '-piglit.sh'),
                 env: piglit_env,
                 timeout: 1200,
+                suite: 'xephyr-glamor' + testsuite,
+            )
+
+            test('go-xts',
+                find_program('scripts/run-xts-go-xephyr.sh'),
+                env: piglit_env,
+                timeout: 300,
                 suite: 'xephyr-glamor' + testsuite,
             )
         endforeach
