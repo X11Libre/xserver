@@ -92,4 +92,5 @@ apt-get install -y \
 	python3-mako \
 	libxcvt-dev \
 	git \
+	golang-go \
 	sudo

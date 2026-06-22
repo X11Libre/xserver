@@ -7,6 +7,7 @@ env:
     MESON_BUILDDIR:  "__BUILD"
     X11_PREFIX:      /home/runner/x11
     X11_BUILD_DIR:   /home/runner/work/xserver/xserver/WORK/sources/3rdparty
+    GOXPROTO_REF:    v0.0.1
 
 on:
     push:
@@ -47,6 +48,7 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
+                    ${{ env.X11_BUILD_DIR }}/goxproto
                 key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
                 restore-keys: ${{ runner.name }}-x11-deps-
 
@@ -88,6 +90,7 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
+                    ${{ env.X11_BUILD_DIR }}/goxproto
                 key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
                 restore-keys: ${{ runner.name }}-x11-deps-
 
