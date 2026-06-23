@@ -31,11 +31,9 @@ char *namespaceConfigFile = NULL;
 
 static struct Xnamespace* select_ns(const char* name)
 {
-    struct Xnamespace *walk;
-    xorg_list_for_each_entry(walk, &ns_list, entry) {
-        if (strcmp(walk->name, name)==0)
-            return walk;
-    }
+    struct Xnamespace *ns = XnsLookup(name, strlen(name));
+    if (ns)
+        return ns;
 
     struct Xnamespace *newns = calloc(1, sizeof(struct Xnamespace));
     newns->name = strdup(name);
@@ -199,11 +197,28 @@ Bool XnsLoadConfig(void)
     return TRUE;
 }
 
-struct Xnamespace *XnsFindByName(const char* name) {
+/**
+ * @brief Look up a namespace by name, comparing exactly @p namelen bytes.
+ *
+ * Length-aware so it can be called with names that are not NUL-terminated
+ * (e.g. straight out of a request buffer).
+ *
+ * @param name    pointer to the name bytes (need not be NUL-terminated)
+ * @param namelen number of bytes to compare
+ * @return the matching namespace, or NULL if none matches
+ */
+struct Xnamespace *XnsLookup(const char *name, size_t namelen)
+{
     struct Xnamespace *walk;
     xorg_list_for_each_entry(walk, &ns_list, entry) {
-        if (strcmp(walk->name, name)==0)
+        if (strlen(walk->name) == namelen &&
+            memcmp(walk->name, name, namelen) == 0)
             return walk;
     }
     return NULL;
+}
+
+struct Xnamespace *XnsFindByName(const char* name) {
+    /* the (NUL-terminated) name path is just the length-aware lookup */
+    return XnsLookup(name, strlen(name));
 }
