@@ -68,6 +68,13 @@ chmod 0770 testx.sh
 
 This should give you 10 glorious seconds of a black and beautiful and empty screen. Afterwards the Xserver complains about being killed, but there should be no other critical errors for a "test passed." For more details, please see [Building XLibre (X11Libre/xserver Wiki)](https://github.com/X11Libre/xserver/wiki/Building-XLibre).
 
+If you are using seatd for rootless operation instead of (e)logind, create the following file named `.xserverrc` in your home directory:
+```shell
+#!/bin/sh
+exec X -keeptty "$@"
+```
+Then, run `chmod +x ~/.xserverrc`.
+
 
 ## I want to help!
 
