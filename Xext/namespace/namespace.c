@@ -54,17 +54,39 @@ NamespaceExtensionInit(void)
     struct XnamespaceClientPriv *srv = XnsClientPriv(serverClient);
     *srv = (struct XnamespaceClientPriv) { .isServer = TRUE };
     XnamespaceAssignClient(srv, &ns_root);
+
+    /* register the runtime management protocol extension. It is gated to
+       superPower clients in hookExtAccess()/hookExtDispatch(), so it stays
+       invisible and unreachable to namespaced clients. */
+    XnsProtoExtensionInit();
 }
 
+/**
+ * @brief Assign a client to a namespace, maintaining reference counts.
+ *
+ * Decrements the old namespace's refcount and increments the new one's. If the
+ * old namespace is transient (XNS_ATTR_TRANSIENT) and its last client just
+ * left, it is destroyed.
+ *
+ * @param priv  the client's namespace private (may already reference a namespace)
+ * @param newns the namespace to move the client into (NULL to detach)
+ */
 void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *newns)
 {
-    if (priv->ns != NULL)
-        priv->ns->refcnt--;
+    struct Xnamespace *oldns = priv->ns;
+
+    if (oldns != NULL)
+        oldns->refcnt--;
 
     priv->ns = newns;
 
     if (newns != NULL)
         newns->refcnt++;
+
+    /* a transient namespace vanishes once its last client has left */
+    if (oldns != NULL && oldns != newns && oldns->refcnt == 0 &&
+        oldns->autoRemove && !oldns->builtin)
+        XnsDestroyNamespace(oldns);
 }
 
 void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name)

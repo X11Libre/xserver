@@ -16,6 +16,7 @@ libxserver_namespace = static_library(
 		'hook-server.c',
 		'hook-windowproperty.c',
 		'namespace.c',
+		'proto.c',
 	],
 	include_directories: inc,
 	dependencies: common_dep,

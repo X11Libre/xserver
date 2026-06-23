@@ -29,6 +29,7 @@ struct Xnamespace {
     Bool allowXInput;
     Bool allowXKeyboard;
     Bool superPower;
+    Bool autoRemove;           /* destroy when the last client exits */
     struct xorg_list auth_tokens;
     CARD32 tokenHandleSeq;      /* monotonic per-namespace handle counter */
     size_t refcnt;
@@ -51,10 +52,22 @@ struct XnamespaceClientPriv {
 extern DevPrivateKeyRec namespaceClientPrivKeyRec;
 
 Bool XnsLoadConfig(void);
+void XnsProtoExtensionInit(void);
 struct Xnamespace *XnsFindByName(const char* name);
 struct Xnamespace *XnsLookup(const char *name, size_t namelen);
 int XnsAddToken(struct Xnamespace *ns, const char *proto, size_t protolen,
                 const char *data, size_t datalen, CARD32 *handleOut);
+
+/* namespace-model setter layer (config.c), shared with the protocol handlers */
+struct Xnamespace *XnsCreate(const char *name, size_t namelen,
+                             CARD32 caps, CARD32 attrs, int *err);
+void XnsDestroyNamespace(struct Xnamespace *ns);
+int  XnsDelete(struct Xnamespace *ns, CARD8 onClients);
+int  XnsSetCaps(struct Xnamespace *ns, CARD32 mask, CARD32 values);
+int  XnsRemoveToken(struct Xnamespace *ns, CARD32 handle);
+CARD32 XnsCountTokens(struct Xnamespace *ns);
+CARD32 XnsCaps(const struct Xnamespace *ns);
+CARD32 XnsAttrs(const struct Xnamespace *ns);
 struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken);
 void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *ns);
 void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name);

@@ -16,6 +16,7 @@
 #include "Xext/xacestr.h"
 
 #include "namespace.h"
+#include "namespaceproto.h"
 #include "hooks.h"
 
 void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
@@ -25,6 +26,11 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
     /* root NS has super powers */
     if (subj->ns->superPower)
         goto pass;
+
+    /* never dispatch the namespace management extension to non-superPower
+       clients (defence in depth; they cannot see it via QueryExtension) */
+    if (streq(param->ext->name, XNS_EXTENSION_NAME))
+        goto reject;
 
     switch (client->majorOp) {
         /* unrestricted access to these */

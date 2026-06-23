@@ -122,6 +122,70 @@ jobs:
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
 
+            # X-NAMESPACE conformance: exercise the management extension end to
+            # end against the Xvfb we just built (namespace is on by default),
+            # using the TAP test tool + runner from go-x11proto.
+            - name: check out go-x11proto (conformance tests)
+              uses: actions/checkout@v4
+              with:
+                  repository: X11Libre/go-x11proto
+                  ref: master
+                  path: go-x11proto
+
+            - name: install Go toolchain
+              uses: actions/setup-go@v5
+              with:
+                  go-version-file: go-x11proto/go.mod
+
+            - name: X-NAMESPACE conformance test (Xvfb)
+              env:
+                  XNS_XSERVER: ${{ github.workspace }}/__BUILD/hw/vfb/Xvfb
+                  XNS_TEST_FLAGS: -v
+              run: |
+                  export LD_LIBRARY_PATH="$X11_PREFIX/lib/$MACHINE:$X11_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+                  ./go-x11proto/contrib/xnamespace/run-xnamespace-test.sh
+
+            # The nested servers (Xephyr, Xnest) need a parent X display; reuse
+            # the Xvfb we just built as that parent. Xfbdev is skipped: it needs
+            # a real /dev/fb0, which CI runners don't have.
+            - name: X-NAMESPACE conformance test (Xephyr, Xnest)
+              env:
+                  XNS_TEST_FLAGS: -v
+              run: |
+                  export LD_LIBRARY_PATH="$X11_PREFIX/lib/$MACHINE:$X11_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+                  build="$PWD/__BUILD"
+                  runner=./go-x11proto/contrib/xnamespace/run-xnamespace-test.sh
+
+                  # bring up the parent display (-ac so the nested servers may
+                  # connect without an auth cookie) and wait for its socket.
+                  "$build/hw/vfb/Xvfb" :99 -ac -screen 0 1280x1024x24 \
+                      >/tmp/xvfb-parent.log 2>&1 &
+                  parent=$!
+                  trap 'kill "$parent" 2>/dev/null || true' EXIT
+                  for _ in $(seq 1 100); do
+                      [ -S /tmp/.X11-unix/X99 ] && break
+                      kill -0 "$parent" 2>/dev/null || {
+                          echo "parent Xvfb exited before becoming ready:" >&2
+                          cat /tmp/xvfb-parent.log >&2; exit 1; }
+                      sleep 0.1
+                  done
+                  export DISPLAY=:99
+
+                  # each nested server takes its own geometry syntax; the runner
+                  # supplies -displayfd/-namespace/+byteswappedclients itself.
+                  rc=0
+                  echo "::group::Xephyr"
+                  XNS_XSERVER="$build/hw/kdrive/ephyr/Xephyr" \
+                  XNS_XSERVER_ARGS="-screen 1280x1024x24" \
+                      "$runner" || rc=1
+                  echo "::endgroup::"
+                  echo "::group::Xnest"
+                  XNS_XSERVER="$build/hw/xnest/Xnest" \
+                  XNS_XSERVER_ARGS="-geometry 1280x1024" \
+                      "$runner" || rc=1
+                  echo "::endgroup::"
+                  exit "$rc"
+
     abi-changes-check:
         runs-on: ubuntu-latest
         outputs:

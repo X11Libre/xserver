@@ -8,6 +8,7 @@
 #include "Xext/xacestr.h"
 
 #include "namespace.h"
+#include "namespaceproto.h"
 #include "hooks.h"
 
 /* called on X_QueryExtension */
@@ -18,6 +19,11 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     /* root NS has super powers */
     if (subj->ns->superPower)
         goto pass;
+
+    /* the namespace management extension is invisible to non-superPower
+       clients - they must not even learn it exists */
+    if (streq(param->ext->name, XNS_EXTENSION_NAME))
+        goto reject;
 
     switch (param->ext->index + EXTENSION_BASE) {
         /* unrestricted access */
