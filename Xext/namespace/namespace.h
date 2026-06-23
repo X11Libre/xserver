@@ -16,6 +16,7 @@ struct auth_token {
     char *authTokenData;
     size_t authTokenLen;
     XID authId;
+    CARD32 handle;              /* per-namespace token handle */
 };
 
 struct Xnamespace {
@@ -29,6 +30,7 @@ struct Xnamespace {
     Bool allowXKeyboard;
     Bool superPower;
     struct xorg_list auth_tokens;
+    CARD32 tokenHandleSeq;      /* monotonic per-namespace handle counter */
     size_t refcnt;
     WindowPtr rootWindow;
 };
@@ -51,6 +53,8 @@ extern DevPrivateKeyRec namespaceClientPrivKeyRec;
 Bool XnsLoadConfig(void);
 struct Xnamespace *XnsFindByName(const char* name);
 struct Xnamespace *XnsLookup(const char *name, size_t namelen);
+int XnsAddToken(struct Xnamespace *ns, const char *proto, size_t protolen,
+                const char *data, size_t datalen, CARD32 *handleOut);
 struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken);
 void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *ns);
 void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name);
