@@ -388,7 +388,8 @@ xf86platformProbe(void)
         }
     }
 
-    /* Then check for pci_device_is_boot_vga()/pci_device_is_boot_display() */
+    /* After the OutputClass loop above, scan for the primary device via
+     * various methods, preferring boot display over boot VGA. */
     for (i = 0; i < xf86_num_platform_devices; i++) {
         struct xf86_platform_device *dev = &xf86_platform_devices[i];
 
@@ -396,13 +397,28 @@ xf86platformProbe(void)
             continue;
 
         pci_device_probe(dev->pdev);
-        if (pci_device_is_boot_display(dev->pdev) ||
-            pci_device_is_boot_vga(dev->pdev)) {
+        if (pci_device_is_boot_display(dev->pdev)) {
             primaryBus.type = BUS_PLATFORM;
             primaryBus.id.plat = dev;
+            return 0;
         }
     }
 
+    /* Fall back to boot VGA if no boot display was found. */
+    for (i = 0; i < xf86_num_platform_devices; i++) {
+        struct xf86_platform_device *dev = &xf86_platform_devices[i];
+
+        if (!dev->pdev)
+            continue;
+
+        if (pci_device_is_boot_vga(dev->pdev)) {
+            primaryBus.type = BUS_PLATFORM;
+            primaryBus.id.plat = dev;
+            return 0;
+        }
+    }
+
+    /* No primary device found. */
     return 0;
 }
 
