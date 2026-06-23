@@ -158,6 +158,108 @@ static inline int __write_reply_hdr_simple(
     do { if (client->swapped) SwapLongs(request_rest, (count)); } while (0) \
 
 /*
+ * macros for walking variable-length fields (strings / binary blobs) that
+ * follow the fixed request struct.
+ *
+ * These complement the X_REQUEST_FIELD_* macros: where the latter handle the
+ * fixed part, these let multiple variable-length fields be peeled off, one
+ * after another, in the same stacked style - while keeping a single source of
+ * truth for the length (the request's own length field) so an embedded length
+ * can never make a handler read past the request.
+ *
+ * Usage (after X_REQUEST_HEAD_AT_LEAST() and swapping the *_len fields):
+ *
+ *     X_REQUEST_VAR_BEGIN();
+ *     X_REQUEST_VAR_FIELD(name,  stuff->name_len);
+ *     X_REQUEST_VAR_FIELD(proto, stuff->proto_len);
+ *     X_REQUEST_VAR_FIELD(data,  stuff->data_len);
+ *     X_REQUEST_VAR_END();
+ *
+ * Each field is padded to a 4-byte boundary on the wire; X_REQUEST_VAR_END()
+ * requires the request to be fully consumed (strict, no trailing smuggling).
+ * Any inconsistency returns BadLength, like the other request macros.
+ *
+ * Note: the *_len fields must already be byte-swapped (via X_REQUEST_FIELD_*)
+ * before they are passed here.
+ */
+
+/* set up the cursor right after the fixed struct.
+   X_REQUEST_HEAD_AT_LEAST() must have run first (sizeof(*stuff) <= req_len). */
+#define X_REQUEST_VAR_BEGIN() \
+    char *_xreq_ptr = (char *)(&stuff[1]); \
+    size_t _xreq_left = ((size_t)client->req_len << 2) - sizeof(*stuff)
+
+/* bind (ptr) to a byte/string field of (n) bytes, advance past its padding */
+#define X_REQUEST_VAR_FIELD(ptr, n) \
+    do { \
+        uint64_t _xreq_n = (uint64_t)(n); \
+        if (_xreq_n > _xreq_left) return (BadLength); \
+        size_t _xreq_adv = pad_to_int32((int)_xreq_n); \
+        if (_xreq_adv > _xreq_left) return (BadLength); \
+        (ptr) = _xreq_ptr; \
+        _xreq_ptr += _xreq_adv; \
+        _xreq_left -= _xreq_adv; \
+    } while (0)
+
+/* bind (ptr) to an array of (count) CARD16, swap them in place if necessary */
+#define X_REQUEST_VAR_FIELD_CARD16(ptr, count) \
+    do { \
+        uint64_t _xreq_n = (uint64_t)(count) * sizeof(CARD16); \
+        if (_xreq_n > _xreq_left) return (BadLength); \
+        size_t _xreq_adv = pad_to_int32((int)_xreq_n); \
+        if (_xreq_adv > _xreq_left) return (BadLength); \
+        (ptr) = (CARD16 *)_xreq_ptr; \
+        if (client->swapped) SwapShorts((short *)(ptr), (count)); \
+        _xreq_ptr += _xreq_adv; \
+        _xreq_left -= _xreq_adv; \
+    } while (0)
+
+/* bind (ptr) to an array of (count) CARD32, swap them in place if necessary */
+#define X_REQUEST_VAR_FIELD_CARD32(ptr, count) \
+    do { \
+        uint64_t _xreq_n = (uint64_t)(count) * sizeof(CARD32); \
+        if (_xreq_n > _xreq_left) return (BadLength); \
+        size_t _xreq_adv = pad_to_int32((int)_xreq_n); \
+        if (_xreq_adv > _xreq_left) return (BadLength); \
+        (ptr) = (CARD32 *)_xreq_ptr; \
+        if (client->swapped) SwapLongs((CARD32 *)(ptr), (count)); \
+        _xreq_ptr += _xreq_adv; \
+        _xreq_left -= _xreq_adv; \
+    } while (0)
+
+/* bind (ptr) to a trailing array of fixed-size elements whose count is
+   *implied by the request length*, not carried in a header field, and store
+   that count in (count_out). The remaining bytes must divide evenly by
+   (elemsize) (e.g. sizeof(xRectangle), sizeof(xColorItem)), else BadLength.
+   Consumes the rest of the request - so this must be the last variable field.
+
+   Element byte-swapping is the caller's job (per-field, element-type
+   specific); this macro only validates the count and delimits the array. */
+#define X_REQUEST_VAR_ARRAY(ptr, count_out, elemsize) \
+    do { \
+        if ((elemsize) == 0 || (_xreq_left % (size_t)(elemsize)) != 0) \
+            return (BadLength); \
+        (count_out) = _xreq_left / (size_t)(elemsize); \
+        (ptr) = (void *)_xreq_ptr; \
+        _xreq_ptr += _xreq_left; \
+        _xreq_left = 0; \
+    } while (0)
+
+/* bind (ptr)/(len) to whatever bytes remain - for a single trailing string
+   whose length is implied by the request length (no embedded length field) */
+#define X_REQUEST_VAR_REST(ptr, len) \
+    do { \
+        (ptr) = _xreq_ptr; \
+        (len) = _xreq_left; \
+        _xreq_ptr += _xreq_left; \
+        _xreq_left = 0; \
+    } while (0)
+
+/* require the variable part to be fully consumed */
+#define X_REQUEST_VAR_END() \
+    do { if (_xreq_left != 0) return (BadLength); } while (0)
+
+/*
  * macros for request handlers
  *
  * these are handling reply struct field byte-swapping if necessary
