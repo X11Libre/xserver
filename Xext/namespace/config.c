@@ -1,9 +1,11 @@
 #include <dix-config.h>
 
+#include <stdlib.h>
 #include <string.h>
 #include <X11/Xdefs.h>
 
 #include "os/auth.h"
+#include "include/os.h"
 
 #include "namespace.h"
 
@@ -37,6 +39,7 @@ static struct Xnamespace* select_ns(const char* name)
 
     struct Xnamespace *newns = calloc(1, sizeof(struct Xnamespace));
     newns->name = strdup(name);
+    xorg_list_init(&newns->auth_tokens);
     xorg_list_append(&newns->entry, &ns_list);
     return newns;
 }
@@ -99,32 +102,30 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 
     if (strcmp(token, "auth") == 0)
     {
-        token = strtok(NULL, " \t");
-        if (token == NULL)
+        char *proto = strtok(NULL, " \t");
+        if (proto == NULL)
             return;
 
-        struct auth_token *new_token = calloc(1, sizeof(struct auth_token));
-        if (new_token == NULL)
+        char *hex = strtok(NULL, " ");
+        if (hex == NULL)
+            return;
+
+        size_t binlen = strlen(hex) / 2;
+        char *bin = calloc(1, binlen ? binlen : 1);
+        if (bin == NULL)
             FatalError("Xnamespace: failed allocating token\n");
 
-        new_token->authProto = strdup(token);
-        token = strtok(NULL, " ");
-
-        new_token->authTokenLen = strlen(token)/2;
-        new_token->authTokenData = calloc(1, new_token->authTokenLen);
-        if (!new_token->authTokenData) {
-            free(new_token->authProto);
-            free(new_token);
+        if (!hex2bin(hex, bin)) {
+            XNS_LOG("invalid hex auth data, ignoring\n");
+            free(bin);
             return;
         }
-        hex2bin(token, new_token->authTokenData);
 
-        new_token->authId = AddAuthorization(strlen(new_token->authProto),
-                                             new_token->authProto,
-                                             new_token->authTokenLen,
-                                             new_token->authTokenData);
-
-        xorg_list_append(&new_token->entry, &curr->auth_tokens);
+        /* the config file stores the key hex-encoded; the model stores it
+           binary. Registration itself is shared with the protocol path. */
+        if (XnsAddToken(curr, proto, strlen(proto), bin, binlen, NULL) != Success)
+            XNS_LOG("failed to add auth token for namespace \"%s\"\n", curr->name);
+        free(bin);
         return;
     }
 
@@ -161,6 +162,8 @@ Bool XnsLoadConfig(void)
 {
     xorg_list_append_ndup(&ns_root.entry, &ns_list);
     xorg_list_append_ndup(&ns_anon.entry, &ns_list);
+    xorg_list_init(&ns_root.auth_tokens);
+    xorg_list_init(&ns_anon.auth_tokens);
 
     if (!namespaceConfigFile) {
         XNS_LOG("no namespace config given - Xnamespace disabled\n");
@@ -221,4 +224,54 @@ struct Xnamespace *XnsLookup(const char *name, size_t namelen)
 struct Xnamespace *XnsFindByName(const char* name) {
     /* the (NUL-terminated) name path is just the length-aware lookup */
     return XnsLookup(name, strlen(name));
+}
+
+/**
+ * @brief Register an authentication token and map it into a namespace.
+ *
+ * Copies the protocol name and key, registers the authorization with the OS
+ * layer and assigns a per-namespace handle for later removal. The single
+ * code path for adding tokens, shared by the config loader and (later) the
+ * management protocol.
+ *
+ * @param ns       the namespace to add the token to
+ * @param proto    auth protocol name bytes (e.g. "MIT-MAGIC-COOKIE-1")
+ * @param protolen length of @p proto
+ * @param data     raw key bytes (may be NULL when @p datalen is 0)
+ * @param datalen  length of @p data
+ * @param[out] handleOut if non-NULL, set to the new token's handle
+ * @return Success, or BadAlloc on allocation failure
+ */
+int XnsAddToken(struct Xnamespace *ns, const char *proto, size_t protolen,
+                const char *data, size_t datalen, CARD32 *handleOut)
+{
+    struct auth_token *t = calloc(1, sizeof(*t));
+    if (!t)
+        return BadAlloc;
+
+    t->authProto = strndup(proto, protolen);
+    if (!t->authProto) {
+        free(t);
+        return BadAlloc;
+    }
+
+    t->authTokenLen = datalen;
+    if (datalen) {
+        t->authTokenData = malloc(datalen);
+        if (!t->authTokenData) {
+            free(t->authProto);
+            free(t);
+            return BadAlloc;
+        }
+        memcpy(t->authTokenData, data, datalen);
+    }
+
+    t->authId = AddAuthorization((unsigned int) protolen, t->authProto,
+                                 (unsigned int) datalen, t->authTokenData);
+    t->handle = ++ns->tokenHandleSeq;   /* 1-based; 0 is never a valid handle */
+    xorg_list_append(&t->entry, &ns->auth_tokens);
+
+    if (handleOut)
+        *handleOut = t->handle;
+    return Success;
 }
