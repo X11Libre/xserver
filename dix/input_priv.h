@@ -365,7 +365,7 @@ void input_constrain_cursor(DeviceIntPtr pDev,
 
 void InputThreadPreInit(void);
 void InputThreadInit(void);
-void InputThreadFini(void);
+void InputThreadFinish(void);
 
 int InputThreadRegisterDev(int fd,
                            NotifyFdProcPtr readInputProc,

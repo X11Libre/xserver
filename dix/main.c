@@ -312,7 +312,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
         CloseInput();
 
-        InputThreadFini();
+        InputThreadFinish();
 
         DIX_FOR_EACH_SCREEN({ walkScreen->root = NullWindow; });
 
