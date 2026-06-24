@@ -58,7 +58,6 @@ SOFTWARE.
 #include "dixstruct_priv.h"
 #include "dispatch.h"
 #include "swaprep.h"
-#include "swapreq.h"
 
 static int
 ProcBadRequest(ClientPtr client)

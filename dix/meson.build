@@ -36,7 +36,6 @@ srcs_dix = [
     'settings.c',
     'sleepuntil.c',
     'swaprep.c',
-    'swapreq.c',
     'tables.c',
     'touch.c',
     'window.c',

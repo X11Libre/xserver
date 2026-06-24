@@ -140,12 +140,13 @@ Equipment Corporation.
 #include "dixfont.h"
 #include "dispatch.h"
 #include "swaprep.h"
-#include "swapreq.h"
 #include "privates.h"
 #include "xace.h"
 #include "inputstr.h"
 #include "xkbsrv.h"
 #include "dixstruct_priv.h"
+
+extern void SwapConnClientPrefix(xConnClientPrefix *pCCP);
 
 #define mskcnt ((MAXCLIENTS + 31) / 32)
 #define BITMASK(i) (1U << ((i) & 31))
@@ -4377,5 +4378,46 @@ DetachOffloadGPU(ScreenPtr secondary)
     assert(secondary->isGPU);
     assert(secondary->is_offload_secondary);
     secondary->is_offload_secondary = FALSE;
+}
+
+/* Byte swap a list of shorts */
+void
+SwapShorts(short *list, unsigned long count)
+{
+    while (count >= 16) {
+        swaps(list + 0);
+        swaps(list + 1);
+        swaps(list + 2);
+        swaps(list + 3);
+        swaps(list + 4);
+        swaps(list + 5);
+        swaps(list + 6);
+        swaps(list + 7);
+        swaps(list + 8);
+        swaps(list + 9);
+        swaps(list + 10);
+        swaps(list + 11);
+        swaps(list + 12);
+        swaps(list + 13);
+        swaps(list + 14);
+        swaps(list + 15);
+        list += 16;
+        count -= 16;
+    }
+    if (count != 0) {
+        do {
+            swaps(list);
+            list++;
+        } while (--count != 0);
+    }
+}
+
+void _X_COLD
+SwapConnClientPrefix(xConnClientPrefix * pCCP)
+{
+    swaps(&pCCP->majorVersion);
+    swaps(&pCCP->minorVersion);
+    swaps(&pCCP->nbytesAuthProto);
+    swaps(&pCCP->nbytesAuthString);
 }
 
