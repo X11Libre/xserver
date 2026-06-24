@@ -377,13 +377,13 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcSetInputFocus,
     ProcGetInputFocus,
     ProcQueryKeymap,
-    SProcOpenFont,                      /* 45 */
+    ProcOpenFont,                       /* 45 */
     ProcCloseFont,
     ProcQueryFont,
     ProcQueryTextExtents,
-    SProcListFonts,
-    SProcListFontsWithInfo,             /* 50 */
-    SProcSetFontPath,
+    ProcListFonts,
+    ProcListFontsWithInfo,              /* 50 */
+    ProcSetFontPath,
     ProcGetFontPath,
     SProcCreatePixmap,
     ProcFreePixmap,

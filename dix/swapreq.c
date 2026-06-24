@@ -93,45 +93,6 @@ SwapShorts(short *list, unsigned long count)
 }
 
 int _X_COLD
-SProcOpenFont(ClientPtr client)
-{
-    REQUEST(xOpenFontReq);
-    REQUEST_AT_LEAST_SIZE(xOpenFontReq);
-    swapl(&stuff->fid);
-    swaps(&stuff->nbytes);
-    return ((*ProcVector[X_OpenFont]) (client));
-}
-
-int _X_COLD
-SProcListFonts(ClientPtr client)
-{
-    REQUEST(xListFontsReq);
-    REQUEST_AT_LEAST_SIZE(xListFontsReq);
-    swaps(&stuff->maxNames);
-    swaps(&stuff->nbytes);
-    return ((*ProcVector[X_ListFonts]) (client));
-}
-
-int _X_COLD
-SProcListFontsWithInfo(ClientPtr client)
-{
-    REQUEST(xListFontsWithInfoReq);
-    REQUEST_AT_LEAST_SIZE(xListFontsWithInfoReq);
-    swaps(&stuff->maxNames);
-    swaps(&stuff->nbytes);
-    return ((*ProcVector[X_ListFontsWithInfo]) (client));
-}
-
-int _X_COLD
-SProcSetFontPath(ClientPtr client)
-{
-    REQUEST(xSetFontPathReq);
-    REQUEST_AT_LEAST_SIZE(xSetFontPathReq);
-    swaps(&stuff->nFonts);
-    return ((*ProcVector[X_SetFontPath]) (client));
-}
-
-int _X_COLD
 SProcCreatePixmap(ClientPtr client)
 {
     REQUEST(xCreatePixmapReq);

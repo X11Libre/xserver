@@ -1317,7 +1317,9 @@ ProcOpenFont(ClientPtr client)
 {
     int err;
 
-    REQUEST(xOpenFontReq);
+    X_REQUEST_HEAD_AT_LEAST(xOpenFontReq);
+    X_REQUEST_FIELD_CARD32(fid);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     REQUEST_FIXED_SIZE(xOpenFontReq, stuff->nbytes);
     client->errorValue = stuff->fid;
@@ -1463,7 +1465,9 @@ ProcQueryTextExtents(ClientPtr client)
 int
 ProcListFonts(ClientPtr client)
 {
-    REQUEST(xListFontsReq);
+    X_REQUEST_HEAD_AT_LEAST(xListFontsReq);
+    X_REQUEST_FIELD_CARD16(maxNames);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     REQUEST_FIXED_SIZE(xListFontsReq, stuff->nbytes);
 
@@ -1474,7 +1478,9 @@ ProcListFonts(ClientPtr client)
 int
 ProcListFontsWithInfo(ClientPtr client)
 {
-    REQUEST(xListFontsWithInfoReq);
+    X_REQUEST_HEAD_AT_LEAST(xListFontsWithInfoReq);
+    X_REQUEST_FIELD_CARD16(maxNames);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     REQUEST_FIXED_SIZE(xListFontsWithInfoReq, stuff->nbytes);
 
@@ -3545,9 +3551,8 @@ ProcSetFontPath(ClientPtr client)
     long nfonts;
     int n;
 
-    REQUEST(xSetFontPathReq);
-
-    REQUEST_AT_LEAST_SIZE(xSetFontPathReq);
+    X_REQUEST_HEAD_AT_LEAST(xSetFontPathReq);
+    X_REQUEST_FIELD_CARD16(nFonts);
 
     nbytes = (client->req_len << 2) - sizeof(xSetFontPathReq);
     total = nbytes;

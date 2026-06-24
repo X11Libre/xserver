@@ -51,14 +51,11 @@ int SProcFillPoly(ClientPtr client);
 int SProcFreeColors(ClientPtr client);
 int SProcGetImage(ClientPtr client);
 int SProcImageText(ClientPtr client);
-int SProcListFonts(ClientPtr client);
-int SProcListFontsWithInfo(ClientPtr client);
-int SProcOpenFont(ClientPtr client);
+
 int SProcPutImage(ClientPtr client);
 int SProcQueryBestSize(ClientPtr client);
 int SProcSetClipRectangles(ClientPtr client);
 int SProcSetDashes(ClientPtr client);
-int SProcSetFontPath(ClientPtr client);
 int SProcStoreColors(ClientPtr client);
 int SProcStoreNamedColor(ClientPtr client);
 
