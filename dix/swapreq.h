@@ -41,7 +41,6 @@ int SProcChangePointerControl(ClientPtr client);
 int SProcChangeWindowAttributes(ClientPtr client);
 int SProcClearToBackground(ClientPtr client);
 int SProcConfigureWindow(ClientPtr client);
-int SProcConvertSelection(ClientPtr client);
 int SProcCopyArea(ClientPtr client);
 int SProcCopyColormapAndFree(ClientPtr client);
 int SProcCopyGC(ClientPtr client);

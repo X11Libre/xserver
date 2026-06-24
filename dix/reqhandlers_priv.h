@@ -59,8 +59,6 @@ XRetCode SProcRecolorCursor(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 XRetCode SProcSetInputFocus(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
-XRetCode SProcSendEvent(ClientPtr pClient)
-    _X_ATTRIBUTE_NONNULL_ARG(1);
 XRetCode SProcUngrabButton(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 XRetCode SProcUngrabKey(ClientPtr pClient)

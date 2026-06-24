@@ -295,8 +295,12 @@ ProcConvertSelection(ClientPtr client)
     Selection *pSel;
     int rc;
 
-    REQUEST(xConvertSelectionReq);
-    REQUEST_SIZE_MATCH(xConvertSelectionReq);
+    X_REQUEST_HEAD_STRUCT(xConvertSelectionReq);
+    X_REQUEST_FIELD_CARD32(requestor);
+    X_REQUEST_FIELD_CARD32(selection);
+    X_REQUEST_FIELD_CARD32(target);
+    X_REQUEST_FIELD_CARD32(property);
+    X_REQUEST_FIELD_CARD32(time);
 
     /* allow extensions to intercept */
     SelectionFilterParamRec param = {

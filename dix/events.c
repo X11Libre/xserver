@@ -5490,9 +5490,25 @@ ProcSendEvent(ClientPtr client)
     DeviceIntPtr keybd = GetMaster(dev, MASTER_KEYBOARD);
     SpritePtr pSprite = dev->spriteInfo->sprite;
 
-    REQUEST(xSendEventReq);
+    X_REQUEST_HEAD_STRUCT(xSendEventReq);
+    X_REQUEST_FIELD_CARD32(destination);
+    X_REQUEST_FIELD_CARD32(eventMask);
 
-    REQUEST_SIZE_MATCH(xSendEventReq);
+    /* Swap event data if needed */
+    if (client->swapped) {
+        xEvent eventT = { .u.u.type = 0 };
+        EventSwapPtr proc;
+
+        if (stuff->event.u.u.type == GenericEvent) {
+            client->errorValue = stuff->event.u.u.type;
+            return BadValue;
+        }
+        proc = EventSwapVector[stuff->event.u.u.type & 0177];
+        if (!proc || proc == NotImplemented)
+            return BadValue;
+        (*proc) (&stuff->event, &eventT);
+        stuff->event = eventT;
+    }
 
     /* libXext and other extension libraries may set the bit indicating
      * that this event came from a SendEvent request so remove it

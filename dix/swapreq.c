@@ -147,47 +147,6 @@ SProcConfigureWindow(ClientPtr client)
 }
 
 int _X_COLD
-SProcConvertSelection(ClientPtr client)
-{
-    REQUEST(xConvertSelectionReq);
-    REQUEST_SIZE_MATCH(xConvertSelectionReq);
-    swapl(&stuff->requestor);
-    swapl(&stuff->selection);
-    swapl(&stuff->target);
-    swapl(&stuff->property);
-    swapl(&stuff->time);
-    return ((*ProcVector[X_ConvertSelection]) (client));
-}
-
-int _X_COLD
-SProcSendEvent(ClientPtr client)
-{
-    xEvent eventT = { .u.u.type = 0 };
-    EventSwapPtr proc;
-
-    REQUEST(xSendEventReq);
-    REQUEST_SIZE_MATCH(xSendEventReq);
-    swapl(&stuff->destination);
-    swapl(&stuff->eventMask);
-
-    /* Generic events can have variable size, but SendEvent request holds
-       exactly 32B of event data. */
-    if (stuff->event.u.u.type == GenericEvent) {
-        client->errorValue = stuff->event.u.u.type;
-        return BadValue;
-    }
-
-    /* Swap event */
-    proc = EventSwapVector[stuff->event.u.u.type & 0177];
-    if (!proc || proc == NotImplemented)        /* no swapping proc; invalid event type? */
-        return BadValue;
-    (*proc) (&stuff->event, &eventT);
-    stuff->event = eventT;
-
-    return ((*ProcVector[X_SendEvent]) (client));
-}
-
-int _X_COLD
 SProcUngrabButton(ClientPtr client)
 {
     REQUEST(xUngrabButtonReq);
