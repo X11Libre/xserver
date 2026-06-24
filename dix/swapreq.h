@@ -33,7 +33,6 @@ extern void SwapConnClientPrefix(xConnClientPrefix * /* pCCP */ );
 int SProcAllocColorCells(ClientPtr client);
 int SProcAllocColorPlanes(ClientPtr client);
 int SProcAllocNamedColor(ClientPtr client);
-int SProcChangeGC(ClientPtr client);
 int SProcChangeHosts(ClientPtr client);
 int SProcChangeKeyboardControl(ClientPtr client);
 int SProcChangeKeyboardMapping(ClientPtr client);
@@ -41,12 +40,10 @@ int SProcChangePointerControl(ClientPtr client);
 int SProcClearToBackground(ClientPtr client);
 int SProcCopyArea(ClientPtr client);
 int SProcCopyColormapAndFree(ClientPtr client);
-int SProcCopyGC(ClientPtr client);
 int SProcCopyPlane(ClientPtr client);
 int SProcCreateColormap(ClientPtr client);
 int SProcCreateCursor(ClientPtr client);
-int SProcCreateGC(ClientPtr client);
-int SProcCreatePixmap(ClientPtr client);
+
 int SProcFillPoly(ClientPtr client);
 int SProcFreeColors(ClientPtr client);
 int SProcGetImage(ClientPtr client);
@@ -54,8 +51,7 @@ int SProcImageText(ClientPtr client);
 
 int SProcPutImage(ClientPtr client);
 int SProcQueryBestSize(ClientPtr client);
-int SProcSetClipRectangles(ClientPtr client);
-int SProcSetDashes(ClientPtr client);
+
 int SProcStoreColors(ClientPtr client);
 int SProcStoreNamedColor(ClientPtr client);
 

@@ -385,13 +385,13 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcListFontsWithInfo,              /* 50 */
     ProcSetFontPath,
     ProcGetFontPath,
-    SProcCreatePixmap,
+    ProcCreatePixmap,
     ProcFreePixmap,
-    SProcCreateGC,                      /* 55 */
-    SProcChangeGC,
-    SProcCopyGC,
-    SProcSetDashes,
-    SProcSetClipRectangles,
+    ProcCreateGC,                       /* 55 */
+    ProcChangeGC,
+    ProcCopyGC,
+    ProcSetDashes,
+    ProcSetClipRectangles,
     ProcFreeGC,                         /* 60 */
     SProcClearToBackground,
     SProcCopyArea,

@@ -1506,14 +1506,17 @@ dixDestroyPixmap(void *value, XID pid)
 int
 ProcCreatePixmap(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xCreatePixmapReq);
+    X_REQUEST_FIELD_CARD32(pid);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+
     PixmapPtr pMap;
     DrawablePtr pDraw;
-
-    REQUEST(xCreatePixmapReq);
     DepthPtr pDepth;
     int rc;
 
-    REQUEST_SIZE_MATCH(xCreatePixmapReq);
     client->errorValue = stuff->pid;
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
@@ -1539,7 +1542,7 @@ ProcCreatePixmap(ClientPtr client)
          * to be much smaller.
          *
          * So, such big pixmaps are rejected here with a BadAlloc
-         */
+         * error. */
         return BadAlloc;
     }
     if (stuff->depth != 1) {
@@ -1601,9 +1604,11 @@ ProcCreateGC(ClientPtr client)
     DrawablePtr pDraw;
     unsigned len;
 
-    REQUEST(xCreateGCReq);
-
-    REQUEST_AT_LEAST_SIZE(xCreateGCReq);
+    X_REQUEST_HEAD_AT_LEAST(xCreateGCReq);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_REST_CARD32();
     client->errorValue = stuff->gc;
     LEGAL_NEW_RESOURCE(stuff->gc, client);
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
@@ -1630,8 +1635,10 @@ ProcChangeGC(ClientPtr client)
     int result;
     unsigned len;
 
-    REQUEST(xChangeGCReq);
-    REQUEST_AT_LEAST_SIZE(xChangeGCReq);
+    X_REQUEST_HEAD_AT_LEAST(xChangeGCReq);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_REST_CARD32();
 
     result = dixLookupGC(&pGC, stuff->gc, client, DixSetAttrAccess);
     if (result != Success)
@@ -1651,8 +1658,10 @@ ProcCopyGC(ClientPtr client)
     GCPtr pGC;
     int result;
 
-    REQUEST(xCopyGCReq);
-    REQUEST_SIZE_MATCH(xCopyGCReq);
+    X_REQUEST_HEAD_STRUCT(xCopyGCReq);
+    X_REQUEST_FIELD_CARD32(srcGC);
+    X_REQUEST_FIELD_CARD32(dstGC);
+    X_REQUEST_FIELD_CARD32(mask);
 
     result = dixLookupGC(&pGC, stuff->srcGC, client, DixGetAttrAccess);
     if (result != Success)
@@ -1675,7 +1684,10 @@ ProcSetDashes(ClientPtr client)
     GCPtr pGC;
     int result;
 
-    REQUEST(xSetDashesReq);
+    X_REQUEST_HEAD_AT_LEAST(xSetDashesReq);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(dashOffset);
+    X_REQUEST_FIELD_CARD16(nDashes);
 
     REQUEST_FIXED_SIZE(xSetDashesReq, stuff->nDashes);
     if (stuff->nDashes == 0) {
@@ -1700,9 +1712,11 @@ ProcSetClipRectangles(ClientPtr client)
     int result;
     GCPtr pGC;
 
-    REQUEST(xSetClipRectanglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xSetClipRectanglesReq);
+    X_REQUEST_HEAD_AT_LEAST(xSetClipRectanglesReq);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(xOrigin);
+    X_REQUEST_FIELD_CARD16(yOrigin);
+    X_REQUEST_REST_CARD16();
     if ((stuff->ordering != Unsorted) && (stuff->ordering != YSorted) &&
         (stuff->ordering != YXSorted) && (stuff->ordering != YXBanded)) {
         client->errorValue = stuff->ordering;
