@@ -743,11 +743,11 @@ xf86CheckModeForMonitor(DisplayModePtr mode, MonPtr monitor)
 
     if (monitor->nVrefresh > 0) {
         /* Check vrefresh against the allowed ranges */
-        float vrefrsh = xf86ModeVRefresh(mode);
+        float vrefresh = xf86ModeVRefresh(mode);
 
         for (i = 0; i < monitor->nVrefresh; i++)
-            if ((vrefrsh > monitor->vrefresh[i].lo * (1.0 - SYNC_TOLERANCE)) &&
-                (vrefrsh < monitor->vrefresh[i].hi * (1.0 + SYNC_TOLERANCE)))
+            if ((vrefresh > monitor->vrefresh[i].lo * (1.0 - SYNC_TOLERANCE)) &&
+                (vrefresh < monitor->vrefresh[i].hi * (1.0 + SYNC_TOLERANCE)))
                 break;
 
         /* Now see whether we ran out of refresh ranges without finding a match */
