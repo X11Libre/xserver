@@ -82,9 +82,6 @@ extern Bool noCompositeExtension;
 #define DEFAULT_STARTX X11BINDIR "/startx -- " X11BINDIR "/Xquartz"
 #define DEFAULT_SHELL  "/bin/sh"
 
-#define _STRINGIZE(s) #s
-#define STRINGIZE(s) _STRINGIZE(s)
-
 #ifndef XSERVER_VERSION
 #define XSERVER_VERSION "?"
 #endif
