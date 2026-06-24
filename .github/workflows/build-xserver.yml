@@ -12,8 +12,25 @@ on:
     push:
     pull_request:
 
+# If a ref is pushed again (or a PR gets a new commit) while its previous run is
+# still in flight, cancel the stale run — only the newest commit needs building.
+# Keyed by ref, so each branch/PR is independent.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     ubuntu-fetch-pkg:
+        # De-duplicate PR runs without a branch-name convention: on a same-repo
+        # pull_request the branch's own push event already builds it, so skip the
+        # redundant build here. Fork PRs raise no push event in this repo, so
+        # they still build. Every build job chains off this root (and the three
+        # other no-needs roots below), so skipping it skips them too. Normal
+        # branch pushes are unaffected — they build exactly as before, and the
+        # push run's checks still populate the PR's status indicator.
+        if: >-
+            github.event_name != 'pull_request' ||
+            github.event.pull_request.head.repo.full_name != github.repository
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
@@ -255,6 +272,10 @@ jobs:
               run: .github/scripts/meson-build.sh --run-install
 
     xserver-build-macos:
+        # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
+        if: >-
+            github.event_name != 'pull_request' ||
+            github.event.pull_request.head.repo.full_name != github.repository
         env:
             MESON_ARGS: -Dprefix=/tmp -Dglx=false -Dxnest=false -Dxfbdev=false
             X11_PREFIX: /Users/runner/x11
@@ -381,6 +402,10 @@ jobs:
               run: ./.github/scripts/alpine/run-xserver-build.sh
 
     xserver-build-cygwin:
+        # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
+        if: >-
+            github.event_name != 'pull_request' ||
+            github.event.pull_request.head.repo.full_name != github.repository
         runs-on: windows-latest
         steps:
             - name: Cygwin packages cache
@@ -438,6 +463,10 @@ jobs:
                   bash ./.github/scripts/Cygwin/build.sh
 
     xserver-build-arch:
+        # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
+        if: >-
+            github.event_name != 'pull_request' ||
+            github.event.pull_request.head.repo.full_name != github.repository
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v6
