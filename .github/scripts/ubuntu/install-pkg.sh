@@ -92,4 +92,8 @@ apt-get install -y \
 	python3-mako \
 	libxcvt-dev \
 	git \
-	sudo
+	sudo \
+	golang-go
+
+# only pull them into apt cache -- for mingw32 build
+apt-get install -d -y mingw-w64-tools gcc-mingw-w64 gcc-mingw-w64-i686 libz-mingw-w64-dev
