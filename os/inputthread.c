@@ -495,7 +495,7 @@ InputThreadInit(void)
  * This function is supposed to be called at server shutdown time only.
  */
 void
-InputThreadFini(void)
+InputThreadFinish(void)
 {
     InputThreadDevice *dev, *next;
 
@@ -543,7 +543,7 @@ void input_force_unlock(void) {}
 
 void InputThreadPreInit(void) {}
 void InputThreadInit(void) {}
-void InputThreadFini(void) {}
+void InputThreadFinish(void) {}
 int in_input_thread(void) { return 0; }
 
 int InputThreadRegisterDev(int fd,
