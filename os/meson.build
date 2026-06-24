@@ -81,7 +81,8 @@ elif host_machine.system() == 'darwin'
 elif host_machine.system() == 'freebsd'
     srcs_os += 'freebsd/client.c'
 elif host_machine.system() == 'dragonfly'
-    # See os/client.c:161
+    # The FreeBSD implementation also works on DragonFlyBSD. To avoid code duplication, we can
+    # just reuse the same implementation for both operating systems.
     srcs_os += 'freebsd/client.c'
 elif host_machine.system() == 'openbsd'
     os_dep += cc.find_library('kvm')
