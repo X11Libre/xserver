@@ -50,7 +50,6 @@ int SProcCreatePixmap(ClientPtr client);
 int SProcFillPoly(ClientPtr client);
 int SProcFreeColors(ClientPtr client);
 int SProcGetImage(ClientPtr client);
-int SProcGetMotionEvents(ClientPtr client);
 int SProcImageText(ClientPtr client);
 int SProcListFonts(ClientPtr client);
 int SProcListFontsWithInfo(ClientPtr client);
@@ -62,6 +61,5 @@ int SProcSetDashes(ClientPtr client);
 int SProcSetFontPath(ClientPtr client);
 int SProcStoreColors(ClientPtr client);
 int SProcStoreNamedColor(ClientPtr client);
-int SProcTranslateCoords(ClientPtr client);
 
 #endif                          /* SWAPREQ_H */

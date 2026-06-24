@@ -3643,14 +3643,21 @@ XineramaWarpPointer(ClientPtr client)
 int
 ProcWarpPointer(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xWarpPointerReq);
+    X_REQUEST_FIELD_CARD32(srcWid);
+    X_REQUEST_FIELD_CARD32(dstWid);
+    X_REQUEST_FIELD_CARD16(srcX);
+    X_REQUEST_FIELD_CARD16(srcY);
+    X_REQUEST_FIELD_CARD16(srcWidth);
+    X_REQUEST_FIELD_CARD16(srcHeight);
+    X_REQUEST_FIELD_CARD16(dstX);
+    X_REQUEST_FIELD_CARD16(dstY);
+
     WindowPtr dest = NULL;
     int x, y, rc;
     ScreenPtr newScreen;
     DeviceIntPtr dev;
     SpritePtr pSprite;
-
-    REQUEST(xWarpPointerReq);
-    REQUEST_SIZE_MATCH(xWarpPointerReq);
 
     dev = PickPointer(client);
 
@@ -4951,11 +4958,11 @@ SetInputFocus(ClientPtr client,
 int
 ProcSetInputFocus(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xSetInputFocusReq);
+    X_REQUEST_FIELD_CARD32(focus);
+    X_REQUEST_FIELD_CARD32(time);
+
     DeviceIntPtr kbd = PickKeyboard(client);
-
-    REQUEST(xSetInputFocusReq);
-
-    REQUEST_SIZE_MATCH(xSetInputFocusReq);
 
     return SetInputFocus(client, kbd, stuff->focus,
                          stuff->revertTo, stuff->time, FALSE);
@@ -5071,14 +5078,15 @@ ProcGrabPointer(ClientPtr client)
 int
 ProcChangeActivePointerGrab(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xChangeActivePointerGrabReq);
+    X_REQUEST_FIELD_CARD32(cursor);
+    X_REQUEST_FIELD_CARD32(time);
+    X_REQUEST_FIELD_CARD16(eventMask);
+
     DeviceIntPtr device;
     GrabPtr grab;
     CursorPtr newCursor, oldCursor;
-
-    REQUEST(xChangeActivePointerGrabReq);
     TimeStamp time;
-
-    REQUEST_SIZE_MATCH(xChangeActivePointerGrabReq);
     if (stuff->eventMask & ~PointerGrabMask) {
         client->errorValue = stuff->eventMask;
         return BadValue;
@@ -5276,14 +5284,14 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
 int
 ProcGrabKeyboard(ClientPtr client)
 {
-    BYTE status;
+    X_REQUEST_HEAD_STRUCT(xGrabKeyboardReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD32(time);
 
-    REQUEST(xGrabKeyboardReq);
+    BYTE status;
     int result;
     DeviceIntPtr keyboard = PickKeyboard(client);
     GrabMask mask;
-
-    REQUEST_SIZE_MATCH(xGrabKeyboardReq);
     UpdateCurrentTime();
 
     mask.core = KeyPressMask | KeyReleaseMask;
@@ -5607,13 +5615,14 @@ ProcSendEvent(ClientPtr client)
 int
 ProcUngrabKey(ClientPtr client)
 {
-    REQUEST(xUngrabKeyReq);
+    X_REQUEST_HEAD_STRUCT(xUngrabKeyReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(modifiers);
+
     WindowPtr pWin;
     GrabPtr tempGrab;
     DeviceIntPtr keybd = PickKeyboard(client);
     int rc;
-
-    REQUEST_SIZE_MATCH(xUngrabKeyReq);
     rc = dixLookupWindow(&pWin, stuff->grabWindow, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -5661,16 +5670,16 @@ ProcUngrabKey(ClientPtr client)
 int
 ProcGrabKey(ClientPtr client)
 {
-    WindowPtr pWin;
+    X_REQUEST_HEAD_STRUCT(xGrabKeyReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(modifiers);
 
-    REQUEST(xGrabKeyReq);
+    WindowPtr pWin;
     GrabPtr grab;
     DeviceIntPtr keybd = PickKeyboard(client);
     int rc;
     GrabParameters param;
     GrabMask mask;
-
-    REQUEST_SIZE_MATCH(xGrabKeyReq);
 
     param = (GrabParameters) {
         .grabtype = CORE,
@@ -5814,13 +5823,14 @@ ProcGrabButton(ClientPtr client)
 int
 ProcUngrabButton(ClientPtr client)
 {
-    REQUEST(xUngrabButtonReq);
+    X_REQUEST_HEAD_STRUCT(xUngrabButtonReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(modifiers);
+
     WindowPtr pWin;
     GrabPtr tempGrab;
     int rc;
     DeviceIntPtr ptr;
-
-    REQUEST_SIZE_MATCH(xUngrabButtonReq);
     UpdateCurrentTime();
     if ((stuff->modifiers != AnyModifier) &&
         (stuff->modifiers & ~AllModifiersMask)) {

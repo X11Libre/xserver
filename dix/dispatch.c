@@ -1240,12 +1240,14 @@ ProcUngrabServer(ClientPtr client)
 int
 ProcTranslateCoords(ClientPtr client)
 {
-    REQUEST(xTranslateCoordsReq);
+    X_REQUEST_HEAD_STRUCT(xTranslateCoordsReq);
+    X_REQUEST_FIELD_CARD32(srcWid);
+    X_REQUEST_FIELD_CARD32(dstWid);
+    X_REQUEST_FIELD_CARD16(srcX);
+    X_REQUEST_FIELD_CARD16(srcY);
 
     WindowPtr pWin, pDst;
     int rc;
-
-    REQUEST_SIZE_MATCH(xTranslateCoordsReq);
     rc = dixLookupWindow(&pWin, stuff->srcWid, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;

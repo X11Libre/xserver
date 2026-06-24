@@ -361,20 +361,20 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcGrabPointer,
     ProcUngrabPointer,
     ProcGrabButton,
-    SProcUngrabButton,
-    SProcChangeActivePointerGrab,       /* 30 */
-    SProcGrabKeyboard,
+    ProcUngrabButton,
+    ProcChangeActivePointerGrab,        /* 30 */
+    ProcGrabKeyboard,
     ProcUngrabKeyboard,
-    SProcGrabKey,
-    SProcUngrabKey,
+    ProcGrabKey,
+    ProcUngrabKey,
     ProcAllowEvents,
     ProcGrabServer,
     ProcUngrabServer,
     ProcQueryPointer,
-    SProcGetMotionEvents,
-    SProcTranslateCoords,               /*40 */
-    SProcWarpPointer,
-    SProcSetInputFocus,
+    ProcGetMotionEvents,
+    ProcTranslateCoords,                /*40 */
+    ProcWarpPointer,
+    ProcSetInputFocus,
     ProcGetInputFocus,
     ProcQueryKeymap,
     SProcOpenFont,                      /* 45 */

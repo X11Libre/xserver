@@ -2339,8 +2339,10 @@ MaybeStopHint(DeviceIntPtr dev, ClientPtr client)
 int
 ProcGetMotionEvents(ClientPtr client)
 {
-    REQUEST(xGetMotionEventsReq);
-    REQUEST_SIZE_MATCH(xGetMotionEventsReq);
+    X_REQUEST_HEAD_STRUCT(xGetMotionEventsReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(start);
+    X_REQUEST_FIELD_CARD32(stop);
 
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
