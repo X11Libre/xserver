@@ -1757,11 +1757,15 @@ ProcFreeGC(ClientPtr client)
 int
 ProcClearToBackground(ClientPtr client)
 {
-    REQUEST(xClearAreaReq);
+    X_REQUEST_HEAD_STRUCT(xClearAreaReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+
     WindowPtr pWin;
     int rc;
-
-    REQUEST_SIZE_MATCH(xClearAreaReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixWriteAccess);
     if (rc != Success)
         return rc;
@@ -1827,15 +1831,22 @@ SendGraphicsExpose(ClientPtr client, RegionPtr pRgn, XID drawable,
 int
 ProcCopyArea(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xCopyAreaReq);
+    X_REQUEST_FIELD_CARD32(srcDrawable);
+    X_REQUEST_FIELD_CARD32(dstDrawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(srcX);
+    X_REQUEST_FIELD_CARD16(srcY);
+    X_REQUEST_FIELD_CARD16(dstX);
+    X_REQUEST_FIELD_CARD16(dstY);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+
     DrawablePtr pDst;
     DrawablePtr pSrc;
     GCPtr pGC;
-
-    REQUEST(xCopyAreaReq);
     RegionPtr pRgn;
     int rc;
-
-    REQUEST_SIZE_MATCH(xCopyAreaReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->dstDrawable, pDst, DixWriteAccess);
     if (stuff->dstDrawable != stuff->srcDrawable) {
@@ -1866,14 +1877,22 @@ ProcCopyArea(ClientPtr client)
 int
 ProcCopyPlane(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xCopyPlaneReq);
+    X_REQUEST_FIELD_CARD32(srcDrawable);
+    X_REQUEST_FIELD_CARD32(dstDrawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(srcX);
+    X_REQUEST_FIELD_CARD16(srcY);
+    X_REQUEST_FIELD_CARD16(dstX);
+    X_REQUEST_FIELD_CARD16(dstY);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD32(bitPlane);
+
     DrawablePtr psrcDraw, pdstDraw;
     GCPtr pGC;
-
-    REQUEST(xCopyPlaneReq);
     RegionPtr pRgn;
     int rc;
-
-    REQUEST_SIZE_MATCH(xCopyPlaneReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->dstDrawable, pdstDraw, DixWriteAccess);
     if (stuff->dstDrawable != stuff->srcDrawable) {
@@ -2049,13 +2068,14 @@ ProcPolyArc(ClientPtr client)
 int
 ProcFillPoly(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xFillPolyReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_REST_CARD16();
+
     int things;
     GCPtr pGC;
     DrawablePtr pDraw;
-
-    REQUEST(xFillPolyReq);
-
-    REQUEST_AT_LEAST_SIZE(xFillPolyReq);
     if ((stuff->shape != Complex) && (stuff->shape != Nonconvex) &&
         (stuff->shape != Convex)) {
         client->errorValue = stuff->shape;
@@ -2193,9 +2213,13 @@ ProcPutImage(ClientPtr client)
     long lengthProto;           /* length of scanline protocol padded */
     char *tmpImage;
 
-    REQUEST(xPutImageReq);
-
-    REQUEST_AT_LEAST_SIZE(xPutImageReq);
+    X_REQUEST_HEAD_AT_LEAST(xPutImageReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD16(dstX);
+    X_REQUEST_FIELD_CARD16(dstY);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     if (stuff->format == XYBitmap) {
         if ((stuff->depth != 1) ||
@@ -2451,9 +2475,13 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
 int
 ProcGetImage(ClientPtr client)
 {
-    REQUEST(xGetImageReq);
-
-    REQUEST_SIZE_MATCH(xGetImageReq);
+    X_REQUEST_HEAD_STRUCT(xGetImageReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD32(planeMask);
 
     return DoGetImage(client, stuff->format, stuff->drawable,
                       stuff->x, stuff->y,
@@ -2493,7 +2521,11 @@ ProcImageText8(ClientPtr client)
     DrawablePtr pDraw;
     GCPtr pGC;
 
-    REQUEST(xImageTextReq);
+    X_REQUEST_HEAD_AT_LEAST(xImageTextReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
 
     REQUEST_FIXED_SIZE(xImageTextReq, stuff->nChars);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
@@ -2512,7 +2544,11 @@ ProcImageText16(ClientPtr client)
     DrawablePtr pDraw;
     GCPtr pGC;
 
-    REQUEST(xImageTextReq);
+    X_REQUEST_HEAD_AT_LEAST(xImageTextReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
 
     REQUEST_FIXED_SIZE(xImageTextReq, stuff->nChars << 1);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);

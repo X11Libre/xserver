@@ -393,23 +393,23 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcSetDashes,
     ProcSetClipRectangles,
     ProcFreeGC,                         /* 60 */
-    SProcClearToBackground,
-    SProcCopyArea,
-    SProcCopyPlane,
+    ProcClearToBackground,
+    ProcCopyArea,
+    ProcCopyPlane,
     ProcPolyPoint,
     ProcPolyLine,                       /* 65 */
     ProcPolySegment,
     ProcPolyRectangle,
     ProcPolyArc,
-    SProcFillPoly,
+    ProcFillPoly,
     ProcPolyFillRectangle,              /* 70 */
     ProcPolyFillArc,
-    SProcPutImage,
-    SProcGetImage,
+    ProcPutImage,
+    ProcGetImage,
     ProcPolyText,
     ProcPolyText,                       /* 75 */
-    SProcImageText,
-    SProcImageText,
+    ProcImageText8,
+    ProcImageText16,
     SProcCreateColormap,
     ProcFreeColormap,
     SProcCopyColormapAndFree,           /* 80 */

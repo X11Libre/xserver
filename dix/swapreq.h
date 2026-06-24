@@ -37,19 +37,11 @@ int SProcChangeHosts(ClientPtr client);
 int SProcChangeKeyboardControl(ClientPtr client);
 int SProcChangeKeyboardMapping(ClientPtr client);
 int SProcChangePointerControl(ClientPtr client);
-int SProcClearToBackground(ClientPtr client);
-int SProcCopyArea(ClientPtr client);
 int SProcCopyColormapAndFree(ClientPtr client);
-int SProcCopyPlane(ClientPtr client);
 int SProcCreateColormap(ClientPtr client);
 int SProcCreateCursor(ClientPtr client);
 
-int SProcFillPoly(ClientPtr client);
 int SProcFreeColors(ClientPtr client);
-int SProcGetImage(ClientPtr client);
-int SProcImageText(ClientPtr client);
-
-int SProcPutImage(ClientPtr client);
 int SProcQueryBestSize(ClientPtr client);
 
 int SProcStoreColors(ClientPtr client);
