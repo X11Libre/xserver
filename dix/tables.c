@@ -333,18 +333,18 @@ int (*ProcVector[256]) (ClientPtr /* client */) = {
 
 int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcBadRequest,
-    SProcCreateWindow,
-    SProcChangeWindowAttributes,
+    ProcCreateWindow,
+    ProcChangeWindowAttributes,
     ProcGetWindowAttributes,
     ProcDestroyWindow,
     ProcDestroySubwindows,              /* 5 */
     ProcChangeSaveSet,
-    SProcReparentWindow,
+    ProcReparentWindow,
     ProcMapWindow,
     ProcMapSubwindows,
     ProcUnmapWindow,                    /* 10 */
     ProcUnmapSubwindows,
-    SProcConfigureWindow,
+    ProcConfigureWindow,
     ProcCirculateWindow,
     ProcGetGeometry,
     ProcQueryTree,                      /* 15 */

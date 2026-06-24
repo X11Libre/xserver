@@ -93,60 +93,6 @@ SwapShorts(short *list, unsigned long count)
 }
 
 int _X_COLD
-SProcCreateWindow(ClientPtr client)
-{
-    REQUEST(xCreateWindowReq);
-    REQUEST_AT_LEAST_SIZE(xCreateWindowReq);
-    swapl(&stuff->wid);
-    swapl(&stuff->parent);
-    swaps(&stuff->x);
-    swaps(&stuff->y);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    swaps(&stuff->borderWidth);
-    swaps(&stuff->class);
-    swapl(&stuff->visual);
-    swapl(&stuff->mask);
-    SwapRestL(stuff);
-    return ((*ProcVector[X_CreateWindow]) (client));
-}
-
-int _X_COLD
-SProcChangeWindowAttributes(ClientPtr client)
-{
-    REQUEST(xChangeWindowAttributesReq);
-    REQUEST_AT_LEAST_SIZE(xChangeWindowAttributesReq);
-    swapl(&stuff->window);
-    swapl(&stuff->valueMask);
-    SwapRestL(stuff);
-    return ((*ProcVector[X_ChangeWindowAttributes]) (client));
-}
-
-int _X_COLD
-SProcReparentWindow(ClientPtr client)
-{
-    REQUEST(xReparentWindowReq);
-    REQUEST_SIZE_MATCH(xReparentWindowReq);
-    swapl(&stuff->window);
-    swapl(&stuff->parent);
-    swaps(&stuff->x);
-    swaps(&stuff->y);
-    return ((*ProcVector[X_ReparentWindow]) (client));
-}
-
-int _X_COLD
-SProcConfigureWindow(ClientPtr client)
-{
-    REQUEST(xConfigureWindowReq);
-    REQUEST_AT_LEAST_SIZE(xConfigureWindowReq);
-    swapl(&stuff->window);
-    swaps(&stuff->mask);
-    SwapRestL(stuff);
-    return ((*ProcVector[X_ConfigureWindow]) (client));
-
-}
-
-int _X_COLD
 SProcUngrabButton(ClientPtr client)
 {
     REQUEST(xUngrabButtonReq);

@@ -758,8 +758,18 @@ int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids)
 int
 ProcCreateWindow(ClientPtr client)
 {
-    REQUEST(xCreateWindowReq);
-    REQUEST_AT_LEAST_SIZE(xCreateWindowReq);
+    X_REQUEST_HEAD_AT_LEAST(xCreateWindowReq);
+    X_REQUEST_FIELD_CARD32(wid);
+    X_REQUEST_FIELD_CARD32(parent);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD16(borderWidth);
+    X_REQUEST_FIELD_CARD16(class);
+    X_REQUEST_FIELD_CARD32(visual);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_REST_CARD32();
 
     int len = client->req_len - bytes_to_int32(sizeof(xCreateWindowReq));
     if (Ones(stuff->mask) != len)
@@ -771,8 +781,11 @@ ProcCreateWindow(ClientPtr client)
 int
 ProcChangeWindowAttributes(ClientPtr client)
 {
-    REQUEST(xChangeWindowAttributesReq);
-    REQUEST_AT_LEAST_SIZE(xChangeWindowAttributesReq);
+    X_REQUEST_HEAD_AT_LEAST(xChangeWindowAttributesReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(valueMask);
+    X_REQUEST_REST_CARD32();
+
     Mask access_mode = (stuff->valueMask & CWEventMask) ? DixReceiveAccess : 0;
     access_mode |= (stuff->valueMask & ~CWEventMask) ? DixSetAttrAccess : 0;
 
@@ -860,8 +873,11 @@ ProcChangeSaveSet(ClientPtr client)
 int
 ProcReparentWindow(ClientPtr client)
 {
-    REQUEST(xReparentWindowReq);
-    REQUEST_SIZE_MATCH(xReparentWindowReq);
+    X_REQUEST_HEAD_STRUCT(xReparentWindowReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(parent);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
 
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
@@ -966,10 +982,13 @@ ProcConfigureWindow(ClientPtr client)
 {
     WindowPtr pWin;
 
-    REQUEST(xConfigureWindowReq);
+    X_REQUEST_HEAD_AT_LEAST(xConfigureWindowReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(mask);
+    X_REQUEST_REST_CARD32();
+
     int len, rc;
 
-    REQUEST_AT_LEAST_SIZE(xConfigureWindowReq);
     rc = dixLookupWindow(&pWin, stuff->window, client,
                          DixManageAccess | DixSetAttrAccess);
     if (rc != Success)
