@@ -410,38 +410,38 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcPolyText,                       /* 75 */
     ProcImageText8,
     ProcImageText16,
-    SProcCreateColormap,
+    ProcCreateColormap,
     ProcFreeColormap,
-    SProcCopyColormapAndFree,           /* 80 */
+    ProcCopyColormapAndFree,           /* 80 */
     ProcInstallColormap,
     ProcUninstallColormap,
     ProcListInstalledColormaps,
     ProcAllocColor,
-    SProcAllocNamedColor,               /* 85 */
-    SProcAllocColorCells,
-    SProcAllocColorPlanes,
-    SProcFreeColors,
-    SProcStoreColors,
-    SProcStoreNamedColor,               /* 90 */
+    ProcAllocNamedColor,               /* 85 */
+    ProcAllocColorCells,
+    ProcAllocColorPlanes,
+    ProcFreeColors,
+    ProcStoreColors,
+    ProcStoreNamedColor,               /* 90 */
     ProcQueryColors,
     ProcLookupColor,
-    SProcCreateCursor,
+    ProcCreateCursor,
     ProcCreateGlyphCursor,
     ProcFreeCursor,                     /* 95 */
-    SProcRecolorCursor,
-    SProcQueryBestSize,
+    ProcRecolorCursor,
+    ProcQueryBestSize,
     ProcQueryExtension,
     ProcListExtensions,
-    SProcChangeKeyboardMapping,         /* 100 */
+    ProcChangeKeyboardMapping,         /* 100 */
     ProcGetKeyboardMapping,
-    SProcChangeKeyboardControl,
+    ProcChangeKeyboardControl,
     ProcGetKeyboardControl,
     ProcBell,
-    SProcChangePointerControl,          /* 105 */
+    ProcChangePointerControl,          /* 105 */
     ProcGetPointerControl,
     ProcSetScreenSaver,
     ProcGetScreenSaver,
-    SProcChangeHosts,
+    ProcChangeHosts,
     ProcListHosts,                      /* 110 */
     ProcChangeAccessControl,
     ProcChangeCloseDownMode,

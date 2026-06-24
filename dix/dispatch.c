@@ -2570,10 +2570,12 @@ ProcCreateColormap(ClientPtr client)
     WindowPtr pWin;
     ScreenPtr pScreen;
 
-    REQUEST(xCreateColormapReq);
-    int i, result;
+    X_REQUEST_HEAD_STRUCT(xCreateColormapReq);
+    X_REQUEST_FIELD_CARD32(mid);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(visual);
 
-    REQUEST_SIZE_MATCH(xCreateColormapReq);
+    int i, result;
 
     if ((stuff->alloc != AllocNone) && (stuff->alloc != AllocAll)) {
         client->errorValue = stuff->alloc;
@@ -2629,10 +2631,11 @@ ProcCopyColormapAndFree(ClientPtr client)
     Colormap mid;
     ColormapPtr pSrcMap;
 
-    REQUEST(xCopyColormapAndFreeReq);
-    int rc;
+    X_REQUEST_HEAD_STRUCT(xCopyColormapAndFreeReq);
+    X_REQUEST_FIELD_CARD32(mid);
+    X_REQUEST_FIELD_CARD32(srcCmap);
 
-    REQUEST_SIZE_MATCH(xCopyColormapAndFreeReq);
+    int rc;
     mid = stuff->mid;
     LEGAL_NEW_RESOURCE(mid, client);
     rc = dixLookupResourceByType((void **) &pSrcMap, stuff->srcCmap,
@@ -2809,7 +2812,9 @@ ProcAllocNamedColor(ClientPtr client)
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xAllocNamedColorReq);
+    X_REQUEST_HEAD_AT_LEAST(xAllocNamedColorReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     REQUEST_FIXED_SIZE(xAllocNamedColorReq, stuff->nbytes);
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
@@ -2863,9 +2868,10 @@ ProcAllocColorCells(ClientPtr client)
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xAllocColorCellsReq);
-
-    REQUEST_SIZE_MATCH(xAllocColorCellsReq);
+    X_REQUEST_HEAD_STRUCT(xAllocColorCellsReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_FIELD_CARD16(colors);
+    X_REQUEST_FIELD_CARD16(planes);
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixAddAccess);
     if (rc == Success) {
@@ -2928,9 +2934,12 @@ ProcAllocColorPlanes(ClientPtr client)
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xAllocColorPlanesReq);
-
-    REQUEST_SIZE_MATCH(xAllocColorPlanesReq);
+    X_REQUEST_HEAD_STRUCT(xAllocColorPlanesReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_FIELD_CARD16(colors);
+    X_REQUEST_FIELD_CARD16(red);
+    X_REQUEST_FIELD_CARD16(green);
+    X_REQUEST_FIELD_CARD16(blue);
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixAddAccess);
     if (rc == Success) {
@@ -2994,9 +3003,10 @@ ProcFreeColors(ClientPtr client)
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xFreeColorsReq);
-
-    REQUEST_AT_LEAST_SIZE(xFreeColorsReq);
+    X_REQUEST_HEAD_AT_LEAST(xFreeColorsReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_FIELD_CARD32(planeMask);
+    X_REQUEST_REST_CARD32();
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixRemoveAccess);
     if (rc == Success) {
@@ -3020,9 +3030,9 @@ ProcStoreColors(ClientPtr client)
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xStoreColorsReq);
-
-    REQUEST_AT_LEAST_SIZE(xStoreColorsReq);
+    X_REQUEST_HEAD_AT_LEAST(xStoreColorsReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_REST_CARD16();
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixWriteAccess);
     if (rc == Success) {
@@ -3046,7 +3056,10 @@ ProcStoreNamedColor(ClientPtr client)
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xStoreNamedColorReq);
+    X_REQUEST_HEAD_AT_LEAST(xStoreNamedColorReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_FIELD_CARD32(pixel);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     REQUEST_FIXED_SIZE(xStoreNamedColorReq, stuff->nbytes);
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
@@ -3186,9 +3199,18 @@ ProcCreateCursor(ClientPtr client)
     CursorMetricRec cm;
     int rc;
 
-    REQUEST(xCreateCursorReq);
-
-    REQUEST_SIZE_MATCH(xCreateCursorReq);
+    X_REQUEST_HEAD_STRUCT(xCreateCursorReq);
+    X_REQUEST_FIELD_CARD32(cid);
+    X_REQUEST_FIELD_CARD32(source);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_FIELD_CARD16(foreRed);
+    X_REQUEST_FIELD_CARD16(foreGreen);
+    X_REQUEST_FIELD_CARD16(foreBlue);
+    X_REQUEST_FIELD_CARD16(backRed);
+    X_REQUEST_FIELD_CARD16(backGreen);
+    X_REQUEST_FIELD_CARD16(backBlue);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
     LEGAL_NEW_RESOURCE(stuff->cid, client);
 
     rc = dixLookupResourceByType((void **) &src, stuff->source, X11_RESTYPE_PIXMAP,
@@ -3339,8 +3361,10 @@ ProcQueryBestSize(ClientPtr client)
     ScreenPtr pScreen;
     int rc;
 
-    REQUEST(xQueryBestSizeReq);
-    REQUEST_SIZE_MATCH(xQueryBestSizeReq);
+    X_REQUEST_HEAD_STRUCT(xQueryBestSizeReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
 
     if ((stuff->class != CursorShape) &&
         (stuff->class != TileShape) && (stuff->class != StippleShape)) {
@@ -3467,7 +3491,8 @@ ProcGetScreenSaver(ClientPtr client)
 int
 ProcChangeHosts(ClientPtr client)
 {
-    REQUEST(xChangeHostsReq);
+    X_REQUEST_HEAD_AT_LEAST(xChangeHostsReq);
+    X_REQUEST_FIELD_CARD16(hostLength);
 
     REQUEST_FIXED_SIZE(xChangeHostsReq, stuff->hostLength);
 

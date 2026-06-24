@@ -26,25 +26,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SWAPREQ_H
 #define SWAPREQ_H 1
 
-extern void SwapColorItem(xColorItem * /* pItem */ );
-
 extern void SwapConnClientPrefix(xConnClientPrefix * /* pCCP */ );
-
-int SProcAllocColorCells(ClientPtr client);
-int SProcAllocColorPlanes(ClientPtr client);
-int SProcAllocNamedColor(ClientPtr client);
-int SProcChangeHosts(ClientPtr client);
-int SProcChangeKeyboardControl(ClientPtr client);
-int SProcChangeKeyboardMapping(ClientPtr client);
-int SProcChangePointerControl(ClientPtr client);
-int SProcCopyColormapAndFree(ClientPtr client);
-int SProcCreateColormap(ClientPtr client);
-int SProcCreateCursor(ClientPtr client);
-
-int SProcFreeColors(ClientPtr client);
-int SProcQueryBestSize(ClientPtr client);
-
-int SProcStoreColors(ClientPtr client);
-int SProcStoreNamedColor(ClientPtr client);
 
 #endif                          /* SWAPREQ_H */

@@ -1755,8 +1755,8 @@ ProcGetModifierMapping(ClientPtr client)
 int
 ProcChangeKeyboardMapping(ClientPtr client)
 {
-    REQUEST(xChangeKeyboardMappingReq);
-    REQUEST_AT_LEAST_SIZE(xChangeKeyboardMappingReq);
+    X_REQUEST_HEAD_AT_LEAST(xChangeKeyboardMappingReq);
+    X_REQUEST_REST_CARD32();
 
     unsigned len = client->req_len - bytes_to_int32(sizeof(xChangeKeyboardMappingReq));
     if (len != (stuff->keyCodes * stuff->keySymsPerKeyCode))
@@ -2118,8 +2118,9 @@ DoChangeKeyboardControl(ClientPtr client, DeviceIntPtr keybd, XID *vlist,
 int
 ProcChangeKeyboardControl(ClientPtr client)
 {
-    REQUEST(xChangeKeyboardControlReq);
-    REQUEST_AT_LEAST_SIZE(xChangeKeyboardControlReq);
+    X_REQUEST_HEAD_AT_LEAST(xChangeKeyboardControlReq);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_REST_CARD32();
 
     BITS32 vmask = stuff->mask;
     if (client->req_len !=
@@ -2220,8 +2221,10 @@ ProcBell(ClientPtr client)
 int
 ProcChangePointerControl(ClientPtr client)
 {
-    REQUEST(xChangePointerControlReq);
-    REQUEST_SIZE_MATCH(xChangePointerControlReq);
+    X_REQUEST_HEAD_STRUCT(xChangePointerControlReq);
+    X_REQUEST_FIELD_CARD16(accelNum);
+    X_REQUEST_FIELD_CARD16(accelDenum);
+    X_REQUEST_FIELD_CARD16(threshold);
 
     DeviceIntPtr mouse = PickPointer(client);
 

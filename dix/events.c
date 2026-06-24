@@ -6028,9 +6028,14 @@ ProcRecolorCursor(ClientPtr client)
     Bool displayed;
     SpritePtr pSprite = PickPointer(client)->spriteInfo->sprite;
 
-    REQUEST(xRecolorCursorReq);
-
-    REQUEST_SIZE_MATCH(xRecolorCursorReq);
+    X_REQUEST_HEAD_STRUCT(xRecolorCursorReq);
+    X_REQUEST_FIELD_CARD32(cursor);
+    X_REQUEST_FIELD_CARD16(foreRed);
+    X_REQUEST_FIELD_CARD16(foreGreen);
+    X_REQUEST_FIELD_CARD16(foreBlue);
+    X_REQUEST_FIELD_CARD16(backRed);
+    X_REQUEST_FIELD_CARD16(backGreen);
+    X_REQUEST_FIELD_CARD16(backBlue);
     rc = dixLookupResourceByType((void **) &pCursor, stuff->cursor, X11_RESTYPE_CURSOR,
                                  client, DixWriteAccess);
     if (rc != Success) {
