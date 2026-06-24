@@ -179,7 +179,7 @@
 #endif
 
 #ifdef DEBUG
-#define	DB(x)	(x)
+#define	DB(x)	x
 #else
 #define	DB(x)
 #endif
