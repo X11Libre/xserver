@@ -84,15 +84,8 @@ elif host_machine.system() == 'dragonfly'
     # See os/client.c:161
     srcs_os += 'freebsd/client.c'
 elif host_machine.system() == 'openbsd'
+    os_dep += cc.find_library('kvm')
     srcs_os += 'openbsd/client.c'
-endif
-
-if get_option('xres')
-    # Only the XRes extension cares about the client ID.
-    os_c_args += '-DCLIENTIDS'
-    if host_machine.system() == 'openbsd'
-        os_dep += cc.find_library('kvm')
-    endif
 endif
 
 libxlibc = []
