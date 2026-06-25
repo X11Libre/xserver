@@ -340,11 +340,8 @@ RRConfigureProviderProperty(RRProviderPtr provider, Atom property,
 int
 ProcRRListProviderProperties(ClientPtr client)
 {
-    REQUEST(xRRListProviderPropertiesReq);
-    REQUEST_SIZE_MATCH(xRRListProviderPropertiesReq);
-
-    if (client->swapped)
-        swapl(&stuff->provider);
+    X_REQUEST_HEAD_STRUCT(xRRListProviderPropertiesReq);
+    X_REQUEST_FIELD_CARD32(provider);
 
     int numProps = 0;
     RRProviderPtr provider;
@@ -372,13 +369,9 @@ ProcRRListProviderProperties(ClientPtr client)
 int
 ProcRRQueryProviderProperty(ClientPtr client)
 {
-    REQUEST(xRRQueryProviderPropertyReq);
-    REQUEST_SIZE_MATCH(xRRQueryProviderPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->provider);
-        swapl(&stuff->property);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRQueryProviderPropertyReq);
+    X_REQUEST_FIELD_CARD32(provider);
+    X_REQUEST_FIELD_CARD32(property);
 
     RRProviderPtr provider;
     RRPropertyPtr prop;
@@ -404,15 +397,11 @@ ProcRRQueryProviderProperty(ClientPtr client)
 int
 ProcRRConfigureProviderProperty(ClientPtr client)
 {
-    REQUEST(xRRConfigureProviderPropertyReq);
-    REQUEST_AT_LEAST_SIZE(xRRConfigureProviderPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->provider);
-        swapl(&stuff->property);
-        /* TODO: no way to specify format? */
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRRConfigureProviderPropertyReq);
+    X_REQUEST_FIELD_CARD32(provider);
+    X_REQUEST_FIELD_CARD32(property);
+    /* TODO: no way to specify format? */
+    X_REQUEST_REST_CARD32();
 
     RRProviderPtr provider;
     int num_valid;
@@ -429,14 +418,12 @@ ProcRRConfigureProviderProperty(ClientPtr client)
 int
 ProcRRChangeProviderProperty(ClientPtr client)
 {
-    REQUEST(xRRChangeProviderPropertyReq);
-    REQUEST_AT_LEAST_SIZE(xRRChangeProviderPropertyReq);
-
+    X_REQUEST_HEAD_AT_LEAST(xRRChangeProviderPropertyReq);
+    X_REQUEST_FIELD_CARD32(provider);
+    X_REQUEST_FIELD_CARD32(property);
+    X_REQUEST_FIELD_CARD32(type);
+    X_REQUEST_FIELD_CARD32(nUnits);
     if (client->swapped) {
-        swapl(&stuff->provider);
-        swapl(&stuff->property);
-        swapl(&stuff->type);
-        swapl(&stuff->nUnits);
         switch (stuff->format) {
             case 8:
                 break;
@@ -502,13 +489,9 @@ ProcRRChangeProviderProperty(ClientPtr client)
 int
 ProcRRDeleteProviderProperty(ClientPtr client)
 {
-    REQUEST(xRRDeleteProviderPropertyReq);
-    REQUEST_SIZE_MATCH(xRRDeleteProviderPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->provider);
-        swapl(&stuff->property);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRDeleteProviderPropertyReq);
+    X_REQUEST_FIELD_CARD32(provider);
+    X_REQUEST_FIELD_CARD32(property);
 
     RRProviderPtr provider;
     RRPropertyPtr prop;
@@ -539,16 +522,12 @@ ProcRRDeleteProviderProperty(ClientPtr client)
 int
 ProcRRGetProviderProperty(ClientPtr client)
 {
-    REQUEST(xRRGetProviderPropertyReq);
-    REQUEST_SIZE_MATCH(xRRGetProviderPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->provider);
-        swapl(&stuff->property);
-        swapl(&stuff->type);
-        swapl(&stuff->longOffset);
-        swapl(&stuff->longLength);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRGetProviderPropertyReq);
+    X_REQUEST_FIELD_CARD32(provider);
+    X_REQUEST_FIELD_CARD32(property);
+    X_REQUEST_FIELD_CARD32(type);
+    X_REQUEST_FIELD_CARD32(longOffset);
+    X_REQUEST_FIELD_CARD32(longLength);
 
     RRPropertyPtr prop, *prev;
     RRPropertyValuePtr prop_value;
