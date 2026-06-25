@@ -1946,11 +1946,8 @@ ProcAllowEvents(ClientPtr client)
     DeviceIntPtr mouse = NULL;
     DeviceIntPtr keybd = NULL;
 
-    REQUEST(xAllowEventsReq);
-    REQUEST_SIZE_MATCH(xAllowEventsReq);
-
-    if (client->swapped)
-        swapl(&stuff->time);
+    X_REQUEST_HEAD_STRUCT(xAllowEventsReq);
+    X_REQUEST_FIELD_CARD32(time);
 
     UpdateCurrentTime();
     time = ClientTimeToServerTime(stuff->time);
@@ -4999,9 +4996,7 @@ ProcGetInputFocus(ClientPtr client)
     else
         reply.focus = focus->win->drawable.id;
 
-    if (client->swapped) {
-        swapl(&reply.focus);
-    }
+    X_REPLY_FIELD_CARD32(focus);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -5015,16 +5010,12 @@ ProcGetInputFocus(ClientPtr client)
 int
 ProcGrabPointer(ClientPtr client)
 {
-    REQUEST(xGrabPointerReq);
-    REQUEST_SIZE_MATCH(xGrabPointerReq);
-
-    if (client->swapped) {
-        swapl(&stuff->grabWindow);
-        swaps(&stuff->eventMask);
-        swapl(&stuff->confineTo);
-        swapl(&stuff->cursor);
-        swapl(&stuff->time);
-    }
+    X_REQUEST_HEAD_STRUCT(xGrabPointerReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(eventMask);
+    X_REQUEST_FIELD_CARD32(confineTo);
+    X_REQUEST_FIELD_CARD32(cursor);
+    X_REQUEST_FIELD_CARD32(time);
 
     DeviceIntPtr device = PickPointer(client);
     GrabPtr grab;
@@ -5135,11 +5126,8 @@ ProcUngrabPointer(ClientPtr client)
     GrabPtr grab;
     TimeStamp time;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     UpdateCurrentTime();
     grab = device->deviceGrab.grab;
@@ -5323,11 +5311,8 @@ ProcUngrabKeyboard(ClientPtr client)
     GrabPtr grab;
     TimeStamp time;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     UpdateCurrentTime();
 
@@ -5356,11 +5341,8 @@ ProcQueryPointer(ClientPtr client)
     SpritePtr pSprite;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
@@ -5417,15 +5399,13 @@ ProcQueryPointer(ClientPtr client)
         reply.winY = 0;
     }
 
-    if (client->swapped) {
-        swapl(&reply.root);
-        swapl(&reply.child);
-        swaps(&reply.rootX);
-        swaps(&reply.rootY);
-        swaps(&reply.winX);
-        swaps(&reply.winY);
-        swaps(&reply.mask);
-    }
+    X_REPLY_FIELD_CARD32(root);
+    X_REPLY_FIELD_CARD32(child);
+    X_REPLY_FIELD_CARD16(rootX);
+    X_REPLY_FIELD_CARD16(rootY);
+    X_REPLY_FIELD_CARD16(winX);
+    X_REPLY_FIELD_CARD16(winY);
+    X_REPLY_FIELD_CARD16(mask);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -5721,16 +5701,12 @@ ProcGrabKey(ClientPtr client)
 int
 ProcGrabButton(ClientPtr client)
 {
-    REQUEST(xGrabButtonReq);
-    REQUEST_SIZE_MATCH(xGrabButtonReq);
-
-    if (client->swapped) {
-        swapl(&stuff->grabWindow);
-        swaps(&stuff->eventMask);
-        swapl(&stuff->confineTo);
-        swapl(&stuff->cursor);
-        swaps(&stuff->modifiers);
-    }
+    X_REQUEST_HEAD_STRUCT(xGrabButtonReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(eventMask);
+    X_REQUEST_FIELD_CARD32(confineTo);
+    X_REQUEST_FIELD_CARD32(cursor);
+    X_REQUEST_FIELD_CARD16(modifiers);
 
     WindowPtr pWin, confineTo;
     CursorPtr cursor;
