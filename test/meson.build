@@ -179,6 +179,7 @@ if build_xorg
      'fixes.c',
      'input.c',
      'list.c',
+     'list_zeroinit.c',
      'misc.c',
      'sha1.c',
      'signal-logging.c',
