@@ -42,6 +42,8 @@ void xf86platformRemoveDevice(int index);
 void xf86platformVTProbe(void);
 void xf86platformPrimary(void);
 
+Bool xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *busid);
+
 #else /* XSERVER_PLATFORM_BUS */
 
 static inline int xf86platformAddGPUDevices(DriverPtr drvp) { return FALSE; }
