@@ -261,14 +261,12 @@ ProcRotateProperties(ClientPtr client)
 int
 ProcChangeProperty(ClientPtr client)
 {
-    REQUEST(xChangePropertyReq);
-    REQUEST_AT_LEAST_SIZE(xChangePropertyReq);
-
+    X_REQUEST_HEAD_AT_LEAST(xChangePropertyReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(property);
+    X_REQUEST_FIELD_CARD32(type);
+    X_REQUEST_FIELD_CARD32(nUnits);
     if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->property);
-        swapl(&stuff->type);
-        swapl(&stuff->nUnits);
         switch (stuff->format) {
         case 8:
             break;
@@ -521,16 +519,12 @@ DeleteAllWindowProperties(WindowPtr pWin)
 int
 ProcGetProperty(ClientPtr client)
 {
-    REQUEST(xGetPropertyReq);
-    REQUEST_SIZE_MATCH(xGetPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->property);
-        swapl(&stuff->type);
-        swapl(&stuff->longOffset);
-        swapl(&stuff->longLength);
-    }
+    X_REQUEST_HEAD_STRUCT(xGetPropertyReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(property);
+    X_REQUEST_FIELD_CARD32(type);
+    X_REQUEST_FIELD_CARD32(longOffset);
+    X_REQUEST_FIELD_CARD32(longLength);
 
     PropertyPtr pProp, prevProp;
     unsigned long n, len, ind;
@@ -593,10 +587,8 @@ ProcGetProperty(ClientPtr client)
             .format = pProp->format,
             .propertyType = pProp->type
         };
-        if (client->swapped) {
-            swapl(&reply.propertyType);
-            swapl(&reply.bytesAfter);
-        }
+        X_REPLY_FIELD_CARD32(propertyType);
+        X_REPLY_FIELD_CARD32(bytesAfter);
         return X_SEND_REPLY_SIMPLE(client, reply);
     }
 
@@ -666,11 +658,9 @@ ProcGetProperty(ClientPtr client)
         dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
     }
 
-    if (client->swapped) {
-        swapl(&reply.propertyType);
-        swapl(&reply.bytesAfter);
-        swapl(&reply.nItems);
-    }
+    X_REPLY_FIELD_CARD32(propertyType);
+    X_REPLY_FIELD_CARD32(bytesAfter);
+    X_REPLY_FIELD_CARD32(nItems);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -680,11 +670,8 @@ ProcListProperties(ClientPtr client)
 {
     WindowPtr pWin;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
     if (rc != Success)
@@ -706,9 +693,7 @@ ProcListProperties(ClientPtr client)
         .nProperties = numProps
     };
 
-    if (client->swapped) {
-        swaps(&reply.nProperties);
-    }
+    X_REPLY_FIELD_CARD16(nProperties);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -716,13 +701,9 @@ ProcListProperties(ClientPtr client)
 int
 ProcDeleteProperty(ClientPtr client)
 {
-    REQUEST(xDeletePropertyReq);
-    REQUEST_SIZE_MATCH(xDeletePropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->property);
-    }
+    X_REQUEST_HEAD_STRUCT(xDeletePropertyReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(property);
 
     UpdateCurrentTime();
     if (!ValidAtom(stuff->property)) {
