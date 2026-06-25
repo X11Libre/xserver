@@ -158,14 +158,16 @@ rdb(u32 addr)
     u8 val;
 
     if (addr > M.mem_size - 1) {
-        DB(printk("mem_read: address %#" PRIx32 " out of range!\n", addr);
-            )
-            HALT_SYS();
+#ifdef DEBUG
+        printk("mem_read: address %#" PRIx32 " out of range!\n", addr);
+#endif
+        HALT_SYS();
     }
     val = *(u8 *) (M.mem_base + addr);
-    DB(if (DEBUG_MEM_TRACE())
-       printk("%#08x 1 -> %#x\n", addr, val);)
-        return val;
+    if (DEBUG_MEM_TRACE()) {
+        printk("%#08x 1 -> %#x\n", addr, val);)
+    }
+    return val;
 }
 
 /****************************************************************************
@@ -184,9 +186,10 @@ rdw(u32 addr)
     u16 val = 0;
 
     if (addr > M.mem_size - 2) {
-        DB(printk("mem_read: address %#" PRIx32 " out of range!\n", addr);
-            )
-            HALT_SYS();
+#ifdef DEBUG
+        printk("mem_read: address %#" PRIx32 " out of range!\n", addr);
+#endif
+        HALT_SYS();
     }
 #ifdef __BIG_ENDIAN__
     if (addr & 0x1) {
