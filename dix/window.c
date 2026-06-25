@@ -1563,11 +1563,8 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
 int
 ProcGetWindowAttributes(ClientPtr client)
 {
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
@@ -1594,16 +1591,14 @@ ProcGetWindowAttributes(ClientPtr client)
         .visualID = wVisual(pWin),
     };
 
-    if (client->swapped) {
-        swapl(&reply.visualID);
-        swaps(&reply.class);
-        swapl(&reply.backingBitPlanes);
-        swapl(&reply.backingPixel);
-        swapl(&reply.colormap);
-        swapl(&reply.allEventMasks);
-        swapl(&reply.yourEventMask);
-        swaps(&reply.doNotPropagateMask);
-    }
+    X_REPLY_FIELD_CARD32(visualID);
+    X_REPLY_FIELD_CARD16(class);
+    X_REPLY_FIELD_CARD32(backingBitPlanes);
+    X_REPLY_FIELD_CARD32(backingPixel);
+    X_REPLY_FIELD_CARD32(colormap);
+    X_REPLY_FIELD_CARD32(allEventMasks);
+    X_REPLY_FIELD_CARD32(yourEventMask);
+    X_REPLY_FIELD_CARD16(doNotPropagateMask);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
