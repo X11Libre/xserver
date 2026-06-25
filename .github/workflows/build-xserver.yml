@@ -601,11 +601,12 @@ jobs:
             - uses: actions/checkout@v4
               with:
                   set-safe-directory: false
-            - run: |
-                  PATH="/usr/bin:$(cygpath "$SYSTEMROOT")/system32"
-              shell: bash --noprofile --norc -e -o igncr '{0}'
-            - run: |
-                  bash ./.github/scripts/Cygwin/build.sh
+            - name: set PATH
+              run: echo "PATH=/usr/bin:$(cygpath '$SYSTEMROOT')/system32" >> "$GITHUB_ENV"
+            - name: build
+              run: bash ./.github/scripts/Cygwin/build.sh
+            - name: test
+              run: bash -c 'ninja -C build test'
 
     xserver-build-arch:
         # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
