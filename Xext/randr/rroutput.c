@@ -456,13 +456,9 @@ RROutputInitErrorValue(void)
 int
 ProcRRGetOutputInfo(ClientPtr client)
 {
-    REQUEST(xRRGetOutputInfoReq);
-    REQUEST_SIZE_MATCH(xRRGetOutputInfoReq);
-
-    if (client->swapped) {
-        swapl(&stuff->output);
-        swapl(&stuff->configTimestamp);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRGetOutputInfoReq);
+    X_REQUEST_FIELD_CARD32(output);
+    X_REQUEST_FIELD_CARD32(configTimestamp);
 
     RROutputPtr output;
     ScreenPtr pScreen;
@@ -556,13 +552,9 @@ RRSetPrimaryOutput(ScreenPtr pScreen, rrScrPrivPtr pScrPriv, RROutputPtr output)
 int
 ProcRRSetOutputPrimary(ClientPtr client)
 {
-    REQUEST(xRRSetOutputPrimaryReq);
-    REQUEST_SIZE_MATCH(xRRSetOutputPrimaryReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->output);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRSetOutputPrimaryReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(output);
 
     RROutputPtr output = NULL;
     WindowPtr pWin;
@@ -609,11 +601,8 @@ ProcRRSetOutputPrimary(ClientPtr client)
 int
 ProcRRGetOutputPrimary(ClientPtr client)
 {
-    REQUEST(xRRGetOutputPrimaryReq);
-    REQUEST_SIZE_MATCH(xRRGetOutputPrimaryReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xRRGetOutputPrimaryReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     rrScrPrivPtr pScrPriv;
