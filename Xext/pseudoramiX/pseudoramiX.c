@@ -175,11 +175,8 @@ PseudoramiXResetProc(ExtensionEntry *extEntry)
 static int
 ProcPseudoramiXGetState(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetStateReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetStateReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     register int rc;
@@ -195,9 +192,7 @@ ProcPseudoramiXGetState(ClientPtr client)
         .window = stuff->window
     };
 
-    if (client->swapped) {
-        swapl(&reply.window);
-    }
+    X_REPLY_FIELD_CARD32(window);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -206,11 +201,8 @@ ProcPseudoramiXGetState(ClientPtr client)
 static int
 ProcPseudoramiXGetScreenCount(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetScreenCountReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetScreenCountReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     register int rc;
@@ -226,9 +218,7 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
         .window = stuff->window
     };
 
-    if (client->swapped) {
-        swapl(&reply.window);
-    }
+    X_REPLY_FIELD_CARD32(window);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -237,13 +227,9 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
 static int
 ProcPseudoramiXGetScreenSize(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetScreenSizeReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->screen);
-    }
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetScreenSizeReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(screen);
 
     WindowPtr pWin;
     register int rc;
