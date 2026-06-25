@@ -287,26 +287,21 @@ RRModeInitErrorValue(void)
 int
 ProcRRCreateMode(ClientPtr client)
 {
-    REQUEST(xRRCreateModeReq);
-    REQUEST_AT_LEAST_SIZE(xRRCreateModeReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        xRRModeInfo *modeinfo = &stuff->modeInfo;
-        swapl(&modeinfo->id);
-        swaps(&modeinfo->width);
-        swaps(&modeinfo->height);
-        swapl(&modeinfo->dotClock);
-        swaps(&modeinfo->hSyncStart);
-        swaps(&modeinfo->hSyncEnd);
-        swaps(&modeinfo->hTotal);
-        swaps(&modeinfo->hSkew);
-        swaps(&modeinfo->vSyncStart);
-        swaps(&modeinfo->vSyncEnd);
-        swaps(&modeinfo->vTotal);
-        swaps(&modeinfo->nameLength);
-        swapl(&modeinfo->modeFlags);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRRCreateModeReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(modeInfo.id);
+    X_REQUEST_FIELD_CARD16(modeInfo.width);
+    X_REQUEST_FIELD_CARD16(modeInfo.height);
+    X_REQUEST_FIELD_CARD32(modeInfo.dotClock);
+    X_REQUEST_FIELD_CARD16(modeInfo.hSyncStart);
+    X_REQUEST_FIELD_CARD16(modeInfo.hSyncEnd);
+    X_REQUEST_FIELD_CARD16(modeInfo.hTotal);
+    X_REQUEST_FIELD_CARD16(modeInfo.hSkew);
+    X_REQUEST_FIELD_CARD16(modeInfo.vSyncStart);
+    X_REQUEST_FIELD_CARD16(modeInfo.vSyncEnd);
+    X_REQUEST_FIELD_CARD16(modeInfo.vTotal);
+    X_REQUEST_FIELD_CARD16(modeInfo.nameLength);
+    X_REQUEST_FIELD_CARD32(modeInfo.modeFlags);
 
     WindowPtr pWin;
     ScreenPtr pScreen;
@@ -351,11 +346,8 @@ ProcRRCreateMode(ClientPtr client)
 int
 ProcRRDestroyMode(ClientPtr client)
 {
-    REQUEST(xRRDestroyModeReq);
-    REQUEST_SIZE_MATCH(xRRDestroyModeReq);
-
-    if (client->swapped)
-        swapl(&stuff->mode);
+    X_REQUEST_HEAD_STRUCT(xRRDestroyModeReq);
+    X_REQUEST_FIELD_CARD32(mode);
 
     RRModePtr mode;
     VERIFY_RR_MODE(stuff->mode, mode, DixDestroyAccess);
@@ -371,13 +363,9 @@ ProcRRDestroyMode(ClientPtr client)
 int
 ProcRRAddOutputMode(ClientPtr client)
 {
-    REQUEST(xRRAddOutputModeReq);
-    REQUEST_SIZE_MATCH(xRRAddOutputModeReq);
-
-    if (client->swapped) {
-        swapl(&stuff->output);
-        swapl(&stuff->mode);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRAddOutputModeReq);
+    X_REQUEST_FIELD_CARD32(output);
+    X_REQUEST_FIELD_CARD32(mode);
 
     RROutputPtr output;
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
@@ -394,13 +382,9 @@ ProcRRAddOutputMode(ClientPtr client)
 int
 ProcRRDeleteOutputMode(ClientPtr client)
 {
-    REQUEST(xRRDeleteOutputModeReq);
-    REQUEST_SIZE_MATCH(xRRDeleteOutputModeReq);
-
-    if (client->swapped) {
-        swapl(&stuff->output);
-        swapl(&stuff->mode);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRDeleteOutputModeReq);
+    X_REQUEST_FIELD_CARD32(output);
+    X_REQUEST_FIELD_CARD32(mode);
 
     RROutputPtr output;
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
