@@ -15,8 +15,20 @@ if get_option('xvfb')
         ['xvinfo',   ['xvinfo']],
     ]
 
-    # run tests on xvfb
+    # Only keep tools that are actually installed: simple-xinit execs the client
+    # by name at runtime, so a missing client (e.g. Cygwin CI ships none of
+    # these) would make the test fail rather than skip. Filter them out up front.
+    avail_tests = []
     foreach test_walk: testlist
+        if find_program(test_walk[1][0], required: false).found()
+            avail_tests += [test_walk]
+        else
+            message('display-info: skipping "' + test_walk[0] + '" — ' + test_walk[1][0] + ' not found')
+        endif
+    endforeach
+
+    # run tests on xvfb
+    foreach test_walk: avail_tests
         test(test_walk[0],
             simple_xinit,
             args: [
@@ -31,7 +43,7 @@ if get_option('xvfb')
 
     # run tests on xephyr inside xvfb
     if get_option('xephyr') and build_glamor
-        foreach test_walk: testlist
+        foreach test_walk: avail_tests
             test(test_walk[0],
                 simple_xinit,
                 args: [
@@ -49,7 +61,7 @@ if get_option('xvfb')
         endforeach
     endif
     if get_option('xephyr') and build_glamor
-        foreach test_walk: testlist
+        foreach test_walk: avail_tests
             test(test_walk[0],
                 simple_xinit,
                 args: [
