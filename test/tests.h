@@ -27,6 +27,7 @@ const testfunc_t* fixes_test(void);
 const testfunc_t* hashtabletest_test(void);
 const testfunc_t* input_test(void);
 const testfunc_t* list_test(void);
+const testfunc_t* list_zeroinit_test(void);
 const testfunc_t* misc_test(void);
 const testfunc_t* sha1_test(void);
 const testfunc_t* signal_logging_test(void);
