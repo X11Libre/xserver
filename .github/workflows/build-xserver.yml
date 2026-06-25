@@ -119,11 +119,36 @@ jobs:
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
 
+    abi-changes-check:
+        runs-on: ubuntu-latest
+        outputs:
+            abi_changed: ${{ steps.filter.outputs.abi_changed }}
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+            - uses: dorny/paths-filter@v3
+              id: filter
+              with:
+                  filters: |
+                      abi_changed:
+                          - 'include/**'
+                          - 'meson.build'
+                          - 'meson_options.txt'
+                          - 'xorg-server.pc.in'
+                          - 'xlibre-server.pc.in'
+                          - 'xorg-server.m4'
+                          - 'hw/xfree86/xlibre-server.h.meson.in'
+                          - 'hw/xfree86/drivers/input/inputtest/xf86-input-inputtest-protocol.h'
+
     drivers-prepare-ubuntu:
         env:
             MESON_ARGS: -Dprefix=/home/runner/x11 -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
+        needs:
+            - ubuntu-fetch-pkg
+            - abi-changes-check
+        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -153,6 +178,8 @@ jobs:
         needs:
             - ubuntu-fetch-pkg
             - drivers-prepare-ubuntu
+            - abi-changes-check
+        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
         runs-on: ubuntu-latest
         strategy:
             matrix:
