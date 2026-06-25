@@ -582,11 +582,8 @@ RRMonitorTimestamp(ScreenPtr screen)
 int
 ProcRRGetMonitors(ClientPtr client)
 {
-    REQUEST(xRRGetMonitorsReq);
-    REQUEST_SIZE_MATCH(xRRGetMonitorsReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xRRGetMonitorsReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr           window;
     ScreenPtr           screen;
@@ -659,21 +656,17 @@ ProcRRGetMonitors(ClientPtr client)
 int
 ProcRRSetMonitor(ClientPtr client)
 {
-    REQUEST(xRRSetMonitorReq);
-    REQUEST_AT_LEAST_SIZE(xRRSetMonitorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->monitor.name);
-        swaps(&stuff->monitor.noutput);
-        swaps(&stuff->monitor.x);
-        swaps(&stuff->monitor.y);
-        swaps(&stuff->monitor.width);
-        swaps(&stuff->monitor.height);
-        swapl(&stuff->monitor.widthInMillimeters);
-        swapl(&stuff->monitor.heightInMillimeters);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRRSetMonitorReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(monitor.name);
+    X_REQUEST_FIELD_CARD16(monitor.noutput);
+    X_REQUEST_FIELD_CARD16(monitor.x);
+    X_REQUEST_FIELD_CARD16(monitor.y);
+    X_REQUEST_FIELD_CARD16(monitor.width);
+    X_REQUEST_FIELD_CARD16(monitor.height);
+    X_REQUEST_FIELD_CARD32(monitor.widthInMillimeters);
+    X_REQUEST_FIELD_CARD32(monitor.heightInMillimeters);
+    X_REQUEST_REST_CARD32();
 
     WindowPtr           window;
     ScreenPtr           screen;
@@ -720,13 +713,9 @@ ProcRRSetMonitor(ClientPtr client)
 int
 ProcRRDeleteMonitor(ClientPtr client)
 {
-    REQUEST(xRRDeleteMonitorReq);
-    REQUEST_SIZE_MATCH(xRRDeleteMonitorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->name);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRDeleteMonitorReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(name);
 
     WindowPtr           window;
     ScreenPtr           screen;
