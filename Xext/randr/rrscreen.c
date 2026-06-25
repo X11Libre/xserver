@@ -190,10 +190,8 @@ RRScreenSizeSet(ScreenPtr pScreen,
 int
 ProcRRGetScreenSizeRange(ClientPtr client)
 {
-    REQUEST(xRRGetScreenSizeRangeReq);
-    REQUEST_SIZE_MATCH(xRRGetScreenSizeRangeReq);
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xRRGetScreenSizeRangeReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     ScreenPtr pScreen;
@@ -233,15 +231,12 @@ ProcRRGetScreenSizeRange(ClientPtr client)
 int
 ProcRRSetScreenSize(ClientPtr client)
 {
-    REQUEST(xRRSetScreenSizeReq);
-    REQUEST_SIZE_MATCH(xRRSetScreenSizeReq);
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swaps(&stuff->width);
-        swaps(&stuff->height);
-        swapl(&stuff->widthInMillimeters);
-        swapl(&stuff->heightInMillimeters);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRSetScreenSizeReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD32(widthInMillimeters);
+    X_REQUEST_FIELD_CARD32(heightInMillimeters);
 
     WindowPtr pWin;
     ScreenPtr pScreen;
@@ -478,11 +473,8 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
 static int
 rrGetScreenResources(ClientPtr client, Bool query)
 {
-    REQUEST(xRRGetScreenResourcesReq);
-    REQUEST_SIZE_MATCH(xRRGetScreenResourcesReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xRRGetScreenResourcesReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     xRRGetScreenResourcesReply reply;
     WindowPtr pWin;
@@ -728,10 +720,8 @@ RR10GetData(ScreenPtr pScreen, RROutputPtr output)
 int
 ProcRRGetScreenInfo(ClientPtr client)
 {
-    REQUEST(xRRGetScreenInfoReq);
-    REQUEST_SIZE_MATCH(xRRGetScreenInfoReq);
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xRRGetScreenInfoReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     xRRGetScreenInfoReply reply;
     WindowPtr pWin;
@@ -865,20 +855,18 @@ ProcRRSetScreenConfig(ClientPtr client)
     int rate = 0;
     if (RRClientKnowsRates(client)) {
         REQUEST_SIZE_MATCH(xRRSetScreenConfigReq);
-        if (client->swapped) swaps(&stuff->rate);
+        X_REQUEST_FIELD_CARD16(rate);
         rate = stuff->rate;
     }
     else {
         REQUEST_SIZE_MATCH(xRR1_0SetScreenConfigReq);
     }
 
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->timestamp);
-        swaps(&stuff->sizeID);
-        swaps(&stuff->rotation);
-        swapl(&stuff->configTimestamp);
-    }
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(timestamp);
+    X_REQUEST_FIELD_CARD16(sizeID);
+    X_REQUEST_FIELD_CARD16(rotation);
+    X_REQUEST_FIELD_CARD32(configTimestamp);
 
     DrawablePtr pDraw;
     int rc;
