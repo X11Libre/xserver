@@ -1822,23 +1822,17 @@ RecordRegisterClients(RecordContextPtr pContext, ClientPtr client,
 static int
 ProcRecordQueryVersion(ClientPtr client)
 {
-    REQUEST(xRecordQueryVersionReq);
-    REQUEST_SIZE_MATCH(xRecordQueryVersionReq);
-
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
+    X_REQUEST_HEAD_STRUCT(xRecordQueryVersionReq);
+    X_REQUEST_FIELD_CARD16(majorVersion);
+    X_REQUEST_FIELD_CARD16(minorVersion);
 
     xRecordQueryVersionReply reply = {
         .majorVersion = SERVER_RECORD_MAJOR_VERSION,
         .minorVersion = SERVER_RECORD_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1923,14 +1917,10 @@ ProcRecordRegisterClients(ClientPtr client)
 static int
 ProcRecordUnregisterClients(ClientPtr client)
 {
-    REQUEST(xRecordUnregisterClientsReq);
-    REQUEST_AT_LEAST_SIZE(xRecordUnregisterClientsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->context);
-        swapl(&stuff->nClients);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRecordUnregisterClientsReq);
+    X_REQUEST_FIELD_CARD32(context);
+    X_REQUEST_FIELD_CARD32(nClients);
+    X_REQUEST_REST_CARD32();
 
     RecordContextPtr pContext;
     int err;
@@ -2155,11 +2145,8 @@ RecordSwapRanges(xRecordRange * pRanges, int nRanges)
 static int
 ProcRecordGetContext(ClientPtr client)
 {
-    REQUEST(xRecordGetContextReq);
-    REQUEST_SIZE_MATCH(xRecordGetContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->context);
+    X_REQUEST_HEAD_STRUCT(xRecordGetContextReq);
+    X_REQUEST_FIELD_CARD32(context);
 
     RecordContextPtr pContext;
     RecordClientsAndProtocolPtr pRCAP;
@@ -2309,11 +2296,8 @@ ProcRecordGetContext(ClientPtr client)
 static int
 ProcRecordEnableContext(ClientPtr client)
 {
-    REQUEST(xRecordEnableContextReq);
-    REQUEST_SIZE_MATCH(xRecordEnableContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->context);
+    X_REQUEST_HEAD_STRUCT(xRecordEnableContextReq);
+    X_REQUEST_FIELD_CARD32(context);
 
     RecordContextPtr pContext;
     int i;
@@ -2423,11 +2407,8 @@ RecordDisableContext(RecordContextPtr pContext)
 static int
 ProcRecordDisableContext(ClientPtr client)
 {
-    REQUEST(xRecordDisableContextReq);
-    REQUEST_SIZE_MATCH(xRecordDisableContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->context);
+    X_REQUEST_HEAD_STRUCT(xRecordDisableContextReq);
+    X_REQUEST_FIELD_CARD32(context);
 
     RecordContextPtr pContext;
     VERIFY_CONTEXT(pContext, stuff->context, client);
@@ -2486,11 +2467,8 @@ RecordDeleteContext(void *value, XID id)
 static int
 ProcRecordFreeContext(ClientPtr client)
 {
-    REQUEST(xRecordFreeContextReq);
-    REQUEST_SIZE_MATCH(xRecordFreeContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->context);
+    X_REQUEST_HEAD_STRUCT(xRecordFreeContextReq);
+    X_REQUEST_FIELD_CARD32(context);
 
     RecordContextPtr pContext;
     VERIFY_CONTEXT(pContext, stuff->context, client);
