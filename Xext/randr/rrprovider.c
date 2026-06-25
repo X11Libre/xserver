@@ -56,11 +56,8 @@ RRProviderInitErrorValue(void)
 int
 ProcRRGetProviders (ClientPtr client)
 {
-    REQUEST(xRRGetProvidersReq);
-    REQUEST_SIZE_MATCH(xRRGetProvidersReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xRRGetProvidersReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     ScreenPtr pScreen;
@@ -108,13 +105,9 @@ ProcRRGetProviders (ClientPtr client)
 int
 ProcRRGetProviderInfo (ClientPtr client)
 {
-    REQUEST(xRRGetProviderInfoReq);
-    REQUEST_SIZE_MATCH(xRRGetProviderInfoReq);
-
-    if (client->swapped) {
-        swapl(&stuff->provider);
-        swapl(&stuff->configTimestamp);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRGetProviderInfoReq);
+    X_REQUEST_FIELD_CARD32(provider);
+    X_REQUEST_FIELD_CARD32(configTimestamp);
 
     rrScrPrivPtr pScrPriv, pScrProvPriv;
     RRProviderPtr provider;
@@ -293,14 +286,10 @@ RRFiniPrimeSyncProps(ScreenPtr pScreen)
 int
 ProcRRSetProviderOutputSource(ClientPtr client)
 {
-    REQUEST(xRRSetProviderOutputSourceReq);
-    REQUEST_SIZE_MATCH(xRRSetProviderOutputSourceReq);
-
-    if (client->swapped) {
-        swapl(&stuff->provider);
-        swapl(&stuff->source_provider);
-        swapl(&stuff->configTimestamp);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRSetProviderOutputSourceReq);
+    X_REQUEST_FIELD_CARD32(provider);
+    X_REQUEST_FIELD_CARD32(source_provider);
+    X_REQUEST_FIELD_CARD32(configTimestamp);
 
     rrScrPrivPtr pScrPriv;
     RRProviderPtr provider, source_provider = NULL;
@@ -339,14 +328,10 @@ ProcRRSetProviderOutputSource(ClientPtr client)
 int
 ProcRRSetProviderOffloadSink(ClientPtr client)
 {
-    REQUEST(xRRSetProviderOffloadSinkReq);
-    REQUEST_SIZE_MATCH(xRRSetProviderOffloadSinkReq);
-
-    if (client->swapped) {
-        swapl(&stuff->provider);
-        swapl(&stuff->sink_provider);
-        swapl(&stuff->configTimestamp);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRSetProviderOffloadSinkReq);
+    X_REQUEST_FIELD_CARD32(provider);
+    X_REQUEST_FIELD_CARD32(sink_provider);
+    X_REQUEST_FIELD_CARD32(configTimestamp);
 
     rrScrPrivPtr pScrPriv;
     RRProviderPtr provider, sink_provider = NULL;
