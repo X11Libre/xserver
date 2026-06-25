@@ -33,11 +33,6 @@ fbdevInitAccel(ScreenPtr pScreen)
     FbScreenConf *config = screen->card->closure;
     int caps = GLAMOR_EGL_CAP_NONE;
 
-    if (config->fbNoAccel) {
-        /* Only disable accel for this screen */
-        return TRUE;
-    }
-
     if (config->fbdev_dri_path) {
         scrpriv->dri_fd = open(config->fbdev_dri_path, O_RDWR);
         if (scrpriv->dri_fd >= 0) {
@@ -141,10 +136,6 @@ fbdevEnableAccel(ScreenPtr pScreen)
     FbdevScrPriv *scrpriv = screen->driver;
     FbScreenConf *config = screen->card->closure;
 
-    if (config->fbNoAccel) {
-        return;
-    }
-
     if (config->fbdev_drm_master && scrpriv->dri_fd >= 0) {
         drmSetMaster(scrpriv->dri_fd);
     }
@@ -160,10 +151,6 @@ fbdevDisableAccel(ScreenPtr pScreen)
     FbdevScrPriv *scrpriv = screen->driver;
     FbScreenConf *config = screen->card->closure;
 
-    if (config->fbNoAccel) {
-        return;
-    }
-
     if (config->fbdev_drm_master && scrpriv->dri_fd >= 0) {
         drmDropMaster(scrpriv->dri_fd);
     }
@@ -176,11 +163,6 @@ fbdevFiniAccel(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     FbdevScrPriv *scrpriv = screen->driver;
-    FbScreenConf *config = screen->card->closure;
-
-    if (config->fbNoAccel) {
-        return;
-    }
 
     if (scrpriv->dri_fd >= 0) {
         close(scrpriv->dri_fd);

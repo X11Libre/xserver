@@ -50,9 +50,6 @@ if full DRI3 initialization isn't possible
 disables the ShadowFB layer on supported hw, may slightly increase performance.
 May also lead to flickering.
 .TP 8
-.B -noaccel
-disables hw acceleration (similar to -dumb, but only for a single screen).
-.TP 8
 .B -glamor
 force enables glamor render acceleration (even on top of sw renderers like softpipe/llvmpipe).
 .TP 8
