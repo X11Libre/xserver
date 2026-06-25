@@ -114,11 +114,8 @@ ProcRRXineramaQueryVersion(ClientPtr client)
 int
 ProcRRXineramaGetState(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetStateReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetStateReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     register int rc;
@@ -162,11 +159,8 @@ RRXineramaScreenActive(ScreenPtr pScreen)
 int
 ProcRRXineramaGetScreenCount(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetScreenCountReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetScreenCountReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     register int rc;
@@ -188,13 +182,9 @@ ProcRRXineramaGetScreenCount(ClientPtr client)
 int
 ProcRRXineramaGetScreenSize(ClientPtr client)
 {
-    REQUEST(xPanoramiXGetScreenSizeReq);
-    REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->screen);
-    }
+    X_REQUEST_HEAD_STRUCT(xPanoramiXGetScreenSizeReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(screen);
 
     WindowPtr pWin, pRoot;
     ScreenPtr pScreen;
