@@ -828,9 +828,7 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
         goto bail;
     }
 
-    if (client->swapped) {
-        swaps(&reply.nFonts);
-    }
+    X_REPLY_FIELD_CARD16(nFonts);
 
     X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
