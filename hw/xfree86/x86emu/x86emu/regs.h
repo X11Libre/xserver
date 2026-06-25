@@ -306,10 +306,6 @@ typedef struct {
 
 /*----------------------------- Global Variables --------------------------*/
 
-#ifdef  __cplusplus
-extern "C" {                    /* Use "C" linkage when in C++ mode */
-#endif
-
 /* Global emulator machine state.
  *
  * We keep it global to avoid pointer dereferences in the code for speed.
@@ -325,7 +321,4 @@ extern "C" {                    /* Use "C" linkage when in C++ mode */
     void printk(const char *fmt, ...)
         _X_ATTRIBUTE_PRINTF(1, 2);
 
-#ifdef  __cplusplus
-}                               /* End of "C" linkage for C++           */
-#endif
 #endif                          /* __X86EMU_REGS_H */

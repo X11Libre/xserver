@@ -39,10 +39,6 @@
 #ifndef __X86EMU_PRIM_OPS_H
 #define __X86EMU_PRIM_OPS_H
 
-#ifdef  __cplusplus
-extern "C" {                    /* Use "C" linkage when in C++ mode */
-#endif
-
     u16 aaa_word(u16 d);
     u16 aas_word(u16 d);
     u16 aad_word(u16 d);
@@ -135,7 +131,4 @@ extern "C" {                    /* Use "C" linkage when in C++ mode */
     u32 pop_long(void);
     void cpuid(void);
 
-#ifdef  __cplusplus
-}                               /* End of "C" linkage for C++           */
-#endif
 #endif                          /* __X86EMU_PRIM_OPS_H */

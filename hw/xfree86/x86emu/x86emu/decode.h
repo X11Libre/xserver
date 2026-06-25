@@ -51,10 +51,6 @@
 
 /*-------------------------- Function Prototypes --------------------------*/
 
-#ifdef  __cplusplus
-extern "C" {                    /* Use "C" linkage when in C++ mode */
-#endif
-
     void x86emu_intr_raise(u8 type);
     void fetch_decode_modrm(int *mod, int *regh, int *regl);
     u8 fetch_byte_imm(void);
@@ -81,7 +77,4 @@ extern "C" {                    /* Use "C" linkage when in C++ mode */
     u32 decode_rm10_address(int rm);
     u32 decode_sib_address(int sib, int mod);
 
-#ifdef  __cplusplus
-}                               /* End of "C" linkage for C++           */
-#endif
 #endif                          /* __X86EMU_DECODE_H */

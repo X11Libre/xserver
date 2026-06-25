@@ -135,10 +135,6 @@ extern X86EMU_intrFuncs _X86EMU_intrTab[256];
 
 /*-------------------------- Function Prototypes --------------------------*/
 
-#ifdef  __cplusplus
-extern "C" {                    /* Use "C" linkage when in C++ mode */
-#endif
-
     void X86EMU_setupMemFuncs(X86EMU_memFuncs * funcs);
     void X86EMU_setupPioFuncs(X86EMU_pioFuncs * funcs);
     void X86EMU_setupIntrFuncs(X86EMU_intrFuncs funcs[]);
@@ -184,7 +180,4 @@ extern "C" {                    /* Use "C" linkage when in C++ mode */
     int X86EMU_trace_on(void);
     int X86EMU_trace_off(void);
 
-#ifdef  __cplusplus
-}                               /* End of "C" linkage for C++           */
-#endif
 #endif                          /* __X86EMU_X86EMU_H */
