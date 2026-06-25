@@ -1114,11 +1114,17 @@ KdInitOutput(int argc, char **argv)
 
     if (!kdCardInfo) {
         InitCard(0);
-        if (!(card = KdCardInfoLast()))
-            FatalError("No matching cards found!\n");
+    }
+
+    if (!(card = KdCardInfoLast()))
+        FatalError("No matching cards found!\n");
+
+    /* Add at least one screen */
+    if (!card->screenList) {
         screen = KdScreenInfoAdd(card);
         KdParseScreen(screen, 0);
     }
+
     /*
      * Initialize all of the screens for all of the cards
      */
