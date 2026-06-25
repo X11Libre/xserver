@@ -417,11 +417,8 @@ RRConfigureOutputProperty(RROutputPtr output, Atom property,
 int
 ProcRRListOutputProperties(ClientPtr client)
 {
-    REQUEST(xRRListOutputPropertiesReq);
-    REQUEST_SIZE_MATCH(xRRListOutputPropertiesReq);
-
-    if (client->swapped)
-        swapl(&stuff->output);
+    X_REQUEST_HEAD_STRUCT(xRRListOutputPropertiesReq);
+    X_REQUEST_FIELD_CARD32(output);
 
     RROutputPtr output;
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
@@ -448,13 +445,9 @@ ProcRRListOutputProperties(ClientPtr client)
 int
 ProcRRQueryOutputProperty(ClientPtr client)
 {
-    REQUEST(xRRQueryOutputPropertyReq);
-    REQUEST_SIZE_MATCH(xRRQueryOutputPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->output);
-        swapl(&stuff->property);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRQueryOutputPropertyReq);
+    X_REQUEST_FIELD_CARD32(output);
+    X_REQUEST_FIELD_CARD32(property);
 
     RROutputPtr output;
     RRPropertyPtr prop;
@@ -480,14 +473,10 @@ ProcRRQueryOutputProperty(ClientPtr client)
 int
 ProcRRConfigureOutputProperty(ClientPtr client)
 {
-    REQUEST(xRRConfigureOutputPropertyReq);
-    REQUEST_AT_LEAST_SIZE(xRRConfigureOutputPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->output);
-        swapl(&stuff->property);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRRConfigureOutputPropertyReq);
+    X_REQUEST_FIELD_CARD32(output);
+    X_REQUEST_FIELD_CARD32(property);
+    X_REQUEST_REST_CARD32();
 
     RROutputPtr output;
     int num_valid;
@@ -507,14 +496,12 @@ ProcRRConfigureOutputProperty(ClientPtr client)
 int
 ProcRRChangeOutputProperty(ClientPtr client)
 {
-    REQUEST(xRRChangeOutputPropertyReq);
-    REQUEST_AT_LEAST_SIZE(xRRChangeOutputPropertyReq);
-
+    X_REQUEST_HEAD_AT_LEAST(xRRChangeOutputPropertyReq);
+    X_REQUEST_FIELD_CARD32(output);
+    X_REQUEST_FIELD_CARD32(property);
+    X_REQUEST_FIELD_CARD32(type);
+    X_REQUEST_FIELD_CARD32(nUnits);
     if (client->swapped) {
-        swapl(&stuff->output);
-        swapl(&stuff->property);
-        swapl(&stuff->type);
-        swapl(&stuff->nUnits);
         switch (stuff->format) {
             case 8:
                 break;
@@ -580,13 +567,9 @@ ProcRRChangeOutputProperty(ClientPtr client)
 int
 ProcRRDeleteOutputProperty(ClientPtr client)
 {
-    REQUEST(xRRDeleteOutputPropertyReq);
-    REQUEST_SIZE_MATCH(xRRDeleteOutputPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->output);
-        swapl(&stuff->property);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRDeleteOutputPropertyReq);
+    X_REQUEST_FIELD_CARD32(output);
+    X_REQUEST_FIELD_CARD32(property);
 
     RROutputPtr output;
     RRPropertyPtr prop;
@@ -620,16 +603,12 @@ ProcRRDeleteOutputProperty(ClientPtr client)
 int
 ProcRRGetOutputProperty(ClientPtr client)
 {
-    REQUEST(xRRGetOutputPropertyReq);
-    REQUEST_SIZE_MATCH(xRRGetOutputPropertyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->output);
-        swapl(&stuff->property);
-        swapl(&stuff->type);
-        swapl(&stuff->longOffset);
-        swapl(&stuff->longLength);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRGetOutputPropertyReq);
+    X_REQUEST_FIELD_CARD32(output);
+    X_REQUEST_FIELD_CARD32(property);
+    X_REQUEST_FIELD_CARD32(type);
+    X_REQUEST_FIELD_CARD32(longOffset);
+    X_REQUEST_FIELD_CARD32(longLength);
 
     RRPropertyPtr prop, *prev;
     RRPropertyValuePtr prop_value;
