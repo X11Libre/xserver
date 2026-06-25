@@ -713,6 +713,15 @@ xf86platformAddDevice(const char *driver_name, int index)
         return -1;
     }
 
+   /*
+    * Almost everything uses these defaults, and many of those that
+    * don't, will wrap them.
+    */
+   xf86GPUScreens[i]->EnableDisableFBAccess = xf86EnableDisableFBAccess;
+#ifdef XFreeXDGA
+   xf86GPUScreens[i]->SetDGAMode = xf86SetDGAMode;
+#endif
+
    scr_index = AddGPUScreen(xf86GPUScreens[i]->ScreenInit, 0, NULL);
    if (scr_index == -1) {
        xf86DeleteScreen(xf86GPUScreens[i]);
