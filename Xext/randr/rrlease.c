@@ -214,16 +214,12 @@ RRLeaseInit(void)
 int
 ProcRRCreateLease(ClientPtr client)
 {
-    REQUEST(xRRCreateLeaseReq);
-    REQUEST_AT_LEAST_SIZE(xRRCreateLeaseReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swaps(&stuff->nCrtcs);
-        swaps(&stuff->nOutputs);
-        swapl(&stuff->lid);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRRCreateLeaseReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(nCrtcs);
+    X_REQUEST_FIELD_CARD16(nOutputs);
+    X_REQUEST_FIELD_CARD32(lid);
+    X_REQUEST_REST_CARD32();
 
     WindowPtr window;
     ScreenPtr screen;
@@ -357,11 +353,8 @@ bail_lease:
 int
 ProcRRFreeLease(ClientPtr client)
 {
-    REQUEST(xRRFreeLeaseReq);
-    REQUEST_SIZE_MATCH(xRRFreeLeaseReq);
-
-    if (client->swapped)
-        swapl(&stuff->lid);
+    X_REQUEST_HEAD_STRUCT(xRRFreeLeaseReq);
+    X_REQUEST_FIELD_CARD32(lid);
 
     RRLeasePtr lease;
     VERIFY_RR_LEASE(stuff->lid, lease, DixDestroyAccess);
