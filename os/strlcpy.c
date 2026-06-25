@@ -27,11 +27,11 @@
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
 size_t
-strlcpy(char *dst, const char *src, size_t siz)
+strlcpy(char * _X_RESTRICT_KYWD dst, const char * _X_RESTRICT_KYWD src, size_t siz)
 {
-    register char *d = dst;
-    register const char *s = src;
-    register size_t n = siz;
+    char *d = dst;
+    const char *s = src;
+    size_t n = siz;
 
     /* Copy as many bytes as will fit */
     if (n != 0 && --n != 0) {

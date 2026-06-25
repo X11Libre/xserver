@@ -225,9 +225,9 @@ xstrcasestr(const char *s, const char *find);
 
 #ifndef HAVE_STRLCPY
 extern _X_EXPORT size_t
-strlcpy(char *dst, const char *src, size_t siz);
+strlcpy(char * _X_RESTRICT_KYWD dst, const char * _X_RESTRICT_KYWD src, size_t siz);
 extern _X_EXPORT size_t
-strlcat(char *dst, const char *src, size_t siz);
+strlcat(char * _X_RESTRICT_KYWD dst, const char * _X_RESTRICT_KYWD src, size_t siz);
 #endif
 
 #ifndef HAVE_STRNDUP

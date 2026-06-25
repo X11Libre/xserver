@@ -7,6 +7,7 @@ env:
     MESON_BUILDDIR:  "__BUILD"
     X11_PREFIX:      /home/runner/x11
     X11_BUILD_DIR:   /home/runner/work/xserver/xserver/WORK/sources/3rdparty
+    GOXPROTO_REF:    v0.0.3
 
 on:
     push:
@@ -64,6 +65,7 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
+                    ${{ env.X11_BUILD_DIR }}/goxproto
                 key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
                 restore-keys: ${{ runner.name }}-x11-deps-
 
@@ -105,6 +107,7 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
+                    ${{ env.X11_BUILD_DIR }}/goxproto
                 key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
                 restore-keys: ${{ runner.name }}-x11-deps-
 
@@ -140,6 +143,47 @@ jobs:
                           - 'xorg-server.m4'
                           - 'hw/xfree86/xlibre-server.h.meson.in'
                           - 'hw/xfree86/drivers/input/inputtest/xf86-input-inputtest-protocol.h'
+
+    xserver-build-ubuntu-debug:
+        env:
+            MESON_ARGS: --buildtype=debug -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
+            LIBGL_ALWAYS_SOFTWARE: 1
+            GALLIUM_DRIVER: llvmpipe
+            PIGLIT_PLATFORM: x11_egl
+        runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v6
+
+            - uses: ./.github/actions/ubuntu-install-pkg
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+
+            - name: X11 prereq cache
+              uses: actions/cache@v5
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
+
+            - name: build and test
+              run:  .github/scripts/ubuntu/run-xserver-build-and-test.sh
+
+            - name: archive build logs
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-logs-debug
+                  path: |
+                      __BUILD/meson-logs/*
+                      __BUILD/test/piglit-results/*
 
     drivers-prepare-ubuntu:
         env:
@@ -529,6 +573,91 @@ jobs:
                   release: '10.1'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
+    # illumos / Solaris build, run in an OpenIndiana VM (vmactions, same
+    # mechanism as the BSD jobs above). Exercises the Solaris-specific os/ code
+    # paths (procfs/psinfo, the sunos meson branch) that no other CI covers.
+    # OpenIndiana packages the full X stack incl. Mesa, so GLX stays enabled.
+    # werror is off for now since this platform is freshly added; tighten once
+    # it is green.
+    xserver-build-solaris:
+        runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
+        env:
+            # dri2/dri3 disabled: illumos has no kernel DRM/KMS, so the
+            # libdrm-backed direct-rendering extensions can't work (and OI's
+            # xf86drm.h pulls a drm.h that only exists for Linux). glx stays on
+            # (Mesa is packaged) for indirect/software GLX.
+            MESON_ARGS: -Dwerror=false -Dxvfb=true -Dxnest=true -Dxorg=false -Dxephyr=false -Dxfbdev=false -Ddri2=false -Ddri3=false
+        steps:
+            - uses: actions/checkout@v6
+            - uses: ./.github/actions/ubuntu-pkg-cache
+            - name: run in OpenIndiana (illumos) VM
+              id: vm
+              uses: vmactions/openindiana-vm@v1
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  run:     ./.github/scripts/solaris/run-xserver-build.sh
+
+    # OpenBSD build, run in an OpenBSD VM (vmactions, same mechanism as the
+    # other BSD jobs). OpenBSD ships X.Org (xenocara) in base, so only build
+    # tooling is installed; X libs (incl. Mesa) come from /usr/X11R6. glx stays
+    # enabled (indirect/software GLX against the base Mesa); dri2/dri3 stay off
+    # (direct rendering needs a working DRM/KMS, n/a in the headless VM).
+    # werror off while the platform is freshly added.
+    xserver-build-openbsd:
+        runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
+        timeout-minutes: 90
+        env:
+            MESON_ARGS: -Dwerror=false -Dxvfb=true -Dxnest=true -Dxorg=false -Dxephyr=false -Dxfbdev=false -Ddri2=false -Ddri3=false
+        steps:
+            - uses: actions/checkout@v6
+            - uses: ./.github/actions/ubuntu-pkg-cache
+
+            # VM boot / image provisioning flakes transiently; retry the whole
+            # VM step up to 3x, tearing down the leftover domain between tries
+            # (see .github/actions/libvirt-cleanup). Only the last attempt is
+            # allowed to fail the job; a success short-circuits the rest.
+            - name: run in OpenBSD VM (attempt 1)
+              id: openbsd-1
+              continue-on-error: true
+              uses: vmactions/openbsd-vm@v1
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  run:     ./.github/scripts/openbsd/run-xserver-build.sh
+
+            - name: cleanup stale VM before retry
+              if: steps.openbsd-1.outcome == 'failure'
+              uses: ./.github/actions/libvirt-cleanup
+              with:
+                  guest: openbsd
+
+            - name: run in OpenBSD VM (attempt 2)
+              id: openbsd-2
+              if: steps.openbsd-1.outcome == 'failure'
+              continue-on-error: true
+              uses: vmactions/openbsd-vm@v1
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  run:     ./.github/scripts/openbsd/run-xserver-build.sh
+
+            - name: cleanup stale VM before final retry
+              if: steps.openbsd-1.outcome == 'failure' && steps.openbsd-2.outcome == 'failure'
+              uses: ./.github/actions/libvirt-cleanup
+              with:
+                  guest: openbsd
+
+            - name: run in OpenBSD VM (attempt 3)
+              if: steps.openbsd-1.outcome == 'failure' && steps.openbsd-2.outcome == 'failure'
+              uses: vmactions/openbsd-vm@v1
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  run:     ./.github/scripts/openbsd/run-xserver-build.sh
+
     xserver-build-alpine:
         runs-on: ubuntu-latest
         needs: ubuntu-fetch-pkg
@@ -601,11 +730,12 @@ jobs:
             - uses: actions/checkout@v4
               with:
                   set-safe-directory: false
-            - run: |
-                  PATH="/usr/bin:$(cygpath "$SYSTEMROOT")/system32"
-              shell: bash --noprofile --norc -e -o igncr '{0}'
-            - run: |
-                  bash ./.github/scripts/Cygwin/build.sh
+            - name: set PATH
+              run: echo "PATH=/usr/bin:$(cygpath '$SYSTEMROOT')/system32" >> "$GITHUB_ENV"
+            - name: build
+              run: bash ./.github/scripts/Cygwin/build.sh
+            - name: test
+              run: bash -c 'ninja -C build test'
 
     xserver-build-arch:
         # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
@@ -651,6 +781,7 @@ jobs:
         needs:
             - xserver-build-alpine
             - xserver-build-ubuntu
+            - xserver-build-ubuntu-debug
             - drivers-build-ubuntu
             - xserver-build-mingw32-ubuntu
             - xserver-build-macos

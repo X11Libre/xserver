@@ -3735,6 +3735,7 @@ InitClient(ClientPtr client, int i, void *ospriv)
     client->index = i;
     xorg_list_init(&client->ready);
     xorg_list_init(&client->output_pending);
+    xorg_list_init(&client->saveSets);
     client->clientAsMask = ((Mask) i) << CLIENTOFFSET;
     client->closeDownMode = i ? DestroyAll : RetainPermanent;
     client->requestVector = InitialVector;
@@ -4279,3 +4280,9 @@ DetachOffloadGPU(ScreenPtr secondary)
     secondary->is_offload_secondary = FALSE;
 }
 
+bool dixAnyOtherGrabbed(ClientPtr client)
+{
+    return ((grabState == GrabActive) &&
+            (grabClient != NULL) &&
+            (grabClient != client));
+}
