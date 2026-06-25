@@ -42,8 +42,6 @@
 #define __X86EMU_X86EMU_H
 
 #include "x86emu/types.h"
-#define	X86API
-#define	X86APIP	*
 #include "x86emu/regs.h"
 
 /*---------------------- Macros and type definitions ----------------------*/
@@ -74,12 +72,12 @@ outw    - Function to write a word to an I/O port
 outl    - Function to write a dword to an I/O port
 ****************************************************************************/
 typedef struct {
-    u8(X86APIP inb) (X86EMU_pioAddr addr);
-    u16(X86APIP inw) (X86EMU_pioAddr addr);
-    u32(X86APIP inl) (X86EMU_pioAddr addr);
-    void (X86APIP outb) (X86EMU_pioAddr addr, u8 val);
-    void (X86APIP outw) (X86EMU_pioAddr addr, u16 val);
-    void (X86APIP outl) (X86EMU_pioAddr addr, u32 val);
+    u8(*inb) (X86EMU_pioAddr addr);
+    u16(*inw) (X86EMU_pioAddr addr);
+    u32(*inl) (X86EMU_pioAddr addr);
+    void (*outb) (X86EMU_pioAddr addr, u8 val);
+    void (*outw) (X86EMU_pioAddr addr, u16 val);
+    void (*outl) (X86EMU_pioAddr addr, u32 val);
 } X86EMU_pioFuncs;
 
 /****************************************************************************
@@ -105,24 +103,24 @@ wrw    	- Function to write a word to an address
 wrl    	- Function to write a dword to an address
 ****************************************************************************/
 typedef struct {
-    u8(X86APIP rdb) (u32 addr);
-    u16(X86APIP rdw) (u32 addr);
-    u32(X86APIP rdl) (u32 addr);
-    void (X86APIP wrb) (u32 addr, u8 val);
-    void (X86APIP wrw) (u32 addr, u16 val);
-    void (X86APIP wrl) (u32 addr, u32 val);
+    u8(*rdb) (u32 addr);
+    u16(*rdw) (u32 addr);
+    u32(*rdl) (u32 addr);
+    void (*wrb) (u32 addr, u8 val);
+    void (*wrw) (u32 addr, u16 val);
+    void (*wrl) (u32 addr, u32 val);
 } X86EMU_memFuncs;
 
 /****************************************************************************
   Here are the default memory read and write
   function in case they are needed as fallbacks.
 ***************************************************************************/
-extern u8 X86API rdb(u32 addr);
-extern u16 X86API rdw(u32 addr);
-extern u32 X86API rdl(u32 addr);
-extern void X86API wrb(u32 addr, u8 val);
-extern void X86API wrw(u32 addr, u16 val);
-extern void X86API wrl(u32 addr, u32 val);
+extern u8 rdb(u32 addr);
+extern u16 rdw(u32 addr);
+extern u32 rdl(u32 addr);
+extern void wrb(u32 addr, u8 val);
+extern void wrw(u32 addr, u16 val);
+extern void wrl(u32 addr, u32 val);
 
 #ifdef END_PACK
 #pragma	END_PACK
@@ -130,7 +128,7 @@ extern void X86API wrl(u32 addr, u32 val);
 
 /*--------------------- type definitions -----------------------------------*/
 
-typedef void (X86APIP X86EMU_intrFuncs) (int num);
+typedef void (*X86EMU_intrFuncs) (int num);
 extern X86EMU_intrFuncs _X86EMU_intrTab[256];
 
 /*-------------------------- Function Prototypes --------------------------*/
