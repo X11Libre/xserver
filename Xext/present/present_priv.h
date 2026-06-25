@@ -203,15 +203,6 @@ struct present_screen_priv {
     present_priv_flip_destroy_ptr       flip_destroy;
 };
 
-#define wrap(priv,real,mem,func) {\
-    (priv)->mem = (real)->mem; \
-    (real)->mem = (func); \
-}
-
-#define unwrap(priv,real,mem) {\
-    (real)->mem = (priv)->mem; \
-}
-
 static inline present_screen_priv_ptr
 present_screen_priv(ScreenPtr screen)
 {

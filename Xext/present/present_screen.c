@@ -26,6 +26,15 @@
 #include "miext/extinit_priv.h"
 #include "Xext/present/present_priv.h"
 
+#define PRESENT_WRAP_HOOK(priv,real,mem,func) {\
+    (priv)->mem = (real)->mem; \
+    (real)->mem = (func); \
+}
+
+#define PRESENT_UNWRAP_HOOK(priv,real,mem) {\
+    (real)->mem = (priv)->mem; \
+}
+
 int present_request;
 DevPrivateKeyRec present_screen_private_key;
 DevPrivateKeyRec present_window_private_key;
@@ -130,12 +139,12 @@ present_config_notify(WindowPtr window,
 
     present_send_config_notify(window, x, y, w, h, bw, sibling, 0);
 
-    unwrap(screen_priv, screen, ConfigNotify);
+    PRESENT_UNWRAP_HOOK(screen_priv, screen, ConfigNotify);
     if (screen->ConfigNotify)
         ret = screen->ConfigNotify (window, x, y, w, h, bw, sibling);
     else
         ret = 0;
-    wrap(screen_priv, screen, ConfigNotify, present_config_notify);
+    PRESENT_WRAP_HOOK(screen_priv, screen, ConfigNotify, present_config_notify);
     return ret;
 }
 
@@ -150,10 +159,10 @@ present_clip_notify(WindowPtr window, int dx, int dy)
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
 
     screen_priv->check_flip_window(window);
-    unwrap(screen_priv, screen, ClipNotify)
+    PRESENT_UNWRAP_HOOK(screen_priv, screen, ClipNotify)
     if (screen->ClipNotify)
         screen->ClipNotify (window, dx, dy);
-    wrap(screen_priv, screen, ClipNotify, present_clip_notify);
+    PRESENT_WRAP_HOOK(screen_priv, screen, ClipNotify, present_clip_notify);
 }
 
 Bool
@@ -180,8 +189,8 @@ present_screen_priv_init(ScreenPtr screen)
     dixScreenHookWindowDestroy(screen, present_destroy_window);
     dixScreenHookClose(screen, present_close_screen);
 
-    wrap(screen_priv, screen, ConfigNotify, present_config_notify);
-    wrap(screen_priv, screen, ClipNotify, present_clip_notify);
+    PRESENT_WRAP_HOOK(screen_priv, screen, ConfigNotify, present_config_notify);
+    PRESENT_WRAP_HOOK(screen_priv, screen, ClipNotify, present_clip_notify);
 
     dixSetPrivate(&screen->devPrivates, &present_screen_private_key, screen_priv);
     screen_priv->pScreen = screen;
