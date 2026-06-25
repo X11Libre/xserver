@@ -41,13 +41,9 @@ RRClientKnowsRates(ClientPtr pClient)
 int
 ProcRRQueryVersion(ClientPtr client)
 {
-    REQUEST(xRRQueryVersionReq);
-    REQUEST_SIZE_MATCH(xRRQueryVersionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->majorVersion);
-        swapl(&stuff->minorVersion);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRQueryVersionReq);
+    X_REQUEST_FIELD_CARD32(majorVersion);
+    X_REQUEST_FIELD_CARD32(minorVersion);
 
     rrClientPriv(client);
 
@@ -77,13 +73,9 @@ ProcRRQueryVersion(ClientPtr client)
 int
 ProcRRSelectInput(ClientPtr client)
 {
-    REQUEST(xRRSelectInputReq);
-    REQUEST_SIZE_MATCH(xRRSelectInputReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swaps(&stuff->enable);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRSelectInputReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(enable);
 
     rrClientPriv(client);
     RRTimesPtr pTimes;
