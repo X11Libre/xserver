@@ -215,6 +215,7 @@ __xorg_list_del(struct xorg_list *prev, struct xorg_list *next)
 static inline void
 xorg_list_del(struct xorg_list *entry)
 {
+    __xorg_list_autoinit(entry);
     __xorg_list_del(entry->prev, entry->next);
     xorg_list_init(entry);
 }
@@ -379,7 +380,7 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
 #define xorg_list_for_each_entry_safe(pos, tmp, head, member)		\
     for ((pos) = NULL,                                                    \
          (pos) = __container_of((head)->next, (pos), member),		\
-	 (tmp) = __container_of((pos)->member.next, (pos), member);		\
+	 (tmp) = __container_of((head)->next ? (pos)->member.next : NULL, (pos), member); \
 	 (((head)->next != NULL) && (&(pos)->member != (head)));		\
 	 (pos) = (tmp), (tmp) = __container_of((pos)->member.next, (tmp), member))
 
