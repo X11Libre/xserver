@@ -806,11 +806,8 @@ ProcDestroyWindow(ClientPtr client)
 {
     WindowPtr pWin;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     int rc;
 
@@ -832,11 +829,8 @@ ProcDestroySubwindows(ClientPtr client)
 {
     WindowPtr pWin;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     int rc;
 
@@ -852,11 +846,8 @@ ProcChangeSaveSet(ClientPtr client)
 {
     WindowPtr pWin;
 
-    REQUEST(xChangeSaveSetReq);
-    REQUEST_SIZE_MATCH(xChangeSaveSetReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xChangeSaveSetReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     int rc;
 
@@ -904,11 +895,8 @@ ProcReparentWindow(ClientPtr client)
 int
 ProcMapWindow(ClientPtr client)
 {
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixShowAccess);
@@ -922,11 +910,8 @@ ProcMapWindow(ClientPtr client)
 int
 ProcMapSubwindows(ClientPtr client)
 {
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixListAccess);
@@ -942,11 +927,8 @@ ProcUnmapWindow(ClientPtr client)
 {
     WindowPtr pWin;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     int rc;
 
@@ -963,11 +945,8 @@ ProcUnmapSubwindows(ClientPtr client)
 {
     WindowPtr pWin;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     int rc;
 
@@ -1005,11 +984,8 @@ ProcCirculateWindow(ClientPtr client)
 {
     WindowPtr pWin;
 
-    REQUEST(xCirculateWindowReq);
-    REQUEST_SIZE_MATCH(xCirculateWindowReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xCirculateWindowReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     int rc;
 
@@ -1030,11 +1006,8 @@ ProcGetGeometry(ClientPtr client)
     DrawablePtr pDraw;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupDrawable(&pDraw, stuff->id, client, M_ANY, DixGetAttrAccess);
     if (rc != Success)
@@ -1055,14 +1028,12 @@ ProcGetGeometry(ClientPtr client)
         reply.borderWidth = pWin->borderWidth;
     }
 
-    if (client->swapped) {
-        swapl(&reply.root);
-        swaps(&reply.x);
-        swaps(&reply.y);
-        swaps(&reply.width);
-        swaps(&reply.height);
-        swaps(&reply.borderWidth);
-    }
+    X_REPLY_FIELD_CARD32(root);
+    X_REPLY_FIELD_CARD16(x);
+    X_REPLY_FIELD_CARD16(y);
+    X_REPLY_FIELD_CARD16(width);
+    X_REPLY_FIELD_CARD16(height);
+    X_REPLY_FIELD_CARD16(borderWidth);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1073,11 +1044,8 @@ ProcQueryTree(ClientPtr client)
     int rc;
     WindowPtr pWin, pHead;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupWindow(&pWin, stuff->id, client, DixListAccess);
     if (rc != Success)
@@ -1099,11 +1067,9 @@ ProcQueryTree(ClientPtr client)
         .nChildren = numChildren,
     };
 
-    if (client->swapped) {
-        swapl(&reply.root);
-        swapl(&reply.parent);
-        swaps(&reply.nChildren);
-    }
+    X_REPLY_FIELD_CARD32(root);
+    X_REPLY_FIELD_CARD32(parent);
+    X_REPLY_FIELD_CARD16(nChildren);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1114,10 +1080,8 @@ ProcInternAtom(ClientPtr client)
     Atom atom;
     char *tchar;
 
-    REQUEST(xInternAtomReq);
-    REQUEST_AT_LEAST_SIZE(xInternAtomReq);
-    if (client->swapped)
-        swaps(&stuff->nbytes);
+    X_REQUEST_HEAD_AT_LEAST(xInternAtomReq);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     REQUEST_FIXED_SIZE(xInternAtomReq, stuff->nbytes);
     if ((stuff->onlyIfExists != xTrue) && (stuff->onlyIfExists != xFalse)) {
@@ -1133,9 +1097,7 @@ ProcInternAtom(ClientPtr client)
         .atom = atom
     };
 
-    if (client->swapped) {
-        swapl(&reply.atom);
-    }
+    X_REPLY_FIELD_CARD32(atom);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1145,11 +1107,8 @@ ProcGetAtomName(ClientPtr client)
 {
     const char *str;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     if (!(str = NameForAtom(stuff->id))) {
         client->errorValue = stuff->id;
@@ -1165,9 +1124,7 @@ ProcGetAtomName(ClientPtr client)
         .nameLength = len
     };
 
-    if (client->swapped) {
-        swaps(&reply.nameLength);
-    }
+    X_REPLY_FIELD_CARD16(nameLength);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1304,11 +1261,9 @@ ProcTranslateCoords(ClientPtr client)
         reply.dstY = y - pDst->drawable.y;
     }
 
-    if (client->swapped) {
-        swapl(&reply.child);
-        swaps(&reply.dstX);
-        swaps(&reply.dstY);
-    }
+    X_REPLY_FIELD_CARD32(child);
+    X_REPLY_FIELD_CARD16(dstX);
+    X_REPLY_FIELD_CARD16(dstY);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1340,11 +1295,8 @@ ProcCloseFont(ClientPtr client)
     FontPtr pFont;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupResourceByType((void **) &pFont, stuff->id, X11_RESTYPE_FONT,
                                  client, DixDestroyAccess);
@@ -1365,11 +1317,8 @@ ProcQueryFont(ClientPtr client)
     FontPtr pFont;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupFontable(&pFont, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
@@ -1419,11 +1368,8 @@ ProcQueryTextExtents(ClientPtr client)
     unsigned long length;
     int rc;
 
-    REQUEST(xQueryTextExtentsReq);
-    REQUEST_AT_LEAST_SIZE(xQueryTextExtentsReq);
-
-    if (client->swapped)
-        swapl(&stuff->fid);
+    X_REQUEST_HEAD_AT_LEAST(xQueryTextExtentsReq);
+    X_REQUEST_FIELD_CARD32(fid);
 
     rc = dixLookupFontable(&pFont, stuff->fid, client, DixGetAttrAccess);
     if (rc != Success)
@@ -1450,15 +1396,13 @@ ProcQueryTextExtents(ClientPtr client)
         .overallRight = info.overallRight
     };
 
-    if (client->swapped) {
-        swaps(&reply.fontAscent);
-        swaps(&reply.fontDescent);
-        swaps(&reply.overallAscent);
-        swaps(&reply.overallDescent);
-        swapl(&reply.overallWidth);
-        swapl(&reply.overallLeft);
-        swapl(&reply.overallRight);
-    }
+    X_REPLY_FIELD_CARD16(fontAscent);
+    X_REPLY_FIELD_CARD16(fontDescent);
+    X_REPLY_FIELD_CARD16(overallAscent);
+    X_REPLY_FIELD_CARD16(overallDescent);
+    X_REPLY_FIELD_CARD32(overallWidth);
+    X_REPLY_FIELD_CARD32(overallLeft);
+    X_REPLY_FIELD_CARD32(overallRight);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1579,11 +1523,8 @@ ProcFreePixmap(ClientPtr client)
     PixmapPtr pMap;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupResourceByType((void **) &pMap, stuff->id, X11_RESTYPE_PIXMAP,
                                  client, DixDestroyAccess);
@@ -1741,11 +1682,8 @@ ProcFreeGC(ClientPtr client)
     GCPtr pGC;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupGC(&pGC, stuff->id, client, DixDestroyAccess);
     if (rc != Success)
@@ -1932,14 +1870,10 @@ ProcCopyPlane(ClientPtr client)
 int
 ProcPolyPoint(ClientPtr client)
 {
-    REQUEST(xPolyPointReq);
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->gc);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xPolyPointReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_REST_CARD16();
 
     int npoint;
     GCPtr pGC;
@@ -1961,14 +1895,10 @@ ProcPolyPoint(ClientPtr client)
 int
 ProcPolyLine(ClientPtr client)
 {
-    REQUEST(xPolyPointReq);
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->gc);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xPolyPointReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_REST_CARD16();
 
     int npoint;
     GCPtr pGC;
@@ -1990,14 +1920,10 @@ ProcPolyLine(ClientPtr client)
 int
 ProcPolySegment(ClientPtr client)
 {
-    REQUEST(xPolyPointReq);
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->gc);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xPolyPointReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_REST_CARD16();
 
     int nsegs;
     GCPtr pGC;
@@ -2016,14 +1942,10 @@ ProcPolySegment(ClientPtr client)
 int
 ProcPolyRectangle(ClientPtr client)
 {
-    REQUEST(xPolyPointReq);
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->gc);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xPolyPointReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_REST_CARD16();
 
     int nrects;
     GCPtr pGC;
@@ -2043,14 +1965,10 @@ ProcPolyRectangle(ClientPtr client)
 int
 ProcPolyArc(ClientPtr client)
 {
-    REQUEST(xPolyPointReq);
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->gc);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xPolyPointReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_REST_CARD16();
 
     int narcs;
     GCPtr pGC;
@@ -2100,14 +2018,10 @@ ProcFillPoly(ClientPtr client)
 int
 ProcPolyFillRectangle(ClientPtr client)
 {
-    REQUEST(xPolyPointReq);
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->gc);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xPolyPointReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_REST_CARD16();
 
     int things;
     GCPtr pGC;
@@ -2128,14 +2042,10 @@ ProcPolyFillRectangle(ClientPtr client)
 int
 ProcPolyFillArc(ClientPtr client)
 {
-    REQUEST(xPolyPointReq);
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->gc);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xPolyPointReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_REST_CARD16();
 
     int narcs;
     GCPtr pGC;
@@ -2466,9 +2376,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         }
     }
 
-    if (client->swapped) {
-        swapl(&reply.visual);
-    }
+    X_REPLY_FIELD_CARD32(visual);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -2493,15 +2401,11 @@ ProcGetImage(ClientPtr client)
 int
 ProcPolyText(ClientPtr client)
 {
-    REQUEST(xPolyTextReq);
-    REQUEST_AT_LEAST_SIZE(xPolyTextReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->gc);
-        swaps(&stuff->x);
-        swaps(&stuff->y);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xPolyTextReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
 
     DrawablePtr pDraw;
     GCPtr pGC;
@@ -2606,11 +2510,8 @@ ProcFreeColormap(ClientPtr client)
     ColormapPtr pmap;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupResourceByType((void **) &pmap, stuff->id, X11_RESTYPE_COLORMAP,
                                  client, DixDestroyAccess);
@@ -2654,11 +2555,8 @@ ProcInstallColormap(ClientPtr client)
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupResourceByType((void **) &pcmp, stuff->id, X11_RESTYPE_COLORMAP,
                                  client, DixInstallAccess);
@@ -2686,11 +2584,8 @@ ProcUninstallColormap(ClientPtr client)
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupResourceByType((void **) &pcmp, stuff->id, X11_RESTYPE_COLORMAP,
                                  client, DixUninstallAccess);
@@ -2719,11 +2614,8 @@ ProcListInstalledColormaps(ClientPtr client)
     int rc;
     WindowPtr pWin;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
@@ -2749,9 +2641,7 @@ ProcListInstalledColormaps(ClientPtr client)
         .nColormaps = nummaps,
     };
 
-    if (client->swapped) {
-        swaps(&reply.nColormaps);
-    }
+    X_REPLY_FIELD_CARD16(nColormaps);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -2774,15 +2664,11 @@ int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
 int
 ProcAllocColor(ClientPtr client)
 {
-    REQUEST(xAllocColorReq);
-    REQUEST_SIZE_MATCH(xAllocColorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cmap);
-        swaps(&stuff->red);
-        swaps(&stuff->green);
-        swaps(&stuff->blue);
-    }
+    X_REQUEST_HEAD_STRUCT(xAllocColorReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_FIELD_CARD16(red);
+    X_REQUEST_FIELD_CARD16(green);
+    X_REQUEST_FIELD_CARD16(blue);
 
     xAllocColorReply reply = {
         .red = stuff->red,
@@ -2797,12 +2683,10 @@ ProcAllocColor(ClientPtr client)
         return rc;
     }
 
-    if (client->swapped) {
-        swaps(&reply.red);
-        swaps(&reply.green);
-        swaps(&reply.blue);
-        swapl(&reply.pixel);
-    }
+    X_REPLY_FIELD_CARD16(red);
+    X_REPLY_FIELD_CARD16(green);
+    X_REPLY_FIELD_CARD16(blue);
+    X_REPLY_FIELD_CARD32(pixel);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -2844,15 +2728,13 @@ ProcAllocNamedColor(ClientPtr client)
                          client->index)))
         return rc;
 
-    if (client->swapped) {
-        swapl(&reply.pixel);
-        swaps(&reply.exactRed);
-        swaps(&reply.exactGreen);
-        swaps(&reply.exactBlue);
-        swaps(&reply.screenRed);
-        swaps(&reply.screenGreen);
-        swaps(&reply.screenBlue);
-    }
+    X_REPLY_FIELD_CARD32(pixel);
+    X_REPLY_FIELD_CARD16(exactRed);
+    X_REPLY_FIELD_CARD16(exactGreen);
+    X_REPLY_FIELD_CARD16(exactBlue);
+    X_REPLY_FIELD_CARD16(screenRed);
+    X_REPLY_FIELD_CARD16(screenGreen);
+    X_REPLY_FIELD_CARD16(screenBlue);
 
 #ifdef XINERAMA
     if (noPanoramiXExtension || !pcmp->pScreen->myNum)
@@ -2912,11 +2794,10 @@ ProcAllocColorCells(ClientPtr client)
                 .nPixels = npixels,
                 .nMasks = nmasks
             };
-            if (client->swapped) {
-                swaps(&reply.nPixels);
-                swaps(&reply.nMasks);
+            X_REPLY_FIELD_CARD16(nPixels);
+            X_REPLY_FIELD_CARD16(nMasks);
+            if (client->swapped)
                 SwapLongs(ppixels, length / 4);
-            }
 
             return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
         }
@@ -2975,13 +2856,12 @@ ProcAllocColorPlanes(ClientPtr client)
             return rc;
         }
 
-        if (client->swapped) {
+        X_REPLY_FIELD_CARD16(nPixels);
+        X_REPLY_FIELD_CARD32(redMask);
+        X_REPLY_FIELD_CARD32(greenMask);
+        X_REPLY_FIELD_CARD32(blueMask);
+        if (client->swapped)
             SwapLongs(ppixels, length / 4);
-            swaps(&reply.nPixels);
-            swapl(&reply.redMask);
-            swapl(&reply.greenMask);
-            swapl(&reply.blueMask);
-        }
 
 #ifdef XINERAMA
         if (noPanoramiXExtension || !pcmp->pScreen->myNum)
@@ -3088,13 +2968,9 @@ ProcStoreNamedColor(ClientPtr client)
 int
 ProcQueryColors(ClientPtr client)
 {
-    REQUEST(xQueryColorsReq);
-    REQUEST_AT_LEAST_SIZE(xQueryColorsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cmap);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xQueryColorsReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_REST_CARD32();
 
     ColormapPtr pcmp;
     int rc;
@@ -3120,10 +2996,9 @@ ProcQueryColors(ClientPtr client)
             .nColors = count
         };
 
-        if (client->swapped) {
-            swaps(&reply.nColors);
+        X_REPLY_FIELD_CARD16(nColors);
+        if (client->swapped)
             SwapShorts((short*)prgbs, count * 4); // xrgb = 4 shorts
-        }
 
         return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }
@@ -3136,13 +3011,9 @@ ProcQueryColors(ClientPtr client)
 int
 ProcLookupColor(ClientPtr client)
 {
-    REQUEST(xLookupColorReq);
-    REQUEST_AT_LEAST_SIZE(xLookupColorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cmap);
-        swaps(&stuff->nbytes);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xLookupColorReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     REQUEST_FIXED_SIZE(xLookupColorReq, stuff->nbytes);
 
@@ -3176,14 +3047,12 @@ ProcLookupColor(ClientPtr client)
                                 &reply.screenBlue,
                                 pcmp->pVisual);
 
-    if (client->swapped) {
-        swaps(&reply.exactRed);
-        swaps(&reply.exactGreen);
-        swaps(&reply.exactBlue);
-        swaps(&reply.screenRed);
-        swaps(&reply.screenGreen);
-        swaps(&reply.screenBlue);
-    }
+    X_REPLY_FIELD_CARD16(exactRed);
+    X_REPLY_FIELD_CARD16(exactGreen);
+    X_REPLY_FIELD_CARD16(exactBlue);
+    X_REPLY_FIELD_CARD16(screenRed);
+    X_REPLY_FIELD_CARD16(screenGreen);
+    X_REPLY_FIELD_CARD16(screenBlue);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -3293,22 +3162,18 @@ ProcCreateCursor(ClientPtr client)
 int
 ProcCreateGlyphCursor(ClientPtr client)
 {
-    REQUEST(xCreateGlyphCursorReq);
-    REQUEST_SIZE_MATCH(xCreateGlyphCursorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cid);
-        swapl(&stuff->source);
-        swapl(&stuff->mask);
-        swaps(&stuff->sourceChar);
-        swaps(&stuff->maskChar);
-        swaps(&stuff->foreRed);
-        swaps(&stuff->foreGreen);
-        swaps(&stuff->foreBlue);
-        swaps(&stuff->backRed);
-        swaps(&stuff->backGreen);
-        swaps(&stuff->backBlue);
-    }
+    X_REQUEST_HEAD_STRUCT(xCreateGlyphCursorReq);
+    X_REQUEST_FIELD_CARD32(cid);
+    X_REQUEST_FIELD_CARD32(source);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_FIELD_CARD16(sourceChar);
+    X_REQUEST_FIELD_CARD16(maskChar);
+    X_REQUEST_FIELD_CARD16(foreRed);
+    X_REQUEST_FIELD_CARD16(foreGreen);
+    X_REQUEST_FIELD_CARD16(foreBlue);
+    X_REQUEST_FIELD_CARD16(backRed);
+    X_REQUEST_FIELD_CARD16(backGreen);
+    X_REQUEST_FIELD_CARD16(backBlue);
 
     CursorPtr pCursor;
     int res;
@@ -3333,11 +3198,8 @@ ProcFreeCursor(ClientPtr client)
     CursorPtr pCursor;
     int rc;
 
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     rc = dixLookupResourceByType((void **) &pCursor, stuff->id, X11_RESTYPE_CURSOR,
                                  client, DixDestroyAccess);
@@ -3391,10 +3253,8 @@ ProcQueryBestSize(ClientPtr client)
         .height = stuff->height
     };
 
-    if (client->swapped) {
-        swaps(&reply.width);
-        swaps(&reply.height);
-    }
+    X_REPLY_FIELD_CARD16(width);
+    X_REPLY_FIELD_CARD16(height);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -3402,13 +3262,9 @@ ProcQueryBestSize(ClientPtr client)
 int
 ProcSetScreenSaver(ClientPtr client)
 {
-    REQUEST(xSetScreenSaverReq);
-    REQUEST_SIZE_MATCH(xSetScreenSaverReq);
-
-    if (client->swapped) {
-        swaps(&stuff->timeout);
-        swaps(&stuff->interval);
-    }
+    X_REQUEST_HEAD_STRUCT(xSetScreenSaverReq);
+    X_REQUEST_FIELD_CARD16(timeout);
+    X_REQUEST_FIELD_CARD16(interval);
 
     int blankingOption, exposureOption;
 
@@ -3481,10 +3337,8 @@ ProcGetScreenSaver(ClientPtr client)
         .allowExposures = ScreenSaverAllowExposures
     };
 
-    if (client->swapped) {
-        swaps(&reply.timeout);
-        swaps(&reply.interval);
-    }
+    X_REPLY_FIELD_CARD16(timeout);
+    X_REPLY_FIELD_CARD16(interval);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -3537,16 +3391,14 @@ ProcListHosts(ClientPtr client)
     if (client->swapped) {
         char *bufT = pdata;
         char *endbuf = bufT + len;
-
         while (bufT < endbuf) {
             xHostEntry *host = (xHostEntry *) bufT;
             int l1 = host->length;
             swaps(&host->length);
             bufT += sizeof(xHostEntry) + pad_to_int32(l1);
         }
-
-        swaps(&reply.nHosts);
     }
+    X_REPLY_FIELD_CARD16(nHosts);
 
     x_rpcbuf_write_CARD8s(&rpcbuf, pdata, len);
     free(pdata);
@@ -3590,11 +3442,8 @@ CloseDownRetainedResources(void)
 int
 ProcKillClient(ClientPtr client)
 {
-    REQUEST(xResourceReq);
-    REQUEST_SIZE_MATCH(xResourceReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(xResourceReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     ClientPtr killclient;
     int rc;
@@ -3661,9 +3510,7 @@ ProcGetFontPath(ClientPtr client)
         .nPaths = FillFontPath(&rpcbuf)
     };
 
-    if (client->swapped) {
-        swaps(&reply.nPaths);
-    }
+    X_REPLY_FIELD_CARD16(nPaths);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
