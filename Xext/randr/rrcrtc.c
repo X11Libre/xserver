@@ -1145,13 +1145,9 @@ RRCrtcInitErrorValue(void)
 int
 ProcRRGetCrtcInfo(ClientPtr client)
 {
-    REQUEST(xRRGetCrtcInfoReq);
-    REQUEST_SIZE_MATCH(xRRGetCrtcInfoReq);
-
-    if (client->swapped) {
-        swapl(&stuff->crtc);
-        swapl(&stuff->configTimestamp);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRGetCrtcInfoReq);
+    X_REQUEST_FIELD_CARD32(crtc);
+    X_REQUEST_FIELD_CARD32(configTimestamp);
 
     RRCrtcPtr crtc;
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
@@ -1243,19 +1239,15 @@ ProcRRGetCrtcInfo(ClientPtr client)
 int
 ProcRRSetCrtcConfig(ClientPtr client)
 {
-    REQUEST(xRRSetCrtcConfigReq);
-    REQUEST_AT_LEAST_SIZE(xRRSetCrtcConfigReq);
-
-    if (client->swapped) {
-        swapl(&stuff->crtc);
-        swapl(&stuff->timestamp);
-        swapl(&stuff->configTimestamp);
-        swaps(&stuff->x);
-        swaps(&stuff->y);
-        swapl(&stuff->mode);
-        swaps(&stuff->rotation);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRRSetCrtcConfigReq);
+    X_REQUEST_FIELD_CARD32(crtc);
+    X_REQUEST_FIELD_CARD32(timestamp);
+    X_REQUEST_FIELD_CARD32(configTimestamp);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
+    X_REQUEST_FIELD_CARD32(mode);
+    X_REQUEST_FIELD_CARD16(rotation);
+    X_REQUEST_REST_CARD32();
 
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
@@ -1462,11 +1454,8 @@ ProcRRSetCrtcConfig(ClientPtr client)
 int
 ProcRRGetPanning(ClientPtr client)
 {
-    REQUEST(xRRGetPanningReq);
-    REQUEST_SIZE_MATCH(xRRGetPanningReq);
-
-    if (client->swapped)
-        swapl(&stuff->crtc);
+    X_REQUEST_HEAD_STRUCT(xRRGetPanningReq);
+    X_REQUEST_FIELD_CARD32(crtc);
 
     RRCrtcPtr crtc;
     ScreenPtr pScreen;
@@ -1528,25 +1517,21 @@ ProcRRGetPanning(ClientPtr client)
 int
 ProcRRSetPanning(ClientPtr client)
 {
-    REQUEST(xRRSetPanningReq);
-    REQUEST_SIZE_MATCH(xRRSetPanningReq);
-
-    if (client->swapped) {
-        swapl(&stuff->crtc);
-        swapl(&stuff->timestamp);
-        swaps(&stuff->left);
-        swaps(&stuff->top);
-        swaps(&stuff->width);
-        swaps(&stuff->height);
-        swaps(&stuff->track_left);
-        swaps(&stuff->track_top);
-        swaps(&stuff->track_width);
-        swaps(&stuff->track_height);
-        swaps(&stuff->border_left);
-        swaps(&stuff->border_top);
-        swaps(&stuff->border_right);
-        swaps(&stuff->border_bottom);
-    }
+    X_REQUEST_HEAD_STRUCT(xRRSetPanningReq);
+    X_REQUEST_FIELD_CARD32(crtc);
+    X_REQUEST_FIELD_CARD32(timestamp);
+    X_REQUEST_FIELD_CARD16(left);
+    X_REQUEST_FIELD_CARD16(top);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD16(track_left);
+    X_REQUEST_FIELD_CARD16(track_top);
+    X_REQUEST_FIELD_CARD16(track_width);
+    X_REQUEST_FIELD_CARD16(track_height);
+    X_REQUEST_FIELD_CARD16(border_left);
+    X_REQUEST_FIELD_CARD16(border_top);
+    X_REQUEST_FIELD_CARD16(border_right);
+    X_REQUEST_FIELD_CARD16(border_bottom);
 
     RRCrtcPtr crtc;
     ScreenPtr pScreen;
@@ -1614,11 +1599,8 @@ sendReply: ;
 int
 ProcRRGetCrtcGammaSize(ClientPtr client)
 {
-    REQUEST(xRRGetCrtcGammaSizeReq);
-    REQUEST_SIZE_MATCH(xRRGetCrtcGammaSizeReq);
-
-    if (client->swapped)
-        swapl(&stuff->crtc);
+    X_REQUEST_HEAD_STRUCT(xRRGetCrtcGammaSizeReq);
+    X_REQUEST_FIELD_CARD32(crtc);
 
     RRCrtcPtr crtc;
 
@@ -1640,11 +1622,8 @@ ProcRRGetCrtcGammaSize(ClientPtr client)
 int
 ProcRRGetCrtcGamma(ClientPtr client)
 {
-    REQUEST(xRRGetCrtcGammaReq);
-    REQUEST_SIZE_MATCH(xRRGetCrtcGammaReq);
-
-    if (client->swapped)
-        swapl(&stuff->crtc);
+    X_REQUEST_HEAD_STRUCT(xRRGetCrtcGammaReq);
+    X_REQUEST_FIELD_CARD32(crtc);
 
     RRCrtcPtr crtc;
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
@@ -1673,14 +1652,10 @@ ProcRRGetCrtcGamma(ClientPtr client)
 int
 ProcRRSetCrtcGamma(ClientPtr client)
 {
-    REQUEST(xRRSetCrtcGammaReq);
-    REQUEST_AT_LEAST_SIZE(xRRSetCrtcGammaReq);
-
-    if (client->swapped) {
-        swapl(&stuff->crtc);
-        swaps(&stuff->size);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xRRSetCrtcGammaReq);
+    X_REQUEST_FIELD_CARD32(crtc);
+    X_REQUEST_FIELD_CARD16(size);
+    X_REQUEST_REST_CARD16();
 
     RRCrtcPtr crtc;
     unsigned long len;
@@ -1712,14 +1687,12 @@ ProcRRSetCrtcGamma(ClientPtr client)
 int
 ProcRRSetCrtcTransform(ClientPtr client)
 {
-    REQUEST(xRRSetCrtcTransformReq);
-    REQUEST_AT_LEAST_SIZE(xRRSetCrtcTransformReq);
-
+    X_REQUEST_HEAD_AT_LEAST(xRRSetCrtcTransformReq);
+    X_REQUEST_FIELD_CARD32(crtc);
     if (client->swapped) {
-        swapl(&stuff->crtc);
         SwapLongs((CARD32 *) &stuff->transform,
                   bytes_to_int32(sizeof(xRenderTransform)));
-        swaps(&stuff->nbytesFilter);
+        X_REQUEST_FIELD_CARD16(nbytesFilter);
         char *filter = (char *) (stuff + 1);
         CARD32 *params = (CARD32 *) (filter + pad_to_int32(stuff->nbytesFilter));
         int nparams = ((CARD32 *) stuff + client->req_len) - params;
@@ -1761,11 +1734,8 @@ ProcRRSetCrtcTransform(ClientPtr client)
 int
 ProcRRGetCrtcTransform(ClientPtr client)
 {
-    REQUEST(xRRGetCrtcTransformReq);
-    REQUEST_SIZE_MATCH(xRRGetCrtcTransformReq);
-
-    if (client->swapped)
-        swapl(&stuff->crtc);
+    X_REQUEST_HEAD_STRUCT(xRRGetCrtcTransformReq);
+    X_REQUEST_FIELD_CARD32(crtc);
 
     RRCrtcPtr crtc;
     RRTransformPtr current, pending;
