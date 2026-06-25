@@ -1,0 +1,25 @@
+name: 'libvirt VM cleanup'
+description: >
+  Tear down a leftover libvirt domain and any orphaned qemu process from a
+  failed VM attempt, so a subsequent retry can start from a clean state instead
+  of hitting "Guest name '<name>' is already in use" (which otherwise makes the
+  retry collide with attempt 1's leftover VM and time out again).
+inputs:
+  guest:
+    description: 'libvirt domain / guest name to destroy (e.g. dragonflybsd, freebsd, netbsd)'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        set +e
+        echo "--> tearing down stale VM '${{ inputs.guest }}'"
+        sudo virsh destroy  "${{ inputs.guest }}" 2>/dev/null
+        sudo virsh undefine "${{ inputs.guest }}" --nvram 2>/dev/null
+        # the vmactions runner leaves a single qemu per job; kill any survivor
+        # so it releases the qcow2 image lock and the domain name.
+        sudo pkill -9 -f qemu-system 2>/dev/null
+        # give libvirt a moment to actually release the domain name + image
+        sleep 5
+        exit 0
