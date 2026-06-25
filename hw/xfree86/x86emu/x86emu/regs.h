@@ -43,10 +43,6 @@
 
 /*---------------------- Macros and type definitions ----------------------*/
 
-#ifdef PACK
-#pragma PACK
-#endif
-
 /*
  * General EAX, EBX, ECX, EDX type registers.  Note that for
  * portability, and speed, the issue of byte swapping is not addressed
@@ -299,10 +295,6 @@ typedef struct {
     void *private;
     X86EMU_regs x86;
 } X86EMU_sysEnv;
-
-#ifdef END_PACK
-#pragma END_PACK
-#endif
 
 /*----------------------------- Global Variables --------------------------*/
 

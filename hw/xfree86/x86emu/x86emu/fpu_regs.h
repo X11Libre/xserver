@@ -41,10 +41,6 @@
 
 #ifdef X86_FPU_SUPPORT
 
-#ifdef PACK
-#pragma PACK
-#endif
-
 /* Basic 8087 register can hold any of the following values: */
 
 union x86_fpu_reg_u {
@@ -88,10 +84,6 @@ struct x86_fpu_registers {
     int x86_fpu_config;         /* rounding modes, etc. */
     short x86_fpu_tos, x86_fpu_bos;
 };
-
-#ifdef END_PACK
-#pragma END_PACK
-#endif
 
 /*
  * There are two versions of the following macro.

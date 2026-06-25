@@ -48,10 +48,6 @@
 
 /*---------------------- Macros and type definitions ----------------------*/
 
-#ifdef PACK
-#pragma	PACK                    /* Don't pack structs with function pointers! */
-#endif
-
 /****************************************************************************
 REMARKS:
 Data structure containing ponters to programmed I/O functions used by the
@@ -123,10 +119,6 @@ extern u32 X86API rdl(u32 addr);
 extern void X86API wrb(u32 addr, u8 val);
 extern void X86API wrw(u32 addr, u16 val);
 extern void X86API wrl(u32 addr, u32 val);
-
-#ifdef END_PACK
-#pragma	END_PACK
-#endif
 
 /*--------------------- type definitions -----------------------------------*/
 
