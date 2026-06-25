@@ -274,9 +274,7 @@ ProcGetSelectionOwner(ClientPtr client)
     else
         goto out;
 
-    if (client->swapped) {
-        swapl(&reply.owner);
-    }
+    X_REPLY_FIELD_CARD32(owner);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 
