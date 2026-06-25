@@ -2495,15 +2495,11 @@ PanoramiXAllocColor(ClientPtr client)
     int result;
     PanoramiXRes *cmap;
 
-    REQUEST(xAllocColorReq);
-    REQUEST_SIZE_MATCH(xAllocColorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->cmap);
-        swaps(&stuff->red);
-        swaps(&stuff->green);
-        swaps(&stuff->blue);
-    }
+    X_REQUEST_HEAD_STRUCT(xAllocColorReq);
+    X_REQUEST_FIELD_CARD32(cmap);
+    X_REQUEST_FIELD_CARD16(red);
+    X_REQUEST_FIELD_CARD16(green);
+    X_REQUEST_FIELD_CARD16(blue);
 
     client->errorValue = stuff->cmap;
 
