@@ -2490,6 +2490,21 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
     if (grab)
         DeliverGrabbedEvent((InternalEvent *) ev, device, FALSE);
 
+    /*
+     * To prevent keylogging, not grabbed raw keyboard event
+     * should not be sent to any client.
+     */
+    if (globalIsolateKeyboard) {
+        switch (ev->type) {
+        case ET_RawKeyPress:
+        case ET_RawKeyRelease:
+            free(xi);
+            return;
+        default:
+            break;
+        }
+    }
+
     filter = GetEventFilter(device, xi);
 
     DIX_FOR_EACH_SCREEN({
@@ -2829,6 +2844,25 @@ static int
 DeliverOneEvent(InternalEvent *event, DeviceIntPtr dev, enum InputLevel level,
                 WindowPtr win, Window child, GrabPtr grab)
 {
+    /*
+     * Deliver keyboard events only if client is focused.
+     * Even if it does not have a window, that means unfocused.
+     * Needed to prevent keylogging.
+     */
+    if (globalIsolateKeyboard) {
+        WindowPtr inputFocus = inputInfo.keyboard->focus->win;
+
+        if (win != inputFocus) {
+            switch (event->any.type) {
+            case ET_KeyPress:
+            case ET_KeyRelease:
+                return 0;
+            default:
+                break;
+            }
+        }
+    }
+
     xEvent *xE = NULL;
     int count = 0;
     int deliveries = 0;
@@ -5529,6 +5563,21 @@ ProcSendEvent(ClientPtr client)
     if (stuff->eventMask & ~AllEventMasks) {
         client->errorValue = stuff->eventMask;
         return BadValue;
+    }
+
+    /*
+     * To prevent silent keylogging by grabbing, logging and redirecting
+     * key press/release events to clients.
+     * Similar is done with key press/release events in 'ProcXTestFakeInput()'.
+     */
+    if (globalIsolateKeyboard) {
+        switch (stuff->event.u.u.type) {
+        case ET_KeyPress:
+        case ET_KeyRelease:
+            return Success;
+        default:
+            break;
+        }
     }
 
     if (stuff->destination == PointerWindow)
