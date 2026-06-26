@@ -167,23 +167,23 @@ __glXSendReplySwap(ClientPtr client, const void *data, size_t elements,
         reply_ints = bytes_to_int32(elements * element_size);
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    /* data is already byte-swapped by the caller */
+    x_rpcbuf_write_CARD8s(&rpcbuf, data, reply_ints * 4);
+
     xGLXSingleReply reply = {
-        .length = bswap_32(reply_ints),
-        .type = X_Reply,
-        .sequenceNumber = bswap_16(client->sequence),
-        .size = bswap_32(elements),
-        .retval = bswap_32(retval),
+        .size = elements,
+        .retval = retval,
     };
+    X_REPLY_FIELD_CARD32(size);
+    X_REPLY_FIELD_CARD32(retval);
 
     /* Single element goes in reply padding; don't leak uninitialized data. */
     if (elements == 1) {
         (void) memcpy(&reply.pad3, data, element_size);
     }
-    WriteToClient(client, sizeof(xGLXSingleReply), &reply);
 
-    if (reply_ints != 0) {
-        WriteToClient(client, reply_ints * 4, data);
-    }
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
