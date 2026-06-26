@@ -247,12 +247,8 @@ __glXDisp_Finish(__GLXclientState * cl, GLbyte * pc)
     glFinish();
 
     /* Send empty reply packet to indicate finish is finished */
-    client = cl->client;
-
     xGLXSingleReply reply = { 0 };
-    __GLX_BEGIN_REPLY(0);
-    __GLX_SEND_HEADER();
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 #define SEPARATOR " "
