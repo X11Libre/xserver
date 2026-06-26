@@ -66,7 +66,7 @@ DoGetProgramString(struct __GLXclientStateRec *cl, GLbyte * pc,
         GLenum pname;
         GLint compsize = 0;
         char *answer = NULL, answerBuffer[200];
-        xGLXSingleReply reply = { 0, };
+        xGLXGetTexImageReply reply = { 0 };
 
         if (do_swap) {
             target = (GLenum) bswap_32(*(int *) (pc + 0));
@@ -89,24 +89,14 @@ DoGetProgramString(struct __GLXclientStateRec *cl, GLbyte * pc,
             get_program_string(target, pname, (GLubyte *) answer);
         }
 
-        if (__glXErrorOccured()) {
-            __GLX_BEGIN_REPLY(0);
-            if (do_swap)
-                __GLX_SWAP_REPLY_HEADER();
-            __GLX_SEND_HEADER();
-        }
-        else {
-            __GLX_BEGIN_REPLY(compsize);
-            ((xGLXGetTexImageReply *) &reply)->width = compsize;
-            if (do_swap) {
-                __GLX_SWAP_REPLY_HEADER();
-                swapl(&((xGLXGetTexImageReply *) &reply)->width);
-            }
-            __GLX_SEND_HEADER();
-            __GLX_SEND_VOID_ARRAY(compsize);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        if (!__glXErrorOccured()) {
+            reply.width = compsize;
+            X_REPLY_FIELD_CARD32(width);
+            x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
         }
 
-        error = Success;
+        error = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }
 
     return error;
