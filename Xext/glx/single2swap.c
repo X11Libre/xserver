@@ -256,12 +256,7 @@ __glXDispSwap_Finish(__GLXclientState * cl, GLbyte * pc)
 
     /* Send empty reply packet to indicate finish is finished */
     xGLXSingleReply reply = { 0 };
-    __GLX_BEGIN_REPLY(0);
-    __GLX_PUT_RETVAL(0);
-    __GLX_SWAP_REPLY_HEADER();
-    __GLX_SEND_HEADER();
-
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
