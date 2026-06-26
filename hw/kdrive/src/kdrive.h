@@ -49,10 +49,10 @@
 
 #include "xkbstr.h"
 
-#define KD_DPMS_NORMAL	    0
-#define KD_DPMS_STANDBY	    1
-#define KD_DPMS_SUSPEND	    2
-#define KD_DPMS_POWERDOWN   3
+#define KD_DPMS_NORMAL      0 /* DPMSModeOn */
+#define KD_DPMS_STANDBY     1 /* DPMSModeStandby */
+#define KD_DPMS_SUSPEND     2 /* DPMSModeSuspend */
+#define KD_DPMS_POWERDOWN   3 /* DPMSModeOff */
 #define KD_DPMS_MAX	    KD_DPMS_POWERDOWN
 
 #define Status int
