@@ -51,20 +51,6 @@
 #define __GLX_GET_DOUBLE(dst,src)	(dst) = *((GLdouble*)(src))
 #endif
 
-#define __GLX_BEGIN_REPLY(size) \
-	reply.length = __GLX_PAD((size)) >> 2;	\
-	reply.type = X_Reply; 			\
-	reply.sequenceNumber = client->sequence;
-
-#define __GLX_SEND_HEADER() \
-	WriteToClient (client, sizeof(xGLXSingleReply), &reply);
-
-#define __GLX_PUT_RETVAL(a) \
-	reply.retval = (a);
-
-#define __GLX_PUT_SIZE(a) \
-	reply.size = (a);
-
 /*
 ** Get a buffer to hold returned data, with the given alignment.  If we have
 ** to realloc, allocate size+align, in case the pointer has to be bumped for
@@ -91,26 +77,6 @@
     } else {								 \
 	(res) = (char *)answerBuffer;					 \
     }
-
-#define __GLX_SEND_BYTE_ARRAY(len) \
-	WriteToClient(client, __GLX_PAD((len)*__GLX_SIZE_INT8), answer)
-
-#define __GLX_SEND_SHORT_ARRAY(len) \
-	WriteToClient(client, __GLX_PAD((len)*__GLX_SIZE_INT16), answer)
-
-#define __GLX_SEND_INT_ARRAY(len) \
-	WriteToClient(client, (len)*__GLX_SIZE_INT32, answer)
-
-#define __GLX_SEND_FLOAT_ARRAY(len) \
-	WriteToClient(client, (len)*__GLX_SIZE_FLOAT32, answer)
-
-#define __GLX_SEND_DOUBLE_ARRAY(len) \
-	WriteToClient(client, (len)*__GLX_SIZE_FLOAT64, answer)
-
-#define __GLX_SEND_VOID_ARRAY(len)  __GLX_SEND_BYTE_ARRAY((len))
-#define __GLX_SEND_UBYTE_ARRAY(len)  __GLX_SEND_BYTE_ARRAY((len))
-#define __GLX_SEND_USHORT_ARRAY(len) __GLX_SEND_SHORT_ARRAY((len))
-#define __GLX_SEND_UINT_ARRAY(len)  __GLX_SEND_INT_ARRAY((len))
 
 /*
 ** PERFORMANCE NOTE:
@@ -161,15 +127,5 @@
 	    __GLX_SWAP_FLOAT(swapPC);		\
 	    swapPC += __GLX_SIZE_FLOAT32;	\
 	}
-
-#define __GLX_SWAP_REPLY_HEADER() \
-	swaps(&reply.sequenceNumber); \
-	swapl(&reply.length);
-
-#define __GLX_SWAP_REPLY_RETVAL() \
-	swpal(&reply.retval)
-
-#define __GLX_SWAP_REPLY_SIZE() \
-	swapl(&reply.size)
 
 #endif                          /* !__GLX_unpack_h__ */
