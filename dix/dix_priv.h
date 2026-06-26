@@ -29,6 +29,7 @@
 #include "include/os.h"
 #include "include/resource.h"
 #include "include/window.h"
+#include "os/io_priv.h"       /* dixWriteToClient */
 
 /* pad scanline to a longword */
 #define BITMAP_SCANLINE_UNIT    32
@@ -753,7 +754,7 @@ static inline Atom dixGetAtomID(const char *name) {
  *
  * @param client      pointer to the client (ClientPtr)
  * @param event       pointer to the event
- * @return            return value of WriteToClient
+ * @return            return value of dixWriteToClient
  */
 static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
 {
@@ -762,7 +763,7 @@ static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
     if (pClient->swapped)
         swaps(&ev.u.u.sequenceNumber);
 
-    return WriteToClient(pClient, sizeof(xEvent), &ev);
+    return dixWriteToClient(pClient, sizeof(xEvent), &ev);
 }
 
 /*

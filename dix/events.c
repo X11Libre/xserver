@@ -138,6 +138,7 @@ Equipment Corporation.
 #include "os/bug_priv.h"
 #include "os/client_priv.h"
 #include "os/fmt.h"
+#include "os/io_priv.h"
 #include "os/log_priv.h"
 #include "os/probes_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
@@ -6146,14 +6147,14 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
             (*EventSwapVector[eventFrom->u.u.type & 0177])
                 (eventFrom, eventTo);
 
-            WriteToClient(pClient, eventlength, eventTo);
+            dixWriteToClient(pClient, eventlength, eventTo);
         }
     }
     else {
         /* only one GenericEvent, remember? that means either count is 1 and
          * eventlength is arbitrary or eventlength is 32 and count doesn't
          * matter. And we're all set. Woohoo. */
-        WriteToClient(pClient, count * eventlength, events);
+        dixWriteToClient(pClient, count * eventlength, events);
     }
 }
 

@@ -125,6 +125,7 @@ Equipment Corporation.
 #include "os/auth.h"
 #include "os/client_priv.h"
 #include "os/ddx_priv.h"
+#include "os/io_priv.h"
 #include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
@@ -1382,7 +1383,7 @@ ProcQueryFont(ClientPtr client)
             SwapFont(reply, TRUE);
         }
 
-        WriteToClient(client, rlength, reply);
+        dixWriteToClient(client, rlength, reply);
         free(reply);
         return Success;
     }
@@ -3848,8 +3849,8 @@ SendConnSetup(ClientPtr client, const char *reason)
         if (client->swapped)
             WriteSConnSetupPrefix(client, &csp);
         else
-            WriteToClient(client, sz_xConnSetupPrefix, &csp);
-        WriteToClient(client, (int) csp.lengthReason, reason);
+            dixWriteToClient(client, sz_xConnSetupPrefix, &csp);
+        dixWriteToClient(client, (int) csp.lengthReason, reason);
         return client->noClientException = -1;
     }
 
@@ -3902,8 +3903,8 @@ SendConnSetup(ClientPtr client, const char *reason)
                              lConnectionInfo);
     }
     else {
-        WriteToClient(client, sizeof(xConnSetupPrefix), lconnSetupPrefix);
-        WriteToClient(client, (int) (lconnSetupPrefix->length << 2),
+        dixWriteToClient(client, sizeof(xConnSetupPrefix), lconnSetupPrefix);
+        dixWriteToClient(client, (int) (lconnSetupPrefix->length << 2),
 		      lConnectionInfo);
     }
     client->clientState = ClientStateRunning;

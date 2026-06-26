@@ -69,6 +69,7 @@ Equipment Corporation.
 #include "include/misc.h"
 #include "include/gcstruct.h"
 #include "os/auth.h"
+#include "os/io_priv.h"
 #include "os/log_priv.h"
 #include "Xext/xf86bigfont/xf86bigfontsrv.h"
 
@@ -1106,8 +1107,8 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
                     pby += 4;
                 }
             }
-            WriteToClient(client, length, reply);
-            WriteToClient(client, namelen, name);
+            dixWriteToClient(client, length, reply);
+            dixWriteToClient(client, namelen, name);
             if (pFontInfo == &fontInfo) {
                 free(fontInfo.props);
                 free(fontInfo.isStringProp);
