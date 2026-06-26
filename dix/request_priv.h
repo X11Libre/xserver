@@ -11,20 +11,20 @@
 #include "include/dix.h"
 #include "include/dixstruct.h"
 #include "include/misc.h"    /* bytes_to_int32 */
-#include "include/os.h"      /* WriteToClient */
+#include "os/io_priv.h"      /* dixWriteToClient */
 
 /*
  * @brief write rpc buffer to client and then clear it
  *
  * @param pClient the client to write buffer to
  * @param rpcbuf  the buffer whose contents will be written
- * @return the result of WriteToClient() call
+ * @return the result of dixWriteToClient() call
  */
 static inline ssize_t WriteRpcbufToClient(ClientPtr pClient,
                                           x_rpcbuf_t *rpcbuf) {
     /* explicitly casting between (s)size_t and int - should be safe,
        since payloads are always small enough to easily fit into int. */
-    ssize_t ret = WriteToClient(pClient,
+    ssize_t ret = dixWriteToClient(pClient,
                                 (int)rpcbuf->wpos,
                                 rpcbuf->buffer);
     x_rpcbuf_clear(rpcbuf);
@@ -57,7 +57,7 @@ static inline int __write_reply_hdr_and_rpcbuf(
          swapl(&reply->length);
     }
 
-    WriteToClient(pClient, (int)hdrLen, hdrData);
+    dixWriteToClient(pClient, (int)hdrLen, hdrData);
     WriteRpcbufToClient(pClient, rpcbuf);
 
     return Success;
@@ -76,7 +76,7 @@ static inline int __write_reply_hdr_simple(
          swapl(&reply->length);
     }
 
-    WriteToClient(pClient, (int)hdrLen, hdrData);
+    dixWriteToClient(pClient, (int)hdrLen, hdrData);
     return Success;
 }
 
