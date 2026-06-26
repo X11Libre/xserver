@@ -52,7 +52,10 @@ DoGetProgramString(struct __GLXclientStateRec *cl, GLbyte * pc,
     xGLXVendorPrivateWithReplyReq *const req =
         (xGLXVendorPrivateWithReplyReq *) pc;
     int error;
-    __GLXcontext *const cx = __glXForceCurrent(cl, req->contextTag, &error);
+    __GLXcontext *const cx =
+        __glXForceCurrent(cl,
+                          do_swap ? bswap_32(req->contextTag) : req->contextTag,
+                          &error);
     ClientPtr client = cl->client;
 
     REQUEST_FIXED_SIZE(xGLXVendorPrivateWithReplyReq, 8);
