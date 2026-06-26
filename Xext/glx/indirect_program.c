@@ -88,11 +88,17 @@ DoGetProgramString(struct __GLXclientStateRec *cl, GLbyte * pc,
 
         if (__glXErrorOccured()) {
             __GLX_BEGIN_REPLY(0);
+            if (do_swap)
+                __GLX_SWAP_REPLY_HEADER();
             __GLX_SEND_HEADER();
         }
         else {
             __GLX_BEGIN_REPLY(compsize);
             ((xGLXGetTexImageReply *) &reply)->width = compsize;
+            if (do_swap) {
+                __GLX_SWAP_REPLY_HEADER();
+                swapl(&((xGLXGetTexImageReply *) &reply)->width);
+            }
             __GLX_SEND_HEADER();
             __GLX_SEND_VOID_ARRAY(compsize);
         }
