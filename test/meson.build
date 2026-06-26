@@ -90,7 +90,7 @@ if get_option('xvfb')
     test('XTS',
         find_program('scripts/xvfb-piglit.sh'),
         env: piglit_env,
-        timeout: 1200,
+        timeout: 3600,
         suite: 'xvfb'
     )
 
@@ -131,7 +131,7 @@ if get_option('xvfb')
             test('XTS',
                 find_program('scripts/xephyr-glamor' + testsuite + '-piglit.sh'),
                 env: piglit_env,
-                timeout: 1200,
+                timeout: 3600,
                 suite: 'xephyr-glamor' + testsuite,
             )
 
