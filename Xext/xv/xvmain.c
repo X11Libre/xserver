@@ -251,6 +251,8 @@ CreateResourceTypes(void)
         return FALSE;
     }
 
+    resources_initialized = true;
+
     return TRUE;
 }
 
