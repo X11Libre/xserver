@@ -53,6 +53,17 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+/* optional debug logging of the exported WriteToClient() frontend.
+ * the lightweight 'caller' variant resolves the return address via dladdr(),
+ * so pull in <dlfcn.h> (needs _GNU_SOURCE) before any other system header. */
+#if defined(CONFIG_DEBUG_WRITETOCLIENT) && \
+    !defined(CONFIG_DEBUG_WRITETOCLIENT_BACKTRACE) && defined(HAVE_DLFCN_H)
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <dlfcn.h>
+#endif
+
 #include <assert.h>
 #undef DEBUG_COMMUNICATION
 
@@ -909,6 +920,24 @@ dixWriteToClient(ClientPtr who, int count, const void *__buf)
 int
 WriteToClient(ClientPtr who, int count, const void *buf)
 {
+#ifdef CONFIG_DEBUG_WRITETOCLIENT
+#ifdef CONFIG_DEBUG_WRITETOCLIENT_BACKTRACE
+    ErrorF("WriteToClient: client=%d count=%d\n", who ? who->index : -1, count);
+    xorg_backtrace();
+#else
+    void *ra = __builtin_return_address(0);
+#ifdef HAVE_DLFCN_H
+    Dl_info info;
+    if (dladdr(ra, &info) && info.dli_sname) {
+        ErrorF("WriteToClient: client=%d count=%d caller=%s+%p\n",
+               who ? who->index : -1, count, info.dli_sname, ra);
+    }
+    else
+#endif
+        ErrorF("WriteToClient: client=%d count=%d caller=%p\n",
+               who ? who->index : -1, count, ra);
+#endif
+#endif
     return dixWriteToClient(who, count, buf);
 }
 
