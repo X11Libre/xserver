@@ -1001,22 +1001,7 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
     if (!validGlxScreen(cl->client, screen, &pGlxScreen, &err))
         return err;
 
-    xGLXGetFBConfigsReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = __GLX_FBCONFIG_ATTRIBS_LENGTH * pGlxScreen->numFBConfigs,
-        .numFBConfigs = pGlxScreen->numFBConfigs,
-        .numAttribs = __GLX_TOTAL_FBCONFIG_ATTRIBS
-    };
-
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swapl(&reply.numFBConfigs);
-        swapl(&reply.numAttribs);
-    }
-
-    WriteToClient(client, sizeof(xGLXGetFBConfigsReply), &reply);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (modes = pGlxScreen->fbconfigs; modes != NULL; modes = modes->next) {
         p = 0;
@@ -1089,13 +1074,18 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
         }
         assert(p == __GLX_FBCONFIG_ATTRIBS_LENGTH);
 
-        if (client->swapped) {
-            SwapLongs((CARD32*)buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);
-        }
-        WriteToClient(client, __GLX_SIZE_CARD32 * __GLX_FBCONFIG_ATTRIBS_LENGTH,
-                      (char *) buf);
+        /* attribs are CARD32; rpcbuf byte-swaps them when client->swapped */
+        x_rpcbuf_write_CARD32s(&rpcbuf, buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);
     }
-    return Success;
+
+    xGLXGetFBConfigsReply reply = {
+        .numFBConfigs = pGlxScreen->numFBConfigs,
+        .numAttribs = __GLX_TOTAL_FBCONFIG_ATTRIBS
+    };
+    X_REPLY_FIELD_CARD32(numFBConfigs);
+    X_REPLY_FIELD_CARD32(numAttribs);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
