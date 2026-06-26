@@ -678,21 +678,12 @@ jobs:
     xserver-build-gentoo:
         runs-on: ubuntu-latest
         needs: ubuntu-fetch-pkg
-        # packages:read lets the GITHUB_TOKEN pull the (currently private) GHCR
-        # image; contents:read is for checkout. Both become unnecessary once the
-        # package is public, but are harmless to keep.
-        permissions:
-            contents: read
-            packages: read
         # Prebuilt image with all build deps baked in (built by gentoo-image.yml,
         # pushed to GHCR). The job only runs meson (~5 min) instead of emerging
-        # 115 packages (~20 min). credentials let it pull while the package is
-        # private; harmless once it is public (then fork PRs can pull too).
+        # 115 packages (~20 min). The package is public, so it pulls anonymously
+        # — no credentials or packages permission needed, and fork PRs work too.
         container:
             image: ghcr.io/x11libre/xserver-gentoo-deps:latest
-            credentials:
-                username: ${{ github.actor }}
-                password: ${{ secrets.GITHUB_TOKEN }}
         env:
             # werror off: Gentoo's hardened toolchain (FORTIFY_SOURCE) trips
             # -Werror=format-truncation in the bundled Xtrans (a bounded snprintf
