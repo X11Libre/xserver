@@ -85,18 +85,11 @@ __glXDispSwap_ReadPixels(__GLXclientState * cl, GLbyte * pc)
                  *(GLsizei *) (pc + 8), *(GLsizei *) (pc + 12),
                  *(GLenum *) (pc + 16), *(GLenum *) (pc + 20), answer);
 
-    if (__glXErrorOccured()) {
-        __GLX_BEGIN_REPLY(0);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-    }
-    else {
-        __GLX_BEGIN_REPLY(compsize);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-        __GLX_SEND_VOID_ARRAY(compsize);
-    }
-    return Success;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!__glXErrorOccured())
+        x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -111,7 +104,7 @@ __glXDispSwap_GetTexImage(__GLXclientState * cl, GLbyte * pc)
     int error;
     char *answer, answerBuffer[200];
     GLint width = 0, height = 0, depth = 1;
-    xGLXSingleReply reply = { 0, };
+    xGLXGetTexImageReply reply = { 0 };
 
     REQUEST_FIXED_SIZE(xGLXSingleReq, 20);
 
@@ -153,24 +146,18 @@ __glXDispSwap_GetTexImage(__GLXclientState * cl, GLbyte * pc)
     glGetTexImage(*(GLenum *) (pc + 0), *(GLint *) (pc + 4),
                   *(GLenum *) (pc + 8), *(GLenum *) (pc + 12), answer);
 
-    if (__glXErrorOccured()) {
-        __GLX_BEGIN_REPLY(0);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!__glXErrorOccured()) {
+        reply.width = width;
+        reply.height = height;
+        reply.depth = depth;
+        X_REPLY_FIELD_CARD32(width);
+        X_REPLY_FIELD_CARD32(height);
+        X_REPLY_FIELD_CARD32(depth);
+        x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
     }
-    else {
-        __GLX_BEGIN_REPLY(compsize);
-        __GLX_SWAP_REPLY_HEADER();
-        swapl(&width);
-        swapl(&height);
-        swapl(&depth);
-        ((xGLXGetTexImageReply *) &reply)->width = width;
-        ((xGLXGetTexImageReply *) &reply)->height = height;
-        ((xGLXGetTexImageReply *) &reply)->depth = depth;
-        __GLX_SEND_HEADER();
-        __GLX_SEND_VOID_ARRAY(compsize);
-    }
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -199,18 +186,11 @@ __glXDispSwap_GetPolygonStipple(__GLXclientState * cl, GLbyte * pc)
 
     __glXClearErrorOccured();
     glGetPolygonStipple((GLubyte *) answer);
-    if (__glXErrorOccured()) {
-        __GLX_BEGIN_REPLY(0);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-    }
-    else {
-        __GLX_BEGIN_REPLY(128);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-        __GLX_SEND_BYTE_ARRAY(128);
-    }
-    return Success;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!__glXErrorOccured())
+        x_rpcbuf_write_binary_pad(&rpcbuf, answer, 128);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -225,7 +205,7 @@ GetSeparableFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
 
     char *answer, answerBuffer[200];
     GLint width = 0, height = 0;
-    xGLXSingleReply reply = { 0, };
+    xGLXGetSeparableFilterReply reply = { 0 };
 
     cx = __glXForceCurrent(cl, tag, &error);
     if (!cx) {
@@ -264,23 +244,16 @@ GetSeparableFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     glGetSeparableFilter(*(GLenum *) (pc + 0), *(GLenum *) (pc + 4),
                          *(GLenum *) (pc + 8), answer, answer + compsize, NULL);
 
-    if (__glXErrorOccured()) {
-        __GLX_BEGIN_REPLY(0);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-    }
-    else {
-        __GLX_BEGIN_REPLY(compsize + compsize2);
-        __GLX_SWAP_REPLY_HEADER();
-        swapl(&width);
-        swapl(&height);
-        ((xGLXGetSeparableFilterReply *) &reply)->width = width;
-        ((xGLXGetSeparableFilterReply *) &reply)->height = height;
-        __GLX_SEND_HEADER();
-        __GLX_SEND_VOID_ARRAY(compsize + compsize2);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!__glXErrorOccured()) {
+        reply.width = width;
+        reply.height = height;
+        X_REPLY_FIELD_CARD32(width);
+        X_REPLY_FIELD_CARD32(height);
+        x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize + compsize2);
     }
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -315,7 +288,7 @@ GetConvolutionFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
 
     char *answer, answerBuffer[200];
     GLint width = 0, height = 0;
-    xGLXSingleReply reply = { 0, };
+    xGLXGetConvolutionFilterReply reply = { 0 };
 
     cx = __glXForceCurrent(cl, tag, &error);
     if (!cx) {
@@ -352,23 +325,16 @@ GetConvolutionFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     glGetConvolutionFilter(*(GLenum *) (pc + 0), *(GLenum *) (pc + 4),
                            *(GLenum *) (pc + 8), answer);
 
-    if (__glXErrorOccured()) {
-        __GLX_BEGIN_REPLY(0);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-    }
-    else {
-        __GLX_BEGIN_REPLY(compsize);
-        __GLX_SWAP_REPLY_HEADER();
-        swapl(&width);
-        swapl(&height);
-        ((xGLXGetConvolutionFilterReply *) &reply)->width = width;
-        ((xGLXGetConvolutionFilterReply *) &reply)->height = height;
-        __GLX_SEND_HEADER();
-        __GLX_SEND_VOID_ARRAY(compsize);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!__glXErrorOccured()) {
+        reply.width = width;
+        reply.height = height;
+        X_REPLY_FIELD_CARD32(width);
+        X_REPLY_FIELD_CARD32(height);
+        x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
     }
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -403,7 +369,7 @@ GetHistogram(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
 
     char *answer, answerBuffer[200];
     GLint width = 0;
-    xGLXSingleReply reply = { 0, };
+    xGLXGetHistogramReply reply = { 0 };
 
     cx = __glXForceCurrent(cl, tag, &error);
     if (!cx) {
@@ -434,21 +400,14 @@ GetHistogram(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     __glXClearErrorOccured();
     glGetHistogram(target, reset, format, type, answer);
 
-    if (__glXErrorOccured()) {
-        __GLX_BEGIN_REPLY(0);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-    }
-    else {
-        __GLX_BEGIN_REPLY(compsize);
-        __GLX_SWAP_REPLY_HEADER();
-        swapl(&width);
-        ((xGLXGetHistogramReply *) &reply)->width = width;
-        __GLX_SEND_HEADER();
-        __GLX_SEND_VOID_ARRAY(compsize);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!__glXErrorOccured()) {
+        reply.width = width;
+        X_REPLY_FIELD_CARD32(width);
+        x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
     }
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -508,19 +467,11 @@ GetMinmax(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     __glXClearErrorOccured();
     glGetMinmax(target, reset, format, type, answer);
 
-    if (__glXErrorOccured()) {
-        __GLX_BEGIN_REPLY(0);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-    }
-    else {
-        __GLX_BEGIN_REPLY(compsize);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-        __GLX_SEND_VOID_ARRAY(compsize);
-    }
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!__glXErrorOccured())
+        x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -555,7 +506,7 @@ GetColorTable(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
 
     char *answer, answerBuffer[200];
     GLint width = 0;
-    xGLXSingleReply reply = { 0, };
+    xGLXGetColorTableReply reply = { 0 };
 
     cx = __glXForceCurrent(cl, tag, &error);
     if (!cx) {
@@ -586,21 +537,14 @@ GetColorTable(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     glGetColorTable(*(GLenum *) (pc + 0), *(GLenum *) (pc + 4),
                     *(GLenum *) (pc + 8), answer);
 
-    if (__glXErrorOccured()) {
-        __GLX_BEGIN_REPLY(0);
-        __GLX_SWAP_REPLY_HEADER();
-        __GLX_SEND_HEADER();
-    }
-    else {
-        __GLX_BEGIN_REPLY(compsize);
-        __GLX_SWAP_REPLY_HEADER();
-        swapl(&width);
-        ((xGLXGetColorTableReply *) &reply)->width = width;
-        __GLX_SEND_HEADER();
-        __GLX_SEND_VOID_ARRAY(compsize);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!__glXErrorOccured()) {
+        reply.width = width;
+        X_REPLY_FIELD_CARD32(width);
+        x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
     }
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
