@@ -979,6 +979,15 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
             (*card->cfuncs->enableAccel) (pScreen);
     }
 
+#ifdef DPMSExtension
+    if (card->cfuncs->dpms && !DPMSDisabledSwitch) {
+        DPMSStandbyTime = 0;
+        DPMSSuspendTime = 0;
+        DPMSOffTime = 0;
+        pScreen->DPMS = KdDPMS;
+    }
+#endif
+
     return TRUE;
 }
 
