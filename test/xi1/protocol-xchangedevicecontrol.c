@@ -42,7 +42,7 @@
 
 #include "protocol-common.h"
 
-DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
+DECLARE_WRAP_FUNCTION(dixWriteToClient, void, ClientPtr client, int len, void *data);
 
 extern ClientRec client_window;
 static ClientRec client_request;
@@ -96,7 +96,7 @@ test_ChangeDeviceControl(void)
 
     request_init(request, ChangeDeviceControl);
 
-    wrapped_WriteToClient  = reply_ChangeDeviceControl;
+    wrapped_dixWriteToClient  = reply_ChangeDeviceControl;
 
     client_request = init_client(request->length, request);
 

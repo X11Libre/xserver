@@ -104,6 +104,19 @@ typedef struct _NewClientRec *NewClientPtr;
 
 extern _X_EXPORT int ReadFdFromClient(ClientPtr client);
 
+/**
+ * @brief write @p count bytes from @p buf into the client's output buffer
+ *
+ * @deprecated Legacy entry point, kept for ABI compatibility. Drivers and
+ *             external modules should not write to clients directly; this
+ *             remains exported only for existing out-of-tree users. In-tree
+ *             code uses the internal dixWriteToClient() worker instead.
+ *
+ * @param who    the client to write to
+ * @param count  number of bytes to write
+ * @param buf    data to write
+ * @return       number of bytes buffered, 0 on no-op, -1 on error
+ */
 extern _X_EXPORT int WriteToClient(ClientPtr /*who */ , int /*count */ ,
                                    const void * /*buf */ );
 

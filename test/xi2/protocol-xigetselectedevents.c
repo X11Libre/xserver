@@ -55,7 +55,7 @@
 
 #include "protocol-common.h"
 
-DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
+DECLARE_WRAP_FUNCTION(dixWriteToClient, void, ClientPtr client, int len, void *data);
 DECLARE_WRAP_FUNCTION(AddResource, Bool, XID id, RESTYPE type, void *value);
 
 static void reply_XIGetSelectedEvents(ClientPtr client, int len, void *data);
@@ -94,7 +94,7 @@ reply_XIGetSelectedEvents(ClientPtr client, int len, void *data)
 
     assert(reply.num_masks == test_data.num_masks_expected);
 
-    wrapped_WriteToClient = reply_XIGetSelectedEvents_data;
+    wrapped_dixWriteToClient = reply_XIGetSelectedEvents_data;
 }
 
 static void
@@ -135,12 +135,12 @@ request_XIGetSelectedEvents(xXIGetSelectedEventsReq * req, int error)
 
     client = init_client(req->length, req);
 
-    wrapped_WriteToClient = reply_XIGetSelectedEvents;
+    wrapped_dixWriteToClient = reply_XIGetSelectedEvents;
 
     rc = ProcXIGetSelectedEvents(&client);
     assert(rc == error);
 
-    wrapped_WriteToClient = reply_XIGetSelectedEvents;
+    wrapped_dixWriteToClient = reply_XIGetSelectedEvents;
     client.swapped = TRUE;
 
     /* MUST NOT swap req->length here !
