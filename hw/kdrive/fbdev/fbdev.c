@@ -984,19 +984,14 @@ fbdevDPMS(ScreenPtr pScreen, int mode)
 {
     KdScreenPriv(pScreen);
     FbdevPriv *priv = pScreenPriv->card->driver;
-    static int oldmode = -1;
 
-    if (mode == oldmode)
-        return TRUE;
 #ifdef FBIOPUT_POWERMODE
     if (ioctl(priv->fd, FBIOPUT_POWERMODE, &mode) >= 0) {
-        oldmode = mode;
         return TRUE;
     }
 #endif
 #ifdef FBIOBLANK
     if (ioctl(priv->fd, FBIOBLANK, mode ? mode + 1 : 0) >= 0) {
-        oldmode = mode;
         return TRUE;
     }
 #endif
