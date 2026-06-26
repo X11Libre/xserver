@@ -45,12 +45,12 @@
 
 #include "protocol-common.h"
 
-DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
+DECLARE_WRAP_FUNCTION(dixWriteToClient, void, ClientPtr client, int len, void *data);
 /*
  * Protocol testing for XIQueryDevice request and reply.
  *
  * Test approach:
- * Wrap WriteToClient to intercept server's reply. ProcXIQueryDevice returns
+ * Wrap dixWriteToClient to intercept server's reply. ProcXIQueryDevice returns
  * data in two batches, once for the request, once for the trailing data
  * with the device information.
  * Repeatedly test with varying deviceids and check against data in reply.
@@ -91,7 +91,7 @@ reply_XIQueryDevice(ClientPtr client, int len, void *data)
 
     test_data.num_devices_in_reply = reply.num_devices;
 
-    wrapped_WriteToClient = reply_XIQueryDevice_data;
+    wrapped_dixWriteToClient = reply_XIQueryDevice_data;
 }
 
 /* reply handling for the trailing bytes that constitute the device info */
@@ -292,7 +292,7 @@ request_XIQueryDevice(struct test_data *querydata, int deviceid, int error)
 
     request_init(&request, XIQueryDevice);
     client = init_client(request.length, &request);
-    wrapped_WriteToClient = reply_XIQueryDevice;
+    wrapped_dixWriteToClient = reply_XIQueryDevice;
 
     querydata->which_device = deviceid;
 
@@ -303,7 +303,7 @@ request_XIQueryDevice(struct test_data *querydata, int deviceid, int error)
     if (rc != Success)
         assert(client.errorValue == deviceid);
 
-    wrapped_WriteToClient = reply_XIQueryDevice;
+    wrapped_dixWriteToClient = reply_XIQueryDevice;
 
     client.swapped = TRUE;
     swaps(&request.length);
@@ -323,7 +323,7 @@ test_XIQueryDevice(void)
 
     init_simple();
 
-    wrapped_WriteToClient = reply_XIQueryDevice;
+    wrapped_dixWriteToClient = reply_XIQueryDevice;
     request_init(&request, XIQueryDevice);
 
     dbg("Testing XIAllDevices.\n");

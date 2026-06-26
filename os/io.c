@@ -761,7 +761,7 @@ OutputBufferMakeRoomAndFlush(ClientPtr who, OsCommPtr oc, const void* extra_buf,
 }
 
 /*****************
- * WriteToClient
+ * dixWriteToClient
  *    Copies buf into ClientPtr.buf if it fits (with padding), else
  *    flushes ClientPtr.buf and buf to client.  As of this writing,
  *    every use of WriteToClient is cast to void, and the result
@@ -769,10 +769,13 @@ OutputBufferMakeRoomAndFlush(ClientPtr who, OsCommPtr oc, const void* extra_buf,
  *    that are sending several chunks of data and want to break
  *    out of a loop on error.  Thus, we will leave the type of
  *    this routine as int.
+ *
+ *    This is the internal worker; WriteToClient() is the exported
+ *    frontend (see below).
  *****************/
 
 int
-WriteToClient(ClientPtr who, int count, const void *__buf)
+dixWriteToClient(ClientPtr who, int count, const void *__buf)
 {
     OsCommPtr oc;
     int padBytes;
@@ -894,6 +897,19 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
         oco->count += padBytes;
     }
     return count;
+}
+
+/*****************
+ * WriteToClient
+ *    Exported (legacy) frontend for dixWriteToClient(). Kept for ABI
+ *    compatibility with external drivers / modules. In-tree callers use
+ *    dixWriteToClient() directly.
+ *****************/
+
+int
+WriteToClient(ClientPtr who, int count, const void *buf)
+{
+    return dixWriteToClient(who, count, buf);
 }
 
  /********************

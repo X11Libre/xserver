@@ -46,7 +46,7 @@
 
 #include "protocol-common.h"
 
-DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
+DECLARE_WRAP_FUNCTION(dixWriteToClient, void, ClientPtr client, int len, void *data);
 DECLARE_WRAP_FUNCTION(GrabButton, int,
                       ClientPtr client, DeviceIntPtr dev,
                       DeviceIntPtr modifier_device, int button,
@@ -101,7 +101,7 @@ reply_XIPassiveGrabDevice(ClientPtr client, int len, void *data)
     /* ProcXIPassiveGrabDevice sends the data in two batches, let the second
      * handler handle the modifier data */
     if (reply.num_modifiers > 0)
-        wrapped_WriteToClient = reply_XIPassiveGrabDevice_data;
+        wrapped_dixWriteToClient = reply_XIPassiveGrabDevice_data;
 }
 
 static void
@@ -127,7 +127,7 @@ reply_XIPassiveGrabDevice_data(ClientPtr client, int len, void *data)
         assert(mods->pad1 == 0);
     }
 
-    wrapped_WriteToClient = reply_XIPassiveGrabDevice;
+    wrapped_dixWriteToClient = reply_XIPassiveGrabDevice;
 }
 
 static void
@@ -197,7 +197,7 @@ test_XIPassiveGrabDevice(void)
 
     request->grab_window = CLIENT_WINDOW_ID;
 
-    wrapped_WriteToClient = reply_XIPassiveGrabDevice;
+    wrapped_dixWriteToClient = reply_XIPassiveGrabDevice;
     client_request = init_client(request->length, request);
 
     dbg("Testing invalid device\n");

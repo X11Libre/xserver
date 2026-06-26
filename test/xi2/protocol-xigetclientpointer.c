@@ -45,7 +45,7 @@
 
 #include "protocol-common.h"
 
-DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
+DECLARE_WRAP_FUNCTION(dixWriteToClient, void, ClientPtr client, int len, void *data);
 
 static struct {
     int cp_is_set;
@@ -114,7 +114,7 @@ test_XIGetClientPointer(void)
 
     request.win = CLIENT_WINDOW_ID;
 
-    wrapped_WriteToClient = reply_XIGetClientPointer;
+    wrapped_dixWriteToClient = reply_XIGetClientPointer;
 
     client_request = init_client(request.length, &request);
 

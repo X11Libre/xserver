@@ -236,7 +236,7 @@ if build_xorg
        ldwraps = [
         '-Wl,-wrap,dixLookupWindow',
         '-Wl,-wrap,dixLookupResourceOwner',
-        '-Wl,-wrap,WriteToClient',
+        '-Wl,-wrap,dixWriteToClient',
         '-Wl,-wrap,dixLookupWindow',
         '-Wl,-wrap,XISetEventMask',
         '-Wl,-wrap,AddResource',

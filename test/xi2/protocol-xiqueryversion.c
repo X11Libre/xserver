@@ -30,7 +30,7 @@
  * Protocol testing for XIQueryVersion request and reply.
  *
  * Test approach:
- * Wrap WriteToClient to intercept the server's reply.
+ * Wrap dixWriteToClient to intercept the server's reply.
  * Repeatedly test a client/server version combination, compare version in
  * reply with versions given. Version must be equal to either
  * server version or client version, whichever is smaller.
@@ -52,7 +52,7 @@
 #include "protocol-common.h"
 #include "Xext/xinput/exglobals.h"
 
-DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
+DECLARE_WRAP_FUNCTION(dixWriteToClient, void, ClientPtr client, int len, void *data);
 
 extern XExtensionVersion XIVersion;
 
@@ -159,7 +159,7 @@ test_XIQueryVersion(void)
 {
     init_simple();
 
-    wrapped_WriteToClient = reply_XIQueryVersion;
+    wrapped_dixWriteToClient = reply_XIQueryVersion;
 
     dbg("Server version 2.0 - client versions [1..3].0\n");
     /* some simple tests to catch common errors quickly */
@@ -216,7 +216,7 @@ test_XIQueryVersion_multiple(void)
     XIVersion.major_version = 2;
     XIVersion.minor_version = 2;
 
-    wrapped_WriteToClient = reply_XIQueryVersion_multiple;
+    wrapped_dixWriteToClient = reply_XIQueryVersion_multiple;
 
     /* run 1 */
 
