@@ -385,20 +385,17 @@ DoGetString(__GLXclientState * cl, GLbyte * pc, GLboolean need_swap)
         length = strlen((const char *) string) + 1;
     }
 
-    xGLXSingleReply reply = { 0 };
-    __GLX_BEGIN_REPLY(length);
-    __GLX_PUT_SIZE(length);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    /* string is an array of chars; no byte-swapping needed */
+    x_rpcbuf_write_binary_pad(&rpcbuf, string, length);
 
-    if (need_swap) {
-        __GLX_SWAP_REPLY_SIZE();
-        __GLX_SWAP_REPLY_HEADER();
-    }
+    xGLXSingleReply reply = {
+        .size = length,
+    };
+    X_REPLY_FIELD_CARD32(size);
 
-    __GLX_SEND_HEADER();
-    WriteToClient(client, length, string);
     free(buf);
-
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
