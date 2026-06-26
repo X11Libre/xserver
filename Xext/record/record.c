@@ -47,6 +47,7 @@ and Jim Haggerty of Metheus.
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
+#include "os/io_priv.h"
 #include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX/panoramiX.h"
@@ -243,13 +244,13 @@ RecordFlushReplyBuffer(RecordContextPtr pContext,
         return;
     ++pContext->inFlush;
     if (pContext->numBufBytes)
-        WriteToClient(pContext->pRecordingClient, pContext->numBufBytes,
+        dixWriteToClient(pContext->pRecordingClient, pContext->numBufBytes,
                       pContext->replyBuffer);
     pContext->numBufBytes = 0;
     if (len1)
-        WriteToClient(pContext->pRecordingClient, len1, data1);
+        dixWriteToClient(pContext->pRecordingClient, len1, data1);
     if (len2)
-        WriteToClient(pContext->pRecordingClient, len2, data2);
+        dixWriteToClient(pContext->pRecordingClient, len2, data2);
     --pContext->inFlush;
 }                               /* RecordFlushReplyBuffer */
 
@@ -2275,7 +2276,7 @@ ProcRecordGetContext(ClientPtr client)
         swapl(&reply.length);
         swapl(&reply.nClients);
     }
-    WriteToClient(client, sizeof(xRecordGetContextReply), &reply);
+    dixWriteToClient(client, sizeof(xRecordGetContextReply), &reply);
 
     /* write all the CLIENT_INFOs */
 
@@ -2292,8 +2293,8 @@ ProcRecordGetContext(ClientPtr client)
             rci.clientResource = pRCAP->pClientIDs[i];
             if (client->swapped)
                 swapl(&rci.clientResource);
-            WriteToClient(client, sizeof(xRecordClientInfo), &rci);
-            WriteToClient(client, sizeof(xRecordRange) * pri->nRanges,
+            dixWriteToClient(client, sizeof(xRecordClientInfo), &rci);
+            dixWriteToClient(client, sizeof(xRecordRange) * pri->nRanges,
                           pri->pRanges);
         }
     }
