@@ -1115,16 +1115,23 @@ xf86VideoPtrToDriverList(struct pci_device *dev, XF86MatchedDrivers *md)
 			driverList[0] = "psb";
 			driverList[1] = "psb_drv";
 			break;
-		/* Default to intel only on pre-gen3 chips */
-		case 0x7121:
-		case 0x7123:
-		case 0x7125:
-		case 0x1132:
+		/* Default to intel only on pre-gen4 chips */
 		case 0x3577:
 		case 0x2562:
 		case 0x3582:
 		case 0x358e:
 		case 0x2572:
+		case 0x2582:
+		case 0x258a:
+		case 0x2592:
+		case 0x2772:
+		case 0x27a2:
+		case 0x27ae:
+		case 0x29b2:
+		case 0x29c2:
+		case 0x29d2:
+		case 0xa001:
+		case 0xa011:
 			driverList[0] = "intel";
 			break;
         }
