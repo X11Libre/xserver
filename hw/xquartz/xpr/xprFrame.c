@@ -577,7 +577,6 @@ xprGetXWindow(xp_window_id wid)
 
     dispatch_sync_f(window_hash_serial_q, &ctx, windowGet);
 #else
-    RootlessWindowRec *winRec;
     pthread_rwlock_rdlock(&window_hash_rwlock);
     winRec = x_hash_table_lookup(window_hash, x_cvt_uint_to_vptr(wid), NULL);
     pthread_rwlock_unlock(&window_hash_rwlock);

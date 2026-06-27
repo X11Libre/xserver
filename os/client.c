@@ -76,15 +76,16 @@
 #include <limits.h>
 #endif
 
-#if defined(__DragonFly__) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__DragonFly__) || defined(__FreeBSD__)
 #include <sys/sysctl.h>
 #include <errno.h>
 #endif
 
 #ifdef __APPLE__
+#include "hw/xquartz/osxcompat.h"
+#ifdef HAS_LIBDISPATCH
 #include <dispatch/dispatch.h>
-#include <errno.h>
-#include <sys/sysctl.h>
+#endif
 #endif
 
 #include "os/auth.h"
@@ -166,7 +167,7 @@ get_argmax_from_kern(void *arg)
 void
 DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 {
-#if !defined(__APPLE__) && !defined(__DragonFly__) && !defined(__FreeBSD__)
+#if !(defined(__APPLE__) && defined(HAS_LIBDISPATCH)) && !defined(__DragonFly__) && !defined(__FreeBSD__)
     char path[PATH_MAX + 1];
     int totsize = 0;
     int fd = 0;
@@ -180,7 +181,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
     if (pid == -1)
         return;
 
-#if defined (__APPLE__)
+#if defined(__APPLE__) && defined(HAS_LIBDISPATCH)
     {
         static dispatch_once_t once;
         static int argmax;
