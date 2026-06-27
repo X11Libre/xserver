@@ -285,9 +285,9 @@ init_simple(void)
     devices = init_devices();
 }
 
-WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data)
+WRAP_FUNCTION(dixWriteToClient, void, ClientPtr client, int len, void *data)
 {
-    IMPLEMENT_WRAP_FUNCTION(WriteToClient, client, len, data);
+    IMPLEMENT_WRAP_FUNCTION(dixWriteToClient, client, len, data);
 }
 
 WRAP_FUNCTION(XISetEventMask, int,

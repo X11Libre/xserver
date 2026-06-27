@@ -43,10 +43,6 @@
 
 /*---------------------- Macros and type definitions ----------------------*/
 
-#ifdef PACK
-#pragma PACK
-#endif
-
 /*
  * General EAX, EBX, ECX, EDX type registers.  Note that for
  * portability, and speed, the issue of byte swapping is not addressed
@@ -300,15 +296,7 @@ typedef struct {
     X86EMU_regs x86;
 } X86EMU_sysEnv;
 
-#ifdef END_PACK
-#pragma END_PACK
-#endif
-
 /*----------------------------- Global Variables --------------------------*/
-
-#ifdef  __cplusplus
-extern "C" {                    /* Use "C" linkage when in C++ mode */
-#endif
 
 /* Global emulator machine state.
  *
@@ -325,7 +313,4 @@ extern "C" {                    /* Use "C" linkage when in C++ mode */
     void printk(const char *fmt, ...)
         _X_ATTRIBUTE_PRINTF(1, 2);
 
-#ifdef  __cplusplus
-}                               /* End of "C" linkage for C++           */
-#endif
 #endif                          /* __X86EMU_REGS_H */

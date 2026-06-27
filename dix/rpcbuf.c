@@ -236,6 +236,7 @@ Bool x_rpcbuf_write_CARD64s(x_rpcbuf_t *rpcbuf, const CARD64 *values,
     return TRUE;
 }
 
+_X_EXPORT /* only for GLX, not part of public ABI */
 Bool x_rpcbuf_write_binary_pad(x_rpcbuf_t *rpcbuf, const void *values,
                                size_t size)
 {

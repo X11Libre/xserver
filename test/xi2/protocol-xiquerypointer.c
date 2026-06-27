@@ -45,7 +45,7 @@
 
 #include "protocol-common.h"
 
-DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
+DECLARE_WRAP_FUNCTION(dixWriteToClient, void, ClientPtr client, int len, void *data);
 
 extern ClientRec client_window;
 static ClientRec client_request;
@@ -107,13 +107,13 @@ reply_XIQueryPointer(ClientPtr client, int len, void *data)
 
     assert(reply.same_screen == xTrue);
 
-    wrapped_WriteToClient = reply_XIQueryPointer_data;
+    wrapped_dixWriteToClient = reply_XIQueryPointer_data;
 }
 
 static void
 reply_XIQueryPointer_data(ClientPtr client, int len, void *data)
 {
-    wrapped_WriteToClient = reply_XIQueryPointer;
+    wrapped_dixWriteToClient = reply_XIQueryPointer;
 
     assert(len < 0xffff); /* suspicious size, swapping bug */
 }
@@ -153,7 +153,7 @@ test_XIQueryPointer(void)
 
     request_init(&request, XIQueryPointer);
 
-    wrapped_WriteToClient = reply_XIQueryPointer;
+    wrapped_dixWriteToClient = reply_XIQueryPointer;
 
     client_request = init_client(request.length, &request);
 

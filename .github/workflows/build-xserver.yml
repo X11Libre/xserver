@@ -7,7 +7,7 @@ env:
     MESON_BUILDDIR:  "__BUILD"
     X11_PREFIX:      /home/runner/x11
     X11_BUILD_DIR:   /home/runner/work/xserver/xserver/WORK/sources/3rdparty
-    GOXPROTO_REF:    v0.0.3
+    GOXPROTO_REF:    v0.0.4
 
 on:
     push:
@@ -675,6 +675,27 @@ jobs:
             - name: build
               run: ./.github/scripts/alpine/run-xserver-build.sh
 
+    xserver-build-gentoo:
+        runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
+        # Prebuilt image with all build deps baked in (built by gentoo-image.yml,
+        # pushed to GHCR). The job only runs meson (~5 min) instead of emerging
+        # 115 packages (~20 min). The package is public, so it pulls anonymously
+        # — no credentials or packages permission needed, and fork PRs work too.
+        container:
+            image: ghcr.io/x11libre/xserver-gentoo-deps:latest
+        env:
+            # werror off: Gentoo's hardened toolchain (FORTIFY_SOURCE) trips
+            # -Werror=format-truncation in the bundled Xtrans (a bounded snprintf
+            # into sun_path) which other platforms don't hit. Matches the other
+            # freshly-added lanes (solaris/openbsd) while the platform is new.
+            MESON_ARGS: -Dprefix=/usr -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v6
+            - name: build
+              run: ./.github/scripts/gentoo/run-xserver-build.sh
+
     xserver-build-cygwin:
         # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
         if: >-
@@ -789,6 +810,7 @@ jobs:
             - xserver-build-dragonflybsd
             - xserver-build-netbsd
             - xserver-build-arch
+            - xserver-build-gentoo
         steps:
             - name: Checkout
               uses: actions/checkout@v6

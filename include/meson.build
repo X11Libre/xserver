@@ -277,6 +277,12 @@ conf_data.set('X_REGISTRY_REQUEST', build_registry_request ? '1' : false)
 conf_data.set('HAVE_SHA1_IN_' + sha1.to_upper(), '1', description: 'Use @0@ SHA1 functions'.format(sha1))
 conf_data.set('HAVE_LIBUNWIND', get_option('libunwind'))
 
+debug_writetoclient = get_option('debug_writetoclient')
+conf_data.set('CONFIG_DEBUG_WRITETOCLIENT',
+              debug_writetoclient != 'none' ? '1' : false)
+conf_data.set('CONFIG_DEBUG_WRITETOCLIENT_BACKTRACE',
+              debug_writetoclient == 'backtrace' ? '1' : false)
+
 conf_data.set('HAVE_APM', (build_apm or build_acpi) ? '1' : false)
 conf_data.set('HAVE_ACPI', build_acpi ? '1' : false)
 

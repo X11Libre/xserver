@@ -152,7 +152,7 @@ Byte value read from emulator memory.
 REMARKS:
 Reads a byte value from the emulator memory.
 ****************************************************************************/
-u8 X86API
+u8
 rdb(u32 addr)
 {
     u8 val;
@@ -178,7 +178,7 @@ Word value read from emulator memory.
 REMARKS:
 Reads a word value from the emulator memory.
 ****************************************************************************/
-u16 X86API
+u16
 rdw(u32 addr)
 {
     u16 val = 0;
@@ -210,7 +210,7 @@ Long value read from emulator memory.
 REMARKS:
 Reads a long value from the emulator memory.
 ****************************************************************************/
-u32 X86API
+u32
 rdl(u32 addr)
 {
     u32 val = 0;
@@ -243,7 +243,7 @@ val		- Value to store
 REMARKS:
 Writes a byte value to emulator memory.
 ****************************************************************************/
-void X86API
+void
 wrb(u32 addr, u8 val)
 {
     DB(if (DEBUG_MEM_TRACE())
@@ -264,7 +264,7 @@ val		- Value to store
 REMARKS:
 Writes a word value to emulator memory.
 ****************************************************************************/
-void X86API
+void
 wrw(u32 addr, u16 val)
 {
     DB(if (DEBUG_MEM_TRACE())
@@ -292,7 +292,7 @@ val		- Value to store
 REMARKS:
 Writes a long value to emulator memory.
 ****************************************************************************/
-void X86API
+void
 wrl(u32 addr, u32 val)
 {
     DB(if (DEBUG_MEM_TRACE())
@@ -322,7 +322,7 @@ RETURN:
 REMARKS:
 Default PIO byte read function. Doesn't perform real inb.
 ****************************************************************************/
-static u8 X86API
+static u8
 p_inb(X86EMU_pioAddr addr)
 {
     DB(if (DEBUG_IO_TRACE())
@@ -338,7 +338,7 @@ RETURN:
 REMARKS:
 Default PIO word read function. Doesn't perform real inw.
 ****************************************************************************/
-static u16 X86API
+static u16
 p_inw(X86EMU_pioAddr addr)
 {
     DB(if (DEBUG_IO_TRACE())
@@ -354,7 +354,7 @@ RETURN:
 REMARKS:
 Default PIO long read function. Doesn't perform real inl.
 ****************************************************************************/
-static u32 X86API
+static u32
 p_inl(X86EMU_pioAddr addr)
 {
     DB(if (DEBUG_IO_TRACE())
@@ -369,7 +369,7 @@ val     - Value to store
 REMARKS:
 Default PIO byte write function. Doesn't perform real outb.
 ****************************************************************************/
-static void X86API
+static void
 p_outb(X86EMU_pioAddr addr, u8 val)
 {
     DB(if (DEBUG_IO_TRACE())
@@ -384,7 +384,7 @@ val     - Value to store
 REMARKS:
 Default PIO word write function. Doesn't perform real outw.
 ****************************************************************************/
-static void X86API
+static void
 p_outw(X86EMU_pioAddr addr, u16 val)
 {
     DB(if (DEBUG_IO_TRACE())
@@ -399,7 +399,7 @@ val     - Value to store
 REMARKS:
 Default PIO ;ong write function. Doesn't perform real outl.
 ****************************************************************************/
-static void X86API
+static void
 p_outl(X86EMU_pioAddr addr, u32 val)
 {
     DB(if (DEBUG_IO_TRACE())
@@ -409,19 +409,19 @@ p_outl(X86EMU_pioAddr addr, u32 val)
 
 /*------------------------- Global Variables ------------------------------*/
 
-u8(X86APIP sys_rdb) (u32 addr) = rdb;
-u16(X86APIP sys_rdw) (u32 addr) = rdw;
-u32(X86APIP sys_rdl) (u32 addr) = rdl;
-void (X86APIP sys_wrb) (u32 addr, u8 val) = wrb;
-void (X86APIP sys_wrw) (u32 addr, u16 val) = wrw;
-void (X86APIP sys_wrl) (u32 addr, u32 val) = wrl;
+u8(*sys_rdb) (u32 addr) = rdb;
+u16(*sys_rdw) (u32 addr) = rdw;
+u32(*sys_rdl) (u32 addr) = rdl;
+void (*sys_wrb) (u32 addr, u8 val) = wrb;
+void (*sys_wrw) (u32 addr, u16 val) = wrw;
+void (*sys_wrl) (u32 addr, u32 val) = wrl;
 
-u8(X86APIP sys_inb) (X86EMU_pioAddr addr) = p_inb;
-u16(X86APIP sys_inw) (X86EMU_pioAddr addr) = p_inw;
-u32(X86APIP sys_inl) (X86EMU_pioAddr addr) = p_inl;
-void (X86APIP sys_outb) (X86EMU_pioAddr addr, u8 val) = p_outb;
-void (X86APIP sys_outw) (X86EMU_pioAddr addr, u16 val) = p_outw;
-void (X86APIP sys_outl) (X86EMU_pioAddr addr, u32 val) = p_outl;
+u8(*sys_inb) (X86EMU_pioAddr addr) = p_inb;
+u16(*sys_inw) (X86EMU_pioAddr addr) = p_inw;
+u32(*sys_inl) (X86EMU_pioAddr addr) = p_inl;
+void (*sys_outb) (X86EMU_pioAddr addr, u8 val) = p_outb;
+void (*sys_outw) (X86EMU_pioAddr addr, u16 val) = p_outw;
+void (*sys_outl) (X86EMU_pioAddr addr, u32 val) = p_outl;
 
 /*----------------------------- Setup -------------------------------------*/
 

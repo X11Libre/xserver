@@ -119,12 +119,8 @@ __glXDispSwap_RenderMode(__GLXclientState * cl, GLbyte * pc)
 {
     ClientPtr client = cl->client;
     __GLXcontext *cx;
-    GLint nitems = 0, retBytes = 0, retval, newModeCheck;
-    GLubyte *retBuffer = NULL;
+    GLint nitems = 0, retval, newModeCheck;
     GLenum newMode;
-
-    __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
     int error;
 
     REQUEST_FIXED_SIZE(xGLXSingleReq, 4);
@@ -139,6 +135,10 @@ __glXDispSwap_RenderMode(__GLXclientState * cl, GLbyte * pc)
     swapl((CARD32*)pc);
     newMode = *(GLenum *) pc;
     retval = glRenderMode(newMode);
+
+    /* feedback/select payload is CARD32-sized; rpcbuf byte-swaps it when
+       client->swapped */
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     /* Check that render mode worked */
     glGetIntegerv(GL_RENDER_MODE, &newModeCheck);
@@ -166,9 +166,7 @@ __glXDispSwap_RenderMode(__GLXclientState * cl, GLbyte * pc)
         else {
             nitems = retval;
         }
-        retBytes = nitems * __GLX_SIZE_FLOAT32;
-        retBuffer = (GLubyte *) cx->feedbackBuf;
-        __GLX_SWAP_FLOAT_ARRAY((GLbyte *) retBuffer, nitems);
+        x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)cx->feedbackBuf, nitems);
         cx->renderMode = newMode;
         break;
     case GL_SELECT:
@@ -197,9 +195,7 @@ __glXDispSwap_RenderMode(__GLXclientState * cl, GLbyte * pc)
             }
             nitems = bp - cx->selectBuf;
         }
-        retBytes = nitems * __GLX_SIZE_CARD32;
-        retBuffer = (GLubyte *) cx->selectBuf;
-        SwapLongs((CARD32*)retBuffer, nitems);
+        x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)cx->selectBuf, nitems);
         cx->renderMode = newMode;
         break;
     }
@@ -210,23 +206,15 @@ __glXDispSwap_RenderMode(__GLXclientState * cl, GLbyte * pc)
      */
  noChangeAllowed:;
     xGLXRenderModeReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = nitems,
         .retval = retval,
         .size = nitems,
         .newMode = newMode
     };
-    swaps(&reply.sequenceNumber);
-    swapl(&reply.length);
-    swapl(&reply.retval);
-    swapl(&reply.size);
-    swapl(&reply.newMode);
-    WriteToClient(client, sizeof(xGLXRenderModeReply), &reply);
-    if (retBytes) {
-        WriteToClient(client, retBytes, retBuffer);
-    }
-    return Success;
+    X_REPLY_FIELD_CARD32(retval);
+    X_REPLY_FIELD_CARD32(size);
+    X_REPLY_FIELD_CARD32(newMode);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -268,12 +256,7 @@ __glXDispSwap_Finish(__GLXclientState * cl, GLbyte * pc)
 
     /* Send empty reply packet to indicate finish is finished */
     xGLXSingleReply reply = { 0 };
-    __GLX_BEGIN_REPLY(0);
-    __GLX_PUT_RETVAL(0);
-    __GLX_SWAP_REPLY_HEADER();
-    __GLX_SEND_HEADER();
-
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int

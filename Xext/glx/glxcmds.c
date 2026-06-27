@@ -1001,22 +1001,7 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
     if (!validGlxScreen(cl->client, screen, &pGlxScreen, &err))
         return err;
 
-    xGLXGetFBConfigsReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = __GLX_FBCONFIG_ATTRIBS_LENGTH * pGlxScreen->numFBConfigs,
-        .numFBConfigs = pGlxScreen->numFBConfigs,
-        .numAttribs = __GLX_TOTAL_FBCONFIG_ATTRIBS
-    };
-
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swapl(&reply.numFBConfigs);
-        swapl(&reply.numAttribs);
-    }
-
-    WriteToClient(client, sizeof(xGLXGetFBConfigsReply), &reply);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (modes = pGlxScreen->fbconfigs; modes != NULL; modes = modes->next) {
         p = 0;
@@ -1089,13 +1074,18 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
         }
         assert(p == __GLX_FBCONFIG_ATTRIBS_LENGTH);
 
-        if (client->swapped) {
-            SwapLongs((CARD32*)buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);
-        }
-        WriteToClient(client, __GLX_SIZE_CARD32 * __GLX_FBCONFIG_ATTRIBS_LENGTH,
-                      (char *) buf);
+        /* attribs are CARD32; rpcbuf byte-swaps them when client->swapped */
+        x_rpcbuf_write_CARD32s(&rpcbuf, buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);
     }
-    return Success;
+
+    xGLXGetFBConfigsReply reply = {
+        .numFBConfigs = pGlxScreen->numFBConfigs,
+        .numAttribs = __GLX_TOTAL_FBCONFIG_ATTRIBS
+    };
+    X_REPLY_FIELD_CARD32(numFBConfigs);
+    X_REPLY_FIELD_CARD32(numAttribs);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -2365,9 +2355,8 @@ __glXDisp_QueryServerString(__GLXclientState * cl, GLbyte * pc)
 {
     ClientPtr client = cl->client;
     xGLXQueryServerStringReq *req = (xGLXQueryServerStringReq *) pc;
-    size_t n, length;
+    size_t n;
     const char *ptr;
-    char *buf;
     __GLXscreen *pGlxScreen;
     int err;
 
@@ -2395,36 +2384,17 @@ __glXDisp_QueryServerString(__GLXclientState * cl, GLbyte * pc)
     }
 
     n = strlen(ptr) + 1;
-    length = __GLX_PAD(n) >> 2;
+
+    /* string payload needs no byte-swapping (array of chars) */
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_binary_pad(&rpcbuf, ptr, n);
 
     xGLXQueryServerStringReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = length,
-        .n = n
+        .n = n,
     };
+    X_REPLY_FIELD_CARD32(n);
 
-    buf = calloc(length, 4);
-    if (buf == NULL) {
-        return BadAlloc;
-    }
-    memcpy(buf, ptr, n);
-
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swapl(&reply.n);
-        WriteToClient(client, sizeof(xGLXQueryServerStringReply), &reply);
-        /** no swap is needed for an array of chars **/
-        WriteToClient(client, length << 2, buf);
-    }
-    else {
-        WriteToClient(client, sizeof(xGLXQueryServerStringReply), &reply);
-        WriteToClient(client, (int) (length << 2), buf);
-    }
-
-    free(buf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int

@@ -50,7 +50,7 @@ __glXDisp_GetCompressedTexImage(struct __GLXclientStateRec *cl, GLbyte * pc)
         const GLint level = *(GLint *) (pc + 4);
         GLint compsize = 0;
         char *answer = NULL, answerBuffer[200];
-        xGLXSingleReply reply = { 0, };
+        xGLXGetTexImageReply reply = { 0 };
 
         glGetTexLevelParameteriv(target, level, GL_TEXTURE_COMPRESSED_IMAGE_SIZE,
                                  &compsize);
@@ -63,18 +63,14 @@ __glXDisp_GetCompressedTexImage(struct __GLXclientStateRec *cl, GLbyte * pc)
             GetCompressedTexImageARB(target, level, answer);
         }
 
-        if (__glXErrorOccured()) {
-            __GLX_BEGIN_REPLY(0);
-            __GLX_SEND_HEADER();
-        }
-        else {
-            __GLX_BEGIN_REPLY(compsize);
-            ((xGLXGetTexImageReply *) &reply)->width = compsize;
-            __GLX_SEND_HEADER();
-            __GLX_SEND_VOID_ARRAY(compsize);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        if (!__glXErrorOccured()) {
+            reply.width = compsize;
+            X_REPLY_FIELD_CARD32(width);
+            x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
         }
 
-        error = Success;
+        error = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }
 
     return error;
@@ -97,7 +93,7 @@ __glXDispSwap_GetCompressedTexImage(struct __GLXclientStateRec *cl, GLbyte * pc)
         const GLint level = (GLint) bswap_32(*(int *) (pc + 4));
         GLint compsize = 0;
         char *answer = NULL, answerBuffer[200];
-        xGLXSingleReply reply = { 0, };
+        xGLXGetTexImageReply reply = { 0 };
 
         glGetTexLevelParameteriv(target, level, GL_TEXTURE_COMPRESSED_IMAGE_SIZE,
                                  &compsize);
@@ -110,18 +106,14 @@ __glXDispSwap_GetCompressedTexImage(struct __GLXclientStateRec *cl, GLbyte * pc)
             GetCompressedTexImageARB(target, level, answer);
         }
 
-        if (__glXErrorOccured()) {
-            __GLX_BEGIN_REPLY(0);
-            __GLX_SEND_HEADER();
-        }
-        else {
-            __GLX_BEGIN_REPLY(compsize);
-            ((xGLXGetTexImageReply *) &reply)->width = compsize;
-            __GLX_SEND_HEADER();
-            __GLX_SEND_VOID_ARRAY(compsize);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        if (!__glXErrorOccured()) {
+            reply.width = compsize;
+            X_REPLY_FIELD_CARD32(width);
+            x_rpcbuf_write_binary_pad(&rpcbuf, answer, compsize);
         }
 
-        error = Success;
+        error = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }
 
     return error;

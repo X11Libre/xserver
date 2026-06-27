@@ -53,6 +53,17 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+/* optional debug logging of the exported WriteToClient() frontend.
+ * the lightweight 'caller' variant resolves the return address via dladdr(),
+ * so pull in <dlfcn.h> (needs _GNU_SOURCE) before any other system header. */
+#if defined(CONFIG_DEBUG_WRITETOCLIENT) && \
+    !defined(CONFIG_DEBUG_WRITETOCLIENT_BACKTRACE) && defined(HAVE_DLFCN_H)
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <dlfcn.h>
+#endif
+
 #include <assert.h>
 #undef DEBUG_COMMUNICATION
 
@@ -761,7 +772,7 @@ OutputBufferMakeRoomAndFlush(ClientPtr who, OsCommPtr oc, const void* extra_buf,
 }
 
 /*****************
- * WriteToClient
+ * dixWriteToClient
  *    Copies buf into ClientPtr.buf if it fits (with padding), else
  *    flushes ClientPtr.buf and buf to client.  As of this writing,
  *    every use of WriteToClient is cast to void, and the result
@@ -769,10 +780,13 @@ OutputBufferMakeRoomAndFlush(ClientPtr who, OsCommPtr oc, const void* extra_buf,
  *    that are sending several chunks of data and want to break
  *    out of a loop on error.  Thus, we will leave the type of
  *    this routine as int.
+ *
+ *    This is the internal worker; WriteToClient() is the exported
+ *    frontend (see below).
  *****************/
 
 int
-WriteToClient(ClientPtr who, int count, const void *__buf)
+dixWriteToClient(ClientPtr who, int count, const void *__buf)
 {
     OsCommPtr oc;
     int padBytes;
@@ -894,6 +908,37 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
         oco->count += padBytes;
     }
     return count;
+}
+
+/*****************
+ * WriteToClient
+ *    Exported (legacy) frontend for dixWriteToClient(). Kept for ABI
+ *    compatibility with external drivers / modules. In-tree callers use
+ *    dixWriteToClient() directly.
+ *****************/
+
+int
+WriteToClient(ClientPtr who, int count, const void *buf)
+{
+#ifdef CONFIG_DEBUG_WRITETOCLIENT
+#ifdef CONFIG_DEBUG_WRITETOCLIENT_BACKTRACE
+    ErrorF("WriteToClient: client=%d count=%d\n", who ? who->index : -1, count);
+    xorg_backtrace();
+#else
+    void *ra = __builtin_return_address(0);
+#ifdef HAVE_DLFCN_H
+    Dl_info info;
+    if (dladdr(ra, &info) && info.dli_sname) {
+        ErrorF("WriteToClient: client=%d count=%d caller=%s+%p\n",
+               who ? who->index : -1, count, info.dli_sname, ra);
+    }
+    else
+#endif
+        ErrorF("WriteToClient: client=%d count=%d caller=%p\n",
+               who ? who->index : -1, count, ra);
+#endif
+#endif
+    return dixWriteToClient(who, count, buf);
 }
 
  /********************
