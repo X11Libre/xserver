@@ -483,9 +483,64 @@ QuartzModeBundleInit(void);
     [self.controller set_apps_menu:list];
 }
 
+#if XPLUGIN_VERSION >= 7
+/* Return the native (CoreGraphics) window id of this process's frontmost
+ * on-screen X11 window, or XP_NULL_NATIVE_WINDOW_ID if there is none. The window
+ * list is ordered front-to-back, so the first of our X11 windows is the
+ * frontmost one.
+ */
+static xp_native_window_id
+x11_front_window_id(void)
+{
+    xp_native_window_id ret = XP_NULL_NATIVE_WINDOW_ID;
+    CFArrayRef windows = CGWindowListCopyWindowInfo(
+        kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+        kCGNullWindowID);
+
+    if (windows == NULL)
+        return ret;
+
+    for (CFIndex i = 0, count = CFArrayGetCount(windows); i < count; i++) {
+        CFDictionaryRef info = CFArrayGetValueAtIndex(windows, i);
+        CFNumberRef numRef = CFDictionaryGetValue(info, kCGWindowNumber);
+        int num = 0;
+
+        if (numRef != NULL && CFNumberGetValue(numRef, kCFNumberIntType, &num)
+            && quartzProcs->IsX11Window(num)) {
+            ret = (xp_native_window_id)num;
+            break;
+        }
+    }
+
+    CFRelease(windows);
+    return ret;
+}
+#endif
+
 - (void) set_front_process:unused
 {
-    [NSApp activateIgnoringOtherApps:YES];
+    OSX_BOOL activated = NO;
+
+#if XPLUGIN_VERSION >= 7
+    /* -[NSApplication activateIgnoringOtherApps:] is no longer honored under the
+     * macOS cooperative activation model (it defers and ultimately drops the
+     * request), so use the libXplugin API instead where available.
+     */
+#if XPLUGIN_VERSION_MIN_REQUIRED < 7
+    /* xp_window_activate() is weakly linked here; only call it if the loaded
+     * Xplugin actually provides it.
+     */
+    if (xp_api_version() >= 7)
+#endif
+    {
+        xp_native_window_id const wid = x11_front_window_id();
+        if (wid != XP_NULL_NATIVE_WINDOW_ID)
+            activated = (xp_window_activate(wid) == XP_Success);
+    }
+#endif
+
+    if (!activated)
+        [NSApp activateIgnoringOtherApps:YES];
 
     if ([self modalWindow] == nil)
         [self activateX:YES];
