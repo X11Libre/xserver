@@ -656,27 +656,45 @@ xf86platformProbeDev(DriverPtr drvp)
 int
 xf86platformAddGPUDevices(DriverPtr drvp)
 {
-    Bool foundScreen = FALSE;
-    GDevPtr *devList;
-    int j;
+    int foundScreens = 0;
 
     if (!drvp->platformProbe || !xf86Info.autoAddGPU)
         return FALSE;
 
-    xf86MatchDevice(drvp->driverName, &devList);
+    for (int j = 0; j < xf86_num_platform_devices; j++) {
 
-    /* if autoaddgpu devices is enabled then go find any unclaimed platform
-     * devices and add them as GPU screens */
-    for (j = 0; j < xf86_num_platform_devices; j++) {
-        if (probeSingleDevice(&xf86_platform_devices[j], drvp,
-                              devList ?  devList[0] : NULL,
-                              PLATFORM_PROBE_GPU_SCREEN))
-            foundScreen = TRUE;
+        if (xf86CheckSlot(&xf86_platform_devices[j], BUS_PLATFORM)){ /* returns true if device is unclaimed */
+
+            GDevPtr *devList;
+            xf86MatchDevice(drvp->driverName, &devList);
+
+            if (probeSingleDevice(&xf86_platform_devices[j], drvp,
+                                  devList ?  devList[0] : NULL,
+                                  PLATFORM_PROBE_GPU_SCREEN)) {
+
+                foundScreens+=1;
+
+                GDevPtr cptr = calloc(1, sizeof(GDevRec));
+                int ret = asprintf((char**)&cptr->identifier,"xf86platformAddGPUDevices automatic added device using %s driver",drvp->driverName);
+                if (ret == -1) { /* If we are short of memory here, I doubt we can recover going futher */
+                    FatalError("xf86platformAddGPUDevices failed to allocate memory to identifier\n");
+                }
+                EntityPtr ent = xf86Entities[xf86NumEntities - 1];
+
+                ent->active = 1;
+                ent->numInstances = 1;
+
+                ent->devices = calloc(1,sizeof(GDevPtr*));
+                ent->devices[0] = cptr;
+
+            }
+            free(devList);
+        }
+
+
+
     }
-
-    free(devList);
-
-    return foundScreen;
+    return foundScreens;
 }
 
 const char *
