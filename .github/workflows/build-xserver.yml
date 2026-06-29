@@ -185,46 +185,53 @@ jobs:
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
 
-    drivers-prepare-ubuntu:
-        env:
-            MESON_ARGS: -Dprefix=/home/runner/x11 -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
+    build-sdk-image:
+        # Build the X-server + SDK from this commit and push it to GHCR as
+        # xserver-sdk:<sha>; the driver builds below run in that image. Replaces
+        # the old drivers-prepare-ubuntu + actions/cache, whose SDK cache could
+        # be evicted under load before the queued driver jobs restored it (then
+        # the whole pipeline had to be re-run by hand). A registry image is not
+        # subject to that LRU eviction.
         runs-on: ubuntu-latest
         needs:
             - ubuntu-fetch-pkg
             - abi-changes-check
         if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+        permissions:
+            contents: read
+            packages: write
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
 
-            - uses: ./.github/actions/ubuntu-install-pkg
+            - name: Log in to GHCR
+              run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-            - name: prepare build environment
+            - name: Build and push SDK image (xserver-sdk:<sha>)
               run: |
-                MACHINE=`gcc -dumpmachine`
-                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
-                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
-
-            - name: X11 prereq cache
-              uses: actions/cache@v5
-              with:
-                path: |
-                    ${{ env.X11_PREFIX }}
-                    ${{ env.X11_BUILD_DIR }}/xts
-                    ${{ env.X11_BUILD_DIR }}/piglit
-                key:          drivers-deps-${{ github.sha }}
-                restore-keys: drivers-deps-${{ github.sha }}
-
-            - name: generic prereq and xserver
-              run:  .github/scripts/ubuntu/install-prereq-drivers.sh
+                  set -eux
+                  img="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/xserver-sdk"
+                  docker build -t "$img:${GITHUB_SHA}" -f .github/docker/sdk/Dockerfile .
+                  docker push "$img:${GITHUB_SHA}"
 
     drivers-build-ubuntu:
         needs:
-            - ubuntu-fetch-pkg
-            - drivers-prepare-ubuntu
+            - build-sdk-image
             - abi-changes-check
         if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
         runs-on: ubuntu-latest
+        # The SDK + prereqs live at /opt/x11 in the image; override the
+        # workflow-level X11_PREFIX (which points at the host /home/runner path)
+        # so conf.sh derives PKG_CONFIG_PATH from the in-image prefix.
+        env:
+            X11_PREFIX: /opt/x11
+            X11_BUILD_DIR: /opt/x11-build
+        # Run in the per-commit SDK image: the xserver SDK + all build deps are
+        # baked in under /opt/x11, so each driver job only compiles the driver
+        # (no apt, no prereq build, no cache restore). The image is public, so it
+        # pulls anonymously — no credentials / packages permission needed.
+        container:
+            image: ghcr.io/x11libre/xserver-sdk:${{ github.sha }}
         strategy:
             matrix:
                 driver:
@@ -284,24 +291,6 @@ jobs:
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
-
-            - uses: ./.github/actions/ubuntu-install-pkg
-
-            - name: prepare build environment
-              run: |
-                MACHINE=`gcc -dumpmachine`
-                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
-                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
-
-            - name: X11 prereq cache
-              uses: actions/cache/restore@v5
-              with:
-                path: |
-                    ${{ env.X11_PREFIX }}
-                    ${{ env.X11_BUILD_DIR }}/xts
-                    ${{ env.X11_BUILD_DIR }}/piglit
-                key:          drivers-deps-${{ github.sha }}
-                fail-on-cache-miss: true
 
             - name: compile driver ${{ matrix.driver }}
               run: .github/scripts/ubuntu/compile-driver-single.sh ${{ matrix.driver }}
