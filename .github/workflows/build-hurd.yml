@@ -77,22 +77,38 @@ jobs:
                   if [ -e /dev/kvm ] && sudo chmod 666 /dev/kvm 2>/dev/null; then
                       accel="-enable-kvm -cpu host"
                   fi
+                  echo "==> qemu accel: $accel"
                   qemu-system-x86_64 $accel -m 4G -smp 2 \
                       -drive file="$img",cache=writeback,format=raw \
                       -net user,hostfwd=tcp:127.0.0.1:2222-:22 \
                       -net nic,model=e1000 \
                       -nographic > qemu.log 2>&1 &
-                  echo $! > qemu.pid
+                  qpid=$!
+                  echo "$qpid" > qemu.pid
+
+                  # fail fast if qemu didn't even start (e.g. KVM still denied)
+                  sleep 8
+                  if ! kill -0 "$qpid" 2>/dev/null; then
+                      echo "::error::qemu exited immediately"; cat qemu.log; exit 1
+                  fi
 
                   SSH="ssh -i hurd_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=8 -p 2222 root@127.0.0.1"
-                  echo "==> waiting for ssh (Hurd boot is slow, esp. under TCG)"
+                  echo "==> waiting for ssh (booting Debian GNU/Hurd; console tail every ~minute)"
                   up=""
-                  for i in $(seq 1 90); do
+                  for i in $(seq 1 40); do
+                      if ! kill -0 "$qpid" 2>/dev/null; then
+                          echo "::error::qemu died during boot"; tail -120 qemu.log; exit 1
+                      fi
                       if $SSH true 2>/dev/null; then up=1; break; fi
+                      if [ $((i % 6)) -eq 0 ]; then
+                          echo "----- qemu.log (boot console) after ${i} tries -----"
+                          tail -25 qemu.log || true
+                          echo "-----------------------------------------------------"
+                      fi
                       sleep 10
                   done
                   if [ -z "$up" ]; then
-                      echo "::error::SSH into the Hurd VM never came up"; tail -80 qemu.log; exit 1
+                      echo "::error::SSH into the Hurd VM never came up"; tail -120 qemu.log; exit 1
                   fi
 
                   echo "==> running build inside the VM"
