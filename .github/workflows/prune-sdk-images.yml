@@ -1,0 +1,42 @@
+name: Prune old SDK images
+
+# Step 5 of the driver-pipeline rework: build-sdk-image pushes a per-commit
+# xserver-sdk:<sha> on every driver-relevant run, so old tags accumulate in
+# GHCR. Keep the most recent $KEEP versions and delete the rest, weekly / on
+# demand.
+#
+# Note: deleting org container-package versions may require more than the
+# default GITHUB_TOKEN packages:write (a PAT with delete:packages). The delete
+# is best-effort (|| true); if it is denied, set a PAT secret and use it here.
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '0 5 * * 1'   # weekly, Monday 05:00 UTC
+
+permissions:
+    packages: write
+
+jobs:
+    prune-xserver-sdk:
+        runs-on: ubuntu-latest
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            OWNER: ${{ github.repository_owner }}
+            PACKAGE: xserver-sdk
+            KEEP: '20'
+        steps:
+            - name: Delete old ${{ env.PACKAGE }} versions (keep newest ${{ env.KEEP }})
+              run: |
+                  set -eu
+                  base="/orgs/$OWNER/packages/container/$PACKAGE/versions"
+                  ids=$(gh api --paginate "$base" \
+                      --jq "sort_by(.created_at) | reverse | .[$KEEP:] | .[].id") || {
+                          echo "could not list versions (package may not exist yet) — nothing to prune"
+                          exit 0
+                      }
+                  if [ -z "$ids" ]; then echo "nothing to prune (<= $KEEP versions)"; exit 0; fi
+                  for id in $ids; do
+                      echo "deleting $PACKAGE version $id"
+                      gh api --method DELETE "$base/$id" || echo "  (delete denied/failed for $id — token may need delete:packages)"
+                  done
