@@ -1,0 +1,47 @@
+name: Build ubuntu deps image
+
+# Builds the base image (.github/docker/ubuntu/Dockerfile) with the apt build
+# dependencies and the from-source prereqs baked in, and pushes it to GHCR. The
+# xserver/SDK/driver builds use it so they skip apt + the prereq build on every
+# run. Off the PR critical path: on demand, weekly, or when the inputs change.
+
+on:
+    workflow_dispatch:
+    schedule:
+        # weekly, Monday 04:30 UTC — keep prereqs fresh with the distro
+        - cron: '30 4 * * 1'
+    push:
+        paths:
+            - '.github/docker/ubuntu/**'
+            - '.github/scripts/ubuntu/install-pkg.sh'
+            - '.github/scripts/ubuntu/install-prereq.sh'
+            - '.github/scripts/conf.sh'
+            - '.github/scripts/util.sh'
+            - '.github/workflows/ubuntu-deps-image.yml'
+
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+    build-ubuntu-deps-image:
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Log in to GHCR
+              run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            - name: Build and push image
+              run: |
+                  set -eux
+                  owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+                  img="ghcr.io/$owner/xserver-ubuntu-build"
+                  docker build \
+                      -t "$img:latest" \
+                      -t "$img:${GITHUB_SHA::12}" \
+                      -f .github/docker/ubuntu/Dockerfile \
+                      .
+                  docker push "$img:latest"
+                  docker push "$img:${GITHUB_SHA::12}"
