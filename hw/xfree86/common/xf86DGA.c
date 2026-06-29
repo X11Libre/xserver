@@ -1294,7 +1294,7 @@ ProcXDGAQueryModes(ClientPtr client)
         info.reserved2 = mode[i].reserved2;
 
         x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)&info, sz_xXDGAModeInfo);
-        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)mode[i].name, size);
+        x_rpcbuf_write_string_0t_pad(&rpcbuf, mode[i].name);
     }
 
     free(mode);
