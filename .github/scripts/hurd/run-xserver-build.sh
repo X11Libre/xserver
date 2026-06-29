@@ -11,15 +11,29 @@ export DEBIAN_FRONTEND=noninteractive
 echo "==> uname / arch"
 uname -a || true
 
-echo "==> apt deps (best-effort; Hurd repo may lack some)"
+echo "==> apt update"
 sudo apt-get update
-sudo apt-get install -y \
-    build-essential meson ninja-build pkg-config git ca-certificates \
-    libpixman-1-dev libxfont2-dev libxkbfile-dev xtrans-dev \
-    x11proto-dev libxcvt-dev libxau-dev libxdmcp-dev libxcb1-dev \
-    libx11-dev libxext-dev libxfixes-dev libxrender-dev libxi-dev \
-    libxtst-dev libxres-dev libxshmfence-dev libxfont-dev libfontenc-dev \
-    libtirpc-dev nettle-dev libbsd-dev || true
+
+# Toolchain MUST succeed (apt is transactional: one unlocatable package aborts
+# the whole install, so keep the essentials separate from the maybe-renamed X
+# libs — otherwise a missing lib takes git/meson down with it, as it did).
+echo "==> install toolchain (required)"
+sudo apt-get install -y --no-install-recommends \
+    git build-essential meson ninja-build pkg-config ca-certificates
+
+# X libraries + helpers: best-effort, one at a time, so a package the Hurd port
+# lacks or renames only skips itself (named in the log); meson then reports what
+# is genuinely required and absent.
+echo "==> install X libs (best-effort)"
+for p in \
+    libpixman-1-dev libxfont2-dev libxfont-dev libxkbfile-dev xtrans-dev \
+    x11proto-dev xorg-sgml-doctools libxcvt-dev libxau-dev libxdmcp-dev \
+    libxcb1-dev libx11-dev libxext-dev libxfixes-dev libxrender-dev \
+    libxi-dev libxtst-dev libxres-dev libxshmfence-dev libfontenc-dev \
+    libtirpc-dev nettle-dev libbsd-dev libgcrypt20-dev libepoxy-dev
+do
+    sudo apt-get install -y --no-install-recommends "$p" || echo "WARN: package $p not available on hurd"
+done
 
 echo "==> clone xserver @ $SHA"
 rm -rf xserver
