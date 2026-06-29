@@ -75,10 +75,13 @@ jobs:
                   # Permission denied"); open it up, else fall back to slow TCG.
                   accel="-accel tcg"
                   if [ -e /dev/kvm ] && sudo chmod 666 /dev/kvm 2>/dev/null; then
-                      accel="-enable-kvm -cpu host"
+                      accel="-enable-kvm"
                   fi
                   echo "==> qemu accel: $accel"
-                  qemu-system-x86_64 $accel -m 4G -smp 2 \
+                  # Single CPU, default cpu model: GNU Mach hangs at "Booting
+                  # from Hard Disk..." with -smp >1 or -cpu host. Match Debian's
+                  # documented working invocation (minimal flags).
+                  qemu-system-x86_64 $accel -m 4G \
                       -drive file="$img",cache=writeback,format=raw \
                       -net user,hostfwd=tcp:127.0.0.1:2222-:22 \
                       -net nic,model=e1000 \
