@@ -70,8 +70,13 @@ jobs:
               run: |
                   set -eux
                   img=$(echo debian-hurd-*.img)
+                  # /dev/kvm exists on GH runners but the runner user lacks
+                  # access by default (qemu: "failed to initialize kvm:
+                  # Permission denied"); open it up, else fall back to slow TCG.
                   accel="-accel tcg"
-                  [ -e /dev/kvm ] && accel="-enable-kvm -cpu host"
+                  if [ -e /dev/kvm ] && sudo chmod 666 /dev/kvm 2>/dev/null; then
+                      accel="-enable-kvm -cpu host"
+                  fi
                   qemu-system-x86_64 $accel -m 4G -smp 2 \
                       -drive file="$img",cache=writeback,format=raw \
                       -net user,hostfwd=tcp:127.0.0.1:2222-:22 \
