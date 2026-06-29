@@ -1018,7 +1018,6 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 #ifdef GLXEXT
     if (!vendor_initialized) {
         GlxPushProvider(&glamor_provider);
-        xorgGlxCreateVendor();
         vendor_initialized = TRUE;
     }
 #endif
