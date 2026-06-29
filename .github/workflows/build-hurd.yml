@@ -1,0 +1,101 @@
+name: Build X server (GNU/Hurd, experimental)
+
+# EXPERIMENTAL / best-effort. There is no vmactions/hurd-vm, so this hand-rolls
+# a QEMU VM the way vmactions does internally: boot Debian's pre-installed
+# GNU/Hurd amd64 image, inject an ssh key into it (the image has no password
+# set), wait for ssh, then build the xserver inside. The X server is not ported
+# to GNU/Hurd yet, so the build step is expected to surface gaps rather than go
+# green — this lane exists to make that progress visible and reproducible.
+#
+# continue-on-error so it never blocks anything while it is a work in progress.
+
+on:
+    workflow_dispatch:
+    push:
+        paths:
+            - '.github/workflows/build-hurd.yml'
+            - '.github/scripts/hurd/**'
+
+jobs:
+    xserver-build-hurd:
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        continue-on-error: true
+        env:
+            IMG_URL: https://cdimage.debian.org/cdimage/ports/latest/hurd-amd64/debian-hurd.img.tar.gz
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Install QEMU + tools
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y qemu-system-x86 qemu-utils openssh-client
+
+            - name: Fetch + extract Debian GNU/Hurd image
+              run: |
+                  set -eux
+                  wget -q -O hurd.img.tar.gz "$IMG_URL"
+                  tar -xzf hurd.img.tar.gz
+                  ls -la debian-hurd-*.img
+
+            - name: Inject ssh key into the image
+              run: |
+                  set -eux
+                  ssh-keygen -t ed25519 -N '' -f hurd_key
+                  img=$(echo debian-hurd-*.img)
+                  loop=$(sudo losetup -fP --show "$img")
+                  mkdir -p mnt
+                  mounted=""
+                  for part in "${loop}"p*; do
+                      if sudo mount -t ext2 "$part" mnt 2>/dev/null; then
+                          if [ -f mnt/etc/passwd ]; then mounted="$part"; break; fi
+                          sudo umount mnt
+                      fi
+                  done
+                  test -n "$mounted"
+                  sudo mkdir -p mnt/root/.ssh
+                  sudo cp hurd_key.pub mnt/root/.ssh/authorized_keys
+                  sudo chmod 700 mnt/root/.ssh
+                  sudo chmod 600 mnt/root/.ssh/authorized_keys
+                  sudo chown -R 0:0 mnt/root/.ssh
+                  # make sure sshd accepts root pubkey login
+                  if [ -f mnt/etc/ssh/sshd_config ]; then
+                      sudo sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' mnt/etc/ssh/sshd_config
+                      sudo sed -i 's/^#*PubkeyAuthentication.*/PubkeyAuthentication yes/' mnt/etc/ssh/sshd_config
+                  fi
+                  sudo umount mnt
+                  sudo losetup -d "$loop"
+
+            - name: Boot VM and build the xserver
+              run: |
+                  set -eux
+                  img=$(echo debian-hurd-*.img)
+                  accel="-accel tcg"
+                  [ -e /dev/kvm ] && accel="-enable-kvm -cpu host"
+                  qemu-system-x86_64 $accel -m 4G -smp 2 \
+                      -drive file="$img",cache=writeback,format=raw \
+                      -net user,hostfwd=tcp:127.0.0.1:2222-:22 \
+                      -net nic,model=e1000 \
+                      -nographic > qemu.log 2>&1 &
+                  echo $! > qemu.pid
+
+                  SSH="ssh -i hurd_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=8 -p 2222 root@127.0.0.1"
+                  echo "==> waiting for ssh (Hurd boot is slow, esp. under TCG)"
+                  up=""
+                  for i in $(seq 1 90); do
+                      if $SSH true 2>/dev/null; then up=1; break; fi
+                      sleep 10
+                  done
+                  if [ -z "$up" ]; then
+                      echo "::error::SSH into the Hurd VM never came up"; tail -80 qemu.log; exit 1
+                  fi
+
+                  echo "==> running build inside the VM"
+                  $SSH "REPO='${{ github.repository }}' SHA='${{ github.sha }}' sh -s" \
+                      < .github/scripts/hurd/run-xserver-build.sh
+
+            - name: Shut down VM
+              if: always()
+              run: |
+                  [ -f qemu.pid ] && sudo kill "$(cat qemu.pid)" 2>/dev/null || true
+                  tail -60 qemu.log 2>/dev/null || true
