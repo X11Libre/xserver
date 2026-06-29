@@ -94,11 +94,14 @@ jobs:
                       accel="-enable-kvm"
                   fi
                   echo "==> qemu accel: $accel"
-                  # Single CPU, default cpu model: GNU Mach hangs at "Booting
-                  # from Hard Disk..." with -smp >1 or -cpu host. Match Debian's
-                  # documented working invocation (minimal flags).
-                  qemu-system-x86_64 $accel -m 4G \
-                      -drive file="$img",cache=writeback,format=raw \
+                  # amd64 Hurd uses rumpdisk, which needs the q35 machine and the
+                  # disk on an AHCI/SATA controller — on the legacy IDE bus it
+                  # fails with "ACPI PIC mode" + ext2fs wd0 I/O errors. Single CPU
+                  # (GNU Mach hangs on -smp>1), >=2G RAM for rumpdisk.
+                  qemu-system-x86_64 $accel -M q35 -m 4G \
+                      -drive id=disk,file="$img",cache=writeback,format=raw,if=none \
+                      -device ich9-ahci,id=ahci \
+                      -device ide-hd,bus=ahci.0,drive=disk \
                       -net user,hostfwd=tcp:127.0.0.1:2222-:22 \
                       -net nic,model=e1000 \
                       -nographic > qemu.log 2>&1 &
