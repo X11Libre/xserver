@@ -24,6 +24,7 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_BIG_REQUESTS:
         case EXTENSION_MAJOR_DAMAGE:
         case EXTENSION_MAJOR_DOUBLE_BUFFER:
+        case EXTENSION_MAJOR_DPMS:
         case EXTENSION_MAJOR_GENERIC_EVENT:
         case EXTENSION_MAJOR_PRESENT:
         case EXTENSION_MAJOR_SYNC:
@@ -31,6 +32,13 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_XFIXES:
         case EXTENSION_MAJOR_XKEYBOARD:
         case EXTENSION_MAJOR_XRESOURCE:
+        case EXTENSION_MAJOR_COMPOSITE:
+        case EXTENSION_MAJOR_GLX:
+        case EXTENSION_MAJOR_DRI2:
+        case EXTENSION_MAJOR_DRI3:
+        case EXTENSION_MAJOR_XINERAMA:
+        case EXTENSION_MAJOR_RENDER:
+        case EXTENSION_MAJOR_RANDR:
             goto pass;
 
         /* really blacklisted */
@@ -43,13 +51,17 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         /* only allowed if namespace has flag set */
         case EXTENSION_MAJOR_SHAPE:
-            if (subj->ns->allowShape)
+            if (subj->ns->perms.allowShape)
                 goto pass;
             goto reject;
 
         /* only allowed if namespace has flag set */
         case EXTENSION_MAJOR_XINPUT:
-            if (subj->ns->allowXInput)
+            if (subj->ns->perms.allowXInput)
+                goto pass;
+            goto reject;
+        case EXTENSION_MAJOR_SHM:
+            if (subj->ns->perms.allowScreen)
                 goto pass;
             goto reject;
     }

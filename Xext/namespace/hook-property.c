@@ -27,11 +27,57 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     ATOM name = (*param->ppProp)->propertyName;
 
-    if (XnsClientSameNS(subj, obj))
-        return;
+    if (subj->ns->superPower || XnsClientSameNS(subj, obj))
+        goto pass;
 
     if (param->pWin == subj->ns->rootWindow)
-        return;
+        goto pass;
+
+    /* Whitelisted atoms - potentially a global allow tag? */
+    if (obj->ns->isRoot) {
+        switch (client->majorOp) {
+            case X_GetProperty: {
+                /* TODO: turn this mess into a switch? they're mostly xcb atoms - tricky */
+                const char* atomNameTest = NameForAtom(name);
+                /* can this expose anything? */
+                if (strcmp("_NET_WORKAREA", atomNameTest)==0)
+                    goto pass;
+                /* questionable */
+                if (strcmp("_NET_ACTIVE_WINDOW", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_DESKTOP_GEOMETRY", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_DESKTOP_VIEWPORT", atomNameTest)==0)
+                    goto pass;
+                /* harmless? */
+                if (strcmp("WM_NAME", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_WM_NAME", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("WM_CLASS", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("WM_STATE", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_SUPPORTING_WM_CHECK", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_SUPPORTED", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_NUMBER_OF_DESKTOPS", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_DESKTOP_NAMES", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_SHOWING_DESKTOP", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_CURRENT_DESKTOP", atomNameTest)==0)
+                    goto pass;
+                /* we already whitelist X_QueryTree, these do the same thing */
+                if (strcmp("_NET_CLIENT_LIST", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_CLIENT_LIST_STACKING", atomNameTest)==0)
+                    goto pass;
+            }
+        }
+    }
 
     if (winIsRoot(param->pWin)) {
         XNS_HOOK_LOG("window is the screen's root window\n");
@@ -44,4 +90,9 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         name,
         (unsigned long)param->pWin->drawable.id,
         dixClientForWindow(param->pWin)->index);
+    param->status = BadAccess;
+    return;
+pass:
+    param->status = Success;
+    return;
 }
