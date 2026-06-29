@@ -112,7 +112,8 @@ KdDPMS(ScreenPtr pScreen, int mode)
 {
     KdScreenPriv(pScreen);
 
-    if (pScreenPriv->card->cfuncs->dpms &&
+    if (pScreenPriv->enabled &&
+        pScreenPriv->card->cfuncs->dpms &&
         pScreenPriv->card->cfuncs->dpms(pScreen, mode)) {
         pScreenPriv->dpmsState = mode;
     }
@@ -756,9 +757,7 @@ Bool KdSaveScreen(ScreenPtr pScreen, int on)
         break;
     }
 
-    if (pScreenPriv->enabled) {
-        KdDPMS(pScreen, dpmsState);
-    }
+    KdDPMS(pScreen, dpmsState);
     return TRUE;
 }
 
