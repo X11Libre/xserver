@@ -112,8 +112,7 @@ KdDPMS(ScreenPtr pScreen, int mode)
 {
     KdScreenPriv(pScreen);
 
-    if (pScreenPriv->dpmsState != mode &&
-        pScreenPriv->card->cfuncs->dpms &&
+    if (pScreenPriv->card->cfuncs->dpms &&
         pScreenPriv->card->cfuncs->dpms(pScreen, mode)) {
         pScreenPriv->dpmsState = mode;
     }
@@ -740,7 +739,7 @@ Bool KdSaveScreen(ScreenPtr pScreen, int on)
     if (!pScreenPriv->card->cfuncs->dpms)
         return FALSE;
 
-    dpmsState = pScreenPriv->dpmsState >= 0 ? pScreenPriv->dpmsState : KD_DPMS_NORMAL;
+    dpmsState = pScreenPriv->dpmsState;
     switch (on) {
     case SCREEN_SAVER_OFF:
         dpmsState = KD_DPMS_NORMAL;
@@ -870,7 +869,7 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     pScreenPriv->screen = screen;
     pScreenPriv->card = card;
     pScreenPriv->bytesPerPixel = screen->fb.bitsPerPixel >> 3;
-    pScreenPriv->dpmsState = -1;
+    pScreenPriv->dpmsState = KD_DPMS_NORMAL;
     pScreen->x = screen->origin.x;
     pScreen->y = screen->origin.y;
 
