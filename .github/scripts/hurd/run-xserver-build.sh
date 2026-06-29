@@ -30,7 +30,10 @@ for p in \
     x11proto-dev xorg-sgml-doctools libxcvt-dev libxau-dev libxdmcp-dev \
     libxcb1-dev libx11-dev libxext-dev libxfixes-dev libxrender-dev \
     libxi-dev libxtst-dev libxres-dev libxshmfence-dev libfontenc-dev \
-    libtirpc-dev nettle-dev libbsd-dev libgcrypt20-dev libepoxy-dev
+    libtirpc-dev nettle-dev libbsd-dev libgcrypt20-dev libepoxy-dev \
+    libxcb-util-dev libxcb-icccm4-dev libxcb-shape0-dev libxcb-xkb-dev \
+    libxcb-keysyms1-dev libxcb-image0-dev libxcb-render-util0-dev \
+    libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev
 do
     sudo apt-get install -y --no-install-recommends "$p" || echo "WARN: package $p not available on hurd"
 done
