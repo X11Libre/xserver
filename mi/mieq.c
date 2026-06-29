@@ -60,9 +60,7 @@ in this Software without prior written authorization from The Open Group.
 #include   "scrnintstr.h"
 #include   "eventstr.h"
 
-#ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#endif
 
 /* Maximum size should be initial size multiplied by a power of 2 */
 #define QUEUE_INITIAL_SIZE                 512
@@ -560,13 +558,11 @@ mieqProcessInputEvents(void)
 
         if (screenIsSaved == SCREEN_SAVER_ON)
             dixSaveScreens(serverClient, SCREEN_SAVER_OFF, ScreenSaverReset);
-#ifdef DPMSExtension
         else if (DPMSPowerLevel != DPMSModeOn)
             SetScreenSaverTimer();
 
         if (DPMSPowerLevel != DPMSModeOn)
             DPMSSet(serverClient, DPMSModeOn);
-#endif
 
         mieqProcessDeviceEvent(dev, &event, screen);
 

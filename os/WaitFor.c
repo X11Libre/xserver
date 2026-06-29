@@ -93,9 +93,7 @@ SOFTWARE.
 #define GetErrno() errno
 #endif
 
-#ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#endif
 
 struct _OsTimerRec {
     struct xorg_list list;
@@ -389,8 +387,6 @@ TimerInit(void)
     }
 }
 
-#ifdef DPMSExtension
-
 #define DPMS_CHECK_MODE(mode,time)\
     if ((time) > 0 && DPMSPowerLevel < (mode) && timeout >= (time))\
 	DPMSSet(serverClient, (mode));
@@ -420,7 +416,6 @@ NextDPMSTimeout(INT32 timeout)
         return 0;
     }
 }
-#endif                          /* DPMSExtension */
 
 static CARD32
 ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
@@ -428,7 +423,6 @@ ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
     INT32 timeout = now - LastEventTime(XIAllDevices).milliseconds;
     CARD32 nextTimeout = 0;
 
-#ifdef DPMSExtension
     /*
      * Check each mode lowest to highest, since a lower mode can
      * have the same timeout as a higher one.
@@ -447,7 +441,6 @@ ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
      */
     if (DPMSPowerLevel != DPMSModeOn)
         return nextTimeout;
-#endif                          /* DPMSExtension */
 
     if (!ScreenSaverTime)
         return nextTimeout;
@@ -485,7 +478,6 @@ SetScreenSaverTimer(void)
 {
     CARD32 timeout = 0;
 
-#ifdef DPMSExtension
     if (DPMSEnabled) {
         /*
          * A higher DPMS level has a timeout that's either less
@@ -500,7 +492,6 @@ SetScreenSaverTimer(void)
         else if (DPMSOffTime > 0)
             timeout = DPMSOffTime;
     }
-#endif
 
     if (ScreenSaverTime > 0) {
         timeout = timeout > 0 ? MIN(ScreenSaverTime, timeout) : ScreenSaverTime;

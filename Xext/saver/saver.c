@@ -61,9 +61,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "cursorstr.h"
 #include "xace.h"
 #include "inputstr.h"
-#ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#endif
 #include "protocol-versions.h"
 
 Bool noScreenSaverExtension = FALSE;
@@ -371,11 +369,7 @@ ScreenSaverFreeSuspend(void *value, XID id)
 
         /* The screensaver could be active, since suspending it (by design)
            doesn't prevent it from being forcibly activated */
-#ifdef DPMSExtension
         if (screenIsSaved != SCREEN_SAVER_ON && DPMSPowerLevel == DPMSModeOn)
-#else
-        if (screenIsSaved != SCREEN_SAVER_ON)
-#endif
         {
             DeviceIntPtr dev;
             UpdateCurrentTimeIf();

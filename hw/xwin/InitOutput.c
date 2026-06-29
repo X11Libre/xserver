@@ -39,9 +39,7 @@ from The Open Group.
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
-#ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
-#endif
 #include "Xext/pseudoramiX/pseudoramiX.h"
 
 #include "winmsg.h"

@@ -122,9 +122,7 @@ Equipment Corporation.
 #include "privates.h"
 #include "exevents.h"
 
-#ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#endif
 
 extern void Dispatch(void);
 
