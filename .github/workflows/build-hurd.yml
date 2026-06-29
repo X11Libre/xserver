@@ -63,6 +63,22 @@ jobs:
                       sudo sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' mnt/etc/ssh/sshd_config
                       sudo sed -i 's/^#*PubkeyAuthentication.*/PubkeyAuthentication yes/' mnt/etc/ssh/sshd_config
                   fi
+
+                  # Boot is invisible on serial (GRUB + gnumach log to VGA),
+                  # so we can't tell "booting" from "hung". Route the console to
+                  # the serial port: dump grub.cfg for reference, point GRUB at
+                  # serial, and append console=com0 to the gnumach (multiboot)
+                  # line so kernel/Hurd messages reach qemu's -nographic stdio.
+                  gcfg=""
+                  for c in mnt/boot/grub/grub.cfg; do [ -f "$c" ] && gcfg="$c"; done
+                  echo "----- grub.cfg (${gcfg:-not found}) -----"
+                  [ -n "$gcfg" ] && sudo sed -n '1,80p' "$gcfg" || true
+                  echo "------------------------------------------"
+                  if [ -n "$gcfg" ]; then
+                      sudo sed -i '1i serial --unit=0 --speed=115200\nterminal_input console serial\nterminal_output console serial' "$gcfg"
+                      sudo sed -i '/^[[:space:]]*multiboot/ s/$/ console=com0/' "$gcfg"
+                  fi
+
                   sudo umount mnt
                   sudo losetup -d "$loop"
 
