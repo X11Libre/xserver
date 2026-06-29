@@ -42,6 +42,26 @@
 #include <dixfontstr.h>
 
 /*
+** Byte alignment of a scanline within an X server glyph bitmap.
+**
+** The X server stores each glyph's bitmap with its rows padded up to a fixed
+** boundary; GLYPHWIDTHBYTESPADDED() in <dixfontstr.h> rounds every row up to 4
+** bytes, so that boundary is 4.  This used to be the machine-dependent
+** GLYPHPADBYTES in <servermd.h>, tunable per platform for the old mfb/cfb glyph
+** blitters; those are long gone and the value is now fixed at 4 everywhere, so
+** the macro was dropped from the SDK.  This file -- the server-side
+** glXUseXFont() implementation -- is its sole remaining user, hence the local
+** definition.  It must stay in sync with GLYPHWIDTHBYTESPADDED()'s 4-byte pad.
+**
+** It is handed to GL_UNPACK_ALIGNMENT below so that, when glBitmap() reads the
+** raw X glyph rows out of client memory, OpenGL advances to the start of each
+** next row on the same boundary X padded them to (companion to the
+** GL_UNPACK_LSB_FIRST = BITMAP_BIT_ORDER setting, which conveys the bit order).
+** GL_UNPACK_ALIGNMENT only accepts 1/2/4/8, and 4 is valid.
+*/
+#define GLYPHPADBYTES 4
+
+/*
 ** Make a single GL bitmap from a single X glyph
 */
 static int
