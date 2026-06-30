@@ -105,6 +105,7 @@ static void InitVelocityData(DeviceVelocityPtr vel)
     vel->reset_time = 300;
     vel->use_softening = 1;
     vel->min_acceleration = 1.0;        /* don't decelerate */
+    vel->micemouse_threshold = 0.0; /* Mic-E-Mouse protection disabled by default */
     vel->max_rel_diff = 0.2;
     vel->max_diff = 1.0;
     vel->initial_range = 2;
@@ -323,6 +324,53 @@ AccelInitAdaptDecelProperty(DeviceIntPtr dev, DeviceVelocityPtr vel)
 }
 
 /**
+ * Mic-E-Mouse protection
+ */
+static int
+AccelSetMicemouseProperty(DeviceIntPtr dev, Atom atom,
+                          XIPropertyValuePtr val, BOOL checkOnly)
+{
+    DeviceVelocityPtr vel;
+    float v, *ptr = &v;
+    int rc;
+    int nelem = 1;
+
+    if (atom != XIGetKnownProperty(ACCEL_PROP_MICEMOUSE_PROTECTION))
+        return Success;
+
+    vel = GetDevicePredictableAccelData(dev);
+    if (!vel)
+        return BadValue;
+    rc = XIPropToFloat(val, &nelem, &ptr);
+
+    if (checkOnly) {
+        if (rc)
+            return rc;
+        return (v >= 0.0f) ? Success : BadValue;
+    }
+
+    if (v >= 0.0f)
+        vel->micemouse_threshold = v;
+
+    return Success;
+}
+
+static long
+AccelInitMicemouseProperty(DeviceIntPtr dev, DeviceVelocityPtr vel)
+{
+    float fval = vel->micemouse_threshold;
+    Atom prop_micemouse =
+        XIGetKnownProperty(ACCEL_PROP_MICEMOUSE_PROTECTION);
+
+    XIChangeDeviceProperty(dev, prop_micemouse,
+                           XIGetKnownProperty(XATOM_FLOAT), 32, PropModeReplace,
+                           1, &fval, FALSE);
+    XISetDevicePropertyDeletable(dev, prop_micemouse, FALSE);
+    return XIRegisterPropertyHandler(dev, AccelSetMicemouseProperty, NULL,
+                                     NULL);
+}
+
+/**
  * velocity scaling
  */
 static int
@@ -374,7 +422,7 @@ InitializePredictableAccelerationProperties(DeviceIntPtr dev,
                                             PredictableAccelSchemePtr
                                             schemeData)
 {
-    int num_handlers = 4;
+    int num_handlers = 5;
 
     if (!vel)
         return FALSE;
@@ -387,6 +435,7 @@ InitializePredictableAccelerationProperties(DeviceIntPtr dev,
     schemeData->prop_handlers[1] = AccelInitDecelProperty(dev, vel);
     schemeData->prop_handlers[2] = AccelInitAdaptDecelProperty(dev, vel);
     schemeData->prop_handlers[3] = AccelInitScaleProperty(dev, vel);
+    schemeData->prop_handlers[4] = AccelInitMicemouseProperty(dev, vel);
 
     return TRUE;
 }
@@ -405,6 +454,8 @@ DeletePredictableAccelerationProperties(DeviceIntPtr dev,
     prop = XIGetKnownProperty(ACCEL_PROP_CONSTANT_DECELERATION);
     XIDeleteDeviceProperty(dev, prop, FALSE);
     prop = XIGetKnownProperty(ACCEL_PROP_PROFILE_NUMBER);
+    XIDeleteDeviceProperty(dev, prop, FALSE);
+    prop = XIGetKnownProperty(ACCEL_PROP_MICEMOUSE_PROTECTION);
     XIDeleteDeviceProperty(dev, prop, FALSE);
 
     vel = GetDevicePredictableAccelData(dev);
@@ -1092,7 +1143,8 @@ acceleratePointerPredictable(DeviceIntPtr dev, ValuatorMask *val, CARD32 evtime)
         return;
 
     if (velocitydata->statistics.profile_number == AccelProfileNone &&
-        velocitydata->const_acceleration == 1.0) {
+        velocitydata->const_acceleration == 1.0 &&
+        velocitydata->micemouse_threshold == 0.0) {
         return;                 /*we're inactive anyway, so skip the whole thing. */
     }
 
@@ -1105,6 +1157,14 @@ acceleratePointerPredictable(DeviceIntPtr dev, ValuatorMask *val, CARD32 evtime)
     }
 
     if (dx != 0.0 || dy != 0.0) {
+        /* Mic-E-Mouse protection */
+        if (velocitydata->micemouse_threshold > 0.0) {
+            if (sqrt(dx * dx + dy * dy) < velocitydata->micemouse_threshold) {
+                dx = 0;
+                dy = 0;
+            }
+        }
+
         /* reset non-visible state? */
         if (ProcessVelocityData2D(velocitydata, dx, dy, evtime)) {
             soften = FALSE;
