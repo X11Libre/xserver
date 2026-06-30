@@ -166,7 +166,7 @@ get_argmax_from_kern(void *arg)
 void
 DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 {
-#if !defined(__APPLE__) && !defined(__DragonFly__) && !defined(__FreeBSD__)
+#if !defined(__APPLE__) && !defined(__DragonFly__) && !defined(__FreeBSD__) && !defined(__OpenBSD__)
     char path[PATH_MAX + 1];
     int totsize = 0;
     int fd = 0;
