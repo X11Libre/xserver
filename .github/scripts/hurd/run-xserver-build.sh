@@ -58,31 +58,32 @@ meson setup _build \
 echo "==> meson compile (baseline)"
 meson compile -C _build
 
-# Now ALSO attempt the PHYSICAL DDXes: the xfree86 server (-Dxorg) and the
-# kdrive framebuffer server (-Dxfbdev). These are not (yet) ported to GNU/Hurd,
-# so this stage is NON-FATAL — it surfaces the missing Hurd pieces without
-# taking down the green Xvfb/Xnest baseline above. libpciaccess has a Hurd
-# backend (Hurd ships a PCI arbiter), so the xfree86 PCI layer has a real chance
-# to configure/link. udev + logind stay off (absent on Hurd → static config /
-# input discovery). The GPU/DRM-coupled subsystems are all forced off because
-# Hurd has no DRM kernel interface: DRI needs libdrm's <drm.h>, which on Hurd
-# pulls a Mach ioctl header (mach/x86_64/ioccom.h) that doesn't exist; and glamor
-# (glamor_egl.c) needs DRM_FORMAT_MOD_INVALID / GBM / EGL-on-DRM. So dri1/dri2/
-# dri3, glx and glamor are off — leaving the xfree86 core (PCI, OS-support,
-# input) and the kdrive fbdev server as the real Hurd-port frontier.
-echo "==> meson setup (PHYSICAL DDXes: -Dxorg + -Dxfbdev — EXPERIMENTAL, non-fatal)"
+# Now ALSO attempt the PHYSICAL xfree86 server (-Dxorg) — the real "Xorg". This
+# stage is NON-FATAL: it surfaces the missing Hurd pieces without taking down the
+# green Xvfb/Xnest baseline above. libpciaccess has a Hurd backend (Hurd ships a
+# PCI arbiter), so the xfree86 PCI layer has a real chance to configure/link.
+# udev + logind stay off (absent on Hurd → static config / input discovery). The
+# GPU/DRM-coupled subsystems are all forced off because Hurd has no DRM kernel
+# interface: DRI needs libdrm's <drm.h>, which on Hurd pulls a Mach ioctl header
+# (mach/x86_64/ioccom.h) that doesn't exist; and glamor (glamor_egl.c) needs
+# DRM_FORMAT_MOD_INVALID / GBM / EGL-on-DRM. So dri1/dri2/dri3, glx and glamor
+# are off, leaving the xfree86 core (PCI, OS-support, input) as the frontier.
+# xfbdev (kdrive) is also off here: it builds hw/kdrive/linux, which needs
+# <linux/vt.h> (Linux VTs) — Hurd would need its own kdrive backend; tracked
+# separately from the xfree86 question.
+echo "==> meson setup (PHYSICAL xfree86 Xorg: -Dxorg — EXPERIMENTAL, non-fatal)"
 phys_ok=0
 if meson setup _build_phys \
     -Dwerror=false \
     -Dxvfb=false -Dxnest=false -Dxephyr=false \
-    -Dxorg=true -Dxfbdev=true \
+    -Dxorg=true -Dxfbdev=false \
     -Dglx=false -Dglamor=false -Ddri1=false -Ddri2=false -Ddri3=false -Dudev=false -Dsystemd_logind=false
 then
-    echo "==> meson compile (physical DDXes)"
+    echo "==> meson compile (physical xfree86 Xorg)"
     if meson compile -C _build_phys; then phys_ok=1; fi
 fi
 if [ "$phys_ok" = 1 ]; then
-    echo "==> RESULT: physical DDXes (Xorg + fbdev) BUILD on GNU/Hurd 🎉"
+    echo "==> RESULT: the xfree86 Xorg server BUILDS on GNU/Hurd 🎉"
 else
-    echo "::warning::physical DDXes (Xorg/fbdev) do not yet build on GNU/Hurd — see the errors above (non-fatal; the Xvfb/Xnest baseline still passes)"
+    echo "::warning::xfree86 Xorg does not yet build on GNU/Hurd — see the errors above (non-fatal; the Xvfb/Xnest baseline still passes)"
 fi
