@@ -199,6 +199,7 @@ KdEnableScreen(ScreenPtr pScreen)
         if (!(*pScreenPriv->card->cfuncs->enable) (pScreen))
             return FALSE;
     pScreenPriv->enabled = TRUE;
+    KdDPMS(pScreen, KD_DPMS_NORMAL);
     pScreenPriv->card->selected = pScreenPriv->screen->mynum;
     if (!pScreenPriv->screen->softCursor &&
         pScreenPriv->card->cfuncs->enableCursor)
@@ -207,7 +208,6 @@ KdEnableScreen(ScreenPtr pScreen)
         (*pScreenPriv->card->cfuncs->enableAccel) (pScreen);
     KdEnableColormap(pScreen);
     SetRootClip(pScreen, ROOT_CLIP_FULL);
-    KdDPMS(pScreen, KD_DPMS_NORMAL);
     return TRUE;
 }
 
