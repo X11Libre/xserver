@@ -4,13 +4,18 @@
 # and installs it (into the /opt/x11 prefix that the base image already uses for
 # its prereqs), so the driver builds can later consume a ready SDK from a
 # per-commit image (ghcr.io/.../xserver-sdk:<sha>) instead of the eviction-prone
-# actions/cache. Built + pushed by .github/workflows/sdk-image.yml.
+# actions/cache. Built + pushed by the build-sdk-image job in build-xserver.yml.
 #
 # Multi-stage so the final image carries only the installed SDK (/opt/x11), not
 # the xserver source tree.
 
+# Base image is the content-addressed ubuntu deps image; the build-sdk-image job
+# passes its content-hash tag via --build-arg BASE so the SDK is built on exactly
+# the deps this commit defines (defaults to :latest for a plain `docker build`).
+ARG BASE=ghcr.io/x11libre/xserver-ubuntu-build:latest
+
 # --- build stage: compile + install the SDK into /opt/x11 -------------------
-FROM ghcr.io/x11libre/xserver-ubuntu-build:latest AS build
+FROM ${BASE} AS build
 
 COPY . /src/xserver
 WORKDIR /src/xserver
@@ -29,5 +34,5 @@ RUN MACHINE="$(gcc -dumpmachine)" && \
     ninja -C _build install
 
 # --- final stage: base + the installed SDK, no source -----------------------
-FROM ghcr.io/x11libre/xserver-ubuntu-build:latest
+FROM ${BASE}
 COPY --from=build /opt/x11 /opt/x11

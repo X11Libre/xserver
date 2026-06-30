@@ -185,6 +185,52 @@ jobs:
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
 
+    ubuntu-deps-image:
+        # Content-addressed base image (apt deps + from-source prereqs baked in),
+        # consumed by build-sdk-image below. The tag is a hash of the image's
+        # build inputs (Dockerfile + the install scripts + conf.sh/util.sh), and
+        # we build only if that tag is missing — an unchanged image is reused on
+        # ANY branch (a few-second existence check, no ~15min rebuild); a branch
+        # that changes the deps automatically gets its own image, so the SDK it
+        # builds is never stale. :latest is only moved by master. Replaces the
+        # standalone ubuntu-deps-image.yml. Gated like build-sdk-image since the
+        # SDK is its only consumer.
+        runs-on: ubuntu-latest
+        needs: abi-changes-check
+        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+        permissions:
+            contents: read
+            packages: write
+        outputs:
+            tag: ${{ steps.tag.outputs.tag }}
+        steps:
+            - uses: actions/checkout@v6
+            - id: tag
+              run: |
+                  echo "tag=$(cat .github/docker/ubuntu/Dockerfile \
+                                   .github/scripts/ubuntu/install-pkg.sh \
+                                   .github/scripts/ubuntu/install-prereq.sh \
+                                   .github/scripts/conf.sh \
+                                   .github/scripts/util.sh \
+                               | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+            - name: Log in to GHCR
+              run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            - name: Build ubuntu deps image if missing
+              run: |
+                  set -eux
+                  img="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/xserver-ubuntu-build"
+                  tag="${{ steps.tag.outputs.tag }}"
+                  if docker manifest inspect "$img:$tag" >/dev/null 2>&1; then
+                      echo "image $img:$tag already exists — reusing"
+                  else
+                      docker build -t "$img:$tag" -f .github/docker/ubuntu/Dockerfile .
+                      docker push "$img:$tag"
+                      if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+                          docker tag "$img:$tag" "$img:latest"
+                          docker push "$img:latest"
+                      fi
+                  fi
+
     build-sdk-image:
         # Build the X-server + SDK from this commit and push it to GHCR as
         # xserver-sdk:<sha>; the driver builds below run in that image. Replaces
@@ -196,6 +242,7 @@ jobs:
         needs:
             - ubuntu-fetch-pkg
             - abi-changes-check
+            - ubuntu-deps-image
         if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
         permissions:
             contents: read
@@ -210,8 +257,10 @@ jobs:
             - name: Build and push SDK image (xserver-sdk:<sha>)
               run: |
                   set -eux
-                  img="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/xserver-sdk"
-                  docker build -t "$img:${GITHUB_SHA}" -f .github/docker/sdk/Dockerfile .
+                  owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+                  base="ghcr.io/$owner/xserver-ubuntu-build:${{ needs.ubuntu-deps-image.outputs.tag }}"
+                  img="ghcr.io/$owner/xserver-sdk"
+                  docker build --build-arg BASE="$base" -t "$img:${GITHUB_SHA}" -f .github/docker/sdk/Dockerfile .
                   docker push "$img:${GITHUB_SHA}"
 
     drivers-build-ubuntu:
@@ -680,15 +729,49 @@ jobs:
             - name: build
               run: ./.github/scripts/alpine/run-xserver-build.sh
 
-    xserver-build-gentoo:
+    gentoo-deps-image:
+        # Content-addressed deps image: tag = hash of the gentoo Dockerfile, and
+        # build only if that tag is missing. An unchanged image is reused on ANY
+        # branch (a few-second existence check, no 22min rebuild); a branch that
+        # edits the Dockerfile automatically gets a fresh image — no waste and no
+        # staleness. :latest is only moved by master.
         runs-on: ubuntu-latest
         needs: ubuntu-fetch-pkg
-        # Prebuilt image with all build deps baked in (built by gentoo-image.yml,
-        # pushed to GHCR). The job only runs meson (~5 min) instead of emerging
-        # 115 packages (~20 min). The package is public, so it pulls anonymously
-        # — no credentials or packages permission needed, and fork PRs work too.
+        permissions:
+            contents: read
+            packages: write
+        outputs:
+            tag: ${{ steps.tag.outputs.tag }}
+        steps:
+            - uses: actions/checkout@v6
+            - id: tag
+              run: echo "tag=$(sha256sum .github/docker/gentoo/Dockerfile | cut -c1-16)" >> "$GITHUB_OUTPUT"
+            - name: Log in to GHCR
+              run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            - name: Build gentoo deps image if missing
+              run: |
+                  set -eux
+                  img="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/xserver-gentoo-deps"
+                  tag="${{ steps.tag.outputs.tag }}"
+                  if docker manifest inspect "$img:$tag" >/dev/null 2>&1; then
+                      echo "image $img:$tag already exists — reusing"
+                  else
+                      docker build -t "$img:$tag" -f .github/docker/gentoo/Dockerfile .github/docker/gentoo
+                      docker push "$img:$tag"
+                      if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+                          docker tag "$img:$tag" "$img:latest"
+                          docker push "$img:latest"
+                      fi
+                  fi
+
+    xserver-build-gentoo:
+        runs-on: ubuntu-latest
+        needs: gentoo-deps-image
+        # Deps image built/reused by gentoo-deps-image above, addressed by
+        # content hash so this always runs against matching deps. Only runs
+        # meson (~5 min) instead of emerging 115 packages (~20 min).
         container:
-            image: ghcr.io/x11libre/xserver-gentoo-deps:latest
+            image: ghcr.io/x11libre/xserver-gentoo-deps:${{ needs.gentoo-deps-image.outputs.tag }}
         env:
             # werror off: Gentoo's hardened toolchain (FORTIFY_SOURCE) trips
             # -Werror=format-truncation in the bundled Xtrans (a bounded snprintf
