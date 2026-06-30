@@ -698,10 +698,7 @@ jobs:
             # an entitlement on public runners.
             image: almalinux:${{ matrix.rhelver }}
         env:
-            # werror off for now: RHEL 10's newer GCC trips -Werror=format-truncation
-            # in os/Xtranssock.c. Freshly-added platform; tighten once it's clean
-            # (same as the gentoo/solaris/openbsd jobs).
-            MESON_ARGS: -Dprefix=/usr -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false
+            MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
