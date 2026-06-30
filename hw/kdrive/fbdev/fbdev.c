@@ -398,7 +398,7 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
     case FB_VISUAL_TRUECOLOR:
     case FB_VISUAL_DIRECTCOLOR:
         screen->fb.visuals = (1 << TrueColor);
-#define Mask(o,l)   (((1 << l) - 1) << o)
+#define Mask(o,l)   (((1 << (l)) - 1) << (o))
         screen->fb.redMask = Mask (priv->var.red.offset, priv->var.red.length);
         screen->fb.greenMask =
             Mask (priv->var.green.offset, priv->var.green.length);
