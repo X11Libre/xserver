@@ -1,11 +1,11 @@
 #!/bin/sh
 #
 # Runs INSIDE the Debian GNU/Hurd VM (over ssh) — see the xserver-build-hurd job
-# in .github/workflows/build-xserver.yml. The virtual DDXes (Xvfb/Xnest) build
-# green on Hurd and are the job's pass/fail baseline; this script ADDITIONALLY
-# makes a non-fatal attempt at the physical DDXes (xfree86 Xorg + kdrive fbdev)
-# to surface what's still missing for a Hurd port. $REPO and $SHA come from the
-# workflow.
+# in .github/workflows/build-xserver.yml. Builds the X servers that work on
+# GNU/Hurd today as the job's FATAL pass/fail gate: the virtual DDXes Xvfb +
+# Xnest AND the physical xfree86 Xorg server. It ADDITIONALLY makes a non-fatal
+# attempt at the kdrive fbdev server (not yet portable — see below). $REPO and
+# $SHA come from the workflow.
 set -ex
 
 export DEBIAN_FRONTEND=noninteractive
@@ -48,42 +48,45 @@ cd xserver
 git fetch --depth 1 origin "$SHA"
 git checkout FETCH_HEAD
 
-echo "==> meson setup (baseline: virtual DDXes Xvfb/Xnest — must succeed)"
-meson setup _build \
-    -Dwerror=false \
-    -Dxvfb=true -Dxnest=true \
-    -Dxorg=false -Dxephyr=false -Dxfbdev=false \
-    -Dglx=false -Ddri2=false -Ddri3=false -Dudev=false -Dsystemd_logind=false
-
-echo "==> meson compile (baseline)"
-meson compile -C _build
-
-# Now ALSO attempt the PHYSICAL xfree86 server (-Dxorg) — the real "Xorg". This
-# stage is NON-FATAL: it surfaces the missing Hurd pieces without taking down the
-# green Xvfb/Xnest baseline above. libpciaccess has a Hurd backend (Hurd ships a
-# PCI arbiter), so the xfree86 PCI layer has a real chance to configure/link.
-# udev + logind stay off (absent on Hurd → static config / input discovery). The
+# FATAL build: the servers proven to build on GNU/Hurd — Xvfb + Xnest (virtual
+# DDXes) and the physical xfree86 Xorg server, all in one meson build so a
+# regression breaking any of them fails the lane. libpciaccess has a Hurd backend
+# (Hurd ships a PCI arbiter), so the xfree86 PCI layer configures/links. udev +
+# logind stay off (absent on Hurd → static config / input discovery). The
 # GPU/DRM-coupled subsystems are all forced off because Hurd has no DRM kernel
 # interface: DRI needs libdrm's <drm.h>, which on Hurd pulls a Mach ioctl header
 # (mach/x86_64/ioccom.h) that doesn't exist; and glamor (glamor_egl.c) needs
 # DRM_FORMAT_MOD_INVALID / GBM / EGL-on-DRM. So dri1/dri2/dri3, glx and glamor
-# are off, leaving the xfree86 core (PCI, OS-support, input) as the frontier.
-# xfbdev (kdrive) is also off here: it builds hw/kdrive/linux, which needs
-# <linux/vt.h> (Linux VTs) — Hurd would need its own kdrive backend; tracked
-# separately from the xfree86 question.
-echo "==> meson setup (PHYSICAL xfree86 Xorg: -Dxorg — EXPERIMENTAL, non-fatal)"
-phys_ok=0
-if meson setup _build_phys \
+# stay off.
+echo "==> meson setup (Xvfb + Xnest + xfree86 Xorg — the servers that build on Hurd)"
+meson setup _build \
     -Dwerror=false \
-    -Dxvfb=false -Dxnest=false -Dxephyr=false \
-    -Dxorg=true -Dxfbdev=false \
-    -Dglx=false -Dglamor=false -Ddri1=false -Ddri2=false -Ddri3=false -Dudev=false -Dsystemd_logind=false
+    -Dxvfb=true -Dxnest=true -Dxorg=true \
+    -Dxephyr=false -Dxfbdev=false \
+    -Dglx=false -Dglamor=false -Ddri1=false -Ddri2=false -Ddri3=false \
+    -Dudev=false -Dsystemd_logind=false
+
+echo "==> meson compile (Xvfb + Xnest + Xorg)"
+meson compile -C _build
+
+# NON-FATAL: the kdrive fbdev server. It builds hw/kdrive/linux, which needs
+# Linux VTs (<linux/vt.h>) — Hurd has none and would need its own kdrive backend.
+# Attempt it so the gap stays visible and the lane lights up green the day a Hurd
+# backend lands, without failing CI meanwhile.
+echo "==> meson setup (kdrive xfbdev — EXPERIMENTAL, non-fatal)"
+kdrive_ok=0
+if meson setup _build_kdrive \
+    -Dwerror=false \
+    -Dxvfb=false -Dxnest=false -Dxorg=false -Dxephyr=false \
+    -Dxfbdev=true \
+    -Dglx=false -Dglamor=false -Ddri1=false -Ddri2=false -Ddri3=false \
+    -Dudev=false -Dsystemd_logind=false
 then
-    echo "==> meson compile (physical xfree86 Xorg)"
-    if meson compile -C _build_phys; then phys_ok=1; fi
+    echo "==> meson compile (kdrive xfbdev)"
+    if meson compile -C _build_kdrive; then kdrive_ok=1; fi
 fi
-if [ "$phys_ok" = 1 ]; then
-    echo "==> RESULT: the xfree86 Xorg server BUILDS on GNU/Hurd 🎉"
+if [ "$kdrive_ok" = 1 ]; then
+    echo "==> RESULT: kdrive xfbdev also BUILDS on GNU/Hurd 🎉"
 else
-    echo "::warning::xfree86 Xorg does not yet build on GNU/Hurd — see the errors above (non-fatal; the Xvfb/Xnest baseline still passes)"
+    echo "::warning::kdrive xfbdev does not yet build on GNU/Hurd (needs a Hurd VT/kdrive backend) — non-fatal"
 fi
