@@ -647,6 +647,22 @@ jobs:
                   usesh: true
                   run:     ./.github/scripts/openbsd/run-xserver-build.sh
 
+    xserver-build-hurd:
+        runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
+        timeout-minutes: 120
+        env:
+            REPO: ${{ github.repository }}
+            SHA: ${{ github.sha }}
+        steps:
+            - uses: actions/checkout@v6
+            - name: Install QEMU
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y qemu-system-x86 qemu-utils openssh-client
+            - name: Boot GNU/Hurd VM and build (Xvfb + Xnest)
+              run: ./.github/scripts/hurd/run-vm-build.sh
+
     xserver-build-alpine:
         runs-on: ubuntu-latest
         needs: ubuntu-fetch-pkg
