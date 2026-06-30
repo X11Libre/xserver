@@ -1002,7 +1002,11 @@ glamor_egl_fds_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap, int *fds,
 
     *modifier = modifiers[0];
 
+#ifdef WITH_LIBDRM
     pixmap_priv->used_modifiers = (*modifier != DRM_FORMAT_MOD_INVALID);
+#else
+    pixmap_priv->used_modifiers = FALSE;
+#endif
 
     return num_planes;
 #else
@@ -2568,7 +2572,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 
     GLAMOR_CHECK_EGL_EXTENSION(KHR_surfaceless_context);
 
-#ifdef GLAMOR_HAS_GBM
+#if defined(GLAMOR_HAS_GBM) && defined(DRI3)
     if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
         GLAMOR_LOG_STR(screen_idx, X_WARNING, "EGL extension EGL_MESA_image_dma_buf_export not available\n");
         GLAMOR_LOG_STR(screen_idx, X_WARNING, "DRI3 dmabuf export will be slower\n");
@@ -2640,6 +2644,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
     glamor_egl->has_EXT_EGL_image_storage = epoxy_has_gl_extension("GL_EXT_EGL_image_storage");
     glamor_egl->has_OES_EGL_image = epoxy_has_gl_extension("GL_OES_EGL_image");
 
+#ifdef DRI3
     if (!glamor_egl->has_EXT_EGL_image_storage && !glamor_egl->has_OES_EGL_image) {
         GLAMOR_LOG_STR(screen_idx, X_ERROR,
                        "Extensions GL_EXT_EGL_image_storage and GL_OES_EGL_image are both unavailable\n");
@@ -2647,6 +2652,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
                        "DRI3 import will not be available\n");
         glamor_dri3_info.pixmap_from_fds = NULL;
     }
+#endif
 
 #if defined(GLAMOR_HAS_GBM) && defined(EGL_MESA_image_dma_buf_export)
     glamor_egl->has_image_dma_buf_export = epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export");
@@ -2681,11 +2687,13 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 #endif
 
     *caps |= GLAMOR_EGL_DEFAULT_CAPS;
+#ifdef DRI3
     if (!glamor_dri3_info.pixmap_from_fds) {
         *caps &= ~GLAMOR_EGL_CAP_DRI3_IMPORT;
         /* Avoid DRI3 returning BadImplementation */
         glamor_dri3_info.pixmap_from_fds = glamor_pixmap_from_fds_noop;
     }
+#endif
 
 #ifdef GLAMOR_HAS_GBM
     if (glamor_egl->can_texture_gbm_bo) {
@@ -2701,6 +2709,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
             GLAMOR_LOG_STR(screen_idx, X_ERROR, "Cannot texture gbm buffers\n");
         }
         *caps &= ~GLAMOR_EGL_CAP_TEXTURE_GBM_BO;
+#ifdef DRI3
         if (epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
             glamor_dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_fast;
             glamor_dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_fast;
@@ -2711,6 +2720,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
             glamor_dri3_info.fds_from_pixmap = NULL;
             *caps &= ~GLAMOR_EGL_CAP_DRI3_EXPORT;
         }
+#endif
     }
 
 #define GLAMOR_EGL_CAP_DRI3_BASE (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
