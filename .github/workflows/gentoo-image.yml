@@ -15,6 +15,7 @@ on:
         # weekly, Monday 04:00 UTC — keep the image fresh with the binhost
         - cron: '0 4 * * 1'
     push:
+        branches: [master]
         paths:
             - '.github/docker/gentoo/**'
             - '.github/workflows/gentoo-image.yml'
