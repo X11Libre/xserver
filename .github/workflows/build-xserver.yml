@@ -615,8 +615,6 @@ jobs:
     # mechanism as the BSD jobs above). Exercises the Solaris-specific os/ code
     # paths (procfs/psinfo, the sunos meson branch) that no other CI covers.
     # OpenIndiana packages the full X stack incl. Mesa, so GLX stays enabled.
-    # werror is off for now since this platform is freshly added; tighten once
-    # it is green.
     xserver-build-solaris:
         runs-on: ubuntu-latest
         needs: ubuntu-fetch-pkg
@@ -625,7 +623,7 @@ jobs:
             # libdrm-backed direct-rendering extensions can't work (and OI's
             # xf86drm.h pulls a drm.h that only exists for Linux). glx stays on
             # (Mesa is packaged) for indirect/software GLX.
-            MESON_ARGS: -Dwerror=false -Dxvfb=true -Dxnest=true -Dxorg=false -Dxephyr=false -Dxfbdev=false -Ddri2=false -Ddri3=false
+            MESON_ARGS: -Dwerror=true -Dxvfb=true -Dxnest=true -Dxorg=false -Dxephyr=false -Dxfbdev=false -Ddri2=false -Ddri3=false
         steps:
             - uses: actions/checkout@v6
             - uses: ./.github/actions/ubuntu-pkg-cache
@@ -642,13 +640,12 @@ jobs:
     # tooling is installed; X libs (incl. Mesa) come from /usr/X11R6. glx stays
     # enabled (indirect/software GLX against the base Mesa); dri2/dri3 stay off
     # (direct rendering needs a working DRM/KMS, n/a in the headless VM).
-    # werror off while the platform is freshly added.
     xserver-build-openbsd:
         runs-on: ubuntu-latest
         needs: ubuntu-fetch-pkg
         timeout-minutes: 90
         env:
-            MESON_ARGS: -Dwerror=false -Dxvfb=true -Dxnest=true -Dxorg=false -Dxephyr=false -Dxfbdev=false -Ddri2=false -Ddri3=false
+            MESON_ARGS: -Dwerror=true -Dxvfb=true -Dxnest=true -Dxorg=false -Dxephyr=false -Dxfbdev=false -Ddri2=false -Ddri3=false
         steps:
             - uses: actions/checkout@v6
             - uses: ./.github/actions/ubuntu-pkg-cache
@@ -718,6 +715,11 @@ jobs:
         container:
             image: alpine:latest
         env:
+            # werror stays off here: on musl, libbsd's <bsd/sys/cdefs.h> pulls the
+            # system <sys/cdefs.h>, which emits a #warning ("non-standard ...
+            # deprecated") that -Werror (-Werror=cpp) turns fatal in every TU using
+            # libbsd. That's a musl/libbsd toolchain quirk, not an xserver warning, so
+            # it can't be fixed in-tree (unlike solaris/gentoo/openbsd, now tightened).
             MESON_ARGS: -Dprefix=/usr -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false -Dwerror=false
         steps:
             # actions/checkout is a JS action; GitHub's bundled Node is
@@ -773,11 +775,7 @@ jobs:
         container:
             image: ghcr.io/x11libre/xserver-gentoo-deps:${{ needs.gentoo-deps-image.outputs.tag }}
         env:
-            # werror off: Gentoo's hardened toolchain (FORTIFY_SOURCE) trips
-            # -Werror=format-truncation in the bundled Xtrans (a bounded snprintf
-            # into sun_path) which other platforms don't hit. Matches the other
-            # freshly-added lanes (solaris/openbsd) while the platform is new.
-            MESON_ARGS: -Dprefix=/usr -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false
+            MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
