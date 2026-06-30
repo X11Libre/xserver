@@ -64,16 +64,19 @@ meson compile -C _build
 # taking down the green Xvfb/Xnest baseline above. libpciaccess has a Hurd
 # backend (Hurd ships a PCI arbiter), so the xfree86 PCI layer has a real chance
 # to configure/link. udev + logind stay off (absent on Hurd → static config /
-# input discovery), and glx/dri stay off: DRI needs libdrm's <drm.h>, which on
-# Hurd pulls a Mach ioctl header (mach/x86_64/ioccom.h) that doesn't exist —
-# Hurd has no DRM kernel interface — so dri1/dri2/dri3 are all forced off.
+# input discovery). The GPU/DRM-coupled subsystems are all forced off because
+# Hurd has no DRM kernel interface: DRI needs libdrm's <drm.h>, which on Hurd
+# pulls a Mach ioctl header (mach/x86_64/ioccom.h) that doesn't exist; and glamor
+# (glamor_egl.c) needs DRM_FORMAT_MOD_INVALID / GBM / EGL-on-DRM. So dri1/dri2/
+# dri3, glx and glamor are off — leaving the xfree86 core (PCI, OS-support,
+# input) and the kdrive fbdev server as the real Hurd-port frontier.
 echo "==> meson setup (PHYSICAL DDXes: -Dxorg + -Dxfbdev — EXPERIMENTAL, non-fatal)"
 phys_ok=0
 if meson setup _build_phys \
     -Dwerror=false \
     -Dxvfb=false -Dxnest=false -Dxephyr=false \
     -Dxorg=true -Dxfbdev=true \
-    -Dglx=false -Ddri1=false -Ddri2=false -Ddri3=false -Dudev=false -Dsystemd_logind=false
+    -Dglx=false -Dglamor=false -Ddri1=false -Ddri2=false -Ddri3=false -Dudev=false -Dsystemd_logind=false
 then
     echo "==> meson compile (physical DDXes)"
     if meson compile -C _build_phys; then phys_ok=1; fi
