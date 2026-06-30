@@ -343,20 +343,23 @@ static inline void x_rpcbuf_pad(x_rpcbuf_t *rpcbuf) {
  * write a Pascal-like counted string, starting with CARD16 couter,
  * followed by the char bytes, padded to full protocol units (4-bytes).
  *
- * if str is NULL, don't write anything
+ * A NULL str is written as an empty counted string (length 0 + padding, i.e.
+ * 4 bytes), NOT omitted: the counted-string wire format always carries the
+ * 16-bit length, so a reader (e.g. the XKB geometry reader _GetCountedString)
+ * unconditionally consumes those bytes. Omitting them for NULL would desync
+ * every following field.
  *
  * @param rpcbuf    pointer to the x_rpcbuf_t to operate on
- * @param str       zero-terminated string to write into the buffer
+ * @param str       zero-terminated string to write into the buffer, or NULL
  */
 static inline void x_rpcbuf_write_counted_string_pad(
         x_rpcbuf_t *rpcbuf, const char *str)
 {
-    if (str) {
-        CARD16 len = (CARD16)strlen(str); /* 64k should really be enough */
-        x_rpcbuf_write_CARD16(rpcbuf, len);
+    CARD16 len = str ? (CARD16)strlen(str) : 0; /* 64k should really be enough */
+    x_rpcbuf_write_CARD16(rpcbuf, len);
+    if (len)
         x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)str, len);
-        x_rpcbuf_pad(rpcbuf);
-    }
+    x_rpcbuf_pad(rpcbuf);
 }
 
 /*
