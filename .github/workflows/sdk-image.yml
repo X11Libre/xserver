@@ -13,6 +13,7 @@ name: Build xserver SDK image
 on:
     workflow_dispatch:
     push:
+        branches: [master]
         paths:
             - '.github/docker/sdk/**'
             - '.github/workflows/sdk-image.yml'

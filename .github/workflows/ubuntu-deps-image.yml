@@ -11,6 +11,7 @@ on:
         # weekly, Monday 04:30 UTC — keep prereqs fresh with the distro
         - cron: '30 4 * * 1'
     push:
+        branches: [master]
         paths:
             - '.github/docker/ubuntu/**'
             - '.github/scripts/ubuntu/install-pkg.sh'
