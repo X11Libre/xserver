@@ -69,24 +69,40 @@ meson setup _build \
 echo "==> meson compile (Xvfb + Xnest + Xorg)"
 meson compile -C _build
 
-# NON-FATAL: the kdrive fbdev server. It builds hw/kdrive/linux, which needs
-# Linux VTs (<linux/vt.h>) — Hurd has none and would need its own kdrive backend.
-# Attempt it so the gap stays visible and the lane lights up green the day a Hurd
-# backend lands, without failing CI meanwhile.
-echo "==> meson setup (kdrive xfbdev — EXPERIMENTAL, non-fatal)"
-kdrive_ok=0
-if meson setup _build_kdrive \
+# --- non-fatal probes for two review points (stefan11111 on PR #3193) -------
+# PROBE 1: glx + glamor "should build without libdrm". Add them on top of the
+# Xorg build with DRI still off (DRI is the part that hard-needs libdrm's
+# <drm.h> → the nonexistent mach/x86_64/ioccom.h).
+echo "==> PROBE 1: meson setup (Xorg + glx + glamor, dri off — non-fatal)"
+glxglamor_ok=0
+if meson setup _build_glx \
     -Dwerror=false \
-    -Dxvfb=false -Dxnest=false -Dxorg=false -Dxephyr=false \
-    -Dxfbdev=true \
+    -Dxvfb=false -Dxnest=false -Dxephyr=false -Dxfbdev=false \
+    -Dxorg=true -Dglx=true -Dglamor=true \
+    -Ddri1=false -Ddri2=false -Ddri3=false -Dudev=false -Dsystemd_logind=false
+then
+    echo "==> meson compile (Xorg + glx + glamor)"
+    if meson compile -C _build_glx; then glxglamor_ok=1; fi
+fi
+[ "$glxglamor_ok" = 1 ] \
+    && echo "==> PROBE 1 RESULT: glx + glamor BUILD on GNU/Hurd without DRI 🎉" \
+    || echo "::warning::PROBE 1: glx/glamor do not build on GNU/Hurd (see errors above) — non-fatal"
+
+# PROBE 2: Xephyr "should work, it doesn't use the kdrive linux input drivers."
+# Xephyr is a kdrive server that runs as an X client over XCB, not the linux
+# fbdev/VT path that blocks xfbdev — so unlike xfbdev it has a real chance.
+echo "==> PROBE 2: meson setup (Xephyr — non-fatal)"
+xephyr_ok=0
+if meson setup _build_xephyr \
+    -Dwerror=false \
+    -Dxvfb=false -Dxnest=false -Dxorg=false -Dxfbdev=false \
+    -Dxephyr=true \
     -Dglx=false -Dglamor=false -Ddri1=false -Ddri2=false -Ddri3=false \
     -Dudev=false -Dsystemd_logind=false
 then
-    echo "==> meson compile (kdrive xfbdev)"
-    if meson compile -C _build_kdrive; then kdrive_ok=1; fi
+    echo "==> meson compile (Xephyr)"
+    if meson compile -C _build_xephyr; then xephyr_ok=1; fi
 fi
-if [ "$kdrive_ok" = 1 ]; then
-    echo "==> RESULT: kdrive xfbdev also BUILDS on GNU/Hurd 🎉"
-else
-    echo "::warning::kdrive xfbdev does not yet build on GNU/Hurd (needs a Hurd VT/kdrive backend) — non-fatal"
-fi
+[ "$xephyr_ok" = 1 ] \
+    && echo "==> PROBE 2 RESULT: Xephyr BUILDS on GNU/Hurd 🎉" \
+    || echo "::warning::PROBE 2: Xephyr does not build on GNU/Hurd (see errors above) — non-fatal"
