@@ -1,13 +1,10 @@
 name: Build X server (GNU/Hurd, experimental)
 
-# EXPERIMENTAL / best-effort. There is no vmactions/hurd-vm, so this hand-rolls
-# a QEMU VM the way vmactions does internally: boot Debian's pre-installed
-# GNU/Hurd amd64 image, inject an ssh key into it (the image has no password
-# set), wait for ssh, then build the xserver inside. The X server is not ported
-# to GNU/Hurd yet, so the build step is expected to surface gaps rather than go
-# green — this lane exists to make that progress visible and reproducible.
-#
-# continue-on-error so it never blocks anything while it is a work in progress.
+# GNU/Hurd build. There is no vmactions/hurd-vm, so this hand-rolls a QEMU VM
+# the way vmactions does internally: boot Debian's pre-installed GNU/Hurd amd64
+# image (rumpdisk → needs q35 + an AHCI disk), inject an ssh key into it (the
+# image ships without a set password), wait for ssh, then build Xvfb + Xnest
+# inside. This builds green; keep an eye on transient VM-boot flakiness.
 
 on:
     workflow_dispatch:
@@ -20,7 +17,6 @@ jobs:
     xserver-build-hurd:
         runs-on: ubuntu-latest
         timeout-minutes: 120
-        continue-on-error: true
         env:
             IMG_URL: https://cdimage.debian.org/cdimage/ports/latest/hurd-amd64/debian-hurd.img.tar.gz
         steps:
