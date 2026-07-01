@@ -79,7 +79,7 @@ SOFTWARE.
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef CSRG_BASED
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #include <netinet/tcp.h>
