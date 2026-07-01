@@ -46,7 +46,6 @@
 # if defined(__CYGWIN__)
 #  include <sys/param.h>
 # endif
-#include <sys/sysmacros.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
