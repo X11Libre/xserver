@@ -139,7 +139,7 @@ SOFTWARE.
 
 #include <netdb.h>
 
-#ifdef CSRG_BASED
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #if (BSD >= 199103)
 #define VARIABLE_IFREQ
