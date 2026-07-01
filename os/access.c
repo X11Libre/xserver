@@ -422,10 +422,6 @@ DefineSelf(int fd)
 #endif
     struct sockaddr_in broad_addr;
 
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
-    _Xgethostbynameparams hparams;
-#endif
-
     /* Why not use gethostname()?  Well, at least on my system, I've had to
      * make an ugly kernel patch to get a name longer than 8 characters, and
      * uname() lets me access to the whole string (it smashes release, you
@@ -985,9 +981,6 @@ ResetHosts(const char *display)
                     }
                 }
 #else                           /* HAVE_GETADDRINFO */
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
-                _Xgethostbynameparams hparams;
-#endif
                 register struct hostent *hp;
 
                 /* host name */
@@ -1792,9 +1785,6 @@ siHostnameAddrMatch(int family, void *addr, int len,
     if (family == FamilyInternet) {
         register struct hostent *hp;
 
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
-        _Xgethostbynameparams hparams;
-#endif
         char hostname[SI_HOSTNAME_MAXLEN];
         int f, hostaddrlen;
         void *hostaddr;
