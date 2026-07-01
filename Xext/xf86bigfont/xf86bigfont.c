@@ -41,6 +41,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #ifdef CONFIG_MITSHM
 # if defined(__CYGWIN__)
@@ -86,8 +87,6 @@ static CARD32 signature;
 /* Index for additional information stored in a FontRec's devPrivates array. */
 static int FontShmdescIndex;
 
-static unsigned int pagesize;
-
 static Bool badSysCall = FALSE;
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
@@ -123,6 +122,10 @@ CheckForShmSyscall(void)
 
 #define MUST_CHECK_FOR_SHM_SYSCALL
 
+/* Set once the SHM syscall probe above has succeeded; gates the
+   local-client shm optimisation in shmalloc(). */
+static bool shmSupported;
+
 #endif
 
 /* ========== Management of shared memory segments ========== */
@@ -150,7 +153,7 @@ shmalloc(unsigned int size)
     char *addr;
 
 #ifdef MUST_CHECK_FOR_SHM_SYSCALL
-    if (pagesize == 0) {
+    if (!shmSupported) {
         return (ShmDescPtr) NULL;
     }
 #endif
@@ -170,7 +173,6 @@ shmalloc(unsigned int size)
         return (ShmDescPtr) NULL;
     }
 
-    size = (size + pagesize - 1) & -pagesize;
     shmid = shmget(IPC_PRIVATE, size, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
     if (shmid == -1) {
         ErrorF(XF86BIGFONTNAME " extension: shmget() failed, size = %u, %s\n",
@@ -651,6 +653,7 @@ XFree86BigfontExtensionInit(void)
                    " extension local-client optimization disabled due to lack of shared memory support in the kernel\n");
             return;
         }
+        shmSupported = true;
 #endif
 
         srand((unsigned int) time(NULL));
@@ -659,16 +662,6 @@ XFree86BigfontExtensionInit(void)
         /* fprintf(stderr, "signature = 0x%08X\n", signature); */
 
         FontShmdescIndex = xfont2_allocate_font_private_index();
-
-#if !defined(CSRG_BASED) && !defined(__CYGWIN__)
-        pagesize = SHMLBA;
-#else
-#ifdef _SC_PAGESIZE
-        pagesize = sysconf(_SC_PAGESIZE);
-#else
-        pagesize = getpagesize();
-#endif
-#endif
 #endif /* CONFIG_MITSHM */
     }
 }
