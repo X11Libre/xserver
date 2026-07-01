@@ -790,7 +790,7 @@ static int _XSERVTransSocketINETCreateListener (
 #ifdef IPv6
 	namelen = sizeof (struct sockaddr_in6);
 #ifdef SIN6_LEN
-	((struct sockaddr_in6 *)&sockname)->sin6_len = sizeof(sockname);
+	((struct sockaddr_in6 *)&sockname)->sin6_len = namelen;
 #endif
 	((struct sockaddr_in6 *)&sockname)->sin6_family = AF_INET6;
 	((struct sockaddr_in6 *)&sockname)->sin6_port = htons(sport);
