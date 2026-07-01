@@ -100,7 +100,6 @@ static struct { const char *name; int id; } reservedExt[] = {
     { "SYNC",                       EXTENSION_MAJOR_SYNC },
     { "Windows-DRI",                EXTENSION_MAJOR_WINDOWS_DRI },
     { "XFIXES",                     EXTENSION_MAJOR_XFIXES },
-    { "XFree86-Bigfont",            EXTENSION_MAJOR_XF86_BIGFONT },
     { "XFree86-DGA",                EXTENSION_MAJOR_XF86_DGA },
     { "XFree86-DRI",                EXTENSION_MAJOR_XF86_DRI },
     { "XFree86-VidModeExtension",   EXTENSION_MAJOR_XF86_VIDMODE },
