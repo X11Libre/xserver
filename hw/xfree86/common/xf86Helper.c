@@ -65,12 +65,6 @@
 #include "xf86Config.h"
 #include "xf86Module_priv.h"
 
-/* For xf86GetClocks */
-#if defined(CSRG_BASED) || defined(__GNU__)
-#define HAS_SETPRIORITY
-#include <sys/resource.h>
-#endif
-
 static int xf86ScrnInfoPrivateCount = 0;
 
 /* Add a pointer to a new DriverRec to xf86DriverList */
