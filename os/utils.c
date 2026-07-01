@@ -814,10 +814,6 @@ set_font_authorizations(char **authorizations, int *authlen, void *client)
         struct addrinfo hints, *ai = NULL;
 #else
         struct hostent *host;
-
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
-        _Xgethostbynameparams hparams;
-#endif
 #endif
 
         struct xhostname hn;

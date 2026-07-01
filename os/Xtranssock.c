@@ -717,9 +717,6 @@ static int _XSERVTransSocketINETCreateListener (
     SOCKLEN_T	namelen = sizeof(sockname);
     int		status;
     long	tmpport;
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
-    _Xgetservbynameparams sparams;
-#endif
     struct servent *servp;
 
     char	portbuf[PORTBUFSIZE];
