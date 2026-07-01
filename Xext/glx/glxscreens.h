@@ -146,7 +146,10 @@ struct __GLXscreen {
     unsigned char glx_enable_bits[__GLX_EXT_BYTES];
 };
 
-void __glXScreenInit(__GLXscreen * screen, ScreenPtr pScreen);
-void __glXScreenDestroy(__GLXscreen * screen);
+/* exported for glamor */
+_X_EXPORT void __glXScreenInit(__GLXscreen * screen, ScreenPtr pScreen);
+
+/* exported for glamor */
+_X_EXPORT void __glXScreenDestroy(__GLXscreen * screen);
 
 #endif                          /* !__GLX_screens_h__ */
