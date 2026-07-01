@@ -692,6 +692,9 @@ hostx_init(void)
             xcb_lookup_color(HostX.conn, xscreen->default_colormap, 3, "red");
         xcb_lookup_color_reply_t *reply =
             xcb_lookup_color_reply(HostX.conn, c, NULL);
+        if (!reply) {
+            FatalError("Xephyr: lost connection to host display while allocating colors\n");
+        }
         red = reply->exact_red;
         green = reply->exact_green;
         blue = reply->exact_blue;
@@ -703,6 +706,9 @@ hostx_init(void)
                                                      xscreen->default_colormap,
                                                      red, green, blue);
         xcb_alloc_color_reply_t *r = xcb_alloc_color_reply(HostX.conn, c, NULL);
+        if (!r) {
+            FatalError("Xephyr: lost connection to host display while allocating colors\n");
+        }
         red = r->red;
         green = r->green;
         blue = r->blue;
