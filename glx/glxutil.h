@@ -5,6 +5,8 @@
 #ifndef _glxcmds_h_
 #define _glxcmds_h_
 
+#include <X11/Xfuncproto.h>
+
 /*
  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
  * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.
@@ -34,7 +36,9 @@
  * other dealings in this Software without prior written authorization from
  * Silicon Graphics, Inc.
  */
-
+ 
+/* exported for glamor */
+_X_EXPORT
 extern GLboolean __glXDrawableInit(__GLXdrawable * drawable,
                                    __GLXscreen * screen,
                                    DrawablePtr pDraw, int type, XID drawID,
