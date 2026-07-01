@@ -120,9 +120,6 @@ static const ExtensionModule staticExtensions[] = {
 #endif /* XINERAMA */
     /* must be before Render to layer DisplayCursor correctly */
     {XFixesExtensionInit, "XFIXES", &noXFixesExtension},
-#ifdef XF86BIGFONT
-    {XFree86BigfontExtensionInit, "XFree86-Bigfont", &noXFree86BigfontExtension},
-#endif
     {RenderExtensionInit, "RENDER", &noRenderExtension},
 #ifdef RANDR
     {RRExtensionInit, "RANDR", &noRRExtension},

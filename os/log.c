@@ -104,10 +104,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "opaque.h"
 
-#ifdef XF86BIGFONT
-#include "Xext/xf86bigfont/xf86bigfontsrv.h"
-#endif
-
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif

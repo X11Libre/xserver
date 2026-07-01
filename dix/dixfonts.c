@@ -46,7 +46,6 @@ SOFTWARE.
 #include "os/io_priv.h"
 #include "os/log_priv.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
-#include "Xext/xf86bigfont/xf86bigfontsrv.h"
 
 #include "scrnintstr.h"
 #include "resource.h"
@@ -510,9 +509,6 @@ CloseFont(void *value, XID fid)
         });
         if (pfont == defaultFont)
             defaultFont = NULL;
-#ifdef XF86BIGFONT
-        XF86BigfontFreeFontShm(pfont);
-#endif
         fpe = pfont->fpe;
         (*fpe_functions[fpe->type]->close_font) (fpe, pfont);
         FreeFPE(fpe);
