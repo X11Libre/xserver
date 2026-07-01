@@ -136,10 +136,6 @@ from the copyright holders.
 /* others don't need this */
 #define SocketInitOnce() /**/
 
-#ifdef __linux__
-#define HAVE_ABSTRACT_SOCKETS
-#endif
-
 #define MIN_BACKLOG 128
 #ifdef SOMAXCONN
 #if SOMAXCONN > MIN_BACKLOG
@@ -607,26 +603,18 @@ static int _XSERVTransSocketSetOption (XtransConnInfo ciptr, int option, int arg
 
 #ifdef UNIXCONN
 static int
-set_sun_path(const char *port, const char *upath, char *path, int abstract)
+set_sun_path(const char *port, const char *upath, char *path)
 {
     struct sockaddr_un s;
-    const char *at = "";
     int n;
 
     if (!port || !*port || !path)
 	return -1;
 
-#ifdef HAVE_ABSTRACT_SOCKETS
-    if (port[0] == '@')
-	upath = "";
-    else if (abstract)
-	at = "@";
-#endif
-
     if (*port == '/') /* a full pathname */
 	upath = "";
 
-    n = snprintf(path, sizeof(s.sun_path), "%s%s%s", at, upath, port);
+    n = snprintf(path, sizeof(s.sun_path), "%s%s", upath, port);
     if (n < 0 || (size_t) n >= sizeof(s.sun_path))
 	return -1;
     return 0;
@@ -833,11 +821,6 @@ static int _XSERVTransSocketUNIXCreateListener (
     unsigned int	mode;
     char		tmpport[108];
 
-    int			abstract = 0;
-#ifdef HAVE_ABSTRACT_SOCKETS
-    abstract = ciptr->transptr->flags & TRANS_ABSTRACT;
-#endif
-
     prmsg (2, "SocketUNIXCreateListener(%s)\n",
 	port ? port : "NULL");
 
@@ -851,7 +834,7 @@ static int _XSERVTransSocketUNIXCreateListener (
 #else
     mode = 0777;
 #endif
-    if (!abstract && trans_mkdir(UNIX_DIR, mode) == -1) {
+    if (trans_mkdir(UNIX_DIR, mode) == -1) {
 	prmsg (1, "SocketUNIXCreateListener: mkdir(%s) failed, errno = %d\n",
 	       UNIX_DIR, errno);
 	(void) umask (oldUmask);
@@ -866,7 +849,7 @@ static int _XSERVTransSocketUNIXCreateListener (
 	snprintf (tmpport, sizeof(tmpport), "%s%ld", UNIX_PATH, (long)getpid());
 	port = tmpport;
     }
-    if (set_sun_path(port, UNIX_PATH, sockname.sun_path, abstract) != 0) {
+    if (set_sun_path(port, UNIX_PATH, sockname.sun_path) != 0) {
 	prmsg (1, "SocketUNIXCreateListener: path too long\n");
 	return TRANS_CREATE_LISTENER_FAILED;
     }
@@ -881,12 +864,7 @@ static int _XSERVTransSocketUNIXCreateListener (
     namelen = strlen(sockname.sun_path) + offsetof(struct sockaddr_un, sun_path);
 #endif
 
-    if (abstract) {
-	sockname.sun_path[0] = '\0';
-	namelen = offsetof(struct sockaddr_un, sun_path) + 1 + strlen(&sockname.sun_path[1]);
-    }
-    else
-	unlink (sockname.sun_path);
+    unlink (sockname.sun_path);
 
     if ((status = _XSERVTransSocketCreateListener (ciptr,
 	(struct sockaddr *) &sockname, namelen, flags)) < 0)
@@ -914,9 +892,6 @@ static int _XSERVTransSocketUNIXCreateListener (
         return TRANS_CREATE_LISTENER_FAILED;
     }
 
-    if (abstract)
-	sockname.sun_path[0] = '@';
-
     ciptr->family = sockname.sun_family;
     ciptr->addrlen = namelen;
     memcpy (ciptr->addr, &sockname, ciptr->addrlen);
@@ -937,22 +912,17 @@ static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
     struct stat		statb;
     int 		status = TRANS_RESET_NOOP;
     unsigned int	mode;
-    int abstract = 0;
-#ifdef HAVE_ABSTRACT_SOCKETS
-    abstract = ciptr->transptr->flags & TRANS_ABSTRACT;
-#endif
 
     prmsg (3, "SocketUNIXResetListener(%p,%d)\n", (void *) ciptr, ciptr->fd);
 
-    if (!abstract && (
-	stat (unsock->sun_path, &statb) == -1 ||
+    if (stat (unsock->sun_path, &statb) == -1 ||
         ((statb.st_mode & S_IFMT) !=
 #if !defined(S_IFSOCK)
 	  		S_IFIFO
 #else
 			S_IFSOCK
 #endif
-				)))
+				))
     {
 	int oldUmask = umask (0);
 
@@ -1109,11 +1079,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
 	free (newciptr);
         return NULL;
     }
-
-    /*
-     * if the socket is abstract, we already modified the address to have a
-     * @ instead of the initial NUL, so no need to do that again here.
-     */
 
     newciptr->addrlen = ciptr->addrlen;
     memcpy (newciptr->addr, ciptr->addr, newciptr->addrlen);
@@ -1388,8 +1353,7 @@ static int _XSERVTransSocketUNIXClose (XtransConnInfo ciptr)
        && sockname->sun_family == AF_UNIX
        && sockname->sun_path[0])
     {
-	if (!(ciptr->flags & TRANS_NOUNLINK
-	    || ciptr->transptr->flags & TRANS_ABSTRACT))
+	if (!(ciptr->flags & TRANS_NOUNLINK))
 		unlink (sockname->sun_path);
     }
 
@@ -1498,11 +1462,7 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 static Xtransport _XSERVTransSocketLocalFuncs = {
 	/* Socket Interface */
 	"local",
-#ifdef HAVE_ABSTRACT_SOCKETS
-	TRANS_ABSTRACT,
-#else
 	0,
-#endif
 	NULL,
 	_XSERVTransSocketOpenCOTSServer,
 	_XSERVTransSocketReopenCOTSServer,
@@ -1526,11 +1486,7 @@ static const char* unix_nolisten[] = { "local" , NULL };
 static Xtransport _XSERVTransSocketUNIXFuncs = {
 	/* Socket Interface */
 	"unix",
-#if !defined(HAVE_ABSTRACT_SOCKETS)
         TRANS_ALIAS,
-#else
-	0,
-#endif
 	unix_nolisten,
 	_XSERVTransSocketOpenCOTSServer,
 	_XSERVTransSocketReopenCOTSServer,
