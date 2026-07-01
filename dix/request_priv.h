@@ -158,6 +158,83 @@ static inline int __write_reply_hdr_simple(
     do { if (client->swapped) SwapLongs(request_rest, (count)); } while (0) \
 
 /*
+ * Passed file descriptors.
+ *
+ * The file descriptors a client sends alongside a request are collected into
+ * client->recv_fd_list[] when the request is read (see ReadRequestFromClient),
+ * in order. By default Dispatch() closes every one of them again once the
+ * handler returns. Two consequences worth relying on:
+ *
+ *   - a handler does NOT have to close the fds it uses, and
+ *   - every error path is clean for free: an early "return BadFoo" leaks
+ *     nothing, because the fds are still owned by the request and Dispatch()
+ *     will close them.
+ *
+ * X_REQUEST_FDS(name...) declares one `int` per name, bound to the request's
+ * fds in order (front-most name gets the first fd), and returns BadValue if the
+ * client passed fewer fds than names. Use it near the top of a handler, next to
+ * the other X_REQUEST_* macros:
+ *
+ *     X_REQUEST_FDS(fd);            // one fd, usable as `fd` below
+ *     X_REQUEST_FDS(front, back);   // two named fds, in order
+ *
+ * The declared fds are borrowed views into recv_fd_list[]; on return Dispatch()
+ * closes them. If the handler hands an fd to something that outlives the request
+ * (e.g. a SyncFence or a syncobj that takes ownership of the fd), it must call
+ *
+ *     X_REQUEST_FD_KEEP(fd);       // ownership transferred -> Dispatch keeps out
+ *
+ * so Dispatch() leaves that fd alone. A handler that merely dup()s the fd (as
+ * dri3 PixmapFromBuffer does - the driver dups it) keeps nothing: Dispatch()
+ * closes the original for it.
+ *
+ * X_REQUEST_FDS_ARRAY(fds, count) is the dynamic-count variant: it binds `count`
+ * fds into the caller-provided int array (same borrow/keep rules).
+ */
+static inline int __x_request_fds_avail(ClientPtr client)
+{
+    int n = 0;
+    for (int i = 0; i < MAX_CLIENT_RECV_FD; i++)
+        if (client->recv_fd_list[i] >= 0)
+            n++;
+    return n;
+}
+
+/* Mark @fd as kept, so Dispatch() will not close it (ownership was handed off). */
+static inline void __x_request_fd_keep(ClientPtr client, int fd)
+{
+    for (int i = 0; i < MAX_CLIENT_RECV_FD; i++)
+        if (client->recv_fd_list[i] == fd) {
+            client->recv_fd_list[i] = -1;
+            return;
+        }
+}
+
+#define X_REQUEST_FD_KEEP(fd) __x_request_fd_keep(client, (fd))
+
+#define __X_REQ_FDS_NARG(...) __X_REQ_FDS_NARG_(__VA_ARGS__, 4, 3, 2, 1, 0)
+#define __X_REQ_FDS_NARG_(_1, _2, _3, _4, N, ...) N
+#define __X_REQ_FDS_CAT_(a, b) a##b
+#define __X_REQ_FDS_DECL(N, ...) __X_REQ_FDS_CAT_(__X_REQ_FDS_DECL_, N)(__VA_ARGS__)
+#define __X_REQ_FDS_DECL_1(a)          int a = client->recv_fd_list[0]
+#define __X_REQ_FDS_DECL_2(a, b)       int a = client->recv_fd_list[0]; int b = client->recv_fd_list[1]
+#define __X_REQ_FDS_DECL_3(a, b, c)    int a = client->recv_fd_list[0]; int b = client->recv_fd_list[1]; int c = client->recv_fd_list[2]
+#define __X_REQ_FDS_DECL_4(a, b, c, d) int a = client->recv_fd_list[0]; int b = client->recv_fd_list[1]; int c = client->recv_fd_list[2]; int d = client->recv_fd_list[3]
+
+#define X_REQUEST_FDS(...) \
+    if (__x_request_fds_avail(client) < __X_REQ_FDS_NARG(__VA_ARGS__)) \
+        return BadValue; \
+    __X_REQ_FDS_DECL(__X_REQ_FDS_NARG(__VA_ARGS__), __VA_ARGS__)
+
+#define X_REQUEST_FDS_ARRAY(fds, count) \
+    do { \
+        if (__x_request_fds_avail(client) < (int)(count)) \
+            return BadValue; \
+        for (int __fdi = 0; __fdi < (int)(count); __fdi++) \
+            (fds)[__fdi] = client->recv_fd_list[__fdi]; \
+    } while (0)
+
+/*
  * macros for request handlers
  *
  * these are handling reply struct field byte-swapping if necessary

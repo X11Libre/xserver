@@ -1137,38 +1137,29 @@ ProcShmAttachFd(ClientPtr client)
     if (!client->local)
         return BadRequest;
 
-    int fd;
     ShmDescPtr shmdesc;
     struct stat statb;
+
+    X_REQUEST_FDS(fd);
 
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
         client->errorValue = stuff->readOnly;
         return BadValue;
     }
-    fd = client->recv_fd_list[0];
-    client->recv_fd_list[0] = -1;
 
-    if (fd < 0)
+    if (fstat(fd, &statb) < 0 || statb.st_size == 0)
         return BadMatch;
-
-    if (fstat(fd, &statb) < 0 || statb.st_size == 0) {
-        close(fd);
-        return BadMatch;
-    }
 
     shmdesc = calloc(1, sizeof(ShmDescRec));
-    if (!shmdesc) {
-        close(fd);
+    if (!shmdesc)
         return BadAlloc;
-    }
     shmdesc->is_fd = TRUE;
     shmdesc->addr = mmap(NULL, statb.st_size,
                          stuff->readOnly ? PROT_READ : PROT_READ|PROT_WRITE,
                          MAP_SHARED,
                          fd, 0);
 
-    close(fd);
     if (shmdesc->addr == ((char *) -1)) {
         free(shmdesc);
         return BadAccess;

@@ -206,11 +206,12 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
     X_REQUEST_FIELD_CARD16(height);
     X_REQUEST_FIELD_CARD16(stride);
 
-    int fd;
     DrawablePtr drawable;
     PixmapPtr pixmap;
     CARD32 stride, offset;
     int rc;
+
+    X_REQUEST_FDS(fd);
 
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
     rc = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
@@ -239,11 +240,6 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
         }
     }
 
-    fd = client->recv_fd_list[0];
-    client->recv_fd_list[0] = -1;
-    if (fd < 0)
-        return BadValue;
-
     offset = 0;
     stride = stuff->stride;
     rc = dri3_pixmap_from_fds(&pixmap,
@@ -252,7 +248,6 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
                               &stride, &offset,
                               stuff->depth, stuff->bpp,
                               DRM_FORMAT_MOD_INVALID);
-    close (fd);
     if (rc != Success)
         return rc;
 
@@ -322,8 +317,9 @@ proc_dri3_fence_from_fd(ClientPtr client)
     X_REQUEST_FIELD_CARD32(fence);
 
     DrawablePtr drawable;
-    int fd;
     int status;
+
+    X_REQUEST_FDS(fd);
 
     LEGAL_NEW_RESOURCE(stuff->fence, client);
 
@@ -331,11 +327,8 @@ proc_dri3_fence_from_fd(ClientPtr client)
     if (status != Success)
         return status;
 
-    fd = client->recv_fd_list[0];
-    client->recv_fd_list[0] = -1;
-    if (fd < 0)
-        return BadValue;
-
+    /* the fence takes ownership of the fd */
+    X_REQUEST_FD_KEEP(fd);
     status = SyncCreateFenceFromFD(client, drawable, stuff->fence,
                                    fd, stuff->initially_triggered);
 
@@ -440,7 +433,6 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
     WindowPtr window;
     PixmapPtr pixmap;
     int rc;
-    int i;
 
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
     rc = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
@@ -475,14 +467,7 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
         return BadValue;
     }
 
-    for (i = 0; i < stuff->num_buffers; i++) {
-        fds[i] = client->recv_fd_list[i];
-        if (fds[i] < 0) {
-            while (--i >= 0)
-                close(fds[i]);
-            return BadValue;
-        }
-    }
+    X_REQUEST_FDS_ARRAY(fds, stuff->num_buffers);
 
     strides[0] = stuff->stride0;
     strides[1] = stuff->stride1;
@@ -499,9 +484,6 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
                               strides, offsets,
                               stuff->depth, stuff->bpp,
                               stuff->modifier);
-
-    for (i = 0; i < stuff->num_buffers; i++)
-        close (fds[i]);
 
     if (rc != Success)
         return rc;
@@ -608,8 +590,9 @@ proc_dri3_import_syncobj(ClientPtr client)
 
     DrawablePtr drawable;
     ScreenPtr screen;
-    int fd;
     int status;
+
+    X_REQUEST_FDS(fd);
 
     LEGAL_NEW_RESOURCE(stuff->syncobj, client);
 
@@ -620,11 +603,8 @@ proc_dri3_import_syncobj(ClientPtr client)
 
     screen = drawable->pScreen;
 
-    fd = client->recv_fd_list[0];
-    client->recv_fd_list[0] = -1;
-    if (fd < 0)
-        return BadValue;
-
+    /* the syncobj takes ownership of the fd */
+    X_REQUEST_FD_KEEP(fd);
     return dri3_import_syncobj(client, screen, stuff->syncobj, fd);
 }
 
