@@ -18,14 +18,16 @@ run_test_in_child(const testfunc_t* (*suite)(void), const char *funcname)
 
     while (*func)
     {
+        fflush(stdout);
         cpid = fork();
         if (cpid) {
             waitpid(cpid, &csts, 0);
-            if (!WIFEXITED(csts))
-                goto child_failed;
-            exit_code = WEXITSTATUS(csts);
+            if (WIFEXITED(csts))
+                exit_code = WEXITSTATUS(csts);
+            else
+                exit_code = WIFSIGNALED(csts) ? 128 + WTERMSIG(csts) : 1;
+
             if (exit_code != 0) {
-    child_failed:
                 printf(" FAIL\n");
                 exit(exit_code);
             }
