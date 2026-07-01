@@ -33,6 +33,8 @@
 
 #include "Xext/glx/glxserver.h"
 
+/* exported for glamor */
+_X_EXPORT
 extern GLboolean __glXDrawableInit(__GLXdrawable * drawable,
                                    __GLXscreen * screen,
                                    DrawablePtr pDraw, int type, XID drawID,
