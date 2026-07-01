@@ -65,7 +65,11 @@ SOFTWARE.
 #define REQUEST(type)                                                   \
     type * stuff = (type *)client->requestBuffer;
 
+/* Some platforms provide ARRAY_SIZE from a system header (e.g. illumos/Solaris
+ * <sys/sysmacros.h>); don't redefine it there (-Werror). */
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a)  (sizeof((a)) / sizeof((a)[0]))
+#endif
 
 #define REQUEST_SIZE_MATCH(req)                                         \
     do {                                                                \
