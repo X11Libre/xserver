@@ -34,6 +34,8 @@
 #ifndef GLX_EXTENSION_STRING_H
 #define GLX_EXTENSION_STRING_H
 
+#include <X11/Xfuncproto.h>
+
 enum {
 /*   GLX_ARB_get_proc_address is implemented on the client. */
     ARB_context_flush_control_bit = 0,
@@ -74,9 +76,16 @@ enum {
 
 #define __GLX_EXT_BYTES ((__NUM_GLX_EXTS + 7) / 8)
 
+/* exported for glamor */
+_X_EXPORT
 extern int __glXGetExtensionString(const unsigned char *enable_bits,
                                    char *buffer);
+/* exported for glamor */
+_X_EXPORT
 extern void __glXEnableExtension(unsigned char *enable_bits, const char *ext);
+
+/* exported for glamor */
+_X_EXPORT
 extern void __glXInitExtensionEnableBits(unsigned char *enable_bits);
 
 #endif                          /* GLX_EXTENSION_STRING_H */
