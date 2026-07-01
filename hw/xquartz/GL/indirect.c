@@ -509,6 +509,27 @@ __glXAquaScreenProbe(ScreenPtr pScreen)
         &screen->base.numFBConfigs, pScreen->myNum);
 
     __glXInitExtensionEnableBits(screen->base.glx_enable_bits);
+
+    /* Advertise GLX_ARB_create_context so clients can call
+     * glXCreateContextAttribsARB.  XQuartz uses AppleDRI + client-side CGL
+     * (direct rendering), which means the server-side createContext hook
+     * (__glXAquaScreenCreateContext) only fires for indirect requests --
+     * those are still capped at GL 1.4 by createcontext.c:validate_GL_version.
+     * The direct path routes to __glXdirectContextCreate in the core dispatch
+     * and the requested profile/version is honored on the client side.
+     *
+     * GLX_ARB_create_context_robustness is advertised for compatibility with
+     * clients that always ask for it, but CGL has no GPU-reset notification
+     * mechanism: GLX_CONTEXT_ROBUST_ACCESS_BIT_ARB /
+     * GLX_LOSE_CONTEXT_ON_RESET_ARB are silently accepted and never signal
+     * a reset.
+     *
+     * This is needed for OpenGL core profile support.
+     */
+    __glXEnableExtension(screen->base.glx_enable_bits, "GLX_ARB_create_context");
+    __glXEnableExtension(screen->base.glx_enable_bits, "GLX_ARB_create_context_profile");
+    __glXEnableExtension(screen->base.glx_enable_bits, "GLX_ARB_create_context_robustness");
+
     __glXScreenInit(&screen->base, pScreen);
 
     return &screen->base;
