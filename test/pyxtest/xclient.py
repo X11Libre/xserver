@@ -68,7 +68,6 @@ class Extension(StrEnum):
     SHAPE = "SHAPE"
     SYNC = "SYNC"
     XC_MISC = "XC-MISC"
-    XF86BIGFONT = "XFree86-Bigfont"
     XF86DGA = "XFree86-DGA"
     XF86VIDMODE = "XFree86-VidModeExtension"
     XFIXES = "XFIXES"

@@ -113,7 +113,6 @@ xf86driproto_dep = dependency('xf86driproto', version: '>= 2.1.0', fallback: ['x
 dri2proto_dep = dependency('dri2proto', version: '>= 2.8', fallback: ['xorgproto', 'ext_xorgproto'], required: get_option('dri2') == 'true')
 dri3proto_dep = dependency('dri3proto', version: '>= 1.4', fallback: ['xorgproto', 'ext_xorgproto'], required: get_option('dri3') == 'true')
 xineramaproto_dep = dependency('xineramaproto', fallback: ['xorgproto', 'ext_xorgproto'])
-xf86bigfontproto_dep = dependency('xf86bigfontproto', version: '>= 1.2.0', fallback: ['xorgproto', 'ext_xorgproto'], required: get_option('xf86bigfont'))
 xf86vidmodeproto_dep = dependency('xf86vidmodeproto', version: '>= 2.2.99.1', fallback: ['xorgproto', 'ext_xorgproto'])
 applewmproto_dep = dependency('applewmproto', version: '>= 1.4', fallback: ['xorgproto', 'ext_xorgproto'], required: false)
 xshmfence_dep = dependency('xshmfence', version: xshmfence_req, required: false)
@@ -581,7 +580,6 @@ if build_xquartz
     build_dpms = false
 endif
 
-build_xf86bigfont = get_option('xf86bigfont')
 build_screensaver = get_option('screensaver')
 build_res = get_option('xres')
 if build_res
@@ -664,7 +662,6 @@ common_dep = [
     dri2proto_dep,
     dri3proto_dep,
     xineramaproto_dep,
-    xf86bigfontproto_dep,
     xf86dgaproto_dep,
     xf86vidmodeproto_dep,
     applewmproto_dep,
@@ -823,7 +820,6 @@ if build_xserver
         libxserver_dri2,
         libxserver_dri3,
         libxserver_xinerama,
-        libxserver_xf86bigfont,
         libxserver_shm,
         libxserver_dpms,
         libxserver_xv,

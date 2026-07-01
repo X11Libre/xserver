@@ -30,7 +30,6 @@ extern Bool noSELinuxExtension;
 extern Bool noShapeExtension;
 extern Bool noTestExtensions;
 extern Bool noXFixesExtension;
-extern Bool noXFree86BigfontExtension;
 extern Bool noNamespaceExtension;
 
 extern Bool PanoramiXExtensionDisabledHack;
@@ -56,7 +55,6 @@ void ShmExtensionInit(void);
 void SyncExtensionInit(void);
 void XCMiscExtensionInit(void);
 void SecurityExtensionInit(void);
-void XFree86BigfontExtensionInit(void);
 void BigReqExtensionInit(void);
 void XFixesExtensionInit(void);
 void XInputExtensionInit(void);

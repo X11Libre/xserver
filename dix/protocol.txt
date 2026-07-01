@@ -628,8 +628,6 @@ R030 XFIXES:ShowCursor
 V000 XFIXES:SelectionNotify
 V001 XFIXES:CursorNotify
 E000 XFIXES:BadRegion
-R000 XFree86-Bigfont:QueryVersion
-R001 XFree86-Bigfont:QueryFont
 R000 XFree86-DGA:QueryVersion
 R001 XFree86-DGA:GetVideoLL
 R002 XFree86-DGA:DirectVideo
