@@ -66,7 +66,7 @@ typedef struct {
 
     /* graphics part */
     ScreenPtr currentScreen;
-#if defined(CSRG_BASED) || defined(__FreeBSD_kernel__)
+#ifdef CONFIG_BSD_CONSOLE
     int consType;               /* Which console driver? */
 #endif
 
@@ -110,7 +110,7 @@ typedef struct {
 #define XCOMP	((unsigned long) 0x00008000)
 
 /* BSD console driver types (consType) */
-#if defined(CSRG_BASED) || defined(__FreeBSD_kernel__)
+#ifdef CONFIG_BSD_CONSOLE
 #define PCCONS		   0
 #define CODRV011	   1
 #define CODRV01X	   2

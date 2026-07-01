@@ -105,7 +105,7 @@ xf86InfoRec xf86Info = {
     .dontZap = FALSE,
     .dontZoom = FALSE,
     .currentScreen = NULL,
-#ifdef CSRG_BASED
+#ifdef CONFIG_BSD_CONSOLE
     .consType = -1,
 #endif
     .allowMouseOpenFail = FALSE,
