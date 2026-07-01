@@ -46,7 +46,6 @@
 # if defined(__CYGWIN__)
 #  include <sys/param.h>
 # endif
-#include <sys/sysmacros.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
@@ -278,8 +277,10 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
     xXF86BigfontQueryVersionReply reply = {
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
         .minorVersion = SERVER_XF86BIGFONT_MINOR_VERSION,
+#if !defined(WIN32) || defined(__CYGWIN__)
         .uid = geteuid(),
         .gid = getegid(),
+#endif
 #ifdef CONFIG_MITSHM
         .signature = signature,
         .capabilities = (client->local && !client->swapped)
@@ -330,7 +331,9 @@ ProcXF86BigfontQueryFont(ClientPtr client)
     X_REQUEST_FIELD_CARD32(id);
 
     FontPtr pFont;
+#ifdef CONFIG_MITSHM
     CARD32 stuff_flags;
+#endif
     xCharInfo *pmax;
     xCharInfo *pmin;
     int nCharInfos;
@@ -349,11 +352,15 @@ ProcXF86BigfontQueryFont(ClientPtr client)
     /* protocol version is decided based on request packet size */
     switch (client->req_len) {
     case 2:                    /* client with version 1.0 libX11 */
+#ifdef CONFIG_MITSHM
         stuff_flags = (client->local &&
                        !client->swapped ? XF86Bigfont_FLAGS_Shm : 0);
+#endif
         break;
     case 3:                    /* client with version 1.1 libX11 */
+#ifdef CONFIG_MITSHM
         stuff_flags = stuff->flags;
+#endif
         break;
     default:
         return BadLength;
