@@ -2186,12 +2186,12 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 
     if (*x < 0)
         *x += pNewScreen->width;
+    else if (*x >= pScreen->width)
+        *x -= pScreen->width;
+
     if (*y < 0)
         *y += pNewScreen->height;
-
-    if (*x >= pScreen->width)
-        *x -= pScreen->width;
-    if (*y >= pScreen->height)
+    else if (*y >= pScreen->height)
         *y -= pScreen->height;
 
     *ppScreen = pNewScreen;
