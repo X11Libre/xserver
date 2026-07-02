@@ -249,6 +249,57 @@ jobs:
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
 
+    xserver-build-ubuntu-valgrind:
+        # Dedicated lane for the pyxtest suite under valgrind memcheck
+        # (out-of-bounds reads/writes, use-after-free, uninitialised-value
+        # use). Kept separate from xserver-build-ubuntu* because valgrind is
+        # slow and this only needs Xvfb, not the full DDX/XTS/piglit matrix.
+        env:
+            MESON_ARGS: --buildtype=debug -Dprefix=/usr -Dxorg=false -Dxvfb=true -Dxnest=false -Dxephyr=false -Dwerror=true
+        runs-on: ubuntu-latest
+        needs: ubuntu-fetch-pkg
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v6
+
+            - uses: ./.github/actions/ubuntu-install-pkg
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+
+            - name: X11 prereq cache
+              uses: actions/cache@v5
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                key: ${{ runner.name }}-x11-deps-xorgproto-${{ hashFiles('.github/scripts/ubuntu/run-pyxtest-valgrind.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-xorgproto-
+
+            - name: build and run pyxtest under valgrind
+              run:  .github/scripts/ubuntu/run-pyxtest-valgrind.sh
+
+            - name: archive build logs
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-logs-valgrind
+                  path: |
+                      __BUILD/meson-logs/*
+
+            - name: archive valgrind reports
+              # Upload even when the pytest step above failed - a failing
+              # run is exactly when the report is most needed, and it's
+              # what triggered writing this step's `if` in the first place.
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: valgrind-logs
+                  path: |
+                      valgrind-logs/*
+                  if-no-files-found: ignore
+
     ubuntu-deps-image:
         # Content-addressed base image (apt deps + from-source prereqs baked in),
         # consumed by build-sdk-image below. The tag is a hash of the image's

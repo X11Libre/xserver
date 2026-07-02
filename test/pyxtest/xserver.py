@@ -451,6 +451,17 @@ class XServerProcess:
                 pass
         return ""
 
+    @property
+    def valgrind_xml_path(self) -> Path | None:
+        """Path to this server's valgrind XML output, if valgrind was used.
+
+        Stays valid after :meth:`stop`, so callers can persist it
+        elsewhere (the file itself is not deleted automatically).
+        """
+        if self._valgrind_xml_file is None:
+            return None
+        return Path(self._valgrind_xml_file.name)
+
     def check_valgrind_errors(self):
         """Parse and assert no valgrind errors occurred."""
         if self._valgrind_xml_file is None:
