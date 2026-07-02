@@ -141,7 +141,6 @@
 #include <signal.h>
 
 #include <termios.h>
-#define termio termios
 
 #include <errno.h>
 
