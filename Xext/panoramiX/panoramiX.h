@@ -73,14 +73,18 @@ typedef struct {
  * Makes a new scopes and declares `walkScreenIdx` as the current screen's
  * index number as well as `walkScreen` as poiner to current ScreenRec
  *
- * @param __LAMBDA__ the code to be executed in each iteration step.
+ * The body is passed via a variadic parameter so it may contain top-level
+ * commas (e.g. a `Foo f = { .a = 1, .b = 2 };` designated initialiser)
+ * without being mis-parsed as multiple macro arguments.
+ *
+ * @param ... the code to be executed in each iteration step.
  */
-#define XINERAMA_FOR_EACH_SCREEN_FORWARD(__LAMBDA__) \
+#define XINERAMA_FOR_EACH_SCREEN_FORWARD(...) \
     do { \
         for (unsigned walkScreenIdx = 0; walkScreenIdx < PanoramiXNumScreens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            __LAMBDA__; \
+            __VA_ARGS__; \
         } \
     } while (0);
 
@@ -88,29 +92,37 @@ typedef struct {
  * just like XINERAMA_FOR_EACH_SCREEN_FORWARD(), but skipping the first
  * screen (which is the frontend to the client)
  *
- * @param __LAMBDA__ the code to be executed in each iteration step.
+ * The body is passed via a variadic parameter so it may contain top-level
+ * commas (e.g. a `Foo f = { .a = 1, .b = 2 };` designated initialiser)
+ * without being mis-parsed as multiple macro arguments.
+ *
+ * @param ... the code to be executed in each iteration step.
  */
-#define XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0(__LAMBDA__) \
+#define XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0(...) \
     do { \
         for (unsigned walkScreenIdx = 1; walkScreenIdx < PanoramiXNumScreens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            __LAMBDA__; \
+            __VA_ARGS__; \
         } \
     } while (0);
 
 /*
  * like XINERAMA_FOR_EACH_SCREEN_FORWARD(), but traveling backwards.
  *
- * @param __LAMBDA__ the code to be executed in each iteration step.
+ * The body is passed via a variadic parameter so it may contain top-level
+ * commas (e.g. a `Foo f = { .a = 1, .b = 2 };` designated initialiser)
+ * without being mis-parsed as multiple macro arguments.
+ *
+ * @param ... the code to be executed in each iteration step.
  */
-#define XINERAMA_FOR_EACH_SCREEN_BACKWARD(__LAMBDA__) \
+#define XINERAMA_FOR_EACH_SCREEN_BACKWARD(...) \
     do { \
         for (unsigned __walkidx = PanoramiXNumScreens; __walkidx > 0; __walkidx--) { \
             unsigned walkScreenIdx = __walkidx - 1; \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
-            __LAMBDA__; \
+            __VA_ARGS__; \
         } \
     } while (0);
 
