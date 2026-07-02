@@ -54,6 +54,7 @@ from The Open Group.
 #include <stddef.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/screenint_priv.h"
 
 #include "windowstr.h"
