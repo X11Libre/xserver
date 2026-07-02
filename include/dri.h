@@ -34,10 +34,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef _DRI_H_
 #define _DRI_H_
 
+#ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
+#endif
 
 #include "scrnintstr.h"
+#ifdef XF86DRI
 #include "xf86dri.h"
+#endif
 
 /* Prototypes for DRI functions */
 

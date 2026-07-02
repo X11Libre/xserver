@@ -48,7 +48,7 @@
 #include "x-hash.h"
 
 #include "visualConfigs.h"
-#include "dri.h"
+#include "xpr_dri.h"
 
 #include "darwin.h"
 #define GLAQUA_DEBUG_MSG(msg, args ...) ASL_LOG(ASL_LEVEL_DEBUG, "GLXAqua", \

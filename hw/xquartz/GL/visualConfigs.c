@@ -31,7 +31,7 @@
 #include <dix-config.h>
 
 #include <assert.h>
-#include "dri.h"
+#include "xpr_dri.h"
 
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
