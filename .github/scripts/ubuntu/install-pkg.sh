@@ -7,6 +7,10 @@ EPHEMERAL="
 	libexpat-dev
 	libgles2-mesa-dev
 	libxkbcommon-dev
+	python3-pytest
+	python3-pytest-timeout
+	python3-pytest-xdist
+	valgrind
 	x11-utils
 	x11-xserver-utils
 	xauth
