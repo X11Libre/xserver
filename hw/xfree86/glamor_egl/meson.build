@@ -15,7 +15,7 @@ shared_module(
         libdrm_dep,
         gbm_dep,
     ],
-    link_with: [glamor, libxserver_glx],
+    link_with: [glamor ],
 
     install: true,
     install_dir: module_abi_dir,
