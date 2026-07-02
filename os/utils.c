@@ -121,7 +121,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "os/xhostname.h"
 #include "Xext/dpms/dpms_priv.h"
 #include "Xext/present/present_priv.h"
-#include "Xext/xf86bigfont/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
 #include "Xext/xkeyboard/xkbsrv_priv.h"
 
 #include "dixstruct.h"
@@ -1484,9 +1483,6 @@ os_move_fd(int fd)
 void
 AbortServer(void)
 {
-#ifdef XF86BIGFONT
-    XF86BigfontCleanup();
-#endif
     CloseWellKnownConnections();
     UnlockServer();
     AbortDevices();
