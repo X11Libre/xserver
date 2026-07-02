@@ -21,7 +21,7 @@ main(int argc, char **argv)
     run_test(xfree86_test);
     run_test(xkb_test);
     run_test(xtest_test);
-
+    run_test(ddc_tests);
 #ifdef RES_TESTS
     run_test(hashtabletest_test);
 #endif
