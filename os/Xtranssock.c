@@ -136,10 +136,6 @@ from the copyright holders.
 /* others don't need this */
 #define SocketInitOnce() /**/
 
-#ifdef __linux__
-#define HAVE_ABSTRACT_SOCKETS
-#endif
-
 #define MIN_BACKLOG 128
 #ifdef SOMAXCONN
 #if SOMAXCONN > MIN_BACKLOG
@@ -607,29 +603,55 @@ static int _XSERVTransSocketSetOption (XtransConnInfo ciptr, int option, int arg
 
 #ifdef UNIXCONN
 static int
-set_sun_path(const char *port, const char *upath, char *path, int abstract)
+set_sun_path(const char *port, const char *upath, char *path)
 {
     struct sockaddr_un s;
-    const char *at = "";
     int n;
 
     if (!port || !*port || !path)
 	return -1;
 
-#ifdef HAVE_ABSTRACT_SOCKETS
-    if (port[0] == '@')
-	upath = "";
-    else if (abstract)
-	at = "@";
-#endif
-
     if (*port == '/') /* a full pathname */
 	upath = "";
 
-    n = snprintf(path, sizeof(s.sun_path), "%s%s%s", at, upath, port);
+    n = snprintf(path, sizeof(s.sun_path), "%s%s", upath, port);
     if (n < 0 || (size_t) n >= sizeof(s.sun_path))
 	return -1;
     return 0;
+}
+
+/*
+ * A leftover socket file at `path` is ambiguous: it may be stale (left
+ * behind by a server that crashed or was killed without unlinking it), or
+ * it may belong to a server that is still very much alive. The path alone
+ * can't tell the two apart. Linux's abstract-socket bind() used to answer
+ * this for free (EADDRINUSE iff someone is actually listening); now that
+ * the local transport always uses a real filesystem path, connect() to it
+ * is the only way to find out - if that succeeds, someone is listening.
+ */
+static Bool
+unix_socket_is_live(const char *path)
+{
+    int fd;
+    struct sockaddr_un addr;
+    Bool live;
+
+    fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (fd < 0) {
+	return FALSE;
+    }
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    /* `path` is always `sockname.sun_path` from a struct sockaddr_un at the
+     * call site, i.e. exactly sizeof(addr.sun_path) bytes, already
+     * NUL-terminated by set_sun_path() - copy it verbatim. */
+    memcpy(addr.sun_path, path, sizeof(addr.sun_path));
+
+    live = connect(fd, (struct sockaddr *) &addr, sizeof(addr)) == 0;
+
+    close(fd);
+    return live;
 }
 #endif
 
@@ -830,11 +852,6 @@ static int _XSERVTransSocketUNIXCreateListener (
     unsigned int	mode;
     char		tmpport[108];
 
-    int			abstract = 0;
-#ifdef HAVE_ABSTRACT_SOCKETS
-    abstract = ciptr->transptr->flags & TRANS_ABSTRACT;
-#endif
-
     prmsg (2, "SocketUNIXCreateListener(%s)\n",
 	port ? port : "NULL");
 
@@ -848,7 +865,7 @@ static int _XSERVTransSocketUNIXCreateListener (
 #else
     mode = 0777;
 #endif
-    if (!abstract && trans_mkdir(UNIX_DIR, mode) == -1) {
+    if (trans_mkdir(UNIX_DIR, mode) == -1) {
 	prmsg (1, "SocketUNIXCreateListener: mkdir(%s) failed, errno = %d\n",
 	       UNIX_DIR, errno);
 	(void) umask (oldUmask);
@@ -863,7 +880,7 @@ static int _XSERVTransSocketUNIXCreateListener (
 	snprintf (tmpport, sizeof(tmpport), "%s%ld", UNIX_PATH, (long)getpid());
 	port = tmpport;
     }
-    if (set_sun_path(port, UNIX_PATH, sockname.sun_path, abstract) != 0) {
+    if (set_sun_path(port, UNIX_PATH, sockname.sun_path) != 0) {
 	prmsg (1, "SocketUNIXCreateListener: path too long\n");
 	return TRANS_CREATE_LISTENER_FAILED;
     }
@@ -878,12 +895,18 @@ static int _XSERVTransSocketUNIXCreateListener (
     namelen = strlen(sockname.sun_path) + offsetof(struct sockaddr_un, sun_path);
 #endif
 
-    if (abstract) {
-	sockname.sun_path[0] = '\0';
-	namelen = offsetof(struct sockaddr_un, sun_path) + 1 + strlen(&sockname.sun_path[1]);
+    /*
+     * Don't blindly unlink a pre-existing socket file: it may belong to a
+     * server that's still running (see unix_socket_is_live()). Only clean
+     * up and rebind if nobody answers there.
+     */
+    if (unix_socket_is_live(sockname.sun_path)) {
+	prmsg (1, "SocketUNIXCreateListener: %s already in use\n",
+	       sockname.sun_path);
+	(void) umask (oldUmask);
+	return TRANS_ADDR_IN_USE;
     }
-    else
-	unlink (sockname.sun_path);
+    unlink (sockname.sun_path);
 
     if ((status = _XSERVTransSocketCreateListener (ciptr,
 	(struct sockaddr *) &sockname, namelen, flags)) < 0)
@@ -911,9 +934,6 @@ static int _XSERVTransSocketUNIXCreateListener (
         return TRANS_CREATE_LISTENER_FAILED;
     }
 
-    if (abstract)
-	sockname.sun_path[0] = '@';
-
     ciptr->family = sockname.sun_family;
     ciptr->addrlen = namelen;
     memcpy (ciptr->addr, &sockname, ciptr->addrlen);
@@ -934,22 +954,17 @@ static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
     struct stat		statb;
     int 		status = TRANS_RESET_NOOP;
     unsigned int	mode;
-    int abstract = 0;
-#ifdef HAVE_ABSTRACT_SOCKETS
-    abstract = ciptr->transptr->flags & TRANS_ABSTRACT;
-#endif
 
     prmsg (3, "SocketUNIXResetListener(%p,%d)\n", (void *) ciptr, ciptr->fd);
 
-    if (!abstract && (
-	stat (unsock->sun_path, &statb) == -1 ||
+    if (stat (unsock->sun_path, &statb) == -1 ||
         ((statb.st_mode & S_IFMT) !=
 #if !defined(S_IFSOCK)
 	  		S_IFIFO
 #else
 			S_IFSOCK
 #endif
-				)))
+				))
     {
 	int oldUmask = umask (0);
 
@@ -1106,11 +1121,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
 	free (newciptr);
         return NULL;
     }
-
-    /*
-     * if the socket is abstract, we already modified the address to have a
-     * @ instead of the initial NUL, so no need to do that again here.
-     */
 
     newciptr->addrlen = ciptr->addrlen;
     memcpy (newciptr->addr, ciptr->addr, newciptr->addrlen);
@@ -1385,8 +1395,7 @@ static int _XSERVTransSocketUNIXClose (XtransConnInfo ciptr)
        && sockname->sun_family == AF_UNIX
        && sockname->sun_path[0])
     {
-	if (!(ciptr->flags & TRANS_NOUNLINK
-	    || ciptr->transptr->flags & TRANS_ABSTRACT))
+	if (!(ciptr->flags & TRANS_NOUNLINK))
 		unlink (sockname->sun_path);
     }
 
@@ -1495,11 +1504,7 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 static Xtransport _XSERVTransSocketLocalFuncs = {
 	/* Socket Interface */
 	"local",
-#ifdef HAVE_ABSTRACT_SOCKETS
-	TRANS_ABSTRACT,
-#else
 	0,
-#endif
 	NULL,
 	_XSERVTransSocketOpenCOTSServer,
 	_XSERVTransSocketReopenCOTSServer,
@@ -1523,11 +1528,7 @@ static const char* unix_nolisten[] = { "local" , NULL };
 static Xtransport _XSERVTransSocketUNIXFuncs = {
 	/* Socket Interface */
 	"unix",
-#if !defined(HAVE_ABSTRACT_SOCKETS)
         TRANS_ALIAS,
-#else
-	0,
-#endif
 	unix_nolisten,
 	_XSERVTransSocketOpenCOTSServer,
 	_XSERVTransSocketReopenCOTSServer,
