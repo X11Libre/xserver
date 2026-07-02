@@ -23,6 +23,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dix/registry_priv.h"
 #include "dix/request_priv.h"
+#include "dix/resource_priv.h"
 
 #include "xselinuxint.h"
 
