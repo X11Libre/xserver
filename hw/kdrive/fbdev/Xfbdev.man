@@ -73,6 +73,56 @@ tells the X server to only use embedded GLES contexts.
 .B -noxv
 disables X-Video support.
 
+.SH CONFIGURATION
+.
+Like all kdrive X servers,
+.B Xfbdev
+doesn't read any configuration file.
+Instead, all configuration is done via command-line arguments.
+
+.B Xfbdev
+is intended to provide a reasonable configuration out-of-the-box, with no special configuration.
+Simply running
+.B xinit -- /path/to/Xfbdev
+should provide a default configuration that is able to provide a usable display.
+This default configuration is rather simplistic, with the aim of working
+almost anywhere, while sacrificing performance.
+
+For regular use, a shell script or similar can be created to invoke xinit and pass all the necessary command-line arguments.
+
+In the most general form, the configuration of
+.B Xfbdev
+looks like this:
+.B xinit -- /path/to/Xfbdev -screen <args> -screen <args> ... -screen <args>
+
+If a single X11 screen is desired, with no special geometry,
+.B Xfbdev
+supports using an implicit first screen, like so:
+.B xinit -- /path/to/Xfbdev <screen arguments>
+
+When any explicit
+.B -screen
+arguments are present, the use of an implicit first screen is unsupported.
+All screens must be explicitly declared in this case, even if the geometry is implicit.
+This also means that any server arguments must be passed after the first
+.B -screen
+argument.
+
+Below are listed some example configurations, intended to serve as a guide for configuring
+.B Xfbdev.
+
+A single X11 screen with DRI3 running on a different card than the framebuffer, with an explicit glvendor and with only OpenGL ES contexts allowed:
+.B xinit  --  /usr/bin/Xfbdev :1 -fb /dev/fb0 -glvendor nvidia -dri /dev/dri/card1 -force-es
+
+A single X11 screen with automatic DRI3 and explicit screen geometry:
+.B xinit -- /usr/bin/Xfbdev -screen 1200x1000 -fb /dev/fb1 -dri auto
+
+Two X11 screens with DRI3 support, with the first screen on the left, the second screen on the right:
+.B xinit -- /usr/bin/Xfbdev -screen 1920x1080 -dri /dev/dri/card1 -fb /dev/fb0 -screen 1920x1080 -origin 1920,0 -fb /dev/fb1 -dri /dev/dri/card1
+
+Two X11 screens with DRI3 support, with the first screen on the left, the second screen on the right, using xinerama:
+.B xinit -- /usr/bin/Xfbdev -screen 1920x1080 -dri /dev/dri/card1 -fb /dev/fb0 -screen 1920x1080 -origin 1920,0 -fb /dev/fb1 -dri /dev/dri/card1 +xinerama
+
 .SH KEYBOARD
 .B Xfbdev
 supports the common special key combinations of the Xkdrive family of servers.  Please
