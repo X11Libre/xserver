@@ -122,9 +122,6 @@ SOFTWARE.
 #include <sys/un.h>
 #endif
 
-#if defined(SVR4) || defined(__GNU__)
-#include <sys/utsname.h>
-#endif
 #ifdef __GNU__
 #undef SIOCGIFCONF
 #include <netdb.h>
