@@ -129,8 +129,10 @@ SOFTWARE.
 #include <net/if.h>
 #endif /*__GNU__ */
 
-#ifdef SVR4
+#ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
+#endif
+#ifdef HAVE_SYS_STROPTS_H
 #include <sys/stropts.h>
 #endif
 
