@@ -54,6 +54,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 DevPrivateKeyRec xkbDevicePrivateKeyRec;
 
+Bool xkbLockModsOnPress = FALSE;
+
 static void XkbFakePointerMotion(DeviceIntPtr dev, unsigned flags, int x,
                                  int y);
 
@@ -372,6 +374,10 @@ _XkbFilterLockState(XkbSrvInfoPtr xkbi,
             xkbi->state.locked_group += XkbSAGroup(&pAction->group);
         return 1;
     }
+    /* When xkbLockModsOnPress is set, a locking modifier such as CapsLock
+       toggles entirely on key press instead of locking on press and only
+       unlocking on the following key release like a mechanical typewriter.
+       Configured from the "ToggleModifiersOnPress" input option. */
     if (filter->keycode == 0) { /* initial press */
         filter->keycode = keycode;
         filter->active = 1;
@@ -379,15 +385,33 @@ _XkbFilterLockState(XkbSrvInfoPtr xkbi,
         filter->priv = xkbi->state.locked_mods & pAction->mods.mask;
         filter->filter = _XkbFilterLockState;
         filter->upAction = *pAction;
-        if (!(filter->upAction.mods.flags & XkbSA_LockNoLock))
-            xkbi->state.locked_mods |= pAction->mods.mask;
-        xkbi->setMods = pAction->mods.mask;
+
+        if (xkbLockModsOnPress) {
+            /* Toggle the whole lock now, on press, and leave the release a
+               no-op. base_mods (setMods/clearMods) is deliberately left
+               untouched so the indicator and the effective state flip
+               together, immediately. */
+            if (filter->priv) {
+                if (!(filter->upAction.mods.flags & XkbSA_LockNoUnlock))
+                    xkbi->state.locked_mods &= ~pAction->mods.mask;
+            }
+            else if (!(filter->upAction.mods.flags & XkbSA_LockNoLock)) {
+                xkbi->state.locked_mods |= pAction->mods.mask;
+            }
+        }
+        else {
+            if (!(filter->upAction.mods.flags & XkbSA_LockNoLock))
+                xkbi->state.locked_mods |= pAction->mods.mask;
+            xkbi->setMods = pAction->mods.mask;
+        }
     }
     else if (filter->keycode == keycode) {
         filter->active = 0;
-        xkbi->clearMods = filter->upAction.mods.mask;
-        if (!(filter->upAction.mods.flags & XkbSA_LockNoUnlock))
-            xkbi->state.locked_mods &= ~filter->priv;
+        if (!xkbLockModsOnPress) {
+            xkbi->clearMods = filter->upAction.mods.mask;
+            if (!(filter->upAction.mods.flags & XkbSA_LockNoUnlock))
+                xkbi->state.locked_mods &= ~filter->priv;
+        }
     }
     return 1;
 }
