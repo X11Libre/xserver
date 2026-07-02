@@ -512,13 +512,15 @@ static char*
 config_udev_get_fallback_bus_id(struct udev_device *udev_device)
 {
     const char *sysname;
+    const char *subsys;
     char *busid;
 
     udev_device = udev_device_get_parent(udev_device);
     if (udev_device == NULL)
         return NULL;
 
-    if (strcmp(udev_device_get_subsystem(udev_device), "pci") != 0)
+    subsys = udev_device_get_subsystem(udev_device);
+    if (!subsys || strcmp(subsys, "pci") != 0)
         return NULL;
 
     sysname = udev_device_get_sysname(udev_device);
