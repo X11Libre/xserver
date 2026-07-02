@@ -104,7 +104,7 @@ from the copyright holders.
 #endif /* !NO_TCP_H */
 
 #include <sys/ioctl.h>
-#if defined(SVR4) || defined(__SVR4)
+#ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
 
