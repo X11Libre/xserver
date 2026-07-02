@@ -107,6 +107,7 @@ pytest test/pyxtest/ -v --server-type=xvfb --server-type=xwayland
 |--------------------------------|-------------------------------------------|
 | `--valgrind`                   | Run all X servers under valgrind memcheck |
 | `--valgrind-suppressions=PATH` | Path to a valgrind suppressions file      |
+| `--valgrind-log-dir=PATH`      | Persist a per-test valgrind XML report here (plus a `.txt` summary when there are findings), independent of pass/fail. Also settable via `VALGRIND_LOG_DIR`. |
 | `--server-type=TYPE`           | Server type to test (`xvfb`, `xwayland`, `xorg`). Repeatable. Default: `xvfb` |
 | `--server-path=PATH`           | Explicit path to the X server binary      |
 | `--display=DISPLAY`            | Connect to an existing server instead of starting one. Accepts `:N` or `N`. Mutually exclusive with `--valgrind` and `--server-path` |
@@ -122,6 +123,8 @@ The server binary is located by checking, in order:
 5. System `PATH` (prints a warning)
 
 `VALGRIND_SUPPRESSIONS` can point to a suppressions file.
+
+`VALGRIND_LOG_DIR` is the environment-variable form of `--valgrind-log-dir`.
 
 `XSERVER_ASAN` set to `1` indicates the server binary was built with
 AddressSanitizer. This is set automatically by meson when

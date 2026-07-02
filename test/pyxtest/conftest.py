@@ -3,7 +3,9 @@
 # pytest configuration and fixtures for X server testing.
 
 import os
+import re
 import shutil
+import warnings
 import pytest
 from pathlib import Path
 
@@ -22,6 +24,16 @@ def pytest_addoption(parser):
         "--valgrind-suppressions",
         default=None,
         help="Path to valgrind suppressions file",
+    )
+    parser.addoption(
+        "--valgrind-log-dir",
+        default=None,
+        help="Directory to persist a per-test valgrind XML report into "
+        "(also honours the VALGRIND_LOG_DIR environment variable). "
+        "Written for every test run under valgrind, independent of "
+        "pass/fail, since the XML otherwise only exists in an ephemeral "
+        "temp file. A short human-readable .txt summary is written "
+        "alongside whenever valgrind reported anything.",
     )
     parser.addoption(
         "--server-type",
@@ -60,6 +72,10 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "swapped_client: mark test as requiring a byte-swapped client"
     )
+
+    log_dir = get_valgrind_log_dir(config)
+    if log_dir is not None:
+        log_dir.mkdir(parents=True, exist_ok=True)
 
     # Validate --display against conflicting options
     display = config.getoption("--display", default=None)
@@ -113,6 +129,24 @@ def get_valgrind_suppressions(config) -> Path | None:
     return None
 
 
+def get_valgrind_log_dir(config) -> Path | None:
+    """Find the directory to persist per-test valgrind reports into."""
+    explicit = config.getoption("--valgrind-log-dir")
+    if explicit:
+        return Path(explicit)
+
+    env = os.environ.get("VALGRIND_LOG_DIR")
+    if env:
+        return Path(env)
+
+    return None
+
+
+def _sanitize_test_id(nodeid: str) -> str:
+    """Turn a pytest nodeid into a safe filename fragment."""
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", nodeid)
+
+
 def is_valgrind_available() -> bool:
     """Check if valgrind is available on the system."""
     return shutil.which("valgrind") is not None
@@ -163,6 +197,36 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("xserver", server_types, indirect=True)
 
 
+def _persist_valgrind_report(request, server_type, xml_path, errors):
+    """Copy a test's valgrind XML into --valgrind-log-dir, if configured.
+
+    Runs for every test executed under valgrind, independent of whether
+    the test passed, failed, or only found leaks (which don't fail the
+    test) - otherwise the XML never leaves the ephemeral temp file it
+    was written to. Writes a short .txt summary alongside whenever
+    valgrind reported anything, so CI can surface findings without
+    parsing XML.
+    """
+    log_dir = get_valgrind_log_dir(request.config)
+    if log_dir is None:
+        return
+
+    stem = f"{_sanitize_test_id(request.node.nodeid)}-{server_type}"
+    dest = log_dir / f"{stem}.xml"
+    try:
+        shutil.copyfile(xml_path, dest)
+    except OSError as e:
+        warnings.warn(f"Failed to persist valgrind XML for {stem}: {e}", stacklevel=2)
+        return
+
+    if errors:
+        summary = log_dir / f"{stem}.txt"
+        summary.write_text(
+            f"{len(errors)} valgrind finding(s) for {request.node.nodeid} "
+            f"({server_type}):\n\n" + "\n\n".join(str(e) for e in errors) + "\n"
+        )
+
+
 def _start_server(request, server_type, log_file=None):
     """Start an X server of the given type for a test.
 
@@ -211,6 +275,11 @@ def _start_server(request, server_type, log_file=None):
         asan_errors = server.get_asan_errors()
 
     valgrind_errors = server.stop()
+
+    if use_valgrind and server.valgrind_xml_path is not None:
+        _persist_valgrind_report(
+            request, server_type, server.valgrind_xml_path, valgrind_errors
+        )
 
     if use_asan and asan_errors:
         msg = f"AddressSanitizer found {len(asan_errors)} error(s):\n\n"
