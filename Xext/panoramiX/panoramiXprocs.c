@@ -2509,11 +2509,16 @@ PanoramiXAllocColor(ClientPtr client)
 
         /* only send out reply for on first screen */
         if (!walkScreenIdx) {
-            xAllocColorReply reply; /* static init would confuse preprocessor */
-            reply.red = red;
-            reply.green = green;
-            reply.blue = blue;
-            reply.pixel = pixel;
+            /* Designated initialiser zeroes the reply's pad/reserved bytes,
+               which were previously left uninitialised and sent to the
+               client. (The XINERAMA_FOR_EACH_SCREEN_* macros are variadic, so
+               the initialiser's commas no longer confuse the preprocessor.) */
+            xAllocColorReply reply = {
+                .red = red,
+                .green = green,
+                .blue = blue,
+                .pixel = pixel,
+            };
 
             if (client->swapped) {
                 swaps(&reply.red);
