@@ -220,8 +220,8 @@ where each NAMESPACEINFO is a fixed header followed by the name:
 ```
   CreateNamespace
     capabilities: CARD32       (initial caps)
-    attributes:   CARD32       (XnsAttrAutoRemove honored; XnsAttrBuiltin
-                                ignored/illegal)
+    attributes:   CARD32       (XNS_ATTR_TRANSIENT honored; XNS_ATTR_IMMUTABLE
+                                rejected with BadValue if set)
     name:         STRING8
   =>
     (empty ack)
@@ -406,7 +406,7 @@ Required changes:
  3. **Removable tokens.** Add an opaque per-namespace `token-handle` to
     `struct auth_token` and support unlinking + `RemoveAuthorization()`
     (today tokens are only ever appended at boot).
- 4. **New attribute fields.** Add `Bool builtin` is already present; add
+ 4. **New attribute fields.** `Bool builtin` already exists; add
     `Bool autoRemove`. Set `builtin` for `root`/`anon`.
  5. **Auto-remove.** Centralise in `XnamespaceAssignClient()`: after the
     `priv->ns->refcnt--` path, if the namespace is non-builtin, has
