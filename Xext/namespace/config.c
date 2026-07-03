@@ -421,6 +421,18 @@ struct Xnamespace *XnsCreate(const char *name, size_t namelen,
     xorg_list_init(&ns->auth_tokens);
     capsToFields(ns, caps);
     ns->autoRemove = !!(attrs & XNS_ATTR_TRANSIENT);
+
+    /* namespaces known at boot get their virtual root from
+       hookInitRootWindow(); one created here, well after that one-shot
+       callback already ran, has no other chance to get one. */
+    ns->rootWindow = XnsCreateVirtualRoot(ns_root.rootWindow, ns->name);
+    if (!ns->rootWindow) {
+        free((void *)ns->name);
+        free(ns);
+        *err = BadAlloc;
+        return NULL;
+    }
+
     xorg_list_append(&ns->entry, &ns_list);
 
     *err = Success;
