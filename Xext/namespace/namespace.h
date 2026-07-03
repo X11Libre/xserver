@@ -53,6 +53,7 @@ extern DevPrivateKeyRec namespaceClientPrivKeyRec;
 
 Bool XnsLoadConfig(void);
 void XnsProtoExtensionInit(void);
+WindowPtr XnsCreateVirtualRoot(WindowPtr realRoot, const char *name);
 struct Xnamespace *XnsFindByName(const char* name);
 struct Xnamespace *XnsLookup(const char *name, size_t namelen);
 int XnsAddToken(struct Xnamespace *ns, const char *proto, size_t protolen,
