@@ -73,6 +73,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
                 case X_CreateGC:
                 case X_CreatePixmap:
+                case X_CreateColormap:
                     if (checkAllowed(param->access_mode, DixGetAttrAccess))
                         goto pass;
                 break;
