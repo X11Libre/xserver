@@ -275,7 +275,11 @@ convolutionFilterValidateParams(ScreenPtr pScreen,
     h = xFixedToInt(params[1]);
 
     nparams -= 2;
-    if (w * h > nparams)
+    /* w and h come from client xFixed values via the sign-extending
+     * xFixedToInt(); reject negatives and use a 64-bit product so the
+     * comparison cannot be defeated by signed overflow before w/h are
+     * handed back to the caller. */
+    if (w < 0 || h < 0 || (int64_t) w * h > nparams)
         return FALSE;
 
     *width = w;
