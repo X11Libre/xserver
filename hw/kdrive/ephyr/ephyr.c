@@ -932,7 +932,7 @@ ephyrUpdateModifierState(unsigned int state)
 static Bool
 ephyrCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 {
-    return FALSE;
+    return KdCursorOffScreen(ppScreen, x, y);
 }
 
 static void
