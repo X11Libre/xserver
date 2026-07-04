@@ -2122,7 +2122,7 @@ KdWakeupHandler(ScreenPtr pScreen, int result)
 
 #define KdScreenOrigin(pScreen) (&(KdGetScreenPriv(pScreen)->screen->origin))
 
-static Bool
+Bool
 KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 {
     ScreenPtr pScreen = *ppScreen;

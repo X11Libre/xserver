@@ -520,6 +520,8 @@ void
 
 void KdRingBell(KdKeyboardInfo * ki, int volume, int pitch, int duration);
 
+Bool KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y);
+
 /* kmode.c */
 int
 KdFindRate(KdScreenInfo * screen,
