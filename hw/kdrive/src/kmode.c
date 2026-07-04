@@ -338,6 +338,167 @@ KdAddMode(const KdMonitorTiming *new)
     return TRUE;
 }
 
+/* Based on the CVT 1.2 reduced blanking formula, see https://glenwing.github.io/docs/VESA-CVT-1.2.pdf for the constants below */
+static KdMonitorTiming
+KdGenerateModeCVT(int width, int height, int rate)
+{
+    KdMonitorTiming new = {0};
+    float hperiod;
+
+/**
+ * 3.4.3 Reduced Blanking Timing Version 2
+ *
+ * The following sections describe new rules mandated by the reduced blanking timing v2. New reduced blank
+ * DMT timings shall use the reduced blanking timing v2 rules.
+ */
+
+/**
+ * 1. Pixel Clock Selection
+ *
+ * The new version shall support a resolution of 0.001MHz to produce more accurate refresh rate result
+ * required in some application.
+
+ * The target refresh rate is comprised of a nominal refresh rate and optionally a 1000/1001 multiplier
+ * factor for video optimized rates (i.e. for 59.94Hz, it has 60Hz nominal refresh rate and a 1000/1001
+ * factor).
+ *
+ * The following lists the steps taken to calculate the pixel clock for a given target refresh rate and
+ * active H/V resolution; further details are in Section 5.4.
+ *
+ * a) First the nominal refresh rate is used to calculate the horizontal and vertical blank parameters,
+ *
+ * b) then calculate horizontal and vertical blank parameter along with required H/V active with the
+ * target refresh rate (including 1000/1001 factor if required) is used to calculate the pixel clock.
+ *
+ * c) The result value is then rounded to nearest 0.001 pixel clock
+ *
+ * Using the nominal value in step (a) guarantees that the only difference in timing between a video
+ * optimized timing vs. a non-video optimized timing for a given refresh rate is in pixel clock (i.e. all
+ * other vertical and horizontal parameters are same).
+ */
+#define CVT_CLOCK_STEP 1 /* KHZ */ /* unused since the remainder when dividing by 1 is always 0 */
+
+/**
+ * 2. Vertical Refresh Rate
+ *
+ * The standard refresh rate for Reduced Blanking v2 timing is 60Hz however other progressive refresh
+ * may be used depending on the application. Higher precision of the pixel clock step allows video
+ * optimized refresh rates (i.e. 60*1000/1001Hz, 30*1000/1001Hz) to be supported with the new
+ * version. A factor of 1000/1001 is applied to the nominal refresh rate if the video optimized target
+ * refresh rate is required.
+ */
+#define CVT_RB_DEF_RATE 60 /* HZ */
+
+/**
+ * 3. Horizontal Counts
+ *
+ * As per rules of the Reduced Blanking v2 timings, Horizontal Timings may have a precision of 1
+ * pixel. This allows timing for resolutions like 1366x768 to be defined with the new standard. No
+ * longer is the Horizontal Timing, including the Horizontal Active pixels, Horizontal Total pixels, Sync
+ * Pulse duration and “Front Porch” and “Back Porch” times required to be divisible by eight.
+ */
+#define CVT_CELL_GRAN 1 /* Pixels */ /* unused since the remainder when dividing by 1 is always 0 */
+
+/**
+ * 4. Horizontal Blanking Time
+ *
+ * For Reduced Blanking v2 timings, the Horizontal Blanking time will in all cases are fixed to 80 clock
+ * cycles instead of 160 clock cycles required by earlier Reduced Blanking Timing.
+ *
+ * 5. Horizontal Sync Pulse Duration and Position
+ *
+ * The Horizontal Sync Pulse duration will in all cases be 32 pixel clocks in duration, with the position
+ * set so that the trailing edge of the Horizontal Sync Pulse is located in the center of the Horizontal
+ * Blanking period. This implies that for a fixed blank of 80 pixel clocks, the Horizontal Back Porch is
+ * fixed to (80/2) 40 pixel clocks and the Horizontal Front Porch is fixed to (80-40-32) = 8 clock cycles.
+ */
+#define CVT_RB_HFP 8 /* Pixels */
+#define CVT_RB_HBP 40 /* Pixels */
+#define CVT_RB_HBLANK 80 /* Pixels */
+
+/**
+ * 6. Vertical Blanking Time
+ *
+ * The Vertical Blanking shall be the first multiple of integer Horizontal Lines that exceeds the
+ * minimum requirement of 460 microseconds.
+ */
+#define CVT_RB_MIN_VBLANK 460 /* microseconds */
+#define HZ2USEC(x) (1e6/(x))
+
+/*
+ * 7. Vertical Sync Pulse Duration and Position
+ *
+ * Vertical Sync Pulse is fixed at 8 lines indicating timing generated based on Reduced Blanking v2
+ * timing rules and aspect ratio information is to be derived based on Vertical and Horizontal Active
+ * Timing. This will allow any new timing with non-standard aspect ratio to be supported without any
+ * update to the specification. The Vertical Back Porch shall in all cases be fixed to 6 lines. The Vertical
+ * Front Porch shall be the remainder of the Vertical Blanking Time.
+ */
+#define CVT_RB_VSYNC 8
+#define CVT_RB_VBP 6
+/* VFB and VBLANK are calulated based on the above */
+
+/* Don't leave the front porch 0 */
+#define CVT_MIN_VFPORCH 1
+
+    new.horizontal = width;
+    new.vertical = height;
+    new.rate = (rate > 0) ? rate : CVT_RB_DEF_RATE;
+
+    new.hfp = CVT_RB_HFP;
+    new.hbp = CVT_RB_HBP;
+    new.hblank = CVT_RB_HBLANK;
+
+    /* The polarities are flipped for the non-reduced blanking formula */
+    new.hpol = KdSyncPositive;
+    new.vpol = KdSyncNegative;
+
+    new.vbp = CVT_RB_VBP;
+
+    /* XXX adapted from libxcvt */
+    /* 8. Estimate Horizontal period. */
+    hperiod = ((float) (HZ2USEC(new.rate) - CVT_RB_MIN_VBLANK)) / new.vertical;
+    if (hperiod <= 0) {
+        hperiod = 1;
+    }
+
+    /* 9. Find number of lines in vertical blanking */
+    new.vblank = ((float) CVT_RB_MIN_VBLANK) / hperiod + 1;
+
+    /* 10. Check if vertical blanking is sufficient */
+    if (new.vblank < (CVT_MIN_VFPORCH + CVT_RB_VSYNC + CVT_RB_VBP)) {
+        new.vblank = CVT_MIN_VFPORCH + CVT_RB_VSYNC + CVT_RB_VBP;
+    }
+
+    new.vfp = new.vblank - CVT_RB_VBP - CVT_RB_VSYNC;
+
+    /* 15/13. Find pixel clock frequency (kHz for xf86) */
+    new.clock = (new.horizontal + CVT_RB_HBLANK) * 1000.0 / hperiod;
+
+    return new;
+}
+
+/* Generate a mode based on the reduced blanking CVT formula and add it */
+Bool
+KdAddModeCVT(int width, int height, int rate)
+{
+    int i;
+    KdMonitorTiming *t;
+    KdMonitorTiming new;
+
+    for (i = kdNumMonitorTimings, t = kdMonitorTimings; i > 0; i--, t++) {
+        /* Look if the mode already exists */
+        if ((t->horizontal == width) &&
+            (t->vertical == height) &&
+            (t->rate == rate)) {
+            return TRUE;
+        }
+    }
+
+    new = KdGenerateModeCVT(width, height, rate);
+    return KdAddMode(&new);
+}
+
 static const KdMonitorTiming *
 kdFindPrevSize(const KdMonitorTiming * old)
 {

@@ -533,6 +533,9 @@ Bool
 KdAddMode(const KdMonitorTiming *new);
 
 Bool
+KdAddModeCVT(int width, int height, int rate);
+
+Bool
 KdTuneMode(KdScreenInfo * screen, const KdMonitorTiming *m,
            Bool (*usable) (KdScreenInfo *, const KdMonitorTiming *),
            Bool (*supported) (KdScreenInfo *, const KdMonitorTiming *));
