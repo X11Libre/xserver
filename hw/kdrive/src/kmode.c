@@ -306,6 +306,8 @@ KdAddMode(const KdMonitorTiming *new)
     int i;
     KdMonitorTiming *t;
 
+    static Bool warned = FALSE;
+
     for (i = kdNumMonitorTimings, t = kdMonitorTimings; i > 0; i--, t++) {
         /* Look if the mode already exists */
         if ((t->horizontal == new->horizontal) &&
@@ -331,6 +333,10 @@ KdAddMode(const KdMonitorTiming *new)
     }
 
     if (!kdNumFreeMonitorTimings) {
+        if (!warned) {
+            ErrorF("Warning: Ran out of space for adding screen modes\n");
+            warned = TRUE;
+        }
         return FALSE;
     }
 
