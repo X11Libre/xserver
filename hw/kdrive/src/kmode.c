@@ -33,6 +33,10 @@ static const KdMonitorTiming kdDefaultTiming =
      37, 23, 66, KdSyncPositive,        /* 72.188 */
      };
 
+#define KD_EXTRA_TIMINGS_4 {0}, {0}, {0}, {0},
+#define KD_EXTRA_TIMINGS_16 KD_EXTRA_TIMINGS_4 KD_EXTRA_TIMINGS_4 KD_EXTRA_TIMINGS_4 KD_EXTRA_TIMINGS_4
+#define KD_EXTRA_TIMINGS_64 KD_EXTRA_TIMINGS_16 KD_EXTRA_TIMINGS_16 KD_EXTRA_TIMINGS_16 KD_EXTRA_TIMINGS_16
+
 static KdMonitorTiming kdMonitorTimings[] = {
     /*  H       V       Hz      KHz */
     /*  FP      BP      BLANK   POLARITY */
@@ -250,8 +254,8 @@ static KdMonitorTiming kdMonitorTimings[] = {
      },
 
     /* Space for extra modes */
-#define NUM_FREE_TIMINGS 4
-    {0}, {0}, {0}, {0},
+#define NUM_FREE_TIMINGS 64
+    KD_EXTRA_TIMINGS_64
 };
 
 #define NUM_MONITOR_TIMINGS (sizeof kdMonitorTimings/sizeof kdMonitorTimings[0])
