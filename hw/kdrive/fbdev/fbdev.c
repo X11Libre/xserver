@@ -168,7 +168,7 @@ fbdevGetRefreshRate(const struct fb_var_screeninfo *var)
      * However, if the rate reported by the driver is wrong, the driver probably doesn't care about
      * refresh rates.
      */
-    return 103;
+    return -1;
 #undef PICOS2HZ
 }
 
@@ -282,11 +282,13 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
     Pixel allbits;
     int depth;
     int rate;
+    Bool want_rate = FALSE;
     Bool gray;
     struct fb_var_screeninfo var;
     const KdMonitorTiming *t;
-    KdMonitorTiming curr_mode = {0};
     int k;
+
+#define FB_DEFAULT_RATE 103 /* The highest rate in the modelist from kmode.c */
 
     k = ioctl(priv->fd, FBIOGET_VSCREENINFO, &var);
 
@@ -294,15 +296,18 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
         if (k >= 0) {
             screen->width = var.xres;
             screen->height = var.yres;
-            screen->rate = fbdevGetRefreshRate(&var);
         } else {
             screen->width = 1024;
             screen->height = 768;
-            screen->rate = 103;
         }
     }
     if (!screen->rate) {
-        screen->rate = (k >= 0) ? fbdevGetRefreshRate(&var) : 103;
+        screen->rate = (k >= 0) ? fbdevGetRefreshRate(&var) : FB_DEFAULT_RATE;
+        if (screen->rate <= 0) {
+            screen->rate = FB_DEFAULT_RATE;
+        }
+    } else {
+        want_rate = TRUE;
     }
     if (!screen->fb.depth) {
         if (k >= 0)
@@ -314,29 +319,43 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
     scrpriv->max_width = 0;
     scrpriv->max_height = 0;
 
-    rate = KdFindRate(screen, fbdevModeSupported);
     if (k >= 0) {
+        KdMonitorTiming curr_mode = {0};
+
+        int saved_width = screen->width;
+        int saved_height = screen->height;
+
         scrpriv->max_width = var.xres;
         scrpriv->max_height = var.yres;
 
+        /* See if the current size is known */
+        screen->width = var.xres;
+        screen->height = var.yres;
+        rate = KdFindRate(screen, fbdevModeSupported);
+        screen->width = saved_width;
+        screen->height = saved_height;
+
         /* Add the current framebuffer mode */
         fbdevConvertVarToTiming(&var, &curr_mode);
-        KdAddMode(&curr_mode);
-        if (!rate) {
-            /* Add the desired framebuffer mode */
-            curr_mode.horizontal = screen->width;
-            curr_mode.vertical = screen->height;
+        if (curr_mode.rate > 0) {
             KdAddMode(&curr_mode);
+        } else if (!rate) {
+            KdAddModeCVT(var.xres, var.yres, screen->rate);
         }
     }
 
+    rate = KdFindRate(screen, fbdevModeSupported);
+    if (!rate || want_rate || (k < 0) || (screen->width != var.xres) || (screen->height != var.yres)) {
+        /* Add the desired framebuffer mode */
+        KdAddModeCVT(screen->width, screen->height, screen->rate);
+    }
+
     /* Fbdev rate isn't reliable, don't forbid modes based on it */
-    if (screen->rate < rate) {
+    if (!want_rate && (screen->rate < rate)) {
         screen->rate = rate;
     }
 
     t = KdFindMode(screen, fbdevModeSupported);
-
 
     /**
      * XXX The only way we can check what modes are supported is by actually setting them.
