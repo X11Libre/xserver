@@ -613,22 +613,26 @@ set_sun_path(const char *port, const char *upath, char *path, int abstract)
     const char *at = "";
     int n;
 
-    if (!port || !*port || !path)
+    if (!port || !*port || !path) {
 	return -1;
+    }
 
 #ifdef HAVE_ABSTRACT_SOCKETS
-    if (port[0] == '@')
+    if (port[0] == '@') {
 	upath = "";
-    else if (abstract)
+    } else if (abstract) {
 	at = "@";
+    }
 #endif
 
-    if (*port == '/') /* a full pathname */
+    if (*port == '/') { /* a full pathname */
 	upath = "";
+    }
 
     n = snprintf(path, sizeof(s.sun_path), "%s%s%s", at, upath, port);
-    if (n < 0 || (size_t) n >= sizeof(s.sun_path))
+    if (n < 0 || (size_t) n >= sizeof(s.sun_path)) {
 	return -1;
+    }
     return 0;
 }
 #endif
