@@ -148,6 +148,8 @@ if xkb_dir == ''
     endif
     if xkb_dir == ''
         xkb_dir = join_paths(get_option('prefix'), 'share/X11/xkb')
+        message('NOTE: xkb_dir falling back to ' + xkb_dir
+                + '. Set -Dxkb_dir= explicitly if this path does not exist.')
     endif
 endif
 
@@ -163,6 +165,8 @@ if xkb_bin_dir == ''
     endif
     if xkb_bin_dir == ''
         xkb_bin_dir = join_paths(get_option('prefix'), get_option('bindir'))
+        message('NOTE: xkb_bin_dir falling back to ' + xkb_bin_dir
+                + '. Set -Dxkb_bin_dir= explicitly if xkbcomp is installed elsewhere.')
     endif
 endif
 
@@ -175,6 +179,8 @@ if dfp == ''
             fontrootdir = fontutil_dep.get_variable(pkgconfig : 'fontrootdir')
         else
             fontrootdir = join_paths(get_option('prefix'), get_option('datadir'), 'fonts', 'X11')
+            message('NOTE: fontrootdir falling back to ' + fontrootdir
+                    + ' (fontutil pkg-config not found).')
         endif
     endif
     dfp_elements = [
@@ -374,6 +380,15 @@ if log_dir == ''
 endif
 
 module_dir = join_paths(get_option('libdir'), get_option('module_dir'))
+
+paths_summary = {
+    'Log directory': log_dir,
+    'XKB data directory': xkb_dir,
+    'XKB binary directory': xkb_bin_dir,
+    'Default font path': default_font_path,
+    'Module directory': module_dir,
+}
+summary(paths_summary, section: 'Paths')
 
 if glamor_option == 'auto'
     build_glamor = build_xorg
