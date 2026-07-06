@@ -288,7 +288,7 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
     const KdMonitorTiming *t;
     int k;
 
-#define FB_DEFAULT_RATE 103 /* The highest rate in the modelist from kmode.c */
+#define FB_DEFAULT_RATE 120 /* The highest rate in the modelist from kmode.c */
 
     k = ioctl(priv->fd, FBIOGET_VSCREENINFO, &var);
 
