@@ -39,6 +39,7 @@ retry pkg update -f
 
 echo "--> install extra dependencies"
 retry pkg install -y \
+    bzip2 \
     curl \
     git \
     libdrm \
