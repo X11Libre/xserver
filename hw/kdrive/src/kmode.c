@@ -784,7 +784,7 @@ kdFindPrevSize(const KdMonitorTiming * old)
      */
     while (new != kdMonitorTimings) {
         new--;
-        if (new->horizontal != old->horizontal &&
+        if (new->horizontal != old->horizontal ||
             new->vertical != old->vertical) {
             break;
         }
