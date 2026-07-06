@@ -237,9 +237,29 @@ static KdMonitorTiming kdMonitorTimings[] = {
 #endif
 
     /* 1280x854 modes */
+    /* Is this mode right? pixclock and vbp don't make sense */
     {1280, 854, 103, 12500,     /* ADDED */
      56, 16, 128, KdSyncPositive,       /* 102.554 */
      1, 216, 12, KdSyncPositive,
+     },
+
+    /* From https://www.pseudorandom.co.uk/2003/debian/tibook/ */
+    /**
+     * Section "Monitor"
+     *   Identifier   "powerbook-lcd"
+     *   VendorName   "Apple"
+     *   ModelName    "TiBook IV"
+     *   Mode "1280x854"
+     *     DotClock 79.816
+     *     HTimings 1280 1296 1408 1536
+     *     VTimings 854 855 858 866
+     *     Flags "-HSync" "-VSync"
+     *   EndMode
+     * EndSection
+     */
+    {1280, 854, 65, 79816,      /* ADDED */
+     16, 128, 256, KdSyncNegative,
+     1, 8, 12, KdSyncNegative,
      },
 
     /* 1280x960 modes */
