@@ -677,10 +677,17 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
                 to->touch->num_touches = from->touch->num_touches;
                 to->touch->touches = calloc(to->touch->num_touches,
                                             sizeof(TouchPointInfoRec));
+                /*
+                 * Checking 'to->touch' here (as this used to) is always
+                 * true -- it was just allocated a few lines above. The
+                 * allocation that can actually fail is 'touches', right
+                 * above, which TouchInitTouchPoint() then indexes
+                 * unconditionally.
+                 */
+                if (!to->touch->touches)
+                    FatalError("[Xi] no memory for class shift.\n");
                 for (i = 0; i < to->touch->num_touches; i++)
                     TouchInitTouchPoint(to->touch, to->valuator, i);
-                if (!to->touch)
-                    FatalError("[Xi] no memory for class shift.\n");
             }
             else
                 classes->touch = NULL;
