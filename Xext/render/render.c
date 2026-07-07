@@ -998,11 +998,18 @@ ProcRenderAddGlyphs(ClientPtr client)
     return Success;
  bail:
     for (i = 0; i < nglyphs; i++) {
-        if (glyphs[i].glyph) {
-            --glyphs[i].glyph->refcnt;
-            if (!glyphs[i].found)
-                free(glyphs[i].glyph);
-        }
+        /*
+         * FreeGlyph(), not a raw refcnt-- + free(): a !found glyph may
+         * already have had CreatePicture()/CreatePixmap() run on it per
+         * screen (see the DIX_FOR_EACH_SCREEN block above) via
+         * SetGlyphPicture(), and only FreeGlyph() -> FreeGlyphPicture()
+         * releases those. It's safe to call even though these glyphs were
+         * never added to the global hash yet (AddGlyph() only runs on the
+         * success path below) -- the hash lookup inside FreeGlyph() keys off
+         * this glyph's own sha1 and simply finds nothing to remove.
+         */
+        if (glyphs[i].glyph)
+            FreeGlyph(glyphs[i].glyph, glyphSet->fdepth);
     }
     if (glyphsBase != glyphsLocal)
         free(glyphsBase);
