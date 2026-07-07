@@ -397,8 +397,10 @@ RRProviderCreate(ScreenPtr pScreen, const char *name,
     provider->name[nameLength] = '\0';
     provider->changed = FALSE;
 
-    if (!AddResource (provider->id, RRProviderType, (void *) provider))
+    if (!AddResource (provider->id, RRProviderType, (void *) provider)) {
+        free(provider);
         return NULL;
+    }
     pScrPriv->provider = provider;
     return provider;
 }
