@@ -113,12 +113,24 @@ RootlessUpdateScreenPixmap(ScreenPtr pScreen)
     rowbytes = PixmapBytePad(pScreen->width, pScreen->rootDepth);
 
     if (s->pixmap_data_size < rowbytes) {
-        free(s->pixmap_data);
-
-        s->pixmap_data_size = rowbytes;
-        s->pixmap_data = calloc(1, s->pixmap_data_size);
-        if (s->pixmap_data == NULL)
+        /*
+         * Allocate the replacement before freeing/resizing the old one:
+         * on failure this used to free s->pixmap_data, bump
+         * pixmap_data_size to the new (larger) size, then return with
+         * s->pixmap_data (and the screen pixmap pPix, still pointing at
+         * the freed block via its old ModifyPixmapHeader() call) left
+         * dangling -- and because pixmap_data_size was already bumped, a
+         * later same-or-smaller-size call would see pixmap_data_size <
+         * rowbytes as false and skip reallocating forever, pinning the
+         * dangling state permanently.
+         */
+        void *new_data = calloc(1, rowbytes);
+        if (new_data == NULL)
             return;
+
+        free(s->pixmap_data);
+        s->pixmap_data_size = rowbytes;
+        s->pixmap_data = new_data;
 
         memset(s->pixmap_data, 0xFF, s->pixmap_data_size);
 
