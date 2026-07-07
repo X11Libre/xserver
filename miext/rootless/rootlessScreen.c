@@ -115,9 +115,15 @@ RootlessUpdateScreenPixmap(ScreenPtr pScreen)
 
     if (s->pixmap_data_size < rowbytes) {
         /*
-         * Allocate before releasing the old buffer.  On failure the pixmap
-         * must keep pointing at storage that is still valid and still covers
-         * the geometry we last published.
+         * Allocate the replacement before releasing the old buffer: on
+         * failure the pixmap must keep pointing at storage that is still
+         * valid and still covers the geometry we last published.  (Freeing
+         * first used to leave s->pixmap_data -- and the screen pixmap pPix,
+         * via its earlier ModifyPixmapHeader() call -- dangling, and since
+         * pixmap_data_size got bumped before the failure check, a later
+         * same-or-smaller-size call would see pixmap_data_size < rowbytes
+         * as false and skip reallocating forever, pinning the dangling
+         * state permanently.)
          */
         void *data = calloc(1, rowbytes);
 
