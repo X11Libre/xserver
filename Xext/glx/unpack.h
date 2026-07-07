@@ -59,16 +59,27 @@
 ** NOTE: the cast (long)res below assumes a long is large enough to hold a
 ** pointer.
 */
+/*
+** realloc() into a temporary first, and only commit it (pointer + size
+** together) to (cl)->returnBuf/returnBufSize on success -- realloc()ing
+** straight into (cl)->returnBuf, as this used to, left returnBuf NULL but
+** returnBufSize at its stale (prior, smaller) value on failure. A later
+** call whose size+align fit under that stale returnBufSize would then
+** skip reallocating (since returnBufSize looks "big enough") and
+** dereference the NULL returnBuf. The sibling __glXGetAnswerBuffer() in
+** indirect_util.c already uses this same temporary-first idiom.
+*/
 #define __GLX_GET_ANSWER_BUFFER(res,cl,size,align)			 \
     if ((size) < 0) return BadLength;                                    \
     else if ((size) > sizeof(answerBuffer)) {				 \
 	int bump;							 \
 	if ((cl)->returnBufSize < (size)+(align)) {			 \
-	    (cl)->returnBuf = (GLbyte*)realloc((cl)->returnBuf,	 	 \
+	    GLbyte *newBuf = (GLbyte*)realloc((cl)->returnBuf,	 	 \
 						(size)+(align));         \
-	    if (!(cl)->returnBuf) {					 \
+	    if (!newBuf) {						 \
 		return BadAlloc;					 \
 	    }								 \
+	    (cl)->returnBuf = newBuf;					 \
 	    (cl)->returnBufSize = (size)+(align);			 \
 	}								 \
 	(res) = (char*)(cl)->returnBuf;					 \
