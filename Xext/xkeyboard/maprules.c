@@ -100,7 +100,10 @@ InputLineAddChar(InputLine * line, int ch)
             memcpy(line->line, line->buf, line->sz_line);
         }
         else {
-            line->line = reallocarray(line->line, line->sz_line, 2);
+            char *newline = reallocarray(line->line, line->sz_line, 2);
+            if (newline == NULL)
+                return -1;
+            line->line = newline;
         }
         line->sz_line *= 2;
     }
