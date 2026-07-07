@@ -107,6 +107,15 @@ miDCInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
     dixSetPrivate(&pScreen->devPrivates, miDCScreenKey, pScreenPriv);
 
     if (!miSpriteInitialize(pScreen, screenFuncs)) {
+        /*
+         * Both the CloseScreen hook and the devPrivates slot were already
+         * set above (dixScreenHookPostClose()/dixSetPrivate()); undo both
+         * before freeing pScreenPriv, or miDCCloseScreen() looks it up as
+         * a live pointer at screen close, uses it (UAF via
+         * miDCSwitchScreenCursor()), and frees it again (double-free).
+         */
+        dixScreenUnhookPostClose(pScreen, miDCCloseScreen);
+        dixSetPrivate(&pScreen->devPrivates, miDCScreenKey, NULL);
         free((void *) pScreenPriv);
         return FALSE;
     }
