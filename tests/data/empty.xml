@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="empty">
+  <interface name="empty" version="1">
+    <request name="empty">
+    </request>
+  </interface>
+</protocol>

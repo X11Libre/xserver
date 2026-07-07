@@ -1,2 +1,0 @@
-subdir('input')
-subdir('video')

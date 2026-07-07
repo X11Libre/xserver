@@ -1,39 +1,43 @@
-
-if build_docs_devel
-    foreach basename : ['Xserver-spec', 'Xinput']
-
-        input_xml = basename + '.xml'
-
-        custom_target(
-            basename + '.html',
-            output: basename + '.html',
-            input: [input_xml],
-            command: [xmlto] + docs_xmlto_search_flags + [
-                '-x',  join_paths(doc_stylesheet_srcdir, 'xorg-xhtml.xsl'),
-                '-o', meson.current_build_dir(),
-                'xhtml-nochunks', '@INPUT0@'],
-            build_by_default: true,
-            install: false,
-        )
-
-        if build_docs_pdf
-            foreach format : ['ps', 'pdf']
-                output_fn = basename + '.' + format
-                custom_target(
-                    output_fn,
-                    output: output_fn,
-                    input: [input_xml],
-                    command: [xmlto] + docs_xmlto_search_flags + [
-                        '-x',  join_paths(doc_stylesheet_srcdir, 'xorg-fo.xsl'),
-                        '--stringparam', 'img.src.path=' + meson.current_build_dir(),
-                        '-o', meson.current_build_dir(),
-                        '--with-fop', format, '@INPUT0@'],
-                    build_by_default: true,
-                    install: false,
-                )
-            endforeach
-        endif
-    endforeach
+if not get_option('libraries')
+	error('-Ddocumentation=true requires -Dlibraries=true')
 endif
 
-subdir('dtrace')
+dot = find_program('dot')
+doxygen = find_program('doxygen')
+xsltproc = find_program('xsltproc')
+xmlto = find_program('xmlto')
+mdbook = find_program('mdbook')
+
+cmd = run_command(doxygen, '--version', check: true)
+message('doxygen: ' + cmd.stdout().strip())
+vers = cmd.stdout().strip()
+if vers.version_compare('< 1.6.0')
+	error('Doxygen 1.6 or later is required for building documentation, found @0@.'.format(vers))
+endif
+
+cmd = run_command(dot, '-V', check: true)
+message('dot: ' + cmd.stderr().strip())
+vers = cmd.stderr().split('version')[1].strip().split(' ')[0]
+if vers.version_compare('< 2.26.0')
+	error('Dot (Graphviz) 2.26 or later is required for building documentation, found @0@.'.format(vers))
+endif
+
+manpage_xsl = 'http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl'
+cmd = run_command(xsltproc, '--nonet', manpage_xsl, check: false)
+if cmd.returncode() != 0
+	error('The style sheet for man pages providing "@0@" was not found.'.format(manpage_xsl))
+endif
+
+publican_install_prefix = join_paths(
+	get_option('prefix'),
+	get_option('datadir'),
+	'doc',
+	meson.project_name(),
+	'Wayland', 'en-US'
+)
+
+publican_html_dir = 'html'
+
+subdir('doxygen')
+subdir('publican')
+subdir('book')
