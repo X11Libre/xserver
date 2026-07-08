@@ -34,7 +34,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pciaccess.h>
+#ifdef WITH_LIBDRM
 #include <xf86drm.h>
+#endif
 #include <X11/X.h>
 
 #include "os/log_priv.h"
@@ -1159,7 +1161,7 @@ xf86VideoPtrToDriverList(struct pci_device *dev, XF86MatchedDrivers *md)
     {
         int idx = 0;
 
-#if defined(__linux__) || defined(__NetBSD__)
+#if defined(WITH_LIBDRM) && (defined(__linux__) || defined(__NetBSD__))
         char busid[32];
         int fd;
 
