@@ -29,8 +29,6 @@
 
 #include <dix-config.h>
 
-#include "dix/request_priv.h"
-
 #include "hashtable.h"
 #include "vndserver_priv.h"
 #include "vndservervendor.h"
@@ -49,7 +47,7 @@ typedef struct GlxVendorPrivDispatchRec {
     HashTable hh;
 } GlxVendorPrivDispatch;
 
-static GlxServerDispatchProc dispatchFuncs[OPCODE_ARRAY_LEN] = { 0 };
+static GlxServerDispatchProc dispatchFuncs[OPCODE_ARRAY_LEN] = {};
 static HashTable vendorPrivHash = NULL;
 static HtGenericHashSetupRec vendorPrivSetup = {
     .keySize = sizeof(CARD32)
@@ -89,6 +87,17 @@ static GlxServerDispatchProc GetVendorDispatchFunc(CARD8 opcode, CARD32 vendorCo
     return DispatchBadRequest;
 }
 
+static void SetReplyHeader(ClientPtr client, void *replyPtr)
+{
+    xGenericReply *rep = (xGenericReply *) replyPtr;
+    rep->type = X_Reply;
+    rep->sequenceNumber = client->sequence;
+    if (client->swapped) {
+	swaps(&rep->sequenceNumber);
+    }
+    rep->length = 0;
+}
+
 /* Include the trivial dispatch handlers */
 #include "vnd_dispatch_stubs.c"
 
@@ -97,10 +106,12 @@ static int dispatch_GLXQueryVersion(ClientPtr client)
     xGLXQueryVersionReply reply;
     REQUEST_SIZE_MATCH(xGLXQueryVersionReq);
 
+    SetReplyHeader(client, &reply);
     reply.majorVersion = GlxCheckSwap(client, 1);
     reply.minorVersion = GlxCheckSwap(client, 4);
 
-    return X_SEND_REPLY_SIMPLE(client, reply);
+    WriteToClient(client, sz_xGLXQueryVersionReply, &reply);
+    return Success;
 }
 
 /* broken header workaround */
@@ -115,6 +126,7 @@ static int dispatch_GLXQueryVersion(ClientPtr client)
 static int dispatch_GLXClientInfo(ClientPtr client)
 {
     GlxServerVendor *vendor;
+    void *requestCopy = NULL;
     size_t requestSize = client->req_len * 4;
 
     if (client->minorOp == X_GLXClientInfo) {
@@ -130,7 +142,7 @@ static int dispatch_GLXClientInfo(ClientPtr client)
     // We'll forward this request to each vendor library. Since a vendor might
     // modify the request data in place (e.g., for byte swapping), make a copy
     // of the request first.
-    void *requestCopy = calloc(1, requestSize);
+    requestCopy = malloc(requestSize);
     if (requestCopy == NULL) {
         return BadAlloc;
     }
@@ -193,7 +205,7 @@ static int CommonMakeCurrent(ClientPtr client,
         GLXDrawable readdrawable,
         GLXContextID context)
 {
-    xGLXMakeCurrentReply reply = { 0 };
+    xGLXMakeCurrentReply reply = {};
     GlxContextTagInfo *oldTag = NULL;
     GlxServerVendor *newVendor = NULL;
 
@@ -201,6 +213,8 @@ static int CommonMakeCurrent(ClientPtr client,
     drawable = GlxCheckSwap(client, drawable);
     readdrawable = GlxCheckSwap(client, readdrawable);
     context = GlxCheckSwap(client, context);
+
+    SetReplyHeader(client, &reply);
 
     if (oldContextTag != 0) {
         oldTag = GlxLookupContextTag(client, oldContextTag);
@@ -229,8 +243,6 @@ static int CommonMakeCurrent(ClientPtr client,
         // TODO: For switching contexts in a single vendor, just make one
         // makeCurrent call?
 
-        // Apparently, the answer is 'no': https://github.com/X11Libre/xserver/issues/1246
-
         // TODO: When changing vendors, would it be better to do the
         // MakeCurrent(new) first, then the LoseCurrent(old)?
         // If the MakeCurrent(new) fails, then the old context will still be current.
@@ -244,6 +256,11 @@ static int CommonMakeCurrent(ClientPtr client,
             if (ret != Success) {
                 return ret;
             }
+            // Free the old tag before calling CommonMakeNewCurrent(),
+            // which may call GlxAllocContextTag() and realloc the
+            // contextTags array, invalidating the oldTag pointer.
+            GlxFreeContextTag(oldTag);
+            oldTag = NULL;
         }
 
         if (newVendor != NULL) {
@@ -254,14 +271,11 @@ static int CommonMakeCurrent(ClientPtr client,
         } else {
             reply.contextTag = 0;
         }
-
-        GlxFreeContextTag(oldTag);
-        oldTag = NULL;
     }
 
     reply.contextTag = GlxCheckSwap(client, reply.contextTag);
-
-    return X_SEND_REPLY_SIMPLE(client, reply);
+    WriteToClient(client, sz_xGLXMakeCurrentReply, &reply);
+    return Success;
 }
 
 static int dispatch_GLXMakeCurrent(ClientPtr client)
