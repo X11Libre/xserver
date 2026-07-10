@@ -351,8 +351,6 @@ conf_data.set('CSRG_BASED', csrg_based ? '1' : false)
 # hw/xfree86/os-support/bsd/ console_*.c backends). True on the BSD-derived
 # systems (csrg_based) plus GNU/kFreeBSD, matching the old
 # `CSRG_BASED || __FreeBSD_kernel__` guard exactly.
-conf_data.set('CONFIG_BSD_CONSOLE',
-              (csrg_based or host_machine.system() == 'kfreebsd') ? '1' : false)
 conf_data.set('PCVT_SUPPORT', supports_pcvt ? '1' : false)
 conf_data.set('SYSCONS_SUPPORT', supports_syscons ? '1' : false)
 conf_data.set('WSCONS_SUPPORT', supports_wscons ? '1' : false)
@@ -410,6 +408,8 @@ xorg_data.set('HAVE_STROPTS_H', cc.has_header('stropts.h') ? '1' : false)
 xorg_data.set('HAVE_SYS_KD_H', cc.has_header('sys/kd.h') ? '1' : false)
 xorg_data.set('HAVE_SYS_VT_H', cc.has_header('sys/vt.h') ? '1' : false)
 xorg_data.set('HAVE_MODESETTING_DRIVER', build_modesetting ? '1' : false)
+xorg_data.set('CONFIG_BSD_CONSOLE',
+              (csrg_based or host_machine.system() == 'kfreebsd') ? '1' : false)
 
 if host_machine.system() == 'freebsd' or host_machine.system() == 'dragonfly'
     if host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64' or host_machine.cpu_family() == 'aarch64'
