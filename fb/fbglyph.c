@@ -21,12 +21,13 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
+#endif
 
-#include <X11/fonts/fontstruct.h>
-
-#include "fb/fb_priv.h"
-#include "include/dixfontstr.h"
+#include "fb.h"
+#include	<X11/fonts/fontstruct.h>
+#include	"dixfontstr.h"
 
 static Bool
 fbGlyphIn(RegionPtr pRegion, int x, int y, int width, int height)

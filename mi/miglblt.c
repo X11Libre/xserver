@@ -44,7 +44,9 @@ SOFTWARE.
 
 ******************************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
+#endif
 
 #include	<X11/X.h>
 #include	<X11/Xmd.h>
@@ -79,7 +81,7 @@ with the sample server.
 */
 
 void
-miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int nglyph, CharInfoPtr * ppci,  /* array of character info */
+miPolyGlyphBlt(DrawablePtr pDrawable, GC * pGC, int x, int y, unsigned int nglyph, CharInfoPtr * ppci,  /* array of character info */
                void *pglyphBase       /* start of array of glyphs */
     )
 {
@@ -118,7 +120,7 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
 
     pGCtmp = GetScratchGC(1, pDrawable->pScreen);
     if (!pGCtmp) {
-        dixDestroyPixmap(pPixmap, 0);
+        (*pDrawable->pScreen->DestroyPixmap) (pPixmap);
         return;
     }
 
@@ -126,12 +128,13 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
     gcvals[1].val = 1;
     gcvals[2].val = 0;
 
-    ChangeGC(NULL, pGCtmp, GCFunction | GCForeground | GCBackground, gcvals);
+    ChangeGC(NullClient, pGCtmp, GCFunction | GCForeground | GCBackground,
+             gcvals);
 
     nbyLine = BitmapBytePad(width);
-    pbits = calloc(height, nbyLine);
+    pbits = xallocarray(height, nbyLine);
     if (!pbits) {
-        dixDestroyPixmap(pPixmap, 0);
+        (*pDrawable->pScreen->DestroyPixmap) (pPixmap);
         FreeScratchGC(pGCtmp);
         return;
     }
@@ -173,13 +176,13 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
         }
         x += pci->metrics.characterWidth;
     }
-    dixDestroyPixmap(pPixmap, 0);
+    (*pDrawable->pScreen->DestroyPixmap) (pPixmap);
     free(pbits);
     FreeScratchGC(pGCtmp);
 }
 
 void
-miImageGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int nglyph, CharInfoPtr * ppci, /* array of character info */
+miImageGlyphBlt(DrawablePtr pDrawable, GC * pGC, int x, int y, unsigned int nglyph, CharInfoPtr * ppci, /* array of character info */
                 void *pglyphBase      /* start of array of glyphs */
     )
 {
@@ -210,13 +213,13 @@ miImageGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngl
     gcvals[0].val = GXcopy;
     gcvals[1].val = pGC->bgPixel;
     gcvals[2].val = FillSolid;
-    ChangeGC(NULL, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
+    ChangeGC(NullClient, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
     ValidateGC(pDrawable, pGC);
     (*pGC->ops->PolyFillRect) (pDrawable, pGC, 1, &backrect);
 
     /* put down the glyphs */
     gcvals[0].val = oldFG;
-    ChangeGC(NULL, pGC, GCForeground, gcvals);
+    ChangeGC(NullClient, pGC, GCForeground, gcvals);
     ValidateGC(pDrawable, pGC);
     (*pGC->ops->PolyGlyphBlt) (pDrawable, pGC, x, y, nglyph, ppci, pglyphBase);
 
@@ -224,7 +227,7 @@ miImageGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngl
     gcvals[0].val = oldAlu;
     gcvals[1].val = oldFG;
     gcvals[2].val = oldFS;
-    ChangeGC(NULL, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
+    ChangeGC(NullClient, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
     ValidateGC(pDrawable, pGC);
 
 }
