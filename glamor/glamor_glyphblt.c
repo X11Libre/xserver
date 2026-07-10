@@ -95,7 +95,7 @@ glamor_poly_glyph_blt_gl(DrawablePtr drawable, GCPtr gc,
             int h = GLYPHHEIGHTPIXELS(charinfo);
             uint8_t *glyphbits = FONTGLYPHBITS(NULL, charinfo);
 
-            if (w && h) {
+            if (w > 0 && h > 0) {
                 int glyph_x = x + charinfo->metrics.leftSideBearing;
                 int glyph_y = y - charinfo->metrics.ascent;
                 int glyph_stride = GLYPHWIDTHBYTESPADDED(charinfo);
