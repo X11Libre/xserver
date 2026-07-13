@@ -64,8 +64,6 @@ static const xf86ConfigSymTabRec TopLevelTab[] = {
     {-1, ""},
 };
 
-#define CLEANUP xf86freeConfig
-
 /*
  * This function resolves name references and reports errors if the named
  * objects cannot be found.
@@ -103,7 +101,7 @@ xf86readConfigFile(void)
         case SECTION:
             if (xf86getSubToken(&(ptr->conf_comment)) != XF86_TOKEN_STRING) {
                 xf86parseError(QUOTE_MSG, "Section");
-                CLEANUP(ptr);
+                clearConfig(ptr);
                 return NULL;
             }
             xf86setSection(xf86_lex_val.str);
@@ -214,12 +212,10 @@ xf86readConfigFile(void)
     if (xf86validateConfig(ptr))
         return ptr;
     else {
-        CLEANUP(ptr);
+        clearConfig(ptr);
         return NULL;
     }
 }
-
-#undef CLEANUP
 
 /*
  * adds an item to the end of the linked list. Any record whose first field
@@ -283,26 +279,28 @@ XF86ConfigPtr xf86allocateConfig(void)
     return xf86configptr;
 }
 
-void
-xf86freeConfig(XF86ConfigPtr p)
+static void
+clearConfig(XF86ConfigPtr config_pointer)
 {
-    if (p == NULL)
+    if(config_pointer == NULL)
+    {
         return;
+    }
 
-    xf86freeFiles(p->conf_files);
-    xf86freeModules(p->conf_modules);
-    xf86freeFlags(p->conf_flags);
-    xf86freeMonitorList(p->conf_monitor_lst);
-    xf86freeModesList(p->conf_modes_lst);
-    xf86freeVideoAdaptorList(p->conf_videoadaptor_lst);
-    xf86freeDeviceList(p->conf_device_lst);
-    xf86freeScreenList(p->conf_screen_lst);
-    xf86freeLayoutList(p->conf_layout_lst);
-    xf86freeInputList(p->conf_input_lst);
-    xf86freeVendorList(p->conf_vendor_lst);
-    xf86freeDRI(p->conf_dri);
-    xf86freeExtensions(p->conf_extensions);
-    TestFree(p->conf_comment);
+    xf86freeFiles(config_pointer->conf_files);
+    xf86freeModules(config_pointer->conf_modules);
+    xf86freeFlags(config_pointer->conf_flags);
+    xf86freeMonitorList(config_pointer->conf_monitor_lst);
+    xf86freeModesList(config_pointer->conf_modes_lst);
+    xf86freeVideoAdaptorList(config_pointer->conf_videoadaptor_lst);
+    xf86freeDeviceList(config_pointer->conf_device_lst);
+    xf86freeScreenList(config_pointer->conf_screen_lst);
+    xf86freeLayoutList(config_pointer->conf_layout_lst);
+    xf86freeInputList(config_pointer->conf_input_lst);
+    xf86freeVendorList(config_pointer->conf_vendor_lst);
+    xf86freeDRI(config_pointer->conf_dri);
+    xf86freeExtensions(config_pointer->conf_extensions);
+    TestFree(config_pointer->conf_comment);
 
-    free(p);
+    free(config_pointer);
 }

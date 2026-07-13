@@ -21,7 +21,6 @@ void xf86setBuiltinConfig(const char *config[]);
 XF86ConfigPtr xf86readConfigFile(void);
 void xf86closeConfigFile(void);
 XF86ConfigPtr xf86allocateConfig(void);
-void xf86freeConfig(XF86ConfigPtr p);
 int xf86writeConfigFile(const char *filename, XF86ConfigPtr cptr);
 int xf86layoutAddInputDevices(XF86ConfigPtr config, XF86ConfLayoutPtr layout);
 
