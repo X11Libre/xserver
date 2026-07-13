@@ -58,6 +58,33 @@
 #include "xf86tokens.h"
 #include "Configint.h"
 
+static void
+clearConfig(XF86ConfigPtr config_pointer)
+{
+    if(config_pointer == NULL)
+    {
+        return;
+    }
+
+    xf86freeFiles(config_pointer->conf_files);
+    xf86freeModules(config_pointer->conf_modules);
+    xf86freeFlags(config_pointer->conf_flags);
+    xf86freeMonitorList(config_pointer->conf_monitor_lst);
+    xf86freeModesList(config_pointer->conf_modes_lst);
+    xf86freeVideoAdaptorList(config_pointer->conf_videoadaptor_lst);
+    xf86freeDeviceList(config_pointer->conf_device_lst);
+    xf86freeScreenList(config_pointer->conf_screen_lst);
+    xf86freeLayoutList(config_pointer->conf_layout_lst);
+    xf86freeInputList(config_pointer->conf_input_lst);
+    xf86freeVendorList(config_pointer->conf_vendor_lst);
+    xf86freeDRI(config_pointer->conf_dri);
+    xf86freeExtensions(config_pointer->conf_extensions);
+    TestFree(config_pointer->conf_comment);
+
+    free(config_pointer);
+}
+
+#define CLEANUP clearConfig
 
 static const xf86ConfigSymTabRec TopLevelTab[] = {
     {SECTION, "section"},
@@ -216,7 +243,7 @@ xf86readConfigFile(void)
         return NULL;
     }
 }
-
+#undef CLEANUP
 /*
  * adds an item to the end of the linked list. Any record whose first field
  * is a GenericListRec can be cast to this type and used with this function.
@@ -277,30 +304,4 @@ XF86ConfigPtr xf86allocateConfig(void)
         xf86configptr = calloc(1, sizeof(XF86ConfigRec));
     }
     return xf86configptr;
-}
-
-static void
-clearConfig(XF86ConfigPtr config_pointer)
-{
-    if(config_pointer == NULL)
-    {
-        return;
-    }
-
-    xf86freeFiles(config_pointer->conf_files);
-    xf86freeModules(config_pointer->conf_modules);
-    xf86freeFlags(config_pointer->conf_flags);
-    xf86freeMonitorList(config_pointer->conf_monitor_lst);
-    xf86freeModesList(config_pointer->conf_modes_lst);
-    xf86freeVideoAdaptorList(config_pointer->conf_videoadaptor_lst);
-    xf86freeDeviceList(config_pointer->conf_device_lst);
-    xf86freeScreenList(config_pointer->conf_screen_lst);
-    xf86freeLayoutList(config_pointer->conf_layout_lst);
-    xf86freeInputList(config_pointer->conf_input_lst);
-    xf86freeVendorList(config_pointer->conf_vendor_lst);
-    xf86freeDRI(config_pointer->conf_dri);
-    xf86freeExtensions(config_pointer->conf_extensions);
-    TestFree(config_pointer->conf_comment);
-
-    free(config_pointer);
 }
