@@ -908,8 +908,8 @@ ProcCompositeReleaseOverlayWindow(ClientPtr client)
 
     FOR_NSCREENS_BACKWARD(i) {
         if ((rc = dixLookupResourceByType((void **) &pWin, win->info[i].id,
-                                          XRT_WINDOW, client,
-                                          DixUnknownAccess))) {
+                                          X11_RESTYPE_WINDOW, client,
+                                          DixGetAttrAccess))) {
             client->errorValue = stuff->window;
             return rc;
         }
