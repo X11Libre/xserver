@@ -746,6 +746,9 @@ jobs:
               id: vm
               uses: vmactions/openindiana-vm@v1
               with:
+                  # -build release ships build-essential pre-baked, so the heavy
+                  # developer/gcc-14 download is avoided (pkg install is a no-op).
+                  release: "202604-build"
                   envs: 'MESON_ARGS'
                   usesh: true
                   run:     ./.github/scripts/solaris/run-xserver-build.sh
