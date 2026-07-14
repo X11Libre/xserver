@@ -11,9 +11,7 @@
 #include "xf86Parser.h"
 
 void xf86initConfigFiles(void);
-char *xf86openConfigFile(const char *path,
-                         const char *cmdline,
-                         const char *projroot);
+char *openConfigFile(const char *path, const char *cmdline, const char *projroot);
 char *xf86openConfigDirFiles(const char *path,
                              const char *cmdline,
                              const char *projroot);

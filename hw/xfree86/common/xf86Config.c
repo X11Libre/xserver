@@ -2357,7 +2357,7 @@ xf86HandleConfigFile(Bool autoconfig)
         sysdirname = xf86openConfigDirFiles(SYS_CONFIGDIRPATH, NULL,
                                             PROJECTROOT);
         dirname = xf86openConfigDirFiles(dirsearch, xf86ConfigDir, PROJECTROOT);
-        filename = xf86openConfigFile(filesearch, xf86ConfigFile, PROJECTROOT);
+        filename = openConfigFile(filesearch, xf86ConfigFile, PROJECTROOT);
         if (filename) {
             LogMessageVerb(filefrom, 0, "Using config file: \"%s\"\n", filename);
             xf86ConfigFile = XNFstrdup(filename);

@@ -1,57 +1,4 @@
-/*
- * Copyright (c) 1997  Metro Link Incorporated
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
- * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * Except as contained in this notice, the name of the Metro Link shall not be
- * used in advertising or otherwise to promote the sale, use or other dealings
- * in this Software without prior written authorization from Metro Link.
- *
- */
-/*
- * Copyright (c) 1997-2003 by The XFree86 Project, Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE COPYRIGHT HOLDER(S) OR AUTHOR(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- *
- * Except as contained in this notice, the name of the copyright holder(s)
- * and author(s) shall not be used in advertising or otherwise to promote
- * the sale, use or other dealings in this Software without prior written
- * authorization from the copyright holder(s) and author(s).
- */
 #include <xorg-config.h>
-
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,17 +10,29 @@
 #include <limits.h>
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
-
 #include "include/misc.h" /* for PATH_MAX */
 #include "os/xhostname.h"
-
 #include "xf86Parser_priv.h"
-
 #include "Configint.h"
 #include "xf86tokens.h"
 
 #define CONFIG_BUF_LEN     1024
 #define CONFIG_MAX_FILES   64
+#ifndef DEFAULT_CONF_PATH
+#define DEFAULT_CONF_PATH	"/etc/X11/%S," \
+							"%P/etc/X11/%S," \
+							"/etc/X11/%G," \
+							"%P/etc/X11/%G," \
+							"/etc/X11/%X-%M," \
+							"/etc/X11/%X," \
+							"/etc/%X," \
+							"%P/etc/X11/%X.%H," \
+							"%P/etc/X11/%X-%M," \
+							"%P/etc/X11/%X," \
+							"%P/lib/X11/%X.%H," \
+							"%P/lib/X11/%X-%M," \
+							"%P/lib/X11/%X"
+#endif
 
 static struct {
     FILE *file;
@@ -689,24 +648,30 @@ DoSubstitution(const char *template, const char *cmdline, const char *projroot,
     return result;
 }
 
-/*
- * Given some searching parameters, locate and open the xorg config file.
- */
-static char *
-OpenConfigFile(const char *path, const char *cmdline, const char *projroot,
-               const char *confname)
+// Given some searching parameters, locate and open the xorg config file.
+char *
+openConfigFile(const char *path, const char *cmdline, const char *projroot)
 {
     char *filepath = NULL;
     char *pathcopy;
     const char *template;
     int cmdlineUsed = 0;
     FILE *file = NULL;
+    
+    if(!path || !path[0])
+    {
+        path = DEFAULT_CONF_PATH;
+    }
+    if(!projroot || !projroot[0])
+    {
+        projroot = PROJECTROOT;
+    }
 
     pathcopy = strdup(path);
     for (template = strtok(pathcopy, ","); template && !file;
          template = strtok(NULL, ",")) {
         filepath = DoSubstitution(template, cmdline, projroot,
-                                  &cmdlineUsed, NULL, confname);
+                                  &cmdlineUsed, NULL, XCONFIGFILE);
         if (!filepath)
             continue;
         if (cmdline && !cmdlineUsed) {
@@ -849,51 +814,6 @@ xf86initConfigFiles(void)
     configBuf = calloc(1, CONFIG_BUF_LEN);
     configRBuf = calloc(1, CONFIG_BUF_LEN);
     configBuf[0] = '\0';        /* sanity ... */
-}
-
-/*
- * xf86openConfigFile --
- *
- * This function take a config file search path (optional), a command-line
- * specified file name (optional) and the ProjectRoot path (optional) and
- * locates and opens a config file based on that information.  If a
- * command-line file name is specified, then this function fails if none
- * of the located files.
- *
- * The return value is a pointer to the actual name of the file that was
- * opened.  When no file is found, the return value is NULL. The caller should
- * free() the returned value.
- *
- * The escape sequences allowed in the search path are defined above.
- *
- */
-
-#ifndef DEFAULT_CONF_PATH
-#define DEFAULT_CONF_PATH	"/etc/X11/%S," \
-							"%P/etc/X11/%S," \
-							"/etc/X11/%G," \
-							"%P/etc/X11/%G," \
-							"/etc/X11/%X-%M," \
-							"/etc/X11/%X," \
-							"/etc/%X," \
-							"%P/etc/X11/%X.%H," \
-							"%P/etc/X11/%X-%M," \
-							"%P/etc/X11/%X," \
-							"%P/lib/X11/%X.%H," \
-							"%P/lib/X11/%X-%M," \
-							"%P/lib/X11/%X"
-#endif
-
-char *
-xf86openConfigFile(const char *path, const char *cmdline, const char *projroot)
-{
-    if (!path || !path[0])
-        path = DEFAULT_CONF_PATH;
-    if (!projroot || !projroot[0])
-        projroot = PROJECTROOT;
-
-    /* Search for a config file */
-    return OpenConfigFile(path, cmdline, projroot, XCONFIGFILE);
 }
 
 /*
