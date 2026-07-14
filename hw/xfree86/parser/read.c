@@ -1,56 +1,3 @@
-/*
- *
- * Copyright (c) 1997  Metro Link Incorporated
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
- * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * Except as contained in this notice, the name of the Metro Link shall not be
- * used in advertising or otherwise to promote the sale, use or other dealings
- * in this Software without prior written authorization from Metro Link.
- *
- */
-/*
- * Copyright (c) 1997-2003 by The XFree86 Project, Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE COPYRIGHT HOLDER(S) OR AUTHOR(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- *
- * Except as contained in this notice, the name of the copyright holder(s)
- * and author(s) shall not be used in advertising or otherwise to promote
- * the sale, use or other dealings in this Software without prior written
- * authorization from the copyright holder(s) and author(s).
- */
 #include <xorg-config.h>
 
 #include "xf86Config.h"
@@ -90,23 +37,6 @@ static const xf86ConfigSymTabRec TopLevelTab[] = {
     {SECTION, "section"},
     {-1, ""},
 };
-
-/*
- * This function resolves name references and reports errors if the named
- * objects cannot be found.
- */
-static int
-xf86validateConfig(XF86ConfigPtr p)
-{
-    if (!xf86validateScreen(p))
-        return FALSE;
-    if (!xf86validateInput(p))
-        return FALSE;
-    if (!xf86validateLayout(p))
-        return FALSE;
-
-    return TRUE;
-}
 
 XF86ConfigPtr
 xf86readConfigFile(void)
@@ -236,12 +166,14 @@ xf86readConfigFile(void)
         }
     }
 
-    if (xf86validateConfig(ptr))
-        return ptr;
-    else {
-        clearConfig(ptr);
+    // Validate name references. report errors if one named object was not found
+	if(!xf86validateScreen(ptr) || !xf86validateInput(ptr) || !xf86validateLayout(ptr))
+	{
+		clearConfig(ptr);
         return NULL;
     }
+
+	return ptr;
 }
 #undef CLEANUP
 /*
