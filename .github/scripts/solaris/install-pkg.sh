@@ -48,7 +48,6 @@ libs="
     x11/library/libxext
     x11/library/libxfixes
     x11/library/libxrender
-    x11/library/libxt
     x11/library/libx11
     x11/library/xtrans
     x11/library/libxkbfile
