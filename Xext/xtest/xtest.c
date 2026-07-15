@@ -64,6 +64,7 @@
 #include "mipointer.h"
 #include "xserver-properties.h"
 #include "eventstr.h"
+#include "globals.h"
 
 Bool noTestExtensions = FALSE;
 
@@ -220,6 +221,15 @@ ProcXTestFakeInput(ClientPtr client)
                 client->errorValue = ev->u.u.type;
                 return BadValue;
             }
+
+            /* 
+             * To prevent silent keylogging by grabbing, logging and retranslating
+             * key press/release events.
+             * Similar is done with synthetic key press/release events in 'ProcSendEvent()'.
+             */
+            if (globalIsolateKeyboard) {
+                return Success;
+            }
             break;
         case XI_DeviceButtonPress:
         case XI_DeviceButtonRelease:
@@ -325,6 +335,14 @@ ProcXTestFakeInput(ClientPtr client)
         switch (type) {
         case KeyPress:
         case KeyRelease:
+            /* 
+             * To prevent silent keylogging by grabbing, logging and retranslating
+             * key press/release events.
+             * Similar is done with synthetic key press/release events in 'ProcSendEvent()'.
+             */
+            if (globalIsolateKeyboard) {
+                return Success;
+            }
             dev = PickKeyboard(client);
             break;
         case ButtonPress:
