@@ -59,6 +59,11 @@ void DetermineClientCmdFreeBSD(pid_t pid, const char **cmdname,
         /* Read KERN_PROC_ARGS contents. Similar to /proc/pid/cmdline
          * the process name and each argument are separated by NUL byte. */
         char *const procargs = calloc(1, len);
+        if (!procargs) {
+                ErrorF("Failed to allocate memory (%zu bytes) for KERN_PROC_ARGS result for pid %d: %s\n", len, pid, strerror(errno));
+                return;
+        }
+                
         if (sysctl(mib, ARRAY_SIZE(mib), procargs, &len, NULL, 0) != 0) {
                 ErrorF("Failed to get KERN_PROC_ARGS for PID %d: %s\n", pid,
                        strerror(errno));
