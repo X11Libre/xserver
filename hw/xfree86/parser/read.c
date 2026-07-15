@@ -140,7 +140,7 @@ xf86readConfigFile(void)
         }
     }
 
-	if(!xf86validateScreen(p) || !xf86validateInput(p) || !xf86validateLayout(p))
+	if(!xf86validateScreen(ptr) || !xf86validateInput(ptr) || !xf86validateLayout(ptr))
 	{
 		CLEANUP(ptr);
         return NULL;
