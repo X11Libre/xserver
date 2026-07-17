@@ -48,6 +48,7 @@
 
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
+#include "os/log_priv.h"
 
 #include "dixstruct.h"
 #include "extnsionst.h"
@@ -279,6 +280,10 @@ CreateSurfaceForWindow(ScreenPtr pScreen, WindowPtr pWin,
         wid = x_cvt_vptr_to_uint(RootlessFrameForWindow(pWin, TRUE));
 
         if (wid == 0) {
+            ErrorF("%s: RootlessFrameForWindow returned 0 for window 0x%x "
+                   "(realized=%d, mapped=%d, viewable=%d)\n", __func__,
+                   (unsigned int)pWin->drawable.id, pWin->realized,
+                   pWin->mapped, pWin->viewable);
             free(pDRIDrawablePriv);
             return NULL;
         }
@@ -287,6 +292,8 @@ CreateSurfaceForWindow(ScreenPtr pScreen, WindowPtr pWin,
         err = xp_create_surface(wid, &pDRIDrawablePriv->sid);
 
         if (err != Success) {
+            ErrorF("%s: xp_create_surface(wid 0x%x) failed: %d\n", __func__,
+                   (unsigned int)wid, err);
             free(pDRIDrawablePriv);
             return NULL;
         }
@@ -296,7 +303,15 @@ CreateSurfaceForWindow(ScreenPtr pScreen, WindowPtr pWin,
         wc.sibling = 0;
         err = xp_configure_surface(pDRIDrawablePriv->sid, XP_STACKING, &wc);
 
+        DebugF("%s: window 0x%x wid 0x%x sid 0x%x "
+               "(realized=%d mapped=%d viewable=%d): xp_configure_surface -> %d\n",
+               __func__, (unsigned int)pWin->drawable.id, (unsigned int)wid,
+               (unsigned int)pDRIDrawablePriv->sid, pWin->realized, pWin->mapped,
+               pWin->viewable, err);
+
         if (err != Success) {
+            ErrorF("%s: xp_configure_surface(sid 0x%x) failed: %d\n", __func__,
+                   (unsigned int)pDRIDrawablePriv->sid, err);
             xp_destroy_surface(pDRIDrawablePriv->sid);
             free(pDRIDrawablePriv);
             return NULL;
