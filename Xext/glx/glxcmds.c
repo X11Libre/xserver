@@ -1135,33 +1135,6 @@ DoCreateGLXDrawable(ClientPtr client, __GLXscreen * pGlxScreen,
     if (pGlxScreen->pScreen != pDraw->pScreen)
         return BadMatch;
 
-    if (type == GLX_DRAWABLE_WINDOW) {
-        /* The GLX window id is a fresh, client-allocated resource id, so
-         * validate it like any other new resource (in the client's id range
-         * and not already in use). */
-        LEGAL_NEW_RESOURCE(glxDrawableId, client);
-
-        /* A window may have only a single GLX drawable associated with it. We
-         * register the __GLXdrawable under both the GLX window id and the X
-         * window id (see below) so DrawableGone() runs regardless of teardown
-         * order. If the client calls glXCreateWindow() again for the same X
-         * window, the second AddResource() below would register a duplicate
-         * (pDraw->id, __glXDrawableRes) resource aliasing a *different*
-         * __GLXdrawable. Tearing the window down then frees one __GLXdrawable
-         * via FreeResourceByType() while leaving the other resource entry
-         * pointing at it, causing a use-after-free / double free in
-         * DrawableGone() (issue #1491). The GLX spec disallows associating two
-         * GLX windows with one X window, so reject it up front with BadAlloc. */
-        if (drawableId != glxDrawableId) {
-            __GLXdrawable *existing;
-
-            if (dixLookupResourceByType((void **) &existing, pDraw->id,
-                                        __glXDrawableRes, client,
-                                        DixGetAttrAccess) == Success)
-                return BadAlloc;
-        }
-    }
-
     pGlxDraw = pGlxScreen->createDrawable(client, pGlxScreen, pDraw,
                                           drawableId, type,
                                           glxDrawableId, config);
