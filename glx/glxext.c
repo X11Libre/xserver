@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include "dix/dix_priv.h"
+#include "dix/resource_priv.h"
 #include "os/client_priv.h"
 
 #include "glxserver.h"
@@ -98,12 +99,19 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
     __GLXcontext *c, *next;
 
     if (glxPriv->type == GLX_DRAWABLE_WINDOW) {
-        /* If this was created by glXCreateWindow, free the matching resource */
+        /* If this was created by glXCreateWindow, free the matching resource.
+         * A window may have more than one GLX drawable registered under its X
+         * id, so free the partner entry that points at *this* drawable rather
+         * than an arbitrary one sharing the id+type; otherwise the survivor
+         * would dangle and DrawableGone() would later run on freed memory
+         * (use-after-free, issue #1491). */
         if (glxPriv->drawId != glxPriv->pDraw->id) {
             if (xid == glxPriv->drawId)
-                FreeResourceByType(glxPriv->pDraw->id, __glXDrawableRes, TRUE);
+                FreeResourceByTypeValue(glxPriv->pDraw->id, __glXDrawableRes,
+                                        glxPriv, TRUE);
             else
-                FreeResourceByType(glxPriv->drawId, __glXDrawableRes, TRUE);
+                FreeResourceByTypeValue(glxPriv->drawId, __glXDrawableRes,
+                                        glxPriv, TRUE);
         }
         /* otherwise this window was implicitly created by MakeCurrent */
     }
