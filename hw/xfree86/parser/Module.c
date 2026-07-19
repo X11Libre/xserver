@@ -245,7 +245,7 @@ xf86addNewLoadDirective(XF86LoadPtr head, const char *name, int type,
         free(xf86_lex_val.str);
         xf86_lex_val.str = NULL;
     } else {
-        xf86unGetToken(token);
+        pushToken = token;
     }
 
     return ((XF86LoadPtr) xf86addListItem((glp) head, (glp) new));

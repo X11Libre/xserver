@@ -473,12 +473,6 @@ xf86getSubTokenWithTab(char **comment, const xf86ConfigSymTabRec * tab)
     }
  /*NOTREACHED*/}
 
-void
-xf86unGetToken(int token)
-{
-    pushToken = token;
-}
-
 char *
 xf86tokenString(void)
 {

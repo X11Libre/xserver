@@ -144,7 +144,7 @@ xf86parseLayoutSection(void)
             if ((token = xf86getSubToken(&(ptr->lay_comment))) == NUMBER)
                 aptr->adj_scrnum = xf86_lex_val.num;
             else
-                xf86unGetToken(token);
+                pushToken = token;
             token = xf86getSubToken(&(ptr->lay_comment));
             if (token != XF86_TOKEN_STRING) {
                 free(aptr);
@@ -178,7 +178,7 @@ xf86parseLayoutSection(void)
                 Error(UNEXPECTED_EOF_MSG);
                 break;
             default:
-                xf86unGetToken(token);
+                pushToken = token;
                 token = xf86getSubToken(&(ptr->lay_comment));
                 if (token == XF86_TOKEN_STRING)
                     aptr->adj_where = CONF_ADJ_OBSOLETE;
@@ -204,7 +204,7 @@ xf86parseLayoutSection(void)
                         Error(INVALID_SCR_MSG);
                     }
                     else
-                        xf86unGetToken(token);
+                        pushToken = token;
                 }
                 break;
             case CONF_ADJ_RIGHTOF:
@@ -279,7 +279,7 @@ xf86parseLayoutSection(void)
                 iptr->iref_option_lst =
                     xf86addNewOption(iptr->iref_option_lst, xf86_lex_val.str, NULL);
             }
-            xf86unGetToken(token);
+            pushToken = token;
             ptr->lay_input_lst = (XF86ConfInputrefPtr)
                 xf86addListItem((glp) ptr->lay_input_lst, (glp) iptr);
         }

@@ -450,7 +450,7 @@ xf86parseOption(XF86OptionPtr head)
             free(xf86_lex_val.str);
             xf86_lex_val.str = NULL;
         } else {
-            xf86unGetToken(token);
+            pushToken = token;
         }
     }
     else {
@@ -462,7 +462,7 @@ xf86parseOption(XF86OptionPtr head)
             free(xf86_lex_val.str);
             xf86_lex_val.str = NULL;
         } else {
-            xf86unGetToken(token);
+            pushToken = token;
         }
     }
 

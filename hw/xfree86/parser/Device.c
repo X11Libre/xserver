@@ -157,7 +157,7 @@ xf86parseDeviceSection(void)
                         ptr->dev_dacSpeeds[i] = (int)
                             (xf86_lex_val.realnum * 1000.0 + 0.5);
                     else {
-                        xf86unGetToken(token);
+                        pushToken = token;
                         break;
                     }
                 }
@@ -209,7 +209,7 @@ xf86parseDeviceSection(void)
             if (token == NUMBER && i >= CONF_MAXCLOCKS)
                 Error(CLOCKS_TOO_MANY, CONF_MAXCLOCKS);
             ptr->dev_clocks = i;
-            xf86unGetToken(token);
+            pushToken = token;
             break;
         case MATCHSEAT:
             if (xf86getSubToken(&(ptr->dev_comment)) != XF86_TOKEN_STRING)

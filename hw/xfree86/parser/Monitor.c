@@ -243,7 +243,7 @@ xf86parseModeLine(void)
         }
         token = xf86getSubTokenWithTab(&(ptr->ml_comment), TimingTab);
     }
-    xf86unGetToken(token);
+    pushToken = token;
 
 #ifdef DEBUG
     printf("ModeLine parsed\n");
@@ -362,7 +362,7 @@ xf86parseVerboseMode(void)
                 }
                 token = xf86getSubToken(&(ptr->ml_comment));
             }
-            xf86unGetToken(token);
+            pushToken = token;
             break;
         case HSKEW:
             if (xf86getSubToken(&(ptr->ml_comment)) != NUMBER)
@@ -484,7 +484,7 @@ xf86parseMonitorSection(void)
                 ptr->mon_n_hsync++;
             } while ((token = xf86getSubToken(&(ptr->mon_comment))) == NUMBER);
  HorizDone:
-            xf86unGetToken(token);
+            pushToken = token;
             break;
 
         case VERTREFRESH:
@@ -521,7 +521,7 @@ xf86parseMonitorSection(void)
                 ptr->mon_n_vrefresh++;
             } while ((token = xf86getSubToken(&(ptr->mon_comment))) == NUMBER);
  VertDone:
-            xf86unGetToken(token);
+            pushToken = token;
             break;
 
         case GAMMA:
@@ -541,7 +541,7 @@ xf86parseMonitorSection(void)
                     }
                 }
                 else
-                    xf86unGetToken(token);
+                    pushToken = token;
             }
             break;
         case OPTION:

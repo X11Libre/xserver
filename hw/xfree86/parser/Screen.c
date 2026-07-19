@@ -196,7 +196,7 @@ xf86parseDisplaySubSection(void)
                 ptr->disp_mode_lst = (XF86ModePtr)
                     xf86addListItem((glp) ptr->disp_mode_lst, (glp) mptr);
             }
-            xf86unGetToken(token);
+            pushToken = token;
         }
             break;
         case OPTION:
