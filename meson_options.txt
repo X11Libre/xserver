@@ -171,6 +171,8 @@ option('xf86-input-inputtest', type: 'boolean', value: true,
        description: 'Test input driver support on XLibre')
 option('xf86-input-null', type: 'boolean', value: true,
        description: 'Null input driver')
+option('xf86-input-hurd', type: 'boolean', value: true,
+       description: 'Hurd Mach-native input driver')
 
 # legacy nvidia driver quirks
 option('legacy_nvidia_padding', type: 'boolean', value: false,

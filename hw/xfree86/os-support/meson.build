@@ -137,6 +137,19 @@ elif host_machine.system().endswith('bsd') or host_machine.system() == 'dragonfl
     else
         srcs_xorg_os_support += 'shared/agp_noop.c'
     endif
+elif host_machine.system() == 'gnu'
+    srcs_xorg_os_support += [
+        'hurd/hurd_init.c',
+        'hurd/hurd_video.c',
+        'hurd/hurd_bell.c',
+        'shared/VTsw_noop.c',
+        'shared/agp_noop.c',
+        'shared/kmod_noop.c',
+        'shared/pm_noop.c',
+        'shared/drm_platform.c',
+        'misc/SlowBcopy.c',
+    ]
+    os_c_args += '-DHURD'
 else
     # stub ossupport
     srcs_xorg_os_support += [
