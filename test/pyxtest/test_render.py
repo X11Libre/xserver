@@ -2,8 +2,6 @@
 #
 # Security tests for Render extension vulnerabilities.
 
-import struct
-
 import pytest
 from proto import render
 from xclient import Extension, X11Error, X11Reply
@@ -43,26 +41,17 @@ class TestRenderSetPictureFilter:
         conn, opcode = render_xclient_swapped
 
         # Get a PictFormat that matches the root depth.
-        # xRenderQueryPictFormatsReply header (32 bytes):
-        #   [8]  numFormats(4)
-        # followed by numFormats xPictFormInfo entries (28 bytes each):
-        #   [0] id(4)  [4] type(1)  [5] depth(1)  ...
         req = render.QueryPictFormatsRequest(opcode=opcode)
         conn.send_request(req)
         resp = conn.recv_response(timeout=5.0)
 
         assert isinstance(resp, X11Reply), "QueryPictFormats failed"
-        num_formats = struct.unpack_from(">I", resp.data, 8)[0]
+        reply = render.QueryPictFormatsReply.from_reply(resp.data, ">")
 
         format_id = 0
-        for i in range(num_formats):
-            off = 32 + i * 28
-            if off + 6 > len(resp.data):
-                break
-            fid = struct.unpack_from(">I", resp.data, off)[0]
-            fdepth = resp.data[off + 5]
-            if fdepth == conn.root_depth:
-                format_id = fid
+        for fmt in reply.formats:
+            if fmt.depth == conn.root_depth:
+                format_id = fmt.id
                 break
 
         if format_id == 0:
