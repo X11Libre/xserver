@@ -51,6 +51,97 @@ class QueryPictFormatsRequest:
 
 
 @dataclass
+class PictFormInfo:
+    """Parsed xPictFormInfo (28 bytes).
+
+    Layout:
+      id(4) type(1) depth(1) pad(2) direct(16) colormap(4)
+
+    direct is xDirectFormat:
+      red(2) redMask(2) green(2) greenMask(2)
+      blue(2) blueMask(2) alpha(2) alphaMask(2)
+    """
+
+    id: int
+    type: int
+    depth: int
+    red: int
+    red_mask: int
+    green: int
+    green_mask: int
+    blue: int
+    blue_mask: int
+    alpha: int
+    alpha_mask: int
+    colormap: int
+
+    SIZE = 28
+
+    @classmethod
+    def from_bytes(
+        cls, data: bytes, offset: int, byte_order: str = "<"
+    ) -> "PictFormInfo":
+        (
+            fid,
+            ftype,
+            fdepth,
+            _pad,
+            red,
+            red_mask,
+            green,
+            green_mask,
+            blue,
+            blue_mask,
+            alpha,
+            alpha_mask,
+            colormap,
+        ) = struct.unpack_from(f"{byte_order}IBBH HHHH HHHH I", data, offset)
+        return cls(
+            id=fid,
+            type=ftype,
+            depth=fdepth,
+            red=red,
+            red_mask=red_mask,
+            green=green,
+            green_mask=green_mask,
+            blue=blue,
+            blue_mask=blue_mask,
+            alpha=alpha,
+            alpha_mask=alpha_mask,
+            colormap=colormap,
+        )
+
+
+@dataclass
+class QueryPictFormatsReply:
+    """Parsed xRenderQueryPictFormatsReply.
+
+    Reply layout (32 bytes header):
+      type(1) pad(1) sequenceNumber(2) length(4)
+      numFormats(4) numScreens(4) numDepths(4) numVisuals(4)
+      numSubpixel(4) pad(4)
+
+    Followed by numFormats xPictFormInfo entries (28 bytes each).
+    """
+
+    formats: list[PictFormInfo]
+
+    @classmethod
+    def from_reply(cls, data: bytes, byte_order: str = "<") -> "QueryPictFormatsReply":
+        """Parse an X11Reply's raw data into a QueryPictFormatsReply."""
+        num_formats = struct.unpack_from(f"{byte_order}I", data, 8)[0]
+
+        formats = []
+        for i in range(num_formats):
+            off = 32 + i * PictFormInfo.SIZE
+            if off + PictFormInfo.SIZE > len(data):
+                break
+            formats.append(PictFormInfo.from_bytes(data, off, byte_order))
+
+        return cls(formats=formats)
+
+
+@dataclass
 class CreatePictureRequest:
     """RenderCreatePicture request."""
 
