@@ -1160,6 +1160,10 @@ ddxProcessArgument(int argc, char **argv, int i)
         xf86Info.ShareVTs = TRUE;
         return 1;
     }
+    if (!strcmp(argv[i], "-fontserverconnections") || !strcmp(argv[i], "+fontserverconnections")) {
+        xf86Info.fontserverFrom = X_CMDLINE;
+        return 0;
+    }
     if (!strcmp(argv[i], "-iglx") || !strcmp(argv[i], "+iglx")) {
         xf86Info.iglxFrom = X_CMDLINE;
         return 0;
