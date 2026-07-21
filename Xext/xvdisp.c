@@ -813,7 +813,8 @@ SingleXvShmPutImage(ClientPtr client)
     size_needed = (*pPort->pAdaptor->ddQueryImageAttributes) (pPort, pImage,
                                                               &width, &height,
                                                               NULL, NULL);
-    if ((size_needed + stuff->offset) > shmdesc->size)
+    if (size_needed < 0 || stuff->offset > shmdesc->size ||
+        (unsigned long) size_needed > shmdesc->size - stuff->offset)
         return BadAccess;
 
     if ((width < stuff->width) || (height < stuff->height))
