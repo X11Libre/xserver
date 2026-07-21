@@ -91,8 +91,6 @@ option('seatd_libseat', type: 'combo', choices: ['true', 'false', 'auto'], value
 
 option('vgahw', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Xorg VGA access module')
-option('dpms', type: 'boolean', value: true,
-       description: 'Xorg DPMS extension')
 option('xf86bigfont', type: 'boolean', value: false,
        description: 'XF86 Big Font extension')
 option('screensaver', type: 'boolean', value: true,

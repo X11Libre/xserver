@@ -2,7 +2,6 @@ srcs_xext = [
     'xace.c',
 ]
 
-
 if build_hashtable
     srcs_xext += 'hashtable.c'
 endif
