@@ -26,7 +26,9 @@
 
  */
 
+#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
+#endif
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -35,16 +37,7 @@
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
-#include "dix/input_priv.h"
-#include "dix/dix_priv.h"
-#include "dix/exevents_priv.h"
-#include "mi/mi_priv.h"
-#include "mi/mipointer_priv.h"
-#include "miext/extinit_priv.h"
-#include "os/client_priv.h"
 #include "os/osdep.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -53,16 +46,19 @@
 #include "windowstr.h"
 #include "inputstr.h"
 #include "scrnintstr.h"
+#include "dixevents.h"
 #include "sleepuntil.h"
+#include "mi.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
 #include "exglobals.h"
 #include "mipointer.h"
 #include "xserver-properties.h"
+#include "exevents.h"
 #include "eventstr.h"
 #include "inpututils.h"
 
-Bool noTestExtensions = FALSE;
+#include "extinit.h"
 
 /* XTest events are sent during request processing and may be interrupted by
  * a SIGIO. We need a separate event list to avoid events overwriting each
@@ -81,6 +77,11 @@ static InternalEvent *xtest_evlist;
  * Neither of these devices can be deleted.
  */
 DeviceIntPtr xtestpointer, xtestkeyboard;
+
+#ifdef PANORAMIX
+#include "panoramiX.h"
+#include "panoramiXsrv.h"
+#endif
 
 static int XTestSwapFakeInput(ClientPtr /* client */ ,
                               xReq *    /* req */
@@ -128,7 +129,7 @@ ProcXTestCompareCursor(ClientPtr client)
     if (stuff->cursor == None)
         pCursor = NullCursor;
     else if (stuff->cursor == XTestCurrentCursor)
-        pCursor = InputDevGetSpriteCursor(ptr);
+        pCursor = GetSpriteCursor(ptr);
     else {
         rc = dixLookupResourceByType((void **) &pCursor, stuff->cursor,
                                      X11_RESTYPE_CURSOR, client, DixReadAccess);
@@ -256,7 +257,7 @@ ProcXTestFakeInput(ClientPtr client)
 
         if (type == XI_DeviceMotionNotify) {
             firstValuator = ((deviceValuator *) (ev + 1))->first_valuator;
-            if (firstValuator >= dev->valuator->numAxes) {
+            if (firstValuator > dev->valuator->numAxes) {
                 client->errorValue = ev->u.u.type;
                 return BadValue;
             }
@@ -286,38 +287,38 @@ ProcXTestFakeInput(ClientPtr client)
                 client->errorValue = dv->first_valuator;
                 return BadValue;
             }
-            if (dv->num_valuators < 1 || dv->num_valuators > 6) {
+            if (!dv->num_valuators || dv->num_valuators > 6 ||
+                base + dv->num_valuators > dev->valuator->numAxes ||
+                base + dv->num_valuators > MAX_VALUATORS) {
                 client->errorValue = dv->num_valuators;
                 return BadValue;
             }
-
-            /* Validate that the valuators stay within the device's axis
-             * count *before* writing them, otherwise an attacker-controlled
-             * first_valuator/num_valuators combination writes past the end of
-             * the fixed-size valuators[MAX_VALUATORS] stack array. */
-            numValuators += dv->num_valuators;
-            if (firstValuator + numValuators > dev->valuator->numAxes) {
-                client->errorValue = dv->num_valuators;
-                return BadValue;
-            }
-
             switch (dv->num_valuators) {
             case 6:
                 valuators[base + 5] = dv->valuator5;
+                _X_FALLTHROUGH; /* fallthrough */
             case 5:
                 valuators[base + 4] = dv->valuator4;
+                _X_FALLTHROUGH; /* fallthrough */
             case 4:
                 valuators[base + 3] = dv->valuator3;
+                _X_FALLTHROUGH; /* fallthrough */
             case 3:
                 valuators[base + 2] = dv->valuator2;
+                _X_FALLTHROUGH; /* fallthrough */
             case 2:
                 valuators[base + 1] = dv->valuator1;
+                _X_FALLTHROUGH; /* fallthrough */
             case 1:
                 valuators[base] = dv->valuator0;
                 break;
+            default:
+                client->errorValue = dv->num_valuators;
+                return BadValue;
             }
 
             base += dv->num_valuators;
+            numValuators += dv->num_valuators;
         }
         type = type - XI_DeviceKeyPress + KeyPress;
 
@@ -354,6 +355,10 @@ ProcXTestFakeInput(ClientPtr client)
             return BadAccess;
 
         dev = GetXTestDevice(dev);
+
+        /* This can only happen if we passed a slave to GetXTestDevice() */
+        if (!dev)
+            return BadAccess;
     }
 
 
@@ -387,7 +392,7 @@ ProcXTestFakeInput(ClientPtr client)
     switch (type) {
     case KeyPress:
     case KeyRelease:
-        if ((!dev) || (!dev->key))
+        if (!dev->key)
             return BadDevice;
 
         if (ev->u.u.detail < dev->key->xkbInfo->desc->min_key_code ||
@@ -399,7 +404,7 @@ ProcXTestFakeInput(ClientPtr client)
         need_ptr_update = 0;
         break;
     case MotionNotify:
-        if (!dev || !dev->valuator)
+        if (!dev->valuator)
             return BadDevice;
 
         if (!(extension || ev->u.keyButtonPointer.root == None)) {
@@ -430,7 +435,7 @@ ProcXTestFakeInput(ClientPtr client)
         break;
     case ButtonPress:
     case ButtonRelease:
-        if (!dev || !dev->button)
+        if (!dev->button)
             return BadDevice;
 
         if (!ev->u.u.detail || ev->u.u.detail > dev->button->numButtons) {
@@ -444,7 +449,7 @@ ProcXTestFakeInput(ClientPtr client)
 
     valuator_mask_set_range(&mask, firstValuator, numValuators, valuators);
 
-    if (dev && dev->sendEventsProc)
+    if (dev->sendEventsProc)
         (*dev->sendEventsProc) (dev, type, ev->u.u.detail, flags, &mask);
 
     if (need_ptr_update)
@@ -653,7 +658,7 @@ AllocXTestDevice(ClientPtr client, const char *name,
 BOOL
 IsXTestDevice(DeviceIntPtr dev, DeviceIntPtr master)
 {
-    if (InputDevIsMaster(dev))
+    if (IsMaster(dev))
         return FALSE;
 
     /* deviceid 0 is reserved for XIAllDevices, non-zero mid means XTest
