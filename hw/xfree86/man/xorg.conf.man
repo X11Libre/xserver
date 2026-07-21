@@ -652,6 +652,15 @@ Include the default font path even if other paths are specified in
 xorg.conf. If enabled, other font paths are included as well. Enabled by
 default.
 .TP 7
+.BI "Option \*qFontServerConnections\*q \*q" boolean \*q
+Allow connections to font servers (e.g.\&
+.BR tcp/fontserver:7100 )
+in the font path. Font servers are rarely used and are a source of
+security vulnerabilities. Disabled by default.
+Can also be set with the
+.B +fontserverconnections
+command line option.
+.TP 7
 .BI "Option \*qIgnoreABI\*q \*q" boolean \*q
 Allow modules built for a different, potentially incompatible version of
 the X server to load. Disabled by default.
