@@ -256,7 +256,7 @@ ProcXTestFakeInput(ClientPtr client)
 
         if (type == XI_DeviceMotionNotify) {
             firstValuator = ((deviceValuator *) (ev + 1))->first_valuator;
-            if (firstValuator >= dev->valuator->numAxes) {
+            if (firstValuator > dev->valuator->numAxes) {
                 client->errorValue = ev->u.u.type;
                 return BadValue;
             }
@@ -307,6 +307,9 @@ ProcXTestFakeInput(ClientPtr client)
             case 1:
                 valuators[base] = dv->valuator0;
                 break;
+            default:
+                client->errorValue = dv->num_valuators;
+                return BadValue;
             }
 
             base += dv->num_valuators;
@@ -347,6 +350,10 @@ ProcXTestFakeInput(ClientPtr client)
             return BadAccess;
 
         dev = GetXTestDevice(dev);
+
+        /* This can only happen if we passed a slave to GetXTestDevice() */
+        if (!dev)
+            return BadAccess;
     }
 
 
