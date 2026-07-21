@@ -136,6 +136,7 @@ __stdcall unsigned long GetTickCount(void);
 Bool CoreDump;
 
 Bool enableIndirectGLX = FALSE;
+Bool enableFontServerConnections = FALSE;
 
 #ifdef XINERAMA
 Bool PanoramiXExtensionDisabledHack = FALSE;
@@ -288,6 +289,8 @@ UseMsg(void)
     ErrorF("-f #                   bell base (0-100)\n");
     ErrorF("-fakescreenfps #       fake screen default fps (1-600)\n");
     ErrorF("-fp string             default font path\n");
+    ErrorF("+fontserverconnections Allow font server connections in the font path\n");
+    ErrorF("-fontserverconnections Prohibit font server connections in the font path (default)\n");
     ErrorF("-help                  prints message with these options\n");
     ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
     ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
@@ -550,6 +553,10 @@ ProcessCommandLine(int argc, char *argv[])
             UseMsg();
             exit(0);
         }
+        else if (strcmp(argv[i], "+fontserverconnections") == 0)
+            enableFontServerConnections = TRUE;
+        else if (strcmp(argv[i], "-fontserverconnections") == 0)
+            enableFontServerConnections = FALSE;
         else if (strcmp(argv[i], "+iglx") == 0)
             enableIndirectGLX = TRUE;
         else if (strcmp(argv[i], "-iglx") == 0)
