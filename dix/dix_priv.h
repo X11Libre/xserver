@@ -65,6 +65,9 @@ extern Bool party_like_its_1989;
 /* needed by libglx and libglamor (server modules) */
 extern _X_EXPORT Bool enableIndirectGLX;
 
+/* whether font server connections are allowed in the font path */
+extern bool enableFontServerConnections;
+
 /* length of ConnectionInfo block, MUST be multiple of 4 */
 extern size_t ConnectionInfoSize;
 extern size_t dixConnBlockScreenStart(const char *connInfo);
