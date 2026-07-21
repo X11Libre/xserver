@@ -83,7 +83,7 @@ Equipment Corporation.
 
 #include "os/mathx_priv.h"
 
-#include "regionstr.h"
+#include "dix/region_priv.h"
 #include "gc.h"
 
 #undef assert
