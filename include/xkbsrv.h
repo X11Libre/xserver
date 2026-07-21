@@ -146,6 +146,12 @@ typedef struct _XkbSrvInfo {
     char overlay_perkey_state[256/8]; /* bitfield */
 } XkbSrvInfoRec, *XkbSrvInfoPtr;
 
+/* Server-wide lock-key timing quirk, configured from an input option.
+ * Global rather than per-device because key events are processed by both
+ * the originating slave keyboard and the master keyboard, each with its
+ * own XkbSrvInfo; a global is read identically on both paths. */
+extern Bool xkbLockModsOnPress;     /* toggle locking mods on press */
+
 typedef struct _XkbSrvLedInfo {
     CARD16 flags;
     CARD16 class;

@@ -356,6 +356,29 @@ ApplyAutoRepeat(DeviceIntPtr dev)
     xkbi->desc->ctrls->repeat_interval = 1000 / rate;
 }
 
+static void
+ApplyXkbToggleTiming(DeviceIntPtr dev)
+{
+    InputInfoPtr pInfo = (InputInfoPtr) dev->public.devicePrivate;
+
+    if (!dev->key)
+        return;
+
+    /* This toggle is server-global (see xkbsrv.h): a key event is processed
+     * by both the originating slave keyboard and the master keyboard, each
+     * with its own XkbSrvInfo, so a per-device flag would only reach one of
+     * the two paths. Propagate via the master keyboard's xinput property
+     * so the value remains readable and writable at runtime */
+    if (xf86SetBoolOption(pInfo->options, "ToggleModifiersOnPress", FALSE)) {
+        CARD8 val = 1;
+        XIChangeDeviceProperty(inputInfo.keyboard,
+                               XIGetKnownProperty(XKB_PROP_LOCK_MODS_ON_PRESS),
+                               XA_INTEGER, 8, PropModeReplace, 1, &val, TRUE);
+        LogMessageVerb(X_CONFIG, 1, "%s: locking modifiers toggle on press\n",
+                       pInfo->name);
+    }
+}
+
 /***********************************************************************
  *
  * xf86ProcessCommonOptions --
@@ -893,6 +916,7 @@ xf86InputDevicePostInit(DeviceIntPtr dev)
     ApplyAccelerationSettings(dev);
     ApplyTransformationMatrix(dev);
     ApplyAutoRepeat(dev);
+    ApplyXkbToggleTiming(dev);
     return Success;
 }
 
