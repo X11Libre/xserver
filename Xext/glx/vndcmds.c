@@ -94,11 +94,12 @@ static GlxServerDispatchProc GetVendorDispatchFunc(CARD8 opcode, CARD32 vendorCo
 
 static int dispatch_GLXQueryVersion(ClientPtr client)
 {
-    xGLXQueryVersionReply reply;
     REQUEST_SIZE_MATCH(xGLXQueryVersionReq);
 
-    reply.majorVersion = GlxCheckSwap(client, 1);
-    reply.minorVersion = GlxCheckSwap(client, 4);
+    xGLXQueryVersionReply reply = {
+        .majorVersion = GlxCheckSwap(client, 1),
+        .minorVersion = GlxCheckSwap(client, 4),
+    };
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
