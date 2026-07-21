@@ -32,6 +32,7 @@
 #include "os/osdep.h"
 #include "Xext/randr/randrstr_priv.h"
 #include "Xext/randr/rrdispatch_priv.h"
+#include "Xext/render/picturestr_priv.h"
 
 #include "swaprep.h"
 #include "mipointer.h"

@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "Xext/randr/randrstr_priv.h"
+#include "Xext/render/picturestr_priv.h"
 
 static RRModePtr
 RROldModeAdd(RROutputPtr output, RRScreenSizePtr size, int refresh)

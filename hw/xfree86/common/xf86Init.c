@@ -63,6 +63,7 @@
 #include "Xext/dpms/dpms_priv.h"
 #endif
 #include "Xext/randr/randrstr_priv.h"
+#include "Xext/render/picturestr_priv.h"
 
 #include "servermd.h"
 #include "windowstr.h"
@@ -85,7 +86,6 @@
 #include "xf86Xinput.h"
 #include "xf86InPriv.h"
 #include "xf86Crtc.h"
-#include "picturestr.h"
 #include "xf86Bus.h"
 #include "globals.h"
 #include "xserver-properties.h"
