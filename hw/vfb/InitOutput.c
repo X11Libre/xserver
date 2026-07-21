@@ -516,6 +516,14 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 2;
     }
 
+    if (strcmp(argv[i], "+fontserverconnections") == 0) {
+        enableFontServerConnections = true;
+        return 1;
+    }
+    if (strcmp(argv[i], "-fontserverconnections") == 0) {
+        enableFontServerConnections = false;
+        return 1;
+    }
     return 0;
 }
 
