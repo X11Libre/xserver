@@ -270,9 +270,52 @@ glamor_copy_cpu_fbo(DrawablePtr src,
         int src_xoff, src_yoff;
 
         fbGetDrawable(src, src_bits, src_stride, src_bpp, src_xoff, src_yoff);
-        glamor_upload_boxes(dst, box, nbox, src_xoff + dx, src_yoff + dy,
-                            dst_xoff, dst_yoff,
-                            (uint8_t *) src_bits, src_stride * sizeof (FbBits));
+
+        /*
+         * Workaround for #3136 (fullscreen Present crash): glamor_upload_boxes()
+         * back-projects the destination-clamped box coordinates into the source
+         * buffer (bits + ofs) but never bounds them against the source
+         * allocation. A copy whose geometry maps outside the source pixmap
+         * therefore reads out of bounds and crashes in the GL driver
+         * (util_copy_rect / memcpy on an unmapped address). Clamp the boxes to
+         * the source pixmap's backing store here so an out-of-range copy turns
+         * into a missing region instead of a crash.
+         *
+         * NOTE: intermediate defensive workaround, not the root-cause fix. It
+         * does not cover the separate depth-24-in-32 tmp_bits path inside
+         * glamor_upload_boxes(). See issue #3136.
+         */
+        PixmapPtr src_pixmap = glamor_get_drawable_pixmap(src);
+        uint32_t byte_stride = src_stride * sizeof(FbBits);
+        int dx_src = src_xoff + dx;
+        int dy_src = src_yoff + dy;
+        /* Physical bounds of the source buffer, in source coordinates.
+         * Use a conservative 4 bytes/pixel for the width so the bound holds
+         * for whatever render format glamor_upload_boxes() selects (<= 32bpp). */
+        int src_w = MIN((int) src_pixmap->drawable.width, (int) (byte_stride / 4));
+        int src_h = (int) src_pixmap->drawable.height;
+
+        BoxPtr clamped = XNFcallocarray(nbox, sizeof(BoxRec));
+        int nclamped = 0;
+        for (int i = 0; i < nbox; i++) {
+            BoxRec b = box[i];
+            if (b.x1 < -dx_src)
+                b.x1 = -dx_src;
+            if (b.y1 < -dy_src)
+                b.y1 = -dy_src;
+            if (b.x2 > src_w - dx_src)
+                b.x2 = src_w - dx_src;
+            if (b.y2 > src_h - dy_src)
+                b.y2 = src_h - dy_src;
+            if (b.x2 > b.x1 && b.y2 > b.y1)
+                clamped[nclamped++] = b;
+        }
+
+        if (nclamped)
+            glamor_upload_boxes(dst, clamped, nclamped, dx_src, dy_src,
+                                dst_xoff, dst_yoff,
+                                (uint8_t *) src_bits, byte_stride);
+        free(clamped);
     }
     glamor_finish_access(src);
 
