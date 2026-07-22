@@ -3,8 +3,8 @@
 # Tests for Present extension.
 
 import pytest
-from proto import present
-from xclient import BadWindow, Extension, X11Error
+from proto import present, x11
+from xclient import Extension, X11Error
 
 
 class TestPresentSelectInput:
@@ -124,7 +124,7 @@ class TestPresentNotify:
         bad_window_errors = [
             r
             for r in responses
-            if isinstance(r, X11Error) and r.error_code == BadWindow
+            if isinstance(r, X11Error) and r.error_code == x11.BadWindow
         ]
         assert len(bad_window_errors) == 0, (
             f"PresentPixmap returned BadWindow error(s): "
