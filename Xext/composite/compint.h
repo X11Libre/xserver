@@ -206,9 +206,6 @@ int
 int
  compUnredirectOneSubwindow(WindowPtr pParent, WindowPtr pWin);
 
-Bool
- compAllocPixmap(WindowPtr pWin);
-
 void
  compSetParentPixmap(WindowPtr pWin);
 

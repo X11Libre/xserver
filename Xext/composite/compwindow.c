@@ -53,6 +53,7 @@
 
 #include "compint.h"
 #include "compositeext_priv.h"
+#include "compositeext_intern.h"
 
 typedef struct _compPixmapVisit {
     WindowPtr pWindow;
@@ -130,9 +131,9 @@ compCheckRedirect(WindowPtr pWin)
     }
 
     if (should != (pWin->redirectDraw != RedirectDrawNone)) {
-        if (should)
-            return compAllocPixmap(pWin);
-        else {
+        if (should) {
+            return (!!compAllocPixmap(pWin));
+        } else {
             ScreenPtr pScreen = pWin->drawable.pScreen;
             PixmapPtr pPixmap = (*pScreen->GetWindowPixmap) (pWin);
 

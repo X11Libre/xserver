@@ -50,6 +50,7 @@
 #include "Xext/damage/damageext_priv.h"
 
 #include "compint.h"
+#include "compositeext_intern.h"
 
 static Bool
 compScreenUpdate(ClientPtr pClient, void *closure)
@@ -612,8 +613,7 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
     return pPixmap;
 }
 
-Bool
-compAllocPixmap(WindowPtr pWin)
+bool compAllocPixmap(WindowPtr pWin)
 {
     int bw = (int) pWin->borderWidth;
     int x = pWin->drawable.x - bw;
@@ -622,7 +622,7 @@ compAllocPixmap(WindowPtr pWin)
     int h = pWin->drawable.height + (bw << 1);
     PixmapPtr pPixmap = compNewPixmap(pWin, x, y, w, h);
     CompWindowPtr cw = GetCompWindow(pWin);
-    Bool status;
+    bool status;
 
     if (!pPixmap) {
         status = FALSE;
