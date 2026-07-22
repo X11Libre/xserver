@@ -104,8 +104,7 @@ compDestroyDamage(DamagePtr pDamage, void *closure)
     cw->damageRegistered = 0;
 }
 
-static Bool
-compMarkWindows(WindowPtr pWin, WindowPtr *ppLayerWin)
+static bool compMarkWindows(WindowPtr pWin, WindowPtr *ppLayerWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     WindowPtr pLayerWin = pWin;
@@ -143,7 +142,6 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
     CompWindowPtr cw = GetCompWindow(pWin);
     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);
     WindowPtr pLayerWin;
-    Bool anyMarked = FALSE;
     int status = Success;
 
     if (pWin == cs->pOverlayWin) {
@@ -174,6 +172,8 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
     /*
      * Now make sure there's a per-window structure to hang this from
      */
+
+    bool anyMarked = FALSE;
     if (!cw) {
         cw = calloc(1, sizeof(CompWindowRec));
         if (!cw) {
@@ -268,7 +268,6 @@ compFreeClientWindow(WindowPtr pWin, XID id)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompWindowPtr cw = GetCompWindow(pWin);
-    Bool anyMarked = FALSE;
     WindowPtr pLayerWin;
     PixmapPtr pPixmap = NULL;
 
@@ -284,6 +283,8 @@ compFreeClientWindow(WindowPtr pWin, XID id)
             break;
         }
     }
+
+    bool anyMarked = FALSE;
     if (!cw->clients) {
         anyMarked = compMarkWindows(pWin, &pLayerWin);
 
