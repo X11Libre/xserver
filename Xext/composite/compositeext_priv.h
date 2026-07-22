@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPLv3+
  *
- * Copyright © 1987, 1998  The Open Group
- * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
+ * Copyright © 2026 Enrico Weigelt, metux IT consult <info@metux.net>
  */
 #ifndef _XSERVER_COMPOSITEEXT_PRIV_H_
 #define _XSERVER_COMPOSITEEXT_PRIV_H_
