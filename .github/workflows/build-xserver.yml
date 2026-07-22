@@ -501,7 +501,7 @@ jobs:
             github.event_name != 'pull_request' ||
             github.event.pull_request.head.repo.full_name != github.repository
         env:
-            MESON_ARGS: -Dprefix=/tmp -Dglx=false -Dxnest=false -Dxfbdev=false -Dxf86bigfont=true
+            MESON_ARGS: -Dprefix=/tmp -Dxfbdev=false -Dxf86bigfont=true
             X11_PREFIX: /Users/runner/x11
             X11_BUILD_DIR: /Users/runner/build-deps
         runs-on: macos-latest
