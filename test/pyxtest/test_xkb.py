@@ -7,8 +7,8 @@ import struct
 import time
 
 import pytest
-from proto import xkb
-from xclient import BadLength, BadMatch, BadValue, X11Error, X11Reply
+from proto import x11, xkb
+from xclient import X11Error, X11Reply
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +157,7 @@ class TestXkbSetMapOverflows:
         # error code 0x25 in the resource_id.  Without the fix, the
         # wire pointer advances past the buffer and a later check
         # returns BadLength (16).
-        bad_value_errors = [e for e in errors if e.error_code == BadValue]
+        bad_value_errors = [e for e in errors if e.error_code == x11.BadValue]
         assert bad_value_errors, (
             "SetMap with totalActs=0 but nonzero per-key action counts "
             "was not rejected with BadValue - server is missing the "
@@ -215,8 +215,8 @@ class TestXkbSetGeometry:
 
         assert xserver.is_alive, "Server crashed - truncated sections in SetGeometry"
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
-        assert resp.error_code == BadLength, (
-            f"Expected BadLength ({BadLength}), got error code {resp.error_code} - "
+        assert resp.error_code == x11.BadLength, (
+            f"Expected BadLength ({x11.BadLength}), got error code {resp.error_code} - "
             f"missing bounds check in SetGeometry section parsing"
         )
 
@@ -265,7 +265,7 @@ class TestXkbSetGeometry:
         resps = xclient.flush_responses(timeout=0.5)
         errors = [r for r in resps if isinstance(r, X11Error)]
 
-        bad_value_errors = [e for e in errors if e.error_code == BadValue]
+        bad_value_errors = [e for e in errors if e.error_code == x11.BadValue]
         assert bad_value_errors, (
             f"SetGeometry with {which_ndx}=200 nOutlines=1 was not rejected "
             f"with BadValue - server is missing the {which_ndx} bounds check"
@@ -322,7 +322,7 @@ class TestXkbSetGeometry:
         # With the fix, we get BadMatch (8) from the color index check.
         # Without the fix, the OOB access happens silently and the
         # request succeeds (no error), so valgrind catches it.
-        match_errors = [e for e in errors if e.error_code == BadMatch]
+        match_errors = [e for e in errors if e.error_code == x11.BadMatch]
         assert match_errors, (
             f"SetGeometry with {which_color}ColorNdx=nColors was not rejected with "
             f"BadMatch - server is missing the off-by-one check"
@@ -386,7 +386,7 @@ class TestXkbSetGeometry:
         # With the fix, we get BadMatch (8) from the rowUnder >= num_rows check.
         # Without the fix, rowUnder == num_rows passes the '>' check and
         # the OOB access happens in XkbAddGeomOverlayRow().
-        match_errors = [e for e in errors if e.error_code == BadMatch]
+        match_errors = [e for e in errors if e.error_code == x11.BadMatch]
         assert match_errors, (
             "SetGeometry with rowUnder=1 num_rows=1 was not rejected with "
             "BadMatch - server is missing the off-by-one check"
