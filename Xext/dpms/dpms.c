@@ -182,8 +182,7 @@ DPMSSupported(void)
     return FALSE;
 }
 
-static Bool
-isUnblank(int mode)
+static bool isUnblank(int mode)
 {
     switch (mode) {
     case SCREEN_SAVER_OFF:
