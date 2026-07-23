@@ -174,9 +174,7 @@ typedef struct _DbeScreenPrivRec {
     bool (*SetupBackgroundPainter) (WindowPtr pWin, GCPtr pGC);
 
     /* Per-screen DDX routines */
-    Bool (*GetVisualInfo) (ScreenPtr /*pScreen */ ,
-                           XdbeScreenVisualInfo *       /*pVisInfo */
-        );
+    bool (*GetVisualInfo) (ScreenPtr pScreen, XdbeScreenVisualInfo *pVisInfo);
     int (*AllocBackBufferName) (WindowPtr /*pWin */ ,
                                 XID /*bufId */ ,
                                 int     /*swapAction */
