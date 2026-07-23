@@ -43,6 +43,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
@@ -52,6 +54,7 @@
 
 #include "compint.h"
 #include "compositeext.h"
+#include "compositeext_intern.h"
 
 Bool noCompositeExtension = FALSE;
 
@@ -303,8 +306,7 @@ static bool compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
     return ret;
 }
 
-Bool
-compScreenInit(ScreenPtr pScreen)
+bool compScreenInit(ScreenPtr pScreen)
 {
     if (!dixRegisterPrivateKey(&CompScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
