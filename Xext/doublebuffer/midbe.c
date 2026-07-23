@@ -70,9 +70,7 @@
  *     function returns FALSE.  Otherwise, it returns TRUE for success.
  *
  *****************************************************************************/
-
-static Bool
-miDbeGetVisualInfo(ScreenPtr pScreen, XdbeScreenVisualInfo * pScrVisInfo)
+static bool miDbeGetVisualInfo(ScreenPtr pScreen, XdbeScreenVisualInfo * pScrVisInfo)
 {
     register int i, j, k;
     register int count;
