@@ -23,6 +23,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/damageproto.h>
 
@@ -243,7 +244,7 @@ ProcDamageQueryVersion(ClientPtr client)
 }
 
 static void
-DamageExtRegister(DrawablePtr pDrawable, DamagePtr pDamage, Bool report)
+DamageExtRegister(DrawablePtr pDrawable, DamagePtr pDamage, bool report)
 {
     DamageSetReportAfterOp(pDamage, TRUE);
     DamageRegister(pDrawable, pDamage);
