@@ -186,8 +186,7 @@ compFindVisuallessDepth(ScreenPtr pScreen, int d)
 /*
  * Add a list of visual IDs to the list of visuals to implicitly redirect.
  */
-static Bool
-compRegisterAlternateVisuals(CompScreenPtr cs, VisualID * vids, int nVisuals)
+static bool compRegisterAlternateVisuals(CompScreenPtr cs, VisualID * vids, int nVisuals)
 {
     VisualID *p;
 
@@ -204,13 +203,13 @@ compRegisterAlternateVisuals(CompScreenPtr cs, VisualID * vids, int nVisuals)
     return TRUE;
 }
 
+/* NOTE: only used by proprietary Nvidia drivers as well as our own glx module */
 Bool
 CompositeRegisterAlternateVisuals(ScreenPtr pScreen, VisualID * vids,
                                   int nVisuals)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
-
-    return compRegisterAlternateVisuals(cs, vids, nVisuals);
+    return (!!compRegisterAlternateVisuals(cs, vids, nVisuals));
 }
 
 typedef struct _alternateVisual {
