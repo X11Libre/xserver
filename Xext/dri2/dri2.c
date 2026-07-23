@@ -90,7 +90,7 @@ typedef struct _DRI2Drawable {
     CARD64 last_swap_ust;       /* ust at completion of most recent swap */
     int swap_limit;             /* for N-buffering */
     unsigned blocked[3];
-    Bool needInvalidate;
+    bool needInvalidate;
     int prime_id;
     PixmapPtr prime_secondary_pixmap;
     PixmapPtr redirectpixmap;
