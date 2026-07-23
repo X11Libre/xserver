@@ -44,9 +44,6 @@
 /* Define to 1 if you have the `reallocarray' function. */
 #mesondefine HAVE_REALLOCARRAY
 
-/* Define to 1 if you have the `strcasestr' function. */
-#mesondefine HAVE_STRCASESTR
-
 /* Define to 1 if you have the `strlcat' function. */
 #mesondefine HAVE_STRLCAT
 
