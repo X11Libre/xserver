@@ -225,9 +225,8 @@ static CompAlternateVisual altVisuals[] = {
     {32, PIXMAN_a8r8g8b8},
 };
 
-static Bool
-compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
-                       CompAlternateVisual * alt)
+static bool compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
+                                   CompAlternateVisual * alt)
 {
     VisualPtr visual;
     DepthPtr depth;
@@ -295,10 +294,9 @@ compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
     return TRUE;
 }
 
-static Bool
-compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
+static bool compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
 {
-    int ret = 0;
+    bool ret = FALSE;
 
     for (int alt = 0; alt < ARRAY_SIZE(altVisuals); alt++)
         ret |= compAddAlternateVisual(pScreen, cs, altVisuals + alt);
