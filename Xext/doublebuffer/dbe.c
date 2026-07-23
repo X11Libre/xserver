@@ -32,8 +32,9 @@
 
 #include <dix-config.h>
 
-#include <string.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
@@ -51,7 +52,8 @@
 #include "extnsionst.h"
 #include "gcstruct.h"
 #include "dixstruct.h"
-#include "xace.h"
+
+#include "doublebuffer_intern.h"
 
 /* GLOBALS */
 Bool noDbeExtension = FALSE;
@@ -189,7 +191,7 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
 
     /* See if the window's visual is on the list. */
     VisualID visual = wVisual(pWin);
-    Bool visualMatched = FALSE;
+    bool visualMatched = FALSE;
     for (int i = 0; (i < scrVisInfo.count) && !visualMatched; i++) {
         if (scrVisInfo.visinfo[i].visual == visual) {
             visualMatched = TRUE;
