@@ -215,13 +215,6 @@ void
 void compMarkAncestors(WindowPtr pWin);
 
 /*
- * compinit.c
- */
-
-Bool
- compScreenInit(ScreenPtr pScreen);
-
-/*
  * compoverlay.c
  */
 
