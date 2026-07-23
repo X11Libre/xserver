@@ -13,5 +13,6 @@
 #include "include/xlibre_ptrtypes.h"
 
 bool compAllocPixmap(WindowPtr pWin);
+bool compCheckRedirect(WindowPtr pWin);
 
 #endif /* _XSERVER_COMPOSITEEXT_INTERN_H_ */

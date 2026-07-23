@@ -43,6 +43,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screensaver_priv.h"
@@ -113,8 +115,7 @@ compSetPixmap(WindowPtr pWindow, PixmapPtr pPixmap, int bw)
     TraverseTree(pWindow, compSetPixmapVisitWindow, (void *) &visitRec);
 }
 
-Bool
-compCheckRedirect(WindowPtr pWin)
+bool compCheckRedirect(WindowPtr pWin)
 {
     CompWindowPtr cw = GetCompWindow(pWin);
     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);

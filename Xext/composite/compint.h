@@ -252,9 +252,6 @@ void
 void
  compSetPixmap(WindowPtr pWin, PixmapPtr pPixmap, int bw);
 
-Bool
- compCheckRedirect(WindowPtr pWin);
-
 void compWindowPosition(CallbackListPtr *pcbl,
                         ScreenPtr pScreen,
                         XorgScreenWindowPositionParamRec *param);
