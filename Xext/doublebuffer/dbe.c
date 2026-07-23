@@ -739,9 +739,7 @@ ProcDbeDispatch(ClientPtr client)
  *     FALSE - the window's background state is NONE
  *
  *****************************************************************************/
-
-static Bool
-DbeSetupBackgroundPainter(WindowPtr pWin, GCPtr pGC)
+static bool DbeSetupBackgroundPainter(WindowPtr pWin, GCPtr pGC)
 {
     ChangeGCVal gcvalues[4];
     int ts_x_origin, ts_y_origin;
