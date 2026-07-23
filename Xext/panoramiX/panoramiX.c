@@ -41,7 +41,7 @@ Equipment Corporation.
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
-#include "Xext/composite/compint.h"
+#include "Xext/composite/compositeext_priv.h"
 #include "Xext/damage/damageext_priv.h"
 #include "Xext/render/picturestr_priv.h"
 #include "Xext/xfixes/xfixesint.h"

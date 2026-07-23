@@ -50,6 +50,7 @@
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "compint.h"
+#include "compositeext_priv.h"
 #include "xace.h"
 #include "protocol-versions.h"
 
