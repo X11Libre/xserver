@@ -972,7 +972,6 @@ DbeExtensionInit(void)
     ExtensionEntry *extEntry;
     DbeScreenPrivPtr pDbeScreenPriv;
     int nStubbedScreens = 0;
-    Bool ddxInitSuccess;
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension)
@@ -1021,7 +1020,7 @@ DbeExtensionInit(void)
             pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
 
             /* Setup DDX. */
-            ddxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
+            bool ddxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
 
             /* DDX DBE initialization may have the side affect of
              * reallocating pDbeScreenPriv, so we need to update it.
