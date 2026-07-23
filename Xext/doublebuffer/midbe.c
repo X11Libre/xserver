@@ -32,6 +32,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -450,7 +451,6 @@ void miDbeWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWin
     int savewidth, saveheight;
     PixmapPtr pFrontBuffer;
     PixmapPtr pBackBuffer;
-    Bool clear;
     GCPtr pGC;
     xRectangle clearRect;
 
@@ -480,7 +480,7 @@ void miDbeWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWin
 
     GravityTranslate(0, 0, -dx, -dy, dw, dh, pWin->bitGravity, &destx, &desty);
 
-    clear = ((pDbeWindowPriv->width < (unsigned short) width) ||
+    bool clear = ((pDbeWindowPriv->width < (unsigned short) width) ||
              (pDbeWindowPriv->height < (unsigned short) height) ||
              (pWin->bitGravity == ForgetGravity));
 
