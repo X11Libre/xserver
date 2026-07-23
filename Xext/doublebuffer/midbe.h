@@ -37,8 +37,6 @@
 #include "include/privates.h"
 #include "Xext/doublebuffer/dbestruct.h"
 
-extern Bool miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv);
-
 extern DevPrivateKeyRec dbeScreenPrivKeyRec;
 extern DevPrivateKeyRec dbeWindowPrivKeyRec;
 
