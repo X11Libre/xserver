@@ -52,8 +52,6 @@
 
 #include "compositeext_intern.h"
 #include "compint.h"
-#include "xace.h"
-
 
 static void compDestroyOverlayWindow(ScreenPtr pScreen)
 {
