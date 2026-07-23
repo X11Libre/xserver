@@ -49,6 +49,7 @@
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
+#include "compositeext_intern.h"
 #include "compint.h"
 #include "compositeext_priv.h"
 #include "xace.h"

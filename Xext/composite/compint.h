@@ -234,9 +234,6 @@ compFindOverlayClient(ScreenPtr pScreen, ClientPtr pClient);
 CompOverlayClientPtr
 compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient);
 
-Bool
- compCreateOverlayWindow(ScreenPtr pScreen);
-
 void
  compDestroyOverlayWindow(ScreenPtr pScreen);
 
