@@ -404,8 +404,7 @@ DamageExtFreeWindowClip(RegionPtr reg)
  * DamageSubtract intersects with borderClip, so we must reconstruct the
  * protocol's perspective of same...
  */
-static Bool
-DamageExtSubtract(DamageExtPtr pDamageExt, const RegionPtr pRegion)
+static bool DamageExtSubtract(DamageExtPtr pDamageExt, const RegionPtr pRegion)
 {
     DamagePtr pDamage = pDamageExt->pDamage;
 
