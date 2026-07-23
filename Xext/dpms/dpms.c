@@ -28,6 +28,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/dpmsproto.h>
@@ -55,11 +56,11 @@ Equipment Corporation.
 Bool noDPMSExtension = FALSE;
 
 CARD16 DPMSPowerLevel = 0;
-Bool DPMSDisabledSwitch = FALSE;
+bool DPMSDisabledSwitch = FALSE;
 CARD32 DPMSStandbyTime = -1;
 CARD32 DPMSSuspendTime = -1;
 CARD32 DPMSOffTime = -1;
-Bool DPMSEnabled;
+bool DPMSEnabled;
 
 static int DPMSReqCode = 0;
 
@@ -308,7 +309,7 @@ ProcDPMSEnable(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xDPMSEnableReq);
 
-    Bool was_enabled = DPMSEnabled;
+    bool was_enabled = DPMSEnabled;
 
     DPMSEnabled = TRUE;
     if (!was_enabled) {
@@ -324,7 +325,7 @@ ProcDPMSDisable(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xDPMSDisableReq);
 
-    Bool was_enabled = DPMSEnabled;
+    bool was_enabled = DPMSEnabled;
 
     DPMSSet(client, DPMSModeOn);
 
