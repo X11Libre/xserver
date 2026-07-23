@@ -285,12 +285,6 @@ Bool
 void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
 
 void
- compSetRedirectBorderClip(WindowPtr pWin, RegionPtr pRegion);
-
-RegionPtr
- compGetRedirectBorderClip(WindowPtr pWin);
-
-void
  compCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 
 void
@@ -306,8 +300,5 @@ int
 
 compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
                  int bw, WindowPtr pSib);
-
-void PanoramiXCompositeInit(void);
-void PanoramiXCompositeReset(void);
 
 #endif                          /* _COMPINT_H_ */

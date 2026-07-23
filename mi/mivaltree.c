@@ -94,7 +94,7 @@ Equipment Corporation.
 
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
-#include "Xext/composite/compint.h"
+#include "Xext/composite/compositeext_priv.h"
 
 #include    "scrnintstr.h"
 #include    "validate.h"
