@@ -162,8 +162,15 @@ SendDPMSInfoNotify(void)
     }
 }
 
-Bool
-DPMSSupported(void)
+/**
+ * Query whether DPMS is supported by any screen.
+ *
+ * Returns TRUE if at least one screen (or GPU screen) has a non-NULL
+ * DPMS function pointer.  Called during DPMSExtensionInit to decide
+ * whether to register the extension at all, and by the Info request
+ * to report the DPMS state.
+ */
+static bool DPMSSupported(void)
 {
     /* For each screen, check if DPMS is supported */
     DIX_FOR_EACH_SCREEN({

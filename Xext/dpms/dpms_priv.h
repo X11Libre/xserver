@@ -56,16 +56,6 @@
 extern int DPMSSet(ClientPtr client, int level);
 
 /**
- * Query whether DPMS is supported by any screen.
- *
- * Returns TRUE if at least one screen (or GPU screen) has a non-NULL
- * DPMS function pointer.  Called during DPMSExtensionInit to decide
- * whether to register the extension at all, and by the Info request
- * to report the DPMS state.
- */
-extern Bool DPMSSupported(void);
-
-/**
  * Standby timeout in milliseconds.
  *
  * The idle time after which the server transitions to DPMS standby
