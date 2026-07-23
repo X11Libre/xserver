@@ -7,6 +7,12 @@
 
 #include <X11/X.h>
 
-#include "screenint.h"
+#include "include/xlibre_ptrtypes.h"
+
+void compSetRedirectBorderClip(WindowPtr pWin, RegionPtr pRegion);
+RegionPtr compGetRedirectBorderClip(WindowPtr pWin);
+
+void PanoramiXCompositeInit(void);
+void PanoramiXCompositeReset(void);
 
 #endif /* _XSERVER_COMPOSITEEXT_PRIV_H_ */
