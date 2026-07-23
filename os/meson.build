@@ -38,9 +38,6 @@ srcs_libc = []
 if conf_data.get('HAVE_REALLOCARRAY').to_int() == 0
     srcs_libc += 'reallocarray.c'
 endif
-if conf_data.get('HAVE_STRCASESTR').to_int() == 0
-    srcs_libc += 'strcasestr.c'
-endif
 if not have_strlcat
     srcs_libc += 'strlcat.c'
 endif
