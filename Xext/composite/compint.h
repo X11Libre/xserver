@@ -283,9 +283,6 @@ WindowPtr
  CompositeRealChildHead(WindowPtr pWin);
 
 int
- DeleteWindowNoInputDevices(void *value, XID wid);
-
-int
 
 compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
                  int bw, WindowPtr pSib);
