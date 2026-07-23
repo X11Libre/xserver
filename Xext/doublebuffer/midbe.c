@@ -53,6 +53,8 @@
 #include "inputstr.h"
 #include "xace.h"
 
+#include "doublebuffer_intern.h"
+
 /******************************************************************************
  *
  * DBE MI Procedure: miDbeGetVisualInfo
@@ -609,9 +611,7 @@ void miDbeWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWin
  *     This is the MI initialization function called by DbeExtensionInit().
  *
  *****************************************************************************/
-
-Bool
-miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv)
+bool miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv)
 {
     dixScreenHookWindowPosition(pScreen, miDbeWindowPosition);
 
