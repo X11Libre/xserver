@@ -2180,49 +2180,48 @@ configExtensions(XF86ConfExtensionsPtr conf_ext)
 {
     XF86OptionPtr o;
 
-    if (conf_ext && conf_ext->ext_option_lst) {
-        for (o = conf_ext->ext_option_lst; o; o = xf86NextOption(o)) {
+    if(conf_ext && conf_ext->ext_option_lst)
+    {
+        for(o = conf_ext->ext_option_lst; o; o = xf86NextOption(o))
+        {
             char *name = xf86OptionName(o);
             char *val = xf86OptionValue(o);
             char *n;
             Bool enable = TRUE;
 
-            /* Handle "No<ExtensionName>" */
+            // Handles extensions that start with "No" like NoComposite
             n = xf86NormalizeName(name);
-            if (strncmp(n, "no", 2) == 0) {
+            if(strncmp(n, "no", 2) == 0)
+            {
                 name += 2;
                 enable = FALSE;
             }
 
-            if (!val ||
-                xf86NameCmp(val, "enable") == 0 ||
-                xf86NameCmp(val, "enabled") == 0 ||
-                xf86NameCmp(val, "on") == 0 ||
-                xf86NameCmp(val, "1") == 0 ||
-                xf86NameCmp(val, "yes") == 0 || xf86NameCmp(val, "true") == 0) {
-                /* NOTHING NEEDED -- enabling is handled below */
-            }
-            else if (xf86NameCmp(val, "disable") == 0 ||
-                     xf86NameCmp(val, "disabled") == 0 ||
-                     xf86NameCmp(val, "off") == 0 ||
-                     xf86NameCmp(val, "0") == 0 ||
-                     xf86NameCmp(val, "no") == 0 ||
-                     xf86NameCmp(val, "false") == 0) {
+            if(!xf86NameCmp(val, "disable"))
+            {
                 enable = !enable;
             }
-            else {
+            else
+            {
                 LogMessageVerb(X_WARNING, 1, "Ignoring unrecognized value \"%s\"\n", val);
                 free(n);
                 continue;
             }
 
-            if (EnableDisableExtension(name, enable)) {
-                LogMessageVerb(X_CONFIG, 1, "Extension \"%s\" is %s\n",
-                        name, enable ? "enabled" : "disabled");
+            if(!EnableDisableExtension(name, enable))
+            {
+                LogMessageVerb(X_WARNING, 1, "Ignoring unrecognized extension \"%s\"\n", name);
             }
-            else {
-                LogMessageVerb(X_WARNING, 1, "Ignoring unrecognized extension \"%s\"\n",
-                        name);
+            else
+            {
+                if(enable)
+                {
+                    LogMessageVerb(X_CONFIG, 1, "Enabling extension %s\n", name);
+                }
+                else
+                {
+                    LogMessageVerb(X_CONFIG, 1, "Disabling extension: %s\n", name);
+                }
             }
             free(n);
         }
