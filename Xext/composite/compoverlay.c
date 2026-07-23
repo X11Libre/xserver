@@ -42,12 +42,15 @@
  */
 
 #include <dix-config.h>
+
+#include <stdbool.h>
 #include <X11/Xmd.h>
 
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
+#include "compositeext_intern.h"
 #include "compint.h"
 #include "xace.h"
 
@@ -120,8 +123,7 @@ compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
 /*
  * Create the overlay window and map it
  */
-Bool
-compCreateOverlayWindow(ScreenPtr pScreen)
+bool compCreateOverlayWindow(ScreenPtr pScreen)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
     WindowPtr pRoot = pScreen->root;
