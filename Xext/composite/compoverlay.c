@@ -54,6 +54,15 @@
 #include "compint.h"
 #include "xace.h"
 
+
+static void compDestroyOverlayWindow(ScreenPtr pScreen)
+{
+    CompScreenPtr cs = GetCompScreen(pScreen);
+
+    cs->pOverlayWin = NullWindow;
+    FreeResource(cs->overlayWid, X11_RESTYPE_NONE);
+}
+
 /*
  * Delete the given overlay client list element from its screen list.
  */
@@ -120,6 +129,7 @@ compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
     return pOc;
 }
 
+
 /*
  * Create the overlay window and map it
  */
@@ -157,16 +167,4 @@ bool compCreateOverlayWindow(ScreenPtr pScreen)
     MapWindow(pWin, serverClient);
 
     return TRUE;
-}
-
-/*
- * Destroy the overlay window
- */
-void
-compDestroyOverlayWindow(ScreenPtr pScreen)
-{
-    CompScreenPtr cs = GetCompScreen(pScreen);
-
-    cs->pOverlayWin = NullWindow;
-    FreeResource(cs->overlayWid, X11_RESTYPE_NONE);
 }
