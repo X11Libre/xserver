@@ -31,6 +31,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dixstruct.h"
 
 /**
@@ -109,7 +111,7 @@ extern CARD16 DPMSPowerLevel;
  * by the DPMS Enable/Disable protocol requests.  When FALSE, the
  * timeout machinery in WaitFor.c skips DPMS transitions entirely.
  */
-extern Bool DPMSEnabled;
+extern bool DPMSEnabled;
 
 /**
  * Set TRUE when the "-dpms" command-line flag is used.
@@ -117,6 +119,6 @@ extern Bool DPMSEnabled;
  * Checked by the DDX (xf86DPMSInit) to suppress DPMS initialisation
  * even when the config file requests it.  Set by ddxProcessArgument().
  */
-extern Bool DPMSDisabledSwitch;
+extern bool DPMSDisabledSwitch;
 
 #endif
