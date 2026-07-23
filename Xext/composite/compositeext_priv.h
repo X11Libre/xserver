@@ -9,8 +9,4 @@
 
 #include "screenint.h"
 
-Bool CompositeIsImplicitRedirectException(ScreenPtr pScreen,
-                                          XID parentVisual,
-                                          XID winVisual);
-
 #endif /* _XSERVER_COMPOSITEEXT_PRIV_H_ */

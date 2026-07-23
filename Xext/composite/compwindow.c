@@ -280,8 +280,7 @@ compIsAlternateVisual(ScreenPtr pScreen, XID visual)
     return FALSE;
 }
 
-Bool
-CompositeIsImplicitRedirectException(ScreenPtr pScreen,
+static bool CompositeIsImplicitRedirectException(ScreenPtr pScreen,
                                      XID parentVisual, XID winVisual)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
