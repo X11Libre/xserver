@@ -716,7 +716,6 @@ compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
     Bool ret = 0;
     WindowPtr pParent = pWin->parent;
     int draw_x, draw_y;
-    Bool alloc_ret;
 
     if (cs->ConfigNotify) {
         pScreen->ConfigNotify = cs->ConfigNotify;
@@ -733,9 +732,9 @@ compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
 
     draw_x = pParent->drawable.x + x + bw;
     draw_y = pParent->drawable.y + y + bw;
-    alloc_ret = compReallocPixmap(pWin, draw_x, draw_y, w, h, bw);
 
-    if (alloc_ret == FALSE)
+    if (!compReallocPixmap(pWin, draw_x, draw_y, w, h, bw))
         return BadAlloc;
+
     return Success;
 }

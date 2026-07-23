@@ -212,11 +212,6 @@ void
 void
  compRestoreWindow(WindowPtr pWin, PixmapPtr pPixmap);
 
-Bool
-
-compReallocPixmap(WindowPtr pWin, int x, int y,
-                  unsigned int w, unsigned int h, int bw);
-
 void compMarkAncestors(WindowPtr pWin);
 
 /*

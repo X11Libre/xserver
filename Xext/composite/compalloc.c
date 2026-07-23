@@ -682,9 +682,8 @@ compSetParentPixmap(WindowPtr pWin)
  * pixmap to change size, adjust origin to change offset, leaving the
  * old pixmap in cw->pOldPixmap so bits can be recovered
  */
-Bool
-compReallocPixmap(WindowPtr pWin, int draw_x, int draw_y,
-                  unsigned int w, unsigned int h, int bw)
+bool compReallocPixmap(WindowPtr pWin, int draw_x, int draw_y,
+                       unsigned int w, unsigned int h, int bw)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     PixmapPtr pOld = (*pScreen->GetWindowPixmap) (pWin);

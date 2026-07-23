@@ -14,5 +14,6 @@
 
 bool compAllocPixmap(WindowPtr pWin);
 bool compCheckRedirect(WindowPtr pWin);
+bool compReallocPixmap(WindowPtr pWin, int x, int y, unsigned int w, unsigned int h, int bw);
 
 #endif /* _XSERVER_COMPOSITEEXT_INTERN_H_ */
