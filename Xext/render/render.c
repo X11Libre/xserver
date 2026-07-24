@@ -200,14 +200,12 @@ ProcRenderQueryPictFormats(ClientPtr client)
 
     X_REQUEST_HEAD_STRUCT(xRenderQueryPictFormatsReq);
 
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled())
-        numScreens = screenInfo.numScreens;
-    else
+    if (PanoramiXEnabled()) {
         numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
-#else
-    numScreens = screenInfo.numScreens;
-#endif /* XINERAMA */
+    } else {
+        numScreens = screenInfo.numScreens;
+    }
+
     ndepth = nformat = nvisual = 0;
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];

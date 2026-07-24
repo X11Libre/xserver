@@ -841,15 +841,14 @@ xf86RandR12Init(ScreenPtr pScreen)
 {
     rrScrPrivPtr rp;
 
-#ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
     if (PanoramiXIsEnabled()) {
-        if (xf86NumScreens == 1)
-            noPanoramiXExtension = TRUE;
-        else
+        if (xf86NumScreens == 1) {
+            PanoramiXDisable();
+        } else {
             return TRUE;
+        }
     }
-#endif /* XINERAMA */
 
     if (xf86RandR12Generation != serverGeneration)
         xf86RandR12Generation = serverGeneration;

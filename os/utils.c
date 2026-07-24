@@ -120,6 +120,7 @@ __stdcall unsigned long GetTickCount(void);
 #include "os/serverlock.h"
 #include "os/xhostname.h"
 #include "Xext/dpms/dpms_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/present/present_priv.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
 
@@ -716,10 +717,10 @@ ProcessCommandLine(int argc, char *argv[])
 #endif
 #ifdef XINERAMA
         else if (strcmp(argv[i], "+xinerama") == 0) {
-            noPanoramiXExtension = FALSE;
+            PanoramiXEnable();
         }
         else if (strcmp(argv[i], "-xinerama") == 0) {
-            noPanoramiXExtension = TRUE;
+            PanoramiXDisable();
         }
         else if (strcmp(argv[i], "-disablexineramaextension") == 0) {
             PanoramiXExtensionDisabledHack = TRUE;

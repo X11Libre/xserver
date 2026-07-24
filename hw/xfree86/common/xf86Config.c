@@ -960,8 +960,12 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     from = X_DEFAULT;
     if (PanoramiXIsEnabled())
         from = X_CMDLINE;
-    else if (xf86GetOptValBool(FlagOptions, FLAG_XINERAMA, &value)) {
-        noPanoramiXExtension = !value;
+    } else if (xf86GetOptValBool(FlagOptions, FLAG_XINERAMA, &value)) {
+        if (value) {
+            PanoramiXEnable();
+        } else {
+            PanoramiXDisable();
+        }
         from = X_CONFIG;
     }
     if (PanoramiXIsEnabled()) {

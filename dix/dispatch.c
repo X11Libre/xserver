@@ -2779,13 +2779,11 @@ ProcAllocNamedColor(ClientPtr client)
     }
 
     /* if PanoramiX is active, and this isn't the master screen, keep radio silence */
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
-        return X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
-#else
+    if (PanoramiXIsSlaveScreen()) {
+        return Success;
+    }
+
     return X_SEND_REPLY_SIMPLE(client, reply);
-#endif /* XINERAMA */
 }
 
 int

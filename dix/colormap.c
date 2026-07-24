@@ -514,11 +514,9 @@ TellGainedMap(WindowPtr pwin, void *value)
 {
     Colormap *pmid = (Colormap *) value;
 
-#ifdef XINERAMA
     if (PanoramiXIsEnabled() && pwin->drawable.pScreen->myNum) {
         return WT_STOPWALKING;
     }
-#endif
 
     if (wColormap(pwin) == *pmid) {
         /* This should be call to DeliverEvent */

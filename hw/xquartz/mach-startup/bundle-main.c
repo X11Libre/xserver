@@ -63,6 +63,8 @@
 
 #include <asl.h>
 
+#include "Xext/panoramiX/panoramiX_priv.h"
+
 /* From darwinEvents.c ... but don't want to pull in all the server cruft */
 void
 DarwinListenOnOpenFD(int fd);
@@ -75,7 +77,6 @@ ErrorF(const char *f, ...) _X_ATTRIBUTE_PRINTF(1, 2);
 extern void
 FatalError(const char *f, ...) _X_ATTRIBUTE_PRINTF(1, 2) _X_NORETURN;
 
-extern int noPanoramiXExtension;
 extern Bool noCompositeExtension;
 
 #define DEFAULT_CLIENT X11BINDIR "/xterm"
@@ -673,7 +674,7 @@ main(int argc, char **argv, char **envp)
     setup_env();
 
     /* The server must not run the PanoramiX operations. */
-    noPanoramiXExtension = TRUE;
+    PanoramiXDisable();
 
     /* https://gitlab.freedesktop.org/xorg/xserver/-/issues/1409 */
     noCompositeExtension = TRUE;
