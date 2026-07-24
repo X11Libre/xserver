@@ -27,11 +27,12 @@
  */
 #include <dix-config.h>
 
-#include "exa_priv.h"
-
+#include <stdbool.h>
 #include <limits.h>
 #include <assert.h>
 #include <stdlib.h>
+
+#include "exa_priv.h"
 
 #if DEBUG_OFFSCREEN
 #define DBG_OFFSCREEN(a) ErrorF a
@@ -495,7 +496,7 @@ ExaOffscreenDefragment(ScreenPtr pScreen)
         ExaOffscreenArea *prev = area->prev;
         PixmapPtr pSrcPix;
         ExaPixmapPrivPtr pExaSrcPix;
-        Bool save_use_gpu_copy;
+        bool save_use_gpu_copy;
         int save_pitch;
 
         if (area->state != ExaOffscreenAvail ||

@@ -30,6 +30,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -272,7 +273,7 @@ ExaDoPrepareAccess(PixmapPtr pPixmap, int index)
 
     ExaScreenPriv(pScreen);
     ExaPixmapPriv(pPixmap);
-    Bool has_gpu_copy, ret;
+    bool has_gpu_copy, ret;
     int i;
 
     if (!(pExaScr->info->flags & EXA_OFFSCREEN_PIXMAPS))
@@ -585,7 +586,7 @@ exaCreateGC(GCPtr pGC)
 
     ExaScreenPriv(pScreen);
     ExaGCPriv(pGC);
-    Bool ret;
+    bool ret;
 
     swap(pExaScr, pScreen, CreateGC);
     if ((ret = (*pScreen->CreateGC) (pGC))) {
@@ -600,7 +601,7 @@ exaCreateGC(GCPtr pGC)
 static Bool
 exaChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 {
-    Bool ret;
+    bool ret;
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
     ExaScreenPriv(pScreen);

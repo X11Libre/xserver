@@ -24,6 +24,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "exa_priv.h"
@@ -170,7 +171,7 @@ exaPrepareAccessReg_mixed(PixmapPtr pPixmap, int index, RegionPtr pReg)
 {
     ExaPixmapPriv(pPixmap);
     Bool has_gpu_copy = exaPixmapHasGpuCopy(pPixmap);
-    Bool success;
+    bool success;
 
     success = ExaDoPrepareAccess(pPixmap, index);
 
@@ -223,7 +224,7 @@ exaPrepareAccessReg_mixed(PixmapPtr pPixmap, int index, RegionPtr pReg)
 
         if (!pExaPixmap->pDamage &&
             (has_gpu_copy || !exaPixmapIsPinned(pPixmap))) {
-            Bool as_dst = pixmaps[0].as_dst;
+            bool as_dst = pixmaps[0].as_dst;
 
             /* Set up damage tracking */
             pExaPixmap->pDamage = DamageCreate(exaDamageReport_mixed, NULL,

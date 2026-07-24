@@ -23,6 +23,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -875,8 +876,8 @@ exaComposite(CARD8 op,
 {
     ExaScreenPriv(pDst->pDrawable->pScreen);
     int ret = -1;
-    Bool saveSrcRepeat = pSrc->repeat;
-    Bool saveMaskRepeat = pMask ? pMask->repeat : 0;
+    bool saveSrcRepeat = pSrc->repeat;
+    bool saveMaskRepeat = pMask ? pMask->repeat : 0;
     RegionRec region;
 
     if (pExaScr->swappedOut)
@@ -916,7 +917,7 @@ exaComposite(CARD8 op,
             if (!pSrc->repeat && xSrc >= 0 && ySrc >= 0 &&
                 (xSrc + width <= pSrc->pDrawable->width) &&
                 (ySrc + height <= pSrc->pDrawable->height)) {
-                Bool suc;
+                bool suc;
 
                 xDst += pDst->pDrawable->x;
                 yDst += pDst->pDrawable->y;
@@ -1002,7 +1003,7 @@ exaComposite(CARD8 op,
 
     if (pExaScr->info->PrepareComposite &&
         !pSrc->alphaMap && (!pMask || !pMask->alphaMap) && !pDst->alphaMap) {
-        Bool isSrcSolid;
+        bool isSrcSolid;
 
         ret = exaTryDriverComposite(op, pSrc, pMask, pDst, xSrc, ySrc, xMask,
                                     yMask, xDst, yDst, width, height);
