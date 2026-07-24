@@ -22,6 +22,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
@@ -350,7 +351,7 @@ static void
 RRComputeContiguity(ScreenPtr pScreen)
 {
     rrScrPriv(pScreen);
-    Bool discontiguous = TRUE;
+    bool discontiguous = TRUE;
     int i, n = pScrPriv->numCrtcs;
 
     int *reachable = calloc(n, sizeof(int));
@@ -755,9 +756,9 @@ RRCrtcSet(RRCrtcPtr crtc,
           int y, Rotation rotation, int numOutputs, RROutputPtr * outputs)
 {
     ScreenPtr pScreen = crtc->pScreen;
-    Bool ret = FALSE;
-    Bool recompute = TRUE;
-    Bool crtcChanged;
+    bool ret = FALSE;
+    bool recompute = TRUE;
+    bool crtcChanged;
     int  o;
 
     BUG_RETURN_VAL(numOutputs != 0 && outputs == NULL, FALSE);
@@ -936,7 +937,7 @@ RRCrtcDestroyResource(void *value, XID pid)
 Bool
 RRCrtcGammaSet(RRCrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue)
 {
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     ScreenPtr pScreen = crtc->pScreen;
 
@@ -960,7 +961,7 @@ RRCrtcGammaSet(RRCrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue)
 static Bool
 RRCrtcGammaGet(RRCrtcPtr crtc)
 {
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     ScreenPtr pScreen = crtc->pScreen;
 
@@ -1859,7 +1860,7 @@ RRConstrainCursorHarder(DeviceIntPtr pDev, ScreenPtr pScreen, int mode, int *x,
                         int *y)
 {
     rrScrPriv(pScreen);
-    Bool ret;
+    bool ret;
     ScreenPtr secondary;
 
     /* intentional dead space -> let it float */
@@ -1899,7 +1900,7 @@ Bool
 RRReplaceScanoutPixmap(DrawablePtr pDrawable, PixmapPtr pPixmap, Bool enable)
 {
     rrScrPriv(pDrawable->pScreen);
-    Bool ret = TRUE;
+    bool ret = TRUE;
     PixmapPtr *saved_scanout_pixmap;
     int i;
 
@@ -1909,7 +1910,7 @@ RRReplaceScanoutPixmap(DrawablePtr pDrawable, PixmapPtr pPixmap, Bool enable)
 
     for (i = 0; i < pScrPriv->numCrtcs; i++) {
         RRCrtcPtr crtc = pScrPriv->crtcs[i];
-        Bool size_fits;
+        bool size_fits;
 
         saved_scanout_pixmap[i] = crtc->scanout_pixmap;
 

@@ -21,6 +21,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
@@ -147,7 +148,7 @@ RRNoticePropertyChange(RROutputPtr output, Atom property, RRPropertyValuePtr val
     if (property == non_desktop_prop) {
         if (value->type == XA_INTEGER && value->format == 32 && value->size >= 1) {
             uint32_t     nonDesktopData;
-            Bool        nonDesktop;
+            bool        nonDesktop;
 
             memcpy(&nonDesktopData, value->data, sizeof (nonDesktopData));
             nonDesktop = nonDesktopData != 0;
@@ -172,7 +173,7 @@ RRChangeOutputProperty(RROutputPtr output, Atom property, Atom type,
     unsigned long total_len;
     RRPropertyValuePtr prop_value;
     RRPropertyValueRec new_value;
-    Bool add = FALSE;
+    bool add = FALSE;
 
     size_in_bytes = format >> 3;
 
@@ -287,7 +288,7 @@ RRPostPendingProperties(RROutputPtr output)
     RRPropertyValuePtr pending_value;
     RRPropertyValuePtr current_value;
     RRPropertyPtr property;
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     if (!output->pendingProperties)
         return TRUE;
@@ -359,7 +360,7 @@ RRConfigureOutputProperty(RROutputPtr output, Atom property,
                           int num_values, const INT32 *values)
 {
     RRPropertyPtr prop = RRQueryOutputProperty(output, property);
-    Bool add = FALSE;
+    bool add = FALSE;
 
     if (!prop) {
         prop = RRCreateOutputProperty(property);
