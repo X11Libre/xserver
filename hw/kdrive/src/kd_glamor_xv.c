@@ -23,6 +23,8 @@
 
 #include <kdrive-config.h>
 
+#include <stdbool.h>
+
 #include "kdrive.h"
 #include "kxv.h"
 #include "glamor_priv.h"
@@ -61,7 +63,7 @@ kd_glamor_xv_get_port_attribute(KdScreenInfo *screen,
 
 static void
 kd_glamor_xv_query_best_size(KdScreenInfo *screen,
-                             Bool motion,
+                             bool motion,
                              short vid_w, short vid_h,
                              short drw_w, short drw_h,
                              unsigned int *p_w, unsigned int *p_h,

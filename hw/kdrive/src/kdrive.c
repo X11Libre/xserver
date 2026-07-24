@@ -22,6 +22,7 @@
 
 #include <kdrive-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "config/hotplug_priv.h"
@@ -678,7 +679,7 @@ Bool KdCloseScreen(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     KdCardInfo *card = pScreenPriv->card;
-    Bool ret;
+    bool ret;
 
     if (card->cfuncs->closeScreen)
         (*card->cfuncs->closeScreen)(pScreen);
