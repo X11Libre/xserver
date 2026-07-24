@@ -26,6 +26,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
@@ -94,7 +95,7 @@ XkbApplyLEDChangeToKeyboard(XkbSrvInfoPtr xkbi,
                             XkbIndicatorMapPtr map,
                             Bool on, XkbChangesPtr change)
 {
-    Bool ctrlChange, stateChange;
+    bool ctrlChange, stateChange;
     XkbStatePtr state;
 
     if ((map->flags & XkbIM_NoExplicit) ||
@@ -188,7 +189,7 @@ static Bool
 ComputeAutoState(XkbIndicatorMapPtr map,
                  XkbStatePtr state, XkbControlsPtr ctrls)
 {
-    Bool on;
+    bool on;
     CARD8 mods, group;
 
     on = FALSE;
@@ -562,8 +563,8 @@ XkbAllocSrvLedInfo(DeviceIntPtr dev,
                    KbdFeedbackPtr kf, LedFeedbackPtr lf, unsigned needed_parts)
 {
     XkbSrvLedInfoPtr sli;
-    Bool checkAccel;
-    Bool checkNames;
+    bool checkAccel;
+    bool checkNames;
 
     sli = NULL;
     checkAccel = checkNames = FALSE;
@@ -965,7 +966,7 @@ XkbApplyLedStateChanges(DeviceIntPtr dev,
     register unsigned i, bit, affected;
     XkbIndicatorMapPtr map;
     unsigned oldState;
-    Bool kb_changed;
+    bool kb_changed;
 
     if (changed_leds == 0)
         return;

@@ -26,6 +26,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <math.h>
@@ -528,7 +529,7 @@ _XkbFilterPointerMove(XkbSrvInfoPtr xkbi,
                       XkbFilterPtr filter, unsigned keycode, XkbAction *pAction)
 {
     int x, y;
-    Bool accel;
+    bool accel;
 
     if (filter->keycode == 0) { /* initial press */
         filter->keycode = keycode;
@@ -1194,7 +1195,7 @@ _XkbApplyFilters(XkbSrvInfoPtr xkbi, unsigned kc, XkbAction *pAction)
 static int
 _XkbEnsureStateChange(XkbSrvInfoPtr xkbi)
 {
-    Bool genStateNotify = FALSE;
+    bool genStateNotify = FALSE;
 
     /* The state may change, so if we're not in the middle of sending a state
      * notify, prepare for it */
@@ -1240,7 +1241,7 @@ void
 XkbPushLockedStateToSlaves(DeviceIntPtr master, int evtype, int key)
 {
     DeviceIntPtr dev;
-    Bool genStateNotify;
+    bool genStateNotify;
 
     nt_list_for_each_entry(dev, inputInfo.devices, next) {
         if (!dev->key || GetMaster(dev, MASTER_KEYBOARD) != master)
@@ -1381,10 +1382,10 @@ XkbHandleActions(DeviceIntPtr dev, DeviceIntPtr kbd, DeviceEvent *event)
     XkbSrvInfoPtr xkbi;
     KeyClassPtr keyc;
     int sendEvent;
-    Bool genStateNotify;
+    bool genStateNotify;
     XkbAction act = { 0 };
-    Bool keyEvent;
-    Bool pressEvent;
+    bool keyEvent;
+    bool pressEvent;
     ProcessInputProc backupproc;
 
     xkbDeviceInfoPtr xkbPrivPtr = XKBDEVICEINFO(dev);
@@ -1595,7 +1596,7 @@ InjectPointerKeyEvents(DeviceIntPtr dev, int type, int button, int flags,
     InternalEvent *events;
     int nevents, i;
     DeviceIntPtr ptr, mpointer, lastSlave = NULL;
-    Bool saveWait;
+    bool saveWait;
 
     if (InputDevIsMaster(dev)) {
         mpointer = GetMaster(dev, MASTER_POINTER);
