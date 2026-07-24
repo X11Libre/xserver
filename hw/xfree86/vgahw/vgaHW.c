@@ -9,6 +9,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -631,7 +632,7 @@ Bool
 vgaHWSaveScreen(ScreenPtr pScreen, int mode)
 {
     ScrnInfoPtr pScrn = NULL;
-    Bool on;
+    bool on;
 
     if (pScreen != NULL)
         pScrn = xf86ScreenToScrn(pScreen);
@@ -718,7 +719,7 @@ vgaHWRestoreFonts(ScrnInfoPtr pScrnInfo, vgaRegPtr restore)
     vgaHWPtr hwp = VGAHWPTR(pScrnInfo);
     int savedIOBase;
     unsigned char miscOut, attr10, gr1, gr3, gr4, gr5, gr6, gr8, seq2, seq4;
-    Bool doMap = FALSE;
+    bool doMap = FALSE;
 
     /* If nothing to do, return now */
     if (!hwp->FontInfo1 && !hwp->FontInfo2 && !hwp->TextInfo)
@@ -900,7 +901,7 @@ vgaHWSaveFonts(ScrnInfoPtr pScrnInfo, vgaRegPtr save)
     vgaHWPtr hwp = VGAHWPTR(pScrnInfo);
     int savedIOBase;
     unsigned char miscOut, attr10, gr4, gr5, gr6, seq2, seq4;
-    Bool doMap = FALSE;
+    bool doMap = FALSE;
 
     if (hwp->Base == NULL) {
         doMap = TRUE;
@@ -1034,7 +1035,7 @@ static void
 vgaHWSaveColormap(ScrnInfoPtr pScrnInfo, vgaRegPtr save)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrnInfo);
-    Bool readError = FALSE;
+    bool readError = FALSE;
     int i;
 
 #ifdef NEED_SAVED_CMAP

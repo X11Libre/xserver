@@ -31,6 +31,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/stat.h>
@@ -284,9 +285,9 @@ InitOutput(int argc, char **argv)
     int i, j, k, scr_index;
     const char **modulelist;
     void **optionlist;
-    Bool autoconfig = FALSE;
-    Bool sigio_blocked = FALSE;
-    Bool want_hw_access = FALSE;
+    bool autoconfig = FALSE;
+    bool sigio_blocked = FALSE;
+    bool want_hw_access = FALSE;
     GDevPtr configured_device;
 
     xf86Initialising = TRUE;
@@ -1260,7 +1261,7 @@ xf86LoadModules(const char **list, void **optlist)
     void *opt;
     int i;
     char *name;
-    Bool failed = FALSE;
+    bool failed = FALSE;
 
     if (!list)
         return TRUE;

@@ -32,6 +32,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <X11/X.h>
@@ -440,7 +441,7 @@ ParseOptionValue(int scrnIndex, XF86OptionPtr options, OptionInfoPtr p,
 {
     const char *s;
     char *end;
-    Bool wasUsed = FALSE;
+    bool wasUsed = FALSE;
 
     if ((s = xf86findOptionValue(options, p->name)) != NULL) {
         if (markUsed) {

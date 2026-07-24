@@ -24,6 +24,8 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
+
 #include "os/fmt.h"
 
 #include "os.h"
@@ -175,7 +177,7 @@ xf86printOutputClassSection(FILE * cf, XF86ConfOutputClassPtr ptr)
 {
     const xf86MatchGroup *group;
     const xf86MatchPattern *pattern;
-    Bool not_first;
+    bool not_first;
 
     while (ptr) {
         fprintf(cf, "Section \"OutputClass\"\n");

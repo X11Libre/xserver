@@ -26,6 +26,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/extensions/XIproto.h>
@@ -135,7 +136,7 @@ xf86SetViewport(ScreenPtr pScreen, int x, int y)
 static void
 xf86PointerMoved(ScrnInfoPtr pScr, int x, int y)
 {
-    Bool frameChanged = FALSE;
+    bool frameChanged = FALSE;
 
     /*
      * check whether (x,y) belongs to the visual part of the screen
@@ -192,7 +193,7 @@ xf86SwitchMode(ScreenPtr pScreen, DisplayModePtr mode)
 {
     ScrnInfoPtr pScr = xf86ScreenToScrn(pScreen);
     ScreenPtr pCursorScreen;
-    Bool Switched;
+    bool Switched;
     int px, py;
     DeviceIntPtr dev, it;
 
@@ -569,7 +570,7 @@ xf86InitOrigins(void)
     int x1, x2, y1, y2, left, right, top, bottom;
     int i, j, ref, minX, minY, min, max;
     xf86ScreenLayoutPtr pLayout;
-    Bool OldStyleConfig = FALSE;
+    bool OldStyleConfig = FALSE;
 
     memset(xf86ScreenLayout, 0, MAXSCREENS * sizeof(xf86ScreenLayoutRec));
 

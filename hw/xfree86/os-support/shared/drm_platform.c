@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "config/hotplug_priv.h"
@@ -127,7 +128,7 @@ xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *bu
 void
 xf86PlatformReprobeDevice(int index, struct OdevAttributes *attribs)
 {
-    Bool ret;
+    bool ret;
     char *dpath = attribs->path;
 
     ret = get_drm_info(attribs, dpath, index);
@@ -145,7 +146,7 @@ xf86PlatformDeviceProbe(struct OdevAttributes *attribs)
 {
     int i;
     char *path = attribs->path;
-    Bool ret;
+    bool ret;
 
     if (!path)
         goto out_free;

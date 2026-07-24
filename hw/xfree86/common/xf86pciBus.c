@@ -29,6 +29,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <ctype.h>
 #include <dirent.h>
 #include <stdlib.h>
@@ -159,7 +160,7 @@ xf86PciProbe(void)
     /* Print a summary of the video devices found */
     for (k = 0; k < num; k++) {
         const char *prim = " ";
-        Bool memdone = FALSE, iodone = FALSE;
+        bool memdone = FALSE, iodone = FALSE;
 
         info = xf86PciVideoInfo[k];
 
@@ -479,7 +480,7 @@ xf86PciProbeDev(DriverPtr drvp)
 {
     int i, j;
     struct pci_device *pPci;
-    Bool foundScreen = FALSE;
+    bool foundScreen = FALSE;
     const struct pci_id_match *const devices = drvp->supported_devices;
     GDevPtr *devList;
     const unsigned numDevs = xf86MatchDevice(drvp->driverName, &devList);
@@ -607,8 +608,8 @@ pciDeviceHasBars(struct pci_device *pci)
 struct Inst {
     struct pci_device *pci;
     GDevPtr dev;
-    Bool foundHW;               /* PCIid in list of supported chipsets */
-    Bool claimed;               /* BusID matches with a device section */
+    bool foundHW;               /* PCIid in list of supported chipsets */
+    bool claimed;               /* BusID matches with a device section */
     int chip;
     int screen;
 };
@@ -685,7 +686,7 @@ xf86MatchPciInstances(const char *driverName, int vendorID,
     iter = pci_slot_match_iterator_create(NULL);
     while ((pPci = pci_device_next(iter)) != NULL) {
         unsigned device_class = pPci->device_class;
-        Bool foundVendor = FALSE;
+        bool foundVendor = FALSE;
 
         /* Convert the pre-PCI 2.0 device class for a VGA adapter to the
          * 2.0 version of the same class.
