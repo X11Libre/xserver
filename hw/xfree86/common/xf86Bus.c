@@ -32,6 +32,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <X11/X.h>
@@ -77,7 +78,7 @@ BusRec primaryBus = { BUS_NONE, {0} };
 Bool
 xf86CallDriverProbe(DriverPtr drv, Bool detect_only)
 {
-    Bool foundScreen = FALSE;
+    bool foundScreen = FALSE;
 
 #ifdef XSERVER_PLATFORM_BUS
     /* xf86platformBus.c does not support Xorg -configure */

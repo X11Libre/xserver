@@ -28,6 +28,8 @@
 #include <xorg-config.h>
 
 #ifdef XSERVER_PLATFORM_BUS
+
+#include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -253,7 +255,7 @@ int
 xf86platformProbe(void)
 {
     int i;
-    Bool pci = TRUE;
+    bool pci = TRUE;
     XF86ConfOutputClassPtr cl, cl_head = (xf86configptr) ?
             xf86configptr->conf_outputclass_lst : NULL;
 
@@ -516,7 +518,7 @@ xf86UnclaimPlatformSlot(struct xf86_platform_device *d, GDevPtr dev)
 static Bool doPlatformProbe(struct xf86_platform_device *dev, DriverPtr drvp,
                             GDevPtr gdev, int flags, intptr_t match_data)
 {
-    Bool foundScreen = FALSE;
+    bool foundScreen = FALSE;
     int entity;
 
     entity = xf86ClaimPlatformSlot(dev, drvp, 0,
@@ -562,7 +564,7 @@ static Bool
 probeSingleDevice(struct xf86_platform_device *dev, DriverPtr drvp, GDevPtr gdev, int flags)
 {
     int k;
-    Bool foundScreen = FALSE;
+    bool foundScreen = FALSE;
     struct pci_device *pPci;
     const struct pci_id_match *const devices = drvp->supported_devices;
 
@@ -603,7 +605,7 @@ isGPUDevice(GDevPtr gdev)
 int
 xf86platformProbeDev(DriverPtr drvp)
 {
-    Bool foundScreen = FALSE;
+    bool foundScreen = FALSE;
     GDevPtr *devList;
     const unsigned numDevs = xf86MatchDevice(drvp->driverName, &devList);
     int i, j;
@@ -672,7 +674,7 @@ xf86platformProbeDev(DriverPtr drvp)
 int
 xf86platformAddGPUDevices(DriverPtr drvp)
 {
-    Bool foundScreen = FALSE;
+    bool foundScreen = FALSE;
     GDevPtr *devList;
     int j;
 
@@ -817,7 +819,7 @@ xf86platformRemoveDevice(int index)
 {
     EntityPtr entity;
     int ent_num, i, j, scrnum;
-    Bool found;
+    bool found;
 
     for (ent_num = 0; ent_num < xf86NumEntities; ent_num++) {
         entity = xf86Entities[ent_num];

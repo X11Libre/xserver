@@ -5,6 +5,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
@@ -240,7 +241,7 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
      */
     {
         int bios_location = V_BIOS;
-        Bool done = FALSE;
+        bool done = FALSE;
 
         vbiosMem = (unsigned char *) base + bios_location;
 

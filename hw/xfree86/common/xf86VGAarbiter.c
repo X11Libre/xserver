@@ -30,6 +30,8 @@
 
 #include "xorg-config.h"
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 
 #include "xf86VGAarbiter_priv.h"
@@ -213,7 +215,7 @@ xf86VGAarbiterWrapFunctions(void)
 static Bool
 VGAarbiterCloseScreen(ScreenPtr pScreen)
 {
-    Bool val;
+    bool val;
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
@@ -360,7 +362,7 @@ VGAarbiterCreatePixmap(ScreenPtr pScreen, int w, int h, int depth,
 static Bool
 VGAarbiterSaveScreen(ScreenPtr pScreen, Bool unblank)
 {
-    Bool val;
+    bool val;
 
     SCREEN_PROLOG(SaveScreen);
     VGAGet(pScreen);
@@ -397,7 +399,7 @@ VGAarbiterRecolorCursor(DeviceIntPtr pDev,
 static Bool
 VGAarbiterRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    Bool val;
+    bool val;
 
     SCREEN_PROLOG(RealizeCursor);
     VGAGet(pScreen);
@@ -411,7 +413,7 @@ static Bool
 VGAarbiterUnrealizeCursor(DeviceIntPtr pDev,
                           ScreenPtr pScreen, CursorPtr pCursor)
 {
-    Bool val;
+    bool val;
 
     SCREEN_PROLOG(UnrealizeCursor);
     VGAGet(pScreen);
@@ -424,7 +426,7 @@ VGAarbiterUnrealizeCursor(DeviceIntPtr pDev,
 static Bool
 VGAarbiterDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    Bool val;
+    bool val;
 
     SCREEN_PROLOG(DisplayCursor);
     VGAGet(pScreen);
@@ -438,7 +440,7 @@ static Bool
 VGAarbiterSetCursorPosition(DeviceIntPtr pDev,
                             ScreenPtr pScreen, int x, int y, Bool generateEvent)
 {
-    Bool val;
+    bool val;
 
     SCREEN_PROLOG(SetCursorPosition);
     VGAGet(pScreen);
@@ -464,7 +466,7 @@ VGAarbiterAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
 static Bool
 VGAarbiterSwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    Bool val;
+    bool val;
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
@@ -479,7 +481,7 @@ VGAarbiterSwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 static Bool
 VGAarbiterEnterVT(ScrnInfoPtr pScrn)
 {
-    Bool val;
+    bool val;
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
@@ -529,7 +531,7 @@ VGAarbiterCreateGC(GCPtr pGC)
     ScreenPtr pScreen = pGC->pScreen;
     VGAarbiterGCPtr pGCPriv =
         (VGAarbiterGCPtr) dixLookupPrivate(&pGC->devPrivates, &VGAarbiterGCKeyRec);
-    Bool ret;
+    bool ret;
 
     SCREEN_PROLOG(CreateGC);
     ret = (*pScreen->CreateGC) (pGC);
@@ -895,7 +897,7 @@ static Bool
 VGAarbiterSpriteRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
                               CursorPtr pCur)
 {
-    Bool val;
+    bool val;
 
     SPRITE_PROLOG;
     VGAGet(pScreen);
@@ -909,7 +911,7 @@ static Bool
 VGAarbiterSpriteUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
                                 CursorPtr pCur)
 {
-    Bool val;
+    bool val;
 
     SPRITE_PROLOG;
     VGAGet(pScreen);
@@ -943,7 +945,7 @@ VGAarbiterSpriteMoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
 static Bool
 VGAarbiterDeviceCursorInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
 {
-    Bool val;
+    bool val;
 
     SPRITE_PROLOG;
     VGAGet(pScreen);
