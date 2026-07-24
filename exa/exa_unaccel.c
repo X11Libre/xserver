@@ -22,6 +22,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "include/mipict.h"
 
 #include "exa_priv.h"
@@ -486,7 +488,7 @@ ExaPrepareCompositeReg(ScreenPtr pScreen,
     PixmapPtr pDstPix;
 
     ExaScreenPriv(pScreen);
-    Bool ret;
+    bool ret;
 
     RegionNull(&region);
 
