@@ -612,12 +612,11 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
             ret = TRUE;
 
     }
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled() || !pScreen->myNum)
-#endif /* XINERAMA */
-    {
+
+    if (PanoramiXIsMasterScreen(pScreen)) {
         SendScreenSaverNotify(pScreen, state, force);
     }
+
     return ret;
 }
 

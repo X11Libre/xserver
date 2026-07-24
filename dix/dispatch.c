@@ -2777,13 +2777,11 @@ ProcAllocNamedColor(ClientPtr client)
     }
 
     /* if PanoramiX is active, and this isn't the master screen, keep radio silence */
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
-        return X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
-#else
+    if (PanoramiXIsSlaveScreen(pcmp->pScreen)) {
+        return Success;
+    }
+
     return X_SEND_REPLY_SIMPLE(client, reply);
-#endif /* XINERAMA */
 }
 
 int
@@ -2826,9 +2824,8 @@ ProcAllocColorCells(ClientPtr client)
             x_rpcbuf_clear(&rpcbuf);
             return rc;
         }
-#ifdef XINERAMA
-        if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
-#endif /* XINERAMA */
+
+        if (PanoramiXIsMasterScreen(pcmp->pScreen))
         {
             xAllocColorCellsReply reply = {
                 .nPixels = npixels,
@@ -2902,12 +2899,10 @@ ProcAllocColorPlanes(ClientPtr client)
             swapl(&reply.blueMask);
         }
 
-#ifdef XINERAMA
-        if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
-#endif /* XINERAMA */
-        {
+        if (PanoramiXIsMasterScreen(pcmp->pScreen)) {
             return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
         }
+
         x_rpcbuf_clear(&rpcbuf);
         return Success;
     }
@@ -3838,7 +3833,6 @@ static int
 SendConnSetup(ClientPtr client, const char *reason)
 {
     xWindowRoot *root;
-    int numScreens;
     char *lConnectionInfo;
     xConnSetupPrefix *lconnSetupPrefix;
 
@@ -3858,7 +3852,6 @@ SendConnSetup(ClientPtr client, const char *reason)
         return client->noClientException = -1;
     }
 
-    numScreens = screenInfo.numScreens;
     lConnectionInfo = ConnectionInfo;
     lconnSetupPrefix = &connSetupPrefix;
 
@@ -3879,12 +3872,11 @@ SendConnSetup(ClientPtr client, const char *reason)
 #endif
     /* fill in the "currentInputMask" */
     root = (xWindowRoot *) (lConnectionInfo + connBlockScreenStart);
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled())
-        numScreens = screenInfo.numScreens;
-    else
+
+    int numScreens = screenInfo.numScreens;
+    if (PanoramiXIsEnabled()) {
         numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
-#endif /* XINERAMA */
+    }
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
