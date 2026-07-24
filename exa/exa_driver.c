@@ -24,6 +24,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "exa_priv.h"
@@ -133,7 +134,7 @@ exaModifyPixmapHeader_driver(PixmapPtr pPixmap, int width, int height,
     ScreenPtr pScreen;
     ExaScreenPrivPtr pExaScr;
     ExaPixmapPrivPtr pExaPixmap;
-    Bool ret;
+    bool ret;
 
     if (!pPixmap)
         return FALSE;
@@ -207,7 +208,7 @@ exaPixmapHasGpuCopy_driver(PixmapPtr pPixmap)
 
     ExaScreenPriv(pScreen);
     void *saved_ptr;
-    Bool ret;
+    bool ret;
 
     saved_ptr = pPixmap->devPrivate.ptr;
     pPixmap->devPrivate.ptr = ExaGetPixmapAddress(pPixmap);

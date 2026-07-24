@@ -29,6 +29,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/fonts/fontstruct.h>
 
 #include "os/mathx_priv.h"
@@ -149,7 +150,7 @@ exaDoPutImage(DrawablePtr pDrawable, GCPtr pGC, int depth, int x, int y,
     int nbox;
     int xoff, yoff;
     int bpp = pDrawable->bitsPerPixel;
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     if (pExaScr->fallback_counter || pExaPixmap->accel_blocked ||
         !pExaScr->info->UploadToScreen)
@@ -197,7 +198,7 @@ exaDoPutImage(DrawablePtr pDrawable, GCPtr pGC, int depth, int x, int y,
         int x2 = x + w;
         int y2 = y + h;
         char *src;
-        Bool ok;
+        bool ok;
 
         if (x1 < pbox->x1)
             x1 = pbox->x1;
@@ -375,7 +376,7 @@ exaHWCopyNtoN(DrawablePtr pSrcDrawable,
     int src_off_x, src_off_y;
     int dst_off_x, dst_off_y;
     RegionPtr srcregion = NULL, dstregion = NULL;
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     /* avoid doing copy operations if no boxes */
     if (nbox == 0)
@@ -999,7 +1000,7 @@ exaFillRegionSolid(DrawablePtr pDrawable, RegionPtr pRegion, Pixel pixel,
 
     ExaPixmapPriv(pPixmap);
     int xoff, yoff;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     exaGetDrawableDeltas(pDrawable, pPixmap, &xoff, &yoff);
     RegionTranslate(pRegion, xoff, yoff);
@@ -1085,7 +1086,7 @@ exaFillRegionTiled(DrawablePtr pDrawable, RegionPtr pRegion, PixmapPtr pTile,
     int tileWidth, tileHeight;
     int nbox = RegionNumRects(pRegion);
     BoxPtr pBox = RegionRects(pRegion);
-    Bool ret = FALSE;
+    bool ret = FALSE;
     int i;
 
     tileWidth = pTile->drawable.width;
@@ -1187,7 +1188,7 @@ exaFillRegionTiled(DrawablePtr pDrawable, RegionPtr pRegion, PixmapPtr pTile,
         if (alu != GXcopy)
             ret = TRUE;
         else {
-            Bool more_copy = FALSE;
+            bool more_copy = FALSE;
 
             for (i = 0; i < nbox; i++) {
                 int dstX = pBox[i].x1 + tileWidth;
@@ -1262,7 +1263,7 @@ exaGetImage(DrawablePtr pDrawable, int x, int y, int w, int h,
 
     ExaPixmapPriv(pPix);
     int xoff, yoff;
-    Bool ok;
+    bool ok;
 
     if (pExaScr->fallback_counter || pExaScr->swappedOut)
         goto fallback;

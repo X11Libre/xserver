@@ -24,6 +24,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "exa_priv.h"
@@ -128,7 +129,7 @@ exaModifyPixmapHeader_mixed(PixmapPtr pPixmap, int width, int height, int depth,
     ScreenPtr pScreen;
     ExaScreenPrivPtr pExaScr;
     ExaPixmapPrivPtr pExaPixmap;
-    Bool ret, has_gpu_copy;
+    bool ret, has_gpu_copy;
 
     if (!pPixmap)
         return FALSE;
@@ -271,7 +272,7 @@ exaPixmapHasGpuCopy_mixed(PixmapPtr pPixmap)
     ExaScreenPriv(pScreen);
     ExaPixmapPriv(pPixmap);
     void *saved_ptr;
-    Bool ret;
+    bool ret;
 
     if (!pExaPixmap->driverPriv)
         return FALSE;
@@ -289,7 +290,7 @@ exaSharePixmapBacking_mixed(PixmapPtr pPixmap, ScreenPtr secondary, void **handl
 {
     ScreenPtr pScreen = pPixmap->drawable.pScreen;
     ExaScreenPriv(pScreen);
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     exaMoveInPixmap(pPixmap);
     /* get the driver to give us a handle */
@@ -304,7 +305,7 @@ exaSetSharedPixmapBacking_mixed(PixmapPtr pPixmap, void *handle)
 {
     ScreenPtr pScreen = pPixmap->drawable.pScreen;
     ExaScreenPriv(pScreen);
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     if (pExaScr->info->SetSharedPixmapBacking)
         ret = pExaScr->info->SetSharedPixmapBacking(pPixmap, handle);
