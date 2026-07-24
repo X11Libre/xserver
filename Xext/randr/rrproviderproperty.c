@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "os/mathx_priv.h"
@@ -139,7 +141,7 @@ RRChangeProviderProperty(RRProviderPtr provider, Atom property, Atom type,
     unsigned long total_len;
     RRPropertyValuePtr prop_value;
     RRPropertyValueRec new_value;
-    Bool add = FALSE;
+    bool add = FALSE;
 
     size_in_bytes = format >> 3;
 
@@ -285,7 +287,7 @@ RRConfigureProviderProperty(RRProviderPtr provider, Atom property,
                           int num_values, INT32 *values)
 {
     RRPropertyPtr prop = RRQueryProviderProperty(provider, property);
-    Bool add = FALSE;
+    bool add = FALSE;
 
     if (!prop) {
         prop = RRCreateProviderProperty(property);

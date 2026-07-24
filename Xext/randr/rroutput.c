@@ -22,6 +22,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
@@ -468,7 +469,7 @@ ProcRRGetOutputInfo(ClientPtr client)
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int i;
-    Bool leased;
+    bool leased;
 
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
