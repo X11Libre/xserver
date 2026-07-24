@@ -31,6 +31,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stddef.h>             /* For NULL */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -272,7 +273,7 @@ RootlessCreateGC(GCPtr pGC)
 {
     RootlessGCRec *gcrec;
     RootlessScreenRec *s;
-    Bool result;
+    bool result;
 
     SCREEN_UNWRAP(pGC->pScreen, CreateGC);
     s = SCREENREC(pGC->pScreen);

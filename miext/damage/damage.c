@@ -22,6 +22,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "dix/screen_hooks_priv.h"
@@ -341,7 +342,7 @@ damageCreateGC(GCPtr pGC)
 
     damageScrPriv(pScreen);
     damageGCPriv(pGC);
-    Bool ret;
+    bool ret;
 
     unwrap(pScrPriv, pScreen, CreateGC);
     if ((ret = (*pScreen->CreateGC) (pGC))) {
@@ -1312,7 +1313,7 @@ damageText(DrawablePtr pDrawable,
     CharInfoPtr *charinfo;
     unsigned long i;
     unsigned int n;
-    Bool imageblt;
+    bool imageblt;
 
     imageblt = (textType == TT_IMAGE8) || (textType == TT_IMAGE16);
 
@@ -1921,7 +1922,7 @@ DamageReportDamage(DamagePtr pDamage, RegionPtr pDamageRegion)
 {
     BoxRec tmpBox;
     RegionRec tmpRegion;
-    Bool was_empty;
+    bool was_empty;
 
     switch (pDamage->damageLevel) {
     case DamageReportRawRegion:
