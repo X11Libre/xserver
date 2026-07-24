@@ -31,6 +31,8 @@ in this Software without prior written authorization from The Open Group.
 
 #include <dix-config.h>
 
+
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/fonts/font.h>
@@ -60,9 +62,9 @@ typedef struct {
     int x;                      /* cursor hotspot */
     int y;
     BoxRec saved;               /* saved area from the screen */
-    Bool isUp;                  /* cursor in frame buffer */
-    Bool shouldBeUp;            /* cursor should be displayed */
-    Bool checkPixels;           /* check colormap collision */
+    bool isUp;                  /* cursor in frame buffer */
+    bool shouldBeUp;            /* cursor should be displayed */
+    bool checkPixels;           /* check colormap collision */
     ScreenPtr pScreen;
 } miCursorInfoRec, *miCursorInfoPtr;
 
@@ -89,7 +91,7 @@ typedef struct {
     ColormapPtr pColormap;
     VisualPtr pVisual;
     DamagePtr pDamage;          /* damage tracking structure */
-    Bool damageRegistered;
+    bool damageRegistered;
     int numberOfCursors;
 } miSpriteScreenRec, *miSpriteScreenPtr;
 
@@ -424,7 +426,7 @@ miSpriteBlockHandler(ScreenPtr pScreen, void *timeout)
     miSpriteScreenPtr pPriv = GetSpriteScreen(pScreen);
     DeviceIntPtr pDev;
     miCursorInfoPtr pCursorInfo;
-    Bool WorkToDo = FALSE;
+    bool WorkToDo = FALSE;
 
     SCREEN_PROLOGUE(pPriv, pScreen, BlockHandler);
 

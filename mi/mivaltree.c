@@ -90,7 +90,8 @@ Equipment Corporation.
   */
 #include <dix-config.h>
 
-#include    <X11/X.h>
+#include <stdbool.h>
+#include <X11/X.h>
 
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
@@ -112,7 +113,7 @@ miShapedWindowIn(RegionPtr universe, RegionPtr bounding,
     BoxRec box;
     BoxPtr boundBox;
     int nbox;
-    Bool someIn, someOut;
+    bool someIn, someOut;
     int t, x1, y1, x2, y2;
 
     nbox = RegionNumRects(bounding);
@@ -555,7 +556,7 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
     WindowPtr pWin;
     Bool overlap;
     int viewvals;
-    Bool forward;
+    bool forward;
 
     pScreen = pParent->drawable.pScreen;
     if (pChild == NullWindow)

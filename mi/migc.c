@@ -28,6 +28,8 @@ from The Open Group.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
@@ -101,7 +103,7 @@ miComputeCompositeClip(GCPtr pGC, DrawablePtr pDrawable)
     if (pDrawable->type == DRAWABLE_WINDOW) {
         WindowPtr pWin = (WindowPtr) pDrawable;
         RegionPtr pregWin;
-        Bool freeTmpClip, freeCompClip;
+        bool freeTmpClip, freeCompClip;
 
         if (pGC->subWindowMode == IncludeInferiors) {
             pregWin = NotClippedByChildren(pWin);
