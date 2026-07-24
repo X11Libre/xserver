@@ -33,6 +33,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "quartz.h"
 #include "xpr.h"
 #include "darwinEvents.h"
@@ -67,7 +69,7 @@ static Bool
 load_cursor(CursorPtr src, int screen)
 {
     uint32_t *data;
-    Bool free_data = FALSE;
+    bool free_data = FALSE;
     uint32_t rowbytes;
     int width, height;
     int hot_x, hot_y;

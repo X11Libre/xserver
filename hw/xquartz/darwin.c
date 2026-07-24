@@ -30,6 +30,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <sys/stat.h>
 #include <X11/X.h>
@@ -188,7 +189,7 @@ DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
     int dpi;
     static int foundIndex = 0;
-    Bool ret;
+    bool ret;
 
     if (!dixRegisterPrivateKey(&darwinScreenKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
