@@ -27,6 +27,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -1031,7 +1032,7 @@ PanoramiXClearToBackground(ClientPtr client)
 {
     PanoramiXRes *win;
     int result, x, y;
-    Bool isRoot;
+    bool isRoot;
 
     REQUEST(xClearAreaReq);
 
@@ -1075,9 +1076,9 @@ PanoramiXCopyArea(ClientPtr client)
 {
     int result, srcx, srcy, dstx, dsty, width, height;
     PanoramiXRes *gc, *src, *dst;
-    Bool srcIsRoot = FALSE;
-    Bool dstIsRoot = FALSE;
-    Bool srcShared, dstShared;
+    bool srcIsRoot = FALSE;
+    bool dstIsRoot = FALSE;
+    bool srcShared, dstShared;
 
     REQUEST(xCopyAreaReq);
 
@@ -1277,9 +1278,9 @@ PanoramiXCopyPlane(ClientPtr client)
 {
     int srcx, srcy, dstx, dsty;
     PanoramiXRes *gc, *src, *dst;
-    Bool srcIsRoot = FALSE;
-    Bool dstIsRoot = FALSE;
-    Bool srcShared, dstShared;
+    bool srcIsRoot = FALSE;
+    bool dstIsRoot = FALSE;
+    bool srcShared, dstShared;
     DrawablePtr psrcDraw, pdstDraw = NULL;
     GCPtr pGC = NULL;
     RegionRec totalReg;
@@ -1384,7 +1385,7 @@ PanoramiXPolyPoint(ClientPtr client)
 {
     PanoramiXRes *gc, *draw;
     int result, npoint;
-    Bool isRoot;
+    bool isRoot;
 
     REQUEST(xPolyPointReq);
 
@@ -1452,7 +1453,7 @@ PanoramiXPolyLine(ClientPtr client)
 {
     PanoramiXRes *gc, *draw;
     int result, npoint;
-    Bool isRoot;
+    bool isRoot;
 
     REQUEST(xPolyLineReq);
 
@@ -1519,7 +1520,7 @@ PanoramiXPolySegment(ClientPtr client)
 {
     int result, nsegs, i;
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
 
     REQUEST(xPolySegmentReq);
 
@@ -1589,7 +1590,7 @@ PanoramiXPolyRectangle(ClientPtr client)
 {
     int result, nrects, i;
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
 
     REQUEST(xPolyRectangleReq);
 
@@ -1658,7 +1659,7 @@ PanoramiXPolyArc(ClientPtr client)
 {
     int result, narcs, i;
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
 
     REQUEST(xPolyArcReq);
 
@@ -1725,7 +1726,7 @@ PanoramiXFillPoly(ClientPtr client)
 {
     int result, count;
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
 
     REQUEST(xFillPolyReq);
 
@@ -1793,7 +1794,7 @@ PanoramiXPolyFillRectangle(ClientPtr client)
 {
     int result, things, i;
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
     REQUEST(xPolyFillRectangleReq);
 
     REQUEST_AT_LEAST_SIZE(xPolyFillRectangleReq);
@@ -1860,7 +1861,7 @@ int
 PanoramiXPolyFillArc(ClientPtr client)
 {
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
     int result, narcs, i;
 
     REQUEST(xPolyFillArcReq);
@@ -1928,7 +1929,7 @@ int
 PanoramiXPutImage(ClientPtr client)
 {
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
     int result, orig_x, orig_y;
 
     REQUEST(xPutImageReq);
@@ -1974,7 +1975,7 @@ PanoramiXGetImage(ClientPtr client)
     DrawablePtr drawables[MAXSCREENS];
     DrawablePtr pDraw;
     PanoramiXRes *draw;
-    Bool isRoot;
+    bool isRoot;
     int x, y, w, h, format;
     Mask plane = 0, planemask;
     int linesDone, nlines, linesPerBuf;
@@ -2134,7 +2135,7 @@ int
 PanoramiXPolyText8(ClientPtr client)
 {
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
     int result;
     int orig_x, orig_y;
 
@@ -2179,7 +2180,7 @@ int
 PanoramiXPolyText16(ClientPtr client)
 {
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
     int result;
     int orig_x, orig_y;
 
@@ -2225,7 +2226,7 @@ PanoramiXImageText8(ClientPtr client)
 {
     int result;
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
     int orig_x, orig_y;
 
     REQUEST(xImageTextReq);
@@ -2270,7 +2271,7 @@ PanoramiXImageText16(ClientPtr client)
 {
     int result;
     PanoramiXRes *gc, *draw;
-    Bool isRoot;
+    bool isRoot;
     int orig_x, orig_y;
 
     REQUEST(xImageTextReq);
