@@ -15,6 +15,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #include "os/Xtrans.h"
@@ -928,10 +929,10 @@ static void
 send_query_msg(void)
 {
     XdmcpHeader header;
-    Bool broadcast = FALSE;
+    bool broadcast = FALSE;
 
 #if defined(IPv6)
-    Bool multicast = FALSE;
+    bool multicast = FALSE;
 #endif
     int i;
     int socketfd = xdmcpSocket;

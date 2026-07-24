@@ -248,9 +248,7 @@ ReadRequestFromClient(ClientPtr client)
     ConnectionInputPtr oci = oc->input;
     unsigned int gotnow, needed;
     int result;
-    register xReq *request;
-    Bool need_header;
-    Bool move_header;
+    xReq *request;
 
     NextAvailableInput(oc);
 
@@ -279,8 +277,8 @@ ReadRequestFromClient(ClientPtr client)
 
     oci->bufptr += oci->lenLastReq;
 
-    need_header = FALSE;
-    move_header = FALSE;
+    bool need_header = FALSE;
+    bool move_header = FALSE;
     gotnow = oci->bufcnt + oci->buffer - oci->bufptr;
 
     if (oci->ignoreBytes > 0) {
@@ -628,7 +626,7 @@ FlushAllOutput(void)
 {
     OsCommPtr oc;
     register ClientPtr client, tmp;
-    Bool newoutput = NewOutputPending;
+    bool newoutput = !!NewOutputPending;
 
     if (!newoutput)
         return;
@@ -796,7 +794,7 @@ dixWriteToClient(ClientPtr who, int count, const void *__buf)
                        "******** %s called from input thread *********\n", __func__);
 
 #ifdef DEBUG_COMMUNICATION
-    Bool multicount = FALSE;
+    bool multicount = FALSE;
 #endif
     if (!count || !who || who == serverClient || who->clientGone)
         return 0;

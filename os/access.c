@@ -78,6 +78,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #endif
@@ -1063,22 +1064,20 @@ ComputeLocalClient(ClientPtr client)
         if (!cmd)
             return FALSE;
 
-        Bool ret;
-
         /* Cut off any colon and whatever comes after it, see
          * https://lists.freedesktop.org/archives/xorg-devel/2015-December/048164.html
          */
         char *tok = strtok(cmd, ":");
 
 #if !defined(WIN32) || defined(__CYGWIN__)
-        ret = strcmp(basename(tok), "ssh") != 0;
+        bool ret = strcmp(basename(tok), "ssh") != 0;
 #else
-        ret = strcmp(tok, "ssh") != 0;
+        bool ret = strcmp(tok, "ssh") != 0;
 #endif
 
         free(cmd);
 
-        return ret;
+        return !!ret;
     }
 
     return TRUE;
@@ -1641,7 +1640,7 @@ siTypeAdd(const char *typeName, siAddrMatchFunc addrMatch,
 static Bool
 siAddrMatch(int family, void *addr, int len, HOST * host, ClientPtr client)
 {
-    Bool matches = FALSE;
+    bool matches = FALSE;
     struct siType *s;
     const char *valueString;
     int addrlen;
@@ -1744,7 +1743,7 @@ siHostnameAddrMatch(int family, void *addr, int len,
                     const char *siAddr, int siAddrLen, ClientPtr client,
                     void *typePriv)
 {
-    Bool res = FALSE;
+    bool res = FALSE;
 
 /* Currently only supports checking against IPv4 & IPv6 connections, but
  * support for other address families, such as DECnet, could be added if
@@ -1832,8 +1831,8 @@ siHostnameCheckAddr(const char *valueString, int length, void *typePriv)
      */
     int len = length;
     int i;
-    Bool dotAllowed = FALSE;
-    Bool dashAllowed = FALSE;
+    bool dotAllowed = FALSE;
+    bool dashAllowed = FALSE;
 
     if ((length <= 0) || (length >= SI_HOSTNAME_MAXLEN)) {
         len = -1;
@@ -1975,7 +1974,7 @@ static siLocalCredPrivRec siLocalGroupPriv = { LOCAL_GROUP };
 static Bool
 siLocalCredGetId(const char *addr, int len, siLocalCredPrivPtr lcPriv, int *id)
 {
-    Bool parsedOK = FALSE;
+    bool parsedOK = FALSE;
     char *addrbuf = calloc(1, len + 1);
 
     if (addrbuf == NULL) {

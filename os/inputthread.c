@@ -27,6 +27,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -75,8 +76,8 @@ typedef struct {
     struct ospoll *fds;
     int readPipe;
     int writePipe;
-    Bool changed;
-    Bool running;
+    bool changed;
+    bool running;
 } InputThreadInfo;
 
 static InputThreadInfo *inputThreadInfo;
@@ -255,7 +256,7 @@ int
 InputThreadUnregisterDev(int fd)
 {
     InputThreadDevice *dev;
-    Bool found_device = FALSE;
+    bool found_device = FALSE;
 
     /* return silently if input thread is already finished (e.g., at
      * DisableDevice time, evdev tries to call this function again through

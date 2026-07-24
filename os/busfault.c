@@ -22,6 +22,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -41,7 +42,7 @@ struct busfault {
     void                *addr;
     size_t              size;
 
-    Bool                valid;
+    bool                valid;
 
     busfault_notify_ptr notify;
     void                *context;
