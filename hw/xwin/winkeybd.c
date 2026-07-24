@@ -32,6 +32,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
 
@@ -350,7 +352,7 @@ winIsFakeCtrl_L(UINT message, WPARAM wParam, LPARAM lParam)
 {
     MSG msgNext;
     LONG lTime;
-    Bool fReturn;
+    bool fReturn;
 
     static Bool lastWasControlL = FALSE;
     static LONG lastTime;
