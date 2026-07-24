@@ -4,6 +4,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -565,7 +566,7 @@ AddSubResourceSizeSpec(void *value,
         xXResResourceSizeSpec **prevCrossRef =
           ht_find(ctx->visitedSubResources, &value);
         if (!prevCrossRef) {
-            Bool ok = TRUE;
+            bool ok = TRUE;
             xXResResourceSizeSpec *crossRef =
                 AddFragment(&ctx->response, sizeof(xXResResourceSizeSpec));
             ok = ok && crossRef != NULL;
@@ -624,7 +625,7 @@ AddResourceSizeValue(void *ptr, XID id, RESTYPE type, void *cdata)
     ConstructResourceBytesCtx *ctx = cdata;
     if (ctx->status == Success &&
         !ht_find(ctx->visitedResources, &id)) {
-        Bool ok = TRUE;
+        bool ok = TRUE;
         HashTable ht;
         HtGenericHashSetupRec htSetup = {
             .keySize = sizeof(void*)
