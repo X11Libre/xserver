@@ -49,6 +49,7 @@
 #include "dri2_priv.h"
 #include "dri2int.h"
 #include "protocol-versions.h"
+#include "dri2_intern.h"
 
 /* For the static extension loader */
 Bool noDRI2Extension = FALSE;

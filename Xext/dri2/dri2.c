@@ -49,6 +49,8 @@
 #include "dri2int.h"
 #include "damage.h"
 
+#include "dri2_intern.h"
+
 CARD8 dri2_major;               /* version of DRI2 supported by DDX */
 CARD8 dri2_minor;
 
@@ -1583,8 +1585,7 @@ DRI2CloseScreen(ScreenPtr pScreen)
 }
 
 /* Called by InitExtensions() */
-Bool
-DRI2ModuleSetup(void)
+bool DRI2ModuleSetup(void)
 {
     dri2DrawableRes = CreateNewResourceType(DRI2DrawableGone, "DRI2Drawable");
     if (!dri2DrawableRes)
