@@ -103,6 +103,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <X11/X.h>
 #include <X11/extensions/ge.h>
@@ -274,7 +275,7 @@ InputInfo inputInfo;
 EventSyncInfoRec syncEvents;
 
 static struct DeviceEventTime {
-    Bool reset;
+    bool reset;
     TimeStamp time;
 } lastDeviceEventTime[MAXDEVICES];
 
@@ -1617,7 +1618,7 @@ ActivatePointerGrab(DeviceIntPtr mouse, GrabPtr grab,
     GrabPtr oldgrab = grabinfo->grab;
     WindowPtr oldWin = (grabinfo->grab) ?
         grabinfo->grab->window : mouse->spriteInfo->sprite->win;
-    Bool isPassive = autoGrab & ~ImplicitGrabMask;
+    bool isPassive = !!(autoGrab & ~ImplicitGrabMask);
 
     /* slave devices need to float for the duration of the grab. */
     if (grab->grabtype == XI2 &&
@@ -1659,7 +1660,7 @@ void
 DeactivatePointerGrab(DeviceIntPtr mouse)
 {
     GrabPtr grab = mouse->deviceGrab.grab;
-    Bool wasPassive = mouse->deviceGrab.fromPassiveGrab;
+    bool wasPassive = !!mouse->deviceGrab.fromPassiveGrab;
     Bool wasImplicit = (mouse->deviceGrab.fromPassiveGrab &&
                         mouse->deviceGrab.implicitGrab);
     XID grab_resource = grab->resource;
@@ -1820,7 +1821,7 @@ DeactivateKeyboardGrab(DeviceIntPtr keybd)
 void
 AllowSome(ClientPtr client, TimeStamp time, DeviceIntPtr thisDev, int newState)
 {
-    Bool thisGrabbed, otherGrabbed, othersFrozen, thisSynced;
+    bool thisGrabbed, otherGrabbed, othersFrozen, thisSynced;
     TimeStamp grabTime;
     GrabInfoPtr devgrabinfo, grabinfo = &thisDev->deviceGrab;
 
@@ -1992,7 +1993,7 @@ ProcAllowEvents(ClientPtr client)
 void
 ReleaseActiveGrabs(ClientPtr client)
 {
-    Bool done;
+    bool done;
 
     /* XXX CloseDownClient should remove passive grabs before
      * releasing active grabs.
@@ -2271,7 +2272,7 @@ DeliverEventToInputClients(DeviceIntPtr dev, InputClients * inputclients,
 {
     int attempt;
     enum EventDeliveryState rc = EVENT_NOT_DELIVERED;
-    Bool have_device_button_grab_class_client = FALSE;
+    bool have_device_button_grab_class_client = FALSE;
 
     for (; inputclients; inputclients = inputclients->next) {
         Mask mask;
@@ -4130,7 +4131,7 @@ CheckDeviceGrabs(DeviceIntPtr device, InternalEvent *ievent, WindowPtr ancestor)
     FocusClassPtr focus =
         IsPointerEvent(ievent) ? NULL : device->focus;
     BOOL sendCore = (InputDevIsMaster(device) && device->coreEvents);
-    Bool ret = FALSE;
+    bool ret = FALSE;
     DeviceEvent *event = &ievent->device_event;
 
     if (event->type != ET_ButtonPress && event->type != ET_KeyPress)
@@ -5995,7 +5996,7 @@ ProcRecolorCursor(ClientPtr client)
 {
     CursorPtr pCursor;
     int rc;
-    Bool displayed;
+    bool displayed;
     SpritePtr pSprite = PickPointer(client)->spriteInfo->sprite;
 
     REQUEST(xRecolorCursorReq);

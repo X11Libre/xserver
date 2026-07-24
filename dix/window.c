@@ -98,6 +98,8 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dispatch.h"
@@ -746,7 +748,7 @@ dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
     WindowPtr pWin;
     WindowPtr pHead;
     ScreenPtr pScreen;
-    Bool fOK;
+    bool fOK;
     DepthPtr pDepth;
     PixmapFormatRec *format;
     WindowOptPtr ancwopt;
@@ -1952,7 +1954,7 @@ static Bool
 ShapeOverlap(WindowPtr pWin, BoxPtr pWinBox, WindowPtr pSib, BoxPtr pSibBox)
 {
     RegionPtr pWinRgn, pSibRgn;
-    Bool ret;
+    bool ret;
 
     if (!IS_SHAPED(pWin) && !IS_SHAPED(pSib))
         return TRUE;
@@ -2126,7 +2128,7 @@ ReflectStackChange(WindowPtr pWin, WindowPtr pSib, VTKind kind)
 /* Note that pSib might be NULL */
 
     Bool WasViewable = (Bool) pWin->viewable;
-    Bool anyMarked;
+    bool anyMarked;
     WindowPtr pFirstChange;
     WindowPtr pLayerWin;
     ScreenPtr pScreen = pWin->drawable.pScreen;
@@ -2647,7 +2649,7 @@ MapWindow(WindowPtr pWin, ClientPtr client)
 
     pScreen = pWin->drawable.pScreen;
     if ((pParent = pWin->parent)) {
-        Bool anyMarked;
+        bool anyMarked;
 
         if ((!pWin->overrideRedirect) && (RedirectSend(pParent)))
             if (MaybeDeliverMapRequest(pWin, pParent, client))
@@ -2707,7 +2709,7 @@ MapSubwindows(WindowPtr pParent, ClientPtr client)
     ScreenPtr pScreen;
     Mask parentRedirect;
     Mask parentNotify;
-    Bool anyMarked;
+    bool anyMarked;
     WindowPtr pLayerWin;
 
     pScreen = pParent->drawable.pScreen;
@@ -2861,7 +2863,7 @@ UnmapSubwindows(WindowPtr pWin)
     WindowPtr pHead;
     Bool wasRealized = (Bool) pWin->realized;
     Bool wasViewable = (Bool) pWin->viewable;
-    Bool anyMarked = FALSE;
+    bool anyMarked = FALSE;
     Mask parentNotify;
     WindowPtr pLayerWin = NULL;
     ScreenPtr pScreen = pWin->drawable.pScreen;
@@ -3597,8 +3599,8 @@ void
 SetRootClip(ScreenPtr pScreen, int enable)
 {
     WindowPtr pWin = pScreen->root;
-    Bool WasViewable;
-    Bool anyMarked = FALSE;
+    bool WasViewable;
+    bool anyMarked = FALSE;
     WindowPtr pLayerWin;
     BoxRec box;
     enum RootClipMode mode = enable;

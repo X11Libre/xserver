@@ -97,6 +97,8 @@ Equipment Corporation.
  */
 
 #include <dix-config.h>
+
+#include <stdbool.h>
 #include <version-config.h>
 
 #include <assert.h>
@@ -4115,7 +4117,7 @@ AddScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
 
     int i;
     ScreenPtr pScreen;
-    Bool ret;
+    bool ret;
 
     i = screenInfo.numScreens;
     if (i == MAXSCREENS)
@@ -4162,7 +4164,7 @@ AddGPUScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
 {
     int i;
     ScreenPtr pScreen;
-    Bool ret;
+    bool ret;
 
     i = screenInfo.numGPUScreens;
     if (i == MAXGPUSCREENS)
