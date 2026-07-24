@@ -32,6 +32,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "win.h"
 
 #include "dix/colormap_priv.h"
@@ -650,7 +652,7 @@ winCloseScreenShadowDDNL(ScreenPtr pScreen)
 {
     winScreenPriv(pScreen);
     winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
-    Bool fReturn = TRUE;
+    bool fReturn = TRUE;
 
 #if ENABLE_DEBUG
     winDebug("winCloseScreenShadowDDNL - Freeing screen resources\n");
@@ -844,7 +846,7 @@ winBltExposedRegionsShadowDDNL(ScreenPtr pScreen)
     HDC hdcUpdate;
     PAINTSTRUCT ps;
     HRESULT ddrval = DD_OK;
-    Bool fReturn = TRUE;
+    bool fReturn = TRUE;
     int i;
 
     /* Quite common case. The primary surface was lost (maybe because of depth

@@ -33,6 +33,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "win.h"
 
 #include "dix/dix_priv.h"
@@ -423,9 +425,9 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     HWND hwndScreen = NULL;
     DrawablePtr pDraw = NULL;
     winWMMessageRec wmMsg;
-    Bool fWMMsgInitialized = FALSE;
+    bool fWMMsgInitialized = FALSE;
     static Bool s_fTracking = FALSE;
-    Bool needRestack = FALSE;
+    bool needRestack = FALSE;
     LRESULT ret;
     static Bool hasEnteredSizeMove = FALSE;
 

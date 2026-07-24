@@ -29,6 +29,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "win.h"
 #include "winconfig.h"
 #include "winmsg.h"
@@ -123,7 +125,7 @@ winConfigKeyboard(DeviceIntPtr pDevice)
     keyboardType = GetKeyboardType(0);
     if (keyboardType > 0 && GetKeyboardLayoutName(layoutName)) {
         WinKBLayoutPtr pLayout;
-        Bool bfound = FALSE;
+        bool bfound = FALSE;
         int pass;
 
         layoutNum = strtoul(layoutName, (char **) NULL, 16);

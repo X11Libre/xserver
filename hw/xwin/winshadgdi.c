@@ -29,6 +29,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include <assert.h>
 
 #include "win.h"
@@ -151,7 +153,7 @@ static
 winQueryRGBBitsAndMasks(ScreenPtr pScreen)
 {
     winScreenPriv(pScreen);
-    Bool fReturn = TRUE;
+    bool fReturn = TRUE;
     LPDWORD pdw = NULL;
     DWORD dwRedBits, dwGreenBits, dwBlueBits;
 
@@ -321,7 +323,7 @@ winAllocateFBShadowGDI(ScreenPtr pScreen)
     winScreenPriv(pScreen);
     winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
     DIBSECTION dibsection;
-    Bool fReturn = TRUE;
+    bool fReturn = TRUE;
 
     /* Describe shadow bitmap to be created */
     pScreenPriv->pbmih->biWidth = pScreenInfo->dwWidth;
@@ -572,7 +574,7 @@ winCloseScreenShadowGDI(ScreenPtr pScreen)
 {
     winScreenPriv(pScreen);
     winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
-    Bool fReturn = TRUE;
+    bool fReturn = TRUE;
 
 #if ENABLE_DEBUG
     winDebug("winCloseScreenShadowGDI - Freeing screen resources\n");
