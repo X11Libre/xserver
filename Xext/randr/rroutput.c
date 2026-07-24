@@ -98,8 +98,10 @@ RROutputCreate(ScreenPtr pScreen,
     output->subpixelOrder = SubPixelUnknown;
     output->devPrivate = devPrivate;
 
-    if (!AddResource(output->id, RROutputType, (void *) output))
+    if (!AddResource(output->id, RROutputType, (void *) output)) {
+        free(output);
         return NULL;
+    }
 
     pScrPriv->outputs[pScrPriv->numOutputs++] = output;
 
