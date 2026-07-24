@@ -35,6 +35,7 @@ from The Open Group.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 
@@ -105,12 +106,10 @@ static Bool
 XdmAuthenticationAddAuth(int name_len, const char *name,
                          int data_len, char *data)
 {
-    Bool ret;
-
     XdmcpUnwrap((unsigned char *) data, (unsigned char *) &privateKey,
                 (unsigned char *) data, data_len);
     authFromXDMCP = TRUE;
-    ret = AddAuthorization(name_len, name, data_len, data);
+    bool ret = !!AddAuthorization(name_len, name, data_len, data);
     authFromXDMCP = FALSE;
     return ret;
 }
