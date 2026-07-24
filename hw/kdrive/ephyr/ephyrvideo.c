@@ -27,6 +27,8 @@
  */
 
 #include <kdrive-config.h>
+
+#include <stdbool.h>
 #include <string.h>
 #include <X11/extensions/Xv.h>
 #include <xcb/xcb.h>
@@ -93,7 +95,7 @@ static int ephyrGetPortAttribute(KdScreenInfo * a_screen_info,
                                  int *a_attr_value, void *a_port_priv);
 
 static void ephyrQueryBestSize(KdScreenInfo * a_info,
-                               Bool a_motion,
+                               bool a_motion,
                                short a_src_w,
                                short a_src_h,
                                short a_drw_w,
@@ -211,7 +213,7 @@ ephyrLocalAtomToHost(int a_local_atom, int *a_host_atom)
 Bool
 ephyrInitVideo(ScreenPtr pScreen)
 {
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
 
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -444,7 +446,7 @@ ephyrXVPrivQueryHostAdaptors(EphyrXVPriv * a_this)
     xcb_connection_t *conn = hostx_get_xcbconn();
     xcb_screen_t *xscreen = xcb_aux_get_screen(conn, hostx_get_screen());
     int base_port_id = 0, i = 0, port_priv_offset = 0;
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
     xcb_generic_error_t *e = NULL;
     xcb_xv_adaptor_info_iterator_t it;
 
@@ -615,7 +617,7 @@ ephyrXVPrivSetAdaptorsHooks(EphyrXVPriv * a_this)
 static Bool
 ephyrXVPrivRegisterAdaptors(EphyrXVPriv * a_this, ScreenPtr a_screen)
 {
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
 
     EPHYR_RETURN_VAL_IF_FAIL(a_this && a_screen, FALSE);
 
@@ -675,7 +677,7 @@ ephyrXVPrivGetImageBufSize(int a_port_id,
     xcb_connection_t *conn = hostx_get_xcbconn();
     xcb_xv_query_image_attributes_cookie_t cookie;
     xcb_xv_query_image_attributes_reply_t *reply;
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
 
     EPHYR_RETURN_VAL_IF_FAIL(a_size, FALSE);
 
@@ -703,7 +705,7 @@ ephyrXVPrivSaveImageToPortPriv(EphyrPortPriv * a_port_priv,
                                const unsigned char *a_image_buf,
                                int a_image_len)
 {
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
 
     EPHYR_LOG("enter\n");
 
@@ -839,7 +841,7 @@ ephyrGetPortAttribute(KdScreenInfo * a_screen_info,
 
 static void
 ephyrQueryBestSize(KdScreenInfo * a_info,
-                   Bool a_motion,
+                   bool a_motion,
                    short a_src_w,
                    short a_src_h,
                    short a_drw_w,
@@ -894,7 +896,7 @@ ephyrHostXVPutImage(KdScreenInfo * a_info,
     EphyrScrPriv *scrpriv = a_info->driver;
     xcb_connection_t *conn = hostx_get_xcbconn();
     xcb_gcontext_t gc;
-    Bool is_ok = TRUE;
+    bool is_ok = TRUE;
     int data_len, width, height;
     xcb_xv_query_image_attributes_cookie_t image_attr_cookie;
     xcb_xv_query_image_attributes_reply_t *image_attr_reply;
@@ -978,7 +980,7 @@ ephyrPutImage(KdScreenInfo * a_info,
               Bool a_sync, RegionPtr a_clipping_region, void *a_port_priv)
 {
     EphyrPortPriv *port_priv = a_port_priv;
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
     int result = BadImplementation, image_size = 0;
 
     EPHYR_RETURN_VAL_IF_FAIL(a_info && a_info->pScreen, BadValue);
