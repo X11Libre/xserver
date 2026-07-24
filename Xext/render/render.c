@@ -24,6 +24,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -781,7 +782,7 @@ ProcRenderFreeGlyphSet(ClientPtr client)
 typedef struct _GlyphNew {
     Glyph id;
     GlyphPtr glyph;
-    Bool found;
+    bool found;
     unsigned char sha1[20];
 } GlyphNewRec, *GlyphNewPtr;
 
