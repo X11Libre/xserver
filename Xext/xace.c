@@ -19,6 +19,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdarg.h>
 
 #include "os/client_priv.h"
@@ -136,7 +137,7 @@ XaceCensorImage(ClientPtr client,
     if (nRects > 0) {           /* we have something to censor */
         GCPtr pScratchGC = NULL;
         PixmapPtr pPix = NULL;
-        Bool failed = FALSE;
+        bool failed = FALSE;
         int depth = 1;
         int bitsPerPixel = 1;
         int i;
