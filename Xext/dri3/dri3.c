@@ -85,6 +85,10 @@ static int dri3_syncobj_free(void *data, XID id)
 void
 dri3_extension_init(void)
 {
+    if (PanoramiXIsEnabled()) {
+        return;
+    }
+
     ExtensionEntry *extension;
 
     /* If no screens support DRI3, there's no point offering the
@@ -92,11 +96,6 @@ dri3_extension_init(void)
      */
     if (dri3_screen_generation != serverGeneration)
         return;
-
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return;
-#endif /* XINERAMA */
 
     extension = AddExtension(DRI3_NAME, DRI3NumberEvents, DRI3NumberErrors,
                              proc_dri3_dispatch, proc_dri3_dispatch,

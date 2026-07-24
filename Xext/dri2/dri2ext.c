@@ -40,6 +40,7 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "include/extinit.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/xfixes/xfixes.h"
 
 #include "dixstruct.h"
@@ -567,10 +568,9 @@ ProcDRI2Dispatch(ClientPtr client)
 void
 DRI2ExtensionInit(void)
 {
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         return;
-#endif /* XINERAMA */
+    }
 
     /**
      * Advertise the DRI2 extension,

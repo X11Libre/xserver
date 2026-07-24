@@ -46,6 +46,7 @@
 #include "dix/screenint_priv.h"
 #include "include/extinit.h"
 #include "os/fmt.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 #include "handlers.h"
 
@@ -163,7 +164,7 @@ ProcXIQueryPointer(ClientPtr client)
     }
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         reply.root_x += double_to_fp1616(masterScreen->x);
         reply.root_y += double_to_fp1616(masterScreen->y);

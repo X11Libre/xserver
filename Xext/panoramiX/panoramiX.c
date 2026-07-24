@@ -43,6 +43,7 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "Xext/composite/compositeext_priv.h"
 #include "Xext/damage/damageext_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/render/picturestr_priv.h"
 #include "Xext/xfixes/xfixesint.h"
 
@@ -425,7 +426,7 @@ PanoramiXExtensionInit(void)
     Bool success = FALSE;
     ScreenPtr masterScreen = dixGetMasterScreen();
 
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled())
         return;
 
     if (!dixRegisterPrivateKey(&PanoramiXScreenKeyRec, PRIVATE_SCREEN, 0)) {
@@ -901,7 +902,7 @@ ProcPanoramiXGetState(ClientPtr client)
     X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     xPanoramiXGetStateReply reply = {
-        .state = !noPanoramiXExtension,
+        .state = PanoramiXIsEnabled(),
         .window = stuff->window
     };
 
@@ -969,9 +970,9 @@ ProcXineramaIsActive(ClientPtr client)
 #if 1
         /* The following hack fools clients into thinking that Xinerama
          * is disabled even though it is not. */
-        .state = !noPanoramiXExtension && !PanoramiXExtensionDisabledHack
+        .state = PanoramiXIsEnabled() && !PanoramiXExtensionDisabledHack
 #else
-        .state = !noPanoramiXExtension;
+        .state = PanoramiXIsEnabled();
 #endif
     };
 
@@ -985,14 +986,14 @@ ProcXineramaQueryScreens(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xXineramaQueryScreensReq);
 
-    CARD32 number = (noPanoramiXExtension) ? 0 : PanoramiXNumScreens;
+    CARD32 number = PanoramiXIsDisabled() ? 0 : PanoramiXNumScreens;
     xXineramaQueryScreensReply reply = {
         .number = number
     };
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             /* xXineramaScreenInfo is the same as xRectangle */
             x_rpcbuf_write_rect(&rpcbuf,

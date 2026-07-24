@@ -87,6 +87,7 @@
 #include "include/extinit.h"
 #include "os/log_priv.h"
 #include "os/mathx_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "xf86Modes.h"
 #include "xf86Crtc.h"
@@ -1630,8 +1631,9 @@ xf86ValidateModes(ScrnInfoPtr scrp, DisplayModePtr availModes,
 
     /* Lookup each mode */
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
+    if (!PanoramiXIsEnabled()) {
         validateAllDefaultModes = TRUE;
+    }
 #endif /* XINERAMA */
 
     for (p = scrp->modes;; p = p->next) {

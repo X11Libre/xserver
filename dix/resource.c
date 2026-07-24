@@ -132,6 +132,7 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "os/probes_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "os.h"
@@ -1212,7 +1213,7 @@ LegalNewID(XID id, ClientPtr client)
 #ifdef XINERAMA
     XID minid, maxid;
 
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         minid = client->clientAsMask | (client->index ?
                                         SERVER_BIT : SERVER_MINID);
         maxid = (clientTable[client->index].fakeID | RESOURCE_ID_MASK) + 1;

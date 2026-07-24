@@ -301,10 +301,9 @@ ProcRRXineramaDispatch(ClientPtr client)
 void
 RRXineramaExtensionInit(void)
 {
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         return;
-#endif /* XINERAMA */
+    }
 
     if (noRRXineramaExtension)
       return;

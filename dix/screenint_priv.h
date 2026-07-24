@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPLv3+
  *
- * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
- * Copyright © 1987, 1998 The Open Group
+ * Copyright © 2026 Enrico Weigelt, metux IT consult <info@metux.net>
  */
 #ifndef _XSERVER_DIX_SCREENINT_PRIV_H
 #define _XSERVER_DIX_SCREENINT_PRIV_H
@@ -12,6 +11,8 @@
 #include "include/callback.h"
 #include "include/screenint.h"
 #include "include/scrnintstr.h" /* for screenInfo */
+
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 typedef Bool (*ScreenInitProcPtr)(ScreenPtr pScreen, int argc, char **argv);
 
@@ -82,8 +83,7 @@ static inline bool dixScreenExists(unsigned int idx) {
 #define DIX_FOR_EACH_SCREEN_XINERAMA(__LAMBDA__) \
     do { \
         unsigned int __num_screens = screenInfo.numScreens; \
-        if (!noPanoramiXExtension) \
-            __num_screens = 1; \
+        if (PanoramiXIsEnabled()) { __num_screens = 1; } \
         for (unsigned walkScreenIdx = 0; walkScreenIdx < __num_screens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \

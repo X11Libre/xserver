@@ -61,6 +61,7 @@ in this Software without prior written authorization from The Open Group.
 #include "include/misc.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include   "windowstr.h"
 #include   "pixmapstr.h"
@@ -407,11 +408,7 @@ miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
     /* Don't call USFS if we use Xinerama, otherwise the root window is
      * updated to the second screen, and we never receive any events.
      * (FDO bug #18668) */
-    if (changedScreen
-#ifdef XINERAMA
-        && noPanoramiXExtension
-#endif /* XINERAMA */
-        ) {
+    if (changedScreen && PanoramiXIsDisabled()) {
             DeviceIntPtr master = GetMaster(pDev, MASTER_POINTER);
             /* Hack for CVE-2023-5380: if we're moving
              * screens PointerWindows[] keeps referring to the
