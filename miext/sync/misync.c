@@ -23,6 +23,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "scrnintstr.h"
 #include "misync_priv.h"
 #include "misyncstr.h"
@@ -134,7 +136,7 @@ void
 miSyncTriggerFence(SyncFence * pFence)
 {
     SyncTriggerList *ptl;
-    Bool triggered;
+    bool triggered;
 
     pFence->funcs.SetTriggered(pFence);
 
