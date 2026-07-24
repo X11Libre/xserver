@@ -133,17 +133,19 @@ present_config_notify(WindowPtr window,
                    int x, int y, int w, int h, int bw,
                    WindowPtr sibling)
 {
-    int ret;
     ScreenPtr screen = window->drawable.pScreen;
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
 
     present_send_config_notify(window, x, y, w, h, bw, sibling, 0);
 
     PRESENT_UNWRAP_HOOK(screen_priv, screen, ConfigNotify);
+
+    int ret;
     if (screen->ConfigNotify)
         ret = screen->ConfigNotify (window, x, y, w, h, bw, sibling);
     else
         ret = 0;
+
     PRESENT_WRAP_HOOK(screen_priv, screen, ConfigNotify, present_config_notify);
     return ret;
 }
@@ -180,9 +182,7 @@ present_screen_register_priv_keys(void)
 present_screen_priv_ptr
 present_screen_priv_init(ScreenPtr screen)
 {
-    present_screen_priv_ptr screen_priv;
-
-    screen_priv = calloc(1, sizeof (present_screen_priv_rec));
+    present_screen_priv_ptr screen_priv = calloc(1, sizeof (present_screen_priv_rec));
     if (!screen_priv)
         return NULL;
 
@@ -247,14 +247,13 @@ present_screen_init(ScreenPtr screen, present_screen_info_ptr info)
 void
 present_extension_init(void)
 {
-    ExtensionEntry *extension;
-
 #ifdef XINERAMA
     if (!noPanoramiXExtension)
         return;
 #endif /* XINERAMA */
 
-    extension = AddExtension(PRESENT_NAME, PresentNumberEvents, PresentNumberErrors,
+    ExtensionEntry *extension = AddExtension(
+                             PRESENT_NAME, PresentNumberEvents, PresentNumberErrors,
                              proc_present_dispatch, sproc_present_dispatch,
                              NULL, StandardMinorOpcode);
     if (!extension)
