@@ -1,6 +1,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 #include <X11/X.h>
 #include <X11/Xfuncproto.h>
@@ -358,7 +359,7 @@ ProcXvMCCreateSubpicture(ClientPtr client)
     X_REQUEST_FIELD_CARD16(width);
     X_REQUEST_FIELD_CARD16(height);
 
-    Bool image_supported = FALSE;
+    bool image_supported = FALSE;
     CARD32 *data = NULL;
     int result, dwords = 0;
     XvMCContextPtr pContext;
