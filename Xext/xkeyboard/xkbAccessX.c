@@ -26,6 +26,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #if !defined(WIN32)
 #include <sys/time.h>
 #endif
@@ -465,7 +466,7 @@ AccessXFilterPressEvent(DeviceEvent *event, DeviceIntPtr keybd)
 {
     XkbSrvInfoPtr xkbi = keybd->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
-    Bool ignoreKeyEvent = FALSE;
+    bool ignoreKeyEvent = FALSE;
     KeyCode key = event->detail.key;
     KeySym *sym = XkbKeySymsPtr(xkbi->desc, key);
 
@@ -604,7 +605,7 @@ AccessXFilterReleaseEvent(DeviceEvent *event, DeviceIntPtr keybd)
     XkbSrvInfoPtr xkbi = keybd->key->xkbInfo;
     XkbControlsPtr ctrls = xkbi->desc->ctrls;
     KeyCode key = event->detail.key;
-    Bool ignoreKeyEvent = FALSE;
+    bool ignoreKeyEvent = FALSE;
 
     /* Don't transmit the KeyRelease if BounceKeys is on and
      * this is the release of a key that was ignored due to

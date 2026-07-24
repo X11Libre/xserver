@@ -26,6 +26,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <xkb-config.h>
 
 #include <stdio.h>
@@ -246,7 +247,7 @@ XkbDDXCompileKeymapByNames(XkbDescPtr xkb,
                            unsigned need, char *nameRtrn, int nameRtrnLen)
 {
     char *keymap;
-    Bool rc = FALSE;
+    bool rc = FALSE;
     XkbKeymapNamesCtx ctx = {
         .xkb = xkb,
         .names = names,
@@ -412,7 +413,7 @@ XkbDDXNamesFromRules(DeviceIntPtr keybd,
 {
     char buf[PATH_MAX] = { 0 };
     FILE *file;
-    Bool complete;
+    bool complete;
     XkbRF_RulesPtr rules;
 
     if (!rules_name)
