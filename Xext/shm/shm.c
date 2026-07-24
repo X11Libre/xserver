@@ -30,6 +30,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -705,7 +706,7 @@ ProcShmPutImage(ClientPtr client)
 
 #ifdef XINERAMA
     PanoramiXRes *draw, *gc;
-    Bool sendEvent;
+    bool sendEvent;
 
     if (PanoramiXIsDisabled())
         return ShmPutImage(client, stuff);
@@ -770,7 +771,7 @@ ProcShmGetImage(ClientPtr client)
     int x, y, w, h, format, rc;
     Mask plane = 0, planemask;
     long lenPer = 0, length, widthBytesLine;
-    Bool isRoot;
+    bool isRoot;
 
     if (PanoramiXIsDisabled())
         return ShmGetImage(client, stuff);
