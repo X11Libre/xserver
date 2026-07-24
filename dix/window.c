@@ -2766,7 +2766,7 @@ UnrealizeTree(WindowPtr pWin, Bool fromConfigure)
         if (pChild->realized) {
             pChild->visibility = VisibilityNotViewable;
 #ifdef XINERAMA
-            if (PanoramiXIsEnabled() && !pChild->drawable.pScreen->myNum) {
+            if (PanoramiXIsMasterScreen(pChild->drawable.pScreen)) {
                 PanoramiXRes *win;
                 int rc = dixLookupResourceByType((void **) &win,
                                                  pChild->drawable.id,
