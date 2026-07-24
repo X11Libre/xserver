@@ -27,6 +27,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
@@ -665,7 +666,7 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
     unsigned long total_len;
     XIPropertyValuePtr prop_value;
     XIPropertyValueRec new_value;
-    Bool add = FALSE;
+    bool add = FALSE;
     int rc;
 
     size_in_bytes = format >> 3;

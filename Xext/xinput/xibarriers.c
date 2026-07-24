@@ -43,6 +43,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
@@ -79,8 +81,8 @@ struct PointerBarrierDevice {
     Time last_timestamp;
     int barrier_event_id;
     int release_event_id;
-    Bool hit;
-    Bool seen;
+    bool hit;
+    bool seen;
 };
 
 struct PointerBarrierClient {
