@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "glamor_priv.h"
 #include "glamor_transform.h"
 #include "glamor_transfer.h"
@@ -57,7 +59,7 @@ glamor_fill_spans_gl(DrawablePtr drawable,
     char *vbo_offset;
     int c;
     int box_index;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
     if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))

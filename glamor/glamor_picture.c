@@ -37,6 +37,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -76,7 +77,7 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
                                            GLenum *swizzle)
 {
     glamor_screen_private *glamor_priv = glamor_get_screen_private(pScreen);
-    Bool is_little_endian = IMAGE_BYTE_ORDER == LSBFirst;
+    bool is_little_endian = IMAGE_BYTE_ORDER == LSBFirst;
 
     *temp_format = format;
     swizzle[0] = GL_RED;
@@ -283,8 +284,8 @@ glamor_upload_picture_to_texture(PicturePtr picture)
     GLenum format, type;
     GLenum swizzle[4];
     GLenum iformat;
-    Bool ret = TRUE;
-    Bool needs_swizzle;
+    bool ret = TRUE;
+    bool needs_swizzle;
     pixman_image_t *converted_image = NULL;
     const struct glamor_format *f = glamor_format_for_pixmap(pixmap);
 

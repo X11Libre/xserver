@@ -28,6 +28,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -492,7 +493,7 @@ glamor_egl_image_from_gbm_bo(ScreenPtr screen, struct gbm_bo *bo)
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
 
-    Bool tried_fast_import = FALSE;
+    bool tried_fast_import = FALSE;
 
     if (glamor_egl->fast_gbm_import) {
         EGLImageKHR image;
@@ -610,7 +611,7 @@ glamor_egl_create_textured_pixmap_from_dma_bufs(PixmapPtr pixmap,
                                                 uint32_t format, uint64_t modifier)
 {
     ScreenPtr screen = pixmap->drawable.pScreen;
-    Bool used_modifiers = modifier != DRM_FORMAT_MOD_INVALID;
+    bool used_modifiers = modifier != DRM_FORMAT_MOD_INVALID;
 
     EGLImageKHR image = glamor_egl_image_from_dma_bufs(screen,
                                                        num_fds, fds,
@@ -664,7 +665,7 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
     unsigned height = pixmap->drawable.height;
     uint32_t format;
     struct gbm_bo *bo = NULL;
-    Bool used_modifiers = FALSE;
+    bool used_modifiers = FALSE;
     PixmapPtr exported;
     GCPtr scratch_gc;
 
@@ -1215,7 +1216,7 @@ glamor_pixmap_from_fds(ScreenPtr screen,
 #ifdef WITH_LIBDRM
     PixmapPtr pixmap;
     glamor_egl_priv_t *glamor_egl;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     glamor_egl = glamor_egl_get_screen_private(screen);
 
@@ -1285,7 +1286,7 @@ glamor_pixmap_from_fd(ScreenPtr screen,
                       CARD16 stride, CARD8 depth, CARD8 bpp)
 {
     PixmapPtr pixmap;
-    Bool ret;
+    bool ret;
 
     pixmap = screen->CreatePixmap(screen, 0, 0, depth, 0);
 
@@ -1483,7 +1484,7 @@ void
 glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
 {
     EGLImageKHR temp_img;
-    Bool temp_mod;
+    bool temp_mod;
     struct glamor_pixmap_private *front_priv =
         glamor_get_pixmap_private(front);
     struct glamor_pixmap_private *back_priv =
@@ -2443,7 +2444,7 @@ glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int is_nvidia)
     /* Check if at least one combination of format + modifier is supported */
     CARD32 *formats = NULL;
     CARD32 num_formats = 0;
-    Bool found = FALSE;
+    bool found = FALSE;
 
     int linear_only;
 

@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+
+#include <stdbool.h>
 #include "glamor_priv.h"
 #include "glamor_transform.h"
 #include "glamor_program.h"
@@ -272,7 +274,7 @@ glamor_build_program(ScreenPtr          screen,
     char                        *fs_prog_string = NULL;
 
     GLint                       fs_prog, vs_prog;
-    Bool                        gpu_shader4 = FALSE;
+    bool                        gpu_shader4 = FALSE;
 
     if (!fill)
         fill = &facet_null_fill;

@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "os/bug_priv.h"
 #include "os/mathx_priv.h"
 
@@ -374,7 +376,7 @@ glamor_copy_fbo_fbo_draw(DrawablePtr src,
     glamor_program *prog;
     const glamor_facet *copy_facet;
     int n;
-    Bool ret = FALSE;
+    bool ret = FALSE;
     BoxRec bounds = glamor_no_rendering_bounds();
 
     glamor_make_current(glamor_priv);
