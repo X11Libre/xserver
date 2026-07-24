@@ -35,6 +35,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xfuncproto.h>
 
 #include "dix/dix_priv.h"
@@ -116,7 +117,7 @@ PseudoramiXAddScreen(int x, int y, int w, int h)
 void
 PseudoramiXExtensionInit(void)
 {
-    Bool success = FALSE;
+    bool success = FALSE;
     ExtensionEntry      *extEntry;
 
     if (noPseudoramiXExtension) return;
