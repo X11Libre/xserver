@@ -30,6 +30,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -129,7 +130,7 @@ CheckMode(ScrnInfoPtr pScrn, vbeInfoPtr pVbe, VbeInfoBlock * vbe, int id,
     VbeModeInfoBlock *mode;
     DisplayModePtr pMode;
     VbeModeInfoData *data;
-    Bool modeOK = FALSE;
+    bool modeOK = FALSE;
 
     major = (unsigned) (vbe->VESAVersion >> 8);
 

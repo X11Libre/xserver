@@ -22,6 +22,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
@@ -209,7 +210,7 @@ void
 xf86CrtcSetScreenSubpixelOrder(ScreenPtr pScreen)
 {
     int subpixel_order = SubPixelUnknown;
-    Bool has_none = FALSE;
+    bool has_none = FALSE;
     ScrnInfoPtr scrn = xf86ScreenToScrn(pScreen);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
     int icrtc, o;
@@ -276,14 +277,14 @@ xf86CrtcSetModeTransform(xf86CrtcPtr crtc, DisplayModePtr mode,
     ScrnInfoPtr scrn = crtc->scrn;
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
     int i;
-    Bool ret = FALSE;
-    Bool didLock = FALSE;
+    bool ret = FALSE;
+    bool didLock = FALSE;
     DisplayModePtr adjusted_mode;
     DisplayModeRec saved_mode;
     int saved_x, saved_y;
     Rotation saved_rotation;
     RRTransformRec saved_transform;
-    Bool saved_transform_present;
+    bool saved_transform_present;
 
     crtc->enabled = xf86CrtcInUse(crtc) && !xf86CrtcIsLeased(crtc);
 
@@ -1115,7 +1116,7 @@ xf86UserConfiguredOutputs(ScrnInfoPtr scrn, DisplayModePtr * modes)
 {
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(scrn);
     int o;
-    Bool user_conf = FALSE;
+    bool user_conf = FALSE;
 
     for (o = 0; o < config->num_output; o++) {
         xf86OutputPtr output = config->output[o];
@@ -1177,8 +1178,8 @@ xf86InitialOutputPositions(ScrnInfoPtr scrn, DisplayModePtr * modes)
      * Loop until all outputs are set
      */
     for (;;) {
-        Bool any_set = FALSE;
-        Bool keep_going = FALSE;
+        bool any_set = FALSE;
+        bool keep_going = FALSE;
 
         for (o = 0; o < config->num_output; o++) {
             static const OutputOpts relations[] = {
@@ -1596,8 +1597,8 @@ enum det_monrec_source {
 struct det_monrec_parameter {
     MonRec *mon_rec;
     int *max_clock;
-    Bool set_hsync;
-    Bool set_vrefresh;
+    bool set_hsync;
+    bool set_vrefresh;
     enum det_monrec_source *sync_source;
 };
 
@@ -1659,7 +1660,7 @@ xf86ProbeOutputModes(ScrnInfoPtr scrn, int maxX, int maxY)
         int max_clock = 0;
         double clock;
         Bool add_default_modes;
-        Bool debug_modes = config->debug_modes || xf86Initialising;
+        bool debug_modes = !!(config->debug_modes || xf86Initialising);
         enum det_monrec_source sync_source = sync_default;
 
         while (output->probed_modes != NULL)
@@ -2044,7 +2045,7 @@ static Bool
 xf86CollectEnabledOutputs(ScrnInfoPtr scrn, xf86CrtcConfigPtr config,
                           Bool *enabled)
 {
-    Bool any_enabled = FALSE;
+    bool any_enabled = FALSE;
     int o;
 
     /*
@@ -2162,7 +2163,7 @@ xf86TargetRightOf(ScrnInfoPtr scrn, xf86CrtcConfigPtr config,
 {
     int o;
     int w = 0;
-    Bool has_tile = FALSE;
+    bool has_tile = FALSE;
     uint32_t configured_outputs;
 
     xf86GetOptValBool(config->options, OPTION_PREFER_CLONEMODE,
@@ -2267,7 +2268,7 @@ xf86TargetPreferred(ScrnInfoPtr scrn, xf86CrtcConfigPtr config,
     int o, p;
     int max_pref_width = 0, max_pref_height = 0;
     DisplayModePtr *preferred, *preferred_match;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     preferred = XNFcallocarray(config->num_output, sizeof(DisplayModePtr));
     preferred_match = XNFcallocarray(config->num_output, sizeof(DisplayModePtr));
@@ -2281,10 +2282,10 @@ xf86TargetPreferred(ScrnInfoPtr scrn, xf86CrtcConfigPtr config,
                                                        width, height))) {
             int pref_width = xf86ModeWidth(preferred[p], r);
             int pref_height = xf86ModeHeight(preferred[p], r);
-            Bool all_match = TRUE;
+            bool all_match = TRUE;
 
             for (o = -1; nextEnabledOutput(config, enabled, &o);) {
-                Bool match = FALSE;
+                bool match = FALSE;
                 xf86OutputPtr output = config->output[o];
 
                 if (o == p)
@@ -2376,7 +2377,7 @@ xf86TargetAspect(ScrnInfoPtr scrn, xf86CrtcConfigPtr config,
     int o;
     float aspect = 0.0, *aspects;
     xf86OutputPtr output;
-    Bool ret = FALSE;
+    bool ret = FALSE;
     DisplayModePtr guess = NULL, aspect_guess = NULL, base_guess = NULL;
 
     aspects = XNFcallocarray(config->num_output, sizeof(float));
@@ -2531,9 +2532,9 @@ xf86InitialConfiguration(ScrnInfoPtr scrn, Bool canGrow)
     int width, height;
     int no_output_width, no_output_height;
     int i = scrn->scrnIndex;
-    Bool have_outputs = TRUE;
-    Bool ret;
-    Bool success = FALSE;
+    bool have_outputs = TRUE;
+    bool ret;
+    bool success = FALSE;
 
     /* Set up the device options */
     config->options = XNFalloc(sizeof(xf86DeviceOptions));
@@ -2944,7 +2945,7 @@ Bool
 xf86SetSingleMode(ScrnInfoPtr pScrn, DisplayModePtr desired, Rotation rotation)
 {
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(pScrn);
-    Bool ok = TRUE;
+    bool ok = TRUE;
     xf86OutputPtr compat_output;
     DisplayModePtr compat_mode = NULL;
     int c;
@@ -3153,7 +3154,7 @@ xf86OutputSetTileProperty(xf86OutputPtr output)
 struct det_phySize_parameter {
     xf86OutputPtr output;
     ddc_quirk_t quirks;
-    Bool ret;
+    bool ret;
 };
 
 static void
@@ -3232,7 +3233,7 @@ xf86OutputSetEDID(xf86OutputPtr output, xf86MonPtr edid_mon)
 {
     ScrnInfoPtr scrn = output->scrn;
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(scrn);
-    Bool debug_modes = config->debug_modes || xf86Initialising;
+    bool debug_modes = !!(config->debug_modes || xf86Initialising);
 
 #ifdef RANDR_12_INTERFACE
     int size;
@@ -3421,7 +3422,7 @@ xf86_crtc_clip_video_helper(ScrnInfoPtr pScrn,
                             INT32 *ya,
                             INT32 *yb, RegionPtr reg, INT32 width, INT32 height)
 {
-    Bool ret;
+    bool ret;
     RegionRec crtc_region_local;
     RegionPtr crtc_region = reg;
 

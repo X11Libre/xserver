@@ -1,5 +1,6 @@
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 #include <X11/X.h>
 
@@ -137,7 +138,7 @@ Bool
 xf86CheckHWCursor(ScreenPtr pScreen, CursorPtr cursor, xf86CursorInfoPtr infoPtr)
 {
     ScreenPtr pSlave;
-    Bool use_hw_cursor = TRUE;
+    bool use_hw_cursor = TRUE;
 
     input_lock();
 
@@ -239,7 +240,7 @@ xf86SetCursor(ScreenPtr pScreen, CursorPtr pCurs, int x, int y)
         (xf86CursorScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
                                                &xf86CursorScreenKeyRec);
     ScreenPtr pSlave;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     input_lock();
 

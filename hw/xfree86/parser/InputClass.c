@@ -24,6 +24,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "os/fmt.h"
@@ -102,7 +103,7 @@ xf86parseInputClassSection(void)
 {
     int has_ident = FALSE;
     int token;
-    Bool negated;
+    bool negated;
     xf86MatchGroup *group;
 
     parsePrologue(XF86ConfInputClassPtr, XF86ConfInputClassRec)
@@ -350,7 +351,7 @@ xf86printInputClassSection (FILE * cf, XF86ConfInputClassPtr ptr)
 {
     const xf86MatchGroup *group;
     const xf86MatchPattern *pattern;
-    Bool not_first;
+    bool not_first;
 
     while (ptr) {
         fprintf(cf, "Section \"InputClass\"\n");

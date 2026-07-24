@@ -11,6 +11,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "include/misc.h"
@@ -367,7 +368,7 @@ DDC2Read(I2CDevPtr dev, int block, unsigned char *R_Buffer)
         /* Stop bits reset the segment pointer to 0, so be careful here. */
         segment = block >> 1;
         if (segment) {
-            Bool b;
+            bool b;
 
             if (!(seg = xf86I2CFindDev(dev->pI2CBus, 0x0060)))
                 return FALSE;

@@ -25,6 +25,7 @@
 #include <xorg-config.h>
 
 #include <dbus/dbus.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -46,8 +47,8 @@
 struct systemd_logind_info {
     DBusConnection *conn;
     char *session;
-    Bool active;
-    Bool vt_active;
+    bool active;
+    bool vt_active;
 };
 
 static struct systemd_logind_info logind_info;

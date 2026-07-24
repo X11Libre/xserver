@@ -4,6 +4,8 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
+
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86Pci.h"
@@ -84,7 +86,7 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
     int pagesize;
     memType cs;
     legacyVGARec vga;
-    Bool videoBiosMapped = FALSE;
+    bool videoBiosMapped = FALSE;
     ScrnInfoPtr pScrn;
     if (int10Generation != serverGeneration) {
         counter = 0;

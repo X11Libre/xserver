@@ -26,6 +26,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 
 #include "xf86_priv.h"
@@ -195,7 +196,7 @@ xf86HandlePMEvents(int fd, void *data)
 {
     pmEvent events[MAX_NO_EVENTS];
     int i, n;
-    Bool wait = FALSE;
+    bool wait = FALSE;
 
     if (!xf86PMGetEventFromOs)
         return;
