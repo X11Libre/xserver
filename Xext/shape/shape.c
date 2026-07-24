@@ -42,6 +42,7 @@ in this Software without prior written authorization from The Open Group.
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "os.h"
@@ -312,8 +313,9 @@ ProcShapeRectangles(ClientPtr client)
     X_REQUEST_REST_CARD16();
 
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled()) {
         return ShapeRectangles(client, stuff);
+    }
 
     PanoramiXRes *win;
     int result;
@@ -410,8 +412,9 @@ ProcShapeMask(ClientPtr client)
     X_REQUEST_FIELD_CARD32(src);
 
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled()) {
         return ShapeMask(client, stuff);
+    }
 
     PanoramiXRes *win, *pmap;
     int result;
@@ -540,8 +543,9 @@ ProcShapeCombine(ClientPtr client)
     X_REQUEST_FIELD_CARD32(src);
 
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled()) {
         return ShapeCombine(client, stuff);
+    }
 
     PanoramiXRes *win, *win2;
     int result;
@@ -614,8 +618,9 @@ ProcShapeOffset(ClientPtr client)
     PanoramiXRes *win;
     int result;
 
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled()) {
         return ShapeOffset(client, stuff);
+    }
 
     result = dixLookupResourceByType((void **) &win, stuff->dest, XRT_WINDOW,
                                      client, DixWriteAccess);

@@ -29,6 +29,7 @@
 #include "include/extinit.h"
 #include "include/xf86DDC.h"
 #include "os/mathx_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/randr/randrstr_priv.h"
 
 #include "xf86.h"
@@ -759,11 +760,9 @@ xf86RandR12CreateScreenResources(ScreenPtr pScreen)
     int width, height;
     int mmWidth, mmHeight;
 
-#ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled())
         return TRUE;
-#endif /* XINERAMA */
 
     config = XF86_CRTC_CONFIG_PTR(pScrn);
     randrp = XF86RANDRINFO(pScreen);
@@ -850,7 +849,7 @@ xf86RandR12Init(ScreenPtr pScreen)
 
 #ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         if (xf86NumScreens == 1)
             noPanoramiXExtension = TRUE;
         else

@@ -130,6 +130,7 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "os/probes_priv.h"
 #include "os/screensaver.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/xfixes/xfixesint.h"
 
 #include "windowstr.h"
@@ -2775,8 +2776,9 @@ ProcAllocNamedColor(ClientPtr client)
         swaps(&reply.screenBlue);
     }
 
+    /* if PanoramiX is active, and this isn't the master screen, keep radio silence */
 #ifdef XINERAMA
-    if (noPanoramiXExtension || !pcmp->pScreen->myNum)
+    if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
         return X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 #else
@@ -2825,7 +2827,7 @@ ProcAllocColorCells(ClientPtr client)
             return rc;
         }
 #ifdef XINERAMA
-        if (noPanoramiXExtension || !pcmp->pScreen->myNum)
+        if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
 #endif /* XINERAMA */
         {
             xAllocColorCellsReply reply = {
@@ -2901,7 +2903,7 @@ ProcAllocColorPlanes(ClientPtr client)
         }
 
 #ifdef XINERAMA
-        if (noPanoramiXExtension || !pcmp->pScreen->myNum)
+        if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
 #endif /* XINERAMA */
         {
             return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
@@ -3878,7 +3880,7 @@ SendConnSetup(ClientPtr client, const char *reason)
     /* fill in the "currentInputMask" */
     root = (xWindowRoot *) (lConnectionInfo + connBlockScreenStart);
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled())
         numScreens = screenInfo.numScreens;
     else
         numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;

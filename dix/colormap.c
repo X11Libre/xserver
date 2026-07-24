@@ -61,6 +61,7 @@ SOFTWARE.
 #include "include/misc.h"
 #include "os/osdep.h"
 #include "os/bug_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "dix.h"
 #include "dixstruct.h"
@@ -470,7 +471,7 @@ TellNoMap(WindowPtr pwin, Colormap * pmid)
         };
         xE.u.u.type = ColormapNotify;
 #ifdef XINERAMA
-        if (noPanoramiXExtension || !pwin->drawable.pScreen->myNum)
+        if (PanoramiXIsDisabled() || !pwin->drawable.pScreen->myNum)
 #endif /* XINERAMA */
             DeliverEvents(pwin, &xE, 1, (WindowPtr) NULL);
         if (pwin->optional) {
@@ -488,10 +489,10 @@ TellLostMap(WindowPtr pwin, void *value)
 {
     Colormap *pmid = (Colormap *) value;
 
-#ifdef XINERAMA
-    if (!noPanoramiXExtension && pwin->drawable.pScreen->myNum)
+    if (PanoramiXIsEnabled() && pwin->drawable.pScreen->myNum) {
         return WT_STOPWALKING;
-#endif /* XINERAMA */
+    }
+
     if (wColormap(pwin) == *pmid) {
         /* This should be call to DeliverEvent */
         xEvent xE = {
@@ -514,9 +515,11 @@ TellGainedMap(WindowPtr pwin, void *value)
     Colormap *pmid = (Colormap *) value;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && pwin->drawable.pScreen->myNum)
+    if (PanoramiXIsEnabled() && pwin->drawable.pScreen->myNum) {
         return WT_STOPWALKING;
-#endif /* XINERAMA */
+    }
+#endif
+
     if (wColormap(pwin) == *pmid) {
         /* This should be call to DeliverEvent */
         xEvent xE = {

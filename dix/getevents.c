@@ -50,6 +50,7 @@
 #include "os/probes_priv.h"
 #include "os/mathx_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "resource.h"
@@ -2120,7 +2121,7 @@ PostSyntheticMotion(DeviceIntPtr pDev,
     /* Translate back to the sprite screen since processInputProc
        will translate from sprite screen to screen 0 upon reentry
        to the DIX layer. */
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         x += masterScreen->x - screenInfo.screens[screen]->x;
         y += masterScreen->y - screenInfo.screens[screen]->y;

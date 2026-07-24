@@ -37,6 +37,7 @@
 #include "Xext/damage/damageext_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/xfixes/xfixes.h"
 
 #include "damagestr.h"
@@ -107,7 +108,7 @@ static void
 damageGetGeometry(DrawablePtr draw, int *x, int *y, int *w, int *h)
 {
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && draw->type == DRAWABLE_WINDOW) {
+    if (PanoramiXIsEnabled() && draw->type == DRAWABLE_WINDOW) {
         WindowPtr win = (WindowPtr)draw;
 
         if (!win->parent) {
@@ -410,7 +411,7 @@ static bool DamageExtSubtract(DamageExtPtr pDamageExt, const RegionPtr pRegion)
     DamagePtr pDamage = pDamageExt->pDamage;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         RegionPtr damage = DamageRegion(pDamage);
         RegionSubtract(damage, damage, pRegion);
 

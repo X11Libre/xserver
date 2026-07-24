@@ -35,6 +35,7 @@
 
 #include "include/extinit.h"
 #include "mi/mi_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "win.h"
 #include "winmsg.h"
@@ -186,7 +187,7 @@ winScreenInit(ScreenPtr pScreen, int argc, char **argv)
     else
         winErrorFVerb(2, "winScreenInit - Using software cursor\n");
 
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         /*
            Note the screen origin in a normalized coordinate space where (0,0) is at the top left
            of the native virtual desktop area

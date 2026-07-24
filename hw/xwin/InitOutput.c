@@ -42,6 +42,7 @@ from The Open Group.
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
 #endif
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/pseudoramiX/pseudoramiX.h"
 
 #include "winmsg.h"
@@ -933,7 +934,7 @@ InitOutput(int argc, char *argv[])
   /*
      Unless full xinerama has been explicitly enabled, register all native screens with pseudoramiX
   */
-  if (!noPanoramiXExtension)
+  if (PanoramiXIsEnabled())
       noPseudoramiXExtension = TRUE;
 
   if ((g_ScreenInfo[0].fMultipleMonitors) && !noPseudoramiXExtension)

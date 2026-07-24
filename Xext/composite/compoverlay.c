@@ -49,6 +49,7 @@
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "compositeext_intern.h"
 #include "compint.h"
@@ -143,7 +144,7 @@ bool compCreateOverlayWindow(ScreenPtr pScreen)
     int x = 0, y = 0;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         x = -pScreen->x;
         y = -pScreen->y;
         w = PanoramiXPixWidth;

@@ -77,6 +77,7 @@ Equipment Corporation.
 #include <version-config.h>
 
 #include <pixman.h>
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xos.h>            /* for unistd.h  */
 #include <X11/Xproto.h>
@@ -106,6 +107,7 @@ Equipment Corporation.
 #include "os/screensaver.h"
 #include "os/serverlock.h"
 #include "Xext/dpms/dpms_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "scrnintstr.h"
@@ -241,8 +243,9 @@ dix_main(int argc, char *argv[], char *envp[])
     /*
      * Consolidate window and colourmap information for each screen
      */
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         PanoramiXConsolidate();
+    }
 #endif /* XINERAMA */
 
     DIX_FOR_EACH_SCREEN({
@@ -264,7 +267,7 @@ dix_main(int argc, char *argv[], char *envp[])
     dixCloseRegistry();
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         if (!PanoramiXCreateConnectionBlock()) {
             FatalError("could not create connection block info");
         }
@@ -295,11 +298,11 @@ dix_main(int argc, char *argv[], char *envp[])
 
 #ifdef XINERAMA
     {
-        Bool remember_it = noPanoramiXExtension;
+        bool remember_it = PanoramiXIsDisabled();
 
         noPanoramiXExtension = TRUE;
         FreeAllResources();
-        noPanoramiXExtension = remember_it;
+        noPanoramiXExtension = (!!remember_it);
     }
 #else
     FreeAllResources();

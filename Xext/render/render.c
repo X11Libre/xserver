@@ -41,6 +41,7 @@
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "os.h"
@@ -200,7 +201,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xRenderQueryPictFormatsReq);
 
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled())
         numScreens = screenInfo.numScreens;
     else
         numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;

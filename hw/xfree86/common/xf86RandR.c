@@ -28,6 +28,7 @@
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
 #include "include/xf86DDC.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "os.h"
 #include "globals.h"
@@ -363,11 +364,10 @@ xf86RandRInit(ScreenPtr pScreen)
     rrScrPrivPtr rp;
     ScrnInfoPtr scrp = xf86ScreenToScrn(pScreen);
 
-#ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         return TRUE;
-#endif /* XINERAMA */
+    }
 
     xf86RandRKey = &xf86RandRKeyRec;
 

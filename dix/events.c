@@ -142,6 +142,7 @@ Equipment Corporation.
 #include "os/log_priv.h"
 #include "os/probes_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/xinput/exglobals.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
@@ -522,7 +523,7 @@ SyntheticMotion(DeviceIntPtr dev, int x, int y)
     int screenno = 0;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled())
         screenno = dev->spriteInfo->sprite->screen->myNum;
 #endif /* XINERAMA */
     PostSyntheticMotion(dev, x, y, screenno,
@@ -626,8 +627,6 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
     SpritePtr pSprite = pDev->spriteInfo->sprite;
 
     int x, y, off_x, off_y;
-
-    assert(!noPanoramiXExtension);
 
     if (!XineramaSetWindowPntrs(pDev, pWin))
         return;
@@ -747,7 +746,7 @@ CheckPhysLimits(DeviceIntPtr pDev, CursorPtr cursor, Bool generateEvents,
         return;
     new = pSprite->hotPhys;
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled())
         /* I don't care what the DDX has to say about it */
         pSprite->physLimits = pSprite->hotLimits;
     else
@@ -775,13 +774,11 @@ CheckPhysLimits(DeviceIntPtr pDev, CursorPtr cursor, Bool generateEvents,
     if (pSprite->hotShape)
         ConfineToShape(pSprite->hotShape, &new.x, &new.y);
     if ((
-#ifdef XINERAMA
-            noPanoramiXExtension &&
-#endif /* XINERAMA */
+            PanoramiXIsDisabled() &&
             (pScreen != pSprite->hotPhys.pScreen)) ||
         (new.x != pSprite->hotPhys.x) || (new.y != pSprite->hotPhys.y)) {
 #ifdef XINERAMA
-        if (!noPanoramiXExtension)
+        if (PanoramiXIsEnabled())
             XineramaSetCursorPosition(pDev, new.x, new.y, generateEvents);
         else
 #endif /* XINERAMA */
@@ -797,7 +794,7 @@ CheckPhysLimits(DeviceIntPtr pDev, CursorPtr cursor, Bool generateEvents,
 
 #ifdef XINERAMA
     /* Tell DDX what the limits are */
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled())
         XineramaConstrainCursor(pDev);
 #endif /* XINERAMA */
 }
@@ -834,7 +831,7 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
         BoxRec lims;
 
 #ifdef XINERAMA
-        if (!noPanoramiXExtension) {
+        if (PanoramiXIsEnabled()) {
             int x, y, off_x, off_y;
 
             if (!XineramaSetWindowPntrs(pDev, pWin))
@@ -882,7 +879,7 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
             pSprite->hot.y = lims.y2 - 1;
 
 #ifdef XINERAMA
-        if (!noPanoramiXExtension) {
+        if (PanoramiXIsEnabled()) {
             if (RegionNumRects(&pSprite->Reg2) > 1)
                 reg = &pSprite->Reg2;
 
@@ -903,9 +900,7 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
             ev->root_y = pSprite->hot.y;
         }
     }
-#ifdef XINERAMA
-    if (noPanoramiXExtension)   /* No typo. Only set the root win if disabled */
-#endif /* XINERAMA */
+    if (PanoramiXIsDisabled())   /* No typo. Only set the root win if disabled */
         RootWindow(pDev->spriteInfo->sprite) = pSprite->hot.pScreen->root;
 }
 
@@ -923,7 +918,7 @@ ConfineCursorToWindow(DeviceIntPtr pDev, WindowPtr pWin, Bool generateEvents,
         ScreenPtr pScreen = pWin->drawable.pScreen;
 
 #ifdef XINERAMA
-        if (!noPanoramiXExtension) {
+        if (PanoramiXIsEnabled()) {
             XineramaConfineCursorToWindow(pDev, pWin, generateEvents);
             return;
         }
@@ -965,7 +960,7 @@ ChangeToCursor(DeviceIntPtr pDev, CursorPtr cursor)
                             (ScreenPtr) NULL);
 #ifdef XINERAMA
         /* XXX: is this really necessary?? (whot) */
-        if (!noPanoramiXExtension)
+        if (PanoramiXIsEnabled())
             pScreen = pSprite->screen;
         else
 #endif /* XINERAMA */
@@ -1191,7 +1186,7 @@ EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
 
     if (event->type == ET_Motion) {
 #ifdef XINERAMA
-        if (!noPanoramiXExtension) {
+        if (PanoramiXIsEnabled()) {
             ScreenPtr masterScreen = dixGetMasterScreen();
             event->root_x += pSprite->screen->x - masterScreen->x;
             event->root_y += pSprite->screen->y - masterScreen->y;
@@ -1261,7 +1256,7 @@ PlayReleasedEvents(void)
             /* Translate back to the sprite screen since processInputProc
                will translate from sprite screen to screen 0 upon reentry
                to the DIX layer */
-            if (!noPanoramiXExtension) {
+            if (PanoramiXIsEnabled()) {
                 DeviceEvent *ev = &qe->event->device_event;
 
                 switch (ev->type) {
@@ -2559,7 +2554,7 @@ Bool MaybeDeliverEventToClient(WindowPtr pWin, xEvent *pEvents,
         if (dixClientForWindow(pWin) == dontClient)
             return FALSE;
 #ifdef XINERAMA
-        if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
+        if (PanoramiXIsEnabled() && pWin->drawable.pScreen->myNum)
             return XineramaTryClientEventsResult(dixClientForWindow(pWin), NullGrab,
                                                  pWin->eventMask, filter);
 #endif /* XINERAMA */
@@ -2573,7 +2568,7 @@ Bool MaybeDeliverEventToClient(WindowPtr pWin, xEvent *pEvents,
             if (SameClient(other, dontClient))
                 return FALSE;
 #ifdef XINERAMA
-            if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
+            if (PanoramiXIsEnabled() && pWin->drawable.pScreen->myNum)
                 return XineramaTryClientEventsResult(dixClientForOtherClients(other), NullGrab,
                                                      other->mask, filter);
 #endif /* XINERAMA */
@@ -2955,7 +2950,7 @@ DeliverEvents(WindowPtr pWin, xEvent *xE, size_t count, WindowPtr otherParent)
     int deliveries;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
+    if (PanoramiXIsEnabled() && pWin->drawable.pScreen->myNum)
         return count;
 #endif /* XINERAMA */
 
@@ -3023,7 +3018,7 @@ PointInBorderSize(WindowPtr pWin, int x, int y)
         return TRUE;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension &&
+    if (PanoramiXIsEnabled() &&
         XineramaSetWindowPntrs(inputInfo.pointer, pWin)) {
         SpritePtr pSprite = inputInfo.pointer->spriteInfo->sprite;
         ScreenPtr masterScreen = dixGetMasterScreen();
@@ -3178,7 +3173,7 @@ CheckMotion(DeviceEvent *ev, DeviceIntPtr pDev)
         }
 
 #ifdef XINERAMA
-        if (!noPanoramiXExtension) {
+        if (PanoramiXIsEnabled()) {
             /* Motion events entering DIX get translated to Screen 0
                coordinates.  Replayed events have already been
                translated since they've entered DIX before */
@@ -3214,7 +3209,7 @@ CheckMotion(DeviceEvent *ev, DeviceIntPtr pDev)
         if ((pSprite->hotPhys.x != ev->root_x) ||
             (pSprite->hotPhys.y != ev->root_y)) {
 #ifdef XINERAMA
-            if (!noPanoramiXExtension) {
+            if (PanoramiXIsEnabled()) {
                 XineramaSetCursorPosition(pDev, pSprite->hotPhys.x,
                                           pSprite->hotPhys.y, FALSE);
             }
@@ -3374,7 +3369,7 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
         dixScreenRaiseDisplayCursor(pScreen, pDev, pSprite->current);
     }
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         pSprite->hotLimits.x1 = -masterScreen->x;
         pSprite->hotLimits.y1 = -masterScreen->y;
@@ -3453,7 +3448,7 @@ UpdateSpriteForScreen(DeviceIntPtr pDev, ScreenPtr pScreen)
     dixScreenRaiseDisplayCursor(pScreen, pDev, pSprite->current);
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         pSprite->hotLimits.x1 = -masterScreen->x;
         pSprite->hotLimits.y1 = -masterScreen->y;
@@ -3494,7 +3489,7 @@ NewCurrentScreen(DeviceIntPtr pDev, ScreenPtr newScreen, int x, int y)
     pSprite->hotPhys.x = x;
     pSprite->hotPhys.y = y;
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         pSprite->hotPhys.x += newScreen->x - masterScreen->x;
         pSprite->hotPhys.y += newScreen->y - masterScreen->y;
@@ -3668,7 +3663,7 @@ ProcWarpPointer(ClientPtr client)
     pSprite = dev->spriteInfo->sprite;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled())
         return XineramaWarpPointer(client);
 #endif /* XINERAMA */
 
@@ -3750,7 +3745,7 @@ BorderSizeNotEmpty(DeviceIntPtr pDev, WindowPtr pWin)
         return TRUE;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && XineramaSetWindowPntrs(pDev, pWin)) {
+    if (PanoramiXIsEnabled() && XineramaSetWindowPntrs(pDev, pWin)) {
         XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
             if (RegionNotEmpty
                 (&pDev->spriteInfo->sprite->windows[walkScreenIdx]->borderSize))
@@ -5390,7 +5385,7 @@ ProcQueryPointer(ClientPtr client)
     }
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         reply.rootX += masterScreen->x;
         reply.rootY += masterScreen->y;
@@ -5963,7 +5958,7 @@ CheckCursorConfinement(WindowPtr pWin)
     WindowPtr confineTo;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
+    if (PanoramiXIsEnabled() && pWin->drawable.pScreen->myNum)
         return;
 #endif /* XINERMA */
 
@@ -6023,7 +6018,7 @@ ProcRecolorCursor(ClientPtr client)
 
     DIX_FOR_EACH_SCREEN({
 #ifdef XINERAMA
-        if (!noPanoramiXExtension)
+        if (PanoramiXIsEnabled())
             displayed = (walkScreen == pSprite->screen);
         else
 #endif /* XINERAMA */
@@ -6069,7 +6064,7 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
 
 #ifdef XINERAMA
     ScreenPtr masterScreen = dixGetMasterScreen();
-    if (!noPanoramiXExtension && (masterScreen->x || masterScreen->y)) {
+    if (PanoramiXIsEnabled() && (masterScreen->x || masterScreen->y)) {
         switch (events->u.u.type) {
         case MotionNotify:
         case ButtonPress:

@@ -969,14 +969,13 @@ static void miDbeWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowP
 void
 DbeExtensionInit(void)
 {
+    if (PanoramiXIsEnabled()) {
+        return;
+    }
+
     ExtensionEntry *extEntry;
     DbeScreenPrivPtr pDbeScreenPriv;
     int nStubbedScreens = 0;
-
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return;
-#endif /* XINERAMA */
 
     /* Create the resource types. */
     dbeDrawableResType =

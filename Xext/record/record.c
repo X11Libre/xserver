@@ -722,7 +722,7 @@ RecordSendProtocolEvents(RecordClientsAndProtocolPtr pRCAP,
 #ifdef XINERAMA
             xEvent shiftedEvent;
 
-            if (!noPanoramiXExtension &&
+            if (PanoramiXIsEnabled() &&
                 (pev->u.u.type == MotionNotify ||
                  pev->u.u.type == ButtonPress ||
                  pev->u.u.type == ButtonRelease ||

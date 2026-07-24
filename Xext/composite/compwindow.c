@@ -51,6 +51,7 @@
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "os/osdep.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "compint.h"
@@ -162,7 +163,7 @@ updateOverlayWindow(ScreenPtr pScreen)
     int h = pScreen->height;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         w = PanoramiXPixWidth;
         h = PanoramiXPixHeight;
     }
