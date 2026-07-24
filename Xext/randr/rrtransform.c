@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "include/rrtransform.h"
 #include "Xext/randr/randrstr_priv.h"
 
@@ -144,7 +146,7 @@ RRTransformCompute(int x,
 {
     PictTransform t_transform, inverse;
     struct pixman_f_transform tf_transform, tf_inverse;
-    Bool overflow = FALSE;
+    bool overflow = FALSE;
 
     if (!transform)
         transform = &t_transform;
