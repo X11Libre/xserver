@@ -62,6 +62,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #endif
@@ -257,10 +258,10 @@ CreateWellKnownSockets(void)
                 FatalError ("Failed to establish all listening sockets");
     }
     else { /* -displayfd and no explicit display number */
-        Bool found = 0;
+        bool found = FALSE;
         for (i = 0; i < 65536 - X_TCP_PORT; i++) {
             if (TryCreateSocket(i, &partial) && !partial) {
-                found = 1;
+                found = TRUE;
                 break;
             }
             else
