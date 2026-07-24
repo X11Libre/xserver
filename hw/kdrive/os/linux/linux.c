@@ -22,6 +22,7 @@
 
 #include <kdrive-config.h>
 #include "klinux.h"
+#include <stdbool.h>
 #include <errno.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
@@ -149,7 +150,7 @@ static void
 LinuxApmNotify(int fd, int mask, void *blockData)
 {
     apm_event_t event;
-    Bool running = LinuxApmRunning;
+    bool running = LinuxApmRunning;
     int cmd = APM_IOC_SUSPEND;
 
     while (read(fd, &event, sizeof(event)) == sizeof(event)) {

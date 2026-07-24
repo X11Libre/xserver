@@ -28,6 +28,7 @@
 #include <kdrive-config.h>
 
 #include <assert.h>
+#include <stdbool.h>
 
 #include "ephyr.h"
 #include "exa_priv.h"
@@ -437,7 +438,7 @@ ephyrDrawInit(ScreenPtr pScreen)
     EphyrScrPriv *scrpriv = screen->driver;
     EphyrPriv *priv = screen->card->driver;
     EphyrFakexaPriv *fakexa;
-    Bool success;
+    bool success;
 
     fakexa = calloc(1, sizeof(*fakexa));
     if (fakexa == NULL)

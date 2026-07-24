@@ -37,6 +37,7 @@ of the copyright holder.
 
 #include <kdrive-config.h>
 
+#include <stdbool.h>
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>
 
@@ -437,7 +438,7 @@ KdXVUpdateCompositeClip(XvPortRecPrivatePtr portPriv)
 {
     RegionPtr pregWin, pCompositeClip;
     WindowPtr pWin;
-    Bool freeCompClip = FALSE;
+    bool freeCompClip = FALSE;
 
     if (portPriv->pCompositeClip)
         return;
@@ -509,7 +510,7 @@ KdXVRegetVideo(XvPortRecPrivatePtr portPriv)
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     KdXVUpdateCompositeClip(portPriv);
 
@@ -570,7 +571,7 @@ KdXVReputVideo(XvPortRecPrivatePtr portPriv)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     KdXVUpdateCompositeClip(portPriv);
 
@@ -646,7 +647,7 @@ KdXVReputImage(XvPortRecPrivatePtr portPriv)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     KdXVUpdateCompositeClip(portPriv);
 
@@ -863,7 +864,7 @@ KdXVWindowExposures(WindowPtr pWin, RegionPtr reg1)
     KdXVWindowPtr WinPriv = GET_KDXV_WINDOW(pWin);
     KdXVWindowPtr pPrev;
     XvPortRecPrivatePtr pPriv;
-    Bool AreasExposed;
+    bool AreasExposed;
 
     AreasExposed = (WinPriv && reg1 && RegionNotEmpty(reg1));
 
@@ -1074,7 +1075,7 @@ KdXVPutStill(DrawablePtr pDraw,
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     if (pDraw->type != DRAWABLE_WINDOW)
         return BadAlloc;
@@ -1218,7 +1219,7 @@ KdXVGetStill(DrawablePtr pDraw,
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     if (pDraw->type != DRAWABLE_WINDOW)
         return BadAlloc;
@@ -1347,7 +1348,7 @@ KdXVPutImage(DrawablePtr pDraw,
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     if (pDraw->type != DRAWABLE_WINDOW)
         return BadAlloc;
