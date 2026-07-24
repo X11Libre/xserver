@@ -32,6 +32,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <errno.h>
 
 #include "dix/dix_priv.h"
@@ -556,8 +557,8 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
     if (!buffers)
         goto err_out;
 
-    Bool need_real_front = FALSE;
-    Bool need_fake_front = FALSE;
+    bool need_real_front = FALSE;
+    bool need_fake_front = FALSE;
     int front_format = 0;
     int buffers_changed = 0;
     int i;
