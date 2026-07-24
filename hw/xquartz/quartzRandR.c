@@ -33,6 +33,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/screenint_priv.h"
 
 #include "quartzRandR.h"
@@ -135,7 +137,7 @@ QuartzRandREnumerateModes(ScreenPtr pScreen,
                           QuartzModeCallback callback,
                           void *data)
 {
-    Bool retval = FALSE;
+    bool retval = FALSE;
     QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(pScreen);
 
     /* Just an 800x600 fallback if we have no attached heads */
@@ -255,7 +257,7 @@ QuartzRandREnumerateModes(ScreenPtr pScreen,
                           QuartzModeCallback callback,
                           void *data)
 {
-    Bool retval = FALSE;
+    bool retval = FALSE;
     QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(pScreen);
 
     /* Just an 800x600 fallback if we have no attached heads */

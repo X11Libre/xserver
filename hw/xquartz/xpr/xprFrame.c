@@ -29,7 +29,9 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
+
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
 #include "dix/screenint_priv.h"
@@ -593,7 +595,7 @@ xprGetXWindow(xp_window_id wid)
 Bool
 xprIsX11Window(int windowNumber)
 {
-    Bool ret;
+    bool ret;
     xp_window_id wid;
 
     if (xp_lookup_native_window(windowNumber, &wid))
