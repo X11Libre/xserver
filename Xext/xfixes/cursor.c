@@ -44,6 +44,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
@@ -146,7 +148,7 @@ static Bool
 CursorDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
     CursorPtr pOldCursor = CursorForDevice(pDev);
-    Bool ret;
+    bool ret;
     DisplayCursorProcPtr backupProc;
 
     Unwrap(&(pScreen->xfixes), pScreen, DisplayCursor, backupProc);
