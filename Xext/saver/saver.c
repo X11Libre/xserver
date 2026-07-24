@@ -158,7 +158,7 @@ SendScreenSaverNotify(ScreenPtr pScreen,
 typedef struct _ScreenSaverScreenPrivate {
     ScreenSaverEventPtr events;
     ScreenSaverAttrPtr attr;
-    Bool hasWindow;
+    bool hasWindow;
     Colormap installedMap;
 } ScreenSaverScreenPrivateRec, *ScreenSaverScreenPrivatePtr;
 
@@ -593,7 +593,7 @@ static Bool
 ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 {
     int state = 0;
-    Bool ret = FALSE;
+    bool ret = FALSE;
     ScreenSaverScreenPrivatePtr pPriv;
 
     switch (xstate) {
