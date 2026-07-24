@@ -28,9 +28,11 @@ Author:  Bob Scheifler, MIT X Consortium
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <math.h>
 #include <X11/X.h>
 #include <X11/Xprotostr.h>
+
 #include "regionstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
@@ -169,7 +171,7 @@ miEllipseAngleToSlope(int angle, int width, int height, int *dxp, int *dyp,
 {
     int dx, dy;
     double d_dx, d_dy, scale;
-    Bool negative_dx, negative_dy;
+    bool negative_dx, negative_dy;
 
     switch (angle) {
     case 0:
@@ -339,7 +341,7 @@ miFillArcSliceSetup(xArc * arc, miArcSliceRec * slice, GCPtr pGC)
     else {
         double w2, h2, x1, y1, x2, y2, dx, dy, scale;
         int signdx, signdy, y, k;
-        Bool isInt1 = TRUE, isInt2 = TRUE;
+        bool isInt1 = TRUE, isInt2 = TRUE;
 
         w2 = (double) arc->width / 2.0;
         h2 = (double) arc->height / 2.0;

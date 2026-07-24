@@ -73,6 +73,8 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #include "xf86Extensions.h"
@@ -208,7 +210,7 @@ EnableDisableExtensionError(const char *name, Bool enable)
 {
     const ExtensionModule *ext;
     int i;
-    Bool found = FALSE;
+    bool found = FALSE;
 
     for (i = 0; i < ARRAY_SIZE(staticExtensions); i++) {
         ext = &staticExtensions[i];

@@ -48,6 +48,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <math.h>
 #include <X11/X.h>
 #include <X11/Xprotostr.h>
@@ -895,7 +896,7 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
     int pixmapWidth = 0, pixmapHeight = 0;
     int xOrg = 0, yOrg = 0;
     int width = pGC->lineWidth;
-    Bool fTricky;
+    bool fTricky;
     DrawablePtr pDrawTo;
     CARD32 fg, bg;
     GCPtr pGCTo;
@@ -2266,7 +2267,7 @@ angleToLength(int angle, dashMap * map)
     double len, excesslen, sidelen = map->map[DASH_MAP_SIZE - 1], totallen;
     int di;
     int excess;
-    Bool oddSide = FALSE;
+    bool oddSide = FALSE;
 
     totallen = 0;
     if (angle >= 0) {
@@ -2314,7 +2315,7 @@ lengthToAngle(double len, dashMap * map)
 {
     double sidelen = map->map[DASH_MAP_SIZE - 1];
     int angle, angleexcess;
-    Bool oddSide = FALSE;
+    bool oddSide = FALSE;
     int a0, a1, a;
 
     angle = 0;

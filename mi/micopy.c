@@ -22,6 +22,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "mi.h"
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -37,8 +39,8 @@ miCopyRegion(DrawablePtr pSrcDrawable,
              int dx, int dy, miCopyProc copyProc, Pixel bitPlane, void *closure)
 {
     int careful;
-    Bool reverse;
-    Bool upsidedown;
+    bool reverse;
+    bool upsidedown;
     BoxPtr pbox;
     int nbox;
     BoxPtr pboxNew1, pboxNew2, pboxBase, pboxNext, pboxTmp;
@@ -136,7 +138,7 @@ miDoCopy(DrawablePtr pSrcDrawable,
          int xOut, int yOut, miCopyProc copyProc, Pixel bitPlane, void *closure)
 {
     RegionPtr prgnSrcClip = NULL;       /* may be a new region, or just a copy */
-    Bool freeSrcClip = FALSE;
+    bool freeSrcClip = FALSE;
     RegionPtr prgnExposed = NULL;
     RegionRec rgnDst;
     int dx;
@@ -146,9 +148,9 @@ miDoCopy(DrawablePtr pSrcDrawable,
     int box_y1;
     int box_x2;
     int box_y2;
-    Bool fastSrc = FALSE;       /* for fast clipping with pixmap source */
-    Bool fastDst = FALSE;       /* for fast clipping with one rect dest */
-    Bool fastExpose = FALSE;    /* for fast exposures with pixmap source */
+    bool fastSrc = FALSE;       /* for fast clipping with pixmap source */
+    bool fastDst = FALSE;       /* for fast clipping with one rect dest */
+    bool fastExpose = FALSE;    /* for fast exposures with pixmap source */
 
     /* Short cut for unmapped windows */
 

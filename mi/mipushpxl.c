@@ -45,7 +45,9 @@ SOFTWARE.
 ******************************************************************/
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
+
 #include "gcstruct.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
@@ -97,7 +99,7 @@ miPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr pDrawable,
     MiBits msk;
     int ib, w;
     int ipt;                    /* index into above arrays */
-    Bool fInBox;
+    bool fInBox;
     xPoint pt[NPT], ptThisLine;
     int width[NPT];
 

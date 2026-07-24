@@ -73,6 +73,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
@@ -132,7 +133,7 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
                                  */
     WindowPtr pSrcWin;
     BoxRec expBox = { 0, };
-    Bool extents;
+    bool extents;
 
     /* avoid work if we can */
     if (!pGC->graphicsExposures && pDstDrawable->type == DRAWABLE_PIXMAP)
@@ -417,7 +418,7 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
      */
     int tile_x_off, tile_y_off;
     PixUnion fill;
-    Bool solid = TRUE;
+    bool solid = TRUE;
     DrawablePtr drawable = &pWin->drawable;
 
     if (what == PW_BACKGROUND) {

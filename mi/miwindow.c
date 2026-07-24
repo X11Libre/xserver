@@ -46,6 +46,7 @@ SOFTWARE.
 ******************************************************************/
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/extensions/shapeconst.h>
 
@@ -141,7 +142,7 @@ miMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst, WindowPtr *ppLayerWin)
 {
     BoxPtr box;
     WindowPtr pChild, pLast;
-    Bool anyMarked = FALSE;
+    bool anyMarked = FALSE;
     MarkWindowProcPtr MarkWindow = pWin->drawable.pScreen->MarkWindow;
 
     /* single layered systems are easy */
@@ -252,7 +253,7 @@ miMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pNextSib, VTKind kind)
     short bw;
     RegionPtr oldRegion = NULL;
     xPoint oldpt;
-    Bool anyMarked = FALSE;
+    bool anyMarked = FALSE;
     ScreenPtr pScreen;
     WindowPtr windowToValidate;
     WindowPtr pLayerWin;
@@ -352,7 +353,7 @@ miResizeWindow(WindowPtr pWin, int x, int y, unsigned int w, unsigned int h,
     short dw, dh;
     xPoint oldpt;
     RegionPtr oldRegion = NULL;
-    Bool anyMarked = FALSE;
+    bool anyMarked = FALSE;
     ScreenPtr pScreen;
     WindowPtr pFirstChange;
     WindowPtr pChild;
@@ -364,8 +365,8 @@ miResizeWindow(WindowPtr pWin, int x, int y, unsigned int w, unsigned int h,
     RegionPtr destClip;         /* portions of destination already written */
     RegionPtr oldWinClip = NULL;        /* old clip list for window */
     RegionPtr borderVisible = NullRegion;       /* visible area of the border */
-    Bool shrunk = FALSE;        /* shrunk in an inner dimension */
-    Bool moved = FALSE;         /* window position changed */
+    bool shrunk = FALSE;        /* shrunk in an inner dimension */
+    bool moved = FALSE;         /* window position changed */
     WindowPtr pLayerWin;
 
     /* if this is a root window, can't be resized */
@@ -636,7 +637,7 @@ miSetShape(WindowPtr pWin, int kind)
 {
     Bool WasViewable = (Bool) (pWin->viewable);
     ScreenPtr pScreen = pWin->drawable.pScreen;
-    Bool anyMarked = FALSE;
+    bool anyMarked = FALSE;
     WindowPtr pLayerWin;
 
     if (kind != ShapeInput) {
@@ -685,10 +686,10 @@ void
 miChangeBorderWidth(WindowPtr pWin, unsigned int width)
 {
     int oldwidth;
-    Bool anyMarked = FALSE;
+    bool anyMarked = FALSE;
     ScreenPtr pScreen;
     Bool WasViewable = (Bool) (pWin->viewable);
-    Bool HadBorder;
+    bool HadBorder;
     WindowPtr pLayerWin;
 
     oldwidth = wBorderWidth(pWin);

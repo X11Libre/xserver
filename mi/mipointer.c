@@ -48,6 +48,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
@@ -78,10 +79,10 @@ typedef struct {
     CursorPtr pCursor;          /* current cursor */
     CursorPtr pSpriteCursor;    /* cursor on screen */
     BoxRec limits;              /* current constraints */
-    Bool confined;              /* pointer can't change screens */
+    bool confined;              /* pointer can't change screens */
     int x, y;                   /* hot spot location */
     int devx, devy;             /* sprite position */
-    Bool generateEvent;         /* generate an event during warping? */
+    bool generateEvent;         /* generate an event during warping? */
 } miPointerRec, *miPointerPtr;
 
 DevPrivateKeyRec miPointerScreenKeyRec;
@@ -567,7 +568,7 @@ Bool
 miPointerSetWaitForUpdate(ScreenPtr pScreen, Bool wait)
 {
     SetupScreen(pScreen);
-    Bool prevWait = pScreenPriv->waitForUpdate;
+    bool prevWait = !!pScreenPriv->waitForUpdate;
 
     pScreenPriv->waitForUpdate = wait;
     return prevWait;
@@ -631,8 +632,8 @@ miPointerSetPosition(DeviceIntPtr pDev, int mode, double *screenx,
     ScreenPtr pScreen;
     ScreenPtr newScreen;
     int x, y;
-    Bool switch_screen = FALSE;
-    Bool should_constrain_barriers = FALSE;
+    bool switch_screen = FALSE;
+    bool should_constrain_barriers = FALSE;
     int i;
 
     miPointerPtr pPointer;

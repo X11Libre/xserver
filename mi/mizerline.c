@@ -45,6 +45,7 @@ SOFTWARE.
 ******************************************************************/
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 
 #include "include/misc.h"
@@ -110,7 +111,7 @@ miZeroLine(DrawablePtr pDraw, GCPtr pGC, int mode,      /* Origin or Previous */
     int oc1, oc2;
     int result;
     int pt1_clipped, pt2_clipped = 0;
-    Bool new_span;
+    bool new_span;
     int signdx, signdy;
     int clipdx, clipdy;
     int width, height;
