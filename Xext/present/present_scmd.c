@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/screenint_priv.h"
 #include "Xext/randr/randrstr_priv.h"
 #include "Xext/present/present_priv.h"
@@ -226,7 +228,7 @@ present_queue_vblank(ScreenPtr screen,
                      uint64_t event_id,
                      uint64_t msc)
 {
-    Bool                        ret;
+    bool                        ret;
 
     if (crtc == NULL)
         ret = present_fake_queue_vblank(screen, event_id, msc);
