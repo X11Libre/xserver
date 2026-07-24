@@ -26,6 +26,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -561,7 +562,7 @@ XkbStringText(char *str, unsigned format)
     char *buf;
     register char *in, *out;
     int len;
-    Bool ok;
+    bool ok;
 
     if (str == NULL) {
         buf = tbGetBuffer(2);

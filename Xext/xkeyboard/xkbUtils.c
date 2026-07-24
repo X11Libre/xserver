@@ -50,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
@@ -2021,7 +2022,7 @@ XkbCopyKeymap(XkbDescPtr dst, XkbDescPtr src)
 Bool
 XkbDeviceApplyKeymap(DeviceIntPtr dst, XkbDescPtr desc)
 {
-    Bool ret;
+    bool ret;
 
     if (!dst->key || !desc)
         return FALSE;

@@ -26,6 +26,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -116,7 +117,7 @@ static Bool
 GetInputLine(FILE * file, InputLine * line, Bool checkbang)
 {
     int ch;
-    Bool endOfFile, spacePending, slashPending, inComment;
+    bool endOfFile, spacePending, slashPending, inComment;
 
     endOfFile = FALSE;
     while ((!endOfFile) && (line->num_line == 0)) {
@@ -275,7 +276,7 @@ SetUpRemap(InputLine * line, RemapSpec * remap)
     memset((char *) remap, 0, sizeof(RemapSpec));
     remap->number = len;
     while ((tok = _XStrtok(str, " ", strtok_buf)) != NULL) {
-        Bool found = FALSE;
+        bool found = FALSE;
         str = NULL;
         if (strcmp(tok, "=") == 0)
             continue;
@@ -425,7 +426,7 @@ CheckLine(InputLine * line,
     int nread;
     _Xstrtokparams strtok_buf;
     char *tok;
-    Bool append = FALSE;
+    bool append = FALSE;
 
     for (nread = 0; (tok = _XStrtok(str, " ", strtok_buf)) != NULL; nread++) {
         str = NULL;
@@ -628,7 +629,7 @@ XkbRF_CheckApplyRule(XkbRF_RulePtr rule,
                      XkbRF_MultiDefsPtr mdefs,
                      XkbComponentNamesPtr names, XkbRF_RulesPtr rules)
 {
-    Bool pending = FALSE;
+    bool pending = FALSE;
 
     if (rule->model != NULL) {
         if (mdefs->model == NULL)

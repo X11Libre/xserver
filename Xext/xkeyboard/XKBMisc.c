@@ -26,6 +26,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -179,7 +180,7 @@ XkbKeyTypesForCoreSymbols(XkbDescPtr xkb,
             }
         }
         if (syms[0] == NoSymbol) {
-            Bool found = FALSE;
+            bool found = FALSE;
 
             for (int n = 1; (!found) && (n < nSyms[i]); n++) {
                 found = (syms[n] != NoSymbol);
@@ -238,7 +239,7 @@ XkbKeyTypesForCoreSymbols(XkbDescPtr xkb,
         if (((sameType) || canonical) &&
             (!(protected &
                (XkbExplicitKeyTypesMask & ~XkbExplicitKeyType1Mask)))) {
-            Bool identical = TRUE;
+            bool identical = TRUE;
 
             for (int i = 1; identical && (i < nGroups); i++) {
                 KeySym *syms;

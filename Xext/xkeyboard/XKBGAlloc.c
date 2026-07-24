@@ -26,6 +26,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -784,7 +785,7 @@ XkbAddGeomOverlayKey(XkbOverlayPtr overlay,
     XkbOverlayKeyPtr key;
     XkbSectionPtr section;
     XkbRowPtr row_under;
-    Bool found;
+    bool found;
 
     if ((!overlay) || (!row) || (!over) || (!under))
         return NULL;

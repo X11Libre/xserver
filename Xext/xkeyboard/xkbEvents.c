@@ -26,6 +26,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -1013,7 +1014,7 @@ XkbRemoveResourceClient(DevicePtr inDev, XID id)
     XkbSrvInfoPtr xkbi;
     DeviceIntPtr dev = (DeviceIntPtr) inDev;
     XkbInterestPtr interest;
-    Bool found;
+    bool found;
     unsigned long autoCtrls, autoValues;
     ClientPtr client = NULL;
 

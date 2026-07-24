@@ -26,6 +26,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -2647,7 +2648,7 @@ _XkbSetMap(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req, char *values)
 {
     XkbEventCauseRec cause = { 0 };
     XkbChangesRec change = { 0 };
-    Bool sentNKN;
+    bool sentNKN;
     XkbSrvInfoPtr xkbi;
     XkbDescPtr xkb;
 
@@ -4299,7 +4300,7 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
         nn.nRadioGroups = names->num_rg;
     }
     if (nn.changed) {
-        Bool needExtEvent;
+        bool needExtEvent;
 
         needExtEvent = (nn.changed & XkbIndicatorNamesMask) != 0;
         XkbSendNamesNotify(dev, &nn);
@@ -5434,7 +5435,7 @@ static int
 _XkbSetGeometry(ClientPtr client, DeviceIntPtr dev, xkbSetGeometryReq * stuff)
 {
     XkbDescPtr xkb;
-    Bool new_name;
+    bool new_name;
     XkbGeometryPtr geom, old;
     int status;
 
@@ -5559,7 +5560,7 @@ ProcXkbPerClientFlags(ClientPtr client)
         client->xkbClientFlags |= stuff->value;
     }
     if (stuff->change & XkbPCF_AutoResetControlsMask) {
-        Bool want;
+        bool want;
 
         want = stuff->value & XkbPCF_AutoResetControlsMask;
         if (interest && !want) {
@@ -5773,7 +5774,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     unsigned len;
     unsigned fwant, fneed;
     int status;
-    Bool geom_changed;
+    bool geom_changed;
     XkbSrvLedInfoPtr old_sli;
     XkbSrvLedInfoPtr sli;
     Mask access_mode = DixGetAttrAccess | DixManageAccess;
@@ -5862,7 +5863,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     if (new == NULL)
         reported = 0;
 
-    Bool loaded = 0;
+    bool loaded = 0;
 
     stuff->want |= stuff->need;
 
@@ -6196,7 +6197,7 @@ CheckDeviceLedFBs(DeviceIntPtr dev,
 {
     int nFBs = 0;
     int length = 0;
-    Bool classOk = FALSE;
+    bool classOk = FALSE;
 
     if (class == XkbDfltXIClass) {
         if (dev->kbdfeed)
