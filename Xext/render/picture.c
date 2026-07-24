@@ -24,6 +24,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
@@ -1427,7 +1429,7 @@ static CARD8
 ReduceCompositeOp(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
                   INT16 xSrc, INT16 ySrc, CARD16 width, CARD16 height)
 {
-    Bool no_src_alpha, no_dst_alpha;
+    bool no_src_alpha, no_dst_alpha;
 
     /* Sampling off the edge of a RepeatNone picture introduces alpha
      * even if the picture itself doesn't have alpha. We don't try to

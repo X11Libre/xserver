@@ -23,6 +23,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 #include "include/mipict.h"
 
@@ -42,7 +44,7 @@ miBuildRenderColormap(ColormapPtr pColormap, Pixel * pixels, int *nump)
     int r, g, b;
     unsigned short red, green, blue;
     Pixel pixel;
-    Bool used[MI_MAX_INDEXED];
+    bool used[MI_MAX_INDEXED];
     int needed;
     int policy;
     int cube, gray;
