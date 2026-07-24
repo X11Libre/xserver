@@ -44,9 +44,9 @@
 #include "picturestr_priv.h"
 #include "glyphstr_priv.h"
 #include "xace.h"
-#ifdef XINERAMA
+
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
-#endif /* XINERAMA */
 
 DevPrivateKeyRec PictureScreenPrivateKeyRec;
 DevPrivateKeyRec PictureWindowPrivateKeyRec;
@@ -998,7 +998,7 @@ static int
 cpAlphaMap(void **result, XID id, ScreenPtr screen, ClientPtr client, Mask mode)
 {
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         PanoramiXRes *res;
         int err = dixLookupResourceByType((void **)&res, id, XRT_PICTURE,
                                           client, mode);
@@ -1017,7 +1017,7 @@ static int
 cpClipMask(void **result, XID id, ScreenPtr screen, ClientPtr client, Mask mode)
 {
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         PanoramiXRes *res;
         int err = dixLookupResourceByType((void **)&res, id, XRT_PIXMAP,
                                           client, mode);

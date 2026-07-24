@@ -57,6 +57,7 @@ in this Software without prior written authorization from The Open Group.
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "shm_priv.h"
@@ -706,7 +707,7 @@ ProcShmPutImage(ClientPtr client)
     PanoramiXRes *draw, *gc;
     Bool sendEvent;
 
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled())
         return ShmPutImage(client, stuff);
 
     int result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
@@ -771,7 +772,7 @@ ProcShmGetImage(ClientPtr client)
     long lenPer = 0, length, widthBytesLine;
     Bool isRoot;
 
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled())
         return ShmGetImage(client, stuff);
 
     if ((stuff->format != XYPixmap) && (stuff->format != ZPixmap)) {
@@ -908,7 +909,7 @@ ProcShmCreatePixmap(ClientPtr client)
         return BadRequest;
 
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled())
         return ShmCreatePixmap(client, stuff);
 
     PixmapPtr pMap = NULL;

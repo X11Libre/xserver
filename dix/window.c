@@ -124,6 +124,7 @@ Equipment Corporation.
 #include "os/screensaver.h"
 #include "Xext/composite/compint.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "scrnintstr.h"
@@ -2273,7 +2274,7 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         event.u.u.type = ConfigureRequest;
         event.u.u.detail = (mask & CWStackMode) ? smode : Above;
 #ifdef XINERAMA
-        if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
+        if (PanoramiXIsEnabled() && (!pParent || !pParent->parent)) {
             ScreenPtr masterScreen = dixGetMasterScreen();
             event.u.configureRequest.x += masterScreen->x;
             event.u.configureRequest.y += masterScreen->y;
@@ -2357,7 +2358,7 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         };
         event.u.u.type = ConfigureNotify;
 #ifdef XINERAMA
-        if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
+        if (PanoramiXIsEnabled() && (!pParent || !pParent->parent)) {
             ScreenPtr masterScreen = dixGetMasterScreen();
             event.u.configureNotify.x += masterScreen->x;
             event.u.configureNotify.y += masterScreen->y;
@@ -2503,7 +2504,7 @@ ReparentWindow(WindowPtr pWin, WindowPtr pParent,
     };
     event.u.u.type = ReparentNotify;
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && !pParent->parent) {
+    if (PanoramiXIsEnabled() && !pParent->parent) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         event.u.reparent.x += masterScreen->x;
         event.u.reparent.y += masterScreen->y;
@@ -2765,7 +2766,7 @@ UnrealizeTree(WindowPtr pWin, Bool fromConfigure)
         if (pChild->realized) {
             pChild->visibility = VisibilityNotViewable;
 #ifdef XINERAMA
-            if (!noPanoramiXExtension && !pChild->drawable.pScreen->myNum) {
+            if (PanoramiXIsEnabled() && !pChild->drawable.pScreen->myNum) {
                 PanoramiXRes *win;
                 int rc = dixLookupResourceByType((void **) &win,
                                                  pChild->drawable.id,
@@ -2993,7 +2994,7 @@ SendVisibilityNotify(WindowPtr pWin)
 
 #ifdef XINERAMA
     /* This is not quite correct yet, but it's close */
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         PanoramiXRes *win;
         WindowPtr pWin2;
         int rc, Scrnum;

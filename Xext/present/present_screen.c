@@ -247,10 +247,9 @@ present_screen_init(ScreenPtr screen, present_screen_info_ptr info)
 void
 present_extension_init(void)
 {
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         return;
-#endif /* XINERAMA */
+    }
 
     ExtensionEntry *extension = AddExtension(
                              PRESENT_NAME, PresentNumberEvents, PresentNumberErrors,

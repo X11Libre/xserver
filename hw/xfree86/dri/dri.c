@@ -52,6 +52,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "include/extinit.h"
 #include "include/misc.h"
 #include "include/sarea.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "xf86.h"
 #include "xf86drm.h"
@@ -390,17 +391,16 @@ DRIScreenInit(ScreenPtr pScreen, DRIInfoPtr pDRIInfo, int *pDRMFD)
         return FALSE;
     }
 
-#ifdef XINERAMA
     /*
      * If Xinerama is on, don't allow DRI to initialise.  It won't be usable
      * anyway.
      */
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         DRIDrvMsg(pScreen->myNum, X_WARNING,
                   "Direct rendering is not supported when Xinerama is enabled\n");
         return FALSE;
     }
-#endif /* XINERAMA */
+
     if (drm_server_inited == FALSE) {
         drmSetServerInfo(&DRIDRMServerInfo);
         drm_server_inited = TRUE;

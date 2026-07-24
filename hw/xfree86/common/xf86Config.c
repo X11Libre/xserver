@@ -54,6 +54,7 @@
 #include "include/extinit.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
@@ -960,14 +961,15 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
 
 #ifdef XINERAMA
     from = X_DEFAULT;
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled())
         from = X_CMDLINE;
     else if (xf86GetOptValBool(FlagOptions, FLAG_XINERAMA, &value)) {
         noPanoramiXExtension = !value;
         from = X_CONFIG;
     }
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         LogMessageVerb(from, 1, "Xinerama: enabled\n");
+    }
 #endif /* XINERAMA */
 
 #ifdef DRI2

@@ -53,6 +53,7 @@
 #include "include/extinit.h"
 #include "include/misc.h"
 #include "mi/mi_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "xf86.h"
 #include "xf86str.h"
@@ -171,9 +172,10 @@ DGAInit(ScreenPtr pScreen, DGAFunctionPtr funcs, DGAModePtr modes, int num)
         modes[i].num = i + 1;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         for (i = 0; i < num; i++)
             modes[i].flags &= ~DGA_PIXMAP_AVAILABLE;
+    }
 #endif /* XINERAMA */
 
     return TRUE;
@@ -220,9 +222,10 @@ DGAReInitModes(ScreenPtr pScreen, DGAModePtr modes, int num)
         modes[i].num = i + 1;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         for (i = 0; i < num; i++)
             modes[i].flags &= ~DGA_PIXMAP_AVAILABLE;
+    }
 #endif /* XINERAMA */
 
     return TRUE;

@@ -86,6 +86,7 @@ Equipment Corporation.
 #include "mi/mi_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "regionstr.h"
 #include "scrnintstr.h"
@@ -322,7 +323,7 @@ miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy)
     }
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         int scrnum = pWin->drawable.pScreen->myNum;
         int x = 0, y = 0;
         XID realWin = 0;
