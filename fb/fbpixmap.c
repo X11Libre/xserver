@@ -22,6 +22,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "fb/fb_priv.h"
@@ -131,7 +132,7 @@ fbPixmapToRegion(PixmapPtr pPix)
     int irectPrevStart, irectLineStart;
     register BoxPtr prectO, prectN;
     BoxPtr FirstRect, rects, prectLineStart;
-    Bool fInBox, fSame;
+    bool fInBox, fSame;
     register FbBits mask0 = FB_ALLONES & ~FbScrRight(FB_ALLONES, 1);
     FbBits *pwLine;
     int nWidth;
@@ -314,7 +315,7 @@ fbValidateDrawable(DrawablePtr pDrawable)
     int stride, bpp;
     int xoff, yoff;
     int height;
-    Bool failed;
+    bool failed;
 
     if (pDrawable->type != DRAWABLE_PIXMAP)
         pDrawable = (DrawablePtr) fbGetWindowPixmap(pDrawable);

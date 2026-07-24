@@ -23,6 +23,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/fonts/fontstruct.h>
 
 #include "fb/fb_priv.h"
@@ -130,7 +131,7 @@ fbImageGlyphBlt(DrawablePtr pDrawable,
     unsigned char *pglyph;      /* pointer bits in glyph */
     int gWidth, gHeight;        /* width and height of glyph */
     FbStride gStride;           /* stride of glyph */
-    Bool opaque;
+    bool opaque;
     int n;
     int gx, gy;
     void (*glyph) (FbBits *, FbStride, int, FbStip *, FbBits, int, int);

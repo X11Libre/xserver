@@ -22,6 +22,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "fb.h"
 
 static void
@@ -57,7 +59,7 @@ fbZeroSegment(DrawablePtr pDrawable, GCPtr pGC, int nseg, xSegment * pSegs)
 {
     int dashOffset;
     int x, y;
-    Bool drawLast = pGC->capStyle != CapNotLast;
+    bool drawLast = pGC->capStyle != CapNotLast;
 
     x = pDrawable->x;
     y = pDrawable->y;
