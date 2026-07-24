@@ -660,7 +660,7 @@ setup_env(void)
 int
 main(int argc, char **argv, char **envp)
 {
-    Bool listenOnly = FALSE;
+    bool listenOnly = FALSE;
     int i;
     mach_msg_size_t mxmsgsz = sizeof(union MaxMsgSize) + MAX_TRAILER_SIZE;
     mach_port_t mp;

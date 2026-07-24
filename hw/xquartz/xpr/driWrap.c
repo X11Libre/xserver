@@ -29,7 +29,9 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stddef.h>
+
 #include "mi.h"
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -51,7 +53,7 @@ typedef struct {
 } DRIWrapScreenRec;
 
 typedef struct {
-    Bool didSave;
+    bool didSave;
     int devKind;
     DevUnion devPrivate;
 } DRISavedDrawableState;
@@ -525,7 +527,7 @@ DRICreateGC(GCPtr pGC)
     ScreenPtr pScreen = pGC->pScreen;
     DRIWrapScreenRec *pScreenPriv;
     DRIGCRec *pGCPriv;
-    Bool ret;
+    bool ret;
 
     pScreenPriv = dixLookupPrivate(&pScreen->devPrivates, driWrapScreenKey);
 

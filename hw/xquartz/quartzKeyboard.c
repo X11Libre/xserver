@@ -35,6 +35,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #define HACK_MISSING   1
 #define HACK_KEYPAD    1
 #define HACK_BLACKLIST 1
@@ -876,7 +878,7 @@ QuartzReadSystemKeymap(darwinKeyboardInfo *info)
 Bool
 QuartsResyncKeymap(Bool sendDDXEvent)
 {
-    Bool retval;
+    bool retval;
     /* Update keyInfo */
     pthread_mutex_lock(&keyInfo_mutex);
     memset(keyInfo.keyMap, 0, sizeof(keyInfo.keyMap));
