@@ -31,6 +31,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -540,7 +541,7 @@ RootlessMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst,
                               WindowPtr *ppLayerWin)
 {
     RegionRec saveRoot;
-    Bool result;
+    bool result;
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
     SCREEN_UNWRAP(pScreen, MarkOverlappedWindows);
@@ -561,7 +562,7 @@ RootlessMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst,
         // This code copied from miMarkOverlappedWindows()
 
         register WindowPtr pChild;
-        Bool anyMarked = FALSE;
+        bool anyMarked = FALSE;
         MarkWindowProcPtr MarkWindow = pScreen->MarkWindow;
 
         RL_DEBUG_MSG("is top level! ");
