@@ -140,7 +140,7 @@ jobs:
             - name: X-NAMESPACE conformance test (Xvfb)
               env:
                   XNS_XSERVER: ${{ github.workspace }}/__BUILD/hw/vfb/Xvfb
-                  XNS_TEST_FLAGS: -v
+                  XNS_TEST_FLAGS: -v -skip-if-unavailable
               run: |
                   export LD_LIBRARY_PATH="$X11_PREFIX/lib/$MACHINE:$X11_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
                   ./go-x11proto/contrib/xnamespace/run-xnamespace-test.sh
@@ -150,7 +150,7 @@ jobs:
             # a real /dev/fb0, which CI runners don't have.
             - name: X-NAMESPACE conformance test (Xephyr, Xnest)
               env:
-                  XNS_TEST_FLAGS: -v
+                  XNS_TEST_FLAGS: -v -skip-if-unavailable
               run: |
                   export LD_LIBRARY_PATH="$X11_PREFIX/lib/$MACHINE:$X11_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
                   build="$PWD/__BUILD"
