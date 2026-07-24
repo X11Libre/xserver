@@ -22,6 +22,7 @@
 
 #include <kdrive-config.h>
 
+#include <stdbool.h>
 #include <sys/ioctl.h>
 #include <errno.h>
 
@@ -282,8 +283,8 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
     Pixel allbits;
     int depth;
     int rate;
-    Bool want_rate = FALSE;
-    Bool gray;
+    bool want_rate = FALSE;
+    bool gray;
     struct fb_var_screeninfo var;
     const KdMonitorTiming *t;
     int k;
@@ -741,7 +742,7 @@ fbdevRandRSetConfig(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     FbdevScrPriv *scrpriv = screen->driver;
-    Bool wasEnabled = pScreenPriv->enabled;
+    bool wasEnabled = !!pScreenPriv->enabled;
     FbdevScrPriv oldscr;
     const KdMonitorTiming *t;
     int oldwidth;

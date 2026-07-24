@@ -25,6 +25,7 @@
 
 #include <kdrive-config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -90,16 +91,16 @@ struct EphyrHostXVars {
     xcb_cursor_t empty_cursor;
     xcb_generic_event_t *saved_event;
     int depth;
-    Bool use_sw_cursor;
-    Bool use_fullscreen;
-    Bool have_shm;
-    Bool have_shm_fd_passing;
+    bool use_sw_cursor;
+    bool use_fullscreen;
+    bool have_shm;
+    bool have_shm_fd_passing;
 
     int n_screens;
     KdScreenInfo **screens;
 
     long damage_debug_msec;
-    Bool size_set_from_configure;
+    bool size_set_from_configure;
     char *glvnd_vendor;
 };
 
@@ -888,7 +889,7 @@ hostx_screen_init(KdScreenInfo *screen,
                   int *bytes_per_line, int *bits_per_pixel)
 {
     EphyrScrPriv *scrpriv = screen->driver;
-    Bool shm_success = FALSE;
+    bool shm_success = FALSE;
 
     if (!scrpriv) {
         fprintf(stderr, "%s: Error in accessing hostx data\n", __func__);
@@ -1388,7 +1389,7 @@ hostx_get_window_attributes(int a_window, EphyrHostWindowAttributes * a_attrs)
 int
 hostx_get_visuals_info(EphyrHostVisualInfo ** a_visuals, int *a_num_entries)
 {
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
     EphyrHostVisualInfo *host_visuals = NULL;
     int nb_items = 0, i = 0, screen_num;
     xcb_screen_iterator_t screens;
@@ -1444,7 +1445,7 @@ hostx_create_window(int a_screen_number,
                     EphyrBox * a_geometry,
                     int a_visual_id, int *a_host_peer /*out parameter */ )
 {
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
     xcb_window_t win;
     int winmask = 0;
     uint32_t attrs[2];
@@ -1540,7 +1541,7 @@ int
 hostx_set_window_bounding_rectangles(int a_window,
                                      EphyrRect * a_rects, int a_num_rects)
 {
-    Bool is_ok = FALSE;
+    bool is_ok = FALSE;
     int i = 0;
     xcb_rectangle_t *rects = NULL;
 
