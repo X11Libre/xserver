@@ -33,6 +33,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 
 #include "include/mipict.h"
@@ -407,7 +408,7 @@ glamor_create_composite_shader(ScreenPtr screen, struct shader_key *key,
     GLuint vs, fs, prog;
     GLint source_sampler_uniform_location, mask_sampler_uniform_location;
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
-    Bool enable_rel_sampler = TRUE;
+    bool enable_rel_sampler = TRUE;
 
     glamor_make_current(glamor_priv);
     vs = glamor_create_composite_vs(glamor_priv, key);
@@ -908,13 +909,13 @@ glamor_composite_choose_shader(CARD8 op,
 {
     ScreenPtr screen = dest->pDrawable->pScreen;
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
-    Bool source_needs_upload = FALSE;
-    Bool mask_needs_upload = FALSE;
+    bool source_needs_upload = FALSE;
+    bool mask_needs_upload = FALSE;
     pixman_format_code_t saved_source_format = 0;
     struct shader_key key;
     GLfloat source_solid_color[4];
     GLfloat mask_solid_color[4];
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(dest_pixmap_priv)) {
         glamor_fallback("dest has no fbo.\n");
@@ -1236,10 +1237,10 @@ glamor_composite_with_shader(CARD8 op,
     float src_matrix[9], mask_matrix[9];
     float *psrc_matrix = NULL, *pmask_matrix = NULL;
     int nrect_max;
-    Bool ret = FALSE;
+    bool ret = FALSE;
     glamor_composite_shader *shader = NULL, *shader_ca = NULL;
     struct blendinfo op_info, op_info_ca;
-    Bool restore_colormask = FALSE;
+    bool restore_colormask = FALSE;
 
     if (!glamor_composite_choose_shader(op, source, mask, dest,
                                         source_pixmap, mask_pixmap, dest_pixmap,
