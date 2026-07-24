@@ -126,7 +126,7 @@ compChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret;
+    bool ret;
 
     pScreen->ChangeWindowAttributes = cs->ChangeWindowAttributes;
     ret = pScreen->ChangeWindowAttributes(pWin, mask);

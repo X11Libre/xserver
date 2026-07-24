@@ -120,7 +120,7 @@ bool compCheckRedirect(WindowPtr pWin)
 {
     CompWindowPtr cw = GetCompWindow(pWin);
     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);
-    Bool should;
+    bool should;
 
     should = pWin->realized && (pWin->drawable.class != InputOnly) &&
         (cw != NULL) && (pWin->parent != NULL);
@@ -214,7 +214,7 @@ compRealizeWindow(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     pScreen->RealizeWindow = cs->RealizeWindow;
     compCheckRedirect(pWin);
@@ -230,7 +230,7 @@ compUnrealizeWindow(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     pScreen->UnrealizeWindow = cs->UnrealizeWindow;
     compCheckRedirect(pWin);
@@ -502,7 +502,7 @@ compCreateWindow(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret;
+    bool ret;
 
     pScreen->CreateWindow = cs->CreateWindow;
     ret = (*pScreen->CreateWindow) (pWin);
@@ -714,7 +714,7 @@ compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret = 0;
+    bool ret = 0;
     WindowPtr pParent = pWin->parent;
     int draw_x, draw_y;
 
