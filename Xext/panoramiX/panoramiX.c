@@ -25,6 +25,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -169,7 +170,7 @@ XineramaCreateGC(GCPtr pGC)
     ScreenPtr pScreen = pGC->pScreen;
     PanoramiXScreenPtr pScreenPriv = (PanoramiXScreenPtr)
         dixLookupPrivate(&pScreen->devPrivates, &PanoramiXScreenKeyRec);
-    Bool ret;
+    bool ret;
 
     pScreen->CreateGC = pScreenPriv->CreateGC;
     if ((ret = (*pScreen->CreateGC) (pGC))) {
@@ -423,7 +424,7 @@ void
 PanoramiXExtensionInit(void)
 {
     int i;
-    Bool success = FALSE;
+    bool success = FALSE;
     ScreenPtr masterScreen = dixGetMasterScreen();
 
     if (PanoramiXIsDisabled())
@@ -574,7 +575,7 @@ Bool
 PanoramiXCreateConnectionBlock(void)
 {
     int i, j, length;
-    Bool disable_backing_store = FALSE;
+    bool disable_backing_store = FALSE;
     int old_width, old_height;
     float width_mult, height_mult;
     xWindowRoot *root;
@@ -710,7 +711,7 @@ static void
 PanoramiXMaybeAddDepth(DepthPtr pDepth)
 {
     int k;
-    Bool found = FALSE;
+    bool found = FALSE;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         for (k = 0; k < walkScreen->numDepths; k++) {
@@ -737,7 +738,7 @@ static void
 PanoramiXMaybeAddVisual(VisualPtr pVisual)
 {
     int k;
-    Bool found = FALSE;
+    bool found = FALSE;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         found = FALSE;
