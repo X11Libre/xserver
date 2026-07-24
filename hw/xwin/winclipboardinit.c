@@ -29,6 +29,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include <unistd.h>
 #include <pthread.h>
 
@@ -58,7 +60,7 @@ winClipboardThreadProc(void *arg)
 
   while (1)
     {
-      Bool fShutdown;
+      bool fShutdown;
 
       ++clipboardRestarts;
 

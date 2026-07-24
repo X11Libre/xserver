@@ -75,6 +75,8 @@
 */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "glwindows.h"
 
 #include "Xext/glx/glxserver.h"
@@ -595,7 +597,7 @@ glxWinScreenProbe(ScreenPtr pScreen)
         {
             const char *wglext;
             const char *glxext;
-            Bool mandatory;
+            bool mandatory;
         } extensionMap[] = {
             { "WGL_ARB_make_current_read", "GLX_SGI_make_current_read", 1 },
             { "WGL_EXT_swap_control", "GLX_SGI_swap_control", 0 },

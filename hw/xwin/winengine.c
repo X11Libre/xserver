@@ -29,6 +29,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "win.h"
 #include "winmsg.h"
 
@@ -206,7 +208,7 @@ winSetEngine(ScreenPtr pScreen)
 Bool
 winGetDDProcAddresses(void)
 {
-    Bool fReturn = TRUE;
+    bool fReturn = TRUE;
 
     /* Load the DirectDraw library */
     g_hmodDirectDraw = LoadLibraryEx("ddraw.dll", NULL, 0);

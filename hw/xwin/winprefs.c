@@ -31,6 +31,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef __CYGWIN__
@@ -542,7 +544,7 @@ LoadImageComma(char *fname, char *iconDirectory, int sx, int sy, int flags)
     else {
         char *file = calloc(1, PATH_MAX + NAME_MAX + 2);
 #ifdef  __CYGWIN__
-        Bool convert = FALSE;
+        bool convert = FALSE;
 #endif
 
         if (!file)
