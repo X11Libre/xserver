@@ -23,6 +23,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
@@ -62,7 +63,7 @@ struct list_font_state {
     int patlen;
     int current_fpe;
     int max_names;
-    Bool list_started;
+    bool list_started;
     void *private;
 };
 
@@ -91,7 +92,7 @@ struct list_fonts_with_info_closure {
     struct list_font_state current;
     struct list_font_state saved;
     int savedNumFonts;
-    Bool haveSaved;
+    bool haveSaved;
     char *savedName;
 };
 
@@ -102,7 +103,7 @@ struct list_fonts_closure {
     FontNamesPtr names;
     struct list_font_state current;
     struct list_font_state saved;
-    Bool haveSaved;
+    bool haveSaved;
     char *savedName;
     int savedNameLen;
 };
