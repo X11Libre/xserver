@@ -384,9 +384,15 @@ AllocateMotionHistory(DeviceIntPtr pDev)
     pDev->valuator->motion = calloc(pDev->valuator->numMotionEvents, size);
     pDev->valuator->first_motion = 0;
     pDev->valuator->last_motion = 0;
-    if (!pDev->valuator->motion)
+    if (!pDev->valuator->motion) {
         ErrorF("[dix] %s: Failed to alloc motion history (%d bytes).\n",
                pDev->name, size * pDev->valuator->numMotionEvents);
+        /* Keep numMotionEvents in sync with the NULL buffer, so every
+         * consumer's existing "if (!numMotionEvents) return;" guard treats
+         * this device as having no history instead of indexing/memcpy'ing
+         * through a NULL pointer. */
+        pDev->valuator->numMotionEvents = 0;
+    }
 }
 
 /**
