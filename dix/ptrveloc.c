@@ -142,6 +142,16 @@ InitPredictableAccelerationScheme(DeviceIntPtr dev,
         return FALSE;
     }
     InitVelocityData(vel);
+    if (!vel->tracker) {
+        /* InitVelocityData()'s InitTrackers(vel, 16) call failed to
+         * allocate the initial tracker buffer -- don't let the device go
+         * live with num_tracker == 0, which every tracker access divides
+         * by (TRACKER_INDEX()). */
+        FreeVelocityData(vel);
+        free(vel);
+        free(schemeData);
+        return FALSE;
+    }
     schemeData->vel = vel;
     scheme.accelData = schemeData;
     if (!InitializePredictableAccelerationProperties(dev, vel, schemeData)) {
@@ -427,12 +437,29 @@ DeletePredictableAccelerationProperties(DeviceIntPtr dev,
 void
 InitTrackers(DeviceVelocityPtr vel, int ntracker)
 {
+    MotionTrackerPtr tracker;
+
     if (ntracker < 1) {
         ErrorF("invalid number of trackers\n");
         return;
     }
+
+    tracker = (MotionTrackerPtr) calloc(ntracker, sizeof(MotionTracker));
+    if (!tracker) {
+        /* Keep whatever tracker buffer/count vel already had (NULL/0 on
+         * the very first, calloc-fed InitVelocityData() call; the previous
+         * valid one on a later resize, e.g. the "VelocityTrackerCount"
+         * driver option in hw/xfree86/common/xf86Xinput.c) instead of
+         * freeing it and leaving num_tracker pointing at a NULL buffer --
+         * every tracker access divides by num_tracker (TRACKER_INDEX()),
+         * so a stale nonzero count over a NULL buffer is a NULL deref *and*
+         * a division-by-zero the moment num_tracker itself gets zeroed.
+         */
+        ErrorF("[dix] Failed to alloc %d motion trackers.\n", ntracker);
+        return;
+    }
     free(vel->tracker);
-    vel->tracker = (MotionTrackerPtr) calloc(ntracker, sizeof(MotionTracker));
+    vel->tracker = tracker;
     vel->num_tracker = ntracker;
 }
 
