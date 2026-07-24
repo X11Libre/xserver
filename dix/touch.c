@@ -26,6 +26,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
 #include "dix/eventconvert.h"
@@ -140,7 +142,7 @@ TouchBeginDDXTouch(DeviceIntPtr dev, uint32_t ddx_id)
     static int next_client_id = 1;
     TouchClassPtr t = dev->touch;
     DDXTouchPointInfoPtr ti = NULL;
-    Bool emulate_pointer;
+    bool emulate_pointer;
 
     if (!t)
         return NULL;
@@ -854,7 +856,7 @@ TouchSetupListeners(DeviceIntPtr dev, TouchPointInfoPtr ti, InternalEvent *ev)
     /* Find the first client with an applicable event selection,
      * going from deepest child window back up to the root window. */
     for (int i = sprite->spriteTraceGood - 1; i >= 0; i--) {
-        Bool delivered;
+        bool delivered;
 
         win = sprite->spriteTrace[i];
         delivered = TouchAddRegularListener(dev, ti, win, ev);

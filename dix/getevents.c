@@ -29,6 +29,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <math.h>
 #include <limits.h>
 #include <pixman.h>
@@ -107,7 +108,7 @@ set_button_up(DeviceIntPtr pDev, int button, int type)
 Bool
 button_is_down(DeviceIntPtr pDev, int button, int type)
 {
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     if (type & BUTTON_PROCESSED)
         ret = ret || BitIsOn(pDev->button->down, button);
@@ -138,7 +139,7 @@ set_key_up(DeviceIntPtr pDev, int key_code, int type)
 Bool
 key_is_down(DeviceIntPtr pDev, int key_code, int type)
 {
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     if (type & KEY_PROCESSED)
         ret = ret || BitIsOn(pDev->key->down, key_code);
@@ -1925,7 +1926,7 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
     RawDeviceEvent *raw;
     DDXTouchPointInfoPtr ti;
     int need_rawevent = TRUE;
-    Bool emulate_pointer = FALSE;
+    bool emulate_pointer = FALSE;
     int client_id = 0;
 
 #ifdef XSERVER_DTRACE

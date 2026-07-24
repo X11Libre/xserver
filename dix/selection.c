@@ -46,6 +46,8 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/selection_priv.h"
@@ -289,7 +291,7 @@ out:
 int
 ProcConvertSelection(ClientPtr client)
 {
-    Bool paramsOkay;
+    bool paramsOkay;
     xEvent event;
     WindowPtr pWin;
     Selection *pSel;

@@ -24,6 +24,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <math.h>
 
 #include "dix/exevents_priv.h"
@@ -1086,7 +1087,7 @@ acceleratePointerPredictable(DeviceIntPtr dev, ValuatorMask *val, CARD32 evtime)
 {
     double dx = 0, dy = 0;
     DeviceVelocityPtr velocitydata = GetDevicePredictableAccelData(dev);
-    Bool soften = TRUE;
+    bool soften = TRUE;
 
     if (valuator_mask_num_valuators(val) == 0 || !velocitydata)
         return;
