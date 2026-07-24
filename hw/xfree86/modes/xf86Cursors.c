@@ -24,8 +24,8 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdio.h>
-
 #include <X11/Xarch.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/render.h>
@@ -380,7 +380,7 @@ xf86_crtc_transform_cursor_position(xf86CrtcPtr crtc, int *x, int *y)
         (xf86CursorScreenPtr) dixLookupPrivate(&screen->devPrivates,
                                                &xf86CursorScreenKeyRec);
     int dx, dy, t;
-    Bool swap_reflection = FALSE;
+    bool swap_reflection = FALSE;
 
     *x = *x - crtc->x + ScreenPriv->HotX;
     *y = *y - crtc->y + ScreenPriv->HotY;

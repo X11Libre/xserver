@@ -35,6 +35,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <sys/stat.h>
 #include <X11/X.h>
@@ -205,7 +206,7 @@ xf86DeleteScreen(ScrnInfoPtr pScrn)
 {
     int i;
     int scrnIndex;
-    Bool is_gpu = FALSE;
+    bool is_gpu = FALSE;
 
     if (!pScrn)
         return;
@@ -393,7 +394,7 @@ xf86SetDepthBpp(ScrnInfoPtr scrp, int depth, int dummy, int fbbpp,
              * Device sections.
              */
             GDevPtr device;
-            Bool found = FALSE;
+            bool found = FALSE;
 
             for (i = 0; i < scrp->numEntities; i++) {
                 device = xf86GetDevFromEntity(scrp->entityList[i],

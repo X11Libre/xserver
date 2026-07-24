@@ -47,6 +47,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <string.h>             /* InputClassMatches */
 #include <X11/Xfuncproto.h>
 #include <X11/Xmd.h>
@@ -627,7 +628,7 @@ MatchAttrToken(const char *attr, struct xorg_list *groups)
      * a separate Match line.
      */
     xorg_list_for_each_entry(group, groups, entry) {
-        Bool match = FALSE;
+        bool match = FALSE;
 
         xorg_list_for_each_entry(pattern, &group->patterns, entry) {
             /* It is enough to find one pattern matched by the attribute */
@@ -688,7 +689,7 @@ InputClassMatches(const XF86ConfInputClassPtr iclass, const InputInfoPtr idev,
      */
     if (!xorg_list_is_empty(&iclass->match_tag)) {
         char *const *tag;
-        Bool match;
+        bool match;
 
         if (!attrs->tags)
             return FALSE;
@@ -785,7 +786,7 @@ static Bool
 IgnoreInputClass(const InputInfoPtr idev, const InputAttributes * attrs)
 {
     XF86ConfInputClassPtr cl;
-    Bool ignore = FALSE;
+    bool ignore = FALSE;
     const char *ignore_class;
 
     for (cl = xf86configptr->conf_inputclass_lst; cl; cl = cl->list.next) {

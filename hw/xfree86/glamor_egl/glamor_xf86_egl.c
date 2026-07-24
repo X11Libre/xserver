@@ -5,6 +5,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #define GLAMOR_FOR_XORG
 #include <xf86.h>
 #include <xf86Priv.h>
@@ -60,7 +62,7 @@ _glamor_egl_init(ScrnInfoPtr scrn, int fd, int *caps)
     OptionInfoPtr options;
     const char *api = NULL;
     glamor_egl_conf_t glamor_egl_conf = {.fd = fd};
-    Bool ret;
+    bool ret;
 
     glamor_egl = calloc(1, sizeof(*glamor_egl));
     if (glamor_egl == NULL)

@@ -25,6 +25,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -52,8 +53,8 @@
 
 struct libseat_info {
     char *session;
-    Bool active;
-    Bool vt_active;
+    bool active;
+    bool vt_active;
     /*
      * This pointer gets initialised to the actual libseat client instance
      * provided by libseat_open_seat.

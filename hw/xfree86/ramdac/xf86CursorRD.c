@@ -1,5 +1,7 @@
 #include <xorg-config.h>
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/screen_hooks_priv.h"
@@ -246,7 +248,7 @@ xf86CursorEnableDisableFBAccess(ScrnInfoPtr pScrn, Bool enable)
 static Bool
 xf86CursorSwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    Bool ret;
+    bool ret;
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     xf86CursorScreenPtr ScreenPriv =
         (xf86CursorScreenPtr) dixLookupPrivate(&pScreen->devPrivates,

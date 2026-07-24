@@ -121,13 +121,15 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
+
 #include "Pci.h"
 #include "../xf86_os_support.h"
 
 Bool
 xf86scanpci(void)
 {
-    Bool success = FALSE;
+    bool success = FALSE;
 
     success = (pci_system_init() == 0);
 

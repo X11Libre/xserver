@@ -52,6 +52,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -755,8 +756,8 @@ static Bool
 AddConfigDirFiles(const char *dirpath, struct dirent **list, int num)
 {
     int i;
-    Bool openedFile = FALSE;
-    Bool warnOnce = FALSE;
+    bool openedFile = FALSE;
+    bool warnOnce = FALSE;
 
     for (i = 0; i < num; i++) {
         FILE *file;
@@ -796,7 +797,7 @@ OpenConfigDir(const char *path, const char *cmdline, const char *projroot,
 {
     char *dirpath = NULL, *pathcopy;
     const char *template;
-    Bool found = FALSE;
+    bool found = FALSE;
     int cmdlineUsed = 0;
 
     pathcopy = strdup(path);

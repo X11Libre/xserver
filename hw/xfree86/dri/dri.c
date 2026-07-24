@@ -33,6 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -167,7 +168,7 @@ DRIOpenDRMMaster(ScrnInfoPtr pScrn,
                  const char *busID, const char *drmDriverName)
 {
     drmSetVersion saveSv, sv;
-    Bool drmWasAvailable;
+    bool drmWasAvailable;
     DRIEntPrivPtr pDRIEntPriv;
     DRIEntPrivRec tmp;
     int count;
@@ -693,7 +694,7 @@ DRICloseScreen(ScreenPtr pScreen)
     int reserved_count;
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     DRIEntPrivPtr pDRIEntPriv = DRI_ENT_PRIV(pScrn);
-    Bool closeMaster;
+    bool closeMaster;
 
     if (pDRIPriv) {
 

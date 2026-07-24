@@ -22,6 +22,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
@@ -357,7 +358,7 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
     int new_width = 0;
     int new_height = 0;
     RRTransformPtr transform = NULL;
-    Bool damage = FALSE;
+    bool damage = FALSE;
 
     if (pScreen->isGPU)
         return TRUE;

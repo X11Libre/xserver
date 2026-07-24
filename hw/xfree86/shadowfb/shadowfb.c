@@ -7,6 +7,7 @@
 */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/fonts/font.h>
@@ -117,7 +118,7 @@ shadowfbReportPost(DamagePtr damage, RegionPtr reg, void *closure)
 static Bool
 ShadowCreateRootWindow(WindowPtr pWin)
 {
-    Bool ret;
+    bool ret;
     ScreenPtr pScreen = pWin->drawable.pScreen;
     ShadowScreenPtr pPriv = shadowfbGetScreenPrivate(pScreen);
 

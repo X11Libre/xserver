@@ -34,6 +34,7 @@
 
 #include "dix-config.h"
 
+#include <stdbool.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -523,7 +524,7 @@ Probe(DriverPtr drv, int flags)
 {
     int i, numDevSections;
     GDevPtr *devSections;
-    Bool foundScreen = FALSE;
+    bool foundScreen = FALSE;
 
     /* For now, just bail out for PROBE_DETECT. */
     if (flags & PROBE_DETECT)
@@ -1334,7 +1335,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     try_enable_glamor(pScrn);
 
     if (!ms->drmmode.glamor_gbm) {
-        Bool prefer_shadow = TRUE;
+        bool prefer_shadow = TRUE;
 
         if (ms->drmmode.force_24_32) {
             prefer_shadow = TRUE;
@@ -1537,7 +1538,7 @@ msUpdatePacked(ScreenPtr pScreen, shadowBufPtr pBuf)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     modesettingPtr ms = modesettingPTR(pScrn);
-    Bool use_3224 = ms->drmmode.force_24_32 && pScrn->bitsPerPixel == 32;
+    bool use_3224 = ms->drmmode.force_24_32 && pScrn->bitsPerPixel == 32;
 
     if (ms->drmmode.shadow_enable2 && ms->drmmode.shadow_fb2) do {
         RegionPtr damage = DamageRegion(pBuf->pDamage), tiles;

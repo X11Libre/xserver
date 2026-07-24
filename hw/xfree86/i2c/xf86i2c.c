@@ -7,6 +7,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <sys/time.h>
 #include <string.h>
 #include <X11/X.h>
@@ -171,7 +172,7 @@ I2CStop(I2CDevPtr d)
 static Bool
 I2CWriteBit(I2CBusPtr b, int sda, int timeout)
 {
-    Bool r;
+    bool r;
 
     b->I2CPutBits(b, 0, sda);
     b->I2CUDelay(b, b->RiseFallTime);
@@ -188,7 +189,7 @@ I2CWriteBit(I2CBusPtr b, int sda, int timeout)
 static Bool
 I2CReadBit(I2CBusPtr b, int *psda, int timeout)
 {
-    Bool r;
+    bool r;
     int scl;
 
     r = I2CRaiseSCL(b, 1, timeout);
@@ -221,7 +222,7 @@ I2CReadBit(I2CBusPtr b, int *psda, int timeout)
 static Bool
 I2CPutByte(I2CDevPtr d, I2CByte data)
 {
-    Bool r;
+    bool r;
     int i, scl, sda;
     I2CBusPtr b = d->pI2CBus;
 
@@ -409,7 +410,7 @@ static Bool
 I2CWriteRead(I2CDevPtr d,
              I2CByte * WriteBuffer, int nWrite, I2CByte * ReadBuffer, int nRead)
 {
-    Bool r = TRUE;
+    bool r = TRUE;
     I2CBusPtr b = d->pI2CBus;
     int s = 0;
 
@@ -495,7 +496,7 @@ Bool
 xf86I2CWriteVec(I2CDevPtr d, I2CByte * vec, int nValues)
 {
     I2CBusPtr b = d->pI2CBus;
-    Bool r = TRUE;
+    bool r = TRUE;
     int s = 0;
 
     if (nValues > 0) {

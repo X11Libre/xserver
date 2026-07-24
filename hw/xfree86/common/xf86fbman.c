@@ -27,12 +27,11 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
+
 #include <X11/X.h>
 
 #include "dix/screen_hooks_priv.h"
-
-#include <X11/X.h>
-
 #include "include/misc.h"
 #include "os/log_priv.h"
 
@@ -624,7 +623,7 @@ localQueryLargestOffscreenArea(ScreenPtr pScreen,
         area = w * h;
 
         if (w > 0) {
-            Bool gotIt = FALSE;
+            bool gotIt = FALSE;
 
             switch (preferences) {
             case FAVOR_AREA_THEN_WIDTH:
@@ -1127,7 +1126,7 @@ xf86InitFBManager(ScreenPtr pScreen, BoxPtr FullBox)
     RegionRec ScreenRegion;
     RegionRec FullRegion;
     BoxRec ScreenBox;
-    Bool ret;
+    bool ret;
 
     ScreenBox.x1 = 0;
     ScreenBox.y1 = 0;

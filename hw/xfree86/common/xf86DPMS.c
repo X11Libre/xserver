@@ -29,7 +29,9 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
+
 #include "os.h"
 #include "globals.h"
 #include "windowstr.h"
@@ -67,7 +69,7 @@ xf86DPMSInit(ScreenPtr pScreen, DPMSSetProcPtr set, int flags)
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     void *DPMSOpt;
     MessageType enabled_from = X_DEFAULT;
-    Bool enabled = TRUE;
+    bool enabled = TRUE;
 
     DPMSOpt = xf86FindOption(pScrn->options, "dpms");
     if (DPMSDisabledSwitch) {

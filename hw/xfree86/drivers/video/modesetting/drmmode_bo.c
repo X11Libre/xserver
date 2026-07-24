@@ -4,6 +4,8 @@
  */
 
 #include <stddef.h>
+
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "dix-config.h"
@@ -24,7 +26,7 @@
 typedef struct {
     void* map_data; /* Opaque ptr for the mapped region */
     void* map_addr; /* Address of the map, what we actually want to use */
-    Bool used_modifiers;
+    bool used_modifiers;
 } bo_priv_t;
 
 #ifndef GBM_HAVE_BO_USE_LINEAR
@@ -141,7 +143,7 @@ gbm_bo_map_or_free(struct gbm_bo *bo, bo_priv_t *data)
 static inline struct gbm_bo*
 gbm_bo_create_and_map(struct gbm_device *gbm,
                       bo_priv_t *data,
-                      Bool do_map,
+                      bool do_map,
                       uint32_t width, uint32_t height,
                       uint32_t format,
                       const uint64_t *modifiers,
@@ -173,7 +175,7 @@ gbm_bo_create_and_map(struct gbm_device *gbm,
 static inline struct gbm_bo*
 gbm_bo_create_and_map_with_flag_list(struct gbm_device *gbm,
                                      bo_priv_t *data,
-                                     Bool do_map,
+                                     bool do_map,
                                      uint32_t width, uint32_t height,
                                      uint32_t format,
                                      const uint64_t *modifiers,

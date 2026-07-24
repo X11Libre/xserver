@@ -5,6 +5,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -195,7 +196,7 @@ xf86printMatchPattern(FILE * cf, const xf86MatchPattern *pattern, Bool not_first
         fprintf(cf, "%c%s%c", REGEX_FLAG,
             pattern->str ? pattern->str : "(none)", REGEX_FLAG);
     else if (pattern->mode == MATCH_SUBSTRINGS_SEQUENCE) {
-        Bool after = FALSE;
+        bool after = FALSE;
         char *str = pattern->str;
         while (*str) {
             if (after)

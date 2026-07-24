@@ -29,6 +29,7 @@
 
 #include "dix-config.h"
 
+#include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 #include <sys/ioctl.h>
@@ -143,7 +144,7 @@ drmmode_is_format_supported(ScrnInfoPtr scrn, uint32_t format,
     for (c = 0; c < xf86_config->num_crtc; c++) {
         xf86CrtcPtr crtc = xf86_config->crtc[c];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-        Bool found = FALSE;
+        bool found = FALSE;
 
         if (!crtc->enabled)
             continue;
@@ -209,7 +210,7 @@ get_modifiers_set(ScrnInfoPtr scrn, uint32_t format, uint64_t **modifiers,
                 continue;
 
             for (j = 0; j < iter->num_modifiers; j++) {
-                Bool found = FALSE;
+                bool found = FALSE;
 
                 /* Don't choose multi-plane formats for our screen pixmap.
                  * These will get used with frontbuffer rendering, which will
@@ -250,7 +251,7 @@ get_drawable_modifiers(DrawablePtr draw, uint32_t format,
 {
     ScrnInfoPtr scrn = xf86ScreenToScrn(draw->pScreen);
     modesettingPtr ms = modesettingPTR(scrn);
-    Bool async_flip;
+    bool async_flip;
 
     if (!present_can_window_flip((WindowPtr) draw) ||
         !ms->drmmode.pageflip || ms->drmmode.dri2_flipping || !scrn->vtSema) {
@@ -336,7 +337,7 @@ drmmode_prop_info_update(drmmode_ptr drmmode,
     assert(num_infos <= 32 && "update return type");
 
     for (i = 0; i < props->count_props; i++) {
-        Bool props_incomplete = FALSE;
+        bool props_incomplete = FALSE;
         unsigned int k;
 
         for (j = 0; j < num_infos; j++) {
@@ -580,7 +581,7 @@ crtc_add_dpms_props(drmModeAtomicReq *req, xf86CrtcPtr crtc,
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(crtc->scrn);
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    Bool crtc_active = FALSE;
+    bool crtc_active = FALSE;
     int i;
     int ret = 0;
 
@@ -1068,7 +1069,7 @@ struct vblank_event_args {
     PixmapPtr backTarget;
     xf86CrtcPtr crtc;
     drmmode_ptr drmmode;
-    Bool flip;
+    bool flip;
 };
 static void
 drmmode_SharedPixmapVBlankEventHandler(uint64_t frame, uint64_t usec,
@@ -1541,7 +1542,7 @@ drmmode_set_mode_major(xf86CrtcPtr crtc, DisplayModePtr mode,
     Rotation saved_rotation;
     DisplayModeRec saved_mode;
     Bool ret = TRUE;
-    Bool can_test;
+    bool can_test;
     int i;
 
     if (mode)
@@ -3625,7 +3626,7 @@ static Bool
 drmmode_connector_check_vrr_capable(uint32_t drm_fd, int connector_id)
 {
     uint32_t i;
-    Bool found = FALSE;
+    bool found = FALSE;
     uint64_t prop_value = 0;
     drmModeObjectPropertiesPtr props;
     const char* prop_name = "VRR_CAPABLE";
@@ -3668,7 +3669,7 @@ drmmode_output_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, drmModeResPtr mode_r
     drmmode_output_private_ptr drmmode_output;
     char name[32];
     int i;
-    Bool nonDesktop = FALSE;
+    bool nonDesktop = FALSE;
     drmModePropertyBlobPtr path_blob = NULL;
     const char *s;
     drmModeObjectPropertiesPtr props;
@@ -4229,7 +4230,7 @@ drmmode_set_desired_modes(ScrnInfoPtr pScrn, drmmode_ptr drmmode, Bool set_hw,
                           Bool ign_err)
 {
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(pScrn);
-    Bool success = TRUE;
+    bool success = TRUE;
     int c;
 
     drmmmode_prepare_modeset(pScrn);
@@ -4447,8 +4448,8 @@ drmmode_update_kms_state(drmmode_ptr drmmode)
     drmModeResPtr mode_res;
     xf86CrtcConfigPtr  config = XF86_CRTC_CONFIG_PTR(scrn);
     int i, j;
-    Bool found = FALSE;
-    Bool changed = FALSE;
+    bool found = FALSE;
+    bool changed = FALSE;
 
     /* Try to re-set the mode on all the connectors with a BAD link-state:
      * This may happen if a link degrades and a new modeset is necessary, using
@@ -4579,7 +4580,7 @@ drmmode_handle_uevents(int fd, void *closure)
 {
     drmmode_ptr drmmode = closure;
     struct udev_device *dev;
-    Bool found = FALSE;
+    bool found = FALSE;
 
     while ((dev = udev_monitor_receive_device(drmmode->uevent_monitor))) {
         udev_device_unref(dev);
@@ -5006,7 +5007,7 @@ static void drmmode_sprite_do_set_cursor(msSpritePrivPtr sprite_priv,
 {
     modesettingPtr ms = modesettingPTR(scrn);
     CursorPtr cursor = sprite_priv->cursor;
-    Bool sprite_visible = sprite_priv->sprite_visible;
+    bool sprite_visible = !!sprite_priv->sprite_visible;
 
     if (cursor) {
         x -= cursor->bits->xhot;

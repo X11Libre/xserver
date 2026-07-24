@@ -9,6 +9,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <string.h>
 #include <X11/extensions/dpmsconst.h>
@@ -51,7 +52,7 @@ VBEExtendedInit(xf86Int10InfoPtr pInt, int entityIndex, int Flags)
     void *page = NULL;
     ScrnInfoPtr pScrn = xf86FindScreenForEntity(entityIndex);
     vbeControllerInfoPtr vbe = NULL;
-    Bool init_int10 = FALSE;
+    bool init_int10 = FALSE;
     vbeInfoPtr vip = NULL;
     int screen;
 
@@ -820,7 +821,7 @@ void
 VBEVesaSaveRestore(vbeInfoPtr pVbe, vbeSaveRestorePtr vbe_sr,
                    vbeSaveRestoreFunction function)
 {
-    Bool SaveSucc = FALSE;
+    bool SaveSucc = FALSE;
 
     if (VBE_VERSION_MAJOR(pVbe->version) > 1
         && (function == MODE_SAVE || vbe_sr->pstate)) {

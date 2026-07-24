@@ -35,6 +35,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 
 #include "dix/screenint_priv.h"
@@ -248,7 +249,7 @@ xf86VidModeSwitchMode(ScreenPtr pScreen, DisplayModePtr mode)
 {
     ScrnInfoPtr pScrn;
     DisplayModePtr pTmpMode;
-    Bool retval;
+    bool retval;
 
     pScrn = xf86ScreenToScrn(pScreen);
     /* save in case we fail */
@@ -441,7 +442,7 @@ xf86VidModeInit(ScreenPtr pScreen)
 void
 XFree86VidModeExtensionInit(void)
 {
-    Bool enabled = FALSE;
+    bool enabled = FALSE;
 
     DebugF("XFree86VidModeExtensionInit");
 

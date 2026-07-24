@@ -26,6 +26,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <math.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -84,13 +85,13 @@ typedef struct {
     int *PreAllocIndices;
     CMapLinkPtr maps;
     unsigned int flags;
-    Bool isDGAmode;
+    bool isDGAmode;
 } CMapScreenRec, *CMapScreenPtr;
 
 typedef struct {
     int numColors;
     LOCO *colors;
-    Bool recalculate;
+    bool recalculate;
     int overscan;
 } CMapColormapRec, *CMapColormapPtr;
 
@@ -288,7 +289,7 @@ CMapCreateColormap(ColormapPtr pmap)
     ScreenPtr pScreen = pmap->pScreen;
     CMapScreenPtr pScreenPriv =
         (CMapScreenPtr) dixLookupPrivate(&pScreen->devPrivates, CMapScreenKey);
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     pScreen->CreateColormap = pScreenPriv->CreateColormap;
     if ((*pScreen->CreateColormap) (pmap)) {
@@ -449,7 +450,7 @@ static Bool
 CMapEnterVT(ScrnInfoPtr pScrn)
 {
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
-    Bool ret;
+    bool ret;
     CMapScreenPtr pScreenPriv =
         (CMapScreenPtr) dixLookupPrivate(&pScreen->devPrivates, CMapScreenKey);
 
@@ -679,7 +680,7 @@ CMapSetOverscan(ColormapPtr pmap, int defs, int *indices)
     int i;
     LOCO *colors;
     int index;
-    Bool newOverscan = FALSE;
+    bool newOverscan = FALSE;
     int overscan, tmpOverscan;
 
     colors = pColPriv->colors;

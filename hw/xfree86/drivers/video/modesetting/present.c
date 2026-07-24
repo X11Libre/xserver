@@ -22,6 +22,7 @@
 
 #include "dix-config.h"
 
+#include <stdbool.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -51,7 +52,7 @@
 
 struct ms_present_vblank_event {
     uint64_t        event_id;
-    Bool            unflip;
+    bool            unflip;
 };
 
 static RRCrtcPtr
@@ -321,7 +322,7 @@ ms_present_check_flip(RRCrtcPtr crtc,
     ScreenPtr screen = window->drawable.pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
-    Bool async_flip = !sync_flip;
+    bool async_flip = !sync_flip;
 
     if (reason)
         *reason = PRESENT_FLIP_REASON_UNKNOWN;
@@ -405,7 +406,7 @@ ms_present_flip(RRCrtcPtr crtc,
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
     xf86CrtcPtr xf86_crtc = crtc->devPrivate;
-    Bool ret;
+    bool ret;
     struct ms_present_vblank_event *event;
 
     /* A NULL pixmap means this is a fake flip to be routed through TearFree */

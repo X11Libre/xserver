@@ -33,6 +33,7 @@ from Kaleb S. KEITHLEY
 
 #ifdef XF86VIDMODE
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86vmproto.h>
@@ -533,7 +534,7 @@ static int VidModeAddModeLine(ClientPtr client, xXF86VidModeAddModeLineReq* stuf
         return BadImplementation;
 
     if (stuff->after_htotal != 0 || stuff->after_vtotal != 0) {
-        Bool found = FALSE;
+        bool found = FALSE;
 
         if (pVidMode->GetFirstModeline(pScreen, &mode, &dotClock)) {
             do {

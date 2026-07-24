@@ -29,6 +29,8 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
+
 #include "os/mathx_priv.h"
 
 #define _PARSE_EDID_
@@ -1007,8 +1009,8 @@ struct det_modes_parameter {
     xf86MonPtr DDC;
     ddc_quirk_t quirks;
     DisplayModePtr Modes;
-    Bool rb;
-    Bool preferred;
+    bool rb;
+    bool preferred;
     int timing_level;
 };
 
@@ -1053,7 +1055,7 @@ xf86DDCGetModes(int scrnIndex, xf86MonPtr DDC)
 {
     DisplayModePtr Modes = NULL, Mode;
     ddc_quirk_t quirks;
-    Bool preferred, rb;
+    bool preferred, rb;
     int timing_level;
     struct det_modes_parameter p;
 
@@ -1110,9 +1112,9 @@ xf86DDCGetModes(int scrnIndex, xf86MonPtr DDC)
 struct det_mon_parameter {
     MonPtr Monitor;
     ddc_quirk_t quirks;
-    Bool have_hsync;
-    Bool have_vrefresh;
-    Bool have_maxpixclock;
+    bool have_hsync;
+    bool have_vrefresh;
+    bool have_maxpixclock;
 };
 
 static void

@@ -38,6 +38,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <string.h>
 #include <X11/X.h>
@@ -99,7 +100,7 @@ static int DGAEventBase;
     dixLookupPrivate(&(pScreen)->devPrivates, &DGAScreenKeyRec))
 
 typedef struct _FakedVisualList {
-    Bool free;
+    bool free;
     VisualPtr pVisual;
     struct _FakedVisualList *next;
 } FakedVisualList;
@@ -119,8 +120,8 @@ typedef struct {
     FakedVisualList *fakedVisuals;
     ColormapPtr dgaColormap;
     ColormapPtr savedColormap;
-    Bool grabMouse;
-    Bool grabKeyboard;
+    bool grabMouse;
+    bool grabKeyboard;
 } DGAScreenRec, *DGAScreenPtr;
 
 Bool
@@ -402,7 +403,7 @@ xf86SetDGAMode(ScrnInfoPtr pScrn, int num, DGADevicePtr devRet)
         return BadAlloc;
 
     if (!pScreenPriv->current) {
-        Bool oldVTSema = pScrn->vtSema;
+        bool oldVTSema = !!pScrn->vtSema;
 
         pScrn->vtSema = FALSE;  /* kludge until we rewrite VT switching */
         (*pScrn->EnableDisableFBAccess) (pScrn, FALSE);

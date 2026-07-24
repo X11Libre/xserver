@@ -26,6 +26,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <libxcvt/libxcvt.h>
 
 #include "os/mathx_priv.h"
@@ -469,7 +470,7 @@ xf86ValidateModesSync(ScrnInfoPtr pScrn, DisplayModePtr modeList, MonPtr mon)
     DisplayModePtr mode;
 
     for (mode = modeList; mode != NULL; mode = mode->next) {
-        Bool bad;
+        bool bad;
         int i;
 
         bad = TRUE;
@@ -516,7 +517,7 @@ xf86ValidateModesClocks(ScrnInfoPtr pScrn, DisplayModePtr modeList,
     int i;
 
     for (mode = modeList; mode != NULL; mode = mode->next) {
-        Bool good = FALSE;
+        bool good = FALSE;
 
         for (i = 0; i < n_ranges; i++) {
             if (mode->Clock >= min[i] * (1 - SYNC_TOLERANCE) &&
@@ -552,7 +553,7 @@ xf86ValidateModesUserConfig(ScrnInfoPtr pScrn, DisplayModePtr modeList)
 
     for (mode = modeList; mode != NULL; mode = mode->next) {
         int i;
-        Bool good = FALSE;
+        bool good = FALSE;
 
         for (i = 0; pScrn->display->modes[i] != NULL; i++) {
             if (strncmp(pScrn->display->modes[i], mode->name,

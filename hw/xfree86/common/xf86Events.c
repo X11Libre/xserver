@@ -50,6 +50,7 @@
 /* [JCH-96/01/21] Extended std reverse map to four buttons. */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 #include <X11/X.h>
@@ -105,8 +106,8 @@ typedef struct x_IHRec {
     int fd;
     InputHandlerProc ihproc;
     void *data;
-    Bool enabled;
-    Bool is_input;
+    bool enabled;
+    bool is_input;
     struct x_IHRec *next;
 } IHRec, *IHPtr;
 

@@ -34,6 +34,7 @@
 
 #include "dix-config.h"
 
+#include <stdbool.h>
 #include <errno.h>
 #include <time.h>
 
@@ -273,7 +274,7 @@ ms_dri2_copy_region2(ScreenPtr screen, DrawablePtr drawable, RegionPtr pRegion,
     DrawablePtr dst = (destBuffer->attachment == DRI2BufferFrontLeft)
         ? drawable : &dst_pixmap->drawable;
     int off_x = 0, off_y = 0;
-    Bool translate = FALSE;
+    bool translate = FALSE;
     RegionPtr pCopyClip;
     GCPtr gc;
 

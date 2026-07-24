@@ -43,6 +43,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <grp.h>
@@ -263,7 +264,7 @@ xf86ModulelistFromConfig(void ***optlist)
     };
     void **optarray;
     XF86LoadPtr modp;
-    Bool found;
+    bool found;
 
     /*
      * make sure the config file has been parsed and that we have a
@@ -529,7 +530,7 @@ static void
 configFiles(XF86ConfFilesPtr fileconf)
 {
     MessageType pathFrom;
-    Bool must_copy;
+    bool must_copy;
     int size, countDirs;
     char *temp_path, *log_buf, *start, *end;
 
@@ -1052,7 +1053,7 @@ static Bool
 checkCoreInputDevices(serverLayoutPtr servlayoutp, Bool implicitLayout)
 {
     InputInfoPtr corePointer = NULL, coreKeyboard = NULL;
-    Bool foundPointer = FALSE, foundKeyboard = FALSE;
+    bool foundPointer = FALSE, foundKeyboard = FALSE;
     const char *pointerMsg = NULL, *keyboardMsg = NULL;
     InputInfoPtr *devs,         /* iterator */
      indp;
@@ -1707,7 +1708,7 @@ configScreen(confScreenPtr screenp, XF86ConfScreenPtr conf_screen, int scrnum,
     int count = 0;
     XF86ConfDisplayPtr dispptr;
     XF86ConfAdaptorLinkPtr conf_adaptor;
-    Bool defaultMonitor = FALSE;
+    bool defaultMonitor = FALSE;
     XF86ConfScreenRec local_conf_screen;
     int i;
 
@@ -2184,7 +2185,7 @@ configExtensions(XF86ConfExtensionsPtr conf_ext)
             char *name = xf86OptionName(o);
             char *val = xf86OptionValue(o);
             char *n;
-            Bool enable = TRUE;
+            bool enable = TRUE;
 
             /* Handle "No<ExtensionName>" */
             n = xf86NormalizeName(name);
@@ -2329,7 +2330,7 @@ xf86HandleConfigFile(Bool autoconfig)
     const char *scanptr;
     Bool singlecard = 0;
 #endif
-    Bool implicit_layout = FALSE;
+    bool implicit_layout = FALSE;
     XF86ConfLayoutPtr layout;
 
     if (!autoconfig) {

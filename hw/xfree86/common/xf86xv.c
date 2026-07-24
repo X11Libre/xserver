@@ -29,6 +29,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/Xv.h>
@@ -552,7 +553,7 @@ xf86XVUpdateCompositeClip(XvPortRecPrivatePtr portPriv)
 {
     RegionPtr pregWin, pCompositeClip;
     WindowPtr pWin;
-    Bool freeCompClip = FALSE;
+    bool freeCompClip = FALSE;
 
     if (portPriv->pCompositeClip)
         return;
@@ -641,7 +642,7 @@ xf86XVRegetVideo(XvPortRecPrivatePtr portPriv)
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     xf86XVUpdateCompositeClip(portPriv);
 
@@ -698,7 +699,7 @@ xf86XVReputVideo(XvPortRecPrivatePtr portPriv)
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     xf86XVUpdateCompositeClip(portPriv);
 
@@ -771,7 +772,7 @@ xf86XVReputImage(XvPortRecPrivatePtr portPriv)
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     xf86XVUpdateCompositeClip(portPriv);
 
@@ -958,7 +959,7 @@ xf86XVReputOrStopAllPorts(ScrnInfoPtr pScrn, Bool onlyChanged)
             XvPortRecPrivatePtr pPriv =
                 (XvPortRecPrivatePtr) pPort->devPriv.ptr;
             WindowPtr pWin = (WindowPtr) pPriv->pDraw;
-            Bool visible;
+            bool visible;
 
             if (pPriv->isOn == XV_OFF || !pWin)
                 continue;
@@ -1039,7 +1040,7 @@ xf86XVWindowExposures(WindowPtr pWin, RegionPtr reg1)
     XF86XVScreenPtr ScreenPriv = GET_XF86XV_SCREEN(pScreen);
     XF86XVWindowPtr WinPriv = GET_XF86XV_WINDOW(pWin);
     XvPortRecPrivatePtr pPriv;
-    Bool AreasExposed;
+    bool AreasExposed;
 
     AreasExposed = (WinPriv && reg1 && RegionNotEmpty(reg1));
 
@@ -1052,7 +1053,7 @@ xf86XVWindowExposures(WindowPtr pWin, RegionPtr reg1)
         return;
 
     while (WinPriv) {
-        Bool visible = TRUE;
+        bool visible = TRUE;
 
         pPriv = WinPriv->PortRec;
 
@@ -1160,7 +1161,7 @@ xf86XVEnterVT(ScrnInfoPtr pScrn)
 {
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     XF86XVScreenPtr ScreenPriv = GET_XF86XV_SCREEN(pScreen);
-    Bool ret;
+    bool ret;
 
     pScrn->EnterVT = ScreenPriv->EnterVT;
     ret = (*ScreenPriv->EnterVT) (pScrn);
@@ -1314,7 +1315,7 @@ xf86XVPutStill(DrawablePtr pDraw,
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     if (pDraw->type != DRAWABLE_WINDOW)
         return BadAlloc;
@@ -1461,7 +1462,7 @@ xf86XVGetStill(DrawablePtr pDraw,
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     if (pDraw->type != DRAWABLE_WINDOW)
         return BadAlloc;
@@ -1584,7 +1585,7 @@ xf86XVPutImage(DrawablePtr pDraw,
     RegionRec ClipRegion;
     BoxRec WinBox;
     int ret = Success;
-    Bool clippedAway = FALSE;
+    bool clippedAway = FALSE;
 
     if (pDraw->type != DRAWABLE_WINDOW)
         return BadAlloc;
