@@ -22,6 +22,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "fb/fb_priv.h"
@@ -125,8 +126,8 @@ fbBresDash(DrawablePtr pDrawable,
 
     FbDashDeclare;
     int dashlen;
-    Bool even;
-    Bool doOdd;
+    bool even;
+    bool doOdd;
 
     fbGetStipDrawable(pDrawable, dst, dstStride, dstBpp, dstXoff, dstYoff);
     doOdd = pGC->lineStyle == LineDoubleDash;
@@ -230,9 +231,9 @@ fbBresFillDash(DrawablePtr pDrawable,
 
     FbDashDeclare;
     int dashlen;
-    Bool even;
-    Bool doOdd;
-    Bool doBg;
+    bool even;
+    bool doOdd;
+    bool doBg;
     Pixel fg, bg;
 
     fg = pGC->fgPixel;
