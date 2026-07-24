@@ -33,6 +33,7 @@ and Jim Haggerty of Metheus.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <assert.h>
 #include <X11/Xmd.h>
@@ -289,9 +290,9 @@ RecordAProtocolElement(RecordContextPtr pContext, ClientPtr pClient,
 {
     CARD32 elemHeaderData[2];
     int numElemHeaders = 0;
-    Bool recordingClientSwapped = pContext->pRecordingClient->swapped;
+    bool recordingClientSwapped = !!pContext->pRecordingClient->swapped;
     CARD32 serverTime = 0;
-    Bool gotServerTime = FALSE;
+    bool gotServerTime = FALSE;
     int replylen;
 
     if (futurelen >= 0) {       /* start of new protocol element */
@@ -955,7 +956,7 @@ RecordUninstallHooks(RecordClientsAndProtocolPtr pRCAP, XID oneclient)
             if (pRCAP->pRequestMajorOpSet) {
                 ClientPtr pClient = dixClientForXID(client);
                 int c;
-                Bool otherRCAPwantsProcVector = FALSE;
+                bool otherRCAPwantsProcVector = FALSE;
                 RecordClientPrivatePtr pClientPriv = NULL;
 
                 assert(pClient);
