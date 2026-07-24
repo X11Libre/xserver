@@ -51,6 +51,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
 #include <X11/X.h>
@@ -344,7 +345,7 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
 {
     SyncObject *pSync = pTrigger->pSync;
     SyncCounter *pCounter = NULL;
-    Bool newSyncObject = FALSE;
+    bool newSyncObject = FALSE;
 
     if (changes & XSyncCACounter) {
         if (syncObject == None) {
@@ -380,7 +381,7 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
         if (pTrigger->value_type == XSyncAbsolute)
             pTrigger->test_value = pTrigger->wait_value;
         else {                  /* relative */
-            Bool overflow;
+            bool overflow;
 
             if (pCounter == NULL)
                 return BadMatch;
@@ -581,7 +582,7 @@ SyncAlarmTriggerFired(SyncTrigger * pTrigger)
     new_test_value = pAlarm->trigger.test_value;
 
     if (pAlarm->state == XSyncAlarmActive) {
-        Bool overflow;
+        bool overflow;
         int64_t oldvalue;
         SyncTrigger *paTrigger = &pAlarm->trigger;
         SyncCounter *paCounter;
@@ -662,7 +663,7 @@ SyncAwaitTriggerFired(SyncTrigger * pTrigger)
      */
     for (; numwaits; numwaits--, pAwait++) {
         int64_t diff;
-        Bool overflow, diffgreater, diffequal;
+        bool overflow, diffgreater, diffequal;
 
         /* "A CounterNotify event with the destroyed flag set to TRUE is
          *  always generated if the counter for one of the triggers is
@@ -846,8 +847,8 @@ SyncChangeAlarmAttributes(ClientPtr client, SyncAlarm * pAlarm, Mask mask,
     XSyncCounter counter;
     Mask origmask = mask;
     SyncTrigger trigger;
-    Bool select_events_changed = FALSE;
-    Bool select_events_value = FALSE;
+    bool select_events_changed = FALSE;
+    bool select_events_value = FALSE;
     int64_t delta;
 
     trigger = pAlarm->trigger;
@@ -1483,7 +1484,7 @@ ProcSyncChangeCounter(ClientPtr client)
 
     SyncCounter *pCounter;
     int64_t newvalue;
-    Bool overflow;
+    bool overflow;
 
     X_CALL_CHECK_ERR(dixLookupResourceByType((void **) &pCounter, stuff->cid, RTCounter,
                                  client, DixWriteAccess));
