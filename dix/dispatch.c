@@ -3637,6 +3637,15 @@ CloseDownClient(ClientPtr client)
     Bool really_close_down = client->clientGone ||
         client->closeDownMode == DestroyAll;
 
+    if (XFixesMustTerminateServerOnDisconnect(client)) {
+        /* A screen locker has just crashed!  Set stopAllEventDelivery
+	 * to prevent any further delivery of events, then shut down.
+         */
+        ErrorF("Client that set XFixesClientDisconnectFlagForceTerminate exited, aborting!");
+        stopAllEventDelivery = xTrue;
+        dispatchException |= DE_TERMINATE;
+    }
+
     if (!client->clientGone) {
         /* ungrab server if grabbing client dies */
         if (grabState != GrabNone && grabClient == client) {
