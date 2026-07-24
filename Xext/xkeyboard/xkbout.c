@@ -26,6 +26,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -356,7 +357,7 @@ XkbWriteXKBSymbols(FILE * file,
     register unsigned i, tmp;
     XkbClientMapPtr map;
     XkbServerMapPtr srv;
-    Bool showActions;
+    bool showActions;
 
     if (!xkb) {
         _XkbLibError(_XkbErrMissingSymbols, "XkbWriteXKBSymbols", 0);
@@ -388,7 +389,7 @@ XkbWriteXKBSymbols(FILE * file,
         fprintf(file, "\n");
     srv = xkb->server;
     for (i = xkb->min_key_code; i <= xkb->max_key_code; i++) {
-        Bool simple;
+        bool simple;
 
         if ((int) XkbKeyNumSyms(xkb, i) < 1)
             continue;
@@ -401,7 +402,7 @@ XkbWriteXKBSymbols(FILE * file,
             if (((srv->explicit[i] & XkbExplicitKeyTypesMask) != 0) ||
                 (showImplicit)) {
                 int typeNdx, g;
-                Bool multi;
+                bool multi;
                 const char *comment = "  ";
 
                 if ((srv->explicit[i] & XkbExplicitKeyTypesMask) == 0)
