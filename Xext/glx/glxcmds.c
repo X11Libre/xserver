@@ -30,6 +30,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 #include <assert.h>
 #include <GL/glxtokens.h>
@@ -640,7 +641,7 @@ xorgGlxMakeCurrent(ClientPtr client, GLXContextTag tag, XID drawId, XID readId,
 
     if (prevglxc) {
         /* Flush the previous context if needed. */
-        Bool need_flush = !prevglxc->isDirect;
+        bool need_flush = !prevglxc->isDirect;
 #ifdef GLX_CONTEXT_RELEASE_BEHAVIOR_ARB
         if (prevglxc->releaseBehavior == GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB)
             need_flush = GL_FALSE;
