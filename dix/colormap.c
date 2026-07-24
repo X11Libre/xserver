@@ -470,10 +470,11 @@ TellNoMap(WindowPtr pwin, Colormap * pmid)
             .u.colormap.state = ColormapUninstalled
         };
         xE.u.u.type = ColormapNotify;
-#ifdef XINERAMA
-        if (PanoramiXIsDisabled() || !pwin->drawable.pScreen->myNum)
-#endif /* XINERAMA */
+
+        if (PanoramiXIsMasterScreen(pwin->drawable.pScreen)) {
             DeliverEvents(pwin, &xE, 1, (WindowPtr) NULL);
+        }
+
         if (pwin->optional) {
             pwin->optional->colormap = None;
             CheckWindowOptionalNeed(pwin);
@@ -489,7 +490,7 @@ TellLostMap(WindowPtr pwin, void *value)
 {
     Colormap *pmid = (Colormap *) value;
 
-    if (PanoramiXIsEnabled() && pwin->drawable.pScreen->myNum) {
+    if (PanoramiXIsSlaveScreen(pwin->drawable.pScreen)) {
         return WT_STOPWALKING;
     }
 
@@ -514,11 +515,9 @@ TellGainedMap(WindowPtr pwin, void *value)
 {
     Colormap *pmid = (Colormap *) value;
 
-#ifdef XINERAMA
-    if (PanoramiXIsEnabled() && pwin->drawable.pScreen->myNum) {
+    if (PanoramiXIsSlaveScreen(pwin->drawable.pScreen)) {
         return WT_STOPWALKING;
     }
-#endif
 
     if (wColormap(pwin) == *pmid) {
         /* This should be call to DeliverEvent */
