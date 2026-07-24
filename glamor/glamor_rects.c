@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "os/bug_priv.h"
 #include "os/mathx_priv.h"
 
@@ -58,7 +60,7 @@ glamor_poly_fill_rect_gl(DrawablePtr drawable,
     GLshort *v;
     char *vbo_offset;
     int box_index;
-    Bool ret = FALSE;
+    bool ret = FALSE;
     BoxRec bounds = glamor_no_rendering_bounds();
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);

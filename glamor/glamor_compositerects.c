@@ -28,6 +28,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "include/mipict.h"
 
 #include "glamor_priv.h"
@@ -111,7 +113,7 @@ glamor_composite_rectangles(CARD8 op,
     pixman_box16_t *boxes;
     int num_boxes;
     PicturePtr source = NULL;
-    Bool need_free_region = FALSE;
+    bool need_free_region = FALSE;
 
     DEBUGF("%s(op=%d, %08x x %d [(%d, %d)x(%d, %d) ...])\n",
            __func__, op,
