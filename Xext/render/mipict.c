@@ -23,6 +23,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "include/mipict.h"
 #include "os/osdep.h"
 
@@ -105,7 +107,7 @@ miValidatePicture(PicturePtr pPicture, Mask mask)
         if (pDrawable->type == DRAWABLE_WINDOW) {
             WindowPtr pWin = (WindowPtr) pDrawable;
             RegionPtr pregWin;
-            Bool freeTmpClip, freeCompClip;
+            bool freeTmpClip, freeCompClip;
 
             if (pPicture->subWindowMode == IncludeInferiors) {
                 pregWin = NotClippedByChildren(pWin);
@@ -265,7 +267,7 @@ static inline Bool
 miClipPictureSrc(RegionPtr pRegion, PicturePtr pPicture, int dx, int dy)
 {
     if (pPicture->clientClip) {
-        Bool result;
+        bool result;
 
         pixman_region_translate(pPicture->clientClip,
                                 pPicture->clipOrigin.x + dx,

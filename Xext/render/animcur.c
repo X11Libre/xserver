@@ -33,6 +33,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 
@@ -164,7 +165,7 @@ static Bool
 AnimCurDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     if (InputDevIsFloating(pDev))
         return FALSE;
@@ -203,7 +204,7 @@ AnimCurSetCursorPosition(DeviceIntPtr pDev,
                          ScreenPtr pScreen, int x, int y, Bool generateEvent)
 {
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
-    Bool ret;
+    bool ret;
 
     Unwrap(as, pScreen, SetCursorPosition);
     if (pDev->spriteInfo->anim.pCursor) {
@@ -218,7 +219,7 @@ static Bool
 AnimCurRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
-    Bool ret;
+    bool ret;
 
     Unwrap(as, pScreen, RealizeCursor);
     if (IsAnimCur(pCursor))
@@ -233,7 +234,7 @@ static Bool
 AnimCurUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
-    Bool ret;
+    bool ret;
 
     Unwrap(as, pScreen, UnrealizeCursor);
     if (IsAnimCur(pCursor)) {
