@@ -34,6 +34,7 @@ Author:  Bob Scheifler, MIT X Consortium
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <math.h>
 #include <X11/X.h>
 #include <X11/Xprotostr.h>
@@ -370,7 +371,7 @@ miZeroArcPts(xArc * arc, DDXPointPtr pts)
     miZeroArcRec info;
     int x, y, a, b, d, mask;
     int k1, k3, dx, dy;
-    Bool do360;
+    bool do360;
 
     do360 = miZeroArcSetup(arc, &info, TRUE);
     MIARCSETUP();
@@ -649,7 +650,7 @@ miZeroPolyArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
     DDXPointPtr points, pts, oddPts = NULL;
     DDXPointPtr pt;
     int numPts;
-    Bool dospans;
+    bool dospans;
     int *widths = NULL;
     XID fgPixel = pGC->fgPixel;
     DashInfo dinfo;

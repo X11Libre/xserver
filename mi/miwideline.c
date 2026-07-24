@@ -54,6 +54,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #ifdef _XOPEN_SOURCE
 #include <math.h>
@@ -1193,7 +1194,7 @@ miLineArcD(DrawablePtr pDraw,
     double radius, x0, y0, el, er, yk, xlk, xrk, k;
     int xbase, ybase, y, boty, xl, xr, xcl, xcr;
     int ymin, ymax;
-    Bool edge1IsMin, edge2IsMin;
+    bool edge1IsMin, edge2IsMin;
     int ymin1, ymin2;
 
     pts = points;
@@ -1893,12 +1894,12 @@ miWideLine(DrawablePtr pDrawable, GCPtr pGC,
     SpanDataRec spanDataRec;
     SpanDataPtr spanData;
     long pixel;
-    Bool projectLeft, projectRight;
+    bool projectLeft, projectRight;
     LineFaceRec leftFace = { 0 }, rightFace = { 0 }, prevRightFace;
     LineFaceRec firstFace;
     int first;
-    Bool somethingDrawn = FALSE;
-    Bool selfJoin;
+    bool somethingDrawn = FALSE;
+    bool selfJoin;
 
     spanData = miSetupSpanData(pGC, &spanDataRec, npt);
     pixel = pGC->fgPixel;
@@ -2037,7 +2038,7 @@ miWideDashSegment(DrawablePtr pDrawable,
     double rdx, rdy;
     double dashDx, dashDy;
     double saveK = 0.0;
-    Bool first = TRUE;
+    bool first = TRUE;
     double lcenterx, lcentery, rcenterx = 0.0, rcentery = 0.0;
     unsigned long fgPixel, bgPixel;
 
@@ -2331,7 +2332,7 @@ miWideDash(DrawablePtr pDrawable, GCPtr pGC,
 {
     int x1, y1, x2, y2;
     unsigned long pixel;
-    Bool projectLeft, projectRight;
+    bool projectLeft, projectRight;
     LineFaceRec leftFace, rightFace, prevRightFace;
     LineFaceRec firstFace;
     int first;
@@ -2339,10 +2340,10 @@ miWideDash(DrawablePtr pDrawable, GCPtr pGC,
     int prevDashIndex;
     SpanDataRec spanDataRec;
     SpanDataPtr spanData;
-    Bool somethingDrawn = FALSE;
-    Bool selfJoin;
-    Bool endIsFg = FALSE, startIsFg = FALSE;
-    Bool firstIsFg = FALSE, prevIsFg = FALSE;
+    bool somethingDrawn = FALSE;
+    bool selfJoin;
+    bool endIsFg = FALSE, startIsFg = FALSE;
+    bool firstIsFg = FALSE, prevIsFg = FALSE;
 
 #if 0
     /* XXX backward compatibility */
