@@ -30,6 +30,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/XI2proto.h>

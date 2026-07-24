@@ -31,6 +31,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/extensions/XI2.h>
 #include <X11/extensions/XI2proto.h>
 
@@ -50,7 +51,7 @@
 int
 ProcXIAllowEvents(ClientPtr client)
 {
-    Bool have_xi22 = FALSE;
+    bool have_xi22 = FALSE;
     CARD32 clientTime;
     int deviceId;
     int mode;

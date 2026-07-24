@@ -31,6 +31,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>              /* for inputstr.h    */
 #include <X11/Xproto.h>         /* Request macro     */
 #include <X11/extensions/XI.h>
@@ -75,7 +76,7 @@ ProcXIQueryPointer(ClientPtr client)
     WindowPtr pWin, t;
     SpritePtr pSprite;
     XkbStatePtr state;
-    Bool have_xi22 = FALSE;
+    bool have_xi22 = FALSE;
 
     /* Check if client is compliant with XInput 2.2 or later. Earlier clients
      * do not know about touches, so we must report emulated button presses. 2.2
