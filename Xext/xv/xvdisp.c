@@ -23,8 +23,9 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include <string.h>
 
+#include <stdbool.h>
+#include <string.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/Xv.h>
@@ -1055,8 +1056,8 @@ XineramaXvShmPutImage(ClientPtr client)
 {
     REQUEST(xvShmPutImageReq);
     PanoramiXRes *draw, *gc, *port;
-    Bool send_event;
-    Bool isRoot;
+    bool send_event;
+    bool isRoot;
     int result, x, y;
 
     send_event = stuff->send_event;
@@ -1109,7 +1110,7 @@ XineramaXvPutImage(ClientPtr client)
 {
     REQUEST(xvPutImageReq);
     PanoramiXRes *draw, *gc, *port;
-    Bool isRoot;
+    bool isRoot;
     int result, x, y;
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
@@ -1156,7 +1157,7 @@ XineramaXvPutVideo(ClientPtr client)
 {
     REQUEST(xvPutImageReq);
     PanoramiXRes *draw, *gc, *port;
-    Bool isRoot;
+    bool isRoot;
     int result, x, y;
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
@@ -1203,7 +1204,7 @@ XineramaXvPutStill(ClientPtr client)
 {
     REQUEST(xvPutImageReq);
     PanoramiXRes *draw, *gc, *port;
-    Bool isRoot;
+    bool isRoot;
     int result, x, y;
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
@@ -1316,7 +1317,7 @@ XineramifyXv(void)
     SetResourceTypeErrorValue(XvXRTPort, _XvBadPort);
 
     for (i = 0; i < xvsp0->nAdaptors; i++) {
-        Bool isOverlay;
+        bool isOverlay;
         XvAdaptorPtr refAdapt = xvsp0->pAdaptors + i;
 
         if (!(refAdapt->type & XvInputMask))
