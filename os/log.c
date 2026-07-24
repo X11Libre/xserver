@@ -385,6 +385,11 @@ LogSetDisplay(void)
         free(logFileName);
         free(saved_log_fname);
         free(saved_log_backup);
+        /* Reset to NULL: if LogSetDisplay() were ever called again, the
+         * "%s" check above would otherwise read these two freed pointers,
+         * and this block would free them a second time. */
+        saved_log_fname = NULL;
+        saved_log_backup = NULL;
     }
     initSyslog();
 }
