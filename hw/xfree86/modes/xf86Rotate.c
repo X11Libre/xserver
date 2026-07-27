@@ -451,7 +451,6 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
                 return FALSE;
             }
         }
-#ifdef RANDR_12_INTERFACE
         if (transform) {
             if (transform->nparams) {
                 new_params = calloc(transform->nparams, sizeof(xFixed));
@@ -469,7 +468,6 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
                 new_height = new_filter->height;
             }
         }
-#endif
         crtc->transform_in_use = TRUE;
     }
     crtc->crtc_to_framebuffer = crtc_to_fb;

@@ -309,7 +309,6 @@ struct _xf86Crtc {
      */
     void *driver_private;
 
-#ifdef RANDR_12_INTERFACE
     /**
      * RandR crtc
      *
@@ -317,9 +316,6 @@ struct _xf86Crtc {
      * points at the associated crtc object
      */
     RRCrtcPtr randr_crtc;
-#else
-    void *randr_crtc;
-#endif
 
     /**
      * Current cursor is ARGB
@@ -503,14 +499,12 @@ typedef struct _xf86OutputFuncs {
      */
      DisplayModePtr(*get_modes) (xf86OutputPtr output);
 
-#ifdef RANDR_12_INTERFACE
     /**
      * Callback when an output's property has changed.
      */
     Bool
      (*set_property) (xf86OutputPtr output,
                       Atom property, RRPropertyValuePtr value);
-#endif
 #ifdef RANDR_13_INTERFACE
     /**
      * Callback to get an updated property value
@@ -633,7 +627,6 @@ struct _xf86Output {
      */
     Bool non_desktop;
 
-#ifdef RANDR_12_INTERFACE
     /**
      * RandR 1.2 output structure.
      *
@@ -641,9 +634,6 @@ struct _xf86Output {
      * RandR output structure and is created when this output is created
      */
     RROutputPtr randr_output;
-#else
-    void *randr_output;
-#endif
     /**
      * Desired initial panning
      * Added in ABI version 2
@@ -823,11 +813,7 @@ typedef struct _xf86CrtcConfig {
 
     char *name;
     const xf86ProviderFuncsRec *provider_funcs;
-#ifdef RANDR_12_INTERFACE
     RRProviderPtr randr_provider;
-#else
-    void *randr_provider;
-#endif
 } xf86CrtcConfigRec, *xf86CrtcConfigPtr;
 
 extern _X_EXPORT int xf86CrtcConfigPrivateIndex;
