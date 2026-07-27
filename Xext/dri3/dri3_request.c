@@ -164,27 +164,25 @@ proc_dri3_open(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drawable);
     X_REQUEST_FIELD_CARD32(provider);
 
-    RRProviderPtr provider;
-    DrawablePtr drawable;
-    ScreenPtr screen;
-    int fd;
-    int status;
+    if (!RRProviderType) {
+        return BadMatch;
+    }
 
-    status = dixLookupDrawable(&drawable, stuff->drawable, client, 0, DixGetAttrAccess);
+    DrawablePtr drawable;
+    int status = dixLookupDrawable(&drawable, stuff->drawable, client, 0, DixGetAttrAccess);
     if (status != Success)
         return status;
 
-    if (stuff->provider == None)
-        provider = NULL;
-    else if (!RRProviderType) {
-        return BadMatch;
-    } else {
+    RRProviderPtr provider = NULL;
+    if (stuff->provider != None) {
         VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
         if (drawable->pScreen != provider->pScreen)
             return BadMatch;
     }
-    screen = drawable->pScreen;
 
+    ScreenPtr screen = drawable->pScreen;
+
+    int fd = -1;
     status = dri3_open(client, screen, provider, &fd);
     if (status != Success)
         return status;
@@ -206,15 +204,10 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
     X_REQUEST_FIELD_CARD16(height);
     X_REQUEST_FIELD_CARD16(stride);
 
-    int fd;
-    DrawablePtr drawable;
-    PixmapPtr pixmap;
-    CARD32 stride, offset;
-    int rc;
-
     SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
-    rc = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
+    DrawablePtr drawable;
+    int rc = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
     if (rc != Success) {
         client->errorValue = stuff->drawable;
         return rc;
@@ -240,12 +233,13 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
         }
     }
 
-    fd = ReadFdFromClient(client);
+    int fd = ReadFdFromClient(client);
     if (fd < 0)
         return BadValue;
 
-    offset = 0;
-    stride = stuff->stride;
+    CARD32 offset = 0;
+    CARD32 stride = stuff->stride;
+    PixmapPtr pixmap = NULL;
     rc = dri3_pixmap_from_fds(&pixmap,
                               drawable->pScreen, 1, &fd,
                               stuff->width, stuff->height,
@@ -278,11 +272,8 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDRI3BufferFromPixmapReq);
     X_REQUEST_FIELD_CARD32(pixmap);
 
-    int rc;
-    int fd;
     PixmapPtr pixmap;
-
-    rc = dixLookupResourceByType((void **) &pixmap, stuff->pixmap, X11_RESTYPE_PIXMAP,
+    int rc = dixLookupResourceByType((void **) &pixmap, stuff->pixmap, X11_RESTYPE_PIXMAP,
                                  client, DixWriteAccess);
     if (rc != Success) {
         client->errorValue = stuff->pixmap;
@@ -297,7 +288,7 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
         .bpp = pixmap->drawable.bitsPerPixel,
     };
 
-    fd = dri3_fd_from_pixmap(pixmap, &reply.stride, &reply.size);
+    int fd = dri3_fd_from_pixmap(pixmap, &reply.stride, &reply.size);
     if (fd < 0)
         return BadPixmap;
 
@@ -321,18 +312,15 @@ proc_dri3_fence_from_fd(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drawable);
     X_REQUEST_FIELD_CARD32(fence);
 
-    DrawablePtr drawable;
-    int fd;
-    int status;
-
     SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->fence, client);
 
-    status = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
+    DrawablePtr drawable;
+    int status = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
     if (status != Success)
         return status;
 
-    fd = ReadFdFromClient(client);
+    int fd = ReadFdFromClient(client);
     if (fd < 0)
         return BadValue;
 
@@ -352,19 +340,18 @@ proc_dri3_fd_from_fence(ClientPtr client)
     xDRI3FDFromFenceReply reply = {
         .nfd = 1,
     };
-    DrawablePtr drawable;
-    int fd;
-    int status;
-    SyncFence *fence;
 
-    status = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
+    DrawablePtr drawable;
+    int status = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
     if (status != Success)
         return status;
+
+    SyncFence *fence;
     status = SyncVerifyFence(&fence, stuff->fence, client, DixWriteAccess);
     if (status != Success)
         return status;
 
-    fd = SyncFDFromFence(client, drawable, fence);
+    int fd = SyncFDFromFence(client, drawable, fence);
     if (fd < 0)
         return BadMatch;
 
@@ -381,18 +368,16 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr window;
-    ScreenPtr pScreen;
+    int status = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
+    if (status != Success)
+        return status;
+
+    ScreenPtr pScreen = window->drawable.pScreen;
+
     CARD64 *window_modifiers = NULL;
     CARD64 *screen_modifiers = NULL;
     CARD32 nwindowmodifiers = 0;
     CARD32 nscreenmodifiers = 0;
-    int status;
-
-    status = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
-    if (status != Success)
-        return status;
-    pScreen = window->drawable.pScreen;
-
     dri3_get_supported_modifiers(pScreen, &window->drawable,
                                  stuff->depth, stuff->bpp,
                                  &nwindowmodifiers, &window_modifiers,
@@ -434,22 +419,16 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
     X_REQUEST_FIELD_CARD32(offset3);
     X_REQUEST_FIELD_CARD64(modifier);
 
-    int fds[4];
-    CARD32 strides[4], offsets[4];
-    ScreenPtr screen;
-    WindowPtr window;
-    PixmapPtr pixmap;
-    int rc;
-    int i;
-
     SetReqFds(client, stuff->num_buffers);
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
-    rc = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
+
+    WindowPtr window;
+    int rc = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
     if (rc != Success) {
         client->errorValue = stuff->window;
         return rc;
     }
-    screen = window->drawable.pScreen;
+    ScreenPtr screen = window->drawable.pScreen;
 
     if (!stuff->width || !stuff->height || !stuff->bpp || !stuff->depth) {
         client->errorValue = 0;
@@ -476,7 +455,8 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
         return BadValue;
     }
 
-    for (i = 0; i < stuff->num_buffers; i++) {
+    int fds[4];
+    for (int i = 0; i < stuff->num_buffers; i++) {
         fds[i] = ReadFdFromClient(client);
         if (fds[i] < 0) {
             while (--i >= 0)
@@ -485,6 +465,7 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
         }
     }
 
+    CARD32 strides[4], offsets[4];
     strides[0] = stuff->stride0;
     strides[1] = stuff->stride1;
     strides[2] = stuff->stride2;
@@ -494,6 +475,7 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
     offsets[2] = stuff->offset2;
     offsets[3] = stuff->offset3;
 
+    PixmapPtr pixmap;
     rc = dri3_pixmap_from_fds(&pixmap, screen,
                               stuff->num_buffers, fds,
                               stuff->width, stuff->height,
@@ -501,7 +483,7 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
                               stuff->depth, stuff->bpp,
                               stuff->modifier);
 
-    for (i = 0; i < stuff->num_buffers; i++)
+    for (int i = 0; i < stuff->num_buffers; i++)
         close (fds[i]);
 
     if (rc != Success)
@@ -529,26 +511,22 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDRI3BuffersFromPixmapReq);
     X_REQUEST_FIELD_CARD32(pixmap);
 
-    int rc;
-    int fds[4];
-    int num_fds;
-    uint32_t strides[4], offsets[4];
-    uint64_t modifier;
-    int i;
     PixmapPtr pixmap;
-
-    rc = dixLookupResourceByType((void **) &pixmap, stuff->pixmap, X11_RESTYPE_PIXMAP,
+    int rc = dixLookupResourceByType((void **) &pixmap, stuff->pixmap, X11_RESTYPE_PIXMAP,
                                  client, DixWriteAccess);
     if (rc != Success) {
         client->errorValue = stuff->pixmap;
         return rc;
     }
 
-    num_fds = dri3_fds_from_pixmap(pixmap, fds, strides, offsets, &modifier);
+    uint32_t strides[4], offsets[4];
+    uint64_t modifier;
+    int fds[4];
+    int num_fds = dri3_fds_from_pixmap(pixmap, fds, strides, offsets, &modifier);
     if (num_fds == 0)
         return BadPixmap;
 
-    for (i = 0; i < num_fds; i++) {
+    for (int i = 0; i < num_fds; i++) {
         if (WriteFdToClient(client, fds[i], TRUE) < 0) {
             while (i--)
                 close(fds[i]);
@@ -585,9 +563,7 @@ proc_dri3_set_drm_device_in_use(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drmMinor);
 
     WindowPtr window;
-    int status;
-
-    status = dixLookupWindow(&window, stuff->window, client,
+    int status = dixLookupWindow(&window, stuff->window, client,
                              DixGetAttrAccess);
     if (status != Success)
         return status;
@@ -607,22 +583,18 @@ proc_dri3_import_syncobj(ClientPtr client)
     X_REQUEST_FIELD_CARD32(syncobj);
     X_REQUEST_FIELD_CARD32(drawable);
 
-    DrawablePtr drawable;
-    ScreenPtr screen;
-    int fd;
-    int status;
-
     SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->syncobj, client);
 
-    status = dixLookupDrawable(&drawable, stuff->drawable, client,
+    DrawablePtr drawable;
+    int status = dixLookupDrawable(&drawable, stuff->drawable, client,
                                M_ANY, DixGetAttrAccess);
     if (status != Success)
         return status;
 
-    screen = drawable->pScreen;
+    ScreenPtr screen = drawable->pScreen;
 
-    fd = ReadFdFromClient(client);
+    int fd = ReadFdFromClient(client);
     if (fd < 0)
         return BadValue;
 
@@ -636,9 +608,7 @@ proc_dri3_free_syncobj(ClientPtr client)
     X_REQUEST_FIELD_CARD32(syncobj);
 
     struct dri3_syncobj *syncobj;
-    int status;
-
-    status = dixLookupResourceByType((void **) &syncobj, stuff->syncobj,
+    int status = dixLookupResourceByType((void **) &syncobj, stuff->syncobj,
                                      dri3_syncobj_type, client, DixWriteAccess);
     if (status != Success)
         return status;

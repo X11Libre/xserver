@@ -89,15 +89,13 @@ dri3_extension_init(void)
         return;
     }
 
-    ExtensionEntry *extension;
-
     /* If no screens support DRI3, there's no point offering the
      * extension at all
      */
     if (dri3_screen_generation != serverGeneration)
         return;
 
-    extension = AddExtension(DRI3_NAME, DRI3NumberEvents, DRI3NumberErrors,
+    ExtensionEntry *extension = AddExtension(DRI3_NAME, DRI3NumberEvents, DRI3NumberErrors,
                              proc_dri3_dispatch, proc_dri3_dispatch,
                              NULL, StandardMinorOpcode);
     if (!extension)
