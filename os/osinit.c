@@ -218,10 +218,10 @@ OsInit(void)
         been_here = TRUE;
     }
     TimerInit();
-    OsVendorInit();
+    ddxInit();
     OsResetSignals();
     /*
-     * No log file by default.  OsVendorInit() should call LogInit() with the
+     * No log file by default.  ddxInit() should call LogInit() with the
      * log file name if logging to a file is desired.
      */
     LogInit(NULL, NULL);

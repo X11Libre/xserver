@@ -277,13 +277,11 @@ ddxGiveUp(enum ExitCode error)
     }
 }
 
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
 }
 
-void
-OsVendorFatalError(const char *f, va_list args)
+void ddxFatalError(const char *f, va_list args)
 {
 }
 

@@ -1162,8 +1162,7 @@ KdInitOutput(int argc, char **argv)
 #endif
 }
 
-void
-OsVendorFatalError(const char *f, va_list args)
+void ddxFatalError(const char *f, va_list args)
 {
 }
 
