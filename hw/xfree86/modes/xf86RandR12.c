@@ -75,10 +75,8 @@ typedef struct _xf86RandR12Info {
     ConstrainCursorHarderProcPtr orig_ConstrainCursorHarder;
 } XF86RandRInfoRec, *XF86RandRInfoPtr;
 
-#ifdef RANDR_12_INTERFACE
 static Bool xf86RandR12Init12(ScreenPtr pScreen);
 static Bool xf86RandR12CreateScreenResources12(ScreenPtr pScreen);
-#endif
 
 static x_server_generation_t xf86RandR12Generation;
 
@@ -735,10 +733,8 @@ xf86RandR12ScreenSetSize(ScreenPtr pScreen,
 
     if (pRoot && pScrn->vtSema)
         (*pScrn->EnableDisableFBAccess) (pScrn, TRUE);
-#if RANDR_12_INTERFACE
     if (pScreen->root && ret)
         RRScreenSizeNotify(pScreen);
-#endif
     return ret;
 }
 
@@ -835,10 +831,8 @@ xf86RandR12CreateScreenResources(ScreenPtr pScreen)
         randrp->virtualY = pScrn->virtualY;
     }
     xf86CrtcSetScreenSubpixelOrder(pScreen);
-#if RANDR_12_INTERFACE
     if (xf86RandR12CreateScreenResources12(pScreen))
         return TRUE;
-#endif
     return TRUE;
 }
 
@@ -891,10 +885,8 @@ xf86RandR12Init(ScreenPtr pScreen)
 
     dixSetPrivate(&pScreen->devPrivates, &xf86RandR12KeyRec, randrp);
 
-#if RANDR_12_INTERFACE
     if (!xf86RandR12Init12(pScreen))
         return FALSE;
-#endif
     return TRUE;
 }
 
@@ -907,10 +899,8 @@ xf86RandR12CloseScreen(ScreenPtr pScreen)
         return;
 
     randrp = XF86RANDRINFO(pScreen);
-#if RANDR_12_INTERFACE
     xf86ScreenToScrn(pScreen)->EnterVT = randrp->orig_EnterVT;
     pScreen->ConstrainCursorHarder = randrp->orig_ConstrainCursorHarder;
-#endif
 
     free(randrp->palette);
     free(randrp);
@@ -921,23 +911,19 @@ xf86RandR12SetRotations(ScreenPtr pScreen, Rotation rotations)
 {
     XF86RandRInfoPtr randrp;
 
-#if RANDR_12_INTERFACE
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     int c;
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(pScrn);
-#endif
 
     if (!dixPrivateKeyRegistered(&xf86RandR12KeyRec))
         return;
 
     randrp = XF86RANDRINFO(pScreen);
-#if RANDR_12_INTERFACE
     for (c = 0; c < config->num_crtc; c++) {
         xf86CrtcPtr crtc = config->crtc[c];
 
         RRCrtcSetRotations(crtc->randr_crtc, rotations);
     }
-#endif
     randrp->supported_rotations = rotations;
 }
 
@@ -977,8 +963,6 @@ xf86RandR12GetOriginalVirtualSize(ScrnInfoPtr pScrn, int *x, int *y)
         *y = randrp->virtualY;
     }
 }
-
-#if RANDR_12_INTERFACE
 
 #define FLAG_BITS (RR_HSyncPositive | \
 		   RR_HSyncNegative | \
@@ -2411,8 +2395,6 @@ xf86RandR12Init12(ScreenPtr pScreen)
 
     return TRUE;
 }
-
-#endif
 
 Bool
 xf86RandR12PreInit(ScrnInfoPtr pScrn)

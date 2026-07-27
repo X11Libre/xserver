@@ -99,9 +99,7 @@ xf86CrtcCreate(ScrnInfoPtr scrn, const xf86CrtcFuncsRec * funcs)
     crtc->version = XF86_CRTC_VERSION;
     crtc->scrn = scrn;
     crtc->funcs = funcs;
-#ifdef RANDR_12_INTERFACE
     crtc->randr_crtc = NULL;
-#endif
     crtc->rotation = RR_Rotate_0;
     crtc->desiredRotation = RR_Rotate_0;
     pixman_transform_init_identity(&crtc->crtc_to_framebuffer);
@@ -657,9 +655,7 @@ xf86OutputCreate(ScrnInfoPtr scrn,
      * Use the old per-screen monitor section for the first output
      */
     output->use_screen_monitor = (xf86_config->num_output == 0);
-#ifdef RANDR_12_INTERFACE
     output->randr_output = NULL;
-#endif
     if (name) {
         xf86OutputSetMonitor(output);
         if (xf86OutputIgnored(output)) {
@@ -2997,9 +2993,7 @@ xf86SetSingleMode(ScrnInfoPtr pScrn, DisplayModePtr desired, Rotation rotation)
         }
     }
     xf86DisableUnusedFunctions(pScrn);
-#ifdef RANDR_12_INTERFACE
     xf86RandR12TellChanged(pScrn->pScreen);
-#endif
     return ok;
 }
 
@@ -3101,8 +3095,6 @@ xf86DisableUnusedFunctions(ScrnInfoPtr pScrn)
     }
 }
 
-#ifdef RANDR_12_INTERFACE
-
 #define EDID_ATOM_NAME		"EDID"
 
 /**
@@ -3146,8 +3138,6 @@ xf86OutputSetTileProperty(xf86OutputPtr output)
         RRDeleteOutputProperty(output->randr_output, tile_atom);
     }
 }
-
-#endif
 
 /* Pull out a physical size from a detailed timing if available. */
 struct det_phySize_parameter {
@@ -3219,9 +3209,7 @@ xf86OutputSetTile(xf86OutputPtr output, struct xf86CrtcTileInfo *tile_info)
         output->tile_info = *tile_info;
     else
         memset(&output->tile_info, 0, sizeof(output->tile_info));
-#ifdef RANDR_12_INTERFACE
     xf86OutputSetTileProperty(output);
-#endif
 }
 
 /**
@@ -3234,9 +3222,7 @@ xf86OutputSetEDID(xf86OutputPtr output, xf86MonPtr edid_mon)
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(scrn);
     Bool debug_modes = config->debug_modes || xf86Initialising;
 
-#ifdef RANDR_12_INTERFACE
     int size;
-#endif
 
     free(output->MonInfo);
 
@@ -3255,7 +3241,6 @@ xf86OutputSetEDID(xf86OutputPtr output, xf86MonPtr edid_mon)
     if (output == xf86CompatOutput(scrn) && !scrn->is_gpu)
         xf86SetDDCproperties(scrn, edid_mon);
 
-#ifdef RANDR_12_INTERFACE
     /* Set the RandR output properties */
     size = 0;
     if (edid_mon) {
@@ -3269,7 +3254,6 @@ xf86OutputSetEDID(xf86OutputPtr output, xf86MonPtr edid_mon)
     }
     xf86OutputSetEDIDProperty(output, edid_mon ? edid_mon->rawData : NULL,
                               size);
-#endif
 
     if (edid_mon) {
 
@@ -3516,9 +3500,7 @@ xf86ProviderSetup(ScrnInfoPtr scrn,
 
     xf86_config->name = strdup(name);
     xf86_config->provider_funcs = funcs;
-#ifdef RANDR_12_INTERFACE
     xf86_config->randr_provider = NULL;
-#endif
 }
 
 void

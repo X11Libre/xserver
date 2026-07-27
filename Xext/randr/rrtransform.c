@@ -255,7 +255,6 @@ RRTransformCompute(int x,
                                      f_scale_dy);
     }
 
-#ifdef RANDR_12_INTERFACE
     if (rr_transform) {
         if (!pixman_transform_multiply
             (transform, &rr_transform->transform, transform))
@@ -265,7 +264,7 @@ RRTransformCompute(int x,
         pixman_f_transform_multiply(f_inverse, f_inverse,
                                     &rr_transform->f_inverse);
     }
-#endif
+
     /*
      * Compute the class of the resulting transform
      */

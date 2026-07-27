@@ -442,7 +442,6 @@ driver writer.
 	 * Holds driver-private information
 	 */
 	void            *driver_private;
-    #ifdef RANDR_12_INTERFACE
 	/**
 	 * RandR crtc
 	 *
@@ -450,9 +449,6 @@ driver writer.
 	 * points at the associated crtc object
 	 */
 	RRCrtcPtr       randr_crtc;
-    #else
-	void            *randr_crtc;
-    #endif
     };
 
     
