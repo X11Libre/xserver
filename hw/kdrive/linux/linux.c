@@ -372,8 +372,7 @@ KdOsFuncs LinuxFuncs = {
     .Bell = LinuxBell,
 };
 
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
     LinuxLogInit();
     KdOsInit(&LinuxFuncs);

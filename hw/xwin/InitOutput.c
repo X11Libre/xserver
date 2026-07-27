@@ -607,8 +607,7 @@ winFixupPaths(void)
 #endif                          /* RELOCATE_PROJECTROOT */
 }
 
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
     /* Re-initialize global variables on server reset */
     winInitializeGlobals();
@@ -636,7 +635,7 @@ OsVendorInit(void)
 
     /* Add a default screen if no screens were specified */
     if (g_iNumScreens == 0) {
-        winDebug("OsVendorInit - Creating default screen 0\n");
+        winDebug("ddxInit - Creating default screen 0\n");
 
         /*
          * We need to initialize the default screen 0 if no -screen

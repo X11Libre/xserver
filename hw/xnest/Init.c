@@ -152,16 +152,12 @@ ddxGiveUp(enum ExitCode error)
     xnestCloseDisplay();
 }
 
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
-    return;
 }
 
-void
-OsVendorFatalError(const char *f, va_list args)
+void ddxFatalError(const char *f, va_list args)
 {
-    return;
 }
 
 #if INPUTTHREAD

@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: MIT OR X11 OR AGPLv3+
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  */
@@ -25,7 +25,7 @@ void ddxGiveUp(enum ExitCode error);
 
 void ddxInputThreadInit(void);
 
-void OsVendorFatalError(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
-void OsVendorInit(void);
+void ddxFatalError(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
+void ddxInit(void);
 
 #endif /* _XSERVER_OS_DDX_PRIV_H */

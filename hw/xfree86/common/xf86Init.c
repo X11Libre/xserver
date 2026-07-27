@@ -754,14 +754,7 @@ CloseInput(void)
     LoaderClose();
 }
 
-/*
- * OsVendorInit --
- *      OS/Vendor-specific initialisations.  Called from OsInit(), which
- *      is called by dix before establishing the well known sockets.
- */
-
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
     static Bool beenHere = FALSE;
 
@@ -860,7 +853,7 @@ ddxGiveUp(enum ExitCode error)
 }
 
 void
-OsVendorFatalError(const char *f, va_list args)
+ddxFatalError(const char *f, va_list args)
 {
     ErrorF("\nPlease consult the XLibre support: https://www.xlibre.net/\n");
     if (xf86LogFile && xf86LogFileWasOpened)

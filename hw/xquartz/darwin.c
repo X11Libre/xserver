@@ -658,20 +658,11 @@ InitOutput(int argc, char **argv)
     DarwinAdjustScreenOrigins();
 }
 
-/*
- * OsVendorFatalError
- */
-void
-OsVendorFatalError(const char *f, va_list args)
+void ddxFatalError(const char *f, va_list args)
 {
 }
 
-/*
- * OsVendorInit
- *  Initialization of Darwin OS support.
- */
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
         char *lf;
         char *home = getenv("HOME");

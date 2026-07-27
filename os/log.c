@@ -958,7 +958,7 @@ FatalError(const char *f, ...)
 
     va_start(args, f);
 
-    /* Make a copy for OsVendorFatalError */
+    /* Make a copy for ddxFatalError */
     va_copy(args2, args);
 
 #ifdef __APPLE__
@@ -975,7 +975,7 @@ FatalError(const char *f, ...)
     va_end(args);
     ErrorF("\n");
     if (!beenhere)
-        OsVendorFatalError(f, args2);
+        ddxFatalError(f, args2);
     va_end(args2);
     if (!beenhere) {
         beenhere = TRUE;

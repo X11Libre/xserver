@@ -243,7 +243,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
             /*
              * Initialize default screen settings.  We have to do this before
-             * OsVendorInit () gets called, otherwise we will overwrite
+             * ddxInit() gets called, otherwise we will overwrite
              * settings changed by parameters such as -fullscreen, etc.
              */
             winErrorFVerb(3, "ddxProcessArgument - Initializing default "
