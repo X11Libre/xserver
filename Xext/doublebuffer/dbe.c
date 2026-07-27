@@ -1019,14 +1019,14 @@ DbeExtensionInit(void)
             pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
 
             /* Setup DDX. */
-            bool ddxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
+            bool dbxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
 
             /* DDX DBE initialization may have the side affect of
              * reallocating pDbeScreenPriv, so we need to update it.
              */
             pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
 
-            if (ddxInitSuccess) {
+            if (dbxInitSuccess) {
                 /* Hook in our window destructor. The DDX initialization function
                  * already added WindowPosition hook for us.
                  */
