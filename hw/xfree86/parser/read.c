@@ -182,12 +182,6 @@ xf86readConfigFile(void)
                 HANDLE_LIST(conf_layout_lst, xf86parseLayoutSection,
                             XF86ConfLayoutPtr);
             }
-            else if (xf86nameCompare(xf86_lex_val.str, "vendor") == 0) {
-                free(xf86_lex_val.str);
-                xf86_lex_val.str = NULL;
-                HANDLE_LIST(conf_vendor_lst, xf86parseVendorSection,
-                            XF86ConfVendorPtr);
-            }
             else if (xf86nameCompare(xf86_lex_val.str, "dri") == 0) {
                 free(xf86_lex_val.str);
                 xf86_lex_val.str = NULL;
@@ -299,7 +293,6 @@ xf86freeConfig(XF86ConfigPtr p)
     xf86freeScreenList(p->conf_screen_lst);
     xf86freeLayoutList(p->conf_layout_lst);
     xf86freeInputList(p->conf_input_lst);
-    xf86freeVendorList(p->conf_vendor_lst);
     xf86freeDRI(p->conf_dri);
     xf86freeExtensions(p->conf_extensions);
     TestFree(p->conf_comment);

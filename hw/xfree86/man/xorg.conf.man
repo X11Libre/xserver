@@ -182,7 +182,6 @@ The section names are:
 .BR "Screen         " "Screen configuration"
 .BR "ServerLayout   " "Overall layout"
 .BR "DRI            " "DRI\-specific configuration"
-.BR "Vendor         " "Vendor\-specific configuration"
 .fi
 .RE
 .PP
@@ -2674,18 +2673,6 @@ This optional section is used to provide some information for the
 Direct Rendering Infrastructure.
 Details about the format of this section can be found on-line at
 .IR <https://dri.freedesktop.org/> .
-.SH "VENDOR SECTION"
-The optional
-.B Vendor
-section may be used to provide vendor\-specific configuration information.
-Multiple
-.B Vendor
-sections may be present, and they may contain an
-.B Identifier
-entry and multiple
-.B Option
-flags.
-The data therein is not used in this release.
 .SH "SEE ALSO"
 General:
 .BR X (@miscmansuffix@),
