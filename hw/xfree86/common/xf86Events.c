@@ -313,8 +313,9 @@ static void xf86DisableInputDeviceForVTSwitch(InputInfoPtr pInfo)
 
     xf86ReleaseKeys(pInfo->dev);
     ProcessInputEvents();
-    seatd_libseat_close_device(pInfo);
+    /* DEVICE_OFF reads pInfo->fd, disable before releasing the seatd fd */
     DisableDevice(pInfo->dev, TRUE);
+    seatd_libseat_close_device(pInfo);
 }
 
 void
