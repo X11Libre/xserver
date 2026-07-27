@@ -113,9 +113,6 @@
 #ifndef SYS_CONFIGDIRPATH
 #define SYS_CONFIGDIRPATH	"%D/X11/%X"
 #endif
-#ifndef PROJECTROOT
-#define PROJECTROOT	"/usr/X11R6"
-#endif
 
 static ModuleDefault ModuleDefaults[] = {
 #ifdef GLXEXT
