@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 # Prebuilt Gentoo image with all X-server build dependencies baked in.
 #
 # Why: the official Gentoo binhost is built with the default-profile USE flags

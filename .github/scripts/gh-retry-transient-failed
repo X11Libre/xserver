@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 # gh-retry-transient-failed — restart CI jobs that likely failed from infrastructure issues.
 #
 # Reads [make-pr] from .git/config to determine the GitHub remote, then

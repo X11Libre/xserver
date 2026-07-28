@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 #
 # Runs INSIDE the Debian GNU/Hurd VM (over ssh) — see the xserver-build-hurd job
 # in .github/workflows/build-xserver.yml. Builds, as the job's FATAL pass/fail

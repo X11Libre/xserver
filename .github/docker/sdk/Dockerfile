@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 # Per-commit X-server + SDK image, built on top of the prebuilt deps base image.
 #
 # Step 2 of the driver-pipeline rework: builds the xserver with -Dxorg-sdk=true

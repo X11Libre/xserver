@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 name: Prune old SDK images
 
 # Step 5 of the driver-pipeline rework: build-sdk-image pushes a per-commit

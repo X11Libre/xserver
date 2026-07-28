@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 #
 # Host-side orchestration for the GNU/Hurd build (runs on the ubuntu runner).
 # There is no vmactions/hurd-vm, so this hand-rolls the VM: fetch Debian's
