@@ -1367,6 +1367,21 @@ ProcXDGAQueryModes(ClientPtr client)
 
         WriteToClient(client, sz_xXDGAModeInfo, (char *) (&info));
         WriteToClient(client, size, mode[i].name);
+        /* rep.length and info.name_size both account for the name padded
+         * to a 4-byte boundary (see the size computation above), so the
+         * bytes actually written must match — otherwise the reply is
+         * short of its announced length and the client desyncs. Pad with
+         * zeroes; do not write info.name_size bytes straight from the name
+         * buffer, which would over-read past the terminating NUL. */
+        {
+            int namepad = pad_to_int32(size) - size;
+
+            if (namepad) {
+                static const char zeros[3] = { 0, 0, 0 };
+
+                WriteToClient(client, namepad, (char *) zeros);
+            }
+        }
     }
 
     free(mode);
