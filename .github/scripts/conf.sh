@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 export X11_OS=`uname -s`
 
 export X11_PREFIX="${X11_PREFIX:-$HOME/x11}"

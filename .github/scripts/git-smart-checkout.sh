@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 # git-smart-checkout: clone/reuse a repo and force-checkout a given ref (branch/tag/commit),
 #                     with mirror URLs, minimal transfer, and automatic retries.
 
