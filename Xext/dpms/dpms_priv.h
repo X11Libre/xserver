@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT OR X11 OR AGPL-3.0-or-later
+/* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later
  *
  * DPMS (Display Power Management Signaling) — interface between the
  * DPMS extension and other parts (DIX, DDX, OS).

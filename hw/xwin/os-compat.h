@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later */
+/* Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net> */
 #ifndef __XWIN_OS_COMPAT_H
 #define __XWIN_OS_COMPAT_H
 
