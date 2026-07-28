@@ -159,6 +159,14 @@ ProcXISelectEvents(ClientPtr client)
     xXIEventMask *evmask = (xXIEventMask *) &stuff[1];
     int num_masks = stuff->num_masks;
     while (num_masks--) {
+        /* Make sure the fixed xXIEventMask header is inside the request
+         * before dereferencing evmask->mask_len below.  A request with
+         * num_masks >= 1 and no trailing data would otherwise read mask_len
+         * one element past the request buffer.  (The swapped path above
+         * already performs the equivalent pre-check.) */
+        if (bytes_to_int32(len + sizeof(xXIEventMask)) > client->req_len)
+            return BadLength;
+
         len += sizeof(xXIEventMask) + evmask->mask_len * 4;
 
         if (bytes_to_int32(len) > client->req_len)
