@@ -11,6 +11,8 @@ import pytest
 from proto import xkb
 from xclient import BadLength, BadMatch, BadValue, X11Error, X11Reply
 
+logger = logging.getLogger(__name__)
+
 
 @pytest.fixture
 def xkb_xclient(xclient):
@@ -523,12 +525,12 @@ class TestXkbSetMapNumLevels:
         sym_maps = map_reply.sym_maps
         explicit_map = map_reply.explicit_map
 
-        logging.debug(
+        logger.debug(
             f"We have {len(types)} types, keycodes are {map_reply.min_key_code}-{map_reply.max_key_code}"
         )
-        logging.debug("Types:")
+        logger.debug("Types:")
         for idx, t in enumerate(types):
-            logging.debug(
+            logger.debug(
                 f"type[{idx:02d}]: num_levels={t.num_levels} {'canonical' if idx < 4 else ''}"
             )
 
@@ -539,7 +541,7 @@ class TestXkbSetMapNumLevels:
         target_group = -1
         has_explicit = False
 
-        logging.debug("Scanning keys for non-canonical type with explicit flag")
+        logger.debug("Scanning keys for non-canonical type with explicit flag")
         for i, sm in enumerate(sym_maps):
             keycode = map_reply.first_key_sym + i
             n_groups = sm.group_info & 0x0F
@@ -548,7 +550,7 @@ class TestXkbSetMapNumLevels:
             for g in range(min(n_groups, 4)):
                 kt = sm.kt_index[g]
                 if kt >= 4 and (expl & (1 << g)):
-                    logging.debug(
+                    logger.debug(
                         f"FOUND: key={keycode} group={g} kt_index={kt} num_levels={types[kt].num_levels} explicit=0x{expl:02x}"
                     )
                     # Found a key with explicit flag already set.
@@ -560,7 +562,7 @@ class TestXkbSetMapNumLevels:
 
         # If none found with explicit flag, find any key using type >= 4.
         if target_key < 0:
-            logging.debug(
+            logger.debug(
                 "No key with explicit + non-canonical type found. Scanning for any type >=4"
             )
             for i, sm in enumerate(sym_maps):
@@ -569,7 +571,7 @@ class TestXkbSetMapNumLevels:
                 for g in range(min(n_groups, 4)):
                     kt = sm.kt_index[g]
                     if kt >= 4:
-                        logging.debug(
+                        logger.debug(
                             f"FOUND: key={keycode} group={g} type={kt} num_levels={types[kt].num_levels}"
                         )
                         target_key = keycode
@@ -582,7 +584,7 @@ class TestXkbSetMapNumLevels:
         if target_key < 0:
             pytest.skip("No key using non-canonical type found")
 
-        logging.debug(
+        logger.debug(
             f"Target: key={target_key} group={target_group} type={target_type}"
         )
 
@@ -623,7 +625,7 @@ class TestXkbSetMapNumLevels:
         types_payload = b""
         for i, t in enumerate(types):
             if i == target_type:
-                logging.debug(
+                logger.debug(
                     f"Modifying key type {i} to have num_levels {EVIL_NUM_LEVELS}"
                 )
                 types_payload += t.to_set_map_wire(num_levels=EVIL_NUM_LEVELS)
@@ -649,7 +651,7 @@ class TestXkbSetMapNumLevels:
             f"SetMap with num_levels={EVIL_NUM_LEVELS} was accepted - "
             "server is missing the numLevels upper bound check (ZDI-CAN-30160)"
         )
-        logging.debug(f"SetMap correctly rejected: {errors}")
+        logger.debug(f"SetMap correctly rejected: {errors}")
 
         # Step 4: Trigger via ChangeKeyboardMapping on the target key.
         # On an unpatched server where the evil num_levels was accepted,
