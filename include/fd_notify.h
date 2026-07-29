@@ -12,4 +12,6 @@
 #define X_NOTIFY_WRITE  0x2
 #define X_NOTIFY_ERROR  0x4     /* don't need to select for, always reported */
 
+typedef void (*NotifyFdProcPtr)(int fd, int ready, void *data);
+
 #endif /* _XSERVER_INCLUDE_FDNOTIFY_H */

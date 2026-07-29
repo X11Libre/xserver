@@ -73,7 +73,7 @@ SOFTWARE.
 #ifndef _X_ATTRIBUTE_VPRINTF
 # if defined(__GNUC__) && (__GNUC__ >= 2) && !defined(__clang__)
 #  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
-          __attribute__((__format__(gnu_printf, fmt, firstarg)))
+           __attribute__((__format__(gnu_printf, fmt, firstarg)))
 # else
 #  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
 # endif
@@ -99,205 +99,14 @@ typedef struct _NewClientRec *NewClientPtr;
 #define xnfstrdup(s) XNFstrdup((s))
 #endif
 
-#include <stdio.h>
-#include <stdarg.h>
-
-extern _X_EXPORT int ReadFdFromClient(ClientPtr client);
-
-/**
- * @brief write @p count bytes from @p buf into the client's output buffer
- *
- * @deprecated Legacy entry point, kept for ABI compatibility. Drivers and
- *             external modules should not write to clients directly; this
- *             remains exported only for existing out-of-tree users. In-tree
- *             code uses the internal dixWriteToClient() worker instead.
- *
- * @param who    the client to write to
- * @param count  number of bytes to write
- * @param buf    data to write
- * @return       number of bytes buffered, 0 on no-op, -1 on error
- */
-extern _X_EXPORT int WriteToClient(ClientPtr /*who */ , int /*count */ ,
-                                   const void * /*buf */ );
-
-typedef void (*NotifyFdProcPtr)(int fd, int ready, void *data);
-
-#include "fd_notify.h"
-
-extern _X_EXPORT Bool SetNotifyFd(int fd, NotifyFdProcPtr notify_fd, int mask, void *data);
-
-static inline void RemoveNotifyFd(int fd)
-{
-    (void) SetNotifyFd(fd, NULL, X_NOTIFY_NONE, NULL);
-}
-
-extern _X_EXPORT void IgnoreClient(ClientPtr /*client */ );
-
-extern _X_EXPORT void AttendClient(ClientPtr /*client */ );
-
-extern _X_EXPORT CARD32 GetTimeInMillis(void);
-extern _X_EXPORT CARD64 GetTimeInMicros(void);
-
-extern _X_EXPORT void AdjustWaitForDelay(void *waitTime, int newdelay);
-
-typedef struct _OsTimerRec *OsTimerPtr;
-
-typedef CARD32 (*OsTimerCallback) (OsTimerPtr timer,
-                                   CARD32 time,
-                                   void *arg);
-
-#define TimerAbsolute (1<<0)
-#define TimerForceOld (1<<1)
-
-extern _X_EXPORT OsTimerPtr TimerSet(OsTimerPtr timer,
-                                     int flags,
-                                     CARD32 millis,
-                                     OsTimerCallback func,
-                                     void *arg);
-
-extern _X_EXPORT void TimerCancel(OsTimerPtr /* pTimer */ );
-extern _X_EXPORT void TimerFree(OsTimerPtr /* pTimer */ );
-
-extern _X_EXPORT void GiveUp(int /*sig */ );
-
-/*
- * This function malloc(3)s buffer, terminating the server if there is not
- * enough memory.
- */
-extern _X_EXPORT void *
-XNFalloc(unsigned long /*amount */ ) __attribute__((returns_nonnull));
-
-/*
- * This function calloc(3)s buffer, terminating the server if there is not
- * enough memory.
- */
-extern _X_EXPORT void *
-XNFcalloc(unsigned long /*amount */ ) _X_DEPRECATED;
-
-/*
- * This function calloc(3)s buffer, terminating the server if there is not
- * enough memory or the arguments overflow when multiplied
- */
-extern _X_EXPORT void *
-XNFcallocarray(size_t nmemb, size_t size) __attribute__((returns_nonnull));
-
-/*
- * This function realloc(3)s passed buffer, terminating the server if there is
- * not enough memory.
- */
-extern _X_EXPORT void *
-XNFrealloc(void * /*ptr */ , unsigned long /*amount */ );
-
-/*
- * This function strdup(3)s passed string. The only difference from the library
- * function that it is safe to pass NULL, as NULL will be returned.
- */
-extern _X_EXPORT char *
-Xstrdup(const char *s);
-
-/*
- * This function strdup(3)s passed string, terminating the server if there is
- * not enough memory. If NULL is passed to this function, NULL is returned.
- */
-extern _X_EXPORT char *
-XNFstrdup(const char *s);
-
-/* Include new X*asprintf API */
+#include "alloc.h"
 #include "Xprintf.h"
-
-typedef int (*OsSigWrapperPtr) (int /* sig */ );
-
-extern _X_EXPORT OsSigWrapperPtr
-OsRegisterSigWrapper(OsSigWrapperPtr newWrap);
-
-extern _X_EXPORT Bool
-PrivsElevated(void);
-
-extern _X_EXPORT int
-GetClientFd(ClientPtr);
-
-/* stuff for FlushCallback */
-extern _X_EXPORT CallbackListPtr FlushCallback;
-
-extern _X_EXPORT int
-TimeSinceLastInputEvent(void);
-
-/* Function fallbacks provided by AC_REPLACE_FUNCS in configure.ac */
-
-#ifndef HAVE_REALLOCARRAY
-#define reallocarray xreallocarray
-extern _X_EXPORT void *
-reallocarray(void *optr, size_t nmemb, size_t size);
-#endif
-
-#ifndef HAVE_STRLCPY
-extern _X_EXPORT size_t
-strlcpy(char * _X_RESTRICT_KYWD dst, const char * _X_RESTRICT_KYWD src, size_t siz);
-extern _X_EXPORT size_t
-strlcat(char * _X_RESTRICT_KYWD dst, const char * _X_RESTRICT_KYWD src, size_t siz);
-#endif
-
-#ifndef HAVE_STRNDUP
-extern _X_EXPORT char *
-strndup(const char *str, size_t n);
-#endif
-
-#ifndef HAVE_TIMINGSAFE_MEMCMP
-extern _X_EXPORT int
-timingsafe_memcmp(const void *b1, const void *b2, size_t len);
-#endif
-
-/* Flags for log messages. */
-typedef enum {
-    X_PROBED,                   /* Value was probed */
-    X_CONFIG,                   /* Value was given in the config file */
-    X_DEFAULT,                  /* Value is a default */
-    X_CMDLINE,                  /* Value was given on the command line */
-    X_NOTICE,                   /* Notice */
-    X_ERROR,                    /* Error message */
-    X_WARNING,                  /* Warning message */
-    X_INFO,                     /* Informational message */
-    X_NONE,                     /* No prefix */
-    X_NOT_IMPLEMENTED,          /* Not implemented */
-    X_DEBUG,                    /* Debug message */
-    X_UNKNOWN = -1              /* unknown -- this must always be last */
-} MessageType;
-
-extern _X_EXPORT void
-LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
-_X_ATTRIBUTE_PRINTF(3, 0);
-extern _X_EXPORT void
-LogMessageVerb(MessageType type, int verb, const char *format, ...)
-_X_ATTRIBUTE_PRINTF(3, 4);
-extern _X_EXPORT void
-LogMessage(MessageType type, const char *format, ...)
-_X_ATTRIBUTE_PRINTF(2, 3);
-
-extern _X_EXPORT void
-LogHdrMessageVerb(MessageType type, int verb,
-                  const char *msg_format, va_list msg_args,
-                  const char *hdr_format, ...)
-_X_ATTRIBUTE_PRINTF(3, 0)
-_X_ATTRIBUTE_PRINTF(5, 6);
-
-extern _X_EXPORT void
-FatalError(const char *f, ...)
-_X_ATTRIBUTE_PRINTF(1, 2)
-    _X_NORETURN;
-
-extern _X_EXPORT void
-ErrorF(const char *f, ...)
-_X_ATTRIBUTE_PRINTF(1, 2);
-
-extern _X_EXPORT void
-xorg_backtrace(void);
-
-/* should not be used anymore, just for backwards compat with drivers */
-#define LogVMessageVerbSigSafe(...) LogVMessageVerb(__VA_ARGS__)
-#define LogMessageVerbSigSafe(...) LogMessageVerb(__VA_ARGS__)
-#define ErrorFSigSafe(...) ErrorF(__VA_ARGS__)
-#define VErrorFSigSafe(...) VErrorF(__VA_ARGS__)
-#define VErrorF(...) LogVMessageVerb(X_NONE, -1, __VA_ARGS__)
+#include "client_io.h"
+#include "fd_notify.h"
+#include "logging.h"
+#include "notify_fd.h"
+#include "timer.h"
+#include "fallback_funcs.h"
 
 /* only for backwards compat with drivers that haven't kept up yet
    (xf86-video-intel)
