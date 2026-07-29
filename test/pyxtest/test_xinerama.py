@@ -3,7 +3,6 @@
 # Tests for XINERAMA (PanoramiX / pseudoramiX) extension.
 
 import pytest
-
 from proto import xinerama
 from xclient import Extension, X11Reply
 

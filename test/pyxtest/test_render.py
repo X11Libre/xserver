@@ -5,7 +5,6 @@
 import struct
 
 import pytest
-
 from proto import render
 from xclient import Extension, X11Error, X11Reply
 

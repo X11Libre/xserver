@@ -7,7 +7,6 @@ import struct
 import time
 
 import pytest
-
 from proto import xkb
 from xclient import BadLength, BadMatch, BadValue, X11Error, X11Reply
 

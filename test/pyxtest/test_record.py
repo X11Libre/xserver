@@ -5,7 +5,6 @@
 import time
 
 import pytest
-
 from proto import record
 from xclient import Extension
 

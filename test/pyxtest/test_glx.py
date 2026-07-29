@@ -6,7 +6,6 @@ import struct
 import time
 
 import pytest
-
 from proto import glx
 from xclient import Extension, X11Error, X11Reply
 
