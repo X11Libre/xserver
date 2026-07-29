@@ -575,7 +575,8 @@ class XlibConnection:
     def close(self):
         try:
             self.display.close()
-        except Exception:
+        except OSError:
+            # Display may already be closed (e.g. server gone).
             pass
 
     def __enter__(self):
