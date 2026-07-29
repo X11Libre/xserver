@@ -264,7 +264,7 @@ class GetMapReply:
 
         # 5. Virtual mods (skip)
         if virtual_mods:
-            n_vmods = bin(virtual_mods).count("1")
+            n_vmods = virtual_mods.bit_count()
             offset += (n_vmods + 3) & ~3
 
         # 6. Explicit components
