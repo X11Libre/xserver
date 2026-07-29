@@ -8,7 +8,7 @@ import struct
 import time
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Protocol, runtime_checkable
+from typing import Protocol, Self, runtime_checkable
 
 from proto import xkb
 from proto.bigrequests import BigRequestsEnableRequest
@@ -523,7 +523,7 @@ class RawX11Connection:
                 data += chunk
         return data
 
-    def __enter__(self) -> "RawX11Connection":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args) -> bool:
@@ -577,7 +577,7 @@ class XlibConnection:
             # Display may already be closed (e.g. server gone).
             pass
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args):
