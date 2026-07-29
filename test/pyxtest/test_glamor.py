@@ -7,7 +7,6 @@ import tempfile
 import time
 
 import pytest
-
 from proto import pcf, x11
 from xclient import X11Error
 

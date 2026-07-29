@@ -6,16 +6,15 @@
 # optionally under valgrind or with AddressSanitizer (ASAN) support,
 # with automatic display number allocation via the -displayfd mechanism.
 
-from typing import Iterator
-
 import os
 import select
 import shutil
-import sys
 import subprocess
+import sys
 import tempfile
 import time
 import warnings
+from collections.abc import Iterator
 from pathlib import Path
 
 from asan import AsanError

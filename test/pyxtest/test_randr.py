@@ -5,7 +5,6 @@
 import struct
 
 import pytest
-
 from proto import randr
 from xclient import BadIDChoice, BadLength, Extension, X11Error, X11Reply
 

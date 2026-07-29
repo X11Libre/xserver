@@ -5,9 +5,8 @@
 import struct
 
 import pytest
-
 from proto import xi
-from xclient import BadLength, BadWindow, BadValue, Extension, X11Error, X11Reply
+from xclient import BadLength, BadValue, BadWindow, Extension, X11Error, X11Reply
 
 
 @pytest.fixture

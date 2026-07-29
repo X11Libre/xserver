@@ -3,7 +3,6 @@
 # Tests for Present extension.
 
 import pytest
-
 from proto import present
 from xclient import BadWindow, Extension, X11Error
 

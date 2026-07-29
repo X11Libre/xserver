@@ -5,7 +5,6 @@
 import time
 
 import pytest
-
 from proto import screensaver, x11
 from xclient import Extension
 

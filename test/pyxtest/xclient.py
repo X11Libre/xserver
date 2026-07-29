@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Protocol, runtime_checkable
 
+from proto import xkb
 from proto.bigrequests import BigRequestsEnableRequest
 from proto.x11 import (
     ChangeKeyboardMappingRequest,
@@ -18,7 +19,6 @@ from proto.x11 import (
     InternAtomRequest,
     QueryExtensionRequest,
 )
-from proto import xkb
 
 
 class X11ConnectionError(Exception):

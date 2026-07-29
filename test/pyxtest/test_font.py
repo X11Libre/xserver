@@ -6,7 +6,6 @@ import os
 import time
 
 import pytest
-
 from proto import x11
 from xclient import X11Reply
 
