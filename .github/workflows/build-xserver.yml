@@ -266,6 +266,11 @@ jobs:
 
             - uses: ./.github/actions/ubuntu-install-pkg
 
+            - name: Install valgrind (separate from install-pkg to work around Ubuntu mirror races on libc6-dbg)
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y valgrind
+
             - name: prepare build environment
               run: |
                 MACHINE=`gcc -dumpmachine`
