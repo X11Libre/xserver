@@ -8,6 +8,9 @@ the above copyright notice appear in all copies and that both that
 copyright notice and this permission notice appear in supporting
 documentation.
 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -41,79 +44,50 @@ SOFTWARE.
 
 ******************************************************************/
 
-#ifndef OS_H
-#define OS_H
-
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef MONOTONIC_CLOCK
-#include <time.h>
-#endif
+#ifndef CLIENT_IO_H
+#define CLIENT_IO_H
 
 #include <X11/Xfuncproto.h>
 
 #include "xlibre_ptrtypes.h"
-#include "callback.h"
-#include "misc.h"
 
-/*
- * @brief macro for specifying non-null arguments
+extern _X_EXPORT int ReadFdFromClient(ClientPtr client);
+
+/**
+ * @brief write @p count bytes from @p buf into the client's output buffer
  *
- * part of public SDK / driver API
+ * @deprecated Legacy entry point, kept for ABI compatibility. Drivers and
+ *             external modules should not write to clients directly; this
+ *             remains exported only for existing out-of-tree users. In-tree
+ *             code uses the internal dixWriteToClient() worker instead.
+ *
+ * @param who    the client to write to
+ * @param count  number of bytes to write
+ * @param buf    data to write
+ * @return       number of bytes buffered, 0 on no-op, -1 on error
  */
-#ifndef _X_ATTRIBUTE_NONNULL_ARG
-#define _X_ATTRIBUTE_NONNULL_ARG(...) __attribute__((nonnull(__VA_ARGS__)))
-#endif
+extern _X_EXPORT int WriteToClient(ClientPtr /*who */ , int /*count */ ,
+                                   const void * /*buf */ );
 
-#ifndef _X_ATTRIBUTE_VPRINTF
-# if defined(__GNUC__) && (__GNUC__ >= 2) && !defined(__clang__)
-#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
-           __attribute__((__format__(gnu_printf, fmt, firstarg)))
-# else
-#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
-# endif
-#endif
+extern _X_EXPORT void IgnoreClient(ClientPtr /*client */ );
 
-#define SCREEN_SAVER_ON   0
-#define SCREEN_SAVER_OFF  1
-#define SCREEN_SAVER_FORCER 2
-#define SCREEN_SAVER_CYCLE  3
+extern _X_EXPORT void AttendClient(ClientPtr /*client */ );
 
-#ifndef MAX_REQUEST_SIZE
-#define MAX_REQUEST_SIZE 65535
-#endif
+extern _X_EXPORT int GetClientFd(ClientPtr);
 
-typedef struct _NewClientRec *NewClientPtr;
+/* Signal handling */
+typedef int (*OsSigWrapperPtr) (int /* sig */ );
 
-#ifndef xnfalloc
-#define xnfalloc(size) XNFalloc((unsigned long)(size))
-#define xnfcalloc(_num, _size) XNFcallocarray((_num), (_size))
-#define xnfrealloc(ptr, size) XNFrealloc((void *)(ptr), (unsigned long)(size))
+extern _X_EXPORT OsSigWrapperPtr
+OsRegisterSigWrapper(OsSigWrapperPtr newWrap);
 
-#define xstrdup(s) Xstrdup((s))
-#define xnfstrdup(s) XNFstrdup((s))
-#endif
+extern _X_EXPORT Bool
+PrivsElevated(void);
 
-#include "alloc.h"
-#include "Xprintf.h"
-#include "client_io.h"
-#include "fd_notify.h"
-#include "logging.h"
-#include "notify_fd.h"
-#include "timer.h"
-#include "fallback_funcs.h"
+/* stuff for FlushCallback */
+extern _X_EXPORT CallbackListPtr FlushCallback;
 
-/* only for backwards compat with drivers that haven't kept up yet
-   (xf86-video-intel)
+extern _X_EXPORT int
+TimeSinceLastInputEvent(void);
 
-   @todo revise after next stable release
-*/
-_X_DEPRECATED
-static inline int System(const char* cmdline)
-{
-    return system(cmdline);
-}
-
-#endif                          /* OS_H */
+#endif /* CLIENT_IO_H */
