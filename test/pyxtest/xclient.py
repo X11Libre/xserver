@@ -24,8 +24,6 @@ from proto.x11 import (
 class X11ConnectionError(Exception):
     """Raised when the X11 connection fails."""
 
-    pass
-
 
 @dataclass
 class XExtensionData:
