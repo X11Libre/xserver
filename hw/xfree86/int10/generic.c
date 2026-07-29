@@ -22,7 +22,7 @@
 
 #include <string.h>             /* needed for memmove */
 
-static __inline__ uint32_t
+static inline uint32_t
 ldl_u(uint32_t * p)
 {
     uint32_t ret;
@@ -31,7 +31,7 @@ ldl_u(uint32_t * p)
     return ret;
 }
 
-static __inline__ uint16_t
+static inline uint16_t
 ldw_u(uint16_t * p)
 {
     uint16_t ret;
@@ -40,7 +40,7 @@ ldw_u(uint16_t * p)
     return ret;
 }
 
-static __inline__ void
+static inline void
 stl_u(uint32_t val, uint32_t * p)
 {
     uint32_t tmp = val;
@@ -48,7 +48,7 @@ stl_u(uint32_t val, uint32_t * p)
     memmove(p, &tmp, sizeof(*p));
 }
 
-static __inline__ void
+static inline void
 stw_u(uint16_t val, uint16_t * p)
 {
     uint16_t tmp = val;
