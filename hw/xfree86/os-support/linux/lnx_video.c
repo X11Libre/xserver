@@ -48,7 +48,6 @@ static Bool ExtendedEnabled = FALSE;
       !defined(__mc68000__) && \
       !defined(__sparc__) && \
       !defined(__mips__) && \
-      !defined(__nds32__) && \
       !defined(__arm__) && \
       !defined(__aarch64__) && \
       !defined(__arc__) && \
