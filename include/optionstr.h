@@ -1,6 +1,5 @@
 #ifndef OPTIONSTR_H_
 #define OPTIONSTR_H_
-#include "list.h"
 
 struct _InputOption {
     GenericListRec list;
