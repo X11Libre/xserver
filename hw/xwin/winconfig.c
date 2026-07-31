@@ -29,6 +29,8 @@
  */
 #include <xwin-config.h>
 
+#include "dix/dix_priv.h"
+
 #include "win.h"
 #include "winconfig.h"
 #include "winmsg.h"
