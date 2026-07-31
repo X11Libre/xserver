@@ -54,38 +54,38 @@
 /* Sections for the default built-in configuration. */
 
 #define BUILTIN_DEVICE_NAME \
-	"\"Builtin Default %s Device %d\""
+    "\"Builtin Default %s Device %d\""
 
 #define BUILTIN_DEVICE_SECTION_PRE \
-	"Section \"Device\"\n" \
-	"\tIdentifier\t" BUILTIN_DEVICE_NAME "\n" \
-	"\tDriver\t\"%s\"\n"
+    "Section \"Device\"\n" \
+    "\tIdentifier\t" BUILTIN_DEVICE_NAME "\n" \
+    "\tDriver\t\"%s\"\n"
 
 #define BUILTIN_DEVICE_SECTION_POST \
-	"EndSection\n\n"
+    "EndSection\n\n"
 
 #define BUILTIN_DEVICE_SECTION \
-	BUILTIN_DEVICE_SECTION_PRE \
-	BUILTIN_DEVICE_SECTION_POST
+    BUILTIN_DEVICE_SECTION_PRE \
+    BUILTIN_DEVICE_SECTION_POST
 
 #define BUILTIN_SCREEN_NAME \
-	"\"Builtin Default %s Screen %d\""
+    "\"Builtin Default %s Screen %d\""
 
 #define BUILTIN_SCREEN_SECTION \
-	"Section \"Screen\"\n" \
-	"\tIdentifier\t" BUILTIN_SCREEN_NAME "\n" \
-	"\tDevice\t" BUILTIN_DEVICE_NAME "\n" \
-	"EndSection\n\n"
+    "Section \"Screen\"\n" \
+    "\tIdentifier\t" BUILTIN_SCREEN_NAME "\n" \
+    "\tDevice\t" BUILTIN_DEVICE_NAME "\n" \
+    "EndSection\n\n"
 
 #define BUILTIN_LAYOUT_SECTION_PRE \
-	"Section \"ServerLayout\"\n" \
-	"\tIdentifier\t\"Builtin Default Layout\"\n"
+    "Section \"ServerLayout\"\n" \
+    "\tIdentifier\t\"Builtin Default Layout\"\n"
 
 #define BUILTIN_LAYOUT_SCREEN_LINE \
-	"\tScreen\t" BUILTIN_SCREEN_NAME "\n"
+    "\tScreen\t" BUILTIN_SCREEN_NAME "\n"
 
 #define BUILTIN_LAYOUT_SECTION_POST \
-	"EndSection\n\n"
+    "EndSection\n\n"
 
 static const char **builtinConfig = NULL;
 static int builtinLines = 0;
@@ -173,11 +173,14 @@ xf86AutoConfig(void)
     ConfigStatus ret;
 
     /* Make sure config rec is there */
-    XF86ConfigPtr xf86configptr = calloc(1, sizeof(XF86ConfigRec));
     if(!xf86configptr)
     {
-        LogMessageVerb(X_ERROR, 1, "Couldn't allocate Config record.\n");
-        return FALSE;
+        xf86configptr = calloc(1, sizeof(XF86ConfigRec));
+        if(!xf86configptr)
+        {
+            LogMessageVerb(X_ERROR, 1, "Couldn't allocate Config record.\n");
+            return FALSE;
+        }
     }
 
     ret = CONFIG_OK;
