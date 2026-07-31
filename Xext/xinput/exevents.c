@@ -2739,7 +2739,15 @@ AddExtensionClient(WindowPtr pWin, ClientPtr client, Mask mask, int mskidx)
     others->next = pWin->optional->inputMasks->inputClients;
     pWin->optional->inputMasks->inputClients = others;
     if (!AddResource(others->resource, RT_INPUTCLIENT, (void *) pWin))
-        goto bail;
+        /*
+         * Do NOT 'goto bail' here: 'others' is already linked into
+         * pWin->optional->inputMasks->inputClients above, so on failure
+         * AddResource() itself already invoked the RT_INPUTCLIENT delete
+         * callback (InputClientGone()), which found 'others' as the list
+         * head and freed it. Falling through to bail's FreeInputClient()
+         * would free it a second time.
+         */
+        return BadAlloc;
     return Success;
 
  bail:
