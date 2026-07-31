@@ -29,4 +29,7 @@ struct _ScrnInfoRec;
 typedef struct _ScrnInfoRec *ScrnInfoPtr;
 typedef struct _ScrnInfoRec ScrnInfoRec;
 
+struct _DeviceIntRec;
+typedef struct _DeviceIntRec *DeviceIntPtr;
+
 #endif /* _XLIBRE_SDK_PTRTYPES_H */

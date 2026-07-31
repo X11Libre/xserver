@@ -25,6 +25,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <unistd.h>
 
 #include "config/config-hal.h"
@@ -103,24 +104,6 @@ remove_devices(const char *backend, const char *config_info)
     }
 
     RemoveInputDeviceTraces(config_info);
-}
-
-BOOL
-device_is_duplicate(const char *config_info)
-{
-    DeviceIntPtr dev;
-
-    for (dev = inputInfo.devices; dev; dev = dev->next) {
-        if (dev->config_info && (strcmp(dev->config_info, config_info) == 0))
-            return TRUE;
-    }
-
-    for (dev = inputInfo.off_devices; dev; dev = dev->next) {
-        if (dev->config_info && (strcmp(dev->config_info, config_info) == 0))
-            return TRUE;
-    }
-
-    return FALSE;
 }
 
 struct OdevAttributes *
