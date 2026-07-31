@@ -20,6 +20,7 @@ srcs_dix = [
     'globals.c',
     'glyphcurs.c',
     'grabs.c',
+    'inputdev.c',
     'inpututils.c',
     'lookup.c',
     'pixmap.c',
