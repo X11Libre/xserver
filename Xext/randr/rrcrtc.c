@@ -98,8 +98,10 @@ RRCrtcCreate(ScreenPtr pScreen, void *devPrivate)
     pixman_f_transform_init_identity(&crtc->f_transform);
     pixman_f_transform_init_identity(&crtc->f_inverse);
 
-    if (!AddResource(crtc->id, RRCrtcType, (void *) crtc))
+    if (!AddResource(crtc->id, RRCrtcType, (void *) crtc)) {
+        free(crtc);
         return NULL;
+    }
 
     /* attach the screen and crtc together */
     crtc->pScreen = pScreen;
