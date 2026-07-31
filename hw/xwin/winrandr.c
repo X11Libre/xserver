@@ -34,6 +34,7 @@
 #include "win.h"
 
 #include "Xext/randr/randrstr_priv.h"
+#include "Xext/render/picturestr_priv.h"
 
 /*
  * Answer queries about the RandR features supported.

@@ -25,13 +25,13 @@
 
 #include "include/mipict.h"
 #include "os/osdep.h"
+#include "render/picturestr_priv.h"
 
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "mi.h"
-#include "picturestr.h"
 
 int
 miCreatePicture(PicturePtr pPicture)

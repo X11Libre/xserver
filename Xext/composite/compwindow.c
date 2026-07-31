@@ -53,6 +53,7 @@
 #include "os/osdep.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
+#include "Xext/render/picturestr_priv.h"
 
 #include "compint.h"
 #include "compositeext_priv.h"
