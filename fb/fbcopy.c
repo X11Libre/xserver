@@ -256,12 +256,14 @@ fbCopyPlane(DrawablePtr pSrcDrawable,
         return miDoCopy(pSrcDrawable, pDstDrawable, pGC,
                         xIn, yIn, widthSrc, heightSrc,
                         xOut, yOut, fbCopyNto1, (Pixel) bitplane, 0);
-    else if (bitplane & 1)
-        return miDoCopy(pSrcDrawable, pDstDrawable, pGC, xIn, yIn,
-                        widthSrc, heightSrc, xOut, yOut, fbCopy1toN,
-                        (Pixel) bitplane, 0);
     else
+    {
+        if (bitplane & 1)
+            return miDoCopy(pSrcDrawable, pDstDrawable, pGC, xIn, yIn,
+                            widthSrc, heightSrc, xOut, yOut, fbCopy1toN,
+                            (Pixel) bitplane, 0);
         return miHandleExposures(pSrcDrawable, pDstDrawable, pGC,
                                  xIn, yIn,
                                  widthSrc, heightSrc, xOut, yOut);
+    }
 }
