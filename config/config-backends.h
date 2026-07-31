@@ -26,9 +26,6 @@
 #ifndef XSERVER_CONFIG_BACKENDS_H
 #define XSERVER_CONFIG_BACKENDS_H
 
-#include "input.h"
-#include "list.h"
-
 void remove_devices(const char *backend, const char *config_info);
 BOOL device_is_duplicate(const char *config_info);
 
