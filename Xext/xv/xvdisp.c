@@ -905,18 +905,20 @@ ProcXvListImageFormats(ClientPtr client)
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->id);
         x_rpcbuf_write_CARD8(&rpcbuf, pImage->type);
         x_rpcbuf_write_CARD8(&rpcbuf, pImage->byte_order);
-        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD16)); /* pad1; */
+        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad1 */
         x_rpcbuf_write_binary_pad(&rpcbuf, pImage->guid, 16);
         x_rpcbuf_write_CARD8(&rpcbuf, pImage->bits_per_pixel);
         x_rpcbuf_write_CARD8(&rpcbuf, pImage->num_planes);
-        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD16)); /* pad2; */
+        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad2 */
         x_rpcbuf_write_CARD8(&rpcbuf, pImage->depth);
-        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)); /* pad3, pad4 */
+        x_rpcbuf_write_CARD8(&rpcbuf, 0);  /* pad3 */
+        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad4 */
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->red_mask);
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->green_mask);
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->blue_mask);
         x_rpcbuf_write_CARD8(&rpcbuf, pImage->format);
-        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)); /* pad5, pad6 */
+        x_rpcbuf_write_CARD8(&rpcbuf, 0);  /* pad5 */
+        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad6 */
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->y_sample_bits);
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->u_sample_bits);
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->v_sample_bits);
@@ -928,7 +930,10 @@ ProcXvListImageFormats(ClientPtr client)
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->vert_v_period);
         x_rpcbuf_write_binary_pad(&rpcbuf, pImage->component_order, 32);
         x_rpcbuf_write_CARD8(&rpcbuf, pImage->scanline_order);
-        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)+(sizeof(CARD32)*2)); /* pad7, pad8, pad9, pad10 */
+        x_rpcbuf_write_CARD8(&rpcbuf, 0);  /* pad7 */
+        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad8 */
+        x_rpcbuf_write_CARD32(&rpcbuf, 0); /* pad9 */
+        x_rpcbuf_write_CARD32(&rpcbuf, 0); /* pad10 */
     }
 
     /* use rpc.wpos here, in order to get how much we've really written */
