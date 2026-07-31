@@ -305,9 +305,10 @@ ms_queue_coalesce(xf86CrtcPtr crtc, uint32_t seq, uint64_t msc)
     return TRUE;
 }
 
-Bool
-ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
-                uint64_t msc, uint64_t *msc_queued, uint32_t seq)
+static Bool
+ms_queue_vblank_internal(xf86CrtcPtr crtc, ms_queue_flag flags,
+                         uint64_t msc, uint64_t *msc_queued, uint32_t seq,
+                         Bool abort_on_fail)
 {
     ScreenPtr screen = crtc->randr_crtc->pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
@@ -369,11 +370,19 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
         }
     check:
         if (errno != EBUSY) {
-            ms_drm_abort_seq(scrn, seq);
+            if (abort_on_fail)
+                ms_drm_abort_seq(scrn, seq);
             return FALSE;
         }
         ms_flush_drm_events(screen);
     }
+}
+
+Bool
+ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
+                uint64_t msc, uint64_t *msc_queued, uint32_t seq)
+{
+    return ms_queue_vblank_internal(crtc, flags, msc, msc_queued, seq, TRUE);
 }
 
 /**
@@ -616,12 +625,27 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     /* Queue an event if the next queued MSC isn't soon enough */
     drmmode_crtc = crtc->driver_private;
     drmmode_crtc->next_msc = next_msc;
-    if (msc < next_msc && !ms_queue_vblank(crtc, MS_QUEUE_ABSOLUTE, msc, NULL, seq)) {
-        xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
-                   "failed to queue next vblank event, aborting lost events\n");
+    if (msc < next_msc &&
+        !ms_queue_vblank_internal(crtc, MS_QUEUE_ABSOLUTE, msc, NULL, seq, FALSE)) {
+        struct xorg_list expired;
+
+        /* Couldn't re-arm: the CRTC was just disabled (VT switch, DPMS off),
+         * so it has no vblank and the queue ioctl returns EINVAL. We asked it
+         * NOT to abort, so the stranded waits are still queued; complete them
+         * rather than drop them, at the earliest pending target msc. Detach
+         * first, then notify -- present_event_notify() re-enters ms_drm_queue. */
+        xorg_list_init(&expired);
         xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
-            if (q->crtc == crtc && q->msc < next_msc)
-                ms_drm_abort_one(q);
+            if (q->crtc == crtc && !q->kernel_queued && q->msc < next_msc) {
+                xorg_list_del(&q->list);
+                xorg_list_append(&q->list, &expired);
+            }
+        }
+        xorg_list_for_each_entry_safe(q, tmp, &expired, list) {
+            xorg_list_del(&q->list);
+            if (!q->aborted)
+                q->handler(msc, ns / 1000, q->data);
+            free(q);
         }
     }
 }
