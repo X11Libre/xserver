@@ -173,13 +173,14 @@ xf86AutoConfig(void)
     ConfigStatus ret;
 
     /* Make sure config rec is there */
-    if (xf86allocateConfig() != NULL) {
-        ret = CONFIG_OK;    /* OK so far */
-    }
-    else {
+    XF86ConfigPtr xf86configptr = calloc(1, sizeof(XF86ConfigRec));
+    if(!xf86configptr)
+    {
         LogMessageVerb(X_ERROR, 1, "Couldn't allocate Config record.\n");
         return FALSE;
     }
+
+    ret = CONFIG_OK;
 
     listPossibleVideoDrivers(&md);
 
