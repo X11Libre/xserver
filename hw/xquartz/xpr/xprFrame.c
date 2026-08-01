@@ -212,23 +212,35 @@ xprCreateFrame(RootlessWindowPtr pFrame, ScreenPtr pScreen,
         wc.window_level = rooted_window_levels[pFrame->level];
     mask |= XP_WINDOW_LEVEL;
 
-    err = xp_create_window(mask, &wc, (xp_window_id *)&pFrame->wid);
+    /* xp_create_window() writes a 32-bit xp_window_id.  Writing it straight
+     * into the 64-bit (void *) pFrame->wid via a truncating cast pointer
+     * leaves the other half of the word uninitialized, and on a big-endian
+     * LP64 target (ppc64) even lands the id in the wrong half.  The value is
+     * later stored into / looked up from window_hash, which compares keys by
+     * exact pointer identity, so a dirty high word makes lookups miss and
+     * trips the assert() in x_cvt_vptr_to_uint().  Go through a real
+     * xp_window_id and zero-extend it so pFrame->wid is well-defined on every
+     * ABI and endianness. */
+    xp_window_id wid = 0;
+    err = xp_create_window(mask, &wc, &wid);
 
     if (err != Success) {
         return FALSE;
     }
 
+    pFrame->wid = x_cvt_uint_to_vptr(wid);
+
 #ifdef HAS_LIBDISPATCH
     WindowHashInsertCtx *ctx = malloc(sizeof(WindowHashInsertCtx));
     if (!ctx) return FALSE;
 
-    ctx->wid = x_cvt_vptr_to_uint(pFrame->wid);
+    ctx->wid = wid;
     ctx->frame = pFrame;
 
     dispatch_async_f(window_hash_serial_q, ctx, windowHashInsert);
 #else
     pthread_rwlock_wrlock(&window_hash_rwlock);
-    x_hash_table_insert(window_hash, pFrame->wid, pFrame);
+    x_hash_table_insert(window_hash, x_cvt_uint_to_vptr(wid), pFrame);
     pthread_rwlock_unlock(&window_hash_rwlock);
 #endif
 
