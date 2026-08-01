@@ -31,7 +31,10 @@
 #include <dix-config.h>
 
 #include <assert.h>
-#include "dri.h"
+/* XQuartz's own DRI header (hw/xquartz/xpr/xpr_dri.h), renamed from dri.h in
+ * 9bd146a39; use the new name so we don't fall through to the generic
+ * include/dri.h, which pulls in Linux-only <pciaccess.h> and xf86dri.h. */
+#include "xpr_dri.h"
 
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>

@@ -48,7 +48,13 @@
 #include "x-hash.h"
 
 #include "visualConfigs.h"
-#include "dri.h"
+/* This is XQuartz's own DRI surface API (hw/xquartz/xpr/xpr_dri.h), not the
+ * generic xfree86 include/dri.h.  It was renamed from dri.h to xpr_dri.h in
+ * 9bd146a39 ("xfree86: dri: move over public SDK headers to include/"); before
+ * that, "dri.h" resolved to ../xpr/dri.h.  Include the new name explicitly so
+ * we don't fall through to include/dri.h, which pulls in Linux-only
+ * <pciaccess.h> and xf86dri.h. */
+#include "xpr_dri.h"
 
 #include "darwin.h"
 #define GLAQUA_DEBUG_MSG(msg, args ...) ASL_LOG(ASL_LEVEL_DEBUG, "GLXAqua", \
