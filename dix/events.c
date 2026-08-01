@@ -2487,6 +2487,21 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
     if (grab)
         DeliverGrabbedEvent((InternalEvent *) ev, device, FALSE);
 
+    /*
+     * To prevent keylogging, not grabbed raw keyboard event
+     * should not be sent to any client.
+     */
+    if (globalIsolateKeyboard) {
+        switch (ev->type) {
+        case ET_RawKeyPress:
+        case ET_RawKeyRelease:
+            free(xi);
+            return;
+        default:
+            break;
+        }
+    }
+
     filter = GetEventFilter(device, xi);
 
     DIX_FOR_EACH_SCREEN({
@@ -2826,6 +2841,24 @@ static int
 DeliverOneEvent(InternalEvent *event, DeviceIntPtr dev, enum InputLevel level,
                 WindowPtr win, Window child, GrabPtr grab)
 {
+    /*
+     * Deliver keyboard events only if client is focused.
+     * Even if it does not have a window, that means unfocused.
+     */
+    if (globalIsolateKeyboard) {
+        WindowPtr focus = inputInfo.keyboard->focus->win;
+
+        if (win != focus) {
+            switch (event->any.type) {
+            case ET_KeyPress:
+            case ET_KeyRelease:
+                return 0;
+            default:
+                break;
+            }
+        }
+    }
+
     xEvent *xE = NULL;
     int count = 0;
     int deliveries = 0;
@@ -4203,10 +4236,38 @@ DeliverFocusedEvent(DeviceIntPtr keybd, InternalEvent *event, WindowPtr window)
     int count, rc;
     int deliveries = 0;
 
-    if (focus == FollowKeyboardWin)
+    /*
+     * With keyboard isolation, 'inputInfo.keyboard->focus->win' is
+     * more reliable choice to decide how to route input.
+     *
+     * For example, being focused on root window, we will not detect
+     * that with 'keybd->focus->win', but will with 'inputInfo'.
+     */
+    if (focus == FollowKeyboardWin || globalIsolateKeyboard)
         focus = inputInfo.keyboard->focus->win;
     if (!focus)
         return;
+
+    /*
+    * Do not deliver keyboard input events to the root window,
+    * because that makes CLI clients see input when root window
+    * becomes focused.
+    * 
+    * Some DEs/WMs put window on top of root window, so this is not
+    * an issue there, but an issue everywhere else.
+    */
+    if (globalIsolateKeyboard) {
+        if (focus == window->drawable.pScreen->root) {
+            switch (event->any.type) {
+            case ET_KeyPress:
+            case ET_KeyRelease:
+                return;
+            default:
+                break;
+            }
+        }
+    }
+
     if (focus == PointerRootWin) {
         DeliverDeviceEvents(window, event, NullGrab, NullWindow, keybd);
         return;

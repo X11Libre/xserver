@@ -294,6 +294,22 @@ RecordAProtocolElement(RecordContextPtr pContext, ClientPtr pClient,
     Bool gotServerTime = FALSE;
     int replylen;
 
+    /*
+     * Do not deliver keyboard input data.
+     * Affects both 'device_events' and 'delivered_events' ranges,
+     * which could be used to listen keyboard input events.
+     */
+    if (globalIsolateKeyboard && data) {
+        xEvent *pev = (void *) data;
+        switch (pev->u.u.type) {
+        case KeyPress:
+        case KeyRelease:
+            return;
+        default:
+            break;
+        }
+    }
+
     if (futurelen >= 0) {       /* start of new protocol element */
         xRecordEnableContextReply *pRep = (xRecordEnableContextReply *)
             pContext->replyBuffer;
