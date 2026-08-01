@@ -26,8 +26,13 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#define Cursor Mac_Cursor
-#define BOOL   Mac_BOOL
+/* QuickDraw in ApplicationServices conflicts with the basic X server headers
+ * (e.g. WindowPtr, now pulled in transitively via os.h -> xlibre_ptrtypes.h).
+ * Rename the QuickDraw symbols out of the way, matching sanitizedCarbon.h. */
+#define Cursor    Mac_Cursor
+#define BOOL      Mac_BOOL
+#define WindowPtr QD_WindowPtr
+#define Picture   QD_Picture
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -35,6 +40,8 @@
 #include <ApplicationServices/ApplicationServices.h>
 #undef Cursor
 #undef BOOL
+#undef WindowPtr
+#undef Picture
 
 #include "capabilities.h"
 
