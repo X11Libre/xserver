@@ -535,11 +535,13 @@ ms_present_screen_init(ScreenPtr screen)
     modesettingPtr ms = modesettingPTR(scrn);
     uint64_t value;
     int ret;
+    present_screen_info_rec info = ms_present_screen_info;
 
 #ifndef DRM_CAP_ATOMIC_ASYNC_PAGE_FLIP
 #define DRM_CAP_ATOMIC_ASYNC_PAGE_FLIP 0x15
 #endif
 
+#ifdef GLAMOR
     ret = drmGetCap(ms->fd, ms->atomic_modeset ?
                             DRM_CAP_ATOMIC_ASYNC_PAGE_FLIP :
                             DRM_CAP_ASYNC_PAGE_FLIP, &value);
@@ -548,6 +550,7 @@ ms_present_screen_init(ScreenPtr screen)
         ms->drmmode.can_async_flip = TRUE;
         xf86DrvMsg(screen->myNum, X_INFO, "Async flip capable\n");
     }
+#endif
 
     return present_screen_init(screen, &info);
 }
