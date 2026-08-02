@@ -490,14 +490,19 @@ ms_present_unflip(ScreenPtr screen, uint64_t event_id)
             continue;
 
         /* info->drmmode.fb_id still points to the FB for the last flipped BO.
-         * Clear it, drmmode_set_mode_major will re-create it
+         * Clear it, the next modeset will re-create it
          */
         if (drmmode_crtc->drmmode->fb_id) {
-            drmModeRmFB(drmmode_crtc->drmmode->fd, drmmode_crtc->drmmode->fb_id);
+            /* atomic_remove_fb() on the live FB would blank a display we no longer own */
+            if (scrn->vtSema)
+                drmModeRmFB(drmmode_crtc->drmmode->fd, drmmode_crtc->drmmode->fb_id);
+            else
+                drmmode_crtc->drmmode->deferred_fb_id = drmmode_crtc->drmmode->fb_id;
+
             drmmode_crtc->drmmode->fb_id = 0;
         }
 
-        if (drmmode_crtc->dpms_mode == DPMSModeOn)
+        if (scrn->vtSema && drmmode_crtc->dpms_mode == DPMSModeOn)
             crtc->funcs->set_mode_major(crtc, &crtc->mode, crtc->rotation,
                                         crtc->x, crtc->y);
         else

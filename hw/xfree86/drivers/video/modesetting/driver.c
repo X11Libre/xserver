@@ -2303,6 +2303,12 @@ EnterVT(ScrnInfoPtr pScrn)
         RRTellChanged(xf86ScrnToScreen(pScrn));
     }
 
+    /* Off-plane after modeset, so this cannot blank anything */
+    if (ms->drmmode.deferred_fb_id) {
+        drmModeRmFB(ms->fd, ms->drmmode.deferred_fb_id);
+        ms->drmmode.deferred_fb_id = 0;
+    }
+
     return TRUE;
 }
 

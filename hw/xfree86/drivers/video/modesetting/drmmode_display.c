@@ -4893,6 +4893,11 @@ drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         drmmode->fb_id = 0;
     }
 
+    if (drmmode->deferred_fb_id) {
+        drmModeRmFB(drmmode->fd, drmmode->deferred_fb_id);
+        drmmode->deferred_fb_id = 0;
+    }
+
     gbm_bo_destroy(drmmode->front_bo);
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
