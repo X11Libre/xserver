@@ -316,6 +316,18 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
     drmVBlank vbl;
     int ret;
 
+    if (!(flags & MS_QUEUE_RELATIVE)) {
+        /* msc_prev holds only the low sequence bits after 32-bit events */
+        uint64_t last_msc = drmmode_crtc->msc_high +
+                            (drmmode_crtc->msc_prev & 0xffffffff);
+
+        /* drm_vblank_passed() looks back only 2^23 seqs; older targets park forever */
+        if ((int64_t)(msc - last_msc) <= 0) {
+            flags = MS_QUEUE_RELATIVE;
+            msc = 1;
+        }
+    }
+
     /* Try coalescing this event into another to avoid event queue exhaustion */
     if (flags == MS_QUEUE_ABSOLUTE && ms_queue_coalesce(crtc, seq, msc))
         return TRUE;
