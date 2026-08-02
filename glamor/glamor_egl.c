@@ -678,7 +678,7 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
         (modifiers_ok || !pixmap_priv->used_modifiers))
         return TRUE;
 
-    if (!glamor_egl->gbm || !glamor_egl->can_texture_gbm_bo) {
+    if (!glamor_egl->can_texture_gbm_bo) {
         return FALSE;
     }
 
@@ -2507,41 +2507,33 @@ glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int is_nvidia)
 }
 #endif
 
-Bool
-glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
+static glamor_egl_priv_t*
+glamor_egl_priv_from_conf(glamor_egl_conf_t* glamor_egl_conf, int *screen_idx)
 {
-    const char *renderer;
-    const char *vendor;
-    glamor_egl_priv_t* glamor_egl = NULL;
-    int *dri_fd = NULL;
-    int platform = 0;
-    int screen_idx = -1;
-    int _caps;
-    int is_nvidia = FALSE;
-
-    if (!caps) {
-        caps = &_caps;
-    }
-
-    *caps = GLAMOR_EGL_CAP_NONE;
+    glamor_egl_priv_t* glamor_egl;
 
     if (glamor_egl_conf->GLAMOR_EGL_PRIV_PROC) {
         glamor_egl_get_screen_private = glamor_egl_conf->GLAMOR_EGL_PRIV_PROC;
         glamor_egl = glamor_egl_conf->glamor_egl_priv;
+        *screen_idx = -1;
     } else {
         if (!glamor_egl_conf->screen ||
             !glamor_egl_init_screen_private(glamor_egl_conf->screen)) {
-            goto error;
+            return NULL;
         }
         glamor_egl = glamor_egl_get_screen_private(glamor_egl_conf->screen);
-        screen_idx = glamor_egl_conf->screen->myNum;
+        *screen_idx = glamor_egl_conf->screen->myNum;
     }
 
     memset(glamor_egl, 0, sizeof(*glamor_egl));
+    return glamor_egl;
+}
 
-#ifdef DRI3
-    glamor_egl->dri3_info = glamor_dri3_info;
-#endif
+static Bool
+glamor_egl_prepare_and_init_display(glamor_egl_priv_t* glamor_egl, int *platform,
+                                    glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+{
+    int *dri_fd = NULL;
 
     if (glamor_egl_conf->glvnd_vendor) {
         glamor_egl->glvnd_vendor = strdup(glamor_egl_conf->glvnd_vendor);
@@ -2567,40 +2559,20 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         dri_fd = &glamor_egl->fd;
     }
 
-    if (!glamor_egl_init_display(glamor_egl, screen_idx, dri_fd, &platform)) {
-        goto error;
+    if (!glamor_egl_init_display(glamor_egl, screen_idx, dri_fd, platform)) {
+        return FALSE;
     }
 
-#define GLAMOR_CHECK_EGL_EXTENSION(EXT)  \
-	if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_" #EXT)) {  \
-		GLAMOR_LOG_STR(screen_idx, X_ERROR, "EGL_" #EXT " required.\n");  \
-		goto error;  \
-	}
+    return TRUE;
+}
 
-    GLAMOR_CHECK_EGL_EXTENSION(KHR_surfaceless_context);
-
-#if defined(GLAMOR_HAS_GBM) && defined(DRI3)
-    if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
-        GLAMOR_LOG_STR(screen_idx, X_WARNING, "EGL extension EGL_MESA_image_dma_buf_export not available\n");
-        GLAMOR_LOG_STR(screen_idx, X_WARNING, "DRI3 dmabuf export will be slower\n");
-        glamor_egl->dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_slow;
-        glamor_egl->dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_slow;
-    }
-#endif
-
-    if (!glamor_egl_conf->force_es) {
-        glamor_egl_try_big_gl_api(glamor_egl, screen_idx);
-    }
-
-    if (glamor_egl->context == EGL_NO_CONTEXT && !glamor_egl_conf->es_disallowed) {
-        glamor_egl_try_gles_api(glamor_egl, screen_idx);
-    }
-
-    if (glamor_egl->context == EGL_NO_CONTEXT) {
-        GLAMOR_LOG_STR(screen_idx, X_ERROR,
-                       "Failed to create GL or GLES2 contexts\n");
-        goto error;
-    }
+static Bool
+glamor_egl_check_renderer(glamor_egl_priv_t* glamor_egl, int platform,
+                          glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+{
+    const char* renderer;
+    const char* vendor;
+    int is_nvidia;
 
     renderer = (const char*)glGetString(GL_RENDERER);
     vendor = (const char*)glGetString(GL_VENDOR);
@@ -2617,12 +2589,12 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         if (!renderer) {
             GLAMOR_LOG_STR(screen_idx, X_ERROR,
                            "glGetString() returned NULL, your GL is broken\n");
-            goto error;
+            return FALSE;
         }
         if (strstr(renderer, "softpipe")) {
             GLAMOR_LOG_STR(screen_idx, X_INFO,
                            "Refusing to try glamor on softpipe\n");
-            goto error;
+            return FALSE;
         }
         if (!strncmp("llvmpipe", renderer, sizeof("llvmpipe") - 1)) {
             if (glamor_egl_conf->llvmpipe_allowed)
@@ -2631,39 +2603,10 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
             else {
                 GLAMOR_LOG_STR(screen_idx, X_INFO,
                                "Refusing to try glamor on llvmpipe\n");
-                 goto error;
+                 return FALSE;
             }
         }
     }
-
-    /*
-     * Force the next glamor_make_current call to set the right context
-     * (in case of multiple GPUs using glamor)
-     */
-    lastGLContext = NULL;
-
-    /* XXX From here on, glamor initialization should not fail completely XXX */
-
-    if (glamor_egl->fd < 0) {
-        goto glamor_no_dri;
-    }
-
-    glamor_egl->has_EXT_EGL_image_storage = epoxy_has_gl_extension("GL_EXT_EGL_image_storage");
-    glamor_egl->has_OES_EGL_image = epoxy_has_gl_extension("GL_OES_EGL_image");
-
-#ifdef DRI3
-    if (!glamor_egl->has_EXT_EGL_image_storage && !glamor_egl->has_OES_EGL_image) {
-        GLAMOR_LOG_STR(screen_idx, X_ERROR,
-                       "Extensions GL_EXT_EGL_image_storage and GL_OES_EGL_image are both unavailable\n");
-        GLAMOR_LOG_STR(screen_idx, X_ERROR,
-                       "DRI3 import will not be available\n");
-        glamor_egl->dri3_info.pixmap_from_fds = NULL;
-    }
-#endif
-
-#if defined(GLAMOR_HAS_GBM) && defined(EGL_MESA_image_dma_buf_export)
-    glamor_egl->has_image_dma_buf_export = epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export");
-#endif
 
     if (epoxy_has_egl_extension(glamor_egl->display,
                                 "EGL_EXT_image_dma_buf_import") &&
@@ -2693,53 +2636,207 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
     }
 #endif
 
-    *caps |= GLAMOR_EGL_DEFAULT_CAPS;
+    return TRUE;
+}
+
+static Bool
+glamor_egl_create_final_context(glamor_egl_priv_t* glamor_egl,
+                                glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+{
+#define GLAMOR_CHECK_EGL_EXTENSION(EXT)  \
+        if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_" #EXT)) {  \
+                GLAMOR_LOG_STR(screen_idx, X_ERROR, "EGL_" #EXT " required.\n");  \
+                return FALSE;  \
+        }
+
+    GLAMOR_CHECK_EGL_EXTENSION(KHR_surfaceless_context);
+
+    if (!glamor_egl_conf->force_es) {
+        glamor_egl_try_big_gl_api(glamor_egl, screen_idx);
+    }
+
+    if (glamor_egl->context == EGL_NO_CONTEXT && !glamor_egl_conf->es_disallowed) {
+        glamor_egl_try_gles_api(glamor_egl, screen_idx);
+    }
+
+    if (glamor_egl->context == EGL_NO_CONTEXT) {
+        GLAMOR_LOG_STR(screen_idx, X_ERROR,
+                       "Failed to create GL or GLES2 contexts\n");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+static Bool
+glamor_egl_create_display_and_context(glamor_egl_priv_t* glamor_egl,
+                                      glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+{
+    int platform = 0;
+
+    if (!glamor_egl_prepare_and_init_display(glamor_egl, &platform, glamor_egl_conf, screen_idx)) {
+        return FALSE;
+    }
+
+    if (!glamor_egl_create_final_context(glamor_egl, glamor_egl_conf, screen_idx)) {
+        return FALSE;
+    }
+
+    if (!glamor_egl_check_renderer(glamor_egl, platform, glamor_egl_conf, screen_idx)) {
+        return FALSE;
+    }
+
+    /*
+     * Force the next glamor_make_current call to set the right context
+     * (in case of multiple GPUs using glamor)
+     */
+    lastGLContext = NULL;
+
+    return TRUE;
+}
+
 #ifdef DRI3
-    if (!glamor_egl->dri3_info.pixmap_from_fds) {
-        *caps &= ~GLAMOR_EGL_CAP_DRI3_IMPORT;
+static Bool
+glamor_egl_probe_dri3_import(glamor_egl_priv_t* glamor_egl, int screen_idx)
+{
+    glamor_egl->has_EXT_EGL_image_storage = epoxy_has_gl_extension("GL_EXT_EGL_image_storage");
+    glamor_egl->has_OES_EGL_image = epoxy_has_gl_extension("GL_OES_EGL_image");
+
+    if (!glamor_egl->has_EXT_EGL_image_storage && !glamor_egl->has_OES_EGL_image) {
+        GLAMOR_LOG_STR(screen_idx, X_ERROR,
+                       "Extensions GL_EXT_EGL_image_storage and GL_OES_EGL_image are both unavailable\n");
+        GLAMOR_LOG_STR(screen_idx, X_ERROR,
+                       "DRI3 import will not be available\n");
+
         /* Avoid DRI3 returning BadImplementation */
         glamor_egl->dri3_info.pixmap_from_fds = glamor_pixmap_from_fds_noop;
+        return FALSE;
     }
+
+    return TRUE;
+}
+
+static Bool
+glamor_egl_probe_dri3_export(glamor_egl_priv_t* glamor_egl, int screen_idx)
+{
+    glamor_egl->has_image_dma_buf_export = epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export");
+
+    if (glamor_egl->has_image_dma_buf_export) {
+#ifdef GLAMOR_HAS_GBM
+        if (!glamor_egl->can_texture_gbm_bo)
+#endif
+        {
+            glamor_egl->dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_fast;
+            glamor_egl->dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_fast;
+        }
+    } else {
+#ifdef GLAMOR_HAS_GBM
+        if (glamor_egl->can_texture_gbm_bo) {
+            GLAMOR_LOG_STR(screen_idx, X_WARNING, "EGL extension EGL_MESA_image_dma_buf_export not available\n");
+            GLAMOR_LOG_STR(screen_idx, X_WARNING, "DRI3 dmabuf export will be slower\n");
+            glamor_egl->dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_slow;
+            glamor_egl->dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_slow;
+        } else
+#endif
+        {
+            GLAMOR_LOG_STR(screen_idx, X_WARNING, "EGL extension EGL_MESA_image_dma_buf_export not available\n");
+            GLAMOR_LOG_STR(screen_idx, X_WARNING, "DRI3 dmabuf export will be unavailable\n");
+            glamor_egl->dri3_info.fd_from_pixmap = NULL;
+            glamor_egl->dri3_info.fds_from_pixmap = NULL;
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+#endif
+
+static Bool
+glamor_egl_probe_dri3(glamor_egl_priv_t* glamor_egl, int *caps,
+                      glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+{
+    Bool ret = TRUE;
+    int _caps;
+
+    if (!caps) {
+        caps = &_caps;
+    }
+
+    *caps = GLAMOR_EGL_CAP_NONE;
+
+    if (glamor_egl->fd < 0) {
+        return FALSE;
+    }
+
+#ifdef DRI3
+    *caps = GLAMOR_EGL_DEFAULT_CAPS;
+    glamor_egl->dri3_info = glamor_dri3_info;
+
+    if (!glamor_egl_probe_dri3_import(glamor_egl, screen_idx)) {
+        *caps &= ~GLAMOR_EGL_CAP_DRI3_IMPORT;
+        ret = FALSE;
+    }
+
+    if (!glamor_egl_probe_dri3_export(glamor_egl, screen_idx)) {
+        *caps &= ~GLAMOR_EGL_CAP_DRI3_EXPORT;
+        ret = FALSE;
+    }
+
+    /* Some clients can handle DRI3 missing, but not partial support */
+    if (!ret) {
+        if (!glamor_egl_conf->partial_dri_allowed) {
+            GLAMOR_LOG_STR(screen_idx, X_INFO, "Not enabling partial DRI3 support\n");
+        } else {
+            GLAMOR_LOG_STR(screen_idx, X_INFO, "Using partial DRI3 support\n");
+            ret = TRUE;
+        }
+    }
+#else
+    ret = FALSE;
 #endif
 
 #ifdef GLAMOR_HAS_GBM
     if (glamor_egl->can_texture_gbm_bo) {
         GLAMOR_LOG_STR(screen_idx, X_INFO, "Can texture gbm buffers\n");
-    }
-#endif
-
-#ifdef GLAMOR_HAS_GBM
-    if (!glamor_egl->gbm || !glamor_egl->can_texture_gbm_bo)
+        *caps |= GLAMOR_EGL_CAP_TEXTURE_GBM_BO;
+    } else
 #endif
     {
+#ifdef GLAMOR_HAS_GBM
         if (!glamor_egl_conf->gbm_forbidden) {
             GLAMOR_LOG_STR(screen_idx, X_ERROR, "Cannot texture gbm buffers\n");
         }
-        *caps &= ~GLAMOR_EGL_CAP_TEXTURE_GBM_BO;
-#ifdef DRI3
-        if (epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
-            glamor_egl->dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_fast;
-            glamor_egl->dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_fast;
-        } else {
-            GLAMOR_LOG_STR(screen_idx, X_WARNING, "EGL extension EGL_MESA_image_dma_buf_export not available\n");
-            GLAMOR_LOG_STR(screen_idx, X_WARNING, "DRI3 dmabuf export will be unavailable\n");
-            glamor_egl->dri3_info.fd_from_pixmap = NULL;
-            glamor_egl->dri3_info.fds_from_pixmap = NULL;
-            *caps &= ~GLAMOR_EGL_CAP_DRI3_EXPORT;
-        }
 #endif
+        *caps &= ~GLAMOR_EGL_CAP_TEXTURE_GBM_BO;
     }
 
-#define GLAMOR_EGL_CAP_DRI3_BASE (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
+    return ret;
+}
 
-    /* Some clients can handle DRI3 missing, but not partial support */
-    if ((*caps & GLAMOR_EGL_CAP_DRI3_BASE) != GLAMOR_EGL_CAP_DRI3_BASE) {
-        if (!glamor_egl_conf->partial_dri_allowed) {
-            GLAMOR_LOG_STR(screen_idx, X_INFO, "Not enabling partial DRI3 support\n");
-            goto glamor_no_dri;
-        } else {
-            GLAMOR_LOG_STR(screen_idx, X_INFO, "Using partial DRI3 support\n");
-        }
+Bool
+glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
+{
+    glamor_egl_priv_t* glamor_egl;
+    const char* renderer;
+    int screen_idx = -1;
+
+    glamor_egl = glamor_egl_priv_from_conf(glamor_egl_conf, &screen_idx);
+    if (!glamor_egl) {
+        goto error;
+    }
+
+    if (!glamor_egl_create_display_and_context(glamor_egl, glamor_egl_conf, screen_idx)) {
+        goto error;
+    }
+
+    /* XXX From here on, glamor initialization should not fail completely XXX */
+
+    renderer = (const char*)glGetString(GL_RENDERER);
+
+    if (!glamor_egl_probe_dri3(glamor_egl, caps, glamor_egl_conf, screen_idx)) {
+        goto glamor_no_dri;
     }
 
     GLAMOR_LOG_MESSAGE(screen_idx, X_INFO, "DRI3 X acceleration enabled on %s\n", renderer);
