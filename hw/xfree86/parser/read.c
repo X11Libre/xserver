@@ -85,12 +85,19 @@ XF86ConfigPtr
 xf86readConfigFile(void)
 {
     int token;
-    XF86ConfigPtr ptr = calloc(1, sizeof(XF86ConfigRec));
+    XF86ConfigPtr ptr = xf86configptr;
 
-	// Return if config allocation failed
+    // Allocate config if it is not
     if(!ptr)
     {
-        return NULL;
+        ptr = calloc(1, sizeof(XF86ConfigRec));
+
+        if(!ptr)
+        {
+            return NULL;
+        }
+
+        xf86configptr = ptr;
     }
 
     while ((token = xf86getToken(TopLevelTab)) != EOF_TOKEN) {
