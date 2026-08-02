@@ -316,6 +316,19 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
     drmVBlank vbl;
     int ret;
 
+    if (!(flags & MS_QUEUE_RELATIVE)) {
+        if (drmmode_crtc->msc_seen == UINT64_MAX) {
+            /* No observed position for this CRTC yet, so nothing to verify against */
+            flags = MS_QUEUE_RELATIVE;
+            msc = 1;
+        } else if ((int64_t)(msc - drmmode_crtc->msc_seen) <= 0) {
+            /* drm_vblank_passed() looks back only 2^23 seqs, so an older target
+             * parks forever; relative 0 fires now, as the kernel would have */
+            flags = MS_QUEUE_RELATIVE | (flags & MS_QUEUE_NEXT_ON_MISS);
+            msc = 0;
+        }
+    }
+
     /* Try coalescing this event into another to avoid event queue exhaustion */
     if (flags == MS_QUEUE_ABSOLUTE && ms_queue_coalesce(crtc, seq, msc))
         return TRUE;
@@ -425,11 +438,13 @@ ms_get_crtc_ust_msc(xf86CrtcPtr crtc, CARD64 *ust, CARD64 *msc)
     ScreenPtr screen = crtc->randr_crtc->pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
+    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     uint64_t kernel_msc;
 
     if (!ms_get_kernel_ust_msc(crtc, &kernel_msc, ust))
         return BadMatch;
     *msc = ms_kernel_msc_to_crtc_msc(crtc, kernel_msc, ms->has_queue_sequence);
+    drmmode_crtc->msc_seen = *msc;
 
     return Success;
 }
@@ -589,6 +604,9 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     if (!crtc)
         return;
 
+    drmmode_crtc = crtc->driver_private;
+    drmmode_crtc->msc_seen = msc;
+
     /* Now run all of the vblank events for this CRTC with an expired MSC */
     xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
         if (q->crtc == crtc && q->msc <= msc) {
@@ -614,7 +632,6 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     }
 
     /* Queue an event if the next queued MSC isn't soon enough */
-    drmmode_crtc = crtc->driver_private;
     drmmode_crtc->next_msc = next_msc;
     if (msc < next_msc && !ms_queue_vblank(crtc, MS_QUEUE_ABSOLUTE, msc, NULL, seq)) {
         xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
