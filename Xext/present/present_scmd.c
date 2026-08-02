@@ -778,6 +778,11 @@ present_scmd_pixmap(WindowPtr window,
     }
 
     ret = present_get_ust_msc(screen, target_crtc, &ust, &crtc_msc);
+    if (ret != Success) {
+        /* MSC is unreadable; fall back to the fake clock */
+        target_crtc = NULL;
+        ret = present_get_ust_msc(screen, NULL, &ust, &crtc_msc);
+    }
 
     present_scmd_update_window_crtc(window, target_crtc, crtc_msc);
 
