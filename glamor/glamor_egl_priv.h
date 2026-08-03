@@ -39,6 +39,7 @@ typedef struct glamor_egl_screen_private {
 #endif
 #endif
 
+    int is_gles;
     int has_EXT_EGL_image_storage;
     int has_OES_EGL_image;
 
