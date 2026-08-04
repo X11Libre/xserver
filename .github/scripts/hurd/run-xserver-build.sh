@@ -19,6 +19,9 @@ uname -a || true
 echo "==> apt update"
 sudo apt-get update
 
+echo "==> force dist-upgrade"
+sudo apt-get dist-upgrade -y --no-install-recommends
+
 # Toolchain MUST succeed (apt is transactional: one unlocatable package aborts
 # the whole install, so keep the essentials separate from the maybe-renamed X
 # libs — otherwise a missing lib takes git/meson down with it, as it did).
