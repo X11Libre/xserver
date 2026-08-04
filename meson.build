@@ -399,7 +399,7 @@ endif
 
 # Don't even link to libgbm
 if not build_gbm
-    gbm_dep = disabler()
+    gbm_dep = dependency('', required: false)
 endif
 
 # Lots of sha1 options, because Linux is about choice :)
