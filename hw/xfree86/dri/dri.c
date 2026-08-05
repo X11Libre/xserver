@@ -812,17 +812,9 @@ dri_drm_debug_print(const char *format, va_list ap)
     return 0;
 }
 
-static void
-dri_drm_get_perms(gid_t * group, mode_t * mode)
-{
-    *group = xf86ConfigDRI.group;
-    *mode = xf86ConfigDRI.mode;
-}
-
 drmServerInfo DRIDRMServerInfo = {
-    dri_drm_debug_print,
-    xf86LoadKernelModule,
-    dri_drm_get_perms,
+    .debug_print = dri_drm_debug_print,
+    .load_module = xf86LoadKernelModule,
 };
 
 Bool
