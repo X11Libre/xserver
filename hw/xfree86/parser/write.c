@@ -108,8 +108,6 @@ doWriteConfigFile(const char *filename, XF86ConfigPtr cptr)
 
     xf86printScreenSection(cf, cptr->conf_screen_lst);
 
-    xf86printDRISection(cf, cptr->conf_dri);
-
     xf86printExtensionsSection(cf, cptr->conf_extensions);
 
     fclose(cf);

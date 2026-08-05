@@ -123,15 +123,6 @@ xf86setSection(const char *section);
 int
 xf86getStringToken(const xf86ConfigSymTabRec * tab);
 
-/* write.c */
-/* DRI.c */
-XF86ConfDRIPtr
-xf86parseDRISection(void);
-void
-xf86printDRISection(FILE * cf, XF86ConfDRIPtr ptr);
-void
-xf86freeDRI(XF86ConfDRIPtr ptr);
-
 /* Extensions.c */
 XF86ConfExtensionsPtr
 xf86parseExtensionsSection(void);
