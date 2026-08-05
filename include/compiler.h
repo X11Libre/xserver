@@ -689,6 +689,8 @@ inl(unsigned short port)
 #include <sys/inline.h>
 #endif                          /* __GNUC__ */
 
+/* drivers that want to prevent automatic byteswapping by MMIO_()* macros
+   on PPC and SPARC should set these */
 #if !defined(MMIO_IS_BE) && \
     (defined(SPARC_MMIO_IS_BE) || defined(PPC_MMIO_IS_BE))
 #define MMIO_IS_BE
