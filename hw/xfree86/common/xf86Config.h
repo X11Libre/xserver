@@ -64,8 +64,6 @@ GDevPtr autoConfigDevice(GDevPtr preconf_device);
 void xf86SetVerbosity(int verb);
 void xf86SetLogVerbosity(int verb);
 
-extern confDRIRec xf86ConfigDRI;
-
 extern const char *xf86ConfigFile;
 extern const char *xf86ConfigDir;
 
