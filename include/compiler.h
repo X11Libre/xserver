@@ -57,9 +57,6 @@
 
 #include <pixman.h>             /* for uint*_t types */
 
-/* NOLINTBEGIN(hicpp-no-assembler) */
-
-#ifdef __GNUC__
 #ifdef __i386__
 
 #ifdef __SSE__
@@ -117,9 +114,7 @@
 #define mem_barrier()           /* XXX: nop for now */
 #define write_mem_barrier()     /* XXX: nop for now */
 #endif
-#endif                          /* __GNUC__ */
 
-#ifdef __GNUC__
 #if defined(__alpha__)
 
 #ifdef __linux__
@@ -661,15 +656,6 @@ inl(unsigned short port)
 }
 
 #endif                          /* arch madness */
-
-#else                           /* !GNUC */
-#if defined(__STDC__) && (__STDC__ == 1)
-#ifndef asm
-#define asm __asm
-#endif
-#endif
-#include <sys/inline.h>
-#endif                          /* __GNUC__ */
 
 /* drivers that want to prevent automatic byteswapping by MMIO_()* macros
    on PPC and SPARC should set these */
