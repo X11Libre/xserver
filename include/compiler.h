@@ -102,11 +102,8 @@
 
 #elif defined __powerpc__
 
-#ifndef eieio
-#define eieio() __asm__ __volatile__ ("eieio" ::: "memory")
-#endif                          /* eieio */
-#define mem_barrier()	eieio()
-#define write_mem_barrier()	eieio()
+#define mem_barrier()       __builtin_ppc_eieio()
+#define write_mem_barrier() __builtin_ppc_eieio()
 
 #elif defined __sparc__
 
@@ -560,7 +557,7 @@ xf86WriteMmio8(__volatile__ void *base, const unsigned long offset,
         __volatile__("stbx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    eieio();
+    __builtin_ppc_eieio();
 }
 
 static inline void
@@ -571,7 +568,7 @@ xf86WriteMmio16Le(__volatile__ void *base, const unsigned long offset,
         __volatile__("sthbrx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    eieio();
+    __builtin_ppc_eieio();
 }
 
 static inline void
@@ -582,7 +579,7 @@ xf86WriteMmio16Be(__volatile__ void *base, const unsigned long offset,
         __volatile__("sthx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    eieio();
+    __builtin_ppc_eieio();
 }
 
 static inline void
@@ -593,7 +590,7 @@ xf86WriteMmio32Le(__volatile__ void *base, const unsigned long offset,
         __volatile__("stwbrx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    eieio();
+    __builtin_ppc_eieio();
 }
 
 static inline void
@@ -604,7 +601,7 @@ xf86WriteMmio32Be(__volatile__ void *base, const unsigned long offset,
         __volatile__("stwx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    eieio();
+    __builtin_ppc_eieio();
 }
 
 static inline void
