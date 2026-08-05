@@ -86,14 +86,8 @@
 
 #elif defined __ia64__
 
-#ifndef __INTEL_COMPILER
 #define mem_barrier()        __asm__ __volatile__ ("mf" : : : "memory")
 #define write_mem_barrier()  __asm__ __volatile__ ("mf" : : : "memory")
-#else
-#include "ia64intrin.h"
-#define mem_barrier() __mf()
-#define write_mem_barrier() __mf()
-#endif
 
 #elif defined __mips__
      /* Note: sync instruction requires MIPS II instruction set */
