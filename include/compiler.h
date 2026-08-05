@@ -119,18 +119,6 @@
 #endif
 #endif                          /* __GNUC__ */
 
-#ifndef barrier
-#define barrier()
-#endif
-
-#ifndef mem_barrier
-#define mem_barrier()           /* NOP */
-#endif
-
-#ifndef write_mem_barrier
-#define write_mem_barrier()     /* NOP */
-#endif
-
 #ifdef __GNUC__
 #if defined(__alpha__)
 
