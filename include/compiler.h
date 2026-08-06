@@ -179,15 +179,13 @@ inl(unsigned short port)
 
 #elif defined(__sparc__)
 
-#ifndef ASI_PL
-#define ASI_PL 0x88
-#endif
+#define __XLIBRE_SPARC_ASI_PRIMAY_LE 0x88 /* just for readability */
 
 static inline void
 outb(unsigned long port, unsigned char val)
 {
     __asm__ __volatile__("stba %0, [%1] %2":    /* No outputs */
-                         :"r"(val), "r"(port), "i"(ASI_PL));
+                         :"r"(val), "r"(port), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
@@ -195,7 +193,7 @@ static inline void
 outw(unsigned long port, unsigned short val)
 {
     __asm__ __volatile__("stha %0, [%1] %2":    /* No outputs */
-                         :"r"(val), "r"(port), "i"(ASI_PL));
+                         :"r"(val), "r"(port), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
@@ -203,7 +201,7 @@ static inline void
 outl(unsigned long port, unsigned int val)
 {
     __asm__ __volatile__("sta %0, [%1] %2":     /* No outputs */
-                         :"r"(val), "r"(port), "i"(ASI_PL));
+                         :"r"(val), "r"(port), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
@@ -212,8 +210,7 @@ inb(unsigned long port)
 {
     unsigned int ret;
     __asm__ __volatile__("lduba [%1] %2, %0":"=r"(ret)
-                         :"r"(port), "i"(ASI_PL));
-
+                         :"r"(port), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     return ret;
 }
 
@@ -222,8 +219,7 @@ inw(unsigned long port)
 {
     unsigned int ret;
     __asm__ __volatile__("lduha [%1] %2, %0":"=r"(ret)
-                         :"r"(port), "i"(ASI_PL));
-
+                         :"r"(port), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     return ret;
 }
 
@@ -232,8 +228,7 @@ inl(unsigned long port)
 {
     unsigned int ret;
     __asm__ __volatile__("lda [%1] %2, %0":"=r"(ret)
-                         :"r"(port), "i"(ASI_PL));
-
+                         :"r"(port), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     return ret;
 }
 
@@ -244,7 +239,7 @@ xf86ReadMmio8(__volatile__ void *base, const unsigned long offset)
     unsigned char ret;
 
     __asm__ __volatile__("lduba [%1] %2, %0":"=r"(ret)
-                         :"r"(addr), "i"(ASI_PL));
+                         :"r"(addr), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
 
     return ret;
 }
@@ -268,7 +263,7 @@ xf86ReadMmio16Le(__volatile__ void *base, const unsigned long offset)
     unsigned short ret;
 
     __asm__ __volatile__("lduha [%1] %2, %0":"=r"(ret)
-                         :"r"(addr), "i"(ASI_PL));
+                         :"r"(addr), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
 
     return ret;
 }
@@ -292,7 +287,7 @@ xf86ReadMmio32Le(__volatile__ void *base, const unsigned long offset)
     unsigned int ret;
 
     __asm__ __volatile__("lda [%1] %2, %0":"=r"(ret)
-                         :"r"(addr), "i"(ASI_PL));
+                         :"r"(addr), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
 
     return ret;
 }
@@ -304,7 +299,7 @@ xf86WriteMmio8(__volatile__ void *base, const unsigned long offset,
     unsigned long addr = ((unsigned long) base) + offset;
 
     __asm__ __volatile__("stba %0, [%1] %2":    /* No outputs */
-                         :"r"(val), "r"(addr), "i"(ASI_PL));
+                         :"r"(val), "r"(addr), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
@@ -326,7 +321,7 @@ xf86WriteMmio16Le(__volatile__ void *base, const unsigned long offset,
     unsigned long addr = ((unsigned long) base) + offset;
 
     __asm__ __volatile__("stha %0, [%1] %2":    /* No outputs */
-                         :"r"(val), "r"(addr), "i"(ASI_PL));
+                         :"r"(val), "r"(addr), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
@@ -348,9 +343,11 @@ xf86WriteMmio32Le(__volatile__ void *base, const unsigned long offset,
     unsigned long addr = ((unsigned long) base) + offset;
 
     __asm__ __volatile__("sta %0, [%1] %2":     /* No outputs */
-                         :"r"(val), "r"(addr), "i"(ASI_PL));
+                         :"r"(val), "r"(addr), "i"(__XLIBRE_SPARC_ASI_PRIMAY_LE));
     __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
+
+#undef __XLIBRE_SPARC_ASI_PRIMAY_LE
 
 #elif defined(__arm32__) && !defined(__linux__)
 
