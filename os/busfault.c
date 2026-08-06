@@ -35,6 +35,7 @@
 #include "os/busfault.h"
 
 #include <list.h>
+#include <setjmp.h>
 
 struct busfault {
     struct xorg_list    list;
@@ -46,6 +47,8 @@ struct busfault {
 
     busfault_notify_ptr notify;
     void                *context;
+
+    sigjmp_buf          *jmp;
 };
 
 static Bool             busfaulted;
@@ -65,6 +68,7 @@ busfault_register_mmap(void *addr, size_t size, busfault_notify_ptr notify, void
     busfault->notify = notify;
     busfault->context = context;
     busfault->valid = TRUE;
+    busfault->jmp = NULL;
 
     xorg_list_add(&busfault->list, &busfaults);
     return busfault;
@@ -75,6 +79,13 @@ busfault_unregister(struct busfault *busfault)
 {
     xorg_list_del(&busfault->list);
     free(busfault);
+}
+
+void
+busfault_set_jmp(struct busfault *busfault, sigjmp_buf *jmp)
+{
+    if (busfault)
+        busfault->jmp = jmp;
 }
 
 void
@@ -101,6 +112,7 @@ busfault_sigaction(int sig, siginfo_t *info, void *param)
     void                *fault = info->si_addr;
     struct busfault     *iter, *busfault = NULL;
     void                *new_addr;
+    sigjmp_buf          *jmp;
 
     /* Locate the faulting address in our list of shared segments
      */
@@ -118,6 +130,12 @@ busfault_sigaction(int sig, siginfo_t *info, void *param)
 
     busfault->valid = FALSE;
     busfaulted = TRUE;
+
+    jmp = busfault->jmp;
+    if (jmp) {
+        busfault->jmp = NULL;
+        siglongjmp(*jmp, 1);
+    }
 
     /* The client truncated the file; unmap the shared file, map
      * /dev/zero over that area and keep going
