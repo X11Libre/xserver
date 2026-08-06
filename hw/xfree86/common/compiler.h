@@ -460,6 +460,45 @@ xf86WriteMmio32Le(__volatile__ void *base, const unsigned long offset,
     barrier();
 }
 
+#elif defined(__mips__)
+
+#  if defined(__mips64)
+#    define __XLIBRE_MIPS_PORT_TYPE unsigned long
+#    define __XLIBRE_MIPS_PORT_ADDR(port) (((unsigned long)(port)) + IOPortBase)
+#  else
+#    define __XLIBRE_MIPS_PORT_TYPE unsigned short
+#    define __XLIBRE_MIPS_PORT_ADDR(port) (((unsigned short)(port)) + IOPortBase)
+#  endif
+
+extern _X_EXPORT unsigned int IOPortBase;      /* Memory mapped I/O port area */
+
+static inline void outb(__XLIBRE_MIPS_PORT_TYPE port, unsigned char val) {
+    *(volatile unsigned char *)(__XLIBRE_MIPS_PORT_ADDR(port)) = val;
+}
+
+static inline void outw(__XLIBRE_MIPS_PORT_TYPE port, unsigned short val) {
+    *(volatile unsigned short *)(__XLIBRE_MIPS_PORT_ADDR(port)) = val;
+}
+
+static inline void outl(__XLIBRE_MIPS_PORT_TYPE port, unsigned int val) {
+    *(volatile unsigned int *)(__XLIBRE_MIPS_PORT_ADDR(port)) = val;
+}
+
+static inline unsigned int inb(__XLIBRE_MIPS_PORT_TYPE port) {
+    return *(volatile unsigned char *)(__XLIBRE_MIPS_PORT_ADDR(port));
+}
+
+static inline unsigned int inw(__XLIBRE_MIPS_PORT_TYPE port) {
+    return *(volatile unsigned short *)(__XLIBRE_MIPS_PORT_ADDR(port));
+}
+
+static inline unsigned int inl(__XLIBRE_MIPS_PORT_TYPE port) {
+    return *(volatile unsigned int *)(__XLIBRE_MIPS_PORT_ADDR(port));
+}
+
+#  undef __XLIBRE_MIPS_PORT_TYPE
+#  undef __XLIBRE_MIPS_PORT_ADDR
+
 #elif defined(__arm32__) && !defined(__linux__)
 #define PORT_SIZE long
 
@@ -506,34 +545,6 @@ inl(unsigned PORT_SIZE port)
     return *(volatile unsigned int *) (((unsigned PORT_SIZE) (port)) +
                                        IOPortBase);
 }
-
-#if defined(__mips__)
-#ifdef __linux__                    /* don't mess with other OSs */
-#if X_BYTE_ORDER == X_BIG_ENDIAN
-static __inline__ unsigned int
-xf86ReadMmio32Be(__volatile__ void *base, const unsigned long offset)
-{
-    unsigned long addr = ((unsigned long) base) + offset;
-    unsigned int ret;
-
-    __asm__ __volatile__("lw %0, 0(%1)":"=r"(ret)
-                         :"r"(addr));
-
-    return ret;
-}
-
-static __inline__ void
-xf86WriteMmio32Be(__volatile__ void *base, const unsigned long offset,
-                  const unsigned int val)
-{
-    unsigned long addr = ((unsigned long) base) + offset;
-
-    __asm__ __volatile__("sw %0, 0(%1)":        /* No outputs */
-                         :"r"(val), "r"(addr));
-}
-#endif
-#endif                          /* !__linux__ */
-#endif                          /* __mips__ */
 
 #elif defined(__powerpc__)
 
