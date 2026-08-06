@@ -58,7 +58,7 @@
 
 #if defined(__alpha__)
 
-#ifdef __linux__
+#  if defined(__linux__)
 /* for Linux on Alpha, we use the LIBC _inx/_outx routines */
 /* note that the appropriate setup via "ioperm" needs to be done */
 /*  *before* any inx/outx is done. */
@@ -106,9 +106,7 @@ inl(unsigned long port)
     return _inl(port);
 }
 
-#endif                          /* __linux__ */
-
-#if (defined(__FreeBSD__) || defined(__OpenBSD__))
+#  elif (defined(__FreeBSD__) || defined(__OpenBSD__))
 
 /* for FreeBSD and OpenBSD on Alpha, we use the libio (resp. libalpha) */
 /*  inx/outx routines */
@@ -122,11 +120,11 @@ extern _X_EXPORT unsigned char inb(unsigned int port);
 extern _X_EXPORT unsigned short inw(unsigned int port);
 extern _X_EXPORT unsigned int inl(unsigned int port);
 
-#endif                          /* (__FreeBSD__ || __OpenBSD__ ) */
+#  elif defined(__NetBSD__)
 
-#if defined(__NetBSD__)
-#include <machine/pio.h>
-#endif                          /* __NetBSD__ */
+#    include <machine/pio.h>
+
+#  endif /* various OS'es on __alpha__ */
 
 #elif defined(__amd64__) || defined(__i386__) || defined(__ia64__)
 
