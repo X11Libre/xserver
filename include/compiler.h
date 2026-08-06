@@ -428,9 +428,7 @@ xf86WriteMmio32Be(__volatile__ void *base, const unsigned long offset,
 
 #elif defined(__powerpc__)
 
-#ifndef MAP_FAILED
-#define MAP_FAILED ((void *)-1)
-#endif
+#include <sys/mman.h>
 
 extern _X_EXPORT volatile unsigned char *ioBase;
 
