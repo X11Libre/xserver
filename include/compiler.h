@@ -632,37 +632,37 @@ inl(unsigned short port)
 
 static inline int MMIO_IN8(void *Base, unsigned long Offset)
 {
-    mem_barrier();
+    xlibre_mem_barrier_read();
     return *(CARD8 *) ((unsigned long) Base + (Offset));
 }
 
 static inline int MMIO_IN16(void *Base, unsigned long Offset)
 {
-    mem_barrier();
+    xlibre_mem_barrier_read();
     return *(CARD16 *) ((unsigned long) Base + (Offset));
 }
 
 static inline int MMIO_IN32(void *Base, unsigned long Offset)
 {
-    mem_barrier();
+    xlibre_mem_barrier_read();
     return *(CARD32 *) ((unsigned long) Base + (Offset));
 }
 
 static inline void MMIO_OUT8(void *Base, unsigned long Offset, int Value)
 {
-    write_mem_barrier();
+    xlibre_mem_barrier_write();
     *(CARD8 *) ((unsigned long) Base + (Offset)) = Value;
 }
 
 static inline void MMIO_OUT16(void *Base, unsigned long Offset, int Value)
 {
-    write_mem_barrier();
+    xlibre_mem_barrier_write();
     *(CARD16 *) ((unsigned long) Base + (Offset)) = Value;
 }
 
 static inline void MMIO_OUT32(void *Base, unsigned long Offset, int Value)
 {
-    write_mem_barrier();
+    xlibre_mem_barrier_write();
     *(CARD32 *) ((unsigned long) Base + (Offset)) = Value;
 }
 
