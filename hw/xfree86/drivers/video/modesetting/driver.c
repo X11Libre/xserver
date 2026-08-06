@@ -1327,9 +1327,24 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     if (!xf86SetDefaultVisual(pScrn, -1))
         return FALSE;
 
-    if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_SW_CURSOR, FALSE)) {
+    /* we have situation where cursor in virtual envirioments doens't work as expected and can be confusing for users
+     * prime example is qemu deskop frontend:
+     * - if display backend is `gtk` by default cursor is showed when window is out of focus and hidden when in focus.
+     * - if display backend us `sdl` it always shows cursor
+     * - if under spice backed using qxl display, the rendering application (remote-viewer) behaves correctly
+     *  This code check if drm driver is `qxl` or `virtio` and disables hardware cursor
+        see: https://www.qemu.org/docs/master/system/qemu-manpage.html search `show-cursor`
+     */
+    drmVersionPtr version = drmGetVersion(ms->fd);
+    if (strstr(version->name,"virtio_gpu") || strstr(version->name,"qxl")){
+        ms->drmmode.sw_cursor = TRUE;
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+            "SWcursor: forcing software cursor as it known causing problems with rendering\n");
+    } else if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_SW_CURSOR, FALSE)) {
         ms->drmmode.sw_cursor = TRUE;
     }
+
+    drmFree(version);
 
     try_enable_glamor(pScrn);
 
