@@ -51,14 +51,11 @@
  * authorization from the copyright holder(s) and author(s).
  */
 #include <xorg-config.h>
-
 #include <assert.h>
-
 #include <X11/Xos.h>
 #include "xf86Parser.h"
 #include "xf86tokens.h"
 #include "Configint.h"
-
 
 static const xf86ConfigSymTabRec FilesTab[] = {
     {ENDSECTION, "endsection"},
@@ -66,9 +63,6 @@ static const xf86ConfigSymTabRec FilesTab[] = {
     {MODULEPATH, "modulepath"},
     {LOGFILEPATH, "logfile"},
     {XKBDIR, "xkbdir"},
-    /* Obsolete keywords that aren't used but shouldn't cause errors: */
-    {OBSOLETE_TOKEN, "rgbpath"},
-    {OBSOLETE_TOKEN, "inputdevices"},
     {-1, ""},
 };
 
@@ -159,10 +153,6 @@ xf86parseFilesSection(XF86ConfFilesPtr ptr)
             break;
         case EOF_TOKEN:
             Error(UNEXPECTED_EOF_MSG);
-            break;
-        case OBSOLETE_TOKEN:
-            xf86parseError(OBSOLETE_MSG, xf86tokenString());
-            xf86getSubToken(&(ptr->file_comment));
             break;
         default:
             Error(INVALID_KEYWORD_MSG, xf86tokenString());
