@@ -114,25 +114,3 @@
 	sta	%o2, [%o0 + %o1] 0x88
 	membar	#StoreStore|#StoreLoad
 	FUNCTION_END(xf86WriteMmio32Le)
-
-	FUNCTION_START(xf86WriteMmio8NB, 0)
-	add	%o0, %o1, %o0
-	stba	%o2, [%o0] 0x88
-	FUNCTION_END(xf86WriteMmio8NB)
-
-	FUNCTION_START(xf86WriteMmio16BeNB, 0)
-	sth	%o2, [%o0 + %o1]
-	FUNCTION_END(xf86WriteMmio16BeNB)
-
-	FUNCTION_START(xf86WriteMmio16LeNB, 0)
-	stha	%o2, [%o0 + %o1] 0x88
-	FUNCTION_END(xf86WriteMmio16LeNB)
-
-	FUNCTION_START(xf86WriteMmio32BeNB, 0)
-	st	%o2, [%o0 + %o1]
-	FUNCTION_END(xf86WriteMmio32BeNB)
-
-	FUNCTION_START(xf86WriteMmio32LeNB, 0)
-	sta	%o2, [%o0 + %o1] 0x88
-	FUNCTION_END(xf86WriteMmio32LeNB)
-
