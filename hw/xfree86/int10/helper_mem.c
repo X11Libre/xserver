@@ -12,10 +12,6 @@
 #include "xf86_OSproc.h"
 #include "compiler.h"
 #include "xf86Pci.h"
-#define _INT10_PRIVATE
-#if 0
-#include "int10Defines.h"
-#endif
 #include "xf86int10_priv.h"
 
 #define REG pInt
