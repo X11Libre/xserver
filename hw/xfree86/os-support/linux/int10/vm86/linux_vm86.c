@@ -7,8 +7,7 @@
 #include "xf86_OSproc.h"
 #include "xf86Pci.h"
 #include "compiler.h"
-#define _INT10_PRIVATE
-#include "xf86int10.h"
+#include "xf86int10_priv.h"
 
 #define REG pInt
 
