@@ -9,7 +9,7 @@
 # architecture and run the build *inside* it with qemu-user-static + binfmt_misc.
 # The compiler is the real target-arch gcc, so arch-specific inline asm (e.g.
 # include/compiler.h, include/xlibre_membarrier.h) is genuinely assembled —
-# which the x86_64-host lanes never exercise. This is what the 
+# which the x86_64-host lanes never exercise. This is what the
 # __asm__ "missing trailing ;" bugs in PR #3484 / #3485 needed.
 #
 # Usage:
@@ -28,6 +28,7 @@
 # only qemu-user-static/binfmt-support/debootstrap get installed on it.
 
 set -e
+set -x  # Debug: print every command
 
 ARCH="$1"
 QEMU="$2"
@@ -48,7 +49,10 @@ fi
 
 ROOTFS=/tmp/qemu-rootfs-$ARCH
 
+echo "=== [$(date)] Starting QEMU build for $ARCH ($QEMU, $SUITE, $MIRROR) ==="
+
 # --- host side: prepare the emulator + debootstrap -------------------------
+echo "=== [$(date)] Installing host packages ==="
 apt-get update
 apt-get install -y \
     qemu-user-static \
@@ -63,23 +67,28 @@ apt-get install -y \
 # archive keyring, which debootstrap resolves automatically from the mirror URL.
 case "$MIRROR" in
     *debian-ports*)
+        echo "=== [$(date)] Fetching debian-ports keyring ==="
         PORTS_KEYRING_DEB=$(wget -qO- "http://deb.debian.org/debian-ports/pool/main/d/debian-ports-archive-keyring/" \
             | grep -o 'debian-ports-archive-keyring_[0-9.]*_all.deb' | sort -V | tail -1)
         if [ -z "$PORTS_KEYRING_DEB" ]; then
             echo "ERROR: could not resolve debian-ports-archive-keyring version" >&2
             exit 1
         fi
+        echo "=== [$(date)] Downloading $PORTS_KEYRING_DEB ==="
         wget -qO "/tmp/$PORTS_KEYRING_DEB" "http://deb.debian.org/debian-ports/pool/main/d/debian-ports-archive-keyring/$PORTS_KEYRING_DEB"
         rm -rf /tmp/ports-keyring
         dpkg-deb -x "/tmp/$PORTS_KEYRING_DEB" /tmp/ports-keyring
         DEBOOTSTRAP_KEYRING="--keyring=/tmp/ports-keyring/usr/share/keyrings/debian-ports-archive-keyring.gpg"
+        echo "=== [$(date)] debian-ports keyring installed ==="
     ;;
 esac
 
 # --- create the foreign-arch rootfs (--foreign: can't run target tools yet) --
+echo "=== [$(date)] Creating rootfs for $ARCH ==="
 rm -rf "$ROOTFS"
 mkdir -p "$ROOTFS"
 
+echo "=== [$(date)] Running debootstrap --foreign ==="
 debootstrap \
     --foreign \
     --arch="$ARCH" \
@@ -90,21 +99,28 @@ debootstrap \
     "$MIRROR"
 
 # --- register the emulator inside the rootfs and finish the bootstrap -------
+echo "=== [$(date)] Copying qemu binary and running --second-stage ==="
 cp "/usr/bin/$QEMU" "$ROOTFS/usr/bin/"
 chroot "$ROOTFS" /debootstrap/debootstrap --second-stage
+echo "=== [$(date)] Bootstrap complete ==="
 
 # --- copy the source tree into the rootfs -----------------------------------
+echo "=== [$(date)] Copying source tree ==="
 mkdir -p "$ROOTFS/src"
 cp -a . "$ROOTFS/src/"
 
 # --- chroot-side scripts ------------------------------------------------------
+echo "=== [$(date)] Creating install-prereq.sh ==="
 cat > "$ROOTFS/install-prereq.sh" <<'INSTALL_PREREQ'
 #!/bin/bash
 set -e
+set -x
 export DEBIAN_FRONTEND=noninteractive
 
+echo "=== [$(date)] Updating apt in chroot ==="
 apt-get update
 
+echo "=== [$(date)] Installing build dependencies ==="
 apt-get install -y \
     autoconf \
     automake \
@@ -187,6 +203,7 @@ apt-get install -y \
 # but the xserver requires >= 1.4. Build the current xorgproto into a private
 # prefix (same approach as the ubuntu lane) and prepend it to PKG_CONFIG_PATH.
 # Needs only meson/ninja/python3, all of which are already installed above.
+echo "=== [$(date)] Building xorgproto from source ==="
 mkdir -p /opt/xorgproto
 cd /opt/xorgproto
 git clone --depth 1 --branch xorgproto-2024.1 \
@@ -195,50 +212,55 @@ cd xorgproto-src
 meson setup build -Dprefix=/opt/xorgproto
 meson compile -C build
 meson install -C build
+echo "=== [$(date)] xorgproto build complete ==="
 INSTALL_PREREQ
 chmod +x "$ROOTFS/install-prereq.sh"
 
+echo "=== [$(date)] Creating run-build.sh ==="
 cat > "$ROOTFS/run-build.sh" <<RUN_BUILD
 #!/bin/bash
 set -e
+set -x
 
 cd /src
 
 export MESON_BUILDDIR=_build
-export FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT:-2}
+export FDO_CI_CONCURRENT=\${FDO_CI_CONCURRENT:-2}
 export PKG_CONFIG_PATH="/opt/xorgproto/lib/pkgconfig:/opt/xorgproto/share/pkgconfig:\${PKG_CONFIG_PATH:-}"
 
 if [ -z "\$MESON_ARGS" ]; then
     MESON_ARGS="-Dprefix=/usr -Dwerror=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false"
 fi
 
-echo "=== meson setup ==="
+echo "=== [$(date)] meson setup ==="
 rm -rf "\$MESON_BUILDDIR"
 meson setup "\$MESON_BUILDDIR" \$MESON_ARGS
 
-echo "=== meson configure ==="
+echo "=== [$(date)] meson configure ==="
 meson configure "\$MESON_BUILDDIR"
 
-echo "=== meson compile ==="
+echo "=== [$(date)] meson compile ==="
 meson compile -v -C "\$MESON_BUILDDIR" -j\$FDO_CI_CONCURRENT
 
 RUN_BUILD
 if [ "$RUN_TEST" = "1" ]; then
 cat >> "$ROOTFS/run-build.sh" <<'RUN_TEST_SH'
 
-echo "=== meson test (best-effort, emulation can be slow/flaky) ==="
-if ! meson test -C "$MESON_BUILDDIR" --print-errorlogs ${MESON_TEST_ARGS} --no-rebuild; then
+echo "=== [$(date)] meson test (best-effort, emulation can be slow/flaky) ==="
+if ! meson test -C "\$MESON_BUILDDIR" --print-errorlogs \${MESON_TEST_ARGS} --no-rebuild; then
     echo "WARNING: meson test failed (QEMU user-mode flakiness); build itself succeeded" >&2
 fi
 RUN_TEST_SH
 fi
 cat >> "$ROOTFS/run-build.sh" <<'RUN_BUILD_END'
-echo "=== build done ==="
+echo "=== [$(date)] build done ==="
 RUN_BUILD_END
 chmod +x "$ROOTFS/run-build.sh"
 
 # --- run the build inside the rootfs -----------------------------------------
+echo "=== [$(date)] Running install-prereq.sh in chroot ==="
 chroot "$ROOTFS" /install-prereq.sh
+echo "=== [$(date)] Running run-build.sh in chroot ==="
 chroot "$ROOTFS" /run-build.sh
 
-echo "QEMU build for '$ARCH' succeeded."
+echo "=== [$(date)] QEMU build for '$ARCH' succeeded ==="
