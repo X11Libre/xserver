@@ -126,6 +126,47 @@ _X_EXPORT unsigned int inl(unsigned int port);
 
 #  endif /* various OS'es on __alpha__ */
 
+static inline int MMIO_IN8(void *Base, unsigned long Offset) {
+    xlibre_mem_barrier_read();
+    return *(CARD8 *) ((unsigned long) Base + (Offset));
+}
+
+static inline int MMIO_IN16(void *Base, unsigned long Offset) {
+    xlibre_mem_barrier_read();
+    return *(CARD16 *) ((unsigned long) Base + (Offset));
+}
+
+static inline int MMIO_IN32(void *Base, unsigned long Offset) {
+    xlibre_mem_barrier_read();
+    return *(CARD32 *) ((unsigned long) Base + (Offset));
+}
+
+static inline void MMIO_OUT8(void *Base, unsigned long Offset, int Value) {
+    xlibre_mem_barrier_write();
+    *(CARD8 *) ((unsigned long) Base + (Offset)) = Value;
+}
+
+static inline void MMIO_OUT16(void *Base, unsigned long Offset, int Value) {
+    xlibre_mem_barrier_write();
+    *(CARD16 *) ((unsigned long) Base + (Offset)) = Value;
+}
+
+static inline void MMIO_OUT32(void *Base, unsigned long Offset, int Value) {
+    xlibre_mem_barrier_write();
+    *(CARD32 *) ((unsigned long) Base + (Offset)) = Value;
+}
+
+_X_EXPORT void xf86SlowBCopyFromBus(unsigned char *src, unsigned char *dst, int count);
+_X_EXPORT void xf86SlowBCopyToBus(unsigned char *src, unsigned char *dst, int count);
+
+static inline void slowbcopy_tobus(unsigned char *src, unsigned char *dst, int count) {
+    xf86SlowBCopyToBus(src, dst, count);
+}
+
+static inline void slowbcopy_frombus(unsigned char *src, unsigned char *dst, int count) {
+    xf86SlowBCopyFromBus(src, dst, count);
+}
+
 #elif defined(__amd64__) || defined(__i386__) || defined(__ia64__)
 
 #include <inttypes.h>
@@ -627,47 +668,6 @@ inl(unsigned short port)
 #endif
 
 #ifdef __alpha__
-
-static inline int MMIO_IN8(void *Base, unsigned long Offset)
-{
-    xlibre_mem_barrier_read();
-    return *(CARD8 *) ((unsigned long) Base + (Offset));
-}
-
-static inline int MMIO_IN16(void *Base, unsigned long Offset)
-{
-    xlibre_mem_barrier_read();
-    return *(CARD16 *) ((unsigned long) Base + (Offset));
-}
-
-static inline int MMIO_IN32(void *Base, unsigned long Offset)
-{
-    xlibre_mem_barrier_read();
-    return *(CARD32 *) ((unsigned long) Base + (Offset));
-}
-
-static inline void MMIO_OUT8(void *Base, unsigned long Offset, int Value)
-{
-    xlibre_mem_barrier_write();
-    *(CARD8 *) ((unsigned long) Base + (Offset)) = Value;
-}
-
-static inline void MMIO_OUT16(void *Base, unsigned long Offset, int Value)
-{
-    xlibre_mem_barrier_write();
-    *(CARD16 *) ((unsigned long) Base + (Offset)) = Value;
-}
-
-static inline void MMIO_OUT32(void *Base, unsigned long Offset, int Value)
-{
-    xlibre_mem_barrier_write();
-    *(CARD32 *) ((unsigned long) Base + (Offset)) = Value;
-}
-
-extern _X_EXPORT void xf86SlowBCopyFromBus(unsigned char *, unsigned char *,
-                                           int);
-extern _X_EXPORT void xf86SlowBCopyToBus(unsigned char *, unsigned char *, int);
-
 #elif defined(__powerpc__) || defined(__sparc__)
  /*
   * we provide byteswapping and no byteswapping functions here
@@ -716,14 +716,9 @@ extern _X_EXPORT void xf86SlowBCopyToBus(unsigned char *, unsigned char *, int);
  * This avoids port I/O during the copy (which causes problems with
  * some hardware).
  */
-#ifdef __alpha__
-#define slowbcopy_tobus(src,dst,count) xf86SlowBCopyToBus((src),(dst),(count))
-#define slowbcopy_frombus(src,dst,count) xf86SlowBCopyFromBus((src),(dst),(count))
-#else                           /* __alpha__ */
+#ifndef __alpha__
 #define slowbcopy_tobus(src,dst,count) xf86SlowBcopy((src),(dst),(count))
 #define slowbcopy_frombus(src,dst,count) xf86SlowBcopy((src),(dst),(count))
-#endif                          /* __alpha__ */
-
-/* NOLINTEND(hicpp-no-assembler) */
+#endif /* __alpha__ */
 
 #endif                          /* _COMPILER_H */
