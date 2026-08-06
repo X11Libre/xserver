@@ -408,49 +408,48 @@ xf86WriteMmio32Le(__volatile__ void *base, const unsigned long offset,
 }
 
 #elif defined(__arm32__) && !defined(__linux__)
-#define PORT_SIZE long
 
 extern _X_EXPORT unsigned int IOPortBase;      /* Memory mapped I/O port area */
 
 static inline void
-outb(unsigned PORT_SIZE port, unsigned char val)
+outb(unsigned long port, unsigned char val)
 {
-    *(volatile unsigned char *) (((unsigned PORT_SIZE) (port)) + IOPortBase) =
+    *(volatile unsigned char *) (((unsigned long) (port)) + IOPortBase) =
         val;
 }
 
 static inline void
-outw(unsigned PORT_SIZE port, unsigned short val)
+outw(unsigned long port, unsigned short val)
 {
-    *(volatile unsigned short *) (((unsigned PORT_SIZE) (port)) + IOPortBase) =
+    *(volatile unsigned short *) (((unsigned long) (port)) + IOPortBase) =
         val;
 }
 
 static inline void
-outl(unsigned PORT_SIZE port, unsigned int val)
+outl(unsigned long port, unsigned int val)
 {
-    *(volatile unsigned int *) (((unsigned PORT_SIZE) (port)) + IOPortBase) =
+    *(volatile unsigned int *) (((unsigned long) (port)) + IOPortBase) =
         val;
 }
 
 static inline unsigned int
-inb(unsigned PORT_SIZE port)
+inb(unsigned long port)
 {
-    return *(volatile unsigned char *) (((unsigned PORT_SIZE) (port)) +
+    return *(volatile unsigned char *) (((unsigned long) (port)) +
                                         IOPortBase);
 }
 
 static inline unsigned int
-inw(unsigned PORT_SIZE port)
+inw(unsigned long port)
 {
-    return *(volatile unsigned short *) (((unsigned PORT_SIZE) (port)) +
+    return *(volatile unsigned short *) (((unsigned long) (port)) +
                                          IOPortBase);
 }
 
 static inline unsigned int
-inl(unsigned PORT_SIZE port)
+inl(unsigned long port)
 {
-    return *(volatile unsigned int *) (((unsigned PORT_SIZE) (port)) +
+    return *(volatile unsigned int *) (((unsigned long) (port)) +
                                        IOPortBase);
 }
 
