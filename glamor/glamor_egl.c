@@ -1018,26 +1018,23 @@ glamor_egl_fds_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap, int *fds,
 #endif
 }
 
+/* See: https://github.com/X11Libre/xserver/issues/3262 */
 int
 glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
                            uint32_t *strides, uint32_t *offsets,
                            uint64_t *modifier)
 {
-    static int warned = FALSE;
-    int ret = glamor_egl_fds_from_pixmap_fast(screen, pixmap, fds,
-                                              strides, offsets, modifier);
-    if (ret) {
-        return ret;
-    }
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
 
-    ret = glamor_egl_fds_from_pixmap_slow(screen, pixmap, fds,
-                                          strides, offsets, modifier);
-
-    if (!warned && ret) {
-        GLAMOR_LOG_STR(screen->myNum, X_WARNING, "glamor_egl_fds_from_pixmap_fast failed\n");
-        warned = TRUE;
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_egl_fds_from_pixmap_slow(screen, pixmap, fds,
+                                               strides, offsets, modifier);
     }
-    return ret;
+#endif
+    return glamor_egl_fds_from_pixmap_fast(screen, pixmap, fds,
+                                           strides, offsets, modifier);
 }
 
 /* Used for untextured pixmaps */
@@ -1092,24 +1089,20 @@ glamor_egl_fd_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap,
     return -1;
 }
 
+/* See: https://github.com/X11Libre/xserver/issues/3262 */
 int
 glamor_egl_fd_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
                           CARD16 *stride, CARD32 *size)
 {
-    static int warned = FALSE;
-    int fd = glamor_egl_fd_from_pixmap_fast(screen, pixmap, stride, size);
-    if (fd >= 0) {
-        return fd;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_egl_fd_from_pixmap_slow(screen, pixmap, stride, size);
     }
-
-    fd = glamor_egl_fd_from_pixmap_slow(screen, pixmap, stride, size);
-
-    if (!warned && (fd >= 0)) {
-        GLAMOR_LOG_STR(screen->myNum, X_WARNING, "glamor_egl_fd_from_pixmap_fast failed\n");
-        warned = TRUE;
-    }
-
-    return fd;
+#endif
+    return glamor_egl_fd_from_pixmap_fast(screen, pixmap, stride, size);
 }
 
 int
@@ -1251,12 +1244,19 @@ glamor_back_pixmap_from_fd(PixmapPtr pixmap,
                            CARD16 height,
                            CARD16 stride, CARD8 depth, CARD8 bpp)
 {
-    Bool ret = glamor_back_pixmap_from_fd_slow(pixmap, fd,
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(pixmap->drawable.pScreen);
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_back_pixmap_from_fd_slow(pixmap, fd,
                                                width, height,
                                                stride, depth, bpp);
-    return ret ? ret : glamor_back_pixmap_from_fd_fast(pixmap, fd,
-                                                       width, height,
-                                                       stride, depth, bpp);
+    }
+#endif
+    return glamor_back_pixmap_from_fd_fast(pixmap, fd,
+                                           width, height,
+                                           stride, depth, bpp);
 }
 
 static PixmapPtr
@@ -1423,14 +1423,21 @@ glamor_pixmap_from_fds(ScreenPtr screen,
                        CARD8 depth, CARD8 bpp,
                        uint64_t modifier)
 {
-    PixmapPtr ret = glamor_pixmap_from_fds_slow(screen, num_fds, fds,
-                                                width, height,
-                                                strides, offsets,
-                                                depth, bpp, modifier);
-    return ret ? ret : glamor_pixmap_from_fds_fast(screen, num_fds, fds,
-                                                   width, height,
-                                                   strides, offsets,
-                                                   depth, bpp, modifier);
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_pixmap_from_fds_slow(screen, num_fds, fds,
+                                           width, height,
+                                           strides, offsets,
+                                           depth, bpp, modifier);
+    }
+#endif
+    return glamor_pixmap_from_fds_fast(screen, num_fds, fds,
+                                       width, height,
+                                       strides, offsets,
+                                       depth, bpp, modifier);
 }
 
 static PixmapPtr
@@ -1489,6 +1496,7 @@ glamor_pixmap_from_fd_slow(ScreenPtr screen,
 #endif
 }
 
+/* See: https://github.com/X11Libre/xserver/issues/3262 */
 PixmapPtr
 glamor_pixmap_from_fd(ScreenPtr screen,
                       int fd,
@@ -1496,13 +1504,19 @@ glamor_pixmap_from_fd(ScreenPtr screen,
                       CARD16 height,
                       CARD16 stride, CARD8 depth, CARD8 bpp)
 {
-    PixmapPtr ret = glamor_pixmap_from_fd_slow(screen, fd,
-                                               width, height,
-                                               stride, depth, bpp);
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
 
-    return ret ? ret : glamor_pixmap_from_fd_fast(screen, fd,
-                                                  width, height,
-                                                  stride, depth, bpp);
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_pixmap_from_fd_slow(screen, fd,
+                                          width, height,
+                                          stride, depth, bpp);
+    }
+#endif
+    return glamor_pixmap_from_fd_fast(screen, fd,
+                                      width, height,
+                                      stride, depth, bpp);
 }
 
 static Bool
