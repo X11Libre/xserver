@@ -63,12 +63,12 @@
 /* note that the appropriate setup via "ioperm" needs to be done */
 /*  *before* any inx/outx is done. */
 
-extern _X_EXPORT void _outb(unsigned char val, unsigned long port);
-extern _X_EXPORT void _outw(unsigned short val, unsigned long port);
-extern _X_EXPORT void _outl(unsigned int val, unsigned long port);
-extern _X_EXPORT unsigned int _inb(unsigned long port);
-extern _X_EXPORT unsigned int _inw(unsigned long port);
-extern _X_EXPORT unsigned int _inl(unsigned long port);
+_X_EXPORT void _outb(unsigned char val, unsigned long port);
+_X_EXPORT void _outw(unsigned short val, unsigned long port);
+_X_EXPORT void _outl(unsigned int val, unsigned long port);
+_X_EXPORT unsigned int _inb(unsigned long port);
+_X_EXPORT unsigned int _inw(unsigned long port);
+_X_EXPORT unsigned int _inl(unsigned long port);
 
 static inline void
 outb(unsigned long port, unsigned char val)
@@ -115,12 +115,12 @@ inl(unsigned long port)
 /* note that the appropriate setup via "ioperm" needs to be done */
 /*  *before* any inx/outx is done. */
 
-extern _X_EXPORT void outb(unsigned int port, unsigned char val);
-extern _X_EXPORT void outw(unsigned int port, unsigned short val);
-extern _X_EXPORT void outl(unsigned int port, unsigned int val);
-extern _X_EXPORT unsigned char inb(unsigned int port);
-extern _X_EXPORT unsigned short inw(unsigned int port);
-extern _X_EXPORT unsigned int inl(unsigned int port);
+_X_EXPORT void outb(unsigned int port, unsigned char val);
+_X_EXPORT void outw(unsigned int port, unsigned short val);
+_X_EXPORT void outl(unsigned int port, unsigned int val);
+_X_EXPORT unsigned char inb(unsigned int port);
+_X_EXPORT unsigned short inw(unsigned int port);
+_X_EXPORT unsigned int inl(unsigned int port);
 
 #endif                          /* (__FreeBSD__ || __OpenBSD__ ) */
 
