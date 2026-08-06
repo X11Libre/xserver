@@ -571,6 +571,7 @@ if build_xorg_sdk
             'xf86Crtc.h',
             'xf86Modes.h',
             'xf86RandR12.h',
+            'xlibre_membarrier.h',
         ],
         install_dir: xorgsdkdir,
     )

@@ -48,68 +48,13 @@
  */
 
 #ifndef _COMPILER_H
-
 #define _COMPILER_H
 
 #ifndef _X_EXPORT
 #include <X11/Xfuncproto.h>
 #endif
 
-#include <pixman.h>             /* for uint*_t types */
-
-#ifdef __i386__
-
-#ifdef __SSE__
-#define write_mem_barrier() __asm__ __volatile__ ("sfence" : : : "memory")
-#else
-#define write_mem_barrier() __asm__ __volatile__ ("lock; addl $0,0(%%esp)" : : : "memory")
-#endif
-
-#ifdef __SSE2__
-#define mem_barrier() __asm__ __volatile__ ("mfence" : : : "memory")
-#else
-#define mem_barrier() __asm__ __volatile__ ("lock; addl $0,0(%%esp)" : : : "memory")
-#endif
-
-#elif defined __alpha__
-
-#define mem_barrier() __asm__ __volatile__ ("mb" : : : "memory")
-#define write_mem_barrier() __asm__ __volatile__ ("wmb" : : : "memory")
-
-#elif defined __amd64__
-
-#define mem_barrier() __asm__ __volatile__ ("mfence" : : : "memory")
-#define write_mem_barrier() __asm__ __volatile__ ("sfence" : : : "memory")
-
-#elif defined __ia64__
-
-#define mem_barrier()        __asm__ __volatile__ ("mf" : : : "memory")
-#define write_mem_barrier()  __asm__ __volatile__ ("mf" : : : "memory")
-
-#elif defined __mips__
-     /* Note: sync instruction requires MIPS II instruction set */
-#define mem_barrier()		\
-	__asm__ __volatile__(		\
-		".set   push\n\t"	\
-		".set   noreorder\n\t"	\
-		".set   mips2\n\t"	\
-		"sync\n\t"		\
-		".set   pop"		\
-		: /* no output */	\
-		: /* no input */	\
-		: "memory")
-#define write_mem_barrier() mem_barrier()
-
-#elif defined __powerpc__
-
-#define mem_barrier()       __builtin_ppc_eieio()
-#define write_mem_barrier() __builtin_ppc_eieio()
-
-#elif defined __sparc__
-
-#define mem_barrier()           /* XXX: nop for now */
-#define write_mem_barrier()     /* XXX: nop for now */
-#endif
+#include "xlibre_membarrier.h" /* backwards compat, remove in ABI-26 */
 
 #if defined(__alpha__)
 
