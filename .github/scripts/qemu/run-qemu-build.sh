@@ -1,0 +1,244 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
+#
+# Native (non-cross) xserver build for a foreign CPU architecture via
+# QEMU user-mode emulation.
+#
+# Instead of a cross toolchain, we debootstrap a Debian rootfs for the target
+# architecture and run the build *inside* it with qemu-user-static + binfmt_misc.
+# The compiler is the real target-arch gcc, so arch-specific inline asm (e.g.
+# include/compiler.h, include/xlibre_membarrier.h) is genuinely assembled —
+# which the x86_64-host lanes never exercise. This is what the 
+# __asm__ "missing trailing ;" bugs in PR #3484 / #3485 needed.
+#
+# Usage:
+#   run-qemu-build.sh <arch> <qemu-static> <suite> <mirror> [--run-test]
+#
+#   arch         Debian architecture name (e.g. ppc64el, armhf, mipsel, sparc64, alpha)
+#   qemu-static  qemu user-mode static binary (e.g. qemu-ppc64le-static)
+#   suite        Debian suite (e.g. bookworm, sid)
+#   mirror       Debian mirror base URL (debootstrap --foreign source)
+#   --run-test   also run `meson test` inside the rootfs (best-effort)
+#
+# Environment:
+#   MESON_ARGS, MESON_TEST_ARGS, FDO_CI_CONCURRENT  (passed into the rootfs)
+#
+# Run as root (workflow uses `sudo`). The runner's own OS stays untouched:
+# only qemu-user-static/binfmt-support/debootstrap get installed on it.
+
+set -e
+
+ARCH="$1"
+QEMU="$2"
+SUITE="$3"
+MIRROR="$4"
+shift 4
+
+RUN_TEST=0
+if [ "$1" = "--run-test" ]; then
+    RUN_TEST=1
+    shift
+fi
+
+if [ -z "$ARCH" ] || [ -z "$QEMU" ] || [ -z "$SUITE" ] || [ -z "$MIRROR" ]; then
+    echo "usage: $0 <arch> <qemu-static> <suite> <mirror> [--run-test]" >&2
+    exit 1
+fi
+
+ROOTFS=/tmp/qemu-rootfs-$ARCH
+
+# --- host side: prepare the emulator + debootstrap -------------------------
+apt-get update
+apt-get install -y \
+    qemu-user-static \
+    binfmt-support \
+    debootstrap \
+    wget
+
+# debian-ports (sparc64/alpha) needs the ports archive keyring. The one
+# shipped by the runner's distro (Ubuntu) is routinely out of date and misses
+# the current ports signing key, so fetch the keyring from the ports archive
+# itself. The official Debian ports (ppc64el/armhf/mipsel) use the regular
+# archive keyring, which debootstrap resolves automatically from the mirror URL.
+case "$MIRROR" in
+    *debian-ports*)
+        PORTS_KEYRING_DEB=$(wget -qO- "http://deb.debian.org/debian-ports/pool/main/d/debian-ports-archive-keyring/" \
+            | grep -o 'debian-ports-archive-keyring_[0-9.]*_all.deb' | sort -V | tail -1)
+        if [ -z "$PORTS_KEYRING_DEB" ]; then
+            echo "ERROR: could not resolve debian-ports-archive-keyring version" >&2
+            exit 1
+        fi
+        wget -qO "/tmp/$PORTS_KEYRING_DEB" "http://deb.debian.org/debian-ports/pool/main/d/debian-ports-archive-keyring/$PORTS_KEYRING_DEB"
+        rm -rf /tmp/ports-keyring
+        dpkg-deb -x "/tmp/$PORTS_KEYRING_DEB" /tmp/ports-keyring
+        DEBOOTSTRAP_KEYRING="--keyring=/tmp/ports-keyring/usr/share/keyrings/debian-ports-archive-keyring.gpg"
+    ;;
+esac
+
+# --- create the foreign-arch rootfs (--foreign: can't run target tools yet) --
+rm -rf "$ROOTFS"
+mkdir -p "$ROOTFS"
+
+debootstrap \
+    --foreign \
+    --arch="$ARCH" \
+    ${DEBOOTSTRAP_KEYRING:-} \
+    --variant=minbase \
+    "$SUITE" \
+    "$ROOTFS" \
+    "$MIRROR"
+
+# --- register the emulator inside the rootfs and finish the bootstrap -------
+cp "/usr/bin/$QEMU" "$ROOTFS/usr/bin/"
+chroot "$ROOTFS" /debootstrap/debootstrap --second-stage
+
+# --- copy the source tree into the rootfs -----------------------------------
+mkdir -p "$ROOTFS/src"
+cp -a . "$ROOTFS/src/"
+
+# --- chroot-side scripts ------------------------------------------------------
+cat > "$ROOTFS/install-prereq.sh" <<'INSTALL_PREREQ'
+#!/bin/bash
+set -e
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+
+apt-get install -y \
+    autoconf \
+    automake \
+    build-essential \
+    bison \
+    ca-certificates \
+    flex \
+    git \
+    libaudit-dev \
+    libbsd-dev \
+    libcairo2-dev \
+    libdbus-1-dev \
+    libdrm-dev \
+    libegl1-mesa-dev \
+    libepoxy-dev \
+    libevdev-dev \
+    libffi-dev \
+    libgbm-dev \
+    libgcrypt-dev \
+    libgl1-mesa-dev \
+    libinput-dev \
+    libpciaccess-dev \
+    libpixman-1-dev \
+    libspice-protocol-dev \
+    libsystemd-dev \
+    libtool \
+    libudev-dev \
+    libunwind-dev \
+    libx11-dev \
+    libx11-xcb-dev \
+    libxau-dev \
+    libxaw7-dev \
+    libxcb-glx0-dev \
+    libxcb-icccm4-dev \
+    libxcb-image0-dev \
+    libxcb-keysyms1-dev \
+    libxcb-randr0-dev \
+    libxcb-render-util0-dev \
+    libxcb-render0-dev \
+    libxcb-shape0-dev \
+    libxcb-shm0-dev \
+    libxcb-util0-dev \
+    libxcb-xf86dri0-dev \
+    libxcb-xkb-dev \
+    libxcb-xv0-dev \
+    libxcb1-dev \
+    libxcvt-dev \
+    libxdmcp-dev \
+    libxext-dev \
+    libxfixes-dev \
+    libxfont-dev \
+    libxi-dev \
+    libxinerama-dev \
+    libxkbfile-dev \
+    libxmu-dev \
+    libxmuu-dev \
+    libxpm-dev \
+    libxrandr-dev \
+    libxrender-dev \
+    libxres-dev \
+    libxshmfence-dev \
+    libxt-dev \
+    libxtst-dev \
+    libxv-dev \
+    libpango1.0-dev \
+    mesa-common-dev \
+    meson \
+    ninja-build \
+    pkg-config \
+    python3-mako \
+    x11-xkb-utils \
+    x11proto-dev \
+    xfonts-utils \
+    xkb-data \
+    xutils-dev \
+    xauth \
+    xvfb
+
+# xorgproto: Debian's x11proto-dev (2022.1 in bookworm) ships presentproto 1.2,
+# but the xserver requires >= 1.4. Build the current xorgproto into a private
+# prefix (same approach as the ubuntu lane) and prepend it to PKG_CONFIG_PATH.
+# Needs only meson/ninja/python3, all of which are already installed above.
+mkdir -p /opt/xorgproto
+cd /opt/xorgproto
+git clone --depth 1 --branch xorgproto-2024.1 \
+    https://github.com/X11Libre/mirror.fdo.xorgproto xorgproto-src
+cd xorgproto-src
+meson setup build -Dprefix=/opt/xorgproto
+meson compile -C build
+meson install -C build
+INSTALL_PREREQ
+chmod +x "$ROOTFS/install-prereq.sh"
+
+cat > "$ROOTFS/run-build.sh" <<RUN_BUILD
+#!/bin/bash
+set -e
+
+cd /src
+
+export MESON_BUILDDIR=_build
+export FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT:-2}
+export PKG_CONFIG_PATH="/opt/xorgproto/lib/pkgconfig:/opt/xorgproto/share/pkgconfig:\${PKG_CONFIG_PATH:-}"
+
+if [ -z "\$MESON_ARGS" ]; then
+    MESON_ARGS="-Dprefix=/usr -Dwerror=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false"
+fi
+
+echo "=== meson setup ==="
+rm -rf "\$MESON_BUILDDIR"
+meson setup "\$MESON_BUILDDIR" \$MESON_ARGS
+
+echo "=== meson configure ==="
+meson configure "\$MESON_BUILDDIR"
+
+echo "=== meson compile ==="
+meson compile -v -C "\$MESON_BUILDDIR" -j\$FDO_CI_CONCURRENT
+
+RUN_BUILD
+if [ "$RUN_TEST" = "1" ]; then
+cat >> "$ROOTFS/run-build.sh" <<'RUN_TEST_SH'
+
+echo "=== meson test (best-effort, emulation can be slow/flaky) ==="
+if ! meson test -C "$MESON_BUILDDIR" --print-errorlogs ${MESON_TEST_ARGS} --no-rebuild; then
+    echo "WARNING: meson test failed (QEMU user-mode flakiness); build itself succeeded" >&2
+fi
+RUN_TEST_SH
+fi
+cat >> "$ROOTFS/run-build.sh" <<'RUN_BUILD_END'
+echo "=== build done ==="
+RUN_BUILD_END
+chmod +x "$ROOTFS/run-build.sh"
+
+# --- run the build inside the rootfs -----------------------------------------
+chroot "$ROOTFS" /install-prereq.sh
+chroot "$ROOTFS" /run-build.sh
+
+echo "QEMU build for '$ARCH' succeeded."
