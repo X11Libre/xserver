@@ -107,7 +107,6 @@
 
 #elif defined __sparc__
 
-#define barrier() __asm__ __volatile__ (".word 0x8143e00a" : : : "memory")
 #define mem_barrier()           /* XXX: nop for now */
 #define write_mem_barrier()     /* XXX: nop for now */
 #endif
@@ -244,8 +243,7 @@ outb(unsigned long port, unsigned char val)
 {
     __asm__ __volatile__("stba %0, [%1] %2":    /* No outputs */
                          :"r"(val), "r"(port), "i"(ASI_PL));
-
-    barrier();
+    __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
 static inline void
@@ -253,8 +251,7 @@ outw(unsigned long port, unsigned short val)
 {
     __asm__ __volatile__("stha %0, [%1] %2":    /* No outputs */
                          :"r"(val), "r"(port), "i"(ASI_PL));
-
-    barrier();
+    __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
 static inline void
@@ -262,8 +259,7 @@ outl(unsigned long port, unsigned int val)
 {
     __asm__ __volatile__("sta %0, [%1] %2":     /* No outputs */
                          :"r"(val), "r"(port), "i"(ASI_PL));
-
-    barrier();
+    __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
 static inline unsigned int
@@ -364,8 +360,7 @@ xf86WriteMmio8(__volatile__ void *base, const unsigned long offset,
 
     __asm__ __volatile__("stba %0, [%1] %2":    /* No outputs */
                          :"r"(val), "r"(addr), "i"(ASI_PL));
-
-    barrier();
+    __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
 static inline void
@@ -376,8 +371,7 @@ xf86WriteMmio16Be(__volatile__ void *base, const unsigned long offset,
 
     __asm__ __volatile__("sth %0, [%1]":        /* No outputs */
                          :"r"(val), "r"(addr));
-
-    barrier();
+    __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
 static inline void
@@ -388,8 +382,7 @@ xf86WriteMmio16Le(__volatile__ void *base, const unsigned long offset,
 
     __asm__ __volatile__("stha %0, [%1] %2":    /* No outputs */
                          :"r"(val), "r"(addr), "i"(ASI_PL));
-
-    barrier();
+    __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
 static inline void
@@ -400,8 +393,7 @@ xf86WriteMmio32Be(__volatile__ void *base, const unsigned long offset,
 
     __asm__ __volatile__("st %0, [%1]": /* No outputs */
                          :"r"(val), "r"(addr));
-
-    barrier();
+    __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
 static inline void
@@ -412,8 +404,7 @@ xf86WriteMmio32Le(__volatile__ void *base, const unsigned long offset,
 
     __asm__ __volatile__("sta %0, [%1] %2":     /* No outputs */
                          :"r"(val), "r"(addr), "i"(ASI_PL));
-
-    barrier();
+    __asm__ __volatile__ (".word 0x8143e00a" : : : "memory");
 }
 
 #elif defined(__arm32__) && !defined(__linux__)
