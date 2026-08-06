@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 1997  Metro Link Incorporated
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,7 +22,6 @@
  * Except as contained in this notice, the name of the Metro Link shall not be
  * used in advertising or otherwise to promote the sale, use or other dealings
  * in this Software without prior written authorization from Metro Link.
- *
  */
 /*
  * Copyright (c) 1997-2003 by The XFree86 Project, Inc.
@@ -52,12 +50,10 @@
  * authorization from the copyright holder(s) and author(s).
  */
 #include <xorg-config.h>
-
 #include "xf86Config.h"
 #include "xf86Parser_priv.h"
 #include "xf86tokens.h"
 #include "Configint.h"
-
 
 static const xf86ConfigSymTabRec TopLevelTab[] = {
     {SECTION, "section"},
@@ -65,23 +61,6 @@ static const xf86ConfigSymTabRec TopLevelTab[] = {
 };
 
 #define CLEANUP xf86freeConfig
-
-/*
- * This function resolves name references and reports errors if the named
- * objects cannot be found.
- */
-static int
-xf86validateConfig(XF86ConfigPtr p)
-{
-    if (!xf86validateScreen(p))
-        return FALSE;
-    if (!xf86validateInput(p))
-        return FALSE;
-    if (!xf86validateLayout(p))
-        return FALSE;
-
-    return TRUE;
-}
 
 XF86ConfigPtr
 xf86readConfigFile(void)
@@ -211,12 +190,13 @@ xf86readConfigFile(void)
         }
     }
 
-    if (xf86validateConfig(ptr))
-        return ptr;
-    else {
+    if(!xf86validateScreen(ptr) || !xf86validateInput(ptr) || !xf86validateLayout(ptr))
+    {
         CLEANUP(ptr);
         return NULL;
     }
+
+    return ptr;
 }
 
 #undef CLEANUP
