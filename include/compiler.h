@@ -102,8 +102,16 @@
 
 #elif defined __powerpc__
 
+#if defined(__has_builtin) && __has_builtin(__builtin_ppc_eieio)
 #define mem_barrier()       __builtin_ppc_eieio()
 #define write_mem_barrier() __builtin_ppc_eieio()
+#elif __GNUC__ >= 10
+#define mem_barrier()       __builtin_ppc_eieio()
+#define write_mem_barrier() __builtin_ppc_eieio()
+#else
+#define mem_barrier()       __asm__ __volatile__ ("eieio" ::: "memory")
+#define write_mem_barrier() __asm__ __volatile__ ("eieio" ::: "memory")
+#endif
 
 #elif defined __sparc__
 
