@@ -40,6 +40,7 @@
 #include "os/mathx_priv.h"
 #include "Xext/present/present_priv.h"
 
+#include "extinit.h"
 #include "inputstr.h"
 #include "xf86str.h"
 #include "X11/Xatom.h"
@@ -1033,7 +1034,13 @@ static Bool
 drmmode_SharedPixmapPresent(PixmapPtr ppix, xf86CrtcPtr crtc,
                             drmmode_ptr drmmode)
 {
-    ScreenPtr primary = crtc->randr_crtc->pScreen->current_primary;
+    ScreenPtr primary;
+
+    if (!crtc->randr_crtc) {
+        return FALSE;
+    }
+
+    primary = crtc->randr_crtc->pScreen->current_primary;
 
     if (primary->PresentSharedPixmap(ppix)) {
         /* Success, queue flip to back target */
@@ -2136,6 +2143,9 @@ drmmode_set_target_scanout_pixmap_cpu(xf86CrtcPtr crtc, PixmapPtr ppix,
 
     ppriv = msGetPixmapPriv(drmmode, ppix);
     if (!ppriv->secondary_damage) {
+        if (!crtc->randr_crtc) {
+            return FALSE;
+        }
         ppriv->secondary_damage = DamageCreate(NULL, NULL,
                                            DamageReportNone,
                                            TRUE,
@@ -4566,7 +4576,12 @@ out_free_res:
 
     drmModeFreeResources(mode_res);
 out:
-    RRGetInfo(xf86ScrnToScreen(scrn), TRUE);
+#ifdef XINERAMA
+    if (noPanoramiXExtension)
+#endif
+    {
+        RRGetInfo(xf86ScrnToScreen(scrn), TRUE);
+    }
 }
 
 #undef DRM_MODE_LINK_STATUS_BAD
