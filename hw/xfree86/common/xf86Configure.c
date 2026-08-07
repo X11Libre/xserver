@@ -44,8 +44,7 @@
 #include "xf86DDC_priv.h"
 #include "xf86pciBus.h"
 #if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
-#include "xf86Bus.h"
-#include "xf86Sbus_priv.h"
+#include "xf86sbusBus_priv.h"
 #endif
 #include "loaderProcs.h"
 #include "xf86Parser_priv.h"
