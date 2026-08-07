@@ -137,7 +137,7 @@ xf86PlatformReprobeDevice(int index, struct OdevAttributes *attribs)
         return;
     }
     ret = xf86platformAddDevice(xf86PlatformFindHotplugDriver(index), index);
-    if (ret == -1)
+    if (ret == FALSE)
         xf86_remove_platform_device(index);
 }
 
