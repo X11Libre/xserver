@@ -719,7 +719,7 @@ xf86PlatformFindHotplugDriver(int dev_index)
     return hp_driver;
 }
 
-int
+bool
 xf86platformAddDevice(const char *driver_name, int index)
 {
     int i, old_screens, scr_index, scrnum;
@@ -727,7 +727,7 @@ xf86platformAddDevice(const char *driver_name, int index)
     screenLayoutPtr layout;
 
     if (!xf86Info.autoAddGPU)
-        return -1;
+        return FALSE;
 
     /* Load modesetting driver if no driver given, or driver open failed */
     if (!driver_name || !xf86LoadOneModule(driver_name, NULL)) {
@@ -747,14 +747,14 @@ xf86platformAddDevice(const char *driver_name, int index)
 
     if (!drvp) {
         ErrorF("can't find driver %s for hotplugged device\n", driver_name);
-        return -1;
+        return FALSE;
     }
 
     old_screens = xf86NumGPUScreens;
     doPlatformProbe(&xf86_platform_devices[index], drvp, NULL,
                     PLATFORM_PROBE_GPU_SCREEN, 0);
     if (old_screens == xf86NumGPUScreens)
-        return -1;
+        return FALSE;
     i = old_screens;
 
     for (layout = xf86ConfigLayout.screens; layout->screen != NULL;
@@ -770,7 +770,7 @@ xf86platformAddDevice(const char *driver_name, int index)
     if (!xf86GPUScreens[i]->configured) {
         ErrorF("hotplugged device %d didn't configure\n", i);
         xf86DeleteScreen(xf86GPUScreens[i]);
-        return -1;
+        return FALSE;
     }
 
    /*
@@ -787,7 +787,7 @@ xf86platformAddDevice(const char *driver_name, int index)
        xf86DeleteScreen(xf86GPUScreens[i]);
        xf86UnclaimPlatformSlot(&xf86_platform_devices[index], NULL);
        xf86NumGPUScreens = old_screens;
-       return -1;
+       return FALSE;
    }
    dixSetPrivate(&xf86GPUScreens[i]->pScreen->devPrivates,
                  xf86ScreenKey, xf86GPUScreens[i]);
@@ -799,7 +799,7 @@ xf86platformAddDevice(const char *driver_name, int index)
        xf86DeleteScreen(xf86GPUScreens[i]);
        xf86UnclaimPlatformSlot(&xf86_platform_devices[index], NULL);
        xf86NumGPUScreens = old_screens;
-       return -1;
+       return FALSE;
    }
    /* attach unbound to the configured protocol screen (or 0) */
    scrnum = xf86GPUScreens[i]->confScreen->screennum;
@@ -811,7 +811,7 @@ xf86platformAddDevice(const char *driver_name, int index)
    RRResourcesChanged(xf86Screens[scrnum]->pScreen);
    RRTellChanged(xf86Screens[scrnum]->pScreen);
 
-   return 0;
+   return TRUE;
 }
 
 void
