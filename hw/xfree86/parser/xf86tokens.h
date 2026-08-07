@@ -85,12 +85,6 @@ typedef enum {
     OPTION,
     COMMENT,
 
-    /* File tokens */
-    FONTPATH,
-    MODULEPATH,
-    LOGFILEPATH,
-    XKBDIR,
-
     /* Server Flag tokens.  These are deprecated in favour of generic Options */
     DONTZAP,
     DONTZOOM,
@@ -255,6 +249,7 @@ typedef enum {
 
     /* OutputClass Tokens */
     MODULE,
+    MODULEPATH,
 } ParserTokens;
 
 #endif                          /* _xf86_tokens_h */
