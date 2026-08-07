@@ -102,12 +102,12 @@
 
 #elif defined __powerpc__
 
-#if defined(__has_builtin) && __has_builtin(__builtin_ppc_eieio)
-#define mem_barrier()       __builtin_ppc_eieio()
-#define write_mem_barrier() __builtin_ppc_eieio()
-#else
+#if defined(__powerpc64__) || !defined(__has_builtin) || !__has_builtin(__builtin_ppc_eieio)
 #define mem_barrier()       __asm__ __volatile__ ("eieio" ::: "memory")
 #define write_mem_barrier() __asm__ __volatile__ ("eieio" ::: "memory")
+#else
+#define mem_barrier()       __builtin_ppc_eieio()
+#define write_mem_barrier() __builtin_ppc_eieio()
 #endif
 
 #elif defined __sparc__
