@@ -289,9 +289,25 @@ RUN_BUILD_END
 chmod +x "$ROOTFS/run-build.sh"
 
 # --- run the build inside the rootfs -----------------------------------------
+# Bind-mount the host's /proc, /sys and /dev into the rootfs. Several package
+# postinst maintainer scripts (e.g. openjdk-25-jre-headless on alpha, which
+# errors out with "the java command requires a mounted proc fs (/proc)" when
+# it's missing) expect a mounted procfs/sysfs inside a chroot. debootstrap
+# --second-stage only populates the skeleton, it doesn't mount anything.
+echo "=== [$(date)] Mounting /proc, /sys and /dev into rootfs ==="
+for m in /proc /sys /dev; do
+    mkdir -p "$ROOTFS$m"
+    mount --bind "$m" "$ROOTFS$m"
+done
+
 echo "=== [$(date)] Running install-prereq.sh in chroot ==="
 ARCH="$ARCH" chroot "$ROOTFS" /install-prereq.sh
 echo "=== [$(date)] Running run-build.sh in chroot ==="
 chroot "$ROOTFS" /run-build.sh
+
+echo "=== [$(date)] Unmounting rootfs ==="
+for m in /proc /sys /dev; do
+    umount "$ROOTFS$m"
+done
 
 echo "=== [$(date)] QEMU build for '$ARCH' succeeded ==="
