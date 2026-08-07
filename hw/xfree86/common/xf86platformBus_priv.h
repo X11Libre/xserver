@@ -36,7 +36,7 @@ int xf86_add_platform_device(struct OdevAttributes *attribs, Bool unowned);
 int xf86_remove_platform_device(int dev_index);
 Bool xf86_get_platform_device_unowned(int index);
 
-int xf86platformAddDevice(const char *driver_name, int index);
+bool xf86platformAddDevice(const char *driver_name, int index);
 void xf86platformRemoveDevice(int index);
 
 void xf86platformVTProbe(void);
