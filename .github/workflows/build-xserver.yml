@@ -1026,7 +1026,7 @@ jobs:
         # ppc64el/armhf/mipsel are official Debian ports (bookworm); sparc64
         # and alpha live in debian-ports (only unstable available).
         runs-on: ubuntu-latest
-        timeout-minutes: 90
+        timeout-minutes: 180
         strategy:
             fail-fast: false
             matrix:
