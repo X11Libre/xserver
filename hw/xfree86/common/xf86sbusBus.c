@@ -647,7 +647,7 @@ static void xf86SbusCmapCloseScreen(CallbackListPtr *pcbl,
     sbusCmapPtr cmap;
     struct fbcmap fbcmap;
 
-    dixScreenUnhook(pScreen, xf86SbusCmapCloseScreen);
+    dixScreenUnhookClose(pScreen, xf86SbusCmapCloseScreen);
 
     cmap = SBUSCMAPPTR(pScreen);
     if (!cmap)
