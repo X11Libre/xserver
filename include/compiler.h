@@ -503,7 +503,7 @@ xf86WriteMmio32Be(__volatile__ void *base, const unsigned long offset,
 
 #include <sys/mman.h>
 
-extern _X_EXPORT volatile unsigned char *ioBase;
+extern _X_EXPORT void *ioBase;
 
 static inline unsigned char
 xf86ReadMmio8(__volatile__ void *base, const unsigned long offset)
@@ -615,7 +615,7 @@ outb(unsigned short port, unsigned char value)
 {
     if (ioBase == MAP_FAILED)
         return;
-    xf86WriteMmio8((void *) ioBase, port, value);
+    xf86WriteMmio8(ioBase, port, value);
 }
 
 static inline void
@@ -623,7 +623,7 @@ outw(unsigned short port, unsigned short value)
 {
     if (ioBase == MAP_FAILED)
         return;
-    xf86WriteMmio16Le((void *) ioBase, port, value);
+    xf86WriteMmio16Le(ioBase, port, value);
 }
 
 static inline void
@@ -631,7 +631,7 @@ outl(unsigned short port, unsigned int value)
 {
     if (ioBase == MAP_FAILED)
         return;
-    xf86WriteMmio32Le((void *) ioBase, port, value);
+    xf86WriteMmio32Le(ioBase, port, value);
 }
 
 static inline unsigned int
@@ -639,7 +639,7 @@ inb(unsigned short port)
 {
     if (ioBase == MAP_FAILED)
         return 0;
-    return xf86ReadMmio8((void *) ioBase, port);
+    return xf86ReadMmio8(ioBase, port);
 }
 
 static inline unsigned int
@@ -647,7 +647,7 @@ inw(unsigned short port)
 {
     if (ioBase == MAP_FAILED)
         return 0;
-    return xf86ReadMmio16Le((void *) ioBase, port);
+    return xf86ReadMmio16Le(ioBase, port);
 }
 
 static inline unsigned int
@@ -655,7 +655,7 @@ inl(unsigned short port)
 {
     if (ioBase == MAP_FAILED)
         return 0;
-    return xf86ReadMmio32Le((void *) ioBase, port);
+    return xf86ReadMmio32Le(ioBase, port);
 }
 
 #endif                          /* arch madness */
