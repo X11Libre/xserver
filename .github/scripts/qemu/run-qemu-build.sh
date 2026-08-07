@@ -153,7 +153,7 @@ apt-get install -y \
     bison \
     ca-certificates \
     flex \
-    git \
+    wget \
     libaudit-dev \
     libbsd-dev \
     libcairo2-dev \
@@ -228,11 +228,17 @@ apt-get install -y \
 # but the xserver requires >= 1.4. Build the current xorgproto into a private
 # prefix (same approach as the ubuntu lane) and prepend it to PKG_CONFIG_PATH.
 # Needs only meson/ninja/python3, all of which are already installed above.
+# We fetch the source via wget tarball instead of git clone: git carries a
+# hard dependency on git-man, which is currently unresolved in
+# debian-ports/unstable (git:alpha=1:2.53.0-1 vs git-man <1:2.53.0-.) — the
+# apt solver aborts on it and drags down every other build dep with it.
 echo "=== [$(date)] Building xorgproto from source ==="
 mkdir -p /opt/xorgproto
 cd /opt/xorgproto
-git clone --depth 1 --branch xorgproto-2024.1 \
-    https://github.com/X11Libre/mirror.fdo.xorgproto xorgproto-src
+wget -qO xorgproto.tar.gz \
+    "https://github.com/X11Libre/mirror.fdo.xorgproto/archive/refs/tags/xorgproto-2024.1.tar.gz"
+mkdir xorgproto-src
+tar -xzf xorgproto.tar.gz -C xorgproto-src --strip-components=1
 cd xorgproto-src
 meson setup build -Dprefix=/opt/xorgproto
 meson compile -C build
