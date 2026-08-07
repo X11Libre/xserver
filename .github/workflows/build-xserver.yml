@@ -1014,6 +1014,50 @@ jobs:
                 path: |
                     ./.github/arch/xlibre-xserver-*.tar.zst
 
+    xserver-build-qemu-user:
+        # Native (non-cross) build of the foreign CPU architectures referenced
+        # in include/compiler.h (__alpha__, __sparc__, __arm32__, __mips__,
+        # __powerpc__). Runs the real target-arch gcc under QEMU user-mode
+        # emulation (qemu-user-static + binfmt_misc + debootstrap), so the
+        # arch-specific inline-asm branches are genuinely compiled — the
+        # x86_64-host lanes never exercise them (the missing-" trailing ;" bugs
+        # in PR #3484/#3485 were invisible to every existing lane).
+        #
+        # ppc64el/armhf/mipsel are official Debian ports (bookworm); sparc64
+        # and alpha live in debian-ports (only unstable available).
+        runs-on: ubuntu-latest
+        timeout-minutes: 90
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - name: ppc64el   # __powerpc__ (PowerPC64 little-endian)
+                      qemu: qemu-ppc64le-static
+                      suite: bookworm
+                      mirror: http://deb.debian.org/debian
+                    - name: armhf     # __arm32__ (ARM 32-bit)
+                      qemu: qemu-arm-static
+                      suite: bookworm
+                      mirror: http://deb.debian.org/debian
+                    - name: mipsel    # __mips__ (MIPS32 little-endian)
+                      qemu: qemu-mipsel-static
+                      suite: bookworm
+                      mirror: http://deb.debian.org/debian
+                    - name: sparc64   # __sparc__ (SPARC64)
+                      qemu: qemu-sparc64-static
+                      suite: unstable
+                      mirror: http://deb.debian.org/debian-ports
+                    - name: alpha     # __alpha__ (Alpha)
+                      qemu: qemu-alpha-static
+                      suite: unstable
+                      mirror: http://deb.debian.org/debian-ports
+        steps:
+            - uses: actions/checkout@v6
+            - name: QEMU user-mode native build for ${{ matrix.name }}
+              run: sudo --preserve-env=MESON_ARGS,FDO_CI_CONCURRENT .github/scripts/qemu/run-qemu-build.sh ${{ matrix.name }} ${{ matrix.qemu }} ${{ matrix.suite }} ${{ matrix.mirror }}
+              env:
+                  MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false -Dglx=true -Dxcsecurity=true
+
     check-sign-off:
         name: Check Signed-Off-By
         if: github.event_name == 'pull_request'
