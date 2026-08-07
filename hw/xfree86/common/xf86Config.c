@@ -84,8 +84,6 @@
 #ifndef ALL_CONFIGPATH
 #define ALL_CONFIGPATH	"%A," "%R," \
 			"/etc/X11/%R," "%P/etc/X11/%R," \
-			"%E," "%F," \
-			"/etc/X11/%F," "%P/etc/X11/%F," \
 			"/etc/X11/%X," "/etc/%X," \
 			"%P/etc/X11/%X.%H," \
 			"%P/etc/X11/%X," \
@@ -94,7 +92,6 @@
 #endif
 #ifndef RESTRICTED_CONFIGPATH
 #define RESTRICTED_CONFIGPATH	"/etc/X11/%S," "%P/etc/X11/%S," \
-			"/etc/X11/%G," "%P/etc/X11/%G," \
 			"/etc/X11/%X," "/etc/%X," \
 			"%P/etc/X11/%X.%H," \
 			"%P/etc/X11/%X," \

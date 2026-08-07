@@ -527,9 +527,6 @@ xf86pathIsSafe(const char *path)
  *    %S    cmdline argument as a "safe" path (relative, and no ".." elements)
  *    %X    default config file name ("xorg.conf")
  *    %H    hostname
- *    %E    config file environment ($XORGCONFIG) as an absolute path
- *    %F    config file environment ($XORGCONFIG) as a relative path
- *    %G    config file environment ($XORGCONFIG) as a safe path
  *    %P    projroot
  *    %C    sysconfdir
  *    %D    datadir
@@ -537,7 +534,6 @@ xf86pathIsSafe(const char *path)
  */
 
 #define XCONFIGSUFFIX	".conf"
-#define XCONFENV	"XORGCONFIG"
 
 #define BAIL_OUT		do {									\
 							free(result);				\
@@ -564,7 +560,6 @@ DoSubstitution(const char *template, const char *cmdline, const char *projroot,
                int *cmdlineUsed, int *envUsed, const char *XConfigFile)
 {
     int i, l;
-    static const char *env = NULL;
     static char *hostname = NULL;
 
     if (!template)
@@ -625,39 +620,6 @@ DoSubstitution(const char *template, const char *cmdline, const char *projroot,
                 }
                 if (hostname)
                     APPEND_STR(hostname);
-                break;
-            case 'E':
-                if (!env)
-                    env = getenv(XCONFENV);
-                if (env && xf86pathIsAbsolute(env)) {
-                    APPEND_STR(env);
-                    if (envUsed)
-                        *envUsed = 1;
-                }
-                else
-                    BAIL_OUT;
-                break;
-            case 'F':
-                if (!env)
-                    env = getenv(XCONFENV);
-                if (env && !xf86pathIsAbsolute(env)) {
-                    APPEND_STR(env);
-                    if (envUsed)
-                        *envUsed = 1;
-                }
-                else
-                    BAIL_OUT;
-                break;
-            case 'G':
-                if (!env)
-                    env = getenv(XCONFENV);
-                if (env && xf86pathIsSafe(env)) {
-                    APPEND_STR(env);
-                    if (envUsed)
-                        *envUsed = 1;
-                }
-                else
-                    BAIL_OUT;
                 break;
             case 'P':
                 if (projroot && xf86pathIsAbsolute(projroot))
@@ -871,8 +833,6 @@ xf86initConfigFiles(void)
 #ifndef DEFAULT_CONF_PATH
 #define DEFAULT_CONF_PATH	"/etc/X11/%S," \
 							"%P/etc/X11/%S," \
-							"/etc/X11/%G," \
-							"%P/etc/X11/%G," \
 							"/etc/X11/%X-%M," \
 							"/etc/X11/%X," \
 							"/etc/%X," \
