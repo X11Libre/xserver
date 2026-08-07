@@ -1053,10 +1053,30 @@ jobs:
                       mirror: http://deb.debian.org/debian-ports
         steps:
             - uses: actions/checkout@v6
+
+            - name: QEMU cache key
+              id: cache-key
+              run: |
+                echo "key=qemu-rootfs-${{ matrix.name }}-${{ matrix.suite }}-${{ hashFiles('.github/scripts/qemu/run-qemu-build.sh') }}" >> $GITHUB_OUTPUT
+
+            - name: Restore QEMU rootfs cache
+              id: restore-cache
+              uses: actions/cache/restore@v4
+              with:
+                path: /tmp/qemu-rootfs-${{ matrix.name }}
+                key: ${{ steps.cache-key.outputs.key }}
+
             - name: QEMU user-mode native build for ${{ matrix.name }}
               run: sudo --preserve-env=MESON_ARGS,FDO_CI_CONCURRENT .github/scripts/qemu/run-qemu-build.sh ${{ matrix.name }} ${{ matrix.qemu }} ${{ matrix.suite }} ${{ matrix.mirror }}
               env:
                   MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false -Dglx=true -Dxcsecurity=true
+
+            - name: Save QEMU rootfs cache
+              if: always()
+              uses: actions/cache/save@v4
+              with:
+                path: /tmp/qemu-rootfs-${{ matrix.name }}
+                key: ${{ steps.cache-key.outputs.key }}
 
     check-sign-off:
         name: Check Signed-Off-By
