@@ -46,6 +46,9 @@ tells the X server that it is allowed to initialize DRI3 partially,
 if full DRI3 initialization isn't possible
 (if DRI3 is enabled).
 .TP 8
+.B -explicit-sync
+tells the X server that it is allowed to initialize DRI3 explicit sync support (experimental).
+.TP 8
 .B -noshadow
 disables the ShadowFB layer on supported hw, may slightly increase performance.
 May also lead to flickering.

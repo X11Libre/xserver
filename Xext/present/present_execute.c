@@ -125,7 +125,8 @@ present_execute_copy(present_vblank_ptr vblank, uint64_t crtc_msc)
      */
     vblank->update = NULL;
 #ifdef DRI3
-    if (vblank->release_syncobj) {
+    if (vblank->release_syncobj && screen_priv->flush_fenced) {
+        /* transfer implicit fence to release syncobj */
         int fence_fd = screen_priv->flush_fenced(window);
         vblank->release_syncobj->import_fence(vblank->release_syncobj,
                                               vblank->release_point, fence_fd);

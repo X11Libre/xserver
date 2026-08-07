@@ -203,6 +203,10 @@ struct present_screen_priv {
     present_priv_flip_destroy_ptr       flip_destroy;
 };
 
+_X_EXPORT int /* for modesetting */
+present_screen_init2(ScreenPtr screen, present_screen_info_ptr info,
+                     present_priv_flush_fenced_ptr flush_fenced);
+
 static inline present_screen_priv_ptr
 present_screen_priv(ScreenPtr screen)
 {

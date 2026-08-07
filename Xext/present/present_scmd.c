@@ -624,6 +624,16 @@ present_execute(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc)
             screen_priv->flip_pending = NULL;
             vblank->flip = FALSE;
             vblank->exec_msc = vblank->target_msc;
+
+            /* This seems to be the intent of the following change, but with some extra guards here:
+             * https://gitlab.freedesktop.org/xorg/xserver/-/commit/588464332d27ee1aca3fc3b16007310f8b1c036b?file_path=hw%2Fxwayland%2Fxwayland-present.c#line_5accbd83b_A1011
+             */
+#ifdef DRI3
+            if (vblank->acquire_syncobj &&
+                present_execute_wait(vblank, crtc_msc)) {
+                return;
+            }
+#endif
         }
         DebugPresent(("\tc %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
                       vblank, crtc_msc, vblank->pixmap->drawable.id, vblank->window->drawable.id));
@@ -756,9 +766,11 @@ present_scmd_pixmap(WindowPtr window,
     ScreenPtr                   screen = window->drawable.pScreen;
     present_window_priv_ptr     window_priv = present_get_window_priv(window, TRUE);
     present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
+    uint32_t caps = (screen_priv && screen_priv->info) ? screen_priv->info->capabilities : 0;
 
 #ifdef DRI3
-    if (acquire_syncobj || release_syncobj)
+    if (!(caps & PresentCapabilitySyncobj) &&
+        (acquire_syncobj || release_syncobj))
         return BadValue;
 #endif /* DRI3 */
 
@@ -816,6 +828,12 @@ present_scmd_pixmap(WindowPtr window,
                 vblank->exec_msc == vblank->target_msc)
                 continue;
 
+#ifdef DRI3
+            if (vblank->release_syncobj)
+                vblank->release_syncobj->signal(vblank->release_syncobj,
+                                                vblank->release_point);
+#endif
+
             present_vblank_scrap(vblank);
             if (vblank->flip_ready)
                 present_re_execute(vblank);
@@ -839,7 +857,7 @@ present_scmd_pixmap(WindowPtr window,
                                    release_point,
 #endif /* DRI3 */
                                    options,
-                                   screen_priv->info ? screen_priv->info->capabilities : 0,
+                                   caps,
                                    notifies,
                                    num_notifies,
                                    target_msc,

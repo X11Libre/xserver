@@ -63,6 +63,7 @@ char *fbdev_dri_path;
 bool fbdev_auto_dri3;
 bool fbdev_drm_master;
 bool partial_dri_allowed;
+bool explicit_sync_allowed;
 
 bool es_allowed;
 bool force_es;

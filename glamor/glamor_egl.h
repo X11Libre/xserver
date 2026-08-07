@@ -62,6 +62,8 @@ typedef struct {
     int dmabuf_forced; /* If glamor should not use dynamic logic and only listen to the config below */
     int dmabuf_capable; /* If glamor should use dmabufs when using direct rendering (dri) */
 
+    int explicit_sync_allowed; /* If glamor should try to enable explicit sync */
+
     int llvmpipe_allowed; /* If glamor render accel should initialize on llvmpipe */
     int force_glamor; /* If glamor should initialize even on softpipe/llvmpipe */
 

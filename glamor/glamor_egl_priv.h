@@ -44,6 +44,8 @@ typedef struct glamor_egl_screen_private {
 
     int fd;
     int dmabuf_capable;
+
+    int supports_syncobj;
 } glamor_egl_priv_t;
 
 /**

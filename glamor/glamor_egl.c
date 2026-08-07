@@ -69,6 +69,12 @@
 #define GBM_MAX_PLANES 4
 #endif
 
+#if defined(DRI3) && \
+    defined(LIBDRM_HAS_SYNCOBJ) && \
+    defined(EGL_ANDROID_native_fence_sync)
+#define GLAMOR_HAS_SYNCOBJ
+#endif
+
 #define GLAMOR_LOG_STR(idx, type, str) \
     do { \
         if ((idx) != -1) { \
@@ -1598,6 +1604,252 @@ glamor_dri3_open_client(ClientPtr client,
     return Success;
 }
 
+#ifdef GLAMOR_HAS_SYNCOBJ
+struct glamor_dri3_syncobj
+{
+    struct dri3_syncobj base;
+    uint32_t handle;
+};
+
+static Bool
+glamor_dri3_check_syncobj(struct dri3_syncobj *syncobj, uint64_t point, Bool check_avail)
+{
+    struct glamor_dri3_syncobj *glamor_syncobj = (struct glamor_dri3_syncobj *)syncobj;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(syncobj->screen);
+
+    return !drmSyncobjTimelineWait(glamor_egl->fd,
+                                   &glamor_syncobj->handle, &point, 1,
+                                   0 /* timeout */,
+                                   check_avail ?
+                                   DRM_SYNCOBJ_WAIT_FLAGS_WAIT_AVAILABLE :
+                                   DRM_SYNCOBJ_WAIT_FLAGS_WAIT_FOR_SUBMIT,
+                                   NULL /* first_signaled */);
+}
+
+static Bool
+glamor_dri3_syncobj_has_fence(struct dri3_syncobj *syncobj, uint64_t point)
+{
+    return glamor_dri3_check_syncobj(syncobj, point, TRUE /* check_avail */);
+}
+
+static Bool
+glamor_dri3_syncobj_is_signaled(struct dri3_syncobj *syncobj, uint64_t point)
+{
+    return glamor_dri3_check_syncobj(syncobj, point, FALSE /* check_avail */);
+}
+
+static int
+glamor_dri3_syncobj_export_fence(struct dri3_syncobj *syncobj, uint64_t point)
+{
+    struct glamor_dri3_syncobj *glamor_syncobj = (struct glamor_dri3_syncobj *)syncobj;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(syncobj->screen);
+    uint32_t temp_syncobj;
+    int fd = -1;
+
+    if (drmSyncobjCreate(glamor_egl->fd, 0, &temp_syncobj)) {
+        return -1;
+    }
+    if (drmSyncobjTransfer(glamor_egl->fd, temp_syncobj, 0,
+                           glamor_syncobj->handle, point, 0)) {
+        goto out;
+    }
+    if (drmSyncobjExportSyncFile(glamor_egl->fd, temp_syncobj, &fd)) {
+        fd = -1;
+        goto out;
+    }
+
+out:
+    drmSyncobjDestroy(glamor_egl->fd, temp_syncobj);
+    return fd;
+}
+
+static void
+glamor_dri3_syncobj_import_fence(struct dri3_syncobj *syncobj,
+                                 uint64_t point, int fd)
+{
+    struct glamor_dri3_syncobj *glamor_syncobj = (struct glamor_dri3_syncobj *)syncobj;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(syncobj->screen);
+    uint32_t temp_syncobj;
+
+    if (drmSyncobjCreate(glamor_egl->fd, 0, &temp_syncobj)) {
+        goto out1;
+    }
+    if (drmSyncobjImportSyncFile(glamor_egl->fd, temp_syncobj, fd)) {
+        goto out2;
+    }
+    if (drmSyncobjTransfer(glamor_egl->fd, glamor_syncobj->handle, point,
+                           temp_syncobj, 0, 0)) {
+        goto out2;
+    }
+
+out2:
+    drmSyncobjDestroy(glamor_egl->fd, temp_syncobj);
+out1:
+    close(fd);
+}
+
+
+static void
+glamor_dri3_signal_syncobj(struct dri3_syncobj *syncobj, uint64_t point)
+{
+    struct glamor_dri3_syncobj *glamor_syncobj = (struct glamor_dri3_syncobj *)syncobj;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(syncobj->screen);
+
+    drmSyncobjTimelineSignal(glamor_egl->fd, &glamor_syncobj->handle, &point, 1);
+}
+
+static void
+glamor_dri3_free_syncobj(struct dri3_syncobj *syncobj)
+{
+    struct glamor_dri3_syncobj *glamor_syncobj = (struct glamor_dri3_syncobj *)syncobj;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(syncobj->screen);
+
+    if (glamor_syncobj->handle)
+        drmSyncobjDestroy(glamor_egl->fd, glamor_syncobj->handle);
+
+    free(glamor_syncobj);
+}
+
+static void
+glamor_dri3_syncobj_eventfd(struct dri3_syncobj *syncobj, uint64_t point,
+                         int efd, Bool wait_avail)
+{
+    struct glamor_dri3_syncobj *glamor_syncobj = (struct glamor_dri3_syncobj *)syncobj;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(syncobj->screen);
+
+    drmSyncobjEventfd(glamor_egl->fd, glamor_syncobj->handle, point, efd,
+                      wait_avail ? DRM_SYNCOBJ_WAIT_FLAGS_WAIT_AVAILABLE : 0);
+}
+
+static void
+glamor_dri3_syncobj_submitted_eventfd(struct dri3_syncobj *syncobj,
+                                   uint64_t point, int efd)
+{
+    glamor_dri3_syncobj_eventfd(syncobj, point, efd, TRUE /* wait_avail */);
+}
+
+static void
+glamor_dri3_syncobj_signaled_eventfd(struct dri3_syncobj *syncobj,
+                                  uint64_t point, int efd)
+{
+    glamor_dri3_syncobj_eventfd(syncobj, point, efd, FALSE /* wait_avail */);
+}
+
+static struct glamor_dri3_syncobj*
+glamor_dri3_create_syncobj(ScreenPtr screen, uint32_t handle)
+{
+    struct glamor_dri3_syncobj *syncobj = calloc(1, sizeof(*syncobj));
+    if (!syncobj)
+        return NULL;
+
+    syncobj->handle = handle;
+    syncobj->base.screen = screen;
+    syncobj->base.refcount = 1;
+
+    syncobj->base.free = glamor_dri3_free_syncobj;
+    syncobj->base.has_fence = glamor_dri3_syncobj_has_fence;
+    syncobj->base.is_signaled = glamor_dri3_syncobj_is_signaled;
+    syncobj->base.export_fence = glamor_dri3_syncobj_export_fence;
+    syncobj->base.import_fence = glamor_dri3_syncobj_import_fence;
+    syncobj->base.signal = glamor_dri3_signal_syncobj;
+    syncobj->base.signaled_eventfd = glamor_dri3_syncobj_signaled_eventfd;
+    syncobj->base.submitted_eventfd = glamor_dri3_syncobj_submitted_eventfd;
+    return syncobj;
+}
+
+static struct dri3_syncobj*
+glamor_dri3_import_syncobj(ClientPtr client, ScreenPtr screen, XID id, int fd)
+
+{
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
+
+    struct glamor_dri3_syncobj *syncobj;
+    uint32_t handle;
+
+    if (drmSyncobjFDToHandle(glamor_egl->fd, fd, &handle))
+        return NULL;
+
+    syncobj = glamor_dri3_create_syncobj(screen, handle);
+    if (!syncobj) {
+        drmSyncobjDestroy(glamor_egl->fd, handle);
+        return NULL;
+    }
+
+    syncobj->base.id = id;
+
+    return &syncobj->base;
+}
+
+static Bool
+glamor_egl_probe_syncobj(glamor_egl_priv_t *glamor_egl)
+{
+    uint64_t syncobj_cap = 0;
+    int ret;
+
+    if (drmGetCap(glamor_egl->fd, DRM_CAP_SYNCOBJ_TIMELINE,
+                  &syncobj_cap) || !syncobj_cap)
+        return FALSE;
+
+    /* Check if syncobj eventfd is supported. */
+    ret = drmSyncobjEventfd(glamor_egl->fd, 0, 0, -1, 0);
+    if (ret && errno != ENOENT)
+        return FALSE;
+
+    return epoxy_has_egl_extension(glamor_egl->display,
+                                   "ANDROID_native_fence_sync");
+}
+#endif
+
+Bool
+glamor_egl_supports_syncobj(ScreenPtr screen)
+{
+    return glamor_egl_get_screen_private(screen)->supports_syncobj;
+}
+
+int
+glamor_egl_get_fence(ScreenPtr screen)
+{
+#ifdef GLAMOR_HAS_SYNCOBJ
+    EGLint attribs[3];
+    EGLSyncKHR sync;
+    int fence_fd = -1;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
+
+    glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
+
+    if (!glamor_priv || !glamor_egl) {
+        return -1;
+    }
+
+    if (glamor_egl->display == EGL_NO_DISPLAY) {
+        return -1;
+    }
+
+    glamor_make_current(glamor_get_screen_private(screen));
+
+    attribs[0] = EGL_SYNC_NATIVE_FENCE_FD_ANDROID;
+    attribs[1] = EGL_NO_NATIVE_FENCE_FD_ANDROID;
+    attribs[2] = EGL_NONE;
+    sync = eglCreateSyncKHR(glamor_egl->display, EGL_SYNC_NATIVE_FENCE_ANDROID, attribs);
+    if (sync != EGL_NO_SYNC_KHR) {
+        fence_fd = eglDupNativeFenceFDANDROID(glamor_egl->display, sync);
+        eglDestroySyncKHR(glamor_egl->display, sync);
+    }
+
+    return fence_fd;
+#else
+    return -1;
+#endif
+}
+
 static dri3_screen_info_rec glamor_dri3_info = {
     .version = 2,
 
@@ -1614,7 +1866,7 @@ static dri3_screen_info_rec glamor_dri3_info = {
     .get_drawable_modifiers = glamor_get_drawable_modifiers,
 
     /* Version 4 */
-    .import_syncobj = NULL, /* TODO: implement */
+    .import_syncobj = NULL, /* need to check for kernel support */
 };
 #endif /* DRI3 */
 
@@ -2722,6 +2974,16 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         }
 #endif
     }
+
+#ifdef GLAMOR_HAS_SYNCOBJ
+    if (glamor_egl_conf->explicit_sync_allowed &&
+        glamor_egl_probe_syncobj(glamor_egl)) {
+        glamor_egl->supports_syncobj = TRUE;
+        glamor_dri3_info.version = 4;
+        glamor_dri3_info.import_syncobj = glamor_dri3_import_syncobj;
+        *caps |= GLAMOR_EGL_CAP_DRI3_SYNCOBJ;
+    }
+#endif
 
 #define GLAMOR_EGL_CAP_DRI3_BASE (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
 

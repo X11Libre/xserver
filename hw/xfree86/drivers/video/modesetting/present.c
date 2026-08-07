@@ -35,6 +35,8 @@
 
 #include "include/present.h"
 
+#include "Xext/present/present_priv.h" /* ugly */
+
 #include <xf86.h>
 #include <xf86Crtc.h>
 #include <xf86drm.h>
@@ -189,6 +191,24 @@ ms_present_flush(WindowPtr window)
         ms->glamor.block_handler(screen);
 #endif
 }
+
+#ifdef GLAMOR
+static int
+ms_present_flush_fenced(WindowPtr window)
+{
+    int fence = -1;
+    ScreenPtr screen = window->drawable.pScreen;
+    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
+    modesettingPtr ms = modesettingPTR(scrn);
+
+    if (ms->drmmode.glamor) {
+        fence = ms->glamor.egl_get_fence(screen);
+    }
+
+    ms_present_flush(window);
+    return fence;
+}
+#endif
 
 #ifdef GLAMOR
 
@@ -546,6 +566,17 @@ ms_present_screen_init(ScreenPtr screen)
         ms->drmmode.can_async_flip = TRUE;
         xf86DrvMsg(screen->myNum, X_INFO, "Async flip capable\n");
     }
+
+#ifdef GLAMOR
+    if (ms->drmmode.glamor &&
+        ms->glamor.egl_supports_syncobj(screen)) {
+        ms_present_screen_info.capabilities |= PresentCapabilitySyncobj;
+        xf86DrvMsg(screen->myNum, X_INFO, "Present 1.4 explicit sync enabled\n");
+
+        return present_screen_init2(screen, &ms_present_screen_info,
+                                            ms_present_flush_fenced);
+    }
+#endif
 
     return present_screen_init(screen, &ms_present_screen_info);
 }

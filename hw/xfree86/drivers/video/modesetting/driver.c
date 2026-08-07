@@ -1072,6 +1072,8 @@ load_glamor(ScrnInfoPtr pScrn)
     ms->glamor.egl_exchange_buffers = LoaderSymbolFromModule(mod, "glamor_egl_exchange_buffers");
     ms->glamor.egl_get_gbm_device = LoaderSymbolFromModule(mod, "glamor_egl_get_gbm_device");
     ms->glamor.egl_init2 = LoaderSymbolFromModule(mod, "glamor_egl_init2");
+    ms->glamor.egl_supports_syncobj = LoaderSymbolFromModule(mod, "glamor_egl_supports_syncobj");
+    ms->glamor.egl_get_fence = LoaderSymbolFromModule(mod, "glamor_egl_get_fence");
     ms->glamor.finish = LoaderSymbolFromModule(mod, "glamor_finish");
     ms->glamor.gbm_bo_from_pixmap = LoaderSymbolFromModule(mod, "glamor_gbm_bo_from_pixmap");
     ms->glamor.init = LoaderSymbolFromModule(mod, "glamor_init");

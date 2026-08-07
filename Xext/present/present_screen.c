@@ -222,7 +222,8 @@ present_check_flips(WindowPtr window)
  * Initialize a screen for use with present in default screen flip mode (scmd)
  */
 int
-present_screen_init(ScreenPtr screen, present_screen_info_ptr info)
+present_screen_init2(ScreenPtr screen, present_screen_info_ptr info,
+                     present_priv_flush_fenced_ptr flush_fenced)
 {
     if (!present_screen_register_priv_keys())
         return FALSE;
@@ -233,12 +234,19 @@ present_screen_init(ScreenPtr screen, present_screen_info_ptr info)
             return FALSE;
 
         screen_priv->info = info;
+        screen_priv->flush_fenced = flush_fenced;
         present_scmd_init_mode_hooks(screen_priv);
 
         present_fake_screen_init(screen);
     }
 
     return TRUE;
+}
+
+int
+present_screen_init(ScreenPtr screen, present_screen_info_ptr info)
+{
+    return present_screen_init2(screen, info, NULL);
 }
 
 /*

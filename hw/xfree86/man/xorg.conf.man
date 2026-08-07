@@ -2246,6 +2246,9 @@ not available. This may be useful for embedded and old cards, where GL ES
 feature set works faster than GL feature set.
 Default: gl.
 .TP 7
+.BI "Option \*qExplicitSync\*q \*q" boolean \*q
+This option tells Glamor that it is allowed to initialize DRI3 explicit sync support (experimental).
+.TP 7
 .BI "Option \*qInitPrimary\*q \*q" boolean \*q
 Use the Int10 module to initialize the primary graphics card.
 Normally, only secondary cards are soft-booted using the Int10 module, as the

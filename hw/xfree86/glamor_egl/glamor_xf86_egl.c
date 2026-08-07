@@ -15,12 +15,14 @@
 
 enum {
     GLAMOREGLOPT_RENDERING_API,
-    GLAMOREGLOPT_VENDOR_LIBRARY
+    GLAMOREGLOPT_VENDOR_LIBRARY,
+    GLAMOREGLOPT_EXPLICIT_SYNC,
 };
 
 static const OptionInfoRec GlamorEGLOptions[] = {
     { GLAMOREGLOPT_RENDERING_API, "RenderingAPI", OPTV_STRING, {0}, FALSE },
     { GLAMOREGLOPT_VENDOR_LIBRARY, "GlxVendorLibrary", OPTV_STRING, {0}, FALSE },
+    { GLAMOREGLOPT_EXPLICIT_SYNC, "ExplicitSync", OPTV_BOOLEAN, {0}, FALSE },
     { -1, NULL, OPTV_NONE, {0}, FALSE },
 };
 
@@ -60,6 +62,7 @@ _glamor_egl_init(ScrnInfoPtr scrn, int fd, int *caps)
     OptionInfoPtr options;
     const char *api = NULL;
     glamor_egl_conf_t glamor_egl_conf = {.fd = fd};
+    Bool explicit_sync;
     Bool ret;
 
     glamor_egl = calloc(1, sizeof(*glamor_egl));
@@ -76,6 +79,9 @@ _glamor_egl_init(ScrnInfoPtr scrn, int fd, int *caps)
     xf86ProcessOptions(scrn->scrnIndex, scrn->options, options);
     glamor_egl_conf.glvnd_vendor = xf86GetOptValString(options, GLAMOREGLOPT_VENDOR_LIBRARY);
     api = xf86GetOptValString(options, GLAMOREGLOPT_RENDERING_API);
+    if (xf86GetOptValBool(options, GLAMOREGLOPT_EXPLICIT_SYNC, &explicit_sync)) {
+        glamor_egl_conf.explicit_sync_allowed = explicit_sync;
+    }
     if (api && !strncasecmp(api, "es", 2))
         glamor_egl_conf.force_es = TRUE;
     else if (api && !strncasecmp(api, "gl", 2))

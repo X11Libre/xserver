@@ -61,6 +61,7 @@ fbdevInitAccel(ScreenPtr pScreen)
                                          .gbm_forbidden = !config->gbm_allowed,
                                          .auto_dri = config->fbdev_auto_dri3,
                                          .partial_dri_allowed = config->partial_dri_allowed,
+                                         .explicit_sync_allowed = config->explicit_sync_allowed,
                                          .llvmpipe_allowed = TRUE,
                                          .force_glamor = TRUE,
                                          .es_disallowed = !config->es_allowed,
@@ -105,11 +106,9 @@ fbdevInitAccel(ScreenPtr pScreen)
                (caps & GLAMOR_EGL_CAP_DRI3_EXPORT) ?
                "available" : "unavailable");
 
-#if 0 /* Not yet implemented */
     LogMessage(X_INFO, "Xfbdev(%d): DRI3 explicit sync %s\n", pScreen->myNum,
                (caps & GLAMOR_EGL_CAP_DRI3_SYNCOBJ) ?
                "available" : "unavailable");
-#endif
 
 #if 0 /* We don't care about this one */
     LogMessage(X_INFO, "Xfbdev(%d): GBM bo's %s be textured\n", pScreen->myNum,

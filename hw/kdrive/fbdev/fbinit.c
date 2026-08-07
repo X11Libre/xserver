@@ -42,6 +42,7 @@ static const FbScreenConf fbDefaultConfig = {
                                              .fbdev_auto_dri3 = FALSE,
                                              .fbdev_drm_master = FALSE,
                                              .partial_dri_allowed = FALSE,
+                                             .explicit_sync_allowed = FALSE,
 
                                              .es_allowed = TRUE,
                                              .force_es = FALSE,
@@ -114,6 +115,8 @@ fbdevLogScreenInfo(const FbScreenConf *config, int screen_num)
                config->fbdev_drm_master ? "enabled" : "disabled");
     LogMessage(X_INFO, "Xfbdev(%d): partial DRI3 %s\n", screen_num,
                config->partial_dri_allowed ? "allowed" : "forbidden");
+    LogMessage(X_INFO, "Xfbdev(%d): DRI3 explicit sync %s\n", screen_num,
+               config->explicit_sync_allowed ? "allowed" : "forbidden");
 
 
     LogMessage(X_INFO, "Xfbdev(%d): glamor OpenGL contexts %s\n", screen_num,
@@ -173,6 +176,8 @@ ddxUseMsg(void)
         ("-dri [path|auto]     Optional drm device path to use\n");
     ErrorF
         ("-partial-dri         Allow glamor to initialize DRI3 only partially\n");
+    ErrorF
+        ("-explicit_sync         Try to enable DRI3 explicit sync support\n");
     ErrorF
         ("-drm-master          Enable master permissions on the fd used for dri\n");
     ErrorF
@@ -281,6 +286,11 @@ ddxProcessArgument(int argc, char **argv, int i)
 
     if (!strcmp(argv[i], "-partial-dri")) {
         fbCurrScreen->partial_dri_allowed = TRUE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-explicit-sync")) {
+        fbCurrScreen->explicit_sync_allowed = TRUE;
         return 1;
     }
 

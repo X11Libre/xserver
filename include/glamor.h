@@ -401,6 +401,13 @@ extern _X_EXPORT Bool
                                                struct gbm_bo *bo,
                                                Bool used_modifiers);
 
+/* Returns whether DRI3 explicit sync is available */
+extern _X_EXPORT Bool glamor_egl_supports_syncobj(ScreenPtr screen);
+
+/* Creates an egl sync fence fd */
+extern _X_EXPORT int glamor_egl_get_fence(ScreenPtr screen);
+
+
 extern _X_EXPORT const char *glamor_egl_get_driver_name(ScreenPtr screen);
 
 
