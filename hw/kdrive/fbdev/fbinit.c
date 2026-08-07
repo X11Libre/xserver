@@ -21,14 +21,16 @@
  */
 
 #include <kdrive-config.h>
+
+#include <stdbool.h>
+#include <string.h>
+
 #include "fbdev.h"
 
 #include "dix/dix_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
-
-#include <string.h>
 
 static FbScreenConf *fbCurrScreen = NULL;
 
@@ -202,7 +204,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         || ((i >= 2) && ('0' <= argv[i - 1][0]) && (argv[i - 1][0] <= '9') && !strcmp(argv[i - 2], "-screen")) /* Last screen had explicit geometry */
         ) {
         /* Put each screen on a separate card */
-        Bool need_new_card = !fbCurrScreen;
+        bool need_new_card = !fbCurrScreen;
 
         /**
          * If this is either the first argument, or the
