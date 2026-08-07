@@ -41,13 +41,54 @@
 #include "xf86Bus.h"
 #include "xf86_OSproc.h"
 
+static Bool
+xf86_check_fb_slot(GDevPtr dev, const char* driver_name)
+{
+#define AUTOCONFIGURED_STRING "Autoconfigured Video Device "
+    /* Apparently asan complains is memcmp is used */
+    if (!dev || !dev->identifier ||
+        !strncmp(dev->identifier, AUTOCONFIGURED_STRING, sizeof(AUTOCONFIGURED_STRING) - 1)) {
+        Bool reject_device = FALSE;
+
+        /**
+         * We have to walk all devices and check for potential collisions.
+         * Sadly, when autoconfiguring, we don't have any information about drivers running in framebuffer mode.
+         * This is both because we don't have any api for sending this information, and because the drivers
+         * often find out what device they will ultimately use way later in the initialization process.
+         * Just checking/counting how many times xf86Claim*Slot gets called is not enough.
+         * There are also drivers like xf86-video-vesa, which don't use the xf86Claim*Slot api to check
+         * for slot conflicts. Instead, vesa just allocates an entity and relies on the fact that is's usually
+         * the last driver in the initialization queue to avoid conflicts.
+         * We even have to forbid multiple autoconfigured drivers running in framebuffer mode, as that can
+         * lead to conflicts too, including black screens.
+         */
+        for (int i = 0; i < xf86NumEntities; i++) {
+            const EntityPtr pent = xf86Entities[i];
+
+            if (pent->numInstances > 0) {
+                reject_device = TRUE;
+                break;
+            }
+        }
+
+        if (reject_device) {
+            LogMessageVerb(X_ERROR, 1, "Refusing to use autoconfigured driver: %s in framebuffer mode.\n", driver_name);
+            LogMessageVerb(X_ERROR, 1, "Please write explicit configuration Screen sections for all framebuffer devices.\n");
+            return FALSE;
+        }
+    }
+#undef AUTOCONFIGURED_STRING
+
+    return TRUE;
+}
+
 int
 xf86ClaimFbSlot(DriverPtr drvp, int chipset, GDevPtr dev, Bool active)
 {
     EntityPtr p;
     int num;
 
-    if (xf86CheckSlot(dev, BUS_NONE)) {
+    if (xf86_check_fb_slot(dev, drvp->driverName)) {
         num = xf86AllocateEntity();
         p = xf86Entities[num];
         p->driver = drvp;
