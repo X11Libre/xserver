@@ -113,12 +113,6 @@ hwDisableIO(void)
 static Bool
 hwEnableIO(void)
 {
-    short i;
-    size_t n=0;
-    int begin, end;
-    char *buf=NULL, target[5];
-    FILE *fp;
-
     /* xf86-video-vesa and others (at least mach64) need access to all I/O ports */
     if (iopl(3)) {
         ErrorF("xf86EnableIO: failed to set I/O privilege level to 3 (%s)\n",
@@ -136,6 +130,12 @@ hwEnableIO(void)
     }
 
 #if !defined(__alpha__)
+    short i;
+    size_t n=0;
+    int begin, end;
+    char *buf=NULL, target[5];
+    FILE *fp;
+
     target[4] = '\0';
 
     /* trap access to the keyboard controller(s) and timer chip(s) */
