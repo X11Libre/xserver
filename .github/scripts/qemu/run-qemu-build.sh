@@ -103,11 +103,16 @@ echo "=== [$(date)] Copying qemu binary and running --second-stage ==="
 cp "/usr/bin/$QEMU" "$ROOTFS/usr/bin/"
 chroot "$ROOTFS" /debootstrap/debootstrap --second-stage
 
-# Copy debian-ports keyring into chroot for apt verification
+# Copy debian-ports keyring into chroot for apt verification. apt only trusts
+# keyrings it finds in /etc/apt/trusted.gpg.d/ (or referenced via signed-by= in
+# sources.list); placing it only under /usr/share/keyrings/ leaves apt without
+# the ports signing key, so `apt-get update` fails with NO_PUBKEY and the index
+# stays stale (e.g. m4 unresolved).
 case "$MIRROR" in
     *debian-ports*)
-        mkdir -p "$ROOTFS/usr/share/keyrings"
+        mkdir -p "$ROOTFS/usr/share/keyrings" "$ROOTFS/etc/apt/trusted.gpg.d"
         cp /tmp/ports-keyring/usr/share/keyrings/debian-ports-archive-keyring.gpg "$ROOTFS/usr/share/keyrings/"
+        cp /tmp/ports-keyring/usr/share/keyrings/debian-ports-archive-keyring.gpg "$ROOTFS/etc/apt/trusted.gpg.d/"
     ;;
 esac
 
