@@ -31,6 +31,8 @@
 #ifdef __sun
 #include <sys/utsname.h>
 #endif
+#include "os.h"
+#include "os/osdep.h"
 #include "xf86.h"
 #include "xf86Priv.h"
 #include "xf86_OSlib.h"
