@@ -145,8 +145,14 @@ esac
 echo "=== [$(date)] Updating apt in chroot ==="
 apt-get update
 
+# --no-install-recommends: dpkg-dev 1.23.7+ Recommends an OpenPGP tool
+# ("sq | sqop | rsop | gosop | pgpainless-cli | gpg-sq | gnupg") for package
+# signature verification. On debian-ports/alpha apt picks pgpainless-cli, a
+# Java (BouncyCastle) implementation, dragging in default-jre-headless ->
+# openjdk-25-jre-headless, whose postinst fails in an unmounted chroot.
+# None of these are needed to build the xserver, so skip Recommends entirely.
 echo "=== [$(date)] Installing build dependencies ==="
-apt-get install -y \
+apt-get install -y --no-install-recommends \
     autoconf \
     automake \
     build-essential \
