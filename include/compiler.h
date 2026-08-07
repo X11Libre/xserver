@@ -563,7 +563,7 @@ xf86WriteMmio8(__volatile__ void *base, const unsigned long offset,
         __volatile__("stbx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    __builtin_ppc_eieio();
+    xlibre_mem_barrier_write();
 }
 
 static inline void
@@ -574,7 +574,7 @@ xf86WriteMmio16Le(__volatile__ void *base, const unsigned long offset,
         __volatile__("sthbrx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    __builtin_ppc_eieio();
+    xlibre_mem_barrier_write();
 }
 
 static inline void
@@ -585,7 +585,7 @@ xf86WriteMmio16Be(__volatile__ void *base, const unsigned long offset,
         __volatile__("sthx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    __builtin_ppc_eieio();
+    xlibre_mem_barrier_write();
 }
 
 static inline void
@@ -596,7 +596,7 @@ xf86WriteMmio32Le(__volatile__ void *base, const unsigned long offset,
         __volatile__("stwbrx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    __builtin_ppc_eieio();
+    xlibre_mem_barrier_write();
 }
 
 static inline void
@@ -607,7 +607,7 @@ xf86WriteMmio32Be(__volatile__ void *base, const unsigned long offset,
         __volatile__("stwx %1,%2,%3\n\t":"=m"
                      (*((volatile unsigned char *) base + offset))
                      :"r"(val), "b"(base), "r"(offset));
-    __builtin_ppc_eieio();
+    xlibre_mem_barrier_write();
 }
 
 static inline void

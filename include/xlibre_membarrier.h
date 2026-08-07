@@ -32,7 +32,11 @@ __attribute__((always_inline)) static inline void xlibre_mem_barrier_read(void)
         : /* no input */
         : "memory");
 #elif defined __powerpc__
+#  if defined(__powerpc64__) || !defined(__has_builtin) || !__has_builtin(__builtin_ppc_eieio)
+    __asm__ __volatile__ ("eieio" : : : "memory");
+#  else
     __builtin_ppc_eieio();
+#  endif
 #elif defined __sparc__
     /* NOP */
 #endif
@@ -53,9 +57,13 @@ __attribute__((always_inline)) static inline void xlibre_mem_barrier_write(void)
 #elif defined __ia64__
     __asm__ __volatile__ ("mf" : : : "memory");
 #elif defined __mips__
-    mem_barrier();
+    xlibre_mem_barrier_read();
 #elif defined __powerpc__
+#  if defined(__powerpc64__) || !defined(__has_builtin) || !__has_builtin(__builtin_ppc_eieio)
+    __asm__ __volatile__ ("eieio" : : : "memory");
+#  else
     __builtin_ppc_eieio();
+#  endif
 #elif defined __sparc__
     /* NOP */
 #endif
