@@ -128,7 +128,7 @@ xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *bu
 void
 xf86PlatformReprobeDevice(int index, struct OdevAttributes *attribs)
 {
-    bool ret;
+    int ret;
     char *dpath = attribs->path;
 
     ret = get_drm_info(attribs, dpath, index);
