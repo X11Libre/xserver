@@ -88,8 +88,6 @@ doWriteConfigFile(const char *filename, XF86ConfigPtr cptr)
         fprintf(cf, "EndSection\n\n");
     }
 
-    xf86printVendorSection(cf, cptr->conf_vendor_lst);
-
     xf86printServerFlagsSection(cf, cptr->conf_flags);
 
     xf86printInputSection(cf, cptr->conf_input_lst);
