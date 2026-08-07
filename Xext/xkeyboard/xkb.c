@@ -2283,19 +2283,29 @@ SetKeyBehaviors(XkbSrvInfoPtr xkbi,
     }
 
     if (maxRG > (int) xkbi->nRadioGroups) {
+        XkbRadioGroupPtr newRG;
+
         if (xkbi->radioGroups)
-            xkbi->radioGroups = reallocarray(xkbi->radioGroups, maxRG,
-                                             sizeof(XkbRadioGroupRec));
+            newRG = reallocarray(xkbi->radioGroups, maxRG,
+                                 sizeof(XkbRadioGroupRec));
         else
-            xkbi->radioGroups = calloc(maxRG, sizeof(XkbRadioGroupRec));
-        if (xkbi->radioGroups) {
+            newRG = calloc(maxRG, sizeof(XkbRadioGroupRec));
+        /*
+         * Only commit newRG on success: reallocarray() returning NULL on
+         * failure leaves the original allocation untouched, but assigning
+         * straight into xkbi->radioGroups either way (as this used to)
+         * loses that pointer, leaking it. Keeping the existing (smaller,
+         * still-valid) radioGroups/nRadioGroups on failure is also just
+         * better than the old behavior of dropping nRadioGroups to 0 and
+         * discarding all radio group data server-wide.
+         */
+        if (newRG) {
+            xkbi->radioGroups = newRG;
             if (xkbi->nRadioGroups)
                 memset(&xkbi->radioGroups[xkbi->nRadioGroups], 0,
                        (maxRG - xkbi->nRadioGroups) * sizeof(XkbRadioGroupRec));
             xkbi->nRadioGroups = maxRG;
         }
-        else
-            xkbi->nRadioGroups = 0;
         /* should compute members here */
     }
     if (changes->map.changed & XkbKeyBehaviorsMask) {
@@ -3021,14 +3031,25 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
         if ((unsigned) (req->firstSI + req->nSI) > USHRT_MAX)
             return BadValue;
         if ((unsigned) (req->firstSI + req->nSI) > compat->size_si) {
-            compat->num_si = compat->size_si = req->firstSI + req->nSI;
-            compat->sym_interpret = reallocarray(compat->sym_interpret,
-                                                 compat->size_si,
-                                                 sizeof(XkbSymInterpretRec));
-            if (!compat->sym_interpret) {
-                compat->num_si = compat->size_si = 0;
+            /*
+             * Compute the new size and realloc into a temporary first:
+             * the old code set num_si/size_si to the *new* size and
+             * reallocated straight into compat->sym_interpret before
+             * checking success, so a failed reallocarray() (which leaves
+             * the original block untouched) both leaked that original
+             * block (the pointer was already overwritten with NULL) and
+             * discarded otherwise-still-valid existing interpretations by
+             * resetting num_si/size_si to 0. Only commit on success now,
+             * so a transient OOM here loses nothing.
+             */
+            unsigned int newSize = req->firstSI + req->nSI;
+            XkbSymInterpretPtr newSI = reallocarray(compat->sym_interpret,
+                                                    newSize,
+                                                    sizeof(XkbSymInterpretRec));
+            if (!newSI)
                 return BadAlloc;
-            }
+            compat->sym_interpret = newSI;
+            compat->num_si = compat->size_si = newSize;
         }
         else if (req->truncateSI || req->firstSI + req->nSI > compat->num_si) {
             compat->num_si = req->firstSI + req->nSI;
