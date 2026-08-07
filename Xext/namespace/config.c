@@ -482,6 +482,11 @@ void XnsDestroyNamespace(struct Xnamespace *ns)
     if (!ns || ns->builtin)
         return;
 
+    if (ns->rootWindow) {
+        FreeResource(ns->rootWindow->drawable.id, RT_NONE);
+        ns->rootWindow = NULL;
+    }
+
     /* detach any clients still pointing here so their later teardown does not
        dereference freed memory (refcnt is being discarded with the namespace) */
     for (int i = 1; i < currentMaxClients; i++) {
