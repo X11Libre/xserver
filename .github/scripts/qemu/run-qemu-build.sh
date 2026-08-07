@@ -102,6 +102,15 @@ debootstrap \
 echo "=== [$(date)] Copying qemu binary and running --second-stage ==="
 cp "/usr/bin/$QEMU" "$ROOTFS/usr/bin/"
 chroot "$ROOTFS" /debootstrap/debootstrap --second-stage
+
+# Copy debian-ports keyring into chroot for apt verification
+case "$MIRROR" in
+    *debian-ports*)
+        mkdir -p "$ROOTFS/usr/share/keyrings"
+        cp /tmp/ports-keyring/usr/share/keyrings/debian-ports-archive-keyring.gpg "$ROOTFS/usr/share/keyrings/"
+    ;;
+esac
+
 echo "=== [$(date)] Bootstrap complete ==="
 
 # --- copy the source tree into the rootfs -----------------------------------
@@ -116,6 +125,17 @@ cat > "$ROOTFS/install-prereq.sh" <<'INSTALL_PREREQ'
 set -e
 set -x
 export DEBIAN_FRONTEND=noninteractive
+
+# libunwind-dev not available in debian-ports/unstable for alpha/sparc64
+# ARCH is passed via env from outer script
+case "$ARCH" in
+    alpha|sparc64)
+        UNWIND_PKG=""
+        ;;
+    *)
+        UNWIND_PKG="libunwind-dev"
+        ;;
+esac
 
 echo "=== [$(date)] Updating apt in chroot ==="
 apt-get update
@@ -148,7 +168,7 @@ apt-get install -y \
     libsystemd-dev \
     libtool \
     libudev-dev \
-    libunwind-dev \
+    ${UNWIND_PKG} \
     libx11-dev \
     libx11-xcb-dev \
     libxau-dev \
@@ -259,7 +279,7 @@ chmod +x "$ROOTFS/run-build.sh"
 
 # --- run the build inside the rootfs -----------------------------------------
 echo "=== [$(date)] Running install-prereq.sh in chroot ==="
-chroot "$ROOTFS" /install-prereq.sh
+ARCH="$ARCH" chroot "$ROOTFS" /install-prereq.sh
 echo "=== [$(date)] Running run-build.sh in chroot ==="
 chroot "$ROOTFS" /run-build.sh
 
