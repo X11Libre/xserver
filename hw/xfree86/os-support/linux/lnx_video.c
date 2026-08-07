@@ -103,7 +103,7 @@ hwEnableIO(void)
 static void
 hwDisableIO(void)
 {
-    munmap(ioBase, 0x20000);
+    munmap((void *)ioBase, 0x20000);
     ioBase = NULL;
 }
 
