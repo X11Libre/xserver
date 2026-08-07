@@ -36,6 +36,8 @@
 #include "xf86Bus.h"
 #include "xf86sbusBus_priv.h"
 #include "xf86Sbus_priv.h"
+#include "os/log_priv.h"
+#include "dix/screen_hooks_priv.h"
 
 static int xf86nSbusInfo;
 
