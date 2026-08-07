@@ -4679,6 +4679,7 @@ drmmode_legacy_cursor_probe_allowed(drmmode_ptr drmmode)
         strstr(version->name, "vboxvideo") ||
         strstr(version->name, "virtio_gpu") ||
         strstr(version->name, "vkms") ||
+        strstr(version->name, "qxl") ||
         strstr(version->name, "vmwgfx")) {
         drmFreeVersion(version);
         return FALSE;
