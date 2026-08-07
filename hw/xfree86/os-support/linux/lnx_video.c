@@ -77,7 +77,7 @@ xf86OSInitVidMem(VidMemInfoPtr pVidMem)
 /***************************************************************************/
 
 #if defined(__powerpc__)
-volatile unsigned char *ioBase = NULL;
+void *ioBase = NULL;
 
 #ifndef __NR_pciconfig_iobase
 #define __NR_pciconfig_iobase	200
@@ -91,7 +91,7 @@ hwEnableIO(void)
 
     fd = open("/dev/mem", O_RDWR);
     if (ioBase == NULL) {
-        ioBase = (volatile unsigned char *) mmap(0, 0x20000,
+        ioBase = mmap(0, 0x20000,
                                                  PROT_READ | PROT_WRITE,
                                                  MAP_SHARED, fd, ioBase_phys);
     }
