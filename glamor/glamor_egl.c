@@ -1015,26 +1015,23 @@ glamor_egl_fds_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap, int *fds,
 #endif
 }
 
+/* See: https://github.com/X11Libre/xserver/issues/3262 */
 int
 glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
                            uint32_t *strides, uint32_t *offsets,
                            uint64_t *modifier)
 {
-    static int warned = FALSE;
-    int ret = glamor_egl_fds_from_pixmap_fast(screen, pixmap, fds,
-                                              strides, offsets, modifier);
-    if (ret) {
-        return ret;
-    }
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
 
-    ret = glamor_egl_fds_from_pixmap_slow(screen, pixmap, fds,
-                                          strides, offsets, modifier);
-
-    if (!warned && ret) {
-        GLAMOR_LOG_STR(screen->myNum, X_WARNING, "glamor_egl_fds_from_pixmap_fast failed\n");
-        warned = TRUE;
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_egl_fds_from_pixmap_slow(screen, pixmap, fds,
+                                               strides, offsets, modifier);
     }
-    return ret;
+#endif
+    return glamor_egl_fds_from_pixmap_fast(screen, pixmap, fds,
+                                           strides, offsets, modifier);
 }
 
 /* Used for untextured pixmaps */
@@ -1089,24 +1086,20 @@ glamor_egl_fd_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap,
     return -1;
 }
 
+/* See: https://github.com/X11Libre/xserver/issues/3262 */
 int
 glamor_egl_fd_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
                           CARD16 *stride, CARD32 *size)
 {
-    static int warned = FALSE;
-    int fd = glamor_egl_fd_from_pixmap_fast(screen, pixmap, stride, size);
-    if (fd >= 0) {
-        return fd;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_egl_fd_from_pixmap_slow(screen, pixmap, stride, size);
     }
-
-    fd = glamor_egl_fd_from_pixmap_slow(screen, pixmap, stride, size);
-
-    if (!warned && (fd >= 0)) {
-        GLAMOR_LOG_STR(screen->myNum, X_WARNING, "glamor_egl_fd_from_pixmap_fast failed\n");
-        warned = TRUE;
-    }
-
-    return fd;
+#endif
+    return glamor_egl_fd_from_pixmap_fast(screen, pixmap, stride, size);
 }
 
 int
@@ -1163,12 +1156,12 @@ glamor_drm_format_for_depth(CARD8 depth)
 }
 #endif
 
-Bool
-glamor_back_pixmap_from_fd(PixmapPtr pixmap,
-                           int fd,
-                           CARD16 width,
-                           CARD16 height,
-                           CARD16 _stride, CARD8 depth, CARD8 bpp)
+static Bool
+glamor_back_pixmap_from_fd_fast(PixmapPtr pixmap,
+                                int fd,
+                                CARD16 width,
+                                CARD16 height,
+                                CARD16 _stride, CARD8 depth, CARD8 bpp)
 {
 #ifdef WITH_LIBDRM
     ScreenPtr screen = pixmap->drawable.pScreen;
@@ -1194,6 +1187,75 @@ glamor_back_pixmap_from_fd(PixmapPtr pixmap,
 #endif
 }
 
+static Bool
+glamor_back_pixmap_from_fd_slow(PixmapPtr pixmap,
+                                int fd,
+                                CARD16 width,
+                                CARD16 height,
+                                CARD16 stride, CARD8 depth, CARD8 bpp)
+{
+#ifdef GLAMOR_HAS_GBM
+    ScreenPtr screen = pixmap->drawable.pScreen;
+    glamor_egl_priv_t *glamor_egl;
+    struct gbm_bo *bo;
+    struct gbm_import_fd_data import_data = { 0 };
+    Bool ret;
+
+    glamor_egl = glamor_egl_get_screen_private(screen);
+
+    /* The call would fail later anyway, but this is faster */
+    if (!glamor_egl->gbm || !glamor_egl->can_texture_gbm_bo) {
+        return FALSE;
+    }
+
+    if (width == 0 || height == 0) {
+        return FALSE;
+    }
+
+    import_data.fd = fd;
+    import_data.width = width;
+    import_data.height = height;
+    import_data.stride = stride;
+    import_data.format = glamor_drm_format_for_depth(depth);
+    bo = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD, &import_data,
+                       GBM_BO_USE_RENDERING);
+    if (!bo) {
+        return FALSE;
+    }
+
+    screen->ModifyPixmapHeader(pixmap, width, height, 0, 0, stride, NULL);
+
+    ret = glamor_egl_create_textured_pixmap_from_gbm_bo(pixmap, bo, FALSE);
+    gbm_bo_destroy(bo);
+    return ret;
+#else
+    return FALSE;
+#endif
+}
+
+/* See: https://github.com/X11Libre/xserver/issues/3262 */
+Bool
+glamor_back_pixmap_from_fd(PixmapPtr pixmap,
+                           int fd,
+                           CARD16 width,
+                           CARD16 height,
+                           CARD16 stride, CARD8 depth, CARD8 bpp)
+{
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(pixmap->drawable.pScreen);
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_back_pixmap_from_fd_slow(pixmap, fd,
+                                               width, height,
+                                               stride, depth, bpp);
+    }
+#endif
+    return glamor_back_pixmap_from_fd_fast(pixmap, fd,
+                                           width, height,
+                                           stride, depth, bpp);
+}
+
 static PixmapPtr
 glamor_pixmap_from_fds_noop(ScreenPtr screen,
                             CARD8 num_fds, const int *fds,
@@ -1205,13 +1267,13 @@ glamor_pixmap_from_fds_noop(ScreenPtr screen,
     return NULL;
 }
 
-PixmapPtr
-glamor_pixmap_from_fds(ScreenPtr screen,
-                       CARD8 num_fds, const int *fds,
-                       CARD16 width, CARD16 height,
-                       const CARD32 *_strides, const CARD32 *_offsets,
-                       CARD8 depth, CARD8 bpp,
-                       uint64_t modifier)
+static PixmapPtr
+glamor_pixmap_from_fds_fast(ScreenPtr screen,
+                            CARD8 num_fds, const int *fds,
+                            CARD16 width, CARD16 height,
+                            const CARD32 *_strides, const CARD32 *_offsets,
+                            CARD8 depth, CARD8 bpp,
+                            uint64_t modifier)
 {
 #ifdef WITH_LIBDRM
     PixmapPtr pixmap;
@@ -1262,8 +1324,8 @@ glamor_pixmap_from_fds(ScreenPtr screen,
                                                               format, modifier);
     } else {
         if (num_fds == 1) {
-            ret = glamor_back_pixmap_from_fd(pixmap, fds[0], width, height,
-                                             _strides[0], depth, bpp);
+            ret = glamor_back_pixmap_from_fd_fast(pixmap, fds[0], width, height,
+                                                  _strides[0], depth, bpp);
         }
     }
 
@@ -1278,6 +1340,160 @@ error:
 #endif
 }
 
+static PixmapPtr
+glamor_pixmap_from_fds_slow(ScreenPtr screen,
+                            CARD8 num_fds, const int *fds,
+                            CARD16 width, CARD16 height,
+                            const CARD32 *strides, const CARD32 *offsets,
+                            CARD8 depth, CARD8 bpp,
+                            uint64_t modifier)
+{
+#if defined(GLAMOR_HAS_GBM) && defined(WITH_LIBDRM)
+    PixmapPtr pixmap;
+    glamor_egl_priv_t *glamor_egl;
+    Bool ret = FALSE;
+    int i;
+
+    glamor_egl = glamor_egl_get_screen_private(screen);
+
+    /* The call would fail later anyway, but this is faster */
+    if (!glamor_egl->gbm || !glamor_egl->can_texture_gbm_bo) {
+        return FALSE;
+    }
+
+    pixmap = screen->CreatePixmap(screen, 0, 0, depth, 0);
+
+#ifdef GBM_BO_WITH_MODIFIERS
+    if (glamor_egl->dmabuf_capable && modifier != DRM_FORMAT_MOD_INVALID) {
+        struct gbm_import_fd_modifier_data import_data = { 0 };
+        struct gbm_bo *bo;
+
+        if (width == 0 || height == 0) {
+            goto error;
+        }
+
+        import_data.width = width;
+        import_data.height = height;
+        import_data.format = glamor_drm_format_for_depth(depth);
+        import_data.num_fds = num_fds;
+        import_data.modifier = modifier;
+        for (i = 0; i < num_fds; i++) {
+            import_data.fds[i] = fds[i];
+            import_data.strides[i] = strides[i];
+            import_data.offsets[i] = offsets[i];
+        }
+        bo = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD_MODIFIER, &import_data,
+                           GBM_BO_USE_RENDERING);
+        if (bo) {
+            screen->ModifyPixmapHeader(pixmap, width, height, 0, 0, strides[0], NULL);
+            ret = glamor_egl_create_textured_pixmap_from_gbm_bo(pixmap, bo, TRUE);
+            gbm_bo_destroy(bo);
+        }
+    } else
+#endif
+    {
+        if (num_fds == 1) {
+            ret = glamor_back_pixmap_from_fd_slow(pixmap, fds[0], width, height,
+                                                  strides[0], depth, bpp);
+        }
+    }
+
+#ifdef GBM_BO_WITH_MODIFIERS
+error:
+#endif
+    if (ret == FALSE) {
+        dixDestroyPixmap(pixmap, 0);
+        return NULL;
+    }
+    return pixmap;
+#else
+    return NULL;
+#endif
+}
+
+/* See: https://github.com/X11Libre/xserver/issues/3262 */
+PixmapPtr
+glamor_pixmap_from_fds(ScreenPtr screen,
+                       CARD8 num_fds, const int *fds,
+                       CARD16 width, CARD16 height,
+                       const CARD32 *strides, const CARD32 *offsets,
+                       CARD8 depth, CARD8 bpp,
+                       uint64_t modifier)
+{
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_pixmap_from_fds_slow(screen, num_fds, fds,
+                                           width, height,
+                                           strides, offsets,
+                                           depth, bpp, modifier);
+    }
+#endif
+    return glamor_pixmap_from_fds_fast(screen, num_fds, fds,
+                                       width, height,
+                                       strides, offsets,
+                                       depth, bpp, modifier);
+}
+
+static PixmapPtr
+glamor_pixmap_from_fd_fast(ScreenPtr screen,
+                           int fd,
+                           CARD16 width,
+                           CARD16 height,
+                           CARD16 stride, CARD8 depth, CARD8 bpp)
+{
+    PixmapPtr pixmap;
+    bool ret;
+
+    pixmap = screen->CreatePixmap(screen, 0, 0, depth, 0);
+
+    ret = glamor_back_pixmap_from_fd_fast(pixmap, fd, width, height,
+                                          stride, depth, bpp);
+
+    if (ret == FALSE) {
+        dixDestroyPixmap(pixmap, 0);
+        return NULL;
+    }
+    return pixmap;
+}
+
+static PixmapPtr
+glamor_pixmap_from_fd_slow(ScreenPtr screen,
+                           int fd,
+                           CARD16 width,
+                           CARD16 height,
+                           CARD16 stride, CARD8 depth, CARD8 bpp)
+{
+#ifdef GLAMOR_HAS_GBM
+    PixmapPtr pixmap;
+    glamor_egl_priv_t *glamor_egl;
+    bool ret;
+
+    glamor_egl = glamor_egl_get_screen_private(screen);
+
+    /* The call would fail later anyway, but this is faster */
+    if (!glamor_egl->gbm || !glamor_egl->can_texture_gbm_bo) {
+        return FALSE;
+    }
+
+    pixmap = screen->CreatePixmap(screen, 0, 0, depth, 0);
+
+    ret = glamor_back_pixmap_from_fd_slow(pixmap, fd, width, height,
+                                          stride, depth, bpp);
+
+    if (ret == FALSE) {
+        dixDestroyPixmap(pixmap, 0);
+        return NULL;
+    }
+    return pixmap;
+#else
+    return NULL;
+#endif
+}
+
+/* See: https://github.com/X11Libre/xserver/issues/3262 */
 PixmapPtr
 glamor_pixmap_from_fd(ScreenPtr screen,
                       int fd,
@@ -1285,19 +1501,19 @@ glamor_pixmap_from_fd(ScreenPtr screen,
                       CARD16 height,
                       CARD16 stride, CARD8 depth, CARD8 bpp)
 {
-    PixmapPtr pixmap;
-    bool ret;
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
 
-    pixmap = screen->CreatePixmap(screen, 0, 0, depth, 0);
-
-    ret = glamor_back_pixmap_from_fd(pixmap, fd, width, height,
-                                     stride, depth, bpp);
-
-    if (ret == FALSE) {
-        dixDestroyPixmap(pixmap, 0);
-        return NULL;
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->can_texture_gbm_bo) {
+        return glamor_pixmap_from_fd_slow(screen, fd,
+                                          width, height,
+                                          stride, depth, bpp);
     }
-    return pixmap;
+#endif
+    return glamor_pixmap_from_fd_fast(screen, fd,
+                                      width, height,
+                                      stride, depth, bpp);
 }
 
 static Bool
@@ -2687,13 +2903,6 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 #endif
 
     *caps |= GLAMOR_EGL_DEFAULT_CAPS;
-#ifdef DRI3
-    if (!glamor_dri3_info.pixmap_from_fds) {
-        *caps &= ~GLAMOR_EGL_CAP_DRI3_IMPORT;
-        /* Avoid DRI3 returning BadImplementation */
-        glamor_dri3_info.pixmap_from_fds = glamor_pixmap_from_fds_noop;
-    }
-#endif
 
 #ifdef GLAMOR_HAS_GBM
     if (glamor_egl->can_texture_gbm_bo) {
@@ -2710,6 +2919,10 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         }
         *caps &= ~GLAMOR_EGL_CAP_TEXTURE_GBM_BO;
 #ifdef DRI3
+        if (glamor_dri3_info.pixmap_from_fds) {
+            glamor_dri3_info.pixmap_from_fds = glamor_pixmap_from_fds_fast;
+        }
+
         if (epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
             glamor_dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_fast;
             glamor_dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_fast;
@@ -2722,6 +2935,14 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         }
 #endif
     }
+
+#ifdef DRI3
+    if (!glamor_dri3_info.pixmap_from_fds) {
+        *caps &= ~GLAMOR_EGL_CAP_DRI3_IMPORT;
+        /* Avoid DRI3 returning BadImplementation */
+        glamor_dri3_info.pixmap_from_fds = glamor_pixmap_from_fds_noop;
+    }
+#endif
 
 #define GLAMOR_EGL_CAP_DRI3_BASE (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
 
