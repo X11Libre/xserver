@@ -22,6 +22,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
@@ -143,7 +145,7 @@ ProcXFixesCreateRegionFromWindow(ClientPtr client)
     }
 
     RegionPtr pRegion;
-    Bool copy = TRUE;
+    bool copy = TRUE;
     switch (stuff->kind) {
     case WindowRegionBounding:
         pRegion = wBoundingShape(pWin);

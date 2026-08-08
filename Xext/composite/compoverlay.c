@@ -42,14 +42,25 @@
  */
 
 #include <dix-config.h>
+
+#include <stdbool.h>
 #include <X11/Xmd.h>
 
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
+#include "compositeext_intern.h"
 #include "compint.h"
-#include "xace.h"
+
+static void compDestroyOverlayWindow(ScreenPtr pScreen)
+{
+    CompScreenPtr cs = GetCompScreen(pScreen);
+
+    cs->pOverlayWin = NullWindow;
+    FreeResource(cs->overlayWid, X11_RESTYPE_NONE);
+}
 
 /*
  * Delete the given overlay client list element from its screen list.
@@ -117,11 +128,11 @@ compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
     return pOc;
 }
 
+
 /*
  * Create the overlay window and map it
  */
-Bool
-compCreateOverlayWindow(ScreenPtr pScreen)
+bool compCreateOverlayWindow(ScreenPtr pScreen)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
     WindowPtr pRoot = pScreen->root;
@@ -133,7 +144,7 @@ compCreateOverlayWindow(ScreenPtr pScreen)
     int x = 0, y = 0;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         x = -pScreen->x;
         y = -pScreen->y;
         w = PanoramiXPixWidth;
@@ -155,16 +166,4 @@ compCreateOverlayWindow(ScreenPtr pScreen)
     MapWindow(pWin, serverClient);
 
     return TRUE;
-}
-
-/*
- * Destroy the overlay window
- */
-void
-compDestroyOverlayWindow(ScreenPtr pScreen)
-{
-    CompScreenPtr cs = GetCompScreen(pScreen);
-
-    cs->pOverlayWin = NullWindow;
-    FreeResource(cs->overlayWid, X11_RESTYPE_NONE);
 }

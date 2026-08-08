@@ -69,6 +69,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xmd.h>
 #include <X11/extensions/panoramiXproto.h>
 
@@ -124,7 +125,7 @@ ProcRRXineramaGetState(ClientPtr client)
     register int rc;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
-    Bool active = FALSE;
+    bool active = FALSE;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
@@ -301,10 +302,9 @@ ProcRRXineramaDispatch(ClientPtr client)
 void
 RRXineramaExtensionInit(void)
 {
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         return;
-#endif /* XINERAMA */
+    }
 
     if (noRRXineramaExtension)
       return;

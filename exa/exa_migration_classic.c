@@ -28,6 +28,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "os/mathx_priv.h"
@@ -115,12 +116,12 @@ exaCopyDirty(ExaMigrationPtr migrate, RegionPtr pValidDst, RegionPtr pValidSrc,
     ExaPixmapPriv(pPixmap);
     RegionPtr damage = DamageRegion(pExaPixmap->pDamage);
     RegionRec CopyReg;
-    Bool save_use_gpu_copy;
+    bool save_use_gpu_copy;
     int save_pitch;
     BoxPtr pBox;
     int nbox;
-    Bool access_prepared = FALSE;
-    Bool need_sync = FALSE;
+    bool access_prepared = FALSE;
+    bool need_sync = FALSE;
 
     /* Damaged bits are valid in current copy but invalid in other one */
     if (pExaPixmap->use_gpu_copy) {
@@ -540,7 +541,7 @@ exaAssertNotDirty(PixmapPtr pPixmap)
     RegionRec ValidReg;
     int dst_pitch, src_pitch, cpp, y, nbox, save_pitch;
     BoxPtr pBox;
-    Bool ret = TRUE, save_use_gpu_copy;
+    bool ret = TRUE, save_use_gpu_copy;
 
     if (exaPixmapIsPinned(pPixmap) || pExaPixmap->area == NULL)
         return ret;

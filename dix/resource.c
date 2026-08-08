@@ -132,6 +132,7 @@ Equipment Corporation.
 #include "os/osdep.h"
 #include "os/probes_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "os.h"
@@ -964,6 +965,42 @@ FreeResourceByType(XID id, RESTYPE type, Bool skipFree)
 }
 
 /*
+ * Like FreeResourceByType(), but only frees the entry whose value also matches.
+ * Needed when several resources share an id and type (e.g. a GLX window
+ * drawable registered under both its GLX id and the backing X window id):
+ * matching on id+type alone would free an arbitrary one of them.
+ */
+void
+FreeResourceByTypeValue(XID id, RESTYPE type, void *value, Bool skipFree)
+{
+    int cid;
+    ResourcePtr res;
+    ResourcePtr *prev, *head;
+
+    if (((cid = dixClientIdForXID(id)) < LimitClients) && clientTable[cid].buckets) {
+        head = &clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
+
+        prev = head;
+        while ((res = *prev)) {
+            if (res->id == id && res->type == type && res->value == value) {
+#ifdef XSERVER_DTRACE
+                XSERVER_RESOURCE_FREE(res->id, res->type,
+                                      res->value, TypeNameString(res->type));
+#endif
+                *prev = res->next;
+                clientTable[cid].elements--;
+
+                doFreeResource(res, skipFree);
+
+                break;
+            }
+            else
+                prev = &res->next;
+        }
+    }
+}
+
+/*
  * Change the value associated with a resource id.  Caller
  * is responsible for "doing the right thing" with the old
  * data
@@ -1176,7 +1213,7 @@ LegalNewID(XID id, ClientPtr client)
 #ifdef XINERAMA
     XID minid, maxid;
 
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         minid = client->clientAsMask | (client->index ?
                                         SERVER_BIT : SERVER_MINID);
         maxid = (clientTable[client->index].fakeID | RESOURCE_ID_MASK) + 1;

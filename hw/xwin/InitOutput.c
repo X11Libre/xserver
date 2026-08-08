@@ -42,6 +42,7 @@ from The Open Group.
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
 #endif
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/pseudoramiX/pseudoramiX.h"
 
 #include "winmsg.h"
@@ -606,8 +607,7 @@ winFixupPaths(void)
 #endif                          /* RELOCATE_PROJECTROOT */
 }
 
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
     /* Re-initialize global variables on server reset */
     winInitializeGlobals();
@@ -635,7 +635,7 @@ OsVendorInit(void)
 
     /* Add a default screen if no screens were specified */
     if (g_iNumScreens == 0) {
-        winDebug("OsVendorInit - Creating default screen 0\n");
+        winDebug("ddxInit - Creating default screen 0\n");
 
         /*
          * We need to initialize the default screen 0 if no -screen
@@ -933,7 +933,7 @@ InitOutput(int argc, char *argv[])
   /*
      Unless full xinerama has been explicitly enabled, register all native screens with pseudoramiX
   */
-  if (!noPanoramiXExtension)
+  if (PanoramiXIsEnabled())
       noPseudoramiXExtension = TRUE;
 
   if ((g_ScreenInfo[0].fMultipleMonitors) && !noPseudoramiXExtension)

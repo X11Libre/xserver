@@ -73,6 +73,8 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #include "xf86Extensions.h"
@@ -120,9 +122,6 @@ static const ExtensionModule staticExtensions[] = {
 #endif /* XINERAMA */
     /* must be before Render to layer DisplayCursor correctly */
     {XFixesExtensionInit, "XFIXES", &noXFixesExtension},
-#ifdef XF86BIGFONT
-    {XFree86BigfontExtensionInit, "XFree86-Bigfont", &noXFree86BigfontExtension},
-#endif
     {RenderExtensionInit, "RENDER", &noRenderExtension},
 #ifdef RANDR
     {RRExtensionInit, "RANDR", &noRRExtension},
@@ -211,7 +210,7 @@ EnableDisableExtensionError(const char *name, Bool enable)
 {
     const ExtensionModule *ext;
     int i;
-    Bool found = FALSE;
+    bool found = FALSE;
 
     for (i = 0; i < ARRAY_SIZE(staticExtensions); i++) {
         ext = &staticExtensions[i];

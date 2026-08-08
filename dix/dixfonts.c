@@ -19,37 +19,11 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
-************************************************************************/
-/* The panoramix components contained the following notice */
-/*
-Copyright (c) 1991, 1997 Digital Equipment Corporation, Maynard, Massachusetts.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software.
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-DIGITAL EQUIPMENT CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES, INCLUDING,
-BUT NOT LIMITED TO CONSEQUENTIAL OR INCIDENTAL DAMAGES, OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Except as contained in this notice, the name of Digital Equipment Corporation
-shall not be used in advertising or otherwise to promote the sale, use or other
-dealings in this Software without prior written authorization from Digital
-Equipment Corporation.
-
 ******************************************************************/
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
@@ -71,7 +45,7 @@ Equipment Corporation.
 #include "os/auth.h"
 #include "os/io_priv.h"
 #include "os/log_priv.h"
-#include "Xext/xf86bigfont/xf86bigfontsrv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "scrnintstr.h"
 #include "resource.h"
@@ -88,7 +62,7 @@ struct list_font_state {
     int patlen;
     int current_fpe;
     int max_names;
-    Bool list_started;
+    bool list_started;
     void *private;
 };
 
@@ -117,7 +91,7 @@ struct list_fonts_with_info_closure {
     struct list_font_state current;
     struct list_font_state saved;
     int savedNumFonts;
-    Bool haveSaved;
+    bool haveSaved;
     char *savedName;
 };
 
@@ -128,7 +102,7 @@ struct list_fonts_closure {
     FontNamesPtr names;
     struct list_font_state current;
     struct list_font_state saved;
-    Bool haveSaved;
+    bool haveSaved;
     char *savedName;
     int savedNameLen;
 };
@@ -535,9 +509,6 @@ CloseFont(void *value, XID fid)
         });
         if (pfont == defaultFont)
             defaultFont = NULL;
-#ifdef XF86BIGFONT
-        XF86BigfontFreeFontShm(pfont);
-#endif
         fpe = pfont->fpe;
         (*fpe_functions[fpe->type]->close_font) (fpe, pfont);
         FreeFPE(fpe);
@@ -1413,7 +1384,7 @@ doPolyText(ClientPtr client, struct poly_text_closure *c)
         err = c->err;
     if (err != Success && c->client != serverClient) {
 #ifdef XINERAMA
-        if (noPanoramiXExtension || !c->pGC->pScreen->myNum)
+        if (PanoramiXIsDisabled() || !c->pGC->pScreen->myNum)
 #endif /* XINERAMA */
             SendErrorToClient(c->client, c->reqType, 0, 0, err);
     }

@@ -27,6 +27,8 @@
  */
 #include <dix-config.h>
 
+
+#include <stdbool.h>
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
@@ -51,7 +53,7 @@ glamor_poly_point_gl(DrawablePtr drawable, GCPtr gc, int mode, int npt, DDXPoint
     GLshort *vbo_ppt;
     char *vbo_offset;
     int box_index;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
     if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))

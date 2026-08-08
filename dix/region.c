@@ -77,6 +77,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xprotostr.h>
 #include <X11/Xfuncproto.h>
 #include <pixman.h>
@@ -579,7 +580,7 @@ RegionOp(RegionPtr newReg,      /* Place to store result         */
          RegionPtr reg2,        /* 2d region in operation        */
          OverlapProcPtr overlapFunc,    /* Function to call for over-
                                          * lapping bands                 */
-         Bool appendNon1,       /* Append non-overlapping bands  */
+         bool appendNon1,       /* Append non-overlapping bands  */
          /* in region 1 ? */
          Bool appendNon2,       /* Append non-overlapping bands  */
          /* in region 2 ? */
@@ -974,7 +975,7 @@ RegionAppend(RegionPtr dstrgn, RegionPtr rgn)
 {
     int numRects, dnumRects, size;
     BoxPtr new, old;
-    Bool prepend;
+    bool prepend;
 
     if (RegionNar(rgn))
         return RegionBreak(dstrgn);
@@ -1157,7 +1158,7 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     BoxPtr box;                 /* Current box in rects                 */
     BoxPtr riBox;               /* Last box in ri[j].reg                */
     RegionPtr hreg;             /* ri[j_half].reg                        */
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     *pOverlap = FALSE;
     if (!badreg->data) {

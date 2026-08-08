@@ -43,6 +43,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <grp.h>
@@ -54,6 +55,7 @@
 #include "include/extinit.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
@@ -112,9 +114,6 @@
 #ifndef SYS_CONFIGDIRPATH
 #define SYS_CONFIGDIRPATH	"%D/X11/%X"
 #endif
-#ifndef PROJECTROOT
-#define PROJECTROOT	"/usr/X11R6"
-#endif
 
 static ModuleDefault ModuleDefaults[] = {
 #ifdef GLXEXT
@@ -170,7 +169,7 @@ xf86ModulelistFromConfig(void ***optlist)
     };
     void **optarray;
     XF86LoadPtr modp;
-    Bool found;
+    bool found;
 
     /*
      * make sure the config file has been parsed and that we have a
@@ -538,7 +537,7 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     MessageType from;
     const char *s;
     XkbRMLVOSet set;
-    const char *rules;
+const char *rules;
 
     /*
      * Merge the ServerLayout and ServerFlags options.  The former have
@@ -767,14 +766,15 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
 
 #ifdef XINERAMA
     from = X_DEFAULT;
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled())
         from = X_CMDLINE;
     else if (xf86GetOptValBool(FlagOptions, FLAG_XINERAMA, &value)) {
         noPanoramiXExtension = !value;
         from = X_CONFIG;
     }
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         LogMessageVerb(from, 1, "Xinerama: enabled\n");
+    }
 #endif /* XINERAMA */
 
 #ifdef DRI2
@@ -860,7 +860,7 @@ static Bool
 checkCoreInputDevices(serverLayoutPtr servlayoutp, Bool implicitLayout)
 {
     InputInfoPtr corePointer = NULL, coreKeyboard = NULL;
-    Bool foundPointer = FALSE, foundKeyboard = FALSE;
+    bool foundPointer = FALSE, foundKeyboard = FALSE;
     const char *pointerMsg = NULL, *keyboardMsg = NULL;
     InputInfoPtr *devs,         /* iterator */
      indp;
@@ -1515,7 +1515,7 @@ configScreen(confScreenPtr screenp, XF86ConfScreenPtr conf_screen, int scrnum,
     int count = 0;
     XF86ConfDisplayPtr dispptr;
     XF86ConfAdaptorLinkPtr conf_adaptor;
-    Bool defaultMonitor = FALSE;
+    bool defaultMonitor = FALSE;
     XF86ConfScreenRec local_conf_screen;
     int i;
 
@@ -1992,7 +1992,7 @@ configExtensions(XF86ConfExtensionsPtr conf_ext)
             char *name = xf86OptionName(o);
             char *val = xf86OptionValue(o);
             char *n;
-            Bool enable = TRUE;
+            bool enable = TRUE;
 
             /* Handle "No<ExtensionName>" */
             n = xf86NormalizeName(name);
@@ -2137,7 +2137,7 @@ xf86HandleConfigFile(Bool autoconfig)
     const char *scanptr;
     Bool singlecard = 0;
 #endif
-    Bool implicit_layout = FALSE;
+    bool implicit_layout = FALSE;
     XF86ConfLayoutPtr layout;
 
     if (!autoconfig) {

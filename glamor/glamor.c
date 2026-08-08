@@ -32,6 +32,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -459,7 +460,7 @@ glamor_add_format(ScreenPtr screen, int depth, CARD32 render_format,
 {
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
     struct glamor_format *f = &glamor_priv->formats[depth];
-    Bool texture_only = FALSE;
+    bool texture_only = FALSE;
 
     /* If we're trying to run on GLES, make sure that we get the read
      * formats that we're expecting, since glamor_transfer relies on

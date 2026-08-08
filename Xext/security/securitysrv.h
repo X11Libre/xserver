@@ -32,9 +32,8 @@ from The Open Group.
 
 #include <X11/extensions/secur.h>
 
-#include "input.h"              /* for DeviceIntPtr */
-#include "pixmap.h"             /* for DrawablePtr */
-#include "resource.h"           /* for RESTYPE */
+#include "include/os.h"         /* for OsTimerPtr */
+#include "include/resource.h"   /* for RESTYPE */
 
 /* resource type to pass in LookupIDByType for authorizations */
 extern RESTYPE SecurityAuthorizationResType;

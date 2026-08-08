@@ -277,13 +277,11 @@ ddxGiveUp(enum ExitCode error)
     }
 }
 
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
 }
 
-void
-OsVendorFatalError(const char *f, va_list args)
+void ddxFatalError(const char *f, va_list args)
 {
 }
 
@@ -963,7 +961,6 @@ vfbRandRInit(ScreenPtr pScreen)
 {
     rrScrPrivPtr pScrPriv;
 
-#if RANDR_12_INTERFACE
     RRModePtr mode;
     RRCrtcPtr crtc;
     RROutputPtr output;
@@ -971,14 +968,12 @@ vfbRandRInit(ScreenPtr pScreen)
     char name[64];
     int i;
     vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
-#endif
     int mmWidth, mmHeight;
 
     if (!RRScreenInit(pScreen))
         return FALSE;
     pScrPriv = rrGetScrPriv(pScreen);
     pScrPriv->rrGetInfo = vfbRRGetInfo;
-#if RANDR_12_INTERFACE
     pScrPriv->rrCrtcSet = vfbRRCrtcSet;
     pScrPriv->rrScreenSetSize = vfbRRScreenSetSize;
     pScrPriv->rrOutputSetProperty = NULL;
@@ -1035,7 +1030,6 @@ vfbRandRInit(ScreenPtr pScreen)
                 return FALSE;
         }
     }
-#endif
     return TRUE;
 }
 

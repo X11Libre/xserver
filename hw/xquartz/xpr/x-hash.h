@@ -64,18 +64,18 @@ X_EXTERN void X_PFX(hash_table_foreach) (x_hash_table * h,
 /* Conversion between unsigned int (e.g. xp_resource_id) and void pointer */
 
 /* Forward declarations */
-static __inline__ void *
+static inline void *
 X_PFX(cvt_uint_to_vptr) (unsigned int val) __attribute__((always_inline));
-static __inline__ unsigned int
+static inline unsigned int
 X_PFX(cvt_vptr_to_uint) (void * val) __attribute__((always_inline));
 
 /* Implementations */
-static __inline__ void *
+static inline void *
 X_PFX(cvt_uint_to_vptr) (unsigned int val) {
     return (void *)((unsigned long)(val));
 }
 
-static __inline__ unsigned int
+static inline unsigned int
 X_PFX(cvt_vptr_to_uint) (void * val) {
     size_t sv = (size_t)val;
     unsigned int uv = (unsigned int)sv;

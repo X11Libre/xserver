@@ -28,6 +28,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>
@@ -186,7 +187,7 @@ ProcXTestFakeInput(ClientPtr client)
     xEvent *ev;
     DeviceIntPtr dev = NULL;
     WindowPtr root;
-    Bool extension = FALSE;
+    bool extension = FALSE;
     ValuatorMask mask;
     int valuators[MAX_VALUATORS] = { 0 };
     int numValuators = 0;

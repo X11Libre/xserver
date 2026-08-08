@@ -22,12 +22,14 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 
 #include "dix/input_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
 #include "include/xf86DDC.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "os.h"
 #include "globals.h"
@@ -156,7 +158,7 @@ xf86RandRSetMode(ScreenPtr pScreen,
     int oldVirtualX = scrp->virtualX;
     int oldVirtualY = scrp->virtualY;
     WindowPtr pRoot = pScreen->root;
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     if (pRoot && scrp->vtSema)
         (*scrp->EnableDisableFBAccess) (scrp, FALSE);
@@ -234,10 +236,10 @@ xf86RandRSetConfig(ScreenPtr pScreen,
     XF86RandRInfoPtr randrp = XF86RANDRINFO(pScreen);
     DisplayModePtr mode;
     int pos[MAXDEVICES][2];
-    Bool useVirtual = FALSE;
+    bool useVirtual = FALSE;
     Rotation oldRotation = randrp->rotation;
     DeviceIntPtr dev;
-    Bool view_adjusted = FALSE;
+    bool view_adjusted = FALSE;
 
     for (dev = inputInfo.devices; dev; dev = dev->next) {
         if (!InputDevIsMaster(dev) && !InputDevIsFloating(dev))
@@ -363,11 +365,10 @@ xf86RandRInit(ScreenPtr pScreen)
     rrScrPrivPtr rp;
     ScrnInfoPtr scrp = xf86ScreenToScrn(pScreen);
 
-#ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         return TRUE;
-#endif /* XINERAMA */
+    }
 
     xf86RandRKey = &xf86RandRKeyRec;
 

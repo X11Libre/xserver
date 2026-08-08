@@ -47,6 +47,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2.h>
@@ -85,7 +86,7 @@ PrintDeviceGrabInfo(DeviceIntPtr dev)
     LocalClientCredRec *lcc;
     GrabInfoPtr devGrab = &dev->deviceGrab;
     GrabPtr grab = devGrab->grab;
-    Bool clientIdPrinted = FALSE;
+    bool clientIdPrinted = FALSE;
 
     ErrorF("Active grab 0x%lx (%s) on device '%s' (%d):\n",
            (unsigned long) grab->resource,
@@ -576,7 +577,7 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
     GrabPtr *deletes, *adds;
     Mask ***updates, **details;
     int i, ndels, nadds, nups;
-    Bool ok;
+    bool ok;
     unsigned int any_modifier;
     unsigned int any_key;
 

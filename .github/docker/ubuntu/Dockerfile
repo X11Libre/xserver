@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 # Base image for the ubuntu xserver / SDK / driver builds.
 #
 # Bakes in everything those jobs install before building the xserver itself:

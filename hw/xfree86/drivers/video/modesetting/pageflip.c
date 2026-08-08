@@ -22,6 +22,7 @@
 
 #include "dix-config.h"
 
+#include <stdbool.h>
 #include <errno.h>
 
 #include "os/xserver_poll.h"
@@ -105,7 +106,7 @@ struct ms_flipdata {
  * one of them per crtc per flip.
  */
 struct ms_crtc_pageflip {
-    Bool on_reference_crtc;
+    bool on_reference_crtc;
     /* reference to the ms_flipdata */
     struct ms_flipdata *flipdata;
     struct xorg_list node;

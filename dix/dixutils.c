@@ -82,6 +82,7 @@ Author:  Adobe Systems Incorporated
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 
@@ -309,7 +310,7 @@ typedef struct _BlockHandler {
     ServerBlockHandlerProcPtr BlockHandler;
     ServerWakeupHandlerProcPtr WakeupHandler;
     void *blockData;
-    Bool deleted;
+    bool deleted;
 } BlockHandlerRec, *BlockHandlerPtr;
 
 static BlockHandlerPtr handlers;

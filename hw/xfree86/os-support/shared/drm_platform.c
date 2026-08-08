@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "config/hotplug_priv.h"
@@ -127,7 +128,7 @@ xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *bu
 void
 xf86PlatformReprobeDevice(int index, struct OdevAttributes *attribs)
 {
-    Bool ret;
+    int ret;
     char *dpath = attribs->path;
 
     ret = get_drm_info(attribs, dpath, index);
@@ -136,7 +137,7 @@ xf86PlatformReprobeDevice(int index, struct OdevAttributes *attribs)
         return;
     }
     ret = xf86platformAddDevice(xf86PlatformFindHotplugDriver(index), index);
-    if (ret == -1)
+    if (!ret)
         xf86_remove_platform_device(index);
 }
 
@@ -145,7 +146,7 @@ xf86PlatformDeviceProbe(struct OdevAttributes *attribs)
 {
     int i;
     char *path = attribs->path;
-    Bool ret;
+    bool ret;
 
     if (!path)
         goto out_free;
@@ -182,7 +183,7 @@ out_free:
 void NewGPUDeviceRequest(struct OdevAttributes *attribs)
 {
     int old_num = xf86_num_platform_devices;
-    int ret;
+    bool ret;
     const char *driver_name;
 
     xf86PlatformDeviceProbe(attribs);
@@ -198,7 +199,7 @@ void NewGPUDeviceRequest(struct OdevAttributes *attribs)
     driver_name = xf86PlatformFindHotplugDriver(xf86_num_platform_devices - 1);
 
     ret = xf86platformAddDevice(driver_name, xf86_num_platform_devices-1);
-    if (ret == -1)
+    if (!ret)
         xf86_remove_platform_device(xf86_num_platform_devices-1);
 
     ErrorF("xf86: found device %d\n", xf86_num_platform_devices);

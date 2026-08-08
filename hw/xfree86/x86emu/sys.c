@@ -65,7 +65,7 @@ struct __una_u16 {
 
 /* Elemental unaligned loads */
 
-static __inline__ u32
+static inline u32
 ldl_u(u32 * p)
 {
     const struct __una_u32 *ptr = (const struct __una_u32 *) p;
@@ -73,7 +73,7 @@ ldl_u(u32 * p)
     return ptr->x;
 }
 
-static __inline__ u16
+static inline u16
 ldw_u(u16 * p)
 {
     const struct __una_u16 *ptr = (const struct __una_u16 *) p;
@@ -83,7 +83,7 @@ ldw_u(u16 * p)
 
 /* Elemental unaligned stores */
 
-static __inline__ void
+static inline void
 stl_u(u32 val, u32 * p)
 {
     struct __una_u32 *ptr = (struct __una_u32 *) p;
@@ -91,7 +91,7 @@ stl_u(u32 val, u32 * p)
     ptr->x = val;
 }
 
-static __inline__ void
+static inline void
 stw_u(u16 val, u16 * p)
 {
     struct __una_u16 *ptr = (struct __una_u16 *) p;
@@ -100,7 +100,7 @@ stw_u(u16 val, u16 * p)
 }
 #else                           /* !__GNUC__ */
 
-static __inline__ u32
+static inline u32
 ldl_u(u32 * p)
 {
     u32 ret;
@@ -109,7 +109,7 @@ ldl_u(u32 * p)
     return ret;
 }
 
-static __inline__ u16
+static inline u16
 ldw_u(u16 * p)
 {
     u16 ret;
@@ -118,7 +118,7 @@ ldw_u(u16 * p)
     return ret;
 }
 
-static __inline__ void
+static inline void
 stl_u(u32 val, u32 * p)
 {
     u32 tmp = val;
@@ -126,7 +126,7 @@ stl_u(u32 val, u32 * p)
     memmove(p, &tmp, sizeof(*p));
 }
 
-static __inline__ void
+static inline void
 stw_u(u16 val, u16 * p)
 {
     u16 tmp = val;

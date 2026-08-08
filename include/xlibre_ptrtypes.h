@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  *
@@ -28,5 +28,8 @@ typedef struct _Window WindowRec;
 struct _ScrnInfoRec;
 typedef struct _ScrnInfoRec *ScrnInfoPtr;
 typedef struct _ScrnInfoRec ScrnInfoRec;
+
+struct _DeviceIntRec;
+typedef struct _DeviceIntRec *DeviceIntPtr;
 
 #endif /* _XLIBRE_SDK_PTRTYPES_H */

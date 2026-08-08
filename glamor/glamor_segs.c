@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "glamor_priv.h"
 #include "glamor_program.h"
 #include "glamor_transform.h"
@@ -47,7 +49,7 @@ glamor_poly_segment_solid_gl(DrawablePtr drawable, GCPtr gc,
     char *vbo_offset;
     int box_index;
     int add_last;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
     if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))

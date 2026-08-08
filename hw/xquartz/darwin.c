@@ -30,6 +30,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <sys/stat.h>
 #include <X11/X.h>
@@ -188,7 +189,7 @@ DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
     int dpi;
     static int foundIndex = 0;
-    Bool ret;
+    bool ret;
 
     if (!dixRegisterPrivateKey(&darwinScreenKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
@@ -658,20 +659,11 @@ InitOutput(int argc, char **argv)
     DarwinAdjustScreenOrigins();
 }
 
-/*
- * OsVendorFatalError
- */
-void
-OsVendorFatalError(const char *f, va_list args)
+void ddxFatalError(const char *f, va_list args)
 {
 }
 
-/*
- * OsVendorInit
- *  Initialization of Darwin OS support.
- */
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
         char *lf;
         char *home = getenv("HOME");

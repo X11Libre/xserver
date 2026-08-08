@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 #
 # Build the X server inside an OpenIndiana (illumos) VM. Mirrors the BSD
 # run-xserver-build.sh scripts: install deps, then meson setup/compile/install.

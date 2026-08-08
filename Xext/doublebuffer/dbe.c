@@ -32,8 +32,9 @@
 
 #include <dix-config.h>
 
-#include <string.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
@@ -51,7 +52,8 @@
 #include "extnsionst.h"
 #include "gcstruct.h"
 #include "dixstruct.h"
-#include "xace.h"
+
+#include "doublebuffer_intern.h"
 
 /* GLOBALS */
 Bool noDbeExtension = FALSE;
@@ -189,7 +191,7 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
 
     /* See if the window's visual is on the list. */
     VisualID visual = wVisual(pWin);
-    Bool visualMatched = FALSE;
+    bool visualMatched = FALSE;
     for (int i = 0; (i < scrVisInfo.count) && !visualMatched; i++) {
         if (scrVisInfo.visinfo[i].visual == visual) {
             visualMatched = TRUE;
@@ -737,9 +739,7 @@ ProcDbeDispatch(ClientPtr client)
  *     FALSE - the window's background state is NONE
  *
  *****************************************************************************/
-
-static Bool
-DbeSetupBackgroundPainter(WindowPtr pWin, GCPtr pGC)
+static bool DbeSetupBackgroundPainter(WindowPtr pWin, GCPtr pGC)
 {
     ChangeGCVal gcvalues[4];
     int ts_x_origin, ts_y_origin;
@@ -969,15 +969,13 @@ static void miDbeWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowP
 void
 DbeExtensionInit(void)
 {
+    if (PanoramiXIsEnabled()) {
+        return;
+    }
+
     ExtensionEntry *extEntry;
     DbeScreenPrivPtr pDbeScreenPriv;
     int nStubbedScreens = 0;
-    Bool ddxInitSuccess;
-
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return;
-#endif /* XINERAMA */
 
     /* Create the resource types. */
     dbeDrawableResType =
@@ -1021,14 +1019,14 @@ DbeExtensionInit(void)
             pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
 
             /* Setup DDX. */
-            ddxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
+            bool dbxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
 
             /* DDX DBE initialization may have the side affect of
              * reallocating pDbeScreenPriv, so we need to update it.
              */
             pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
 
-            if (ddxInitSuccess) {
+            if (dbxInitSuccess) {
                 /* Hook in our window destructor. The DDX initialization function
                  * already added WindowPosition hook for us.
                  */

@@ -31,6 +31,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -113,12 +114,24 @@ RootlessUpdateScreenPixmap(ScreenPtr pScreen)
     rowbytes = PixmapBytePad(pScreen->width, pScreen->rootDepth);
 
     if (s->pixmap_data_size < rowbytes) {
-        free(s->pixmap_data);
-
-        s->pixmap_data_size = rowbytes;
-        s->pixmap_data = calloc(1, s->pixmap_data_size);
-        if (s->pixmap_data == NULL)
+        /*
+         * Allocate the replacement before freeing/resizing the old one:
+         * on failure this used to free s->pixmap_data, bump
+         * pixmap_data_size to the new (larger) size, then return with
+         * s->pixmap_data (and the screen pixmap pPix, still pointing at
+         * the freed block via its old ModifyPixmapHeader() call) left
+         * dangling -- and because pixmap_data_size was already bumped, a
+         * later same-or-smaller-size call would see pixmap_data_size <
+         * rowbytes as false and skip reallocating forever, pinning the
+         * dangling state permanently.
+         */
+        void *new_data = calloc(1, rowbytes);
+        if (new_data == NULL)
             return;
+
+        free(s->pixmap_data);
+        s->pixmap_data_size = rowbytes;
+        s->pixmap_data = new_data;
 
         memset(s->pixmap_data, 0xFF, s->pixmap_data_size);
 
@@ -540,7 +553,7 @@ RootlessMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst,
                               WindowPtr *ppLayerWin)
 {
     RegionRec saveRoot;
-    Bool result;
+    bool result;
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
     SCREEN_UNWRAP(pScreen, MarkOverlappedWindows);
@@ -561,7 +574,7 @@ RootlessMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst,
         // This code copied from miMarkOverlappedWindows()
 
         register WindowPtr pChild;
-        Bool anyMarked = FALSE;
+        bool anyMarked = FALSE;
         MarkWindowProcPtr MarkWindow = pScreen->MarkWindow;
 
         RL_DEBUG_MSG("is top level! ");

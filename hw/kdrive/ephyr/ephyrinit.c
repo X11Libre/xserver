@@ -383,8 +383,7 @@ KdOsFuncs EphyrOsFuncs = {
     .Init = EphyrInit,
 };
 
-void
-OsVendorInit(void)
+void ddxInit(void)
 {
     EPHYR_DBG("mark");
 

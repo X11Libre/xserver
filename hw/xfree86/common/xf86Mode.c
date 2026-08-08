@@ -81,12 +81,14 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 
 #include "include/edid.h"
 #include "include/extinit.h"
 #include "os/log_priv.h"
 #include "os/mathx_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "xf86Modes.h"
 #include "xf86Crtc.h"
@@ -463,7 +465,7 @@ xf86LookupMode(ScrnInfoPtr scrp, DisplayModePtr modep,
     ClockRangePtr cp;
     int i, k, gap, minimumGap = CLOCK_TOLERANCE + 1;
     double refresh, bestRefresh = 0.0;
-    Bool found = FALSE;
+    bool found = FALSE;
     int extraFlags = 0;
     int clockIndex = -1;
     int MulFactor = 1;
@@ -1353,12 +1355,12 @@ xf86ValidateModes(ScrnInfoPtr scrp, DisplayModePtr availModes,
     int linePitch = -1, virtX = 0, virtY = 0;
     int newLinePitch, newVirtX, newVirtY;
     int modeSize;               /* in pixels */
-    Bool validateAllDefaultModes = FALSE;
-    Bool userModes = FALSE;
+    bool validateAllDefaultModes = FALSE;
+    bool userModes = FALSE;
     int saveType;
     PixmapFormatRec *BankFormat;
     ClockRangePtr cp;
-    Bool inferred_virtual = FALSE;
+    bool inferred_virtual = FALSE;
 
     DebugF
         ("xf86ValidateModes(%p, %p, %p, %p,\n\t\t  %p, %d, %d, %d, %d, %d, %d, %d, %d, 0x%x)\n",
@@ -1394,7 +1396,7 @@ xf86ValidateModes(ScrnInfoPtr scrp, DisplayModePtr availModes,
     }
     else {
         const char *type = "";
-        Bool specified = FALSE;
+        bool specified = FALSE;
 
         if (scrp->monitor->nHsync <= 0) {
             scrp->monitor->hsync[0].lo = 31.5;
@@ -1630,12 +1632,13 @@ xf86ValidateModes(ScrnInfoPtr scrp, DisplayModePtr availModes,
 
     /* Lookup each mode */
 #ifdef XINERAMA
-    if (noPanoramiXExtension)
+    if (!PanoramiXIsEnabled()) {
         validateAllDefaultModes = TRUE;
+    }
 #endif /* XINERAMA */
 
     for (p = scrp->modes;; p = p->next) {
-        Bool repeat;
+        bool repeat;
 
         /*
          * If the supplied mode names don't produce a valid mode, scan through

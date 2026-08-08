@@ -27,6 +27,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
@@ -53,7 +55,7 @@ glamor_poly_glyph_blt_gl(DrawablePtr drawable, GCPtr gc,
     glamor_program *prog;
     RegionPtr clip = gc->pCompositeClip;
     int box_index;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
     if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))
@@ -187,7 +189,7 @@ glamor_push_pixels_gl(GCPtr gc, PixmapPtr bitmap,
     int num_points;
     INT16 *points = NULL;
     char *vbo_offset;
-    Bool ret = FALSE;
+    bool ret = FALSE;
 
     if (w * h > MAXINT / (2 * sizeof(float)))
         goto bail;

@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include "config/config-udev.h"
+#include "dix/inputdev_priv.h"
 #include "dix/settings_priv.h"
 #include "config/hotplug_priv.h"
 #include "os/fmt.h"
@@ -212,7 +213,8 @@ device_added(struct udev_device *udev_device)
         goto unwind;
     }
 
-    if (device_is_duplicate(config_info)) {
+    if (dixInputDeviceFindByConf(config_info) ||
+        dixInputDeviceOffFindByConf(config_info)) {
         LogMessage(X_WARNING, "config/udev: device %s already added. "
                    "Ignoring.\n", name);
         goto unwind;

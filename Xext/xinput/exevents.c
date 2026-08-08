@@ -80,6 +80,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/geproto.h>
@@ -678,10 +679,17 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
                 to->touch->num_touches = from->touch->num_touches;
                 to->touch->touches = calloc(to->touch->num_touches,
                                             sizeof(TouchPointInfoRec));
+                /*
+                 * Checking 'to->touch' here (as this used to) is always
+                 * true -- it was just allocated a few lines above. The
+                 * allocation that can actually fail is 'touches', right
+                 * above, which TouchInitTouchPoint() then indexes
+                 * unconditionally.
+                 */
+                if (!to->touch->touches)
+                    FatalError("[Xi] no memory for class shift.\n");
                 for (i = 0; i < to->touch->num_touches; i++)
                     TouchInitTouchPoint(to->touch, to->valuator, i);
-                if (!to->touch)
-                    FatalError("[Xi] no memory for class shift.\n");
             }
             else
                 classes->touch = NULL;
@@ -1778,8 +1786,8 @@ ProcessGestureEvent(InternalEvent *ev, DeviceIntPtr dev)
 {
     GestureInfoPtr gi;
     DeviceIntPtr kbd;
-    Bool deactivateGestureGrab = FALSE;
-    Bool delivered = FALSE;
+    bool deactivateGestureGrab = FALSE;
+    bool delivered = FALSE;
 
     if (!dev->gesture)
         return;
@@ -1829,7 +1837,7 @@ static void
 ProcessDeviceEvent(InternalEvent *ev, DeviceIntPtr device)
 {
     GrabPtr grab;
-    Bool deactivateDeviceGrab = FALSE;
+    bool deactivateDeviceGrab = FALSE;
     int key = 0, rootX, rootY;
     ButtonClassPtr b;
     int ret = 0;
@@ -2026,7 +2034,7 @@ DeliverTouchBeginEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
 {
     enum TouchListenerState state;
     int rc = Success;
-    Bool has_ownershipmask;
+    bool has_ownershipmask;
 
     if (listener->type == TOUCH_LISTENER_POINTER_REGULAR ||
         listener->type == TOUCH_LISTENER_POINTER_GRAB) {
@@ -2138,7 +2146,7 @@ DeliverTouchEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, InternalEvent *ev,
                   TouchListener * listener, ClientPtr client,
                   WindowPtr win, GrabPtr grab, XI2Mask *xi2mask)
 {
-    Bool has_ownershipmask = FALSE;
+    bool has_ownershipmask = FALSE;
     int rc = Success;
 
     if (xi2mask)

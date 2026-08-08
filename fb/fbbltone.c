@@ -22,6 +22,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "fb.h"
 
 /*
@@ -179,10 +181,10 @@ fbBltOne(FbStip * src, FbStride srcStride,      /* FbStip units per scanline */
     int w;
     int n, nmiddle;
     int dstS;                   /* stipple-relative dst X coordinate */
-    Bool copy;                  /* accelerate dest-invariant */
-    Bool transparent;           /* accelerate 0 nop */
+    bool copy;                  /* accelerate dest-invariant */
+    bool transparent;           /* accelerate 0 nop */
     int srcinc;                 /* source units consumed */
-    Bool endNeedsLoad = FALSE;  /* need load for endmask */
+    bool endNeedsLoad = FALSE;  /* need load for endmask */
     int startbyte, endbyte;
 
     /*

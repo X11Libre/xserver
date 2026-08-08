@@ -50,7 +50,7 @@ xf86OSInitVidMem(VidMemInfoPtr pVidMem)
     xf86EnableIO();
 }
 
-volatile unsigned char *ioBase = MAP_FAILED;
+void *ioBase = MAP_FAILED;
 
 Bool
 xf86EnableIO()
@@ -75,11 +75,7 @@ xf86DisableIO()
 {
 
     if (ioBase != MAP_FAILED) {
-#if defined(__FreeBSD__)
-        munmap(__DEVOLATILE(unsigned char *, ioBase), 0x10000);
-#else
-        munmap(__UNVOLATILE(ioBase), 0x10000);
-#endif
+        munmap(ioBase, 0x10000);
         ioBase = MAP_FAILED;
     }
 }

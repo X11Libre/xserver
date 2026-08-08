@@ -25,6 +25,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -41,8 +42,9 @@ Equipment Corporation.
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
-#include "Xext/composite/compint.h"
+#include "Xext/composite/compositeext_priv.h"
 #include "Xext/damage/damageext_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/render/picturestr_priv.h"
 #include "Xext/xfixes/xfixesint.h"
 
@@ -168,7 +170,7 @@ XineramaCreateGC(GCPtr pGC)
     ScreenPtr pScreen = pGC->pScreen;
     PanoramiXScreenPtr pScreenPriv = (PanoramiXScreenPtr)
         dixLookupPrivate(&pScreen->devPrivates, &PanoramiXScreenKeyRec);
-    Bool ret;
+    bool ret;
 
     pScreen->CreateGC = pScreenPriv->CreateGC;
     if ((ret = (*pScreen->CreateGC) (pGC))) {
@@ -422,10 +424,10 @@ void
 PanoramiXExtensionInit(void)
 {
     int i;
-    Bool success = FALSE;
+    bool success = FALSE;
     ScreenPtr masterScreen = dixGetMasterScreen();
 
-    if (noPanoramiXExtension)
+    if (PanoramiXIsDisabled())
         return;
 
     if (!dixRegisterPrivateKey(&PanoramiXScreenKeyRec, PRIVATE_SCREEN, 0)) {
@@ -573,7 +575,7 @@ Bool
 PanoramiXCreateConnectionBlock(void)
 {
     int i, j, length;
-    Bool disable_backing_store = FALSE;
+    bool disable_backing_store = FALSE;
     int old_width, old_height;
     float width_mult, height_mult;
     xWindowRoot *root;
@@ -709,7 +711,7 @@ static void
 PanoramiXMaybeAddDepth(DepthPtr pDepth)
 {
     int k;
-    Bool found = FALSE;
+    bool found = FALSE;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         for (k = 0; k < walkScreen->numDepths; k++) {
@@ -736,7 +738,7 @@ static void
 PanoramiXMaybeAddVisual(VisualPtr pVisual)
 {
     int k;
-    Bool found = FALSE;
+    bool found = FALSE;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         found = FALSE;
@@ -901,7 +903,7 @@ ProcPanoramiXGetState(ClientPtr client)
     X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
 
     xPanoramiXGetStateReply reply = {
-        .state = !noPanoramiXExtension,
+        .state = PanoramiXIsEnabled(),
         .window = stuff->window
     };
 
@@ -969,9 +971,9 @@ ProcXineramaIsActive(ClientPtr client)
 #if 1
         /* The following hack fools clients into thinking that Xinerama
          * is disabled even though it is not. */
-        .state = !noPanoramiXExtension && !PanoramiXExtensionDisabledHack
+        .state = PanoramiXIsEnabled() && !PanoramiXExtensionDisabledHack
 #else
-        .state = !noPanoramiXExtension;
+        .state = PanoramiXIsEnabled();
 #endif
     };
 
@@ -985,14 +987,14 @@ ProcXineramaQueryScreens(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xXineramaQueryScreensReq);
 
-    CARD32 number = (noPanoramiXExtension) ? 0 : PanoramiXNumScreens;
+    CARD32 number = PanoramiXIsDisabled() ? 0 : PanoramiXNumScreens;
     xXineramaQueryScreensReply reply = {
         .number = number
     };
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             /* xXineramaScreenInfo is the same as xRectangle */
             x_rpcbuf_write_rect(&rpcbuf,

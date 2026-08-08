@@ -28,6 +28,4 @@
 
 #include <X11/Xdefs.h>
 
-extern Bool DRI2ModuleSetup(void);
-
 #endif /* XSERVER_XFREE86_DRI2INT_H */

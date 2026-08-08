@@ -48,6 +48,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
@@ -61,6 +62,7 @@ in this Software without prior written authorization from The Open Group.
 #include "include/misc.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include   "windowstr.h"
 #include   "pixmapstr.h"
@@ -77,10 +79,10 @@ typedef struct {
     CursorPtr pCursor;          /* current cursor */
     CursorPtr pSpriteCursor;    /* cursor on screen */
     BoxRec limits;              /* current constraints */
-    Bool confined;              /* pointer can't change screens */
+    bool confined;              /* pointer can't change screens */
     int x, y;                   /* hot spot location */
     int devx, devy;             /* sprite position */
-    Bool generateEvent;         /* generate an event during warping? */
+    bool generateEvent;         /* generate an event during warping? */
 } miPointerRec, *miPointerPtr;
 
 DevPrivateKeyRec miPointerScreenKeyRec;
@@ -407,11 +409,7 @@ miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
     /* Don't call USFS if we use Xinerama, otherwise the root window is
      * updated to the second screen, and we never receive any events.
      * (FDO bug #18668) */
-    if (changedScreen
-#ifdef XINERAMA
-        && noPanoramiXExtension
-#endif /* XINERAMA */
-        ) {
+    if (changedScreen && PanoramiXIsDisabled()) {
             DeviceIntPtr master = GetMaster(pDev, MASTER_POINTER);
             /* Hack for CVE-2023-5380: if we're moving
              * screens PointerWindows[] keeps referring to the
@@ -570,7 +568,7 @@ Bool
 miPointerSetWaitForUpdate(ScreenPtr pScreen, Bool wait)
 {
     SetupScreen(pScreen);
-    Bool prevWait = pScreenPriv->waitForUpdate;
+    bool prevWait = !!pScreenPriv->waitForUpdate;
 
     pScreenPriv->waitForUpdate = wait;
     return prevWait;
@@ -634,8 +632,8 @@ miPointerSetPosition(DeviceIntPtr pDev, int mode, double *screenx,
     ScreenPtr pScreen;
     ScreenPtr newScreen;
     int x, y;
-    Bool switch_screen = FALSE;
-    Bool should_constrain_barriers = FALSE;
+    bool switch_screen = FALSE;
+    bool should_constrain_barriers = FALSE;
     int i;
 
     miPointerPtr pPointer;

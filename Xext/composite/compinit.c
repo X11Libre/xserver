@@ -43,6 +43,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
@@ -52,6 +54,7 @@
 
 #include "compint.h"
 #include "compositeext.h"
+#include "compositeext_intern.h"
 
 Bool noCompositeExtension = FALSE;
 
@@ -123,7 +126,7 @@ compChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret;
+    bool ret;
 
     pScreen->ChangeWindowAttributes = cs->ChangeWindowAttributes;
     ret = pScreen->ChangeWindowAttributes(pWin, mask);
@@ -186,8 +189,7 @@ compFindVisuallessDepth(ScreenPtr pScreen, int d)
 /*
  * Add a list of visual IDs to the list of visuals to implicitly redirect.
  */
-static Bool
-compRegisterAlternateVisuals(CompScreenPtr cs, VisualID * vids, int nVisuals)
+static bool compRegisterAlternateVisuals(CompScreenPtr cs, VisualID * vids, int nVisuals)
 {
     VisualID *p;
 
@@ -204,13 +206,13 @@ compRegisterAlternateVisuals(CompScreenPtr cs, VisualID * vids, int nVisuals)
     return TRUE;
 }
 
+/* NOTE: only used by proprietary Nvidia drivers as well as our own glx module */
 Bool
 CompositeRegisterAlternateVisuals(ScreenPtr pScreen, VisualID * vids,
                                   int nVisuals)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
-
-    return compRegisterAlternateVisuals(cs, vids, nVisuals);
+    return (!!compRegisterAlternateVisuals(cs, vids, nVisuals));
 }
 
 typedef struct _alternateVisual {
@@ -225,9 +227,8 @@ static CompAlternateVisual altVisuals[] = {
     {32, PIXMAN_a8r8g8b8},
 };
 
-static Bool
-compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
-                       CompAlternateVisual * alt)
+static bool compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
+                                   CompAlternateVisual * alt)
 {
     VisualPtr visual;
     DepthPtr depth;
@@ -295,10 +296,9 @@ compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
     return TRUE;
 }
 
-static Bool
-compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
+static bool compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
 {
-    int ret = 0;
+    bool ret = FALSE;
 
     for (int alt = 0; alt < ARRAY_SIZE(altVisuals); alt++)
         ret |= compAddAlternateVisual(pScreen, cs, altVisuals + alt);
@@ -306,8 +306,7 @@ compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
     return ret;
 }
 
-Bool
-compScreenInit(ScreenPtr pScreen)
+bool compScreenInit(ScreenPtr pScreen)
 {
     if (!dixRegisterPrivateKey(&CompScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;

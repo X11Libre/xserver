@@ -25,7 +25,6 @@
 #include "xf86_OSproc.h"
 #include "xf86Bus.h"
 #include "compiler.h"
-#define _INT10_PRIVATE
 #include "int10Defines.h"
 #include "xf86int10_priv.h"
 #include "Pci.h"

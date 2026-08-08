@@ -4,12 +4,13 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
+
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86Pci.h"
 #include "compiler.h"
-#define _INT10_PRIVATE
-#include "xf86int10.h"
+#include "xf86int10_priv.h"
 #ifdef __sparc__
 #define DEV_MEM "/dev/fb"
 #else
@@ -84,7 +85,7 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
     int pagesize;
     memType cs;
     legacyVGARec vga;
-    Bool videoBiosMapped = FALSE;
+    bool videoBiosMapped = FALSE;
     ScrnInfoPtr pScrn;
     if (int10Generation != serverGeneration) {
         counter = 0;

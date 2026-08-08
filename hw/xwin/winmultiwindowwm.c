@@ -118,7 +118,7 @@ typedef struct _WMInfo {
     xcb_atom_t atmNumberDesktops;
     xcb_atom_t atmDesktopNames;
     xcb_ewmh_connection_t ewmh;
-    Bool fCompositeWM;
+    bool fCompositeWM;
 } WMInfoRec, *WMInfoPtr;
 
 typedef struct _WMProcArgRec {
@@ -557,7 +557,7 @@ getHwnd(WMInfoPtr pWMInfo, xcb_window_t iWindow)
 static Bool
 IsOverrideRedirect(xcb_connection_t *conn, xcb_window_t iWin)
 {
-    Bool result = FALSE;
+    bool result = FALSE;
     xcb_get_window_attributes_reply_t *reply;
     xcb_get_window_attributes_cookie_t cookie;
 
@@ -908,7 +908,7 @@ winMultiWindowWMProc(void *pArg)
             */
             if (pNode->msg.iWindow)
             {
-              Bool neverFocus = FALSE;
+              bool neverFocus = FALSE;
               xcb_get_property_cookie_t cookie;
               xcb_icccm_wm_hints_t hints;
 
@@ -1203,7 +1203,7 @@ winMultiWindowXMsgProc(void *pArg)
     while (1) {
         xcb_generic_event_t *event;
         uint8_t type;
-        Bool send_event;
+        bool send_event;
 
         if (g_shutdown)
             break;
@@ -1653,7 +1653,7 @@ winSendMessageToWM(void *pWMInfo, winWMMessagePtr pMsg)
 static Bool
 CheckAnotherWindowManager(xcb_connection_t *conn, DWORD dwScreen)
 {
-    Bool redirectError = FALSE;
+    bool redirectError = FALSE;
 
     /* Get root window id */
     xcb_screen_t *root_screen = xcb_aux_get_screen(conn, dwScreen);

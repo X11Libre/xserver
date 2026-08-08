@@ -31,6 +31,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stddef.h>             /* For NULL */
 #include <limits.h>             /* For CHAR_BIT */
 #include <assert.h>
@@ -146,7 +147,7 @@ RootlessNativeWindowMoved(WindowPtr pWin)
 Bool
 RootlessCreateWindow(WindowPtr pWin)
 {
-    Bool result;
+    bool result;
     RegionRec saveRoot;
 
     SETWINREC(pWin, NULL);
@@ -278,7 +279,7 @@ RootlessSetShape(WindowPtr pWin, int kind)
 Bool
 RootlessChangeWindowAttributes(WindowPtr pWin, unsigned long vmask)
 {
-    Bool result;
+    bool result;
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
     RL_DEBUG_MSG("change window attributes start ");
@@ -419,7 +420,7 @@ RootlessEnsureFrame(WindowPtr pWin)
 Bool
 RootlessRealizeWindow(WindowPtr pWin)
 {
-    Bool result;
+    bool result;
     RegionRec saveRoot;
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
@@ -493,7 +494,7 @@ RootlessUnrealizeWindow(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     RootlessWindowRec *winRec = WINREC(pWin);
-    Bool result;
+    bool result;
 
     RL_DEBUG_MSG("unrealizewindow start ");
 

@@ -21,6 +21,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <X11/extensions/render.h>
 
 #include "dix/dix_priv.h"
@@ -29,6 +30,7 @@
 #include "include/extinit.h"
 #include "include/xf86DDC.h"
 #include "os/mathx_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/randr/randrstr_priv.h"
 
 #include "xf86.h"
@@ -70,14 +72,12 @@ typedef struct _xf86RandR12Info {
      */
     xf86EnterVTProc *orig_EnterVT;
 
-    Bool                         panning;
+    bool                         panning;
     ConstrainCursorHarderProcPtr orig_ConstrainCursorHarder;
 } XF86RandRInfoRec, *XF86RandRInfoPtr;
 
-#ifdef RANDR_12_INTERFACE
 static Bool xf86RandR12Init12(ScreenPtr pScreen);
 static Bool xf86RandR12CreateScreenResources12(ScreenPtr pScreen);
-#endif
 
 static x_server_generation_t xf86RandR12Generation;
 
@@ -351,7 +351,7 @@ xf86RandR13Pan(xf86CrtcPtr crtc, int x, int y)
 {
     int newX, newY;
     int width, height;
-    Bool panned = FALSE;
+    bool panned = FALSE;
 
     if (crtc->version < 2)
         return;
@@ -520,7 +520,7 @@ xf86RandR12SetMode(ScreenPtr pScreen,
     int oldmmHeight = pScreen->mmHeight;
     WindowPtr pRoot = pScreen->root;
     DisplayModePtr currentMode = NULL;
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     if (pRoot)
         (*scrp->EnableDisableFBAccess) (scrp, FALSE);
@@ -588,11 +588,11 @@ xf86RandR12SetConfig(ScreenPtr pScreen,
     XF86RandRInfoPtr randrp = XF86RANDRINFO(pScreen);
     DisplayModePtr mode;
     int pos[MAXDEVICES][2];
-    Bool useVirtual = FALSE;
+    bool useVirtual = FALSE;
     int maxX = 0, maxY = 0;
     Rotation oldRotation = randrp->rotation;
     DeviceIntPtr dev;
-    Bool view_adjusted = FALSE;
+    bool view_adjusted = FALSE;
 
     randrp->rotation = rotation;
 
@@ -687,7 +687,7 @@ xf86RandR12ScreenSetSize(ScreenPtr pScreen,
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(pScrn);
     WindowPtr pRoot = pScreen->root;
     PixmapPtr pScrnPix;
-    Bool ret = FALSE;
+    bool ret = FALSE;
     int c;
 
     if (randrp->virtualX == -1 || randrp->virtualY == -1) {
@@ -734,10 +734,8 @@ xf86RandR12ScreenSetSize(ScreenPtr pScreen,
 
     if (pRoot && pScrn->vtSema)
         (*pScrn->EnableDisableFBAccess) (pScrn, TRUE);
-#if RANDR_12_INTERFACE
     if (pScreen->root && ret)
         RRScreenSizeNotify(pScreen);
-#endif
     return ret;
 }
 
@@ -759,11 +757,9 @@ xf86RandR12CreateScreenResources(ScreenPtr pScreen)
     int width, height;
     int mmWidth, mmHeight;
 
-#ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled())
         return TRUE;
-#endif /* XINERAMA */
 
     config = XF86_CRTC_CONFIG_PTR(pScrn);
     randrp = XF86RANDRINFO(pScreen);
@@ -836,10 +832,8 @@ xf86RandR12CreateScreenResources(ScreenPtr pScreen)
         randrp->virtualY = pScrn->virtualY;
     }
     xf86CrtcSetScreenSubpixelOrder(pScreen);
-#if RANDR_12_INTERFACE
     if (xf86RandR12CreateScreenResources12(pScreen))
         return TRUE;
-#endif
     return TRUE;
 }
 
@@ -850,7 +844,7 @@ xf86RandR12Init(ScreenPtr pScreen)
 
 #ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         if (xf86NumScreens == 1)
             noPanoramiXExtension = TRUE;
         else
@@ -892,10 +886,8 @@ xf86RandR12Init(ScreenPtr pScreen)
 
     dixSetPrivate(&pScreen->devPrivates, &xf86RandR12KeyRec, randrp);
 
-#if RANDR_12_INTERFACE
     if (!xf86RandR12Init12(pScreen))
         return FALSE;
-#endif
     return TRUE;
 }
 
@@ -908,10 +900,8 @@ xf86RandR12CloseScreen(ScreenPtr pScreen)
         return;
 
     randrp = XF86RANDRINFO(pScreen);
-#if RANDR_12_INTERFACE
     xf86ScreenToScrn(pScreen)->EnterVT = randrp->orig_EnterVT;
     pScreen->ConstrainCursorHarder = randrp->orig_ConstrainCursorHarder;
-#endif
 
     free(randrp->palette);
     free(randrp);
@@ -922,23 +912,19 @@ xf86RandR12SetRotations(ScreenPtr pScreen, Rotation rotations)
 {
     XF86RandRInfoPtr randrp;
 
-#if RANDR_12_INTERFACE
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     int c;
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(pScrn);
-#endif
 
     if (!dixPrivateKeyRegistered(&xf86RandR12KeyRec))
         return;
 
     randrp = XF86RANDRINFO(pScreen);
-#if RANDR_12_INTERFACE
     for (c = 0; c < config->num_crtc; c++) {
         xf86CrtcPtr crtc = config->crtc[c];
 
         RRCrtcSetRotations(crtc->randr_crtc, rotations);
     }
-#endif
     randrp->supported_rotations = rotations;
 }
 
@@ -978,8 +964,6 @@ xf86RandR12GetOriginalVirtualSize(ScrnInfoPtr pScrn, int *x, int *y)
         *y = randrp->virtualY;
     }
 }
-
-#if RANDR_12_INTERFACE
 
 #define FLAG_BITS (RR_HSyncPositive | \
 		   RR_HSyncNegative | \
@@ -1058,7 +1042,7 @@ xf86RandR12CrtcNotify(RRCrtcPtr randr_crtc)
     xf86OutputPtr output;
     int i, j;
     DisplayModePtr mode = &crtc->mode;
-    Bool ret;
+    bool ret;
 
     randr_outputs = calloc(config->num_output, sizeof(RROutputPtr));
     if (!randr_outputs)
@@ -1144,10 +1128,10 @@ xf86RandR12CrtcSet(ScreenPtr pScreen,
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(pScrn);
     xf86CrtcPtr crtc = randr_crtc->devPrivate;
     RRTransformPtr transform;
-    Bool changed = FALSE;
+    bool changed = FALSE;
     int o, ro;
     xf86CrtcPtr *save_crtcs;
-    Bool save_enabled = crtc->enabled;
+    bool save_enabled = !!crtc->enabled;
 
     if (!crtc->scrn->vtSema)
         return FALSE;
@@ -1590,7 +1574,7 @@ xf86RROutputSetModes(RROutputPtr randr_output, DisplayModePtr modes)
     RRModePtr *rrmodes = NULL;
     int nmode = 0;
     int npreferred = 0;
-    Bool ret = TRUE;
+    bool ret = TRUE;
     int pref;
 
     for (mode = modes; mode; mode = mode->next)
@@ -1925,7 +1909,7 @@ xf86RandR13SetPanning(ScreenPtr pScreen,
     BoxRec oldTotalArea;
     BoxRec oldTrackingArea;
     INT16 oldBorder[4];
-    Bool oldPanning = randrp->panning;
+    bool oldPanning = randrp->panning;
 
     if (crtc->version < 2)
         return FALSE;
@@ -2061,7 +2045,7 @@ xf86RandR12EnterVT(ScrnInfoPtr pScrn)
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     XF86RandRInfoPtr randrp = XF86RANDRINFO(pScreen);
     rrScrPrivPtr rp = rrGetScrPriv(pScreen);
-    Bool ret;
+    bool ret;
     int i;
 
     if (randrp->orig_EnterVT) {
@@ -2412,8 +2396,6 @@ xf86RandR12Init12(ScreenPtr pScreen)
 
     return TRUE;
 }
-
-#endif
 
 Bool
 xf86RandR12PreInit(ScrnInfoPtr pScrn)

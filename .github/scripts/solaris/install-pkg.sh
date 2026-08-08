@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 #
 # Install xserver build dependencies on OpenIndiana (illumos), via IPS (`pkg`).
 #
@@ -48,7 +50,6 @@ libs="
     x11/library/libxext
     x11/library/libxfixes
     x11/library/libxrender
-    x11/library/libxt
     x11/library/libx11
     x11/library/xtrans
     x11/library/libxkbfile

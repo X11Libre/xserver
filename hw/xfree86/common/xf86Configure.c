@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include "include/misc.h"
 #include "os/ddx_priv.h"
@@ -43,8 +44,7 @@
 #include "xf86DDC_priv.h"
 #include "xf86pciBus.h"
 #if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
-#include "xf86Bus.h"
-#include "xf86Sbus_priv.h"
+#include "xf86sbusBus_priv.h"
 #endif
 #include "loaderProcs.h"
 #include "xf86Parser_priv.h"
@@ -629,7 +629,7 @@ DoConfigure(void)
 
     /* Call all of the probe functions, reporting the results. */
     for (CurrentDriver = 0; CurrentDriver < xf86NumDrivers; CurrentDriver++) {
-        Bool found_screen;
+        bool found_screen;
         DriverRec *const drv = xf86DriverList[CurrentDriver];
 
         found_screen = xf86CallDriverProbe(drv, TRUE);
@@ -728,7 +728,7 @@ DoConfigure(void)
             k = screennum > 0 ? screennum : 1;
             for (l = oldNumScreens; l < xf86NumScreens; l++) {
                 /* is screen primary? */
-                Bool primary = FALSE;
+                bool primary = FALSE;
 
                 for (n = 0; n < xf86Screens[l]->numEntities; n++) {
                     if (xf86IsEntityPrimary(xf86Screens[l]->entityList[n])) {

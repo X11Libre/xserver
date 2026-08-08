@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT OR X11 OR AGPL-3.0-or-later
+/* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later
  *
  * DPMS (Display Power Management Signaling) — interface between the
  * DPMS extension and other parts (DIX, DDX, OS).
@@ -31,6 +31,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dixstruct.h"
 
 /**
@@ -54,16 +56,6 @@
  * @return  Success on success, or a dixSaveScreens error code.
  */
 extern int DPMSSet(ClientPtr client, int level);
-
-/**
- * Query whether DPMS is supported by any screen.
- *
- * Returns TRUE if at least one screen (or GPU screen) has a non-NULL
- * DPMS function pointer.  Called during DPMSExtensionInit to decide
- * whether to register the extension at all, and by the Info request
- * to report the DPMS state.
- */
-extern Bool DPMSSupported(void);
 
 /**
  * Standby timeout in milliseconds.
@@ -109,7 +101,7 @@ extern CARD16 DPMSPowerLevel;
  * by the DPMS Enable/Disable protocol requests.  When FALSE, the
  * timeout machinery in WaitFor.c skips DPMS transitions entirely.
  */
-extern Bool DPMSEnabled;
+extern bool DPMSEnabled;
 
 /**
  * Set TRUE when the "-dpms" command-line flag is used.
@@ -117,6 +109,6 @@ extern Bool DPMSEnabled;
  * Checked by the DDX (xf86DPMSInit) to suppress DPMS initialisation
  * even when the config file requests it.  Set by ddxProcessArgument().
  */
-extern Bool DPMSDisabledSwitch;
+extern bool DPMSDisabledSwitch;
 
 #endif

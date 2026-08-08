@@ -206,28 +206,13 @@ int
 int
  compUnredirectOneSubwindow(WindowPtr pParent, WindowPtr pWin);
 
-Bool
- compAllocPixmap(WindowPtr pWin);
-
 void
  compSetParentPixmap(WindowPtr pWin);
 
 void
  compRestoreWindow(WindowPtr pWin, PixmapPtr pPixmap);
 
-Bool
-
-compReallocPixmap(WindowPtr pWin, int x, int y,
-                  unsigned int w, unsigned int h, int bw);
-
 void compMarkAncestors(WindowPtr pWin);
-
-/*
- * compinit.c
- */
-
-Bool
- compScreenInit(ScreenPtr pScreen);
 
 /*
  * compoverlay.c
@@ -242,21 +227,12 @@ compFindOverlayClient(ScreenPtr pScreen, ClientPtr pClient);
 CompOverlayClientPtr
 compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient);
 
-Bool
- compCreateOverlayWindow(ScreenPtr pScreen);
-
-void
- compDestroyOverlayWindow(ScreenPtr pScreen);
-
 /*
  * compwindow.c
  */
 
 void
  compSetPixmap(WindowPtr pWin, PixmapPtr pPixmap, int bw);
-
-Bool
- compCheckRedirect(WindowPtr pWin);
 
 void compWindowPosition(CallbackListPtr *pcbl,
                         ScreenPtr pScreen,
@@ -291,12 +267,6 @@ Bool
 void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
 
 void
- compSetRedirectBorderClip(WindowPtr pWin, RegionPtr pRegion);
-
-RegionPtr
- compGetRedirectBorderClip(WindowPtr pWin);
-
-void
  compCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 
 void
@@ -306,14 +276,8 @@ WindowPtr
  CompositeRealChildHead(WindowPtr pWin);
 
 int
- DeleteWindowNoInputDevices(void *value, XID wid);
-
-int
 
 compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
                  int bw, WindowPtr pSib);
-
-void PanoramiXCompositeInit(void);
-void PanoramiXCompositeReset(void);
 
 #endif                          /* _COMPINT_H_ */

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later */
+/* Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net> */
 #define HOOK_NAME "server"
 
 #include <dix-config.h>

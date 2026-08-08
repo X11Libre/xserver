@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/server_priv.h"
@@ -172,12 +174,10 @@ RRScreenSizeSet(ScreenPtr pScreen,
 {
     rrScrPriv(pScreen);
 
-#if RANDR_12_INTERFACE
     if (pScrPriv->rrScreenSetSize) {
         return (*pScrPriv->rrScreenSetSize) (pScreen,
                                              width, height, mmWidth, mmHeight);
     }
-#endif
     if (pScrPriv->rrSetConfig) {
         return TRUE;            /* can't set size separately */
     }

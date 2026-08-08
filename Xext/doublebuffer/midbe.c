@@ -32,6 +32,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -53,6 +54,8 @@
 #include "inputstr.h"
 #include "xace.h"
 
+#include "doublebuffer_intern.h"
+
 /******************************************************************************
  *
  * DBE MI Procedure: miDbeGetVisualInfo
@@ -68,9 +71,7 @@
  *     function returns FALSE.  Otherwise, it returns TRUE for success.
  *
  *****************************************************************************/
-
-static Bool
-miDbeGetVisualInfo(ScreenPtr pScreen, XdbeScreenVisualInfo * pScrVisInfo)
+static bool miDbeGetVisualInfo(ScreenPtr pScreen, XdbeScreenVisualInfo * pScrVisInfo)
 {
     register int i, j, k;
     register int count;
@@ -448,7 +449,6 @@ void miDbeWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWin
     int savewidth, saveheight;
     PixmapPtr pFrontBuffer;
     PixmapPtr pBackBuffer;
-    Bool clear;
     GCPtr pGC;
     xRectangle clearRect;
 
@@ -478,7 +478,7 @@ void miDbeWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWin
 
     GravityTranslate(0, 0, -dx, -dy, dw, dh, pWin->bitGravity, &destx, &desty);
 
-    clear = ((pDbeWindowPriv->width < (unsigned short) width) ||
+    bool clear = ((pDbeWindowPriv->width < (unsigned short) width) ||
              (pDbeWindowPriv->height < (unsigned short) height) ||
              (pWin->bitGravity == ForgetGravity));
 
@@ -609,9 +609,7 @@ void miDbeWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWin
  *     This is the MI initialization function called by DbeExtensionInit().
  *
  *****************************************************************************/
-
-Bool
-miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv)
+bool miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv)
 {
     dixScreenHookWindowPosition(pScreen, miDbeWindowPosition);
 

@@ -22,20 +22,22 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <X11/X.h>
+
 #include "os.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
 #include "xf86_OSlib.h"
 #include "xf86cmap.h"
-
 #include "xf86Bus.h"
-
 #include "xf86sbusBus_priv.h"
 #include "xf86Sbus_priv.h"
+#include "os/log_priv.h"
+#include "dix/screen_hooks_priv.h"
 
 static int xf86nSbusInfo;
 
@@ -385,7 +387,7 @@ xf86MatchSbusInstances(const char *driverName, int sbusDevId,
     struct Inst {
         sbusDevicePtr sbus;
         GDevPtr dev;
-        Bool claimed;           /* BusID matches with a device section */
+        bool claimed;           /* BusID matches with a device section */
     } *instances = NULL;
 
     *foundEntities = NULL;
@@ -596,7 +598,7 @@ static DevPrivateKeyRec sbusPaletteKeyRec;
 
 typedef struct _sbusCmap {
     sbusDevicePtr psdp;
-    Bool origCmapValid;
+    bool origCmapValid;
     unsigned char origRed[16];
     unsigned char origGreen[16];
     unsigned char origBlue[16];
@@ -645,7 +647,7 @@ static void xf86SbusCmapCloseScreen(CallbackListPtr *pcbl,
     sbusCmapPtr cmap;
     struct fbcmap fbcmap;
 
-    dixScreenUnhook(pScreen, xf86SbusCmapCloseScreen);
+    dixScreenUnhookClose(pScreen, xf86SbusCmapCloseScreen);
 
     cmap = SBUSCMAPPTR(pScreen);
     if (!cmap)

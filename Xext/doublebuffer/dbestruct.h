@@ -33,6 +33,7 @@
 #ifndef DBE_STRUCT_H
 #define DBE_STRUCT_H
 
+#include <stdbool.h>
 #include <X11/Xmd.h>
 #include <X11/extensions/dbeproto.h>
 
@@ -170,14 +171,10 @@ typedef struct _DbeWindowPrivRec {
 
 typedef struct _DbeScreenPrivRec {
     /* Per-screen DIX routines */
-    Bool (*SetupBackgroundPainter) (WindowPtr /*pWin */ ,
-                                    GCPtr       /*pGC */
-        );
+    bool (*SetupBackgroundPainter) (WindowPtr pWin, GCPtr pGC);
 
     /* Per-screen DDX routines */
-    Bool (*GetVisualInfo) (ScreenPtr /*pScreen */ ,
-                           XdbeScreenVisualInfo *       /*pVisInfo */
-        );
+    bool (*GetVisualInfo) (ScreenPtr pScreen, XdbeScreenVisualInfo *pVisInfo);
     int (*AllocBackBufferName) (WindowPtr /*pWin */ ,
                                 XID /*bufId */ ,
                                 int     /*swapAction */

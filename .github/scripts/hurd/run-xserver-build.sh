@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 #
 # Runs INSIDE the Debian GNU/Hurd VM (over ssh) — see the xserver-build-hurd job
 # in .github/workflows/build-xserver.yml. Builds, as the job's FATAL pass/fail
@@ -20,9 +22,20 @@ sudo apt-get update
 # Toolchain MUST succeed (apt is transactional: one unlocatable package aborts
 # the whole install, so keep the essentials separate from the maybe-renamed X
 # libs — otherwise a missing lib takes git/meson down with it, as it did).
+# debian-ports can briefly hold an inconsistent sid/unreleased state for
+# hurd-amd64: the arch:all git-man moves ahead (e.g. 2.55.0-1) while the hurd
+# git binary lags behind, so plain `git` is unresolvable ("git-man (<< ...)
+# ... not installable"). Fall back to the coherent git/git-man pair pinned to
+# unreleased (e.g. 2.53.0-1+hurd.1); drop this once the ports buildd catches up.
 echo "==> install toolchain (required)"
-sudo apt-get install -y --no-install-recommends \
+if ! sudo apt-get install -y --no-install-recommends \
     git build-essential meson ninja-build pkg-config ca-certificates
+then
+    echo "==> toolchain install failed; retrying with git/git-man pinned to unreleased"
+    sudo apt-get install -y --no-install-recommends \
+        git/unreleased git-man/unreleased build-essential meson ninja-build \
+        pkg-config ca-certificates
+fi
 
 # X libraries + helpers: best-effort, one at a time, so a package the Hurd port
 # lacks or renames only skips itself (named in the log); meson then reports what

@@ -98,6 +98,8 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dispatch.h"
@@ -124,6 +126,7 @@ Equipment Corporation.
 #include "os/screensaver.h"
 #include "Xext/composite/compint.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "scrnintstr.h"
@@ -745,7 +748,7 @@ dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
     WindowPtr pWin;
     WindowPtr pHead;
     ScreenPtr pScreen;
-    Bool fOK;
+    bool fOK;
     DepthPtr pDepth;
     PixmapFormatRec *format;
     WindowOptPtr ancwopt;
@@ -1951,7 +1954,7 @@ static Bool
 ShapeOverlap(WindowPtr pWin, BoxPtr pWinBox, WindowPtr pSib, BoxPtr pSibBox)
 {
     RegionPtr pWinRgn, pSibRgn;
-    Bool ret;
+    bool ret;
 
     if (!IS_SHAPED(pWin) && !IS_SHAPED(pSib))
         return TRUE;
@@ -2125,7 +2128,7 @@ ReflectStackChange(WindowPtr pWin, WindowPtr pSib, VTKind kind)
 /* Note that pSib might be NULL */
 
     Bool WasViewable = (Bool) pWin->viewable;
-    Bool anyMarked;
+    bool anyMarked;
     WindowPtr pFirstChange;
     WindowPtr pLayerWin;
     ScreenPtr pScreen = pWin->drawable.pScreen;
@@ -2273,7 +2276,7 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         event.u.u.type = ConfigureRequest;
         event.u.u.detail = (mask & CWStackMode) ? smode : Above;
 #ifdef XINERAMA
-        if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
+        if (PanoramiXIsEnabled() && (!pParent || !pParent->parent)) {
             ScreenPtr masterScreen = dixGetMasterScreen();
             event.u.configureRequest.x += masterScreen->x;
             event.u.configureRequest.y += masterScreen->y;
@@ -2357,7 +2360,7 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         };
         event.u.u.type = ConfigureNotify;
 #ifdef XINERAMA
-        if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
+        if (PanoramiXIsEnabled() && (!pParent || !pParent->parent)) {
             ScreenPtr masterScreen = dixGetMasterScreen();
             event.u.configureNotify.x += masterScreen->x;
             event.u.configureNotify.y += masterScreen->y;
@@ -2503,7 +2506,7 @@ ReparentWindow(WindowPtr pWin, WindowPtr pParent,
     };
     event.u.u.type = ReparentNotify;
 #ifdef XINERAMA
-    if (!noPanoramiXExtension && !pParent->parent) {
+    if (PanoramiXIsEnabled() && !pParent->parent) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         event.u.reparent.x += masterScreen->x;
         event.u.reparent.y += masterScreen->y;
@@ -2646,7 +2649,7 @@ MapWindow(WindowPtr pWin, ClientPtr client)
 
     pScreen = pWin->drawable.pScreen;
     if ((pParent = pWin->parent)) {
-        Bool anyMarked;
+        bool anyMarked;
 
         if ((!pWin->overrideRedirect) && (RedirectSend(pParent)))
             if (MaybeDeliverMapRequest(pWin, pParent, client))
@@ -2706,7 +2709,7 @@ MapSubwindows(WindowPtr pParent, ClientPtr client)
     ScreenPtr pScreen;
     Mask parentRedirect;
     Mask parentNotify;
-    Bool anyMarked;
+    bool anyMarked;
     WindowPtr pLayerWin;
 
     pScreen = pParent->drawable.pScreen;
@@ -2765,7 +2768,7 @@ UnrealizeTree(WindowPtr pWin, Bool fromConfigure)
         if (pChild->realized) {
             pChild->visibility = VisibilityNotViewable;
 #ifdef XINERAMA
-            if (!noPanoramiXExtension && !pChild->drawable.pScreen->myNum) {
+            if (PanoramiXIsEnabled() && !pChild->drawable.pScreen->myNum) {
                 PanoramiXRes *win;
                 int rc = dixLookupResourceByType((void **) &win,
                                                  pChild->drawable.id,
@@ -2860,7 +2863,7 @@ UnmapSubwindows(WindowPtr pWin)
     WindowPtr pHead;
     Bool wasRealized = (Bool) pWin->realized;
     Bool wasViewable = (Bool) pWin->viewable;
-    Bool anyMarked = FALSE;
+    bool anyMarked = FALSE;
     Mask parentNotify;
     WindowPtr pLayerWin = NULL;
     ScreenPtr pScreen = pWin->drawable.pScreen;
@@ -2993,7 +2996,7 @@ SendVisibilityNotify(WindowPtr pWin)
 
 #ifdef XINERAMA
     /* This is not quite correct yet, but it's close */
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         PanoramiXRes *win;
         WindowPtr pWin2;
         int rc, Scrnum;
@@ -3596,8 +3599,8 @@ void
 SetRootClip(ScreenPtr pScreen, int enable)
 {
     WindowPtr pWin = pScreen->root;
-    Bool WasViewable;
-    Bool anyMarked = FALSE;
+    bool WasViewable;
+    bool anyMarked = FALSE;
     WindowPtr pLayerWin;
     BoxRec box;
     enum RootClipMode mode = enable;

@@ -23,6 +23,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -281,7 +282,7 @@ __glXDRIcontextWait(__GLXcontext * baseContext,
                     __GLXclientState * cl, int *error)
 {
     __GLXcontext *cx = lastGLContext;
-    Bool ret;
+    bool ret;
 
     ret = DRI2WaitSwap(cl->client, baseContext->drawPriv->pDraw);
     if (cx != lastGLContext) {
@@ -591,7 +592,7 @@ __glXDRIscreenCreateDrawable(ClientPtr client,
     __GLXDRIconfig *config = (__GLXDRIconfig *) glxConfig;
     __GLXDRIdrawable *private;
     __GLXcontext *cx = lastGLContext;
-    Bool ret;
+    bool ret;
 
     private = calloc(1, sizeof *private);
     if (private == NULL)
@@ -775,7 +776,7 @@ static const __DRIextension *loader_extensions[] = {
 static Bool
 glxDRIEnterVT(ScrnInfoPtr scrn)
 {
-    Bool ret;
+    bool ret;
     __GLXDRIscreen *screen = (__GLXDRIscreen *)
         glxGetScreen(xf86ScrnToScreen(scrn));
 

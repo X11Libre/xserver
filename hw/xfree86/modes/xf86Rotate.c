@@ -22,6 +22,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
@@ -357,7 +358,7 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
     int new_width = 0;
     int new_height = 0;
     RRTransformPtr transform = NULL;
-    Bool damage = FALSE;
+    bool damage = FALSE;
 
     if (pScreen->isGPU)
         return TRUE;
@@ -451,7 +452,6 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
                 return FALSE;
             }
         }
-#ifdef RANDR_12_INTERFACE
         if (transform) {
             if (transform->nparams) {
                 new_params = calloc(transform->nparams, sizeof(xFixed));
@@ -469,7 +469,6 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
                 new_height = new_filter->height;
             }
         }
-#endif
         crtc->transform_in_use = TRUE;
     }
     crtc->crtc_to_framebuffer = crtc_to_fb;

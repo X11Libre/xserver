@@ -32,6 +32,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <errno.h>
 
 #include "dix/dix_priv.h"
@@ -48,6 +49,8 @@
 #include "dri2_priv.h"
 #include "dri2int.h"
 #include "damage.h"
+
+#include "dri2_intern.h"
 
 CARD8 dri2_major;               /* version of DRI2 supported by DDX */
 CARD8 dri2_minor;
@@ -90,7 +93,7 @@ typedef struct _DRI2Drawable {
     CARD64 last_swap_ust;       /* ust at completion of most recent swap */
     int swap_limit;             /* for N-buffering */
     unsigned blocked[3];
-    Bool needInvalidate;
+    bool needInvalidate;
     int prime_id;
     PixmapPtr prime_secondary_pixmap;
     PixmapPtr redirectpixmap;
@@ -554,8 +557,8 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
     if (!buffers)
         goto err_out;
 
-    Bool need_real_front = FALSE;
-    Bool need_fake_front = FALSE;
+    bool need_real_front = FALSE;
+    bool need_fake_front = FALSE;
     int front_format = 0;
     int buffers_changed = 0;
     int i;
@@ -1583,8 +1586,7 @@ DRI2CloseScreen(ScreenPtr pScreen)
 }
 
 /* Called by InitExtensions() */
-Bool
-DRI2ModuleSetup(void)
+bool DRI2ModuleSetup(void)
 {
     dri2DrawableRes = CreateNewResourceType(DRI2DrawableGone, "DRI2Drawable");
     if (!dri2DrawableRes)

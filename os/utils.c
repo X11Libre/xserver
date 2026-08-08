@@ -121,7 +121,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "os/xhostname.h"
 #include "Xext/dpms/dpms_priv.h"
 #include "Xext/present/present_priv.h"
-#include "Xext/xf86bigfont/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
 #include "Xext/xkeyboard/xkbsrv_priv.h"
 
 #include "dixstruct.h"
@@ -1115,10 +1114,23 @@ Popen(const char *command, const char *type)
     if (*type == 'r') {
         iop = fdopen(pdes[0], type);
         close(pdes[1]);
+        if (!iop)
+            close(pdes[0]);
     }
     else {
         iop = fdopen(pdes[1], type);
         close(pdes[0]);
+        if (!iop)
+            close(pdes[1]);
+    }
+
+    if (!iop) {
+        free(cur);
+#ifdef HAVE_SETITIMER
+        if (SmartScheduleEnable() < 0)
+            perror("signal");
+#endif
+        return NULL;
     }
 
     cur->fp = iop;
@@ -1484,9 +1496,6 @@ os_move_fd(int fd)
 void
 AbortServer(void)
 {
-#ifdef XF86BIGFONT
-    XF86BigfontCleanup();
-#endif
     CloseWellKnownConnections();
     UnlockServer();
     AbortDevices();

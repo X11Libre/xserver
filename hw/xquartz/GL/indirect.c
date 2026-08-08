@@ -48,7 +48,13 @@
 #include "x-hash.h"
 
 #include "visualConfigs.h"
-#include "dri.h"
+/* This is XQuartz's own DRI surface API (hw/xquartz/xpr/xpr_dri.h), not the
+ * generic xfree86 include/dri.h.  It was renamed from dri.h to xpr_dri.h in
+ * 9bd146a39 ("xfree86: dri: move over public SDK headers to include/"); before
+ * that, "dri.h" resolved to ../xpr/dri.h.  Include the new name explicitly so
+ * we don't fall through to include/dri.h, which pulls in Linux-only
+ * <pciaccess.h> and xf86dri.h. */
+#include "xpr_dri.h"
 
 #include "darwin.h"
 #define GLAQUA_DEBUG_MSG(msg, args ...) ASL_LOG(ASL_LEVEL_DEBUG, "GLXAqua", \
@@ -297,15 +303,21 @@ attach(__GLXAquaContext *context, __GLXAquaDrawable *draw)
         //if (!quartzProcs->CreateSurface(pDraw->pScreen, pDraw->id, pDraw,
         if (!DRICreateSurface(pDraw->pScreen, pDraw->id, pDraw,
                               0, &draw->sid, NULL,
-                              surface_notify, draw))
+                              surface_notify, draw)) {
+            ErrorF("%s: DRICreateSurface failed for drawable 0x%x\n",
+                   __func__, (unsigned int)pDraw->id);
             return TRUE;
+        }
         draw->pDraw = pDraw;
     }
 
     if (!context->isAttached || context->sid != draw->sid) {
         x_list *lst;
+        xp_error xp_err = xp_attach_gl_context(context->ctx, draw->sid);
 
-        if (xp_attach_gl_context(context->ctx, draw->sid) != Success) {
+        if (xp_err != Success) {
+            ErrorF("%s: xp_attach_gl_context(ctx %p, sid 0x%x) failed: %d\n",
+                   __func__, context->ctx, (unsigned int)draw->sid, xp_err);
             //quartzProcs->DestroySurface(pDraw->pScreen, pDraw->id, pDraw,
             DRIDestroySurface(pDraw->pScreen, pDraw->id, pDraw,
                               surface_notify, draw);
@@ -350,8 +362,12 @@ __glXAquaContextMakeCurrent(__GLXcontext *baseContext)
 
     GLAQUA_DEBUG_MSG("glAquaMakeCurrent (ctx 0x%p)\n", baseContext);
 
-    if (context->base.drawPriv != context->base.readPriv)
+    if (context->base.drawPriv != context->base.readPriv) {
+        ErrorF("%s: separate read/draw drawables are unsupported "
+               "(draw %p, read %p)\n", __func__,
+               context->base.drawPriv, context->base.readPriv);
         return 0;
+    }
 
     if (attach(context, drawPriv))
         return /*error*/ 0;

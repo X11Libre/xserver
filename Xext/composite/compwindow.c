@@ -43,16 +43,20 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screensaver_priv.h"
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "os/osdep.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "compint.h"
 #include "compositeext_priv.h"
+#include "compositeext_intern.h"
 
 typedef struct _compPixmapVisit {
     WindowPtr pWindow;
@@ -112,12 +116,11 @@ compSetPixmap(WindowPtr pWindow, PixmapPtr pPixmap, int bw)
     TraverseTree(pWindow, compSetPixmapVisitWindow, (void *) &visitRec);
 }
 
-Bool
-compCheckRedirect(WindowPtr pWin)
+bool compCheckRedirect(WindowPtr pWin)
 {
     CompWindowPtr cw = GetCompWindow(pWin);
     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);
-    Bool should;
+    bool should;
 
     should = pWin->realized && (pWin->drawable.class != InputOnly) &&
         (cw != NULL) && (pWin->parent != NULL);
@@ -130,9 +133,9 @@ compCheckRedirect(WindowPtr pWin)
     }
 
     if (should != (pWin->redirectDraw != RedirectDrawNone)) {
-        if (should)
-            return compAllocPixmap(pWin);
-        else {
+        if (should) {
+            return (!!compAllocPixmap(pWin));
+        } else {
             ScreenPtr pScreen = pWin->drawable.pScreen;
             PixmapPtr pPixmap = (*pScreen->GetWindowPixmap) (pWin);
 
@@ -160,7 +163,7 @@ updateOverlayWindow(ScreenPtr pScreen)
     int h = pScreen->height;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         w = PanoramiXPixWidth;
         h = PanoramiXPixHeight;
     }
@@ -211,7 +214,7 @@ compRealizeWindow(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     pScreen->RealizeWindow = cs->RealizeWindow;
     compCheckRedirect(pWin);
@@ -227,7 +230,7 @@ compUnrealizeWindow(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
     pScreen->UnrealizeWindow = cs->UnrealizeWindow;
     compCheckRedirect(pWin);
@@ -279,8 +282,7 @@ compIsAlternateVisual(ScreenPtr pScreen, XID visual)
     return FALSE;
 }
 
-Bool
-CompositeIsImplicitRedirectException(ScreenPtr pScreen,
+static bool CompositeIsImplicitRedirectException(ScreenPtr pScreen,
                                      XID parentVisual, XID winVisual)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
@@ -500,7 +502,7 @@ compCreateWindow(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret;
+    bool ret;
 
     pScreen->CreateWindow = cs->CreateWindow;
     ret = (*pScreen->CreateWindow) (pWin);
@@ -712,10 +714,9 @@ compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret = 0;
+    bool ret = 0;
     WindowPtr pParent = pWin->parent;
     int draw_x, draw_y;
-    Bool alloc_ret;
 
     if (cs->ConfigNotify) {
         pScreen->ConfigNotify = cs->ConfigNotify;
@@ -732,9 +733,9 @@ compConfigNotify(WindowPtr pWin, int x, int y, int w, int h,
 
     draw_x = pParent->drawable.x + x + bw;
     draw_y = pParent->drawable.y + y + bw;
-    alloc_ret = compReallocPixmap(pWin, draw_x, draw_y, w, h, bw);
 
-    if (alloc_ret == FALSE)
+    if (!compReallocPixmap(pWin, draw_x, draw_y, w, h, bw))
         return BadAlloc;
+
     return Success;
 }

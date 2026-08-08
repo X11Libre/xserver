@@ -230,12 +230,6 @@ extern _X_EXPORT void *
 reallocarray(void *optr, size_t nmemb, size_t size);
 #endif
 
-#ifndef HAVE_STRCASESTR
-#define strcasestr xstrcasestr
-extern _X_EXPORT char *
-xstrcasestr(const char *s, const char *find);
-#endif
-
 #ifndef HAVE_STRLCPY
 extern _X_EXPORT size_t
 strlcpy(char * _X_RESTRICT_KYWD dst, const char * _X_RESTRICT_KYWD src, size_t siz);

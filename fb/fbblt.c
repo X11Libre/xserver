@@ -22,6 +22,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 #include "fb.h"
 
@@ -79,7 +80,7 @@ fbBlt(FbBits * srcLine,
     FbBits startmask, endmask;
     FbBits bits, bits1;
     int n, nmiddle;
-    Bool destInvarient;
+    bool destInvarient;
     int startbyte, endbyte;
 
     FbDeclareMergeRop();

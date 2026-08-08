@@ -38,6 +38,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <string.h>
 #include <X11/X.h>
@@ -53,6 +54,7 @@
 #include "include/extinit.h"
 #include "include/misc.h"
 #include "mi/mi_priv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "xf86.h"
 #include "xf86str.h"
@@ -98,7 +100,7 @@ static int DGAEventBase;
     dixLookupPrivate(&(pScreen)->devPrivates, &DGAScreenKeyRec))
 
 typedef struct _FakedVisualList {
-    Bool free;
+    bool free;
     VisualPtr pVisual;
     struct _FakedVisualList *next;
 } FakedVisualList;
@@ -118,8 +120,8 @@ typedef struct {
     FakedVisualList *fakedVisuals;
     ColormapPtr dgaColormap;
     ColormapPtr savedColormap;
-    Bool grabMouse;
-    Bool grabKeyboard;
+    bool grabMouse;
+    bool grabKeyboard;
 } DGAScreenRec, *DGAScreenPtr;
 
 Bool
@@ -171,9 +173,10 @@ DGAInit(ScreenPtr pScreen, DGAFunctionPtr funcs, DGAModePtr modes, int num)
         modes[i].num = i + 1;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         for (i = 0; i < num; i++)
             modes[i].flags &= ~DGA_PIXMAP_AVAILABLE;
+    }
 #endif /* XINERAMA */
 
     return TRUE;
@@ -220,9 +223,10 @@ DGAReInitModes(ScreenPtr pScreen, DGAModePtr modes, int num)
         modes[i].num = i + 1;
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension)
+    if (PanoramiXIsEnabled()) {
         for (i = 0; i < num; i++)
             modes[i].flags &= ~DGA_PIXMAP_AVAILABLE;
+    }
 #endif /* XINERAMA */
 
     return TRUE;
@@ -399,7 +403,7 @@ xf86SetDGAMode(ScrnInfoPtr pScrn, int num, DGADevicePtr devRet)
         return BadAlloc;
 
     if (!pScreenPriv->current) {
-        Bool oldVTSema = pScrn->vtSema;
+        bool oldVTSema = !!pScrn->vtSema;
 
         pScrn->vtSema = FALSE;  /* kludge until we rewrite VT switching */
         (*pScrn->EnableDisableFBAccess) (pScrn, FALSE);

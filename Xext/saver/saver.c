@@ -48,6 +48,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "os/screensaver.h"
 #include "Xext/dpms/dpms_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "os.h"
@@ -157,7 +158,7 @@ SendScreenSaverNotify(ScreenPtr pScreen,
 typedef struct _ScreenSaverScreenPrivate {
     ScreenSaverEventPtr events;
     ScreenSaverAttrPtr attr;
-    Bool hasWindow;
+    bool hasWindow;
     Colormap installedMap;
 } ScreenSaverScreenPrivateRec, *ScreenSaverScreenPrivatePtr;
 
@@ -592,7 +593,7 @@ static Bool
 ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 {
     int state = 0;
-    Bool ret = FALSE;
+    bool ret = FALSE;
     ScreenSaverScreenPrivatePtr pPriv;
 
     switch (xstate) {
@@ -612,7 +613,7 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 
     }
 #ifdef XINERAMA
-    if (noPanoramiXExtension || !pScreen->myNum)
+    if (PanoramiXIsDisabled() || !pScreen->myNum)
 #endif /* XINERAMA */
     {
         SendScreenSaverNotify(pScreen, state, force);
@@ -1105,7 +1106,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
     X_REQUEST_REST_CARD32();
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         PanoramiXRes *draw;
         PanoramiXRes *backPix = NULL;
         PanoramiXRes *bordPix = NULL;
@@ -1194,7 +1195,7 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drawable);
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         PanoramiXRes *draw;
         int i;
 

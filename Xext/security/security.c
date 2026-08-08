@@ -26,6 +26,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xmd.h>
 #include <X11/extensions/securproto.h>
 #include <X11/Xfuncproto.h>
@@ -408,7 +409,7 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     X_REQUEST_FIELD_CARD32(valueMask);
 
     int len;                    /* request length in CARD32s */
-    Bool removeAuth = FALSE;    /* if bailout, call RemoveAuthorization? */
+    bool removeAuth = FALSE;    /* if bailout, call RemoveAuthorization? */
     int err;                    /* error to return from this function */
     XID authId;                 /* authorization ID assigned by os layer */
     unsigned int trustLevel;    /* trust level of new auth */

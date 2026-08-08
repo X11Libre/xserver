@@ -24,6 +24,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/colormap_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
@@ -44,9 +46,9 @@
 #include "picturestr_priv.h"
 #include "glyphstr_priv.h"
 #include "xace.h"
-#ifdef XINERAMA
+
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
-#endif /* XINERAMA */
 
 DevPrivateKeyRec PictureScreenPrivateKeyRec;
 DevPrivateKeyRec PictureWindowPrivateKeyRec;
@@ -998,7 +1000,7 @@ static int
 cpAlphaMap(void **result, XID id, ScreenPtr screen, ClientPtr client, Mask mode)
 {
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         PanoramiXRes *res;
         int err = dixLookupResourceByType((void **)&res, id, XRT_PICTURE,
                                           client, mode);
@@ -1017,7 +1019,7 @@ static int
 cpClipMask(void **result, XID id, ScreenPtr screen, ClientPtr client, Mask mode)
 {
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         PanoramiXRes *res;
         int err = dixLookupResourceByType((void **)&res, id, XRT_PIXMAP,
                                           client, mode);
@@ -1427,7 +1429,7 @@ static CARD8
 ReduceCompositeOp(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
                   INT16 xSrc, INT16 ySrc, CARD16 width, CARD16 height)
 {
-    Bool no_src_alpha, no_dst_alpha;
+    bool no_src_alpha, no_dst_alpha;
 
     /* Sampling off the edge of a RepeatNone picture introduces alpha
      * even if the picture itself doesn't have alpha. We don't try to

@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "os/mathx_priv.h"
@@ -132,7 +134,7 @@ RRMonitorGetGeometry(RRMonitorPtr monitor, RRMonitorGeometryPtr geometry)
         *geometry = first;
         for (o = 0; o < monitor->numOutputs; o++) {
             RRCrtcPtr   crtc = NULL;
-            Bool        in_use = FALSE;
+            bool        in_use = FALSE;
 
             for (c = 0; !in_use && c < pScrPriv->numCrtcs; c++) {
                 crtc = pScrPriv->crtcs[c];
@@ -318,7 +320,7 @@ RRMonitorMakeList(ScreenPtr screen, Bool get_active, RRMonitorPtr *monitors_ret,
     RRMonitorListRec    list;
     int                 m, c;
     RRMonitorPtr        mon, monitors;
-    Bool                has_primary = FALSE;
+    bool                has_primary = FALSE;
 
     if (!pScrPriv)
         return FALSE;
@@ -594,7 +596,7 @@ ProcRRGetMonitors(ClientPtr client)
     int                 r;
     RRMonitorPtr        monitors;
     int                 nmonitors;
-    Bool                get_active;
+    bool                get_active;
 
     r = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
     if (r != Success)

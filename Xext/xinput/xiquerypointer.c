@@ -31,6 +31,7 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>              /* for inputstr.h    */
 #include <X11/Xproto.h>         /* Request macro     */
 #include <X11/extensions/XI.h>
@@ -46,6 +47,7 @@
 #include "dix/screenint_priv.h"
 #include "include/extinit.h"
 #include "os/fmt.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 #include "handlers.h"
 
@@ -74,7 +76,7 @@ ProcXIQueryPointer(ClientPtr client)
     WindowPtr pWin, t;
     SpritePtr pSprite;
     XkbStatePtr state;
-    Bool have_xi22 = FALSE;
+    bool have_xi22 = FALSE;
 
     /* Check if client is compliant with XInput 2.2 or later. Earlier clients
      * do not know about touches, so we must report emulated button presses. 2.2
@@ -163,7 +165,7 @@ ProcXIQueryPointer(ClientPtr client)
     }
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         ScreenPtr masterScreen = dixGetMasterScreen();
         reply.root_x += double_to_fp1616(masterScreen->x);
         reply.root_y += double_to_fp1616(masterScreen->y);

@@ -30,6 +30,8 @@
  */
 #include <xwin-config.h>
 
+#include <stdbool.h>
+
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 
@@ -57,7 +59,7 @@ static
 Bool
 winCreateWindowRootless(WindowPtr pWin)
 {
-    Bool fResult = FALSE;
+    bool fResult = FALSE;
 
     winWindowPriv(pWin);
 

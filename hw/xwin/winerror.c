@@ -39,13 +39,12 @@
 #include "dix/input_priv.h"
 
 /*
- * os/log.c:FatalError () calls our vendor ErrorF, so the message
+ * os/log.c:FatalError () calls our ddx ErrorF, so the message
  * from a FatalError will be logged.
  *
  * Attempt to do last-ditch, safe, important cleanup here.
  */
-void
-OsVendorFatalError(const char *f, va_list args)
+void ddxFatalError(const char *f, va_list args)
 {
     char errormsg[1024] = "";
 

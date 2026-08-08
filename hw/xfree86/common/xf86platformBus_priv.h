@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT OR X11
+/* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  */
@@ -36,7 +36,7 @@ int xf86_add_platform_device(struct OdevAttributes *attribs, Bool unowned);
 int xf86_remove_platform_device(int dev_index);
 Bool xf86_get_platform_device_unowned(int index);
 
-int xf86platformAddDevice(const char *driver_name, int index);
+bool xf86platformAddDevice(const char *driver_name, int index);
 void xf86platformRemoveDevice(int index);
 
 void xf86platformVTProbe(void);

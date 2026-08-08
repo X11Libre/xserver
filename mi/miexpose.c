@@ -73,6 +73,7 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
@@ -86,6 +87,7 @@ Equipment Corporation.
 #include "mi/mi_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
+#include "Xext/panoramiX/panoramiX_priv.h"
 
 #include "regionstr.h"
 #include "scrnintstr.h"
@@ -131,7 +133,7 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
                                  */
     WindowPtr pSrcWin;
     BoxRec expBox = { 0, };
-    Bool extents;
+    bool extents;
 
     /* avoid work if we can */
     if (!pGC->graphicsExposures && pDstDrawable->type == DRAWABLE_PIXMAP)
@@ -322,7 +324,7 @@ miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy)
     }
 
 #ifdef XINERAMA
-    if (!noPanoramiXExtension) {
+    if (PanoramiXIsEnabled()) {
         int scrnum = pWin->drawable.pScreen->myNum;
         int x = 0, y = 0;
         XID realWin = 0;
@@ -416,7 +418,7 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
      */
     int tile_x_off, tile_y_off;
     PixUnion fill;
-    Bool solid = TRUE;
+    bool solid = TRUE;
     DrawablePtr drawable = &pWin->drawable;
 
     if (what == PW_BACKGROUND) {

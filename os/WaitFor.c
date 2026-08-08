@@ -54,6 +54,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <errno.h>
 #include <stdio.h>
 #ifdef WIN32
@@ -171,9 +172,7 @@ WaitForSomething(Bool are_ready)
     int timeout;
     int pollerr;
     static Bool were_ready;
-    Bool timer_is_running;
-
-    timer_is_running = were_ready;
+    bool timer_is_running = !!were_ready;
 
     if (were_ready && !are_ready) {
         timer_is_running = FALSE;

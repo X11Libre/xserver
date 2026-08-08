@@ -22,6 +22,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
@@ -350,7 +351,7 @@ static void
 RRComputeContiguity(ScreenPtr pScreen)
 {
     rrScrPriv(pScreen);
-    Bool discontiguous = TRUE;
+    bool discontiguous = TRUE;
     int i, n = pScrPriv->numCrtcs;
 
     int *reachable = calloc(n, sizeof(int));
@@ -755,9 +756,9 @@ RRCrtcSet(RRCrtcPtr crtc,
           int y, Rotation rotation, int numOutputs, RROutputPtr * outputs)
 {
     ScreenPtr pScreen = crtc->pScreen;
-    Bool ret = FALSE;
-    Bool recompute = TRUE;
-    Bool crtcChanged;
+    bool ret = FALSE;
+    bool recompute = TRUE;
+    bool crtcChanged;
     int  o;
 
     BUG_RETURN_VAL(numOutputs != 0 && outputs == NULL, FALSE);
@@ -807,13 +808,11 @@ RRCrtcSet(RRCrtcPtr crtc,
                                            numOutputs, outputs);
             }
         }
-#if RANDR_12_INTERFACE
         if (pScrPriv->rrCrtcSet) {
             ret = (*pScrPriv->rrCrtcSet) (pScreen, crtc, mode, x, y,
                                           rotation, numOutputs, outputs);
         }
         else
-#endif
         {
             if (pScrPriv->rrSetConfig) {
                 RRScreenSize size;
@@ -938,22 +937,20 @@ RRCrtcDestroyResource(void *value, XID pid)
 Bool
 RRCrtcGammaSet(RRCrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue)
 {
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
-#if RANDR_12_INTERFACE
     ScreenPtr pScreen = crtc->pScreen;
-#endif
 
     memcpy(crtc->gammaRed, red, crtc->gammaSize * sizeof(CARD16));
     memcpy(crtc->gammaGreen, green, crtc->gammaSize * sizeof(CARD16));
     memcpy(crtc->gammaBlue, blue, crtc->gammaSize * sizeof(CARD16));
-#if RANDR_12_INTERFACE
+
     if (pScreen) {
         rrScrPriv(pScreen);
         if (pScrPriv->rrCrtcSetGamma)
             ret = (*pScrPriv->rrCrtcSetGamma) (pScreen, crtc);
     }
-#endif
+
     return ret;
 }
 
@@ -964,19 +961,16 @@ RRCrtcGammaSet(RRCrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue)
 static Bool
 RRCrtcGammaGet(RRCrtcPtr crtc)
 {
-    Bool ret = TRUE;
+    bool ret = TRUE;
 
-#if RANDR_12_INTERFACE
     ScreenPtr pScreen = crtc->pScreen;
-#endif
 
-#if RANDR_12_INTERFACE
     if (pScreen) {
         rrScrPriv(pScreen);
         if (pScrPriv->rrCrtcGetGamma)
             ret = (*pScrPriv->rrCrtcGetGamma) (pScreen, crtc);
     }
-#endif
+
     return ret;
 }
 
@@ -1390,7 +1384,6 @@ ProcRRSetCrtcConfig(ClientPtr client)
             return BadMatch;
         }
 
-#ifdef RANDR_12_INTERFACE
         /*
          * Check screen size bounds if the DDX provides a 1.2 interface
          * for setting screen size. Else, assume the CrtcSet sets
@@ -1434,7 +1427,6 @@ ProcRRSetCrtcConfig(ClientPtr client)
                 return BadValue;
             }
         }
-#endif
     }
 
     if (!RRCrtcSet(crtc, mode, stuff->x, stuff->y,
@@ -1868,7 +1860,7 @@ RRConstrainCursorHarder(DeviceIntPtr pDev, ScreenPtr pScreen, int mode, int *x,
                         int *y)
 {
     rrScrPriv(pScreen);
-    Bool ret;
+    bool ret;
     ScreenPtr secondary;
 
     /* intentional dead space -> let it float */
@@ -1908,7 +1900,7 @@ Bool
 RRReplaceScanoutPixmap(DrawablePtr pDrawable, PixmapPtr pPixmap, Bool enable)
 {
     rrScrPriv(pDrawable->pScreen);
-    Bool ret = TRUE;
+    bool ret = TRUE;
     PixmapPtr *saved_scanout_pixmap;
     int i;
 
@@ -1918,7 +1910,7 @@ RRReplaceScanoutPixmap(DrawablePtr pDrawable, PixmapPtr pPixmap, Bool enable)
 
     for (i = 0; i < pScrPriv->numCrtcs; i++) {
         RRCrtcPtr crtc = pScrPriv->crtcs[i];
-        Bool size_fits;
+        bool size_fits;
 
         saved_scanout_pixmap[i] = crtc->scanout_pixmap;
 
