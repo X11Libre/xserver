@@ -36,6 +36,8 @@
 #include "xf86Bus.h"
 #include "xf86sbusBus_priv.h"
 #include "xf86Sbus_priv.h"
+#include "os/log_priv.h"
+#include "dix/screen_hooks_priv.h"
 
 static int xf86nSbusInfo;
 
@@ -645,7 +647,7 @@ static void xf86SbusCmapCloseScreen(CallbackListPtr *pcbl,
     sbusCmapPtr cmap;
     struct fbcmap fbcmap;
 
-    dixScreenUnhook(pScreen, xf86SbusCmapCloseScreen);
+    dixScreenUnhookClose(pScreen, xf86SbusCmapCloseScreen);
 
     cmap = SBUSCMAPPTR(pScreen);
     if (!cmap)
