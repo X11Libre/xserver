@@ -80,6 +80,7 @@ enum drmmode_crtc_property {
 typedef struct {
     int fd;
     unsigned fb_id;
+    unsigned deferred_fb_id;
     drmModeFBPtr mode_fb;
     int cpp;
     int kbpp;
