@@ -51,7 +51,7 @@ typedef struct dri3_screen_priv {
     CARD32                      num_formats;
     dri3_dmabuf_format_ptr      formats;
 
-    const dri3_screen_info_rec *info;
+    dri3_screen_info_rec       *info;
 } dri3_screen_priv_rec, *dri3_screen_priv_ptr;
 
 #define VERIFY_DRI3_SYNCOBJ(id, ptr, a)\

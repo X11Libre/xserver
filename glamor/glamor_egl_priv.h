@@ -18,6 +18,10 @@
 #include "scrnintstr.h"
 #include "glamor_egl_ext.h"
 
+#ifdef DRI3
+#include "dri3.h"
+#endif
+
 #ifdef GLAMOR_HAS_GBM
 #include <gbm.h>
 #endif
@@ -30,15 +34,17 @@ typedef struct glamor_egl_screen_private {
     int exact_glvnd_vendor; /* If the glvnd vendor should be assumed valid with no checks */
     void* server_private;
 
+#ifdef DRI3
+    dri3_screen_info_rec dri3_info;
+#endif
+
 #ifdef GLAMOR_HAS_GBM
     struct gbm_device *gbm;
     int fast_gbm_import;
     int can_texture_gbm_bo;
-#ifdef EGL_MESA_image_dma_buf_export
-    int has_image_dma_buf_export;
-#endif
 #endif
 
+    int has_image_dma_buf_export;
     int has_EXT_EGL_image_storage;
     int has_OES_EGL_image;
 
