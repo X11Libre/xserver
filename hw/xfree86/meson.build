@@ -92,6 +92,9 @@ xorg_deps = [
     xshmfence_dep,
     config_dep,
     libdrm_dep,
+    mimalloc_dep,
+    tcmalloc_dep,
+    jemalloc_dep,
 ]
 
 if get_option('suid_wrapper')
