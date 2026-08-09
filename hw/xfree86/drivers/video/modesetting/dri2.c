@@ -653,7 +653,7 @@ ms_dri2_frame_event_handler(uint64_t msc,
             ms_dri2_exchange_buffers(drawable, frame_info->front, frame_info->back);
             break;
         }
-        /* else fall through to blit */
+        /* else fall through */
     case MS_DRI2_QUEUE_SWAP:
         ms_dri2_blit_swap(drawable, frame_info->front, frame_info->back);
         DRI2SwapComplete(frame_info->client, drawable, msc, tv_sec, tv_usec,
