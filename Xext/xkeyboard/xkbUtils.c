@@ -1435,7 +1435,7 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
     /* geometry */
     if (src->geom) {
         if (!dst->geom) {
-            dst->geom = calloc(sizeof(XkbGeometryRec), 1);
+            dst->geom = calloc(1, sizeof(XkbGeometryRec));
             if (!dst->geom)
                 return FALSE;
         }
