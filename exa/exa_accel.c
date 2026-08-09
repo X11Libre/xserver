@@ -234,7 +234,7 @@ exaPutImage(DrawablePtr pDrawable, GCPtr pGC, int depth, int x, int y,
                          bits);
 }
 
-static Bool inline
+static inline Bool
 exaCopyNtoNTwoDir(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
                   GCPtr pGC, BoxPtr pbox, int nbox, int dx, int dy)
 {
