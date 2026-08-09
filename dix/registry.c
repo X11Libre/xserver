@@ -58,6 +58,7 @@ static int
 double_size(void *p, unsigned n, unsigned size)
 {
     char **ptr = (char **) p;
+    char *grown;
     unsigned s, f;
 
     if (n) {
@@ -70,11 +71,16 @@ double_size(void *p, unsigned n, unsigned size)
         n = f = BASE_SIZE * size;
     }
 
-    *ptr = realloc(*ptr, n);
-    if (!*ptr) {
-        dixResetRegistry();
+    grown = realloc(*ptr, n);
+    if (!grown) {
+        /* Leave the still-valid old buffer/count in place on failure,
+         * instead of overwriting *ptr with the failed realloc()'s NULL
+         * (which would leak the old buffer and desync the caller's size
+         * counter from it) and nuking the whole registry via
+         * dixResetRegistry() over one failed growth. */
         return FALSE;
     }
+    *ptr = grown;
     memset(*ptr + s, 0, f - s);
     return TRUE;
 }
