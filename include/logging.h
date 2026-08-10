@@ -8,6 +8,9 @@ the above copyright notice appear in all copies and that both that
 copyright notice and this permission notice appear in supporting
 documentation.
 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -41,79 +44,66 @@ SOFTWARE.
 
 ******************************************************************/
 
-#ifndef OS_H
-#define OS_H
+#ifndef LOGGING_H
+#define LOGGING_H
 
 #include <stdarg.h>
 #include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef MONOTONIC_CLOCK
-#include <time.h>
-#endif
 
 #include <X11/Xfuncproto.h>
 
 #include "xlibre_ptrtypes.h"
-#include "callback.h"
-#include "misc.h"
 
-/*
- * @brief macro for specifying non-null arguments
- *
- * part of public SDK / driver API
- */
-#ifndef _X_ATTRIBUTE_NONNULL_ARG
-#define _X_ATTRIBUTE_NONNULL_ARG(...) __attribute__((nonnull(__VA_ARGS__)))
-#endif
+/* Flags for log messages. */
+typedef enum {
+    X_PROBED,                   /* Value was probed */
+    X_CONFIG,                   /* Value was given in the config file */
+    X_DEFAULT,                  /* Value is a default */
+    X_CMDLINE,                  /* Value was given on the command line */
+    X_NOTICE,                   /* Notice */
+    X_ERROR,                    /* Error message */
+    X_WARNING,                  /* Warning message */
+    X_INFO,                     /* Informational message */
+    X_NONE,                     /* No prefix */
+    X_NOT_IMPLEMENTED,          /* Not implemented */
+    X_DEBUG,                    /* Debug message */
+    X_UNKNOWN = -1              /* unknown -- this must always be last */
+} MessageType;
 
-#ifndef _X_ATTRIBUTE_VPRINTF
-# if defined(__GNUC__) && (__GNUC__ >= 2) && !defined(__clang__)
-#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
-           __attribute__((__format__(gnu_printf, fmt, firstarg)))
-# else
-#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
-# endif
-#endif
+extern _X_EXPORT void
+LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
+_X_ATTRIBUTE_PRINTF(3, 0);
+extern _X_EXPORT void
+LogMessageVerb(MessageType type, int verb, const char *format, ...)
+_X_ATTRIBUTE_PRINTF(3, 4);
+extern _X_EXPORT void
+LogMessage(MessageType type, const char *format, ...)
+_X_ATTRIBUTE_PRINTF(2, 3);
 
-#define SCREEN_SAVER_ON   0
-#define SCREEN_SAVER_OFF  1
-#define SCREEN_SAVER_FORCER 2
-#define SCREEN_SAVER_CYCLE  3
+extern _X_EXPORT void
+LogHdrMessageVerb(MessageType type, int verb,
+                  const char *msg_format, va_list msg_args,
+                  const char *hdr_format, ...)
+_X_ATTRIBUTE_PRINTF(3, 0)
+_X_ATTRIBUTE_PRINTF(5, 6);
 
-#ifndef MAX_REQUEST_SIZE
-#define MAX_REQUEST_SIZE 65535
-#endif
+extern _X_EXPORT void
+FatalError(const char *f, ...)
+_X_ATTRIBUTE_PRINTF(1, 2)
+    _X_NORETURN;
 
-typedef struct _NewClientRec *NewClientPtr;
+extern _X_EXPORT void
+ErrorF(const char *f, ...)
+_X_ATTRIBUTE_PRINTF(1, 2);
 
-#ifndef xnfalloc
-#define xnfalloc(size) XNFalloc((unsigned long)(size))
-#define xnfcalloc(_num, _size) XNFcallocarray((_num), (_size))
-#define xnfrealloc(ptr, size) XNFrealloc((void *)(ptr), (unsigned long)(size))
+extern _X_EXPORT void
+xorg_backtrace(void);
 
-#define xstrdup(s) Xstrdup((s))
-#define xnfstrdup(s) XNFstrdup((s))
-#endif
+/* should not be used anymore, just for backwards compat with drivers */
+#define LogVMessageVerbSigSafe(...) LogVMessageVerb(__VA_ARGS__)
+#define LogMessageVerbSigSafe(...) LogMessageVerb(__VA_ARGS__)
+#define ErrorFSigSafe(...) ErrorF(__VA_ARGS__)
+#define VErrorFSigSafe(...) VErrorF(__VA_ARGS__)
+#define VErrorF(...) LogVMessageVerb(X_NONE, -1, __VA_ARGS__)
 
-#include "alloc.h"
-#include "Xprintf.h"
-#include "client_io.h"
-#include "fd_notify.h"
-#include "logging.h"
-#include "notify_fd.h"
-#include "timer.h"
-#include "fallback_funcs.h"
-
-/* only for backwards compat with drivers that haven't kept up yet
-   (xf86-video-intel)
-
-   @todo revise after next stable release
-*/
-_X_DEPRECATED
-static inline int System(const char* cmdline)
-{
-    return system(cmdline);
-}
-
-#endif                          /* OS_H */
+#endif /* LOGGING_H */
