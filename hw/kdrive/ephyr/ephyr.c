@@ -26,6 +26,7 @@
 #include <kdrive-config.h>
 
 #include <assert.h>
+#include <stdbool.h>
 #include <xcb/xcb_keysyms.h>
 #include <X11/keysym.h>
 
@@ -58,7 +59,7 @@ static int mouseState = 0;
 static Rotation ephyrRandr = RR_Rotate_0;
 
 typedef struct _EphyrInputPrivate {
-    Bool enabled;
+    bool enabled;
 } EphyrKbdPrivate, EphyrPointerPrivate;
 
 Bool EphyrWantGrayScale = 0;
@@ -480,10 +481,10 @@ ephyrRandRSetConfig(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     EphyrScrPriv *scrpriv = screen->driver;
-    Bool wasEnabled = pScreenPriv->enabled;
+    bool wasEnabled = pScreenPriv->enabled;
     EphyrScrPriv oldscr;
     int oldwidth, oldheight, oldmmwidth, oldmmheight;
-    Bool oldshadow;
+    bool oldshadow;
     int newwidth, newheight;
 
     if (screen->randr & (RR_Rotate_0 | RR_Rotate_180)) {
@@ -625,7 +626,7 @@ ephyrResizeScreen (ScreenPtr           pScreen,
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     RRScreenSize size = {0};
-    Bool ret;
+    bool ret;
     int t;
 
     if (screen->randr & (RR_Rotate_90|RR_Rotate_270)) {
