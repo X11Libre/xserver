@@ -280,8 +280,14 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
                 if (builtinConfig[builtinIndex] == NULL)
                     ret = NULL;
                 else {
-                    strlcpy(configBuf,
-                            builtinConfig[builtinIndex], CONFIG_BUF_LEN);
+                    if (!configBuf)
+                        configBuf = calloc(1, CONFIG_BUF_LEN);
+                    if (!configRBuf)
+                        configRBuf = calloc(1, CONFIG_BUF_LEN);
+                    if (configBuf) {
+                        strlcpy(configBuf,
+                                builtinConfig[builtinIndex], CONFIG_BUF_LEN);
+                    }
                     ret = configBuf;
                     builtinIndex++;
                 }
@@ -953,6 +959,10 @@ void
 xf86setBuiltinConfig(const char *config[])
 {
     builtinConfig = config;
+    if (!configBuf)
+        configBuf = calloc(1, CONFIG_BUF_LEN);
+    if (!configRBuf)
+        configRBuf = calloc(1, CONFIG_BUF_LEN);
 }
 
 void

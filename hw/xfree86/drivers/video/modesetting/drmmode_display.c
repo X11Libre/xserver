@@ -1308,8 +1308,7 @@ drmmode_ConvertToKMode(ScrnInfoPtr scrn,
 
     kmode->flags = mode->Flags; //& FLAG_BITS;
     if (mode->name)
-        strncpy(kmode->name, mode->name, DRM_DISPLAY_MODE_LEN);
-    kmode->name[DRM_DISPLAY_MODE_LEN - 1] = 0;
+        strlcpy(kmode->name, mode->name, DRM_DISPLAY_MODE_LEN);
 
 }
 
