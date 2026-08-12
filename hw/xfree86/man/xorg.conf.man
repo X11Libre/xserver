@@ -40,8 +40,6 @@ server is started as a normal user:
 .nf
 .IR /etc/X11/ <cmdline>
 .IR @projectroot@/etc/X11/ <cmdline>
-.IB /etc/X11/ $XORGCONFIG
-.IB @projectroot@/etc/X11/ $XORGCONFIG
 .I /etc/X11/xorg.conf
 .I /etc/xorg.conf
 .IR @projectroot@/etc/X11/xorg.conf. <hostname>
@@ -56,9 +54,6 @@ where
 is a relative path (with no \(lq..\&\(rq components) specified with the
 .B \-config
 command line option,
-.B $XORGCONFIG
-is the relative path (with no \(lq..\&\(rq components) specified by that
-environment variable, and
 .I <hostname>
 is the machine's hostname as reported by
 .BR gethostname (@libmansuffix@).
@@ -71,9 +66,6 @@ search locations are as follows:
 <cmdline>
 .IR /etc/X11/ <cmdline>
 .IR @projectroot@/etc/X11/ <cmdline>
-.B $XORGCONFIG
-.IB /etc/X11/ $XORGCONFIG
-.IB @projectroot@/etc/X11/ $XORGCONFIG
 .I /etc/X11/xorg.conf
 .I /etc/xorg.conf
 .IR @projectroot@/etc/X11/xorg.conf. <hostname>
@@ -88,9 +80,6 @@ where
 is the path specified with the
 .B \-config
 command line option (which may be absolute or relative),
-.B $XORGCONFIG
-is the path specified by that
-environment variable (absolute or relative),
 .B $HOME
 is the path specified by that environment variable (usually the home
 directory), and
