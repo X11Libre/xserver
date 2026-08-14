@@ -1,3 +1,8 @@
+/* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later
+ *
+ * Copyright © 2026 cepelinas9000, gtautvis@gmail.com
+ */
+
 #undef LTTNG_UST_TRACEPOINT_PROVIDER
 #define LTTNG_UST_TRACEPOINT_PROVIDER xlibre_xext_composite
 
@@ -48,7 +53,76 @@ defined(LTTNG_UST_TRACEPOINT_HEADER_MULTI_READ)
             )
         )
 
+    LTTNG_UST_TRACEPOINT_EVENT(
+        /* Tracepoint provider name */
+        xlibre_xext_composite,
 
+        /* Tracepoint/event name */
+        redirect_req,
+
+        /* List of tracepoint arguments (input) */
+        LTTNG_UST_TP_ARGS(
+            int, client_id,
+            uint8_t, _req,
+            uint32_t, window,
+            uint8_t, update
+            ),
+
+        /* List of fields of eventual event (output) */
+        LTTNG_UST_TP_FIELDS(
+            lttng_ust_field_integer(int,client_id,client_id)
+            lttng_ust_field_enum(xlibre_xext_composite, composite_req, uint8_t, req, _req)
+            lttng_ust_field_integer_hex(uint32_t,window,window)
+            lttng_ust_field_integer_hex(uint8_t,update,update)
+            )
+        )
+
+    LTTNG_UST_TRACEPOINT_EVENT(
+        /* Tracepoint provider name */
+        xlibre_xext_composite,
+
+        /* Tracepoint/event name */
+        redirect_req_simple,
+
+        /* List of tracepoint arguments (input) */
+        LTTNG_UST_TP_ARGS(
+            int, client_id,
+            uint8_t, _req,
+            uint32_t, window
+            ),
+
+        /* List of fields of eventual event (output) */
+        LTTNG_UST_TP_FIELDS(
+            lttng_ust_field_integer(int,client_id,client_id)
+            lttng_ust_field_enum(xlibre_xext_composite, composite_req, uint8_t, req, _req)
+            lttng_ust_field_integer_hex(uint32_t,window,window)
+            )
+        )
+
+
+    LTTNG_UST_TRACEPOINT_EVENT(
+        /* Tracepoint provider name */
+        xlibre_xext_composite,
+
+        /* Tracepoint/event name */
+        window_pixmap_redirect_req,
+
+        /* List of tracepoint arguments (input) */
+        LTTNG_UST_TP_ARGS(
+            int, client_id,
+            uint8_t, _req,
+            uint32_t, window,
+            uint32_t, pixmap
+            ),
+
+        /* List of fields of eventual event (output) */
+        LTTNG_UST_TP_FIELDS(
+            lttng_ust_field_integer(int,client_id,client_id)
+            lttng_ust_field_enum(xlibre_xext_composite, composite_req, uint8_t, req, _req)
+            lttng_ust_field_integer_hex(uint32_t,window,window)
+            lttng_ust_field_integer_hex(uint32_t,pixmap,pixmap)
+            )
+        )
 #endif
 
 
