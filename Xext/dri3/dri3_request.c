@@ -37,6 +37,11 @@
 #include <drm_fourcc.h>
 #include "dixstruct_priv.h"
 
+#ifdef _XLIBRE_LTTNG_UST
+
+#include "dri3_tp.h"
+#endif
+
 static Bool
 dri3_screen_can_one_point_one(ScreenPtr screen)
 {
@@ -80,6 +85,10 @@ proc_dri3_query_version(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDRI3QueryVersionReq);
     X_REQUEST_FIELD_CARD32(majorVersion);
     X_REQUEST_FIELD_CARD32(minorVersion);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,generic_req,client->index,stuff->dri3ReqType,stuff->length);
+#endif
 
     xDRI3QueryVersionReply reply = {
         .majorVersion = SERVER_DRI3_MAJOR_VERSION,
@@ -164,6 +173,10 @@ proc_dri3_open(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drawable);
     X_REQUEST_FIELD_CARD32(provider);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,generic_req,client->index,stuff->dri3ReqType,stuff->length);
+#endif
+
     if (!RRProviderType) {
         return BadMatch;
     }
@@ -203,6 +216,11 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
     X_REQUEST_FIELD_CARD16(width);
     X_REQUEST_FIELD_CARD16(height);
     X_REQUEST_FIELD_CARD16(stride);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,generic_req,client->index,stuff->dri3ReqType,stuff->length);
+#endif
+
 
     SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
@@ -272,6 +290,11 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDRI3BufferFromPixmapReq);
     X_REQUEST_FIELD_CARD32(pixmap);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,drawable_fd_req,client->index,stuff->dri3ReqType,stuff->pixmap);
+#endif
+
+
     PixmapPtr pixmap;
     int rc = dixLookupResourceByType((void **) &pixmap, stuff->pixmap, X11_RESTYPE_PIXMAP,
                                  client, DixWriteAccess);
@@ -308,9 +331,14 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
 static int
 proc_dri3_fence_from_fd(ClientPtr client)
 {
+
     X_REQUEST_HEAD_STRUCT(xDRI3FenceFromFDReq);
     X_REQUEST_FIELD_CARD32(drawable);
     X_REQUEST_FIELD_CARD32(fence);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,drawable_fd_req,client->index,stuff->dri3ReqType,stuff->drawable);
+#endif
 
     SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->fence, client);
@@ -336,6 +364,10 @@ proc_dri3_fd_from_fence(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDRI3FDFromFenceReq);
     X_REQUEST_FIELD_CARD32(drawable);
     X_REQUEST_FIELD_CARD32(fence);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,generic_req,client->index,stuff->dri3ReqType,stuff->length);
+#endif
 
     xDRI3FDFromFenceReply reply = {
         .nfd = 1,
@@ -366,6 +398,10 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xDRI3GetSupportedModifiersReq);
     X_REQUEST_FIELD_CARD32(window);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,generic_req,client->index,stuff->dri3ReqType,stuff->length);
+#endif
 
     WindowPtr window;
     int status = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
@@ -418,6 +454,10 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
     X_REQUEST_FIELD_CARD32(stride3);
     X_REQUEST_FIELD_CARD32(offset3);
     X_REQUEST_FIELD_CARD64(modifier);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,drawable_fd_req,client->index,stuff->dri3ReqType,stuff->pixmap);
+#endif
 
     SetReqFds(client, stuff->num_buffers);
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
@@ -511,6 +551,10 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDRI3BuffersFromPixmapReq);
     X_REQUEST_FIELD_CARD32(pixmap);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,drawable_fd_req,client->index,stuff->dri3ReqType,stuff->pixmap);
+#endif
+
     PixmapPtr pixmap;
     int rc = dixLookupResourceByType((void **) &pixmap, stuff->pixmap, X11_RESTYPE_PIXMAP,
                                  client, DixWriteAccess);
@@ -562,6 +606,10 @@ proc_dri3_set_drm_device_in_use(ClientPtr client)
     X_REQUEST_FIELD_CARD32(drmMajor);
     X_REQUEST_FIELD_CARD32(drmMinor);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,generic_req,client->index,stuff->dri3ReqType,stuff->length);
+#endif
+
     WindowPtr window;
     int status = dixLookupWindow(&window, stuff->window, client,
                              DixGetAttrAccess);
@@ -582,6 +630,10 @@ proc_dri3_import_syncobj(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDRI3ImportSyncobjReq);
     X_REQUEST_FIELD_CARD32(syncobj);
     X_REQUEST_FIELD_CARD32(drawable);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,generic_req,client->index,stuff->dri3ReqType,stuff->length);
+#endif
 
     SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->syncobj, client);
@@ -606,6 +658,10 @@ proc_dri3_free_syncobj(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xDRI3FreeSyncobjReq);
     X_REQUEST_FIELD_CARD32(syncobj);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_dri3,generic_req,client->index,stuff->dri3ReqType,stuff->length);
+#endif
 
     struct dri3_syncobj *syncobj;
     int status = dixLookupResourceByType((void **) &syncobj, stuff->syncobj,
