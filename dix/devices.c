@@ -169,6 +169,8 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
                 EnableDevice(dev, TRUE);
             else if (!(*((CARD8 *) prop->data)) && dev->enabled)
                 DisableDevice(dev, TRUE);
+            /* commit-pass errors are ignored; commit the real state */
+            *((CARD8 *) prop->data) = !!dev->enabled;
         }
     }
     else if (property == XIGetKnownProperty(XI_PROP_TRANSFORM)) {
