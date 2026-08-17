@@ -771,12 +771,20 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
     for (i = minKC; i <= (int) maxKC; i++) {
         Atom typeName[XkbNumKbdGroups];
         XkbKeyTypePtr type[XkbNumKbdGroups];
+        int nGroups;
 
         if ((tmp = fread(&wireMap, SIZEOF(xkmKeySymMapDesc), 1, file)) < 1) {
             _XkbLibError(_XkbErrBadLength, "ReadXkmSymbols", 0);
             return -1;
         }
         nRead += tmp * SIZEOF(xkmKeySymMapDesc);
+        /* group_info carries the out-of-range action and number alongside the
+         * count, and the count itself is four bits wide while everything it
+         * indexes here holds only XkbNumKbdGroups entries.
+         */
+        nGroups = XkbNumGroups(wireMap.num_groups);
+        if (nGroups > XkbNumKbdGroups)
+            nGroups = XkbNumKbdGroups;
         memset((char *) typeName, 0, XkbNumKbdGroups * sizeof(Atom));
         memset((char *) type, 0, XkbNumKbdGroups * sizeof(XkbKeyTypePtr));
         if (wireMap.flags & XkmKeyHasTypes) {
@@ -804,12 +812,15 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
             xkb->server->explicit[i] |= XkbExplicitAutoRepeatMask;
         }
         xkb->map->modmap[i] = wireMap.modifier_map;
-        if (XkbNumGroups(wireMap.num_groups) > 0) {
+        if (nGroups > 0) {
             KeySym *sym;
             int nSyms;
 
-            if (XkbNumGroups(wireMap.num_groups) > xkb->ctrls->num_groups)
-                xkb->ctrls->num_groups = wireMap.num_groups;
+            if (nGroups > xkb->ctrls->num_groups)
+                xkb->ctrls->num_groups = nGroups;
+            /* The file still holds symbols for every group it claimed, so read
+             * and store them all even when we clamped the count above.
+             */
             nSyms = XkbNumGroups(wireMap.num_groups) * wireMap.width;
             sym = XkbResizeKeySyms(xkb, i, nSyms);
             if (!sym)
@@ -828,7 +839,7 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
                 xkb->server->explicit[i] |= XkbExplicitInterpretMask;
             }
         }
-        for (g = 0; g < XkbNumGroups(wireMap.num_groups); g++) {
+        for (g = 0; g < nGroups; g++) {
             if (((xkb->server->explicit[i] & (1 << g)) == 0) ||
                 (type[g] == NULL)) {
                 KeySym *tmpSyms;
@@ -839,7 +850,8 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
             xkb->map->key_sym_map[i].kt_index[g] =
                 type[g] - (&xkb->map->types[0]);
         }
-        xkb->map->key_sym_map[i].group_info = wireMap.num_groups;
+        xkb->map->key_sym_map[i].group_info =
+            XkbSetNumGroups(wireMap.num_groups, nGroups);
         xkb->map->key_sym_map[i].width = wireMap.width;
         if (wireMap.flags & XkmKeyHasBehavior) {
             xkmBehaviorDesc b;
@@ -851,6 +863,12 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
             xkb->server->explicit[i] |= XkbExplicitBehaviorMask;
         }
     }
+    /* A symbols section in which no key defines a group leaves the count at
+     * the zero it was allocated with, which would put group 0 itself out of
+     * range for the rest of the server.
+     */
+    if (xkb->ctrls->num_groups == 0)
+        xkb->ctrls->num_groups = 1;
     if (totalVModMaps > 0) {
         xkmVModMapDesc v;
 
