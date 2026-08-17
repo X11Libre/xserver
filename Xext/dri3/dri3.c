@@ -36,17 +36,9 @@ static x_server_generation_t dri3_screen_generation;
 static void dri3_screen_close(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     dri3_screen_priv_ptr screen_priv = dri3_screen_priv(screen);
-
-    if (screen_priv && screen_priv->formats && screen_priv->formats_cached) {
-        for (int i = 0; i < screen_priv->num_formats; i++) {
-            free(screen_priv->formats[i].modifiers);
-        }
-        free(screen_priv->formats);
-    }
+    dixScreenUnhookClose(screen, dri3_screen_close);
     free(screen_priv->info);
     free(screen_priv);
-
-    dixScreenUnhookClose(screen, dri3_screen_close);
 }
 
 Bool
@@ -70,13 +62,14 @@ dri3_screen_init(ScreenPtr screen, const dri3_screen_info_rec *info)
         dixSetPrivate(&screen->devPrivates, &dri3_screen_private_key, screen_priv);
     }
 
-<<<<<<< HEAD:Xext/dri3/dri3.c
-    if (info)
-        dri3_screen_priv(screen)->info = info;
-=======
-    if (info)
-        dri3_screen_priv(screen)->info = info;
->>>>>>> 2caa0ac21e (fix DRI3 version detection):dri3/dri3.c
+    if (info) {
+        void *ptr = realloc(screen_priv->info, sizeof(*info));
+        if (!ptr) {
+            return FALSE;
+        }
+        screen_priv->info = ptr;
+        *screen_priv->info = *info;
+    }
 
     return TRUE;
 }
@@ -92,57 +85,3 @@ static int dri3_syncobj_free(void *data, XID id)
 }
 
 void
-dri3_extension_init(void)
-{
-    ExtensionEntry *extension;
-
-    /* If no screens support DRI3, there's no point offering the
-     * extension at all
-     */
-    if (dri3_screen_generation != serverGeneration)
-        return;
-
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        return;
-#endif /* XINERAMA */
-
-    extension = AddExtension(DRI3_NAME, DRI3NumberEvents, DRI3NumberErrors,
-                             proc_dri3_dispatch, proc_dri3_dispatch,
-                             NULL, StandardMinorOpcode);
-    if (!extension)
-        goto bail;
-
-    dri3_request = extension->base;
-
-    DIX_FOR_EACH_SCREEN({
-        if (!dri3_screen_init(walkScreen, NULL))
-            goto bail;
-    });
-
-    dri3_syncobj_type = CreateNewResourceType(dri3_syncobj_free, "DRI3Syncobj");
-    if (!dri3_syncobj_type)
-        goto bail;
-
-    return;
-
-bail:
-    FatalError("Cannot initialize DRI3 extension");
-}
-
-uint32_t
-drm_format_for_depth(uint32_t depth, uint32_t bpp)
-{
-    switch (bpp) {
-        case 16:
-            return DRM_FORMAT_RGB565;
-        case 24:
-            return DRM_FORMAT_XRGB8888;
-        case 30:
-            return DRM_FORMAT_XRGB2101010;
-        case 32:
-            return DRM_FORMAT_ARGB8888;
-        default:
-            return 0;
-    }
-}
