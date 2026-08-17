@@ -107,29 +107,50 @@ RootlessUpdateScreenPixmap(ScreenPtr pScreen)
     pPix = (*pScreen->GetScreenPixmap) (pScreen);
     if (pPix == NULL) {
         pPix = (*pScreen->CreatePixmap) (pScreen, 0, 0, pScreen->rootDepth, 0);
+        if (pPix == NULL)
+            return;
         (*pScreen->SetScreenPixmap) (pPix);
     }
 
     rowbytes = PixmapBytePad(pScreen->width, pScreen->rootDepth);
 
     if (s->pixmap_data_size < rowbytes) {
-        free(s->pixmap_data);
-
-        s->pixmap_data_size = rowbytes;
-        s->pixmap_data = calloc(1, s->pixmap_data_size);
-        if (s->pixmap_data == NULL)
+        /*
+         * Allocate before releasing the old buffer.  On failure the pixmap
+         * must keep pointing at storage that is still valid and still covers
+         * the geometry we last published.
+         */
+        void *data = malloc(rowbytes);
+        if (data == NULL)
             return;
 
-        memset(s->pixmap_data, 0xFF, s->pixmap_data_size);
+        memset(data, 0xFF, rowbytes);
 
-        pScreen->ModifyPixmapHeader(pPix, pScreen->width, pScreen->height,
-                                    pScreen->rootDepth,
-                                    BitsPerPixel(pScreen->rootDepth),
-                                    0, s->pixmap_data);
-        /* ModifyPixmapHeader ignores zero arguments, so install rowbytes
-           by hand. */
-        pPix->devKind = 0;
+        free(s->pixmap_data);
+        s->pixmap_data = data;
+        s->pixmap_data_size = rowbytes;
     }
+
+    if (s->pixmap_data == NULL)
+        return;
+
+    /*
+     * Republish the geometry on every call.  The branch above only runs when
+     * the buffer grows, so a screen that shrinks would otherwise keep
+     * advertising its previous, larger size.
+     */
+    pScreen->ModifyPixmapHeader(pPix, pScreen->width, pScreen->height,
+                                pScreen->rootDepth,
+                                BitsPerPixel(pScreen->rootDepth),
+                                0, s->pixmap_data);
+
+    /*
+     * A zero devKind is what makes every row alias row 0, and that is what
+     * keeps a one-scanline allocation in bounds vertically.  Passing devKind
+     * as zero above leaves the field untouched rather than setting it, so
+     * install it here -- this line is load-bearing, not a fixup of rowbytes.
+     */
+    pPix->devKind = 0;
 }
 
 /*
