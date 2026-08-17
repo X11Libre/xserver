@@ -18,6 +18,10 @@
 #include "scrnintstr.h"
 #include "glamor_egl_ext.h"
 
+#ifdef DRI3
+#include "dri3.h"
+#endif
+
 #ifdef GLAMOR_HAS_GBM
 #include <gbm.h>
 #endif
@@ -29,6 +33,10 @@ typedef struct glamor_egl_screen_private {
     char *glvnd_vendor; /* glvnd vendor library name or driver name */
     int exact_glvnd_vendor; /* If the glvnd vendor should be assumed valid with no checks */
     void* server_private;
+
+#ifdef DRI3
+    dri3_screen_info_rec dri3_info;
+#endif
 
 #ifdef GLAMOR_HAS_GBM
     struct gbm_device *gbm;
