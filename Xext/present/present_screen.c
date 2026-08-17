@@ -75,6 +75,7 @@ static void present_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *
 
     dixScreenUnhookClose(screen, present_close_screen);
     dixSetPrivate(&screen->devPrivates, &present_screen_private_key, NULL);
+    free(screen_priv->info);
     free(screen_priv);
 }
 
@@ -232,7 +233,15 @@ present_screen_init(ScreenPtr screen, present_screen_info_ptr info)
         if (!screen_priv)
             return FALSE;
 
-        screen_priv->info = info;
+        if (info) {
+            screen_priv->info = malloc(sizeof(*info));
+            if (!screen_priv->info) {
+                return FALSE;
+            }
+            *screen_priv->info = *info;
+        } else {
+            screen_priv->info = NULL;
+        }
         present_scmd_init_mode_hooks(screen_priv);
 
         present_fake_screen_init(screen);
