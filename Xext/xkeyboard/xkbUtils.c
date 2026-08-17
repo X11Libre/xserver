@@ -664,6 +664,13 @@ XkbAdjustGroup(int group, XkbControlsPtr ctrls)
 {
     unsigned act;
 
+    /* A keymap with no groups leaves nothing to adjust into, and every action
+     * below misbehaves: wrapping divides by zero, clamping underflows to -1,
+     * and the negative-group loop never terminates.
+     */
+    if (ctrls->num_groups == 0)
+        return XkbGroup1Index;
+
     act = XkbOutOfRangeGroupAction(ctrls->groups_wrap);
     if (group < 0) {
         while (group < 0) {
