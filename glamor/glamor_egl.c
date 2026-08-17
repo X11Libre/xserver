@@ -63,7 +63,10 @@
 #include "glamor_egl_ext.h"
 #include "glamor_egl_priv.h"
 #include "glamor_glx_provider.h"
+
+#ifdef DRI3
 #include "dri3.h"
+#endif
 
 #ifndef GBM_MAX_PLANES
 #define GBM_MAX_PLANES 4
@@ -1598,7 +1601,7 @@ glamor_dri3_open_client(ClientPtr client,
     return Success;
 }
 
-static dri3_screen_info_rec glamor_dri3_info = {
+static const dri3_screen_info_rec glamor_dri3_info = {
     .version = 2,
 
     .fd_from_pixmap = glamor_egl_fd_from_pixmap,
@@ -1730,7 +1733,7 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
             if (!glamor_egl->device_path)
                 glamor_egl->device_path = drmGetDeviceNameFromFd2(glamor_egl->fd);
 
-            if (!dri3_screen_init(screen, &glamor_dri3_info)) {
+            if (!dri3_screen_init(screen, &glamor_egl->dri3_info)) {
                 GLAMOR_LOG_STR(screen->myNum, X_ERROR,
                                "Failed to initialize DRI3.\n");
             }
@@ -2536,6 +2539,10 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 
     memset(glamor_egl, 0, sizeof(*glamor_egl));
 
+#ifdef DRI3
+    glamor_egl->dri3_info = glamor_dri3_info;
+#endif
+
     if (glamor_egl_conf->glvnd_vendor) {
         glamor_egl->glvnd_vendor = strdup(glamor_egl_conf->glvnd_vendor);
         glamor_egl->exact_glvnd_vendor = !!glamor_egl->glvnd_vendor;
@@ -2576,8 +2583,8 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
     if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
         GLAMOR_LOG_STR(screen_idx, X_WARNING, "EGL extension EGL_MESA_image_dma_buf_export not available\n");
         GLAMOR_LOG_STR(screen_idx, X_WARNING, "DRI3 dmabuf export will be slower\n");
-        glamor_dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_slow;
-        glamor_dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_slow;
+        glamor_egl->dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_slow;
+        glamor_egl->dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_slow;
     }
 #endif
 
@@ -2650,7 +2657,7 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
                        "Extensions GL_EXT_EGL_image_storage and GL_OES_EGL_image are both unavailable\n");
         GLAMOR_LOG_STR(screen_idx, X_ERROR,
                        "DRI3 import will not be available\n");
-        glamor_dri3_info.pixmap_from_fds = NULL;
+        glamor_egl->dri3_info.pixmap_from_fds = NULL;
     }
 #endif
 
@@ -2688,10 +2695,10 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 
     *caps |= GLAMOR_EGL_DEFAULT_CAPS;
 #ifdef DRI3
-    if (!glamor_dri3_info.pixmap_from_fds) {
+    if (!glamor_egl->dri3_info.pixmap_from_fds) {
         *caps &= ~GLAMOR_EGL_CAP_DRI3_IMPORT;
         /* Avoid DRI3 returning BadImplementation */
-        glamor_dri3_info.pixmap_from_fds = glamor_pixmap_from_fds_noop;
+        glamor_egl->dri3_info.pixmap_from_fds = glamor_pixmap_from_fds_noop;
     }
 #endif
 
@@ -2711,13 +2718,13 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
         *caps &= ~GLAMOR_EGL_CAP_TEXTURE_GBM_BO;
 #ifdef DRI3
         if (epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export")) {
-            glamor_dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_fast;
-            glamor_dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_fast;
+            glamor_egl->dri3_info.fd_from_pixmap = glamor_egl_fd_from_pixmap_fast;
+            glamor_egl->dri3_info.fds_from_pixmap = glamor_egl_fds_from_pixmap_fast;
         } else {
             GLAMOR_LOG_STR(screen_idx, X_WARNING, "EGL extension EGL_MESA_image_dma_buf_export not available\n");
             GLAMOR_LOG_STR(screen_idx, X_WARNING, "DRI3 dmabuf export will be unavailable\n");
-            glamor_dri3_info.fd_from_pixmap = NULL;
-            glamor_dri3_info.fds_from_pixmap = NULL;
+            glamor_egl->dri3_info.fd_from_pixmap = NULL;
+            glamor_egl->dri3_info.fds_from_pixmap = NULL;
             *caps &= ~GLAMOR_EGL_CAP_DRI3_EXPORT;
         }
 #endif
