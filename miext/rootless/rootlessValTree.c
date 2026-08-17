@@ -518,6 +518,7 @@ RootlessMiValidateTree(WindowPtr pRoot, /* Parent to validate */
     }
 
     RegionUninit(&childClip);
+    RegionUninit(&exposed);
 
     /* The root is never clipped by its children, so nothing on the root
        is ever exposed by moving or mapping its children. */
