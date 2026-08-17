@@ -2145,5 +2145,8 @@ XkbCopyControls(XkbDescPtr dst, XkbDescPtr src)
             nTG = nG;
         }
     }
+    /* A keymap always has at least one group, even when no key defines any symbols */
+    if (nTG == 0)
+        nTG = 1;
     dst->ctrls->num_groups = nTG;
 }
