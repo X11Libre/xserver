@@ -285,7 +285,6 @@ conf_data.set('DEBUG', enable_debugging ? '1' : false)
 
 if build_rootless
     conf_data.set('ROOTLESS', build_rootless ? '1' : false)
-    conf_data.set('ROOTLESS_WORKAROUND', 1)
     conf_data.set('ROOTLESS_SAFEALPHA', 1)
 endif
 
