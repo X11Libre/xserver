@@ -36,10 +36,11 @@ typedef struct _damage {
     DamagePtr pNext;
     DamagePtr pNextWin;
     /*
-     * Drawable on which this damage was inserted. Used to re-derive the list head at removal time
-     * to avoid caching a pointer into a realloc()able privates array.
+     * Head of the pNext list this damage is currently linked on, or NULL if it is not linked on any list.  Recorded at
+     * insertion time so that removal always unlinks from the list the damage actually went onto; see
+     * damageInsertDamage().
      */
-    DrawablePtr pListDrawable;
+    DamagePtr *pListHead;
     RegionRec damage;
 
     DamageReportLevel damageLevel;

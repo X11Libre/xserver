@@ -1446,13 +1446,12 @@ damagePushPixels(GCPtr pGC,
 }
 
 static void
-damageRemoveDamage(DrawablePtr pListDrawable, DamagePtr pDamage)
+damageRemoveDamage(DamagePtr * pPrev, DamagePtr pDamage)
 {
-    DamagePtr *pPrev = getDrawableDamageRef(pListDrawable);
-
     while (*pPrev) {
         if (*pPrev == pDamage) {
             *pPrev = pDamage->pNext;
+            pDamage->pListHead = NULL;
             return;
         }
         pPrev = &(*pPrev)->pNext;
@@ -1463,6 +1462,16 @@ damageRemoveDamage(DrawablePtr pListDrawable, DamagePtr pDamage)
 #endif
 }
 
+/*
+ * Link pDamage onto the list headed by pPrev, remembering that list so that damageRemoveDamage() can later unlink it
+ * from the same place.
+ *
+ * The list a window's damage belongs on is chosen by getDrawableDamageRef() and depends on the window pixmap, which can
+ * change while the damage is registered (Composite redirection, rootless drawing and Present flips all swap it).
+ * Re-deriving the list at removal time can therefore consult a different list than the damage was inserted onto, in
+ * which case the removal silently does nothing and leaves an unregistered -- possibly freed -- damage linked where
+ * damageRegionAppend() will dereference its NULL pDrawable.
+ */
 static void
 damageInsertDamage(DamagePtr * pPrev, DamagePtr pDamage)
 {
@@ -1477,16 +1486,16 @@ damageInsertDamage(DamagePtr * pPrev, DamagePtr pDamage)
 #endif
     pDamage->pNext = *pPrev;
     *pPrev = pDamage;
-    pDamage->pListDrawable = pDamage->pDrawable;
+    pDamage->pListHead = pPrev;
 }
-static void
-damagePixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
+
+static void damagePixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
     DamagePtr *pPrev = getPixmapDamageRef(pPixmap);
     DamagePtr pDamage;
 
     while ((pDamage = *pPrev)) {
-        damageRemoveDamage((DrawablePtr)pPixmap, pDamage);
+        damageRemoveDamage(pPrev, pDamage);
         if (!pDamage->isWindow)
             DamageDestroy(pDamage);
     }
@@ -1540,8 +1549,8 @@ damageSetWindowPixmap(WindowPtr pWindow, PixmapPtr pPixmap)
 
     if ((pDamage = damageGetWinPriv(pWindow))) {
         while (pDamage) {
-            if (pDamage->pListDrawable)
-                damageRemoveDamage(pDamage->pListDrawable, pDamage);
+            if (pDamage->pListHead)
+                damageRemoveDamage(pDamage->pListHead, pDamage);
             pDamage = pDamage->pNextWin;
         }
     }
@@ -1701,7 +1710,7 @@ DamageCreate(DamageReportFunc damageReport,
         return 0;
     pDamage->pNext = 0;
     pDamage->pNextWin = 0;
-    pDamage->pListDrawable = NULL;
+    pDamage->pListHead = NULL;
     RegionNull(&pDamage->damage);
     RegionNull(&pDamage->pendingDamage);
 
@@ -1806,9 +1815,9 @@ DamageUnregister(DamagePtr pDamage)
         }
 #endif
     }
-    if (pDamage->pListDrawable)
-        damageRemoveDamage(pDamage->pListDrawable, pDamage);
     pDamage->pDrawable = 0;
+    if (pDamage->pListHead)
+        damageRemoveDamage(pDamage->pListHead, pDamage);
 }
 
 void
