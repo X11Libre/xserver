@@ -2207,6 +2207,9 @@ SetKeySyms(ClientPtr client,
         if (XkbKeyNumGroups(xkb, i) > s)
             s = XkbKeyNumGroups(xkb, i);
     }
+    /* Never drop to zero groups: a client is free to clear every key's symbols */
+    if (s == 0)
+        s = 1;
     if (s != xkb->ctrls->num_groups) {
         xkbControlsNotify cn = {
             .requestMajor = XkbReqCode,
