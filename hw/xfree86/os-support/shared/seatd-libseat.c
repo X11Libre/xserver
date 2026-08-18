@@ -371,11 +371,9 @@ seatd_libseat_close_device(InputInfoPtr p)
     if (libseat_close_device(seat_info.client, id)) {
         LogMessage(X_ERROR, "seatd_libseat close failed %d\n", -errno);
     }
-    else {
-        close(fd);
-        p->fd = -1;
-        p->options = xf86ReplaceIntOption(p->options, "fd", -1);
-    }
+    close(fd);
+    p->fd = -1;
+    p->options = xf86ReplaceIntOption(p->options, "fd", -1);
 out:
     free(path);
 }
