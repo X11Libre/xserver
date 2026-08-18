@@ -317,13 +317,13 @@ seatd_libseat_open_device(InputInfoPtr p, int *pfd, Bool *paused)
     char *path = xf86CheckStrOption(p->options, "Device", NULL);
 
     if (!libseat_active()) {
-        return;
+        goto out;
     }
     if (!seat_info.vt_active) {
         *pfd = -2; /* Invalid, but not -1. See xf86NewInputDevice() */
         *paused = TRUE;
         LogMessage(X_INFO, "seatd_libseat paused %s\n", path);
-        return;
+        goto out;
     }
     fd = check_duplicate_device(p->major,p->minor);
     if (fd < 0) {
@@ -332,7 +332,7 @@ seatd_libseat_open_device(InputInfoPtr p, int *pfd, Bool *paused)
             fd = -errno;
             LogMessage(X_ERROR, "seatd_libseat open %s (%d) failed: %d\n",
                        path, id, fd);
-            return;
+            goto out;
         }
     }
     else {
@@ -343,6 +343,8 @@ seatd_libseat_open_device(InputInfoPtr p, int *pfd, Bool *paused)
     p->options = xf86ReplaceIntOption(p->options, "fd", fd);
     p->options = xf86ReplaceIntOption(p->options, "libseat_id", id);
     LogMessage(X_INFO, "seatd_libseat opened %s (%d:%d)\n", path, id, fd);
+out:
+    free(path);
 }
 
 /*
@@ -356,15 +358,15 @@ seatd_libseat_close_device(InputInfoPtr p)
     int id = xf86CheckIntOption(p->options, "libseat_id", -1);
 
     if (!libseat_active())
-        return;
+        goto out;
     LogMessage(X_INFO, "seatd_libseat try close %s (%d:%d)\n", path, id, fd);
     if (fd < 0) {
         LogMessage(X_ERROR, "seatd_libseat device not open (%s)\n", path);
-        return;
+        goto out;
     }
     if (id < 0) {
         LogMessage(X_ERROR, "seatd_libseat no libseat ID\n");
-        return;
+        goto out;
     }
     if (libseat_close_device(seat_info.client, id)) {
         LogMessage(X_ERROR, "seatd_libseat close failed %d\n", -errno);
@@ -374,6 +376,8 @@ seatd_libseat_close_device(InputInfoPtr p)
         p->fd = -1;
         p->options = xf86ReplaceIntOption(p->options, "fd", -1);
     }
+out:
+    free(path);
 }
 
 /*
