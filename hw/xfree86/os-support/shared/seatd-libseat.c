@@ -82,7 +82,7 @@ enable_seat(struct libseat *seat, void *userdata)
     /* Reactivate all input devices */
     for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next)
         if (pInfo->flags & XI86_SERVER_FD){
-            if (xf86CheckIntOption(pInfo->options, "libseat_id", -1) > 0){
+            if (xf86CheckIntOption(pInfo->options, "libseat_id", -1) >= 0){
                 int fd = -1, paused = FALSE;
                 seatd_libseat_open_device(pInfo, &fd, &paused);
                 xf86EnableInputDeviceForVTSwitch(pInfo);
