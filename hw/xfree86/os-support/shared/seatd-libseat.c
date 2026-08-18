@@ -261,7 +261,6 @@ seatd_libseat_fini(void)
  * Return
  *   file descriptor (>=0) if all is ok.
  *   -EPERM (-1) if the libseat client is not activated
- *   -EAGAIN (-11) if the VT is not active
  *   -errno from libseat_open_device if device access failed
  */
 int
@@ -325,7 +324,7 @@ seatd_libseat_open_device(InputInfoPtr p, int *pfd, Bool *paused)
         LogMessage(X_INFO, "seatd_libseat paused %s\n", path);
         goto out;
     }
-    fd = check_duplicate_device(p->major,p->minor);
+    fd = check_duplicate_device(p->major, p->minor);
     if (fd < 0) {
         LogMessage(X_INFO, "seatd_libseat try open %s\n", path);
         if ((id = libseat_open_device(seat_info.client, path, &fd)) == -1) {
@@ -393,13 +392,13 @@ seatd_libseat_controls_session(void){
 int
 seatd_libseat_switch_session(int session)
 {
-    int ret=0;
+    int ret = 0;
 
     LogMessage(X_INFO, "seatd_libseat switch VT %d\n", session);
     if ((ret = libseat_switch_session(seat_info.client, session)) < 0) {
         LogMessage(X_ERROR, "seatd_libseat switch VT failed with %d\n", -errno);
         goto ret;
     }
- ret:
+ret:
     return ret;
 }

@@ -985,10 +985,10 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
     if (path && pInfo->major == 0 && pInfo->minor == 0)
         xf86stat(path, &pInfo->major, &pInfo->minor);
 
-    if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)){
+    if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)) {
         int fd = systemd_logind_take_fd(pInfo->major, pInfo->minor,
                                         path, &paused);
-        seatd_libseat_open_device(pInfo,&fd,&paused);
+        seatd_libseat_open_device(pInfo, &fd, &paused);
         if (fd != -1) {
             if (paused) {
                 /* Put on new_input_devices list for delayed probe */
