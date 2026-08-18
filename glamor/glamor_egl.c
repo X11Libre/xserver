@@ -720,6 +720,11 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
             return FALSE;
         }
 
+ErrorF("Num Renderable Modifiers: %d\n", num_modifiers);
+for (int i = 0; i < num_modifiers; i++) {
+    ErrorF("modifiers[%d] = 0x%lx\n", i, modifiers[i]);
+}
+
         if (num_modifiers > 0) {
 #ifdef GBM_BO_WITH_MODIFIERS2
             bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
@@ -987,9 +992,15 @@ glamor_egl_fds_from_pixmap_fast(ScreenPtr screen, PixmapPtr pixmap, int *fds,
     struct glamor_pixmap_private *pixmap_priv =
         glamor_get_pixmap_private(pixmap);
 
+#if 1
     if (!glamor_egl_make_pixmap_exportable2(pixmap, TRUE)) {
         return 0;
     }
+#else /* picom doesn't like this from my testing */
+    if (!glamor_make_pixmap_exportable(pixmap, TRUE)) {
+        return 0;
+    }
+#endif
 
     int num_planes = 0;
     EGLuint64KHR modifiers[GBM_MAX_PLANES] = {0};
@@ -1027,15 +1038,31 @@ glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
 {
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
+    int ret;
 
 #ifdef GLAMOR_HAS_GBM
     if (!direct_only && glamor_egl->can_texture_gbm_bo) {
-        return glamor_egl_fds_from_pixmap_slow(screen, pixmap, fds,
+        ret = glamor_egl_fds_from_pixmap_slow(screen, pixmap, fds,
                                                strides, offsets, modifier);
-    }
+    } else
 #endif
-    return glamor_egl_fds_from_pixmap_fast(screen, pixmap, fds,
+    {
+    ret = glamor_egl_fds_from_pixmap_fast(screen, pixmap, fds,
                                            strides, offsets, modifier);
+    }
+
+    ErrorF("fds_from_pixmap\n");
+    ErrorF("num fds: %d\n", ret);
+
+    for (int i = 0; i < ret; i++) {
+        ErrorF("fds[%d] = %d\n", i, fds[i]);
+        ErrorF("strides[%d] = %d\n", i, strides[i]);
+        ErrorF("offsets[%d] = %d\n", i, offsets[i]);
+    }
+
+    ErrorF("Modifier: 0x%lx\n", *modifier);
+
+    return ret;
 }
 
 /* Used for untextured pixmaps */
@@ -1097,13 +1124,23 @@ glamor_egl_fd_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
 {
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
+    int ret;
 
 #ifdef GLAMOR_HAS_GBM
     if (!direct_only && glamor_egl->can_texture_gbm_bo) {
-        return glamor_egl_fd_from_pixmap_slow(screen, pixmap, stride, size);
-    }
+        ret = glamor_egl_fd_from_pixmap_slow(screen, pixmap, stride, size);
+    } else
 #endif
-    return glamor_egl_fd_from_pixmap_fast(screen, pixmap, stride, size);
+    {
+    ret = glamor_egl_fd_from_pixmap_fast(screen, pixmap, stride, size);
+    }
+
+    ErrorF("fd_from_pixmap\n");
+    ErrorF("stride: %d\n", (int)*stride);
+    ErrorF("size: %d\n", *size);
+    ErrorF("ret: %d\n", ret);
+
+    return ret;
 }
 
 int
@@ -1426,19 +1463,36 @@ glamor_pixmap_from_fds(ScreenPtr screen,
 {
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
+    PixmapPtr ret;
+
+    ErrorF("pixmap_from_fds\n");
+    ErrorF("width: %d, height: %d\n", (int)width, (int)height);
+    ErrorF("num_fds: %d\n", num_fds);
+    for (int i = 0; i < num_fds; i++) {
+        ErrorF("fds[%d] = %d\n", i, fds[i]);
+        ErrorF("strides[%d] = %d\n", i, strides[i]);
+        ErrorF("offsets[%d] = %d\n", i, offsets[i]);
+    }
+    ErrorF("depth: %d, bpp: %d\n", (int)depth, (int)bpp);
+    ErrorF("modifier: 0x%lx\n", modifier);
 
 #ifdef GLAMOR_HAS_GBM
     if (!direct_only && glamor_egl->can_texture_gbm_bo) {
-        return glamor_pixmap_from_fds_slow(screen, num_fds, fds,
+        ret = glamor_pixmap_from_fds_slow(screen, num_fds, fds,
                                            width, height,
                                            strides, offsets,
                                            depth, bpp, modifier);
-    }
+    } else
 #endif
-    return glamor_pixmap_from_fds_fast(screen, num_fds, fds,
+    {
+    ret = glamor_pixmap_from_fds_fast(screen, num_fds, fds,
                                        width, height,
                                        strides, offsets,
                                        depth, bpp, modifier);
+    }
+
+    ErrorF("ret: %p\n", ret);
+    return ret;
 }
 
 static PixmapPtr
@@ -1507,17 +1561,29 @@ glamor_pixmap_from_fd(ScreenPtr screen,
 {
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
+    PixmapPtr ret;
+
+    ErrorF("pixmap_from_fd\n");
+    ErrorF("width: %d, height: %d\n", (int)width, (int)height);
+    ErrorF("fd: %d\n", fd);
+    ErrorF("depth: %d, bpp: %d\n", (int)depth, (int)bpp);
+
 
 #ifdef GLAMOR_HAS_GBM
     if (!direct_only && glamor_egl->can_texture_gbm_bo) {
-        return glamor_pixmap_from_fd_slow(screen, fd,
+        ret = glamor_pixmap_from_fd_slow(screen, fd,
                                           width, height,
                                           stride, depth, bpp);
-    }
+    } else
 #endif
-    return glamor_pixmap_from_fd_fast(screen, fd,
+    {
+    ret = glamor_pixmap_from_fd_fast(screen, fd,
                                       width, height,
                                       stride, depth, bpp);
+    }
+
+    ErrorF("ret: %p\n", ret);
+    return ret;
 }
 
 static Bool
@@ -1964,7 +2030,7 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
     }
 #endif
 
-    char *direct = getenv("DIRECT_IMPORT");
+    char *direct = getenv("DIRECT_DRI3");
     if (direct && direct[0] == '1') {
         direct_only = TRUE;
         ErrorF("Direct DRI3\n");
