@@ -90,6 +90,7 @@
         } \
     } while(0)
 
+static int direct_only = FALSE;
 
 /**
  * EGLDeviceEXT's are internally stored as globals.
@@ -1028,7 +1029,7 @@ glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
         glamor_egl_get_screen_private(screen);
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->can_texture_gbm_bo) {
+    if (!direct_only && glamor_egl->can_texture_gbm_bo) {
         return glamor_egl_fds_from_pixmap_slow(screen, pixmap, fds,
                                                strides, offsets, modifier);
     }
@@ -1098,7 +1099,7 @@ glamor_egl_fd_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
         glamor_egl_get_screen_private(screen);
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->can_texture_gbm_bo) {
+    if (!direct_only && glamor_egl->can_texture_gbm_bo) {
         return glamor_egl_fd_from_pixmap_slow(screen, pixmap, stride, size);
     }
 #endif
@@ -1248,7 +1249,7 @@ glamor_back_pixmap_from_fd(PixmapPtr pixmap,
         glamor_egl_get_screen_private(pixmap->drawable.pScreen);
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->can_texture_gbm_bo) {
+    if (!direct_only && glamor_egl->can_texture_gbm_bo) {
         return glamor_back_pixmap_from_fd_slow(pixmap, fd,
                                                width, height,
                                                stride, depth, bpp);
@@ -1427,7 +1428,7 @@ glamor_pixmap_from_fds(ScreenPtr screen,
         glamor_egl_get_screen_private(screen);
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->can_texture_gbm_bo) {
+    if (!direct_only && glamor_egl->can_texture_gbm_bo) {
         return glamor_pixmap_from_fds_slow(screen, num_fds, fds,
                                            width, height,
                                            strides, offsets,
@@ -1508,7 +1509,7 @@ glamor_pixmap_from_fd(ScreenPtr screen,
         glamor_egl_get_screen_private(screen);
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->can_texture_gbm_bo) {
+    if (!direct_only && glamor_egl->can_texture_gbm_bo) {
         return glamor_pixmap_from_fd_slow(screen, fd,
                                           width, height,
                                           stride, depth, bpp);
@@ -1962,6 +1963,14 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
         vendor_initialized = TRUE;
     }
 #endif
+
+    char *direct = getenv("DIRECT_IMPORT");
+    if (direct && direct[0] == '1') {
+        direct_only = TRUE;
+        ErrorF("Direct DRI3\n");
+    } else {
+        ErrorF("GBM DRI3\n");
+    }
 }
 
 static Bool
