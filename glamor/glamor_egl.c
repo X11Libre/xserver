@@ -71,6 +71,29 @@
 #define GBM_MAX_PLANES 4
 #endif
 
+/* libdrm compat */
+#ifndef DRM_FORMAT_MOD_LINEAR
+#define DRM_FORMAT_MOD_LINEAR  0ULL
+#endif
+#ifndef DRM_FORMAT_MOD_INVALID
+#define DRM_FORMAT_MOD_INVALID 0x00ffffffffffffffULL
+#endif
+#ifndef DRM_FORMAT_ARGB1555
+#define DRM_FORMAT_ARGB1555 0x35315241
+#endif
+#ifndef DRM_FORMAT_RGB565
+#define DRM_FORMAT_RGB565 0x36314752
+#endif
+#ifndef DRM_FORMAT_XRGB8888
+#define DRM_FORMAT_XRGB8888 0x34325258
+#endif
+#ifndef DRM_FORMAT_ARGB8888
+#define DRM_FORMAT_ARGB8888 0x34325241
+#endif
+#ifndef DRM_FORMAT_ARGB2101010
+#define DRM_FORMAT_ARGB2101010 0x30335241
+#endif
+
 #define GLAMOR_LOG_STR(idx, type, str) \
     do { \
         if ((idx) != -1) { \
@@ -208,7 +231,7 @@ glamor_egl_make_current(struct glamor_context *glamor_ctx)
     }
 }
 
-#if defined(GLAMOR_HAS_GBM) && defined (WITH_LIBDRM)
+#if defined(GLAMOR_HAS_GBM) && defined(WITH_LIBDRM)
 static int
 glamor_get_flink_name(int fd, int handle, int *name)
 {
@@ -599,12 +622,6 @@ glamor_egl_create_textured_pixmap_from_egl_image(PixmapPtr pixmap,
     return TRUE;
 }
 
-#ifdef WITH_LIBDRM
-/**
- * XXX We only need libdrm for fourcc's here XXX
- *
- * Perhaps we should have some compatibility defines somewhere?
- */
 static Bool
 glamor_egl_create_textured_pixmap_from_dma_bufs(PixmapPtr pixmap,
                                                 uint32_t num_fds, const int *fds,
@@ -624,7 +641,6 @@ glamor_egl_create_textured_pixmap_from_dma_bufs(PixmapPtr pixmap,
     return glamor_egl_create_textured_pixmap_from_egl_image(pixmap, image,
                                                             used_modifiers);
 }
-#endif
 
 Bool
 glamor_egl_create_textured_pixmap_from_gbm_bo(PixmapPtr pixmap,
@@ -642,7 +658,7 @@ glamor_egl_create_textured_pixmap_from_gbm_bo(PixmapPtr pixmap,
 #endif
 }
 
-#if defined(GLAMOR_HAS_GBM) && defined (WITH_LIBDRM)
+#if defined(GLAMOR_HAS_GBM) && defined(WITH_LIBDRM)
 static void
 glamor_get_name_from_bo(int gbm_fd, struct gbm_bo *bo, int *name)
 {
@@ -706,8 +722,11 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
     }
 
     /**
-     * Now that DRI3 has been decoupled from glamor, the (indirect) callers of this
+     * Now that DRI3 has been partially decoupled from gbm, the (indirect) callers of this
      * (e.g. modesetting's pageflip code) usually expect buffers that can be scanned out.
+     *
+     * Even DRI3 X clients seem to expect scanout-capable buffers.
+     * See: https://github.com/X11Libre/xserver/issues/3262
      */
 #ifdef GBM_BO_WITH_MODIFIERS
     if (modifiers_ok && glamor_egl->dmabuf_capable) {
@@ -903,7 +922,6 @@ glamor_egl_fds_from_pixmap_gbm(ScreenPtr screen, PixmapPtr pixmap, int *fds,
                                uint32_t *strides, uint32_t *offsets,
                                uint64_t *modifier)
 {
-#ifdef WITH_LIBDRM
     struct gbm_bo *bo;
     int num_fds;
 #ifdef GBM_BO_WITH_MODIFIERS
@@ -968,9 +986,6 @@ glamor_egl_fds_from_pixmap_gbm(ScreenPtr screen, PixmapPtr pixmap, int *fds,
 
     gbm_bo_destroy(bo);
     return num_fds;
-#else
-    return 0;
-#endif
 }
 #endif
 
@@ -1130,7 +1145,6 @@ glamor_egl_fd_name_from_pixmap(ScreenPtr screen,
 #endif
 }
 
-#ifdef WITH_LIBDRM
 static uint32_t
 glamor_drm_format_for_depth(CARD8 depth)
 {
@@ -1149,7 +1163,6 @@ glamor_drm_format_for_depth(CARD8 depth)
         return DRM_FORMAT_ARGB8888;
     }
 }
-#endif
 
 static Bool
 glamor_back_pixmap_from_fd_direct(PixmapPtr pixmap,
@@ -1158,7 +1171,6 @@ glamor_back_pixmap_from_fd_direct(PixmapPtr pixmap,
                                   CARD16 height,
                                   CARD16 _stride, CARD8 depth, CARD8 bpp)
 {
-#ifdef WITH_LIBDRM
     ScreenPtr screen = pixmap->drawable.pScreen;
     uint32_t format;
     const int stride = _stride;
@@ -1177,9 +1189,6 @@ glamor_back_pixmap_from_fd_direct(PixmapPtr pixmap,
                                                            width, height,
                                                            &stride, &offset,
                                                            format, DRM_FORMAT_MOD_INVALID);
-#else
-    return FALSE;
-#endif
 }
 
 #ifdef GLAMOR_HAS_GBM
@@ -1264,7 +1273,6 @@ glamor_pixmap_from_fds_direct(ScreenPtr screen,
                               CARD8 depth, CARD8 bpp,
                               uint64_t modifier)
 {
-#ifdef WITH_LIBDRM
     PixmapPtr pixmap;
     glamor_egl_priv_t *glamor_egl;
     Bool ret = FALSE;
@@ -1324,9 +1332,6 @@ error:
         return NULL;
     }
     return pixmap;
-#else
-    return NULL;
-#endif
 }
 
 #ifdef GLAMOR_HAS_GBM
@@ -1338,7 +1343,6 @@ glamor_pixmap_from_fds_gbm(ScreenPtr screen,
                            CARD8 depth, CARD8 bpp,
                            uint64_t modifier)
 {
-#ifdef WITH_LIBDRM
     PixmapPtr pixmap;
     glamor_egl_priv_t *glamor_egl;
     Bool ret = FALSE;
@@ -1391,9 +1395,6 @@ error:
         return NULL;
     }
     return pixmap;
-#else
-    return NULL;
-#endif
 }
 #endif
 
@@ -2687,12 +2688,8 @@ glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int is_nvidia)
             if (linear_only) {
                 for (uint32_t j = 0; j < num_modifiers; j++) {
                     if (
-#ifdef WITH_LIBDRM
                         (modifiers[j] == DRM_FORMAT_MOD_LINEAR) ||
                         (modifiers[j] == DRM_FORMAT_MOD_INVALID))
-#else
-                        modifiers[j] == 0) /* DRM_FORMAT_MOD_LINEAR */
-#endif
                     {
                         found = TRUE;
                         break;
