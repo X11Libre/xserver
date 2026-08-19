@@ -226,6 +226,8 @@ typedef struct {
      */
     uint32_t msc_prev;
     uint64_t msc_high;
+    /* Last observed position, never set from queue write-backs */
+    uint64_t msc_seen;
     /** @} */
 
     uint64_t next_msc;

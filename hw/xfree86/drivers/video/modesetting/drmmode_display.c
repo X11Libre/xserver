@@ -2841,6 +2841,7 @@ drmmode_crtc_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, drmModeResPtr mode_res
     xorg_list_init(&drmmode_crtc->mode_list);
     xorg_list_init(&drmmode_crtc->tearfree.dri_flip_list);
     drmmode_crtc->next_msc = UINT64_MAX;
+    drmmode_crtc->msc_seen = UINT64_MAX;
 
     /* Setup the fallback cursor immediately. */
     drmmode_crtc->cursor.dimensions = malloc(sizeof(drmmode_cursor_dim_rec));
