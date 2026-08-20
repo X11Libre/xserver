@@ -1888,6 +1888,7 @@ dix_enqueue_events(void)
     int i;
 
     memset(&dev, 0, sizeof(dev));
+    memset(ev, 0, sizeof(ev));
     dev.public.processInputProc = process_input_proc;
 
     memset(&spriteInfo, 0, sizeof(spriteInfo));
