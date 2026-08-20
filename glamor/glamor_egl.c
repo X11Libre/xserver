@@ -2952,7 +2952,9 @@ glamor_egl_probe_dri3_gbm(glamor_egl_priv_t* glamor_egl, int *caps,
 
     GLAMOR_LOG_STR(screen_idx, X_INFO, "Can texture gbm buffers\n");
 #ifdef DRI3
-    if (glamor_egl->has_EXT_EGL_image_storage || glamor_egl->has_OES_EGL_image) {
+    if (!glamor_egl_conf->direct_dri3_only &&
+        (glamor_egl->has_EXT_EGL_image_storage ||
+         glamor_egl->has_OES_EGL_image)) {
         glamor_egl->dri3_info = glamor_dri3_info_gbm;
         *caps = GLAMOR_EGL_DEFAULT_CAPS;
         return TRUE;
@@ -3008,6 +3010,7 @@ glamor_egl_probe_dri3(glamor_egl_priv_t* glamor_egl, int *caps,
     }
 
     *caps |= GLAMOR_EGL_CAP_DRI3;
+    GLAMOR_LOG_STR(screen_idx, X_INFO, "Using the direct DRI3 implementation (experimental)\n");
     return TRUE;
 #else
     return FALSE;
