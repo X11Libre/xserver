@@ -88,7 +88,7 @@ fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
     /* quiet valgrind */
     memset(&priv->var, '\0', sizeof(priv->var));
     if (ioctl(priv->fd, FBIOGET_VSCREENINFO, &priv->var) < 0) {
-        LogMessage(X_ERROR, "Xfbdev(%d): FBIOPUT_VSCREENINFO: %s\n",
+        LogMessage(X_ERROR, "Xfbdev(%d): FBIOGET_VSCREENINFO: %s\n",
                    card->mynum, strerror(errno));
         close(priv->fd);
         return FALSE;
@@ -220,7 +220,7 @@ fbdevSetMode(KdScreenInfo *screen, const KdMonitorTiming *t)
     }
 
     var.activate = FB_ACTIVATE_NOW;
-    var.bits_per_pixel = screen->fb.depth;
+    var.bits_per_pixel = screen->fb.bitsPerPixel;
     var.nonstd = 0;
     var.grayscale = 0;
 
@@ -292,15 +292,18 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
 
     k = ioctl(priv->fd, FBIOGET_VSCREENINFO, &var);
 
-    if (!screen->width || !screen->height) {
-        if (k >= 0) {
-            screen->width = var.xres;
-            screen->height = var.yres;
-        } else {
-            screen->width = 1024;
-            screen->height = 768;
-        }
-    }
+#define FB_SET(field, val, fallback) \
+    do { \
+        if (!screen->field) { \
+            screen->field = (k >= 0) ? (val) : (fallback); \
+        } \
+    } while(0) \
+
+    FB_SET(width, var.xres, 1024);
+    FB_SET(height, var.yres, 768);
+    FB_SET(fb.depth, (var.bits_per_pixel == 32) ? 24 : var.bits_per_pixel, 16);
+    FB_SET(fb.bitsPerPixel, var.bits_per_pixel, 16);
+
     if (!screen->rate) {
         screen->rate = (k >= 0) ? fbdevGetRefreshRate(&var) : FB_DEFAULT_RATE;
         if (screen->rate <= 0) {
@@ -308,12 +311,6 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
         }
     } else {
         want_rate = TRUE;
-    }
-    if (!screen->fb.depth) {
-        if (k >= 0)
-            screen->fb.depth = var.bits_per_pixel;
-        else
-            screen->fb.depth = 16;
     }
 
     scrpriv->max_width = 0;
@@ -572,15 +569,12 @@ fbdevSetScreenSizes(ScreenPtr pScreen)
 static void
 fbdevClearFramebuffer(KdScreenInfo * screen)
 {
-#if 0 /* XXX Does not work reliably XXX */
     FbdevPriv *priv = screen->card->driver;
-    memset(priv->fb_base, 0, priv->fix.smem_len);
-    volatile char *clear_me = (volatile char*)priv->fb_base;
-    for (int i = 0; i < priv->fix.smem_len; i++, clear_me[i] = 0);
-#else
-    kdOsFuncs->Disable();
-    kdOsFuncs->Enable();
-#endif
+    char *clear_me = priv->fb;
+    for (int i = 0; i < priv->var.yres; i++) {
+        memset(clear_me, 0, priv->var.xres * priv->var.bits_per_pixel / 8);
+        clear_me += priv->fix.line_length;
+    }
 }
 
 static Bool
@@ -763,8 +757,10 @@ fbdevRandRSetConfig(ScreenPtr pScreen,
         newmmheight = pSize->mmWidth;
     }
 
-    if (wasEnabled)
+    if (wasEnabled) {
+        fbdevClearFramebuffer(screen);
         KdDisableScreen(pScreen);
+    }
 
     oldscr = *scrpriv;
 
@@ -817,7 +813,6 @@ fbdevRandRSetConfig(ScreenPtr pScreen,
 
     if (wasEnabled) {
         KdEnableScreen(pScreen);
-        fbdevClearFramebuffer(screen);
     }
 
     return TRUE;
