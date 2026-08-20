@@ -389,6 +389,45 @@ class TestXIChangeDeviceControl:
                 "resolution values not byte-swapped"
             )
 
+    @pytest.mark.swapped_client
+    def test_change_device_control_resolution_unbounded_swap(
+        self, xserver, xi_xclient_swapped
+    ):
+        """Unbounded SwapLongs of DEVICE_RESOLUTION valuators."""
+        conn = xi_xclient_swapped
+        opcode = conn.query_extension(Extension.XI).opcode
+        bo = conn._byte_order
+
+        ctl = xi.DeviceResolutionCtl(
+            first_valuator=0,
+            num_valuators=255,
+            resolutions=[],
+        )
+        bad = xi.XChangeDeviceControlRequest(
+            opcode=opcode,
+            control=xi.DEVICE_RESOLUTION,
+            deviceid=xi.VirtualCorePointer,
+            control_data=ctl.to_bytes(bo),
+        )
+        canary = x11.InternAtomRequest(name="_TEST_CDC_UNBOUNDED_SWAP")
+
+        conn.send_request(bad.to_bytes(bo) + canary.to_bytes(bo))
+        conn.seq += 1
+
+        resp_bad = conn.recv_response(timeout=2.0)
+        resp_canary = conn.recv_response(timeout=2.0)
+
+        assert xserver.is_alive, "Server crashed"
+        assert isinstance(resp_bad, X11Error), f"Expected error, got {resp_bad}"
+        assert resp_bad.error_code == x11.BadLength, (
+            f"Expected BadLength (16), got {resp_bad.error_code}"
+        )
+        assert isinstance(resp_canary, X11Reply), (
+            f"InternAtom canary corrupted, got {resp_canary}"
+        )
+        atom = struct.unpack_from(f"{bo}I", resp_canary.data, 8)[0]
+        assert atom != 0, "InternAtom canary returned None atom"
+
 
 class TestXIChangeCursor:
     def test_change_cursor_null_window(self, xserver, xi_xclient):
