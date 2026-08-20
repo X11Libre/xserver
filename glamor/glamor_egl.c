@@ -2716,7 +2716,7 @@ glamor_egl_can_texture_gbm_bo(glamor_egl_priv_t *glamor_egl, int is_nvidia)
 #endif
 
 static glamor_egl_priv_t*
-glamor_egl_priv_from_conf(glamor_egl_conf_t* glamor_egl_conf, int *screen_idx)
+glamor_egl_priv_from_conf(const glamor_egl_conf_t* glamor_egl_conf, int *screen_idx)
 {
     glamor_egl_priv_t* glamor_egl;
 
@@ -2739,7 +2739,7 @@ glamor_egl_priv_from_conf(glamor_egl_conf_t* glamor_egl_conf, int *screen_idx)
 
 static Bool
 glamor_egl_prepare_and_init_display(glamor_egl_priv_t* glamor_egl, int *platform,
-                                    glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+                                    const glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
 {
     int *dri_fd = NULL;
 
@@ -2776,7 +2776,7 @@ glamor_egl_prepare_and_init_display(glamor_egl_priv_t* glamor_egl, int *platform
 
 static Bool
 glamor_egl_check_renderer(glamor_egl_priv_t* glamor_egl, int platform,
-                          glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+                          const glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
 {
     const char* renderer;
     const char* vendor;
@@ -2849,7 +2849,7 @@ glamor_egl_check_renderer(glamor_egl_priv_t* glamor_egl, int platform,
 
 static Bool
 glamor_egl_create_final_context(glamor_egl_priv_t* glamor_egl,
-                                glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+                                const glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
 {
 #define GLAMOR_CHECK_EGL_EXTENSION(EXT)  \
         if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_" #EXT)) {  \
@@ -2879,7 +2879,7 @@ glamor_egl_create_final_context(glamor_egl_priv_t* glamor_egl,
 
 static Bool
 glamor_egl_create_display_and_context(glamor_egl_priv_t* glamor_egl,
-                                      glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+                                      const glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
 {
     int platform = 0;
 
@@ -2941,7 +2941,7 @@ glamor_egl_probe_dri3_direct_export(glamor_egl_priv_t* glamor_egl, int screen_id
 #ifdef GLAMOR_HAS_GBM
 static Bool
 glamor_egl_probe_dri3_gbm(glamor_egl_priv_t* glamor_egl, int *caps,
-                          glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+                          const glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
 {
     if (!glamor_egl->can_texture_gbm_bo) {
         if (!glamor_egl_conf->gbm_forbidden) {
@@ -2965,7 +2965,7 @@ glamor_egl_probe_dri3_gbm(glamor_egl_priv_t* glamor_egl, int *caps,
 
 static Bool
 glamor_egl_probe_dri3(glamor_egl_priv_t* glamor_egl, int *caps,
-                      glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
+                      const glamor_egl_conf_t* glamor_egl_conf, int screen_idx)
 {
     int _caps;
     if (!caps) {
@@ -3023,7 +3023,7 @@ glamor_egl_probe_dri3(glamor_egl_priv_t* glamor_egl, int *caps,
  * for the fact that we aren't actually called from ScreenInit in xf86.
  */
 Bool
-glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
+glamor_egl_init_internal(const glamor_egl_conf_t* glamor_egl_conf, int *caps)
 {
     glamor_egl_priv_t* glamor_egl;
     const char* renderer;
