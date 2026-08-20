@@ -478,18 +478,25 @@ KdPointerProc(DeviceIntPtr pDevice, int onoff)
         default:
         case 7:
             btn_labels[6] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_HWHEEL_RIGHT);
+            /* fallthrough */
         case 6:
             btn_labels[5] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_HWHEEL_LEFT);
+            /* fallthrough */
         case 5:
             btn_labels[4] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_DOWN);
+            /* fallthrough */
         case 4:
             btn_labels[3] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_UP);
+            /* fallthrough */
         case 3:
             btn_labels[2] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_RIGHT);
+            /* fallthrough */
         case 2:
             btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
+            /* fallthrough */
         case 1:
             btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
+            /* fallthrough */
         case 0:
             break;
         }
@@ -2181,12 +2188,12 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 
     if (*x < 0)
         *x += pNewScreen->width;
+    else if (*x >= pScreen->width)
+        *x -= pScreen->width;
+
     if (*y < 0)
         *y += pNewScreen->height;
-
-    if (*x >= pScreen->width)
-        *x -= pScreen->width;
-    if (*y >= pScreen->height)
+    else if (*y >= pScreen->height)
         *y -= pScreen->height;
 
     *ppScreen = pNewScreen;
