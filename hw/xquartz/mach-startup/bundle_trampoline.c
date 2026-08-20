@@ -26,13 +26,15 @@
  * prior written authorization.
  */
 
-#include <assert.h>
 #include <mach-o/dyld.h>
 #include <libgen.h>
+#include <os/log.h>
 #include <spawn.h>
 #include <sys/syslimits.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 /* We want XQuartz.app to inherit a login shell environment.  This is handled by the X11.sh
@@ -57,7 +59,10 @@ static char *executable_path(void) {
     if (_NSGetExecutablePath(buf, &bufsize) == -1) {
         free(buf);
         buf = calloc(1, bufsize);
-        assert(_NSGetExecutablePath(buf, &bufsize) == 0);
+        if (_NSGetExecutablePath(buf, &bufsize) != 0) {
+            os_log_error(OS_LOG_DEFAULT, "Failed to determine executable path");
+            abort();
+        }
     }
 
     return buf;
@@ -72,16 +77,31 @@ int main(int argc, char **argv, char **envp) {
         free(executable);
         asprintf(&executable, "%s/X11", executable_directory);
     }
-    assert(access(executable, X_OK) == 0);
+    if (access(executable, X_OK) != 0) {
+        os_log_error(OS_LOG_DEFAULT, "Cannot execute %{public}s: %{public}s", executable, strerror(errno));
+        abort();
+    }
 
     argv[0] = executable;
 
     posix_spawnattr_t attr;
-    assert(posix_spawnattr_init(&attr) == 0);
-    assert(posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETEXEC) == 0);
+    int error = posix_spawnattr_init(&attr);
+    if (error != 0) {
+        os_log_error(OS_LOG_DEFAULT, "posix_spawnattr_init failed: %{public}s", strerror(error));
+        abort();
+    }
+    error = posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETEXEC);
+    if (error != 0) {
+        os_log_error(OS_LOG_DEFAULT, "posix_spawnattr_setflags failed: %{public}s", strerror(error));
+        abort();
+    }
 
     pid_t child_pid;
-    assert(posix_spawn(&child_pid, executable, NULL, &attr, argv, envp) == 0);
+    error = posix_spawn(&child_pid, executable, NULL, &attr, argv, envp);
+    if (error != 0) {
+        os_log_error(OS_LOG_DEFAULT, "posix_spawn failed for %{public}s: %{public}s", executable, strerror(error));
+        abort();
+    }
 
     return EXIT_FAILURE;
 }

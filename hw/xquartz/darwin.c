@@ -527,9 +527,10 @@ InitInput(int argc, char **argv)
     /* We need to really have rules... or something... */
     XkbSetRulesDflts(&rmlvo);
 
-    assert(Success == AllocDevicePair(serverClient, "xquartz virtual",
-                                      &darwinPointer, &darwinKeyboard,
-                                      DarwinMouseProc, DarwinKeybdProc, FALSE));
+    if (Success != AllocDevicePair(serverClient, "xquartz virtual",
+                                    &darwinPointer, &darwinKeyboard,
+                                    DarwinMouseProc, DarwinKeybdProc, FALSE))
+        FatalError("Failed to allocate xquartz virtual device pair\n");
 
     /* here's the snippet from the current gdk sources:
        if (!strcmp (tmp_name, "pointer"))
@@ -546,15 +547,18 @@ InitInput(int argc, char **argv)
      */
 
     darwinTabletStylus = AddInputDevice(serverClient, DarwinTabletProc, TRUE);
-    assert(darwinTabletStylus);
+    if (!darwinTabletStylus)
+        FatalError("Failed to add tablet stylus input device\n");
     darwinTabletStylus->name = strdup("pen");
 
     darwinTabletCursor = AddInputDevice(serverClient, DarwinTabletProc, TRUE);
-    assert(darwinTabletCursor);
+    if (!darwinTabletCursor)
+        FatalError("Failed to add tablet cursor input device\n");
     darwinTabletCursor->name = strdup("cursor");
 
     darwinTabletEraser = AddInputDevice(serverClient, DarwinTabletProc, TRUE);
-    assert(darwinTabletEraser);
+    if (!darwinTabletEraser)
+        FatalError("Failed to add tablet eraser input device\n");
     darwinTabletEraser->name = strdup("eraser");
 
     DarwinEQInit();
@@ -667,8 +671,10 @@ void ddxInit(void)
 {
         char *lf;
         char *home = getenv("HOME");
-        assert(home);
-        assert(0 < asprintf(&lf, "%s/Library/Logs/X11", home));
+        if (!home)
+            FatalError("HOME is not set\n");
+        if (asprintf(&lf, "%s/Library/Logs/X11", home) < 0)
+            FatalError("Failed to allocate log directory path\n");
 
         /* Ignore errors.  If EEXIST, we don't care.  If anything else,
          * LogInit will handle it for us.
@@ -676,9 +682,9 @@ void ddxInit(void)
         (void)mkdir(lf, S_IRWXU | S_IRWXG | S_IRWXO);
         free(lf);
 
-        assert(0 <
-               asprintf(&lf, "%s/Library/Logs/X11/%s.log", home,
-                        bundle_id_prefix));
+        if (asprintf(&lf, "%s/Library/Logs/X11/%s.log", home,
+                     bundle_id_prefix) < 0)
+            FatalError("Failed to allocate log file path\n");
         LogInit(lf, ".old");
         free(lf);
 
