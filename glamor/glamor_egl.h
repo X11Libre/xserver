@@ -77,7 +77,7 @@ typedef struct {
  * If caps is not NULL, it will be set to a bitmask containing
  * information about glamor.
  */
-Bool glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps);
+Bool glamor_egl_init_internal(const glamor_egl_conf_t* glamor_egl_conf, int *caps);
 
 /*
  * Create an EGLDisplay from a native display type. This is a little quirky
