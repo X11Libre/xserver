@@ -1315,6 +1315,11 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     for (int i = 0; i < numRI; i++)
         xfreeData(&ri[i].reg);
     free(ri);
+    /* ri[0].reg.data aliased badreg->data before RegionRectAlloc() could have
+     * reallocated it above, so badreg->data may now be a stale pointer to
+     * memory already freed by xfreeData() or by the realloc() itself.
+     */
+    badreg->data = NULL;
     return RegionBreak(badreg);
 }
 
