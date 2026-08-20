@@ -6,8 +6,17 @@ srcs_composite = [
     'compwindow.c',
 ]
 
+compext_deps = common_dep
+
+if build_lttngust
+    srcs_composite += [ 'compext_tp.c' ]
+    compext_deps += [ lttng_ust_dep ]
+endif
+
+
+
 libxserver_composite = static_library('xserver_composite',
     srcs_composite,
     include_directories: inc,
-    dependencies: common_dep,
+    dependencies: compext_deps,
 )
