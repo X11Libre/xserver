@@ -2246,6 +2246,10 @@ not available. This may be useful for embedded and old cards, where GL ES
 feature set works faster than GL feature set.
 Default: gl.
 .TP 7
+.BI "Option \*qDirectDRI3\*q \*q"  boolean \*q
+This option tells glamor to use the direct implementation of DRI3.
+This option is experimental, and there are known bugs with it.
+.TP 7
 .BI "Option \*qInitPrimary\*q \*q" boolean \*q
 Use the Int10 module to initialize the primary graphics card.
 Normally, only secondary cards are soft-booted using the Int10 module, as the
