@@ -76,6 +76,7 @@ typedef struct _ephyrScrPriv {
     Bool win_explicit_position;
     int win_x, win_y;
     int win_width, win_height;
+    int win_width_mm, win_height_mm;
     int server_depth;
     const char *output;         /* Set via -output option */
     unsigned char *fb_data;     /* only used when host bpp != server bpp */
