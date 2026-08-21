@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include "include/misc.h"
+#include "render/picturestr_priv.h"
 
 #include "scrnintstr.h"
 #include "os.h"
