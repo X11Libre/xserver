@@ -12,6 +12,9 @@
 #include "glamor.h"
 #include "glamor_egl.h"
 
+#include "present.h"
+#include "Xext/present/present_priv.h" /* extern uint32_t FakeScreenFps; */
+
 #include "fbdev.h"
 
 #ifdef XV
@@ -123,6 +126,19 @@ fbdevInitAccel(ScreenPtr pScreen)
         kd_glamor_xv_init(pScreen);
     }
 #endif
+
+    if (scrpriv->dri_fd >= 0) {
+        /*
+         * X clients use present to try to synchronize with the screen
+         * If no global fake rate was requested and the screen's rate is sane,
+         * use that instead of the 60 fps default
+         */
+        if (!FakeScreenFps && (screen->rate >= 60) && (screen->rate <= 600)) {
+            FakeScreenFps = screen->rate;
+            present_screen_init(pScreen, NULL);
+            FakeScreenFps = 0;
+        }
+    }
 
     return TRUE;
 }
