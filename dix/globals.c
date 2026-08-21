@@ -122,3 +122,5 @@ int monitorResolution = 0;
 
 Bool explicit_display = FALSE;
 char *ConnectionInfo;
+
+Bool globalIsolateKeyboard = FALSE;

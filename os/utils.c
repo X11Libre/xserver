@@ -108,6 +108,7 @@ __stdcall unsigned long GetTickCount(void);
 #include "dix/settings_priv.h"
 #include "dix/screensaver_priv.h"
 #include "include/misc.h"
+#include "include/globals.h"
 #include "miext/extinit_priv.h"
 #include "os/audit_priv.h"
 #include "os/auth.h"
@@ -291,6 +292,7 @@ UseMsg(void)
     ErrorF("-help                  prints message with these options\n");
     ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
     ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
+    ErrorF("-isolatekeyboard       Prevent keyboard input delivery to CLI and unfocused clients\n");
     ErrorF("-I                     ignore all remaining arguments\n");
 #ifdef CONFIG_NAMESPACE
     ErrorF("-namespace <conf>      Enable NAMESPACE extension with given config file\n");
@@ -559,6 +561,9 @@ ProcessCommandLine(int argc, char *argv[])
                 i += skip - 1;
             else
                 UseMsg();
+        }
+        else if (strcmp(argv[i], "-isolatekeyboard") == 0) {
+            globalIsolateKeyboard = TRUE;
         }
 #ifdef LOCK_SERVER
         else if (strcmp(argv[i], "-nolock") == 0) {
