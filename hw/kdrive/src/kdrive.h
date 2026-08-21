@@ -98,6 +98,7 @@ typedef struct _KdScreenInfo {
     int width;
     int height;
     int rate;
+    int requested_mm;
     int width_mm;
     int height_mm;
     int subpixel_order;

@@ -327,6 +327,7 @@ KdParseScreen(KdScreenInfo * screen, const char *arg)
     screen->y = 0;
     screen->width = 0;
     screen->height = 0;
+    screen->requested_mm = FALSE;
     screen->width_mm = 0;
     screen->height_mm = 0;
     screen->subpixel_order = kdSubpixelOrder;
@@ -350,6 +351,7 @@ KdParseScreen(KdScreenInfo * screen, const char *arg)
             if (!save[0])
                 return;
             mm = atoi(save);
+            screen->requested_mm = TRUE;
         }
 
         if (i == 0) {
@@ -871,6 +873,15 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     pScreenPriv->dpmsState = KD_DPMS_NORMAL;
     pScreen->x = screen->origin.x;
     pScreen->y = screen->origin.y;
+
+    /*
+     * We can actually compute the dpi or even have the DDX
+     * probe the physical screen size.
+     * However, reporting the correct physical screen sizes here
+     * often leads to ugly scaling.
+     *
+     * xf86 modesetting does the same thing, but with 96 instead of 75
+     */
 
     if (!monitorResolution)
         monitorResolution = 75;
