@@ -224,12 +224,20 @@ static Bool
 ms_get_kernel_ust_msc(xf86CrtcPtr crtc,
                       uint64_t *msc, uint64_t *ust)
 {
-    ScreenPtr screen = crtc->randr_crtc->pScreen;
-    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
-    modesettingPtr ms = modesettingPTR(scrn);
+    ScreenPtr screen;
+    ScrnInfoPtr scrn;
+    modesettingPtr ms;
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmVBlank vbl;
     int ret;
+
+    if (!crtc->randr_crtc) {
+        return FALSE;
+    }
+
+    screen = crtc->randr_crtc->pScreen;
+    scrn = xf86ScreenToScrn(screen);
+    ms = modesettingPTR(scrn);
 
     if (ms->has_queue_sequence || !ms->tried_queue_sequence) {
         uint64_t ns;
@@ -309,12 +317,20 @@ Bool
 ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
                 uint64_t msc, uint64_t *msc_queued, uint32_t seq)
 {
-    ScreenPtr screen = crtc->randr_crtc->pScreen;
-    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
-    modesettingPtr ms = modesettingPTR(scrn);
+    ScreenPtr screen;
+    ScrnInfoPtr scrn;
+    modesettingPtr ms;
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmVBlank vbl;
     int ret;
+
+    if (!crtc->randr_crtc) {
+        return FALSE;
+    }
+
+    screen = crtc->randr_crtc->pScreen;
+    scrn = xf86ScreenToScrn(screen);
+    ms = modesettingPTR(scrn);
 
     /* Try coalescing this event into another to avoid event queue exhaustion */
     if (flags == MS_QUEUE_ABSOLUTE && ms_queue_coalesce(crtc, seq, msc))
@@ -422,10 +438,18 @@ ms_kernel_msc_to_crtc_msc(xf86CrtcPtr crtc, uint64_t sequence, Bool is64bit)
 int
 ms_get_crtc_ust_msc(xf86CrtcPtr crtc, CARD64 *ust, CARD64 *msc)
 {
-    ScreenPtr screen = crtc->randr_crtc->pScreen;
-    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
-    modesettingPtr ms = modesettingPTR(scrn);
+    ScreenPtr screen;
+    ScrnInfoPtr scrn;
+    modesettingPtr ms;
     uint64_t kernel_msc;
+
+    if (!crtc->randr_crtc) {
+        return BadImplementation;
+    }
+
+    screen = crtc->randr_crtc->pScreen;
+    scrn = xf86ScreenToScrn(screen);
+    ms = modesettingPTR(scrn);
 
     if (!ms_get_kernel_ust_msc(crtc, &kernel_msc, ust))
         return BadMatch;
@@ -460,9 +484,13 @@ ms_drm_queue_alloc(xf86CrtcPtr crtc,
                    ms_drm_handler_proc handler,
                    ms_drm_abort_proc abort)
 {
-    ScreenPtr screen = crtc->randr_crtc->pScreen;
-    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
+    ScrnInfoPtr scrn = NULL;
     struct ms_drm_queue *q;
+
+    if (crtc->randr_crtc) {
+        ScreenPtr screen = crtc->randr_crtc->pScreen;
+        scrn = xf86ScreenToScrn(screen);
+    }
 
     q = calloc(1, sizeof(struct ms_drm_queue));
 
