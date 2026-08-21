@@ -8,6 +8,5 @@
 
 extern _X_EXPORT const char *defaultFontPath;
 extern _X_EXPORT int monitorResolution;
-extern _X_EXPORT int defaultColorVisualClass;
 
 #endif                          /* !_XSERV_GLOBAL_H_ */
