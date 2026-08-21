@@ -832,9 +832,34 @@ fbdevRandRSetConfig(ScreenPtr pScreen,
 }
 
 static Bool
+fbdevGetPhysicalScreenSizes(KdScreenInfo *screen, int *mmWidth, int *mmHeight)
+{
+    FbdevPriv *priv = screen->card->driver;
+
+    *mmWidth = screen->width_mm;
+    *mmHeight = screen->height_mm;
+
+    if (screen->requested_mm) {
+        return TRUE;
+    }
+
+    if (((int)priv->var.width > 0) && ((int)priv->var.height > 0)) {
+        *mmWidth = priv->var.width;
+        *mmHeight = priv->var.height;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static Bool
 fbdevRandRInit(ScreenPtr pScreen)
 {
     rrScrPrivPtr pScrPriv;
+    KdScreenPriv(pScreen);
+    KdScreenInfo *screen = pScreenPriv->screen;
+    int mmWidth, mmHeight;
+
 
     if (!RRScreenInit(pScreen))
         return FALSE;
@@ -842,6 +867,21 @@ fbdevRandRInit(ScreenPtr pScreen)
     pScrPriv = rrGetScrPriv(pScreen);
     pScrPriv->rrGetInfo = fbdevRandRGetInfo;
     pScrPriv->rrSetConfig = fbdevRandRSetConfig;
+
+    if (fbdevGetPhysicalScreenSizes(screen, &mmWidth, &mmHeight)) {
+        RROutputPtr pOutput;
+
+        /* Create the output */
+        RRGetInfo(pScreen, TRUE);
+
+        pOutput = RRFirstOutput(pScreen);
+        if (pOutput) {
+            RROutputSetPhysicalSize(pOutput,
+                                    mmWidth,
+                                    mmHeight);
+        }
+    }
+
     return TRUE;
 }
 #endif
