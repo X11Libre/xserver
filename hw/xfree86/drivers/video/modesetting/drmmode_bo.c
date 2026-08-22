@@ -219,10 +219,17 @@ gbm_create_front_bo(drmmode_ptr drmmode, Bool do_map,
                                                 GBM_BO_USE_WRITE | GBM_BO_USE_SCANOUT,
                                               };
 
+    const int dumb_offset = ARRAY_SIZE(front_flag_list) - 1;
+    int offset = 0;
+
 #ifdef GBM_BO_WITH_MODIFIERS
     num_modifiers = get_modifiers_set(drmmode->scrn, format, &modifiers,
                                       FALSE, TRUE, TRUE);
 #endif
+
+    if (do_map) {
+        offset = dumb_offset;
+    }
 
     ret = gbm_bo_create_and_map_with_flag_list(drmmode->gbm,
                                                data,
@@ -230,8 +237,8 @@ gbm_create_front_bo(drmmode_ptr drmmode, Bool do_map,
                                                width, height,
                                                format,
                                                modifiers, num_modifiers,
-                                               front_flag_list,
-                                               ARRAY_SIZE(front_flag_list));
+                                               front_flag_list + offset,
+                                               ARRAY_SIZE(front_flag_list) - offset);
 
 #ifdef GBM_BO_WITH_MODIFIERS
     free(modifiers);

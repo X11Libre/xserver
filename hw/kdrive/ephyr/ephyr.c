@@ -420,7 +420,7 @@ ephyrRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     int n = 0;
 
     /* Dummy refresh rate so that new proton (>= 8) works */
-    int rate = 60;
+    int rate = screen->rate ? screen->rate : 60;
 
     struct {
         int width, height;
@@ -864,7 +864,8 @@ ephyrScreenFini(KdScreenInfo * screen)
     if (scrpriv->shadow) {
         KdShadowFbFree(screen);
     }
-    scrpriv->BlockHandler = NULL;
+    free(screen->driver);
+    screen->driver = NULL;
 }
 
 void
