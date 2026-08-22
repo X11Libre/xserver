@@ -27,10 +27,14 @@
 #include "kxv.h"
 #include "glamor_priv.h"
 
+#include "dix/screen_hooks_priv.h"
+
 #include <X11/extensions/Xv.h>
 #include "fourcc.h"
 
 #define NUM_FORMATS 4
+
+static DevPrivateKeyRec KdGlamorXVScreenPrivateKey;
 
 static KdVideoFormatRec Formats[NUM_FORMATS] = {
     {15, TrueColor}, {16, TrueColor}, {24, TrueColor}, {30, TrueColor}
@@ -102,12 +106,25 @@ kd_glamor_xv_put_image(KdScreenInfo *screen,
                                id, buf, width, height, sync, clipBoxes);
 }
 
-void
+static void
+kd_glamor_xv_close_screen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
+{
+    KdVideoAdaptorRec *adaptor = dixGetPrivate(&pScreen->devPrivates, &KdGlamorXVScreenPrivateKey);
+
+    for (int i = 0; i < adaptor->nPorts; i++) {
+        glamor_xv_free_port_data(adaptor->pPortPrivates[i].ptr);
+    }
+    free(adaptor->pPortPrivates[0].ptr);
+    free(adaptor->pPortPrivates);
+    free(adaptor);
+    dixScreenUnhookClose(pScreen, kd_glamor_xv_close_screen);
+}
+
+Bool
 kd_glamor_xv_init(ScreenPtr screen)
 {
-    KdVideoAdaptorRec *adaptor;
-    glamor_port_private *port_privates;
-    int i;
+    KdVideoAdaptorRec *adaptor = NULL;
+    glamor_port_private *port_privates = NULL;
     GLint max_size = 0;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
     if (max_size <= 0) {
@@ -124,7 +141,10 @@ kd_glamor_xv_init(ScreenPtr screen)
 
     glamor_xv_core_init(screen);
 
-    adaptor = XNFcallocarray(1, sizeof(*adaptor));
+    adaptor = calloc(1, sizeof(*adaptor));
+    if (!adaptor) {
+        goto fail;
+    }
 
     adaptor->name = "GLAMOR Textured Video";
     adaptor->type = XvWindowMask | XvInputMask | XvImageMask;
@@ -136,11 +156,17 @@ kd_glamor_xv_init(ScreenPtr screen)
     adaptor->nFormats = NUM_FORMATS;
 
     adaptor->nPorts = 16; /* Some absurd number */
-    port_privates = XNFcallocarray(adaptor->nPorts,
-                              sizeof(glamor_port_private));
-    adaptor->pPortPrivates = XNFcallocarray(adaptor->nPorts,
-                                       sizeof(glamor_port_private *));
-    for (i = 0; i < adaptor->nPorts; i++) {
+    port_privates = calloc(adaptor->nPorts,
+                           sizeof(glamor_port_private));
+    if (!port_privates) {
+        goto fail;
+    }
+    adaptor->pPortPrivates = calloc(adaptor->nPorts,
+                                    sizeof(glamor_port_private *));
+    if (!adaptor->pPortPrivates) {
+        goto fail;
+    }
+    for (int i = 0; i < adaptor->nPorts; i++) {
         adaptor->pPortPrivates[i].ptr = &port_privates[i];
         glamor_xv_init_port(&port_privates[i]);
     }
@@ -158,5 +184,23 @@ kd_glamor_xv_init(ScreenPtr screen)
     adaptor->PutImage = kd_glamor_xv_put_image;
     adaptor->QueryImageAttributes = kd_glamor_xv_query_image_attributes;
 
-    KdXVScreenInit(screen, adaptor, 1);
+    if (!KdXVScreenInit(screen, adaptor, 1) ||
+        !dixRegisterPrivateKey(&KdGlamorXVScreenPrivateKey, PRIVATE_SCREEN, 0)) {
+        goto fail;
+    }
+
+    dixSetPrivate(&screen->devPrivates, &KdGlamorXVScreenPrivateKey, adaptor);
+    dixScreenHookClose(screen, kd_glamor_xv_close_screen);
+    return TRUE;
+
+fail:
+    if (adaptor->pPortPrivates) {
+        for (int i = 0; i < adaptor->nPorts; i++) {
+            glamor_xv_free_port_data(adaptor->pPortPrivates[i].ptr);
+        }
+        free(adaptor->pPortPrivates);
+    }
+    free(port_privates);
+    free(adaptor);
+    return FALSE;
 }
