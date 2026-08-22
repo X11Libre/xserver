@@ -458,15 +458,13 @@ fbdevScreenInitialize(KdScreenInfo * screen, FbdevScrPriv * scrpriv)
 Bool
 fbdevScreenInit(KdScreenInfo * screen)
 {
-    FbdevScrPriv *scrpriv;
-
-    scrpriv = calloc(1, sizeof(FbdevScrPriv));
-    if (!scrpriv)
+    screen->driver = calloc(1, sizeof(FbdevScrPriv));
+    if (!screen->driver)
         return FALSE;
-    screen->driver = scrpriv;
-    if (!fbdevScreenInitialize(screen, scrpriv)) {
-        screen->driver = 0;
-        free(scrpriv);
+
+    if (!fbdevScreenInitialize(screen, screen->driver)) {
+        free(screen->driver);
+        screen->driver = NULL;
         return FALSE;
     }
     return TRUE;
@@ -1074,6 +1072,8 @@ fbdevRestore(KdCardInfo * card)
 void
 fbdevScreenFini(KdScreenInfo * screen)
 {
+    free(screen->driver);
+    screen->driver = NULL;
 }
 
 void
