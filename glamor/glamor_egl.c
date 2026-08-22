@@ -1726,6 +1726,8 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
          * to stay out of the way and let it init DRI3 on its own.
          */
         if (!(glamor_priv->flags & GLAMOR_NO_DRI3)) {
+            const dri3_screen_info_rec dri3_info = glamor_egl->dri3_info;
+
             /* To do DRI3 device FD generation, we need to open a new fd
              * to the same device we were handed in originally.
              */
@@ -1733,7 +1735,7 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
             if (!glamor_egl->device_path)
                 glamor_egl->device_path = drmGetDeviceNameFromFd2(glamor_egl->fd);
 
-            if (!dri3_screen_init(screen, &glamor_egl->dri3_info)) {
+            if (!dri3_screen_init(screen, &dri3_info)) {
                 GLAMOR_LOG_STR(screen->myNum, X_ERROR,
                                "Failed to initialize DRI3.\n");
             }
