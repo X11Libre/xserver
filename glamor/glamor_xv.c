@@ -265,7 +265,7 @@ glamor_xv_stop_video(glamor_port_private *port_priv)
 {
 }
 
-static void
+void
 glamor_xv_free_port_data(glamor_port_private *port_priv)
 {
     int i;
@@ -278,6 +278,11 @@ glamor_xv_free_port_data(glamor_port_private *port_priv)
     }
     RegionUninit(&port_priv->clip);
     RegionNull(&port_priv->clip);
+
+    if (port_priv->xv_prog.prog) {
+        glDeleteProgram(port_priv->xv_prog.prog);
+        port_priv->xv_prog.prog = 0;
+    }
 }
 
 int
@@ -652,18 +657,7 @@ glamor_xv_put_image(glamor_port_private *port_priv,
     s2offset = s3offset = srcPitch2 = 0;
 
     if (!glamor_xv_can_reuse_port(port_priv, id, width, height)) {
-        int i;
-
         glamor_xv_free_port_data(port_priv);
-
-        if (port_priv->xv_prog.prog) {
-            glDeleteProgram(port_priv->xv_prog.prog);
-            port_priv->xv_prog.prog = 0;
-        }
-
-        for (i = 0; i < 3; i++)
-            if (port_priv->src_pix[i])
-                glamor_destroy_pixmap(port_priv->src_pix[i]);
 
         switch (id) {
         case FOURCC_YV12:

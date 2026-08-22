@@ -968,6 +968,7 @@ extern int glamor_xv_num_images;
 
 void glamor_xv_init_port(glamor_port_private *port_priv);
 void glamor_xv_stop_video(glamor_port_private *port_priv);
+void glamor_xv_free_port_data(glamor_port_private *port_priv);
 int glamor_xv_set_port_attribute(glamor_port_private *port_priv,
                                  Atom attribute, INT32 value);
 int glamor_xv_get_port_attribute(glamor_port_private *port_priv,
