@@ -17,12 +17,14 @@
 
 enum {
     GLAMOREGLOPT_RENDERING_API,
-    GLAMOREGLOPT_VENDOR_LIBRARY
+    GLAMOREGLOPT_VENDOR_LIBRARY,
+    GLAMOREGLOPT_DIRECT_DRI3,
 };
 
 static const OptionInfoRec GlamorEGLOptions[] = {
     { GLAMOREGLOPT_RENDERING_API, "RenderingAPI", OPTV_STRING, {0}, FALSE },
     { GLAMOREGLOPT_VENDOR_LIBRARY, "GlxVendorLibrary", OPTV_STRING, {0}, FALSE },
+    { GLAMOREGLOPT_DIRECT_DRI3, "DirectDRI3", OPTV_BOOLEAN, {0}, FALSE },
     { -1, NULL, OPTV_NONE, {0}, FALSE },
 };
 
@@ -82,6 +84,8 @@ _glamor_egl_init(ScrnInfoPtr scrn, int fd, int *caps)
         glamor_egl_conf.force_es = TRUE;
     else if (api && !strncasecmp(api, "gl", 2))
         glamor_egl_conf.es_disallowed = TRUE;
+
+    xf86GetOptValBool(options, GLAMOREGLOPT_DIRECT_DRI3, &glamor_egl_conf.direct_dri3_only);
 
     glamor_egl_conf.GLAMOR_EGL_PRIV_PROC = glamor_xf86_egl_get_screen_private;
 
