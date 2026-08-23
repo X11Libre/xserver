@@ -180,6 +180,8 @@ fbdevFiniAccel(ScreenPtr pScreen)
     KdScreenInfo *screen = pScreenPriv->screen;
     FbdevScrPriv *scrpriv = screen->driver;
 
+    glamor_fini(pScreen);
+
     if (scrpriv->dri_fd >= 0) {
         close(scrpriv->dri_fd);
     }
