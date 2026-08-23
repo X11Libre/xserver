@@ -314,9 +314,25 @@ gbm_create_best_bo(drmmode_ptr drmmode, Bool do_map,
 }
 
 /* dmabuf import */
+static struct gbm_bo*
+gbm_back_bo_from_fd_internal(drmmode_ptr drmmode, bo_priv_t *data, Bool do_map, struct gbm_import_fd_data *import_data)
+{
+    TRY_CREATE(gbm_bo_import, data, do_map,
+               drmmode->gbm, GBM_BO_IMPORT_FD, import_data,
+               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+
+    TRY_CREATE(gbm_bo_import, data, do_map,
+               drmmode->gbm, GBM_BO_IMPORT_FD, import_data,
+               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);
+
+    return NULL;
+}
+
 struct gbm_bo*
 gbm_back_bo_from_fd(drmmode_ptr drmmode, Bool do_map, int fd_handle, uint32_t pitch, uint32_t size)
 {
+    struct gbm_bo *ret;
+
     /* pitch == width * cpp */
     int width = pitch / drmmode->cpp;
     /* size == pitch * height */
@@ -341,15 +357,13 @@ gbm_back_bo_from_fd(drmmode_ptr drmmode, Bool do_map, int fd_handle, uint32_t pi
 
     data->used_modifiers = FALSE;
 
-    TRY_CREATE(gbm_bo_import, data, do_map,
-               drmmode->gbm, GBM_BO_IMPORT_FD, &import_data,
-               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+    ret = gbm_back_bo_from_fd_internal(drmmode, data, do_map, &import_data);
+    if (!ret) {
+        return NULL;
+    }
 
-    TRY_CREATE(gbm_bo_import, data, do_map,
-               drmmode->gbm, GBM_BO_IMPORT_FD, &import_data,
-               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);
-
-    return NULL;
+    gbm_bo_set_user_data(ret, data, destroy_user_data);
+    return ret;
 }
 
 /* A bit of a misnomer, this is a dmabuf export */
