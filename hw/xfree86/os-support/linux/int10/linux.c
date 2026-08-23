@@ -63,7 +63,7 @@ readLegacy(struct pci_device *dev, unsigned char *buf, int base, int len)
         return FALSE;
 
     memcpy(buf, map, len);
-    pci_device_unmap_legacy(dev, man, len);
+    pci_device_unmap_legacy(dev, map, len);
 
     return TRUE;
 }
@@ -212,8 +212,7 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
     Int10Current = pInt;
 
     DebugF("Mapping int area\n");
-    /* note: yes, we really are writing the 0 page here */
-    if (!readLegacy(pInt->dev, (unsigned char *) 0, 0, LOW_PAGE_SIZE)) {
+    if (!readLegacy(pInt->dev, xf86int10Addr(pInt, 0), 0, LOW_PAGE_SIZE)) {
         xf86DrvMsg(screen, X_ERROR, "Cannot read int vect\n");
         goto error3;
     }
