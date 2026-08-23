@@ -43,7 +43,7 @@
 
 #define	_INLINE static
 
-#define	X86EMU_UNUSED(v)	(v)
+#define	X86EMU_UNUSED(v)	v
 
 #include "x86emu.h"
 #include "x86emu/regs.h"
