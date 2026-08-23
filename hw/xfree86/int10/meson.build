@@ -1,9 +1,6 @@
 srcs_xorg_int10 = [
     'vbe.c',
     'vbeModes.c',
-    'helper_exec.c',
-    'helper_mem.c',
-    'xf86int10.c',
     'xf86int10module.c',
 ]
 
@@ -16,7 +13,12 @@ endif
 
 if int10 == 'stub'
     srcs_xorg_int10 += 'stub.c'
-    int10_c_args += '-D_VM86_LINUX'
+else
+    srcs_xorg_int10 += [
+        'helper_exec.c',
+        'helper_mem.c',
+        'xf86int10.c',
+    ]
 endif
 
 if int10 == 'x86emu'
