@@ -7,7 +7,7 @@ srcs_xorg_int10 = [
 int10_c_args = [xorg_c_args]
 int10_link = []
 
-if host_machine.cpu() == 'i386' or host_machine.cpu() == 'x86_64'
+if host_machine.cpu_family() in ['x86', 'x86_64']
     int10_c_args += '-D_PC'
 endif
 
