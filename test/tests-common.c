@@ -27,7 +27,7 @@ run_test_in_child(const testfunc_t* (*suite)(void), const char *funcname)
             if (exit_code != 0) {
     child_failed:
                 printf(" FAIL\n");
-                exit(exit_code);
+                exit(EXIT_FAILURE);
             }
         } else {
             testfunc_t f = *func;
