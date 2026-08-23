@@ -33,12 +33,12 @@
 static int counter = 0;
 static x_server_generation_t int10Generation = 0;
 
-static CARD8 read_b(xf86Int10InfoPtr pInt, int addr);
-static CARD16 read_w(xf86Int10InfoPtr pInt, int addr);
-static CARD32 read_l(xf86Int10InfoPtr pInt, int addr);
-static void write_b(xf86Int10InfoPtr pInt, int addr, CARD8 val);
-static void write_w(xf86Int10InfoPtr pInt, int addr, CARD16 val);
-static void write_l(xf86Int10InfoPtr pInt, int addr, CARD32 val);
+static uint8_t read_b(xf86Int10InfoPtr pInt, int addr);
+static uint16_t read_w(xf86Int10InfoPtr pInt, int addr);
+static uint32_t read_l(xf86Int10InfoPtr pInt, int addr);
+static void write_b(xf86Int10InfoPtr pInt, int addr, uint8_t val);
+static void write_w(xf86Int10InfoPtr pInt, int addr, uint16_t val);
+static void write_l(xf86Int10InfoPtr pInt, int addr, uint32_t val);
 
 int10MemRec linuxMem = {
     read_b,
@@ -442,45 +442,44 @@ xf86Int10FreePages(xf86Int10InfoPtr pInt, void *pbase, int num)
         ((linuxInt10Priv *) pInt->private)->alloc[i] = 0;
 }
 
-static CARD8
+static uint8_t
 read_b(xf86Int10InfoPtr pInt, int addr)
 {
-    return *((CARD8 *) (memType) addr);
+    return *((uint8_t *) (memType) addr);
 }
 
-static CARD16
+static uint16_t
 read_w(xf86Int10InfoPtr pInt, int addr)
 {
-    return *((CARD16 *) (memType) addr);
+    return *((uint16_t *) (memType) addr);
 }
 
-static CARD32
+static uint32_t
 read_l(xf86Int10InfoPtr pInt, int addr)
 {
-    return *((CARD32 *) (memType) addr);
+    return *((uint32_t *) (memType) addr);
 }
 
 static void
-write_b(xf86Int10InfoPtr pInt, int addr, CARD8 val)
+write_b(xf86Int10InfoPtr pInt, int addr, uint8_t val)
 {
-    *((CARD8 *) (memType) addr) = val;
+    *((uint8_t *) (memType) addr) = val;
 }
 
 static void
-write_w(xf86Int10InfoPtr pInt, int addr, CARD16 val)
+write_w(xf86Int10InfoPtr pInt, int addr, uint16_t val)
 {
-    *((CARD16 *) (memType) addr) = val;
+    *((uint16_t *) (memType) addr) = val;
 }
 
-static
-    void
-write_l(xf86Int10InfoPtr pInt, int addr, CARD32 val)
+static void
+write_l(xf86Int10InfoPtr pInt, int addr, uint32_t val)
 {
-    *((CARD32 *) (memType) addr) = val;
+    *((uint32_t *) (memType) addr) = val;
 }
 
 void *
-xf86int10Addr(xf86Int10InfoPtr pInt, CARD32 addr)
+xf86int10Addr(xf86Int10InfoPtr pInt, uint32_t addr)
 {
     if (addr < V_RAM)
         return ((linuxInt10Priv *) pInt->private)->base + addr;
