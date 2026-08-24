@@ -102,7 +102,12 @@ xnestCreateColormap(ColormapPtr pCmap)
     case StaticGray:           /* read only */
     case StaticColor:          /* read only */
     {
-        uint32_t *colors = malloc(ncolors * sizeof(uint32_t));
+        uint32_t *colors;
+        if (ncolors > SIZE_MAX / sizeof(uint32_t))
+            return FALSE;
+        colors = malloc(ncolors * sizeof(uint32_t));
+        if (!colors)
+            return FALSE;
         for (int i = 0; i < ncolors; i++)
             colors[i] = i;
         return load_colormap(pCmap, ncolors, colors);
@@ -111,7 +116,12 @@ xnestCreateColormap(ColormapPtr pCmap)
 
     case TrueColor:            /* read only */
     {
-        uint32_t *colors = malloc(ncolors * sizeof(uint32_t));
+        uint32_t *colors;
+        if (ncolors > SIZE_MAX / sizeof(uint32_t))
+            return FALSE;
+        colors = malloc(ncolors * sizeof(uint32_t));
+        if (!colors)
+            return FALSE;
         Pixel red = 0, redInc = lowbit(pVisual->redMask);
         Pixel green = 0, greenInc = lowbit(pVisual->greenMask);
         Pixel blue = 0, blueInc = lowbit(pVisual->blueMask);
