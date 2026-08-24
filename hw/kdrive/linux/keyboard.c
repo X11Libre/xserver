@@ -358,6 +358,11 @@ LinuxKeyboardLeds(KdKeyboardInfo * ki, int leds)
     ioctl((int) (intptr_t) ki->driverPrivate, KDSETLED, leds & 7);
 }
 
+static void
+LinuxKeyboardFini(KdKeyboardInfo *ki)
+{
+}
+
 KdKeyboardDriver LinuxKeyboardDriver = {
     .name = "keyboard",
     .PreInit = LinuxKeyboardPreInit,
@@ -365,4 +370,5 @@ KdKeyboardDriver LinuxKeyboardDriver = {
     .Enable = LinuxKeyboardEnable,
     .Leds = LinuxKeyboardLeds,
     .Disable = LinuxKeyboardDisable,
+    .Fini = LinuxKeyboardFini,
 };
