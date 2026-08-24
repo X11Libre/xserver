@@ -5,6 +5,7 @@
 #ifndef _XSERVER_DIX_RESOURCE_PRIV_H
 #define _XSERVER_DIX_RESOURCE_PRIV_H
 
+#include <stdbool.h>
 #include <X11/Xdefs.h>
 
 #include "include/dix.h"
@@ -155,5 +156,23 @@ void GetXIDRange(int client,
                  Bool server,
                  XID *minp,
                  XID *maxp);
+
+/*
+ * @brief free a specific resource among several sharing an id and type
+ *
+ * Like FreeResourceByType(), but only frees the entry whose value matches the
+ * one supplied. Needed when more than one resource is registered under the same
+ * id and type (e.g. a GLX window drawable, registered under both its GLX id and
+ * the backing X window id): matching on id+type alone frees an arbitrary one.
+ *
+ * @param id the resource id to free
+ * @param type the resource type to match
+ * @param value the resource value to match
+ * @param skipFree if TRUE, unlink the entry without calling its delete function
+ *
+ * Exported (like FreeResourceByType) because loadable dix modules such as glx
+ * call it across the dlopen boundary, even though it stays out of the SDK.
+ */
+void FreeResourceByTypeValue(XID id, RESTYPE type, void *value, bool skipFree);
 
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */
