@@ -548,7 +548,7 @@ ms_drm_abort(ScrnInfoPtr scrn, Bool (*match)(void *data, void *match_data),
     struct ms_drm_queue *q;
 
     xorg_list_for_each_entry(q, &ms_drm_queue, list) {
-        if (match(q->data, match_data)) {
+        if (!q->aborted && match(q->data, match_data)) {
             ms_drm_abort_one(q);
             break;
         }
