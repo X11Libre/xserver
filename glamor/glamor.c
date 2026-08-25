@@ -988,6 +988,7 @@ static void glamor_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *u
     }
 
     screen->GetSpans = glamor_priv->saved_procs.get_spans;
+    screen->GetImage = glamor_priv->saved_procs.get_image;
     screen->ChangeWindowAttributes =
         glamor_priv->saved_procs.change_window_attributes;
     screen->CopyWindow = glamor_priv->saved_procs.copy_window;
