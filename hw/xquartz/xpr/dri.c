@@ -47,6 +47,7 @@
 #include <sys/stat.h>
 
 #include "miext/extinit_priv.h"
+#include "os/log_priv.h"
 
 #include "misc.h"
 #include "dixstruct.h"
