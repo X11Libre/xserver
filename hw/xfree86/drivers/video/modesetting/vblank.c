@@ -35,6 +35,11 @@
 #include "driver.h"
 #include "drmmode_display.h"
 
+#ifdef _XLIBRE_LTTNG_UST
+#include "modesetting_tp.h"
+#endif
+
+
 /**
  * Tracking for outstanding events queued to the kernel.
  *
@@ -236,9 +241,18 @@ ms_get_kernel_ust_msc(xf86CrtcPtr crtc,
 
         ret = drmCrtcGetSequence(ms->fd, drmmode_crtc->mode_crtc->crtc_id,
                                  msc, &ns);
-        if (ret)
+        if (ret){
+#ifdef _XLIBRE_LTTNG_UST
+            lttng_ust_tracepoint(xlibre_modesetting,ms_get_kernel_ust_msc_has_qs,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,ret,*msc,*ust);
+#endif
             return FALSE;
+
+        }
         *ust = ns / 1000;
+#ifdef _XLIBRE_LTTNG_UST
+        lttng_ust_tracepoint(xlibre_modesetting,ms_get_kernel_ust_msc_has_qs,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,ret,*msc,*ust);
+#endif
+
         return TRUE;
     }
     /* Get current count */
@@ -249,10 +263,19 @@ ms_get_kernel_ust_msc(xf86CrtcPtr crtc,
     if (ret) {
         *msc = 0;
         *ust = 0;
+#ifdef _XLIBRE_LTTNG_UST
+        lttng_ust_tracepoint(xlibre_modesetting,ms_get_kernel_ust_msc_no_qs,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,ret,*msc,*ust);
+#endif
+
         return FALSE;
     } else {
         *msc = vbl.reply.sequence;
         *ust = (CARD64) vbl.reply.tval_sec * 1000000 + vbl.reply.tval_usec;
+
+#ifdef _XLIBRE_LTTNG_UST
+        lttng_ust_tracepoint(xlibre_modesetting,ms_get_kernel_ust_msc_no_qs,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,ret,*msc,*ust);
+#endif
+
         return TRUE;
     }
 }
@@ -344,11 +367,19 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
             ret = drmCrtcQueueSequence(ms->fd, drmmode_crtc->mode_crtc->crtc_id,
                                        drm_flags, msc, &kernel_queued, seq);
             if (ret == 0) {
+                uint64_t msc_orig = msc;
                 msc = ms_kernel_msc_to_crtc_msc(crtc, kernel_queued, TRUE);
                 ms_drm_set_seq_queued(seq, msc);
                 if (msc_queued)
                     *msc_queued = msc;
+#ifdef _XLIBRE_LTTNG_UST
+                lttng_ust_tracepoint(xlibre_modesetting,ms_queue_vblank_has_qs,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,drm_flags,msc_orig,seq,ret,1,msc);
+#endif
                 return TRUE;
+            } else {
+#ifdef _XLIBRE_LTTNG_UST
+                lttng_ust_tracepoint(xlibre_modesetting,ms_queue_vblank_has_qs,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,drm_flags,msc,seq,ret,0,0);
+#endif
             }
         } else {
             vbl.request.type = DRM_VBLANK_EVENT | drmmode_crtc->vblank_pipe;
@@ -363,14 +394,27 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
             vbl.request.signal = seq;
             ret = drmWaitVBlank(ms->fd, &vbl);
             if (ret == 0) {
+                uint64_t msc_orig = msc;
                 msc = ms_kernel_msc_to_crtc_msc(crtc, vbl.reply.sequence, FALSE);
                 ms_drm_set_seq_queued(seq, msc);
                 if (msc_queued)
                     *msc_queued = msc;
+#ifdef _XLIBRE_LTTNG_UST
+                lttng_ust_tracepoint(xlibre_modesetting,ms_queue_vblank_no_qs,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,vbl.request.type,msc_orig,seq,ret,1,msc);
+#endif
+
                 return TRUE;
+            } else {
+#ifdef _XLIBRE_LTTNG_UST
+                lttng_ust_tracepoint(xlibre_modesetting,ms_queue_vblank_no_qs,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,vbl.request.type,msc,seq,ret,0,0);
+#endif
+
             }
         }
         if (errno != EBUSY) {
+#ifdef _XLIBRE_LTTNG_UST
+            lttng_ust_tracepoint(xlibre_modesetting,ms_queue_vblank_abort,scrn->scrnIndex,drmmode_crtc->mode_crtc->crtc_id,flags,msc,seq);
+#endif
             ms_drm_abort_seq(scrn, seq);
             return FALSE;
         }
@@ -683,6 +727,10 @@ ms_vblank_screen_init(ScreenPtr screen)
     /* ID 0 is never valid and fails with ENOENT when the ioctl is available */
     ms->has_queue_sequence =
         !drmCrtcGetSequence(ms->fd, 0, &dummy_msc, &dummy_ns) || errno == ENOENT;
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_modesetting,vblank_screen_init,scrn->scrnIndex,ms->has_queue_sequence);
+#endif
 
     return TRUE;
 }
