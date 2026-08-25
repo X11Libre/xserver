@@ -427,7 +427,7 @@ glamor_composite_glyphs(CARD8 op,
                  */
                 if (_X_UNLIKELY(glyph_draw->width > glyph_max_dim ||
                                 glyph_draw->height > glyph_max_dim ||
-                                !glamor_pixmap_is_memory((PixmapPtr)glyph_draw)))
+                                glamor_pixmap_is_memory((PixmapPtr)glyph_draw)))
                 {
                     if (glyphs_queued) {
                         glamor_glyphs_flush(op, src, dst, prog, glyph_atlas, glyphs_queued);
