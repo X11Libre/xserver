@@ -561,7 +561,13 @@ mieqProcessInputEvents(void)
         else if (DPMSPowerLevel != DPMSModeOn)
             SetScreenSaverTimer();
 
-        if (DPMSPowerLevel != DPMSModeOn)
+        /* Only allow input activity to wake the display when an automatic
+         * screen-saver or DPMS timeout is configured. If all timeouts are
+         * disabled, the current DPMS state is assumed to be externally managed
+         * and must not be overridden by input activity. */
+        if (DPMSPowerLevel != DPMSModeOn &&
+            (ScreenSaverTime > 0 || DPMSStandbyTime > 0 ||
+             DPMSSuspendTime > 0 || DPMSOffTime > 0))
             DPMSSet(serverClient, DPMSModeOn);
 #endif
 
