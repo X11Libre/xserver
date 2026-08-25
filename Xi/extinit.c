@@ -691,8 +691,21 @@ SDeviceChangedEvent(xXIDeviceChangedEvent * from, xXIDeviceChangedEvent * to)
             swapl(&ai->min.frac);
             swapl(&ai->max.integral);
             swapl(&ai->max.frac);
+            swapl(&ai->value.integral);
+            swapl(&ai->value.frac);
             swapl(&ai->resolution);
             swaps(&ai->number);
+        }
+            break;
+        case XIScrollClass:
+        {
+            xXIScrollInfo *si = (xXIScrollInfo *) any;
+
+            swaps(&si->number);
+            swaps(&si->scroll_type);
+            swapl(&si->flags);
+            swapl(&si->increment.integral);
+            swapl(&si->increment.frac);
         }
             break;
         }
