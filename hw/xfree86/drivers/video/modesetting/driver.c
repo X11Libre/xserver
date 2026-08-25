@@ -1124,9 +1124,14 @@ try_enable_glamor(ScrnInfoPtr pScrn)
     modesettingPtr ms = modesettingPTR(pScrn);
     const char *accel_method_str = xf86GetOptValString(ms->drmmode.Options,
                                                        OPTION_ACCEL_METHOD);
-    Bool do_glamor = (!accel_method_str ||
-                      strcmp(accel_method_str, "glamor") == 0);
 
+    Bool no_accel = accel_method_str && !strcmp(accel_method_str, "dri3_only");
+
+    Bool do_glamor = (!accel_method_str ||
+                      no_accel ||
+                      !strcmp(accel_method_str, "glamor"));
+
+    ms->drmmode.no_accel = no_accel;
     ms->drmmode.glamor = FALSE;
     ms->drmmode.glamor_gbm = FALSE;
 
@@ -1145,7 +1150,8 @@ try_enable_glamor(ScrnInfoPtr pScrn)
         int caps = GLAMOR_EGL_CAP_NONE;
         if (ms->glamor.egl_init2(pScrn, ms->fd, &caps, 0)) {
             ms->drmmode.glamor_gbm = !!(caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO);
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO, "glamor initialized\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO, "glamor initialized%s\n",
+                       no_accel ? " without render acceleration" : "");
             ms->drmmode.glamor = TRUE;
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
