@@ -4200,7 +4200,9 @@ drmmode_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     modesettingPtr ms = modesettingPTR(pScrn);
 
     if (drmmode->glamor) {
-        if (!ms->glamor.init(pScreen, GLAMOR_USE_EGL_SCREEN)) {
+        if (!ms->glamor.init(pScreen, drmmode->no_accel ?
+                                      GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_RENDER_ACCEL :
+                                      GLAMOR_USE_EGL_SCREEN)) {
             return FALSE;
         }
 #ifdef GBM_BO_WITH_MODIFIERS
