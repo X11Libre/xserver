@@ -6,6 +6,8 @@ import struct
 from dataclasses import dataclass
 
 # GLX minor opcodes
+GLXRender = 1
+GLXRenderLarge = 2
 GLXCreateContext = 3
 GLXDestroyContext = 4
 GLXMakeCurrent = 5
@@ -197,3 +199,51 @@ class ChangeDrawableAttributesRequest:
             num_attribs,
         )
         return header + self.attribs + b"\x00" * pad_len
+
+
+@dataclass
+class RenderLargeRequest:
+    """GLX RenderLarge request (X_GLXRenderLarge, minor opcode 2).
+
+    Wire format (xGLXRenderLargeReq):
+        CARD8    reqType         (GLX major opcode)
+        CARD8    glxCode         (2)
+        CARD16   length          (request length in 4-byte words)
+        CARD32   contextTag      (from MakeCurrent reply)
+        CARD16   requestNumber   (1-based sequence within the large command)
+        CARD16   requestTotal    (total number of sub-requests)
+        CARD32   dataBytes       (number of data bytes in this sub-request)
+        <data>                   (padded to 4 bytes)
+
+    For requestNumber=1, the data begins with a GL rendering command
+    header: opcode(2) + cmdlen(2) + data...
+    """
+
+    opcode: int
+    context_tag: int
+    request_number: int
+    request_total: int
+    data_bytes: int
+    data: bytes = b""
+    length_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        pad_len = (4 - len(self.data) % 4) % 4 if self.data else 0
+        total_bytes = 16 + len(self.data) + pad_len
+        length = (
+            self.length_override
+            if self.length_override is not None
+            else total_bytes // 4
+        )
+
+        header = struct.pack(
+            f"{byte_order}BBH I HH I",
+            self.opcode,
+            GLXRenderLarge,
+            length,
+            self.context_tag,
+            self.request_number,
+            self.request_total,
+            self.data_bytes,
+        )
+        return header + self.data + b"\x00" * pad_len
