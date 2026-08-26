@@ -2229,7 +2229,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         xf86DPMSInit(pScreen, xf86DPMSSet, 0);
 
 #if defined(GLAMOR) && defined(XV)
-    if (ms->drmmode.glamor) {
+    if (ms->drmmode.glamor && !ms->drmmode.no_accel) {
         XF86VideoAdaptorPtr     glamor_adaptor;
 
         glamor_adaptor = ms->glamor.xv_init(pScreen, 16);
