@@ -151,7 +151,7 @@ XkbAllocNames(XkbDescPtr xkb, unsigned which, int nTotalRG, int nTotalAliases)
             (!XkbIsLegalKeycode(xkb->max_key_code)) ||
             (xkb->max_key_code < xkb->min_key_code))
             return BadValue;
-        names->keys = calloc((xkb->max_key_code + 1), sizeof(XkbKeyNameRec));
+        names->keys = calloc(MAP_LENGTH, sizeof(XkbKeyNameRec));
         if (names->keys == NULL)
             return BadAlloc;
     }
