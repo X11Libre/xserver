@@ -1149,7 +1149,7 @@ try_enable_glamor(ScrnInfoPtr pScrn)
     if (load_glamor(pScrn)) {
         int caps = GLAMOR_EGL_CAP_NONE;
         if (ms->glamor.egl_init2(pScrn, ms->fd, &caps, 0)) {
-            ms->drmmode.glamor_gbm = !!(caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO);
+            ms->drmmode.glamor_gbm = !no_accel && (caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO);
             xf86DrvMsg(pScrn->scrnIndex, X_INFO, "glamor initialized%s\n",
                        no_accel ? " without render acceleration" : "");
             ms->drmmode.glamor = TRUE;
