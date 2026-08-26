@@ -32,14 +32,14 @@
 void
 present_clear_window_notifies(WindowPtr window)
 {
-    present_notify_ptr          notify;
+    present_notify_ptr          notify, tmp;
     present_window_priv_ptr     window_priv = present_window_priv(window);
 
     if (!window_priv)
         return;
 
-    xorg_list_for_each_entry(notify, &window_priv->notifies, window_list) {
-        notify->window = NULL;
+    xorg_list_for_each_entry_safe(notify, tmp, &window_priv->notifies, window_list) {
+        present_free_window_notify(notify);
     }
 }
 
@@ -50,6 +50,7 @@ present_clear_window_notifies(WindowPtr window)
 void
 present_free_window_notify(present_notify_ptr notify)
 {
+    notify->window = NULL;
     xorg_list_del(&notify->window_list);
 }
 
