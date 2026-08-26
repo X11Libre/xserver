@@ -10,6 +10,25 @@ from proto import x11, xi
 from xclient import Extension, X11Error, X11Reply
 
 
+def find_device(
+    resp, name_prefix: str, use: int | None = None, byte_order: str = "<"
+) -> int | None:
+    """Parse an XIQueryDevice reply to find a master device by name.
+
+    Returns the device ID or None if not found.
+    """
+    if not isinstance(resp, X11Reply):
+        return None
+
+    reply = xi.XIQueryDeviceReply.from_reply(resp.data, byte_order)
+
+    for device in reply.devices:
+        if (use is None or device.use == use) and device.name.startswith(name_prefix):
+            return device.deviceid
+
+    return None
+
+
 @pytest.fixture
 def xi_xclient(xclient):
     """Provide an xclient with XI2 initialized."""
@@ -168,6 +187,96 @@ class TestXIPassiveGrab:
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
         assert resp.error_code == x11.BadValue, (
             f"Expected BadValue ({x11.BadValue}), got error code {resp.error_code}"
+        )
+
+    @pytest.mark.asan
+    def test_passive_grab_modifier_device_uaf(self, xserver, xi_xclient):
+        """
+        ZDI-CAN-31832: Use-after-free in CheckPassiveGrab via
+        grab->modifierDevice after device removal.
+
+        XGrabDeviceButton creates a passive grab with grabtype XI. The grab
+        stores a raw DeviceIntPtr in grab->modifierDevice without any reference
+        counting or lifetime management.
+
+        When the modifier device (a master keyboard) is removed via
+        XIChangeHierarchy(XIRemoveMaster), CloseDevice frees
+        the device struct, but doesn't clear the now-dangling
+        grab->modifierDevice pointer.
+
+        A subsequent pointer event routed to the grab window triggers
+        CheckPassiveGrabsOnWindow -> CheckPassiveGrab, which
+        dereferences the freed device via gdev = grab->modifierDevice
+        then reads gdev->key.
+        """
+        conn = xi_xclient
+        opcode = conn.query_extension(Extension.XI).opcode
+
+        # 1. Create a window for the grab target
+        wid = conn.create_window()
+        req = x11.MapWindowRequest(window=wid)
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # 2. Create a new master device pair "uaf"
+        add_info = xi.XIAddMasterInfo(name="uaf", send_core=1, enable=1)
+        req = xi.XIChangeHierarchyRequest(
+            opcode=opcode,
+            num_changes=1,
+            changes_data=add_info.to_bytes("<"),
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=1.0)
+
+        req = xi.XIQueryDeviceRequest(opcode=opcode, deviceid=xi.XIAllDevices)
+        conn.send_request(req)
+        resp = conn.recv_response(timeout=2.0)
+        kbd_id = find_device(resp, name_prefix="uaf", use=xi.XIMasterKeyboard)
+        if kbd_id is None:
+            pytest.fail("Could not find 'uaf' master keyboard device")
+
+        # 3. XGrabDeviceButton: passive grab on VCP with modifierDevice=kbd_id.
+        #    This creates a grabtype=XI grab with modifierDevice pointing
+        #    to the new master keyboard.
+        req = xi.XGrabDeviceButtonRequest(
+            opcode=opcode,
+            grab_window=wid,
+            grabbed_device=xi.VirtualCorePointer,
+            modifier_device=kbd_id,
+            button=0,  # AnyButton
+            modifiers=0x8000,  # AnyModifier
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # 4. Remove the master device - this frees the device struct
+        rem_info = xi.XIRemoveMasterInfo(
+            deviceid=kbd_id,
+            return_mode=xi.XIFloating,
+        )
+        req = xi.XIChangeHierarchyRequest(
+            opcode=opcode,
+            num_changes=1,
+            changes_data=rem_info.to_bytes("<"),
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=1.0)
+
+        # 6. Warp the pointer into the grab window to trigger
+        #    CheckMotion -> ActivateEnterGrab -> CheckPassiveGrab -> UAF
+        req = x11.WarpPointerRequest(
+            dst_window=wid,
+            dst_x=50,
+            dst_y=50,
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - passive grab modifierDevice "
+            "use-after-free on device removal (ZDI-CAN-31832)"
         )
 
 

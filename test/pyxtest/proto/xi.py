@@ -6,17 +6,39 @@ import struct
 from dataclasses import dataclass
 
 # XI (v1) minor opcodes
+XGrabDeviceButton = 17
 XChangeDeviceControl = 35
 XChangeDeviceProperty = 37
 XGetDeviceProperty = 39
 
 # XI2 minor opcodes
 XIChangeCursor = 42
+XIChangeHierarchy = 43
 XIQueryVersion = 47
+XIQueryDevice = 48
 XIPassiveGrabDevice = 54
 XIPassiveUngrabDevice = 55
 XIChangeProperty = 57
 XIGetProperty = 59
+
+# XIChangeHierarchy change types
+XIAddMaster = 1
+XIRemoveMaster = 2
+
+# XIRemoveMaster return modes
+XIAttachToMaster = 1
+XIFloating = 2
+
+# XIQueryDevice special device IDs
+# XIAllDevices = 0  (already defined below)
+# XIAllMasterDevices = 1  (already defined below)
+
+# XI device use types (from xXIDeviceInfo)
+XIMasterPointer = 1
+XIMasterKeyboard = 2
+XISlavePointer = 3
+XISlaveKeyboard = 4
+XIFloatingSlave = 5
 
 XI2_MAJOR = 2
 XI2_MINOR = 4
@@ -394,3 +416,290 @@ class DeviceResolutionCtl:
             self.num_valuators,
         )
         return header + val_data
+
+
+@dataclass
+class XIAddMasterInfo:
+    """XIAddMaster change body for XIChangeHierarchy.
+
+    Wire format (xXIAddMasterInfo):
+        CARD16   type           (1 = XIAddMaster)
+        CARD16   length         (in 4-byte words)
+        CARD16   name_len
+        CARD8    send_core
+        CARD8    enable
+        STRING8  name           (padded to 4 bytes)
+    """
+
+    name: str
+    send_core: int = 1
+    enable: int = 1
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        name_bytes = self.name.encode("ascii")
+        name_padded = name_bytes + b"\x00" * ((4 - len(name_bytes) % 4) % 4)
+        total = 8 + len(name_padded)
+        length = total // 4
+
+        header = struct.pack(
+            f"{byte_order}HH HBB",
+            XIAddMaster,
+            length,
+            len(name_bytes),
+            self.send_core,
+            self.enable,
+        )
+        return header + name_padded
+
+
+@dataclass
+class XIRemoveMasterInfo:
+    """XIRemoveMaster change body for XIChangeHierarchy.
+
+    Wire format (xXIRemoveMasterInfo):
+        CARD16   type           (2 = XIRemoveMaster)
+        CARD16   length         (3 words = 12 bytes)
+        CARD16   deviceid
+        CARD8    return_mode    (1=AttachToMaster, 2=Floating)
+        CARD8    pad
+        CARD16   return_pointer (device to attach pointer slaves to)
+        CARD16   return_keyboard (device to attach keyboard slaves to)
+    """
+
+    deviceid: int
+    return_mode: int = XIFloating
+    return_pointer: int = VirtualCorePointer
+    return_keyboard: int = VirtualCoreKeyboard
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}HH HBx HH",
+            XIRemoveMaster,
+            3,  # length = 3 words (12 bytes)
+            self.deviceid,
+            self.return_mode,
+            self.return_pointer,
+            self.return_keyboard,
+        )
+
+
+@dataclass
+class XIChangeHierarchyRequest:
+    """XIChangeHierarchy request (XI2 minor opcode 43).
+
+    Wire format (xXIChangeHierarchyReq):
+        CARD8    reqType         (XI major opcode)
+        CARD8    ReqType         (43)
+        CARD16   length
+        CARD8    num_changes
+        CARD8    pad0
+        CARD16   pad1
+        <changes>               (variable-length change bodies)
+    """
+
+    opcode: int
+    num_changes: int
+    changes_data: bytes
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        total = 8 + len(self.changes_data)
+        length = total // 4
+
+        header = struct.pack(
+            f"{byte_order}BBH Bx H",
+            self.opcode,
+            XIChangeHierarchy,
+            length,
+            self.num_changes,
+            0,  # pad1
+        )
+        return header + self.changes_data
+
+
+@dataclass
+class XIQueryDeviceRequest:
+    """XIQueryDevice request (XI2 minor opcode 48).
+
+    Wire format (xXIQueryDeviceReq):
+        CARD8    reqType         (XI major opcode)
+        CARD8    ReqType         (48)
+        CARD16   length          (2)
+        CARD16   deviceid
+        CARD16   pad
+    """
+
+    opcode: int
+    deviceid: int = XIAllDevices
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH HH",
+            self.opcode,
+            XIQueryDevice,
+            2,  # 8 bytes = 2 words
+            self.deviceid,
+            0,  # pad
+        )
+
+
+@dataclass
+class XGrabDeviceButtonRequest:
+    """XGrabDeviceButton request (XI v1, minor opcode 17).
+
+    Wire format (xGrabDeviceButtonReq):
+        CARD8    reqType         (XI major opcode)
+        CARD8    ReqType         (17)
+        CARD16   length
+        CARD32   grabWindow
+        CARD8    grabbed_device
+        CARD8    modifier_device
+        CARD16   event_count
+        CARD16   modifiers
+        CARD8    this_device_mode
+        CARD8    other_devices_mode
+        CARD8    button
+        CARD8    ownerEvents
+        CARD16   pad
+        <event classes>          (event_count * CARD32)
+    """
+
+    opcode: int
+    grab_window: int
+    grabbed_device: int
+    modifier_device: int
+    button: int = 0  # AnyButton
+    modifiers: int = 0x8000  # AnyModifier
+    this_device_mode: int = 1  # Async
+    other_devices_mode: int = 1  # Async
+    owner_events: int = 0
+    event_classes: list[int] | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        classes = self.event_classes or []
+        event_count = len(classes)
+        total = 20 + event_count * 4
+        length = total // 4
+
+        header = struct.pack(
+            f"{byte_order}BBH I BB H HBB BB H",
+            self.opcode,
+            XGrabDeviceButton,
+            length,
+            self.grab_window,
+            self.grabbed_device,
+            self.modifier_device,
+            event_count,
+            self.modifiers,
+            self.this_device_mode,
+            self.other_devices_mode,
+            self.button,
+            self.owner_events,
+            0,  # pad
+        )
+
+        class_data = b""
+        for c in classes:
+            class_data += struct.pack(f"{byte_order}I", c)
+
+        return header + class_data
+
+
+@dataclass
+class XIDeviceInfo:
+    """Parsed xXIDeviceInfo structure from XIQueryDevice reply.
+
+    Wire format (xXIDeviceInfo):
+        CARD16   deviceid
+        CARD16   use               (MasterPointer, MasterKeyboard, etc.)
+        CARD16   attachment
+        CARD16   num_classes
+        CARD16   name_len
+        CARD8    enabled
+        CARD8    pad
+        STRING8  name              (name_len bytes, padded to 4)
+        <class info structs>       (num_classes * variable-length)
+    """
+
+    deviceid: int
+    use: int
+    attachment: int
+    name: str
+    enabled: bool
+
+    @classmethod
+    def parse_device_list(
+        cls, data: bytes, offset: int, num_devices: int, byte_order: str = "<"
+    ) -> list["XIDeviceInfo"]:
+        """Parse a list of XIDeviceInfo structures from reply data.
+
+        Returns a list of XIDeviceInfo objects and updates offset to point
+        past the last device.
+        """
+        devices = []
+        current_offset = offset
+
+        for _ in range(num_devices):
+            if current_offset + 12 > len(data):
+                break
+
+            deviceid, use, attachment, num_classes, name_len, enabled = (
+                struct.unpack_from(f"{byte_order}HHH HHB x", data, current_offset)
+            )
+            current_offset += 12
+
+            # Read device name
+            if current_offset + name_len > len(data):
+                break
+            device_name = data[current_offset : current_offset + name_len].decode(
+                "ascii", errors="replace"
+            )
+            name_padded = (name_len + 3) & ~3
+            current_offset += name_padded
+
+            # Skip class info structs
+            for _ in range(num_classes):
+                if current_offset + 4 > len(data):
+                    break
+                _cls_type, cls_len = struct.unpack_from(
+                    f"{byte_order}HH", data, current_offset
+                )
+                # cls_len is in 4-byte words
+                current_offset += cls_len * 4
+
+            devices.append(
+                cls(
+                    deviceid=deviceid,
+                    use=use,
+                    attachment=attachment,
+                    name=device_name,
+                    enabled=bool(enabled),
+                )
+            )
+
+        return devices
+
+
+@dataclass
+class XIQueryDeviceReply:
+    """Parsed XIQueryDevice reply.
+
+    Wire format (xXIQueryDeviceReply):
+        type(1) + pad(1) + sequenceNumber(2) + length(4)
+        num_devices(2) + pad(22)
+        <device info list> (num_devices * variable-length xXIDeviceInfo)
+    """
+
+    devices: list[XIDeviceInfo]
+
+    @classmethod
+    def from_reply(cls, data: bytes, byte_order: str = "<") -> "XIQueryDeviceReply":
+        """Parse an X11Reply's raw data into an XIQueryDeviceReply."""
+        if len(data) < 32:
+            return cls(devices=[])
+
+        num_devices = struct.unpack_from(f"{byte_order}H", data, 8)[0]
+        devices = XIDeviceInfo.parse_device_list(
+            data, offset=32, num_devices=num_devices, byte_order=byte_order
+        )
+
+        return cls(devices=devices)
