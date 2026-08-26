@@ -928,13 +928,15 @@ glamor_init(ScreenPtr screen, unsigned int flags)
 
     glamor_init_vbo(screen);
 
-    glamor_priv->enable_gradient_shader = TRUE;
-
-    if (!glamor_init_gradient_shader(screen)) {
-        LogMessage(X_WARNING,
-                   "glamor%d: Cannot initialize gradient shader, falling back to software rendering for gradients\n",
-                   screen->myNum);
-        glamor_priv->enable_gradient_shader = FALSE;
+    glamor_priv->enable_gradient_shader = FALSE;
+    if (!(glamor_priv->flags & GLAMOR_NO_RENDER_ACCEL)) {
+        if (!glamor_init_gradient_shader(screen)) {
+            LogMessage(X_WARNING,
+                       "glamor%d: Cannot initialize gradient shader, falling back to software rendering for gradients\n",
+                       screen->myNum);
+        } else {
+            glamor_priv->enable_gradient_shader = TRUE;
+        }
     }
 
     glamor_pixmap_init(screen);
