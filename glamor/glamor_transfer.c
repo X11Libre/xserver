@@ -46,8 +46,14 @@ glamor_upload_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
     int                         bytes_per_pixel = PIXMAN_FORMAT_BPP(f->render_format) >> 3;
     char *tmp_bits = NULL;
 
-    if (glamor_drawable_effective_depth(drawable) == 24 && pixmap->drawable.depth == 32)
-        tmp_bits = XNFalloc(byte_stride * pixmap->drawable.height);
+    if (glamor_drawable_effective_depth(drawable) == 24 && pixmap->drawable.depth == 32) {
+        int tmp_height = pixmap->drawable.height - dy_dst + dy_src;
+        if (tmp_height > 0) {
+            if (byte_stride > 0 && tmp_height > INT_MAX / byte_stride)
+                return;
+            tmp_bits = XNFalloc(byte_stride * tmp_height);
+        }
+    }
 
     glamor_make_current(glamor_priv);
 
