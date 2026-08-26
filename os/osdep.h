@@ -54,6 +54,9 @@ SOFTWARE.
 #include <limits.h>
 #include <signal.h>
 #include <stddef.h>
+#ifdef HAVE_GETRANDOM
+#include <sys/random.h>
+#endif
 #include <X11/Xos.h>
 #include <X11/Xmd.h>
 #include <X11/Xdefs.h>
@@ -90,8 +93,8 @@ static inline void arc4random_buf(void *buf, size_t nbytes)
 {
 #ifdef HAVE_GETRANDOM
     ssize_t pos = 0;
-    while (pos < len) {
-        ssize_t ret = getrandom(buf + pos, nbytes - pos, 0);
+    while (pos < nbytes) {
+        ssize_t ret = getrandom((unsigned char*)buf + pos, nbytes - pos, 0);
         if (ret <= 0) {
             if (ret < 0 && errno == EINTR)
                 continue;
