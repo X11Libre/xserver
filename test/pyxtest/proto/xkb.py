@@ -57,6 +57,13 @@ XkbNumRequiredTypes = 4
 XkbMaxLegalKeyCode = 255
 XkbNoShape = 0xFF
 
+# Doodad types
+XkbOutlineDoodad = 1
+XkbSolidDoodad = 2
+XkbTextDoodad = 3
+XkbIndicatorDoodad = 4
+XkbLogoDoodad = 5
+
 # XkbAllMapComponentsMask
 XkbAllClientInfoMask = XkbKeyTypesMask | XkbKeySymsMask | XkbModifierMapMask
 XkbAllServerInfoMask = (
@@ -801,6 +808,61 @@ class OverlayWire:
         for row_under in rows_under:
             rows += struct.pack(f"{byte_order}BBxx", row_under, 0)
         return header + rows
+
+
+@dataclass
+class TextDoodadWire:
+    """
+    xkbDoodadWireDesc for XkbTextDoodad (20 bytes header) + text + font strings.
+
+    Wire layout (xkbAnyDoodadWireDesc common):
+      name(4 Atom) + type(1) + priority(1) + top(2) + left(2) + angle(2)
+    Text-specific part of the 20-byte wire desc:
+      width(2) + height(2) + colorNdx(1) + pad1(1) + pad2(2)
+    Followed by: text (counted string) + font (counted string)
+    """
+
+    name: int = 0  # Atom
+    priority: int = 0
+    top: int = 0
+    left: int = 0
+    angle: int = 0
+    width: int = 50
+    height: int = 20
+    color_ndx: int = 0
+    text: str = "text"
+    font: str = "font"
+    # If set, use this raw value as the font string length (for malformed requests)
+    font_length_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        header = struct.pack(
+            f"{byte_order}I"  # name (Atom)
+            f"BB"  # type, priority
+            f"hhh"  # top, left, angle
+            f"HH"  # width, height
+            f"Bx"  # colorNdx, pad1
+            f"xx",  # pad2
+            self.name,
+            XkbTextDoodad,
+            self.priority,
+            self.top,
+            self.left,
+            self.angle,
+            self.width,
+            self.height,
+            self.color_ndx,
+        )
+        text_data = build_counted_string(self.text, byte_order)
+        if self.font_length_override is not None:
+            # Craft a malformed font string: just a 2-byte length with no data
+            font_data = struct.pack(f"{byte_order}H", self.font_length_override)
+            # Pad to 4-byte boundary
+            pad = (4 - len(font_data) % 4) % 4
+            font_data += b"\x00" * pad
+        else:
+            font_data = build_counted_string(self.font, byte_order)
+        return header + text_data + font_data
 
 
 @dataclass
