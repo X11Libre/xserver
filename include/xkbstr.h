@@ -312,8 +312,8 @@ typedef struct _XkbControls {
                                   XkbAX_NeedOption((c), (w)))
 
 typedef struct _XkbServerMapRec {
-    unsigned short num_acts;
-    unsigned short size_acts;
+    unsigned int num_acts;
+    unsigned int size_acts;
     XkbAction *acts;
 
     XkbBehavior *behaviors;
@@ -346,8 +346,8 @@ typedef struct _XkbClientMapRec {
     unsigned char num_types;
     XkbKeyTypePtr types;
 
-    unsigned short size_syms;
-    unsigned short num_syms;
+    unsigned int size_syms;
+    unsigned int num_syms;
     KeySym *syms;
     XkbSymMapPtr key_sym_map;
 
