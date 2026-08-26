@@ -2400,7 +2400,6 @@ CloseScreen(ScreenPtr pScreen)
     }
 
     if (ms->drmmode.shadow_enable) {
-        ms->shadow.Remove(pScreen, pScreen->GetScreenPixmap(pScreen));
         free(ms->drmmode.shadow_fb);
         ms->drmmode.shadow_fb = NULL;
         free(ms->drmmode.shadow_fb2);
