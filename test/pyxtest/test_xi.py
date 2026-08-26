@@ -3,6 +3,7 @@
 # Security tests for XI/XI2 (XInput) extension vulnerabilities.
 
 import struct
+import time
 
 import pytest
 from proto import x11, xi
@@ -115,6 +116,56 @@ class TestXIPassiveGrab:
         )
         # The fix returns BadValue (error code 2)
         assert isinstance(resp, X11Error), f"Expected an error reply, got {resp}"
+        assert resp.error_code == x11.BadValue, (
+            f"Expected BadValue ({x11.BadValue}), got error code {resp.error_code}"
+        )
+
+    @pytest.mark.asan
+    def test_passive_ungrab_modifier_oob_write(self, xserver, xi_xclient):
+        """
+        ZDI-CAN-32366: ProcXIPassiveUngrabDevice does not validate modifier
+        values. The grab path (ProcXIPassiveGrabDevice) validates modifiers
+        via CheckGrabValues(), but the ungrab path passes them directly to
+        DeletePassiveGrabFromList(). BITCLEAR(mask, modifier) with
+        modifier > 255 indexes mask[modifier>>5] past the 8-word (32-byte)
+        mask allocation, causing a controlled single-bit-clear at an
+        attacker-chosen heap offset.
+
+        The fix adds the same modifier validation to the ungrab path.
+        """
+        opcode = xi_xclient.query_extension(Extension.XI).opcode
+
+        wid = xi_xclient.create_window()
+
+        # First create a valid grab so DeletePassiveGrabFromList has
+        # something to match against
+        grab_req = xi.XIPassiveGrabDeviceRequest(
+            opcode=opcode,
+            grab_window=wid,
+            detail=1,
+            grab_type=xi.XIGrabtypeButton,
+        )
+        xi_xclient.send_request(grab_req)
+        xi_xclient.recv_response(timeout=2.0)
+
+        # Now try to ungrab with an oversized modifier (0x10000)
+        # This would cause BITCLEAR to write past the mask allocation
+        req = xi.XIPassiveUngrabDeviceRequest(
+            opcode=opcode,
+            grab_window=wid,
+            detail=1,
+            grab_type=xi.XIGrabtypeButton,
+            modifiers=[0x10000],  # > 255: OOB write via BITCLEAR
+        )
+        xi_xclient.send_request(req)
+        resp = xi_xclient.recv_response(timeout=2.0)
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - XIPassiveUngrabDevice modifier OOB write: "
+            "BITCLEAR(mask, modifier) with modifier > 255"
+        )
+        assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
         assert resp.error_code == x11.BadValue, (
             f"Expected BadValue ({x11.BadValue}), got error code {resp.error_code}"
         )
