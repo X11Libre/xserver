@@ -5312,7 +5312,8 @@ _CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
             return status;
         status = _GetCountedString(&wire, client, &doodad->text.font);
         if (status != Success) {
-            free (doodad->text.text);
+            free(doodad->text.text);
+            doodad->text.text = NULL;
             return status;
         }
         break;
