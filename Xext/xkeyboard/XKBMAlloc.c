@@ -386,7 +386,8 @@ XkbResizeKeyType(XkbDescPtr xkb,
         }
         if (nResize > 0) {
             int nextMatch;
-
+            if (nTotal > INT_MAX / 15)
+                return BadAlloc;
             xkb->map->size_syms = (nTotal * 15) / 10;
             newSyms = calloc(xkb->map->size_syms, sizeof(KeySym));
             if (newSyms == NULL)
