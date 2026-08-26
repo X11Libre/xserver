@@ -425,6 +425,18 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
     DeviceIntPtr master;
     bool can_emit = events && nevents;
 
+    /* We cannot know how many events are available in *events, but
+     * we know it all DDX very protbably allocated them with
+     * GetMaximumEventsNum() and fill_pointer_events() may have added one.
+     *
+     * Let's cap at a maximum of 64 barrier events which is way more than
+     * we'll need but low enough that we shouldn't OOB on *events.
+     *
+     * Changing the signatures to get some sz_events in here is an ABI change
+     * through miPointerSetPosition so... weeping face.
+     */
+    const int MAX_BARRIER_EVENTS = 64;
+
     if (nevents)
         *nevents = 0;
 
@@ -469,7 +481,6 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
         if (pbd->barrier_event_id == pbd->release_event_id)
             continue;
 
-        ev.type = ET_BarrierHit;
         barrier_clamp_to_barrier(nearest, dir, &x, &y);
 
         if (barrier_is_vertical(nearest)) {
@@ -481,21 +492,22 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
             current_y = y;
         }
 
-        ev.flags = 0;
-        ev.event_id = pbd->barrier_event_id;
-        ev.barrierid = c->id;
+        if (can_emit && *nevents < MAX_BARRIER_EVENTS) {
+            ev.type = ET_BarrierHit;
+            ev.flags = 0;
+            ev.event_id = pbd->barrier_event_id;
+            ev.barrierid = c->id;
 
-        ev.dt = new_sequence ? 0 : ms - pbd->last_timestamp;
-        ev.window = c->window;
-        pbd->last_timestamp = ms;
+            ev.dt = new_sequence ? 0 : ms - pbd->last_timestamp;
+            ev.window = c->window;
 
-        /* root x/y is filled in later */
+            /* root x/y is filled in later */
 
-        if (can_emit) {
             barrier_events->barrier_event = ev;
             barrier_events++;
             *nevents += 1;
         }
+        pbd->last_timestamp = ms;
     }
 
     xorg_list_for_each_entry(c, &cs->barriers, entry) {
@@ -514,31 +526,31 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
             continue;
 
         pbd->hit = FALSE;
-
-        ev.type = ET_BarrierLeave;
-
-        if (pbd->barrier_event_id == pbd->release_event_id)
-            flags |= XIBarrierPointerReleased;
-
-        ev.flags = flags;
-        ev.event_id = pbd->barrier_event_id;
-        ev.barrierid = c->id;
-
-        ev.dt = ms - pbd->last_timestamp;
-        ev.window = c->window;
         pbd->last_timestamp = ms;
+        /* If we've left the hit box, this is the
+         * start of a new event ID. */
+        pbd->barrier_event_id++;
 
-        /* root x/y is filled in later */
+        if (can_emit && *nevents < MAX_BARRIER_EVENTS) {
+            ev.type = ET_BarrierLeave;
 
-        if (can_emit) {
+            if (pbd->barrier_event_id == pbd->release_event_id)
+                flags |= XIBarrierPointerReleased;
+
+            ev.flags = flags;
+            ev.event_id = pbd->barrier_event_id;
+            ev.barrierid = c->id;
+
+            ev.dt = ms - pbd->last_timestamp;
+            ev.window = c->window;
+
+            /* root x/y is filled in later */
+
             barrier_events->barrier_event = ev;
             barrier_events++;
             *nevents += 1;
         }
 
-        /* If we've left the hit box, this is the
-         * start of a new event ID. */
-        pbd->barrier_event_id++;
     }
 
  out:
@@ -567,8 +579,10 @@ CreatePointerBarrierClient(ClientPtr client,
     BarrierScreenPtr cs;
     int err;
     int i;
+    struct PointerBarrierClient *counter;
     CARD16 *in_devices;
     DeviceIntPtr dev;
+    size_t nbarriers = 0;
 
     const int size = sizeof(struct PointerBarrierClient)
                    + sizeof(DeviceIntPtr) * stuff->num_devices;
@@ -587,6 +601,16 @@ CreatePointerBarrierClient(ClientPtr client,
 
     ScreenPtr pScreen = pWin->drawable.pScreen;
     cs = GetBarrierScreen(pScreen);
+
+    /* Only allow for a maximum of 32 barriers to be created. This
+     * should be more than enough and prevents issues in
+     * input_constrain_cursor, see MAX_BARRIER_EVENTS in that
+     * function */
+    xorg_list_for_each_entry(counter, &cs->barriers, entry) {
+        nbarriers++;
+        if (nbarriers >= 32)
+            return BadAlloc;
+    }
 
     ret->pScreen = pScreen;
     ret->window = stuff->window;

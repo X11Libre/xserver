@@ -6,7 +6,8 @@ import struct
 import time
 
 import pytest
-from proto import x11, xi
+
+from proto import x11, xfixes, xi, xtest
 from xclient import Extension, X11Error, X11Reply
 
 
@@ -611,4 +612,103 @@ class TestXIChangeCursor:
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
         assert resp.error_code == x11.BadWindow, (
             "ChangeCursor didn't return BadWindow for Window 0"
+        )
+
+
+class TestXIBarrier:
+    @pytest.mark.asan
+    def test_barrier_leave_event_buffer_overflow(self, xserver, xi_xclient):
+        """
+        ZDI-CAN-31938: Heap buffer overflow in input_constrain_cursor
+        from too many barrier leave events.
+
+        input_constrain_cursor() writes barrier hit/leave events
+        into a fixed-size internal event buffer (GetMaximumEventsNum()
+        = 100 slots). When all barriers are in the "released" state,
+        the first loop marks every barrier as hit (released barriers
+        skip the clamp, so dir never clears and iteration
+        continues). The second loop emits one event per hit barrier
+        with no capacity check.
+
+        Creating >100 barriers at the same position, releasing all
+        of them (by setting eventid=1 which matches the initial
+        barrier_event_id), and driving pointer motion across them
+        causes 200+ events to be written into the 100-slot buffer
+        which is generally considered a bad idea..
+        """
+        conn = xi_xclient
+        xi_opcode = conn.query_extension(Extension.XI).opcode
+
+        xf = conn.query_extension(Extension.XFIXES)
+        if not xf:
+            pytest.skip("XFIXES extension not available")
+
+        xt = conn.query_extension(Extension.XTEST)
+        if not xt:
+            pytest.skip("XTEST extension not available")
+
+        req = xfixes.XFixesQueryVersionRequest(
+            opcode=xf.opcode, major_version=5, minor_version=0
+        )
+        conn.send_request(req)
+        resp = conn.recv_response(timeout=5.0)
+        if resp is None:
+            pytest.fail("XFixesQueryVersion got no response")
+
+        # Create 200 barriers at x=500, vertical line y=[0,4000].
+        # All at the same position so pointer motion crosses them all.
+        barriers = []
+        for _ in range(200):
+            bid = conn.alloc_id()
+            req = xfixes.XFixesCreatePointerBarrierRequest(
+                opcode=xf.opcode,
+                barrier=bid,
+                window=conn.root_window,
+                x1=500,
+                y1=0,
+                x2=500,
+                y2=4000,
+                directions=0,
+                num_devices=0,
+            )
+            conn.send_request(req)
+            barriers.append(bid)
+        conn.flush_responses(timeout=1.0)
+
+        # Release all barriers by sending XIBarrierReleasePointer
+        # with eventid=1 (matching the initial barrier_event_id).
+        # This puts all barriers into the "released" state.
+        req = xi.XIBarrierReleasePointerRequest(
+            opcode=xi_opcode,
+            barriers=[(xi.VirtualCorePointer, bid, 1) for bid in barriers],
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # Position the pointer to the left of the barriers
+        req = x11.WarpPointerRequest(
+            dst_window=conn.root_window,
+            dst_x=100,
+            dst_y=2000,
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # Use xtest to generate relative pointer motion
+        # crossing the barrier line at x=500 (motion dx=+500).
+        # This will trigger a BarrierHit on all 200 barriers.
+        req = xtest.XTestFakeInputRequest(
+            opcode=xt.opcode,
+            event_type=xtest.MotionNotify,
+            detail=1,  # relative motion
+            root_x=500,
+            root_y=0,
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - barrier leave event buffer overflow (ZDI-CAN-31938)"
         )

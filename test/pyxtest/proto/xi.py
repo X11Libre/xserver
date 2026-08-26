@@ -20,6 +20,7 @@ XIPassiveGrabDevice = 54
 XIPassiveUngrabDevice = 55
 XIChangeProperty = 57
 XIGetProperty = 59
+XIBarrierReleasePointer = 61
 
 # XIChangeHierarchy change types
 XIAddMaster = 1
@@ -703,3 +704,51 @@ class XIQueryDeviceReply:
         )
 
         return cls(devices=devices)
+
+
+@dataclass
+class XIBarrierReleasePointerRequest:
+    """XIBarrierReleasePointer request (XI2 minor opcode 61).
+
+    Wire format (xXIBarrierReleasePointerReq):
+        CARD8    reqType         (XI major opcode)
+        CARD8    ReqType         (61)
+        CARD16   length
+        CARD32   num_barriers
+        <barriers>               (num_barriers * xXIBarrierReleasePointerInfo)
+
+    Each xXIBarrierReleasePointerInfo (12 bytes):
+        CARD16   deviceid
+        CARD16   pad
+        CARD32   barrier
+        CARD32   eventid
+    """
+
+    opcode: int
+    barriers: list[tuple[int, int, int]]
+    """List of (deviceid, barrier_id, eventid)"""
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        num_barriers = len(self.barriers)
+        total = 8 + num_barriers * 12
+        length = total // 4
+
+        header = struct.pack(
+            f"{byte_order}BBH I",
+            self.opcode,
+            XIBarrierReleasePointer,
+            length,
+            num_barriers,
+        )
+
+        payload = b""
+        for deviceid, barrier_id, eventid in self.barriers:
+            payload += struct.pack(
+                f"{byte_order}HH II",
+                deviceid,
+                0,  # pad
+                barrier_id,
+                eventid,
+            )
+
+        return header + payload
