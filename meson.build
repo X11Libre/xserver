@@ -218,7 +218,6 @@ else
     build_seatd_libseat = get_option('seatd_libseat') == 'true'
 endif
 
-
 if get_option('systemd_logind') == 'auto'
     build_systemd_logind = build_udev_kms and dbus_dep.found() and not build_seatd_libseat
 else
