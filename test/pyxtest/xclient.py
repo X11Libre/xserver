@@ -78,24 +78,27 @@ class Extension(StrEnum):
     XVIDEO_MC = "XVideo-MotionCompensation"
 
 
-# X11 core protocol error codes (from X.h)
-BadRequest = 1
-BadValue = 2
-BadWindow = 3
-BadPixmap = 4
-BadAtom = 5
-BadCursor = 6
-BadFont = 7
-BadMatch = 8
-BadDrawable = 9
-BadAccess = 10
-BadAlloc = 11
-BadColor = 12
-BadGC = 13
-BadIDChoice = 14
-BadName = 15
-BadLength = 16
-BadImplementation = 17
+# X11 core protocol error codes -- canonical definitions are in proto/x11.py,
+# re-exported here for backward compatibility.
+from proto.x11 import (  # noqa: F401
+    BadAccess,
+    BadAlloc,
+    BadAtom,
+    BadColor,
+    BadCursor,
+    BadDrawable,
+    BadFont,
+    BadGC,
+    BadIDChoice,
+    BadImplementation,
+    BadLength,
+    BadMatch,
+    BadName,
+    BadPixmap,
+    BadRequest,
+    BadValue,
+    BadWindow,
+)
 
 
 @dataclass
