@@ -767,7 +767,7 @@ if build_docs or build_docs_devel
     ]
 endif
 
-module_abi_tag = 'xlibre-25'
+module_abi_tag = 'xlibre-25.0'
 
 # Include must come first, as it sets up dix-config.h
 subdir('include')
