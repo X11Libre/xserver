@@ -724,6 +724,8 @@ if serverconfigdir == ''
     serverconfigdir = join_paths(get_option('prefix'), get_option('libdir'), 'xorg')
 endif
 
+subdir('typegen')
+
 subdir('man')
 
 require_docs = get_option('docs') == 'true'
