@@ -1,0 +1,17 @@
+* each extension (as well as core has one yaml file)
+* section `reply-structs` --> struct definition for x11 replies
+  --> list of reply structs used by this extension
+  --> key is the struct name, subkeys defining the struct layout
+  --> `data-name` (optional) is the name of the 2nd byte field (data1)
+       --> if given, that field is named so, instead of `data1`
+  --> `data-type` (optional) is the type of the 2nd byte field (default: CARD8)
+  --> `payload` -> map of fields and their types
+* C-genertor:
+    * reply structs are named "X11_Reply_"+<name>
+    * field types are named "X11_"+<name>
+* generator automatically adds the standard fields type(BYTE), data(BYTE) (see data-type / data-name), sequenceNumner(CARD16), length(CARD32)
+* also automatically adds padding fields according X11 protocol padding rules (at least 32 bytes, always factor of 4)
+* see x11-core-pre.h
+* see core.yaml
+* generator soll in golang geschrieben werden (minimal-version 1.22) und in meson build eingedockt - vor allem anderen durchlaufen
+* definiere macros for byteswap X11_REPLY_<name>_SWAP, die entsprechend X_REPLY_FIELD_*() macros aufrufen (siehe zb. dbe.c)

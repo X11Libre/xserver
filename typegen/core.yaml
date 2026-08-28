@@ -1,0 +1,82 @@
+# structure definition for reply structs
+reply-struct:
+    GetWindowAttributes:
+        data-name: backingStore
+        payload:
+            visualID:           VISUAL
+            class:              CARD16
+            bitGravity:         CARD8
+            winGravity:         CARD8
+            backingBitPlanes:   CARD32
+            backingPixel:       CARD32
+            saveUnder:          BOOL
+            mapInstalled:       BOOL
+            mapState:           CARD8
+            override:           BOOL
+            colormap:           COLORMAP
+            allEventMasks:      CARD32
+            yourEventMask:      CARD32
+            doNotPropagateMask: CARD16
+    GetGeometry:
+        data-name: depth
+        payload:
+            root:       WINDOW
+            x:          INT16
+            y:          INT16
+            width:      CARD16
+            height:     CARD16
+            borderWith: CARD16
+    QueryTree:
+        payload:
+            root:      WINDOW
+            parent:    WINDOW
+            nChildren: CARD16
+    IntenAtom:
+        payload:
+            atom:      ATOM
+    GetAtomName:
+        payload:
+            nameLength: CARD16
+    GetProperty:
+        payload:
+            propertyType: ATOM
+            bytesAfter:   CARD32
+            nItems:       CARD32
+    ListProperties:
+        payload:
+            nProperties:  CARD16
+    GetSelectionOwner:
+        payload:
+            owner: WINDOW
+    GrabPointer:
+        data-name: status
+    GrabKeyboardReply:
+        data-name: status
+    QueryPointer:
+        data-name: sameScreen
+        data-type: BOOL
+        payload:
+            root:  WINDOW
+            child: WINDOW
+            rootX: INT16
+            rootY: INT16
+            winX:  INT16
+            winY:  INT16
+            mask:  CARD16
+    GetMotionEvents:
+        payload:
+            nEvents: CARD32
+    TranslateCoords:
+        data-name: sameScreen
+        data-type: BOOL
+        payload:
+            child: WINDOW
+            dstX:  INT16
+            dstY:  INT16
+    GetInputFocus:
+        data-name: revertTo
+        payload:
+            focus: WINDOW
+    QueryKeymap:
+        payload:
+            map: BYTE_ARRAY_32
