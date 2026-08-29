@@ -119,6 +119,7 @@ TimeStamp currentTime;
 
 int defaultColorVisualClass = -1;
 int monitorResolution = 0;
+Bool autosetDPI = FALSE;
 
 Bool explicit_display = FALSE;
 char *ConnectionInfo;
