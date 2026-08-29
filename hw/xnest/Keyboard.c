@@ -239,6 +239,8 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
         break;
     case DEVICE_CLOSE:
         break;
+    default:
+        break;
     }
     return Success;
 

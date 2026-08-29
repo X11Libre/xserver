@@ -191,6 +191,7 @@ xnestBitBlitHelper(GCPtr pGC)
                     struct xnest_event_queue *q = malloc(sizeof(struct xnest_event_queue));
                     q->event = event;
                     xorg_list_add(&q->entry, &xnestUpstreamInfo.eventQueue.entry);
+                    break;
                 }
             }
         }

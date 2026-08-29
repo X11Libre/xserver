@@ -261,6 +261,8 @@ freeScreenInfo(vfbScreenInfoPtr pvfb)
     case NORMAL_MEMORY_FB:
         free(pvfb->pXWDHeader);
         break;
+    default:
+        break;
     }
 
     free(pvfb->crtcs);
@@ -719,6 +721,8 @@ vfbAllocateFramebufferMemory(vfbScreenInfoPtr pvfb)
     case NORMAL_MEMORY_FB:
         pvfb->pXWDHeader = (XWDFileHeader *) calloc(1, pvfb->sizeInBytes);
         break;
+    default:
+        break;
     }
 
     if (pvfb->pXWDHeader) {
@@ -1094,6 +1098,7 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
         break;
     default:
         return FALSE;
+        break;
     }
 
     miSetPixmapDepths();
