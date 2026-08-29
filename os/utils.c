@@ -502,7 +502,10 @@ ProcessCommandLine(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "-dpi") == 0) {
             if (++i < argc)
-                monitorResolution = atoi(argv[i]);
+                if (strcmp(argv[i], "auto") == 0)
+                    autosetDPI = TRUE;
+                else
+                    monitorResolution = atoi(argv[i]);
             else
                 UseMsg();
         }
