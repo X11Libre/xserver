@@ -1,5 +1,15 @@
 # structure definition for reply structs
+# field order follows X11/Xproto.h; explicit pad fields reproduce the
+# reference wire layout exactly (auto-padding is only a fallback)
 reply-struct:
+    GenericReply:
+        payload:
+            data00: CARD32
+            data01: CARD32
+            data02: CARD32
+            data03: CARD32
+            data04: CARD32
+            data05: CARD32
     GetWindowAttributes:
         data-name: backingStore
         payload:
@@ -17,6 +27,7 @@ reply-struct:
             allEventMasks:      CARD32
             yourEventMask:      CARD32
             doNotPropagateMask: CARD16
+            pad:                CARD16
     GetGeometry:
         data-name: depth
         payload:
@@ -26,32 +37,78 @@ reply-struct:
             width:      CARD16
             height:     CARD16
             borderWith: CARD16
+            pad1:       CARD16
+            pad2:       CARD32
+            pad3:       CARD32
     QueryTree:
         payload:
             root:      WINDOW
             parent:    WINDOW
             nChildren: CARD16
+            pad2:      CARD16
+            pad3:      CARD32
+            pad4:      CARD32
+            pad5:      CARD32
     IntenAtom:
         payload:
-            atom:      ATOM
+            atom: ATOM
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
     GetAtomName:
         payload:
             nameLength: CARD16
+            pad2:       CARD16
+            pad3:       CARD32
+            pad4:       CARD32
+            pad5:       CARD32
+            pad6:       CARD32
+            pad7:       CARD32
     GetProperty:
         payload:
             propertyType: ATOM
             bytesAfter:   CARD32
             nItems:       CARD32
+            pad1:         CARD32
+            pad2:         CARD32
+            pad3:         CARD32
     ListProperties:
         payload:
-            nProperties:  CARD16
+            nProperties: CARD16
+            pad2:        CARD16
+            pad3:        CARD32
+            pad4:        CARD32
+            pad5:        CARD32
+            pad6:        CARD32
+            pad7:        CARD32
     GetSelectionOwner:
         payload:
             owner: WINDOW
+            pad2:  CARD32
+            pad3:  CARD32
+            pad4:  CARD32
+            pad5:  CARD32
+            pad6:  CARD32
     GrabPointer:
         data-name: status
+        payload:
+            pad1: CARD32
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
     GrabKeyboardReply:
         data-name: status
+        payload:
+            pad1: CARD32
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
     QueryPointer:
         data-name: sameScreen
         data-type: BOOL
@@ -63,9 +120,16 @@ reply-struct:
             winX:  INT16
             winY:  INT16
             mask:  CARD16
+            pad1:  CARD16
+            pad:   CARD32
     GetMotionEvents:
         payload:
             nEvents: CARD32
+            pad2:    CARD32
+            pad3:    CARD32
+            pad4:    CARD32
+            pad5:    CARD32
+            pad6:    CARD32
     TranslateCoords:
         data-name: sameScreen
         data-type: BOOL
@@ -73,10 +137,286 @@ reply-struct:
             child: WINDOW
             dstX:  INT16
             dstY:  INT16
+            pad2:  CARD32
+            pad3:  CARD32
+            pad4:  CARD32
+            pad5:  CARD32
     GetInputFocus:
         data-name: revertTo
         payload:
             focus: WINDOW
+            pad1:  CARD32
+            pad2:  CARD32
+            pad3:  CARD32
+            pad4:  CARD32
+            pad5:  CARD32
     QueryKeymap:
         payload:
             map: BYTE_ARRAY_32
+    QueryFont:
+        payload:
+            minBounds:      CHAR_INFO
+            walign1:        CARD32
+            maxBounds:      CHAR_INFO
+            walign2:        CARD32
+            minCharOrByte2: CARD16
+            maxCharOrByte2: CARD16
+            defaultChar:    CARD16
+            nFontProps:     CARD16
+            drawDirection:  CARD8
+            minByte1:       CARD8
+            maxByte1:       CARD8
+            allCharsExist:  BOOL
+            fontAscent:     INT16
+            fontDescent:    INT16
+            nCharInfos:     CARD32
+    QueryTextExtents:
+        data-name: drawDirection
+        payload:
+            fontAscent:      INT16
+            fontDescent:     INT16
+            overallAscent:   INT16
+            overallDescent:  INT16
+            overallWidth:    INT32
+            overallLeft:     INT32
+            overallRight:    INT32
+            pad:             CARD32
+    ListFonts:
+        payload:
+            nFonts: CARD16
+            pad2:   CARD16
+            pad3:   CARD32
+            pad4:   CARD32
+            pad5:   CARD32
+            pad6:   CARD32
+            pad7:   CARD32
+    ListFontsWithInfo:
+        data-name: nameLength
+        payload:
+            minBounds:      CHAR_INFO
+            walign1:        CARD32
+            maxBounds:      CHAR_INFO
+            walign2:        CARD32
+            minCharOrByte2: CARD16
+            maxCharOrByte2: CARD16
+            defaultChar:    CARD16
+            nFontProps:     CARD16
+            drawDirection:  CARD8
+            minByte1:       CARD8
+            maxByte1:       CARD8
+            allCharsExist:  BOOL
+            fontAscent:     INT16
+            fontDescent:    INT16
+            nReplies:       CARD32
+    GetFontPath:
+        payload:
+            nPaths: CARD16
+            pad2:   CARD16
+            pad3:   CARD32
+            pad4:   CARD32
+            pad5:   CARD32
+            pad6:   CARD32
+            pad7:   CARD32
+    GetImage:
+        data-name: depth
+        payload:
+            visual: VISUAL
+            pad3:   CARD32
+            pad4:   CARD32
+            pad5:   CARD32
+            pad6:   CARD32
+            pad7:   CARD32
+    ListInstalledColormaps:
+        payload:
+            nColormaps: CARD16
+            pad2:       CARD16
+            pad3:       CARD32
+            pad4:       CARD32
+            pad5:       CARD32
+            pad6:       CARD32
+            pad7:       CARD32
+    AllocColor:
+        payload:
+            red:   CARD16
+            green: CARD16
+            blue:  CARD16
+            pad2:  CARD16
+            pixel: CARD32
+            pad3:  CARD32
+            pad4:  CARD32
+            pad5:  CARD32
+    AllocNamedColor:
+        payload:
+            pixel:         CARD32
+            exactRed:      CARD16
+            exactGreen:    CARD16
+            exactBlue:     CARD16
+            screenRed:     CARD16
+            screenGreen:   CARD16
+            screenBlue:    CARD16
+            pad2:          CARD32
+            pad3:          CARD32
+    AllocColorCells:
+        payload:
+            nPixels: CARD16
+            nMasks:  CARD16
+            pad3:    CARD32
+            pad4:    CARD32
+            pad5:    CARD32
+            pad6:    CARD32
+            pad7:    CARD32
+    AllocColorPlanes:
+        payload:
+            nPixels:    CARD16
+            pad2:       CARD16
+            redMask:    CARD32
+            greenMask:  CARD32
+            blueMask:   CARD32
+            pad3:       CARD32
+            pad4:       CARD32
+    QueryColors:
+        payload:
+            nColors: CARD16
+            pad2:    CARD16
+            pad3:    CARD32
+            pad4:    CARD32
+            pad5:    CARD32
+            pad6:    CARD32
+            pad7:    CARD32
+    LookupColor:
+        payload:
+            exactRed:    CARD16
+            exactGreen:  CARD16
+            exactBlue:   CARD16
+            screenRed:   CARD16
+            screenGreen: CARD16
+            screenBlue:  CARD16
+            pad3:        CARD32
+            pad4:        CARD32
+            pad5:        CARD32
+    QueryBestSize:
+        payload:
+            width:  CARD16
+            height: CARD16
+            pad3:   CARD32
+            pad4:   CARD32
+            pad5:   CARD32
+            pad6:   CARD32
+            pad7:   CARD32
+    QueryExtension:
+        payload:
+            present:      BOOL
+            major_opcode: CARD8
+            first_event:  CARD8
+            first_error:  CARD8
+            pad3:         CARD32
+            pad4:         CARD32
+            pad5:         CARD32
+            pad6:         CARD32
+            pad7:         CARD32
+    ListExtensions:
+        data-name: nExtensions
+        payload:
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
+            pad7: CARD32
+    SetMapping:
+        data-name: success
+        payload:
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
+            pad7: CARD32
+    SetPointerMapping:
+        data-name: success
+        payload:
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
+            pad7: CARD32
+    SetModifierMapping:
+        data-name: success
+        payload:
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
+            pad7: CARD32
+    GetPointerMapping:
+        data-name: nElts
+        payload:
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
+            pad7: CARD32
+    GetKeyboardMapping:
+        data-name: keySymsPerKeyCode
+        payload:
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
+            pad7: CARD32
+    GetModifierMapping:
+        data-name: numKeyPerModifier
+        payload:
+            pad1: CARD32
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
+    GetKeyboardControl:
+        data-name: globalAutoRepeat
+        data-type: BOOL
+        payload:
+            ledMask:        CARD32
+            keyClickPercent: CARD8
+            bellPercent:    CARD8
+            bellPitch:      CARD16
+            bellDuration:   CARD16
+            pad:            CARD16
+            map:            BYTE_ARRAY_32
+    GetPointerControl:
+        payload:
+            accelNumerator:   CARD16
+            accelDenominator: CARD16
+            threshold:        CARD16
+            pad2:             CARD16
+            pad3:             CARD32
+            pad4:             CARD32
+            pad5:             CARD32
+            pad6:             CARD32
+    GetScreenSaver:
+        payload:
+            timeout:         CARD16
+            interval:        CARD16
+            preferBlanking:  BOOL
+            allowExposures:  BOOL
+            pad2:            CARD16
+            pad3:            CARD32
+            pad4:            CARD32
+            pad5:            CARD32
+            pad6:            CARD32
+    ListHosts:
+        data-name: enabled
+        data-type: BOOL
+        payload:
+            nHosts: CARD16
+            pad1:   CARD16
+            pad3:   CARD32
+            pad4:   CARD32
+            pad5:   CARD32
+            pad6:   CARD32
+            pad7:   CARD32

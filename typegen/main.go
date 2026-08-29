@@ -10,6 +10,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// compoundMember is one field of an embedded struct type (e.g. xCharInfo).
+type compoundMember struct {
+	name  string
+	ctype string
+	swap  string // swap macro for this member, "" if none
+}
+
 // typeInfo describes an X11 protocol scalar type used in reply structs.
 type typeInfo struct {
 	ctype string // emitted C type name (X11_*) as used in struct members
@@ -18,6 +25,9 @@ type typeInfo struct {
 	size  int    // size in bytes
 	align int    // wire/C alignment requirement
 	swap  string // X_REPLY_FIELD_* macro name for byteswap, "" if none
+	// compound non-nil marks an embedded struct type; its members' swap
+	// entries are expanded by SWAP macros using field.member paths
+	compound []compoundMember
 }
 
 // typeTable maps YAML type names onto their X11_* C representation.
@@ -36,15 +46,27 @@ var typeTable = map[string]typeInfo{
 	"ATOM":          {ctype: "X11_ATOM", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
 	"WINDOW":        {ctype: "X11_WINDOW", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
 	"BYTE_ARRAY_32": {ctype: "X11_BYTE_ARRAY_32", base: "CARD8", arr: "[32]", size: 32, align: 1},
+	"CHAR_INFO": {
+		ctype: "X11_CharInfo", size: 12, align: 2,
+		compound: []compoundMember{
+			{name: "leftSideBearing", ctype: "INT16", swap: "X_REPLY_FIELD_CARD16"},
+			{name: "rightSideBearing", ctype: "INT16", swap: "X_REPLY_FIELD_CARD16"},
+			{name: "characterWidth", ctype: "INT16", swap: "X_REPLY_FIELD_CARD16"},
+			{name: "ascent", ctype: "INT16", swap: "X_REPLY_FIELD_CARD16"},
+			{name: "descent", ctype: "INT16", swap: "X_REPLY_FIELD_CARD16"},
+			{name: "attributes", ctype: "CARD16", swap: "X_REPLY_FIELD_CARD16"},
+		},
+	},
 }
 
 // cField is a single emitted C struct member.
 type cField struct {
-	name  string
-	ctype string
-	arr   int // array length, >0 for byte-array pads
-	size  int
-	swap  string // swap macro for this field (payload multi-byte fields only)
+	name     string
+	ctype    string
+	arr      int // array length, >0 for byte-array pads
+	size     int
+	swap     string           // swap macro for this field (payload multi-byte fields only)
+	compound []compoundMember // non-nil for embedded struct fields (e.g. xCharInfo)
 }
 
 // replySpec is one parsed reply-struct entry.
@@ -257,7 +279,7 @@ func layoutFields(s *replySpec) ([]cField, int) {
 			addPad(a - offset)
 		}
 		swap := ti.swap
-		addField(cField{name: fname, ctype: ti.ctype, size: ti.size, swap: swap})
+		addField(cField{name: fname, ctype: ti.ctype, size: ti.size, swap: swap, compound: ti.compound})
 	}
 
 	// tail padding: at least 32 bytes, always a multiple of 4
@@ -316,7 +338,16 @@ func renderHeader(specs []replySpec, outPath string) string {
 	sort.Strings(names)
 	for _, t := range names {
 		ti := typeTable[t]
-		fmt.Fprintf(&b, "typedef %s %s%s;\n", ti.base, ti.ctype, ti.arr)
+		if ti.compound != nil {
+			// embedded struct type (e.g. X11_CharInfo)
+			fmt.Fprintf(&b, "typedef struct {\n")
+			for _, m := range ti.compound {
+				fmt.Fprintf(&b, "    %s %s;\n", m.ctype, m.name)
+			}
+			fmt.Fprintf(&b, "} %s;\n", ti.ctype)
+		} else {
+			fmt.Fprintf(&b, "typedef %s %s%s;\n", ti.base, ti.ctype, ti.arr)
+		}
 	}
 	fmt.Fprintf(&b, "\n")
 
@@ -338,7 +369,14 @@ func renderHeader(specs []replySpec, outPath string) string {
 		// payload multi-byte fields are swapped here (see dbe.c usage)
 		var swaps []string
 		for _, f := range fields {
-			if f.swap != "" {
+			if f.compound != nil {
+				// embedded struct: swap each multi-byte member via field.member
+				for _, m := range f.compound {
+					if m.swap != "" {
+						swaps = append(swaps, fmt.Sprintf("        %s(%s.%s);", m.swap, f.name, m.name))
+					}
+				}
+			} else if f.swap != "" {
 				swaps = append(swaps, fmt.Sprintf("        %s(%s);", f.swap, f.name))
 			}
 		}

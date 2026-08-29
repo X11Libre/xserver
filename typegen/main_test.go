@@ -8,21 +8,48 @@ import (
 // expectedSizes maps reply struct names onto their X11 protocol size
 // (verified against sz_* macros in X11/Xproto.h).
 var expectedSizes = map[string]int{
-	"GetWindowAttributes": 44,
-	"GetGeometry":         32,
-	"QueryTree":           32,
-	"IntenAtom":           32,
-	"GetAtomName":         32,
-	"GetProperty":         32,
-	"ListProperties":      32,
-	"GetSelectionOwner":   32,
-	"GrabPointer":         32,
-	"GrabKeyboardReply":   32,
-	"QueryPointer":        32,
-	"GetMotionEvents":     32,
-	"TranslateCoords":     32,
-	"GetInputFocus":       32,
-	"QueryKeymap":         40,
+	"GenericReply":           32,
+	"GetWindowAttributes":    44,
+	"GetGeometry":            32,
+	"QueryTree":              32,
+	"IntenAtom":              32,
+	"GetAtomName":            32,
+	"GetProperty":            32,
+	"ListProperties":         32,
+	"GetSelectionOwner":      32,
+	"GrabPointer":            32,
+	"GrabKeyboardReply":      32,
+	"QueryPointer":           32,
+	"GetMotionEvents":        32,
+	"TranslateCoords":        32,
+	"GetInputFocus":          32,
+	"QueryKeymap":            40,
+	"QueryFont":              60,
+	"QueryTextExtents":       32,
+	"ListFonts":              32,
+	"ListFontsWithInfo":      60,
+	"GetFontPath":            32,
+	"GetImage":               32,
+	"ListInstalledColormaps": 32,
+	"AllocColor":             32,
+	"AllocNamedColor":        32,
+	"AllocColorCells":        32,
+	"AllocColorPlanes":       32,
+	"QueryColors":            32,
+	"LookupColor":            32,
+	"QueryBestSize":          32,
+	"QueryExtension":         32,
+	"ListExtensions":         32,
+	"SetMapping":             32,
+	"SetPointerMapping":      32,
+	"SetModifierMapping":     32,
+	"GetPointerMapping":      32,
+	"GetKeyboardMapping":     32,
+	"GetModifierMapping":     32,
+	"GetKeyboardControl":     52,
+	"GetPointerControl":      32,
+	"GetScreenSaver":         32,
+	"ListHosts":              32,
 }
 
 func TestLayoutSizes(t *testing.T) {
@@ -87,9 +114,19 @@ func TestRender(t *testing.T) {
 			t.Errorf("missing header element %q", want)
 		}
 	}
-	// empty-payload structs still reach 32 bytes via trailing pad array
-	if !strings.Contains(out, "X11_CARD8 pad1[24];") {
-		t.Errorf("GrabPointer trailing pad[24] missing")
+	// embedded compound type (xCharInfo) emitted once + used in the font replies
+	if !strings.Contains(out, "typedef struct {\n    INT16 leftSideBearing;") {
+		t.Errorf("X11_CharInfo compound typedef missing")
+	}
+	if !strings.Contains(out, "X11_CharInfo minBounds;") {
+		t.Errorf("QueryFont minBounds member missing")
+	}
+	if !strings.Contains(out, "X_REPLY_FIELD_CARD16(minBounds.characterWidth);") {
+		t.Errorf("compound member swap expansion missing")
+	}
+	// GetKeyboardControl: explicit CARD16 pad keeps the map at wire offset 20
+	if !strings.Contains(out, "X11_CARD16 pad;\n    X11_BYTE_ARRAY_32 map;") {
+		t.Errorf("GetKeyboardControl mid-pad + map layout wrong")
 	}
 	// byte-array typedef must not be aliased to itself
 	if strings.Contains(out, "typedef CARD8 X11_BYTE_ARRAY_32 X11_BYTE_ARRAY_32") {
