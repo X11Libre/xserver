@@ -222,9 +222,13 @@ fbBlt(FbBits * srcLine,
             leftShift = srcX - dstX;
             rightShift = FB_UNIT - leftShift;
         }
-        else {
+        else if (srcX < dstX) {
             rightShift = dstX - srcX;
             leftShift = FB_UNIT - rightShift;
+        }
+        else {
+            leftShift = 0;
+            rightShift = 0;
         }
         while (height--) {
             src = srcLine;
