@@ -15,7 +15,6 @@ apk add --no-cache \
 	build-base \
 	cairo-dev \
 	ca-certificates \
-	dbus-dev \
 	eudev-dev \
 	expat-dev \
 	font-util-dev \

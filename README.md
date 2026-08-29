@@ -13,7 +13,7 @@ The XLibre Xserver is the community-managed display server for the [X Window Sys
 * [TearFree modesetting](https://github.com/X11Libre/xserver/commit/0dacee6c5149b63a563e9bed63502da2e9f1ac1f) by default and optionally [atomic modesetting](https://github.com/X11Libre/xserver/commit/461411c798c263f70daa96f7136614dfefda6adc)
 * Support for the Nvidia drivers 340, 390, 470, 570, and newer
 * [Xnamespace extension](https://github.com/X11Libre/xserver/blob/master/doc/Xnamespace.md) for separating X clients
-* Support for seat management via [seatd](https://sr.ht/~kennylevinsen/seatd) besides [systemd-logind](https://www.freedesktop.org/software/systemd/man/latest/systemd-logind.service.html)
+* Support for seat management via [libseat / seatd](https://sr.ht/~kennylevinsen/seatd)
 * [Xfbdev](https://github.com/X11Libre/xserver/tree/master/hw/kdrive), the generic framebuffer Xserver for Linux
 * CI builds for several BSDs, Linux, MacOS, and Microsoft Windows
 * Active community, cleanups, fixes, and development based on merit

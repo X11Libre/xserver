@@ -845,7 +845,7 @@ jobs:
             # deprecated") that -Werror (-Werror=cpp) turns fatal in every TU using
             # libbsd. That's a musl/libbsd toolchain quirk, not an xserver warning, so
             # it can't be fixed in-tree (unlike solaris/gentoo/openbsd, now tightened).
-            MESON_ARGS: -Dprefix=/usr -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false -Dwerror=false
+            MESON_ARGS: -Dprefix=/usr -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dwerror=false
         steps:
             # actions/checkout is a JS action; GitHub's bundled Node is
             # glibc-linked, so musl-based Alpine needs gcompat to run it.
@@ -900,7 +900,7 @@ jobs:
         container:
             image: ghcr.io/x11libre/xserver-gentoo-deps:${{ needs.gentoo-deps-image.outputs.tag }}
         env:
-            MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false
+            MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -920,7 +920,7 @@ jobs:
             # an entitlement on public runners.
             image: almalinux:${{ matrix.rhelver }}
         env:
-            MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false -Dsystemd_logind=false
+            MESON_ARGS: -Dprefix=/usr -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxephyr=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6

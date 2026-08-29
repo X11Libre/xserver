@@ -40,9 +40,6 @@ if host_machine.system() == 'linux'
     else
         srcs_xorg_os_support += 'shared/agp_noop.c'
     endif
-    if build_systemd_logind
-        srcs_xorg_os_support += 'linux/systemd-logind.c'
-    endif
 
 
     # this is ugly because the code is also
@@ -169,7 +166,6 @@ xorg_os_support = static_library('xorg_os_support',
     include_directories: [inc, xorg_inc],
     dependencies: [
         common_dep,
-        dbus_dep,
         libdrm_dep,
         os_dep,
     ],

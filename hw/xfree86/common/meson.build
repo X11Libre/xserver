@@ -68,7 +68,6 @@ xorg_common = static_library('xorg_common',
     include_directories: [inc, xorg_inc, top_dir_inc],
     dependencies: [
         common_dep,
-        dbus_dep,
         pciaccess_dep,
         libdrm_dep,
     ],

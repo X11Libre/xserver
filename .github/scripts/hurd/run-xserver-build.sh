@@ -84,7 +84,7 @@ meson setup _build \
     -Dxvfb=true -Dxnest=true -Dxorg=true -Dxephyr=true \
     -Dglx=true \
     -Dxfbdev=false -Dglamor=false -Ddri1=false -Ddri2=false -Ddri3=false \
-    -Dudev=false -Dsystemd_logind=false
+    -Dudev=false
 
 echo "==> meson compile (Xvfb + Xnest + Xorg + Xephyr + glx)"
 meson compile -C _build
