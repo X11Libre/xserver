@@ -70,6 +70,7 @@ class XServerProcess:
         self._valgrind_xml_file = None
         self._asan_log_path = None
         self._stderr_file = None
+        self._stderr_path = None
         self._weston_process = None
 
     def _find_server(self):
@@ -156,12 +157,13 @@ class XServerProcess:
 
         cmd = self._build_command(write_fd)
 
-        self._stderr_file = tempfile.NamedTemporaryFile(
+        # Kept open for the server subprocess lifetime; closed in stop().
+        stderr_fd, stderr_path = tempfile.mkstemp(
             prefix=f"xserver-{self.server_type}-stderr-",
             suffix=".log",
-            delete=False,
-            mode="w",
         )
+        self._stderr_file = open(stderr_fd, "w")  # noqa: SIM115
+        self._stderr_path = Path(stderr_path)
 
         if self.server_type == "xwayland":
             self._start_wayland_compositor()
@@ -323,10 +325,11 @@ class XServerProcess:
         if not self.valgrind:
             return server_args
 
-        self._valgrind_xml_file = tempfile.NamedTemporaryFile(
-            prefix=f"xserver-{self.server_type}-valgrind-", suffix=".xml", delete=False
+        xml_fd, xml_path = tempfile.mkstemp(
+            prefix=f"xserver-{self.server_type}-valgrind-", suffix=".xml"
         )
-        self._valgrind_xml_file.close()
+        os.close(xml_fd)
+        self._valgrind_xml_file = Path(xml_path)
 
         valgrind_cmd = [
             "valgrind",
@@ -337,7 +340,7 @@ class XServerProcess:
             "--gen-suppressions=all",
             f"--error-exitcode={self.VALGRIND_ERROR_EXIT}",
             "--xml=yes",
-            f"--xml-file={self._valgrind_xml_file.name}",
+            f"--xml-file={self._valgrind_xml_file}",
         ]
 
         if self.valgrind_suppressions:
@@ -352,13 +355,12 @@ class XServerProcess:
         detect leaks (too noisy for these tests).  Any existing
         ASAN_OPTIONS from the environment are preserved.
         """
-        asan_log_file = tempfile.NamedTemporaryFile(
+        asan_fd, asan_path = tempfile.mkstemp(
             prefix=f"xserver-{self.server_type}-asan-",
             suffix=".log",
-            delete=False,
         )
-        self._asan_log_path = Path(asan_log_file.name)
-        asan_log_file.close()
+        os.close(asan_fd)
+        self._asan_log_path = Path(asan_path)
 
         asan_opts = {
             "log_path": str(self._asan_log_path),
@@ -433,7 +435,7 @@ class XServerProcess:
                 self._weston_process.wait()
 
         if self.valgrind and self._valgrind_xml_file:
-            errors = ValgrindError.from_xml(Path(self._valgrind_xml_file.name))
+            errors = ValgrindError.from_xml(self._valgrind_xml_file)
 
         if self._stderr_file:
             self._stderr_file.close()
@@ -445,7 +447,7 @@ class XServerProcess:
         if self._stderr_file:
             self._stderr_file.flush()
             try:
-                return Path(self._stderr_file.name).read_text()
+                return self._stderr_path.read_text()
             except OSError:
                 pass
         return ""
@@ -465,7 +467,7 @@ class XServerProcess:
         """Parse and assert no valgrind errors occurred."""
         if self._valgrind_xml_file is None:
             return []
-        errors = ValgrindError.from_xml(Path(self._valgrind_xml_file.name))
+        errors = ValgrindError.from_xml(self._valgrind_xml_file)
         if errors:
             msg = f"Valgrind found {len(errors)} error(s):\n\n"
             msg += "\n\n".join(str(e) for e in errors)
