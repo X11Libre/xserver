@@ -113,6 +113,9 @@ xnestSaveScreen(ScreenPtr pScreen, int what)
             xcb_unmap_window(xnestUpstreamInfo.conn, screenPriv->screenSaverWindow);
             xnestSetInstalledColormapWindows(pScreen);
             break;
+
+        default:
+            break;
     }
     return TRUE;
 }
