@@ -1,0 +1,141 @@
+# SHAPE protocol extension types (X11/extensions/shapeproto.h).
+# Minor opcodes are relative to the extension's runtime base; the
+# opcode-prefix folds into the generated X11_OP_* symbol names.
+opcode-prefix: SHAPE
+opcodes:
+    QUERY_VERSION: 0
+    RECTANGLES: 1
+    MASK: 2
+    COMBINE: 3
+    OFFSET: 4
+    QUERY_EXTENTS: 5
+    SELECT_INPUT: 6
+    INPUT_SELECTED: 7
+    GET_RECTANGLES: 8
+
+reply-struct:
+    ShapeQueryVersion:
+        payload:
+            majorVersion: CARD16
+            minorVersion: CARD16
+            pad0: CARD32
+            pad1: CARD32
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+    ShapeQueryExtents:
+        data-name: unused
+        payload:
+            boundingShaped:   BYTE
+            clipShaped:       BYTE
+            unused1:          CARD16
+            xBoundingShape:   INT16
+            yBoundingShape:   INT16
+            widthBoundingShape: CARD16
+            heightBoundingShape: CARD16
+            xClipShape:       INT16
+            yClipShape:       INT16
+            widthClipShape:   CARD16
+            heightClipShape:  CARD16
+            pad1:             CARD32
+    ShapeInputSelected:
+        data-name: enabled
+        payload:
+            pad1: CARD32
+            pad2: CARD32
+            pad3: CARD32
+            pad4: CARD32
+            pad5: CARD32
+            pad6: CARD32
+    ShapeGetRectangles:
+        data-name: ordering
+        payload:
+            nrects: CARD32
+            pad1:   CARD32
+            pad2:   CARD32
+            pad3:   CARD32
+            pad4:   CARD32
+            pad5:   CARD32
+
+request-struct:
+    ShapeQueryVersion:
+        data-name: shapeReqType
+        payload: {}
+    ShapeRectangles:
+        data-name: shapeReqType
+        payload:
+            op:       BYTE
+            destKind: BYTE
+            ordering: BYTE
+            pad0:     BYTE
+            dest:     WINDOW
+            xOff:     INT16
+            yOff:     INT16
+    ShapeMask:
+        data-name: shapeReqType
+        payload:
+            op:       BYTE
+            destKind: BYTE
+            junk:     CARD16
+            dest:     WINDOW
+            xOff:     INT16
+            yOff:     INT16
+            src:      CARD32
+    ShapeCombine:
+        data-name: shapeReqType
+        payload:
+            op:       BYTE
+            destKind: BYTE
+            srcKind:  BYTE
+            junk:     BYTE
+            dest:     WINDOW
+            xOff:     INT16
+            yOff:     INT16
+            src:      WINDOW
+    ShapeOffset:
+        data-name: shapeReqType
+        payload:
+            destKind: BYTE
+            junk1:    BYTE
+            junk2:    CARD16
+            dest:     WINDOW
+            xOff:     INT16
+            yOff:     INT16
+    ShapeQueryExtents:
+        data-name: shapeReqType
+        payload:
+            window: WINDOW
+    ShapeSelectInput:
+        data-name: shapeReqType
+        payload:
+            window: WINDOW
+            enable: BYTE
+            pad1:   BYTE
+            pad2:   CARD16
+    ShapeInputSelected:
+        data-name: shapeReqType
+        payload:
+            window: WINDOW
+    ShapeGetRectangles:
+        data-name: shapeReqType
+        payload:
+            window: WINDOW
+            kind:   BYTE
+            junk1:  BYTE
+            junk2:  CARD16
+
+event:
+    ShapeNotify:
+        data-name: kind
+        payload:
+            window: WINDOW
+            x:      INT16
+            y:      INT16
+            width:  CARD16
+            height: CARD16
+            time:   TIME
+            shaped: BYTE
+            pad0:   BYTE
+            pad1:   CARD16
+            pad2:   CARD32
+            pad3:   CARD32

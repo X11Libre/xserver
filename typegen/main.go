@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -17,7 +18,7 @@ type compoundMember struct {
 	swap  string // swap macro for this member, "" if none
 }
 
-// typeInfo describes an X11 protocol scalar type used in reply structs.
+// typeInfo describes an X11 protocol scalar type used in generated structs.
 type typeInfo struct {
 	ctype string // emitted C type name (X11_*) as used in struct members
 	base  string // underlying C type for the typedef (e.g. CARD32)
@@ -30,14 +31,25 @@ type typeInfo struct {
 	compound []compoundMember
 }
 
+// Supported struct kinds; each has its own header layout, tail-padding and
+// C naming scheme (see structName / layoutFields).
+const (
+	kindReply   = "reply"
+	kindRequest = "request"
+	kindEvent   = "event"
+)
+
 // typeTable maps YAML type names onto their X11_* C representation.
-// Window/Atom/VisualID/Colormap are all CARD32 XIDs in the wire protocol.
+// Window/Atom/VisualID/Colormap/... are all CARD32 XIDs on the wire.
 var typeTable = map[string]typeInfo{
 	"BYTE":          {ctype: "X11_BYTE", base: "CARD8", size: 1, align: 1},
+	"INT8":          {ctype: "X11_INT8", base: "INT8", size: 1, align: 1},
 	"CARD8":         {ctype: "X11_CARD8", base: "CARD8", size: 1, align: 1},
+	"KEYCODE":       {ctype: "X11_KEYCODE", base: "CARD8", size: 1, align: 1},
 	"BOOL":          {ctype: "X11_BOOL", base: "CARD8", size: 1, align: 1},
 	"CARD16":        {ctype: "X11_CARD16", base: "CARD16", size: 2, align: 2, swap: "X_REPLY_FIELD_CARD16"},
 	"INT16":         {ctype: "X11_INT16", base: "INT16", size: 2, align: 2, swap: "X_REPLY_FIELD_CARD16"},
+	"KEYBUTMASK":    {ctype: "X11_KEYBUTMASK", base: "CARD16", size: 2, align: 2, swap: "X_REPLY_FIELD_CARD16"},
 	"CARD32":        {ctype: "X11_CARD32", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
 	"INT32":         {ctype: "X11_INT32", base: "INT32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
 	"CARD64":        {ctype: "X11_CARD64", base: "CARD64", size: 8, align: 8, swap: "X_REPLY_FIELD_CARD64"},
@@ -45,6 +57,13 @@ var typeTable = map[string]typeInfo{
 	"COLORMAP":      {ctype: "X11_COLORMAP", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
 	"ATOM":          {ctype: "X11_ATOM", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
 	"WINDOW":        {ctype: "X11_WINDOW", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
+	"TIME":          {ctype: "X11_TIME", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
+	"FONT":          {ctype: "X11_FONT", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
+	"CURSOR":        {ctype: "X11_CURSOR", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
+	"GCONTEXT":      {ctype: "X11_GCONTEXT", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
+	"PIXMAP":        {ctype: "X11_PIXMAP", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
+	"DRAWABLE":      {ctype: "X11_DRAWABLE", base: "CARD32", size: 4, align: 4, swap: "X_REPLY_FIELD_CARD32"},
+	"BYTE_ARRAY_31": {ctype: "X11_BYTE_ARRAY_31", base: "CARD8", arr: "[31]", size: 31, align: 1},
 	"BYTE_ARRAY_32": {ctype: "X11_BYTE_ARRAY_32", base: "CARD8", arr: "[32]", size: 32, align: 1},
 	"CHAR_INFO": {
 		ctype: "X11_CharInfo", size: 12, align: 2,
@@ -69,12 +88,45 @@ type cField struct {
 	compound []compoundMember // non-nil for embedded struct fields (e.g. xCharInfo)
 }
 
-// replySpec is one parsed reply-struct entry.
-type replySpec struct {
+// structSpec is one parsed YAML struct definition (reply, request or event).
+type structSpec struct {
+	kind     string
 	name     string
 	dataName string
 	dataType string
+	noHeader bool
 	payload  [][2]string // ordered field name / type pairs from YAML
+}
+
+// opcode is one parsed YAML opcode entry. name already carries any
+// per-file opcode-prefix, value is the protocol opcode number.
+type opcode struct {
+	name  string
+	value int
+}
+
+// structName returns the emitted C typedef name for a struct.
+func structName(s *structSpec) string {
+	switch s.kind {
+	case kindRequest:
+		return "X11_Request_" + s.name
+	case kindEvent:
+		return "X11_Event_" + s.name
+	default:
+		return "X11_Reply_" + s.name
+	}
+}
+
+// swapMacro returns the emitted C byteswap macro name for a struct.
+func swapMacro(s *structSpec) string {
+	switch s.kind {
+	case kindRequest:
+		return "X11_REQUEST_" + s.name + "_SWAP()"
+	case kindEvent:
+		return "X11_EVENT_" + s.name + "_SWAP()"
+	default:
+		return "X11_REPLY_" + s.name + "_SWAP()"
+	}
 }
 
 func main() {
@@ -94,17 +146,19 @@ func main() {
 		}
 	}
 
-	var specs []replySpec
+	var specs []structSpec
+	var ops []opcode
 	for _, in := range inputs {
-		s, err := parseFile(in)
+		ss, oo, err := parseFile(in)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: %v\n", in, err)
 			os.Exit(1)
 		}
-		specs = append(specs, s...)
+		specs = append(specs, ss...)
+		ops = append(ops, oo...)
 	}
 
-	out := renderHeader(specs, outPath)
+	out := renderHeader(specs, ops, outPath)
 	if outPath != "" {
 		if err := os.WriteFile(outPath, []byte(out), 0o644); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -115,52 +169,75 @@ func main() {
 	}
 }
 
-// parseFile parses one YAML file into reply specs (preserving order).
-func parseFile(path string) ([]replySpec, error) {
+// parseFile parses one YAML file into struct specs (preserving order) and
+// opcode entries.
+func parseFile(path string) ([]structSpec, []opcode, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer f.Close()
 
 	var doc yaml.Node
 	if err := yaml.NewDecoder(f).Decode(&doc); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	root := doc.Content
 	if len(root) == 0 {
-		return nil, fmt.Errorf("empty document")
+		return nil, nil, fmt.Errorf("empty document")
 	}
 	rootMap := root[0]
 	if rootMap.Kind != yaml.MappingNode {
-		return nil, fmt.Errorf("document root is not a mapping")
+		return nil, nil, fmt.Errorf("document root is not a mapping")
 	}
 
-	var specs []replySpec
+	var specs []structSpec
+	var ops []opcode
+	prefix := ""
 	pairs := keyValues(rootMap)
 	for _, kv := range pairs {
-		switch kv[0].Value { // accept both the spec default and the singular form actually used
+		switch kv[0].Value { // accept both the spec default and the singular form
 		case "reply-structs", "reply-struct":
-			sub, err := parseStructList(kv[1])
+			sub, err := parseStructList(kindReply, kv[1])
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			specs = append(specs, sub...)
+		case "request-structs", "request-struct":
+			sub, err := parseStructList(kindRequest, kv[1])
+			if err != nil {
+				return nil, nil, err
+			}
+			specs = append(specs, sub...)
+		case "events", "event":
+			sub, err := parseStructList(kindEvent, kv[1])
+			if err != nil {
+				return nil, nil, err
+			}
+			specs = append(specs, sub...)
+		case "opcode-prefix":
+			prefix = kv[1].Value
+		case "opcodes", "opcode":
+			oo, err := parseOpcodes(prefix, kv[1])
+			if err != nil {
+				return nil, nil, err
+			}
+			ops = append(ops, oo...)
 		}
 	}
-	return specs, nil
+	return specs, ops, nil
 }
 
-// parseStructList parses the value of `reply-struct(s)`: a mapping of struct
+// parseStructList parses the value of a struct section: a mapping of struct
 // name -> definition.
-func parseStructList(n *yaml.Node) ([]replySpec, error) {
+func parseStructList(kind string, n *yaml.Node) ([]structSpec, error) {
 	if n.Kind != yaml.MappingNode {
-		return nil, fmt.Errorf("reply-struct section is not a mapping")
+		return nil, fmt.Errorf("struct section is not a mapping")
 	}
-	var out []replySpec
+	var out []structSpec
 	for _, kv := range keyValues(n) {
-		spec, err := parseStruct(kv[0].Value, kv[1])
+		spec, err := parseStruct(kind, kv[0].Value, kv[1])
 		if err != nil {
 			return nil, err
 		}
@@ -169,17 +246,19 @@ func parseStructList(n *yaml.Node) ([]replySpec, error) {
 	return out, nil
 }
 
-func parseStruct(name string, n *yaml.Node) (replySpec, error) {
+func parseStruct(kind, name string, n *yaml.Node) (structSpec, error) {
 	if n.Kind != yaml.MappingNode {
-		return replySpec{}, fmt.Errorf("struct %q: not a mapping", name)
+		return structSpec{}, fmt.Errorf("struct %q: not a mapping", name)
 	}
-	spec := replySpec{name: name, dataType: "CARD8"}
+	spec := structSpec{kind: kind, name: name, dataType: "CARD8"}
 	for _, kv := range keyValues(n) {
 		switch kv[0].Value {
 		case "data-name":
 			spec.dataName = kv[1].Value
 		case "data-type":
 			spec.dataType = kv[1].Value
+		case "header":
+			spec.noHeader = kv[1].Value == "false" || kv[1].Value == "no" || kv[1].Value == "0"
 		case "payload":
 			payload, err := parsePayload(kv[1])
 			if err != nil {
@@ -206,6 +285,25 @@ func parsePayload(n *yaml.Node) ([][2]string, error) {
 	return out, nil
 }
 
+func parseOpcodes(prefix string, n *yaml.Node) ([]opcode, error) {
+	if n.Kind != yaml.MappingNode {
+		return nil, fmt.Errorf("opcode section is not a mapping")
+	}
+	var out []opcode
+	for _, kv := range keyValues(n) {
+		v, err := strconv.Atoi(kv[1].Value)
+		if err != nil {
+			return nil, fmt.Errorf("opcode %q: invalid value %q", kv[0].Value, kv[1].Value)
+		}
+		name := kv[0].Value
+		if prefix != "" {
+			name = prefix + "_" + name
+		}
+		out = append(out, opcode{name: name, value: v})
+	}
+	return out, nil
+}
+
 // keyValues returns ordered key/value pairs of a mapping node.
 func keyValues(n *yaml.Node) [][2]*yaml.Node {
 	var out [][2]*yaml.Node
@@ -227,10 +325,21 @@ func alignTo(offset, a int) int {
 	return offset + (a - rem)
 }
 
-// layoutFields computes the full ordered C field list for a reply struct,
-// including automatically added header fields and X11 padding.
-// Returns total struct size.
-func layoutFields(s *replySpec) ([]cField, int) {
+// defaultDataName returns the header data-byte field name per kind.
+func defaultDataName(kind string) string {
+	switch kind {
+	case kindRequest:
+		return "data"
+	case kindEvent:
+		return "detail"
+	default:
+		return "data1"
+	}
+}
+
+// layoutFields computes the full ordered C field list for a struct,
+// including the protocol header and X11 padding. Returns total struct size.
+func layoutFields(s *structSpec) ([]cField, int) {
 	var fields []cField
 	offset := 0
 
@@ -239,24 +348,49 @@ func layoutFields(s *replySpec) ([]cField, int) {
 		offset += f.size
 	}
 
-	// standard protocol header
-	addField(cField{name: "type", ctype: "X11_BYTE", size: 1})
+	used := map[string]bool{}
+	if !s.noHeader {
+		// protocol header. The data byte is handled by the generic write
+		// helpers, never by the SWAP macro.
+		//
+		// The request byte 0 is named reqType (as in libX11's xChangePropertyReq
+		// and friends) because the wire protocol re-uses "type" for the ATOM
+		// member of ChangeProperty. Events/replies keep "type".
+		byte0 := "type"
+		if s.kind == kindRequest {
+			byte0 = "reqType"
+		}
+		addField(cField{name: byte0, ctype: "X11_BYTE", size: 1})
+		used[byte0] = true
 
-	dname := s.dataName
-	if dname == "" {
-		dname = "data1"
+		dname := s.dataName
+		if dname == "" {
+			dname = defaultDataName(s.kind)
+		}
+		dti, ok := typeTable[s.dataType]
+		if !ok {
+			dti = typeTable["CARD8"]
+		}
+		addField(cField{name: dname, ctype: dti.ctype, size: dti.size})
+		used[dname] = true
+
+		switch s.kind {
+		case kindRequest:
+			// request header: [opcode, data, length] — no sequence number
+			addField(cField{name: "length", ctype: "X11_CARD16", size: 2})
+			used["length"] = true
+		case kindEvent:
+			// event header: [type, detail, sequenceNumber] — no length
+			addField(cField{name: "sequenceNumber", ctype: "X11_CARD16", size: 2})
+			used["sequenceNumber"] = true
+		default: // reply
+			addField(cField{name: "sequenceNumber", ctype: "X11_CARD16", size: 2})
+			addField(cField{name: "length", ctype: "X11_CARD32", size: 4})
+			used["sequenceNumber"] = true
+			used["length"] = true
+		}
 	}
-	dti, ok := typeTable[s.dataType]
-	if !ok {
-		dti = typeTable["CARD8"]
-	}
-	// header data byte is handled by __write_reply_hdr_* → never in swap macro
-	addField(cField{name: dname, ctype: dti.ctype, size: dti.size})
 
-	addField(cField{name: "sequenceNumber", ctype: "X11_CARD16", size: 2})
-	addField(cField{name: "length", ctype: "X11_CARD32", size: 4})
-
-	used := map[string]bool{"type": true, dname: true, "sequenceNumber": true, "length": true}
 	padNo := 1
 	addPad := func(gap int) {
 		// name pads pad1, pad2, ... avoiding payload field names
@@ -282,12 +416,18 @@ func layoutFields(s *replySpec) ([]cField, int) {
 		addField(cField{name: fname, ctype: ti.ctype, size: ti.size, swap: swap, compound: ti.compound})
 	}
 
-	// tail padding: at least 32 bytes, always a multiple of 4
+	// tail padding per kind:
+	//   reply/event: at least 32 bytes (fixed-size), multiple of 4
+	//   request:     requests are 4-byte multiples, no 32-byte minimum
 	target := offset
-	if target < 32 {
-		target = 32
+	if s.kind == kindRequest {
+		target = alignTo(target, 4)
+	} else {
+		if target < 32 {
+			target = 32
+		}
+		target = alignTo(target, 4)
 	}
-	target = alignTo(target, 4)
 	if target > offset {
 		addPad(target - offset)
 	}
@@ -296,7 +436,7 @@ func layoutFields(s *replySpec) ([]cField, int) {
 }
 
 // renderHeader produces the full generated C header.
-func renderHeader(specs []replySpec, outPath string) string {
+func renderHeader(specs []structSpec, ops []opcode, outPath string) string {
 	var b strings.Builder
 
 	guard := "X11_CORE_REPLY_H"
@@ -351,6 +491,18 @@ func renderHeader(specs []replySpec, outPath string) string {
 	}
 	fmt.Fprintf(&b, "\n")
 
+	// opcodes (prefix-resolved symbols), emitted sorted for determinism
+	if len(ops) > 0 {
+		sorted := make([]opcode, len(ops))
+		copy(sorted, ops)
+		sort.Slice(sorted, func(i, j int) bool { return sorted[i].name < sorted[j].name })
+		fmt.Fprintf(&b, "/* opcodes */\n")
+		for _, op := range sorted {
+			fmt.Fprintf(&b, "#define X11_OP_%s %d\n", op.name, op.value)
+		}
+		fmt.Fprintf(&b, "\n")
+	}
+
 	// emit the structs in declaration order (as given by the yaml file)
 	for _, s := range specs {
 		fields, size := layoutFields(&s)
@@ -362,11 +514,11 @@ func renderHeader(specs []replySpec, outPath string) string {
 				fmt.Fprintf(&b, "    %s %s;\n", f.ctype, f.name)
 			}
 		}
-		fmt.Fprintf(&b, "} X11_Reply_%s;   /* %d bytes */\n\n", s.name, size)
+		fmt.Fprintf(&b, "} %s;   /* %d bytes */\n\n", structName(&s), size)
 
 		// swap macro: header fields (type/data/sequenceNumber/length) are
-		// handled by __write_reply_hdr_* / X_SEND_REPLY_WITH_RPCBUF, so only
-		// payload multi-byte fields are swapped here (see dbe.c usage)
+		// handled by the generic write helpers; only payload multi-byte
+		// fields are swapped here (see dbe.c usage)
 		var swaps []string
 		for _, f := range fields {
 			if f.compound != nil {
@@ -380,7 +532,7 @@ func renderHeader(specs []replySpec, outPath string) string {
 				swaps = append(swaps, fmt.Sprintf("        %s(%s);", f.swap, f.name))
 			}
 		}
-		fmt.Fprintf(&b, "#define X11_REPLY_%s_SWAP() \\\n", s.name)
+		fmt.Fprintf(&b, "#define %s \\\n", swapMacro(&s))
 		if len(swaps) == 0 {
 			fmt.Fprintf(&b, "    do { } while (0)\n\n")
 		} else {

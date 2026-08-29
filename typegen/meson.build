@@ -18,6 +18,7 @@ x11_core_reply_h = custom_target('x11-core-reply',
     output: 'x11-core-reply.h',
     input: [
         'core.yaml',
+        'shape.yaml',
     ],
     command: [
         gen_script, '-o', '@OUTPUT@', '@INPUT@',

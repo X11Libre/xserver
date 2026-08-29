@@ -49,7 +49,7 @@ reply-struct:
             pad3:      CARD32
             pad4:      CARD32
             pad5:      CARD32
-    IntenAtom:
+    InternAtom:
         payload:
             atom: ATOM
             pad2: CARD32
@@ -420,3 +420,972 @@ reply-struct:
             pad5:   CARD32
             pad6:   CARD32
             pad7:   CARD32
+# ---------------------------------------------------------------------------
+# core protocol opcodes (X11/Xproto.h, X_* defines)
+# ---------------------------------------------------------------------------
+opcode:
+    CREATE_WINDOW: 1
+    CHANGE_WINDOW_ATTRIBUTES: 2
+    GET_WINDOW_ATTRIBUTES: 3
+    DESTROY_WINDOW: 4
+    DESTROY_SUBWINDOWS: 5
+    CHANGE_SAVE_SET: 6
+    REPARENT_WINDOW: 7
+    MAP_WINDOW: 8
+    MAP_SUBWINDOWS: 9
+    UNMAP_WINDOW: 10
+    UNMAP_SUBWINDOWS: 11
+    CONFIGURE_WINDOW: 12
+    CIRCULATE_WINDOW: 13
+    GET_GEOMETRY: 14
+    QUERY_TREE: 15
+    INTERN_ATOM: 16
+    GET_ATOM_NAME: 17
+    CHANGE_PROPERTY: 18
+    DELETE_PROPERTY: 19
+    GET_PROPERTY: 20
+    LIST_PROPERTIES: 21
+    SET_SELECTION_OWNER: 22
+    GET_SELECTION_OWNER: 23
+    CONVERT_SELECTION: 24
+    SEND_EVENT: 25
+    GRAB_POINTER: 26
+    UNGRAB_POINTER: 27
+    GRAB_BUTTON: 28
+    UNGRAB_BUTTON: 29
+    CHANGE_ACTIVE_POINTER_GRAB: 30
+    GRAB_KEYBOARD: 31
+    UNGRAB_KEYBOARD: 32
+    GRAB_KEY: 33
+    UNGRAB_KEY: 34
+    ALLOW_EVENTS: 35
+    GRAB_SERVER: 36
+    UNGRAB_SERVER: 37
+    QUERY_POINTER: 38
+    GET_MOTION_EVENTS: 39
+    TRANSLATE_COORDS: 40
+    WARP_POINTER: 41
+    SET_INPUT_FOCUS: 42
+    GET_INPUT_FOCUS: 43
+    QUERY_KEYMAP: 44
+    OPEN_FONT: 45
+    CLOSE_FONT: 46
+    QUERY_FONT: 47
+    QUERY_TEXT_EXTENTS: 48
+    LIST_FONTS: 49
+    LIST_FONTS_WITH_INFO: 50
+    SET_FONT_PATH: 51
+    GET_FONT_PATH: 52
+    CREATE_PIXMAP: 53
+    FREE_PIXMAP: 54
+    CREATE_GC: 55
+    CHANGE_GC: 56
+    COPY_GC: 57
+    SET_DASHES: 58
+    SET_CLIP_RECTANGLES: 59
+    FREE_GC: 60
+    CLEAR_AREA: 61
+    COPY_AREA: 62
+    COPY_PLANE: 63
+    POLY_POINT: 64
+    POLY_LINE: 65
+    POLY_SEGMENT: 66
+    POLY_RECTANGLE: 67
+    POLY_ARC: 68
+    FILL_POLY: 69
+    POLY_FILL_RECTANGLE: 70
+    POLY_FILL_ARC: 71
+    PUT_IMAGE: 72
+    GET_IMAGE: 73
+    POLY_TEXT8: 74
+    POLY_TEXT16: 75
+    IMAGE_TEXT8: 76
+    IMAGE_TEXT16: 77
+    CREATE_COLORMAP: 78
+    FREE_COLORMAP: 79
+    COPY_COLORMAP_AND_FREE: 80
+    INSTALL_COLORMAP: 81
+    UNINSTALL_COLORMAP: 82
+    LIST_INSTALLED_COLORMAPS: 83
+    ALLOC_COLOR: 84
+    ALLOC_NAMED_COLOR: 85
+    ALLOC_COLOR_CELLS: 86
+    ALLOC_COLOR_PLANES: 87
+    FREE_COLORS: 88
+    STORE_COLORS: 89
+    STORE_NAMED_COLOR: 90
+    QUERY_COLORS: 91
+    LOOKUP_COLOR: 92
+    CREATE_CURSOR: 93
+    CREATE_GLYPH_CURSOR: 94
+    FREE_CURSOR: 95
+    RECOLOR_CURSOR: 96
+    QUERY_BEST_SIZE: 97
+    QUERY_EXTENSION: 98
+    LIST_EXTENSIONS: 99
+    CHANGE_KEYBOARD_MAPPING: 100
+    GET_KEYBOARD_MAPPING: 101
+    CHANGE_KEYBOARD_CONTROL: 102
+    GET_KEYBOARD_CONTROL: 103
+    BELL: 104
+    CHANGE_POINTER_CONTROL: 105
+    GET_POINTER_CONTROL: 106
+    SET_SCREEN_SAVER: 107
+    GET_SCREEN_SAVER: 108
+    CHANGE_HOSTS: 109
+    LIST_HOSTS: 110
+    SET_ACCESS_CONTROL: 111
+    SET_CLOSE_DOWN_MODE: 112
+    KILL_CLIENT: 113
+    ROTATE_PROPERTIES: 114
+    FORCE_SCREEN_SAVER: 115
+    SET_POINTER_MAPPING: 116
+    GET_POINTER_MAPPING: 117
+    SET_MODIFIER_MAPPING: 118
+    GET_MODIFIER_MAPPING: 119
+    NO_OPERATION: 127
+
+# ---------------------------------------------------------------------------
+# core protocol request structs (wire-exact, X11/Xproto.h x*Req)
+# resource-id-only requests use the generic xResourceReq layout ("id")
+# ---------------------------------------------------------------------------
+request-struct:
+    CreateWindow:
+        data-name: depth
+        payload:
+            wid:       WINDOW
+            parent:    WINDOW
+            x:         INT16
+            y:         INT16
+            width:     CARD16
+            height:    CARD16
+            borderWidth: CARD16
+            class:     CARD16
+            visual:    VISUAL
+            mask:      CARD32
+    ChangeWindowAttributes:
+        payload:
+            window:    WINDOW
+            valueMask: CARD32
+    GetWindowAttributes:
+        payload:
+            id: CARD32
+    DestroyWindow:
+        payload:
+            id: CARD32
+    DestroySubwindows:
+        payload:
+            id: CARD32
+    ChangeSaveSet:
+        data-name: mode
+        payload:
+            window: WINDOW
+    ReparentWindow:
+        payload:
+            window: WINDOW
+            parent: WINDOW
+            x:      INT16
+            y:      INT16
+    MapWindow:
+        payload:
+            id: CARD32
+    MapSubwindows:
+        payload:
+            id: CARD32
+    UnmapWindow:
+        payload:
+            id: CARD32
+    UnmapSubwindows:
+        payload:
+            id: CARD32
+    ConfigureWindow:
+        payload:
+            window: WINDOW
+            mask:   CARD16
+            pad2:   CARD16
+    CirculateWindow:
+        data-name: direction
+        payload:
+            window: WINDOW
+    GetGeometry:
+        payload:
+            id: CARD32
+    QueryTree:
+        payload:
+            id: CARD32
+    InternAtom:
+        data-name: onlyIfExists
+        data-type: BOOL
+        payload:
+            nbytes: CARD16
+            pad:    CARD16
+    GetAtomName:
+        payload:
+            id: CARD32
+    ChangeProperty:
+        data-name: mode
+        payload:
+            window: WINDOW
+            property: ATOM
+            type:     ATOM
+            format:   CARD8
+            nUnits:   CARD32
+    DeleteProperty:
+        payload:
+            window:   WINDOW
+            property: ATOM
+    GetProperty:
+        data-name: delete
+        data-type: BOOL
+        payload:
+            window:     WINDOW
+            property:   ATOM
+            type:       ATOM
+            longOffset: CARD32
+            longLength: CARD32
+    ListProperties:
+        payload:
+            id: CARD32
+    SetSelectionOwner:
+        payload:
+            window:    WINDOW
+            selection: ATOM
+            time:      TIME
+    GetSelectionOwner:
+        payload:
+            id: CARD32
+    ConvertSelection:
+        payload:
+            requestor: WINDOW
+            selection: ATOM
+            target:    ATOM
+            property:  ATOM
+            time:      TIME
+    SendEvent:
+        data-name: propagate
+        data-type: BOOL
+        payload:
+            destination: WINDOW
+            eventMask:   CARD32
+            event:       BYTE_ARRAY_32
+    GrabPointer:
+        data-name: ownerEvents
+        data-type: BOOL
+        payload:
+            grabWindow:   WINDOW
+            eventMask:    CARD16
+            pointerMode:  BYTE
+            keyboardMode: BYTE
+            confineTo:    WINDOW
+            cursor:       CURSOR
+            time:         TIME
+    UngrabPointer:
+        payload:
+            id: CARD32
+    GrabButton:
+        data-name: ownerEvents
+        data-type: BOOL
+        payload:
+            grabWindow:   WINDOW
+            eventMask:    CARD16
+            pointerMode:  BYTE
+            keyboardMode: BYTE
+            confineTo:    WINDOW
+            cursor:       CURSOR
+            button:       CARD8
+            pad:          BYTE
+            modifiers:    CARD16
+    UngrabButton:
+        data-name: button
+        payload:
+            grabWindow: WINDOW
+            modifiers:  CARD16
+            pad:        CARD16
+    ChangeActivePointerGrab:
+        payload:
+            cursor:    CURSOR
+            time:      TIME
+            eventMask: CARD16
+            pad2:      CARD16
+    GrabKeyboard:
+        data-name: ownerEvents
+        data-type: BOOL
+        payload:
+            grabWindow:   WINDOW
+            time:         TIME
+            pointerMode:  BYTE
+            keyboardMode: BYTE
+            pad:          CARD16
+    UngrabKeyboard:
+        payload:
+            id: CARD32
+    GrabKey:
+        data-name: ownerEvents
+        data-type: BOOL
+        payload:
+            grabWindow:   WINDOW
+            modifiers:    CARD16
+            key:          CARD8
+            pointerMode:  BYTE
+            keyboardMode: BYTE
+            pad1:         BYTE
+            pad2:         BYTE
+            pad3:         BYTE
+    UngrabKey:
+        data-name: key
+        payload:
+            grabWindow: WINDOW
+            modifiers:  CARD16
+            pad:        CARD16
+    AllowEvents:
+        data-name: mode
+        payload:
+            time: TIME
+    GrabServer:
+        payload: {}
+    UngrabServer:
+        payload: {}
+    QueryPointer:
+        payload:
+            id: CARD32
+    GetMotionEvents:
+        payload:
+            window: WINDOW
+            start:  TIME
+            stop:   TIME
+    TranslateCoords:
+        payload:
+            srcWid: WINDOW
+            dstWid: WINDOW
+            srcX:   INT16
+            srcY:   INT16
+    WarpPointer:
+        payload:
+            srcWid:    WINDOW
+            dstWid:    WINDOW
+            srcX:      INT16
+            srcY:      INT16
+            srcWidth:  CARD16
+            srcHeight: CARD16
+            dstX:      INT16
+            dstY:      INT16
+    SetInputFocus:
+        data-name: revertTo
+        payload:
+            focus: WINDOW
+            time:  TIME
+    GetInputFocus:
+        payload: {}
+    QueryKeymap:
+        payload: {}
+    OpenFont:
+        payload:
+            fid:    FONT
+            nbytes: CARD16
+            pad1:   BYTE
+            pad2:   BYTE
+    CloseFont:
+        payload:
+            id: CARD32
+    QueryFont:
+        payload:
+            id: CARD32
+    QueryTextExtents:
+        data-name: oddLength
+        data-type: BOOL
+        payload:
+            fid: FONT
+    ListFonts:
+        payload:
+            maxNames: CARD16
+            nbytes:   CARD16
+    ListFontsWithInfo:
+        payload:
+            maxNames: CARD16
+            nbytes:   CARD16
+    SetFontPath:
+        payload:
+            nFonts: CARD16
+            pad1:   BYTE
+            pad2:   BYTE
+    GetFontPath:
+        payload: {}
+    CreatePixmap:
+        data-name: depth
+        payload:
+            pid:      PIXMAP
+            drawable: DRAWABLE
+            width:    CARD16
+            height:   CARD16
+    FreePixmap:
+        payload:
+            id: CARD32
+    CreateGC:
+        payload:
+            gc:       GCONTEXT
+            drawable: DRAWABLE
+            mask:     CARD32
+    ChangeGC:
+        payload:
+            gc:   GCONTEXT
+            mask: CARD32
+    CopyGC:
+        payload:
+            srcGC: GCONTEXT
+            dstGC: GCONTEXT
+            mask:  CARD32
+    SetDashes:
+        payload:
+            gc:         GCONTEXT
+            dashOffset: CARD16
+            nDashes:    CARD16
+    SetClipRectangles:
+        data-name: ordering
+        payload:
+            gc:      GCONTEXT
+            xOrigin: INT16
+            yOrigin: INT16
+    FreeGC:
+        payload:
+            id: CARD32
+    ClearArea:
+        data-name: exposures
+        data-type: BOOL
+        payload:
+            window: WINDOW
+            x:      INT16
+            y:      INT16
+            width:  CARD16
+            height: CARD16
+    CopyArea:
+        payload:
+            srcDrawable: DRAWABLE
+            dstDrawable: DRAWABLE
+            gc:          GCONTEXT
+            srcX:        INT16
+            srcY:        INT16
+            dstX:        INT16
+            dstY:        INT16
+            width:       CARD16
+            height:      CARD16
+    CopyPlane:
+        payload:
+            srcDrawable: DRAWABLE
+            dstDrawable: DRAWABLE
+            gc:          GCONTEXT
+            srcX:        INT16
+            srcY:        INT16
+            dstX:        INT16
+            dstY:        INT16
+            width:       CARD16
+            height:      CARD16
+            bitPlane:    CARD32
+    PolyPoint:
+        data-name: coordMode
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+    PolyLine:
+        data-name: coordMode
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+    PolySegment:
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+    PolyRectangle:
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+    PolyArc:
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+    FillPoly:
+        payload:
+            drawable:  DRAWABLE
+            gc:        GCONTEXT
+            shape:     BYTE
+            coordMode: BYTE
+            pad1:      CARD16
+    PolyFillRectangle:
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+    PolyFillArc:
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+    PutImage:
+        data-name: format
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+            width:    CARD16
+            height:   CARD16
+            dstX:     INT16
+            dstY:     INT16
+            leftPad:  CARD8
+            depth:    CARD8
+            pad:      CARD16
+    GetImage:
+        data-name: format
+        payload:
+            drawable:  DRAWABLE
+            x:         INT16
+            y:         INT16
+            width:     CARD16
+            height:    CARD16
+            planeMask: CARD32
+    PolyText8:
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+            x:        INT16
+            y:        INT16
+    PolyText16:
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+            x:        INT16
+            y:        INT16
+    ImageText8:
+        data-name: nChars
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+            x:        INT16
+            y:        INT16
+    ImageText16:
+        data-name: nChars
+        payload:
+            drawable: DRAWABLE
+            gc:       GCONTEXT
+            x:        INT16
+            y:        INT16
+    CreateColormap:
+        data-name: alloc
+        payload:
+            mid:    COLORMAP
+            window: WINDOW
+            visual: VISUAL
+    FreeColormap:
+        payload:
+            id: CARD32
+    CopyColormapAndFree:
+        payload:
+            mid:     COLORMAP
+            srcCmap: COLORMAP
+    InstallColormap:
+        payload:
+            id: CARD32
+    UninstallColormap:
+        payload:
+            id: CARD32
+    ListInstalledColormaps:
+        payload:
+            id: CARD32
+    AllocColor:
+        payload:
+            cmap: COLORMAP
+            red:  CARD16
+            green: CARD16
+            blue: CARD16
+            pad2: CARD16
+    AllocNamedColor:
+        payload:
+            cmap:   COLORMAP
+            nbytes: CARD16
+            pad1:   BYTE
+            pad2:   BYTE
+    AllocColorCells:
+        data-name: contiguous
+        data-type: BOOL
+        payload:
+            cmap:   COLORMAP
+            colors: CARD16
+            planes: CARD16
+    AllocColorPlanes:
+        data-name: contiguous
+        data-type: BOOL
+        payload:
+            cmap:   COLORMAP
+            colors: CARD16
+            red:    CARD16
+            green:  CARD16
+            blue:   CARD16
+    FreeColors:
+        payload:
+            cmap:      COLORMAP
+            planeMask: CARD32
+    StoreColors:
+        payload:
+            cmap: COLORMAP
+    StoreNamedColor:
+        data-name: flags
+        payload:
+            cmap:   COLORMAP
+            pixel:  CARD32
+            nbytes: CARD16
+            pad1:   BYTE
+            pad2:   BYTE
+    QueryColors:
+        payload:
+            cmap: COLORMAP
+    LookupColor:
+        payload:
+            cmap:   COLORMAP
+            nbytes: CARD16
+            pad1:   BYTE
+            pad2:   BYTE
+    CreateCursor:
+        payload:
+            cid:     CURSOR
+            source:  PIXMAP
+            mask:    PIXMAP
+            foreRed: CARD16
+            foreGreen: CARD16
+            foreBlue: CARD16
+            backRed: CARD16
+            backGreen: CARD16
+            backBlue: CARD16
+            x:       CARD16
+            y:       CARD16
+    CreateGlyphCursor:
+        payload:
+            cid:       CURSOR
+            source:    FONT
+            mask:      FONT
+            sourceChar: CARD16
+            maskChar:  CARD16
+            foreRed:   CARD16
+            foreGreen: CARD16
+            foreBlue:  CARD16
+            backRed:   CARD16
+            backGreen: CARD16
+            backBlue:  CARD16
+    FreeCursor:
+        payload:
+            id: CARD32
+    RecolorCursor:
+        payload:
+            cursor:   CURSOR
+            foreRed:  CARD16
+            foreGreen: CARD16
+            foreBlue: CARD16
+            backRed:  CARD16
+            backGreen: CARD16
+            backBlue: CARD16
+    QueryBestSize:
+        data-name: class
+        payload:
+            drawable: DRAWABLE
+            width:    CARD16
+            height:   CARD16
+    QueryExtension:
+        payload:
+            nbytes: CARD16
+            pad1:   BYTE
+            pad2:   BYTE
+    ListExtensions:
+        payload: {}
+    ChangeKeyboardMapping:
+        data-name: keyCodes
+        payload:
+            firstKeyCode:      KEYCODE
+            keySymsPerKeyCode: CARD8
+            pad1:              CARD16
+    GetKeyboardMapping:
+        payload:
+            firstKeyCode: KEYCODE
+            count:        CARD8
+            pad1:         CARD16
+    ChangeKeyboardControl:
+        payload:
+            mask: CARD32
+    GetKeyboardControl:
+        payload: {}
+    Bell:
+        data-name: percent
+        data-type: INT8
+        payload: {}
+    ChangePointerControl:
+        payload:
+            accelNum: INT16
+            accelDenum: INT16
+            threshold: INT16
+            doAccel:  BOOL
+            doThresh: BOOL
+    GetPointerControl:
+        payload: {}
+    SetScreenSaver:
+        payload:
+            timeout:     INT16
+            interval:    INT16
+            preferBlank: BYTE
+            allowExpose: BYTE
+            pad2:        CARD16
+    GetScreenSaver:
+        payload: {}
+    ChangeHosts:
+        data-name: mode
+        payload:
+            hostFamily: CARD8
+            pad:        BYTE
+            hostLength: CARD16
+    ListHosts:
+        payload: {}
+    SetAccessControl:
+        data-name: mode
+        payload: {}
+    SetCloseDownMode:
+        data-name: mode
+        payload: {}
+    KillClient:
+        payload:
+            id: CARD32
+    RotateProperties:
+        payload:
+            window:    WINDOW
+            nAtoms:    CARD16
+            nPositions: INT16
+    ForceScreenSaver:
+        data-name: mode
+        payload: {}
+    SetPointerMapping:
+        data-name: nElts
+        payload: {}
+    GetPointerMapping:
+        payload: {}
+    SetModifierMapping:
+        data-name: numKeyPerModifier
+        payload: {}
+    GetModifierMapping:
+        payload: {}
+    NoOperation:
+        payload: {}
+
+# ---------------------------------------------------------------------------
+# core protocol events (wire-exact, X11/Xproto.h xEvent union)
+# the 4-byte type/detail/sequenceNumber header doubles as the reference "pad00"
+# ---------------------------------------------------------------------------
+event:
+    KeyButtonPointer:
+        payload:
+            time:       TIME
+            root:       WINDOW
+            event:      WINDOW
+            child:      WINDOW
+            rootX:      INT16
+            rootY:      INT16
+            eventX:     INT16
+            eventY:     INT16
+            state:      KEYBUTMASK
+            sameScreen: BOOL
+            pad1:       BYTE
+    EnterLeave:
+        payload:
+            time:   TIME
+            root:   WINDOW
+            event:  WINDOW
+            child:  WINDOW
+            rootX:  INT16
+            rootY:  INT16
+            eventX: INT16
+            eventY: INT16
+            state:  KEYBUTMASK
+            mode:   BYTE
+            flags:  BYTE
+    Focus:
+        payload:
+            window: WINDOW
+            mode:   BYTE
+            pad1:   BYTE
+            pad2:   BYTE
+            pad3:   BYTE
+    Expose:
+        payload:
+            window: WINDOW
+            x:      INT16
+            y:      INT16
+            width:  CARD16
+            height: CARD16
+            count:  CARD16
+            pad2:   CARD16
+    GraphicsExposure:
+        payload:
+            drawable:   DRAWABLE
+            x:          INT16
+            y:          INT16
+            width:      CARD16
+            height:     CARD16
+            minorEvent: CARD16
+            count:      CARD16
+            majorEvent: BYTE
+            pad1:       BYTE
+            pad2:       BYTE
+            pad3:       BYTE
+    NoExposure:
+        payload:
+            drawable:   DRAWABLE
+            minorEvent: CARD16
+            majorEvent: BYTE
+            bpad:       BYTE
+    Visibility:
+        payload:
+            window: WINDOW
+            state:  BYTE
+            pad1:   BYTE
+            pad2:   BYTE
+            pad3:   BYTE
+    CreateNotify:
+        payload:
+            parent:      WINDOW
+            window:      WINDOW
+            x:           INT16
+            y:           INT16
+            width:       CARD16
+            height:      CARD16
+            borderWidth: CARD16
+            override:    BOOL
+            bpad:        BYTE
+    DestroyNotify:
+        payload:
+            event:  WINDOW
+            window: WINDOW
+    UnmapNotify:
+        payload:
+            event:         WINDOW
+            window:        WINDOW
+            fromConfigure: BOOL
+            pad1:          BYTE
+            pad2:          BYTE
+            pad3:          BYTE
+    MapNotify:
+        payload:
+            event:   WINDOW
+            window:  WINDOW
+            override: BOOL
+            pad1:    BYTE
+            pad2:    BYTE
+            pad3:    BYTE
+    MapRequest:
+        payload:
+            parent: WINDOW
+            window: WINDOW
+    Reparent:
+        payload:
+            event:   WINDOW
+            window:  WINDOW
+            parent:  WINDOW
+            x:       INT16
+            y:       INT16
+            override: BOOL
+            pad1:    BYTE
+            pad2:    BYTE
+            pad3:    BYTE
+    ConfigureNotify:
+        payload:
+            event:        WINDOW
+            window:       WINDOW
+            aboveSibling: WINDOW
+            x:            INT16
+            y:            INT16
+            width:        CARD16
+            height:       CARD16
+            borderWidth:  CARD16
+            override:     BOOL
+            bpad:         BYTE
+    ConfigureRequest:
+        payload:
+            parent:       WINDOW
+            window:       WINDOW
+            sibling:      WINDOW
+            x:            INT16
+            y:            INT16
+            width:        CARD16
+            height:       CARD16
+            borderWidth:  CARD16
+            valueMask:    CARD16
+            pad1:         CARD32
+    Gravity:
+        payload:
+            event:  WINDOW
+            window: WINDOW
+            x:      INT16
+            y:      INT16
+            pad1:   CARD32
+            pad2:   CARD32
+            pad3:   CARD32
+            pad4:   CARD32
+    ResizeRequest:
+        payload:
+            window: WINDOW
+            width:  CARD16
+            height: CARD16
+    Circulate:
+        payload:
+            event:  WINDOW
+            window: WINDOW
+            parent: WINDOW
+            place:  BYTE
+            pad1:   BYTE
+            pad2:   BYTE
+            pad3:   BYTE
+    Property:
+        payload:
+            window: WINDOW
+            atom:   ATOM
+            time:   TIME
+            state:  BYTE
+            pad1:   BYTE
+            pad2:   CARD16
+    SelectionClear:
+        payload:
+            time:   TIME
+            window: WINDOW
+            atom:   ATOM
+    SelectionRequest:
+        payload:
+            time:      TIME
+            owner:     WINDOW
+            requestor: WINDOW
+            selection: ATOM
+            target:    ATOM
+            property:  ATOM
+    SelectionNotify:
+        payload:
+            time:      TIME
+            requestor: WINDOW
+            selection: ATOM
+            target:    ATOM
+            property:  ATOM
+    Colormap:
+        payload:
+            window:   WINDOW
+            colormap: COLORMAP
+            new:      BOOL
+            state:    BYTE
+            pad1:     BYTE
+            pad2:     BYTE
+    MappingNotify:
+        data-name: request
+        payload:
+            firstKeyCode: KEYCODE
+            count:        CARD8
+            pad1:         BYTE
+    ClientMessage:
+        payload:
+            window:    WINDOW
+            messageType: ATOM
+            longs0:    INT32
+            longs1:    INT32
+            longs2:    INT32
+            longs3:    INT32
+            longs4:    INT32
+    Keymap:
+        header: false
+        payload:
+            type: BYTE
+            map:  BYTE_ARRAY_31
