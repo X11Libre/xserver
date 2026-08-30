@@ -25,6 +25,8 @@
 
 #include <kdrive-config.h>
 
+#include <stdbool.h>
+
 #include "dix/dix_priv.h"
 #include "dix/settings_priv.h"
 #include "os/cmdline.h"
@@ -153,7 +155,7 @@ processScreenOrOutputArg(const char *screen_size, const char *output, char *pare
     if (card) {
         KdScreenInfo *screen;
         unsigned long p_id = 0;
-        Bool use_geometry;
+        bool use_geometry;
 
         screen = KdScreenInfoAdd(card);
         KdParseScreen(screen, screen_size);

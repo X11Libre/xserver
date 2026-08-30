@@ -22,6 +22,8 @@
  */
 
 #include <kdrive-config.h>
+
+#include <stdbool.h>
 #include <xkb-config.h>
 #include "kdrive.h"
 #include "inputstr.h"
@@ -673,7 +675,7 @@ KdKbdCtrl(DeviceIntPtr pDevice, KeybdCtrl * ctrl)
 static int
 KdKeyboardProc(DeviceIntPtr pDevice, int onoff)
 {
-    Bool ret;
+    bool ret;
     DevicePtr pDev = (DevicePtr) pDevice;
     KdKeyboardInfo *ki;
     Atom xiclass;
@@ -1881,7 +1883,7 @@ static void
 KdCheckLock(void)
 {
     KeyClassPtr keyc = NULL;
-    Bool isSet = FALSE, shouldBeSet = FALSE;
+    bool isSet = FALSE, shouldBeSet = FALSE;
     KdKeyboardInfo *tmp = NULL;
 
     for (tmp = kdKeyboards; tmp; tmp = tmp->next) {
