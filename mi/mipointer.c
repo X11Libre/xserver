@@ -703,7 +703,7 @@ miPointerSetPosition(DeviceIntPtr pDev, int mode, double *screenx,
 
     /* check if we generated any barrier events and if so, update root x/y
      * to the fully constrained coords */
-    if (should_constrain_barriers) {
+    if (should_constrain_barriers && nevents && events) {
         for (i = 0; i < *nevents; i++) {
             if (events[i].any.type == ET_BarrierHit ||
                 events[i].any.type == ET_BarrierLeave) {
