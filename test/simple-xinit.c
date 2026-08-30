@@ -152,7 +152,8 @@ start_client(char *const *client_args, int display)
     if (client_pid == -1) {
         fprintf(stderr, "Fork failed: %s\n", strerror(errno));
         exit(1);
-    } else if (client_pid) {
+    }
+    if (client_pid) {
         int wstatus;
 
         ret = waitpid(client_pid, &wstatus, 0);
@@ -166,12 +167,11 @@ start_client(char *const *client_args, int display)
             return 1;
 
         return WEXITSTATUS(wstatus);
-    } else {
-        execvp(client_args[0], client_args);
-        /* exec only returns if an error occurred. */
-        fprintf(stderr, "Error starting the client: %s\n", strerror(errno));
-        exit(1);
     }
+    execvp(client_args[0], client_args);
+    /* exec only returns if an error occurred. */
+    fprintf(stderr, "Error starting the client: %s\n", strerror(errno));
+    exit(1);
 }
 
 /* Splits the incoming argc/argv into a pair of NULL-terminated arrays
