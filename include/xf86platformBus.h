@@ -84,9 +84,6 @@ _xf86_get_platform_device_int_attrib(struct xf86_platform_device *device, int at
 
 #define xf86_get_platform_device_int_attrib(device, attrib, def) _xf86_get_platform_device_int_attrib(device,attrib,_ODEV_ATTRIB_INT_CHECK(attrib,def))
 
-extern _X_EXPORT Bool
-xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *busid);
-
 #endif
 
 #endif
