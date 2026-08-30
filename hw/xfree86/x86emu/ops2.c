@@ -78,11 +78,7 @@ Handles opcode 0x0f,0x31
 static void
 x86emuOp2_rdtsc(u8 X86EMU_UNUSED(op2))
 {
-#ifdef __HAS_LONG_LONG__
     static u64 counter = 0;
-#else
-    static u32 counter = 0;
-#endif
 
     counter += 0x10000;
 
@@ -95,13 +91,8 @@ x86emuOp2_rdtsc(u8 X86EMU_UNUSED(op2))
     START_OF_INSTR();
     DECODE_PRINTF("RDTSC\n");
     TRACE_AND_STEP();
-#ifdef __HAS_LONG_LONG__
     M.x86.R_EAX = counter & 0xffffffff;
     M.x86.R_EDX = counter >> 32;
-#else
-    M.x86.R_EAX = counter;
-    M.x86.R_EDX = 0;
-#endif
     DECODE_CLEAR_SEGOVR();
     END_OF_INSTR();
 }
