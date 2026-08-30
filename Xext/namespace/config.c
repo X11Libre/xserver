@@ -43,7 +43,14 @@ static struct Xnamespace* select_ns(const char* name)
         return ns;
 
     struct Xnamespace *newns = calloc(1, sizeof(struct Xnamespace));
+    if (!newns) {
+        FatalError("Xnamespace: failed allocating namespace configuration struct\n");
+    }
     newns->name = strdup(name);
+    if (!newns->name) {
+        free(newns);
+        FatalError("Xnamespace: failed allocating namespace name copy\n");
+    }
     xorg_list_init(&newns->auth_tokens);
     xorg_list_append(&newns->entry, &ns_list);
     return newns;
@@ -474,6 +481,11 @@ void XnsDestroyNamespace(struct Xnamespace *ns)
 {
     if (!ns || ns->builtin)
         return;
+
+    if (ns->rootWindow) {
+        FreeResource(ns->rootWindow->drawable.id, RT_NONE);
+        ns->rootWindow = NULL;
+    }
 
     /* detach any clients still pointing here so their later teardown does not
        dereference freed memory (refcnt is being discarded with the namespace) */
