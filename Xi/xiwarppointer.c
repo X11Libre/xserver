@@ -184,7 +184,7 @@ ProcXIWarpPointer(ClientPtr client)
     pDev->last.valuators[1] = y;
     miPointerUpdateSprite(pDev);
 
-    if (*newScreen->CursorWarpedTo)
+    if (newScreen->CursorWarpedTo)
         (*newScreen->CursorWarpedTo) (pDev, newScreen, client,
                                       dest, pSprite, x, y);
 
