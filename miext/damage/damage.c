@@ -1862,19 +1862,20 @@ DamageSubtract(DamagePtr pDamage, const RegionPtr pRegion)
 void
 DamageEmpty(DamagePtr pDamage)
 {
-    RegionEmpty(&pDamage->damage);
+    if (pDamage)
+        RegionEmpty(&pDamage->damage);
 }
 
 RegionPtr
 DamageRegion(DamagePtr pDamage)
 {
-    return &pDamage->damage;
+    return pDamage ? &pDamage->damage : NULL;
 }
 
 RegionPtr
 DamagePendingRegion(DamagePtr pDamage)
 {
-    return &pDamage->pendingDamage;
+    return pDamage ? &pDamage->pendingDamage : NULL;
 }
 
 void
