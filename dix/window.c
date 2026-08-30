@@ -1080,15 +1080,9 @@ DeleteWindow(void *value, XID wid)
 int
 DestroySubwindows(WindowPtr pWin, ClientPtr client)
 {
-    /* XXX
-     * The protocol is quite clear that each window should be
-     * destroyed in turn, however, unmapping all of the first
-     * eliminates most of the calls to ValidateTree.  So,
-     * this implementation is incorrect in that all of the
-     * UnmapNotifies occur before all of the DestroyNotifies.
-     * If you care, simply delete the call to UnmapSubwindows.
-     */
-    UnmapSubwindows(pWin);
+    /* The protocol requires each window to be destroyed in turn.
+     * Unmapping each child window individually ensures correct UnmapNotify
+     * and DestroyNotify event ordering. */
     while (pWin->lastChild) {
         int rc = XaceHookResourceAccess(client,
                           pWin->lastChild->drawable.id, X11_RESTYPE_WINDOW,
