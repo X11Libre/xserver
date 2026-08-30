@@ -226,4 +226,7 @@ OsInit(void)
      */
     LogInit(NULL, NULL);
     SmartScheduleInit();
+#ifdef HAVE_SECCOMP
+    OsSeccompInit();
+#endif
 }
