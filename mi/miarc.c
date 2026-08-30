@@ -2834,7 +2834,7 @@ hookX(double scan_y,
                 acc->h2 * scan_y * (3 * ellipse_y * ellipse_y - 2 * acc->h2);
             if ((left && maxMin > 0) || (!left && maxMin < 0)) {
                 if (ellipse_y == 0)
-                    return def->w + left ? -def->l : def->l;
+                    return def->w + (left ? -def->l : def->l);
                 x = (acc->h2 * scan_y - ellipse_y * acc->h2mw2) *
                     sqrt(acc->h2 - ellipse_y * ellipse_y) /
                     (def->h * def->w * ellipse_y);
