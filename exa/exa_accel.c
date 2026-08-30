@@ -177,7 +177,7 @@ exaDoPutImage(DrawablePtr pDrawable, GCPtr pGC, int depth, int x, int y,
         pixmaps[0].as_dst = TRUE;
         pixmaps[0].as_src = FALSE;
         pixmaps[0].pPix = pPix;
-        pixmaps[0].pReg = DamagePendingRegion(pExaPixmap->pDamage);
+        pixmaps[0].pReg = NULL;
 
         exaDoMigration(pixmaps, 1, TRUE);
     }
