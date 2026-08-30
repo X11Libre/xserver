@@ -15,7 +15,7 @@ shared_module(
         dependency('libdrm', version: '>= 2.4.46'),
         gbm_dep,
     ],
-    link_with: [glamor, libxserver_glx],
+    link_with: [glamor ],
 
     install: true,
     install_dir: module_abi_dir,
