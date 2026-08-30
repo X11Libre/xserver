@@ -8,6 +8,9 @@ the above copyright notice appear in all copies and that both that
 copyright notice and this permission notice appear in supporting
 documentation.
 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -41,79 +44,36 @@ SOFTWARE.
 
 ******************************************************************/
 
-#ifndef OS_H
-#define OS_H
-
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef MONOTONIC_CLOCK
-#include <time.h>
-#endif
+#ifndef TIMER_H
+#define TIMER_H
 
 #include <X11/Xfuncproto.h>
 
 #include "xlibre_ptrtypes.h"
-#include "callback.h"
-#include "misc.h"
 
-/*
- * @brief macro for specifying non-null arguments
- *
- * part of public SDK / driver API
- */
-#ifndef _X_ATTRIBUTE_NONNULL_ARG
-#define _X_ATTRIBUTE_NONNULL_ARG(...) __attribute__((nonnull(__VA_ARGS__)))
-#endif
+typedef struct _OsTimerRec *OsTimerPtr;
 
-#ifndef _X_ATTRIBUTE_VPRINTF
-# if defined(__GNUC__) && (__GNUC__ >= 2) && !defined(__clang__)
-#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
-           __attribute__((__format__(gnu_printf, fmt, firstarg)))
-# else
-#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
-# endif
-#endif
+typedef CARD32 (*OsTimerCallback) (OsTimerPtr timer,
+                                   CARD32 time,
+                                   void *arg);
 
-#define SCREEN_SAVER_ON   0
-#define SCREEN_SAVER_OFF  1
-#define SCREEN_SAVER_FORCER 2
-#define SCREEN_SAVER_CYCLE  3
+#define TimerAbsolute (1<<0)
+#define TimerForceOld (1<<1)
 
-#ifndef MAX_REQUEST_SIZE
-#define MAX_REQUEST_SIZE 65535
-#endif
+extern _X_EXPORT OsTimerPtr TimerSet(OsTimerPtr timer,
+                                     int flags,
+                                     CARD32 millis,
+                                     OsTimerCallback func,
+                                     void *arg);
 
-typedef struct _NewClientRec *NewClientPtr;
+extern _X_EXPORT void TimerCancel(OsTimerPtr /* pTimer */ );
+extern _X_EXPORT void TimerFree(OsTimerPtr /* pTimer */ );
 
-#ifndef xnfalloc
-#define xnfalloc(size) XNFalloc((unsigned long)(size))
-#define xnfcalloc(_num, _size) XNFcallocarray((_num), (_size))
-#define xnfrealloc(ptr, size) XNFrealloc((void *)(ptr), (unsigned long)(size))
+extern _X_EXPORT CARD32 GetTimeInMillis(void);
+extern _X_EXPORT CARD64 GetTimeInMicros(void);
 
-#define xstrdup(s) Xstrdup((s))
-#define xnfstrdup(s) XNFstrdup((s))
-#endif
+extern _X_EXPORT void AdjustWaitForDelay(void *waitTime, int newdelay);
 
-#include "alloc.h"
-#include "Xprintf.h"
-#include "client_io.h"
-#include "fd_notify.h"
-#include "logging.h"
-#include "notify_fd.h"
-#include "timer.h"
-#include "fallback_funcs.h"
+extern _X_EXPORT void GiveUp(int /*sig */ );
 
-/* only for backwards compat with drivers that haven't kept up yet
-   (xf86-video-intel)
-
-   @todo revise after next stable release
-*/
-_X_DEPRECATED
-static inline int System(const char* cmdline)
-{
-    return system(cmdline);
-}
-
-#endif                          /* OS_H */
+#endif /* TIMER_H */
