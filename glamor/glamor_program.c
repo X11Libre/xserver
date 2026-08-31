@@ -491,6 +491,12 @@ glamor_set_blend(CARD8 op, glamor_program_alpha alpha, PicturePtr dst)
     case glamor_program_alpha_ca_second:
         op = PictOpAdd;
         break;
+    case glamor_program_alpha_normal:
+    case glamor_program_alpha_dual_blend:
+    case glamor_program_alpha_dual_blend_gles2:
+        break;
+    case glamor_program_alpha_count:
+        break;
     default:
         break;
     }

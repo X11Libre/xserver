@@ -85,6 +85,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
     swizzle[2] = GL_BLUE;
     swizzle[3] = GL_ALPHA;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
     switch (format) {
     case PIXMAN_a1:
         *tex_format = glamor_priv->formats[1].format;
@@ -227,6 +229,7 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
     default:
         return FALSE;
     }
+#pragma GCC diagnostic pop
 
     if (!PIXMAN_FORMAT_A(format))
         swizzle[3] = GL_ONE;

@@ -275,6 +275,9 @@ glamor_create_composite_fs(glamor_screen_private *glamor_priv, struct shader_key
     case SHADER_SOURCE_TEXTURE:
         source_fetch = source_pixmap_fetch;
         break;
+    case SHADER_SOURCE_COUNT:
+        FatalError("Bad composite shader source");
+        break;
     default:
         FatalError("Bad composite shader source");
     }
@@ -291,6 +294,9 @@ glamor_create_composite_fs(glamor_screen_private *glamor_priv, struct shader_key
         break;
     case SHADER_MASK_TEXTURE:
         mask_fetch = mask_pixmap_fetch;
+        break;
+    case SHADER_MASK_COUNT:
+        FatalError("Bad composite shader mask");
         break;
     default:
         FatalError("Bad composite shader mask");
@@ -309,6 +315,9 @@ glamor_create_composite_fs(glamor_screen_private *glamor_priv, struct shader_key
         break;
     case SHADER_DEST_SWIZZLE_IGNORE_ALPHA:
         dest_swizzle = dest_swizzle_ignore_alpha;
+        break;
+    case SHADER_DEST_SWIZZLE_COUNT:
+        FatalError("Bad composite shader dest swizzle");
         break;
     default:
         FatalError("Bad composite shader dest swizzle");
@@ -331,6 +340,9 @@ glamor_create_composite_fs(glamor_screen_private *glamor_priv, struct shader_key
     case glamor_program_alpha_dual_blend_gles2:
         in = in_ca_dual_blend_gles2;
         header = header_ca_dual_blend_gles2;
+        break;
+    case glamor_program_alpha_count:
+        FatalError("Bad composite IN type");
         break;
     default:
         FatalError("Bad composite IN type");
@@ -780,6 +792,8 @@ combine_pict_format(pixman_format_code_t *des,
         src_type = PIXMAN_FORMAT_TYPE(src);
         mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
+    case glamor_program_alpha_count:
+        return FALSE;
     default:
         return FALSE;
     }
@@ -863,6 +877,8 @@ glamor_render_format_is_supported(PicturePtr picture)
 
     storage_format = f->render_format;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
     switch (picture->format) {
     case PIXMAN_a2r10g10b10:
         return storage_format == PIXMAN_x2r10g10b10;
@@ -874,6 +890,7 @@ glamor_render_format_is_supported(PicturePtr picture)
     default:
         return picture->format == storage_format;
     }
+#pragma GCC diagnostic pop
 }
 
 static Bool
