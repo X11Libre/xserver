@@ -85,6 +85,9 @@ eventName(pmEvent event, const char **str)
     case XF86_APM_SUSPEND_FAILED:
         *str = "Suspend Request Failed";
         return 0;
+    case XF86_APM_UNKNOWN:
+        *str = "Unknown Event";
+        return 0;
     default:
         *str = "Unknown Event";
         return 0;
@@ -150,10 +153,27 @@ DoApmEvent(pmEvent event, Bool undo)
     int i;
 
     switch (event) {
-#if 0
     case XF86_APM_SYS_STANDBY:
     case XF86_APM_USER_STANDBY:
-#endif
+    case XF86_APM_STANDBY_RESUME:
+    case XF86_APM_LOW_BATTERY:
+    case XF86_APM_POWER_STATUS_CHANGE:
+    case XF86_APM_UPDATE_TIME:
+    case XF86_APM_CAPABILITY_CHANGED:
+    case XF86_APM_STANDBY_FAILED:
+    case XF86_APM_SUSPEND_FAILED:
+    case XF86_APM_UNKNOWN:
+        /* fall through to default handler */
+        /* FALLTHROUGH */
+    default:
+        input_lock();
+        for (i = 0; i < xf86NumScreens; i++) {
+            if (xf86Screens[i]->PMEvent) {
+                xf86Screens[i]->PMEvent(xf86Screens[i], event, undo);
+            }
+        }
+        input_unlock();
+        break;
     case XF86_APM_SYS_SUSPEND:
     case XF86_APM_CRITICAL_SUSPEND:    /*do we want to delay a critical suspend? */
     case XF86_APM_USER_SUSPEND:
@@ -167,24 +187,12 @@ DoApmEvent(pmEvent event, Bool undo)
             suspended = FALSE;
         }
         break;
-#if 0
-    case XF86_APM_STANDBY_RESUME:
-#endif
     case XF86_APM_NORMAL_RESUME:
     case XF86_APM_CRITICAL_RESUME:
         if (suspended) {
             resume(event, undo);
             suspended = FALSE;
         }
-        break;
-    default:
-        input_lock();
-        for (i = 0; i < xf86NumScreens; i++) {
-            if (xf86Screens[i]->PMEvent) {
-                xf86Screens[i]->PMEvent(xf86Screens[i], event, undo);
-            }
-        }
-        input_unlock();
         break;
     }
 }
@@ -219,6 +227,9 @@ xf86HandlePMEvents(int fd, void *data)
                 case PM_FAILED:
                     DoApmEvent(events[i], TRUE);
                     wait = FALSE;
+                    break;
+                case PM_NONE:
+                    /* no specific wait action needed */
                     break;
                 default:
                     break;
