@@ -408,6 +408,10 @@ ms_driver_func(ScrnInfoPtr scrn, xorgDriverFuncOp op, void *data)
     xorgHWFlags *flag;
 
     switch (op) {
+    case RR_GET_INFO:
+    case RR_SET_CONFIG:
+    case RR_GET_MODE_MM:
+        return FALSE;
     case GET_REQUIRED_HW_INTERFACES:
         flag = (CARD32 *) data;
         (*flag) = 0;
