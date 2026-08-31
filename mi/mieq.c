@@ -358,7 +358,18 @@ ChangeDeviceID(DeviceIntPtr dev, InternalEvent *event)
     case ET_GestureSwipeEnd:
         event->gesture_event.deviceid = dev->id;
         break;
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_XQuartz:
+    case ET_Internal:
+        /* these events carry no deviceid field to update */
+        ErrorF("[mi] Unknown event type (%d), cannot change id.\n",
+               event->any.type);
+        break;
     default:
+        /* defensive: invalid (non-enum) input */
         ErrorF("[mi] Unknown event type (%d), cannot change id.\n",
                event->any.type);
     }
@@ -486,7 +497,36 @@ mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen)
         if (!handler && (event->device_event.flags & TOUCH_POINTER_EMULATED))
             mieqMoveToNewScreen(dev, screen, &event->device_event);
         break;
-    default:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_GesturePinchBegin:
+    case ET_GesturePinchUpdate:
+    case ET_GesturePinchEnd:
+    case ET_GestureSwipeBegin:
+    case ET_GestureSwipeUpdate:
+    case ET_GestureSwipeEnd:
+    case ET_Internal:
+        /* these events do not carry pointer/valuator info that could
+         * change the screen */
         break;
     }
     master = CopyGetMasterEvent(dev, event, &mevent);
