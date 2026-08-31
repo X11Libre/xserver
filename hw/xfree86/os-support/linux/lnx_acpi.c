@@ -125,6 +125,22 @@ lnxACPIConfirmEventToOs(int fd, pmEvent event)
 {
     /* No ability to send back to the kernel in ACPI */
     switch (event) {
+    case XF86_APM_SYS_STANDBY:
+    case XF86_APM_SYS_SUSPEND:
+    case XF86_APM_CRITICAL_SUSPEND:
+    case XF86_APM_USER_STANDBY:
+    case XF86_APM_USER_SUSPEND:
+    case XF86_APM_STANDBY_RESUME:
+    case XF86_APM_NORMAL_RESUME:
+    case XF86_APM_CRITICAL_RESUME:
+    case XF86_APM_LOW_BATTERY:
+    case XF86_APM_POWER_STATUS_CHANGE:
+    case XF86_APM_UPDATE_TIME:
+    case XF86_APM_CAPABILITY_CHANGED:
+    case XF86_APM_STANDBY_FAILED:
+    case XF86_APM_SUSPEND_FAILED:
+    case XF86_APM_UNKNOWN:
+        return PM_NONE;
     default:
         return PM_NONE;
     }

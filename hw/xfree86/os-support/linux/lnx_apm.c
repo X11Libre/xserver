@@ -122,6 +122,11 @@ lnxPMConfirmEventToOs(int fd, pmEvent event)
     case XF86_APM_CRITICAL_RESUME:
     case XF86_APM_STANDBY_FAILED:
     case XF86_APM_SUSPEND_FAILED:
+    case XF86_APM_LOW_BATTERY:
+    case XF86_APM_POWER_STATUS_CHANGE:
+    case XF86_APM_UPDATE_TIME:
+    case XF86_APM_CAPABILITY_CHANGED:
+    case XF86_APM_UNKNOWN:
         return PM_CONTINUE;
     default:
         return PM_NONE;
