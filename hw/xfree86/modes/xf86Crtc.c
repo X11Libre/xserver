@@ -1284,6 +1284,20 @@ xf86InitialOutputPositions(ScrnInfoPtr scrn, DisplayModePtr * modes)
                         output->initial_x -=
                             xf86ModeWidth(modes[o], output->initial_rotation);
                     break;
+                case OPTION_PREFERRED_MODE:
+                case OPTION_ZOOM_MODES:
+                case OPTION_POSITION:
+                case OPTION_ENABLE:
+                case OPTION_DISABLE:
+                case OPTION_MIN_CLOCK:
+                case OPTION_MAX_CLOCK:
+                case OPTION_IGNORE:
+                case OPTION_ROTATE:
+                case OPTION_PANNING:
+                case OPTION_PRIMARY:
+                case OPTION_DEFAULT_MODES:
+                    /* positional options only; other output options ignored here */
+                    break;
                 default:
                     break;
                 }
