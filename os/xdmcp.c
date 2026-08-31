@@ -765,6 +765,20 @@ send_packet(void)
     case XDM_KEEPALIVE:
         send_keepalive_msg();
         break;
+    case XDM_COLLECT_QUERY:
+    case XDM_COLLECT_BROADCAST_QUERY:
+    case XDM_COLLECT_INDIRECT_QUERY:
+    case XDM_COLLECT_MULTICAST_QUERY:
+    case XDM_START_CONNECTION:
+    case XDM_AWAIT_REQUEST_RESPONSE:
+    case XDM_AWAIT_MANAGE_RESPONSE:
+    case XDM_RUN_SESSION:
+    case XDM_OFF:
+    case XDM_AWAIT_USER_INPUT:
+    case XDM_AWAIT_ALIVE_RESPONSE:
+    case XDM_KEEP_ME_LAST:
+        /* waiting/collecting states send nothing */
+        break;
     default:
         break;
     }
@@ -853,6 +867,21 @@ timeout(void)
         break;
     case XDM_AWAIT_ALIVE_RESPONSE:
         state = XDM_KEEPALIVE;
+        break;
+    case XDM_QUERY:
+    case XDM_BROADCAST:
+    case XDM_INDIRECT:
+#if defined(IPv6)
+    case XDM_MULTICAST:
+#endif
+    case XDM_START_CONNECTION:
+    case XDM_MANAGE:
+    case XDM_RUN_SESSION:
+    case XDM_OFF:
+    case XDM_AWAIT_USER_INPUT:
+    case XDM_KEEPALIVE:
+    case XDM_KEEP_ME_LAST:
+        /* states that need no transition here */
         break;
     default:
         break;
@@ -959,6 +988,24 @@ send_query_msg(void)
         header.opcode = (CARD16) INDIRECT_QUERY;
         state = XDM_COLLECT_INDIRECT_QUERY;
         break;
+    case XDM_COLLECT_QUERY:
+    case XDM_COLLECT_BROADCAST_QUERY:
+#if defined(IPv6)
+    case XDM_COLLECT_MULTICAST_QUERY:
+#endif
+    case XDM_COLLECT_INDIRECT_QUERY:
+    case XDM_START_CONNECTION:
+    case XDM_AWAIT_REQUEST_RESPONSE:
+    case XDM_AWAIT_MANAGE_RESPONSE:
+    case XDM_MANAGE:
+    case XDM_RUN_SESSION:
+    case XDM_OFF:
+    case XDM_AWAIT_USER_INPUT:
+    case XDM_KEEPALIVE:
+    case XDM_AWAIT_ALIVE_RESPONSE:
+    case XDM_KEEP_ME_LAST:
+        /* these states do not initiate a query packet */
+        break;
     default:
         break;
     }
@@ -1041,6 +1088,24 @@ recv_willing_msg(struct sockaddr *from, int fromlen, unsigned length)
             case XDM_COLLECT_INDIRECT_QUERY:
                 XdmcpAddHost(from, fromlen, &authenticationName, &hostname,
                              &status);
+                break;
+            case XDM_QUERY:
+            case XDM_BROADCAST:
+            case XDM_INDIRECT:
+#if defined(IPv6)
+            case XDM_MULTICAST:
+#endif
+            case XDM_START_CONNECTION:
+            case XDM_AWAIT_REQUEST_RESPONSE:
+            case XDM_AWAIT_MANAGE_RESPONSE:
+            case XDM_MANAGE:
+            case XDM_RUN_SESSION:
+            case XDM_OFF:
+            case XDM_AWAIT_USER_INPUT:
+            case XDM_KEEPALIVE:
+            case XDM_AWAIT_ALIVE_RESPONSE:
+            case XDM_KEEP_ME_LAST:
+                /* only collected query states select/add hosts */
                 break;
             default:
                 break;
