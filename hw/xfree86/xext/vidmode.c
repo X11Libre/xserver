@@ -580,6 +580,42 @@ static int VidModeAddModeLine(ClientPtr client, xXF86VidModeAddModeLineReq* stuf
     case MODE_V_ILLEGAL:
         free(mode);
         return VidModeErrorBase + XF86VidModeBadVTimings;
+    case MODE_BAD_WIDTH:
+    case MODE_NOMODE:
+    case MODE_NO_INTERLACE:
+    case MODE_NO_DBLESCAN:
+    case MODE_NO_VSCAN:
+    case MODE_MEM:
+    case MODE_VIRTUAL_X:
+    case MODE_VIRTUAL_Y:
+    case MODE_MEM_VIRT:
+    case MODE_NOCLOCK:
+    case MODE_CLOCK_HIGH:
+    case MODE_CLOCK_LOW:
+    case MODE_CLOCK_RANGE:
+    case MODE_BAD_HVALUE:
+    case MODE_BAD_VVALUE:
+    case MODE_BAD_VSCAN:
+    case MODE_HSYNC_NARROW:
+    case MODE_HSYNC_WIDE:
+    case MODE_HBLANK_NARROW:
+    case MODE_HBLANK_WIDE:
+    case MODE_VSYNC_NARROW:
+    case MODE_VSYNC_WIDE:
+    case MODE_VBLANK_NARROW:
+    case MODE_VBLANK_WIDE:
+    case MODE_PANEL:
+    case MODE_INTERLACE_WIDTH:
+    case MODE_ONE_WIDTH:
+    case MODE_ONE_HEIGHT:
+    case MODE_ONE_SIZE:
+    case MODE_NO_REDUCED:
+    case MODE_BANDWIDTH:
+    case MODE_DUPLICATE:
+    case MODE_BAD:
+    case MODE_ERROR:
+        free(mode);
+        return VidModeErrorBase + XF86VidModeModeUnsuitable;
     default:
         free(mode);
         return VidModeErrorBase + XF86VidModeModeUnsuitable;
@@ -905,6 +941,42 @@ VidModeModModeLine(ClientPtr client, xXF86VidModeModModeLineReq *stuff)
     case MODE_V_ILLEGAL:
         free(modetmp);
         return VidModeErrorBase + XF86VidModeBadVTimings;
+    case MODE_BAD_WIDTH:
+    case MODE_NOMODE:
+    case MODE_NO_INTERLACE:
+    case MODE_NO_DBLESCAN:
+    case MODE_NO_VSCAN:
+    case MODE_MEM:
+    case MODE_VIRTUAL_X:
+    case MODE_VIRTUAL_Y:
+    case MODE_MEM_VIRT:
+    case MODE_NOCLOCK:
+    case MODE_CLOCK_HIGH:
+    case MODE_CLOCK_LOW:
+    case MODE_CLOCK_RANGE:
+    case MODE_BAD_HVALUE:
+    case MODE_BAD_VVALUE:
+    case MODE_BAD_VSCAN:
+    case MODE_HSYNC_NARROW:
+    case MODE_HSYNC_WIDE:
+    case MODE_HBLANK_NARROW:
+    case MODE_HBLANK_WIDE:
+    case MODE_VSYNC_NARROW:
+    case MODE_VSYNC_WIDE:
+    case MODE_VBLANK_NARROW:
+    case MODE_VBLANK_WIDE:
+    case MODE_PANEL:
+    case MODE_INTERLACE_WIDTH:
+    case MODE_ONE_WIDTH:
+    case MODE_ONE_HEIGHT:
+    case MODE_ONE_SIZE:
+    case MODE_NO_REDUCED:
+    case MODE_BANDWIDTH:
+    case MODE_DUPLICATE:
+    case MODE_BAD:
+    case MODE_ERROR:
+        free(modetmp);
+        return VidModeErrorBase + XF86VidModeModeUnsuitable;
     default:
         free(modetmp);
         return VidModeErrorBase + XF86VidModeModeUnsuitable;
