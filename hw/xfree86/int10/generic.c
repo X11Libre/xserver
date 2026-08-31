@@ -205,6 +205,12 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
             INTPriv(pInt)->highMemory = GET_HIGH_BASE(rom_device->rom_size);
             break;
         }
+        case BUS_NONE:
+        case BUS_SBUS:
+        case BUS_PLATFORM:
+        case BUS_USB:
+        case BUS_last:
+            goto error1;
         default:
             goto error1;
         }
