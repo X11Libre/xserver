@@ -1211,6 +1211,10 @@ GetXI2Type(enum EventType type)
 /**
  * Converts a gesture type to corresponding Gesture{Pinch,Swipe}Begin.
  * Returns 0 if the input type is not a gesture.
+ *
+ * All non-gesture EventType values have no gesture-begin counterpart and are
+ * listed explicitly (returning 0) so that -Wswitch-enum confirms every event
+ * type is consciously considered.
  */
 enum EventType
 GestureTypeToBegin(enum EventType type)
@@ -1224,7 +1228,40 @@ GestureTypeToBegin(enum EventType type)
     case ET_GestureSwipeUpdate:
     case ET_GestureSwipeEnd:
         return ET_GestureSwipeBegin;
+    case ET_KeyPress:
+    case ET_KeyRelease:
+    case ET_ButtonPress:
+    case ET_ButtonRelease:
+    case ET_Motion:
+    case ET_TouchBegin:
+    case ET_TouchUpdate:
+    case ET_TouchEnd:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_Internal:
+        /* no gesture-begin counterpart */
+        return 0;
     default:
+        /* handle invalid (non-enum) input defensively */
         return 0;
     }
 }
@@ -1232,6 +1269,10 @@ GestureTypeToBegin(enum EventType type)
 /**
  * Converts a gesture type to corresponding Gesture{Pinch,Swipe}End.
  * Returns 0 if the input type is not a gesture.
+ *
+ * All non-gesture EventType values have no gesture-end counterpart and are
+ * listed explicitly (returning 0) so that -Wswitch-enum confirms every event
+ * type is consciously considered.
  */
 enum EventType
 GestureTypeToEnd(enum EventType type)
@@ -1245,7 +1286,40 @@ GestureTypeToEnd(enum EventType type)
     case ET_GestureSwipeUpdate:
     case ET_GestureSwipeEnd:
         return ET_GestureSwipeEnd;
+    case ET_KeyPress:
+    case ET_KeyRelease:
+    case ET_ButtonPress:
+    case ET_ButtonRelease:
+    case ET_Motion:
+    case ET_TouchBegin:
+    case ET_TouchUpdate:
+    case ET_TouchEnd:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_Internal:
+        /* no gesture-end counterpart */
+        return 0;
     default:
+        /* handle invalid (non-enum) input defensively */
         return 0;
     }
 }
