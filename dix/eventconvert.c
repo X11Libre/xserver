@@ -959,6 +959,13 @@ eventToGestureSwipeEvent(GestureEvent *ev, xEvent **xi)
 /**
  * Return the corresponding core type for the given event or 0 if no core
  * equivalent exists.
+ *
+ * Only KeyPress/KeyRelease/ButtonPress/ButtonRelease/Motion have a direct
+ * core protocol counterpart. All other internal event types (touches, raw
+ * and gesture events, enter/leave/focus, proximity, device changes,
+ * hierarchy, DGA, quartz, internal) have no core equivalent, so they leave
+ * the return value at 0. These are listed explicitly so that -Wswitch-enum
+ * confirms every EventType value is considered.
  */
 int
 GetCoreType(enum EventType type)
@@ -981,7 +988,36 @@ GetCoreType(enum EventType type)
     case ET_KeyRelease:
         coretype = KeyRelease;
         break;
-    default:
+    case ET_TouchBegin:
+    case ET_TouchUpdate:
+    case ET_TouchEnd:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_GesturePinchBegin:
+    case ET_GesturePinchUpdate:
+    case ET_GesturePinchEnd:
+    case ET_GestureSwipeBegin:
+    case ET_GestureSwipeUpdate:
+    case ET_GestureSwipeEnd:
+    case ET_Internal:
+        /* no core equivalent */
         break;
     }
     return coretype;
@@ -990,6 +1026,12 @@ GetCoreType(enum EventType type)
 /**
  * Return the corresponding XI 1.x type for the given event or 0 if no
  * equivalent exists.
+ *
+ * Only device key/button/motion/proximity events map onto an XI 1.x
+ * (deviceKeyButtonPointer) type. Touches, raw and gesture events,
+ * enter/leave/focus, device changes, hierarchy, DGA, quartz and internal
+ * have no XI 1.x equivalent and leave the return value at 0. Listed
+ * explicitly so that -Wswitch-enum confirms every EventType is considered.
  */
 int
 GetXIType(enum EventType type)
@@ -1018,7 +1060,34 @@ GetXIType(enum EventType type)
     case ET_ProximityOut:
         xitype = ProximityOut;
         break;
-    default:
+    case ET_TouchBegin:
+    case ET_TouchUpdate:
+    case ET_TouchEnd:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_GesturePinchBegin:
+    case ET_GesturePinchUpdate:
+    case ET_GesturePinchEnd:
+    case ET_GestureSwipeBegin:
+    case ET_GestureSwipeUpdate:
+    case ET_GestureSwipeEnd:
+    case ET_Internal:
+        /* no XI 1.x equivalent */
         break;
     }
     return xitype;
@@ -1127,7 +1196,13 @@ GetXI2Type(enum EventType type)
     case ET_GestureSwipeEnd:
         xi2type = XI_GestureSwipeEnd;
         break;
-    default:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DGAEvent:
+    case ET_XQuartz:
+    case ET_Internal:
+        /* proximity has no XI2 event; DGA/quartz are platform-specific and
+         * Internal is a wrapper type, so none of them get an XI2 type */
         break;
     }
     return xi2type;
