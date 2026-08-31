@@ -342,6 +342,11 @@ xf86IsEntityPrimary(int entityIndex)
         return pEnt->bus.id.sbus.fbNum == primaryBus.id.sbus.fbNum;
     case BUS_PLATFORM:
         return pEnt->bus.id.plat == primaryBus.id.plat;
+    case BUS_NONE:
+    case BUS_USB:
+    case BUS_last:
+        /* no primary bus match for these bus types */
+        return FALSE;
     default:
         return FALSE;
     }

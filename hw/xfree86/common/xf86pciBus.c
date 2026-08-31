@@ -397,6 +397,11 @@ xf86GetPciInfoForEntity(int entityIndex)
         return p->bus.id.pci;
     case BUS_PLATFORM:
         return p->bus.id.plat->pdev;
+    case BUS_NONE:
+    case BUS_SBUS:
+    case BUS_USB:
+    case BUS_last:
+        break;
     default:
         break;
     }

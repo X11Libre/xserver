@@ -102,11 +102,18 @@ xf86AddBusDeviceToConfigure(const char *driver, BusType bus, void *busData,
             ret = xf86PciConfigure(busData, DevToConfig[i].pVideo);
             break;
 #endif
-#if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
         case BUS_SBUS:
+#if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
             ret = xf86SbusConfigure(busData, DevToConfig[i].sVideo);
-            break;
+#else
+            ret = -1;
 #endif
+            break;
+        case BUS_NONE:
+        case BUS_PLATFORM:
+        case BUS_USB:
+        case BUS_last:
+            return NULL;
         default:
             return NULL;
         }
@@ -138,13 +145,18 @@ xf86AddBusDeviceToConfigure(const char *driver, BusType bus, void *busData,
                                &DevToConfig[i].GDev, &chipset);
         break;
 #endif
-#if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
     case BUS_SBUS:
+#if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
 	DevToConfig[i].sVideo = busData;
         xf86SbusConfigureNewDev(busData, DevToConfig[i].sVideo,
                                 &DevToConfig[i].GDev);
-        break;
 #endif
+        break;
+    case BUS_NONE:
+    case BUS_PLATFORM:
+    case BUS_USB:
+    case BUS_last:
+        break;
     default:
         break;
     }

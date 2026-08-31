@@ -448,6 +448,12 @@ xf86MergeOutputClassOptions(int entityIndex, void **options)
             }
         }
         break;
+    case BUS_NONE:
+    case BUS_SBUS:
+    case BUS_USB:
+    case BUS_last:
+        /* fall through to default log message */
+        break;
     default:
         LogMessageVerb(X_DEBUG, 1, "xf86MergeOutputClassOptions unsupported bus type %d\n",
                        entity->bus.type);
