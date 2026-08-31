@@ -363,6 +363,11 @@ eventToKeyButtonPointer(DeviceEvent *ev, xEvent **xi, int *count)
 
     num_events = (countValuators(ev, &first) + 5) / 6;  /* valuator ev */
     if (num_events <= 0) {
+        /* No axes. Key/button events are valid without axes; motion and
+         * proximity events always carry axes, so they -- and every other
+         * event type, since deviceKeyButtonPointer is the only XI 1.x
+         * representation -- are rejected here. Each EventType is listed
+         * explicitly for -Wswitch-enum. */
         switch (ev->type) {
         case ET_KeyPress:
         case ET_KeyRelease:
@@ -375,7 +380,36 @@ eventToKeyButtonPointer(DeviceEvent *ev, xEvent **xi, int *count)
         case ET_ProximityOut:
             *count = 0;
             return BadMatch;
-        default:
+        case ET_TouchBegin:
+        case ET_TouchUpdate:
+        case ET_TouchEnd:
+        case ET_TouchOwnership:
+        case ET_Enter:
+        case ET_Leave:
+        case ET_FocusIn:
+        case ET_FocusOut:
+        case ET_DeviceChanged:
+        case ET_Hierarchy:
+        case ET_DGAEvent:
+        case ET_RawKeyPress:
+        case ET_RawKeyRelease:
+        case ET_RawButtonPress:
+        case ET_RawButtonRelease:
+        case ET_RawMotion:
+        case ET_RawTouchBegin:
+        case ET_RawTouchUpdate:
+        case ET_RawTouchEnd:
+        case ET_XQuartz:
+        case ET_BarrierHit:
+        case ET_BarrierLeave:
+        case ET_GesturePinchBegin:
+        case ET_GesturePinchUpdate:
+        case ET_GesturePinchEnd:
+        case ET_GestureSwipeBegin:
+        case ET_GestureSwipeUpdate:
+        case ET_GestureSwipeEnd:
+        case ET_Internal:
+            /* no XI 1.x deviceKeyButtonPointer representation */
             *count = 0;
             return BadImplementation;
         }
@@ -402,6 +436,10 @@ eventToKeyButtonPointer(DeviceEvent *ev, xEvent **xi, int *count)
     if (num_events > 1)
         kbp->deviceid |= MORE_EVENTS;
 
+    /* Only deviceKeyButtonPointer-compatible types reach this point (the
+     * no-axes branch above rejects everything else). Map the seven that have
+     * an XI 1.x type; any remaining value keeps kbp->type == 0 (from calloc)
+     * as a defensive no-op. Listed explicitly for -Wswitch-enum. */
     switch (ev->type) {
     case ET_Motion:
         kbp->type = DeviceMotionNotify;
@@ -424,7 +462,36 @@ eventToKeyButtonPointer(DeviceEvent *ev, xEvent **xi, int *count)
     case ET_ProximityOut:
         kbp->type = ProximityOut;
         break;
-    default:
+    case ET_TouchBegin:
+    case ET_TouchUpdate:
+    case ET_TouchEnd:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_GesturePinchBegin:
+    case ET_GesturePinchUpdate:
+    case ET_GesturePinchEnd:
+    case ET_GestureSwipeBegin:
+    case ET_GestureSwipeUpdate:
+    case ET_GestureSwipeEnd:
+    case ET_Internal:
+        /* no XI 1.x deviceKeyButtonPointer type */
         break;
     }
 
