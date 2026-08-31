@@ -1087,6 +1087,10 @@ _glamor_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
 
             return fds[0] >= 0;
         }
+    case GLAMOR_MEMORY:
+    case GLAMOR_DRM_ONLY:
+        /* not backed by FBO/texture */
+        break;
     default:
         break;
     }
@@ -1155,6 +1159,9 @@ glamor_name_from_pixmap(PixmapPtr pixmap, CARD16 *stride, CARD32 *size)
             return -1;
         return glamor_egl_fd_name_from_pixmap(pixmap->drawable.pScreen,
                                               pixmap, stride, size);
+    case GLAMOR_MEMORY:
+    case GLAMOR_DRM_ONLY:
+        break;
     default:
         break;
     }

@@ -298,6 +298,10 @@ glamor_pixmap_attach_fbo(PixmapPtr pixmap, glamor_pixmap_fbo *fbo)
     case GLAMOR_TEXTURE_DRM:
         pixmap_priv->gl_fbo = GLAMOR_FBO_NORMAL;
         pixmap->devPrivate.ptr = NULL;
+        break;
+    case GLAMOR_MEMORY:
+    case GLAMOR_DRM_ONLY:
+        break;
     default:
         break;
     }
