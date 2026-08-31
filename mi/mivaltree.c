@@ -318,6 +318,10 @@ miComputeClips(WindowPtr pParent,
             return;
         }
         /* fall through */
+    case VTOther:
+        /* Any other/miscellaneous validation operation falls back to the
+         * default exposure handling (translate the old clip regions). */
+        /* fall through */
     default:
         /*
          * To calculate exposures correctly, we have to translate the old
@@ -706,6 +710,13 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
     switch (kind) {
     case VTStack:
         break;
+    case VTMove:
+    case VTUnmap:
+    case VTBroken:
+    case VTOther:
+        /* move/unmap/broken/other all recompute exposures and then
+         * re-install the recomputed clipList like a fresh map */
+        /* fall through */
     default:
         /*
          * totalClip contains the new clipList for the parent. Figure out
