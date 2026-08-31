@@ -644,6 +644,10 @@ appendScrollInfo(DeviceChangedEvent *dce, xXIScrollInfo * info, int axisnumber)
     case SCROLL_TYPE_HORIZONTAL:
         info->scroll_type = XIScrollTypeHorizontal;
         break;
+    case SCROLL_TYPE_NONE:
+        /* handled by the early return above; kept explicit so
+         * -Wswitch-enum confirms every ScrollType value is considered */
+        return 0;
     default:
         ErrorF("[Xi] Unknown scroll type %d. This is a bug.\n",
                dce->valuators[axisnumber].scroll.type);
