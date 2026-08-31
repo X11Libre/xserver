@@ -137,6 +137,16 @@ if not libsystemd_daemon_dep.found()
     libsystemd_daemon_dep = dependency('libsystemd-daemon', required: false)
 endif
 
+
+build_lttngust = false
+
+if get_option('tracing_lttng')
+    build_lttngust = true
+    lttng_ust_dep = dependency('lttng-ust',version : '>= 2.12.0')
+    conf_data.set('_XLIBRE_LTTNG_UST', '1')
+
+endif
+
 build_hashtable = false
 
 # Resolve default values of some options

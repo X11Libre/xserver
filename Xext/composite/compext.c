@@ -55,6 +55,10 @@
 #include "xace.h"
 #include "protocol-versions.h"
 
+#ifdef _XLIBRE_LTTNG_UST
+#include "compext_tp.h"
+#endif
+
 static CARD8 CompositeReqCode;
 static DevPrivateKeyRec CompositeClientPrivateKeyRec;
 
@@ -128,6 +132,11 @@ ProcCompositeQueryVersion(ClientPtr client)
     X_REPLY_FIELD_CARD32(majorVersion);
     X_REPLY_FIELD_CARD32(minorVersion);
 
+    #ifdef _XLIBRE_LTTNG_UST
+
+    lttng_ust_tracepoint(xlibre_xext_composite,generic_req,client->index,stuff->compositeReqType,stuff->length);
+
+    #endif
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
@@ -192,6 +201,10 @@ ProcCompositeCreateRegionFromBorderClip(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xCompositeCreateRegionFromBorderClipReq);
     X_REQUEST_FIELD_CARD32(region);
     X_REQUEST_FIELD_CARD32(window);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_composite,redirect_req_simple,client->index,stuff->compositeReqType,stuff->window);
+#endif
 
     WindowPtr pWin;
     VERIFY_WINDOW(pWin, stuff->window, client, DixGetAttrAccess);
@@ -456,6 +469,10 @@ ProcCompositeRedirectWindow(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xCompositeRedirectWindowReq);
     X_REQUEST_FIELD_CARD32(window);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_composite,redirect_req,client->index,stuff->compositeReqType,stuff->window,stuff->update);
+#endif
+
 #ifdef XINERAMA
     if (!compositeUseXinerama)
         return SingleCompositeRedirectWindow(client, stuff);
@@ -487,6 +504,10 @@ ProcCompositeRedirectSubwindows(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xCompositeRedirectSubwindowsReq);
     X_REQUEST_FIELD_CARD32(window);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_composite,redirect_req,client->index,stuff->compositeReqType,stuff->window,stuff->update);
+#endif
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -520,6 +541,10 @@ ProcCompositeUnredirectWindow(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xCompositeUnredirectWindowReq);
     X_REQUEST_FIELD_CARD32(window);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_composite,redirect_req,client->index,stuff->compositeReqType,stuff->window,stuff->update);
+#endif
+
 #ifdef XINERAMA
     if (!compositeUseXinerama)
         return SingleCompositeUnredirectWindow(client, stuff);
@@ -551,6 +576,10 @@ ProcCompositeUnredirectSubwindows(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xCompositeUnredirectSubwindowsReq);
     X_REQUEST_FIELD_CARD32(window);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_composite,redirect_req,client->index,stuff->compositeReqType,stuff->window,stuff->update);
+#endif
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -584,6 +613,11 @@ ProcCompositeNameWindowPixmap(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xCompositeNameWindowPixmapReq);
     X_REQUEST_FIELD_CARD32(window);
     X_REQUEST_FIELD_CARD32(pixmap);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_composite,window_pixmap_redirect_req,client->index,stuff->compositeReqType,stuff->window,stuff->pixmap);
+#endif
+
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -659,6 +693,10 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xCompositeGetOverlayWindowReq);
     X_REQUEST_FIELD_CARD32(window);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_composite,redirect_req_simple,client->index,stuff->compositeReqType,stuff->window);
+#endif
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -756,6 +794,10 @@ ProcCompositeReleaseOverlayWindow(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xCompositeReleaseOverlayWindowReq);
     X_REQUEST_FIELD_CARD32(window);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_composite,redirect_req_simple,client->index,stuff->compositeReqType,stuff->window);
+#endif
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
