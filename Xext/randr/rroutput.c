@@ -118,7 +118,13 @@ RROutputCreate(ScreenPtr pScreen,
         static const INT32 values[2] = { 0, 960 }; // arbitrary range
         (void) RRConfigureOutputProperty(output, DPIAtom, FALSE, TRUE, FALSE,
                                          2, values);
-        INT32 value = monitorResolution ? monitorResolution : 96;
+        INT32 value;
+        if (monitorResolution > 0)
+            value = monitorResolution;
+        else if (autosetDPI)
+            value = (int) ((double) pScreen->width * 25.4 / pScreen->mmWidth);
+        else
+            value = 96;
         (void) RRChangeOutputProperty(output, DPIAtom, XA_INTEGER, 32,
                                       PropModeReplace, 1, &value, FALSE, FALSE);
     }
