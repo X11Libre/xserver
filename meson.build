@@ -124,6 +124,9 @@ xkbcomp_dep = dependency('xkbcomp', required: false)
 xkbfile_dep = dependency('xkbfile')
 xfont2_dep = dependency('xfont2', version: '>= 2.0')
 
+gbm_dep = dependency('gbm', version: gbm_req, required: false)
+epoxy_dep = dependency('epoxy', required: false)
+
 dbus_required = get_option('systemd_logind') == 'true'
 dbus_dep = dependency('dbus-1', version: '>= 1.0', required: dbus_required)
 
@@ -385,6 +388,7 @@ else
     build_glamor = glamor_option == 'true'
 endif
 
+<<<<<<< HEAD
 gbm_dep = dependency('gbm', version: gbm_req, required: false)
 epoxy_dep = dependency('', required: false)
 if build_glamor
@@ -394,6 +398,19 @@ endif
 gbm_option = get_option('gbm')
 if gbm_option == 'auto'
     build_gbm = gbm_dep.found()
+=======
+if build_xwayland
+    libdecor_dep = dependency('libdecor-0', required: false)
+    libdecor_option = get_option('libdecor')
+    if libdecor_option == 'auto'
+        have_libdecor = libdecor_dep.found()
+    else
+        have_libdecor = libdecor_option == 'true'
+        if have_libdecor and not libdecor_dep.found()
+            error('libdecor support requested but not found')
+        endif
+    endif
+>>>>>>> 5b22bb635b (Generalize glamor dependencies)
 else
     build_gbm = (gbm_option == 'true')
 endif

@@ -97,8 +97,17 @@ conf_data.set('CONFIG_WSCONS', host_machine.system() in ['openbsd', 'netbsd'] ? 
 
 conf_data.set('HAVE_XSHMFENCE', xshmfence_dep.found() ? '1' : false)
 conf_data.set('WITH_LIBDRM', libdrm_required ? '1' : false)
+<<<<<<< HEAD
 conf_data.set('LIBDRM_HAS_PLANE_SIZE_HINTS', libdrm_required ? libdrm_dep.version().version_compare('>= 2.4.122') : false)
 conf_data.set('GLAMOR_HAS_EGL', epoxy_dep.found() ? '1' : false)
+=======
+conf_data.set('HAVE_GBM', gbm_dep.found() ? '1' : false)
+conf_data.set('HAVE_EPOXY', epoxy_dep.found() ? '1' : false)
+conf_data.set('GLAMOR_HAS_EGL_QUERY_DMABUF',
+              epoxy_dep.found() and epoxy_dep.version().version_compare('>= 1.4.4') ? '1' : false)
+conf_data.set('GLAMOR_HAS_EGL_QUERY_DRIVER',
+              epoxy_dep.found() and epoxy_dep.version().version_compare('>= 1.5.4') ? '1' : false)
+>>>>>>> 5b22bb635b (Generalize glamor dependencies)
 conf_data.set('GLXEXT', build_glx ? '1' : false)
 conf_data.set('GLAMOR', build_glamor ? '1' : false)
 conf_data.set('GLAMOR_HAS_GBM', build_gbm ? '1' : false)
