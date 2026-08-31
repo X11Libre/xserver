@@ -149,6 +149,10 @@ EventToCore(InternalEvent *event, xEvent **core_out, int *count_out)
         ret = Success;
     }
         break;
+    /* These events have no core protocol equivalent: XI2-specific events,
+     * raw/touch events that are XI2-only, and events whose core counterparts
+     * (EnterNotify, LeaveNotify, FocusIn, FocusOut) are assembled directly
+     * by CoreEnterLeaveEvent/CoreFocusEvent, not via EventToCore. */
     case ET_ProximityIn:
     case ET_ProximityOut:
     case ET_RawKeyPress:
@@ -171,11 +175,21 @@ EventToCore(InternalEvent *event, xEvent **core_out, int *count_out)
     case ET_GestureSwipeBegin:
     case ET_GestureSwipeUpdate:
     case ET_GestureSwipeEnd:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_XQuartz:
+    case ET_Internal:
         ret = BadMatch;
         break;
+
     default:
-        /* XXX: */
-        ErrorF("[dix] EventToCore: Not implemented yet \n");
+        ErrorF("[dix] EventToCore: Not implemented for type %d\n",
+               event->any.type);
         ret = BadImplementation;
     }
 
@@ -235,6 +249,14 @@ EventToXI(InternalEvent *ev, xEvent **xi, int *count)
     case ET_GestureSwipeBegin:
     case ET_GestureSwipeUpdate:
     case ET_GestureSwipeEnd:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_XQuartz:
+    case ET_Internal:
         *count = 0;
         *xi = NULL;
         return BadMatch;
@@ -307,6 +329,17 @@ EventToXI2(InternalEvent *ev, xEvent **xi)
     case ET_GestureSwipeUpdate:
     case ET_GestureSwipeEnd:
         return eventToGestureSwipeEvent(&ev->gesture_event, xi);
+    /* No XI2 equivalent: Leave/FocusOut are delivered elsewhere, Hierarchy
+     * is internal, DGAEvent/XQuartz are platform-specific, Internal is a
+     * wrapper type. */
+    case ET_Leave:
+    case ET_FocusOut:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_XQuartz:
+    case ET_Internal:
+        *xi = NULL;
+        return BadMatch;
     default:
         break;
     }
