@@ -285,6 +285,9 @@ grab_grabtype_to_text(GrabPtr pGrab)
             return "xi2";
         case CORE:
             return "core";
+        case XI:
+            /* XI 1.x grab type, historically reported via default */
+            return "xi1";
         default:
             return "xi1";
     }
