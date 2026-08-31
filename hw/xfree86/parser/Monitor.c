@@ -381,6 +381,7 @@ xf86parseVerboseMode(void)
             break;
         default:
             Error("Unexpected token in verbose \"Mode\" entry\n");
+            break;
         }
     }
     if (!had_dotclock)
@@ -480,6 +481,7 @@ xf86parseMonitorSection(void)
                         ptr->mon_hsync[ptr->mon_n_hsync].lo;
                     ptr->mon_n_hsync++;
                     goto HorizDone;
+                    break;
                 }
                 ptr->mon_n_hsync++;
             } while ((token = xf86getSubToken(&(ptr->mon_comment))) == NUMBER);
@@ -515,6 +517,7 @@ xf86parseMonitorSection(void)
                         ptr->mon_vrefresh[ptr->mon_n_vrefresh].lo;
                     ptr->mon_n_vrefresh++;
                     goto VertDone;
+                    break;
                 }
                 if (ptr->mon_n_vrefresh >= CONF_MAX_VREFRESH)
                     Error("Sorry. Too many vertical refresh intervals.");
