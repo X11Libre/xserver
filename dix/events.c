@@ -4157,7 +4157,37 @@ CheckPassiveGrabsOnWindow(WindowPtr pWin,
     case ET_TouchEnd:
         tempGrab->detail.exact = event->device_event.detail.button;
         break;
-    default:
+    case ET_Motion:
+    case ET_TouchUpdate:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_GesturePinchBegin:
+    case ET_GesturePinchUpdate:
+    case ET_GesturePinchEnd:
+    case ET_GestureSwipeBegin:
+    case ET_GestureSwipeUpdate:
+    case ET_GestureSwipeEnd:
+    case ET_Internal:
+        /* only key/button/touch events carry a grab detail */
         tempGrab->detail.exact = 0;
         break;
     }
