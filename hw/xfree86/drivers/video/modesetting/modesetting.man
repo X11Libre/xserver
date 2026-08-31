@@ -48,6 +48,10 @@ are supported:
 .BI "Option \*qSWcursor\*q \*q" boolean \*q
 Selects software cursor.  The default is
 .B off.
+
+Note: due to issues with cursor rendering this option will be forced
+.B on
+if it is running under bochs-drm, evdi, vboxvideo, virtio_gpu, vkms, vmwgfx or qxl drm driver.
 .TP
 .BI "Option \*qCursorSize\*q \*q" string \*q
 The size of the cursor.
