@@ -726,14 +726,26 @@ static void
 client_new_handle_event(InputInfoPtr pInfo, xf86ITEventAny *event)
 {
     switch (event->header.type) {
-        case XF86IT_EVENT_CLIENT_VERSION:
-            handle_client_version(pInfo, &event->version);
-            break;
-        default:
-            xf86IDrvMsg(pInfo, X_ERROR, "Event before client is ready: event type %d\n",
-                        event->header.type);
-            teardown_client_connection(pInfo);
-            break;
+    case XF86IT_EVENT_CLIENT_VERSION:
+        handle_client_version(pInfo, &event->version);
+        break;
+    case XF86IT_EVENT_WAIT_FOR_SYNC:
+    case XF86IT_EVENT_MOTION:
+    case XF86IT_EVENT_PROXIMITY:
+    case XF86IT_EVENT_BUTTON:
+    case XF86IT_EVENT_KEY:
+    case XF86IT_EVENT_TOUCH:
+    case XF86IT_EVENT_GESTURE_PINCH:
+    case XF86IT_EVENT_GESTURE_SWIPE:
+        xf86IDrvMsg(pInfo, X_ERROR, "Event before client is ready: event type %d\n",
+                    event->header.type);
+        teardown_client_connection(pInfo);
+        break;
+    default:
+        xf86IDrvMsg(pInfo, X_ERROR, "Event before client is ready: event type %d\n",
+                    event->header.type);
+        teardown_client_connection(pInfo);
+        break;
     }
 }
 
