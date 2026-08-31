@@ -391,6 +391,11 @@ ListScrollInfo(DeviceIntPtr dev, xXIScrollInfo * info, int axisnumber)
     case SCROLL_TYPE_HORIZONTAL:
         info->scroll_type = XIScrollTypeHorizontal;
         break;
+    case SCROLL_TYPE_NONE:
+        /* unreachable: handled by the early return above */
+        ErrorF("[Xi] Unknown scroll type %d. This is a bug.\n",
+               axis->scroll.type);
+        break;
     default:
         ErrorF("[Xi] Unknown scroll type %d. This is a bug.\n",
                axis->scroll.type);
