@@ -68,6 +68,7 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         '-Wshift-negative-value',
         '-Wvla',
         '-Wincompatible-pointer-types',
+        '-Wswitch-enum',
     ]
 else
     test_wflags = []
