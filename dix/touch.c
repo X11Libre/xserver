@@ -425,7 +425,40 @@ TouchEventHistoryPush(TouchPointInfoPtr ti, const DeviceEvent *ev)
         break;
     case ET_TouchEnd:
         return;                 /* no TouchEnd events in the history */
-    default:
+    case ET_KeyPress:
+    case ET_KeyRelease:
+    case ET_ButtonPress:
+    case ET_ButtonRelease:
+    case ET_Motion:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_GesturePinchBegin:
+    case ET_GesturePinchUpdate:
+    case ET_GesturePinchEnd:
+    case ET_GestureSwipeBegin:
+    case ET_GestureSwipeUpdate:
+    case ET_GestureSwipeEnd:
+    case ET_Internal:
+        /* only touch begin/update/end events may be stored in the history */
         return;
     }
 
@@ -567,7 +600,44 @@ TouchConvertToPointerEvent(const InternalEvent *event,
         nevents = 2;            /* motion + release */
         ptrtype = ET_ButtonRelease;
         break;
+    case ET_KeyPress:
+    case ET_KeyRelease:
+    case ET_ButtonPress:
+    case ET_ButtonRelease:
+    case ET_Motion:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_GesturePinchBegin:
+    case ET_GesturePinchUpdate:
+    case ET_GesturePinchEnd:
+    case ET_GestureSwipeBegin:
+    case ET_GestureSwipeUpdate:
+    case ET_GestureSwipeEnd:
+    case ET_Internal:
+        /* only touch begin/update/end can be converted to pointer events */
+        BUG_WARN_MSG(1, "Invalid event type %d\n", event->any.type);
+        return 0;
     default:
+        /* defensive: invalid (non-enum) input */
         BUG_WARN_MSG(1, "Invalid event type %d\n", event->any.type);
         return 0;
     }
@@ -610,7 +680,40 @@ TouchGetPointerEventType(const InternalEvent *event)
     case ET_TouchEnd:
         type = ET_ButtonRelease;
         break;
-    default:
+    case ET_KeyPress:
+    case ET_KeyRelease:
+    case ET_ButtonPress:
+    case ET_ButtonRelease:
+    case ET_Motion:
+    case ET_TouchOwnership:
+    case ET_Enter:
+    case ET_Leave:
+    case ET_FocusIn:
+    case ET_FocusOut:
+    case ET_ProximityIn:
+    case ET_ProximityOut:
+    case ET_DeviceChanged:
+    case ET_Hierarchy:
+    case ET_DGAEvent:
+    case ET_RawKeyPress:
+    case ET_RawKeyRelease:
+    case ET_RawButtonPress:
+    case ET_RawButtonRelease:
+    case ET_RawMotion:
+    case ET_RawTouchBegin:
+    case ET_RawTouchUpdate:
+    case ET_RawTouchEnd:
+    case ET_XQuartz:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+    case ET_GesturePinchBegin:
+    case ET_GesturePinchUpdate:
+    case ET_GesturePinchEnd:
+    case ET_GestureSwipeBegin:
+    case ET_GestureSwipeUpdate:
+    case ET_GestureSwipeEnd:
+    case ET_Internal:
+        /* only touch begin/update/end have a pointer-emulation type */
         break;
     }
     return type;
