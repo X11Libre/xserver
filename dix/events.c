@@ -2555,9 +2555,10 @@ Bool MaybeDeliverEventToClient(WindowPtr pWin, xEvent *pEvents,
         if (dixClientForWindow(pWin) == dontClient)
             return FALSE;
 #ifdef XINERAMA
-        if (PanoramiXIsEnabled() && pWin->drawable.pScreen->myNum)
+        if (PanoramiXIsSlaveScreen(pWin->drawable.pScreen)) {
             return XineramaTryClientEventsResult(dixClientForWindow(pWin), NullGrab,
                                                  pWin->eventMask, filter);
+        }
 #endif /* XINERAMA */
         if (XaceHookReceiveAccess(dixClientForWindow(pWin), pWin, pEvents, 1))
             return TRUE;           /* don't send, but pretend we did */
@@ -2569,9 +2570,10 @@ Bool MaybeDeliverEventToClient(WindowPtr pWin, xEvent *pEvents,
             if (SameClient(other, dontClient))
                 return FALSE;
 #ifdef XINERAMA
-            if (PanoramiXIsEnabled() && pWin->drawable.pScreen->myNum)
+            if (PanoramiXIsSlaveScreen(pWin->drawable.pScreen)) {
                 return XineramaTryClientEventsResult(dixClientForOtherClients(other), NullGrab,
                                                      other->mask, filter);
+            }
 #endif /* XINERAMA */
             if (XaceHookReceiveAccess(dixClientForOtherClients(other), pWin, pEvents, 1))
                 return TRUE;       /* don't send, but pretend we did */
@@ -2950,10 +2952,9 @@ DeliverEvents(WindowPtr pWin, xEvent *xE, size_t count, WindowPtr otherParent)
     DeviceIntRec dummy;
     int deliveries;
 
-#ifdef XINERAMA
-    if (PanoramiXIsEnabled() && pWin->drawable.pScreen->myNum)
+    if (PanoramiXIsSlaveScreen(pWin->drawable.pScreen)) {
         return count;
-#endif /* XINERAMA */
+    }
 
     if (!count)
         return 0;
@@ -5958,10 +5959,9 @@ CheckCursorConfinement(WindowPtr pWin)
     GrabPtr grab;
     WindowPtr confineTo;
 
-#ifdef XINERAMA
-    if (PanoramiXIsEnabled() && pWin->drawable.pScreen->myNum)
+    if (PanoramiXIsSlaveScreen(pWin->drawable.pScreen)) {
         return;
-#endif /* XINERMA */
+    }
 
     for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next) {
         if (DevHasCursor(pDev)) {
