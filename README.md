@@ -1,5 +1,8 @@
 # XLibre Xserver
 
+[![GetMerged Scorecard](https://getmerged.abhishekco.de/api/badge/X11Libre/xserver)](https://getmerged.abhishekco.de/X11Libre/xserver)
+
+
 The XLibre Xserver is the community-managed display server for the [X Window System Protocol Version 11 (Wikipedia)](https://en.wikipedia.org/wiki/X_Window_System_core_protocol), in short, X11.
 
 <p>
