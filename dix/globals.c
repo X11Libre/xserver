@@ -123,3 +123,5 @@ Bool autosetDPI = FALSE;
 
 Bool explicit_display = FALSE;
 char *ConnectionInfo;
+
+Bool globalIsolateKeyboard = FALSE;

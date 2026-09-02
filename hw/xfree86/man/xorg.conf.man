@@ -692,6 +692,14 @@ Allow clients with a different byte-order than the server. Disabled by default.
 Only the first successfully probed driver is allowed to add screens to the current layout, others may
 add secondary GPU screens only (e.g., if non-primary GPUs are used for offloading).
 Disabled by default.
+.TP 7
+.BI "Option \*qIsolateKeyboard\*q \*q" boolean \*q
+Disallows delivery of raw keyboard input events to clients that have not
+grabbed the keyboard. Disallows delivery of XI2 keyboard events to
+clients that are either unfocused or do not own the window. Disallows
+listening keyboard input events through RECORD extension. As a result,
+prevents common keylogging methods that depend on X server features.
+Disabled by default.
 .SH "MODULE SECTION"
 The
 .B Module
