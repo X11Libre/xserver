@@ -51,6 +51,10 @@ glamor_font_get(ScreenPtr screen, FontPtr font)
     CharInfoPtr         glyph;
     unsigned long       count;
 
+    if (glamor_priv->flags & GLAMOR_NO_RENDER_ACCEL) {
+        return NULL;
+    }
+
     if (!glamor_glsl_has_ints(glamor_priv))
         return NULL;
 

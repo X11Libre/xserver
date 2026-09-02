@@ -91,8 +91,7 @@ fbdevInitAccel(ScreenPtr pScreen)
         }
     }
 
-    if (scrpriv->dri_fd < 0 ||
-        flags & GLAMOR_NO_RENDER_ACCEL) {
+    if (scrpriv->dri_fd < 0) {
         flags |= GLAMOR_NO_DRI3;
     }
 
@@ -121,8 +120,7 @@ fbdevInitAccel(ScreenPtr pScreen)
 #endif
 
 #ifdef XV
-    /* X-Video needs glamor render accel */
-    if (config->fbXVAllowed && !(flags & GLAMOR_NO_RENDER_ACCEL)) {
+    if (config->fbXVAllowed) {
         kd_glamor_xv_init(pScreen);
     }
 #endif

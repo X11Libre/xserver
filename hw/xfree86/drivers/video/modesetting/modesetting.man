@@ -80,7 +80,8 @@ This defaults to enabled for ASPEED and Matrox G200 devices, and disabled
 otherwise.
 .TP
 .BI "Option \*qAccelMethod\*q \*q" string \*q
-One of \*qglamor\*q or \*qnone\*q.  Default: glamor.
+One of \*qglamor\*q or \*qdri3_only\*q or \*qnone\*q.  Default: glamor.
+dri3_only means that glamor is used only for DRI3, but not for accelerating any other pixmaps.
 .TP
 .BI "Option \*qPageFlip\*q \*q" boolean \*q
 Enable DRI3 page flipping.  The default is

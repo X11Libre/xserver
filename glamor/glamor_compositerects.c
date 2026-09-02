@@ -195,6 +195,8 @@ glamor_composite_rectangles(CARD8 op,
         return;
     }
 
+    need_free_region = TRUE;
+
     pixmap = glamor_get_drawable_pixmap(dst->pDrawable);
     priv = glamor_get_pixmap_private(pixmap);
 
@@ -204,8 +206,6 @@ glamor_composite_rectangles(CARD8 op,
         DEBUGF("%s: fallback, dst has an alpha-map\n", __func__);
         goto fallback;
     }
-
-    need_free_region = TRUE;
 
     DEBUGF("%s: drawable extents (%d, %d),(%d, %d) x %d\n",
            __func__,

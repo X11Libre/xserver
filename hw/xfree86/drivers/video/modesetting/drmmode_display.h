@@ -99,6 +99,7 @@ typedef struct {
     /* Broken-out options. */
     OptionInfoPtr Options;
 
+    Bool no_accel;
     Bool glamor;
     Bool glamor_gbm;
     Bool glamor_gbm_device;
