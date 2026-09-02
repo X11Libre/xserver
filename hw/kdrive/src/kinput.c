@@ -65,7 +65,7 @@
 #define DEV_INPUT_EVENT_PREFIX_LEN (sizeof(DEV_INPUT_EVENT_PREFIX) - 1)
 #endif
 
-#define AtomFromName(x) MakeAtom(x, strlen(x), 1)
+#define AtomFromName(x) MakeAtom((x), strlen((x)), 1)
 
 #define KD_KEY_COUNT    248
 #define KD_MIN_KEYCODE  8
@@ -2120,7 +2120,7 @@ KdWakeupHandler(ScreenPtr pScreen, int result)
         KdProcessSwitch();
 }
 
-#define KdScreenOrigin(pScreen) (&(KdGetScreenPriv(pScreen)->screen->origin))
+#define KdScreenOrigin(pScreen) (&(KdGetScreenPriv((pScreen))->screen->origin))
 
 static Bool
 KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
