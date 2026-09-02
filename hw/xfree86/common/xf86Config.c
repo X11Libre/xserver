@@ -138,7 +138,6 @@ static Bool configInput(InputInfoPtr pInfo, XF86ConfInputPtr conf_input,
 static Bool configDisplay(DispPtr displayp, XF86ConfDisplayPtr conf_display);
 static Bool addDefaultModes(MonPtr monitorp);
 
-static void configDRI(XF86ConfDRIPtr drip);
 static void configExtensions(XF86ConfExtensionsPtr conf_ext);
 
 /*
@@ -2155,27 +2154,6 @@ configDevice(GDevPtr devicep, XF86ConfDevicePtr conf_device, Bool active, Bool g
 }
 
 static void
-configDRI(XF86ConfDRIPtr drip)
-{
-    struct group *grp;
-
-    xf86ConfigDRI.group = -1;
-    xf86ConfigDRI.mode = 0;
-
-    if (drip) {
-        if (drip->dri_group_name) {
-            if ((grp = getgrnam(drip->dri_group_name)))
-                xf86ConfigDRI.group = grp->gr_gid;
-        }
-        else {
-            if (drip->dri_group >= 0)
-                xf86ConfigDRI.group = drip->dri_group;
-        }
-        xf86ConfigDRI.mode = drip->dri_mode;
-    }
-}
-
-static void
 configExtensions(XF86ConfExtensionsPtr conf_ext)
 {
     XF86OptionPtr o;
@@ -2470,7 +2448,6 @@ xf86HandleConfigFile(Bool autoconfig)
     /* Now process everything else */
     configFiles(xf86configptr->conf_files);
     configExtensions(xf86configptr->conf_extensions);
-    configDRI(xf86configptr->conf_dri);
 
     checkInput(&xf86ConfigLayout, implicit_layout);
 
