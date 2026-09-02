@@ -423,6 +423,7 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
     };
     InternalEvent *barrier_events = events;
     DeviceIntPtr master;
+    bool can_emit = events && nevents;
 
     if (nevents)
         *nevents = 0;
@@ -490,9 +491,11 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
 
         /* root x/y is filled in later */
 
-        barrier_events->barrier_event = ev;
-        barrier_events++;
-        *nevents += 1;
+        if (can_emit) {
+            barrier_events->barrier_event = ev;
+            barrier_events++;
+            *nevents += 1;
+        }
     }
 
     xorg_list_for_each_entry(c, &cs->barriers, entry) {
@@ -527,9 +530,11 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
 
         /* root x/y is filled in later */
 
-        barrier_events->barrier_event = ev;
-        barrier_events++;
-        *nevents += 1;
+        if (can_emit) {
+            barrier_events->barrier_event = ev;
+            barrier_events++;
+            *nevents += 1;
+        }
 
         /* If we've left the hit box, this is the
          * start of a new event ID. */
