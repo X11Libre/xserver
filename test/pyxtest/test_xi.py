@@ -6,8 +6,13 @@ import struct
 import time
 
 import pytest
-
+from inputtest import InputTestConnection
 from proto import x11, xfixes, xi, xtest
+from proto.xi import (
+    XI_GestureSwipeBegin,
+    XI_GestureSwipeEnd,
+    XI_GestureSwipeUpdate,
+)
 from xclient import Extension, X11Error, X11Reply
 
 
@@ -712,3 +717,184 @@ class TestXIBarrier:
         assert xserver.is_alive, (
             "Server crashed - barrier leave event buffer overflow (ZDI-CAN-31938)"
         )
+
+
+# --- Xorg config template for inputtest gesture device ---
+
+_GESTURE_XORG_CONF = """\
+Section "ServerFlags"
+    Option "AutoAddDevices" "false"
+    Option "AutoEnableDevices" "false"
+    Option "AllowEmptyInput" "true"
+EndSection
+
+Section "Device"
+    Identifier "DummyCard"
+    Driver "modesetting"
+EndSection
+
+Section "Screen"
+    Identifier "DummyScreen"
+    Device "DummyCard"
+EndSection
+
+Section "InputDevice"
+    Identifier "GestureDevice"
+    Driver "inputtest"
+    Option "DeviceType" "PointerGesture"
+    Option "SocketPath" "{socket_path}"
+EndSection
+
+Section "ServerLayout"
+    Identifier "GestureLayout"
+    Screen "DummyScreen"
+    InputDevice "GestureDevice" "CorePointer"
+EndSection
+"""
+
+
+class TestGestureWithInputTestDriver:
+    """
+    Gesture tests using the xf86-input-inputtest driver. XTEST doesn't
+    support gestures so the only way to emulate gestures are uinput (requires
+    root) or Xorg tests with the inputtest driver.
+    """
+
+    @pytest.fixture
+    def xserver_args(self, tmp_path):
+        """Override xserver_args to provide a custom Xorg config with
+        the inputtest driver configured for PointerGesture events."""
+        # Create a unique socket path for this test
+        socket_path = tmp_path / "inputtest.sock"
+        # Store it so the test can access it
+        self._inputtest_socket_path = socket_path
+
+        # Write the Xorg config to a temp file
+        conf_path = str(tmp_path / "gesture-test.conf")
+        with open(conf_path, "w") as f:
+            f.write(_GESTURE_XORG_CONF.format(socket_path=socket_path))
+
+        # These args are appended after the defaults in _build_command.
+        # Since Xorg takes the last occurrence of -config, our -config
+        # overrides the -config /dev/null from the builddir defaults.
+        return ["-config", conf_path, "-configdir", "/dev/null"]
+
+    @pytest.mark.asan
+    @pytest.mark.xorg_only
+    def test_gesture_sprite_uaf_on_window_destroy(self, xserver, xi_xclient):
+        """
+        ZDI-CAN-32753: Use-after-free in DeliverOneGestureEvent via
+        gesture sprite after child window destruction.
+
+        When a gesture begins (e.g. GestureSwipeBegin),
+        ``GestureBuildSprite`` copies the current pointer sprite trace
+        into the gesture's sprite. This trace contains raw ``WindowPtr``
+        pointers to each window from the root down to the window under
+        the pointer (e.g. root -> parent -> child).
+
+        If the child window is destroyed while the gesture is active,
+        the ``WindowPtr`` in the gesture sprite becomes dangling.
+        A subsequent gesture update event triggers
+        ``DeliverOneGestureEvent`` which walks the sprite trace and
+        dereferences the freed ``WindowPtr``, causing a use-after-free.
+
+        Test sequence:
+            1. Start Xorg with inputtest driver (PointerGesture device)
+            2. Create parent window, create child window inside it
+            3. Warp pointer into child (builds sprite trace: root,
+               parent, child)
+            4. XISelectEvents for gesture swipe on parent
+            5. Send GestureSwipeBegin via inputtest (captures sprite)
+            6. DestroyWindow(child) -- sprite retains dangling pointer
+            7. Send GestureSwipeUpdate -- dereferences freed WindowPtr
+            8. Assert server is still alive (ASAN catches the UAF)
+        """
+        conn = xi_xclient
+        opcode = conn.query_extension(Extension.XI).opcode
+
+        # 1. Create parent window (200x200)
+        parent_wid = conn.create_window(width=200, height=200)
+        req = x11.MapWindowRequest(window=parent_wid)
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # 2. Create child window (100x100 inside parent)
+        child_wid = conn.create_window(
+            width=100, height=100, parent=parent_wid, x=10, y=10
+        )
+        req = x11.MapWindowRequest(window=child_wid)
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # 3. Warp pointer into child to build the sprite trace
+        #    (root -> parent -> child)
+        req = x11.WarpPointerRequest(dst_window=child_wid, dst_x=50, dst_y=50)
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # 4. XISelectEvents on parent for gesture swipe events.
+        #    Gesture swipe event types: Begin=30, Update=31, End=32
+        #    We need a mask with bits 30-32 set.
+        #    Bit 30 is in byte 3 (30//8=3, bit 30%8=6), bit 0x40
+        #    Bit 31 is in byte 3 (31//8=3, bit 31%8=7), bit 0x80
+        #    Bit 32 is in byte 4 (32//8=4, bit 32%8=0), bit 0x01
+        #    We need at least 5 bytes of mask, padded to 8 (2 words).
+        mask_bytes = bytearray(8)
+
+        def set_bit(mask: bytearray, bit: int):
+            mask[bit // 8] |= 1 << (bit % 8)
+
+        set_bit(mask_bytes, XI_GestureSwipeBegin)
+        set_bit(mask_bytes, XI_GestureSwipeEnd)
+        set_bit(mask_bytes, XI_GestureSwipeUpdate)
+        req = xi.XISelectEventsRequest(
+            opcode=opcode,
+            window=parent_wid,
+            masks=[(xi.XIAllDevices, bytes(mask_bytes))],
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # 5. Connect to the inputtest driver and send gesture begin
+        socket_path = self._inputtest_socket_path
+        it_conn = InputTestConnection.connect(socket_path, timeout_secs=1.0)
+
+        it_conn.send_gesture_swipe(
+            XI_GestureSwipeBegin, num_touches=3, delta_x=1.0, delta_y=1.0
+        )
+        it_conn.sync()
+
+        # Give the server time to process the begin event
+        time.sleep(0.2)
+
+        # 6. Destroy the child window -- the gesture sprite still holds
+        #    a pointer to the now-freed WindowPtr
+        req = x11.DestroyWindowRequest(window=child_wid)
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # Give the server time to process the destroy
+        time.sleep(0.2)
+
+        # 7. Send gesture swipe update -- this triggers
+        #    DeliverOneGestureEvent which walks the sprite trace
+        #    and dereferences the freed child WindowPtr (UAF)
+        it_conn.send_gesture_swipe(
+            XI_GestureSwipeUpdate, num_touches=3, delta_x=1.0, delta_y=1.0
+        )
+        it_conn.sync()
+
+        # Give ASAN time to detect and report the UAF
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - gesture sprite use-after-free on window "
+            "destruction (ZDI-CAN-32753)"
+        )
+
+        # 8. Cleanup: send gesture end
+        it_conn.send_gesture_swipe(
+            XI_GestureSwipeEnd, num_touches=3, delta_x=0.0, delta_y=0.0
+        )
+        it_conn.sync()
+        it_conn.close()

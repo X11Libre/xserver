@@ -14,6 +14,7 @@ XGetDeviceProperty = 39
 # XI2 minor opcodes
 XIChangeCursor = 42
 XIChangeHierarchy = 43
+XISelectEvents = 46
 XIQueryVersion = 47
 XIQueryDevice = 48
 XIPassiveGrabDevice = 54
@@ -58,6 +59,14 @@ XIGrabModeAsync = 1
 XIAllDevices = 0
 XIAllMasterDevices = 1
 XIAnyModifier = 1 << 31
+
+# Event type
+XI_GestureSwipeBegin = 30
+XI_GestureSwipeUpdate = 31
+XI_GestureSwipeEnd = 32
+XI_GesturePinchBegin = 25
+XI_GesturePinchUpdate = 26
+XI_GesturePinchEnd = 27
 
 # Grab status codes (returned as X11 error codes when used as
 # ProcXIPassiveGrabDevice return values)
@@ -515,6 +524,73 @@ class XIChangeHierarchyRequest:
             0,  # pad1
         )
         return header + self.changes_data
+
+
+@dataclass
+class XISelectEventsRequest:
+    """XISelectEvents request (XI2 minor opcode 46).
+
+    Wire format (xXISelectEventsReq):
+        CARD8    reqType         (XI major opcode)
+        CARD8    ReqType         (46)
+        CARD16   length
+        CARD32   window
+        CARD16   num_masks
+        CARD16   pad
+
+    Followed by num_masks * xXIEventMask:
+        CARD16   deviceid
+        CARD16   mask_len        (in 4-byte words)
+        CARD8    mask[]          (mask_len * 4 bytes)
+
+    The mask is a bitmask where bit N selects event type N.
+    """
+
+    opcode: int
+    window: int
+    masks: list[tuple[int, bytes]]
+    """List of (deviceid, mask_bytes) tuples."""
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        num_masks = len(self.masks)
+
+        header = struct.pack(
+            f"{byte_order}BBH I HH",
+            self.opcode,
+            XISelectEvents,
+            0,  # placeholder for length
+            self.window,
+            num_masks,
+            0,  # pad
+        )
+
+        mask_data = b""
+        for deviceid, mask_bytes in self.masks:
+            # Pad mask to 4-byte boundary
+            padded = mask_bytes + b"\x00" * ((4 - len(mask_bytes) % 4) % 4)
+            mask_len = len(padded) // 4
+            mask_data += struct.pack(
+                f"{byte_order}HH",
+                deviceid,
+                mask_len,
+            )
+            mask_data += padded
+
+        total = len(header) + len(mask_data)
+        length = total // 4
+
+        # Patch the length field
+        header = struct.pack(
+            f"{byte_order}BBH I HH",
+            self.opcode,
+            XISelectEvents,
+            length,
+            self.window,
+            num_masks,
+            0,  # pad
+        )
+
+        return header + mask_data
 
 
 @dataclass
