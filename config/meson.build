@@ -4,15 +4,6 @@ srcs_config = [
 
 config_dep = [common_dep]
 
-if build_dbus
-    srcs_config += 'dbus-core.c'
-    config_dep += dbus_dep
-endif
-
-if build_hal
-    srcs_config += 'hal.c'
-    config_dep += hal_dep
-endif
 
 if build_udev
     srcs_config += 'udev.c'

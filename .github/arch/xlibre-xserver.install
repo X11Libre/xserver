@@ -18,8 +18,8 @@ post_install() {
         Option "IgnoreABI" "true"
     EndSection
 
->>> xlibre-xserver has now the ability to run without root rights with
-    the help of systemd-logind. xserver will fail to run if not launched
+>>> xlibre-xserver has the ability to run without root rights with
+    the help of seat management (libseat / seatd). xserver will fail to run if not launched
     from the same virtual terminal as was used to log in.
     Without root rights, log files will be in ~/.local/share/xorg/ directory.
 

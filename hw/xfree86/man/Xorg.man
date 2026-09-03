@@ -235,7 +235,7 @@ is anything other than \(oqPCI\(cq.
 .TP 8
 .B \-keeptty
 Prevent the server from detaching its initial controlling terminal. If you
-want to use systemd-logind integration you must specify this option.
+want to use seat management (e.g. seatd/libseat) integration you must specify this option.
 Not all platforms support (or can use) this option.
 .TP 8
 .BI \-keyboard " keyboard-name"
