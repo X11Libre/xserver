@@ -75,6 +75,8 @@ vfbKeybdProc(DeviceIntPtr pDevice, int onoff)
         break;
     case DEVICE_CLOSE:
         break;
+    default:
+        break;
     }
     return Success;
 }
@@ -127,6 +129,9 @@ vfbMouseProc(DeviceIntPtr pDevice, int onoff)
         break;
 
     case DEVICE_CLOSE:
+        break;
+
+    default:
         break;
     }
     return Success;

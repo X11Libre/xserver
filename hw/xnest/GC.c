@@ -310,6 +310,9 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
             nRects,
             (xcb_rectangle_t*)pValue);
         break;
+
+    default:
+        break;
     }
 
     switch (type) {

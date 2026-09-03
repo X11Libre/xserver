@@ -100,6 +100,15 @@ xf86parseFlagsSection(XF86ConfFlagsPtr ptr)
         int strvalue = FALSE;
         int tokentype;
 
+        if (token == DEFAULTLAYOUT) {
+            strvalue = TRUE;
+            hasvalue = TRUE;
+        }
+        else if (token == BLANKTIME || token == STANDBYTIME ||
+                 token == SUSPENDTIME || token == OFFTIME) {
+            hasvalue = TRUE;
+        }
+
         switch (token) {
         case COMMENT:
             ptr->flg_comment = xf86addComment(ptr->flg_comment, xf86_lex_val.str);
@@ -108,15 +117,12 @@ xf86parseFlagsSection(XF86ConfFlagsPtr ptr)
             break;
             /*
              * these old keywords are turned into standard generic options.
-             * we fall through here on purpose
              */
         case DEFAULTLAYOUT:
-            strvalue = TRUE;
         case BLANKTIME:
         case STANDBYTIME:
         case SUSPENDTIME:
         case OFFTIME:
-            hasvalue = TRUE;
         case DONTZAP:
         case DONTZOOM:
         case DISABLEVIDMODE:

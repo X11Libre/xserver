@@ -142,6 +142,9 @@ xnestCreateColormap(ColormapPtr pCmap)
 
     case DirectColor:          /* read and write */
         break;
+
+    default:
+        break;
     }
 
     return TRUE;
