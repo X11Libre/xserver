@@ -12,7 +12,7 @@ shared_module(
     install_dir: module_abi_dir,
 )
 
-shared_module(
+shadow_lib = shared_module(
     'shadow',
     'shmodule.c',
 
@@ -27,7 +27,7 @@ shared_module(
 )
 
 if build_glx
-    shared_module(
+    glx_lib = shared_module(
         'glx',
         [ 'glxmodule.c', srcs_glxdri2 ],
 

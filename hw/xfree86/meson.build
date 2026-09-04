@@ -131,6 +131,20 @@ if build_vgahw
     subdir('vgahw')
 endif
 
+# For symbol presence testing only
+xorgserver_lib = shared_library(
+    'xorgserver',
+    srcs_xorg,
+    include_directories: [inc, xorg_inc],
+    link_whole: xorg_link,
+    dependencies: xorg_deps,
+    link_args: linker_export_flags,
+    c_args: xorg_c_args,
+    install: false,
+)
+
+xorgserver_dep = declare_dependency(link_with: xorgserver_lib)
+
 subdir('drivers')
 
 install_symlink(
@@ -173,20 +187,6 @@ executable('gtf',
     c_args: xorg_c_args,
     install: true,
 )
-
-# For symbol presence testing only
-xorgserver_lib = shared_library(
-    'xorgserver',
-    srcs_xorg,
-    include_directories: [inc, xorg_inc],
-    link_whole: xorg_link,
-    dependencies: xorg_deps,
-    link_args: linker_export_flags,
-    c_args: xorg_c_args,
-    install: false,
-)
-
-xorgserver_dep = declare_dependency(link_with: xorgserver_lib)
 
 install_man(configure_file(
     input: 'man/Xorg.man',

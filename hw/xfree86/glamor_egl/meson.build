@@ -4,7 +4,7 @@ glamoregl_src = [
     'glamor_xf86_xv.c',
 ]
 
-shared_module(
+glamoregl_lib = shared_module(
     'glamoregl',
     glamoregl_src,
 

@@ -8,7 +8,7 @@ modesetting_srcs = [
     'vblank.c',
 ]
 
-shared_module(
+modesetting_drv_lib = shared_module(
     'modesetting_drv',
     modesetting_srcs,
     name_prefix: '',
@@ -29,15 +29,15 @@ shared_module(
 # Test that we don't have any unresolved symbols from our module to Xorg.
 xorg_build_root = join_paths(meson.project_build_root(), 'hw', 'xfree86')
 symbol_test_args = []
-symbol_test_args += join_paths(xorg_build_root, 'libxorgserver.so')
-symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libshadow.so')
+symbol_test_args += xorgserver_lib.full_path()
+symbol_test_args += shadow_lib.full_path()
 if build_glx
-  symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libglx.so')
+  symbol_test_args += glx_lib.full_path()
 endif
-if build_glamor
-    symbol_test_args += join_paths(xorg_build_root, 'glamor_egl', 'libglamoregl.so')
+if build_glamor and build_gbm
+    symbol_test_args += glamoregl_lib.full_path()
 endif
-symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video', 'modesetting', 'modesetting_drv.so')
+symbol_test_args += modesetting_drv_lib.full_path()
 
 install_man(configure_file(
     input: 'modesetting.man',
