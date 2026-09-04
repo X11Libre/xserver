@@ -34,7 +34,7 @@ symbol_test_args += shadow_lib.full_path()
 if build_glx
   symbol_test_args += glx_lib.full_path()
 endif
-if build_glamor
+if gbm_dep.found()
     symbol_test_args += glamoregl_lib.full_path()
 endif
 symbol_test_args += modesetting_drv_lib.full_path()
