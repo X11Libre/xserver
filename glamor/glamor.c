@@ -149,15 +149,24 @@ glamor_clear_pixmap(PixmapPtr pixmap)
     glamor_screen_private *glamor_priv;
     glamor_pixmap_private *pixmap_priv;
     const struct glamor_format *pixmap_format;
+    int i;
 
     glamor_priv = glamor_get_screen_private(screen);
     pixmap_priv = glamor_get_pixmap_private(pixmap);
     pixmap_format = glamor_format_for_pixmap(pixmap);
 
     BUG_RETURN(!pixmap_priv);
-    assert(pixmap_priv->fbo != NULL);
+    if (!pixmap_priv->fbo)
+        return;
 
-    glamor_pixmap_clear_fbo(glamor_priv, pixmap_priv->fbo, pixmap_format);
+    if (pixmap_priv->fbo_array) {
+        for (i = 0; i < pixmap_priv->block_wcnt * pixmap_priv->block_hcnt; i++) {
+            if (pixmap_priv->fbo_array[i])
+                glamor_pixmap_clear_fbo(glamor_priv, pixmap_priv->fbo_array[i], pixmap_format);
+        }
+    } else {
+        glamor_pixmap_clear_fbo(glamor_priv, pixmap_priv->fbo, pixmap_format);
+    }
 }
 
 uint32_t
@@ -273,6 +282,7 @@ glamor_create_pixmap(ScreenPtr screen, int w, int h, int depth,
     }
 
     glamor_pixmap_attach_fbo(pixmap, fbo);
+    glamor_clear_pixmap(pixmap);
 
     return pixmap;
 }
