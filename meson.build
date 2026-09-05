@@ -47,6 +47,7 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         '-Wold-style-definition',
         '-Wunused',
         '-Wuninitialized',
+        '-Wconditional-uninitialized',
         '-Wshadow',
         '-Wmissing-noreturn',
         '-Wmissing-format-attribute',

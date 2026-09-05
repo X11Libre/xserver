@@ -172,7 +172,7 @@ DRIOpenDRMMaster(ScrnInfoPtr pScrn,
     DRIEntPrivPtr pDRIEntPriv;
     DRIEntPrivRec tmp;
     int count;
-    int err;
+    int err = 0;
 
     if (DRIEntPrivIndex == -1)
         DRIEntPrivIndex = xf86AllocateEntityPrivateIndex();

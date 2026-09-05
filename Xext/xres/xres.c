@@ -626,7 +626,7 @@ AddResourceSizeValue(void *ptr, XID id, RESTYPE type, void *cdata)
     if (ctx->status == Success &&
         !ht_find(ctx->visitedResources, &id)) {
         bool ok = TRUE;
-        HashTable ht;
+        HashTable ht = NULL;
         HtGenericHashSetupRec htSetup = {
             .keySize = sizeof(void*)
         };

@@ -764,7 +764,7 @@ AllocateLinear(FBManagerPtr offman, int size, int granularity, void *privData)
 {
     ScreenPtr pScreen = offman->pScreen;
     FBLinearLinkPtr linear = NULL;
-    int offset, end;
+    int offset = 0, end;
 
     if (size <= 0)
         return NULL;

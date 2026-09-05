@@ -314,7 +314,7 @@ KdSubRotation(Rotation a, Rotation b)
 void
 KdParseScreen(KdScreenInfo * screen, const char *arg)
 {
-    char delim;
+    char delim = '\0';
     char save[1024];
     int i;
     int pixels, mm;

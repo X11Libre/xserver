@@ -885,7 +885,7 @@ static Status
 MouseInit(KdPointerInfo * pi)
 {
     int i;
-    int fd;
+    int fd = -1;
     Kmouse *km;
 
     if (!pi)

@@ -549,7 +549,7 @@ TouchConvertToPointerEvent(const InternalEvent *event,
                            InternalEvent *motion_event,
                            InternalEvent *button_event)
 {
-    int ptrtype;
+    int ptrtype = 0;
     int nevents = 0;
 
     BUG_RETURN_VAL(!event, 0);

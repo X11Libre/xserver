@@ -425,7 +425,7 @@ ms_get_crtc_ust_msc(xf86CrtcPtr crtc, CARD64 *ust, CARD64 *msc)
     ScreenPtr screen = crtc->randr_crtc->pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
-    uint64_t kernel_msc;
+    uint64_t kernel_msc = 0;
 
     if (!ms_get_kernel_ust_msc(crtc, &kernel_msc, ust))
         return BadMatch;
@@ -566,7 +566,7 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     uint32_t seq = (uint32_t) user_data;
     xf86CrtcPtr crtc = NULL;
     drmmode_crtc_private_ptr drmmode_crtc;
-    uint64_t msc, next_msc = UINT64_MAX;
+    uint64_t msc = UINT64_MAX, next_msc = UINT64_MAX;
 
     /* Handle the seq for this event first in order to get the CRTC */
     xorg_list_for_each_entry(q, &ms_drm_queue, list) {

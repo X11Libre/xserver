@@ -227,7 +227,7 @@ static int
 SELinuxLabelResource(XaceResourceAccessRec * rec, SELinuxSubjectRec * subj,
                      SELinuxObjectRec * obj, security_class_t class)
 {
-    int offset;
+    int offset = -1;
     security_id_t tsid;
 
     /* Check for a create context */

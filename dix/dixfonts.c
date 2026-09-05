@@ -587,8 +587,8 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
     FontPathElementPtr fpe;
     int err = Successful;
     FontNamesPtr names = NULL;
-    char *name, *resolved = NULL;
-    int namelen, resolvedlen = 0;
+    char *name = NULL, *resolved = NULL;
+    int namelen = 0, resolvedlen = 0;
     int aliascount = 0;
 
     if (client->clientGone) {
@@ -865,8 +865,8 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
     int err = Successful;
     char *name = NULL;
     int namelen = 0;
-    int numFonts;
-    FontInfoRec fontInfo, *pFontInfo;
+    int numFonts = 0;
+    FontInfoRec fontInfo, *pFontInfo = NULL;
     int length;
     xFontProp *pFP;
     int aliascount = 0;

@@ -474,7 +474,7 @@ glamor_add_format(ScreenPtr screen, int depth, CARD32 render_format,
      */
     if (rendering_supported && glamor_priv->is_gles) {
         unsigned fbo, tex;
-        int read_format, read_type;
+        int read_format = 0, read_type = 0;
         GLenum status;
 
         glGenTextures(1, &tex);

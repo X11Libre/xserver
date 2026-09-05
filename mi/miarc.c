@@ -389,7 +389,7 @@ miComputeCircleSpans(int lw, xArc * parc, miArcSpanData * spdata)
     int x, y, e;
     int xk, yk, xm, ym, dx, dy;
     int slw, inslw;
-    int inx = 0, iny, ine = 0;
+    int inx = 0, iny = 0, ine = 0;
     int inxk = 0, inyk = 0, inxm = 0, inym = 0;
 
     doinner = -lw;

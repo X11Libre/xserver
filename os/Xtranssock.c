@@ -569,7 +569,7 @@ static XtransConnInfo _XSERVTransSocketOpenCOTSServer (
 static XtransConnInfo _XSERVTransSocketReopenCOTSServer (
     Xtransport *thistrans, int fd, const char *port)
 {
-    XtransConnInfo	ciptr;
+    XtransConnInfo	ciptr = NULL;
     int			i = -1;
 
     prmsg (2,

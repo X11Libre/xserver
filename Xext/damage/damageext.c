@@ -289,8 +289,8 @@ DamageExtCreate(DrawablePtr pDrawable, DamageReportLevel level,
 
 static int doDamageCreate(ClientPtr client, DamageExtPtr *ext, xDamageCreateReq *stuff)
 {
-    DrawablePtr pDrawable;
-    DamageExtPtr pDamageExt;
+    DrawablePtr pDrawable = NULL;
+    DamageExtPtr pDamageExt = NULL;
     DamageReportLevel level;
 
     X_CALL_CHECK_ERR(dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
@@ -599,7 +599,7 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     int rc = doDamageCreate(client, &(damage->ext), stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
         XINERAMA_FOR_EACH_SCREEN_FORWARD({
-            DrawablePtr pDrawable;
+            DrawablePtr pDrawable = NULL;
             DamagePtr pDamage = DamageCreate(PanoramiXDamageReport,
                                              PanoramiXDamageExtDestroy,
                                              DamageReportRawRegion,

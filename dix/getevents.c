@@ -1923,7 +1923,7 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
     double screenx = 0.0, screeny = 0.0;        /* desktop coordinate system */
     double devx = 0.0, devy = 0.0;      /* desktop-wide in device coords */
     int num_events = 0;
-    RawDeviceEvent *raw;
+    RawDeviceEvent *raw = NULL;
     DDXTouchPointInfoPtr ti;
     int need_rawevent = TRUE;
     bool emulate_pointer = FALSE;

@@ -194,7 +194,7 @@ xf86SwitchMode(ScreenPtr pScreen, DisplayModePtr mode)
     ScrnInfoPtr pScr = xf86ScreenToScrn(pScreen);
     ScreenPtr pCursorScreen;
     bool Switched;
-    int px, py;
+    int px = 0, py = 0;
     DeviceIntPtr dev, it;
 
     if (!pScr->vtSema || !mode || !pScr->SwitchMode)

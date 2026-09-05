@@ -140,7 +140,7 @@ PrintDeviceGrabInfo(DeviceIntPtr dev)
     }
     else if (grab->grabtype == XI2) {
         for (int i = 0; i < xi2mask_num_masks(grab->xi2mask); i++) {
-            const unsigned char *mask;
+            const unsigned char *mask = NULL;
             int print;
 
             print = 0;

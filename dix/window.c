@@ -337,7 +337,7 @@ log_grab_info(void *value, XID id, void *cdata)
     }
     else if (pGrab->grabtype == XI2) {
         for (int i = 0; i < xi2mask_num_masks(pGrab->xi2mask); i++) {
-            const unsigned char *mask;
+            const unsigned char *mask = NULL;
             int print;
 
             print = 0;

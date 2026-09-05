@@ -267,7 +267,7 @@ ProcShmQueryVersion(ClientPtr client)
 static int
 shm_access(ClientPtr client, SHMPERM_TYPE * perm, int readonly)
 {
-    int uid, gid;
+    int uid = 0, gid = 0;
     mode_t mask;
     int uidset = 0, gidset = 0;
     LocalClientCredRec *lcc;

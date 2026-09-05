@@ -5683,7 +5683,7 @@ ProcXkbListComponents(ClientPtr client)
     X_REQUEST_FIELD_CARD16(maxNames);
 
     DeviceIntPtr dev;
-    unsigned len;
+    unsigned len = 0;
     unsigned char *str;
     uint8_t size;
     int i;

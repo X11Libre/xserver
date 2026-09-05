@@ -494,7 +494,7 @@ static __GLXdrawable *
 __glXGetDrawable(__GLXcontext * glxc, GLXDrawable drawId, ClientPtr client,
                  int *error)
 {
-    DrawablePtr pDraw;
+    DrawablePtr pDraw = NULL;
     __GLXdrawable *pGlxDraw;
     __GLXconfig *config;
     __GLXscreen *pGlxScreen;
@@ -1808,7 +1808,7 @@ DoGetDrawableAttributes(__GLXclientState * cl, XID drawId)
 {
     ClientPtr client = cl->client;
     __GLXdrawable *pGlxDraw = NULL;
-    DrawablePtr pDraw;
+    DrawablePtr pDraw = NULL;
     CARD32 attributes[20];
     int num = 0, error;
 

@@ -1057,7 +1057,7 @@ checkCoreInputDevices(serverLayoutPtr servlayoutp, Bool implicitLayout)
     const char *pointerMsg = NULL, *keyboardMsg = NULL;
     InputInfoPtr *devs,         /* iterator */
      indp;
-    InputInfoPtr Pointer, Keyboard;
+    InputInfoPtr Pointer = NULL, Keyboard = NULL;
     XF86ConfInputPtr confInput;
     XF86ConfInputRec defPtr, defKbd;
     MessageType from = X_DEFAULT;

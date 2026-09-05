@@ -4284,10 +4284,10 @@ DeliverOneGrabbedEvent(InternalEvent *event, DeviceIntPtr dev,
     xEvent *xE = NULL;
     int count = 0;
     int deliveries = 0;
-    Mask mask;
     GrabInfoPtr grabinfo = &dev->deviceGrab;
     GrabPtr grab = grabinfo->grab;
-    Mask filter;
+    Mask mask = 0;
+    Mask filter = 0;
 
     if (grab->grabtype != level)
         return 0;

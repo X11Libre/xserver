@@ -1230,9 +1230,9 @@ glamor_composite_with_shader(CARD8 op,
     GLfloat dst_xscale, dst_yscale;
     GLfloat mask_xscale = 1, mask_yscale = 1, src_xscale = 1, src_yscale = 1;
     struct shader_key key, key_ca;
-    int dest_x_off, dest_y_off;
-    int source_x_off, source_y_off;
-    int mask_x_off, mask_y_off;
+    int dest_x_off = 0, dest_y_off = 0;
+    int source_x_off = 0, source_y_off = 0;
+    int mask_x_off = 0, mask_y_off = 0;
     pixman_format_code_t saved_source_format = 0;
     float src_matrix[9], mask_matrix[9];
     float *psrc_matrix = NULL, *pmask_matrix = NULL;

@@ -2532,7 +2532,7 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
     drmModePlaneRes *kplane_res;
     drmModePlane *kplane, *best_kplane = NULL;
     drmModeObjectProperties *props;
-    uint32_t blob_id, async_blob_id;
+    uint32_t blob_id = 0, async_blob_id = 0;
     int best_plane = 0;
 
     static drmmode_prop_enum_info_rec plane_type_enums[] = {

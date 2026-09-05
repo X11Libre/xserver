@@ -107,7 +107,7 @@ Ps2Read(int ps2Port, void *closure)
 static Status
 Ps2Init(KdPointerInfo * pi)
 {
-    int ps2Port, i;
+    int ps2Port = -1, i;
 
     if (!pi->path) {
         for (i = 0; i < NUM_PS2_NAMES; i++) {
