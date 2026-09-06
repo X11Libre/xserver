@@ -104,12 +104,12 @@ elif host_machine.system().endswith('bsd') or host_machine.system() == 'dragonfl
         endif
     elif host_machine.cpu_family() == 'x86'
         srcs_xorg_os_support += 'bsd/i386_video.c'
-        if host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd'
+        if host_machine.system() in ['netbsd', 'openbsd']
             os_dep += cc.find_library('i386')
         endif
-    elif host_machine.cpu_family() == 'arm' or host_machine.cpu_family() == 'aarch64'
+    elif host_machine.cpu_family() in ['arm', 'aarch64']
         srcs_xorg_os_support += 'bsd/arm_video.c'
-    elif host_machine.cpu_family() == 'ppc' or host_machine.cpu_family() == 'ppc64'
+    elif host_machine.cpu_family() in ['ppc', 'ppc64']
         srcs_xorg_os_support += 'bsd/ppc_video.c'
     elif host_machine.cpu_family() == 'sparc64'
         srcs_xorg_os_support += 'bsd/sparc64_video.c'
