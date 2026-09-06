@@ -34,7 +34,7 @@ add_project_link_arguments('-fvisibility=hidden', language : 'c')
 conf_data = configuration_data()
 conf_data.set('_DIX_CONFIG_H_', '1')
 
-if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+if cc.get_id() in ['gcc', 'clang']
     test_wflags = [
         '-Wchar-subscripts',
         '-Wpointer-arith',
@@ -199,15 +199,23 @@ endif
 glamor_option = get_option('glamor')
 
 hal_option = get_option('hal')
-if ['windows', 'darwin', 'cygwin'].contains(host_machine.system())
+if host_machine.system() in ['windows', 'darwin', 'cygwin']
     hal_option = 'false'
 endif
 
+<<<<<<< HEAD
 udev_option = get_option('udev')
 udev_kms_option = get_option('udev_kms')
 if not dependency('libudev', required: (udev_option == 'true' or udev_kms_option == 'true')).found()
     udev_option = 'false'
     udev_kms_option = 'false'
+=======
+build_udev = get_option('udev')
+build_udev_kms = get_option('udev_kms')
+if host_machine.system() in ['windows', 'darwin', 'cygwin', 'freebsd', 'netbsd', 'openbsd', 'sunos']
+    build_udev = false
+    build_udev_kms = false
+>>>>>>> 3983c7408c (meson: convert remaining `foo == a or foo == b` to `foo in [a, b]` style)
 endif
 
 build_udev = (udev_option != 'false')
@@ -240,16 +248,47 @@ build_xorg_sdk = get_option('xorg-sdk')
 build_xorg = false
 if (host_machine.system() != 'windows')
     if get_option('xorg') == 'auto'
-        build_xorg = (host_machine.system() != 'darwin' and
-                      host_machine.system() != 'windows')
+        build_xorg = host_machine.system() not in ['darwin', 'windows']
     else
         build_xorg = get_option('xorg') == 'true'
     endif
 endif
 
+<<<<<<< HEAD
 if build_xorg
     build_xorg_sdk = true
     libxcvt_dep = dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: build_xorg)
+=======
+build_xwayland = false
+if (host_machine.system() not in ['darwin', 'windows'] and
+    get_option('xwayland') != 'false')
+    xwayland_required = get_option('xwayland') == 'true'
+    build_glamor = glamor_option in ['true', 'auto']
+
+    xwayland_path = get_option('xwayland-path')
+    if (xwayland_path == '')
+        xwayland_path = get_option('prefix') / get_option('bindir')
+    endif
+
+    xwayland_dep = [
+        dependency('wayland-client', version: wayland_req, required: xwayland_required),
+        dependency('wayland-protocols', version: wayland_protocols_req, required: xwayland_required),
+        dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: xwayland_required),
+    ]
+    if build_glamor
+        xwayland_dep += dependency('xshmfence', version: xshmfence_req, required: xwayland_required)
+        xwayland_dep += dependency('libdrm', version: libdrm_req, required: xwayland_required)
+        xwayland_dep += dependency('epoxy', required: xwayland_required)
+    endif
+
+    build_xwayland = true
+    # check for all the deps being found, to handle 'auto' mode.
+    foreach d: xwayland_dep
+        if not d.found()
+            build_xwayland = false
+        endif
+    endforeach
+>>>>>>> 3983c7408c (meson: convert remaining `foo == a or foo == b` to `foo in [a, b]` style)
 endif
 
 xorgsdkdir = join_paths(get_option('prefix'), get_option('includedir'), 'xorg')
@@ -259,8 +298,7 @@ build_xnest = get_option('xnest') != 'false'
 
 build_xwin = false
 if get_option('xwin') == 'auto'
-    if (host_machine.system() == 'cygwin' or
-        host_machine.system() == 'windows')
+    if host_machine.system() in ['cygwin', 'windows']
             build_xwin = true
     endif
 else
@@ -567,9 +605,7 @@ build_modesetting = libdrm_dep.found() and dri2proto_dep.found() and build_gbm
 
 build_vgahw = false
 if get_option('vgahw') == 'auto'
-    if (host_machine.system() != 'darwin' and
-        host_machine.system() != 'windows' and
-        host_machine.system() != 'cygwin')
+    if host_machine.system() not in ['darwin', 'windows', 'cygwin']
         build_vgahw = true
     endif
 else
@@ -621,9 +657,7 @@ endif
 build_acpi = false
 if (get_option('linux_acpi') == true and
    host_machine.system() == 'linux')
-    if (host_machine.cpu_family() == 'x86' or
-       host_machine.cpu_family() == 'x86_64' or
-       host_machine.cpu_family() == 'ia64')
+    if host_machine.cpu_family() in ['x86', 'x86_64', 'ia64']
         build_acpi = true
     endif
 endif
@@ -916,8 +950,7 @@ if build_xorg_sdk
 
     # On Windows, modules built with the SDK will need to link with server and
     # module implibs to resolve symbols
-    if (host_machine.system() == 'cygwin' or
-        host_machine.system() == 'windows')
+    if host_machine.system() in ['cygwin', 'windows']
         sdkconfig.set('XORG_DRIVER_LIBS', '-lXorg.exe -L\${moduledir} -lshadow -no-undefined')
     endif
 

@@ -302,7 +302,8 @@ supports_syscons = false
 supports_wscons = false
 csrg_based = false
 
-if host_machine.system() == 'freebsd' or host_machine.system() == 'dragonfly'
+if host_machine.system() in ['freebsd', 'dragonfly']
+  supports_pccons = true
   supports_pcvt = true
   supports_syscons = true
   csrg_based = true
@@ -388,17 +389,17 @@ xorg_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
 xorg_data.set_quoted('PCI_TXT_IDS_PATH', '')
 xorg_data.set('XSERVER_PLATFORM_BUS', build_udev_kms ? '1' : false)
 xorg_data.set('WSCONS_SUPPORT',
-              host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd' ? '1' : false)
+              host_machine.system() in ['netbsd', 'openbsd'] ? '1' : false)
 xorg_data.set('HAVE_STROPTS_H', cc.has_header('stropts.h') ? '1' : false)
 xorg_data.set('HAVE_SYS_KD_H', cc.has_header('sys/kd.h') ? '1' : false)
 xorg_data.set('HAVE_SYS_VT_H', cc.has_header('sys/vt.h') ? '1' : false)
 xorg_data.set('HAVE_MODESETTING_DRIVER', build_modesetting ? '1' : false)
 
-if host_machine.system() == 'freebsd' or host_machine.system() == 'dragonfly'
-    if host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64' or host_machine.cpu_family() == 'aarch64'
+if host_machine.system() in ['freebsd', 'dragonfly']
+    if host_machine.cpu_family() in ['x86', 'x86_64', 'aarch64']
         xorg_data.set('USE_DEV_IO', '1')
     endif
-elif host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd'
+elif host_machine.system() in ['netbsd', 'openbsd']
     if host_machine.cpu_family() == 'x86'
         xorg_data.set('USE_I386_IOPL', '1')
     endif

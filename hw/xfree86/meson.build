@@ -72,9 +72,9 @@ if build_dri1
     xorg_link += xorg_dri
 endif
 
-if host_machine.system() == 'cygwin' or host_machine.system() == 'windows'
+if host_machine.system() in ['cygwin', 'windows']
     linker_export_flags = '-Wl,--export-all-symbols'
-elif host_machine.system() == 'sunos' or host_machine.system() == 'darwin'
+elif host_machine.system() in ['sunos', 'darwin']
     linker_export_flags = []
 else
     linker_export_flags = '-Wl,--export-dynamic'

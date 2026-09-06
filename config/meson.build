@@ -19,7 +19,7 @@ if build_udev
     config_dep += udev_dep
 endif
 
-if host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd'
+if host_machine.system() in ['netbsd', 'openbsd']
     srcs_config += 'wscons.c'
 endif
 
