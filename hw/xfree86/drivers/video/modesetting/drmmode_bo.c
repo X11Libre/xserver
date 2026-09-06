@@ -29,18 +29,6 @@ typedef struct {
     bool used_modifiers;
 } bo_priv_t;
 
-#ifndef GBM_HAVE_BO_USE_LINEAR
-#define GBM_BO_USE_LINEAR 0
-#endif
-
-#ifndef GBM_HAVE_BO_USE_FRONT_RENDERING
-#define GBM_BO_USE_FRONT_RENDERING 0
-#endif
-
-#ifndef GBM_MAX_PLANES
-#define GBM_MAX_PLANES 4
-#endif
-
 /**
  * Thin wrapper around gbm_bo_{create,map,unmap}
  * that creates and maps (if necessary) the "best"

@@ -7,6 +7,8 @@
 #define DRMMODE_BO_H
 
 #include <gbm.h>
+
+#include "drm_defines.h"
 #include "drmmode_display.h"
 
 enum {

@@ -54,6 +54,8 @@
 #include <gbm.h>
 #endif
 
+#include "drm_defines.h"
+
 #include "dix/screen_hooks_priv.h"
 #include "glamor/glamor_priv.h"
 #include "os/bug_priv.h"
@@ -66,33 +68,6 @@
 
 #ifdef DRI3
 #include "dri3.h"
-#endif
-
-#ifndef GBM_MAX_PLANES
-#define GBM_MAX_PLANES 4
-#endif
-
-/* libdrm compat */
-#ifndef DRM_FORMAT_MOD_LINEAR
-#define DRM_FORMAT_MOD_LINEAR  0ULL
-#endif
-#ifndef DRM_FORMAT_MOD_INVALID
-#define DRM_FORMAT_MOD_INVALID 0x00ffffffffffffffULL
-#endif
-#ifndef DRM_FORMAT_ARGB1555
-#define DRM_FORMAT_ARGB1555 0x35315241
-#endif
-#ifndef DRM_FORMAT_RGB565
-#define DRM_FORMAT_RGB565 0x36314752
-#endif
-#ifndef DRM_FORMAT_XRGB8888
-#define DRM_FORMAT_XRGB8888 0x34325258
-#endif
-#ifndef DRM_FORMAT_ARGB8888
-#define DRM_FORMAT_ARGB8888 0x34325241
-#endif
-#ifndef DRM_FORMAT_ARGB2101010
-#define DRM_FORMAT_ARGB2101010 0x30335241
 #endif
 
 #define GLAMOR_LOG_STR(idx, type, str) \

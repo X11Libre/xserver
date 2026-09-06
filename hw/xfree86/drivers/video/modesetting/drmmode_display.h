@@ -38,6 +38,8 @@
 
 #include <gbm.h>
 
+#include "drm_defines.h"
+
 enum drmmode_plane_property {
     DRMMODE_PLANE_TYPE = 0,
     DRMMODE_PLANE_FB_ID,
