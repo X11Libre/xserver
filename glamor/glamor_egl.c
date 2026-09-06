@@ -1724,9 +1724,11 @@ glamor_dri3_open_client(ClientPtr client,
     glamor_egl_priv_t *glamor_egl =
         glamor_egl_get_screen_private(screen);
     int fd;
+#ifdef WITH_LIBDRM
     drm_magic_t magic;
+#endif
 
-    fd = open(glamor_egl->device_path, O_RDWR|O_CLOEXEC);
+    fd = glamor_egl->device_path ? open(glamor_egl->device_path, O_RDWR|O_CLOEXEC) : dup(glamor_egl->fd);
     if (fd < 0)
         return BadAlloc;
 
@@ -1742,8 +1744,15 @@ glamor_dri3_open_client(ClientPtr client,
      * authentication on its own and hand the prepared FD off to the
      * client.
      */
+#ifdef WITH_LIBDRM
     if (drmGetMagic(fd, &magic) < 0) {
-        if (errno == EACCES) {
+        if (errno == EACCES)
+#else
+    {
+        /* This seems to work with /dev/dri/cardxx nodes too */
+        if (TRUE /* glamor_egl_fd_is_render_node(fd) */)
+#endif
+        {
             /* Assume that we're on a render node, and the fd is
              * already as authenticated as it should be.
              */
@@ -1754,7 +1763,7 @@ glamor_dri3_open_client(ClientPtr client,
             return BadMatch;
         }
     }
-
+#ifdef WITH_LIBDRM
     if (drmAuthMagic(glamor_egl->fd, magic) < 0) {
         close(fd);
         return BadMatch;
@@ -1762,6 +1771,7 @@ glamor_dri3_open_client(ClientPtr client,
 
     *fdp = fd;
     return Success;
+#endif
 }
 
 #ifdef GLAMOR_HAS_GBM
@@ -1916,9 +1926,11 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
             /* To do DRI3 device FD generation, we need to open a new fd
              * to the same device we were handed in originally.
              */
+#ifdef WITH_LIBDRM
             glamor_egl->device_path = drmGetRenderDeviceNameFromFd(glamor_egl->fd);
             if (!glamor_egl->device_path)
                 glamor_egl->device_path = drmGetDeviceNameFromFd2(glamor_egl->fd);
+#endif
 
             if (!dri3_screen_init(screen, &dri3_info)) {
                 GLAMOR_LOG_STR(screen->myNum, X_ERROR,
