@@ -536,10 +536,6 @@ ms_present_screen_init(ScreenPtr screen)
     uint64_t value;
     int ret;
 
-#ifndef DRM_CAP_ATOMIC_ASYNC_PAGE_FLIP
-#define DRM_CAP_ATOMIC_ASYNC_PAGE_FLIP 0x15
-#endif
-
     ret = drmGetCap(ms->fd, ms->atomic_modeset ?
                             DRM_CAP_ATOMIC_ASYNC_PAGE_FLIP :
                             DRM_CAP_ASYNC_PAGE_FLIP, &value);

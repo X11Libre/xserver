@@ -683,6 +683,7 @@ inc = include_directories(
     'miext/damage',
     'miext/shadow',
     'miext/sync',
+    'msutil',
     'dix',
     'include',
     epoll_inc,
