@@ -34,7 +34,7 @@ add_project_link_arguments('-fvisibility=hidden', language : 'c')
 conf_data = configuration_data()
 conf_data.set('_DIX_CONFIG_H_', '1')
 
-if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+if cc.get_id() in ['gcc', 'clang']
     test_wflags = [
         '-Wchar-subscripts',
         '-Wpointer-arith',
@@ -198,7 +198,7 @@ endif
 glamor_option = get_option('glamor')
 
 hal_option = get_option('hal')
-if ['windows', 'darwin', 'cygwin'].contains(host_machine.system())
+if host_machine.system() in ['windows', 'darwin', 'cygwin']
     hal_option = 'false'
 endif
 
@@ -238,8 +238,7 @@ build_xorg_sdk = get_option('xorg-sdk')
 build_xorg = false
 if (host_machine.system() != 'windows')
     if get_option('xorg') == 'auto'
-        build_xorg = (host_machine.system() != 'darwin' and
-                      host_machine.system() != 'windows')
+        build_xorg = host_machine.system() not in ['darwin', 'windows']
     else
         build_xorg = get_option('xorg') == 'true'
     endif
@@ -257,8 +256,7 @@ build_xnest = get_option('xnest') != 'false'
 
 build_xwin = false
 if get_option('xwin') == 'auto'
-    if (host_machine.system() == 'cygwin' or
-        host_machine.system() == 'windows')
+    if host_machine.system() in ['cygwin', 'windows']
             build_xwin = true
     endif
 else
@@ -574,9 +572,7 @@ build_modesetting = libdrm_dep.found() and dri2proto_dep.found() and build_gbm
 
 build_vgahw = false
 if get_option('vgahw') == 'auto'
-    if (host_machine.system() != 'darwin' and
-        host_machine.system() != 'windows' and
-        host_machine.system() != 'cygwin')
+    if host_machine.system() not in ['darwin', 'windows', 'cygwin']
         build_vgahw = true
     endif
 else
@@ -922,8 +918,7 @@ if build_xorg_sdk
 
     # On Windows, modules built with the SDK will need to link with server and
     # module implibs to resolve symbols
-    if (host_machine.system() == 'cygwin' or
-        host_machine.system() == 'windows')
+    if host_machine.system() in ['cygwin', 'windows']
         sdkconfig.set('XORG_DRIVER_LIBS', '-lXorg.exe -L\${moduledir} -lshadow -no-undefined')
     endif
 
