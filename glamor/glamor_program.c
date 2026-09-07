@@ -118,12 +118,36 @@ static glamor_location_var location_vars[] = {
         .location = glamor_program_location_fillsamp,
         .fs_vars = "uniform sampler2D sampler;\n"
     },
+    /*
+     * fill_pos selects texels via (offset + pixel) * (1/width, 1/height).
+     *
+     * On GLES, GLAMOR_DEFAULT_PRECISION sets mediump float in the fragment
+     * shader. mediump typically has only ~10 bits of relative precision, so
+     * for large destinations (e.g. 2560px wide) UVs near the right edge can
+     * be off by about a pixel. With GL_NEAREST sampling that shows up as
+     * shifted or broken edges in CopyArea / texture-fill paths (including
+     * Xwayland n-buffer blits).
+     *
+     * Keep the global mediump default for other FS math; only force highp
+     * for these UV uniforms/ins/outs so pixel-exact sampling stays correct
+     * without paying highp everywhere.
+     */
     {
         .location = glamor_program_location_fillpos,
-        .vs_vars = ("uniform vec2 fill_offset;\n"
+        .vs_vars = ("#ifdef GL_ES\n"
+                    "uniform highp vec2 fill_offset;\n"
+                    "uniform highp vec2 fill_size_inv;\n"
+                    "out highp vec2 fill_pos;\n"
+                    "#else\n"
+                    "uniform vec2 fill_offset;\n"
                     "uniform vec2 fill_size_inv;\n"
-                    "out vec2 fill_pos;\n"),
-        .fs_vars = ("in vec2 fill_pos;\n")
+                    "out vec2 fill_pos;\n"
+                    "#endif\n"),
+        .fs_vars = ("#ifdef GL_ES\n"
+                    "in highp vec2 fill_pos;\n"
+                    "#else\n"
+                    "in vec2 fill_pos;\n"
+                    "#endif\n")
     },
     {
         .location = glamor_program_location_font,
