@@ -172,6 +172,9 @@
 /* System has wscons console */
 #mesondefine WSCONS_SUPPORT
 
+/* BSD console support (xf86Info.consType machinery + console_*.c backends) */
+#mesondefine CONFIG_BSD_CONSOLE
+
 /* Loadable XFree86 server awesomeness */
 #define XFree86LOADER
 
