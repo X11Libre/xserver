@@ -1185,7 +1185,7 @@ TouchPuntToNextOwner(DeviceIntPtr dev, TouchPointInfoPtr ti,
     int accepted_early = listener->state == TOUCH_LISTENER_EARLY_ACCEPT;
 
     /* Deliver the ownership */
-    if (listener->state == TOUCH_LISTENER_AWAITING_OWNER || accepted_early)
+    if ((listener->state == TOUCH_LISTENER_AWAITING_OWNER || accepted_early) && ev)
         DeliverTouchEvents(dev, ti, (InternalEvent *) ev,
                            listener->listener);
     else if (listener->state == TOUCH_LISTENER_AWAITING_BEGIN) {
@@ -2209,6 +2209,9 @@ DeliverTouchEvents(DeviceIntPtr dev, TouchPointInfoPtr ti,
                    InternalEvent *ev, XID resource)
 {
     int i;
+
+    if (!ev)
+        return;
 
     if (ev->any.type == ET_TouchBegin &&
         !(ev->device_event.flags & (TOUCH_CLIENT_ID | TOUCH_REPLAYING)))
