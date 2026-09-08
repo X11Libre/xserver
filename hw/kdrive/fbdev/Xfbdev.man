@@ -24,35 +24,9 @@ also accepts the following additional options:
 .B -fb "</dev/fbxx>"
 sets the framebuffer device path the X server will use.
 .TP 8
-.B -dri "</dev/dri/cardxx|/dev/dri/renderDxxx>"
-enables DRI3 support for the X server.
-.TP 8
 .B -noshadow
 disables the ShadowFB layer on supported hw, may slightly increase performance.
 May also lead to flickering.
-.TP 8
-.B -glamor
-force enables glamor render acceleration (even on top of sw renderers like softpipe/llvmpipe).
-.TP 8
-.B -gbm
-allows glamor to use libgbm (it is only used for matching EGLDeviceEXT's to dri fd's).
-.TP 8
-.B -noglamor
-force disables glamor render acceleration.
-Also disables DRI3 and X-Video support. GLX is still enabled.
-.TP 8
-.B -glvendor "<library>"
-tells the X server what gl vendor library to use.
-Particularly useful on multi-card systems.
-.TP 8
-.B -force-gl
-tells the X server to only use desktop OpenGL contexts.
-.TP 8
-.B -force-es
-tells the X server to only use embedded GLES contexts.
-.TP 8
-.B -noxv
-disables X-Video support.
 
 .SH CONFIGURATION
 .
@@ -103,13 +77,6 @@ Two X11 screens, the first one below the second one:
 .B Xfbdev
 supports the common special key combinations of the Xkdrive family of servers.  Please
 see Xkdrive(@appmansuffix@).
-.B Xfbdev
-also accepts the following additional special key combinations:
-.TP 8
-.B Ctrl+Alt+F1...F12
-For systems with virtual terminal support, these keystroke
-combinations are used to switch to virtual terminals 1 through 12,
-respectively.
 
 .SH SEE ALSO
 X(@miscmansuffix@), Xserver(@appmansuffix@), Xkdrive(@appmansuffix@), xdm(@appmansuffix@), xinit(@appmansuffix@).
