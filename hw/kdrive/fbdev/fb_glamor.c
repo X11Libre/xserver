@@ -5,21 +5,13 @@
 
 #include <kdrive-config.h>
 
-#include <X11/Xfuncproto.h>
-
-#include "scrnintstr.h"
-
-#include "glamor.h"
-#include "glamor_egl.h"
-
 #include "present.h"
 #include "Xext/present/present_priv.h" /* extern uint32_t FakeScreenFps; */
 
 #include "fbdev.h"
+#include "kglamor.h"
 
-#ifdef XV
-#include "kxv.h"
-#endif
+#include "glamor.h"
 
 #ifdef WITH_LIBDRM
 #include <xf86drm.h>
@@ -35,16 +27,26 @@ fbdevInitAccel(ScreenPtr pScreen)
     FbdevScrPriv *scrpriv = screen->driver;
     FbScreenConf *config = screen->card->closure;
     int caps = GLAMOR_EGL_CAP_NONE;
+    int has_dri3;
+
+    KdGlamorInfo info = {
+                         .glvnd = config->fbdev_glvnd_provider,
+                         .dri_fd = -1,
+                         .use_gbm = config->gbm_allowed,
+                         .direct_dri3 = !config->gbm_allowed,
+                         .force_gl = !config->es_allowed,
+                         .force_es = config->force_es,
+
+                         .use_xv = config->fbXVAllowed,
+                         .no_render_accel = !config->fbGlamorAllowed,
+                         .force_render_accel = config->fbForceGlamor,
+                        };
 
     if (config->fbdev_dri_path) {
         scrpriv->dri_fd = open(config->fbdev_dri_path, O_RDWR);
         if (scrpriv->dri_fd >= 0) {
 #ifdef WITH_LIBDRM
-            if (config->fbdev_drm_master) {
-                drmSetMaster(scrpriv->dri_fd);
-            } else {
-                drmDropMaster(scrpriv->dri_fd);
-            }
+            drmDropMaster(scrpriv->dri_fd);
 #endif
         } else {
             LogMessage(X_WARNING, "Xfbdev(%d): Could not open %s: %s\n", pScreen->myNum, config->fbdev_dri_path, strerror(errno));
@@ -53,78 +55,20 @@ fbdevInitAccel(ScreenPtr pScreen)
         scrpriv->dri_fd = -1;
     }
 
-    if (scrpriv->dri_fd >= 0) {
-        config->fbdev_auto_dri3 = FALSE;
-    }
+    info.dri_fd = scrpriv->dri_fd;
 
-    glamor_egl_conf_t glamor_egl_conf = {
-                                         .screen = pScreen,
-                                         .glvnd_vendor = config->fbdev_glvnd_provider,
-                                         .fd = scrpriv->dri_fd,
-                                         .gbm_forbidden = !config->gbm_allowed,
-                                         .auto_dri = config->fbdev_auto_dri3,
-                                         .partial_dri_allowed = config->partial_dri_allowed,
-                                         .llvmpipe_allowed = TRUE,
-                                         .force_glamor = TRUE,
-                                         .es_disallowed = !config->es_allowed,
-                                         .force_es = config->force_es,
-                                        };
-
-    if (!glamor_egl_init_internal(&glamor_egl_conf, &caps)) {
+    if (!KdGlamorInit(pScreen, &info, &caps)) {
         return FALSE;
     }
 
-    if (config->fbdev_auto_dri3) {
-        scrpriv->dri_fd = glamor_egl_get_fd(pScreen);
-    }
-
-    const char *renderer = (const char*)glGetString(GL_RENDERER);
-
-    int flags = GLAMOR_USE_EGL_SCREEN;
-    if (!config->fbGlamorAllowed) {
-        flags |= GLAMOR_NO_RENDER_ACCEL;
-    } else if (!config->fbForceGlamor){
-        if (!renderer ||
-            strstr(renderer, "softpipe") ||
-            strstr(renderer, "llvmpipe")) {
-            flags |= GLAMOR_NO_RENDER_ACCEL;
-        }
-    }
-
-    if (scrpriv->dri_fd < 0 ||
-        flags & GLAMOR_NO_RENDER_ACCEL) {
-        flags |= GLAMOR_NO_DRI3;
-    }
-
-    if (!glamor_init(pScreen, flags)) {
-        return FALSE;
-    }
-
-    LogMessage(X_INFO, "Xfbdev(%d): DRI3 import %s\n", pScreen->myNum,
-               (caps & GLAMOR_EGL_CAP_DRI3_IMPORT) ?
-               "available" : "unavailable");
-
-    LogMessage(X_INFO, "Xfbdev(%d): DRI3 export %s\n", pScreen->myNum,
-               (caps & GLAMOR_EGL_CAP_DRI3_EXPORT) ?
-               "available" : "unavailable");
+#define GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
+    has_dri3 = (caps & GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT) == GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT;
+    LogMessage(X_INFO, "Xfbdev(%d): DRI3 %s initialized\n", pScreen->myNum, has_dri3 ? "" : "not");
 
 #if 0 /* Not yet implemented */
     LogMessage(X_INFO, "Xfbdev(%d): DRI3 explicit sync %s\n", pScreen->myNum,
                (caps & GLAMOR_EGL_CAP_DRI3_SYNCOBJ) ?
                "available" : "unavailable");
-#endif
-
-#if 0 /* We don't care about this one */
-    LogMessage(X_INFO, "Xfbdev(%d): GBM bo's %s be textured\n", pScreen->myNum,
-               (caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO) ?
-               "can" : "cannot");
-#endif
-
-#ifdef XV
-    /* X-Video needs glamor render accel */
-    if (config->fbXVAllowed && !(flags & GLAMOR_NO_RENDER_ACCEL)) {
-        kd_glamor_xv_init(pScreen);
-    }
 #endif
 
     if (scrpriv->dri_fd >= 0) {
@@ -146,31 +90,13 @@ fbdevInitAccel(ScreenPtr pScreen)
 void
 fbdevEnableAccel(ScreenPtr pScreen)
 {
-#ifdef WITH_LIBDRM
-    KdScreenPriv(pScreen);
-    KdScreenInfo *screen = pScreenPriv->screen;
-    FbdevScrPriv *scrpriv = screen->driver;
-    FbScreenConf *config = screen->card->closure;
-
-    if (config->fbdev_drm_master && scrpriv->dri_fd >= 0) {
-        drmSetMaster(scrpriv->dri_fd);
-    }
-#endif
+    KdGlamorEnable(pScreen);
 }
 
 void
 fbdevDisableAccel(ScreenPtr pScreen)
 {
-#ifdef WITH_LIBDRM
-    KdScreenPriv(pScreen);
-    KdScreenInfo *screen = pScreenPriv->screen;
-    FbdevScrPriv *scrpriv = screen->driver;
-    FbScreenConf *config = screen->card->closure;
-
-    if (config->fbdev_drm_master && scrpriv->dri_fd >= 0) {
-        drmDropMaster(scrpriv->dri_fd);
-    }
-#endif
+    KdGlamorDisable(pScreen);
 }
 
 void
@@ -180,7 +106,7 @@ fbdevFiniAccel(ScreenPtr pScreen)
     KdScreenInfo *screen = pScreenPriv->screen;
     FbdevScrPriv *scrpriv = screen->driver;
 
-    glamor_fini(pScreen);
+    KdGlamorFini(pScreen);
 
     if (scrpriv->dri_fd >= 0) {
         close(scrpriv->dri_fd);

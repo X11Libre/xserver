@@ -1,6 +1,7 @@
 srcs_kdrive = [
     'kcmap.c',
     'kdrive.c',
+    'kglamor.c',
     'kinfo.c',
     'kinput.c',
     'kmode.c',
@@ -8,6 +9,11 @@ srcs_kdrive = [
     '../../../mi/miinitext.c',
     '../../../mi/miinitext.h',
 ]
+
+kdrive_glamor = []
+if build_glamor
+    kdrive_glamor += glamor
+endif
 
 if build_xv
     srcs_kdrive += 'kxv.c'
@@ -31,5 +37,8 @@ kdrive = static_library('kdrive',
     srcs_kdrive,
     include_directories: inc,
     dependencies: common_dep,
-    link_with: libxserver_miext_shadow,
+    link_with: [
+        libxserver_miext_shadow,
+        kdrive_glamor,
+    ],
 )
