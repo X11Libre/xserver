@@ -21,7 +21,7 @@
  */
 
 #include <kdrive-config.h>
-#include "kdrive.h"
+#include "klinux.h"
 #include <errno.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
@@ -31,27 +31,6 @@
 #include <linux/apm_bios.h>
 
 #include "os/osdep.h"
-#include "os/ddx_priv.h"
-
-#ifdef KDRIVE_MOUSE
-extern KdPointerDriver LinuxMouseDriver;
-extern KdPointerDriver Ps2MouseDriver;
-extern KdPointerDriver MsMouseDriver;
-extern KdPointerDriver BusMouseDriver;
-#endif
-#ifdef KDRIVE_TSLIB
-extern KdPointerDriver TsDriver;
-#endif
-#ifdef KDRIVE_EVDEV
-extern KdPointerDriver LinuxEvdevMouseDriver;
-extern KdKeyboardDriver LinuxEvdevKeyboardDriver;
-#endif
-#ifdef KDRIVE_KBD
-extern KdKeyboardDriver LinuxKeyboardDriver;
-#endif
-
-/* Implemented by the X server */
-extern void LinuxLogInit(void);
 
 static int vtno;
 int LinuxConsoleFd;
@@ -335,7 +314,7 @@ LinuxFini(void)
 }
 
 void
-KdOsAddInputDrivers(void)
+LinuxAddInputDrivers(void)
 {
 #ifdef KDRIVE_MOUSE
     KdAddPointerDriver(&LinuxMouseDriver);
@@ -371,9 +350,3 @@ KdOsFuncs LinuxFuncs = {
     .Fini = LinuxFini,
     .Bell = LinuxBell,
 };
-
-void ddxInit(void)
-{
-    LinuxLogInit();
-    KdOsInit(&LinuxFuncs);
-}

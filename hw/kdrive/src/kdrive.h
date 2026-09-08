@@ -427,8 +427,6 @@ int
  */
 void KdOsInit(const KdOsFuncs * pOsFuncs);
 
-void
- KdOsAddInputDrivers(void);
 
 Bool KdCreateScreenResources(ScreenPtr pScreen);
 

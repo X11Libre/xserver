@@ -21,6 +21,7 @@
  */
 
 #include <kdrive-config.h>
+#include "klinux.h"
 #include "fbdev.h"
 
 #include "dix/dix_priv.h"
@@ -55,10 +56,8 @@ static const FbScreenConf fbDefaultConfig = {
 
 static void fbdevLogScreenInfo(const FbScreenConf *config, int screen_num);
 
-void LinuxLogInit(void);
-
-void
-LinuxLogInit(void)
+static void
+FbdevLogInit(void)
 {
     KdCardInfo *curr_card = kdCardInfo;
     char *log_file = NULL;
@@ -151,7 +150,7 @@ InitOutput(int argc, char **argv)
 void
 InitInput(int argc, char **argv)
 {
-    KdOsAddInputDrivers();
+    LinuxAddInputDrivers();
     KdAddConfigInputDrivers();
     KdInitInput();
 }
@@ -305,6 +304,12 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
 
     return KdProcessArgument(argc, argv, i);
+}
+
+void ddxInit(void)
+{
+    FbdevLogInit();
+    KdOsInit(&LinuxFuncs);
 }
 
 KdCardFuncs fbdevFuncs = {

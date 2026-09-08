@@ -31,7 +31,7 @@
  */
 
 #include <kdrive-config.h>
-#include "kdrive.h"
+#include "klinux.h"
 #include <linux/keyboard.h>
 #include <linux/kd.h>
 #define XK_PUBLISHING
@@ -40,8 +40,6 @@
 #include <sys/ioctl.h>
 
 #include "os/xserver_poll.h"
-
-extern int LinuxConsoleFd;
 
 /*
  * We need these to handle extended scancodes correctly (I could just use the
