@@ -29,35 +29,22 @@ fbdevInitAccel(ScreenPtr pScreen)
     int caps = GLAMOR_EGL_CAP_NONE;
     int has_dri3;
 
-    KdGlamorInfo info = {
-                         .glvnd = config->fbdev_glvnd_provider,
-                         .dri_fd = -1,
-                         .use_gbm = config->gbm_allowed,
-                         .direct_dri3 = !config->gbm_allowed,
-                         .force_gl = !config->es_allowed,
-                         .force_es = config->force_es,
-
-                         .use_xv = config->fbXVAllowed,
-                         .no_render_accel = !config->fbGlamorAllowed,
-                         .force_render_accel = config->fbForceGlamor,
-                        };
-
-    if (config->fbdev_dri_path) {
-        scrpriv->dri_fd = open(config->fbdev_dri_path, O_RDWR);
+    if (config->dri_path) {
+        scrpriv->dri_fd = open(config->dri_path, O_RDWR);
         if (scrpriv->dri_fd >= 0) {
 #ifdef WITH_LIBDRM
             drmDropMaster(scrpriv->dri_fd);
 #endif
         } else {
-            LogMessage(X_WARNING, "Xfbdev(%d): Could not open %s: %s\n", pScreen->myNum, config->fbdev_dri_path, strerror(errno));
+            LogMessage(X_WARNING, "Xfbdev(%d): Could not open %s: %s\n", pScreen->myNum, config->dri_path, strerror(errno));
         }
     } else {
         scrpriv->dri_fd = -1;
     }
 
-    info.dri_fd = scrpriv->dri_fd;
+    config->glamor_info.dri_fd = scrpriv->dri_fd;
 
-    if (!KdGlamorInit(pScreen, &info, &caps)) {
+    if (!KdGlamorInit(pScreen, &config->glamor_info, &caps)) {
         return FALSE;
     }
 
