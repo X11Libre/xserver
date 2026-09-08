@@ -144,34 +144,20 @@ CloseInput(void)
 void
 ddxUseMsg(void)
 {
-    KdUseMsg();
+    KdGlamorUseMsg();
     ErrorF("\nXfbdev Device Usage:\n");
     ErrorF
         ("-fb <path>           Framebuffer device to use. Defaults to /dev/fb0\n");
     ErrorF
-        ("-dri <path>          Optional drm device path to use\n");
-    ErrorF
         ("-noshadow            Disable the ShadowFB layer if possible\n");
-    ErrorF
-        ("-glamor              Force enable glamor render acceleration if possible\n");
-    ErrorF
-        ("-noglamor            Force disable glamor render acceleration\n");
-    ErrorF
-        ("-gbm                 Allow glamor to use libgbm\n");
-    ErrorF
-        ("-glvendor <string>   Suggest what glvnd vendor library should be used\n");
-    ErrorF
-        ("-force-gl            Force glamor to only use GL contexts\n");
-    ErrorF
-        ("-force-es            Force glamor to only use GLES contexts\n");
-    ErrorF
-        ("-noxv                Disable X-Video support\n");
     ErrorF("\n");
 }
 
 int
 ddxProcessArgument(int argc, char **argv, int i)
 {
+    int glamor_arg;
+
     if (!fbCurrScreen /* We need at least one card */
         || !strcmp(argv[i - 1], "-screen") /* Last screen had no explicit geometry */
         || ((i >= 2) && ('0' <= argv[i - 1][0]) && (argv[i - 1][0] <= '9') && !strcmp(argv[i - 2], "-screen")) /* Last screen had explicit geometry */
@@ -203,7 +189,7 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
 
     if (!strcmp(argv[i], "-fb")) {
-        if (i + 1 < argc) {
+        if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
             fbCurrScreen->fb_path = argv[i + 1];
             return 2;
         }
@@ -216,52 +202,9 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
-    if (!strcmp(argv[i], "-glamor")) {
-        fbCurrScreen->glamor_info.force_render_accel = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-noglamor")) {
-        fbCurrScreen->glamor_info.no_render_accel = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-gbm")) {
-        fbCurrScreen->glamor_info.use_gbm = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-glvendor")) {
-        if ((i + 1) < argc) {
-            fbCurrScreen->glamor_info.glvnd = argv[i + 1];
-            return 2;
-        }
-        UseMsg();
-        exit(1);
-    }
-
-    if (!strcmp(argv[i], "-dri")) {
-        if ((i + 1) < argc) {
-            fbCurrScreen->dri_path = argv[i + 1];
-            return 2;
-        }
-        UseMsg();
-        exit(1);
-    }
-
-    if (!strcmp(argv[i], "-force-gl")) {
-        fbCurrScreen->glamor_info.force_gl = FALSE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-force-es")) {
-        fbCurrScreen->glamor_info.force_es = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-noxv")) {
-        fbCurrScreen->glamor_info.use_xv = FALSE;
-        return 1;
+    glamor_arg = KdGlamorParse(&fbCurrScreen->glamor_info, &fbCurrScreen->dri_path, argc, argv, i);
+    if (glamor_arg) {
+        return glamor_arg;
     }
 
     return KdProcessArgument(argc, argv, i);

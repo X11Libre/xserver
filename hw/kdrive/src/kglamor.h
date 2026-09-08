@@ -33,4 +33,7 @@ void KdGlamorDisable(ScreenPtr pScreen);
 void KdGlamorFini(ScreenPtr pScreen);
 #endif
 
+int KdGlamorParse(KdGlamorInfo *info, const char **dri, int argc, char **argv, int i);
+void KdGlamorUseMsg(void);
+
 #endif /* _KGLAMOR_H_ */
