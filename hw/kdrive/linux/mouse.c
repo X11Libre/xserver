@@ -90,7 +90,6 @@ MouseReadByte(Kbufio * b, int timeout)
     return b->buf[b->used++];
 }
 
-#if NOTUSED
 static int
 MouseFlush(Kbufio * b, char *buf, int size)
 {
@@ -114,6 +113,7 @@ MouseFlush(Kbufio * b, char *buf, int size)
     return n;
 }
 
+#if NOTUSED
 static int
 MousePeekByte(Kbufio * b, int timeout)
 {
@@ -938,9 +938,7 @@ MouseEnable(KdPointerInfo * pi)
 
     km = pi->driverPrivate;
 
-    km->iob.fd = open(pi->path, 2);
-    if (km->iob.fd < 0)
-        return BadMatch;
+    MouseFlush(&km->iob, (char[256]){0}, 256);
 
     if (!KdRegisterFd(km->iob.fd, MouseRead, pi)) {
         close(km->iob.fd);
@@ -959,12 +957,19 @@ MouseDisable(KdPointerInfo * pi)
         return;
 
     km = pi->driverPrivate;
-    KdUnregisterFd(pi, km->iob.fd, TRUE);
+    KdUnregisterFd(pi, km->iob.fd, FALSE);
 }
 
 static void
 MouseFini(KdPointerInfo * pi)
 {
+    Kmouse *km;
+
+    if (!pi || !pi->driverPrivate)
+        return;
+
+    km = pi->driverPrivate;
+    close(km->iob.fd);
     free(pi->driverPrivate);
     pi->driverPrivate = NULL;
 }
