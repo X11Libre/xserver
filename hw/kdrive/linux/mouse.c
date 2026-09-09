@@ -886,6 +886,7 @@ MouseInit(KdPointerInfo * pi)
 {
     int i;
     int fd;
+    char *tmp;
     Kmouse *km;
 
     if (!pi)
@@ -906,6 +907,12 @@ MouseInit(KdPointerInfo * pi)
 
     if (fd < 0)
         return BadMatch;
+
+    tmp = strdup("Linux Generic Mouse");
+    if (tmp) {
+        free(pi->name);
+        pi->name = tmp;
+    }
 
     km = (Kmouse *) malloc(sizeof(Kmouse));
     if (km) {
