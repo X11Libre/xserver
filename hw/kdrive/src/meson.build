@@ -24,6 +24,7 @@ endif
 
 kdrive_data = configuration_data()
 
+kdrive_data.set('KDRIVE_LINUX', build_kdrive_linux ? '1' : false)
 kdrive_data.set('KDRIVE_KBD', build_kdrive_kbd ? '1' : false)
 kdrive_data.set('KDRIVE_MOUSE', build_kdrive_mouse ? '1' : false)
 kdrive_data.set('KDRIVE_EVDEV', build_kdrive_evdev ? '1' : false)

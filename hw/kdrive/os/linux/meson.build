@@ -29,7 +29,7 @@ linux = static_library('linux',
     srcs_linux,
     include_directories: [
         inc,
-        include_directories('../src'),
+        include_directories('../../src'),
     ],
     dependencies: kdrive_linux_dep,
 )

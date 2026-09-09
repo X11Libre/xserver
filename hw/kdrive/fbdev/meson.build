@@ -16,7 +16,7 @@ xfbdev_server = executable(
     include_directories: [
         inc,
         include_directories('../src'),
-        include_directories('../linux'),
+        include_directories('../os/linux'),
     ],
     dependencies: [ common_dep, libdrm_dep ],
     link_with: [

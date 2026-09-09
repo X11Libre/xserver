@@ -7,6 +7,9 @@
 
 #include <dix-config.h>
 
+/* Build the kdrive linux backend */
+#mesondefine KDRIVE_LINUX
+
 /* Build the kdrive keyboard input driver */
 #mesondefine KDRIVE_KBD
 
