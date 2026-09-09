@@ -215,7 +215,7 @@ EvdevPtrEnable(KdPointerInfo * pi)
     if (!pi || !pi->path)
         return BadImplementation;
 
-    fd = open(pi->path, 2);
+    fd = open(pi->path, O_RDWR);
     if (fd < 0)
         return BadMatch;
 

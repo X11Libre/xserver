@@ -77,7 +77,7 @@ LinuxInit(void)
     if (kdVirtualTerminal >= 0)
         vtno = kdVirtualTerminal;
     else {
-        if ((fd = open("/dev/tty0", O_WRONLY, 0)) < 0) {
+        if ((fd = open("/dev/tty0", O_WRONLY)) < 0) {
             FatalError("LinuxInit: Cannot open /dev/tty0 (%s)\n",
                        strerror(errno));
         }
@@ -89,7 +89,7 @@ LinuxInit(void)
 
     snprintf(vtname, sizeof(vtname), "/dev/tty%d", vtno);       /* /dev/tty1-64 */
 
-    if ((LinuxConsoleFd = open(vtname, O_RDWR | O_NDELAY, 0)) < 0) {
+    if ((LinuxConsoleFd = open(vtname, O_RDWR | O_NDELAY)) < 0) {
         FatalError("LinuxInit: Cannot open %s (%s)\n", vtname, strerror(errno));
     }
 
@@ -201,9 +201,9 @@ LinuxEnable(void)
     /*
      * Open the APM driver
      */
-    LinuxApmFd = open("/dev/apm_bios", 2);
+    LinuxApmFd = open("/dev/apm_bios", O_RDWR);
     if (LinuxApmFd < 0 && errno == ENOENT)
-        LinuxApmFd = open("/dev/misc/apm_bios", 2);
+        LinuxApmFd = open("/dev/misc/apm_bios", O_RDWR);
     if (LinuxApmFd >= 0) {
         LinuxApmRunning = TRUE;
         fcntl(LinuxApmFd, F_SETFL, fcntl(LinuxApmFd, F_GETFL) | NOBLOCK);
@@ -301,7 +301,7 @@ LinuxFini(void)
     }
     close(LinuxConsoleFd);      /* make the vt-manager happy */
     LinuxConsoleFd = -1;
-    fd = open("/dev/tty0", O_RDWR | O_NDELAY, 0);
+    fd = open("/dev/tty0", O_RDWR | O_NDELAY);
     if (fd >= 0) {
         memset(&vts, '\0', sizeof(vts));        /* valgrind */
         ioctl(fd, VT_GETSTATE, &vts);

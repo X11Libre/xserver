@@ -69,7 +69,7 @@ BusInit (KdPointerInfo *pi)
     {
         for (i = 0; i < NUM_BUS_NAMES; i++)
         {
-            if ((fd = open (BusNames[i], 0)) >= 0)
+            if ((fd = open(BusNames[i], O_RDONLY)) >= 0)
             {
                 close(fd);
                 free(pi->path);
@@ -80,7 +80,7 @@ BusInit (KdPointerInfo *pi)
     }
     else
     {
-        if ((fd = open(pi->path, 0)) >= 0)
+        if ((fd = open(pi->path, O_RDONLY)) >= 0)
         {
             close(fd);
             return Success;
@@ -93,7 +93,7 @@ BusInit (KdPointerInfo *pi)
 static int
 BusEnable (KdPointerInfo *pi)
 {
-    int fd = open(pi->path, 0);
+    int fd = open(pi->path, O_RDONLY);
 
     if (fd >= 0)
     {

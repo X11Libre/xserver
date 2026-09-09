@@ -893,7 +893,7 @@ MouseInit(KdPointerInfo * pi)
 
     if (!pi->path || strcmp(pi->path, "auto") == 0) {
         for (i = 0; i < NUM_DEFAULT_MOUSE; i++) {
-            fd = open(kdefaultMouse[i], 2);
+            fd = open(kdefaultMouse[i], O_RDWR);
             if (fd >= 0) {
                 pi->path = strdup(kdefaultMouse[i]);
                 break;
@@ -901,7 +901,7 @@ MouseInit(KdPointerInfo * pi)
         }
     }
     else {
-        fd = open(pi->path, 2);
+        fd = open(pi->path, O_RDWR);
     }
 
     if (fd < 0)
