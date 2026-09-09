@@ -327,20 +327,38 @@ LinuxKeyboardDisable(KdKeyboardInfo * ki)
 static Status
 LinuxKeyboardPreInit(KdKeyboardInfo * ki)
 {
-    ki->xkbRules = strdup("base");
+    char *tmp = NULL;
+
+    if (!ki)
+        return !Success;
+
+    tmp = strdup("base");
+    if (tmp) {
+        free(ki->xkbRules);
+        ki->xkbRules = tmp;
+    }
     return Success;
 }
 
 static Status
 LinuxKeyboardInit(KdKeyboardInfo * ki)
 {
+    char *tmp = NULL;
+
     if (!ki)
         return !Success;
 
-    free(ki->path);
-    ki->path = strdup("console");
-    free(ki->name);
-    ki->name = strdup("Linux console keyboard");
+    tmp = strdup("console");
+    if (tmp) {
+        free(ki->path);
+        ki->path = tmp;
+    }
+
+    tmp = strdup("Linux console keyboard");
+    if (tmp) {
+        free(ki->name);
+        ki->name = tmp;
+    }
 
     ki->minScanCode = 0;
     ki->maxScanCode = 255;
