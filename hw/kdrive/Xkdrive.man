@@ -64,7 +64,6 @@ Forces glamor to use the direct implementation of DRI3.
 .TP 8
 .B -noglamor
 force disables glamor render acceleration.
-Also disables DRI3 and X-Video support. GLX is still enabled.
 .TP 8
 .B -glvendor "<library>"
 tells the X server what gl vendor library to use.
