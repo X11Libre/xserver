@@ -21,6 +21,11 @@ if build_kdrive_linux
     subdir('os/linux')
 endif
 
+build_stub = false
+if build_stub
+    subdir('os/stub')
+endif
+
 if build_kdrive
     subdir('src')
 endif
