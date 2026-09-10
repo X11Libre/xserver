@@ -28,10 +28,19 @@
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 
+static FakeScreenConf *fakeCurrScreen = NULL;
+
+static const FakeScreenConf fakeDefaultConfig = {
+                                                 .shadow = -1,
+                                                };
+
 void
 InitCard(char *name)
 {
-    KdCardInfoAdd(&fakeFuncs, 0);
+    fakeCurrScreen = XNFalloc(sizeof(*fakeCurrScreen));
+    *fakeCurrScreen = fakeDefaultConfig;
+    fakeCurrScreen->glamor_info = kdGlamorDefault;
+    KdCardInfoAdd(&fakeFuncs, fakeCurrScreen);
 }
 
 #if INPUTTHREAD
@@ -65,12 +74,37 @@ CloseInput(void)
 void
 ddxUseMsg(void)
 {
-    KdUseMsg();
+    KdGlamorUseMsg();
+    ErrorF("\nXfake Usage:\n");
+    ErrorF
+        ("-shadow              Enable the ShadowFB layer\n");
+    ErrorF
+        ("-noshadow            Disable the ShadowFB layer\n");
+    ErrorF("\n");
 }
 
 int
 ddxProcessArgument(int argc, char **argv, int i)
 {
+    int glamor_arg;
+
+    KdEnsureCard(argc, argv, i, !fakeCurrScreen);
+
+    if (!strcmp(argv[i], "-shadow")) {
+        fakeCurrScreen->shadow = TRUE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-noshadow")) {
+        fakeCurrScreen->shadow = FALSE;
+        return 1;
+    }
+
+    glamor_arg = KdGlamorParse(&fakeCurrScreen->glamor_info, &fakeCurrScreen->dri_path, argc, argv, i);
+    if (glamor_arg) {
+        return glamor_arg;
+    }
+
     return KdProcessArgument(argc, argv, i);
 }
 
@@ -97,7 +131,12 @@ KdCardFuncs fakeFuncs = {
     /* no cursor funcs */
     /* XXX We could add sw-emulated versions of the hw cursor funcs for testing/reference purposes XXX */
 
-    /* no accel funcs, for now */
+#ifdef GLAMOR
+    .initAccel        = fakeInitAccel,
+    .enableAccel      = fakeEnableAccel,
+    .disableAccel     = fakeDisableAccel,
+    .finiAccel        = fakeFiniAccel,
+#endif
 
     .getColors        = fakeGetColors,
     .putColors        = fakePutColors,

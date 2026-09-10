@@ -5,10 +5,10 @@ srcs = [
 ]
 
 fake_glamor = []
-#if build_glamor
-#    srcs += 'fake_glamor.c'
-#    fake_glamor += glamor
-#endif
+if build_glamor
+    srcs += 'fake_glamor.c'
+    fake_glamor += glamor
+endif
 
 xfake_server = executable(
     'Xfake',

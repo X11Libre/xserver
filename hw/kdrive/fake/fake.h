@@ -24,7 +24,7 @@
 #define _FBDEV_H_
 #include <stdio.h>
 #include <unistd.h>
-#include "kdrive.h"
+#include "kglamor.h"
 
 #ifdef RANDR
 #include "randrstr.h"
@@ -38,7 +38,16 @@ typedef struct _fakePriv {
 typedef struct _fakeScrPriv {
     Rotation randr;
     Bool shadow;
+#ifdef GLAMOR
+    int dri_fd;
+#endif
 } FakeScrPriv;
+
+typedef struct _fakeScreenConf {
+    int shadow;
+    KdGlamorInfo glamor_info;
+    const char *dri_path;
+} FakeScreenConf;
 
 extern KdCardFuncs fakeFuncs;
 
@@ -120,6 +129,16 @@ fakeRandRSetConfig(ScreenPtr pScreen,
 Bool
  fakeRandRInit(ScreenPtr pScreen);
 
+#endif
+
+#ifdef GLAMOR
+Bool fakeInitAccel(ScreenPtr screen);
+
+void fakeEnableAccel(ScreenPtr screen);
+
+void fakeDisableAccel(ScreenPtr screen);
+
+void fakeFiniAccel(ScreenPtr screen);
 #endif
 
 #endif                          /* _FBDEV_H_ */

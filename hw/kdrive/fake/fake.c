@@ -158,11 +158,15 @@ fakeMapFramebuffer(KdScreenInfo * screen)
     FakeScrPriv *scrpriv = screen->driver;
     KdPointerMatrix m;
     FakePriv *priv = screen->card->driver;
+    FakeScreenConf *config = screen->card->closure;
 
-    if (scrpriv->randr != RR_Rotate_0)
+    if (config->shadow >= 0) {
+        scrpriv->shadow = config->shadow;
+    } else if (scrpriv->randr != RR_Rotate_0) {
         scrpriv->shadow = TRUE;
-    else
+    } else {
         scrpriv->shadow = FALSE;
+    }
 
     KdComputePointerMatrix(&m, scrpriv->randr, screen->width, screen->height);
 
@@ -453,6 +457,9 @@ fakeCardFini(KdCardInfo * card)
 
     free(priv->base);
     free(priv);
+
+    free(card->closure);
+    card->closure = NULL;
 }
 
 void
