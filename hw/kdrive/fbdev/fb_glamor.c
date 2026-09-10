@@ -45,6 +45,11 @@ fbdevInitAccel(ScreenPtr pScreen)
     config->glamor_info.dri_fd = scrpriv->dri_fd;
 
     if (!KdGlamorInit(pScreen, &config->glamor_info, &caps)) {
+        if (scrpriv->dri_fd >= 0) {
+            close(scrpriv->dri_fd);
+            scrpriv->dri_fd = -1;
+            config->glamor_info.dri_fd = -1;
+        }
         return FALSE;
     }
 
