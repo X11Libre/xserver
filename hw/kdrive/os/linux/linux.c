@@ -313,6 +313,34 @@ LinuxFini(void)
     return;
 }
 
+#ifdef KDRIVE_KBD
+#define DEFAULT_KEYBOARD "keyboard"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_KEYBOARD "evdev"
+#endif
+#endif
+
+#ifdef KDRIVE_MOUSE
+#define DEFAULT_MOUSE "mouse"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_MOUSE "evdev"
+#endif
+#endif
+
+static void
+LinuxAddDefaultInputDrivers(void)
+{
+    #ifdef DEFAULT_KEYBOARD
+    KdAddDefaultKeyboard(DEFAULT_KEYBOARD);
+    #endif
+
+    #ifdef DEFAULT_MOUSE
+    KdAddDefaultPointer(DEFAULT_MOUSE);
+    #endif
+}
+
 void
 LinuxAddInputDrivers(void)
 {
@@ -332,6 +360,8 @@ LinuxAddInputDrivers(void)
 #ifdef KDRIVE_KBD
     KdAddKeyboardDriver(&LinuxKeyboardDriver);
 #endif
+
+    LinuxAddDefaultInputDrivers();
 }
 
 static void

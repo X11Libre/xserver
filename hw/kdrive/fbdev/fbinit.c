@@ -131,7 +131,6 @@ void
 InitInput(int argc, char **argv)
 {
     LinuxAddInputDrivers();
-    KdAddConfigInputDrivers();
     KdInitInput();
 }
 

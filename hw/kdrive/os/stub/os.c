@@ -43,6 +43,9 @@ StubAddInputDrivers(void)
 {
     KdAddPointerDriver(&StubMouseDriver);
     KdAddKeyboardDriver(&StubKeyboardDriver);
+
+    KdAddDefaultKeyboard("stub");
+    KdAddDefaultPointer("stub");
 }
 
 KdOsFuncs StubOsFuncs = {
