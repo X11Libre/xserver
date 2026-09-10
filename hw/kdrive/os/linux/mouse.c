@@ -914,17 +914,15 @@ MouseInit(KdPointerInfo * pi)
         pi->name = tmp;
     }
 
-    km = (Kmouse *) malloc(sizeof(Kmouse));
+    km = (Kmouse *) calloc(1, sizeof(Kmouse));
     if (km) {
-        km->iob.avail = km->iob.used = 0;
-        MouseFirstProtocol(km, pi->protocol ? pi->protocol : "ps/2");
+        km->tty = isatty(fd);
+        km->iob.fd = fd;
+        MouseFirstProtocol(km, pi->protocol);
         /* MouseFirstProtocol sets state to MouseBroken for later protocol
          * checks. Skip these checks if a protocol was supplied */
         if (pi->protocol)
             km->state = MouseWorking;
-        km->i_prot = 0;
-        km->tty = isatty(fd);
-        km->iob.fd = fd;
         pi->driverPrivate = km;
     }
     else {
