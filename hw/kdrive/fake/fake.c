@@ -50,6 +50,18 @@ fakeCardInit(KdCardInfo * card)
     return TRUE;
 }
 
+static Bool
+fakeModeSupported(KdScreenInfo * screen, const KdMonitorTiming * t)
+{
+    return TRUE;
+}
+
+static Bool
+fakeRandRModeSupported(ScreenPtr pScreen, const KdMonitorTiming * t)
+{
+    return TRUE;
+}
+
 Bool
 fakeScreenInitialize(KdScreenInfo * screen, FakeScrPriv * scrpriv)
 {
@@ -101,6 +113,10 @@ fakeScreenInitialize(KdScreenInfo * screen, FakeScrPriv * scrpriv)
     }
 
     scrpriv->randr = screen->randr;
+
+    if (!KdFindRate(screen, fakeModeSupported)) {
+        KdAddModeCVT(screen->width, screen->height, screen->rate);
+    }
 
     return fakeMapFramebuffer(screen);
 }
@@ -232,7 +248,6 @@ fakeRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     FakeScrPriv *scrpriv = screen->driver;
-    RRScreenSizePtr pSize;
     Rotation randr;
     int n;
 
@@ -244,15 +259,9 @@ fakeRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     if (n == pScreen->numDepths)
         return FALSE;
 
-    pSize = RRRegisterSize(pScreen,
-                           screen->width,
-                           screen->height, screen->width_mm, screen->height_mm);
-
     randr = KdSubRotation(scrpriv->randr, screen->randr);
 
-    RRSetCurrentConfig(pScreen, randr, 0, pSize);
-
-    return TRUE;
+    return KdRandRGetInfo(pScreen, randr, fakeRandRModeSupported);
 }
 
 Bool
@@ -266,6 +275,7 @@ fakeRandRSetConfig(ScreenPtr pScreen,
     FakeScrPriv oldscr;
     int oldwidth;
     int oldheight;
+    int oldrate;
     int oldmmwidth;
     int oldmmheight;
     int newwidth, newheight, newmmwidth, newmmheight;
@@ -290,6 +300,7 @@ fakeRandRSetConfig(ScreenPtr pScreen,
 
     oldwidth = screen->width;
     oldheight = screen->height;
+    oldrate = screen->rate;
     oldmmwidth = pScreen->mmWidth;
     oldmmheight = pScreen->mmHeight;
 
@@ -304,6 +315,7 @@ fakeRandRSetConfig(ScreenPtr pScreen,
     (void)newheight;
     screen->width = pSize->width;
     screen->height = pSize->height;
+    screen->rate = rate;
 
     pScreen->mmWidth = newmmwidth;
     pScreen->mmHeight = newmmheight;
@@ -345,6 +357,7 @@ fakeRandRSetConfig(ScreenPtr pScreen,
     (void) fakeMapFramebuffer(screen);
     pScreen->width = oldwidth;
     pScreen->height = oldheight;
+    screen->rate = oldrate;
     pScreen->mmWidth = oldmmwidth;
     pScreen->mmHeight = oldmmheight;
 
