@@ -284,6 +284,8 @@ build_xvfb = get_option('xvfb')
 
 build_xephyr = get_option('xephyr')
 
+build_xfake = get_option('xfake')
+
 build_xfbdev = get_option('xfbdev')
 
 build_xserver = (build_xorg or
@@ -291,6 +293,7 @@ build_xserver = (build_xorg or
                  build_xvfb or
                  build_xquartz or
                  build_xephyr or
+                 build_xfake or
                  build_xfbdev)
 
 summary({
@@ -300,6 +303,7 @@ summary({
         'Xwin': build_xwin,
         'Xquartz': build_xquartz,
         'Xephyr': build_xephyr,
+        'Xfake': build_xfake,
         'Xfbdev': build_xfbdev,
     },
     section: 'DDX',

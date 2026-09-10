@@ -1,4 +1,4 @@
-build_kdrive = build_xephyr or build_xfbdev
+build_kdrive = build_xephyr or build_xfake or build_xfbdev
 
 need_kdrive_linux = build_xfbdev
 build_kdrive_linux = (host_machine.system() == 'linux') and need_kdrive_linux
@@ -21,7 +21,7 @@ if build_kdrive_linux
     subdir('os/linux')
 endif
 
-build_stub = false
+build_stub = build_xfake
 if build_stub
     subdir('os/stub')
 endif
@@ -32,6 +32,10 @@ endif
 
 if build_xephyr
     subdir('ephyr')
+endif
+
+if build_xfake
+    subdir('fake')
 endif
 
 if build_xfbdev
