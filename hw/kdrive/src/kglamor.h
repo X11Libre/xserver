@@ -36,4 +36,7 @@ void KdGlamorFini(ScreenPtr pScreen);
 int KdGlamorParse(KdGlamorInfo *info, const char **dri, int argc, char **argv, int i);
 void KdGlamorUseMsg(void);
 
+/* Put each screen on a different card */
+void KdEnsureCard(int argc, char **argv, int i, Bool force);
+
 #endif /* _KGLAMOR_H_ */

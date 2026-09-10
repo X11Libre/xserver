@@ -199,3 +199,42 @@ KdGlamorUseMsg(void)
     ErrorF
         ("-noxv                Disable X-Video support\n");
 }
+
+/*
+ * I don't think this deserves its own .c file
+ *
+ * Put each screen on a different card
+ */
+void
+KdEnsureCard(int argc, char **argv, int i, Bool force)
+{
+    if (force /* We need at least one card */
+        || ((i >= 1) && !strcmp(argv[i - 1], "-screen")) /* Last screen had no explicit geometry */
+        || ((i >= 2) && ('0' <= argv[i - 1][0]) && (argv[i - 1][0] <= '9') && !strcmp(argv[i - 2], "-screen")) /* Last screen had explicit geometry */
+        ) {
+        /* Put each screen on a separate card */
+        Bool need_new_card = force;
+
+        /**
+         * If this is either the first argument, or the
+         * first argument after the last -screen argument.
+         *
+         * If this is the first argument, we need to create a new card.
+         *
+         * If this is the first argument after a -screen argument
+         * we need to determine if this argument, and all those that follow
+         * represent a new screen, or if they are arguments for the screen we just parsed.
+         *
+         * We do this by checking if any of the remaining arguments, *including this one* are -screen arguments.
+         */
+        for (int j = i; j < argc && !need_new_card; j++) {
+            if (!strcmp(argv[j], "-screen")) {
+                need_new_card = TRUE;
+                break;
+            }
+        }
+        if (need_new_card) {
+            InitCard(NULL);
+        }
+    }
+}

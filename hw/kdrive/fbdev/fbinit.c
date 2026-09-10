@@ -157,35 +157,7 @@ ddxProcessArgument(int argc, char **argv, int i)
 {
     int glamor_arg;
 
-    if (!fbCurrScreen /* We need at least one card */
-        || !strcmp(argv[i - 1], "-screen") /* Last screen had no explicit geometry */
-        || ((i >= 2) && ('0' <= argv[i - 1][0]) && (argv[i - 1][0] <= '9') && !strcmp(argv[i - 2], "-screen")) /* Last screen had explicit geometry */
-        ) {
-        /* Put each screen on a separate card */
-        Bool need_new_card = !fbCurrScreen;
-
-        /**
-         * If this is either the first argument, or the
-         * first argument after the last -screen argument.
-         *
-         * If this is the first argument, we need to create a new card.
-         *
-         * If this is the first argument after a -screen argument
-         * we need to determine if this argument, and all those that follow
-         * represent a new screen, or if they are arguments for the screen we just parsed.
-         *
-         * We do this by checking if any of the remaining arguments, *including this one* are -screen arguments.
-         */
-        for (int j = i; j < argc && !need_new_card; j++) {
-            if (!strcmp(argv[j], "-screen")) {
-                need_new_card = TRUE;
-                break;
-            }
-        }
-        if (need_new_card) {
-            InitCard(NULL);
-        }
-    }
+    KdEnsureCard(argc, argv, i, !fbCurrScreen);
 
     if (!strcmp(argv[i], "-fb")) {
         if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
