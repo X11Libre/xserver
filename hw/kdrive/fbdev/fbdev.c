@@ -25,7 +25,6 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#include "fb/fb_priv.h"
 #include "os/osdep.h"
 
 #include "fbdev.h"
@@ -826,7 +825,7 @@ fbdevRandRSetConfig(ScreenPtr pScreen,
     /*
      * Set frame buffer mapping
      */
-    (*pScreen->ModifyPixmapHeader) (fbGetScreenPixmap(pScreen),
+    (*pScreen->ModifyPixmapHeader) ((*pScreen->GetScreenPixmap)(pScreen),
                                     pScreen->width,
                                     pScreen->height,
                                     screen->fb.depth,
