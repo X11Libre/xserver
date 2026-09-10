@@ -948,7 +948,6 @@ MouseEnable(KdPointerInfo * pi)
     MouseFlush(&km->iob, (char[256]){0}, 256);
 
     if (!KdRegisterFd(km->iob.fd, MouseRead, pi)) {
-        close(km->iob.fd);
         return BadAlloc;
     }
 
