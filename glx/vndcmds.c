@@ -103,12 +103,14 @@ static void SetReplyHeader(ClientPtr client, void *replyPtr)
 
 static int dispatch_GLXQueryVersion(ClientPtr client)
 {
-    xGLXQueryVersionReply reply;
     REQUEST_SIZE_MATCH(xGLXQueryVersionReq);
 
+    xGLXQueryVersionReply reply = {
+        .majorVersion = GlxCheckSwap(client, 1),
+        .minorVersion = GlxCheckSwap(client, 4),
+    };
+
     SetReplyHeader(client, &reply);
-    reply.majorVersion = GlxCheckSwap(client, 1);
-    reply.minorVersion = GlxCheckSwap(client, 4);
 
     WriteToClient(client, sizeof(xGLXQueryVersionReply), &reply);
     return Success;
