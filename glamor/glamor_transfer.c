@@ -107,12 +107,13 @@ glamor_upload_boxes(DrawablePtr drawable, BoxPtr in_boxes, int in_nbox,
                                 f->format, f->type,
                                 src_line);
             } else {
-                for (; y1 < y2; y1++, src_line += byte_stride / bytes_per_pixel)
+                uint8_t *src = (uint8_t*)src_line;
+                for (; y1 < y2; y1++, src += byte_stride)
                     glTexSubImage2D(GL_TEXTURE_2D, 0,
                                     x1 - box->x1, y1 - box->y1,
                                     x2 - x1, 1,
                                     f->format, f->type,
-                                    src_line);
+                                    src);
             }
         }
     }
