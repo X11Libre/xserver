@@ -40,8 +40,8 @@ endif
 
 if int10 == 'vm86'
     srcs_xorg_int10 += [
-        'vm86/linux_vm86.c',
-        'linux.c',
+        '../os-support/linux/int10/vm86/linux_vm86.c',
+        '../os-support/linux/int10/linux.c',
     ]
     int10_c_args += '-D_VM86_LINUX'
 endif

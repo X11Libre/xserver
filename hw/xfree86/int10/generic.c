@@ -450,7 +450,7 @@ write_b(xf86Int10InfoPtr pInt, int addr, uint8_t val)
 }
 
 static void
-write_w(xf86Int10InfoPtr pInt, int addr, CARD16 val)
+write_w(xf86Int10InfoPtr pInt, int addr, uint16_t val)
 {
 #if X_BYTE_ORDER == X_LITTLE_ENDIAN
     if (OFF(addr + 1) > 0) {

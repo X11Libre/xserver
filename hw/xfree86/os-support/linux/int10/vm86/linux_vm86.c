@@ -3,6 +3,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "os/log_priv.h"
+
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86Pci.h"
@@ -42,7 +44,6 @@ static Bool
 vm86_GP_fault(xf86Int10InfoPtr pInt)
 {
     unsigned char *csp, *lina;
-    CARD32 org_eip;
     int pref_seg;
     int done, is_rep, prefix66, prefix67;
 
@@ -91,7 +92,6 @@ vm86_GP_fault(xf86Int10InfoPtr pInt)
         }
     } while (!done);
     csp--;                      /* oops one too many */
-    org_eip = X86_EIP;
     X86_IP += (csp - lina);
 
     switch (MEM_RB(pInt, (int) csp)) {
@@ -99,7 +99,7 @@ vm86_GP_fault(xf86Int10InfoPtr pInt)
         /* NOTE: ES can't be overwritten; prefixes 66,67 should use esi,edi,ecx
          * but is anyone using extended regs in real mode? */
         /* WARNING: no test for DI wrapping! */
-        X86_EDI += port_rep_inb(pInt, X86_DX, SEG_EADR((CARD32), X86_ES, DI),
+        X86_EDI += port_rep_inb(pInt, X86_DX, SEG_EADR((uint32_t), X86_ES, DI),
                                 X86_FLAGS & DF, is_rep ? LWECX : 1);
         if (is_rep)
             LWECX_ZERO;
@@ -110,11 +110,11 @@ vm86_GP_fault(xf86Int10InfoPtr pInt)
         /* NOTE: ES can't be overwritten */
         /* WARNING: no test for _DI wrapping! */
         if (prefix66) {
-            X86_DI += port_rep_inl(pInt, X86_DX, SEG_ADR((CARD32), X86_ES, DI),
+            X86_DI += port_rep_inl(pInt, X86_DX, SEG_ADR((uint32_t), X86_ES, DI),
                                    X86_EFLAGS & DF, is_rep ? LWECX : 1);
         }
         else {
-            X86_DI += port_rep_inw(pInt, X86_DX, SEG_ADR((CARD32), X86_ES, DI),
+            X86_DI += port_rep_inw(pInt, X86_DX, SEG_ADR((uint32_t), X86_ES, DI),
                                    X86_FLAGS & DF, is_rep ? LWECX : 1);
         }
         if (is_rep)
@@ -126,7 +126,7 @@ vm86_GP_fault(xf86Int10InfoPtr pInt)
         if (pref_seg < 0)
             pref_seg = X86_DS;
         /* WARNING: no test for _SI wrapping! */
-        X86_SI += port_rep_outb(pInt, X86_DX, (CARD32) LIN_PREF_SI,
+        X86_SI += port_rep_outb(pInt, X86_DX, (uint32_t) LIN_PREF_SI,
                                 X86_FLAGS & DF, is_rep ? LWECX : 1);
         if (is_rep)
             LWECX_ZERO;
@@ -138,11 +138,11 @@ vm86_GP_fault(xf86Int10InfoPtr pInt)
             pref_seg = X86_DS;
         /* WARNING: no test for _SI wrapping! */
         if (prefix66) {
-            X86_SI += port_rep_outl(pInt, X86_DX, (CARD32) LIN_PREF_SI,
+            X86_SI += port_rep_outl(pInt, X86_DX, (uint32_t) LIN_PREF_SI,
                                     X86_EFLAGS & DF, is_rep ? LWECX : 1);
         }
         else {
-            X86_SI += port_rep_outw(pInt, X86_DX, (CARD32) LIN_PREF_SI,
+            X86_SI += port_rep_outw(pInt, X86_DX, (uint32_t) LIN_PREF_SI,
                                     X86_FLAGS & DF, is_rep ? LWECX : 1);
         }
         if (is_rep)
@@ -209,7 +209,7 @@ vm86_GP_fault(xf86Int10InfoPtr pInt)
     case 0x0f:
         xf86DrvMsg(pInt->pScrn->scrnIndex, X_ERROR,
                    "CPU 0x0f Trap at CS:EIP=0x%4.4x:0x%8.8lx\n", X86_CS,
-                   X86_EIP);
+                   (unsigned long) X86_EIP);
         goto op0ferr;
 
     default:
