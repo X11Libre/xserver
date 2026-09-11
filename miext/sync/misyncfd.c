@@ -38,9 +38,20 @@ typedef struct _SyncFdScreenPrivate {
 
 static inline SyncFdScreenPrivatePtr sync_fd_screen_priv(ScreenPtr pScreen)
 {
+    SyncFdScreenPrivatePtr      priv;
+
     if (!dixPrivateKeyRegistered(&syncFdScreenPrivateKey))
         return NULL;
-    return dixLookupPrivate(&pScreen->devPrivates, &syncFdScreenPrivateKey);
+
+    /* The private is preallocated on every screen as soon as the key is
+     * registered by any single screen, so its mere presence says nothing.
+     * Only screens that went through miSyncFdScreenInit() have funcs set.
+     */
+    priv = dixLookupPrivate(&pScreen->devPrivates, &syncFdScreenPrivateKey);
+    if (priv->funcs.version <= 0)
+        return NULL;
+
+    return priv;
 }
 
 int
@@ -72,7 +83,8 @@ Bool miSyncFdScreenInit(ScreenPtr pScreen,
     SyncFdScreenPrivatePtr     priv;
 
     /* Check to see if we've already been initialized */
-    if (sync_fd_screen_priv(pScreen) != NULL)
+    priv = dixLookupPrivate(&pScreen->devPrivates, &syncFdScreenPrivateKey);
+    if (priv && priv->funcs.version > 0)
         return FALSE;
 
     if (!miSyncSetup(pScreen))
@@ -83,9 +95,8 @@ Bool miSyncFdScreenInit(ScreenPtr pScreen,
             return FALSE;
     }
 
-    priv = calloc(1, sizeof (SyncFdScreenPrivateRec));
-    if (!priv)
-        return FALSE;
+    priv = dixLookupPrivate(&pScreen->devPrivates, &syncFdScreenPrivateKey);
+    memset(priv, 0, sizeof(*priv));
 
     /* Will require version checks when there are multiple versions
      * of the funcs structure
