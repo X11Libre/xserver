@@ -482,6 +482,12 @@ InputThreadInit(void)
     if (pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM) != 0)
         ErrorF("input-thread: error setting thread scope\n");
 
+#ifdef __APPLE__
+    if (&pthread_attr_set_qos_class_np) {
+        pthread_attr_set_qos_class_np(&attr, QOS_CLASS_USER_INTERACTIVE, 0);
+    }
+#endif
+
     DebugF("input-thread: creating thread\n");
     pthread_create(&inputThreadInfo->thread, &attr,
                    &InputThreadDoWork, NULL);
