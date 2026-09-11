@@ -138,7 +138,6 @@ const char *xf86LogFile = DEFAULT_LOGDIR "/" DEFAULT_LOGPREFIX;
 MessageType xf86LogFileFrom = X_DEFAULT;
 Bool xf86LogFileWasOpened = FALSE;
 serverLayoutRec xf86ConfigLayout = { NULL, };
-confDRIRec xf86ConfigDRI = { 0, };
 
 XF86ConfigPtr xf86configptr = NULL;
 Bool xf86Resetting = FALSE;

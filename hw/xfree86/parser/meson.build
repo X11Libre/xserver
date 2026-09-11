@@ -16,7 +16,6 @@ srcs_xorg_parser = [
     'read.c',
     'scan.c',
     'write.c',
-    'DRI.c',
     'Extensions.c',
 ]
 
