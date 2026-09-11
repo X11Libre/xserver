@@ -57,7 +57,7 @@ sha1_test_repeated_blocks(void *data, size_t length, unsigned int repeat,
                           const char *expected_hash)
 {
     void *ctx;
-    unsigned char raw_result[20];
+    unsigned char raw_result[20] = {0};
     unsigned char hex_result[41];
 
     assert((ctx = x_sha1_init()) != NULL);
