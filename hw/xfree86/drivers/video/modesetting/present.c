@@ -323,6 +323,7 @@ ms_present_check_flip(RRCrtcPtr crtc,
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
     bool async_flip = !sync_flip;
+    bool pixmap_unchecked = false;
 
     if (reason)
         *reason = PRESENT_FLIP_REASON_UNKNOWN;
@@ -343,11 +344,17 @@ ms_present_check_flip(RRCrtcPtr crtc,
      *
      * See: https://github.com/X11Libre/xserver/issues/1812
      * See: https://github.com/X11Libre/xserver/issues/1754
+     *
+     * Bailing out here skips ms_present_check_unflip(), so nothing is known
+     * about the pixmap yet: not its format, not its modifier, not whether the
+     * scanout could ever take it. Say nothing about TearFree in that case
+     * rather than claim a presentation path we have not verified.
      */
     if (window->drawable.x != 0 || window->drawable.y != 0 ||
         window->drawable.x != pixmap->screen_x || window->drawable.y != pixmap->screen_y ||
         window->drawable.width != pixmap->drawable.width ||
         window->drawable.height != pixmap->drawable.height) {
+        pixmap_unchecked = true;
         goto no_flip;
     }
 
@@ -374,7 +381,7 @@ ms_present_check_flip(RRCrtcPtr crtc,
 
 no_flip:
     /* Export some info about TearFree if Present can't flip anyway */
-    if (reason && *reason == PRESENT_FLIP_REASON_UNKNOWN) {
+    if (reason && *reason == PRESENT_FLIP_REASON_UNKNOWN && !pixmap_unchecked) {
         xf86CrtcPtr xf86_crtc = crtc->devPrivate;
         drmmode_crtc_private_ptr drmmode_crtc = xf86_crtc->driver_private;
         drmmode_tearfree_ptr trf = &drmmode_crtc->tearfree;
