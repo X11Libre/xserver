@@ -194,6 +194,14 @@ of directories which the X server searches for font databases.
 See the FONTS section of this manual page for more information and the default
 list.
 .TP 8
+.B \-fontserverconnections
+Prohibit font server connections in the font path.  Font servers are
+rarely used and are a source of security vulnerabilities.
+This is the default unless +fontserverconnections is specified.
+.TP 8
+.B +fontserverconnections
+Allow font server connections in the font path.
+.TP 8
 .B \-help
 prints a usage message.
 .TP 8

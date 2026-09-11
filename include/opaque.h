@@ -33,6 +33,7 @@ from The Open Group.
 
 #include "globals.h"
 
+extern _X_EXPORT Bool enableFontServerConnections;
 extern _X_EXPORT Bool bgNoneRoot;
 
 #endif                          /* OPAQUE_H */
