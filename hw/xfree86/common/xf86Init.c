@@ -49,7 +49,6 @@
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
-#include "config/dbus-core.h"
 #include "config/hotplug_priv.h"
 #include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
@@ -68,7 +67,6 @@
 #include "servermd.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
-#include "../os-support/linux/systemd-logind.h"
 #include "seatd-libseat.h"
 
 #include "xf86VGAarbiter_priv.h"
@@ -334,9 +332,7 @@ InitOutput(int argc, char **argv)
         if (xf86DoShowOptions)
             DoShowOptions();
 
-        dbus_core_init();
         seatd_libseat_init(xf86VTKeepTtyIsSet());
-        systemd_logind_init();
 
         /* Do a general bus probe.  This will be a PCI probe for x86 platforms */
         xf86BusProbe();
@@ -847,8 +843,6 @@ ddxGiveUp(enum ExitCode error)
     }
 
     seatd_libseat_fini();
-    systemd_logind_fini();
-    dbus_core_fini();
 
     xf86CloseLog(error);
 }

@@ -28,7 +28,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-#include "config/config-hal.h"
 #include "config/config-udev.h"
 #include "config/config-wscons.h"
 #include "config/hotplug_priv.h"
@@ -36,8 +35,6 @@
 #include "os.h"
 #include "inputstr.h"
 #include "config-backends.h"
-
-#include "../hw/xfree86/os-support/linux/systemd-logind.h"
 
 void
 config_pre_init(void)
@@ -51,8 +48,6 @@ config_init(void)
 {
     if (!config_udev_init())
         ErrorF("[config] failed to initialise udev\n");
-    if (!config_hal_init())
-        ErrorF("[config] failed to initialise HAL\n");
     if (!config_wscons_init())
         ErrorF("[config] failed to initialise wscons\n");
 }
@@ -61,7 +56,6 @@ void
 config_fini(void)
 {
     config_udev_fini();
-    config_hal_fini();
     config_wscons_fini();
 }
 
@@ -119,7 +113,7 @@ void
 config_odev_free_attributes(struct OdevAttributes *attribs)
 {
     if (attribs->fd != -1)
-        systemd_logind_release_fd(attribs->major, attribs->minor, attribs->fd);
+        close(attribs->fd);
     free(attribs->path);
     free(attribs->syspath);
     free(attribs->busid);

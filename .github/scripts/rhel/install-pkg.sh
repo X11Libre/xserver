@@ -14,7 +14,6 @@ dnf -y makecache
 echo "--> install build dependencies"
 dnf -y install \
 	cairo-devel \
-	dbus-devel \
 	expat-devel \
 	gcc \
 	git \

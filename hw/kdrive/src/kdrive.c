@@ -56,10 +56,6 @@
 #include <execinfo.h>
 #endif
 
-/* This stub can be safely removed once we can
- * split input and GPU parts in hotplug.h et al. */
-#include "../../xfree86/os-support/linux/systemd-logind.h"
-
 typedef struct _kdDepths {
     CARD8 depth;
     CARD8 bpp;
@@ -1196,18 +1192,5 @@ struct xf86_platform_device *
 xf86_find_platform_device_by_devnum(unsigned int major, unsigned int minor)
 {
     return NULL;
-}
-#endif
-
-#ifdef SYSTEMD_LOGIND
-void
-systemd_logind_vtenter(void)
-{
-}
-
-void
-systemd_logind_release_fd(int major, int minor, int fd)
-{
-    close(fd);
 }
 #endif

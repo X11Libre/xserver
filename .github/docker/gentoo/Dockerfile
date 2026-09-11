@@ -45,7 +45,6 @@ RUN emerge --oneshot \
     media-libs/libglvnd \
     media-libs/mesa \
     net-libs/libtirpc \
-    sys-apps/dbus \
     sys-libs/libunwind \
     virtual/libudev \
     virtual/pkgconfig \

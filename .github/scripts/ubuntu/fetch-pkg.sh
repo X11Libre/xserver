@@ -28,7 +28,6 @@ apt-get install -d -y \
 	libaudit-dev \
 	libbsd-dev \
 	libcairo2-dev \
-	libdbus-1-dev \
 	libdrm-dev \
 	libegl1-mesa-dev \
 	libepoxy-dev \

@@ -90,7 +90,6 @@
 #include <X11/extensions/dpmsconst.h>
 #endif
 
-#include "../os-support/linux/systemd-logind.h"
 #include "seatd-libseat.h"
 
 
@@ -413,10 +412,6 @@ xf86VTLeave(void)
     for (i = 0; i < xf86NumGPUScreens; i++)
         xf86GPUScreens[i]->LeaveVT(xf86GPUScreens[i]);
 
-    if (systemd_logind_controls_session()) {
-        systemd_logind_drop_master();
-    }
-
     if (!xf86VTSwitchAway())
         goto switch_failed;
 
@@ -543,13 +538,11 @@ xf86VTSwitch(void)
      * Since all screens are currently all in the same state it is sufficient
      * check the first.  This might change in future.
      *
-     * VTLeave is always handled here (VT_PROCESS guarantees this is safe),
-     * if we use systemd_logind xf86VTEnter() gets called by systemd-logind.c
-     * once it has resumed all drm nodes.
+     * VTLeave is always handled here (VT_PROCESS guarantees this is safe).
      */
     if (xf86VTOwner())
         xf86VTLeave();
-    else if (!systemd_logind_controls_session())
+    else
         xf86VTEnter();
 }
 

@@ -124,9 +124,6 @@ xkbcomp_dep = dependency('xkbcomp', required: false)
 xkbfile_dep = dependency('xkbfile')
 xfont2_dep = dependency('xfont2', version: '>= 2.0')
 
-dbus_required = get_option('systemd_logind') == 'true'
-dbus_dep = dependency('dbus-1', version: '>= 1.0', required: dbus_required)
-
 seat_libseat_required = get_option('seatd_libseat') == 'true'
 seat_libseat_dep = dependency('libseat', version: '>= 0.9.1', required: seat_libseat_required)
 
@@ -197,11 +194,6 @@ endif
 
 glamor_option = get_option('glamor')
 
-hal_option = get_option('hal')
-if ['windows', 'darwin', 'cygwin'].contains(host_machine.system())
-    hal_option = 'false'
-endif
-
 udev_option = get_option('udev')
 udev_kms_option = get_option('udev_kms')
 if not dependency('libudev', required: (udev_option == 'true' or udev_kms_option == 'true')).found()
@@ -216,17 +208,6 @@ if get_option('seatd_libseat') == 'auto'
     build_seatd_libseat = build_udev_kms and seat_libseat_dep.found()
 else
     build_seatd_libseat = get_option('seatd_libseat') == 'true'
-endif
-
-
-if get_option('systemd_logind') == 'auto'
-    build_systemd_logind = build_udev_kms and dbus_dep.found() and not build_seatd_libseat
-else
-    build_systemd_logind = get_option('systemd_logind') == 'true'
-endif
-
-if build_systemd_logind and build_seatd_libseat
-    error('Support for systemd-logind and seatd-libseat are mutually exclusive: choose either.')
 endif
 
 with_dtrace = get_option('dtrace')
@@ -334,33 +315,6 @@ if int10 == 'auto'
         int10 = 'stub'
     endif
 endif
-
-hal_dep = []
-if hal_option == 'auto'
-    if not build_udev
-        hal_dep = dependency('hal', required: false)
-        build_hal = hal_dep.found()
-    else
-        build_hal = false
-    endif
-else
-    build_hal = hal_option == 'true'
-    if build_hal
-        hal_dep = dependency('hal')
-    endif
-endif
-
-if build_hal
-    message('WARNING: HAL is deprecated and might be removed in near future')
-    message('If you really need it, please file a feature request on keeping it')
-    message('and explain why you need it, what your use case is.')
-endif
-
-if build_udev and build_hal
-    error('Hotplugging through both libudev and hal not allowed')
-endif
-
-build_dbus = build_hal or build_systemd_logind
 
 udev_dep = dependency('', required:false)
 if build_udev or build_udev_kms

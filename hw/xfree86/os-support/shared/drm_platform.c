@@ -19,7 +19,6 @@
 #include "xf86platformBus_priv.h"
 #include "xf86Bus.h"
 
-#include "../linux/systemd-logind.h"
 #include "seatd-libseat.h"
 
 static Bool
@@ -28,7 +27,7 @@ get_drm_info(struct OdevAttributes *attribs, char *path, int delayed_index)
     drmVersionPtr v;
     int fd = -1;
     int err = 0;
-    Bool paused = FALSE, server_fd = FALSE;
+    Bool server_fd = FALSE;
 
     LogMessage(X_INFO, "Platform probe for %s\n", attribs->syspath);
 
@@ -36,18 +35,6 @@ get_drm_info(struct OdevAttributes *attribs, char *path, int delayed_index)
     if (fd >= 0) {
         attribs->fd = fd;
         server_fd = TRUE;
-    } else {
-       fd = systemd_logind_take_fd(attribs->major, attribs->minor, path, &paused);
-       if (fd != -1) {
-            if (paused) {
-                LogMessage(X_ERROR,
-                        "Error systemd-logind returned paused fd for drm node\n");
-                systemd_logind_release_fd(attribs->major, attribs->minor, -1);
-                return FALSE;
-            }
-            attribs->fd = fd;
-            server_fd = TRUE;
-        }
     }
 
     if (fd == -1) {
