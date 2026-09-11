@@ -107,7 +107,7 @@ option('xcsecurity', type: 'boolean', value: false,
        description: 'Security extension')
 option('xv', type: 'boolean', value: true,
        description: 'Xv extension')
-option('xvmc', type: 'boolean', value: true,
+option('xvmc', type: 'boolean', value: false,
        description: 'XvMC extension')
 option('dga', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'DGA extension')
