@@ -34,10 +34,7 @@
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
 
-#include <stdio.h>
 #include <errno.h>
-#include <sys/time.h>
-#include <sys/file.h>
 #include <mach.h>
 #include <hurd.h>
 
@@ -65,21 +62,20 @@ xf86OpenConsole()
     if (serverGeneration == 1) {
         kern_return_t err;
         mach_port_t device;
-        int fd;
 
         err = get_privileged_ports(NULL, &device);
         if (err) {
             errno = err;
-            FatalError("xf86KbdInit can't get_privileged_ports. (%s)\n",
+            FatalError("xf86OpenConsole: can't get_privileged_ports. (%s)\n",
                        strerror(errno));
         }
         mach_port_deallocate(mach_task_self(), device);
 
-        if ((fd = open("/dev/kbd", O_RDONLY | O_NONBLOCK)) < 0) {
-            fprintf(stderr, "Cannot open keyboard (%s)\n", strerror(errno));
-            exit(1);
-        }
-        xf86Info.consoleFd = fd;
+        /*
+         * Hurd has no VT concept, so leave consoleFd = -1.
+         * Opening /dev/kbd here would clash with the external
+         * kbd input driver which opens it for reading events.
+         */
     }
     return;
 }
@@ -87,7 +83,8 @@ xf86OpenConsole()
 void
 xf86CloseConsole()
 {
-    close(xf86Info.consoleFd);
+    if (xf86Info.consoleFd >= 0)
+        close(xf86Info.consoleFd);
     return;
 }
 
