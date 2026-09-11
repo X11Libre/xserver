@@ -152,6 +152,10 @@ Equipment Corporation.
 #include "xkbsrv.h"
 #include "dixstruct_priv.h"
 
+#ifdef _XLIBRE_LTTNG_UST
+#include "xlibre_gentracing_tp.h"
+#endif
+
 #define mskcnt ((MAXCLIENTS + 31) / 32)
 #define BITMASK(i) (1U << ((i) & 31))
 #define MASKIDX(i) ((i) >> 5)
@@ -1800,6 +1804,10 @@ ProcCopyArea(ClientPtr client)
     int rc;
 
     REQUEST_SIZE_MATCH(xCopyAreaReq);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_dix,CopyArea,client->index,stuff->srcDrawable,stuff->dstDrawable,stuff->srcX,stuff->srcY,stuff->dstX,stuff->dstY,stuff->width,stuff->height);
+#endif
 
     VALIDATE_DRAWABLE_AND_GC(stuff->dstDrawable, pDst, DixWriteAccess);
     if (stuff->dstDrawable != stuff->srcDrawable) {
@@ -3711,6 +3719,11 @@ CloseDownClient(ClientPtr client)
 #ifdef XSERVER_DTRACE
         XSERVER_CLIENT_DISCONNECT(client->index);
 #endif
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_dix,print,client->index,"client disconnected");
+#endif
+
         if (client->index < nextFreeClientID)
             nextFreeClientID = client->index;
         clients[client->index] = NULL;
@@ -3923,6 +3936,11 @@ SendConnSetup(ClientPtr client, const char *reason)
         CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
     }
     CancelDispatchExceptionTimer();
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_dix,print,client->index,"client connected");
+#endif
+
     return Success;
 }
 

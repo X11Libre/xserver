@@ -8,6 +8,20 @@ modesetting_srcs = [
     'vblank.c',
 ]
 
+modesetting_deps = [
+    common_dep,
+    udev_dep,
+    libdrm_dep,
+    gbm_dep,
+]
+
+
+if build_lttngust
+    modesetting_srcs += [ 'modesetting_tp.c' ]
+    modesetting_deps += [ lttng_ust_dep ]
+endif
+
+
 shared_module(
     'modesetting_drv',
     modesetting_srcs,
@@ -15,12 +29,7 @@ shared_module(
 
     include_directories: [inc, xorg_inc],
     c_args: xorg_c_args,
-    dependencies: [
-        common_dep,
-        udev_dep,
-        libdrm_dep,
-        gbm_dep,
-    ],
+    dependencies: modesetting_deps,
 
     install: true,
     install_dir: join_paths(module_abi_dir, 'drivers'),

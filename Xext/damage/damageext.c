@@ -44,6 +44,10 @@
 #include "protocol-versions.h"
 #include "dixstruct_priv.h"
 
+#ifdef _XLIBRE_LTTNG_UST
+#include "damageext_tp.h"
+#endif
+
 typedef struct _DamageClient {
     CARD32 major_version;
     CARD32 minor_version;
@@ -221,6 +225,10 @@ ProcDamageQueryVersion(ClientPtr client)
 
     DamageClientPtr pDamageClient = GetDamageClient(client);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_damage,generic_req,client->index,stuff->damageReqType,stuff->length);
+#endif
+
     xDamageQueryVersionReply reply = { 0 };
     if (stuff->majorVersion < SERVER_DAMAGE_MAJOR_VERSION) {
         reply.majorVersion = stuff->majorVersion;
@@ -333,6 +341,11 @@ ProcDamageCreate(ClientPtr client)
     X_REQUEST_FIELD_CARD32(damage);
     X_REQUEST_FIELD_CARD32(drawable);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_damage,generic_req2,client->index,stuff->damageReqType,stuff->damage,stuff->drawable);
+#endif
+
+
 #ifdef XINERAMA
     if (damageUseXinerama)
         return PanoramiXDamageCreate(client, stuff);
@@ -347,6 +360,11 @@ ProcDamageDestroy(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(xDamageDestroyReq);
     X_REQUEST_FIELD_CARD32(damage);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_damage,generic_req2,client->index,stuff->damageReqType,stuff->damage,0);
+#endif
+
 
     DamageExtPtr pDamageExt;
     VERIFY_DAMAGEEXT(pDamageExt, stuff->damage, client, DixDestroyAccess);
@@ -441,6 +459,10 @@ ProcDamageSubtract(ClientPtr client)
     X_REQUEST_FIELD_CARD32(repair);
     X_REQUEST_FIELD_CARD32(parts);
 
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_damage,generic_req2,client->index,stuff->damageReqType,stuff->damage,0);
+#endif
+
     DamageExtPtr pDamageExt;
     RegionPtr pRepair;
     RegionPtr pParts;
@@ -475,6 +497,10 @@ ProcDamageAdd(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDamageAddReq);
     X_REQUEST_FIELD_CARD32(drawable);
     X_REQUEST_FIELD_CARD32(region);
+
+#ifdef _XLIBRE_LTTNG_UST
+    lttng_ust_tracepoint(xlibre_xext_damage,generic_req2,client->index,stuff->damageReqType,0,stuff->drawable);
+#endif
 
     DrawablePtr pDrawable;
     RegionPtr pRegion;

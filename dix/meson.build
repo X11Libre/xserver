@@ -43,6 +43,12 @@ srcs_dix = [
     'window.c',
 ]
 
+libxserver_dix_extra_deps = []
+if build_lttngust
+    srcs_dix += [ 'xlibre_gentracing_tp.c' ]
+    libxserver_dix_extra_deps += [ lttng_ust_dep ]
+endif
+
 atom_generator = generator(
     find_program('generate-atoms'),
     output: '@BASENAME@.c',
@@ -65,7 +71,7 @@ dtrace_dep = declare_dependency(sources: [dtrace_src, dtrace_hdr])
 libxserver_dix = static_library('xserver_dix',
     [ srcs_dix, builtinatoms_src ],
     include_directories: inc,
-    dependencies: [ dtrace_dep, common_dep, ]
+    dependencies: [ dtrace_dep, common_dep, ] + libxserver_dix_extra_deps
 )
 
 libxserver_main = static_library('xserver_main',
