@@ -1251,6 +1251,16 @@ entries.
 This optional entry specifies that the device should be ignored entirely,
 and not added to the server. This can be useful when the device is handled
 by another program and no X events should be generated.
+.TP 7
+.BI "Option \*qToggleModifiersOnPress\*q \*q" boolean \*q
+When enabled, a locking modifier such as CapsLock or NumLock toggles
+entirely on key press instead of locking on press and unlocking only on the
+subsequent release (as on a mechanical typewriter).
+This sets the server default behavior and can be adjusted at runtime by
+.I "Toggle Lock Modifiers On Press"
+xinput property on any master keyboard.
+The default is
+.B off.
 .SH "OUTPUTCLASS SECTION"
 The config file may have multiple
 .B OutputClass
