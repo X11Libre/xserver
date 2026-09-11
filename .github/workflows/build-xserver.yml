@@ -299,7 +299,7 @@ jobs:
                    libxcb-render-devel, libxcb-render-util-devel,
                    libxcb-shape-devel, libxcb-util-devel, libxcb-xkb-devel,
                    libxcvt-devel, libxkbfile-devel, font-util,
-                   khronos-opengl-registry, python39-lxml, xkbcomp-devel,
+                   khronos-opengl-registry, python312-lxml, xkbcomp-devel,
                    xkeyboard-config, git
 
             - name: Cygwin ccache cache
