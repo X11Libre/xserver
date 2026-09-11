@@ -8,6 +8,9 @@ the above copyright notice appear in all copies and that both that
 copyright notice and this permission notice appear in supporting
 documentation.
 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -41,79 +44,53 @@ SOFTWARE.
 
 ******************************************************************/
 
-#ifndef OS_H
-#define OS_H
-
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef MONOTONIC_CLOCK
-#include <time.h>
-#endif
+#ifndef ALLOC_H
+#define ALLOC_H
 
 #include <X11/Xfuncproto.h>
 
 #include "xlibre_ptrtypes.h"
-#include "callback.h"
-#include "misc.h"
 
 /*
- * @brief macro for specifying non-null arguments
- *
- * part of public SDK / driver API
+ * This function malloc(3)s buffer, terminating the server if there is not
+ * enough memory.
  */
-#ifndef _X_ATTRIBUTE_NONNULL_ARG
-#define _X_ATTRIBUTE_NONNULL_ARG(...) __attribute__((nonnull(__VA_ARGS__)))
-#endif
+extern _X_EXPORT void *
+XNFalloc(unsigned long /*amount */ ) __attribute__((returns_nonnull));
 
-#ifndef _X_ATTRIBUTE_VPRINTF
-# if defined(__GNUC__) && (__GNUC__ >= 2) && !defined(__clang__)
-#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
-           __attribute__((__format__(gnu_printf, fmt, firstarg)))
-# else
-#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
-# endif
-#endif
+/*
+ * This function calloc(3)s buffer, terminating the server if there is not
+ * enough memory.
+ */
+extern _X_EXPORT void *
+XNFcalloc(unsigned long /*amount */ ) _X_DEPRECATED;
 
-#define SCREEN_SAVER_ON   0
-#define SCREEN_SAVER_OFF  1
-#define SCREEN_SAVER_FORCER 2
-#define SCREEN_SAVER_CYCLE  3
+/*
+ * This function calloc(3)s buffer, terminating the server if there is not
+ * enough memory or the arguments overflow when multiplied
+ */
+extern _X_EXPORT void *
+XNFcallocarray(size_t nmemb, size_t size) __attribute__((returns_nonnull));
 
-#ifndef MAX_REQUEST_SIZE
-#define MAX_REQUEST_SIZE 65535
-#endif
+/*
+ * This function realloc(3)s passed buffer, terminating the server if there is
+ * not enough memory.
+ */
+extern _X_EXPORT void *
+XNFrealloc(void * /*ptr */ , unsigned long /*amount */ );
 
-typedef struct _NewClientRec *NewClientPtr;
+/*
+ * This function strdup(3)s passed string. The only difference from the library
+ * function that it is safe to pass NULL, as NULL will be returned.
+ */
+extern _X_EXPORT char *
+Xstrdup(const char *s);
 
-#ifndef xnfalloc
-#define xnfalloc(size) XNFalloc((unsigned long)(size))
-#define xnfcalloc(_num, _size) XNFcallocarray((_num), (_size))
-#define xnfrealloc(ptr, size) XNFrealloc((void *)(ptr), (unsigned long)(size))
+/*
+ * This function strdup(3)s passed string, terminating the server if there is
+ * not enough memory. If NULL is passed to this function, NULL is returned.
+ */
+extern _X_EXPORT char *
+XNFstrdup(const char *s);
 
-#define xstrdup(s) Xstrdup((s))
-#define xnfstrdup(s) XNFstrdup((s))
-#endif
-
-#include "alloc.h"
-#include "Xprintf.h"
-#include "client_io.h"
-#include "fd_notify.h"
-#include "logging.h"
-#include "notify_fd.h"
-#include "timer.h"
-#include "fallback_funcs.h"
-
-/* only for backwards compat with drivers that haven't kept up yet
-   (xf86-video-intel)
-
-   @todo revise after next stable release
-*/
-_X_DEPRECATED
-static inline int System(const char* cmdline)
-{
-    return system(cmdline);
-}
-
-#endif                          /* OS_H */
+#endif /* ALLOC_H */
