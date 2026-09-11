@@ -1015,6 +1015,35 @@ ms_window_update_async_flip_modifiers(WindowPtr win, Bool async_flip)
     priv->async_flip_modifiers = async_flip;
 }
 
+/**
+ * This function exist because there are necesary extra work around for correct behaviour,
+ * for example: force software rendering for cursor.
+ */
+static inline bool
+ms_is_running_virtual_gpu(drmmode_ptr drmmode)
+{
+    drmVersionPtr version = drmGetVersion(drmmode->fd);
+    if (!version) {
+        return false;
+    }
+
+    if (!version->name ||
+        strstr(version->name, "bochs-drm") ||
+        strstr(version->name, "evdi") ||
+        strstr(version->name, "vboxvideo") ||
+        strstr(version->name, "virtio_gpu") ||
+        strstr(version->name, "vkms") ||
+        strstr(version->name, "vmwgfx") ||
+        strstr(version->name, "qxl" )) {
+        drmFreeVersion(version);
+        return true;
+    }
+
+    drmFreeVersion(version);
+    return false;
+}
+
+
 static void
 FreeScreen(ScrnInfoPtr pScrn)
 {
@@ -1328,6 +1357,27 @@ PreInit(ScrnInfoPtr pScrn, int flags)
 
     if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_SW_CURSOR, FALSE)) {
         ms->drmmode.sw_cursor = TRUE;
+    } else {
+        /* we have situation where cursor in virtual envirioment doesn't work as expected and can be confusing for users, for example under qemu:
+         * - if display backend is `gtk`, by default cursor is showed when window is out of focus and hidden when in focus (it have to be rendered by vm gpu in software).
+         * - if display backend us `sdl` it always shows cursor regardless of drmModeSetCursor2 & friends settings
+         * - if vm run under spice backed using qxl display, the rendering application (remote-viewer) behaves correctly
+         *  for more detail see : https://www.qemu.org/docs/master/system/qemu-manpage.html search `show-cursor`
+         *
+         *  until better solution is found, force software cursor
+        */
+        if (ms_is_running_virtual_gpu(&ms->drmmode)){
+
+            drmVersionPtr version = drmGetVersion(ms->drmmode.fd);
+            const char *name="N/A";
+            if (version){
+                name = version->name;
+            }
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Forcing software cursor on virtual machine driver %s due to known issues\n", name);
+            drmFreeVersion(version);
+
+            ms->drmmode.sw_cursor = TRUE;
+        }
     }
 
     try_enable_glamor(pScrn);
