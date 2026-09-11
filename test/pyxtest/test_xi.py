@@ -5,8 +5,8 @@
 import struct
 
 import pytest
-from proto import xi
-from xclient import BadLength, BadValue, BadWindow, Extension, X11Error, X11Reply
+from proto import x11, xi
+from xclient import Extension, X11Error, X11Reply
 
 
 @pytest.fixture
@@ -115,8 +115,8 @@ class TestXIPassiveGrab:
         )
         # The fix returns BadValue (error code 2)
         assert isinstance(resp, X11Error), f"Expected an error reply, got {resp}"
-        assert resp.error_code == BadValue, (
-            f"Expected BadValue ({BadValue}), got error code {resp.error_code}"
+        assert resp.error_code == x11.BadValue, (
+            f"Expected BadValue ({x11.BadValue}), got error code {resp.error_code}"
         )
 
 
@@ -167,8 +167,8 @@ class TestXIChangeProperty:
         # server tries to allocate 4 GB, failing with BadAlloc (11)
         # instead.
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
-        assert resp.error_code == BadLength, (
-            f"Expected BadLength ({BadLength}), got error code {resp.error_code} - "
+        assert resp.error_code == x11.BadLength, (
+            f"Expected BadLength ({x11.BadLength}), got error code {resp.error_code} - "
             f"integer truncation not caught by length check"
         )
 
@@ -384,7 +384,7 @@ class TestXIChangeDeviceControl:
         # With the fix: either a reply (success) or BadMatch (device
         # doesn't support resolution control), but NOT BadValue.
         if isinstance(resp, X11Error):
-            assert resp.error_code != BadValue, (
+            assert resp.error_code != x11.BadValue, (
                 "ChangeDeviceControl returned BadValue - "
                 "resolution values not byte-swapped"
             )
@@ -410,6 +410,6 @@ class TestXIChangeCursor:
         # Without the fix: SegFault on a NULL WindowPtr
         # With the fix: BadWindow
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
-        assert resp.error_code == BadWindow, (
+        assert resp.error_code == x11.BadWindow, (
             "ChangeCursor didn't return BadWindow for Window 0"
         )
