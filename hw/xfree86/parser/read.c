@@ -52,12 +52,10 @@
  * authorization from the copyright holder(s) and author(s).
  */
 #include <xorg-config.h>
-
 #include "xf86Config.h"
 #include "xf86Parser_priv.h"
 #include "xf86tokens.h"
 #include "Configint.h"
-
 
 static const xf86ConfigSymTabRec TopLevelTab[] = {
     {SECTION, "section"},
@@ -87,10 +85,19 @@ XF86ConfigPtr
 xf86readConfigFile(void)
 {
     int token;
-    XF86ConfigPtr ptr = NULL;
+    XF86ConfigPtr ptr = xf86configptr;
 
-    if ((ptr = xf86allocateConfig()) == NULL) {
-        return NULL;
+    // Allocate config if it is not
+    if(!ptr)
+    {
+        ptr = calloc(1, sizeof(XF86ConfigRec));
+
+        if(!ptr)
+        {
+            return NULL;
+        }
+
+        xf86configptr = ptr;
     }
 
     while ((token = xf86getToken(TopLevelTab)) != EOF_TOKEN) {
@@ -268,19 +275,6 @@ xf86itemNotSublist(GenericListPtr list_1, GenericListPtr list_2)
     }
 
     return (!(last_1 == last_2));
-}
-
-/*
- * Conditionally allocate config struct, but only allocate it
- * if it's not already there.  In either event, return the pointer
- * to the global config struct.
- */
-XF86ConfigPtr xf86allocateConfig(void)
-{
-    if (!xf86configptr) {
-        xf86configptr = calloc(1, sizeof(XF86ConfigRec));
-    }
-    return xf86configptr;
 }
 
 void
