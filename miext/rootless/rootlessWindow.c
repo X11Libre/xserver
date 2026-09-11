@@ -399,6 +399,8 @@ RootlessEnsureFrame(WindowPtr pWin)
         RL_DEBUG_MSG("implementation failed to create frame!\n");
         free(winRec);
         SETWINREC(pWin, NULL);
+        if (pShape != NULL)
+            RegionUninit(&shape);
         return NULL;
     }
 
