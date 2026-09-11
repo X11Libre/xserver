@@ -84,7 +84,8 @@ xcb_cursor_t
 void
  hostx_get_output_geometry(const char *output,
                            int *x, int *y,
-                           int *width, int *height);
+                           int *width, int *height,
+                           int *width_mm, int *height_mm);
 
 void
  hostx_use_fullscreen(void);
