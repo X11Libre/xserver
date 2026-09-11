@@ -461,7 +461,7 @@ handle_detailed_input(struct detailed_monitor_section *det_mon, void *data)
 
     switch (det_mon->type) {
     case DS_NAME:
-        ptr->mon_modelname = realloc(ptr->mon_modelname,
+        ptr->mon_modelname = XNFrealloc(ptr->mon_modelname,
                                      strlen((char *) (det_mon->section.name)) +
                                      1);
         assert(ptr->mon_modelname);
