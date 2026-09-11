@@ -346,24 +346,15 @@ conf_data.set_quoted('__XSERVERNAME__', 'Xorg')
 conf_data.set('WITH_VGAHW', build_vgahw ? '1' : false)
 
 # BSD console-driver support (the xf86Info.consType machinery + the
-# hw/xfree86/os-support/bsd/ console_*.c backends).
-# For the SDK (build_xorg_sdk), define these unconditionally so that
-# drivers can build against the SDK regardless of the build platform.
-# For non-SDK builds, use the platform-appropriate values.
-if build_xorg_sdk
-    conf_data.set('CSRG_BASED', '1')
-    conf_data.set('CONFIG_BSD_CONSOLE', '1')
-    conf_data.set('PCVT_SUPPORT', '1')
-    conf_data.set('SYSCONS_SUPPORT', '1')
-    conf_data.set('WSCONS_SUPPORT', '1')
-else
-    conf_data.set('CSRG_BASED', csrg_based ? '1' : false)
-    conf_data.set('CONFIG_BSD_CONSOLE',
-                  (csrg_based or host_machine.system() == 'kfreebsd') ? '1' : false)
-    conf_data.set('PCVT_SUPPORT', supports_pcvt ? '1' : false)
-    conf_data.set('SYSCONS_SUPPORT', supports_syscons ? '1' : false)
-    conf_data.set('WSCONS_SUPPORT', supports_wscons ? '1' : false)
-endif
+# hw/xfree86/os-support/bsd/ console_*.c backends). True on the BSD-derived
+# systems (csrg_based) plus GNU/kFreeBSD, matching the old
+# `CSRG_BASED || __FreeBSD_kernel__` guard exactly.
+conf_data.set('CSRG_BASED', csrg_based ? '1' : false)
+conf_data.set('CONFIG_BSD_CONSOLE',
+              (csrg_based or host_machine.system() == 'kfreebsd') ? '1' : false)
+conf_data.set('PCVT_SUPPORT', supports_pcvt ? '1' : false)
+conf_data.set('SYSCONS_SUPPORT', supports_syscons ? '1' : false)
+conf_data.set('WSCONS_SUPPORT', supports_wscons ? '1' : false)
 
 conf_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
 if get_option('pciaccess')
@@ -413,18 +404,9 @@ xorg_data.set_quoted('__XSERVERNAME__', 'Xorg')
 xorg_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
 xorg_data.set_quoted('PCI_TXT_IDS_PATH', '')
 xorg_data.set('XSERVER_PLATFORM_BUS', build_udev_kms ? '1' : false)
+# WSCONS_SUPPORT is only for netbsd/openbsd
 xorg_data.set('WSCONS_SUPPORT',
               host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd' ? '1' : false)
-
-# BSD console support macros (xf86Info.consType machinery + console_*.c backends).
-# These are defined unconditionally in the SDK so that drivers can build against
-# it regardless of the build platform. The old CSRG_BASED/PCVT/SYSCONS/WSCONS
-# macros are kept for backwards compatibility with existing drivers.
-xorg_data.set('CONFIG_BSD_CONSOLE', '1')
-xorg_data.set('CSRG_BASED', '1')
-xorg_data.set('PCVT_SUPPORT', '1')
-xorg_data.set('SYSCONS_SUPPORT', '1')
-# WSCONS_SUPPORT is already set above for netbsd/openbsd
 
 xorg_data.set('HAVE_STROPTS_H', cc.has_header('stropts.h') ? '1' : false)
 xorg_data.set('HAVE_SYS_KD_H', cc.has_header('sys/kd.h') ? '1' : false)

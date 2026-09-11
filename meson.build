@@ -954,17 +954,32 @@ endif
 configure_file(output : 'dix-config.h',
                configuration : conf_data)
 
+# The installed SDK headers are generated from conf_data, but with the BSD
+# console macros defined unconditionally: driver builds may reference the
+# PCCONS/SYSCONS/PCVT/WSCONS constants regardless of the platform the SDK
+# itself was built on. For non-SDK builds we keep the platform-appropriate
+# values (the SDK headers are not installed then anyway).
+sdk_hdr_data = configuration_data()
+sdk_hdr_data.merge_from(conf_data)
+if build_xorg_sdk
+    sdk_hdr_data.set('CSRG_BASED', '1')
+    sdk_hdr_data.set('CONFIG_BSD_CONSOLE', '1')
+    sdk_hdr_data.set('PCVT_SUPPORT', '1')
+    sdk_hdr_data.set('SYSCONS_SUPPORT', '1')
+    sdk_hdr_data.set('WSCONS_SUPPORT', '1')
+endif
+
 # deprecated, but still supported for a while
 configure_file(output : 'xorg-server.h',
                input : 'hw/xfree86/xlibre-server.h.meson.in',
-               configuration : conf_data,
+               configuration : sdk_hdr_data,
                install: build_xorg_sdk,
                install_dir: xorgsdkdir)
 
 # new config include file for drivers
 configure_file(output : 'xlibre-server.h',
                input : 'hw/xfree86/xlibre-server.h.meson.in',
-               configuration : conf_data,
+               configuration : sdk_hdr_data,
                install: build_xorg_sdk,
                install_dir: xorgsdkdir)
 
