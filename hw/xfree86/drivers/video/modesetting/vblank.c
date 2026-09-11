@@ -273,7 +273,7 @@ ms_drm_set_seq_msc(uint32_t seq, uint64_t msc)
     }
 }
 
-static void
+void
 ms_drm_set_seq_queued(uint32_t seq, uint64_t msc)
 {
     drmmode_crtc_private_ptr drmmode_crtc;
@@ -513,11 +513,14 @@ ms_drm_abort_one(struct ms_drm_queue *q)
 static void
 ms_drm_abort_scrn(ScrnInfoPtr scrn)
 {
-    struct ms_drm_queue *q, *tmp;
+    struct ms_drm_queue *q;
 
-    xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
-        if (q->scrn == scrn)
+restart:
+    xorg_list_for_each_entry(q, &ms_drm_queue, list) {
+        if (q->scrn == scrn && !q->aborted) {
             ms_drm_abort_one(q);
+            goto restart;
+        }
     }
 }
 
@@ -527,9 +530,9 @@ ms_drm_abort_scrn(ScrnInfoPtr scrn)
 void
 ms_drm_abort_seq(ScrnInfoPtr scrn, uint32_t seq)
 {
-    struct ms_drm_queue *q, *tmp;
+    struct ms_drm_queue *q;
 
-    xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
+    xorg_list_for_each_entry(q, &ms_drm_queue, list) {
         if (q->seq == seq) {
             ms_drm_abort_one(q);
             break;
@@ -562,7 +565,7 @@ ms_drm_abort(ScrnInfoPtr scrn, Bool (*match)(void *data, void *match_data),
 static void
 ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint64_t user_data)
 {
-    struct ms_drm_queue *q, *tmp;
+    struct ms_drm_queue *q;
     uint32_t seq = (uint32_t) user_data;
     xf86CrtcPtr crtc = NULL;
     drmmode_crtc_private_ptr drmmode_crtc;
@@ -590,12 +593,14 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
         return;
 
     /* Now run all of the vblank events for this CRTC with an expired MSC */
-    xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
+restart:
+    xorg_list_for_each_entry(q, &ms_drm_queue, list) {
         if (q->crtc == crtc && q->msc <= msc) {
             xorg_list_del(&q->list);
             if (!q->aborted)
                 q->handler(msc, ns / 1000, q->data);
             free(q);
+            goto restart;
         }
     }
 
@@ -619,9 +624,12 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     if (msc < next_msc && !ms_queue_vblank(crtc, MS_QUEUE_ABSOLUTE, msc, NULL, seq)) {
         xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
                    "failed to queue next vblank event, aborting lost events\n");
-        xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
-            if (q->crtc == crtc && q->msc < next_msc)
+restart_lost:
+        xorg_list_for_each_entry(q, &ms_drm_queue, list) {
+            if (q->crtc == crtc && q->msc < next_msc && !q->aborted) {
                 ms_drm_abort_one(q);
+                goto restart_lost;
+            }
         }
     }
 }

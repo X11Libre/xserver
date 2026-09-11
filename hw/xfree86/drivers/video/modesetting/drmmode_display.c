@@ -1166,6 +1166,8 @@ drmmode_SharedPixmapFlip(PixmapPtr frontTarget, xf86CrtcPtr crtc,
         return FALSE;
     }
 
+    ms_drm_set_seq_queued(ppriv_front->flip_seq, UINT64_MAX);
+
     return TRUE;
 }
 

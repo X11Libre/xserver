@@ -186,6 +186,12 @@ do_queue_flip_on_crtc(ScreenPtr screen, xf86CrtcPtr crtc, uint32_t flags,
     drmmode_tearfree_ptr trf = &drmmode_crtc->tearfree;
 
     while (drmmode_crtc_flip(crtc, fb_id, x, y, flags, (void *)(long)seq)) {
+        /* If we failed for a reason other than a busy queue, abort and return error. */
+        if (errno != EBUSY && errno != EAGAIN) {
+            ms_drm_abort_seq(crtc->scrn, seq);
+            return TRUE;
+        }
+
         /* We may have failed because the event queue was full.  Flush it
          * and retry.  If there was nothing to flush, then we failed for
          * some other reason and should just return an error.
@@ -247,6 +253,8 @@ queue_flip_on_crtc(ScreenPtr screen, xf86CrtcPtr crtc,
     if (do_queue_flip_on_crtc(screen, crtc, flags, seq, ms->drmmode.fb_id,
                               crtc->x, crtc->y))
         return QUEUE_FLIP_DRM_FLUSH_FAILED;
+
+    ms_drm_set_seq_queued(seq, UINT64_MAX);
 
     /* The page flip succeeded. */
     return QUEUE_FLIP_SUCCESS;
@@ -675,6 +683,7 @@ ms_do_tearfree_flip(ScreenPtr screen, xf86CrtcPtr crtc)
                               seq, trf->buf[idx].fb_id, 0, 0))
         goto no_flip;
 
+    ms_drm_set_seq_queued(seq, UINT64_MAX);
     trf->flip_seq = seq;
     return FALSE;
 

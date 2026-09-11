@@ -215,6 +215,7 @@ void ms_drm_abort(ScrnInfoPtr scrn,
                   Bool (*match)(void *data, void *match_data),
                   void *match_data);
 void ms_drm_abort_seq(ScrnInfoPtr scrn, uint32_t seq);
+void ms_drm_set_seq_queued(uint32_t seq, uint64_t msc);
 
 Bool ms_drm_queue_is_empty(void);
 
