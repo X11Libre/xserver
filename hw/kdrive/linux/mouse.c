@@ -21,6 +21,8 @@
  */
 
 #include <kdrive-config.h>
+
+#include <stdbool.h>
 #include <errno.h>
 #include <termios.h>
 #include <X11/X.h>
@@ -182,7 +184,7 @@ typedef struct _kmouseProt {
     Bool (*Init) (KdPointerInfo * pi);
     unsigned char headerMask, headerValid;
     unsigned char dataMask, dataValid;
-    Bool tty;
+    bool tty;
     unsigned int c_iflag;
     unsigned int c_oflag;
     unsigned int c_lflag;
@@ -201,7 +203,7 @@ typedef struct _kmouse {
     const KmouseProt *prot;
     int i_prot;
     KmouseStage stage;          /* protocol verification stage */
-    Bool tty;                   /* mouse device is a tty */
+    bool tty;                   /* mouse device is a tty */
     int valid;                  /* sequential valid events */
     int tested;                 /* bytes scanned during Testing phase */
     int invalid;                /* total invalid bytes for this protocol */
@@ -419,7 +421,7 @@ ps2SkipInit(KdPointerInfo * pi, int ninit, Bool ret_next)
 {
     Kmouse *km = pi->driverPrivate;
     int c = -1;
-    Bool waiting;
+    bool waiting;
 
     waiting = FALSE;
     while (ninit || ret_next) {

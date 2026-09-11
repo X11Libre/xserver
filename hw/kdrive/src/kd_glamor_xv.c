@@ -23,6 +23,8 @@
 
 #include <kdrive-config.h>
 
+#include <stdbool.h>
+
 #include "kdrive.h"
 #include "kxv.h"
 #include "glamor_priv.h"
