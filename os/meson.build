@@ -72,10 +72,18 @@ if host_machine.system() == 'sunos'
     os_c_args += '-D__EXTENSIONS__'
     os_dep += cc.find_library('socket')
     os_dep += cc.find_library('nsl')
-endif
-
-if host_machine.system() == 'openbsd'
+    srcs_os += 'solaris/client.c'
+elif host_machine.system() == 'darwin'
+    srcs_os += 'apple/client.c'
+elif host_machine.system() == 'freebsd'
+    srcs_os += 'freebsd/client.c'
+elif host_machine.system() == 'dragonfly'
+    # The FreeBSD implementation also works on DragonFlyBSD. To avoid code duplication, we can
+    # just reuse the same implementation for both operating systems.
+    srcs_os += 'freebsd/client.c'
+elif host_machine.system() == 'openbsd'
     os_dep += cc.find_library('kvm')
+    srcs_os += 'openbsd/client.c'
 endif
 
 libxlibc = []
