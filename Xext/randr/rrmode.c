@@ -95,6 +95,7 @@ RRModeCreate(xRRModeInfo * modeInfo, const char *name, ScreenPtr userScreen)
     mode->mode.id = dixAllocServerXID();
     if (!AddResource(mode->mode.id, RRModeType, (void *) mode)) {
         free(newModes);
+        free(mode);
         return NULL;
     }
     modes = newModes;
