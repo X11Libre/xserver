@@ -250,17 +250,15 @@ glamor_pixmap_clear_fbo(glamor_screen_private *glamor_priv, glamor_pixmap_fbo *f
 {
     glamor_make_current(glamor_priv);
 
-    assert(fbo->fb != 0 && fbo->tex != 0);
+    if (glamor_pixmap_ensure_fb(glamor_priv, fbo) != 0)
+        return;
 
-    if (glamor_priv->has_clear_texture) {
-        glClearTexImage(fbo->tex, 0, pixmap_format->format, pixmap_format->type, NULL);
-    }
-    else {
-        glamor_set_destination_pixmap_fbo(glamor_priv, fbo, 0, 0, fbo->width, fbo->height);
+    glamor_set_destination_pixmap_fbo(glamor_priv, fbo, 0, 0, fbo->width, fbo->height);
 
-        glClearColor(0.0, 0.0, 0.0, 0.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
+    glDisable(GL_SCISSOR_TEST);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 glamor_pixmap_fbo *
