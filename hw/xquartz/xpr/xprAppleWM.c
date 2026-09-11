@@ -127,6 +127,12 @@ xprFrameDraw(WindowPtr pWin,
     if (wid == 0)
         return BadWindow;
 
+    /* xp_frame_draw() renders the decorations into the window's backing store, so the frame must not be locked for
+     * our own drawing when it runs.  Otherwise Xplugin re-enters the backing lock on an already-locked window, which
+     * remaps the backing store out from under whichever of the two writers loses the race.
+     */
+    RootlessStopDrawing(pWin, FALSE);
+
     if (xp_frame_draw(wid, class, attr, outer, inner,
                       title_len, title_bytes) != Success) {
         return BadValue;
