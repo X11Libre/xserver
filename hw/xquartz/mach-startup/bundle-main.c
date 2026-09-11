@@ -59,6 +59,8 @@
 
 #ifdef HAS_LIBDISPATCH
 #include <dispatch/dispatch.h>
+#else
+#include <pthread.h>
 #endif
 
 #include <asl.h>

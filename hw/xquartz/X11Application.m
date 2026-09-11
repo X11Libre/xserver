@@ -159,6 +159,16 @@ X11Application *X11App;
 
 @interface X11Application (Private)
 - (void) sendX11NSEvent:(NSEvent *)e;
+#ifndef HAS_LIBDISPATCH
+- (void)setWindowMenuCompat:(NSArray *)items;
+- (void)setWindowMenuCheckCompat:(NSNumber *)idx;
+- (void)setFrontProcessCompat:(id)unused;
+- (void)setCanQuitCompat:(NSNumber *)state;
+- (void)serverReadyCompat:(id)unused;
+- (void)showHideMenubarCompat:(NSNumber *)state;
+- (void)launchClientCompat:(NSString *)cmd;
+- (void)runAlertPanelCompat:(NSMutableDictionary *)ctx;
+#endif
 @end
 
 @interface X11Application ()
@@ -492,6 +502,7 @@ sendX11NSEvent_fptr(void *e_ptr)
         NSEvent *event_copy = [e retain];
         dispatch_async_f(eventTranslationQueue, event_copy, sendX11NSEvent_fptr);
 #else
+        /* On 10.5, process events directly without async queue */
         [self sendX11NSEvent:e];
 #endif
     }
@@ -579,7 +590,6 @@ x11_front_window_id(void)
 {
     (void)[self.controller application:self openFile:cmd];
 }
-
 
 - (void) read_defaults
 {
@@ -669,9 +679,15 @@ X11ApplicationSetWindowMenu(int nitems, const char **items,
             [menuItem release];
         }
 
+#ifdef HAS_LIBDISPATCH
         dispatch_async_f(dispatch_get_main_queue(),
                          allMenuItems,
                          setWindowMenuOnMain_fptr);
+#else
+        [X11App performSelectorOnMainThread:@selector(setWindowMenuCompat:)
+                                  withObject:allMenuItems
+                               waitUntilDone:NO];
+#endif
     OBJC_AUTORELEASEPOOL_END
 }
 
@@ -687,9 +703,14 @@ void
 X11ApplicationSetWindowMenuCheck(int idx)
 {
     NSNumber *num = [[NSNumber alloc] initWithInt:idx];
+#ifdef HAS_LIBDISPATCH
     dispatch_async_f(dispatch_get_main_queue(), num, setWindowMenuCheck_fptr);
+#else
+    [X11App performSelectorOnMainThread:@selector(setWindowMenuCheckCompat:)
+                              withObject:num
+                           waitUntilDone:NO];
+#endif
 }
-
 
 static void
 appSetFrontProcess_fptr(void* unused)
@@ -700,7 +721,13 @@ appSetFrontProcess_fptr(void* unused)
 void
 X11ApplicationSetFrontProcess(void)
 {
+#ifdef HAS_LIBDISPATCH
     dispatch_async_f(dispatch_get_main_queue(), NULL, appSetFrontProcess_fptr);
+#else
+    [X11App performSelectorOnMainThread:@selector(setFrontProcessCompat:)
+                              withObject:nil
+                           waitUntilDone:NO];
+#endif
 }
 
 static void
@@ -714,7 +741,13 @@ void
 X11ApplicationSetCanQuit(int state)
 {
     NSNumber *state_alloc = [[NSNumber alloc] initWithInt:state];
+#ifdef HAS_LIBDISPATCH
     dispatch_async_f(dispatch_get_main_queue(), state_alloc, appSetCanQuit_fptr);
+#else
+    [X11App performSelectorOnMainThread:@selector(setCanQuitCompat:)
+                              withObject:state_alloc
+                           waitUntilDone:NO];
+#endif
 }
 
 static void
@@ -726,7 +759,13 @@ appServerReady_fptr(void* unused)
 void
 X11ApplicationServerReady(void)
 {
+#ifdef HAS_LIBDISPATCH
     dispatch_async_f(dispatch_get_main_queue(), NULL, appServerReady_fptr);
+#else
+    [X11App performSelectorOnMainThread:@selector(serverReadyCompat:)
+                              withObject:nil
+                           waitUntilDone:NO];
+#endif
 }
 
 static void
@@ -740,7 +779,13 @@ void
 X11ApplicationShowHideMenubar(int state)
 {
     NSNumber *state_alloc = [[NSNumber alloc] initWithInt:state];
+#ifdef HAS_LIBDISPATCH
     dispatch_async_f(dispatch_get_main_queue(), state_alloc, appShowHideMenubar_fptr);
+#else
+    [X11App performSelectorOnMainThread:@selector(showHideMenubarCompat:)
+                              withObject:state_alloc
+                           waitUntilDone:NO];
+#endif
 }
 
 static void
@@ -755,10 +800,15 @@ X11ApplicationLaunchClient(const char *cmd)
 {
     OBJC_AUTORELEASEPOOL_BEGIN
         NSString *string_alloc = [[NSString alloc] initWithUTF8String:cmd];
+#ifdef HAS_LIBDISPATCH
         dispatch_async_f(dispatch_get_main_queue(), string_alloc, appLaunchClient_fptr);
+#else
+        [X11App performSelectorOnMainThread:@selector(launchClientCompat:)
+                                  withObject:string_alloc
+                               waitUntilDone:NO];
+#endif
     OBJC_AUTORELEASEPOOL_END
 }
-
 
 /* helper function for X11ApplicationCanEnterRandR(),
  * extracted from previous Apple block */
@@ -788,7 +838,7 @@ runAlertPanel(void *result_ptr)
 Bool
 X11ApplicationCanEnterRandR(void)
 {
-    
+
     NSUserDefaults * const defaults = NSUserDefaults.xquartzDefaults;
 
     if ([defaults boolForKey:XQuartzPrefKeyNoRANDRAlert] ||
@@ -799,7 +849,16 @@ X11ApplicationCanEnterRandR(void)
         QuartzShowFullscreen(FALSE);
 
     NSInteger alert_result;
+#ifdef HAS_LIBDISPATCH
     dispatch_sync_f(dispatch_get_main_queue(), &alert_result, runAlertPanel);
+#else
+    NSMutableDictionary *ctx = [[NSMutableDictionary alloc] init];
+    [ctx setObject:[NSValue valueWithPointer:&alert_result] forKey:@"result"];
+    [X11App performSelectorOnMainThread:@selector(runAlertPanelCompat:)
+                              withObject:ctx
+                           waitUntilDone:YES];
+    [ctx release];
+#endif
 
     switch (alert_result) {
     case NSAlertOtherReturn:
@@ -906,7 +965,7 @@ X11ApplicationMain(int argc, char **argv, char **envp)
 
         /* Calculate the height of the menubar so we can avoid it. */
         aquaMenuBarHeight = [[NSApp mainMenu] menuBarHeight];
-#if ! __LP64__
+#if !__LP64__
         if (!aquaMenuBarHeight) {
             aquaMenuBarHeight = [NSMenuView menuBarHeight];
         }
@@ -954,6 +1013,34 @@ X11ApplicationMain(int argc, char **argv, char **envp)
 }
 
 @implementation X11Application (Private)
+
+#ifndef HAS_LIBDISPATCH
+- (void)setWindowMenuCompat:(NSArray *)items {
+    setWindowMenuOnMain_fptr(items);
+}
+- (void)setWindowMenuCheckCompat:(NSNumber *)idx {
+    setWindowMenuCheck_fptr(idx);
+}
+- (void)setFrontProcessCompat:(id)unused {
+    appSetFrontProcess_fptr(NULL);
+}
+- (void)setCanQuitCompat:(NSNumber *)state {
+    appSetCanQuit_fptr(state);
+}
+- (void)serverReadyCompat:(id)unused {
+    appServerReady_fptr(NULL);
+}
+- (void)showHideMenubarCompat:(NSNumber *)state {
+    appShowHideMenubar_fptr(state);
+}
+- (void)launchClientCompat:(NSString *)cmd {
+    appLaunchClient_fptr(cmd);
+}
+- (void)runAlertPanelCompat:(NSMutableDictionary *)ctx {
+    NSInteger *result = [[ctx objectForKey:@"result"] pointerValue];
+    runAlertPanel(result);
+}
+#endif
 
 #ifdef NX_DEVICELCMDKEYMASK
 /* This is to workaround a bug in the VNC server where we sometimes see the L
@@ -1479,7 +1566,11 @@ handle_mouse:
             if (pthread_main_np()) {
                 copyKeyboardLayout_fptr(&ctx);
             } else {
+#ifdef HAS_LIBDISPATCH
                 dispatch_sync_f(dispatch_get_main_queue(), &ctx, copyKeyboardLayout_fptr);
+#else
+                copyKeyboardLayout_fptr(&ctx);
+#endif
             }
 
             TISInputSourceRef clear;
