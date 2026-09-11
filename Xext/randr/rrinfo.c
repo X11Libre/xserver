@@ -80,8 +80,8 @@ RRScanOldConfig(ScreenPtr pScreen, Rotation rotations)
     RRCrtcPtr crtc;
     RRModePtr mode, newMode = NULL;
     int i;
-    CARD16 minWidth = MAXSHORT, minHeight = MAXSHORT;
-    CARD16 maxWidth = 0, maxHeight = 0;
+    CARD16 minSize = MAXSHORT;
+    CARD16 maxSize = 0;
     CARD16 width, height;
 
     /*
@@ -148,17 +148,22 @@ RRScanOldConfig(ScreenPtr pScreen, Rotation rotations)
         width = mode->mode.width;
         height = mode->mode.height;
 
-        if (width < minWidth)
-            minWidth = width;
-        if (width > maxWidth)
-            maxWidth = width;
-        if (height < minHeight)
-            minHeight = height;
-        if (height > maxHeight)
-            maxHeight = height;
+        if (width < minSize)
+            minSize = width;
+        if (width > maxSize)
+            maxSize = width;
+        if (height < minSize)
+            minSize = height;
+        if (height > maxSize)
+            maxSize = height;
     }
 
-    RRScreenSetSizeRange(pScreen, minWidth, minHeight, maxWidth, maxHeight);
+    /**
+     * We pass the minimum/maximum sizes like this to allow rotations.
+     * For example, on a 1920x1080 screen, when we rotate the entire screen,
+     * randr thinks we're going to end up with a 1080x1920 mode, outside the supported range.
+     */
+    RRScreenSetSizeRange(pScreen, minSize, minSize, maxSize, maxSize);
 
     /* notice current mode */
     if (newMode)
