@@ -38,6 +38,7 @@ main(int argc, char **argv)
     run_test(protocol_xiquerypointer_test);
     run_test(protocol_xiwarppointer_test);
     run_test(protocol_eventconvert_test);
+    run_test(protocol_xkbgetkbdbyname_test);
     run_test(xi2_test);
 #endif
 
