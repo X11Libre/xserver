@@ -930,7 +930,7 @@ ConfineCursorToWindow(DeviceIntPtr pDev, WindowPtr pWin, Bool generateEvents,
         CheckPhysLimits(pDev, pSprite->current, generateEvents,
                         confineToScreen, pWin->drawable.pScreen);
 
-        if (*pScreen->CursorConfinedTo)
+        if (pScreen->CursorConfinedTo)
             (*pScreen->CursorConfinedTo) (pDev, pScreen, pWin);
     }
 }
@@ -3733,7 +3733,7 @@ ProcWarpPointer(ClientPtr client)
     else if (!PointerConfinedToScreen(dev)) {
         NewCurrentScreen(dev, newScreen, x, y);
     }
-    if (*newScreen->CursorWarpedTo)
+    if (newScreen->CursorWarpedTo)
         (*newScreen->CursorWarpedTo) (dev, newScreen, client,
                                       dest, pSprite, x, y);
     return Success;
