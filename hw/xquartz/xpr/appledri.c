@@ -299,7 +299,7 @@ ProcAppleDRICreatePixmap(ClientPtr client)
     CARD32 stringLength = strlen(path) + 1;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    x_rpcbuf_write_CARD8s(&rpcbuf, path, stringLength);
+    x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)path, stringLength);
 
     xAppleDRICreatePixmapReply reply = {
         .stringLength = stringLength,
