@@ -70,7 +70,7 @@ KdCardInfoDispose(KdCardInfo * ci)
 }
 
 KdScreenInfo *
-KdScreenInfoAdd(KdCardInfo * ci)
+KdScreenInfoAdd(KdCardInfo * ci, void *closure)
 {
     KdScreenInfo *si, **prev;
     int n;
@@ -80,6 +80,7 @@ KdScreenInfoAdd(KdCardInfo * ci)
         return 0;
     for (prev = &ci->screenList, n = 0; *prev; prev = &(*prev)->next, n++);
     *prev = si;
+    si->closure = closure;
     si->next = 0;
     si->card = ci;
     si->mynum = n;

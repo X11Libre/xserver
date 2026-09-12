@@ -139,7 +139,7 @@ processScreenOrOutputArg(const char *screen_size, const char *output, char *pare
         unsigned long p_id = 0;
         Bool use_geometry;
 
-        screen = KdScreenInfoAdd(card);
+        screen = KdScreenInfoAdd(card, NULL);
         KdParseScreen(screen, screen_size);
         screen->driver = calloc(1, sizeof(EphyrScrPriv));
         if (!screen->driver)
