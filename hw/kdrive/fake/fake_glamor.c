@@ -8,7 +8,7 @@
 #include "present.h"
 #include "Xext/present/present_priv.h" /* extern uint32_t FakeScreenFps; */
 
-#include "fbdev.h"
+#include "fake.h"
 #include "kglamor.h"
 
 #include "glamor.h"
@@ -20,12 +20,12 @@
 #include <errno.h>
 
 Bool
-fbdevInitAccel(ScreenPtr pScreen)
+fakeInitAccel(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    FbdevScrPriv *scrpriv = screen->driver;
-    FbScreenConf *config = screen->card->closure;
+    FakeScrPriv *scrpriv = screen->driver;
+    FakeScreenConf *config = screen->card->closure;
     int caps = GLAMOR_EGL_CAP_NONE;
     int has_dri3;
 
@@ -36,7 +36,7 @@ fbdevInitAccel(ScreenPtr pScreen)
             drmDropMaster(scrpriv->dri_fd);
 #endif
         } else {
-            LogMessage(X_WARNING, "Xfbdev(%d): Could not open %s: %s\n", pScreen->myNum, config->dri_path, strerror(errno));
+            LogMessage(X_WARNING, "Xfake(%d): Could not open %s: %s\n", pScreen->myNum, config->dri_path, strerror(errno));
         }
     } else {
         scrpriv->dri_fd = -1;
@@ -55,10 +55,10 @@ fbdevInitAccel(ScreenPtr pScreen)
 
 #define GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
     has_dri3 = (caps & GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT) == GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT;
-    LogMessage(X_INFO, "Xfbdev(%d): DRI3 %s initialized\n", pScreen->myNum, has_dri3 ? "" : "not");
+    LogMessage(X_INFO, "Xfake(%d): DRI3 %s initialized\n", pScreen->myNum, has_dri3 ? "" : "not");
 
 #if 0 /* Not yet implemented */
-    LogMessage(X_INFO, "Xfbdev(%d): DRI3 explicit sync %s\n", pScreen->myNum,
+    LogMessage(X_INFO, "Xfake(%d): DRI3 explicit sync %s\n", pScreen->myNum,
                (caps & GLAMOR_EGL_CAP_DRI3_SYNCOBJ) ?
                "available" : "unavailable");
 #endif
@@ -66,11 +66,10 @@ fbdevInitAccel(ScreenPtr pScreen)
     if (scrpriv->dri_fd >= 0) {
         /*
          * X clients use present to try to synchronize with the screen
-         * If no global fake rate was requested and the screen's rate is sane,
-         * use that instead of the 60 fps default
+         * If no global fake rate was requested, use the highest value dix accepts (600)
          */
-        if (!FakeScreenFps && (screen->rate >= 60) && (screen->rate <= 600)) {
-            FakeScreenFps = screen->rate;
+        if (!FakeScreenFps) {
+            FakeScreenFps = 600;
             present_screen_init(pScreen, NULL);
             FakeScreenFps = 0;
         }
@@ -80,23 +79,23 @@ fbdevInitAccel(ScreenPtr pScreen)
 }
 
 void
-fbdevEnableAccel(ScreenPtr pScreen)
+fakeEnableAccel(ScreenPtr pScreen)
 {
     KdGlamorEnable(pScreen);
 }
 
 void
-fbdevDisableAccel(ScreenPtr pScreen)
+fakeDisableAccel(ScreenPtr pScreen)
 {
     KdGlamorDisable(pScreen);
 }
 
 void
-fbdevFiniAccel(ScreenPtr pScreen)
+fakeFiniAccel(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    FbdevScrPriv *scrpriv = screen->driver;
+    FakeScrPriv *scrpriv = screen->driver;
 
     KdGlamorFini(pScreen);
 

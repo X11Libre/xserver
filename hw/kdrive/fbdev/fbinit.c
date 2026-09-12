@@ -21,6 +21,7 @@
  */
 
 #include <kdrive-config.h>
+#include "klinux.h"
 #include "fbdev.h"
 
 #include "dix/dix_priv.h"
@@ -33,32 +34,14 @@
 static FbScreenConf *fbCurrScreen = NULL;
 
 static const FbScreenConf fbDefaultConfig = {
-                                             .fbdevDevicePath = NULL,
-                                             .fbDisableShadow = FALSE,
-
-                                             .fbdev_glvnd_provider = NULL,
-
-                                             .fbdev_dri_path = NULL,
-                                             .fbdev_auto_dri3 = FALSE,
-                                             .fbdev_drm_master = FALSE,
-                                             .partial_dri_allowed = FALSE,
-
-                                             .es_allowed = TRUE,
-                                             .force_es = FALSE,
-
-                                             .fbGlamorAllowed = TRUE,
-                                             .fbForceGlamor = FALSE,
-                                             .gbm_allowed = FALSE,
-
-                                             .fbXVAllowed = TRUE,
+                                             .fb_path = NULL,
+                                             .shadow = TRUE,
                                             };
 
 static void fbdevLogScreenInfo(const FbScreenConf *config, int screen_num);
 
-void LinuxLogInit(void);
-
-void
-LinuxLogInit(void)
+static void
+FbdevLogInit(void)
 {
     KdCardInfo *curr_card = kdCardInfo;
     char *log_file = NULL;
@@ -81,7 +64,9 @@ LinuxLogInit(void)
             curr_card = curr_card->next;
         }
     } else {
-        fbdevLogScreenInfo(&fbDefaultConfig, 0);
+        FbScreenConf fbDummyConfig = fbDefaultConfig;
+        fbDummyConfig.glamor_info = kdGlamorDefault;
+        fbdevLogScreenInfo(&fbDummyConfig, 0);
     }
 }
 
@@ -90,6 +75,7 @@ InitCard(char *name)
 {
     fbCurrScreen = XNFalloc(sizeof(*fbCurrScreen));
     *fbCurrScreen = fbDefaultConfig;
+    fbCurrScreen->glamor_info = kdGlamorDefault;
     KdCardInfoAdd(&fbdevFuncs, fbCurrScreen);
 }
 
@@ -99,37 +85,30 @@ fbdevLogScreenInfo(const FbScreenConf *config, int screen_num)
     LogMessage(X_INFO, "Xfbdev(%d): Screen %d:\n", screen_num, screen_num);
 
     LogMessage(X_INFO, "Xfbdev(%d): framebuffer device: %s\n", screen_num,
-               config->fbdevDevicePath ? config->fbdevDevicePath : "not passed");
+               config->fb_path ? config->fb_path : "not passed");
     LogMessage(X_INFO, "Xfbdev(%d): ShadowFB %s\n", screen_num,
-               config->fbDisableShadow ? "disabled" : "enabled");
+               config->shadow ? "enabled" : "disabled");
 
     LogMessage(X_INFO, "Xfbdev(%d): glvnd library: %s\n", screen_num,
-               config->fbdev_glvnd_provider ? config->fbdev_glvnd_provider : "not passed");
+               config->glamor_info.glvnd ? config->glamor_info.glvnd : "not passed");
 
     LogMessage(X_INFO, "Xfbdev(%d): dri device: %s\n", screen_num,
-               config->fbdev_dri_path ? config->fbdev_dri_path : "none");
-    LogMessage(X_INFO, "Xfbdev(%d): automatic DRI3 %s\n", screen_num,
-               config->fbdev_auto_dri3 ? "enabled" : "disabled");
-    LogMessage(X_INFO, "Xfbdev(%d): drm master %s\n", screen_num,
-               config->fbdev_drm_master ? "enabled" : "disabled");
-    LogMessage(X_INFO, "Xfbdev(%d): partial DRI3 %s\n", screen_num,
-               config->partial_dri_allowed ? "allowed" : "forbidden");
-
+               config->dri_path ? config->dri_path : "none");
 
     LogMessage(X_INFO, "Xfbdev(%d): glamor OpenGL contexts %s\n", screen_num,
-               !config->force_es ? "allowed" : "forbidden");
+               !config->glamor_info.force_es ? "allowed" : "forbidden");
     LogMessage(X_INFO, "Xfbdev(%d): glamor GLES contexts %s\n", screen_num,
-               config->es_allowed ? "allowed" : "forbidden");
+               !config->glamor_info.force_gl ? "allowed" : "forbidden");
 
     LogMessage(X_INFO, "Xfbdev(%d): glamor render acceleration %s\n", screen_num,
-               config->fbGlamorAllowed ? "enabled" : "disabled");
+               !config->glamor_info.no_render_accel ? "enabled" : "disabled");
     LogMessage(X_INFO, "Xfbdev(%d): glamor render acceleration %s on software renderers\n", screen_num,
-               config->fbForceGlamor ? "allowed" : "forbidden");
+               config->glamor_info.force_render_accel ? "allowed" : "forbidden");
     LogMessage(X_INFO, "Xfbdev(%d): glamor is %s libgbm \n", screen_num,
-               config->gbm_allowed ? "allowed to use" : "forbidden from using");
+               config->glamor_info.use_gbm ? "allowed to use" : "forbidden from using");
 
     LogMessage(X_INFO, "Xfbdev(%d): glamor X-Video support %s\n", screen_num,
-               config->fbXVAllowed ? "allowed" : "forbidden");
+               config->glamor_info.use_xv ? "allowed" : "forbidden");
     LogMessage(X_INFO, "\n");
 }
 
@@ -151,8 +130,7 @@ InitOutput(int argc, char **argv)
 void
 InitInput(int argc, char **argv)
 {
-    KdOsAddInputDrivers();
-    KdAddConfigInputDrivers();
+    LinuxAddInputDrivers();
     KdInitInput();
 }
 
@@ -165,71 +143,25 @@ CloseInput(void)
 void
 ddxUseMsg(void)
 {
-    KdUseMsg();
+    KdGlamorUseMsg();
     ErrorF("\nXfbdev Device Usage:\n");
     ErrorF
         ("-fb <path>           Framebuffer device to use. Defaults to /dev/fb0\n");
     ErrorF
-        ("-dri [path|auto]     Optional drm device path to use\n");
-    ErrorF
-        ("-partial-dri         Allow glamor to initialize DRI3 only partially\n");
-    ErrorF
-        ("-drm-master          Enable master permissions on the fd used for dri\n");
-    ErrorF
         ("-noshadow            Disable the ShadowFB layer if possible\n");
-    ErrorF
-        ("-glamor              Force enable glamor render acceleration if possible\n");
-    ErrorF
-        ("-noglamor            Force disable glamor render acceleration\n");
-    ErrorF
-        ("-gbm                 Allow glamor to use libgbm\n");
-    ErrorF
-        ("-glvendor <string>   Suggest what glvnd vendor library should be used\n");
-    ErrorF
-        ("-force-gl            Force glamor to only use GL contexts\n");
-    ErrorF
-        ("-force-es            Force glamor to only use GLES contexts\n");
-    ErrorF
-        ("-noxv                Disable X-Video support\n");
     ErrorF("\n");
 }
 
 int
 ddxProcessArgument(int argc, char **argv, int i)
 {
-    if (!fbCurrScreen /* We need at least one card */
-        || !strcmp(argv[i - 1], "-screen") /* Last screen had no explicit geometry */
-        || ((i >= 2) && ('0' <= argv[i - 1][0]) && (argv[i - 1][0] <= '9') && !strcmp(argv[i - 2], "-screen")) /* Last screen had explicit geometry */
-        ) {
-        /* Put each screen on a separate card */
-        Bool need_new_card = !fbCurrScreen;
+    int glamor_arg;
 
-        /**
-         * If this is either the first argument, or the
-         * first argument after the last -screen argument.
-         *
-         * If this is the first argument, we need to create a new card.
-         *
-         * If this is the first argument after a -screen argument
-         * we need to determine if this argument, and all those that follow
-         * represent a new screen, or if they are arguments for the screen we just parsed.
-         *
-         * We do this by checking if any of the remaining arguments, *including this one* are -screen arguments.
-         */
-        for (int j = i; j < argc && !need_new_card; j++) {
-            if (!strcmp(argv[j], "-screen")) {
-                need_new_card = TRUE;
-                break;
-            }
-        }
-        if (need_new_card) {
-            InitCard(NULL);
-        }
-    }
+    KdEnsureCard(argc, argv, i, !fbCurrScreen);
 
     if (!strcmp(argv[i], "-fb")) {
-        if (i + 1 < argc) {
-            fbCurrScreen->fbdevDevicePath = argv[i + 1];
+        if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
+            fbCurrScreen->fb_path = argv[i + 1];
             return 2;
         }
         UseMsg();
@@ -237,74 +169,22 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
 
     if (!strcmp(argv[i], "-noshadow")) {
-        fbCurrScreen->fbDisableShadow = TRUE;
+        fbCurrScreen->shadow = FALSE;
         return 1;
     }
 
-    if (!strcmp(argv[i], "-glamor")) {
-        fbCurrScreen->fbForceGlamor = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-noglamor")) {
-        fbCurrScreen->fbGlamorAllowed = FALSE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-gbm")) {
-        fbCurrScreen->gbm_allowed = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-glvendor")) {
-        if (i + 1 < argc) {
-            fbCurrScreen->fbdev_glvnd_provider = argv[i + 1];
-            return 2;
-        }
-        UseMsg();
-        exit(1);
-    }
-
-    if (!strcmp(argv[i], "-dri")) {
-        if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
-            if (!strcmp(argv[i + 1], "auto")) {
-                fbCurrScreen->fbdev_auto_dri3 = TRUE;
-            } else {
-                fbCurrScreen->fbdev_dri_path = argv[i + 1];
-            }
-            return 2;
-        } else {
-            fbCurrScreen->fbdev_auto_dri3 = TRUE;
-            return 1;
-        }
-    }
-
-    if (!strcmp(argv[i], "-partial-dri")) {
-        fbCurrScreen->partial_dri_allowed = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-drm-master")) {
-        fbCurrScreen->fbdev_drm_master = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-force-gl")) {
-        fbCurrScreen->es_allowed = FALSE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-force-es")) {
-        fbCurrScreen->force_es = TRUE;
-        return 1;
-    }
-
-    if (!strcmp(argv[i], "-noxv")) {
-        fbCurrScreen->fbXVAllowed = FALSE;
-        return 1;
+    glamor_arg = KdGlamorParse(&fbCurrScreen->glamor_info, &fbCurrScreen->dri_path, argc, argv, i);
+    if (glamor_arg) {
+        return glamor_arg;
     }
 
     return KdProcessArgument(argc, argv, i);
+}
+
+void ddxInit(void)
+{
+    FbdevLogInit();
+    KdOsInit(&LinuxFuncs);
 }
 
 KdCardFuncs fbdevFuncs = {

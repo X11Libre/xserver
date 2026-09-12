@@ -4,8 +4,10 @@ option('xorg-sdk', type: 'boolean', value: false,
        description: 'Enable Xorg X Server SDK (enabled with xorg)')
 option('xephyr', type: 'boolean', value: false,
        description: 'Enable Xephyr nested X server')
+option('xfake', type: 'boolean', value: false,
+       description: 'Enable the kdrive fake X server')
 option('xfbdev', type: 'boolean', value: false,
-       description: 'Enable the kdrive framebuffer device server')
+       description: 'Enable the kdrive framebuffer device X server')
 option('glamor', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable glamor (default yes for Xorg builds)')
 option('xnest', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',

@@ -25,7 +25,6 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#include "fb/fb_priv.h"
 #include "os/osdep.h"
 
 #include "fbdev.h"
@@ -40,15 +39,15 @@ fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
     unsigned long off;
     FbScreenConf *config = card->closure;
 
-    if (config->fbdevDevicePath) {
-        priv->fd = open(config->fbdevDevicePath, O_RDWR);
+    if (config->fb_path) {
+        priv->fd = open(config->fb_path, O_RDWR);
         if (priv->fd < 0) {
             ErrorF("Error opening framebuffer %s: %s\n",
-                   config->fbdevDevicePath, strerror(errno));
+                   config->fb_path, strerror(errno));
             return FALSE;
         }
         LogMessage(X_INFO, "Xfbdev(%d): Using framebuffer device: %s\n",
-                   card->mynum, config->fbdevDevicePath);
+                   card->mynum, config->fb_path);
     } else {
         char devbuf[] = "/dev/fbxx";
         memcpy(devbuf, "/dev/fb", sizeof("/dev/fb"));
@@ -540,7 +539,7 @@ fbdevMapFramebuffer(KdScreenInfo * screen)
     FbdevPriv *priv = screen->card->driver;
     FbScreenConf *config = screen->card->closure;
 
-    if (!config->fbDisableShadow) {
+    if (config->shadow) {
         scrpriv->shadow = TRUE;
     } else if (scrpriv->randr != RR_Rotate_0 ||
         priv->fix.type != FB_TYPE_PACKED_PIXELS) {
@@ -826,7 +825,7 @@ fbdevRandRSetConfig(ScreenPtr pScreen,
     /*
      * Set frame buffer mapping
      */
-    (*pScreen->ModifyPixmapHeader) (fbGetScreenPixmap(pScreen),
+    (*pScreen->ModifyPixmapHeader) ((*pScreen->GetScreenPixmap)(pScreen),
                                     pScreen->width,
                                     pScreen->height,
                                     screen->fb.depth,

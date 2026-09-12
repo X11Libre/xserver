@@ -21,7 +21,7 @@
  */
 
 #include <kdrive-config.h>
-#include "kdrive.h"
+#include "klinux.h"
 #include <errno.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
@@ -31,27 +31,6 @@
 #include <linux/apm_bios.h>
 
 #include "os/osdep.h"
-#include "os/ddx_priv.h"
-
-#ifdef KDRIVE_MOUSE
-extern KdPointerDriver LinuxMouseDriver;
-extern KdPointerDriver Ps2MouseDriver;
-extern KdPointerDriver MsMouseDriver;
-extern KdPointerDriver BusMouseDriver;
-#endif
-#ifdef KDRIVE_TSLIB
-extern KdPointerDriver TsDriver;
-#endif
-#ifdef KDRIVE_EVDEV
-extern KdPointerDriver LinuxEvdevMouseDriver;
-extern KdKeyboardDriver LinuxEvdevKeyboardDriver;
-#endif
-#ifdef KDRIVE_KBD
-extern KdKeyboardDriver LinuxKeyboardDriver;
-#endif
-
-/* Implemented by the X server */
-extern void LinuxLogInit(void);
 
 static int vtno;
 int LinuxConsoleFd;
@@ -98,7 +77,7 @@ LinuxInit(void)
     if (kdVirtualTerminal >= 0)
         vtno = kdVirtualTerminal;
     else {
-        if ((fd = open("/dev/tty0", O_WRONLY, 0)) < 0) {
+        if ((fd = open("/dev/tty0", O_WRONLY)) < 0) {
             FatalError("LinuxInit: Cannot open /dev/tty0 (%s)\n",
                        strerror(errno));
         }
@@ -110,7 +89,7 @@ LinuxInit(void)
 
     snprintf(vtname, sizeof(vtname), "/dev/tty%d", vtno);       /* /dev/tty1-64 */
 
-    if ((LinuxConsoleFd = open(vtname, O_RDWR | O_NDELAY, 0)) < 0) {
+    if ((LinuxConsoleFd = open(vtname, O_RDWR | O_NDELAY)) < 0) {
         FatalError("LinuxInit: Cannot open %s (%s)\n", vtname, strerror(errno));
     }
 
@@ -222,9 +201,9 @@ LinuxEnable(void)
     /*
      * Open the APM driver
      */
-    LinuxApmFd = open("/dev/apm_bios", 2);
+    LinuxApmFd = open("/dev/apm_bios", O_RDWR);
     if (LinuxApmFd < 0 && errno == ENOENT)
-        LinuxApmFd = open("/dev/misc/apm_bios", 2);
+        LinuxApmFd = open("/dev/misc/apm_bios", O_RDWR);
     if (LinuxApmFd >= 0) {
         LinuxApmRunning = TRUE;
         fcntl(LinuxApmFd, F_SETFL, fcntl(LinuxApmFd, F_GETFL) | NOBLOCK);
@@ -322,7 +301,7 @@ LinuxFini(void)
     }
     close(LinuxConsoleFd);      /* make the vt-manager happy */
     LinuxConsoleFd = -1;
-    fd = open("/dev/tty0", O_RDWR | O_NDELAY, 0);
+    fd = open("/dev/tty0", O_RDWR | O_NDELAY);
     if (fd >= 0) {
         memset(&vts, '\0', sizeof(vts));        /* valgrind */
         ioctl(fd, VT_GETSTATE, &vts);
@@ -334,8 +313,36 @@ LinuxFini(void)
     return;
 }
 
+#ifdef KDRIVE_KBD
+#define DEFAULT_KEYBOARD "keyboard"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_KEYBOARD "evdev"
+#endif
+#endif
+
+#ifdef KDRIVE_MOUSE
+#define DEFAULT_MOUSE "mouse"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_MOUSE "evdev"
+#endif
+#endif
+
+static void
+LinuxAddDefaultInputDrivers(void)
+{
+    #ifdef DEFAULT_KEYBOARD
+    KdAddDefaultKeyboard(DEFAULT_KEYBOARD);
+    #endif
+
+    #ifdef DEFAULT_MOUSE
+    KdAddDefaultPointer(DEFAULT_MOUSE);
+    #endif
+}
+
 void
-KdOsAddInputDrivers(void)
+LinuxAddInputDrivers(void)
 {
 #ifdef KDRIVE_MOUSE
     KdAddPointerDriver(&LinuxMouseDriver);
@@ -353,6 +360,8 @@ KdOsAddInputDrivers(void)
 #ifdef KDRIVE_KBD
     KdAddKeyboardDriver(&LinuxKeyboardDriver);
 #endif
+
+    LinuxAddDefaultInputDrivers();
 }
 
 static void
@@ -371,9 +380,3 @@ KdOsFuncs LinuxFuncs = {
     .Fini = LinuxFini,
     .Bell = LinuxBell,
 };
-
-void ddxInit(void)
-{
-    LinuxLogInit();
-    KdOsInit(&LinuxFuncs);
-}

@@ -90,7 +90,6 @@ MouseReadByte(Kbufio * b, int timeout)
     return b->buf[b->used++];
 }
 
-#if NOTUSED
 static int
 MouseFlush(Kbufio * b, char *buf, int size)
 {
@@ -114,6 +113,7 @@ MouseFlush(Kbufio * b, char *buf, int size)
     return n;
 }
 
+#if NOTUSED
 static int
 MousePeekByte(Kbufio * b, int timeout)
 {
@@ -886,6 +886,7 @@ MouseInit(KdPointerInfo * pi)
 {
     int i;
     int fd;
+    char *tmp;
     Kmouse *km;
 
     if (!pi)
@@ -893,7 +894,7 @@ MouseInit(KdPointerInfo * pi)
 
     if (!pi->path || strcmp(pi->path, "auto") == 0) {
         for (i = 0; i < NUM_DEFAULT_MOUSE; i++) {
-            fd = open(kdefaultMouse[i], 2);
+            fd = open(kdefaultMouse[i], O_RDWR);
             if (fd >= 0) {
                 pi->path = strdup(kdefaultMouse[i]);
                 break;
@@ -901,23 +902,27 @@ MouseInit(KdPointerInfo * pi)
         }
     }
     else {
-        fd = open(pi->path, 2);
+        fd = open(pi->path, O_RDWR);
     }
 
     if (fd < 0)
         return BadMatch;
 
-    km = (Kmouse *) malloc(sizeof(Kmouse));
+    tmp = strdup("Linux Generic Mouse");
+    if (tmp) {
+        free(pi->name);
+        pi->name = tmp;
+    }
+
+    km = (Kmouse *) calloc(1, sizeof(Kmouse));
     if (km) {
-        km->iob.avail = km->iob.used = 0;
-        MouseFirstProtocol(km, pi->protocol ? pi->protocol : "ps/2");
+        km->tty = isatty(fd);
+        km->iob.fd = fd;
+        MouseFirstProtocol(km, pi->protocol);
         /* MouseFirstProtocol sets state to MouseBroken for later protocol
          * checks. Skip these checks if a protocol was supplied */
         if (pi->protocol)
             km->state = MouseWorking;
-        km->i_prot = 0;
-        km->tty = isatty(fd);
-        km->iob.fd = fd;
         pi->driverPrivate = km;
     }
     else {
@@ -938,12 +943,9 @@ MouseEnable(KdPointerInfo * pi)
 
     km = pi->driverPrivate;
 
-    km->iob.fd = open(pi->path, 2);
-    if (km->iob.fd < 0)
-        return BadMatch;
+    MouseFlush(&km->iob, (char[256]){0}, 256);
 
     if (!KdRegisterFd(km->iob.fd, MouseRead, pi)) {
-        close(km->iob.fd);
         return BadAlloc;
     }
 
@@ -959,12 +961,19 @@ MouseDisable(KdPointerInfo * pi)
         return;
 
     km = pi->driverPrivate;
-    KdUnregisterFd(pi, km->iob.fd, TRUE);
+    KdUnregisterFd(pi, km->iob.fd, FALSE);
 }
 
 static void
 MouseFini(KdPointerInfo * pi)
 {
+    Kmouse *km;
+
+    if (!pi || !pi->driverPrivate)
+        return;
+
+    km = pi->driverPrivate;
+    close(km->iob.fd);
     free(pi->driverPrivate);
     pi->driverPrivate = NULL;
 }

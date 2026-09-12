@@ -44,6 +44,40 @@ enable emulation of a middle mouse button by chording.
 .TP 8
 .B -3button
 disable emulation of a middle mouse button by chording.
+
+.PP
+Additionally, kdrive X servers using the common glamor code (currently Xfbdev),
+also support the following options:
+
+.TP 8
+.B -dri "</dev/dri/cardxx|/dev/dri/renderDxxx>"
+enables DRI3 support for the X server.
+.TP 8
+.B -glamor
+force enables glamor render acceleration (even on top of sw renderers like softpipe/llvmpipe).
+.TP 8
+.B -gbm
+allows glamor to use libgbm (it is only used for matching EGLDeviceEXT's to dri fd's).
+.TP 8
+.B -direct-dri3
+Forces glamor to use the direct implementation of DRI3.
+.TP 8
+.B -noglamor
+force disables glamor render acceleration.
+.TP 8
+.B -glvendor "<library>"
+tells the X server what gl vendor library to use.
+Particularly useful on multi-card systems.
+.TP 8
+.B -force-gl
+tells the X server to only use desktop OpenGL contexts.
+.TP 8
+.B -force-es
+tells the X server to only use embedded GLES contexts.
+.TP 8
+.B -noxv
+disables X-Video support.
+
 .SH KEYBOARD
 The
 .B Xkdrive
@@ -66,6 +100,17 @@ Immediately kills the server -- no questions asked. It can be disabled by
 adding the
 .B -nozap
 command-line argument.
+
+.PP
+Additionally, kdrive X servers using the linux backend (currently Xfbdev),
+also support the following special key combinations:
+
+.TP 8
+.B Ctrl+Alt+F1...F12
+For systems with virtual terminal support, these keystroke
+combinations are used to switch to virtual terminals 1 through 12,
+respectively.
+
 .SH SEE ALSO
 .BR X (@miscmansuffix@),
 .BR Xserver (@appmansuffix@),

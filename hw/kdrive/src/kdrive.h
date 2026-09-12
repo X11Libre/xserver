@@ -235,6 +235,7 @@ KdPointerInfo *KdNewPointer(void);
 void KdFreePointer(KdPointerInfo *);
 int KdAddPointer(KdPointerInfo * ki);
 int KdAddConfigPointer(const char *pointer);
+int KdAddDefaultPointer(const char *pointer);
 void KdRemovePointer(KdPointerInfo * ki);
 
 typedef struct {
@@ -286,7 +287,8 @@ void KdAddKeyboardDriver(KdKeyboardDriver * driver);
 void KdRemoveKeyboardDriver(KdKeyboardDriver * driver);
 KdKeyboardInfo *KdNewKeyboard(void);
 void KdFreeKeyboard(KdKeyboardInfo * ki);
-int KdAddConfigKeyboard(const char *pointer);
+int KdAddConfigKeyboard(const char *keyboard);
+int KdAddDefaultKeyboard(const char *keyboard);
 int KdAddKeyboard(KdKeyboardInfo * ki);
 void KdRemoveKeyboard(KdKeyboardInfo * ki);
 
@@ -427,8 +429,6 @@ int
  */
 void KdOsInit(const KdOsFuncs * pOsFuncs);
 
-void
- KdOsAddInputDrivers(void);
 
 Bool KdCreateScreenResources(ScreenPtr pScreen);
 
@@ -463,8 +463,7 @@ void
 /* kinput.c */
 void
  KdInitInput(void);
- void
- KdAddConfigInputDrivers(void);
+
 void
  KdCloseInput(void);
 
