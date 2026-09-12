@@ -1,7 +1,8 @@
-build_kdrive = build_xephyr or build_xfake or build_xfbdev
+build_kdrive = build_xephyr or build_xfake or build_xfbdev or build_xmodesetting
 
+want_kdrive_linux = build_xfbdev or build_xmodesetting
 need_kdrive_linux = build_xfbdev
-build_kdrive_linux = (host_machine.system() == 'linux') and need_kdrive_linux
+build_kdrive_linux = (host_machine.system() == 'linux') and want_kdrive_linux
 
 build_kdrive_kbd = false
 build_kdrive_mouse = false
@@ -21,7 +22,7 @@ if build_kdrive_linux
     subdir('os/linux')
 endif
 
-build_stub = build_xfake
+build_stub = build_xfake or ((not build_kdrive_linux) and want_kdrive_linux)
 if build_stub
     subdir('os/stub')
 endif
@@ -40,6 +41,13 @@ endif
 
 if build_xfbdev
     subdir('fbdev')
+endif
+
+if build_xmodesetting
+    if (not build_gbm) or (not libdrm_dep.found())
+        error('Xmodesetting needs libdrm and libgbm')
+    endif
+    subdir('modesetting')
 endif
 
 if build_kdrive
