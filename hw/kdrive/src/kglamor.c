@@ -111,7 +111,7 @@ KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps)
     glamor_egl_conf.fd = info->dri_fd;
 
     if (!glamor_egl_init_internal(&glamor_egl_conf, caps)) {
-        return FALSE;
+        goto bail;
     }
 
     if (info->no_render_accel) {
@@ -130,7 +130,7 @@ KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps)
     }
 
     if (!glamor_init(pScreen, flags)) {
-        return FALSE;
+        goto bail;
     }
 
 #define GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
@@ -162,6 +162,14 @@ KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps)
     }
 
     return TRUE;
+
+bail:
+    if (info->dri_fd >= 0) {
+        close(info->dri_fd);
+        info->dri_fd = -1;
+    }
+
+    return FALSE;
 }
 
 void
