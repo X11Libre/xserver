@@ -29,9 +29,6 @@ typedef struct _msScrPriv {
     Rotation randr;
     Bool blockHandler;
     Bool shadow;
-#ifdef GLAMOR
-    int dri_fd;
-#endif
 } msScrPriv;
 
 typedef struct _msScreenConf {

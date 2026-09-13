@@ -13,14 +13,13 @@ fbdevInitAccel(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    FbdevScrPriv *scrpriv = screen->driver;
     FbScreenConf *config = screen->card->closure;
 
     if (screen->rate > 60) {
         config->glamor_info.fake_rate = screen->rate;
     }
 
-    return KdGlamorInit(pScreen, &config->glamor_info, NULL, &scrpriv->dri_fd);
+    return KdGlamorInit(pScreen, &config->glamor_info, NULL);
 }
 
 void
@@ -40,11 +39,7 @@ fbdevFiniAccel(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    FbdevScrPriv *scrpriv = screen->driver;
+    FbScreenConf *config = screen->card->closure;
 
-    KdGlamorFini(pScreen);
-
-    if (scrpriv->dri_fd >= 0) {
-        close(scrpriv->dri_fd);
-    }
+    KdGlamorFini(pScreen, &config->glamor_info);
 }
