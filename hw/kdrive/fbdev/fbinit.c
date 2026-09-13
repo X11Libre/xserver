@@ -108,7 +108,7 @@ fbdevLogScreenInfo(const FbScreenConf *config, int screen_num)
                config->glamor_info.use_gbm ? "allowed to use" : "forbidden from using");
 
     LogMessage(X_INFO, "Xfbdev(%d): glamor X-Video support %s\n", screen_num,
-               config->glamor_info.use_xv ? "allowed" : "forbidden");
+               config->glamor_info.no_xv ? "allowed" : "forbidden");
     LogMessage(X_INFO, "\n");
 }
 

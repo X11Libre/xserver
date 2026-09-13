@@ -18,7 +18,7 @@ typedef struct {
     Bool force_es; /* If glamor should only create gles contexts */
 
     /* Handled by KdGlamorInit */
-    Bool use_xv; /* Enable X-Video support */
+    Bool no_xv; /* Disable X-Video support */
     Bool no_render_accel; /* Disable render acceleration */
     Bool force_render_accel; /* Enable render acceleration on top of sw renderers */
 } KdGlamorInfo;
