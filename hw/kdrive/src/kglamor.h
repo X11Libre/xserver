@@ -33,6 +33,7 @@ void KdGlamorFini(ScreenPtr pScreen);
 #endif
 
 int KdGlamorParse(KdGlamorInfo *info, int argc, char **argv, int i);
+void KdGlamorLogScreenInfo(const KdGlamorInfo *info, int screen_num);
 void KdGlamorUseMsg(void);
 
 /* Put each screen on a different card */

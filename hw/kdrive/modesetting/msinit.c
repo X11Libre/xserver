@@ -72,31 +72,12 @@ msLogScreenInfo(const MsScreenConf *config, int screen_num)
 {
     LogMessage(X_INFO, "Xmodesetting(%d): Screen %d:\n", screen_num, screen_num);
 
-    LogMessage(X_INFO, "Xmodesetting(%d): kms device: %s\n", screen_num,
+    LogMessage(X_INFO, "Xmodesetting(%d): KMS device: %s\n", screen_num,
                config->dev_path ? config->dev_path : "not passed");
     LogMessage(X_INFO, "Xmodesetting(%d): ShadowFB %s\n", screen_num,
                config->shadow ? "enabled" : "disabled");
 
-    LogMessage(X_INFO, "Xmodesetting(%d): glvnd library: %s\n", screen_num,
-               config->glamor_info.glvnd ? config->glamor_info.glvnd : "not passed");
-
-    LogMessage(X_INFO, "Xmodesetting(%d): dri device: %s\n", screen_num,
-               config->glamor_info.dri_path ? config->glamor_info.dri_path : "none");
-
-    LogMessage(X_INFO, "Xmodesetting(%d): glamor OpenGL contexts %s\n", screen_num,
-               !config->glamor_info.force_es ? "allowed" : "forbidden");
-    LogMessage(X_INFO, "Xmodesetting(%d): glamor GLES contexts %s\n", screen_num,
-               !config->glamor_info.force_gl ? "allowed" : "forbidden");
-
-    LogMessage(X_INFO, "Xmodesetting(%d): glamor render acceleration %s\n", screen_num,
-               !config->glamor_info.no_render_accel ? "enabled" : "disabled");
-    LogMessage(X_INFO, "Xmodesetting(%d): glamor render acceleration %s on software renderers\n", screen_num,
-               config->glamor_info.force_render_accel ? "allowed" : "forbidden");
-    LogMessage(X_INFO, "Xmodesetting(%d): glamor is %s libgbm \n", screen_num,
-               config->glamor_info.use_gbm ? "allowed to use" : "forbidden from using");
-
-    LogMessage(X_INFO, "Xmodesetting(%d): glamor X-Video support %s\n", screen_num,
-               config->glamor_info.no_xv ? "allowed" : "forbidden");
+    KdGlamorLogScreenInfo(&config->glamor_info, screen_num);
     LogMessage(X_INFO, "\n");
 }
 
