@@ -64,12 +64,11 @@ static int drmDropMaster(int fd)
 
 #ifdef GLAMOR
 Bool
-KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps, int *dri_fd)
+KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps)
 {
     int flags = GLAMOR_USE_EGL_SCREEN;
     int has_dri3;
     int _caps;
-    int _dri_fd;
 
     glamor_egl_conf_t glamor_egl_conf = {
                                          .server_private = NULL, /* only for xf86 */
@@ -96,24 +95,20 @@ KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps, int *dri_fd
 
     *caps = GLAMOR_EGL_CAP_NONE;
 
-    if (!dri_fd) {
-        dri_fd = &_dri_fd;
-    }
-
     if (info->dri_path) {
-        *dri_fd = open(info->dri_path, O_RDWR);
-        if (*dri_fd < 0) {
+        info->dri_fd = open(info->dri_path, O_RDWR);
+        if (info->dri_fd < 0) {
             LogMessage(X_WARNING, "KGlamor(%d): Could not open %s: %s\n", pScreen->myNum, info->dri_path, strerror(errno));
         }
     } else {
-        *dri_fd = -1;
+        info->dri_fd = -1;
     }
 
-    if ((*dri_fd >= 0) && info->drop_master) {
-        drmDropMaster(*dri_fd);
+    if ((info->dri_fd >= 0) && info->drop_master) {
+        drmDropMaster(info->dri_fd);
     }
 
-    glamor_egl_conf.fd = *dri_fd;
+    glamor_egl_conf.fd = info->dri_fd;
 
     if (!glamor_egl_init_internal(&glamor_egl_conf, caps)) {
         return FALSE;
@@ -130,7 +125,7 @@ KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps, int *dri_fd
         }
     }
 
-    if (*dri_fd < 0) {
+    if (info->dri_fd < 0) {
         flags |= GLAMOR_NO_DRI3;
     }
 
@@ -154,7 +149,7 @@ KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps, int *dri_fd
     }
 #endif
 
-    if (info->fake_rate && (*dri_fd >= 0)) {
+    if (info->fake_rate && (info->dri_fd >= 0)) {
         /*
          * X clients use present to try to synchronize with the screen
          * If no global fake rate was requested and a per-screen rate was requested, use that
@@ -180,9 +175,14 @@ KdGlamorDisable(ScreenPtr pScreen)
 }
 
 void
-KdGlamorFini(ScreenPtr pScreen)
+KdGlamorFini(ScreenPtr pScreen, KdGlamorInfo *info)
 {
     glamor_fini(pScreen);
+
+    if (info->dri_fd) {
+        close(info->dri_fd);
+        info->dri_fd = -1;
+    }
 }
 #endif
 

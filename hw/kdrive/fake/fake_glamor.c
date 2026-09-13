@@ -13,10 +13,9 @@ fakeInitAccel(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    FakeScrPriv *scrpriv = screen->driver;
     FakeScreenConf *config = screen->card->closure;
 
-    return KdGlamorInit(pScreen, &config->glamor_info, NULL, &scrpriv->dri_fd);
+    return KdGlamorInit(pScreen, &config->glamor_info, NULL);
 }
 
 void
@@ -36,11 +35,7 @@ fakeFiniAccel(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    FakeScrPriv *scrpriv = screen->driver;
+    FakeScreenConf *config = screen->card->closure;
 
-    KdGlamorFini(pScreen);
-
-    if (scrpriv->dri_fd >= 0) {
-        close(scrpriv->dri_fd);
-    }
+    KdGlamorFini(pScreen, &config->glamor_info);
 }

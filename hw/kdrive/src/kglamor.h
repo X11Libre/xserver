@@ -23,13 +23,16 @@ typedef struct {
     Bool no_xv; /* Disable X-Video support */
     Bool no_render_accel; /* Disable render acceleration */
     Bool force_render_accel; /* Enable render acceleration on top of sw renderers */
+
+    /* Populated and closed by KdGlamorInit / KdGlamorFini */
+    int dri_fd;
 } KdGlamorInfo;
 
 #ifdef GLAMOR
-Bool KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps, int *dri_fd);
+Bool KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps);
 void KdGlamorEnable(ScreenPtr pScreen);
 void KdGlamorDisable(ScreenPtr pScreen);
-void KdGlamorFini(ScreenPtr pScreen);
+void KdGlamorFini(ScreenPtr pScreen, KdGlamorInfo *info);
 #endif
 
 int KdGlamorParse(KdGlamorInfo *info, int argc, char **argv, int i);

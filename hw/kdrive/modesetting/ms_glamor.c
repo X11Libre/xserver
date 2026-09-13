@@ -15,7 +15,6 @@ msInitAccel(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    msScrPriv *scrpriv = screen->driver;
     MsScreenConf *config = screen->card->closure;
     int caps = GLAMOR_EGL_CAP_NONE;
 
@@ -23,7 +22,7 @@ msInitAccel(ScreenPtr pScreen)
         config->glamor_info.fake_rate = screen->rate;
     }
 
-    if (!KdGlamorInit(pScreen, &config->glamor_info, &caps, &scrpriv->dri_fd)) {
+    if (!KdGlamorInit(pScreen, &config->glamor_info, &caps)) {
         return FALSE;
     }
 
@@ -52,11 +51,7 @@ msFiniAccel(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    msScrPriv *scrpriv = screen->driver;
+    MsScreenConf *config = screen->card->closure;
 
-    KdGlamorFini(pScreen);
-
-    if (scrpriv->dri_fd >= 0) {
-        close(scrpriv->dri_fd);
-    }
+    KdGlamorFini(pScreen, &config->glamor_info);
 }

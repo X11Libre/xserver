@@ -38,9 +38,6 @@ typedef struct _fakePriv {
 typedef struct _fakeScrPriv {
     Rotation randr;
     Bool shadow;
-#ifdef GLAMOR
-    int dri_fd;
-#endif
 } FakeScrPriv;
 
 typedef struct _fakeScreenConf {
