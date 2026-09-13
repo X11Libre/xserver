@@ -4,10 +4,8 @@ srcs = [
     '../../stubs/ddxBeforeReset.c',
 ]
 
-fake_glamor = []
 if build_glamor
     srcs += 'fake_glamor.c'
-    fake_glamor += glamor
 endif
 
 xfake_server = executable(
@@ -18,10 +16,9 @@ xfake_server = executable(
         include_directories('../src'),
         include_directories('../os/stub'),
     ],
-    dependencies: [ common_dep, libdrm_dep ],
+    dependencies: common_dep,
     link_with: [
         libxserver_main,
-        fake_glamor,
         kdrive,
         stub,
         libxserver_fb,

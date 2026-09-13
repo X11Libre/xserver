@@ -57,7 +57,6 @@ typedef struct _fbScreenConf {
     const char *fb_path;
     Bool shadow;
     KdGlamorInfo glamor_info;
-    const char *dri_path;
 } FbScreenConf;
 
 extern KdCardFuncs fbdevFuncs;
