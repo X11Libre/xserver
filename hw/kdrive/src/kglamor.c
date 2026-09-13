@@ -251,6 +251,31 @@ KdGlamorParse(KdGlamorInfo *info, int argc, char **argv, int i)
 }
 
 void
+KdGlamorLogScreenInfo(const KdGlamorInfo *info, int screen_num)
+{
+    LogMessage(X_INFO, "KGlamor(%d): glvnd library: %s\n", screen_num,
+               info->glvnd ? info->glvnd : "not passed");
+
+    LogMessage(X_INFO, "KGlamor(%d): dri device: %s\n", screen_num,
+               info->dri_path ? info->dri_path : "not passed");
+
+    LogMessage(X_INFO, "KGlamor(%d): glamor OpenGL contexts %s\n", screen_num,
+               !info->force_es ? "allowed" : "forbidden");
+    LogMessage(X_INFO, "KGlamor(%d): glamor GLES contexts %s\n", screen_num,
+               !info->force_gl ? "allowed" : "forbidden");
+
+    LogMessage(X_INFO, "KGlamor(%d): glamor render acceleration %s\n", screen_num,
+               !info->no_render_accel ? "enabled" : "disabled");
+    LogMessage(X_INFO, "KGlamor(%d): glamor render acceleration %s on software renderers\n", screen_num,
+               info->force_render_accel ? "allowed" : "forbidden");
+    LogMessage(X_INFO, "KGlamor(%d): glamor is %s libgbm \n", screen_num,
+               info->use_gbm ? "allowed to use" : "forbidden from using");
+
+    LogMessage(X_INFO, "KGlamor(%d): glamor X-Video support %s\n", screen_num,
+               !info->no_xv ? "enabled" : "disabled");
+}
+
+void
 KdGlamorUseMsg(void)
 {
     KdUseMsg();
