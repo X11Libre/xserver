@@ -37,7 +37,7 @@ configure_file(input : 'kdrive-config.h.meson.in',
 kdrive = static_library('kdrive',
     srcs_kdrive,
     include_directories: inc,
-    dependencies: common_dep,
+    dependencies: [ common_dep, libdrm_dep ],
     link_with: [
         libxserver_miext_shadow,
         kdrive_glamor,

@@ -46,7 +46,6 @@ typedef struct _fakeScrPriv {
 typedef struct _fakeScreenConf {
     int shadow;
     KdGlamorInfo glamor_info;
-    const char *dri_path;
 } FakeScreenConf;
 
 extern KdCardFuncs fakeFuncs;

@@ -36,6 +36,7 @@ static FbScreenConf *fbCurrScreen = NULL;
 static const FbScreenConf fbDefaultConfig = {
                                              .fb_path = NULL,
                                              .shadow = TRUE,
+                                             .glamor_info = {.drop_master = TRUE,},
                                             };
 
 static void fbdevLogScreenInfo(const FbScreenConf *config, int screen_num);
@@ -65,7 +66,6 @@ FbdevLogInit(void)
         }
     } else {
         FbScreenConf fbDummyConfig = fbDefaultConfig;
-        fbDummyConfig.glamor_info = kdGlamorDefault;
         fbdevLogScreenInfo(&fbDummyConfig, 0);
     }
 }
@@ -75,7 +75,6 @@ InitCard(char *name)
 {
     fbCurrScreen = XNFalloc(sizeof(*fbCurrScreen));
     *fbCurrScreen = fbDefaultConfig;
-    fbCurrScreen->glamor_info = kdGlamorDefault;
     KdCardInfoAdd(&fbdevFuncs, fbCurrScreen);
 }
 
@@ -93,7 +92,7 @@ fbdevLogScreenInfo(const FbScreenConf *config, int screen_num)
                config->glamor_info.glvnd ? config->glamor_info.glvnd : "not passed");
 
     LogMessage(X_INFO, "Xfbdev(%d): dri device: %s\n", screen_num,
-               config->dri_path ? config->dri_path : "none");
+               config->glamor_info.dri_path ? config->glamor_info.dri_path : "none");
 
     LogMessage(X_INFO, "Xfbdev(%d): glamor OpenGL contexts %s\n", screen_num,
                !config->glamor_info.force_es ? "allowed" : "forbidden");
@@ -173,7 +172,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
-    glamor_arg = KdGlamorParse(&fbCurrScreen->glamor_info, &fbCurrScreen->dri_path, argc, argv, i);
+    glamor_arg = KdGlamorParse(&fbCurrScreen->glamor_info, argc, argv, i);
     if (glamor_arg) {
         return glamor_arg;
     }

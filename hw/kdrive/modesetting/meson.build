@@ -4,10 +4,8 @@ srcs = [
     '../../stubs/ddxBeforeReset.c',
 ]
 
-ms_glamor = []
 if build_glamor
     srcs += 'ms_glamor.c'
-    ms_glamor += glamor
 endif
 
 xmodesetting_server = executable(
@@ -22,7 +20,6 @@ xmodesetting_server = executable(
     dependencies: [ common_dep, libdrm_dep, gbm_dep ],
     link_with: [
         libxserver_main,
-        ms_glamor,
         kdrive,
         linux,
         libxserver_fb,
