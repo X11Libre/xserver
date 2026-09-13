@@ -31,7 +31,7 @@ const KdGlamorInfo kdGlamorDefault = {
                                       .direct_dri3 = FALSE,
                                       .force_gl = FALSE,
                                       .force_es = FALSE,
-                                      .use_xv = TRUE,
+                                      .no_xv = FALSE,
                                       .no_render_accel = FALSE,
                                       .force_render_accel = FALSE,
                                      };
@@ -89,7 +89,7 @@ KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps)
     }
 
 #ifdef XV
-    if (info->use_xv) {
+    if (!info->no_xv) {
         kd_glamor_xv_init(pScreen);
     }
 #endif
@@ -168,7 +168,7 @@ KdGlamorParse(KdGlamorInfo *info, const char **dri_path, int argc, char **argv, 
     }
 
     if (!strcmp(argv[i], "-noxv")) {
-        info->use_xv = FALSE;
+        info->no_xv = TRUE;
         return 1;
     }
 
