@@ -56,7 +56,7 @@ extern _X_EXPORT const unsigned char byte_reversed[256];
 
 /* Compatibility functions for pre-input-thread drivers */
 static inline _X_DEPRECATED int xf86BlockSIGIO(void) { input_lock(); return 0; }
-static inline _X_DEPRECATED void xf86UnblockSIGIO(int wasset) { input_unlock(); }
+static inline _X_DEPRECATED void xf86UnblockSIGIO(_X_UNUSED int wasset) { input_unlock(); }
 
 /* PCI related */
 #ifdef XSERVER_LIBPCIACCESS
