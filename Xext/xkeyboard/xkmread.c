@@ -305,7 +305,7 @@ ReadXkmKeyTypes(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
         return nRead;
     if (XkbAllocClientMap(xkb, XkbKeyTypesMask, num_types) != Success) {
         _XkbLibError(_XkbErrBadAlloc, "ReadXkmKeyTypes", 0);
-        return nRead;
+        return -1;
     }
     xkb->map->num_types = num_types;
     if (num_types < XkbNumRequiredTypes) {

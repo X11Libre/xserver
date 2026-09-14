@@ -5879,9 +5879,9 @@ ProcXkbGetKbdByName(ClientPtr client)
     xkbGetGeometryReply grep     = { .type = X_Reply, .sequenceNumber = client->sequence };
 
     if (new) {
-        if (stuff->load)
+        if (stuff->load && ((found & fneed) == fneed))
             loaded = TRUE;
-        if (stuff->load ||
+        if (loaded ||
             ((reported & XkbGBN_SymbolsMask) && (new->compat))) {
             XkbChangesRec changes = { 0 };
             XkbUpdateDescActions(new,
