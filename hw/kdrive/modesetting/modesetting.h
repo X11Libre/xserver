@@ -18,6 +18,7 @@
 
 typedef struct _msPriv {
     struct gbm_device *gbm;
+    drmModeRes *resources;
     __u16 red[256];
     __u16 green[256];
     __u16 blue[256];

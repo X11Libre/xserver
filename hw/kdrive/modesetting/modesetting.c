@@ -16,7 +16,6 @@
 
 typedef struct {
     drmModeConnector *connector;
-    drmModeRes *resources;
     drmModeModeInfo *mode;
 
     void *map_data;
@@ -56,10 +55,6 @@ destroy_user_data(struct gbm_bo *bo, void *_data)
 
     if (data->connector) {
         drmModeFreeConnector(data->connector);
-    }
-
-    if (data->resources) {
-        drmModeFreeResources(data->resources);
     }
 
     free(data);
@@ -309,8 +304,9 @@ modeseting_find_crtc(int fd, drmModeRes *res, drmModeConnector *conn)
 
 
 static struct gbm_bo*
-modesetting_open(struct gbm_device *gbm, KdScreenInfo *screen)
+modesetting_open(msPriv *priv, KdScreenInfo *screen)
 {
+    struct gbm_device *gbm = priv->gbm;
     int fd = gbm_device_get_fd(gbm);
     struct gbm_bo *ret = NULL;
     gbm_user_data_t *data = NULL;
@@ -320,14 +316,7 @@ modesetting_open(struct gbm_device *gbm, KdScreenInfo *screen)
         goto fail;
     }
 
-    drmSetMaster(fd);
-
-    data->resources = drmModeGetResources(fd);
-    if (!data->resources) {
-        goto fail;
-    }
-
-    data->connector = modesetting_find_connector(data->resources, fd, &data->conn_id);
+    data->connector = modesetting_find_connector(priv->resources, fd, &data->conn_id);
     if (!data->connector) {
         goto fail;
     }
@@ -352,7 +341,7 @@ modesetting_open(struct gbm_device *gbm, KdScreenInfo *screen)
         goto fail;
     }
 
-    data->crtc_id = modeseting_find_crtc(fd, data->resources, data->connector);
+    data->crtc_id = modeseting_find_crtc(fd, priv->resources, data->connector);
     if (data->crtc_id < 0) {
         goto fail;
     }
@@ -369,8 +358,6 @@ fail:
     if (data) {
         if (data->connector)
             drmModeFreeConnector(data->connector);
-        if (data->resources)
-            drmModeFreeResources(data->resources);
         free(data);
     }
 
@@ -395,7 +382,7 @@ msSetMode(ScreenPtr pScreen, int rate)
     screen->height = pScreen->height;
     screen->rate = rate;
 
-    new_bo = modesetting_open(priv->gbm, screen);
+    new_bo = modesetting_open(priv, screen);
     if (!new_bo) {
         screen->width = oldwidth;
         screen->height = oldheight;
@@ -418,7 +405,7 @@ static Bool msInitialize(KdCardInfo * card, msPriv * priv)
         if (fd < 0) {
             LogMessage(X_ERROR, "Xmodesetting(%d): Error opening KMS device %s: %s\n",
                        card->mynum, config->dev_path, strerror(errno));
-            return FALSE;
+            goto bail;
         }
         LogMessage(X_INFO, "Xmodesetting(%d): Using KMS device: %s\n",
                    card->mynum, config->dev_path);
@@ -442,20 +429,37 @@ static Bool msInitialize(KdCardInfo * card, msPriv * priv)
             }
         }
         if (fd < 0) {
-            ErrorF("Error opening kms devices /dev/dri/card[0-63]\n");
-            return FALSE;
+            LogMessage(X_ERROR, "Xmodesetting(%d): Error opening kms devices /dev/dri/card[0-63]\n", card->mynum);
+            goto bail;
         }
         LogMessage(X_INFO, "Xmodesetting(%d): Using kms device: %s\n", card->mynum, devbuf);
     }
 
     priv->gbm = gbm_create_device(fd);
     if (!priv->gbm) {
-        ErrorF("Could not create a gbm device\n");
-        close(fd);
-        return FALSE;
+        LogMessage(X_ERROR, "Xmodesetting(%d): Could not create a gbm device\n", card->mynum);
+        goto bail;
+    }
+
+    drmSetMaster(fd);
+
+    priv->resources = drmModeGetResources(fd);
+    if (!priv->resources) {
+        LogMessage(X_ERROR, "Xmodesetting(%d): Could not get drm resources: %s\n", card->mynum, strerror(errno));
+        goto bail;
     }
 
     return TRUE;
+
+bail:
+    if (priv->gbm) {
+        gbm_device_destroy(priv->gbm);
+        priv->gbm = NULL;
+    }
+    if (fd >= 0) {
+        close(fd);
+    }
+    return FALSE;
 }
 
 Bool msCardInit(KdCardInfo * card)
@@ -480,7 +484,7 @@ static Bool msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
     msPriv *priv = screen->card->driver;
     gbm_user_data_t *data = NULL;
 
-    scrpriv->front = modesetting_open(priv->gbm, screen);
+    scrpriv->front = modesetting_open(priv, screen);
     if (!scrpriv->front) {
         return FALSE;
     }
@@ -1078,6 +1082,7 @@ void msCardFini(KdCardInfo * card)
     struct gbm_device *gbm = priv->gbm;
     int fd = gbm_device_get_fd(gbm);
 
+    drmModeFreeResources(priv->resources);
     gbm_device_destroy(gbm);
     close(fd);
     free(priv);
