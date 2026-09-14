@@ -1,12 +1,11 @@
 Title: "starfleet: task file format nachschärfen"
 Category: starfleet
-Kind: task
-Status: "open"
+Kind: "task"
+Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "McKinley"
 Created: "2026-09-11T15:23:50Z"
-Assigned-To: "—"
 Doc-Ref: "—"
-Slug: starfleet/task-starfleet-task-file-format-nachsch-rfen
 
 Header-Namen fixen:
 
