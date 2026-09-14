@@ -1,12 +1,11 @@
 Title: "starfleet: bug: termctl terminal -> nach resize alles dunkel"
 Category: starfleet
-Kind: task
-Status: "open"
+Kind: "task"
+Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "Pasteur"
 Created: "2026-08-04T08:15:27Z"
-Assigned-To: "—"
 Doc-Ref: "—"
-Slug: starfleet/task-starfleet-bug-termctl-terminal-nach-resize-alles-dunkel
 
 wenn man das fenster resized, wird's dunkel, keine ausgabe mehr. 
 
