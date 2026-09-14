@@ -1,12 +1,11 @@
 Title: "starfleet: reports format auf rfc2822 umstellen"
 Category: starfleet
-Kind: task
-Status: "open"
+Kind: "task"
+Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "McKinley"
 Created: "2026-09-11T15:27:57Z"
-Assigned-To: "—"
 Doc-Ref: "—"
-Slug: starfleet/task-starfleet-reports-format-auf-rfc2822-umstellen
 
 analog zu zuvor schon die tasks, nun die reports auch auf email-format / rfc822-style umbauen.
 
