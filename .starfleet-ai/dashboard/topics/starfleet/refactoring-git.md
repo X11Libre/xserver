@@ -1,7 +1,7 @@
 Title: "starfleet: internes refactoring: git utilty class"
 Category: active
-Status: "open"
-Assigned-To: "—"
+Status: "assigned"
+Assigned-To: "Scotty"
 
 Internes refactoring: git-operationen in separate utility class / module auslagern.
 evtl. alle utils unter `./util` legen.
