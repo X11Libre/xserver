@@ -42,8 +42,8 @@ fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
     if (config->fb_path) {
         priv->fd = open(config->fb_path, O_RDWR);
         if (priv->fd < 0) {
-            ErrorF("Error opening framebuffer %s: %s\n",
-                   config->fb_path, strerror(errno));
+            LogMessage(X_ERROR, "Xfbdev(%d): Error opening framebuffer %s: %s\n",
+                       card->mynum, config->fb_path, strerror(errno));
             return FALSE;
         }
         LogMessage(X_INFO, "Xfbdev(%d): Using framebuffer device: %s\n",
@@ -67,7 +67,7 @@ fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
             }
         }
         if (priv->fd < 0) {
-            ErrorF("Error opening framebuffers /dev/fb[0-31]\n");
+            LogMessage(X_ERROR, "Xfbdev(%d): Error opening framebuffers /dev/fb[0-31]\n", card->mynum);
             return FALSE;
         }
         LogMessage(X_INFO, "Xfbdev(%d): Using framebuffer device: %s\n", card->mynum, devbuf);
