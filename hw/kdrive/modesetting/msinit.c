@@ -20,15 +20,19 @@
 
 #include <string.h>
 
+static int ac = 0;
+static char **av = NULL;
+
 static MsScreenConf *msCurrScreen = NULL;
 
 static const MsScreenConf msDefaultConfig = {
-                                             .dev_path = NULL,
                                              .shadow = TRUE,
                                              .glamor_info = {.use_gbm = TRUE,},
                                             };
 
-static void msLogScreenInfo(const MsScreenConf *config, int screen_num);
+static const char* FindDevPath(int argc, char **argv, int i);
+
+static void msLogScreenInfo(const MsScreenConf *config, const char* dev_path, int screen_num);
 
 static void
 msLogInit(void)
@@ -36,6 +40,7 @@ msLogInit(void)
     KdCardInfo *curr_card = kdCardInfo;
     char *log_file = NULL;
     const char *display_name = display ? display : "";
+    int idx = 0;
     if (asprintf(&log_file, DEFAULT_LOGDIR "/Xmodesetting.%s.log", display_name) < 0) {
         LogInit(DEFAULT_LOGDIR "/Xkdrive.log", ".old");
     } else {
@@ -50,30 +55,120 @@ msLogInit(void)
 
     if (curr_card) {
         while(curr_card) {
-            msLogScreenInfo(curr_card->closure, curr_card->mynum);
+            for (KdScreenInfo *screen = curr_card->screenList; screen; screen = screen->next) {
+                msLogScreenInfo(screen->closure, curr_card->closure, idx++);
+            }
             curr_card = curr_card->next;
         }
     } else {
-        MsScreenConf msDummyConfig = msDefaultConfig;
-        msLogScreenInfo(&msDummyConfig, 0);
+        msLogScreenInfo(msCurrScreen ? msCurrScreen : &msDefaultConfig, FindDevPath(ac, av, 0), 0);
     }
 }
 
 void
 InitCard(char *name)
 {
-    msCurrScreen = XNFalloc(sizeof(*msCurrScreen));
-    *msCurrScreen = msDefaultConfig;
-    KdCardInfoAdd(&msFuncs, msCurrScreen);
+    KdCardInfoAdd(&msFuncs, name);
+}
+
+/* Find the dev_path argument for this screen */
+static const char*
+FindDevPath(int argc, char **argv, int i)
+{
+    const char *dev_path = NULL;
+
+    /* If this is the last screen and we find a -dev argument, return it */
+    for (int j = i + 1; j < argc; j++) {
+        if (!strcmp(argv[j], "-dev")) {
+            if ((j + 1 < argc) && (argv[j + 1][0] != '-')) {
+                dev_path = argv[j + 1];
+            }
+        }
+
+        /* This was not the last screen */
+        if (!strcmp(argv[j], "-screen")) {
+            dev_path = NULL;
+            break;
+        }
+    }
+
+    if (dev_path) {
+        return dev_path;
+    }
+
+    /* Now go backwards to find the -dev argument */
+    for (int j = i - 1; j >= 0; j--) {
+        if (!strcmp(argv[j], "-dev")) {
+            if ((j + 1 < argc) && (argv[j + 1][0] != '-')) {
+                return argv[j + 1];
+            }
+        }
+
+        /* This screen had no -dev argument */
+        if (!strcmp(argv[j], "-screen")) {
+            return NULL;
+        }
+    }
+
+    /* This screen had no -dev argument */
+    return NULL;
+}
+
+static int
+InitScreen(int argc, char **argv, int i)
+{
+    KdCardInfo *card;
+    KdScreenInfo *screen;
+    const char *screen_arg;
+    const char *dev_path;
+
+    /* We need at least one screen config */
+    if (!msCurrScreen) {
+        msCurrScreen = XNFalloc(sizeof(*msCurrScreen));
+        *msCurrScreen = msDefaultConfig;
+    }
+
+    /* Not a -screen argument */
+    if (strcmp(argv[i], "-screen")) {
+        return 0;
+    }
+
+    screen_arg = ((i + 1) < argc && argv[i + 1][0] != '-') ? argv[i + 1] : NULL;
+    dev_path = FindDevPath(argc, argv, i);
+
+    card = msFindMatchingCard(dev_path);
+    if (!card) {
+        InitCard((char*)dev_path);
+        card = KdCardInfoLast();
+    }
+
+    if (!card) {
+        FatalError("Xmodesetting: No matching card found for device: %s!\n", dev_path);
+    }
+
+    screen = KdScreenInfoAdd(card, msCurrScreen);
+    KdParseScreen(screen, screen_arg);
+
+    /* Check if there are any more screens */
+    for (int j = i + 1; j < argc; j++) {
+        /* If yes, allocate one more screen config */
+        if (!strcmp(argv[j], "-screen")) {
+            msCurrScreen = XNFalloc(sizeof(*msCurrScreen));
+            *msCurrScreen = msDefaultConfig;
+            break;
+        }
+    }
+
+    return screen_arg ? 2 : 1;
 }
 
 static void
-msLogScreenInfo(const MsScreenConf *config, int screen_num)
+msLogScreenInfo(const MsScreenConf *config, const char *dev_path, int screen_num)
 {
     LogMessage(X_INFO, "Xmodesetting(%d): Screen %d:\n", screen_num, screen_num);
 
     LogMessage(X_INFO, "Xmodesetting(%d): KMS device: %s\n", screen_num,
-               config->dev_path ? config->dev_path : "not passed");
+               dev_path ? dev_path : "not passed");
     LogMessage(X_INFO, "Xmodesetting(%d): ShadowFB %s\n", screen_num,
                config->shadow ? "enabled" : "disabled");
 
@@ -93,6 +188,26 @@ ddxInputThreadInit(void)
 void
 InitOutput(int argc, char **argv)
 {
+    KdCardInfo *card;
+    KdScreenInfo *screen;
+
+    if (!kdCardInfo) {
+        InitCard((char*)FindDevPath(argc, argv, 0));
+    }
+
+    if (!(card = KdCardInfoLast()))
+        FatalError("No matching cards found!\n");
+
+    /* Add at least one screen */
+    if (!card->screenList) {
+        if (!msCurrScreen) {
+            msCurrScreen = XNFalloc(sizeof(*msCurrScreen));
+            *msCurrScreen = msDefaultConfig;
+        }
+        screen = KdScreenInfoAdd(card, msCurrScreen);
+        KdParseScreen(screen, NULL);
+    }
+
     KdInitOutput(argc, argv);
 }
 
@@ -129,15 +244,24 @@ int
 ddxProcessArgument(int argc, char **argv, int i)
 {
     int glamor_arg;
+    int screen_arg;
 
-    KdEnsureCard(argc, argv, i, !msCurrScreen);
+    ac = argc;
+    av = argv;
+
+    screen_arg = InitScreen(argc, argv, i);
+    if (screen_arg) {
+        return screen_arg;
+    }
 
     if (!strcmp(argv[i], "-dev")) {
         if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
+#if 0 /* Handled by InitScreen */
             msCurrScreen->dev_path = argv[i + 1];
             if (!msCurrScreen->glamor_info.dri_path) {
                 msCurrScreen->glamor_info.dri_path = msCurrScreen->dev_path;
             }
+#endif
             return 2;
         }
         UseMsg();

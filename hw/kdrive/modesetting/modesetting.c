@@ -382,18 +382,18 @@ bail:
 
 static Bool msInitialize(KdCardInfo * card, msPriv * priv)
 {
-    MsScreenConf *config = card->closure;
+    const char *dev_path = card->closure;
     int fd;
 
-    if (config->dev_path) {
-        fd = open(config->dev_path, O_RDWR);
+    if (dev_path) {
+        fd = open(dev_path, O_RDWR);
         if (fd < 0) {
-            LogMessage(X_ERROR, "Xmodesetting(%d): Error opening KMS device %s: %s\n",
-                       card->mynum, config->dev_path, strerror(errno));
+            LogMessage(X_ERROR, "Xmodesetting(card %d): Error opening KMS device %s: %s\n",
+                       card->mynum, dev_path, strerror(errno));
             goto bail;
         }
-        LogMessage(X_INFO, "Xmodesetting(%d): Using KMS device: %s\n",
-                   card->mynum, config->dev_path);
+        LogMessage(X_INFO, "Xmodesetting(card %d): Using KMS device: %s\n",
+                   card->mynum, dev_path);
     } else {
         char devbuf[] = "/dev/dri/cardxx";
         fd = -1;
@@ -414,15 +414,15 @@ static Bool msInitialize(KdCardInfo * card, msPriv * priv)
             }
         }
         if (fd < 0) {
-            LogMessage(X_ERROR, "Xmodesetting(%d): Error opening kms devices /dev/dri/card[0-63]\n", card->mynum);
+            LogMessage(X_ERROR, "Xmodesetting(card %d): Error opening kms devices /dev/dri/card[0-63]\n", card->mynum);
             goto bail;
         }
-        LogMessage(X_INFO, "Xmodesetting(%d): Using kms device: %s\n", card->mynum, devbuf);
+        LogMessage(X_INFO, "Xmodesetting(card %d): Using kms device: %s\n", card->mynum, devbuf);
     }
 
     priv->gbm = gbm_create_device(fd);
     if (!priv->gbm) {
-        LogMessage(X_ERROR, "Xmodesetting(%d): Could not create a gbm device\n", card->mynum);
+        LogMessage(X_ERROR, "Xmodesetting(card %d): Could not create a gbm device\n", card->mynum);
         goto bail;
     }
 
@@ -430,7 +430,7 @@ static Bool msInitialize(KdCardInfo * card, msPriv * priv)
 
     priv->resources = drmModeGetResources(fd);
     if (!priv->resources) {
-        LogMessage(X_ERROR, "Xmodesetting(%d): Could not get drm resources: %s\n", card->mynum, strerror(errno));
+        LogMessage(X_ERROR, "Xmodesetting(card %d): Could not get drm resources: %s\n", card->mynum, strerror(errno));
         goto bail;
     }
 
@@ -447,7 +447,68 @@ bail:
     return FALSE;
 }
 
-Bool msCardInit(KdCardInfo * card)
+/* XXX This really belongs in os/, like the version from glamor_egl */
+static Bool
+msFdMatch(int fd1, int fd2)
+{
+    struct stat stat1, stat2;
+
+    if (fd1 == fd2) {
+        return TRUE;
+    }
+
+    if (fd1 < 0 || fd2 < 0) {
+        return FALSE;
+    }
+
+    if (fstat(fd1, &stat1) < 0 ||
+        fstat(fd2, &stat2) < 0) {
+        return FALSE;
+    }
+
+    /**
+     * From https://pubs.opengroup.org/onlinepubs/009696699/basedefs/sys/stat.h.html
+     *
+     * The st_ino and st_dev fields taken together uniquely identify the file within the system.
+     */
+    return (stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino);
+}
+
+static KdCardInfo*
+msFindCardForFd(int fd)
+{
+    for (KdCardInfo *card = kdCardInfo; card; card = card->next) {
+        const char *card_path = card->closure;
+        int cardFd = card_path ? open(card_path, O_RDWR) : -1;
+        Bool ret = msFdMatch(cardFd, fd);
+
+        if (cardFd >= 0) {
+            close(cardFd);
+        }
+        if (ret) {
+            return card;
+        }
+    }
+
+    return NULL;
+}
+
+KdCardInfo*
+msFindMatchingCard(const char *card_path)
+{
+    KdCardInfo *card;
+    int fd = card_path ? open(card_path, O_RDWR) : -1;
+
+    card = msFindCardForFd(fd);
+
+    if (fd >= 0) {
+        close(fd);
+    }
+    return card;
+}
+
+Bool
+msCardInit(KdCardInfo * card)
 {
     msPriv *priv;
 
@@ -481,10 +542,10 @@ static Bool msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
 
     scrpriv->mode = modesetting_find_mode(scrpriv->connector, screen->width, screen->height, screen->rate);
     if (!scrpriv->mode) {
-        LogMessage(X_WARNING, "Xmodesetting(%d): Could not find a supported mode\n",
-                   screen->card->mynum);
-        LogMessage(X_WARNING, "Xmodesetting(%d): This likely means the video card has no connected outputs, or the requested mode is not supported\n",
-                   screen->card->mynum);
+        LogMessage(X_WARNING, "Xmodesetting(card %d, screen %d): Could not find a supported mode\n",
+                   screen->card->mynum, screen->mynum);
+        LogMessage(X_WARNING, "Xmodesetting(card %d, screen %d): This likely means that this output is not connected, or the requested mode is not supported\n",
+                   screen->card->mynum, screen->mynum);
     }
 
     /* modesetting_open allocates the bo based on this */
@@ -568,7 +629,7 @@ static Bool msMapFramebuffer(KdScreenInfo * screen)
 {
     msScrPriv *scrpriv = screen->driver;
     KdPointerMatrix m;
-    MsScreenConf *config = screen->card->closure;
+    MsScreenConf *config = screen->closure;
 
     unsigned long stride = gbm_bo_get_stride(scrpriv->front);
 

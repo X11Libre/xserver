@@ -19,10 +19,11 @@
 typedef struct _msPriv {
     struct gbm_device *gbm;
     drmModeRes *resources;
-
+#if 0
     __u16 red[256];
     __u16 green[256];
     __u16 blue[256];
+#endif
 } msPriv;
 
 typedef struct _msScrPriv {
@@ -39,13 +40,13 @@ typedef struct _msScrPriv {
 } msScrPriv;
 
 typedef struct _msScreenConf {
-    const char *dev_path;
     Bool shadow;
     KdGlamorInfo glamor_info;
-    const char *dri_path;
 } MsScreenConf;
 
 extern KdCardFuncs msFuncs;
+
+KdCardInfo* msFindMatchingCard(const char *card_path);
 
 Bool msCardInit(KdCardInfo * card);
 
