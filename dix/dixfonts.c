@@ -619,6 +619,7 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
                 if (!ClientIsAsleep(client))
                     ClientSleep(client,
                                 (ClientSleepProcPtr) doListFontsAndAliases, c);
+                free(resolved);
                 return TRUE;
             }
 
@@ -644,6 +645,7 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
                         ClientSleep(client,
                                     (ClientSleepProcPtr) doListFontsAndAliases,
                                     c);
+                    free(resolved);
                     return TRUE;
                 }
                 if (err == Successful)
@@ -661,6 +663,7 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
                         ClientSleep(client,
                                     (ClientSleepProcPtr) doListFontsAndAliases,
                                     c);
+                    free(resolved);
                     return TRUE;
                 }
                 if (err == FontNameAlias) {
