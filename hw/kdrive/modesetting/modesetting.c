@@ -15,14 +15,9 @@
 #endif
 
 typedef struct {
-    drmModeConnector *connector;
-    drmModeModeInfo *mode;
-
     void *map_data;
     void *map_addr;
 
-    uint32_t conn_id;
-    uint32_t crtc_id;
     uint32_t fb_id;
 } gbm_user_data_t;
 
@@ -51,10 +46,6 @@ destroy_user_data(struct gbm_bo *bo, void *_data)
 
     if (data->map_data) {
         gbm_bo_unmap(bo, data->map_data);
-    }
-
-    if (data->connector) {
-        drmModeFreeConnector(data->connector);
     }
 
     free(data);
@@ -121,11 +112,8 @@ gbm_bo_create_and_map_once(struct gbm_device *gbm,
 }
 
 static struct gbm_bo*
-gbm_bo_create_and_map(struct gbm_device *gbm, gbm_user_data_t *data, int w, int h)
+gbm_bo_create_and_map(struct gbm_device *gbm, gbm_user_data_t *data, uint32_t width, uint32_t height)
 {
-    uint32_t width = data->mode ? data->mode->hdisplay : w;
-    uint32_t height = data->mode ? data->mode->vdisplay : h;
-
     uint32_t format = GBM_FORMAT_XRGB8888;
 #if 0
     uint32_t flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING | GBM_BO_USE_FRONT_RENDERING;
@@ -307,7 +295,6 @@ static struct gbm_bo*
 modesetting_open(msPriv *priv, KdScreenInfo *screen)
 {
     struct gbm_device *gbm = priv->gbm;
-    int fd = gbm_device_get_fd(gbm);
     struct gbm_bo *ret = NULL;
     gbm_user_data_t *data = NULL;
 
@@ -316,20 +303,7 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen)
         goto fail;
     }
 
-    data->connector = modesetting_find_connector(priv->resources, fd, &data->conn_id);
-    if (!data->connector) {
-        goto fail;
-    }
-
-    data->mode = modesetting_find_mode(data->connector, screen->width, screen->height, screen->rate);
-    if (!data->mode) {
-        LogMessage(X_WARNING, "Xmodesetting(%d): Could not find a supported mode\n",
-                   screen->card->mynum);
-        LogMessage(X_WARNING, "Xmodesetting(%d): This likely means the video card has no connected outputs, or the requested mode is not supported\n",
-                   screen->card->mynum);
-    }
-
-    ret = gbm_bo_create_and_map(gbm, data, screen->width ? screen->width : 1920, screen->height ? screen->height : 1080);
+    ret = gbm_bo_create_and_map(gbm, data, screen->width, screen->height);
     if (!ret) {
         goto fail;
     }
@@ -338,11 +312,6 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen)
 
     data->fb_id = gbm_bo_create_fb(ret);
     if (!data->fb_id) {
-        goto fail;
-    }
-
-    data->crtc_id = modeseting_find_crtc(fd, priv->resources, data->connector);
-    if (data->crtc_id < 0) {
         goto fail;
     }
 
@@ -356,8 +325,6 @@ fail:
     }
 
     if (data) {
-        if (data->connector)
-            drmModeFreeConnector(data->connector);
         free(data);
     }
 
@@ -365,34 +332,52 @@ fail:
 }
 
 static Bool
-msSetMode(ScreenPtr pScreen, int rate)
+msSetMode(ScreenPtr pScreen, int width, int height, int rate)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
-    struct gbm_bo *new_bo;
+    struct gbm_bo *old_front;
+    drmModeModeInfo *old_mode;
     int oldwidth, oldheight, oldrate;
 
+    old_front = scrpriv->front;
+    old_mode = scrpriv->mode;
     oldwidth = screen->width;
     oldheight = screen->height;
     oldrate = screen->rate;
 
-    screen->width = pScreen->width;
-    screen->height = pScreen->height;
+    screen->width = width;
+    screen->height = height;
     screen->rate = rate;
 
-    new_bo = modesetting_open(priv, screen);
-    if (!new_bo) {
-        screen->width = oldwidth;
-        screen->height = oldheight;
-        screen->rate = oldrate;
-        return FALSE;
+    /* Find the mode */
+    scrpriv->mode = modesetting_find_mode(scrpriv->connector, screen->width, screen->height, screen->rate);
+    if (!scrpriv->mode) {
+        goto bail;
     }
 
-    gbm_bo_destroy(scrpriv->front);
-    scrpriv->front = new_bo;
+    /* Create a new front with the new sizes */
+    if (oldwidth != screen->width ||
+        oldheight != screen->height) {
+        scrpriv->front = modesetting_open(priv, screen);
+        if (!scrpriv->front) {
+            goto bail;
+        }
+
+        gbm_bo_destroy(old_front);
+    }
     return TRUE;
+
+bail:
+    scrpriv->front = old_front;
+    scrpriv->mode = old_mode;
+    screen->width = oldwidth;
+    screen->height = oldheight;
+    screen->rate = oldrate;
+
+    return FALSE;
 }
 
 static Bool msInitialize(KdCardInfo * card, msPriv * priv)
@@ -482,18 +467,40 @@ Bool msCardInit(KdCardInfo * card)
 static Bool msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
 {
     msPriv *priv = screen->card->driver;
-    gbm_user_data_t *data = NULL;
+    int fd = gbm_device_get_fd(priv->gbm);
+
+    scrpriv->connector = modesetting_find_connector(priv->resources, fd, &scrpriv->conn_id);
+    if (!scrpriv->connector) {
+        goto fail;
+    }
+
+    scrpriv->crtc_id = modeseting_find_crtc(fd, priv->resources, scrpriv->connector);
+    if (scrpriv->crtc_id < 0) {
+        goto fail;
+    }
+
+    scrpriv->mode = modesetting_find_mode(scrpriv->connector, screen->width, screen->height, screen->rate);
+    if (!scrpriv->mode) {
+        LogMessage(X_WARNING, "Xmodesetting(%d): Could not find a supported mode\n",
+                   screen->card->mynum);
+        LogMessage(X_WARNING, "Xmodesetting(%d): This likely means the video card has no connected outputs, or the requested mode is not supported\n",
+                   screen->card->mynum);
+    }
+
+    /* modesetting_open allocates the bo based on this */
+    if (!screen->width || !screen->height) {
+        screen->width = scrpriv->mode ? scrpriv->mode->hdisplay : 1920;
+        screen->height = scrpriv->mode ? scrpriv->mode->vdisplay : 1080;
+    }
 
     scrpriv->front = modesetting_open(priv, screen);
     if (!scrpriv->front) {
-        return FALSE;
+        goto fail;
     }
-
-    data = gbm_bo_get_user_data(scrpriv->front);
 
     screen->width = gbm_bo_get_width(scrpriv->front);
     screen->height = gbm_bo_get_height(scrpriv->front);
-    screen->rate = data->mode ? data->mode->vrefresh : 0; /* XXX 0 means accept any rate on msEnable */
+    screen->rate = scrpriv->mode ? scrpriv->mode->vrefresh : 0; /* XXX 0 means accept any rate on msEnable */
 
     /* GBM_FORMAT_XRGB8888 */
     screen->fb.visuals = (1 << TrueColor);
@@ -505,7 +512,22 @@ static Bool msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
     screen->fb.bitsPerPixel = 32;
 
     scrpriv->randr = screen->randr;
-    return msMapFramebuffer(screen);
+    if (!msMapFramebuffer(screen)) {
+        goto fail;
+    }
+
+    return TRUE;
+
+fail:
+    if (scrpriv->front) {
+        gbm_bo_destroy(scrpriv->front);
+    }
+
+    if (scrpriv->connector) {
+        drmModeFreeConnector(scrpriv->connector);
+    }
+
+    return FALSE;
 }
 
 Bool msScreenInit(KdScreenInfo * screen)
@@ -627,7 +649,6 @@ static Bool msRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
-    gbm_user_data_t *data = gbm_bo_get_user_data(scrpriv->front);
     Rotation randr;
     int n;
 
@@ -645,8 +666,8 @@ static Bool msRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
 
     randr = KdSubRotation(scrpriv->randr, screen->randr);
 
-    for (int i = 0; i < data->connector->count_modes; i++) {
-        drmModeModeInfo *mode = &data->connector->modes[i];
+    for (int i = 0; i < scrpriv->connector->count_modes; i++) {
+        drmModeModeInfo *mode = &scrpriv->connector->modes[i];
         RRScreenSizePtr pSize;
         pSize = RRRegisterSize(pScreen,
                                mode->hdisplay,
@@ -715,7 +736,7 @@ msRandRSetConfig(ScreenPtr pScreen,
 
     msUnmapFramebuffer(screen);
 
-    if (!msSetMode(pScreen, rate))
+    if (!msSetMode(pScreen, pSize->width, pSize->height, rate))
         goto bail4;
 
     if (!msMapFramebuffer(screen))
@@ -767,7 +788,6 @@ msGetPhysicalScreenSizes(ScreenPtr pScreen, int *mmWidth, int *mmHeight)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
-    gbm_user_data_t *data = gbm_bo_get_user_data(scrpriv->front);
 
     *mmWidth = screen->width_mm;
     *mmHeight = screen->height_mm;
@@ -776,9 +796,9 @@ msGetPhysicalScreenSizes(ScreenPtr pScreen, int *mmWidth, int *mmHeight)
         return TRUE;
     }
 
-    if (((int)data->connector->mmWidth > 0) && ((int)data->connector->mmHeight > 0)) {
-        *mmWidth = data->connector->mmWidth;
-        *mmWidth = data->connector->mmHeight;
+    if (((int)scrpriv->connector->mmWidth > 0) && ((int)scrpriv->connector->mmHeight > 0)) {
+        *mmWidth = scrpriv->connector->mmWidth;
+        *mmWidth = scrpriv->connector->mmHeight;
         return TRUE;
     }
 
@@ -1016,10 +1036,10 @@ Bool msEnable(ScreenPtr pScreen)
 
     drmSetMaster(fd);
 
-    if (!data->mode) {
-        data->mode = modesetting_find_mode(data->connector, screen->width, screen->height, screen->rate);
+    if (!priv->mode) {
+        priv->mode = modesetting_find_mode(priv->connector, screen->width, screen->height, screen->rate);
     }
-    if (data->mode && drmModeSetCrtc(fd, data->crtc_id, data->fb_id, 0, 0, &data->conn_id, 1, data->mode)) {
+    if (priv->mode && drmModeSetCrtc(fd, priv->crtc_id, data->fb_id, 0, 0, &priv->conn_id, 1, priv->mode)) {
         return FALSE;
     }
 
@@ -1071,6 +1091,8 @@ void msScreenFini(KdScreenInfo * screen)
     msScrPriv *priv = screen->driver;
 
     gbm_bo_destroy(priv->front);
+    drmModeFreeConnector(priv->connector);
+
     free(priv);
     screen->driver = NULL;
 }

@@ -19,6 +19,7 @@
 typedef struct _msPriv {
     struct gbm_device *gbm;
     drmModeRes *resources;
+
     __u16 red[256];
     __u16 green[256];
     __u16 blue[256];
@@ -26,6 +27,11 @@ typedef struct _msPriv {
 
 typedef struct _msScrPriv {
     struct gbm_bo *front;
+    drmModeConnector *connector;
+    drmModeModeInfo *mode;
+    uint32_t conn_id;
+    uint32_t crtc_id;
+
     DamagePtr damage;
     Rotation randr;
     Bool blockHandler;
