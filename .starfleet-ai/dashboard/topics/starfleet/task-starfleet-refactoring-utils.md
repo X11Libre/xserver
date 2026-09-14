@@ -1,12 +1,11 @@
 Title: "starfleet: refactoring utils"
 Category: starfleet
-Kind: task
-Status: "open"
+Kind: "task"
+Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "McKinley"
 Created: "2026-09-11T14:27:58Z"
-Assigned-To: "—"
 Doc-Ref: "—"
-Slug: starfleet/task-starfleet-refactoring-utils
 
 Generische utils in util/.../* auskapseln (später könnte das vielleicht mal eine extra library werden), zb:
 
