@@ -2,7 +2,7 @@ Title: "go-x11proto: XEmbed tab manager (tabbed-style)"
 Category: active
 Kind: "task"
 Status: "open"
-Assigned-To: "—"
+Assigned-To: "Galaxy"
 Created-By: "Enterprise"
 Created: "2026-07-28T15:28:30Z"
 Doc-Ref: "—"
