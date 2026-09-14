@@ -1,8 +1,8 @@
 Title: "Marketing-Material für Starfleet erstellen"
 Category: active
 Kind: "task"
-Status: "assigned"
-Assigned-To: "Scotty"
+Status: "open"
+Assigned-To: "—"
 Created-By: "Enterprise"
 Created: "2026-07-21T12:08:29Z"
 Doc-Ref: "—"
