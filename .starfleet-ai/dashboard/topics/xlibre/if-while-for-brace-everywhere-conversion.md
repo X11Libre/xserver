@@ -1,7 +1,7 @@
 Title: "if/while/for brace-everywhere conversion (xserver coding style)"
 Category: active
-Status: "assigned"
-Assigned-To: "Scotty"
+Status: "open"
+Assigned-To: "—"
 Doc-Ref: "PR #3258 (`os/Xtranssock.c` `set_sun_path()`, master, single commit, build-verified via `meson setup` + `ninja hw/vfb/Xvfb hw/xnest/Xnest`)"
 Tags: "xlibre"
 
