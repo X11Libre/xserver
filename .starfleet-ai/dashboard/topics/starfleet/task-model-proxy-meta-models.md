@@ -1,8 +1,8 @@
 Title: "Model-Proxy Meta-Models — klassenbasiertes Model-Routing mit Fallback/Round-Robin"
 Category: active
-Kind: task
-Status: open
-Assigned-To: "—"
+Kind: "task"
+Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "Defiant"
 Created: "2026-09-09T00:00:00Z"
 Doc-Ref: "—"
