@@ -1,8 +1,8 @@
 Title: "xlibre: LSPs mit einbinden (workspace-schema + ship-config snippets)"
 Category: active
 Kind: "task"
-Status: "offen"
-Assigned-To: ""
+Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "Praetor"
 Created: "2026-08-07T11:20:00Z"
 
