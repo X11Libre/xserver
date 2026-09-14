@@ -1,8 +1,8 @@
 Title: "os.h: AC_REPLACE_FUNCS-Fallbacks verschieben"
 Category: active
 Kind: "task"
-Status: "open"
-Assigned-To: "—"
+Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "Saratoga"
 Created: "2026-07-29T15:54:48Z"
 Doc-Ref: "—"
