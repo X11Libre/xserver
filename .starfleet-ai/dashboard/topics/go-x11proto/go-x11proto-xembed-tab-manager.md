@@ -1,3 +1,4 @@
+Bereits aktuell.
 Title: "go-x11proto: XEmbed tab manager (tabbed-style)"
 Category: active
 Kind: "task"
