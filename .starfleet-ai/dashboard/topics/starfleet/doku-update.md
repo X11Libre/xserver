@@ -1,5 +1,7 @@
 Title: "User-Dokumentation konsolidieren"
-Slug: doku-update
+Category: active
+Status: "assigned"
+Assigned-To: "Scotty"
 
 Konsolidierung der Doku:
 
