@@ -1,6 +1,7 @@
 Title: "Pure-Go diagnosis tool (xdpyinfo-like) on go-x11proto"
 Category: parked
-Noted-By: ""
+Status: "assigned"
+Assigned-To: "Galaxy"
 Since: "2026-07-01"
 
 Idea only, deprioritized. A pure-Go server-inventory dumper 
