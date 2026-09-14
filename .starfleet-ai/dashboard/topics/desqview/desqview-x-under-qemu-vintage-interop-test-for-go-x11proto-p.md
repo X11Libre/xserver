@@ -1,10 +1,7 @@
 Title: ""
 Category: active
-Status: "parked"
-Assigned-To: ""
-Created-By: ""
-Created: ""
-Doc-Ref: ""
+Status: "assigned"
+Assigned-To: "Galaxy"
 
 proof-of-life — FreeDOS + DESQview + DESQview/X booting under QEMU, DOS-side TCP/IP (mTCP recommended, works well with
 QEMU's emulated ne2000 NIC) + packet driver configured so the X server is reachable over TCP from the host; verify with
