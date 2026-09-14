@@ -2,7 +2,7 @@ Title: "starfleet: bug: terminal kann kein paste"
 Category: starfleet
 Kind: "task"
 Status: "assigned"
-Assigned-To: "—"
+Assigned-To: "Scotty"
 Created-By: "Pasteur"
 Created: "2026-08-04T08:13:52Z"
 Doc-Ref: "—"
