@@ -1,9 +1,9 @@
 Title: "if/while/for brace-everywhere conversion (xserver coding style)"
 Category: active
+Status: "assigned"
+Assigned-To: "Scotty"
 Doc-Ref: "PR #3258 (`os/Xtranssock.c` `set_sun_path()`, master, single commit, build-verified via `meson setup` + `ninja hw/vfb/Xvfb hw/xnest/Xnest`)"
-Migrated-From: 8cf8692b9f0057ffe44e793b35bcf7329da83d3f
 Tags: "xlibre"
-Slug: if-while-for-brace-everywhere-conversion
 
 Praetor confirmed 2026-07-03: always brace `if`/`while`/`for`/`else` bodies, even single-statement, in **all new/touched
 code from now on** (already the rule since PR #3199, now made permanent policy) — **and** convert existing unbraced
