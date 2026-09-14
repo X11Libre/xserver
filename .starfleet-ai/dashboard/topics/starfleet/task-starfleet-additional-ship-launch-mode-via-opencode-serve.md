@@ -1,8 +1,8 @@
 Title: "starfleet: additional ship-launch mode via opencode serve"
 Category: starfleet
 Kind: "task"
-Status: "open"
-Assigned-To: "—"
+Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "McKinley"
 Created: "2026-09-07T08:48:29Z"
 Doc-Ref: "—"
