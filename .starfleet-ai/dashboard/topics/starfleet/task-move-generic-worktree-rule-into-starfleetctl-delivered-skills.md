@@ -1,5 +1,5 @@
 Title: "Move generic worktree rule into starfleetctl-delivered skills"
-Category: active
+Category: starfleet
 Kind: "task"
 Status: "assigned"
 Assigned-To: "Scotty"
