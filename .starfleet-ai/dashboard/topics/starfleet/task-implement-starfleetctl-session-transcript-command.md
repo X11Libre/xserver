@@ -1,9 +1,8 @@
 Title: "Nachtrag: Implement starfleetctl session transcript command"
 Category: starfleet
 Kind: "task"
-Status: "offen"
-Assigned-To: "—"
-Created-By: ""
+Status: "assigned"
+Assigned-To: "Scotty"
 Created: "2026-09-10T08:13:21Z"
 Doc-Ref: "—"
 
