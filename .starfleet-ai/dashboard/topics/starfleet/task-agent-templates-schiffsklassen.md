@@ -1,12 +1,11 @@
-title: starfleetctl: schiffsklassen / rollen
-category: active
-kind: task
-status: open
-created-by: Defiant
-created: 2026-09-09T11:55:26Z
-assigned-to: —
-doc-ref: —
-slug: starfleet/task-agent-templates-schiffsklassen
+Title: "starfleetctl: schiffsklassen / rollen"
+Category: active
+Kind: "task"
+Status: "assigned"
+Assigned-To: "Scotty"
+Created-By: "Defiant"
+Created: "2026-09-09T11:55:26Z"
+Doc-Ref: "—"
 
 # Agent-Templates / Schiffsklassen — vordefinierte Profile für on-demand Ship-Spawns
 
