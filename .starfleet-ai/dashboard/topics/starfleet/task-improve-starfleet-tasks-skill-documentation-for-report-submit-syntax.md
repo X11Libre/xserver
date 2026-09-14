@@ -1,5 +1,5 @@
 Title: "Improve starfleet-tasks skill documentation for report submit syntax"
-Category: active
+Category: starfleet
 Kind: "task"
 Status: "assigned"
 Assigned-To: "Scotty"
