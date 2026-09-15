@@ -14,143 +14,7 @@
 #include "kxv.h"
 #endif
 
-typedef struct {
-    void *map_data;
-    void *map_addr;
-
-    uint32_t fb_id;
-} gbm_user_data_t;
-
 static Bool msMapFramebuffer(KdScreenInfo * screen);
-
-static inline void*
-gbm_bo_get_map(struct gbm_bo *bo)
-{
-    gbm_user_data_t *data = gbm_bo_get_user_data(bo);
-    return data ? data->map_addr : NULL;
-}
-
-static void
-destroy_user_data(struct gbm_bo *bo, void *_data)
-{
-    struct gbm_device *gbm = gbm_bo_get_device(bo);
-    int fd = gbm_device_get_fd(gbm);
-    gbm_user_data_t* data = _data;
-    if (!data) {
-        return;
-    }
-
-    if (data->fb_id) {
-        drmModeRmFB(fd, data->fb_id);
-    }
-
-    if (data->map_data) {
-        gbm_bo_unmap(bo, data->map_data);
-    }
-
-    free(data);
-}
-
-static inline int
-gbm_bo_map_all(struct gbm_bo *bo, gbm_user_data_t *data)
-{
-    uint32_t stride = 0;
-
-    if (!bo || !data) {
-        return FALSE;
-    }
-
-    if (data->map_addr) {
-        return TRUE;
-    }
-
-    uint32_t width = gbm_bo_get_width(bo);
-    uint32_t height = gbm_bo_get_height(bo);
-
-    /* must be NULL before the map call */
-    data->map_data = NULL;
-
-    /* While reading from gpu memory is often very slow, we do allow it */
-    data->map_addr = gbm_bo_map(bo, 0, 0, width, height,
-                                GBM_BO_TRANSFER_READ_WRITE,
-                                &stride, &data->map_data);
-
-    return !!data->map_addr;
-}
-
-static inline int
-gbm_bo_map_or_free(struct gbm_bo *bo, gbm_user_data_t *data)
-{
-    if (gbm_bo_map_all(bo, data)) {
-        return TRUE;
-    }
-
-    if (bo) {
-        gbm_bo_destroy(bo);
-    }
-    return FALSE;
-}
-
-static inline struct gbm_bo*
-gbm_bo_create_and_map_once(struct gbm_device *gbm,
-                           gbm_user_data_t *data,
-                           uint32_t width, uint32_t height,
-                           uint32_t format, uint32_t flags)
-{
-    struct gbm_bo *ret = NULL;
-
-    if (!data) {
-        return NULL;
-    }
-
-    ret = gbm_bo_create(gbm, width, height, format, flags);
-    if (ret && gbm_bo_map_or_free(ret, data)) {
-        return ret;
-    }
-
-    return NULL;
-}
-
-static struct gbm_bo*
-gbm_bo_create_and_map(struct gbm_device *gbm, gbm_user_data_t *data, uint32_t width, uint32_t height)
-{
-    uint32_t format = GBM_FORMAT_XRGB8888;
-#if 0
-    uint32_t flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING | GBM_BO_USE_FRONT_RENDERING;
-    uint32_t flags2 = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING;
-#endif
-    uint32_t flags_dumb = GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE;
-
-    struct gbm_bo *bo = NULL;
-
-#if 0 /* non-dumb buffers require unmap + map to flush writes, which is far slower than ShadowFB */
-    bo = gbm_bo_create_and_map_once(gbm, data, width, height, format, flags);
-    if (!bo) {
-        bo = gbm_bo_create_and_map_once(gbm, data, width, height, format, flags2);
-    }
-#endif
-    if (!bo) {
-        bo = gbm_bo_create_and_map_once(gbm, data, width, height, format, flags_dumb);
-    }
-
-    return bo;
-}
-
-static int
-gbm_bo_create_fb(struct gbm_bo *bo)
-{
-    struct gbm_device *gbm = gbm_bo_get_device(bo);
-    int fd = gbm_device_get_fd(gbm);
-
-    uint32_t width = gbm_bo_get_width(bo);
-    uint32_t height = gbm_bo_get_height(bo);
-    uint32_t pitch = gbm_bo_get_stride(bo);
-    uint32_t handle = gbm_bo_get_handle(bo).u32;
-    uint32_t fb_id = 0;
-
-    int ret = drmModeAddFB(fd, width, height, 24, 32, pitch, handle, &fb_id);
-    return ret ? 0 : fb_id;
-}
 
 static int
 modesetting_grade_mode(drmModeModeInfo *mode, uint32_t req_w, uint32_t req_h, uint32_t req_rate)
@@ -330,41 +194,25 @@ modeseting_find_crtc(msPriv *priv, int fd, drmModeConnector *conn)
 static struct gbm_bo*
 modesetting_open(msPriv *priv, KdScreenInfo *screen)
 {
-    struct gbm_device *gbm = priv->gbm;
+    msScrPriv *scrpriv = screen->driver;
+
     struct gbm_bo *ret = NULL;
-    gbm_user_data_t *data = NULL;
+    uint32_t format;
 
-    data = calloc(1, sizeof(*data));
-    if (!data) {
-        goto fail;
+    if (scrpriv->front) {
+        Bool want_map = !!gbm_bo_get_map(scrpriv->front);
+        format = gbm_bo_get_format(scrpriv->front);
+        return gbm_create_front_bo(priv->gbm, want_map, screen->width, screen->height, format);
     }
 
-    ret = gbm_bo_create_and_map(gbm, data, screen->width, screen->height);
-    if (!ret) {
-        goto fail;
-    }
-
-    gbm_bo_set_user_data(ret, data, destroy_user_data);
-
-    data->fb_id = gbm_bo_create_fb(ret);
-    if (!data->fb_id) {
-        goto fail;
-    }
-
-    return ret;
-
-fail:
+    format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, FALSE /* rb_swap */);
+    ret = gbm_create_front_bo(priv->gbm, TRUE /* do map */, screen->width, screen->height, format);
     if (ret) {
-        gbm_bo_destroy(ret);
-        /* destroy_user_data takes care of the rest */
-        return NULL;
+        return ret;
     }
 
-    if (data) {
-        free(data);
-    }
-
-    return NULL;
+    format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, TRUE /* rb_swap */);
+    return gbm_create_front_bo(priv->gbm, TRUE /* do map */, screen->width, screen->height, format);
 }
 
 static Bool
@@ -605,6 +453,8 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
 {
     msPriv *priv = screen->card->driver;
     int fd = gbm_device_get_fd(priv->gbm);
+    uint32_t format;
+    Bool rb_swap = FALSE;
 
     scrpriv->connector = modesetting_find_connector(priv, fd, &scrpriv->conn_id);
     if (!scrpriv->connector) {
@@ -639,14 +489,75 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
     screen->height = gbm_bo_get_height(scrpriv->front);
     screen->rate = scrpriv->mode ? scrpriv->mode->vrefresh : 0; /* XXX 0 means accept any rate on msEnable */
 
-    /* GBM_FORMAT_XRGB8888 */
-    screen->fb.visuals = (1 << TrueColor);
-    screen->fb.redMask = 0xff << 16;
-    screen->fb.greenMask = 0xff << 8;
-    screen->fb.blueMask = 0xff;
+    format = gbm_bo_get_format(scrpriv->front);
 
-    screen->fb.depth = 24;
-    screen->fb.bitsPerPixel = 32;
+    switch (format) {
+    case GBM_FORMAT_C8:
+    case GBM_FORMAT_R8:
+        screen->fb.depth = 8;
+        screen->fb.bitsPerPixel = 8;
+        screen->fb.visuals = (1 << GrayScale);
+        screen->fb.redMask = 0xff;
+        screen->fb.greenMask = 0x00;
+        screen->fb.blueMask = 0x00;
+        break;
+    case GBM_FORMAT_XBGR1555:
+        rb_swap = TRUE;
+    case GBM_FORMAT_XRGB1555:
+        screen->fb.depth = 15;
+        screen->fb.bitsPerPixel = 16;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0x1f << 10;
+        screen->fb.greenMask = 0x1f << 5;
+        screen->fb.blueMask = 0x1f;
+        break;
+    case GBM_FORMAT_BGR565:
+        rb_swap = TRUE;
+    case GBM_FORMAT_RGB565:
+        screen->fb.depth = 16;
+        screen->fb.bitsPerPixel = 16;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0x1f << 11;
+        screen->fb.greenMask = 0x3f << 5;
+        screen->fb.blueMask = 0x1f;
+        break;
+    case GBM_FORMAT_BGR888:
+        rb_swap = TRUE;
+    case GBM_FORMAT_RGB888:
+        screen->fb.depth = 24;
+        screen->fb.bitsPerPixel = 24;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0xff << 16;
+        screen->fb.greenMask = 0xff << 8;
+        screen->fb.blueMask = 0xff;
+        break;
+    case GBM_FORMAT_XBGR8888:
+        rb_swap = TRUE;
+    case GBM_FORMAT_XRGB8888:
+        screen->fb.depth = 24;
+        screen->fb.bitsPerPixel = 32;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0xff << 16;
+        screen->fb.greenMask = 0xff << 8;
+        screen->fb.blueMask = 0xff;
+        break;
+    case GBM_FORMAT_XBGR2101010:
+        rb_swap = TRUE;
+    case GBM_FORMAT_XRGB2101010:
+        screen->fb.depth = 30;
+        screen->fb.bitsPerPixel = 32;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0x3ff << 20;
+        screen->fb.greenMask = 0x3ff <<10;
+        screen->fb.blueMask = 0x3ff;
+        break;
+    }
+
+    if (rb_swap) {
+        int tmp = screen->fb.blueMask;
+        screen->fb.blueMask = screen->fb.redMask;
+        screen->fb.redMask = tmp;
+    }
 
     scrpriv->randr = screen->randr;
     if (!msMapFramebuffer(screen)) {
@@ -777,7 +688,9 @@ static Bool msSetShadow(ScreenPtr pScreen)
     window = msWindowLinear;
     update = 0;
 
-    if (scrpriv->randr)
+    if (screen->fb.bitsPerPixel == 24)
+        update = shadowUpdate32to24;
+    else if (scrpriv->randr)
         update = shadowUpdateRotatePacked;
     else
         update = shadowUpdatePacked;
@@ -1044,14 +957,14 @@ msBlockHandler(void *blockData, void *timeout)
     RegionPtr dirty;
     drmModeClip full_clip;
     struct gbm_device *gbm;
-    gbm_user_data_t *data;
+    uint32_t fb_id;
     int fd;
     uint32_t width;
     uint32_t height;
     unsigned num_cliprects;
 
     gbm = gbm_bo_get_device(priv->front);
-    data = gbm_bo_get_user_data(priv->front);
+    fb_id = gbm_bo_get_fb(priv->front);
     fd = gbm_device_get_fd(gbm);
 
     width = gbm_bo_get_width(priv->front);
@@ -1081,12 +994,12 @@ msBlockHandler(void *blockData, void *timeout)
         }
 
         /* TODO query connector property to see if this is needed */
-        ret = drmModeDirtyFB(fd, data->fb_id, clip, num_cliprects);
+        ret = drmModeDirtyFB(fd, fb_id, clip, num_cliprects);
 
         /* if we're swamping it with work, try one at a time */
         if (ret) {
             for (int i = 0; i < num_cliprects; i++) {
-                ret = drmModeDirtyFB(fd, data->fb_id, &clip[i], 1);
+                ret = drmModeDirtyFB(fd, fb_id, &clip[i], 1);
                 if (ret) {
                     break;
                 }
@@ -1104,7 +1017,7 @@ msBlockHandler(void *blockData, void *timeout)
     return;
 
 bail:
-    drmModeDirtyFB(fd, data->fb_id, &full_clip, 1);
+    drmModeDirtyFB(fd, fb_id, &full_clip, 1);
     if (priv->damage) {
         DamageEmpty(priv->damage);
     }
@@ -1122,11 +1035,11 @@ Bool msCreateResources(ScreenPtr pScreen)
     msScrPriv *priv = screen->driver;
     PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
     struct gbm_device *gbm;
-    gbm_user_data_t *data;
+    uint32_t fb_id;
     int fd;
 
     gbm = gbm_bo_get_device(priv->front);
-    data = gbm_bo_get_user_data(priv->front);
+    fb_id = gbm_bo_get_fb(priv->front);
     fd = gbm_device_get_fd(gbm);
 
     if (!msSetShadow(pScreen)) {
@@ -1134,7 +1047,7 @@ Bool msCreateResources(ScreenPtr pScreen)
     }
 
     /* Damage tracking not supported/needed */
-    if (drmModeDirtyFB(fd, data->fb_id, NULL, 0) &&
+    if (drmModeDirtyFB(fd, fb_id, NULL, 0) &&
         ((errno == EINVAL) || (errno == ENOSYS))) {
         return TRUE;
     }
@@ -1171,7 +1084,7 @@ Bool msEnable(ScreenPtr pScreen)
     msScrPriv *priv = screen->driver;
 
     struct gbm_device *gbm = gbm_bo_get_device(priv->front);
-    gbm_user_data_t *data = gbm_bo_get_user_data(priv->front);
+    uint32_t fb_id = gbm_bo_get_fb(priv->front);
     int fd = gbm_device_get_fd(gbm);
 
     drmSetMaster(fd);
@@ -1179,7 +1092,7 @@ Bool msEnable(ScreenPtr pScreen)
     if (!priv->mode) {
         priv->mode = modesetting_find_mode(priv->connector, screen->width, screen->height, screen->rate);
     }
-    if (priv->mode && drmModeSetCrtc(fd, priv->crtc_id, data->fb_id, 0, 0, &priv->conn_id, 1, priv->mode)) {
+    if (priv->mode && drmModeSetCrtc(fd, priv->crtc_id, fb_id, 0, 0, &priv->conn_id, 1, priv->mode)) {
         return FALSE;
     }
 

@@ -90,4 +90,21 @@ void msFiniAccel(ScreenPtr screen);
 
 void msCloseScreen(ScreenPtr pScreen);
 
+/* ms_gbm.c */
+
+void*
+gbm_bo_get_map(struct gbm_bo *bo);
+
+uint32_t
+gbm_bo_get_fb(struct gbm_bo *bo);
+
+uint32_t
+gbm_front_format_for_depth(int depth, int bpp, Bool rb_swap);
+
+int
+gbm_format_get_depth(uint32_t format);
+
+struct gbm_bo*
+gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_t height, uint32_t format);
+
 #endif				/* _MODESETTING_H_ */
