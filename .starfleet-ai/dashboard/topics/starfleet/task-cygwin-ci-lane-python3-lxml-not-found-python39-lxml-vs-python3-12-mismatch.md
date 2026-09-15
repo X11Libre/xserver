@@ -1,5 +1,5 @@
 Title: "cygwin CI lane: python3 lxml not found (python39-lxml vs python3.12 mismatch)"
-Category: active
+Category: starfleet
 Kind: "task"
 Status: "open"
 Assigned-To: "—"
