@@ -380,14 +380,14 @@ void KdSetColormap(ScreenPtr pScreen);
 /* kdrive.c */
 extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
-void KdSuspend(int ddxAbort);
+void KdSuspend(void);
 
 void KdInitScreen(KdScreenInfo * screen, int argc, char **argv);
 
 void
  KdDisableScreen(ScreenPtr pScreen);
 
-void KdDisableScreens(int ddxAbort);
+void KdDisableScreens(void);
 
 Bool
  KdEnableScreen(ScreenPtr pScreen);
