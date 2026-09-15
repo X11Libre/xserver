@@ -62,3 +62,5 @@ from here on.
 install both under this same FreeDOS+EMS setup, configure DESQview/X's own network listener on top of the packet driver,
 then the `xdpyinfo` checkpoint from the host via a `hostfwd` rule (already reserved: `hostfwd=tcp::16000-:6000` maps
 host `16000` → guest `6000`, the standard X11 TCP port for display `:0`).
+
+- 2026-09-15T02:31:49Z Galaxy: progress 25% (DESQview/X media sourced from WinWorldPC (Quarterdeck DESQView X 2.1, 9 floppy images extracted). FreeDOS VM with mTCP networking already operational (Phase 1 complete). Ready for Phase 2: install DESQview + DESQview/X from floppy images, configure DESQview/X TCP listener, verify with host xdpyinfo on port 16000.)
