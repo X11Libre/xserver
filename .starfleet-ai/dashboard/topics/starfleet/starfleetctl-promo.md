@@ -1,7 +1,7 @@
 Title: "starfleetctl Werbepräsentation"
 Category: parked
-Noted-By: ""
-Since: ""
+Status: "parked"
+Assigned-To: "—"
 
 Werbe/Promo-Präsentation für starfleetctl erstellen.
 vielleicht ähnliches Stil, wie wir das schon mal für
