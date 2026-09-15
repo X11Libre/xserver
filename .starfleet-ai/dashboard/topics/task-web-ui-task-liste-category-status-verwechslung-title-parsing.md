@@ -1,12 +1,11 @@
 Title: "Web-UI Task-Liste: Category/Status-Verwechslung + Title-Parsing"
 Category: active
-Kind: task
+Kind: "task"
 Status: "assigned"
+Assigned-To: "Scotty"
 Created-By: "Enterprise"
 Created: "2026-09-15T09:56:36Z"
-Assigned-To: "Enterprise"
 Doc-Ref: "—"
-Slug: task-web-ui-task-liste-category-status-verwechslung-title-parsing
 
 Bugs in der Task-Liste (renderTasks in index.html):
 
