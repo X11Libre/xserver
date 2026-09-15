@@ -1,7 +1,7 @@
 Title: "Web-UI Task-Liste: Category/Status-Verwechslung + Title-Parsing"
 Category: active
 Kind: "task"
-Status: "assigned"
+Status: "done"
 Assigned-To: "Scotty"
 Created-By: "Enterprise"
 Created: "2026-09-15T09:56:36Z"
@@ -20,3 +20,5 @@ Bugs in der Task-Liste (renderTasks in index.html):
 
 4. **Optische Trennung:** [category] ist aktuell innerhalb des &lt;a&gt;-Links. Soll nicht klickbar sein, nur der Titel.
    Fix: &lt;span class='task-cat'&gt;[cat]&lt;/span&gt; &lt;a class='task-title-link'&gt;title&lt;/a&gt;.
+
+- 2026-09-15T11:20:53Z Scotty: completed
