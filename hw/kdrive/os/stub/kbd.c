@@ -9,6 +9,17 @@
 static int
 StubKeyboardInit(KdKeyboardInfo * ki)
 {
+    char *tmp = NULL;
+
+    if (!ki)
+        return !Success;
+
+    tmp = strdup("Stub keyboard");
+    if (tmp) {
+        free(ki->name);
+        ki->name = tmp;
+    }
+
     ki->minScanCode = 8;
     ki->maxScanCode = 255;
     return Success;
