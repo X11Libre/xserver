@@ -2,7 +2,7 @@ Title: "Xserver master: Screen-Liste-Hook (Callback) im Connection-Setup als Vor
 Category: active
 Kind: "task"
 Status: "assigned"
-Assigned-To: "enterprise"
+Assigned-To: "Saratoga"
 Created-By: "Enterprise"
 Created: "2026-09-15T18:30:19Z"
 Doc-Ref: "—"
