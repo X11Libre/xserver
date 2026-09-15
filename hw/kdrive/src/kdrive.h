@@ -105,6 +105,7 @@ typedef struct _KdScreenInfo {
     int subpixel_order;
     Bool dumb;
     Bool softCursor;
+    Bool initialized; /* If KdScreenInit succeeded */
     int mynum;
     xPoint origin;
     KdFrameBuffer fb;
