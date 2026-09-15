@@ -199,30 +199,45 @@ modesetting_find_mode(drmModeConnector *conn, uint32_t req_w, uint32_t req_h, ui
 }
 
 static int
-modesetting_grade_connector(drmModeConnector *conn)
+modesetting_grade_connector(msPriv *priv, drmModeConnector *conn, uint32_t conn_id)
 {
-    if (!conn->modes || !conn->count_modes) {
-        return 1;
+    int score = 1;
+    Bool in_use = FALSE;
+
+    if (conn->modes && conn->count_modes) {
+        score += 5;
     }
 
     switch(conn->connection) {
     case DRM_MODE_CONNECTED:
-        return 5;
+        score++;
     case DRM_MODE_UNKNOWNCONNECTION:
-        return 4;
+        score++;
     case DRM_MODE_DISCONNECTED:
-        return 3;
+        score++;
     }
 
-    /* unreachable */
-    return 2;
+    for(int i = 0; i < priv->num_used_connectors; i++) {
+        if (priv->used_connectors[i] == conn_id) {
+            in_use = TRUE;
+            break;
+        }
+    }
+
+    if (!in_use) {
+        score += 10;
+    }
+
+    return score;
 }
 
 static drmModeConnector*
-modesetting_find_connector(drmModeRes *res, int fd, uint32_t *conn_id)
+modesetting_find_connector(msPriv *priv, int fd, uint32_t *conn_id)
 {
     drmModeConnector *best_connector = NULL;
     int best_score = 0;
+
+    drmModeRes *res = priv->resources;
 
     for (int i = 0; i < res->count_connectors; i++) {
         drmModeConnector *conn;
@@ -234,7 +249,7 @@ modesetting_find_connector(drmModeRes *res, int fd, uint32_t *conn_id)
             continue;
         }
 
-        score = modesetting_grade_connector(conn);
+        score = modesetting_grade_connector(priv, conn, id);
         if (score <= best_score) {
             drmModeFreeConnector(conn);
             continue;
@@ -252,12 +267,26 @@ modesetting_find_connector(drmModeRes *res, int fd, uint32_t *conn_id)
     return best_connector;
 }
 
-/* From man drm-kms */
-static int
-modeseting_find_crtc(int fd, drmModeRes *res, drmModeConnector *conn)
+static Bool
+modesetting_crtc_is_used(msPriv *priv, int crtc)
 {
+    for (int i = 0; i < priv->num_used_crtcs; i++) {
+        if (priv->used_crtcs[i] == crtc) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+/* Slightly modified rom man drm-kms */
+static int
+modeseting_find_crtc(msPriv *priv, int fd, drmModeConnector *conn)
+{
+    drmModeRes *res = priv->resources;
     drmModeEncoder *enc;
     unsigned int i, j;
+    int crtc = -ENOENT;
 
     /* iterate all encoders of this connector */
     for (i = 0; i < conn->count_encoders; ++i) {
@@ -279,15 +308,22 @@ modeseting_find_crtc(int fd, drmModeRes *res, drmModeConnector *conn)
              * step. Otherwise, simply scan your list of configured
              * connectors and CRTCs whether this CRTC is already
              * used. If it is, then simply continue the search here. */
-            drmModeFreeEncoder(enc);
-            return res->crtcs[j];
+            if (!modesetting_crtc_is_used(priv, res->crtcs[j])) {
+                drmModeFreeEncoder(enc);
+                return res->crtcs[j];
+            }
+
+            /* Allow reusing crtcs for testing */
+            if (crtc < 0) {
+                crtc = res->crtcs[j];
+            }
         }
 
         drmModeFreeEncoder(enc);
     }
 
     /* cannot find a suitable CRTC */
-    return -ENOENT;
+    return crtc;
 }
 
 
@@ -525,17 +561,57 @@ msCardInit(KdCardInfo * card)
     return TRUE;
 }
 
-static Bool msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
+static void
+modesetting_claim_connector_crtc(msPriv *priv, uint32_t conn, int crtc)
+{
+    Bool need_new_conn = TRUE;
+    Bool need_new_crtc = TRUE;
+
+    for (int i = 0; i < priv->num_used_connectors; i++) {
+        if (priv->used_connectors[i] == conn) {
+            need_new_conn = FALSE;
+            break;
+        }
+    }
+
+    for (int i = 0; i < priv->num_used_crtcs; i++) {
+        if (priv->used_crtcs[i] == crtc) {
+            need_new_crtc = FALSE;
+            break;
+        }
+    }
+
+    if (need_new_conn) {
+        void *tmp = realloc(priv->used_connectors, (priv->num_used_connectors + 1) * sizeof(*priv->used_connectors));
+        if (tmp) {
+            priv->used_connectors = tmp;
+            priv->used_connectors[priv->num_used_connectors] = conn;
+            priv->num_used_connectors++;
+        }
+    }
+
+    if (need_new_crtc) {
+        void *tmp = realloc(priv->used_crtcs, (priv->num_used_crtcs + 1) * sizeof(*priv->used_crtcs));
+        if (tmp) {
+            priv->used_crtcs = tmp;
+            priv->used_crtcs[priv->num_used_crtcs] = crtc;
+            priv->num_used_crtcs++;
+        }
+    }
+}
+
+static Bool
+msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
 {
     msPriv *priv = screen->card->driver;
     int fd = gbm_device_get_fd(priv->gbm);
 
-    scrpriv->connector = modesetting_find_connector(priv->resources, fd, &scrpriv->conn_id);
+    scrpriv->connector = modesetting_find_connector(priv, fd, &scrpriv->conn_id);
     if (!scrpriv->connector) {
         goto fail;
     }
 
-    scrpriv->crtc_id = modeseting_find_crtc(fd, priv->resources, scrpriv->connector);
+    scrpriv->crtc_id = modeseting_find_crtc(priv, fd, scrpriv->connector);
     if (scrpriv->crtc_id < 0) {
         goto fail;
     }
@@ -576,6 +652,9 @@ static Bool msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
     if (!msMapFramebuffer(screen)) {
         goto fail;
     }
+
+    /* Mark the connector and crtc used */
+    modesetting_claim_connector_crtc(priv, scrpriv->conn_id, scrpriv->crtc_id);
 
     return TRUE;
 
@@ -1165,6 +1244,8 @@ void msCardFini(KdCardInfo * card)
     struct gbm_device *gbm = priv->gbm;
     int fd = gbm_device_get_fd(gbm);
 
+    free(priv->used_crtcs);
+    free(priv->used_connectors);
     drmModeFreeResources(priv->resources);
     gbm_device_destroy(gbm);
     close(fd);
