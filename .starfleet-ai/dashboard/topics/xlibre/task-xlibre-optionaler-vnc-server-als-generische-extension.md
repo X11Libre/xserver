@@ -1,8 +1,8 @@
 Title: "xlibre: optionaler VNC-Server als generische Extension"
 Category: active
 Kind: "task"
-Status: "assigned"
-Assigned-To: "Scotty"
+Status: "open"
+Assigned-To: "—"
 Created-By: "Yamato"
 Created: "2026-07-16T07:17:49Z"
 Doc-Ref: "—"
