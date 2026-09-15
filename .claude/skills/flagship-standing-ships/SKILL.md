@@ -44,3 +44,22 @@ Wenn eines der drei Schiffe abstürzt oder gestoppt werden muss:
 - Das Flagschiff **überwacht die Schiffe** (Board, Screens bei Auffälligkeiten)
   und tut das Nötige, damit sie durchgängig arbeiten können (Respawn,
   Continuation, Rate-Limit-Abwarten, Modellwechsel).
+
+## Störungen dokumentieren (Reports)
+
+Bei **jeder Störung** (Absturz, Stop, Loop, Rate-Limit, Blockade) und deren
+**Behebung** wird ein starfleet-Report eingestellt (`starfleetctl reports
+submit`), der **genau beschreibt**:
+
+- **Was passiert ist** (Symptome: z.B. Repetitions-Loop, deutsches
+  Prosa-Text als Bash-Kommando mit exit 127, 429 rate-limit, eingefrorener
+  Screen, Kontext-Overflow).
+- **Wie das Problem gelöst wurde** (z.B. session stop + respawn mit anderem
+  Modell, Continuation-Direktive, Task-Neuzuweisung, auf Rate-Limit warten).
+- **Welches warum** / Erkenntnisse.
+
+Diese Reports dienen als **Lektionen für später** — wiederkehrende Muster,
+funktionierende Modelle je Aufgabe, do's/don'ts beim Respawn. Wichtige
+generalisierbare Erkenntnisse zusätzlich in die `agents.d/local/` knowledge
+dump ablegen bzw. als SOP-Fragment promoten, wenn sie sich als stabil
+erweisen.
