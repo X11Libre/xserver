@@ -703,8 +703,8 @@ jobs:
               uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS LDFLAGS'
-                  usesh: true
                   release: '11.0'
+                  sync: rsync
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
             - name: cleanup stale VM before retry
@@ -720,8 +720,8 @@ jobs:
               uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS LDFLAGS'
-                  usesh: true
                   release: '11.0'
+                  sync: rsync
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
             - name: cleanup stale VM before final retry
@@ -735,8 +735,8 @@ jobs:
               uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS LDFLAGS'
-                  usesh: true
                   release: '11.0'
+                  sync: rsync
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
     # illumos / Solaris build, run in an OpenIndiana VM (vmactions, same
