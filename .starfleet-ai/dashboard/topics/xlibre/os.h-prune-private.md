@@ -1,8 +1,8 @@
 Title: "os.h: Private Symbole aus os.h entfernen"
 Category: active
 Kind: "task"
-Status: "assigned"
-Assigned-To: "Scotty"
+Status: "open"
+Assigned-To: "—"
 Created-By: "Saratoga"
 Created: "2026-07-29T15:54:48Z"
 Doc-Ref: "—"
