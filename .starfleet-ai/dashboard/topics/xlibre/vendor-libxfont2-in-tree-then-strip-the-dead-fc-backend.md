@@ -1,13 +1,9 @@
 Title: "Vendor `libXfont2` in-tree (like `os/Xtrans*.c` already is), then strip the dead `fc/` backend"
 Category: active
-Status: "Idea stage — sized/scoped 2026-07-01, nothing written yet"
-Created-By: ""
-Created: ""
-Assigned-To: ""
+Status: "parked"
+Assigned-To: "—"
 Doc-Ref: "precedent: `cd81370e9d` (\"os: incorporate xtrans xtrans-1.6.0\")"
-Migrated-From: 8cf8692b9f0057ffe44e793b35bcf7329da83d3f
 Tags: "xlibre"
-Slug: vendor-libxfont2-in-tree-then-strip-the-dead-fc-backend
 
 Follows from the XFS investigation above. **Other consumers:** none outside the X-server family — Debian reverse-deps of
 `libxfont2` are only
