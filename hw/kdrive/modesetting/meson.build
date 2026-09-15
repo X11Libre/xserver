@@ -1,6 +1,7 @@
 srcs = [
     'modesetting.c',
     'msinit.c',
+    'ms_gbm.c',
     '../../stubs/ddxBeforeReset.c',
 ]
 
