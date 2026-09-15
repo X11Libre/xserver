@@ -18,6 +18,7 @@ Subtask aus compiler.h/os.h Analyse
 - Implementierungen in `os/` (reallocarray.c, strlcpy.c, strlcat.c, strndup.c, timingsafe_memcmp.c)
 
 **NOCH ZU TUN:**
+- Zuerst: sorgfältig prüfen welche dieser functions Teil der von Treibern verwendeten ABI sind (sowohl unsere eigenen als auch Nvidia genau prüfen!) 
 - Privaten Header `include/os_fallbacks.h` (oder ähnlich) erstellen
 - Deklarationen dorthin verschieben
 - `os.h` anpassen: nur noch `#include "os_fallbacks.h"` für interne Nutzer
