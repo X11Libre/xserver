@@ -1,6 +1,6 @@
 Title: "User-Dokumentation konsolidieren"
 Category: active
-Status: "assigned"
+Status: "done"
 Assigned-To: "Scotty"
 
 Konsolidierung der Doku:
@@ -15,3 +15,5 @@ Konsolidierung der Doku:
 * USER.md: "Appendix: File Layout" --> muß aktualisiert werden.
 * agents.md: file format update --> zb. sollte "slug" IIRC nicht mehr nötig sein
 * agents.md: "agents.d/xlibre/" streichen, evtl. könnte man beispiele geben, wie man sich selbst neue kategorien schaffen kann.
+
+- 2026-09-15T12:55:18Z Scotty: completed
