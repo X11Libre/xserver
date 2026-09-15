@@ -29,3 +29,9 @@ Fokus (ci-platform-Skill):
 4. SSH connectivity issue FIXED - rsync now works (VM boots, rsync installs, packages install, meson setup runs)
 
 Push run (34996393661) shows NetBSD job running successfully through attempt 1 & 2, attempt 3 failed after full build execution - this is an actual build failure (not SSH connectivity). PR run (34996571989) skipped NetBSD because ubuntu-fetch-pkg is skipped for same-repo PRs (expected behavior). Awaiting full push run completion to see final NetBSD result.)
+
+- 2026-09-15T18:56:14Z Galaxy: progress 95% (Fix implemented in PR #3697 (branch fix/netbsd-ci-ssh-fix):
+1. CI infrastructure: vmactions/netbsd-vm v1.2.3 → v1.5.0 + sync: rsync (SSH connectivity FIXED)
+2. Source code fix: include/xf86_OSlib.h - guard sys/console.h include for NetBSD/OpenBSD (they use wscons)
+
+Both commits pushed. Push run 35006152246 and PR run 35006158586 are in progress. NetBSD job executing - awaiting completion to verify build passes. Will report final status.)
