@@ -694,12 +694,12 @@ jobs:
             - name: run in netbsd VM (attempt 1)
               id: netbsd-1
               continue-on-error: true
-              uses: vmactions/netbsd-vm@v1.2.3
+              uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS'
-                  usesh: true
                   release: '10.1'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
+                  sync: rsync
 
             - name: cleanup stale VM before retry
               if: steps.netbsd-1.outcome == 'failure'
@@ -711,12 +711,12 @@ jobs:
               id: netbsd-2
               if: steps.netbsd-1.outcome == 'failure'
               continue-on-error: true
-              uses: vmactions/netbsd-vm@v1.2.3
+              uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS'
-                  usesh: true
                   release: '10.1'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
+                  sync: rsync
 
             - name: cleanup stale VM before final retry
               if: steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
@@ -726,12 +726,12 @@ jobs:
 
             - name: run in netbsd VM (attempt 3)
               if: steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
-              uses: vmactions/netbsd-vm@v1.2.3
+              uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS'
-                  usesh: true
                   release: '10.1'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
+                  sync: rsync
 
     # illumos / Solaris build, run in an OpenIndiana VM (vmactions, same
     # mechanism as the BSD jobs above). Exercises the Solaris-specific os/ code
