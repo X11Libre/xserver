@@ -1,11 +1,8 @@
-Automatischen Stash erzeugt: 07d7bd539d
-Aktueller Branch mtx/agent-config ist auf dem neuesten Stand.
-Automatischen Stash angewendet.
 Title: "xlibre: LSPs mit einbinden (workspace-schema + ship-config snippets)"
 Category: active
 Kind: "task"
-Status: "assigned"
-Assigned-To: "Scotty"
+Status: "open"
+Assigned-To: "—"
 Created-By: "Praetor"
 Created: "2026-08-07T11:20:00Z"
 
