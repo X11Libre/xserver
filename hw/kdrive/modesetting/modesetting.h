@@ -19,6 +19,12 @@
 typedef struct _msPriv {
     struct gbm_device *gbm;
     drmModeRes *resources;
+
+    int *used_crtcs;
+    int num_used_crtcs;
+
+    int num_used_connectors;
+    uint32_t *used_connectors;
 #if 0
     __u16 red[256];
     __u16 green[256];
