@@ -18,6 +18,7 @@ typedef struct {
     Bool force_es; /* If glamor should only create gles contexts */
 
     /* Handled by KdGlamorInit */
+    Bool want_dri_fd; /* If dri_fd is already populated */
     int fake_rate; /* If a fake refresh rate should be used by present */
     Bool drop_master; /* If KdGlamorInit should call drmDropMaster on the dri fd */
     Bool no_xv; /* Disable X-Video support */

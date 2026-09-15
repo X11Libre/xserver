@@ -16,6 +16,7 @@ msInitAccel(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     MsScreenConf *config = screen->closure;
+    msPriv *priv = screen->card->driver;
     int caps = GLAMOR_EGL_CAP_NONE;
 
     if (screen->rate > 60) {
@@ -23,7 +24,12 @@ msInitAccel(ScreenPtr pScreen)
     }
 
     if (!config->glamor_info.dri_path) {
-        config->glamor_info.dri_path = screen->card->closure;
+        config->glamor_info.dri_fd = dup(gbm_device_get_fd(priv->gbm));
+        if (config->glamor_info.dri_fd >= 0) {
+            config->glamor_info.want_dri_fd = TRUE;
+        } else {
+            config->glamor_info.dri_path = screen->card->closure;
+        }
     }
 
     if (!KdGlamorInit(pScreen, &config->glamor_info, &caps)) {

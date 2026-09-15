@@ -256,12 +256,7 @@ ddxProcessArgument(int argc, char **argv, int i)
 
     if (!strcmp(argv[i], "-dev")) {
         if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
-#if 0 /* Handled by InitScreen */
-            msCurrScreen->dev_path = argv[i + 1];
-            if (!msCurrScreen->glamor_info.dri_path) {
-                msCurrScreen->glamor_info.dri_path = msCurrScreen->dev_path;
-            }
-#endif
+            /* Handled by InitScreen */
             return 2;
         }
         UseMsg();

@@ -95,7 +95,9 @@ KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps)
 
     *caps = GLAMOR_EGL_CAP_NONE;
 
-    if (info->dri_path) {
+    if (info->want_dri_fd) {
+        /* do nothing */
+    } else if (info->dri_path) {
         info->dri_fd = open(info->dri_path, O_RDWR);
         if (info->dri_fd < 0) {
             LogMessage(X_WARNING, "KGlamor(%d): Could not open %s: %s\n", pScreen->myNum, info->dri_path, strerror(errno));
