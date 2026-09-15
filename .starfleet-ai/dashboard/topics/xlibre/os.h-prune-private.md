@@ -32,3 +32,5 @@ Alle 6 neuen public Headers erstellt:
 7. Build testen
 
 Nach Wiederaufnahme: os.h finalisieren + Build verifizieren
+
+Bericht erstellen, was genau getan wurde, und in welcher branch die changes liegen.
