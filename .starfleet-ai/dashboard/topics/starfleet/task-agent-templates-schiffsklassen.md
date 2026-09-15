@@ -1,7 +1,7 @@
 Title: "starfleetctl: schiffsklassen / rollen"
 Category: active
 Kind: "task"
-Status: "assigned"
+Status: "done"
 Assigned-To: "Scotty"
 Created-By: "Defiant"
 Created: "2026-09-09T11:55:26Z"
@@ -118,3 +118,5 @@ Empfohlen: Kombination aus 2 und 4 - Enterprise kann beim Task-Zuweisen das nöt
 - Soll es mehrere optionale Skills geben, oder nur einen pro Klasse?
 
 Die beiden Topics sind jetzt komplett spezifiziert und adressieren alle Anforderungen einschließlich der neuen Fähigkeit, benutzerkonfigurierbare Skills pro Klasse zu laden und Schiffsklassen-Bewusstsein.
+
+- 2026-09-15T16:39:12Z Scotty: completed
