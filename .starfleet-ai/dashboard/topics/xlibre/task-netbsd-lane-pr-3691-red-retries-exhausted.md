@@ -17,3 +17,5 @@ Fokus (ci-platform-Skill):
 - Ergebnis: Fix committen/pushen, CI grün bekommen, danach Starfleet-Report + Status an Enterprise.
 
 - 2026-09-15T12:10:15Z Galaxy: progress 25% (Triggered full workflow re-run (run 34956549682) for PR #3691. NetBSD VM was timing out on boot (attempt 3: boot timeout after 100 retries, SSH not accessible). This appears to be a transient infrastructure/VM boot issue rather than a build error. Re-run should get fresh runner.)
+
+- 2026-09-15T13:43:07Z Galaxy: progress 50% (Re-run completed but NetBSD lane still fails. VM boots successfully (attempt 3 ready at retry 18), but build script fails silently — SSH session output from inside VM not captured in GH Actions log. The action vmactions/netbsd-vm@v1.2.3 runs build script via SSH but output doesn't appear in step log. Need to add debug logging to run-xserver-build.sh or check action's output capture. Not a transient boot issue anymore — it's a build failure inside NetBSD.)
