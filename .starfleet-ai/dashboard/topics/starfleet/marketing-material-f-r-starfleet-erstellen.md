@@ -1,5 +1,5 @@
 Title: "Marketing-Material für Starfleet erstellen"
-Category: active
+Category: starfleet
 Kind: "task"
 Status: "open"
 Assigned-To: "—"
