@@ -177,7 +177,7 @@ LinuxApmNotify(int fd, int mask, void *blockData)
         LinuxApmRunning = TRUE;
     }
     else if (!running && LinuxApmRunning) {
-        KdSuspend(FALSE);
+        KdSuspend();
         LinuxApmRunning = FALSE;
         ioctl(fd, cmd, 0);
     }
