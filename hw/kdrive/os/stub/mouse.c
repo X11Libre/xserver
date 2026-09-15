@@ -9,6 +9,17 @@
 static Status
 StubMouseInit(KdPointerInfo * pi)
 {
+    char *tmp;
+
+    if (!pi)
+        return BadImplementation;
+
+    tmp = strdup("Stub Mouse");
+    if (tmp) {
+        free(pi->name);
+        pi->name = tmp;
+    }
+
     return Success;
 }
 
