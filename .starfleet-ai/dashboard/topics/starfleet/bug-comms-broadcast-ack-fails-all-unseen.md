@@ -1,5 +1,7 @@
 Title: "comms: ack von Broadcast (target all) schlägt fehl — 'no such directive'"
 Category: parked
+Status: "open"
+Assigned-To: "—"
 Noted-By: "Enterprise"
 Since: "2026-08-06"
 
