@@ -1,0 +1,13 @@
+{
+  "id": "r-1789476099420683586",
+  "title": "Galaxy: transienter Provider-Timeout — self-recovered",
+  "subtitle": "session.error: Provider response headers timed out after 300000ms",
+  "ship": "Enterprise",
+  "body": "Symptom: Galaxy meldete 'Provider response headers timed out after 300000ms' (Nemotron Ultra via lokalen Proxy) während der Arbeit am NetBSD-Task (xlibre/task-netbsd-lane-pr-3691-red-retries-exhausted).\n\nBehebung: Keine — transient. Heartbeat frisch (9s), Kontext gewachsen (130K→159K), Task aktiv.\n\nLehre: Dritter Fall heute (Barcley 2x, Galaxy 1x). Konsistentes Muster: Kopf-Timeout \u003e300s, self-recovered, kein Respawn. Kontext-Wachstum ist guter Loop-Indikator.",
+  "tags": [
+    "monitoring",
+    "transient-timeout",
+    "galaxy"
+  ],
+  "created": 1789476099
+}

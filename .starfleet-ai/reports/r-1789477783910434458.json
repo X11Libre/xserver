@@ -1,0 +1,13 @@
+{
+  "id": "r-1789477783910434458",
+  "title": "Galaxy: Provider-Timeout (transient, 3.) — NetBSD-Debugging läuft weiter",
+  "subtitle": "session.error: Provider response headers timed out after 300000ms",
+  "ship": "Enterprise",
+  "body": "Symptom: 3. Timeout bei Galaxy heute.\n\nBehebung: Keine — self-recovered. Screen: Galaxy arbeitet weiter an PR #3691 (gh run view 34956549682, job 104374261455 status in_progress, conclusion leer — Run läuft noch). Heartbeat 8s frisch.\n\nLehre: Series heute: Barcley 3x + Galaxy 3x = 6x transient. Kein Respawn erforderlich. Run #3691 (netbsd-lane) ist laut Galaxy weiterhin in_progress — ggf. kam der Fix aus vorherigem Job.",
+  "tags": [
+    "monitoring",
+    "transient-timeout",
+    "galaxy"
+  ],
+  "created": 1789477783
+}

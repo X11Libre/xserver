@@ -1,0 +1,13 @@
+{
+  "id": "r-1789477055757471483",
+  "title": "Task starfleet/doku-update abgeschlossen",
+  "subtitle": "User-Dokumentation konsolidiert",
+  "ship": "Scotty",
+  "body": "USER.md documentation consolidated and deployed:\n\n- All content translated to English (removed German headings from web frontend)\n- Integrated Web UI documentation from doc/web-ui.md: tabs (Flotte, Tasks, Bus, Funk, Log, Sitzungen, Timer, Berichte, Files), API endpoints, model registry (gen-models-yaml), server management\n- Integrated Reports documentation from doc/reports.md: CLI usage, web UI, storage, API\n- Updated Appendix: File Layout to match current .starfleet-ai/var structure (dashboard/topics/, sop.d/, agent-claims/, log/, ships/, etc.)\n- Removed architecture/implementation details (belong in architecture.md)\n- Updated Further Reading links with all doc/ files\n- Tests pass, make all + starfleet-bootstrap + web/timer restart verified\n",
+  "tags": [
+    "starfleet",
+    "doc",
+    "web-ui"
+  ],
+  "created": 1789477055
+}

@@ -1,0 +1,43 @@
+# Ship class templates for starfleetctl
+# Place custom templates in .starfleet-ai/conf/templates/
+# Each file defines a ship class with its default configuration
+
+templates:
+  - name: scout
+    description: "Fast, lightweight ship for CI checks and quick scans"
+    model: "nvidia/nemotron-3-nano-30b-a3b"
+    session_type: "background"
+    name_prefix: "Scout"
+    skills_always:
+      - "datei"
+      - "grep"
+      - "glob"
+    skill_optional: "web-scanner"
+    timeout: "15m"
+    auto_cleanup: true
+
+  - name: cruiser
+    description: "Standard workhorse for general tasks and PR reviews"
+    model: "nvidia/nemotron-3-ultra-550b-a55b"
+    session_type: "background"
+    name_prefix: "Cruiser"
+    skills_always:
+      - "datei"
+      - "grep"
+      - "edit"
+    skill_optional: "code-reviewer"
+    timeout: "60m"
+    auto_cleanup: true
+
+  - name: heavy
+    description: "Heavy-duty ship for complex analysis and large codebases"
+    model: "opencode/big-pickle"
+    session_type: "background"
+    name_prefix: "Heavy"
+    skills_always:
+      - "datei"
+      - "edit"
+      - "bash"
+    skill_optional: "security-analyzer"
+    timeout: "120m"
+    auto_cleanup: false

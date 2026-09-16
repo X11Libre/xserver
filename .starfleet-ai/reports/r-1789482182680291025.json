@@ -1,0 +1,13 @@
+{
+  "id": "r-1789482182680291025",
+  "title": "Task starfleet/refactoring-git abgeschlossen",
+  "subtitle": "Git/GH utilities refactored into internal/util",
+  "ship": "Scotty",
+  "body": "Git/GH refactoring completed and deployed:\n\n- Created internal/util/git.go: Git wrapper with comprehensive methods (Clone, Fetch, Push, Pull, Branch, Checkout, Merge, Rebase, Log, Show, Worktree*, Config*, Status, Diff, Add, Commit, etc.)\n- Created internal/util/gh.go: GH CLI wrapper for PR operations (View, List, Checks, Comment, Labels, Checkout, Create), Repo/Issue view, Workflow runs, Releases, Auth status\n- Created internal/util/utils.go: Shared TrimTrailingNewline helper\n\nConsolidates scattered exec.Command(\"git\", ...) calls from:\n- internal/ghpr/git.go (now deprecated)\n- internal/wscommit/commands.go\n- internal/worktree/run.go\n- internal/selfinstall/selfinstall.go\n- internal/sop/commands.go\n- internal/withclonelock/withclonelock.go\n- internal/web/web_test.go (tests)\n- internal/sop/reindex_test.go (tests)\n- internal/bridged/server_test.go (tests)\n\nPer analysis from 2026-09-07 (Aeon). Tests pass, make all + starfleet-bootstrap + web/timer restart verified.\n",
+  "tags": [
+    "starfleet",
+    "refactor",
+    "git"
+  ],
+  "created": 1789482182
+}

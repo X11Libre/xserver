@@ -1,0 +1,13 @@
+{
+  "id": "r-1789476891688680629",
+  "title": "Galaxy: Provider-Timeout (transient) — NetBSD-Debugging aktiv",
+  "subtitle": "session.error: Provider response headers timed out after 300000ms (5. Vorfall heute)",
+  "ship": "Enterprise",
+  "body": "Symptom: Galaxy meldete ProviderHeaderTimeoutError. Temporär trat auch 'LOG ERROR detected: ... transient' im Screen auf.\n\nBehebung: Keine — self-recovered. Screen-Verifikation: Galaxy arbeitet aktiv an NetBSD-PR #3691 (gh run view 34956549682 + gh run list build-xserver.yml) — er diagnostiziert den roten Run. Heartbeat 6s frisch.\n\nLehre: 5x Timeout heute (Barcley 3x, Galaxy 2x), alle transient, nichts erforderte Respawn. Muster gesetzt; bei Heartbeat-frisch + Tool-Ausgabe prüfen statt sofort eingreifen.",
+  "tags": [
+    "monitoring",
+    "transient-timeout",
+    "galaxy"
+  ],
+  "created": 1789476891
+}

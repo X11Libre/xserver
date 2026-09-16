@@ -1,0 +1,13 @@
+{
+  "id": "r-1789484468893518201",
+  "title": "Galaxy: Provider-Timeout (transient) — neuer NetBSD-Run nach Debug-Commit",
+  "subtitle": "session.error: Provider response headers timed out after 300000ms (10. Vorfall heute)",
+  "ship": "Enterprise",
+  "body": "Symptom: 4. Timeout bei Galaxy heute.\n\nBehebung: Keine — self-recovered. Screen: Galaxy analysiert neuen Run 34979256982 (nach gepushtem showDebugInfo-Commit), VM_RELEASE=10.1, NetBSD-10.1-amd64.iso — Diagnose des roten NetBSD-Logs. Heartbeat 12s frisch.\n\nLehre: 10x Timeout heute (Barcley 3x, Galaxy 4x, Scotty 2x). Muster bleibt: transient, self-recovered. Galaxy legt echtes Vorankommen vor (neuer Run frisch gestartet).",
+  "tags": [
+    "monitoring",
+    "transient-timeout",
+    "galaxy"
+  ],
+  "created": 1789484468
+}

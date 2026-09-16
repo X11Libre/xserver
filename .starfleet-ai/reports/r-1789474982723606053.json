@@ -1,0 +1,14 @@
+{
+  "id": "r-1789474982723606053",
+  "title": "Barcley: erneuter transienter Provider-Timeout — self-recovered",
+  "subtitle": "session.error: Provider response headers timed out after 300000ms",
+  "ship": "Enterprise",
+  "body": "Symptom: Barcley meldete (erneut) 'Provider response headers timed out after 300000ms' (Nemotron Ultra via lokalen Proxy).\n\nBehebung: Keine — transient, bereits 2. Vorfall heute (vorher r-1789465410312715102). Heartbeat frisch (1s), Screen aktiv (80% Kontext), Rebase läuft weiter.\n\nLehre/Bestätigung: Provider-Header-Timeouts (\u003e300s) treten bei Nemotron-Ultra-Proxy regelmäßig auf (Barcley 2x heute). Muster konsistent: transient, self-recovered, kein Respawn nötig, solange Heartbeat frisch + Kontext wächst. Auffällig: Galaxy (idle) wechselte ohne Aktivitätsindikator — beobachten.",
+  "tags": [
+    "monitoring",
+    "transient-timeout",
+    "barcley",
+    "recurring"
+  ],
+  "created": 1789474982
+}

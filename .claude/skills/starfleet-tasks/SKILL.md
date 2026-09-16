@@ -21,6 +21,7 @@ starfleetctl task capture --title "<title>" \
     [--desc "<what needs doing>"] \
     [--slug "<override>"] \
     [--assign [<ship>]] \
+    [--category <cat>] \
     [--no-push]
 ```
 
@@ -149,6 +150,10 @@ starfleetctl reports list --tag ci --json          # filter + JSON
 starfleetctl reports show <id>
 starfleetctl reports delete <id>
 ```
+
+⚠️ **WARNING**: The title is the **first positional argument**, not a `--title` flag!
+Using `--title "Title"` will cause the title to be interpreted as the literal
+string `--title` and the actual title will be lost. This is a common mistake.
 
 Attachments are uploaded to the filestore (`file put` → `/api/store/<name>`).
 See `doc/reports.md` for full reference and web UI walkthrough.

@@ -1,0 +1,12 @@
+{
+  "id": "r-1789555691751520282",
+  "title": "Task starfleet/task-remove-dashboard-show-dashboard-md-generation-and-file-fix-comments-docs-skills abgeschlossen",
+  "subtitle": "Dashboard show + DASHBOARD.md removed",
+  "ship": "Scotty",
+  "body": "Dashboard show + DASHBOARD.md generation removed:\n\n1. Removed dashboard show subcommand (DoShow in internal/dashboard/commands.go)\n2. Removed DASHBOARD.md generation + guards: DoReindex still exists for topic index, but DASHBOARD.md file removed\n3. Removed bootstrap/support: internal/bootstrap/checks.go verifyDashboardMD/fixDashboardMD removed\n4. Removed .starfleet-ai/var/DASHBOARD.md (gitignored) from workspace\n5. Fixed outdated comments/docs:\n   - internal/web/web.go: comments updated\n   - internal/dashboard/*.go Header-Kommentare corrected\n   - cmd/starfleetctl/github.go references to \"DASHBOARD.md\" updated\n   - cmd/starfleetctl/main.go:7 \"DASHBOARD.md Row\" removed\n6. Fixed starfleet-delivered SOP-Fragments / Skills references\n7. Tests pass, make all + starfleet-bootstrap + web restart verified\n",
+  "tags": [
+    "starfleet",
+    "dashboard"
+  ],
+  "created": 1789555691
+}

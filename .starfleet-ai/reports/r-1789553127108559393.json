@@ -1,0 +1,14 @@
+{
+  "id": "r-1789553127108559393",
+  "title": "Task starfleet/task-model-proxy-meta-models abgeschlossen",
+  "subtitle": "Model-Proxy Meta-Models system implemented",
+  "ship": "Scotty",
+  "body": "Model-Proxy Meta-Models system implemented and deployed:\n\n- Config: Added strategies, routing, triggers, heuristics to model-proxy.yaml\n- ModelProxyConfig: Extended with Strategies, Routing, ModelProxyStrategy, triggers, heuristics\n- Proxy: StrategyState with circuit breaker, session affinity, metrics\n- Routing: fallback, round-robin, weighted (sticky), single\n- Circuit Breaker: closed/open/half-open with auto-recovery\n- Heuristics: latency p95, error rate, token throughput, consecutive failures\n- Session Affinity: sessionID -\u003e model mapping\n- API Endpoints:\n  - GET /api/meta-models — list strategies\n  - GET /api/meta-models/\u003cstrategy\u003e — strategy details + runtime state\n  - GET /api/meta-models/sessions — session affinities\n  - POST /api/meta-models/switch — manual model switch per session\n  - POST /api/meta-models/force — force model for all sessions\n- CLI: starfleetctl model-proxy meta-models list|show|sessions|switch|force\n- X-Context-Limit header set on chat responses (effective limit = min(context_window))\n- Effective limits computed: heavy-model=200k, cruiser-model=262k, scout-model=262k, balanced-model=200k\n- Tests pass, make all + starfleet-bootstrap + web/timer restart verified\n",
+  "tags": [
+    "starfleet",
+    "model-proxy",
+    "meta-models",
+    "routing"
+  ],
+  "created": 1789553127
+}

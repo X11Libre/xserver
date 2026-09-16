@@ -1,0 +1,13 @@
+{
+  "id": "r-1789554777539031288",
+  "title": "Task starfleet/task-fix-starfleetctl-skill-docs-task-capture-cli-flags-outdated-wrong abgeschlossen",
+  "subtitle": "Skill docs: task capture CLI flags verified",
+  "ship": "Scotty",
+  "body": "starfleetctl skill docs: task capture CLI flags verified:\n\n- CLI flags match `task capture --help`: --title (required), --desc, --slug, --assign [\u003cship\u003e], --category (default: active), --no-push\n- No --priority flag exists (referenced as future feature in workspace-auto-assign skill)\n- starfleet-tasks skill (SKILL.md) correctly documents all current flags\n- starfleet reference.md only references the skill\n- workspace-auto-assign mentions --priority as future feature\n- starfleet-tasks skill documentation already corrected with --category flag\n",
+  "tags": [
+    "starfleet",
+    "doc",
+    "skill"
+  ],
+  "created": 1789554777
+}

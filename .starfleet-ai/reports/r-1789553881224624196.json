@@ -1,0 +1,12 @@
+{
+  "id": "r-1789553881224624196",
+  "title": "Task task-dashboard-topic-show-soll-kein-sync-pull-machen abgeschlossen",
+  "subtitle": "Dashboard topic show sync/pull entfernt",
+  "ship": "Scotty",
+  "body": "Dashboard: DoTopicShow sync/pull entfernt:\n\n- In internal/dashboard/topic_commands.go: DoTopicShow() den d.sync(runQuiet) Aufruf entfernt\n- Das Lesen funktioniert jetzt rein lokal ohne git pull --rebase --autostash\n- In der Workspace/MPBT-Umgebung unnötig und fehleranfällig (fatal: Cannot rebase onto multiple branches)\n- Tests pass, make all + starfleet-bootstrap + web restart verifiziert\n",
+  "tags": [
+    "starfleet",
+    "dashboard"
+  ],
+  "created": 1789553881
+}

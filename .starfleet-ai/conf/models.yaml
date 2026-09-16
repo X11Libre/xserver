@@ -53,6 +53,34 @@ models:
       context: 131072
       caps:
         - reasoning
+    - id: meta-model/balanced-model
+      provider: meta-model
+      label: 60% BigPickle, 40% Nemotron Ultra Free
+      context: 200000
+      caps:
+        - toolcall
+        - temperature
+    - id: meta-model/cruiser-model
+      provider: meta-model
+      label: Allgemeine Arbeit — Round-Robin für Verfügbarkeit
+      context: 262144
+      caps:
+        - toolcall
+        - temperature
+    - id: meta-model/heavy-model
+      provider: meta-model
+      label: Komplexe Aufgaben — BigPickle, Fallback Nemotron Ultra Free
+      context: 200000
+      caps:
+        - toolcall
+        - temperature
+    - id: meta-model/scout-model
+      provider: meta-model
+      label: Leichte Aufgaben — schnell, billig
+      context: 262144
+      caps:
+        - toolcall
+        - temperature
     - id: nim-proxy/nvidia/ai-synthetic-video-detector
       provider: nim-proxy
       label: AI Synthetic Video Detector
@@ -122,6 +150,22 @@ models:
       provider: nim-proxy
       label: Fuyu 8B
       context: 0
+    - id: nim-proxy/z-ai/glm-5.3
+      provider: nim-proxy
+      label: GLM-5.3
+      context: 1000000
+      caps:
+        - reasoning
+    - id: nim-proxy/z-ai/glm-5.3-flash
+      provider: nim-proxy
+      label: GLM-5.3-Flash
+      context: 1000000
+      caps:
+        - reasoning
+        - attachment
+        - image-in
+        - video-in
+        - pdf-in
     - id: nim-proxy/openai/gpt-oss-20b
       provider: nim-proxy
       label: GPT OSS 20B
@@ -266,15 +310,6 @@ models:
       provider: nim-proxy
       label: Llama3 Chatqa 1.5 70B
       context: 0
-    - id: nim-proxy/minimaxai/minimax-m3
-      provider: nim-proxy
-      label: MiniMax-M3
-      context: 1000000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
     - id: nim-proxy/mistralai/mistral-large
       provider: nim-proxy
       label: Mistral Large
@@ -361,6 +396,10 @@ models:
       provider: nim-proxy
       label: Nemotron Parse
       context: 0
+    - id: nim-proxy/nvidia/nemotron-parse-2.0
+      provider: nim-proxy
+      label: Nemotron Parse 2.0
+      context: 131072
     - id: nim-proxy/nvidia/nemotron-3-ultra-550b-a55b
       provider: nim-proxy
       label: Nemotron Ultra
@@ -483,6 +522,16 @@ models:
       context: 1000000
       caps:
         - reasoning
+    - id: nvidia/z-ai/glm-5.3-flash
+      provider: nvidia
+      label: GLM-5.3-Flash
+      context: 1000000
+      caps:
+        - reasoning
+        - attachment
+        - image-in
+        - video-in
+        - pdf-in
     - id: nvidia/openai/gpt-oss-20b
       provider: nvidia
       label: GPT OSS 20B
@@ -897,6 +946,22 @@ models:
       provider: nvidia-direct
       label: Fuyu 8B
       context: 0
+    - id: nvidia-direct/z-ai/glm-5.3
+      provider: nvidia-direct
+      label: GLM-5.3
+      context: 1000000
+      caps:
+        - reasoning
+    - id: nvidia-direct/z-ai/glm-5.3-flash
+      provider: nvidia-direct
+      label: GLM-5.3-Flash
+      context: 1000000
+      caps:
+        - reasoning
+        - attachment
+        - image-in
+        - video-in
+        - pdf-in
     - id: nvidia-direct/openai/gpt-oss-20b
       provider: nvidia-direct
       label: GPT OSS 20B
@@ -1041,15 +1106,6 @@ models:
       provider: nvidia-direct
       label: Llama3 Chatqa 1.5 70B
       context: 0
-    - id: nvidia-direct/minimaxai/minimax-m3
-      provider: nvidia-direct
-      label: MiniMax-M3
-      context: 1000000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
     - id: nvidia-direct/mistralai/mistral-large
       provider: nvidia-direct
       label: Mistral Large
@@ -1136,6 +1192,10 @@ models:
       provider: nvidia-direct
       label: Nemotron Parse
       context: 0
+    - id: nvidia-direct/nvidia/nemotron-parse-2.0
+      provider: nvidia-direct
+      label: Nemotron Parse 2.0
+      context: 131072
     - id: nvidia-direct/nvidia/nemotron-3-ultra-550b-a55b
       provider: nvidia-direct
       label: Nemotron Ultra
@@ -1221,30 +1281,6 @@ models:
       provider: nvidia-direct
       label: riva-translate-4b-instruct-v1_1
       context: 128000
-    - id: ollama/llama-64k:latest
-      provider: ollama
-      label: Llama 64k:latest
-      context: 131072
-    - id: ollama/llama3.2:latest
-      provider: ollama
-      label: Llama3.2:latest
-      context: 131072
-    - id: ollama/qwen-coder-agent:latest
-      provider: ollama
-      label: Qwen Coder Agent:latest
-      context: 131072
-    - id: ollama/qwen2.5-coder:3b
-      provider: ollama
-      label: Qwen2.5 Coder:3b
-      context: 131072
-    - id: ollama/qwen2.5-coder:7b
-      provider: ollama
-      label: Qwen2.5 Coder:7b
-      context: 131072
-    - id: ollama/qwen3:0.6b
-      provider: ollama
-      label: Qwen3:0.6b
-      context: 131072
     - id: opencode/big-pickle
       provider: opencode
       label: Big Pickle
@@ -1575,6 +1611,258 @@ models:
         - attachment
         - image-in
         - video-in
+    - id: zen-proxy/gemini-3.7-flash
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5-codex
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.2
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.3-codex
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.3-codex-spark
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.4-nano
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.4-mini
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.4-pro
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.4
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.5-pro
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.1
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.5
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/muse-spark-1.2
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/deepseek-v4-flash
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.6-luna
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/deepseek-v4-pro
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.1-codex-max
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/nemotron-3.5-lightning-free
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.1-codex
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/nemotron-3-ultra-free
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.6-terra
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.6-sol
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/ling-3.0-flash-fin-free
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-6-astra
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gemini-3-flash
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gemini-3.1-pro
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gemini-3.5-flash
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gemini-3.5-flash-lite
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.1-codex-mini
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gemini-3.8-flash
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gemini-3.6-flash
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/claude-sonnet-4
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/claude-sonnet-4-5
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5.2-codex
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/mimo-v2.5-free
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/muse-spark-1.2-contributor-free
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/muse-spark-1.3-contributor-free
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/deepseek-v4-flash-free
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/qwen3.5-plus
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/qwen3.6-plus
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/kimi-k2.5
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/kimi-k2.6
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/kimi-k2.7-code
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/kimi-k3
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/minimax-m2.5
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/minimax-m2.7
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/minimax-m3
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/glm-5
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/glm-5.1
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/gpt-5-nano
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/grok-build-0.1
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/grok-4.6
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/grok-4.5
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/claude-sonnet-4-6
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/claude-sonnet-5
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/glm-5.2
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/glm-5.3
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/glm-5.3-flash
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/deepseek-v4-flash-vision-exp
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/muse-spark-1.3
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/claude-opus-4-8
+      provider: zen-proxy
+      label: ""
+      context: 0
+    - id: zen-proxy/claude-opus-5
+      provider: zen-proxy
+      label: ""
+      context: 0
     - id: zen-proxy/big-pickle
       provider: zen-proxy
       label: Big Pickle
@@ -1635,398 +1923,6 @@ models:
         - attachment
         - image-in
         - pdf-in
-    - id: zen-proxy/claude-opus-4-8
-      provider: zen-proxy
-      label: Claude Opus 4.8
-      context: 1000000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - pdf-in
-    - id: zen-proxy/claude-opus-5
-      provider: zen-proxy
-      label: Claude Opus 5
-      context: 1000000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - pdf-in
-    - id: zen-proxy/claude-sonnet-4
-      provider: zen-proxy
-      label: Claude Sonnet 4
-      context: 0
-    - id: zen-proxy/claude-sonnet-4-5
-      provider: zen-proxy
-      label: Claude Sonnet 4 5
-      context: 0
-    - id: zen-proxy/claude-sonnet-4-6
-      provider: zen-proxy
-      label: Claude Sonnet 4.6
-      context: 1000000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - pdf-in
-    - id: zen-proxy/claude-sonnet-5
-      provider: zen-proxy
-      label: Claude Sonnet 5
-      context: 1000000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - pdf-in
-    - id: zen-proxy/deepseek-v4-flash
-      provider: zen-proxy
-      label: DeepSeek V4 Flash
-      context: 1000000
-      caps:
-        - reasoning
-    - id: zen-proxy/deepseek-v4-flash-free
-      provider: zen-proxy
-      label: DeepSeek V4 Flash Free
-      context: 0
-    - id: zen-proxy/deepseek-v4-flash-vision-exp
-      provider: zen-proxy
-      label: DeepSeek V4 Flash Vision Exp
-      context: 1000000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-    - id: zen-proxy/deepseek-v4-pro
-      provider: zen-proxy
-      label: DeepSeek V4 Pro
-      context: 1000000
-      caps:
-        - reasoning
-    - id: zen-proxy/glm-5
-      provider: zen-proxy
-      label: GLM-5
-      context: 204800
-      caps:
-        - reasoning
-    - id: zen-proxy/glm-5.1
-      provider: zen-proxy
-      label: GLM-5.1
-      context: 204800
-      caps:
-        - reasoning
-    - id: zen-proxy/glm-5.2
-      provider: zen-proxy
-      label: GLM-5.2
-      context: 1000000
-      caps:
-        - reasoning
-    - id: zen-proxy/glm-5.3
-      provider: zen-proxy
-      label: GLM-5.3
-      context: 1000000
-      caps:
-        - reasoning
-    - id: zen-proxy/glm-5.3-flash
-      provider: zen-proxy
-      label: GLM-5.3-Flash
-      context: 1000000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
-        - pdf-in
-    - id: zen-proxy/gpt-5
-      provider: zen-proxy
-      label: GPT 5
-      context: 0
-    - id: zen-proxy/gpt-5-codex
-      provider: zen-proxy
-      label: GPT 5 Codex
-      context: 0
-    - id: zen-proxy/gpt-5-nano
-      provider: zen-proxy
-      label: GPT 5 Nano
-      context: 0
-    - id: zen-proxy/gpt-5.1
-      provider: zen-proxy
-      label: GPT 5.1
-      context: 0
-    - id: zen-proxy/gpt-5.1-codex
-      provider: zen-proxy
-      label: GPT 5.1 Codex
-      context: 0
-    - id: zen-proxy/gpt-5.1-codex-max
-      provider: zen-proxy
-      label: GPT 5.1 Codex Max
-      context: 0
-    - id: zen-proxy/gpt-5.1-codex-mini
-      provider: zen-proxy
-      label: GPT 5.1 Codex Mini
-      context: 0
-    - id: zen-proxy/gpt-5.2
-      provider: zen-proxy
-      label: GPT 5.2
-      context: 0
-    - id: zen-proxy/gpt-5.2-codex
-      provider: zen-proxy
-      label: GPT 5.2 Codex
-      context: 0
-    - id: zen-proxy/gpt-5.3-codex
-      provider: zen-proxy
-      label: GPT 5.3 Codex
-      context: 0
-    - id: zen-proxy/gpt-5.3-codex-spark
-      provider: zen-proxy
-      label: GPT 5.3 Codex Spark
-      context: 0
-    - id: zen-proxy/gpt-5.4
-      provider: zen-proxy
-      label: GPT 5.4
-      context: 0
-    - id: zen-proxy/gpt-5.4-mini
-      provider: zen-proxy
-      label: GPT 5.4 Mini
-      context: 0
-    - id: zen-proxy/gpt-5.4-nano
-      provider: zen-proxy
-      label: GPT 5.4 Nano
-      context: 131072
-    - id: zen-proxy/gpt-5.4-pro
-      provider: zen-proxy
-      label: GPT 5.4 Pro
-      context: 131072
-    - id: zen-proxy/gpt-5.5
-      provider: zen-proxy
-      label: GPT 5.5
-      context: 131072
-    - id: zen-proxy/gpt-5.5-pro
-      provider: zen-proxy
-      label: GPT 5.5 Pro
-      context: 131072
-    - id: zen-proxy/gpt-5.6-luna
-      provider: zen-proxy
-      label: GPT 5.6 Luna
-      context: 131072
-    - id: zen-proxy/gpt-5.6-sol
-      provider: zen-proxy
-      label: GPT 5.6 Sol
-      context: 131072
-    - id: zen-proxy/gpt-5.6-terra
-      provider: zen-proxy
-      label: GPT 5.6 Terra
-      context: 131072
-    - id: zen-proxy/gpt-6-astra
-      provider: zen-proxy
-      label: GPT 6 Astra
-      context: 131072
-    - id: zen-proxy/gemini-3-flash
-      provider: zen-proxy
-      label: Gemini 3 Flash
-      context: 1048576
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - audio-in
-        - video-in
-        - pdf-in
-    - id: zen-proxy/gemini-3.1-pro
-      provider: zen-proxy
-      label: Gemini 3.1 Pro
-      context: 0
-    - id: zen-proxy/gemini-3.5-flash
-      provider: zen-proxy
-      label: Gemini 3.5 Flash
-      context: 1048576
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - audio-in
-        - video-in
-        - pdf-in
-    - id: zen-proxy/gemini-3.5-flash-lite
-      provider: zen-proxy
-      label: Gemini 3.5 Flash Lite
-      context: 1048576
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - audio-in
-        - video-in
-        - pdf-in
-    - id: zen-proxy/gemini-3.6-flash
-      provider: zen-proxy
-      label: Gemini 3.6 Flash
-      context: 1048576
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - audio-in
-        - video-in
-        - pdf-in
-    - id: zen-proxy/gemini-3.7-flash
-      provider: zen-proxy
-      label: Gemini 3.7 Flash
-      context: 1048576
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - audio-in
-        - video-in
-        - pdf-in
-    - id: zen-proxy/gemini-3.8-flash
-      provider: zen-proxy
-      label: Gemini 3.8 Flash
-      context: 1048576
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - audio-in
-        - video-in
-        - pdf-in
-    - id: zen-proxy/grok-4.5
-      provider: zen-proxy
-      label: Grok 4.5
-      context: 131072
-    - id: zen-proxy/grok-4.6
-      provider: zen-proxy
-      label: Grok 4.6
-      context: 131072
-    - id: zen-proxy/grok-build-0.1
-      provider: zen-proxy
-      label: Grok Build 0.1
-      context: 256000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - pdf-in
-    - id: zen-proxy/kimi-k2.5
-      provider: zen-proxy
-      label: Kimi K2.5
-      context: 262144
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
-    - id: zen-proxy/kimi-k2.6
-      provider: zen-proxy
-      label: Kimi K2.6
-      context: 262144
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
-    - id: zen-proxy/kimi-k2.7-code
-      provider: zen-proxy
-      label: Kimi K2.7 Code
-      context: 262144
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
-    - id: zen-proxy/kimi-k3
-      provider: zen-proxy
-      label: Kimi K3
-      context: 1048576
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
-    - id: zen-proxy/ling-3.0-flash-fin-free
-      provider: zen-proxy
-      label: Ling 3.0 Flash Fin Free
-      context: 262144
-      caps:
-        - reasoning
-    - id: zen-proxy/mimo-v2.5-free
-      provider: zen-proxy
-      label: MiMo V2.5 Free
-      context: 200000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - audio-in
-        - video-in
-    - id: zen-proxy/minimax-m2.5
-      provider: zen-proxy
-      label: MiniMax-M2.5
-      context: 204800
-      caps:
-        - reasoning
-    - id: zen-proxy/minimax-m2.7
-      provider: zen-proxy
-      label: MiniMax-M2.7
-      context: 204800
-      caps:
-        - reasoning
-    - id: zen-proxy/minimax-m3
-      provider: zen-proxy
-      label: MiniMax-M3
-      context: 512000
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
-    - id: zen-proxy/muse-spark-1.2
-      provider: zen-proxy
-      label: Muse Spark 1.2
-      context: 131072
-    - id: zen-proxy/muse-spark-1.2-contributor-free
-      provider: zen-proxy
-      label: Muse Spark 1.2 Contributor Free
-      context: 131072
-    - id: zen-proxy/muse-spark-1.3
-      provider: zen-proxy
-      label: Muse Spark 1.3
-      context: 131072
-    - id: zen-proxy/muse-spark-1.3-contributor-free
-      provider: zen-proxy
-      label: Muse Spark 1.3 Contributor Free
-      context: 131072
-    - id: zen-proxy/nemotron-3-ultra-free
-      provider: zen-proxy
-      label: Nemotron 3 Ultra Free
-      context: 1000000
-      caps:
-        - reasoning
-    - id: zen-proxy/nemotron-3.5-lightning-free
-      provider: zen-proxy
-      label: Nemotron 3.5 Lightning Free
-      context: 262144
-      caps:
-        - reasoning
-    - id: zen-proxy/qwen3.5-plus
-      provider: zen-proxy
-      label: Qwen3.5 Plus
-      context: 262144
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
-    - id: zen-proxy/qwen3.6-plus
-      provider: zen-proxy
-      label: Qwen3.6 Plus
-      context: 262144
-      caps:
-        - reasoning
-        - attachment
-        - image-in
-        - video-in
     - id: custom-openai/qwen-122b
       provider: custom-openai
       label: Qwen 3.5 122B
@@ -2148,6 +2044,16 @@ models:
       label: Llama Nemotron Embed 1B V2
       context: 0
       disabled: true
+    - id: nim-proxy/minimaxai/minimax-m3
+      provider: nim-proxy
+      label: MiniMax-M3
+      context: 1000000
+      caps:
+        - reasoning
+        - attachment
+        - image-in
+        - video-in
+      disabled: true
     - id: nim-proxy/mistralai/mistral-medium-3.5-128b
       provider: nim-proxy
       label: Mistral Medium 3.5
@@ -2252,6 +2158,46 @@ models:
       provider: nvidia
       label: solar-10.7b-instruct
       context: 128000
+      disabled: true
+    - id: nvidia-direct/minimaxai/minimax-m3
+      provider: nvidia-direct
+      label: MiniMax-M3
+      context: 1000000
+      caps:
+        - reasoning
+        - attachment
+        - image-in
+        - video-in
+      disabled: true
+    - id: ollama/llama-64k:latest
+      provider: ollama
+      label: Llama 64k:latest
+      context: 131072
+      disabled: true
+    - id: ollama/llama3.2:latest
+      provider: ollama
+      label: Llama3.2:latest
+      context: 131072
+      disabled: true
+    - id: ollama/qwen-coder-agent:latest
+      provider: ollama
+      label: Qwen Coder Agent:latest
+      context: 131072
+      disabled: true
+    - id: ollama/qwen2.5-coder:3b
+      provider: ollama
+      label: Qwen2.5 Coder:3b
+      context: 131072
+      disabled: true
+    - id: ollama/qwen2.5-coder:7b
+      provider: ollama
+      label: Qwen2.5 Coder:7b
+      context: 131072
+      disabled: true
+    - id: ollama/qwen3:0.6b
+      provider: ollama
+      label: Qwen3:0.6b
+      context: 131072
       disabled: true
     - id: opencode/deepseek-v4-flash-free
       provider: opencode

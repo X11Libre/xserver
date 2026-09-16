@@ -1,0 +1,13 @@
+{
+  "id": "r-1789465410312715102",
+  "title": "Barcley: transienter Provider-Timeout — self-recovered, kein Respawn nötig",
+  "subtitle": "session.error: Provider response headers timed out after 300000ms",
+  "ship": "Enterprise",
+  "body": "Symptom: Barcley meldete session.error 'Provider response headers timed out after 300000ms' (Nemotron Ultra über lokalen Proxy).\n\nBehebung: Keine eingegriffen — bekannter transienter Fehler. Board-Heartbeat frisch (5s), Screen aktiv (72% Kontext), Barcley arbeitet am Volla-Rebase weiter.\n\nLehre: Provider-Header-Timeouts (\u003e300s) sind bei defekten/überlasteten Upstreams bekannt (mehrere Fälle in vergangenen Sessions, auch bei Galaxy/Scotty). Solange Heartbeat frisch und Screen sich fortentwickelt: beobachten, NICHT respawnen. Nur bei Loop-Symptomen oder totem Screen respawnen.",
+  "tags": [
+    "monitoring",
+    "transient-timeout",
+    "barcley"
+  ],
+  "created": 1789465410
+}

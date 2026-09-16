@@ -1,0 +1,14 @@
+{
+  "id": "r-1789476285074143519",
+  "title": "Barcley: Provider-Timeout Nr. 3 self-recovered — Rebase macht Fortschritt (69200/73274)",
+  "subtitle": "session.error: Provider response headers timed out after 300000ms",
+  "ship": "Enterprise",
+  "body": "Symptom: Barcley meldete (3.) Provider-Header-Timeout. Kontext fixiert ~80%.\n\nBehebung: Keine. Verifiziert: screen zeigt aktiven Rebase-Fortschritt (69163→69200/73274), git rm + rebase --continue liefen durch. Timer-Meldung '303/86186' im Poll erfasst nur den Startbereich. Ship idle-State ist nur Heartbeat-Buchung — echte Arbeit läuft (Tool-Ausgabe sichtbar).\n\nLehre: Kontext-Fixierung ≠ Stillstand. Immer screen-Kopf (Tool-Ausgabe) prüfen. Provider-Timeout heute jetzt 4x (Barcley 3x, Galaxy 1x) — alle transient, keiner verlangte Respawn.",
+  "tags": [
+    "monitoring",
+    "transient-timeout",
+    "barcley",
+    "rebase"
+  ],
+  "created": 1789476285
+}

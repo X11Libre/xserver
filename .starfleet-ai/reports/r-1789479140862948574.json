@@ -1,0 +1,13 @@
+{
+  "id": "r-1789479140862948574",
+  "title": "Scotty: Provider-Timeout (transient, 1.) — refactoring-git läuft weiter",
+  "subtitle": "session.error: Provider response headers timed out after 300000ms",
+  "ship": "Enterprise",
+  "body": "Symptom: Scotty meldete ProviderHeaderTimeoutError während Arbeit am starfleet/refactoring-git Task.\n\nBehebung: Keine — self-recovered. Screen: active (liest Go-Code, z.B. internal/git wrapper SymbolicRef/ShowRefVerify). Heartbeat 5s frisch. Galaxy hat blocked-Status verlassen, wieder working am NetBSD-Task (m102255-Rückfrage evtl. beantwortet).\n\nLehre: 7x Provider-Timeout heute (Barcley 3x, Galaxy 3x, Scotty 1x). Alle transient. Muster bestätigt sich betriebsweit — Proxy/Netzlast.",
+  "tags": [
+    "monitoring",
+    "transient-timeout",
+    "scotty"
+  ],
+  "created": 1789479140
+}

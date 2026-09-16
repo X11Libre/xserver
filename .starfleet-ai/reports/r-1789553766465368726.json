@@ -1,0 +1,13 @@
+{
+  "id": "r-1789553766465368726",
+  "title": "Task task-skill-starfleet-tasks-category-flag-beim-task-capture-ergaenzen abgeschlossen",
+  "subtitle": "Skill starfleet-tasks: --category Flag beim task capture ergänzt",
+  "ship": "Scotty",
+  "body": "Skill starfleet-tasks: --category Flag beim task capture ergänzt:\n\n- In .claude/skills/starfleet-tasks/SKILL.md das --category Flag in der task capture one-liner Dokumentation hinzugefügt\n- Das Flag existiert bereits in der CLI (default: active), fehlte nur in der Skill-Dokumentation\n- Format: --category \u003ccat\u003e (default: active)\n",
+  "tags": [
+    "starfleet",
+    "doc",
+    "skill"
+  ],
+  "created": 1789553766
+}

@@ -1,0 +1,13 @@
+{
+  "id": "r-1789554300942486021",
+  "title": "Task starfleet/task-implement-starfleetctl-session-transcript-command abgeschlossen",
+  "subtitle": "Session transcript command already implemented",
+  "ship": "Scotty",
+  "body": "Session transcript command already implemented:\n\n- Implemented 'session transcript \u003cid\u003e [--limit/--offset/--output/--json|--text]' in internal/session/transcript.go, wired into run.go, exported ocsessions.MaxListLimit(). Tests green in clean worktree at HEAD. Committed cf7afb3 + pushed to master.\n\nRemaining items noted in task:\n- User-Dokumentation aktualisieren (to be done separately)\n- separater starfleet-skill für troubleshooting-aufgaben mit transcript Funktionalität (to be done separately)\n- weitere sinnvolle Troubleshooting-Tips für Agents (to be done separately)\n\nCore implementation complete and deployed.\n",
+  "tags": [
+    "starfleet",
+    "session",
+    "transcript"
+  ],
+  "created": 1789554300
+}

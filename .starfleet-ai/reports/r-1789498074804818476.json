@@ -1,0 +1,15 @@
+{
+  "id": "r-1789498074804818476",
+  "title": "Flotte: Provider-429-RateLimit auf allen 4 Workern (transient)",
+  "subtitle": "Too Many Requests 429 am Nemotron-Ultra NIM-PROXY — alle retryen autonom (attempt #5)",
+  "ship": "Enterprise",
+  "body": "Symptom: Equally bei Barcley (Volla-Rebase 5.8), Galaxy (NetBSD-CI-Fix), Saratoga (Xserver-Xinerama-Konzept+POC), Scotty (model-proxy-meta-models) — alle in Retry-Schleife 'Too Many Requests: 429 [retrying in 12-28s attempt #5]'. Heartbeats teils noch aktiv/Board blocked.\n\nBehebung: Keine — transientes Lastmuster am geteilten NIM-Proxy; alle 4 retryen autonom. Kein Respawn (kein Dead), Kontext-Fortschritt intakt. Schlussfolgerung: mehrere gleichzeitige Nemotron-Ultra-Sessions überlasten den Proxy/Kontext (Templates-evidenz: 4 Ultra-Ships parallel). \n\nLehre: Bei 4+ gleichzeitigen Ultra-Sessions ist mit 429-Wellen zu rechnen; Retry ist self-healing. Optional Entlastung: verteilte Modellwahl (Nemotron-3-Mix) oder Sessions-Staffelung.",
+  "tags": [
+    "monitoring",
+    "provider",
+    "429",
+    "ratelimit",
+    "multi-ship"
+  ],
+  "created": 1789498074
+}

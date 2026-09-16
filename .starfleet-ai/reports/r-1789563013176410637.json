@@ -1,0 +1,13 @@
+{
+  "id": "r-1789563013176410637",
+  "title": "Task task-sop-ships-sollen-board-status-auch-waehrend-langer-tasks-aktuell-halten abgeschlossen",
+  "subtitle": "SOP: Board-Status während langer Tasks aktuell halten",
+  "ship": "Scotty",
+  "body": "SOP working-practices-for-ships erweitert — Board-Status während langer Tasks aktuell halten:\n\n- Neue Regel in working-practices-for-ships Fragment hinzugefügt:\n  - Long-running operations (rebases, builds, test suites) müssen Board-Heartbeat periodisch aktualisieren\n  - Intervalle: alle 10-20 Rebase-Schritte, ~5 Minuten bei Builds, nach jedem major step\n  - Verwende `starfleetctl comms status working \"\u003cwhat\u003e\"` oder `starfleetctl comms touch`\n  - Timer-based self-reminder: `starfleetctl timer set --every 5m --type ship --text \"comms touch\"`\n  - Board muss Realität zu jeder Zeit widerspiegeln\n\n- Addresses Barcley's stale idle status during rebases\n- Fragment: fragments/starfleet-instructions/working-practices-for-ships.md\n- Deployed via starfleet-bootstrap + sop reindex\n",
+  "tags": [
+    "starfleet",
+    "sop",
+    "board-status"
+  ],
+  "created": 1789563013
+}

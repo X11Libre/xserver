@@ -1,0 +1,13 @@
+{
+  "id": "r-1789554515932482871",
+  "title": "Task starfleet/task-improve-starfleet-tasks-skill-documentation-for-report-submit-syntax abgeschlossen",
+  "subtitle": "Skill Doku: report submit Syntax Warnung ergänzt",
+  "ship": "Scotty",
+  "body": "starfleet-tasks Skill Dokumentation für report submit verbessert:\n\n- Explizite Warnung hinzugefügt: Titel ist erster positional Argument, NICHT --title Flag\n- Beispiel hinzugefügt um Verwirrung zu vermeiden (falsche Nutzung von --title führt zu Title '--title')\n- Dokumentation in .claude/skills/starfleet-tasks/SKILL.md aktualisiert\n",
+  "tags": [
+    "starfleet",
+    "doc",
+    "skill"
+  ],
+  "created": 1789554515
+}

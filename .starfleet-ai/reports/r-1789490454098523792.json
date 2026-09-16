@@ -1,0 +1,13 @@
+{
+  "id": "r-1789490454098523792",
+  "title": "Task starfleet/task-agent-templates-schiffsklassen abgeschlossen",
+  "subtitle": "Ship class templates implemented",
+  "ship": "Scotty",
+  "body": "Ship class templates implemented and deployed:\n\n- Created internal/config/templates.go with ShipTemplate struct, LoadShipTemplates(), GetTemplate(), ListTemplateNames(), ApplyToLaunchOpts()\n- Created .starfleet-ai/conf/templates/templates.yaml with default templates: scout (Nemotron Nano), cruiser (Nemotron Ultra), heavy (Big Pickle)\n- Added --template flag to session ship-run command (loads model, launch-type, class from template)\n- Added /api/templates endpoint for web UI to fetch template list\n- Extended apiShipLaunch to support template parameter (template defaults overridden by explicit flags)\n- Templates include: name, description, model, session_type, name_prefix, skills_always, skill_optional, timeout, auto_cleanup\n\nCLI usage:\n  starfleetctl session ship-run --template cruiser --name Cruiser-1\n  starfleetctl session ship-run --template scout\n\nWeb API:\n  GET /api/templates → JSON array of templates\n  POST /api/ship with {template: \"cruiser\", name: \"Cruiser-1\"} → launches ship with template defaults\n\nTests pass, make all + starfleet-bootstrap + web/timer restart verified.\n",
+  "tags": [
+    "starfleet",
+    "templates",
+    "ship-classes"
+  ],
+  "created": 1789490454
+}

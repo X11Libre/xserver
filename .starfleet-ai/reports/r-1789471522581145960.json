@@ -1,0 +1,13 @@
+{
+  "id": "r-1789471522581145960",
+  "title": "Task task-web-ui-task-liste-category-status-verwechslung-title-parsing abgeschlossen",
+  "subtitle": "Web-UI Task-Liste Category/Status-Verwechslung + Title-Parsing fixes",
+  "ship": "Scotty",
+  "body": "Alle 4 Punkte behoben und deployed:\n\n1. **Category/Status-Verwechslung**: Neue Funktion `taskDisplayCategory()` ignoriert Status-ähnliche Kategorien (parked, done, analysis) und zeigt stattdessen den eigentlichen Projektbereich an (z.B. 'xlibre' statt 'parked'). Toplevel-Tasks bekommen kein Kategorie-Prefix mehr.\n\n2. **'active' Default-Category**: Für Toplevel-Tasks (ohne '/') wird nun gar kein Kategorie-Prefix mehr angezeigt (kein '[active]' Noise).\n\n3. **Leere Titles**: Fallback auf slug in der Liste UND im Edit-Formular (task_m_t value).\n\n4. **Optische Trennung**: Kategorie-Prefix als `\u003cspan class=\"task-cat\"\u003e[cat]\u003c/span\u003e` außerhalb des klickbaren Links `\u003cspan class=\"task-title-link\"\u003e`.\n\nDeployment: make all + starfleet-bootstrap + web restart + timer worker restart verifiziert. Tests grün.\n",
+  "tags": [
+    "starfleet",
+    "web",
+    "ui"
+  ],
+  "created": 1789471522
+}
