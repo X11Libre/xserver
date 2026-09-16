@@ -13,6 +13,8 @@ typedef struct {
     void *map_data;
     void *map_addr;
 
+    Bool used_modifiers;
+
     uint32_t fb_id;
 } gbm_user_data_t;
 
@@ -28,6 +30,13 @@ gbm_bo_get_fb(struct gbm_bo *bo)
 {
     gbm_user_data_t *data = gbm_bo_get_user_data(bo);
     return data ? data->fb_id : 0;
+}
+
+Bool
+gbm_bo_get_used_modifiers(struct gbm_bo *bo)
+{
+    gbm_user_data_t *data = gbm_bo_get_user_data(bo);
+    return data ? data->used_modifiers : FALSE;
 }
 
 static void
@@ -130,6 +139,28 @@ gbm_bo_create_and_map(struct gbm_device *gbm, gbm_user_data_t *data, uint32_t wi
 #endif
     if (!bo) {
         bo = gbm_bo_create_and_map_once(gbm, data, width, height, format, flags_dumb);
+    }
+
+    return bo;
+}
+
+static struct gbm_bo*
+gbm_bo_create_tiled(struct gbm_device *gbm, uint32_t width, uint32_t height, uint32_t format)
+{
+    struct gbm_bo *bo = NULL;
+
+    /* Used by mesa */
+    uint32_t flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_FRONT_RENDERING;
+
+    /* Used by nvidia */
+    uint32_t flags2 = GBM_BO_USE_SCANOUT;
+
+    if (!bo) {
+        bo = gbm_bo_create(gbm, width, height, format, flags);
+    }
+
+    if (!bo) {
+        bo = gbm_bo_create(gbm, width, height, format, flags2);
     }
 
     return bo;
@@ -266,14 +297,13 @@ gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_
     struct gbm_bo *ret = NULL;
     gbm_user_data_t *data = NULL;
 
-    (void)do_map; /* Ignored for now */
-
     data = calloc(1, sizeof(*data));
     if (!data) {
         goto fail;
     }
 
-    ret = gbm_bo_create_and_map(gbm, data, width, height, format);
+    ret = do_map ? gbm_bo_create_and_map(gbm, data, width, height, format) :
+                   gbm_bo_create_tiled(gbm, width, height, format);
     if (!ret) {
         goto fail;
     }
