@@ -1,8 +1,8 @@
 Title: "SOP: Ships sollen Board-Status auch waehrend langer Tasks aktuell halten"
 Category: active
 Kind: "task"
-Status: "done"
-Assigned-To: "Scotty"
+Status: "assigned"
+Assigned-To: "Barcley"
 Created-By: "Enterprise"
 Created: "2026-09-16T12:43:06Z"
 Doc-Ref: "—"
