@@ -358,7 +358,8 @@ bail:
     return FALSE;
 }
 
-static Bool msInitialize(KdCardInfo * card, msPriv * priv)
+static Bool
+msInitialize(KdCardInfo * card, msPriv * priv)
 {
     const char *dev_path = card->closure;
     int fd;
@@ -681,7 +682,8 @@ fail:
     return FALSE;
 }
 
-Bool msScreenInit(KdScreenInfo * screen)
+Bool
+msScreenInit(KdScreenInfo * screen)
 {
     msScrPriv *scrpriv;
 
@@ -698,9 +700,10 @@ Bool msScreenInit(KdScreenInfo * screen)
     return TRUE;
 }
 
-static void *msWindowLinear(ScreenPtr pScreen,
-			CARD32 row,
-			CARD32 offset, int mode, CARD32 * size, void *closure)
+static void*
+msWindowLinear(ScreenPtr pScreen,
+               CARD32 row,
+               CARD32 offset, int mode, CARD32 * size, void *closure)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -755,7 +758,8 @@ msMapFramebuffer(KdScreenInfo * screen)
     return TRUE;
 }
 
-static void msSetScreenSizes(ScreenPtr pScreen)
+static void
+msSetScreenSizes(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -802,7 +806,8 @@ msSetShadow(ScreenPtr pScreen)
     return KdShadowSet(pScreen, scrpriv->randr, update, window);
 }
 
-static Bool msRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
+static Bool
+msRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -963,7 +968,8 @@ msGetPhysicalScreenSizes(ScreenPtr pScreen, int *mmWidth, int *mmHeight)
     return FALSE;
 }
 
-static Bool msRandRInit(ScreenPtr pScreen)
+static Bool
+msRandRInit(ScreenPtr pScreen)
 {
     rrScrPrivPtr pScrPriv;
     int mmWidth, mmHeight;
@@ -993,13 +999,15 @@ static Bool msRandRInit(ScreenPtr pScreen)
     return TRUE;
 }
 
-Bool msInitScreen(ScreenPtr pScreen)
+Bool
+msInitScreen(ScreenPtr pScreen)
 {
     pScreen->CreateColormap = fbInitializeColormap;
     return TRUE;
 }
 
-Bool msFinishInitScreen(ScreenPtr pScreen)
+Bool
+msFinishInitScreen(ScreenPtr pScreen)
 {
     if (!shadowSetup(pScreen)) {
         return FALSE;
@@ -1133,7 +1141,8 @@ msWakeupHandler(void *blockData, int result)
 {
 }
 
-Bool msCreateResources(ScreenPtr pScreen)
+Bool
+msCreateResources(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -1184,11 +1193,13 @@ Bool msCreateResources(ScreenPtr pScreen)
     return TRUE;
 }
 
-void msPreserve(KdCardInfo * card)
+void
+msPreserve(KdCardInfo * card)
 {
 }
 
-Bool msEnable(ScreenPtr pScreen)
+Bool
+msEnable(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -1214,23 +1225,26 @@ Bool msEnable(ScreenPtr pScreen)
     return TRUE;
 }
 
-#if 0
-Bool msDPMS(ScreenPtr pScreen, int mode)
+Bool
+msDPMS(ScreenPtr pScreen, int mode)
 {
     KdScreenPriv(pScreen);
-    msPriv *priv = pScreenPriv->card->driver;
-    static int oldmode = -1;
+    KdScreenInfo *screen = pScreenPriv->screen;
+    msScrPriv *priv = screen->driver;
 
-    if (mode == oldmode)
-        return TRUE;
+    struct gbm_device *gbm = gbm_bo_get_device(priv->front);
+    uint32_t fb_id = gbm_bo_get_fb(priv->front);
+    int fd = gbm_device_get_fd(gbm);
 
-    /* TODO: implement dpms */
+    if (mode == KD_DPMS_NORMAL) {
+        return !priv->mode || !drmModeSetCrtc(fd, priv->crtc_id, fb_id, 0, 0, &priv->conn_id, 1, priv->mode);
+    }
 
-    return FALSE;
+    return !drmModeSetCrtc(fd, priv->crtc_id, 0, 0, 0, NULL, 0, NULL);
 }
-#endif
 
-void msDisable(ScreenPtr pScreen)
+void
+msDisable(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -1246,11 +1260,13 @@ void msDisable(ScreenPtr pScreen)
     drmDropMaster(fd);
 }
 
-void msRestore(KdCardInfo * card)
+void
+msRestore(KdCardInfo * card)
 {
 }
 
-void msScreenFini(KdScreenInfo * screen)
+void
+msScreenFini(KdScreenInfo * screen)
 {
     msScrPriv *priv = screen->driver;
 
@@ -1261,7 +1277,8 @@ void msScreenFini(KdScreenInfo * screen)
     screen->driver = NULL;
 }
 
-void msCardFini(KdCardInfo * card)
+void
+msCardFini(KdCardInfo * card)
 {
     msPriv *priv = card->driver;
 
