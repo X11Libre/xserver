@@ -80,7 +80,7 @@ KdDepths kdDepths[] = {
 DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 Bool kdVideoTest;
-unsigned long kdVideoTestTime;
+unsigned long kdVideoTestTime = 5000; /* miliseconds */
 Bool kdEmulateMiddleButton;
 Bool kdRawPointerCoordinates;
 Bool kdDisableZaphod;
@@ -106,6 +106,13 @@ static Bool kdCaughtSignal = FALSE;
  * to KdScreenInit
  */
 const KdOsFuncs *kdOsFuncs = NULL;
+
+static CARD32
+KdVideoTestFunc(OsTimerPtr timer, CARD32 time, void *arg)
+{
+    dispatchException |= DE_TERMINATE;
+    return 0;
+}
 
 static void
 KdDPMS(ScreenPtr pScreen, int mode)
@@ -971,6 +978,9 @@ bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
     kdEnabled = TRUE;
 
     if (screen->mynum == card->selected) {
+        if (kdVideoTest) {
+            TimerSet(NULL, 0, kdVideoTestTime, KdVideoTestFunc, NULL);
+        }
         if (card->cfuncs->preserve)
             (*card->cfuncs->preserve) (card);
         if (card->cfuncs->enable)
