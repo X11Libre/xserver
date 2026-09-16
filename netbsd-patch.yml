@@ -1,0 +1,41 @@
+            - name: run in netbsd VM (attempt 1)
+              id: netbsd-1
+              continue-on-error: true
+              uses: vmactions/netbsd-vm@v1.5.0
+              with:
+                  envs: 'MESON_ARGS'
+                  release: '10.1'
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+                  sync: rsync
+
+            - name: cleanup stale VM before retry
+              if: steps.netbsd-1.outcome == 'failure'
+              uses: ./.github/actions/libvirt-cleanup
+              with:
+                  guest: netbsd
+
+            - name: run in netbsd VM (attempt 2)
+              id: netbsd-2
+              if: steps.netbsd-1.outcome == 'failure'
+              continue-on-error: true
+              uses: vmactions/netbsd-vm@v1.5.0
+              with:
+                  envs: 'MESON_ARGS'
+                  release: '10.1'
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+                  sync: rsync
+
+            - name: cleanup stale VM before final retry
+              if: steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
+              uses: ./.github/actions/libvirt-cleanup
+              with:
+                  guest: netbsd
+
+            - name: run in netbsd VM (attempt 3)
+              if: steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
+              uses: vmactions/netbsd-vm@v1.5.0
+              with:
+                  envs: 'MESON_ARGS'
+                  release: '10.1'
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+                  sync: rsync
