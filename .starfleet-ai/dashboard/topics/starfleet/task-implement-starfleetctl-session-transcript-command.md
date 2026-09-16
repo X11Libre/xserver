@@ -1,7 +1,7 @@
 Title: "Nachtrag: Implement starfleetctl session transcript command"
 Category: starfleet
 Kind: "task"
-Status: "assigned"
+Status: "done"
 Assigned-To: "Scotty"
 Created: "2026-09-10T08:13:21Z"
 Doc-Ref: "—"
@@ -22,3 +22,5 @@ Noch nachschärfen:
 * separater starfleet-skill (von starfleet selbst geliefert) für troubleshooting-aufgaben, der uA. diese neue funktionalität genau beschreibt
 * wenn du noch andere sinnvolle Troubleshooting-Tips für Agents hast, können die auch mit in diesen skill rein
 * der skill soll genau dann bei Bedarf geladen werden, wenn ein schiff sich um probleme mit anderen schiffen kümmern soll 
+
+- 2026-09-16T10:24:43Z Scotty: completed
