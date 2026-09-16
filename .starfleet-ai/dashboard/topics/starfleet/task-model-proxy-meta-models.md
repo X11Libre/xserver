@@ -1,7 +1,7 @@
 Title: "Model-Proxy Meta-Models — klassenbasiertes Model-Routing mit Fallback/Round-Robin"
 Category: active
 Kind: "task"
-Status: "assigned"
+Status: "done"
 Assigned-To: "Scotty"
 Created-By: "Defiant"
 Created: "2026-09-09T00:00:00Z"
@@ -336,3 +336,5 @@ routing:
 Die beiden Topics sind jetzt vollständig spezifiziert und bereit für die Implementierung:
 - `starfleet/task-agent-templates-schiffsklassen` – Schiffs-Klassen-Templates + Enterprise-Koordination
 - `starfleet/task-model-proxy-meta-models` – Model-Routing mit Context-Sicherheit, starfleetctl-Integration, forced switching, session-affinity, circuit breaker, heuristiken, kompletter Dokumentationsplan
+
+- 2026-09-16T10:05:09Z Scotty: completed
