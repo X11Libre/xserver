@@ -1,15 +1,11 @@
-Automatischen Stash erzeugt: 1ad0851487
-Aktueller Branch mtx/agent-config ist auf dem neuesten Stand.
-Automatischen Stash angewendet.
 Title: "Remove dashboard show + DASHBOARD.md generation and file; fix comments/docs/skills"
 Category: starfleet
-Kind: task
-Status: "assigned"
+Kind: "task"
+Status: "done"
+Assigned-To: "scotty"
 Created-By: "Defiant"
 Created: "2026-09-14T13:35:38Z"
-Assigned-To: "scotty"
 Doc-Ref: "—"
-Slug: starfleet/task-remove-dashboard-show-dashboard-md-generation-and-file-fix-comments-docs-skills
 
 dashboard-show + DASHBOARD.md sind obsolet: topic list / Task-Dedup lesen bereits live die Topic-Dateien (loadAllTopics / LoadAllTopicsJSON). DASHBOARD.md ist nur noch ein regeneriertes Anzeige-Derivat. Schluessel mit "dashboard topic list" ist nuetzlich (liefert Filter/JSON) - dashboard show ist dagegen reine Optik.
 
@@ -29,3 +25,5 @@ Scope (starfleetctl-Source, Branch master, make+tests gruen, Deployment via ./st
 7. Workspace: nach Deploy neue starfleet-bootstrap + sop reindex ausfuehren.
 
 Erwartung: make gruen, tests laufen, bootstrap deployt sauber, Zwischenstand an Defiant + Enterprise melden.
+
+- 2026-09-16T10:47:40Z Scotty: completed
