@@ -14,6 +14,9 @@
 #include "kxv.h"
 #endif
 
+static Bool
+msFdMatch(int fd1, int fd2);
+
 static int
 modesetting_grade_mode(drmModeModeInfo *mode, uint32_t req_w, uint32_t req_h, uint32_t req_rate)
 {
@@ -192,8 +195,73 @@ modeseting_find_crtc(msPriv *priv, int fd, drmModeConnector *conn)
 struct gbm_bo*
 modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
 {
+#ifdef GLAMOR
+    MsScreenConf *config = screen->closure;
+#endif
     struct gbm_bo *ret = NULL;
     uint32_t format, format_swap;
+
+    /*
+     *  XXX This all simplifies with modifier support
+     *
+     * Just query the renderable modifiers on the render card,
+     * and allocate a gbm bo on the scanout card using those modifiers.
+     *
+     * If that fails, fall back to dumb buffers.
+     */
+
+#ifdef GLAMOR
+    if (screen->dumb) {
+        need_map = TRUE;
+    } else if (config->glamor_info.dri_path) {
+        /*
+         * Until modifier support, we want to be conservative here.
+         *
+         * If the render card is different fron the scanout card, assume the modifier sets are disjoint.
+         * If the cards are the same, and it is from nvidia, and the gbm backend is mesa or dumb,
+         * assume that buffers are not renderable.
+         */
+        int dri_fd = open(config->glamor_info.dri_path, O_RDWR);
+        if (!msFdMatch(gbm_device_get_fd(priv->gbm), dri_fd)) {
+            need_map = TRUE;
+        }
+
+        if (dri_fd >= 0) {
+            close(dri_fd);
+        }
+    } else {
+        drmVersionPtr version;
+        Bool is_nvidia = TRUE;
+        Bool backend_is_mesa = FALSE;
+        Bool linear_only = FALSE;
+        const char *backend_name;
+
+        version = drmGetVersion(gbm_device_get_fd(priv->gbm));
+        if (version) {
+            is_nvidia = !version->name || !strcmp(version->name, "nvidia-drm");
+            drmFreeVersion(version);
+        }
+        backend_name = gbm_device_get_backend_name(priv->gbm);
+        if (!backend_name) {
+            linear_only = TRUE;
+        } else if (!strcmp(backend_name, "dumb")) {
+            linear_only = TRUE;
+        } else if (!strcmp(backend_name, "drm")) {
+            backend_is_mesa = TRUE;
+        }
+
+        /**
+         * Nvidia's egl libraries do not allow creating GL_TEXTURE_2D textures from linear buffers.
+         *
+         * See: https://gitlab.freedesktop.org/xorg/xserver/-/work_items/1444
+         */
+        if (is_nvidia) {
+            if (linear_only || backend_is_mesa) {
+                need_map = TRUE;
+            }
+        }
+    }
+#endif
 
     while (!ret) {
         format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, FALSE /* rb_swap */);
@@ -219,10 +287,14 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
 
         if (!ret) {
             int old_depth = screen->fb.depth;
+            int old_bpp = screen->fb.bitsPerPixel;
             if (screen->fb.depth > 30) {
                 screen->fb.depth = 30;
                 screen->fb.bitsPerPixel = 24;
             } else if (screen->fb.depth > 24) {
+                screen->fb.depth = 24;
+                screen->fb.bitsPerPixel = 32;
+            } else if (screen->fb.depth == 24 && screen->fb.bitsPerPixel == 32) {
                 screen->fb.depth = 24;
                 screen->fb.bitsPerPixel = 24;
             } else if (screen->fb.depth > 16) {
@@ -234,8 +306,8 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
             } else {
                 break;
             }
-            LogMessage(X_ERROR, "Xmodesetting(card: %d, screen: %d): Cannot use a depth %d front, trying again with depth %d\n",
-                       screen->card->mynum, screen->mynum, old_depth, screen->fb.depth);
+            LogMessage(X_ERROR, "Xmodesetting(card: %d, screen: %d): Cannot use a depth %d/%d front, trying again with depth %d/%d\n",
+                       screen->card->mynum, screen->mynum, old_depth, old_bpp, screen->fb.depth, screen->fb.bitsPerPixel);
         }
     }
 
@@ -506,7 +578,7 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         screen->height = scrpriv->mode ? scrpriv->mode->vdisplay : 1080;
     }
 
-    scrpriv->front = modesetting_open(priv, screen, screen->dumb /* need_map */);
+    scrpriv->front = modesetting_open(priv, screen, FALSE /* need_map */);
     if (!scrpriv->front) {
         LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not create a front buffer\n",
                    screen->card->mynum, screen->mynum);

@@ -75,11 +75,6 @@ msGlamorMapFront(ScreenPtr pScreen)
 
     msUnmapFramebuffer(screen);
 
-    /* Depth >24 requires tiled bo */
-    if (screen->fb.depth > 24) {
-        goto bail;
-    }
-
     scrpriv->front = modesetting_open(priv, screen, TRUE /* need_map */);
     if (!scrpriv->front) {
         goto bail;
