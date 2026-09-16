@@ -72,6 +72,12 @@
 #include <rootlessCommon.h>
 #include <Xplugin.h>
 
+/* Work around a bug on Leopard's headers */
+#if defined (__LP64__) && MAC_OS_X_VERSION_MAX_ALLOWED >= 1050 && MAC_OS_X_VERSION_MAX_ALLOWED < 1060
+extern OSErr UpdateSystemActivity(UInt8 activity);
+#define OverallAct 0
+#endif
+
 // These are vended by the Objective-C runtime, but they are unfortunately
 // not available as API in the macOS SDK.  We are following suit with swift
 // and clang in declaring them inline here.  They cannot be removed or changed
