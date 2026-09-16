@@ -14,8 +14,6 @@
 #include "kxv.h"
 #endif
 
-static Bool msMapFramebuffer(KdScreenInfo * screen);
-
 static int
 modesetting_grade_mode(drmModeModeInfo *mode, uint32_t req_w, uint32_t req_h, uint32_t req_rate)
 {
@@ -191,28 +189,57 @@ modeseting_find_crtc(msPriv *priv, int fd, drmModeConnector *conn)
 }
 
 
-static struct gbm_bo*
-modesetting_open(msPriv *priv, KdScreenInfo *screen)
+struct gbm_bo*
+modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
 {
-    msScrPriv *scrpriv = screen->driver;
-
     struct gbm_bo *ret = NULL;
-    uint32_t format;
+    uint32_t format, format_swap;
 
-    if (scrpriv->front) {
-        Bool want_map = !!gbm_bo_get_map(scrpriv->front);
-        format = gbm_bo_get_format(scrpriv->front);
-        return gbm_create_front_bo(priv->gbm, want_map, screen->width, screen->height, format);
+    while (!ret) {
+        format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, FALSE /* rb_swap */);
+        format_swap = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, TRUE /* rb_swap */);
+
+#ifdef GLAMOR
+        if (!need_map) {
+            if (!ret) {
+                ret = gbm_create_front_bo(priv->gbm, FALSE /* do map */, screen->width, screen->height, format);
+            }
+            if (!ret) {
+                ret = gbm_create_front_bo(priv->gbm, FALSE /* do map */, screen->width, screen->height, format_swap);
+            }
+        }
+#endif
+
+        if (!ret) {
+            ret = gbm_create_front_bo(priv->gbm, TRUE /* do map */, screen->width, screen->height, format);
+        }
+        if (!ret) {
+            ret = gbm_create_front_bo(priv->gbm, TRUE /* do map */, screen->width, screen->height, format_swap);
+        }
+
+        if (!ret) {
+            int old_depth = screen->fb.depth;
+            if (screen->fb.depth > 30) {
+                screen->fb.depth = 30;
+                screen->fb.bitsPerPixel = 24;
+            } else if (screen->fb.depth > 24) {
+                screen->fb.depth = 24;
+                screen->fb.bitsPerPixel = 24;
+            } else if (screen->fb.depth > 16) {
+                screen->fb.depth = 16;
+                screen->fb.bitsPerPixel = 16;
+            } else if (screen->fb.depth > 8) {
+                screen->fb.depth = 8;
+                screen->fb.bitsPerPixel = 8;
+            } else {
+                break;
+            }
+            LogMessage(X_ERROR, "Xmodesetting(card: %d, screen: %d): Cannot use a depth %d front, trying again with depth %d\n",
+                       screen->card->mynum, screen->mynum, old_depth, screen->fb.depth);
+        }
     }
 
-    format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, FALSE /* rb_swap */);
-    ret = gbm_create_front_bo(priv->gbm, TRUE /* do map */, screen->width, screen->height, format);
-    if (ret) {
-        return ret;
-    }
-
-    format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, TRUE /* rb_swap */);
-    return gbm_create_front_bo(priv->gbm, TRUE /* do map */, screen->width, screen->height, format);
+    return ret;
 }
 
 static Bool
@@ -224,42 +251,37 @@ msSetMode(ScreenPtr pScreen, int width, int height, int rate)
     msScrPriv *scrpriv = screen->driver;
     struct gbm_bo *old_front;
     drmModeModeInfo *old_mode;
-    int oldwidth, oldheight, oldrate;
 
     old_front = scrpriv->front;
     old_mode = scrpriv->mode;
-    oldwidth = screen->width;
-    oldheight = screen->height;
-    oldrate = screen->rate;
-
-    screen->width = width;
-    screen->height = height;
-    screen->rate = rate;
 
     /* Find the mode */
-    scrpriv->mode = modesetting_find_mode(scrpriv->connector, screen->width, screen->height, screen->rate);
+    scrpriv->mode = modesetting_find_mode(scrpriv->connector, width, height, rate);
     if (!scrpriv->mode) {
         goto bail;
     }
 
     /* Create a new front with the new sizes */
-    if (oldwidth != screen->width ||
-        oldheight != screen->height) {
-        scrpriv->front = modesetting_open(priv, screen);
+    if (width != screen->width ||
+        height != screen->height) {
+        uint32_t format = gbm_bo_get_format(scrpriv->front);
+        Bool do_map = !!gbm_bo_get_map(scrpriv->front);
+        scrpriv->front = gbm_create_front_bo(priv->gbm, do_map, width, height, format);
         if (!scrpriv->front) {
             goto bail;
         }
 
         gbm_bo_destroy(old_front);
     }
+
+    screen->width = width;
+    screen->height = height;
+    screen->rate = rate;
     return TRUE;
 
 bail:
     scrpriv->front = old_front;
     scrpriv->mode = old_mode;
-    screen->width = oldwidth;
-    screen->height = oldheight;
-    screen->rate = oldrate;
 
     return FALSE;
 }
@@ -458,11 +480,15 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
 
     scrpriv->connector = modesetting_find_connector(priv, fd, &scrpriv->conn_id);
     if (!scrpriv->connector) {
+        LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not find a usable connector\n",
+                   screen->card->mynum, screen->mynum);
         goto fail;
     }
 
     scrpriv->crtc_id = modeseting_find_crtc(priv, fd, scrpriv->connector);
     if (scrpriv->crtc_id < 0) {
+        LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not find a suitable crtc\n",
+                   screen->card->mynum, screen->mynum);
         goto fail;
     }
 
@@ -480,8 +506,10 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         screen->height = scrpriv->mode ? scrpriv->mode->vdisplay : 1080;
     }
 
-    scrpriv->front = modesetting_open(priv, screen);
+    scrpriv->front = modesetting_open(priv, screen, screen->dumb /* need_map */);
     if (!scrpriv->front) {
+        LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not create a front buffer\n",
+                   screen->card->mynum, screen->mynum);
         goto fail;
     }
 
@@ -615,7 +643,8 @@ static void *msWindowLinear(ScreenPtr pScreen,
     return mem + row * (*size) + offset;
 }
 
-static Bool msMapFramebuffer(KdScreenInfo * screen)
+Bool
+msMapFramebuffer(KdScreenInfo * screen)
 {
     msScrPriv *scrpriv = screen->driver;
     KdPointerMatrix m;
@@ -623,7 +652,9 @@ static Bool msMapFramebuffer(KdScreenInfo * screen)
 
     unsigned long stride = gbm_bo_get_stride(scrpriv->front);
 
-    if (config->shadow >= 0) {
+    if (!gbm_bo_get_map(scrpriv->front)) {
+        scrpriv->shadow = FALSE;
+    } else if (config->shadow >= 0) {
         scrpriv->shadow = config->shadow;
     } else if (scrpriv->randr != RR_Rotate_0) {
         scrpriv->shadow = TRUE;
@@ -671,13 +702,15 @@ static void msSetScreenSizes(ScreenPtr pScreen)
     }
 }
 
-static Bool msUnmapFramebuffer(KdScreenInfo * screen)
+Bool
+msUnmapFramebuffer(KdScreenInfo * screen)
 {
     KdShadowFbFree(screen);
     return TRUE;
 }
 
-static Bool msSetShadow(ScreenPtr pScreen)
+Bool
+msSetShadow(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -1041,6 +1074,12 @@ Bool msCreateResources(ScreenPtr pScreen)
     gbm = gbm_bo_get_device(priv->front);
     fb_id = gbm_bo_get_fb(priv->front);
     fd = gbm_device_get_fd(gbm);
+
+#ifdef GLAMOR
+    if (!msGlamorCreateRes(pScreen)) {
+        return FALSE;
+    }
+#endif
 
     if (!msSetShadow(pScreen)) {
         return FALSE;

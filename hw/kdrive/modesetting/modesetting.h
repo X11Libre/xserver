@@ -43,6 +43,9 @@ typedef struct _msScrPriv {
     Rotation randr;
     Bool blockHandler;
     Bool shadow;
+
+    Bool error;
+    Bool setPixmapBits;
 } msScrPriv;
 
 typedef struct _msScreenConf {
@@ -79,6 +82,10 @@ void msScreenFini(KdScreenInfo * screen);
 void msCardFini(KdCardInfo * card);
 
 #ifdef GLAMOR
+/* ms_glamor.c */
+
+Bool msGlamorCreateRes(ScreenPtr pScreen);
+
 Bool msInitAccel(ScreenPtr screen);
 
 void msEnableAccel(ScreenPtr screen);
@@ -90,6 +97,15 @@ void msFiniAccel(ScreenPtr screen);
 
 void msCloseScreen(ScreenPtr pScreen);
 
+Bool msMapFramebuffer(KdScreenInfo * screen);
+
+Bool msUnmapFramebuffer(KdScreenInfo * screen);
+
+Bool msSetShadow(ScreenPtr pScreen);
+
+struct gbm_bo*
+modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map);
+
 /* ms_gbm.c */
 
 void*
@@ -97,6 +113,9 @@ gbm_bo_get_map(struct gbm_bo *bo);
 
 uint32_t
 gbm_bo_get_fb(struct gbm_bo *bo);
+
+Bool
+gbm_bo_get_used_modifiers(struct gbm_bo *bo);
 
 uint32_t
 gbm_front_format_for_depth(int depth, int bpp, Bool rb_swap);
