@@ -55,3 +55,70 @@ model_proxy:
       # The "ollama" type force-enables the caps virtually all Ollama models
       # support (tool calling + temperature) on every model entry; tune the
       # exact set here if needed (e.g. "attachment" for vision models).
+
+    - id: meta-model
+      name: "Meta-Model Strategies"
+      type: meta-model
+      # Virtual provider: no upstream, no base_url. Its catalog is synthesized
+      # from the strategies below — one model endpoint per strategy, named by
+      # the strategy ID (e.g. "heavy-model"). Chat requests addressing such a
+      # virtual model are routed through the strategy's picking logic onto the
+      # real upstream models; direct requests for real model ids bypass the
+      # strategy layer entirely.
+
+  # Meta-model routing strategies — own curated models on zen-proxy only.
+  # NEVER reference normal models (nim-proxy) here: the whole point is that
+  # meta-model routing is decoupled from the normal model pool, so NIM
+  # outages don't cascade into the strategy layer.
+  strategies:
+    - id: heavy-model
+      description: "Komplexe Aufgaben — BigPickle, Fallback Nemotron Ultra Free"
+      default_model: "big-pickle"
+      models:
+        - id: "big-pickle"
+          provider: "zen-proxy"
+          context_window: 200000
+          priority: 1
+        - id: "nemotron-3-ultra-free"
+          provider: "zen-proxy"
+          context_window: 1000000
+          priority: 2
+      strategy: "fallback"
+      # Effective limit: min(200000, 1000000) = 200000
+
+    - id: cruiser-model
+      description: "Allgemeine Arbeit — Round-Robin für Verfügbarkeit"
+      models:
+        - id: "nemotron-3-ultra-free"
+          provider: "zen-proxy"
+          context_window: 1000000
+          weight: 1
+        - id: "nemotron-3.5-lightning-free"
+          provider: "zen-proxy"
+          context_window: 262144
+          weight: 1
+      strategy: "round-robin"
+      # Effective limit: min(1000000, 262144) = 262144
+
+    - id: scout-model
+      description: "Leichte Aufgaben — schnell, billig"
+      models:
+        - id: "nemotron-3.5-lightning-free"
+          provider: "zen-proxy"
+          context_window: 262144
+      strategy: "single"
+      # Effective limit: 262144
+
+    - id: balanced-model
+      description: "60% BigPickle, 40% Nemotron Ultra Free"
+      models:
+        - id: "big-pickle"
+          provider: "zen-proxy"
+          context_window: 200000
+          weight: 3
+        - id: "nemotron-3-ultra-free"
+          provider: "zen-proxy"
+          context_window: 1000000
+          weight: 2
+      strategy: "weighted"
+      # Effective limit: min(200000, 1000000) = 200000
