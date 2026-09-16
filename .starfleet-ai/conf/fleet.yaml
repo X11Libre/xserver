@@ -20,37 +20,37 @@ fleet:
 
 #  provider_mode: "model-proxy-only"
 
-# Direct providers — bypass the local model proxy entirely, connecting
-# straight to the upstream API. Used exceptionally (proxy down, ZEN quota
-# exhausted). These are merged with proxied providers for ship opencode
-# config generation and the web frontend model list.
-direct_providers:
-  - id: nvidia-direct
-    name: "NVIDIA NIM (direct)"
-    base_url: "https://integrate.api.nvidia.com/v1"
-    api_key: "{env:NIM_API_KEY}"
-    type: "nim-proxy"
-    model_filter: "free-only"
-    capabilities: ["toolcall", "temperature"]
-    user_agent: ""
-    max_retries: 3
-    retry_delay_ms: 1000
-    hold_timeout_ms: 15000
-    health_interval: "5m"
-    health_timeout: "10s"
-    health_endpoint: "/health"
+  # Direct providers — bypass the local model proxy entirely, connecting
+  # straight to the upstream API. Used exceptionally (proxy down, ZEN quota
+  # exhausted). These are merged with proxied providers for ship opencode
+  # config generation and the web frontend model list.
+  direct_providers:
+    - id: nvidia-direct
+      name: "NVIDIA NIM (direct)"
+      base_url: "https://integrate.api.nvidia.com/v1"
+      api_key: "{env:NIM_API_KEY}"
+      type: "nim-proxy"
+      model_filter: "free-only"
+      capabilities: ["toolcall", "temperature"]
+      user_agent: ""
+      max_retries: 3
+      retry_delay_ms: 1000
+      hold_timeout_ms: 15000
+      health_interval: "5m"
+      health_timeout: "10s"
+      health_endpoint: "/health"
 
-  - id: ollama
-    name: "Ollama (local)"
-    type: ollama
-    base_url: "http://localhost:11434/v1"
-    api_key: "ollama"
-    model_filter: "all"
-    capabilities: ["toolcall", "temperature"]
-    user_agent: ""
-    max_retries: 3
-    retry_delay_ms: 1000
-    hold_timeout_ms: 15000
-    health_interval: "5m"
-    health_timeout: "10s"
-    health_endpoint: "/api/version"
+    - id: ollama
+      name: "Ollama (local)"
+      type: ollama
+      base_url: "http://localhost:11434/v1"
+      api_key: "ollama"
+      model_filter: "all"
+      capabilities: ["toolcall", "temperature"]
+      user_agent: ""
+      max_retries: 3
+      retry_delay_ms: 1000
+      hold_timeout_ms: 15000
+      health_interval: "5m"
+      health_timeout: "10s"
+      health_endpoint: "/api/version"

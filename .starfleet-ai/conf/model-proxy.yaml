@@ -16,8 +16,8 @@ model_proxy:
   # Each provider: id (opencode provider name), name (label), base_url
   # (OpenAI-compatible upstream), api_key (env-referenced — the proxy keeps
   # the real key, ships never see it), optional retry tuning.
-  # When `direct: true`, the provider is exposed directly to ships (bypassing
-  # the local proxy) using the upstream's actual BaseURL and APIKey.
+  # Direct providers (bypassing the proxy) are configured in fleet.yaml
+  # under direct_providers: and merged at runtime.
   providers:
     - id: nim-proxy
       name: "NVIDIA NIM (local proxy)"
@@ -35,26 +35,6 @@ model_proxy:
       # proxy forward the client's real session id (opencode sends it as
       # X-Session-Id; forwarded verbatim so Zen's per-session prefix cache
       # stays warm) and stamps the missing identity headers.
-
-    - id: nvidia-direct
-      name: "NVIDIA NIM (direct)"
-      base_url: "https://integrate.api.nvidia.com/v1"
-      api_key: "{env:NIM_API_KEY}"
-      direct: true
-
-    - id: ollama
-      name: "Ollama (local)"
-      type: ollama
-      base_url: "http://localhost:11434/v1"
-      # Ollama doesn't require API keys, but we need to provide something
-      # to satisfy the OpenAI-compatible interface. The value doesn't matter
-      # as Ollama ignores it.
-      api_key: "ollama"
-      # Ollama's /v1/models catalog carries no capability metadata, so the
-      # generated per-ship opencode.json would treat its models as tool-less.
-      # The "ollama" type force-enables the caps virtually all Ollama models
-      # support (tool calling + temperature) on every model entry; tune the
-      # exact set here if needed (e.g. "attachment" for vision models).
 
     - id: meta-model
       name: "Meta-Model Strategies"
