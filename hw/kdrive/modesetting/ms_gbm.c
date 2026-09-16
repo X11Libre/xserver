@@ -143,15 +143,54 @@ gbm_bo_create_fb(struct gbm_bo *bo)
 
     uint32_t width = gbm_bo_get_width(bo);
     uint32_t height = gbm_bo_get_height(bo);
-    uint32_t pitch = gbm_bo_get_stride(bo);
-    uint32_t handle = gbm_bo_get_handle(bo).u32;
     uint32_t fb_id = 0;
+    Bool need_check = FALSE;
 
     uint32_t format = gbm_bo_get_format(bo);
     int depth = gbm_format_get_depth(format);
     int bpp = gbm_bo_get_bpp(bo);
+    int num_planes = gbm_bo_get_plane_count(bo);
+    int ret;
 
-    int ret = drmModeAddFB(fd, width, height, depth, bpp, pitch, handle, &fb_id);
+    uint32_t handles[4] = {0};
+    uint32_t pitches[4] = {0};
+    uint32_t offsets[4] = {0};
+    uint64_t modifiers[4] = {0};
+    uint64_t modifier = gbm_bo_get_modifier(bo);
+
+    for (int i = 0; i < num_planes; i++) {
+        handles[i] = gbm_bo_get_handle_for_plane(bo, i).u32;
+        pitches[i] = gbm_bo_get_stride_for_plane(bo, i);
+        offsets[i] = gbm_bo_get_offset(bo, i);
+        modifiers[i] = modifier;
+    }
+
+    ret = drmModeAddFB2WithModifiers(fd, width, height, format, handles, pitches, offsets,
+                                     modifiers, &fb_id, DRM_MODE_FB_MODIFIERS);
+    if (ret) {
+        need_check = TRUE;
+        ret = drmModeAddFB2(fd, width, height, format, handles, pitches, offsets, &fb_id, 0);
+    }
+    if (ret && num_planes == 1) {
+        ret = drmModeAddFB(fd, width, height, depth, bpp, pitches[0], handles[0], &fb_id);
+    }
+
+    if (!ret && need_check) {
+        /* Check that we didn't lose format + modifier information */
+        drmModeFB2Ptr fb_ptr;
+
+        fb_ptr = drmModeGetFB2(fd, fb_id);
+        if (fb_ptr) {
+            if (fb_ptr->pixel_format != format ||
+                fb_ptr->modifier != modifier) {
+                drmModeFreeFB2(fb_ptr);
+                drmModeRmFB(fd, fb_id);
+                return 0;
+            }
+            drmModeFreeFB2(fb_ptr);
+        }
+    }
+
     return ret ? 0 : fb_id;
 }
 
