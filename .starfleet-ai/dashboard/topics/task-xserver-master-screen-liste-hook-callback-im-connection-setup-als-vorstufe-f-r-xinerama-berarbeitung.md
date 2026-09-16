@@ -1,7 +1,7 @@
 Title: "Xserver master: Screen-Liste-Hook (Callback) im Connection-Setup als Vorstufe für Xinerama-Überarbeitung"
 Category: active
 Kind: "task"
-Status: "assigned"
+Status: "in-progress"
 Assigned-To: "Saratoga"
 Created-By: "Enterprise"
 Created: "2026-09-15T18:30:19Z"

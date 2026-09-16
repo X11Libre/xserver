@@ -135,16 +135,14 @@ Markdown body, tags, a dashboard task reference, and file attachments.
 ### Key commands
 
 ```sh
-starfleetctl reports submit "Title"     --subtitle "one-liner"     --body "Markdown body text"     --body-file path/to/log     --tags "ci,build"     --task-ref xlibre/some-task     --attachment path/to/file ...
-```
+starfleetctl reports submit "Title" \
+    --subtitle "one-liner" \
+    --body "Markdown body text" \
+    --body-file path/to/log \
+    --tags "ci,build" \
+    --task-ref xlibre/some-task \
+    --attachment path/to/file
 
-⚠️ **WARNING**: The title is the **first positional argument**, not a `--title` flag!
-Using `--title "Title"` will cause the title to be interpreted as the literal
-string `--title` and the actual title will be lost. This is a common mistake.
-
-### More commands
-
-```sh
 starfleetctl reports list                          # newest first
 starfleetctl reports list --ship Enterprise        # by ship
 starfleetctl reports list --tag ci --json          # filter + JSON
