@@ -7,9 +7,37 @@ from proto import present, x11
 from xclient import Extension, X11Error
 
 
+@pytest.fixture
+def present_xclient(xclient):
+    """Provide an xclient with Present initialized."""
+    ext = xclient.query_extension(Extension.PRESENT)
+    if not ext:
+        pytest.skip("Present extension not available")
+
+    req = present.QueryVersionRequest(opcode=ext.opcode)
+    xclient.send_request(req)
+    xclient.recv_response(timeout=5.0)
+
+    return xclient
+
+
+@pytest.fixture
+def present_xclient_swapped(xclient_swapped):
+    """Provide a byte-swapped xclient with Present initialized."""
+    ext = xclient_swapped.query_extension(Extension.PRESENT)
+    if not ext:
+        pytest.skip("Present extension not available")
+
+    req = present.QueryVersionRequest(opcode=ext.opcode)
+    xclient_swapped.send_request(req)
+    xclient_swapped.recv_response(timeout=5.0)
+
+    return xclient_swapped
+
+
 class TestPresentSelectInput:
     @pytest.mark.swapped_client
-    def test_present_select_input_eid_swapped(self, xserver, xclient_swapped):
+    def test_present_select_input_eid_swapped(self, xserver, present_xclient_swapped):
         """
         sproc_present_select_input was missing swapl(&stuff->eid).
         Without the swap, the eid fails LEGAL_NEW_RESOURCE because
@@ -19,15 +47,8 @@ class TestPresentSelectInput:
         Fixed in commit a5ac3c871219 ("present: add missing byte
         swapping for various fields").
         """
-        conn = xclient_swapped
-
+        conn = present_xclient_swapped
         ext = conn.query_extension(Extension.PRESENT)
-        if not ext:
-            pytest.skip("Present extension not available")
-
-        req = present.QueryVersionRequest(opcode=ext.opcode)
-        conn.send_request(req)
-        conn.recv_response(timeout=5.0)
 
         win = conn.create_window()
         eid = conn.alloc_id()
@@ -72,7 +93,9 @@ class TestPresentNotify:
     """
 
     @pytest.mark.swapped_client
-    def test_present_pixmap_notifies_window_swapped(self, xserver, xclient_swapped):
+    def test_present_pixmap_notifies_window_swapped(
+        self, xserver, present_xclient_swapped
+    ):
         """
         sproc_present_pixmap was missing byte swaps for the variable-length
         xPresentNotify array.
@@ -85,15 +108,8 @@ class TestPresentNotify:
         Fixed in commit 925edb6c9e ("present: Fix missing byte swaps in
         sproc_present_pixmap()").
         """
-        conn = xclient_swapped
-
+        conn = present_xclient_swapped
         ext = conn.query_extension(Extension.PRESENT)
-        if not ext:
-            pytest.skip("Present extension not available")
-
-        req = present.QueryVersionRequest(opcode=ext.opcode)
-        conn.send_request(req)
-        conn.recv_response(timeout=5.0)
 
         win = conn.create_window()
         pixmap = conn.create_pixmap()
