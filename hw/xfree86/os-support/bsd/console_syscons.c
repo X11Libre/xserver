@@ -1,14 +1,9 @@
 /* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later */
 /* Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net> */
+#if defined(SYSCONS_SUPPORT) && (defined(__FreeBSD__) || defined(__DragonFly__))
 #include <xorg-config.h>
-
-#if defined(SYSCONS_SUPPORT)
-
-#if defined(__FreeBSD__) || defined(__DragonFly__)
 #include <sys/consio.h>
 #include <sys/kbio.h>
-#endif
-
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
