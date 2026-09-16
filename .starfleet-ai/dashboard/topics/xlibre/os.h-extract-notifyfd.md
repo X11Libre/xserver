@@ -1,7 +1,7 @@
 Title: "os.h: notify-fd.h aus os.h extrahieren"
-Category: active
+Category: parked
 Kind: "task"
-Status: "open"
+Status: "parked"
 Assigned-To: "—"
 Created-By: "Saratoga"
 Created: "2026-07-29T15:54:48Z"
