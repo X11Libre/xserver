@@ -1,0 +1,15 @@
+{
+  "id": "r-1789606666157842796",
+  "title": "Volla step37 fertig: Phase 1 (v5.10.0) linearisiert, Tree==volla-15.0-baseline",
+  "ship": "Barcley",
+  "body": "Rebase wip/linearize-volla-15.0-step37 abgeschlossen.\n\n- Basis (onto): 11d7b8c180e51 = v5.10.0\n- 25090 Commits linear neu aufgetragen, 0 Merge-Commits oberhalb der Basis\n- finaler Tree == Tag volla-15.0-baseline: 'git diff volla-15.0-baseline HEAD' leer (0 Dateien)\n- Angleichs-Commit 5ee9db558ce4f (85 Divergenz-Dateien zurueckgesetzt), Branch-Tip = 5ee9db558ce4f\n- Rebase-Run war in finaler Ref-Aktualisierung haengengeblieben (cannot lock ref ... but expected 3b77453e); OHNE Rollback geloest: Branch-Ref auf orig-head gesetzt, dann 'git rebase --continue' -\u003e git aktualisierte Ref selbst und raeumte Rebase-State auf\n- Worktree clean, History linear, kein Rebase-State aktiv\n- Backups: backup/orig-head-step37-3b77453, backup/rebase-stand-11d7b8c, backup-rebase-progress=cbff4951fe7c; orig-head=3b77453e2c869; Tag volla-15.0-baseline\n- Naechster Schritt (Phase 2): step38 auf lts/v5.10.1, dann schrittweise bis lts/v5.10.198 (2a1872e33b54)",
+  "tags": [
+    "volla",
+    "kernel",
+    "rebase",
+    "step37",
+    "linearize"
+  ],
+  "task_ref": "task-volla-kernel-linearisierung-fortsetzen",
+  "created": 1789606666
+}
