@@ -40,13 +40,11 @@ Auftrag; der Skill ist die Arbeitsanweisung.
   ältere `linearize-volla-15.0-stepN`), Analyse der Merge-History
   durchgeführt. Diese Vorarbeit ist die Grundlage — **darauf aufbauen, nicht
   neu beginnen**.
-- **Aktueller Stand / wo anknüpfen:** Rebase-Run steht auf
-  `wip/linearize-volla-15.0-step33` (Basis 5.4). Ein früherer Agent hat bei
-  NIM-Rate-Limit irrtümlich `git rebase --abort` ausgeführt (⟶ FEHLVERHALTEN,
-  im Skill verankert); kein `.git/rebase-merge` mehr aktiv. Backup-Branch
-  `backup-rebase-progress` vorhanden. Barcley hat inzwischen `step34` abgezweigt
-  und rebased auf `linux/v5.5` (aktiver Rebase). Die Arbeit ist an genau der
-  Stelle fortzusetzen, an der sie unterbrochen wurde.
+- **Aktueller Stand / wo anknüpfen:** **Phase 1 abgeschlossen** —
+  `wip/linearize-volla-15.0-step37` ist fertig (Basis v5.10.0, Tree identisch
+  zu `volla-15.0-baseline`). Nächster Schritt ist der erste LTS-Unterschritt
+  der Phase 2 (`…-step38` auf `lts/v5.10.1`). Details siehe Abschnitt
+  „Aktueller Stand (2026-09-17, Barcley)" am Ende.
 
 ## Analyse-Hintergrund (aus Topic starfleet/volla-kernel-linearization)
 
@@ -122,24 +120,33 @@ Nach jedem Schritt: **Report** (`reports submit`, belegt den Tree-Abgleich) +
   Workspace-Root-Branch (`mtx/agent-config`) nicht anfassen, keine fremden
   Branches auschecken (siehe Skill, Abschnitt Workspace isolation).
 
-## Aktueller Stand / Wiederaufnahme (2026-09-10, Enterprise)
+## Aktueller Stand (2026-09-17, Barcley)
 
-**Barcley hing am 2026-09-10 in einer Modell-Repetitions-Loop** (Modell
-`nemotron-3-super-120b`, lahmte ~10h) und wurde von Enterprise mit
-`nemotron-3-ultra-550b-a55b` neu gestartet. Exakter Fortsetzungszustand:
+**Phase 1 (Mainline-Releases v5.4 → v5.10.0) ist abgeschlossen.**
+`wip/linearize-volla-15.0-step37` ist fertig und verifiziert:
 
-- **Aktiver Rebase** auf `wip/linearize-volla-15.0-step34`
-  (`.git/rebase-merge` vorhanden) — **NICHT zurückrollen**, nur fortsetzen.
-- **Fortschritt:** `msgnum`/`end` = **303 / 86186** Commits rebased.
-- **HEAD:** `b304ec2a88759 net: aquantia: adding fields and device features
-  for vlan offload`
-- **Angehalen an:** `969593e39d67e net/mlx5: Support querying max VFs from
-  device` — **Conflict** in
-  - `drivers/net/ethernet/aquantia/atlantic/aq_nic.c`
-  - `drivers/net/ethernet/aquantia/atlantic/hw_atl/hw_atl_b0.c`
-- **Conflict-Auflösung war bereits gestaged** (VLAN-offload fields, ~2730
-  Diff-Zeilen). Nächstes Kommando: semantische Prüfung des gestagten Stands,
-  `git add` falls nötig, dann `git rebase --continue`.
-- **Voll-Snapshot 2026-09-10** der Rebase-Metadaten unter
-  `_WORK_/volla-kernel/rebase-snapshot-2026-09-10/` (`git-rebase-todo`,
-  `done`, `aquantia-staged.diff`) — dient als Referenz/Backup.
+- **Basis (onto):** `11d7b8c180e51` = v5.10.0 (Makefile 5.10.0).
+- **Rebase vollständig:** **25090 Commits** linear neu aufgetragen,
+  **keine Merge-Commits** oberhalb der Basis.
+- **Tree-Konformität:** finaler Tree == `volla-15.0-baseline` (Tag) —
+  `git diff volla-15.0-baseline HEAD` ist leer (0 Dateien); Worktree clean.
+- **Angleichs-Commit:** `5ee9db558ce4f` („reconcile tree to
+  volla-15.0-baseline") setzt die 85 verbliebenen Divergenz-Dateien auf den
+  Original-Inhalt zurück. **Branch-Tip = `5ee9db558ce4f`.**
+- **Abschluss des Rebase-Runs:** der Run war in der finalen
+  Ref-Aktualisierung hängengeblieben (`cannot lock ref … is at 11d7b8c… but
+  expected 3b77453e…`, weil der Branch-Ref zuvor auf die onto-Basis statt auf
+  orig-head zeigte). Sauber gelöst OHNE Rollback: Branch-Ref auf `orig-head`
+  (`3b77453e2c869`) gesetzt, dann `git rebase --continue` → git aktualisierte
+  den Ref selbst auf den Rebase-Tip und räumte den Rebase-State auf.
+- **Refs/Backups:** `orig-head` = `3b77453e2c869` (Volla-Tip = Inhalt-Ziel),
+  `backup/orig-head-step37-3b77453`, `backup/rebase-stand-11d7b8c`,
+  `backup-rebase-progress` = `cbff4951fe7c`, Tag `volla-15.0-baseline`
+  (== `3b77453e2c869`).
+- **Nächster Schritt (Phase 2):** neuen Branch `…-step38` von step37 abzweigen,
+  auf `lts/v5.10.1` rebasen, Tree-Abgleich, dann schrittweise weiter bis
+  `lts/v5.10.198` (= `2a1872e33b54`).
+
+*(Vorheriger Stand 2026-09-10: Rebase hing auf step34; Modell-Repetitions-Loop
+von `nemotron-3-super-120b`, von Enterprise auf `nemotron-3-ultra-550b-a55b`
+neu gestartet. Snapshot unter `_WORK_/volla-kernel/rebase-snapshot-2026-09-10/`.)*
