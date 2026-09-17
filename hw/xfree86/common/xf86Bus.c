@@ -741,10 +741,12 @@ xf86CheckSlot(const void *ptr, BusType type)
         const char *msOther = NULL;
         const char *fbOther = NULL;
 
+        /* secondary gpus have numInstances == 0
         if (pent->numInstances <= 0) {
-        /* All devices are unclaimed, ignore this entity */
+        / * All devices are unclaimed, ignore this entity * /
             continue;
         }
+       */
 
         if ((fbPath != NULL) && (*fbPath == '\0')) {
             /* Autoconfigured fbdev device is incompatible with anything */
@@ -769,10 +771,17 @@ xf86CheckSlot(const void *ptr, BusType type)
                     LogMessageVerb(X_INFO, 1,
                         " PCI device skipped because\n");
                 }
-                LogMessageVerb(X_INFO, 1,
-                    "  PCI bus id %u@%u:%u:%u has already been claimed by \"%s\".\n",
-                    pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func, 
-                    pent->devices[0]->identifier);
+               if (pent->devices) {
+                    LogMessageVerb(X_INFO, 1,
+                        "  PCI bus id %u@%u:%u:%u has already been claimed by \"%s\".\n",
+                        pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func,
+                        pent->devices[0]->identifier);
+               } else {
+                    LogMessageVerb(X_INFO, 1,
+                        "  PCI bus id %u@%u:%u:%u has already been claimed as secondary GPU by \"%s\" driver.\n",
+                        pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func,
+                        pent->driver->driverName);
+               }
                 return FALSE;
             }
             else
