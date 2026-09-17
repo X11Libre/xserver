@@ -25,6 +25,7 @@
 # MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 
 import sys
+
 from reg import *
 
 # Default input / log files
@@ -94,7 +95,7 @@ if __name__ == "__main__":
             nodebug = True
         elif arg[0:1] == "-":
             print("Unrecognized argument:", arg, file=sys.stderr)
-            exit(1)
+            sys.exit(1)
 
 print("Generating", outFilename, file=sys.stderr)
 
@@ -104,7 +105,7 @@ tree = etree.parse(regFilename)
 reg.loadElementTree(tree)
 
 if shim:
-    versions = "1\.[012]"
+    versions = r"1\.[012]"
 else:
     versions = ".*"
 
@@ -166,12 +167,12 @@ class PreResolveOutputGenerator(OutputGenerator):
 
     def beginFile(self, genOpts):
         self.outFile.write(
-            "/* Automatically generated from %s - DO NOT EDIT */\n\n" % regFilename
+            f"/* Automatically generated from {regFilename} - DO NOT EDIT */\n\n"
         )
 
     def endFile(self):
         self.outFile.write("\nvoid " + prefix + "ResolveExtensionProcs(void)\n{\n")
-        for funcname in self.wrappers.keys():
+        for funcname in self.wrappers:
             self.outFile.write(
                 "  PRERESOLVE(PFN" + funcname.upper() + 'PROC, "' + funcname + '");\n'
             )
@@ -205,7 +206,7 @@ class WrapperOutputGenerator(OutputGenerator):
 
     def beginFile(self, genOpts):
         self.outFile.write(
-            "/* Automatically generated from %s - DO NOT EDIT */\n\n" % regFilename
+            f"/* Automatically generated from {regFilename} - DO NOT EDIT */\n\n"
         )
 
     def endFile(self):
@@ -236,12 +237,12 @@ class WrapperOutputGenerator(OutputGenerator):
 
         if staticwrappers:
             self.outFile.write("static ")
-        self.outFile.write("%s %sWrapper(" % (rettype, name))
+        self.outFile.write(f"{rettype} {name}Wrapper(")
         plist = ParseCmdParams(cmd)
         Comma = ""
         if len(plist):
             for ptype, pname in plist:
-                self.outFile.write("%s%s" % (Comma, ptype))
+                self.outFile.write(f"{Comma}{ptype}")
                 Comma = ", "
         else:
             self.outFile.write("void")
@@ -252,58 +253,51 @@ class WrapperOutputGenerator(OutputGenerator):
         if self.OldVersion:
             if not nodebug:
                 self.outFile.write(
-                    '  if (glxWinDebugSettings.enable%scallTrace) ErrorF("%s\\n");\n'
-                    % (prefix.upper(), name)
+                    f'  if (glxWinDebugSettings.enable{prefix.upper()}callTrace) ErrorF("{name}\\n");\n'
                 )
                 self.outFile.write("  glWinDirectProcCalls++;\n")
                 self.outFile.write("\n")
 
             if rettype.lower() == "void":
-                self.outFile.write("  %s( " % (name))
+                self.outFile.write(f"  {name}( ")
             else:
-                self.outFile.write("  return %s( " % (name))
+                self.outFile.write(f"  return {name}( ")
 
             Comma = ""
             for ptype, pname in plist:
-                self.outFile.write("%s%s" % (Comma, pname))
+                self.outFile.write(f"{Comma}{pname}")
                 Comma = ", "
 
         # for GL 1.2+ functions, generate stdcall wrappers which use wglGetProcAddress()
         else:
             if rettype.lower() == "void":
-                self.outFile.write(
-                    '  RESOLVE(PFN%sPROC, "%s");\n' % (name.upper(), name)
-                )
+                self.outFile.write(f'  RESOLVE(PFN{name.upper()}PROC, "{name}");\n')
 
                 if not nodebug:
                     self.outFile.write("\n")
                     self.outFile.write(
-                        '  if (glxWinDebugSettings.enable%scallTrace) ErrorF("%s\\n");\n'
-                        % (prefix.upper(), name)
+                        f'  if (glxWinDebugSettings.enable{prefix.upper()}callTrace) ErrorF("{name}\\n");\n'
                     )
                     self.outFile.write("\n")
 
-                self.outFile.write("  RESOLVED_PROC(PFN%sPROC)( " % (name.upper()))
+                self.outFile.write(f"  RESOLVED_PROC(PFN{name.upper()}PROC)( ")
             else:
                 self.outFile.write(
-                    '  RESOLVE_RET(PFN%sPROC, "%s", FALSE);\n' % (name.upper(), name)
+                    f'  RESOLVE_RET(PFN{name.upper()}PROC, "{name}", FALSE);\n'
                 )
 
                 if not nodebug:
                     self.outFile.write("\n")
                     self.outFile.write(
-                        '  if (glxWinDebugSettings.enable%scallTrace) ErrorF("%s\\n");\n'
-                        % (prefix.upper(), name)
+                        f'  if (glxWinDebugSettings.enable{prefix.upper()}callTrace) ErrorF("{name}\\n");\n'
                     )
                     self.outFile.write("\n")
 
-                self.outFile.write(
-                    "  return RESOLVED_PROC(PFN%sPROC)(" % (name.upper())
-                )
+                self.outFile.write(f"  return RESOLVED_PROC(PFN{name.upper()}PROC)(")
 
             Comma = ""
             for ptype, pname in plist:
-                self.outFile.write("%s%s" % (Comma, pname))
+                self.outFile.write(f"{Comma}{pname}")
                 Comma = ", "
         self.outFile.write(" );\n}\n\n")
 
@@ -314,7 +308,7 @@ class ThunkOutputGenerator(OutputGenerator):
 
     def beginFile(self, genOpts):
         self.outFile.write(
-            "/* Automatically generated from %s - DO NOT EDIT */\n\n" % regFilename
+            f"/* Automatically generated from {regFilename} - DO NOT EDIT */\n\n"
         )
 
     def endFile(self):
@@ -337,13 +331,13 @@ class ThunkOutputGenerator(OutputGenerator):
         OutputGenerator.genCmd(self, cmd, name)
 
         rettype = ParseCmdRettype(cmd)
-        self.outFile.write("%s %sWrapper(" % (rettype, name))
+        self.outFile.write(f"{rettype} {name}Wrapper(")
         plist = ParseCmdParams(cmd)
 
         Comma = ""
         if len(plist):
             for ptype, pname in plist:
-                self.outFile.write("%s%s" % (Comma, ptype))
+                self.outFile.write(f"{Comma}{ptype}")
                 Comma = ", "
         else:
             self.outFile.write("void")
@@ -353,33 +347,29 @@ class ThunkOutputGenerator(OutputGenerator):
         # for GL 1.0 and 1.1 functions, generate stdcall thunk wrappers which call the function directly
         if self.OldVersion:
             if rettype.lower() == "void":
-                self.outFile.write("  %s( " % (name))
+                self.outFile.write(f"  {name}( ")
             else:
-                self.outFile.write("  return %s( " % (name))
+                self.outFile.write(f"  return {name}( ")
 
             Comma = ""
             for ptype, pname in plist:
-                self.outFile.write("%s%s" % (Comma, pname))
+                self.outFile.write(f"{Comma}{pname}")
                 Comma = ", "
 
         # for GL 1.2+ functions, generate wrappers which use wglGetProcAddress()
         else:
             if rettype.lower() == "void":
-                self.outFile.write(
-                    '  RESOLVE(PFN%sPROC, "%s");\n' % (name.upper(), name)
-                )
-                self.outFile.write("  RESOLVED_PROC(PFN%sPROC)( " % (name.upper()))
+                self.outFile.write(f'  RESOLVE(PFN{name.upper()}PROC, "{name}");\n')
+                self.outFile.write(f"  RESOLVED_PROC(PFN{name.upper()}PROC)( ")
             else:
                 self.outFile.write(
-                    '  RESOLVE_RET(PFN%sPROC, "%s", FALSE);\n' % (name.upper(), name)
+                    f'  RESOLVE_RET(PFN{name.upper()}PROC, "{name}", FALSE);\n'
                 )
-                self.outFile.write(
-                    "  return RESOLVED_PROC(PFN%sPROC)(" % (name.upper())
-                )
+                self.outFile.write(f"  return RESOLVED_PROC(PFN{name.upper()}PROC)(")
 
             Comma = ""
             for ptype, pname in plist:
-                self.outFile.write("%s%s" % (Comma, pname))
+                self.outFile.write(f"{Comma}{pname}")
                 Comma = ", "
         self.outFile.write(" );\n}\n\n")
 
@@ -393,7 +383,7 @@ class ThunkDefsOutputGenerator(OutputGenerator):
             "EXPORTS\n"
         )  # this must be the first line for libtool to realize this is a .def file
         self.outFile.write(
-            "; Automatically generated from %s - DO NOT EDIT\n\n" % regFilename
+            f"; Automatically generated from {regFilename} - DO NOT EDIT\n\n"
         )
 
     def endFile(self):
@@ -415,7 +405,7 @@ class ThunkDefsOutputGenerator(OutputGenerator):
         OutputGenerator.genCmd(self, cmd, name)
 
         # export the wrapper function with the name of the function it wraps
-        self.outFile.write("%s = %sWrapper\n" % (name, name))
+        self.outFile.write(f"{name} = {name}Wrapper\n")
 
 
 class ShimOutputGenerator(OutputGenerator):
@@ -424,7 +414,7 @@ class ShimOutputGenerator(OutputGenerator):
 
     def beginFile(self, genOpts):
         self.outFile.write(
-            "/* Automatically generated from %s - DO NOT EDIT */\n\n" % regFilename
+            f"/* Automatically generated from {regFilename} - DO NOT EDIT */\n\n"
         )
 
     def endFile(self):
@@ -458,25 +448,25 @@ class ShimOutputGenerator(OutputGenerator):
 
         # for GL functions which are in the ABI, generate a shim which calls the function via GetProcAddress
         rettype = ParseCmdRettype(cmd)
-        self.outFile.write("%s %s(" % (rettype, name))
+        self.outFile.write(f"{rettype} {name}(")
         plist = ParseCmdParams(cmd)
 
         Comma = ""
         if len(plist):
             for ptype, pname in plist:
-                self.outFile.write("%s%s" % (Comma, ptype))
+                self.outFile.write(f"{Comma}{ptype}")
                 Comma = ", "
         else:
             self.outFile.write("void")
 
         self.outFile.write(")\n{\n")
 
-        self.outFile.write("  typedef %s (* PFN%sPROC)(" % (rettype, name.upper()))
+        self.outFile.write(f"  typedef {rettype} (* PFN{name.upper()}PROC)(")
 
         if len(plist):
             Comma = ""
             for ptype, pname in plist:
-                self.outFile.write("%s %s" % (Comma, ptype))
+                self.outFile.write(f"{Comma} {ptype}")
                 Comma = ", "
         else:
             self.outFile.write("void")
@@ -484,17 +474,17 @@ class ShimOutputGenerator(OutputGenerator):
         self.outFile.write(");\n")
 
         if rettype.lower() == "void":
-            self.outFile.write('  RESOLVE(PFN%sPROC, "%s");\n' % (name.upper(), name))
+            self.outFile.write(f'  RESOLVE(PFN{name.upper()}PROC, "{name}");\n')
             self.outFile.write("  RESOLVED_PROC(")
         else:
             self.outFile.write(
-                '  RESOLVE_RET(PFN%sPROC, "%s", 0);\n' % (name.upper(), name)
+                f'  RESOLVE_RET(PFN{name.upper()}PROC, "{name}", 0);\n'
             )
             self.outFile.write("  return RESOLVED_PROC(")
 
         Comma = ""
         for ptype, pname in plist:
-            self.outFile.write("%s%s" % (Comma, pname))
+            self.outFile.write(f"{Comma}{pname}")
             Comma = ", "
 
         self.outFile.write(" );\n}\n\n")
