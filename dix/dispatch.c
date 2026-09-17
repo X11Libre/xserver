@@ -612,6 +612,20 @@ CreateConnectionBlock(void)
     char *pBuf;
     const char VendorString[] = "XLibre";
 
+    ScreenInfoRec *temp_screens = calloc(screenInfo.numScreens, sizeof(ScreenInfoRec));
+    if (!temp_screens) { /* OOM */
+        return FALSE;
+    }
+
+    memcpy(temp_screens, screenInfo.screens
+
+    ScreenListCallDataRec call_data = {
+        .screens = temp_screens,
+        .num_screens = &temp_count,
+    };
+
+    CallCallbacks(&ConnectionScreenListCallback, &call_data);
+
     memset(&setup, 0, sizeof(xConnSetup));
     /* Leave off the ridBase and ridMask, these must be sent with
        connection */
@@ -638,8 +652,10 @@ CreateConnectionBlock(void)
         (setup.numFormats * sizeof(xPixmapFormat)) +
         (setup.numRoots * sizeof(xWindowRoot));
     ConnectionInfo = calloc(1, lenofblock);
-    if (!ConnectionInfo)
+    if (!ConnectionInfo) {
+        free(temp_screens);
         return FALSE;
+    }
 
     memcpy(ConnectionInfo, &setup, sizeof(xConnSetup));
     sizesofar = sizeof(xConnSetup);
@@ -821,6 +837,11 @@ CreateConnectionBlock(void)
     connSetupPrefix.majorVersion = X_PROTOCOL;
     connSetupPrefix.minorVersion = X_PROTOCOL_REVISION;
     return TRUE;
+
+err_out:
+    free(temp_screens);
+    free(
+
 }
 
 int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids)
