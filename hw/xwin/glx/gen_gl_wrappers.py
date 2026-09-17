@@ -122,10 +122,10 @@ genOpts = CGeneratorOptions(
 
 # create error/warning & diagnostic files
 if errFilename:
-    errWarn = open(errFilename, "w")
+    errWarn = open(errFilename, "w")  # noqa: SIM115
 else:
     errWarn = sys.stderr
-diag = open(diagFilename, "w")
+diag = open(diagFilename, "w")  # noqa: SIM115
 
 
 def ParseCmdRettype(cmd):
@@ -477,9 +477,7 @@ class ShimOutputGenerator(OutputGenerator):
             self.outFile.write(f'  RESOLVE(PFN{name.upper()}PROC, "{name}");\n')
             self.outFile.write("  RESOLVED_PROC(")
         else:
-            self.outFile.write(
-                f'  RESOLVE_RET(PFN{name.upper()}PROC, "{name}", 0);\n'
-            )
+            self.outFile.write(f'  RESOLVE_RET(PFN{name.upper()}PROC, "{name}", 0);\n')
             self.outFile.write("  return RESOLVED_PROC(")
 
         Comma = ""
@@ -491,41 +489,42 @@ class ShimOutputGenerator(OutputGenerator):
 
 
 def genHeaders():
-    outFile = open(outFilename, "w")
+    with open(outFilename, "w") as outFile:
+        if preresolve:
+            gen = PreResolveOutputGenerator(
+                errFile=errWarn, warnFile=errWarn, diagFile=diag
+            )
+            gen.outFile = outFile
+            reg.setGenerator(gen)
+            reg.apiGen(genOpts)
 
-    if preresolve:
-        gen = PreResolveOutputGenerator(
-            errFile=errWarn, warnFile=errWarn, diagFile=diag
-        )
-        gen.outFile = outFile
-        reg.setGenerator(gen)
-        reg.apiGen(genOpts)
+        if wrapper:
+            gen = WrapperOutputGenerator(
+                errFile=errWarn, warnFile=errWarn, diagFile=diag
+            )
+            gen.outFile = outFile
+            reg.setGenerator(gen)
+            reg.apiGen(genOpts)
 
-    if wrapper:
-        gen = WrapperOutputGenerator(errFile=errWarn, warnFile=errWarn, diagFile=diag)
-        gen.outFile = outFile
-        reg.setGenerator(gen)
-        reg.apiGen(genOpts)
+        if shim:
+            gen = ShimOutputGenerator(errFile=errWarn, warnFile=errWarn, diagFile=diag)
+            gen.outFile = outFile
+            reg.setGenerator(gen)
+            reg.apiGen(genOpts)
 
-    if shim:
-        gen = ShimOutputGenerator(errFile=errWarn, warnFile=errWarn, diagFile=diag)
-        gen.outFile = outFile
-        reg.setGenerator(gen)
-        reg.apiGen(genOpts)
+        if thunk:
+            gen = ThunkOutputGenerator(errFile=errWarn, warnFile=errWarn, diagFile=diag)
+            gen.outFile = outFile
+            reg.setGenerator(gen)
+            reg.apiGen(genOpts)
 
-    if thunk:
-        gen = ThunkOutputGenerator(errFile=errWarn, warnFile=errWarn, diagFile=diag)
-        gen.outFile = outFile
-        reg.setGenerator(gen)
-        reg.apiGen(genOpts)
-
-    if thunkdefs:
-        gen = ThunkDefsOutputGenerator(errFile=errWarn, warnFile=errWarn, diagFile=diag)
-        gen.outFile = outFile
-        reg.setGenerator(gen)
-        reg.apiGen(genOpts)
-
-    outFile.close()
+        if thunkdefs:
+            gen = ThunkDefsOutputGenerator(
+                errFile=errWarn, warnFile=errWarn, diagFile=diag
+            )
+            gen.outFile = outFile
+            reg.setGenerator(gen)
+            reg.apiGen(genOpts)
 
 
 genHeaders()
