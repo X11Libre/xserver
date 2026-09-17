@@ -785,11 +785,15 @@ LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
 void
 LogMessageVerb(MessageType type, int verb, const char *format, ...)
 {
+    ErrorF("LogMessageVerb: ENTRY type=%d verb=%d\n", type, verb);
+    fflush(stderr);
     va_list ap;
 
     va_start(ap, format);
     LogVMessageVerb(type, verb, format, ap);
     va_end(ap);
+    ErrorF("LogMessageVerb: EXIT\n");
+    fflush(stderr);
 }
 
 /* Log a message with the standard verbosity level of 1. */

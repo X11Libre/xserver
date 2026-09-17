@@ -120,6 +120,7 @@ Equipment Corporation.
 #include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
+#include "Xext/nexus/nexus.h"
 #include "dix/settings_priv.h"
 #include "dix/window_priv.h"
 #include "include/resource.h"
@@ -4151,6 +4152,11 @@ int AddScreen(ScreenInitProcPtr pfnInit, int argc, char **argv, void *closure)
         free(pScreen);
         screenInfo.numScreens--;
         return -1;
+    }
+
+    /* If nexus extension is enabled, register physical screens */
+    if (screenInfo.numScreens > 0 && pfnInit != nexus_dummy_screen_init) {
+        nexus_register_physical_screen(pScreen);
     }
 
     update_desktop_dimensions();
