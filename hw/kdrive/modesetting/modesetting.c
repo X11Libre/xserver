@@ -565,6 +565,8 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         goto fail;
     }
 
+    scrpriv->crtc = drmModeGetCrtc(fd, scrpriv->crtc_id);
+
     scrpriv->mode = modesetting_find_mode(scrpriv->connector, screen->width, screen->height, screen->rate);
     if (!scrpriv->mode) {
         LogMessage(X_WARNING, "Xmodesetting(card %d, screen %d): Could not find a supported mode\n",
@@ -945,6 +947,7 @@ bail4:
     return FALSE;
 }
 
+#ifdef RANDR
 static Bool
 msGetPhysicalScreenSizes(ScreenPtr pScreen, int *mmWidth, int *mmHeight)
 {
@@ -969,10 +972,30 @@ msGetPhysicalScreenSizes(ScreenPtr pScreen, int *mmWidth, int *mmHeight)
 }
 
 static Bool
+msRandRSetPhysicalScreenSizes(ScreenPtr pScreen)
+{
+    int mmWidth, mmHeight;
+
+    if (msGetPhysicalScreenSizes(pScreen, &mmWidth, &mmHeight)) {
+        RROutputPtr pOutput;
+        pOutput = RRFirstOutput(pScreen);
+
+        if (!pOutput) {
+            return FALSE;
+        }
+
+        RROutputSetPhysicalSize(pOutput,
+                                mmWidth,
+                                mmHeight);
+    }
+
+    return TRUE;
+}
+
+static Bool
 msRandRInit(ScreenPtr pScreen)
 {
     rrScrPrivPtr pScrPriv;
-    int mmWidth, mmHeight;
 
     if (!RRScreenInit(pScreen)) {
         return FALSE;
@@ -982,22 +1005,19 @@ msRandRInit(ScreenPtr pScreen)
     pScrPriv->rrGetInfo = msRandRGetInfo;
     pScrPriv->rrSetConfig = msRandRSetConfig;
 
-    if (msGetPhysicalScreenSizes(pScreen, &mmWidth, &mmHeight)) {
-        RROutputPtr pOutput;
+    /* Create the output */
+    RRGetInfo(pScreen, TRUE);
 
-        /* Create the output */
-        RRGetInfo(pScreen, TRUE);
+    msRandRSetPhysicalScreenSizes(pScreen);
 
-        pOutput = RRFirstOutput(pScreen);
-        if (pOutput) {
-            RROutputSetPhysicalSize(pOutput,
-                                    mmWidth,
-                                    mmHeight);
-        }
+#if RANDR_12_INTERFACE
+    if (msRandRGammaInit(pScreen)) {
+        pScrPriv->rrCrtcSetGamma = msRandRCrtcSetGamma;
     }
-
+#endif
     return TRUE;
 }
+#endif /* RANDR */
 
 Bool
 msInitScreen(ScreenPtr pScreen)
@@ -1012,11 +1032,11 @@ msFinishInitScreen(ScreenPtr pScreen)
     if (!shadowSetup(pScreen)) {
         return FALSE;
     }
-
+#ifdef RANDR
     if (!msRandRInit(pScreen)) {
         return FALSE;
     }
-
+#endif
     return TRUE;
 }
 
@@ -1271,6 +1291,9 @@ msScreenFini(KdScreenInfo * screen)
     msScrPriv *priv = screen->driver;
 
     gbm_bo_destroy(priv->front);
+    if (priv->crtc) {
+        drmModeFreeCrtc(priv->crtc);
+    }
     drmModeFreeConnector(priv->connector);
 
     free(priv);
@@ -1293,18 +1316,6 @@ msCardFini(KdCardInfo * card)
     free(priv);
     card->driver = NULL;
 }
-
-#if 0
-void
-msGetColors(ScreenPtr pScreen, int n, xColorItem * pdefs)
-{
-}
-
-void
-msPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs)
-{
-}
-#endif
 
 void
 msCloseScreen(ScreenPtr pScreen)

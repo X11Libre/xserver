@@ -310,10 +310,8 @@ KdCardFuncs msFuncs = {
     .finiAccel        = msFiniAccel,
 #endif
 
-#if 0
     .getColors        = msGetColors,
     .putColors        = msPutColors,
-#endif
 
     .closeScreen      = msCloseScreen,
 };
