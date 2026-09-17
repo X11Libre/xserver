@@ -667,64 +667,155 @@ CreateConnectionBlock(void)
     memset(&depth, 0, sizeof(xDepth));
     memset(&visual, 0, sizeof(xVisualType));
 
-    DIX_FOR_EACH_SCREEN({
-        DepthPtr pDepth;
-        VisualPtr pVisual;
+    /* Build initial screen info array for callback */
+    ScreenInfoRec *temp_screens = calloc(screenInfo.numScreens, sizeof(ScreenInfoRec));
+    int temp_count = screenInfo.numScreens;
 
-        xWindowRoot *root = (xWindowRoot*)pBuf;
-        root->windowId = walkScreen->root->drawable.id;
-        root->defaultColormap = walkScreen->defColormap;
-        root->whitePixel = walkScreen->whitePixel;
-        root->blackPixel = walkScreen->blackPixel;
-        root->currentInputMask = 0;      /* filled in when sent */
-        root->pixWidth = walkScreen->width;
-        root->pixHeight = walkScreen->height;
-        root->mmWidth = walkScreen->mmWidth;
-        root->mmHeight = walkScreen->mmHeight;
-        root->minInstalledMaps = walkScreen->minInstalledCmaps;
-        root->maxInstalledMaps = walkScreen->maxInstalledCmaps;
-        root->rootVisualID = walkScreen->rootVisual;
-        root->backingStore = walkScreen->backingStoreSupport;
-        root->saveUnders = FALSE;
-        root->rootDepth = walkScreen->rootDepth;
-        root->nDepths = walkScreen->numDepths;
+    if (temp_screens) {
+        int idx = 0;
+        DIX_FOR_EACH_SCREEN({
+            temp_screens[idx].x = walkScreen->x;
+            temp_screens[idx].y = walkScreen->y;
+            temp_screens[idx].width = walkScreen->width;
+            temp_screens[idx].height = walkScreen->height;
+            temp_screens[idx].pScreen = walkScreen;
+            idx++;
+        });
 
-        sizesofar += sizeof(xWindowRoot);
-        pBuf += sizeof(xWindowRoot);
+        /* Call callbacks if registered - allows screen list manipulation */
+        if (ConnectionScreenListCallback) {
+            ScreenListCallDataRec call_data = {
+                .screens = temp_screens,
+                .num_screens = &temp_count,
+            };
+            CallCallbacks(&ConnectionScreenListCallback, &call_data);
+        }
 
-        pDepth = walkScreen->allowedDepths;
-        for (int j = 0; j < walkScreen->numDepths; j++, pDepth++) {
-            lenofblock += sizeof(xDepth) +
-                (pDepth->numVids * sizeof(xVisualType));
-            pBuf = (char *) realloc(ConnectionInfo, lenofblock);
-            if (!pBuf) {
-                free(ConnectionInfo);
-                return FALSE;
-            }
-            ConnectionInfo = pBuf;
-            pBuf += sizesofar;
-            depth.depth = pDepth->depth;
-            depth.nVisuals = pDepth->numVids;
-            memcpy(pBuf, &depth, sizeof(xDepth));
-            pBuf += sizeof(xDepth);
-            sizesofar += sizeof(xDepth);
-            for (int k = 0; k < pDepth->numVids; k++) {
-                vid = pDepth->vids[k];
-                for (pVisual = walkScreen->visuals;
-                     pVisual->vid != vid; pVisual++);
-                visual.visualID = vid;
-                visual.class = pVisual->class;
-                visual.bitsPerRGB = pVisual->bitsPerRGBValue;
-                visual.colormapEntries = pVisual->ColormapEntries;
-                visual.redMask = pVisual->redMask;
-                visual.greenMask = pVisual->greenMask;
-                visual.blueMask = pVisual->blueMask;
-                memcpy(pBuf, &visual, sizeof(xVisualType));
-                pBuf += sizeof(xVisualType);
-                sizesofar += sizeof(xVisualType);
+        /* Write screen roots from (possibly modified) temp array */
+        for (int i = 0; i < temp_count; i++) {
+            if (temp_screens[i].width > 0 && temp_screens[i].height > 0) {
+                ScreenPtr pScreen = temp_screens[i].pScreen;
+                if (!pScreen) continue;
+                
+                xWindowRoot *root = (xWindowRoot*)pBuf;
+                root->windowId = pScreen->root->drawable.id;
+                root->defaultColormap = pScreen->defColormap;
+                root->whitePixel = pScreen->whitePixel;
+                root->blackPixel = pScreen->blackPixel;
+                root->currentInputMask = 0;
+                root->pixWidth = temp_screens[i].width;
+                root->pixHeight = temp_screens[i].height;
+                root->mmWidth = pScreen->mmWidth;
+                root->mmHeight = pScreen->mmHeight;
+                root->minInstalledMaps = pScreen->minInstalledCmaps;
+                root->maxInstalledMaps = pScreen->maxInstalledCmaps;
+                root->rootVisualID = pScreen->rootVisual;
+                root->backingStore = pScreen->backingStoreSupport;
+                root->saveUnders = FALSE;
+                root->rootDepth = pScreen->rootDepth;
+                root->nDepths = pScreen->numDepths;
+
+                sizesofar += sizeof(xWindowRoot);
+                pBuf += sizeof(xWindowRoot);
+
+                DepthPtr pDepth = pScreen->allowedDepths;
+                for (int j = 0; j < pScreen->numDepths; j++, pDepth++) {
+                    lenofblock += sizeof(xDepth) +
+                        (pDepth->numVids * sizeof(xVisualType));
+                    pBuf = (char *) realloc(ConnectionInfo, lenofblock);
+                    if (!pBuf) {
+                        free(ConnectionInfo);
+                        free(temp_screens);
+                        return FALSE;
+                    }
+                    ConnectionInfo = pBuf;
+                    pBuf += sizesofar;
+                    depth.depth = pDepth->depth;
+                    depth.nVisuals = pDepth->numVids;
+                    memcpy(pBuf, &depth, sizeof(xDepth));
+                    pBuf += sizeof(xDepth);
+                    sizesofar += sizeof(xDepth);
+                    for (int k = 0; k < pDepth->numVids; k++) {
+                        vid = pDepth->vids[k];
+                        VisualPtr pVisual2;
+                        for (pVisual2 = pScreen->visuals;
+                             pVisual2->vid != vid; pVisual2++);
+                        visual.visualID = vid;
+                        visual.class = pVisual2->class;
+                        visual.bitsPerRGB = pVisual2->bitsPerRGBValue;
+                        visual.colormapEntries = pVisual2->ColormapEntries;
+                        visual.redMask = pVisual2->redMask;
+                        visual.greenMask = pVisual2->greenMask;
+                        visual.blueMask = pVisual2->blueMask;
+                        memcpy(pBuf, &visual, sizeof(xVisualType));
+                        pBuf += sizeof(xVisualType);
+                        sizesofar += sizeof(xVisualType);
+                    }
+                }
             }
         }
-    });
+        free(temp_screens);
+    } else {
+        /* Fallback: original behavior without callback on allocation failure */
+        DIX_FOR_EACH_SCREEN({
+            DepthPtr pDepth;
+            VisualPtr pVisual2;
+
+            xWindowRoot *root = (xWindowRoot*)pBuf;
+            root->windowId = walkScreen->root->drawable.id;
+            root->defaultColormap = walkScreen->defColormap;
+            root->whitePixel = walkScreen->whitePixel;
+            root->blackPixel = walkScreen->blackPixel;
+            root->currentInputMask = 0;
+            root->pixWidth = walkScreen->width;
+            root->pixHeight = walkScreen->height;
+            root->mmWidth = walkScreen->mmWidth;
+            root->mmHeight = walkScreen->mmHeight;
+            root->minInstalledMaps = walkScreen->minInstalledCmaps;
+            root->maxInstalledMaps = walkScreen->maxInstalledCmaps;
+            root->rootVisualID = walkScreen->rootVisual;
+            root->backingStore = walkScreen->backingStoreSupport;
+            root->saveUnders = FALSE;
+            root->rootDepth = walkScreen->rootDepth;
+            root->nDepths = walkScreen->numDepths;
+
+            sizesofar += sizeof(xWindowRoot);
+            pBuf += sizeof(xWindowRoot);
+
+            pDepth = walkScreen->allowedDepths;
+            for (int j = 0; j < walkScreen->numDepths; j++, pDepth++) {
+                lenofblock += sizeof(xDepth) +
+                    (pDepth->numVids * sizeof(xVisualType));
+                pBuf = (char *) realloc(ConnectionInfo, lenofblock);
+                if (!pBuf) {
+                    free(ConnectionInfo);
+                    return FALSE;
+                }
+                ConnectionInfo = pBuf;
+                pBuf += sizesofar;
+                depth.depth = pDepth->depth;
+                depth.nVisuals = pDepth->numVids;
+                memcpy(pBuf, &depth, sizeof(xDepth));
+                pBuf += sizeof(xDepth);
+                sizesofar += sizeof(xDepth);
+                for (int k = 0; k < pDepth->numVids; k++) {
+                    vid = pDepth->vids[k];
+                    for (pVisual2 = walkScreen->visuals;
+                         pVisual2->vid != vid; pVisual2++);
+                    visual.visualID = vid;
+                    visual.class = pVisual2->class;
+                    visual.bitsPerRGB = pVisual2->bitsPerRGBValue;
+                    visual.colormapEntries = pVisual2->ColormapEntries;
+                    visual.redMask = pVisual2->redMask;
+                    visual.greenMask = pVisual2->greenMask;
+                    visual.blueMask = pVisual2->blueMask;
+                    memcpy(pBuf, &visual, sizeof(xVisualType));
+                    pBuf += sizeof(xVisualType);
+                    sizesofar += sizeof(xVisualType);
+                }
+            }
+        });
+    }
     connSetupPrefix.success = xTrue;
     connSetupPrefix.length = lenofblock / 4;
     connSetupPrefix.majorVersion = X_PROTOCOL;

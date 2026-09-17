@@ -77,6 +77,57 @@ extern _X_EXPORT Bool enableIndirectGLX;
  */
 extern CallbackListPtr PostInitRootWindowCallback;
 
+/*
+ * @brief Screen info structure for connection screen list manipulation
+ *
+ * This structure holds screen geometry and optional screen pointer
+ * for the screen list manipulation callback at connection setup.
+ */
+typedef struct {
+    int x, y;
+    int width, height;
+    ScreenPtr pScreen;
+} ScreenInfoRec, *ScreenInfoPtr;
+
+/*
+ * @brief Call data passed to screen list callbacks during connection setup
+ *
+ * Contains the screen info array and count pointer.
+ * The callback may modify the array contents and the count value.
+ */
+typedef struct {
+    ScreenInfoPtr screens;
+    int *num_screens;
+} ScreenListCallDataRec, *ScreenListCallDataPtr;
+
+/*
+ * @brief Callback function type for screen list manipulation at connection setup
+ *
+ * Called from CreateConnectionBlock() / PanoramiXCreateConnectionBlock()
+ * to allow extensions to modify the screen list sent to clients.
+ *
+ * @param pcbl Pointer to callback list (unused)
+ * @param call_data Pointer to ScreenListCallDataRec
+ * @param closure Opaque closure data (unused)
+ */
+typedef void (*ScreenListCallbackProcPtr)(CallbackListPtr *pcbl,
+                                           ScreenListCallDataPtr call_data,
+                                           void *closure);
+
+/*
+ * @brief callback for manipulating the screen list sent to clients
+ *        during connection block creation
+ *
+ * Called from CreateConnectionBlock() and PanoramiXCreateConnectionBlock()
+ * when building the screen list that gets sent to clients in the connection
+ * setup reply. Allows extensions (e.g. Xinerama) to inject virtual screens,
+ * reorder screens, or modify the screen geometry before it's sent to clients.
+ *
+ * Callback receives a ScreenListCallDataRec containing the screen
+ * info array and count. The callback may modify the array and count.
+ */
+extern CallbackListPtr ConnectionScreenListCallback;
+
 static inline _X_NOTSAN Bool
 InputCheckPending(void)
 {

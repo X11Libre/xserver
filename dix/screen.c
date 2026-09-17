@@ -13,6 +13,7 @@
 
 CallbackListPtr ScreenSaverAccessCallback = NULL;
 CallbackListPtr ScreenAccessCallback = NULL;
+CallbackListPtr ConnectionScreenListCallback = NULL;
 
 void dixFreeScreen(ScreenPtr pScreen)
 {
