@@ -14,7 +14,9 @@
 
 #include "kglamor.h"
 
+#ifdef RANDR
 #include "randrstr.h"
+#endif
 
 typedef struct _msPriv {
     struct gbm_device *gbm;
@@ -25,17 +27,13 @@ typedef struct _msPriv {
 
     int num_used_connectors;
     uint32_t *used_connectors;
-#if 0
-    __u16 red[256];
-    __u16 green[256];
-    __u16 blue[256];
-#endif
 } msPriv;
 
 typedef struct _msScrPriv {
     struct gbm_bo *front;
     drmModeConnector *connector;
     drmModeModeInfo *mode;
+    drmModeCrtcPtr crtc;
     uint32_t conn_id;
     uint32_t crtc_id;
 
@@ -80,6 +78,19 @@ void msRestore(KdCardInfo * card);
 void msScreenFini(KdScreenInfo * screen);
 
 void msCardFini(KdCardInfo * card);
+
+/* ms_gamma.c */
+
+void msGetColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
+
+void msPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
+
+#ifdef RANDR
+#if RANDR_12_INTERFACE
+Bool msRandRCrtcSetGamma(ScreenPtr pScreen, RRCrtcPtr crtc);
+#endif
+Bool msRandRGammaInit(ScreenPtr pScreen);
+#endif
 
 #ifdef GLAMOR
 /* ms_glamor.c */
