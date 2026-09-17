@@ -109,6 +109,7 @@ Equipment Corporation.
 #include "Xext/dpms/dpms_priv.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
+#include "Xext/nexus/nexus.h"
 
 #include "scrnintstr.h"
 #include "os.h"
@@ -184,19 +185,31 @@ dix_main(int argc, char *argv[], char *envp[])
     SetInputCheck(&alwaysCheckForInput[0], &alwaysCheckForInput[1]);
     screenInfo.numScreens = 0;
 
+    if (!NexusPreInit()) {
+        FatalError("nexus pre-init failed");
+    }
+
     InitAtoms();
     InitEvents();
     xfont2_init_glyph_caching();
     dixResetRegistry();
     InitFonts();
     InitCallbackManager();
+    ErrorF("main: before InitOutput\n");
     InitOutput(argc, argv);
+    ErrorF("main: after InitOutput, numScreens=%d\n", screenInfo.numScreens);
+
+    if (!NexusPostInit()) {
+        FatalError("nexus post-init failed");
+    }
 
     if (screenInfo.numScreens < 1)
         FatalError("no screens found");
     LogMessageVerb(X_INFO, 1, "Output(s) initialized\n");
 
+    ErrorF("main: before InitExtensions\n");
     InitExtensions(argc, argv);
+    ErrorF("main: after InitExtensions\n");
     LogMessageVerb(X_INFO, 1, "Extensions initialized\n");
 
     DIX_FOR_EACH_GPU_SCREEN({
@@ -204,16 +217,30 @@ dix_main(int argc, char *argv[], char *envp[])
             FatalError("failed to create screen pixmap properties");
         if (!dixScreenRaiseCreateResources(walkScreen))
             FatalError("failed to create screen resources");
+        ErrorF("DIX_FOR_EACH_GPU_SCREEN: done with walkScreen=%p\n", walkScreen);
+        fflush(stderr);
     });
+
+    ErrorF("main: after DIX_FOR_EACH_GPU_SCREEN\n");
+    fflush(stderr);
 
     /* Let all screens register the necessary privates */
 
+    ErrorF("main: before DIX_FOR_EACH_SCREEN\n");
+    fflush(stderr);
     DIX_FOR_EACH_SCREEN({
+        ErrorF("DIX_FOR_EACH_SCREEN: walkScreen=%p myNum=%d\n", walkScreen, walkScreen->myNum);
+        fflush(stderr);
         if (!PixmapScreenInit(walkScreen))
             FatalError("failed to create screen pixmap properties");
         if (!dixScreenRaiseCreateResources(walkScreen))
             FatalError("failed to create screen resources");
+        ErrorF("DIX_FOR_EACH_SCREEN: done with walkScreen=%p\n", walkScreen);
+        fflush(stderr);
     });
+
+    ErrorF("main: after DIX_FOR_EACH_SCREEN\n");
+    fflush(stderr);
 
     /* Then use these privates to initialize root windows etc */
 

@@ -88,6 +88,7 @@ SOFTWARE.
 
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
+#include "Xext/nexus/nexus.h"
 
 #include "extension.h"
 #include "micmap.h"
@@ -164,6 +165,7 @@ static const ExtensionModule staticExtensions[] = {
 #ifdef GLXEXT
     {GlxExtensionInit, "GLX", &noGlxExtension},
 #endif
+    {NexusExtensionInit, "NEXUS", &noNexusExtension},
 };
 
 void
@@ -251,6 +253,8 @@ InitExtensions(int argc, char *argv[])
     int i;
     ExtensionModule *ext;
 
+    ErrorF("InitExtensions: ENTRY\n");
+    fflush(stderr);
     AddStaticExtensions();
 
     for (i = 0; i < numExtensionModules; i++) {

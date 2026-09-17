@@ -39,6 +39,7 @@ if build_xwin or build_xquartz
 endif
 subdir('randr')
 subdir('record')
+subdir('nexus')
 subdir('xcmisc')
 subdir('shape')
 subdir('saver')

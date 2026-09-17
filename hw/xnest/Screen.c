@@ -31,6 +31,7 @@ is" without express or implied warranty.
 #include "resource.h"
 
 #include "xnest-xcb.h"
+#include "Xext/nexus/nexus.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -310,6 +311,8 @@ breakout:
                       numVisuals, visuals))
         return FALSE;
 
+    ErrorF("xnestOpenScreen: after miScreenInit, myNum=%d\n", pScreen->myNum);
+
     pScreen->defColormap = (Colormap) dixAllocServerXID();
     pScreen->minInstalledCmaps = MINCMAPS;
     pScreen->maxInstalledCmaps = MAXCMAPS;
@@ -511,6 +514,7 @@ breakout:
     if (!xnestCreateDefaultColormap(pScreen))
         return FALSE;
 
+    ErrorF("xnestOpenScreen: returning TRUE\n");
     return TRUE;
 }
 

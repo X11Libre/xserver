@@ -31,6 +31,7 @@ extern Bool noShapeExtension;
 extern Bool noTestExtensions;
 extern Bool noXFixesExtension;
 extern Bool noNamespaceExtension;
+extern Bool noNexusExtension;
 
 extern Bool PanoramiXExtensionDisabledHack;
 
