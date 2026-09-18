@@ -51,8 +51,12 @@ msGlamorCreateRes(ScreenPtr pScreen)
     }
 
     if (ret) {
-        LogMessage(X_INFO, "Xmodesetting(%d): Front buffer depth: %d, bpp: %d\n",
-                   pScreen->myNum, screen->fb.depth, screen->fb.bitsPerPixel);
+        struct gbm_format_name_desc desc = {0};
+        uint32_t format = gbm_bo_get_format(scrpriv->front);
+        uint64_t modifier = gbm_bo_get_modifier(scrpriv->front);
+        const char *format_name = gbm_format_get_name(format, &desc);
+        LogMessage(X_INFO, "Xmodesetting(%d): Front buffer depth: %d, bpp: %d, format: %s, modifier: 0x%lx\n",
+                   pScreen->myNum, screen->fb.depth, screen->fb.bitsPerPixel, format_name, modifier);
     }
 
     return ret;
