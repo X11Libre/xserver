@@ -61,6 +61,10 @@
 #define ACCEL_PROP_ADAPTIVE_DECELERATION "Device Accel Adaptive Deceleration"
 /* FLOAT, format 32 */
 #define ACCEL_PROP_VELOCITY_SCALING "Device Accel Velocity Scaling"
+/* FLOAT, format 32. Threshold for Mic-E-Mouse protection.
+ * Any movement smaller than this threshold will be discarded.
+ * Set to 0.0 to disable. */
+#define ACCEL_PROP_MICEMOUSE_PROTECTION "Device Accel Micemouse Protection"
 
 /* Axis labels */
 #define AXIS_LABEL_PROP "Axis Labels"
