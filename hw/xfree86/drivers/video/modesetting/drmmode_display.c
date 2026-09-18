@@ -1489,6 +1489,34 @@ drmmode_create_tearfree_shadow(xf86CrtcPtr crtc)
     if (!drmmode->tearfree_enable)
         return TRUE;
 
+    /*
+     * A modeset that doesn't change the scanout dimensions — a position change,
+     * a refresh rate change, re-asserting the same mode — can keep the buffers
+     * it already has. Tearing them down and rebuilding them leaves the CRTC
+     * with nothing valid to scan out until the new ones are painted, which
+     * shows up as the display blanking on every RandR change. xf86-video-amdgpu
+     * takes the same shortcut in drmmode_crtc_scanout_create().
+     *
+     * The buffers are kept, but their contents are not: drmmode_copy_damage()
+     * reads the screen pixmap at the CRTC's position, so a CRTC that moved has
+     * to be re-seeded from its new bounds, exactly as if the buffers had just
+     * been allocated.
+     */
+    if (trf->buf[0].px && trf->buf[1].px &&
+        trf->buf[0].px->drawable.width == w &&
+        trf->buf[0].px->drawable.height == h &&
+        trf->buf[0].px->drawable.depth == crtc->scrn->depth &&
+        trf->buf[0].px->drawable.bitsPerPixel == drmmode->kbpp) {
+        for (i = 0; i < ARRAY_SIZE(trf->buf); i++) {
+            RegionUninit(&trf->buf[i].dmg);
+            RegionInit(&trf->buf[i].dmg, &crtc->bounds, 0);
+        }
+
+        drmmode_copy_damage(crtc, trf->buf[trf->back_idx ^ 1].px,
+                            &trf->buf[trf->back_idx ^ 1].dmg, TRUE);
+        return TRUE;
+    }
+
     /* Destroy the old mode's buffers and make new ones */
     drmmode_destroy_tearfree_shadow(crtc);
     for (i = 0; i < ARRAY_SIZE(trf->buf); i++) {
