@@ -23,7 +23,9 @@ If no -dri option was passed, this device will also be used for rendering
 .B -noshadow
 disables the ShadowFB layer on supported hw, may slightly increase performance.
 May also lead to flickering.
-
+.TP 8
+.B -swap
+Sets the prefered format color ordering to BGR instead of RGB.
 .SH CONFIGURATION
 .
 Like all kdrive X servers,

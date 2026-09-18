@@ -48,6 +48,7 @@ typedef struct _msScrPriv {
 
 typedef struct _msScreenConf {
     Bool shadow;
+    Bool format_swap;
     KdGlamorInfo glamor_info;
 } MsScreenConf;
 
