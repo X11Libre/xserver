@@ -685,14 +685,12 @@ jobs:
 
     xserver-build-netbsd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         timeout-minutes: 90
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
             LDFLAGS: "-Wl,--no-fatal-warnings"
         steps:
             - uses: actions/checkout@v6
-            - uses: ./.github/actions/ubuntu-pkg-cache
 
             # VM boot / image provisioning flakes transiently; retry the whole
             # VM step up to 3x, tearing down the leftover domain between tries
@@ -705,6 +703,7 @@ jobs:
                   envs: 'MESON_ARGS LDFLAGS'
                   usesh: true
                   release: '11.0'
+                  sync: rsync
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
             - name: cleanup stale VM before retry
@@ -722,6 +721,7 @@ jobs:
                   envs: 'MESON_ARGS LDFLAGS'
                   usesh: true
                   release: '11.0'
+                  sync: rsync
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
             - name: cleanup stale VM before final retry
@@ -737,6 +737,7 @@ jobs:
                   envs: 'MESON_ARGS LDFLAGS'
                   usesh: true
                   release: '11.0'
+                  sync: rsync
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
     # illumos / Solaris build, run in an OpenIndiana VM (vmactions, same
