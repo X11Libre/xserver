@@ -267,6 +267,12 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
         format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, FALSE /* rb_swap */);
         format_swap = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, TRUE /* rb_swap */);
 
+        if (config->format_swap) {
+            uint32_t tmp = format;
+            format = format_swap;
+            format_swap = tmp;
+        }
+
 #ifdef GLAMOR
         if (!need_map) {
             if (!ret) {
@@ -656,7 +662,8 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         break;
     }
 
-    if (rb_swap) {
+    /* XXX Only cpu-mapped buffers need swap here */
+    if (rb_swap && gbm_bo_get_map(scrpriv->front)) {
         int tmp = screen->fb.blueMask;
         screen->fb.blueMask = screen->fb.redMask;
         screen->fb.redMask = tmp;
