@@ -422,8 +422,11 @@ xorg_data.set('WSCONS_SUPPORT',
 # macros are kept for backwards compatibility with existing drivers.
 xorg_data.set('CONFIG_BSD_CONSOLE', '1')
 xorg_data.set('CSRG_BASED', '1')
-xorg_data.set('PCVT_SUPPORT', '1')
-xorg_data.set('SYSCONS_SUPPORT', '1')
+# PCVT and SYSCONS are FreeBSD/DragonFly specific; NetBSD/OpenBSD use wscons
+if host_machine.system() == 'freebsd' or host_machine.system() == 'dragonfly'
+    xorg_data.set('PCVT_SUPPORT', '1')
+    xorg_data.set('SYSCONS_SUPPORT', '1')
+endif
 # WSCONS_SUPPORT is already set above for netbsd/openbsd
 
 xorg_data.set('HAVE_STROPTS_H', cc.has_header('stropts.h') ? '1' : false)
