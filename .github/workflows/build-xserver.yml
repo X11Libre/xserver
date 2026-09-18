@@ -694,7 +694,7 @@ jobs:
             - name: run in netbsd VM (attempt 1)
               id: netbsd-1
               continue-on-error: true
-              uses: vmactions/netbsd-vm@v1.2.3
+              uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
@@ -711,7 +711,7 @@ jobs:
               id: netbsd-2
               if: steps.netbsd-1.outcome == 'failure'
               continue-on-error: true
-              uses: vmactions/netbsd-vm@v1.2.3
+              uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
@@ -726,7 +726,7 @@ jobs:
 
             - name: run in netbsd VM (attempt 3)
               if: steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
-              uses: vmactions/netbsd-vm@v1.2.3
+              uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
