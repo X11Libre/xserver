@@ -1,7 +1,7 @@
-#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "dix-config.h"
+#include <X11/X.h>
 #include "nexus.h"
 #include "dix.h"
 #include "screenint.h"
@@ -28,7 +28,7 @@ static DevPrivateKeyRec nexus_screen_private_key;
 static ScreenPtr nexus_screen = NULL;
 static bool nexus_privates_registered = false;
 
-static int
+int
 nexus_dummy_screen_init(ScreenPtr pScreen, int argc, char **argv)
 {
     (void)argc;
@@ -95,28 +95,28 @@ nexus_dummy_screen_init(ScreenPtr pScreen, int argc, char **argv)
     return TRUE;
 }
 
-static bool
+static Bool
 nexus_dummy_validate_physical(ScreenPtr nexus, ScreenPtr physical)
 {
     (void)nexus;
     (void)physical;
-    return true;
+    return TRUE;
 }
 
-static bool
+static Bool
 nexus_register_privates(void)
 {
     if (nexus_privates_registered)
-        return true;
+        return TRUE;
 
     if (!dixRegisterPrivateKey(&nexus_screen_private_key, PRIVATE_SCREEN, 0))
-        return false;
+        return FALSE;
 
-    nexus_privates_registered = true;
-    return true;
+    nexus_privates_registered = TRUE;
+    return TRUE;
 }
-
-static ScreenPtr nexus_create_screen(void)
+static ScreenPtr
+nexus_create_screen(void)
 {
     if (!nexus_register_privates())
         return NULL;
@@ -132,7 +132,8 @@ static ScreenPtr nexus_create_screen(void)
     return pScreen;
 }
 
-bool NexusPreInit(void)
+Bool
+NexusPreInit(void)
 {
     if (noNexusExtension)
         return TRUE;
@@ -146,7 +147,8 @@ bool NexusPreInit(void)
     return TRUE;
 }
 
-bool NexusPostInit(void)
+Bool
+NexusPostInit(void)
 {
     if (!nexus_screen)
         return TRUE;
@@ -156,7 +158,8 @@ bool NexusPostInit(void)
     return nexus_validate_all_physical();
 }
 
-bool nexus_validate_all_physical(void)
+Bool
+nexus_validate_all_physical(void)
 {
     if (!nexus_screen)
         return TRUE;

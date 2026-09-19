@@ -135,8 +135,9 @@ typedef struct {
 #endif
 } vfbScreenInfo, *vfbScreenInfoPtr;
 
-static int vfbNumScreens;
-static vfbScreenInfo *vfbScreens;
+/* Screen info array - fixed size to handle nexus screen offset */
+static vfbScreenInfo vfbScreens[MAXSCREENS];
+static int vfbNumScreens = 0;
 
 static vfbScreenInfo defaultScreenInfo = {
     .width = VFB_DEFAULT_WIDTH,
@@ -354,11 +355,13 @@ ddxProcessArgument(int argc, char *argv[], int i)
                        screenNum);
         }
 
+        if (screenNum >= MAXSCREENS) {
+            ErrorF("Screen number %d exceeds maximum %d\n", screenNum, MAXSCREENS - 1);
+            UseMsg();
+            FatalError("Screen number %d exceeds maximum %d\n", screenNum, MAXSCREENS - 1);
+        }
+
         if (vfbNumScreens <= screenNum) {
-            vfbScreens =
-                reallocarray(vfbScreens, screenNum + 1, sizeof(*vfbScreens));
-            if (!vfbScreens)
-                FatalError("Not enough memory for screen %d\n", screenNum);
             for (; vfbNumScreens <= screenNum; ++vfbNumScreens)
                 vfbInitializeScreenInfo(&vfbScreens[vfbNumScreens]);
         }
@@ -1190,7 +1193,7 @@ InitOutput(int argc, char **argv)
     /* initialize screens */
 
     if (vfbNumScreens < 1) {
-        vfbScreens = &defaultScreenInfo;
+        vfbScreens[0] = defaultScreenInfo;
         vfbNumScreens = 1;
     }
     for (i = 0; i < vfbNumScreens; i++) {

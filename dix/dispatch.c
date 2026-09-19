@@ -120,6 +120,7 @@ Equipment Corporation.
 #include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
+#include "Xext/nexus/nexus.h"
 #include "dix/settings_priv.h"
 #include "dix/window_priv.h"
 #include "include/resource.h"
@@ -4166,7 +4167,6 @@ AddScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
     update_desktop_dimensions();
 
     return i;
-}
 }
 
 int
