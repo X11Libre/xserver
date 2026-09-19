@@ -639,6 +639,9 @@ modesetting_claim_connector_crtc(msPriv *priv, uint32_t conn, int crtc)
 static Bool
 msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
 {
+#ifdef GLAMOR
+    MsScreenConf *config = screen->closure;
+#endif
     msPriv *priv = screen->card->driver;
     int fd = gbm_device_get_fd(priv->gbm);
     uint32_t format;
@@ -749,8 +752,15 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         break;
     }
 
-    /* XXX Only cpu-mapped buffers need swap here */
-    if (rb_swap && gbm_bo_get_map(scrpriv->front)) {
+    /* XXX Tiled buffers don't need r-b swap, unless it's depth 30 on gles */
+    if (!gbm_bo_get_map(scrpriv->front)) {
+        if (screen->fb.depth != 30 ||
+            !config->glamor_info.force_es) {
+            rb_swap = FALSE;
+        }
+    }
+
+    if (rb_swap) {
         int tmp = screen->fb.blueMask;
         screen->fb.blueMask = screen->fb.redMask;
         screen->fb.redMask = tmp;
