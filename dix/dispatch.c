@@ -4158,9 +4158,15 @@ AddScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
         return -1;
     }
 
+    /* If nexus extension is enabled, register physical screens */
+    if (screenInfo.numScreens > 0 && pfnInit != nexus_dummy_screen_init) {
+        nexus_register_physical_screen(pScreen);
+    }
+
     update_desktop_dimensions();
 
     return i;
+}
 }
 
 int

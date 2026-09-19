@@ -181,3 +181,15 @@ NexusExtensionInit(void)
         FatalError("NEXUS extension requires at least one physical screen");
     }
 }
+
+/* Called from AddScreen to register physical screens with nexus */
+void
+nexus_register_physical_screen(ScreenPtr pScreen)
+{
+    if (noNexusExtension || !nexus_screen)
+        return;
+
+    if (pScreen != nexus_screen) {
+        dixSetPrivate(&pScreen->devPrivates, &nexus_screen_private_key, (void *)1);
+    }
+}
