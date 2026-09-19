@@ -20,46 +20,39 @@ msGlamorCreateRes(ScreenPtr pScreen)
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
     PixmapPtr rootPixmap;
-    Bool ret = TRUE;
+
+    struct gbm_format_name_desc desc = {0};
+    uint32_t format;
+    uint64_t modifier;
+    const char *format_name;
 
     rootPixmap = (*pScreen->GetScreenPixmap)(pScreen);
 
     if (!gbm_bo_get_map(scrpriv->front)) {
         Bool used_modifiers = gbm_bo_get_used_modifiers(scrpriv->front);
-        ret = !screen->dumb && glamor_egl_create_textured_pixmap_from_gbm_bo(rootPixmap, scrpriv->front,
-                                                                             used_modifiers);
-        if (ret) {
+        if (!screen->dumb &&
+            glamor_egl_create_textured_pixmap_from_gbm_bo(rootPixmap, scrpriv->front, used_modifiers)) {
             LogMessage(X_INFO, "Xmodesetting(%d): Using a tiled front buffer\n", pScreen->myNum);
         } else {
             if (!msGlamorMapFront(pScreen)) {
+                LogMessage(X_ERROR, "Xmodesetting(%d): Could not map the front buffer\n",
+                           pScreen->myNum);
                 return FALSE;
             }
-            ret = (*pScreen->ModifyPixmapHeader) (rootPixmap,
-                                                  pScreen->width,
-                                                  pScreen->height,
-                                                  screen->fb.depth,
-                                                  screen->fb.bitsPerPixel,
-                                                  screen->fb.byteStride,
-                                                  screen->fb.frameBuffer);
 
-            if (ret) {
-                LogMessage(X_INFO, "Xmodesetting(%d): Using a cpu mapped front buffer\n", pScreen->myNum);
-            }
+            LogMessage(X_INFO, "Xmodesetting(%d): Using a cpu mapped front buffer\n", pScreen->myNum);
         }
     } else {
         LogMessage(X_INFO, "Xmodesetting(%d): Using a cpu mapped front buffer\n", pScreen->myNum);
     }
 
-    if (ret) {
-        struct gbm_format_name_desc desc = {0};
-        uint32_t format = gbm_bo_get_format(scrpriv->front);
-        uint64_t modifier = gbm_bo_get_modifier(scrpriv->front);
-        const char *format_name = gbm_format_get_name(format, &desc);
-        LogMessage(X_INFO, "Xmodesetting(%d): Front buffer depth: %d, bpp: %d, format: %s, modifier: 0x%lx\n",
-                   pScreen->myNum, screen->fb.depth, screen->fb.bitsPerPixel, format_name, modifier);
-    }
+    format = gbm_bo_get_format(scrpriv->front);
+    modifier = gbm_bo_get_modifier(scrpriv->front);
+    format_name = gbm_format_get_name(format, &desc);
+    LogMessage(X_INFO, "Xmodesetting(%d): Front buffer depth: %d, bpp: %d, format: %s, modifier: 0x%lx\n",
+               pScreen->myNum, screen->fb.depth, screen->fb.bitsPerPixel, format_name, modifier);
 
-    return ret;
+    return TRUE;
 }
 
 static Bool
@@ -68,36 +61,22 @@ msGlamorMapFront(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msPriv *priv = screen->card->driver;
-    msScrPriv *scrpriv = screen->driver;
-    msScrPriv oldscr;
-
-    struct gbm_bo *old_front = scrpriv->front;
+    struct gbm_bo *new_front = NULL;
 
     LogMessage(X_ERROR, "Xmodesetting(%d): Cannot use tiled gbm front, trying to use a mapped front bo\n", pScreen->myNum);
 
-    oldscr = *scrpriv;
-
-    msUnmapFramebuffer(screen);
-
-    scrpriv->front = modesetting_open(priv, screen, TRUE /* need_map */);
-    if (!scrpriv->front) {
+    new_front = modesetting_open(priv, screen, TRUE /* need_map */);
+    if (!new_front ||
+        !msSetScreenBo(pScreen, new_front, FALSE /* flip */)) {
         goto bail;
     }
-
-    if (!msMapFramebuffer(screen)) {
-        goto bail;
-    }
-
-    gbm_bo_destroy(old_front);
-    scrpriv->setPixmapBits = TRUE;
 
     return TRUE;
 
 bail:
-    msUnmapFramebuffer(screen);
-    *scrpriv = oldscr;
-    msMapFramebuffer(screen);
-    scrpriv->error = TRUE;
+    if (new_front) {
+        gbm_bo_destroy(new_front);
+    }
     return FALSE;
 }
 
