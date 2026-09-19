@@ -99,6 +99,16 @@ glamor_init_pixmap_private_small(PixmapPtr pixmap, glamor_pixmap_private *pixmap
     pixmap_priv->fbo_array = &pixmap_priv->fbo;
 }
 
+glamor_pixmap_type_t
+glamor_get_pixmap_type(PixmapPtr pixmap)
+{
+    glamor_pixmap_private *pixmap_priv;
+
+    pixmap_priv = glamor_get_pixmap_private(pixmap);
+    BUG_RETURN_VAL(!pixmap_priv, GLAMOR_DRM_ONLY);
+    return pixmap_priv->type;
+}
+
 void
 glamor_set_pixmap_type(PixmapPtr pixmap, glamor_pixmap_type_t type)
 {
