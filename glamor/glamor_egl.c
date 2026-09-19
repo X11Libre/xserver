@@ -477,7 +477,6 @@ glamor_egl_make_pixmap_exportable2(PixmapPtr pixmap, Bool used_modifiers)
     EGLImageKHR image = glamor_egl_image_from_pixmap(pixmap);
 
     if (image == EGL_NO_IMAGE_KHR) {
-        glamor_set_pixmap_type(pixmap, GLAMOR_DRM_ONLY);
         return FALSE;
     }
 
@@ -580,22 +579,35 @@ glamor_egl_create_textured_pixmap_from_egl_image(PixmapPtr pixmap,
                                                  Bool used_modifiers)
 {
     ScreenPtr screen = pixmap->drawable.pScreen;
-    GLuint texture;
+    glamor_pixmap_type_t saved_pixmap_type;
+    GLuint texture = 0;
+
+    saved_pixmap_type = glamor_get_pixmap_type(pixmap);
 
     if (!glamor_create_texture_from_image(screen, image, &texture)) {
-        if (image != EGL_NO_IMAGE_KHR) {
-            glamor_egl_priv_t *glamor_egl =
-            glamor_egl_get_screen_private(screen);
-            eglDestroyImageKHR(glamor_egl->display, image);
-        }
-        glamor_set_pixmap_type(pixmap, GLAMOR_DRM_ONLY);
-        return FALSE;
+        goto bail;
     }
 
     glamor_set_pixmap_type(pixmap, GLAMOR_TEXTURE_DRM);
-    glamor_set_pixmap_texture(pixmap, texture);
+    if (!glamor_set_pixmap_texture(pixmap, texture)) {
+        goto bail;
+    }
     glamor_egl_set_pixmap_image(pixmap, image, used_modifiers);
     return TRUE;
+
+bail:
+    if (texture) {
+        glDeleteTextures(1, &texture);
+    }
+
+    if (image != EGL_NO_IMAGE_KHR) {
+        glamor_egl_priv_t *glamor_egl =
+            glamor_egl_get_screen_private(screen);
+        eglDestroyImageKHR(glamor_egl->display, image);
+    }
+
+    glamor_set_pixmap_type(pixmap, saved_pixmap_type);
+    return FALSE;
 }
 
 static Bool
@@ -1651,6 +1663,7 @@ glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
 {
     EGLImageKHR temp_img;
     bool temp_mod;
+    glamor_pixmap_type_t temp_type;
     struct glamor_pixmap_private *front_priv =
         glamor_get_pixmap_private(front);
     struct glamor_pixmap_private *back_priv =
@@ -1663,6 +1676,7 @@ glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
 
     temp_img = back_priv->image;
     temp_mod = back_priv->used_modifiers;
+    temp_type = back_priv->type;
 
     back_priv->image = front_priv->image;
     back_priv->used_modifiers = front_priv->used_modifiers;
@@ -1670,8 +1684,8 @@ glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
     front_priv->image = temp_img;
     front_priv->used_modifiers = temp_mod;
 
-    glamor_set_pixmap_type(front, GLAMOR_TEXTURE_DRM);
-    glamor_set_pixmap_type(back, GLAMOR_TEXTURE_DRM);
+    glamor_set_pixmap_type(back, front_priv->type);
+    glamor_set_pixmap_type(front, temp_type);
 }
 
 static void glamor_egl_pre_close_screen_cleanup(glamor_egl_priv_t *glamor_egl);
