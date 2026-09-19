@@ -44,6 +44,8 @@ typedef struct glamor_egl_screen_private {
     int can_texture_gbm_bo;
 #endif
 
+    int is_gles;
+
     int has_image_dma_buf_export;
     int has_EXT_EGL_image_storage;
     int has_OES_EGL_image;
