@@ -11,29 +11,33 @@
 typedef struct {
     /* Passed to glamor_egl */
     const char* glvnd; /* glvnd vendor library or driver name */
-    int dri_fd; /* /dev/dri/[cardxx|renderDxxx] */
+    const char* dri_path; /* /dev/dri/[cardxx|renderDxxx] */
     Bool use_gbm; /* If glamor should try to use libgbm */
     Bool direct_dri3; /* If glamor should only use the direct DRI3 implementation */
     Bool force_gl; /* If glamor should only create desktop gl contexts */
     Bool force_es; /* If glamor should only create gles contexts */
 
     /* Handled by KdGlamorInit */
-    Bool use_xv; /* Enable X-Video support */
+    Bool want_dri_fd; /* If dri_fd is already populated */
+    int fake_rate; /* If a fake refresh rate should be used by present */
+    Bool drop_master; /* If KdGlamorInit should call drmDropMaster on the dri fd */
+    Bool no_xv; /* Disable X-Video support */
     Bool no_render_accel; /* Disable render acceleration */
     Bool force_render_accel; /* Enable render acceleration on top of sw renderers */
+
+    /* Populated and closed by KdGlamorInit / KdGlamorFini */
+    int dri_fd;
 } KdGlamorInfo;
 
-/* A sane default config for KdGlamorInit */
-extern const KdGlamorInfo kdGlamorDefault;
-
 #ifdef GLAMOR
-Bool KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps);
+Bool KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps);
 void KdGlamorEnable(ScreenPtr pScreen);
 void KdGlamorDisable(ScreenPtr pScreen);
-void KdGlamorFini(ScreenPtr pScreen);
+void KdGlamorFini(ScreenPtr pScreen, KdGlamorInfo *info);
 #endif
 
-int KdGlamorParse(KdGlamorInfo *info, const char **dri, int argc, char **argv, int i);
+int KdGlamorParse(KdGlamorInfo *info, int argc, char **argv, int i);
+void KdGlamorLogScreenInfo(const KdGlamorInfo *info, int screen_num);
 void KdGlamorUseMsg(void);
 
 /* Put each screen on a different card */

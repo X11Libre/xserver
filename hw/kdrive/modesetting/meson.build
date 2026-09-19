@@ -1,26 +1,29 @@
 srcs = [
-    'fake.c',
-    'fakeinit.c',
+    'modesetting.c',
+    'msinit.c',
+    'ms_gamma.c',
+    'ms_gbm.c',
     '../../stubs/ddxBeforeReset.c',
 ]
 
 if build_glamor
-    srcs += 'fake_glamor.c'
+    srcs += 'ms_glamor.c'
 endif
 
-xfake_server = executable(
-    'Xfake',
+xmodesetting_server = executable(
+    'Xmodesetting',
     srcs,
     include_directories: [
         inc,
         include_directories('../src'),
+        include_directories('../os/linux'),
         include_directories('../os/stub'),
     ],
-    dependencies: common_dep,
+    dependencies: [ common_dep, libdrm_dep, gbm_dep ],
     link_with: [
         libxserver_main,
         kdrive,
-        stub,
+        linux,
         libxserver_fb,
         libxserver,
         libxserver_glx,
@@ -30,3 +33,10 @@ xfake_server = executable(
     ],
     install: true,
 )
+
+xmodesetting_man = configure_file(
+    input: 'Xmodesetting.man',
+    output: 'Xmodesetting.1',
+    configuration: manpage_config,
+)
+install_man(xmodesetting_man)

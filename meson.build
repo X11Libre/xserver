@@ -288,13 +288,16 @@ build_xfake = get_option('xfake')
 
 build_xfbdev = get_option('xfbdev')
 
+build_xmodesetting = get_option('xmodesetting')
+
 build_xserver = (build_xorg or
                  build_xnest or
                  build_xvfb or
                  build_xquartz or
                  build_xephyr or
                  build_xfake or
-                 build_xfbdev)
+                 build_xfbdev or
+                 build_xmodesetting)
 
 summary({
         'Xorg': build_xorg,
@@ -305,6 +308,7 @@ summary({
         'Xephyr': build_xephyr,
         'Xfake': build_xfake,
         'Xfbdev': build_xfbdev,
+        'Xmodesetting': build_xfbdev,
     },
     section: 'DDX',
     bool_yn: true,

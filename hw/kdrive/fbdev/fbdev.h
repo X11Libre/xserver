@@ -48,16 +48,12 @@ typedef struct _fbdevScrPriv {
     Bool shadow;
     int max_width;
     int max_height;
-#ifdef GLAMOR
-    int dri_fd;
-#endif
 } FbdevScrPriv;
 
 typedef struct _fbScreenConf {
     const char *fb_path;
     Bool shadow;
     KdGlamorInfo glamor_info;
-    const char *dri_path;
 } FbScreenConf;
 
 extern KdCardFuncs fbdevFuncs;

@@ -11,6 +11,9 @@
 
 #include "os/cmdline.h" /* UseMsg() */
 
+#include "present.h"
+#include "Xext/present/present_priv.h" /* extern uint32_t FakeScreenFps; */
+
 #ifdef GLAMOR
 #include "glamor.h"
 #include "glamor_egl.h"
@@ -24,23 +27,48 @@
 
 #include <errno.h>
 
-const KdGlamorInfo kdGlamorDefault = {
-                                      .glvnd = NULL,
-                                      .dri_fd = -1,
-                                      .use_gbm = FALSE,
-                                      .direct_dri3 = FALSE,
-                                      .force_gl = FALSE,
-                                      .force_es = FALSE,
-                                      .use_xv = TRUE,
-                                      .no_render_accel = FALSE,
-                                      .force_render_accel = FALSE,
-                                     };
+#ifdef WITH_LIBDRM
+#include <xf86drm.h>
+#else
+#ifdef GLAMOR
+
+#ifdef KDRIVE_LINUX
+#include <sys/ioctl.h>
+#endif
+
+#ifndef DRM_IOCTL_DROP_MASTER
+#define DRM_IOCTL_DROP_MASTER 0x641f
+#endif
+
+static int
+drmIoctl(int fd, unsigned long request, void *arg)
+{
+#ifdef KDRIVE_LINUX
+    int ret;
+
+    do {
+        ret = ioctl(fd, request, arg);
+    } while (ret == -1 && (errno == EINTR || errno == EAGAIN));
+    return ret;
+#else
+    return -ENOSYS;
+#endif
+}
+
+static int drmDropMaster(int fd)
+{
+    return drmIoctl(fd, DRM_IOCTL_DROP_MASTER, NULL);
+}
+#endif
+#endif
 
 #ifdef GLAMOR
 Bool
-KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps)
+KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps)
 {
     int flags = GLAMOR_USE_EGL_SCREEN;
+    int has_dri3;
+    int _caps;
 
     glamor_egl_conf_t glamor_egl_conf = {
                                          .server_private = NULL, /* only for xf86 */
@@ -48,7 +76,7 @@ KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps)
                                          .glamor_egl_priv = NULL, /* only for xf86 */
                                          .GLAMOR_EGL_PRIV_PROC = NULL, /* only for xf86 */
                                          .glvnd_vendor = info->glvnd,
-                                         .fd = info->dri_fd,
+                                         .fd = -1,
                                          .gbm_forbidden = !info->use_gbm,
                                          .direct_dri3_only = info->direct_dri3,
                                          .auto_dri = FALSE, /* deprecated */
@@ -61,12 +89,31 @@ KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps)
                                          .force_es = info->force_es,
                                         };
 
-    if (caps) {
-        *caps = GLAMOR_EGL_CAP_NONE;
+    if (!caps) {
+        caps = &_caps;
     }
 
+    *caps = GLAMOR_EGL_CAP_NONE;
+
+    if (info->want_dri_fd) {
+        /* do nothing */
+    } else if (info->dri_path) {
+        info->dri_fd = open(info->dri_path, O_RDWR);
+        if (info->dri_fd < 0) {
+            LogMessage(X_WARNING, "KGlamor(%d): Could not open %s: %s\n", pScreen->myNum, info->dri_path, strerror(errno));
+        }
+    } else {
+        info->dri_fd = -1;
+    }
+
+    if ((info->dri_fd >= 0) && info->drop_master) {
+        drmDropMaster(info->dri_fd);
+    }
+
+    glamor_egl_conf.fd = info->dri_fd;
+
     if (!glamor_egl_init_internal(&glamor_egl_conf, caps)) {
-        return FALSE;
+        goto bail;
     }
 
     if (info->no_render_accel) {
@@ -85,16 +132,46 @@ KdGlamorInit(ScreenPtr pScreen, const KdGlamorInfo *info, int *caps)
     }
 
     if (!glamor_init(pScreen, flags)) {
-        return FALSE;
+        goto bail;
     }
 
+#define GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT (GLAMOR_EGL_CAP_DRI3_IMPORT | GLAMOR_EGL_CAP_DRI3_EXPORT)
+    has_dri3 = (*caps & GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT) == GLAMOR_EGL_CAP_DRI3_IMPORT_EXPORT;
+    LogMessage(X_INFO, "KGlamor(%d): DRI3 %s initialized\n", pScreen->myNum, has_dri3 ? "" : "not");
+
+#if 0 /* Not yet implemented */
+    LogMessage(X_INFO, "KGlamor(%d): DRI3 explicit sync %s\n", pScreen->myNum,
+               (*caps & GLAMOR_EGL_CAP_DRI3_SYNCOBJ) ?
+               "available" : "unavailable");
+#endif
+
 #ifdef XV
-    if (info->use_xv) {
+    if (!info->no_xv) {
         kd_glamor_xv_init(pScreen);
     }
 #endif
 
+    if (info->fake_rate && (info->dri_fd >= 0)) {
+        /*
+         * X clients use present to try to synchronize with the screen
+         * If no global fake rate was requested and a per-screen rate was requested, use that
+         */
+        if (!FakeScreenFps) {
+            FakeScreenFps = info->fake_rate;
+            present_screen_init(pScreen, NULL);
+            FakeScreenFps = 0;
+        }
+    }
+
     return TRUE;
+
+bail:
+    if (info->dri_fd >= 0) {
+        close(info->dri_fd);
+        info->dri_fd = -1;
+    }
+
+    return FALSE;
 }
 
 void
@@ -108,14 +185,19 @@ KdGlamorDisable(ScreenPtr pScreen)
 }
 
 void
-KdGlamorFini(ScreenPtr pScreen)
+KdGlamorFini(ScreenPtr pScreen, KdGlamorInfo *info)
 {
     glamor_fini(pScreen);
+
+    if (info->dri_fd) {
+        close(info->dri_fd);
+        info->dri_fd = -1;
+    }
 }
 #endif
 
 int
-KdGlamorParse(KdGlamorInfo *info, const char **dri_path, int argc, char **argv, int i)
+KdGlamorParse(KdGlamorInfo *info, int argc, char **argv, int i)
 {
     if (!strcmp(argv[i], "-glamor")) {
         info->force_render_accel = TRUE;
@@ -129,6 +211,11 @@ KdGlamorParse(KdGlamorInfo *info, const char **dri_path, int argc, char **argv, 
 
     if (!strcmp(argv[i], "-gbm")) {
         info->use_gbm = TRUE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-nogbm")) {
+        info->use_gbm = FALSE;
         return 1;
     }
 
@@ -148,9 +235,7 @@ KdGlamorParse(KdGlamorInfo *info, const char **dri_path, int argc, char **argv, 
 
     if (!strcmp(argv[i], "-dri")) {
         if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
-            if (dri_path) {
-                *dri_path = argv[i + 1];
-            }
+            info->dri_path = argv[i + 1];
             return 2;
         }
         UseMsg();
@@ -168,11 +253,36 @@ KdGlamorParse(KdGlamorInfo *info, const char **dri_path, int argc, char **argv, 
     }
 
     if (!strcmp(argv[i], "-noxv")) {
-        info->use_xv = FALSE;
+        info->no_xv = TRUE;
         return 1;
     }
 
     return 0;
+}
+
+void
+KdGlamorLogScreenInfo(const KdGlamorInfo *info, int screen_num)
+{
+    LogMessage(X_INFO, "KGlamor(%d): glvnd library: %s\n", screen_num,
+               info->glvnd ? info->glvnd : "not passed");
+
+    LogMessage(X_INFO, "KGlamor(%d): dri device: %s\n", screen_num,
+               info->dri_path ? info->dri_path : "not passed");
+
+    LogMessage(X_INFO, "KGlamor(%d): glamor OpenGL contexts %s\n", screen_num,
+               !info->force_es ? "allowed" : "forbidden");
+    LogMessage(X_INFO, "KGlamor(%d): glamor GLES contexts %s\n", screen_num,
+               !info->force_gl ? "allowed" : "forbidden");
+
+    LogMessage(X_INFO, "KGlamor(%d): glamor render acceleration %s\n", screen_num,
+               !info->no_render_accel ? "enabled" : "disabled");
+    LogMessage(X_INFO, "KGlamor(%d): glamor render acceleration %s on software renderers\n", screen_num,
+               info->force_render_accel ? "allowed" : "forbidden");
+    LogMessage(X_INFO, "KGlamor(%d): glamor is %s libgbm \n", screen_num,
+               info->use_gbm ? "allowed to use" : "forbidden from using");
+
+    LogMessage(X_INFO, "KGlamor(%d): glamor X-Video support %s\n", screen_num,
+               !info->no_xv ? "enabled" : "disabled");
 }
 
 void
@@ -188,6 +298,8 @@ KdGlamorUseMsg(void)
         ("-noglamor            Force disable glamor render acceleration\n");
     ErrorF
         ("-gbm                 Allow glamor to use libgbm\n");
+    ErrorF
+        ("-nogbm               Force glamor to not use libgbm\n");
     ErrorF
         ("-direct-dri3         Force glamor to use the direct DRI3 implementation\n");
     ErrorF
