@@ -14,6 +14,10 @@
 #include "kxv.h"
 #endif
 
+
+static void
+msSetScreenSizes(ScreenPtr pScreen);
+
 static Bool
 msFdMatch(int fd1, int fd2);
 
@@ -320,6 +324,78 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
     return ret;
 }
 
+Bool
+msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
+{
+    KdScreenPriv(pScreen);
+    KdScreenInfo *screen = pScreenPriv->screen;
+    msScrPriv *scrpriv = screen->driver;
+    struct gbm_bo *old_front;
+    Bool wasEnabled = pScreenPriv->enabled;
+    msScrPriv oldscr;
+
+    if (wasEnabled) {
+        KdDisableScreen(pScreen);
+    }
+
+    oldscr = *scrpriv;
+
+    old_front = scrpriv->front;
+
+    msUnmapFramebuffer(screen);
+
+    scrpriv->front = bo;
+
+    if (!msMapFramebuffer(screen)) {
+        goto bail;
+    }
+
+    KdShadowUnset(screen->pScreen);
+
+    if (!msSetShadow(screen->pScreen)) {
+        goto bail;
+    }
+
+    msSetScreenSizes(screen->pScreen);
+
+    /*
+     * Set frame buffer mapping
+     */
+    (*pScreen->ModifyPixmapHeader) ((*pScreen->GetScreenPixmap)(pScreen),
+                                    pScreen->width,
+                                    pScreen->height,
+                                    screen->fb.depth,
+                                    screen->fb.bitsPerPixel,
+                                    screen->fb.byteStride,
+                                    screen->fb.frameBuffer);
+
+    /* set the subpixel order */
+
+    KdSetSubpixelOrder(pScreen, scrpriv->randr);
+
+    /* Scan out the new bo on the screen's crtc */
+    if (wasEnabled) {
+        KdEnableScreen(pScreen);
+    }
+
+    if (!flip) {
+        gbm_bo_destroy(old_front);
+    }
+    return TRUE;
+
+bail:
+    msUnmapFramebuffer(screen);
+    old_front = scrpriv->front;
+    *scrpriv = oldscr;
+    msMapFramebuffer(screen);
+    msSetScreenSizes(screen->pScreen);
+
+    if (wasEnabled) {
+        KdEnableScreen(pScreen);
+    }
+    return FALSE;
+}
+
 static Bool
 msSetMode(ScreenPtr pScreen, int width, int height, int rate)
 {
@@ -327,11 +403,15 @@ msSetMode(ScreenPtr pScreen, int width, int height, int rate)
     KdScreenInfo *screen = pScreenPriv->screen;
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
-    struct gbm_bo *old_front;
+    struct gbm_bo *new_front = NULL;
     drmModeModeInfo *old_mode;
+    int old_width, old_height, old_rate;
 
-    old_front = scrpriv->front;
     old_mode = scrpriv->mode;
+
+    old_width = screen->width;
+    old_height = screen->height;
+    old_rate = screen->rate;
 
     /* Find the mode */
     scrpriv->mode = modesetting_find_mode(scrpriv->connector, width, height, rate);
@@ -339,26 +419,33 @@ msSetMode(ScreenPtr pScreen, int width, int height, int rate)
         goto bail;
     }
 
+    screen->width = width;
+    screen->height = height;
+    screen->rate = rate;
+
     /* Create a new front with the new sizes */
     if (width != screen->width ||
         height != screen->height) {
         uint32_t format = gbm_bo_get_format(scrpriv->front);
         Bool do_map = !!gbm_bo_get_map(scrpriv->front);
-        scrpriv->front = gbm_create_front_bo(priv->gbm, do_map, width, height, format);
-        if (!scrpriv->front) {
+        new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format);
+        if (!new_front ||
+            !msSetScreenBo(pScreen, new_front, FALSE /* flip */)) {
             goto bail;
         }
-
-        gbm_bo_destroy(old_front);
     }
 
-    screen->width = width;
-    screen->height = height;
-    screen->rate = rate;
     return TRUE;
 
 bail:
-    scrpriv->front = old_front;
+    if (new_front) {
+        gbm_bo_destroy(new_front);
+    }
+
+    screen->width = old_width;
+    screen->height = old_height;
+    screen->rate = old_rate;
+
     scrpriv->mode = old_mode;
 
     return FALSE;
@@ -865,33 +952,20 @@ msRandRSetConfig(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
-    Bool wasEnabled = pScreenPriv->enabled;
-    msScrPriv oldscr;
-    int oldwidth;
-    int oldheight;
+
     int oldmmwidth;
     int oldmmheight;
-    int newwidth, newheight, newmmwidth, newmmheight;
+    int newmmwidth;
+    int newmmheight;
 
     if (screen->randr & (RR_Rotate_0 | RR_Rotate_180)) {
-        newwidth = pSize->width;
-        newheight = pSize->height;
         newmmwidth = pSize->mmWidth;
         newmmheight = pSize->mmHeight;
     } else {
-        newwidth = pSize->height;
-        newheight = pSize->width;
         newmmwidth = pSize->mmHeight;
         newmmheight = pSize->mmWidth;
     }
 
-    if (wasEnabled)
-        KdDisableScreen(pScreen);
-
-    oldscr = *scrpriv;
-
-    oldwidth = screen->width;
-    oldheight = screen->height;
     oldmmwidth = pScreen->mmWidth;
     oldmmheight = pScreen->mmHeight;
 
@@ -901,56 +975,18 @@ msRandRSetConfig(ScreenPtr pScreen,
 
     scrpriv->randr = KdAddRotation(screen->randr, randr);
 
-    pScreen->width = newwidth;
-    pScreen->height = newheight;
     pScreen->mmWidth = newmmwidth;
     pScreen->mmHeight = newmmheight;
 
-    msUnmapFramebuffer(screen);
-
-    if (!msSetMode(pScreen, pSize->width, pSize->height, rate))
-        goto bail4;
-
-    if (!msMapFramebuffer(screen))
-        goto bail4;
-
-    KdShadowUnset(screen->pScreen);
-
-    if (!msSetShadow(screen->pScreen))
-        goto bail4;
-
-    msSetScreenSizes(screen->pScreen);
-
-    /*
-     * Set frame buffer mapping
-     */
-    (*pScreen->ModifyPixmapHeader) ((*pScreen->GetScreenPixmap)(pScreen),
-                                    pScreen->width,
-                                    pScreen->height,
-                                    screen->fb.depth,
-                                    screen->fb.bitsPerPixel,
-                                    screen->fb.byteStride,
-                                    screen->fb.frameBuffer);
-
-    /* set the subpixel order */
-
-    KdSetSubpixelOrder(pScreen, scrpriv->randr);
-    if (wasEnabled)
-        KdEnableScreen(pScreen);
+    if (!msSetMode(pScreen, pSize->width, pSize->height, rate)) {
+        goto bail;
+    }
 
     return TRUE;
 
-bail4:
-    msUnmapFramebuffer(screen);
-    *scrpriv = oldscr;
-    msMapFramebuffer(screen);
-    pScreen->width = oldwidth;
-    pScreen->height = oldheight;
+bail:
     pScreen->mmWidth = oldmmwidth;
     pScreen->mmHeight = oldmmheight;
-
-    if (wasEnabled)
-        KdEnableScreen(pScreen);
     return FALSE;
 }
 
@@ -1183,15 +1219,15 @@ msCreateResources(ScreenPtr pScreen)
     fb_id = gbm_bo_get_fb(priv->front);
     fd = gbm_device_get_fd(gbm);
 
+    if (!msSetShadow(pScreen)) {
+        return FALSE;
+    }
+
 #ifdef GLAMOR
     if (!msGlamorCreateRes(pScreen)) {
         return FALSE;
     }
 #endif
-
-    if (!msSetShadow(pScreen)) {
-        return FALSE;
-    }
 
     /* Damage tracking not supported/needed */
     if (drmModeDirtyFB(fd, fb_id, NULL, 0) &&

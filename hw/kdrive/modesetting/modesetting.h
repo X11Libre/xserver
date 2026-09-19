@@ -80,6 +80,8 @@ void msScreenFini(KdScreenInfo * screen);
 
 void msCardFini(KdCardInfo * card);
 
+Bool msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip);
+
 /* ms_gamma.c */
 
 void msGetColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
