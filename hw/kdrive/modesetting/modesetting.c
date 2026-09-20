@@ -831,8 +831,6 @@ msMapFramebuffer(KdScreenInfo * screen)
     KdPointerMatrix m;
     MsScreenConf *config = screen->closure;
 
-    unsigned long stride = gbm_bo_get_stride(scrpriv->front);
-
     if (!gbm_bo_get_map(scrpriv->front)) {
         scrpriv->shadow = FALSE;
     } else if (config->shadow >= 0) {
@@ -856,8 +854,10 @@ msMapFramebuffer(KdScreenInfo * screen)
             return FALSE;
         }
     } else {
+        unsigned long stride = gbm_bo_get_stride(scrpriv->front);
+        int cpp = (gbm_bo_get_bpp(scrpriv->front) + 7) / 8;
         screen->fb.byteStride = stride;
-        screen->fb.pixelStride = stride / 4;
+        screen->fb.pixelStride = stride / cpp;
         screen->fb.frameBuffer = gbm_bo_get_map(scrpriv->front);
     }
 
