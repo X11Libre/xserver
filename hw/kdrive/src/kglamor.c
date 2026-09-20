@@ -157,7 +157,8 @@ KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps)
          * If no global fake rate was requested and a per-screen rate was requested, use that
          */
         if (!FakeScreenFps) {
-            FakeScreenFps = info->fake_rate;
+            /* 1000000 is the highest fake rate present supports */
+            FakeScreenFps = info->fake_rate > 0 ? info->fake_rate : 1000000;
             present_screen_init(pScreen, NULL);
             FakeScreenFps = 0;
         }

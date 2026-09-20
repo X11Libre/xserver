@@ -32,7 +32,7 @@ static FakeScreenConf *fakeCurrScreen = NULL;
 
 static const FakeScreenConf fakeDefaultConfig = {
                                                  .shadow = -1,
-                                                 .glamor_info = {.fake_rate = 600, .drop_master = TRUE,},
+                                                 .glamor_info = {.fake_rate = -1, .drop_master = TRUE,},
                                                 };
 
 void

@@ -27,7 +27,7 @@ static MsScreenConf *msCurrScreen = NULL;
 
 static const MsScreenConf msDefaultConfig = {
                                              .shadow = TRUE,
-                                             .glamor_info = {.use_gbm = TRUE,},
+                                             .glamor_info = {.fake_rate = -1, .use_gbm = TRUE,},
                                             };
 
 static const char* FindDevPath(int argc, char **argv, int i);

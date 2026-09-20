@@ -36,7 +36,7 @@ static FbScreenConf *fbCurrScreen = NULL;
 static const FbScreenConf fbDefaultConfig = {
                                              .fb_path = NULL,
                                              .shadow = TRUE,
-                                             .glamor_info = {.drop_master = TRUE,},
+                                             .glamor_info = {.fake_rate = -1, .drop_master = TRUE,},
                                             };
 
 static void fbdevLogScreenInfo(const FbScreenConf *config, int screen_num);

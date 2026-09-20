@@ -15,10 +15,6 @@ fbdevInitAccel(ScreenPtr pScreen)
     KdScreenInfo *screen = pScreenPriv->screen;
     FbScreenConf *config = screen->card->closure;
 
-    if (screen->rate > 60) {
-        config->glamor_info.fake_rate = screen->rate;
-    }
-
     return KdGlamorInit(pScreen, &config->glamor_info, NULL);
 }
 
