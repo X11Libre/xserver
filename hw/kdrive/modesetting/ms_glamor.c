@@ -88,10 +88,6 @@ msInitAccel(ScreenPtr pScreen)
     MsScreenConf *config = screen->closure;
     msPriv *priv = screen->card->driver;
 
-    if (screen->rate > 60) {
-        config->glamor_info.fake_rate = screen->rate;
-    }
-
     if (!config->glamor_info.dri_path) {
         config->glamor_info.dri_fd = dup(gbm_device_get_fd(priv->gbm));
         if (config->glamor_info.dri_fd >= 0) {
