@@ -261,8 +261,6 @@ typedef Bool (*winAdjustVideoModeProcPtr) (ScreenPtr);
 
 typedef Bool (*winCreateBoundingWindowProcPtr) (ScreenPtr);
 
-typedef Bool (*winFinishScreenInitProcPtr) (int, ScreenPtr, int, char **);
-
 typedef Bool (*winBltExposedRegionsProcPtr) (ScreenPtr);
 
 typedef Bool (*winBltExposedWindowRegionProcPtr) (ScreenPtr, WindowPtr);
