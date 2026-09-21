@@ -254,8 +254,7 @@ AddVTAtoms(CallbackListPtr *pcbl, void *data, void *screen)
                    "Failed to register VT properties\n");
 }
 
-static Bool
-xf86ScreenInit(ScreenPtr pScreen, int argc, char **argv)
+static bool xf86ScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 
@@ -635,7 +634,7 @@ InitOutput(int argc, char **argv)
 #ifdef XFreeXDGA
         xf86Screens[i]->SetDGAMode = xf86SetDGAMode;
 #endif
-        scr_index = AddScreen(xf86ScreenInit, argc, argv);
+        scr_index = AddScreen(xf86ScreenInit, argc, argv, xf86Screens[i]);
         xf86VGAarbiterUnlock(xf86Screens[i]);
         if (scr_index == i) {
             /*
@@ -682,7 +681,7 @@ InitOutput(int argc, char **argv)
 #ifdef XFreeXDGA
         pScrn->SetDGAMode = xf86SetDGAMode;
 #endif
-        scr_index = AddGPUScreen(xf86ScreenInit, argc, argv);
+        scr_index = AddGPUScreen(xf86ScreenInit, argc, argv, pScrn);
         xf86VGAarbiterUnlock(pScrn);
         if (scr_index == i) {
             dixSetPrivate(&screenInfo.gpuscreens[scr_index]->devPrivates,

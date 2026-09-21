@@ -51,9 +51,7 @@ static Bool winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **arg
  * and call the appropriate procedure to initialize
  * that type of screen.
  */
-
-Bool
-winScreenInit(ScreenPtr pScreen, int argc, char **argv)
+bool winScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
     winScreenInfoPtr pScreenInfo = &g_ScreenInfo[pScreen->myNum];
     winPrivScreenPtr pScreenPriv;

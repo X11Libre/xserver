@@ -925,7 +925,7 @@ InitOutput(int argc, char *argv[])
     /* Initialize each screen */
     for (i = 0; i < g_iNumScreens; ++i) {
         /* Initialize the screen */
-        if (-1 == AddScreen(winScreenInit, argc, argv)) {
+        if (-1 == AddScreen(winScreenInit, argc, argv, &g_ScreenInfo[i])) {
             FatalError("InitOutput - Couldn't add screen %d", i);
         }
     }

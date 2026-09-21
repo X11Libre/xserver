@@ -14,10 +14,10 @@
 
 #include "Xext/panoramiX/panoramiX_priv.h"
 
-typedef Bool (*ScreenInitProcPtr)(ScreenPtr pScreen, int argc, char **argv);
+typedef bool (*ScreenInitProcPtr)(ScreenPtr pScreen, int argc, char **argv, void *closure);
 
-int AddScreen(ScreenInitProcPtr pfnInit, int argc, char **argv);
-int AddGPUScreen(ScreenInitProcPtr pfnInit, int argc, char **argv);
+int AddScreen(ScreenInitProcPtr pfnInit, int argc, char **argv, void *closure);
+int AddGPUScreen(ScreenInitProcPtr pfnInit, int argc, char **argv, void *closure);
 
 void RemoveGPUScreen(ScreenPtr pScreen);
 

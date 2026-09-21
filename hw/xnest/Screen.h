@@ -24,7 +24,7 @@ extern xcb_window_t xnestDefaultWindows[MAXSCREENS];
 extern xcb_window_t xnestScreenSaverWindows[MAXSCREENS];
 
 ScreenPtr xnestScreen(xcb_window_t window);
-Bool xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[]);
+bool xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[], void *closure);
 Bool xnestCloseScreen(ScreenPtr pScreen);
 
 #endif                          /* XNESTSCREEN_H */

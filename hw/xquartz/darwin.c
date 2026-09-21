@@ -32,6 +32,7 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -184,8 +185,7 @@ DarwinPrintBanner(void)
  *  This is a callback from dix during AddScreen() from InitOutput().
  *  Initialize the screen and communicate information about it back to dix.
  */
-static Bool
-DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
+static bool DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
     int dpi;
     static int foundIndex = 0;
@@ -651,7 +651,7 @@ InitOutput(int argc, char **argv)
 
     // Add screens
     for (i = 0; i < darwinScreensFound; i++) {
-        AddScreen(DarwinScreenInit, argc, argv);
+        AddScreen(DarwinScreenInit, argc, argv, NULL);
     }
 
     xorgGlxCreateVendor();

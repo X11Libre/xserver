@@ -160,8 +160,7 @@ static void add_depth_visual(DepthPtr depths, int *numDepths, int nplanes, Visua
     walk->numVids++;
 }
 
-Bool
-xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
+bool xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[], void *closure)
 {
     unsigned long valuemask;
     VisualID defaultVisual = 0;

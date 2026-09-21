@@ -1033,10 +1033,9 @@ vfbRandRInit(ScreenPtr pScreen)
     return TRUE;
 }
 
-static Bool
-vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
+static bool vfbScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = (vfbScreenInfoPtr)closure;
     int dpix = monitorResolution, dpiy = monitorResolution;
     int ret;
     char *pbits;
@@ -1194,7 +1193,7 @@ InitOutput(int argc, char **argv)
         vfbNumScreens = 1;
     }
     for (i = 0; i < vfbNumScreens; i++) {
-        if (-1 == AddScreen(vfbScreenInit, argc, argv)) {
+        if (-1 == AddScreen(vfbScreenInit, argc, argv, &vfbScreens[i])) {
             FatalError("Couldn't add screen %d", i);
         }
     }
