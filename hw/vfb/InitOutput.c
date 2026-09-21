@@ -753,15 +753,9 @@ vfbWriteXWDFileHeader(ScreenPtr pScreen)
     pXWDHeader->xoffset = 0;
     pXWDHeader->byte_order = IMAGE_BYTE_ORDER;
     pXWDHeader->bitmap_bit_order = BITMAP_BIT_ORDER;
-#ifndef INTERNAL_VS_EXTERNAL_PADDING
     pXWDHeader->pixmap_width = pXWDHeader->window_width = pvfb->width;
     pXWDHeader->bitmap_unit = BITMAP_SCANLINE_UNIT;
     pXWDHeader->bitmap_pad = BITMAP_SCANLINE_PAD;
-#else
-    pXWDHeader->pixmap_width = pXWDHeader->window_width = pvfb->paddedWidth;
-    pXWDHeader->bitmap_unit = BITMAP_SCANLINE_UNIT_PROTO;
-    pXWDHeader->bitmap_pad = BITMAP_SCANLINE_PAD_PROTO;
-#endif
     pXWDHeader->bits_per_pixel = pvfb->bitsPerPixel;
     pXWDHeader->bytes_per_line = pvfb->paddedBytesWidth;
     pXWDHeader->ncolors = pvfb->ncolors;
