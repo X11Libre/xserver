@@ -832,12 +832,9 @@ KdSetSubpixelOrder(ScreenPtr pScreen, Rotation randr)
     PictureSetSubpixelOrder(pScreen, subpixel_order);
 }
 
-/* Pass through AddScreen, which doesn't take any closure */
-static KdScreenInfo *kdCurrentScreen;
-
-Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
+bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
-    KdScreenInfo *screen = kdCurrentScreen;
+    KdScreenInfo *screen = closure;
     KdCardInfo *card = screen->card;
     KdPrivScreenPtr pScreenPriv;
 
@@ -1091,9 +1088,7 @@ static void KdAddScreen(KdScreenInfo * screen, int argc, char **argv)
                                  visuals, 8, rm, gm, bm);
     }
 
-    kdCurrentScreen = screen;
-
-    AddScreen(KdScreenInit, argc, argv);
+    AddScreen(KdScreenInit, argc, argv, screen);
 }
 
 #if 0                           /* This function is not used currently */

@@ -719,6 +719,19 @@ xf86PlatformFindHotplugDriver(int dev_index)
     return hp_driver;
 }
 
+/* wrapper to adapt for the xf86 driver ABI */
+static bool __screenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
+{
+    ScrnInfoPtr pScrn = closure;
+    assert(pScrn);
+
+    if (pScrn->ScreenInit) {
+        return !!(pScrn->ScreenInit(pScreen, argc, argv));
+    }
+
+    return true;
+}
+
 bool
 xf86platformAddDevice(const char *driver_name, int index)
 {
@@ -782,7 +795,7 @@ xf86platformAddDevice(const char *driver_name, int index)
    xf86GPUScreens[i]->SetDGAMode = xf86SetDGAMode;
 #endif
 
-   scr_index = AddGPUScreen(xf86GPUScreens[i]->ScreenInit, 0, NULL);
+   scr_index = AddGPUScreen(__screenInit, 0, NULL, xf86GPUScreens[i]);
    if (scr_index == -1) {
        xf86DeleteScreen(xf86GPUScreens[i]);
        xf86UnclaimPlatformSlot(&xf86_platform_devices[index], NULL);

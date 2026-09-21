@@ -434,7 +434,7 @@ Bool KdCreateScreenResources(ScreenPtr pScreen);
 
 Bool KdSaveScreen(ScreenPtr pScreen, int on);
 
-Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv);
+bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure);
 
 void
  KdInitCard(ScreenInfo * pScreenInfo, KdCardInfo * card, int argc, char **argv);

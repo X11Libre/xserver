@@ -4116,13 +4116,8 @@ static int init_screen(ScreenPtr pScreen, int i, Bool gpu)
     return 0;
 }
 
-int
-AddScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
-                           int /*argc */ ,
-                           char **      /*argv */
-          ), int argc, char **argv)
+int AddScreen(ScreenInitProcPtr pfnInit, int argc, char **argv, void *closure)
 {
-
     int i;
     ScreenPtr pScreen;
     bool ret;
@@ -4150,7 +4145,7 @@ AddScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
      */
     screenInfo.screens[i] = pScreen;
     screenInfo.numScreens++;
-    if (!(*pfnInit) (pScreen, argc, argv)) {
+    if (!(*pfnInit) (pScreen, argc, argv, closure)) {
         dixFreeScreenSpecificPrivates(pScreen);
         dixFreePrivates(pScreen->devPrivates, PRIVATE_SCREEN);
         free(pScreen);
@@ -4163,12 +4158,7 @@ AddScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
     return i;
 }
 
-int
-AddGPUScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
-                              int /*argc */ ,
-                              char **      /*argv */
-                              ),
-             int argc, char **argv)
+int AddGPUScreen(ScreenInitProcPtr pfnInit, int argc, char **argv, void *closure)
 {
     int i;
     ScreenPtr pScreen;
@@ -4198,7 +4188,7 @@ AddGPUScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
      */
     screenInfo.gpuscreens[i] = pScreen;
     screenInfo.numGPUScreens++;
-    if (!(*pfnInit) (pScreen, argc, argv)) {
+    if (!(*pfnInit) (pScreen, argc, argv, closure)) {
         dixFreePrivates(pScreen->devPrivates, PRIVATE_SCREEN);
         free(pScreen);
         screenInfo.numGPUScreens--;
