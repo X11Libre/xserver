@@ -135,6 +135,16 @@ typedef struct {
 #endif
 } vfbScreenInfo, *vfbScreenInfoPtr;
 
+static DevPrivateKeyRec vfbScreenPrivateKeyRec = { 0 };
+
+static inline vfbScreenInfoPtr vfbGetScreenPriv(ScreenPtr pScreen) {
+    return dixLookupPrivate(&pScreen->devPrivates, &vfbScreenPrivateKeyRec);
+}
+
+static inline void vfbSetScreenPriv(ScreenPtr pScreen, vfbScreenInfoPtr priv) {
+    dixSetPrivate(&pScreen->devPrivates, &vfbScreenPrivateKeyRec, priv);
+}
+
 static int vfbNumScreens;
 static vfbScreenInfo *vfbScreens;
 
@@ -483,7 +493,6 @@ vfbInstallColormap(ColormapPtr pmap)
 
     if (pmap != oldpmap) {
         int entries;
-        XWDFileHeader *pXWDHeader;
         VisualPtr pVisual;
         Pixel *ppix;
         xrgb *prgb;
@@ -493,8 +502,9 @@ vfbInstallColormap(ColormapPtr pmap)
         miInstallColormap(pmap);
 
         entries = pmap->pVisual->ColormapEntries;
-        pXWDHeader = vfbScreens[pmap->pScreen->myNum].pXWDHeader;
         pVisual = pmap->pVisual;
+
+        XWDFileHeader *pXWDHeader = vfbGetScreenPriv(pmap->pScreen)->pXWDHeader;
 
         swapcopy32(pXWDHeader->visual_class, pVisual->class);
         swapcopy32(pXWDHeader->red_mask, pVisual->redMask);
@@ -533,20 +543,17 @@ out:
 static void
 vfbStoreColors(ColormapPtr pmap, int ndef, xColorItem * pdefs)
 {
-    XWDColor *pXWDCmap;
-    int i;
-
     if (pmap != GetInstalledmiColormap(pmap->pScreen)) {
         return;
     }
-
-    pXWDCmap = vfbScreens[pmap->pScreen->myNum].pXWDCmap;
 
     if ((pmap->pVisual->class | DynamicClass) == DirectColor) {
         return;
     }
 
-    for (i = 0; i < ndef; i++) {
+    XWDColor *pXWDCmap = vfbGetScreenPriv(pmap->pScreen)->pXWDCmap;
+
+    for (int i = 0; i < ndef; i++) {
         if (pdefs[i].flags & DoRed) {
             swapcopy16(pXWDCmap[pdefs[i].pixel].red, pdefs[i].red);
         }
@@ -736,7 +743,7 @@ vfbAllocateFramebufferMemory(vfbScreenInfoPtr pvfb)
 static void
 vfbWriteXWDFileHeader(ScreenPtr pScreen)
 {
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = vfbGetScreenPriv(pScreen);
     XWDFileHeader *pXWDHeader = pvfb->pXWDHeader;
     unsigned long swaptest = 1;
     int i;
@@ -808,7 +815,7 @@ static miPointerScreenFuncRec vfbPointerCursorFuncs = {
 static Bool
 vfbCloseScreen(ScreenPtr pScreen)
 {
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = vfbGetScreenPriv(pScreen);
 
     pScreen->CloseScreen = pvfb->closeScreen;
 
@@ -832,7 +839,7 @@ vfbCloseScreen(ScreenPtr pScreen)
 static Bool
 vfbGlamorInit(ScreenPtr pScreen)
 {
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = vfbGetScreenPriv(pScreen);
 
     if (!use_glamor && !render_node) {
         return FALSE;
@@ -961,7 +968,7 @@ vfbRandRInit(ScreenPtr pScreen)
     xRRModeInfo modeInfo;
     char name[64];
     int i;
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = vfbGetScreenPriv(pScreen);
     int mmWidth, mmHeight;
 
     if (!RRScreenInit(pScreen))
@@ -1030,6 +1037,10 @@ vfbRandRInit(ScreenPtr pScreen)
 static bool vfbScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
     vfbScreenInfoPtr pvfb = (vfbScreenInfoPtr)closure;
+    assert(pvfb);
+
+    vfbSetScreenPriv(pScreen, pvfb);
+
     int dpix = monitorResolution, dpiy = monitorResolution;
     int ret;
     char *pbits;
@@ -1131,6 +1142,11 @@ static bool vfbScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closur
 void
 InitOutput(int argc, char **argv)
 {
+    if (!dixRegisterPrivateKey(&vfbScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+        FatalError("vfb: failed register screen private key\n");
+        return;
+    }
+
     int i;
     int NumFormats = 0;
 
