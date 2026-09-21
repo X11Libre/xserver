@@ -44,7 +44,7 @@
 // windows headers #define CreateWindow to CreateWindowA
 #undef CreateWindow
 
-static Bool winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv);
+static Bool winFinishScreenInitFB(ScreenPtr pScreen, int argc, char **argv);
 
 /*
  * Determine what type of screen we are initializing
@@ -53,7 +53,7 @@ static Bool winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **arg
  */
 bool winScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
-    winScreenInfoPtr pScreenInfo = &g_ScreenInfo[pScreen->myNum];
+    winScreenInfoPtr pScreenInfo = (winScreenInfoPtr)closure;
     winPrivScreenPtr pScreenPriv;
     HDC hdc;
     DWORD dwInitialBPP;
@@ -171,7 +171,7 @@ bool winScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
     /* Clear the visuals list */
     miClearVisualTypes();
 
-    if (!winFinishScreenInitFB(pScreen->myNum, pScreen, argc, argv)) {
+    if (!winFinishScreenInitFB(pScreen, argc, argv)) {
         ErrorF("%s(): winFinishScreenInitFB () failed\n", __func__);
 
         /* call the engine dependent screen close procedure to clean up from a failure */
@@ -226,7 +226,7 @@ winCreateScreenResources(ScreenPtr pScreen)
 
 /* See Porting Layer Definition - p. 20 */
 static Bool
-winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
+winFinishScreenInitFB(ScreenPtr pScreen, int argc, char **argv)
 {
     winScreenPriv(pScreen);
     winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
