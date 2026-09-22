@@ -1,6 +1,6 @@
 # Code of Conduct
 
-**`-ENOENT;`**
+**`404`**
 
 This project operates on an **objective, do-ocratic model** and has chosen not to implement a formal, bureaucratic Code of Conduct.
 
