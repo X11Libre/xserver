@@ -24,6 +24,8 @@
  */
 
 #include <kdrive-config.h>
+static int ephyr_screen_counter = 0;
+
 
 #include <assert.h>
 #include <xcb/xcb_keysyms.h>
@@ -785,8 +787,11 @@ ephyrInitScreen(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
 
-    EPHYR_LOG("pScreen->myNum:%d\n", pScreen->myNum);
-    hostx_set_screen_number(screen, pScreen->myNum);
+    EphyrScrPriv *scrpriv = screen->driver;
+    int screen_num = ephyr_screen_counter++;
+    scrpriv->mynum = screen_num;
+    EPHYR_LOG("pScreen->screen_num:%d\n", screen_num);
+    hostx_set_screen_number(screen, screen_num);
     if (!EphyrHostGrabSet) {
         ephyrSetGrabShortcut("ctrl+shift");
     }
