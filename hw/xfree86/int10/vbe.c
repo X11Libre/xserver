@@ -408,7 +408,7 @@ VBEGetVBEInfo(vbeInfoPtr pVbe)
     block->TotalMemory = *(CARD16 *) (((char *) pVbe->memory) + 18);
 
     if (major < 2)
-        memcpy(&block->OemSoftwareRev, ((char *) pVbe->memory) + 20, 236);
+        memcpy(block->Reserved, ((char *) pVbe->memory) + 20, sizeof(block->Reserved));
     else {
         block->OemSoftwareRev = *(CARD16 *) (((char *) pVbe->memory) + 20);
         pStr = GET_UNALIGNED2((((char *) pVbe->memory) + 22));
@@ -420,8 +420,8 @@ VBEGetVBEInfo(vbeInfoPtr pVbe)
         pStr = GET_UNALIGNED2((((char *) pVbe->memory) + 30));
         str = xf86int10Addr(pVbe->pInt10, FARP(pStr));
         block->OemProductRevPtr = strdup(str);
-        memcpy(&block->Reserved, ((char *) pVbe->memory) + 34, 222);
-        memcpy(&block->OemData, ((char *) pVbe->memory) + 256, 256);
+        memcpy(block->Reserved, ((char *) pVbe->memory) + 34, sizeof(block->Reserved));
+        memcpy(block->OemData, ((char *) pVbe->memory) + 256, sizeof(block->OemData));
     }
 
     return block;
