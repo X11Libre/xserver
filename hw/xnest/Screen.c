@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -30,6 +31,8 @@ is" without express or implied warranty.
 #include "micmap.h"
 #include "resource.h"
 
+#include "xnest-eventmask.h"
+#include "xnest-screen_priv.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -46,20 +49,18 @@ is" without express or implied warranty.
 #include "Args.h"
 #include "mipointrst.h"
 
-xcb_window_t xnestDefaultWindows[MAXSCREENS];
-xcb_window_t xnestScreenSaverWindows[MAXSCREENS];
+DevPrivateKeyRec xnestScreenPrivateKeyRec;
 DevPrivateKeyRec xnestScreenCursorFuncKeyRec;
 DevScreenPrivateKeyRec xnestScreenCursorPrivKeyRec;
 
 ScreenPtr
 xnestScreen(xcb_window_t window)
 {
-    int i;
-
-    for (i = 0; i < xnestNumScreens; i++)
-        if (xnestDefaultWindows[i] == window)
-            return screenInfo.screens[i];
-
+    DIX_FOR_EACH_SCREEN({
+        XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(walkScreen);
+        if (screenPriv && screenPriv->defaultWindow == window)
+            return walkScreen;
+    });
     return NULL;
 }
 
@@ -79,36 +80,41 @@ xnestSaveScreen(ScreenPtr pScreen, int what)
 {
     if (xnestSoftwareScreenSaver)
         return FALSE;
-    else {
-        switch (what) {
+
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestSaveScreen() not on xnest screen\n");
+        return FALSE;
+    }
+
+    switch (what) {
         case SCREEN_SAVER_ON:
-            xcb_map_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_map_window(xnestUpstreamInfo.conn, screenPriv->screenSaverWindow);
             uint32_t value = XCB_STACK_MODE_ABOVE;
             xcb_configure_window(xnestUpstreamInfo.conn,
-                                 xnestScreenSaverWindows[pScreen->myNum],
+                                 screenPriv->screenSaverWindow,
                                  XCB_CONFIG_WINDOW_STACK_MODE,
                                  &value);
             xnestSetScreenSaverColormapWindow(pScreen);
             break;
 
         case SCREEN_SAVER_OFF:
-            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, screenPriv->screenSaverWindow);
             xnestSetInstalledColormapWindows(pScreen);
             break;
 
         case SCREEN_SAVER_FORCER:
             lastEventTime = GetTimeInMillis();
-            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, screenPriv->screenSaverWindow);
             xnestSetInstalledColormapWindows(pScreen);
             break;
 
         case SCREEN_SAVER_CYCLE:
-            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, screenPriv->screenSaverWindow);
             xnestSetInstalledColormapWindows(pScreen);
             break;
-        }
-        return TRUE;
     }
+    return TRUE;
 }
 
 static Bool
@@ -182,10 +188,17 @@ bool xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[], void *closure)
         return FALSE;
     if (!dixRegisterPrivateKey(&xnestScreenCursorFuncKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
-
+    if (!dixRegisterPrivateKey(&xnestScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
+        return FALSE;
     if (!dixRegisterScreenPrivateKey(&xnestScreenCursorPrivKeyRec, pScreen,
                                      PRIVATE_CURSOR, 0))
         return FALSE;
+
+    XnestScreenPrivate *screenPriv = calloc(1, sizeof(XnestScreenPrivate));
+    if (!screenPriv) {
+        return false;
+    }
+    dixSetPrivate(&pScreen->devPrivates, &xnestScreenPrivateKeyRec, screenPriv);
 
     int numVisuals = 0;
     VisualPtr visuals = calloc(1, sizeof(VisualRec));
@@ -413,17 +426,17 @@ breakout:
         valuemask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP;
 
         if (xnestParentWindow != 0) {
-            xnestDefaultWindows[pScreen->myNum] = xnestParentWindow;
+            screenPriv->defaultWindow = xnestParentWindow;
             xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[pScreen->myNum],
+                                         xnestGetScreenPrivate(pScreen)->defaultWindow,
                                          XCB_CW_EVENT_MASK,
                                          &xnestEventMask);
         }
         else {
-            xnestDefaultWindows[pScreen->myNum] = xcb_generate_id(xnestUpstreamInfo.conn);
+            screenPriv->defaultWindow = xcb_generate_id(xnestUpstreamInfo.conn);
             xcb_aux_create_window(xnestUpstreamInfo.conn,
                                   pScreen->rootDepth,
-                                  xnestDefaultWindows[pScreen->myNum],
+                                  screenPriv->defaultWindow,
                                   xnestUpstreamInfo.screenInfo->root,
                                   xnestGeometry.x + POSITION_OFFSET,
                                   xnestGeometry.y + POSITION_OFFSET,
@@ -459,21 +472,21 @@ breakout:
         const size_t windowNameLen = strlen(xnestWindowName);
 
         xcb_icccm_set_wm_name_checked(xnestUpstreamInfo.conn,
-                                      xnestDefaultWindows[pScreen->myNum],
+                                      screenPriv->defaultWindow,
                                       XCB_ATOM_STRING,
                                       8,
                                       windowNameLen,
                                       xnestWindowName);
 
         xcb_icccm_set_wm_icon_name_checked(xnestUpstreamInfo.conn,
-                                           xnestDefaultWindows[pScreen->myNum],
+                                           screenPriv->defaultWindow,
                                            XCB_ATOM_STRING,
                                            8,
                                            windowNameLen,
                                            xnestWindowName);
 
         xnest_set_command(xnestUpstreamInfo.conn,
-                          xnestDefaultWindows[pScreen->myNum],
+                          screenPriv->defaultWindow,
                           argv, argc);
 
         xcb_icccm_wm_hints_t wmhints = {
@@ -482,20 +495,20 @@ breakout:
         };
 
         xcb_icccm_set_wm_hints_checked(xnestUpstreamInfo.conn,
-                                       xnestDefaultWindows[pScreen->myNum],
+                                       screenPriv->defaultWindow,
                                        &wmhints);
 
-        xcb_map_window(xnestUpstreamInfo.conn, xnestDefaultWindows[pScreen->myNum]);
+        xcb_map_window(xnestUpstreamInfo.conn, screenPriv->defaultWindow);
 
         valuemask = XCB_CW_BACK_PIXMAP | XCB_CW_COLORMAP;
         attributes.back_pixmap = xnestScreenSaverPixmap;
         attributes.colormap = xnestUpstreamInfo.screenInfo->default_colormap;
 
-        xnestScreenSaverWindows[pScreen->myNum] = xcb_generate_id(xnestUpstreamInfo.conn);
+        screenPriv->screenSaverWindow = xcb_generate_id(xnestUpstreamInfo.conn);
         xcb_aux_create_window(xnestUpstreamInfo.conn,
                               xnestUpstreamInfo.screenInfo->root_depth,
-                              xnestScreenSaverWindows[pScreen->myNum],
-                              xnestDefaultWindows[pScreen->myNum],
+                              screenPriv->screenSaverWindow,
+                              screenPriv->defaultWindow,
                               0,
                               0,
                               xnestGeometry.width,
@@ -523,6 +536,7 @@ xnestCloseScreen(ScreenPtr pScreen)
     free(pScreen->allowedDepths);
     free(pScreen->visuals);
     miScreenClose(pScreen);
+    free(xnestGetScreenPrivate(pScreen));
 
     /*
        If xnestDoFullGeneration all x resources will be destroyed upon closing
