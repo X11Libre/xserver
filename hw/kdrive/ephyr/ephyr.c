@@ -851,7 +851,7 @@ ephyrCreateResources(ScreenPtr pScreen)
     EphyrScrPriv *scrpriv = screen->driver;
 
     EPHYR_LOG("mark pScreen=%p mynum=%d shadow=%d",
-              pScreen, pScreen->myNum, scrpriv->shadow);
+              pScreen, scrpriv->mynum, scrpriv->shadow);
 
     if (scrpriv->shadow)
         return KdShadowSet(pScreen,
@@ -1051,7 +1051,7 @@ ephyrProcessMouseMotion(xcb_generic_event_t *xev)
     if (ephyrCursorScreen != screen->pScreen) {
         EPHYR_LOG("warping mouse cursor. "
                   "cur_screen:%d, motion_screen:%d\n",
-                  ephyrCursorScreen ? ephyrCursorScreen->driver->mynum : -1, screen->pScreen->myNum);
+                  ephyrCursorScreen ? ephyrCursorScreen->driver->mynum : -1, screen->pScreen->driver->mynum);
         ephyrWarpCursor(inputInfo.pointer, screen->pScreen,
                         motion->event_x, motion->event_y);
     }
