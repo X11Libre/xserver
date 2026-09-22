@@ -151,7 +151,7 @@ processScreenOrOutputArg(const char *screen_size, const char *output, char *pare
 
         use_geometry = (strchr(screen_size, '+') != NULL);
         EPHYR_DBG("screen number:%d\n", screen->mynum);
-        hostx_add_screen(screen, p_id, screen->mynum, use_geometry, output);
+        hostx_add_screen(screen, p_id, use_geometry, output);
     }
     else {
         ErrorF("No matching card found!\n");

@@ -152,7 +152,7 @@ hostx_want_screen_geometry(KdScreenInfo *screen, int *width, int *height, int *x
 }
 
 void
-hostx_add_screen(KdScreenInfo *screen, unsigned long win_id, int screen_num, Bool use_geometry, const char *output)
+hostx_add_screen(KdScreenInfo *screen, unsigned long win_id, Bool use_geometry, const char *output)
 {
     EphyrScrPriv *scrpriv = screen->driver;
     int index = HostX.n_screens;
