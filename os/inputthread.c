@@ -43,7 +43,13 @@
 #include "opaque.h"
 #include "osdep.h"
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__)
+#define XSERVER_WIN32 1
+#else
+#define XSERVER_WIN32 0
+#endif
+
+#if XSERVER_WIN32
 #include <winsock2.h>
 #include <windows.h>
 #include <io.h>
@@ -167,7 +173,7 @@ InputThreadFillPipe(PIPE_FD writeHead)
     int ret;
     char byte = 0;
 
-#if defined(_WIN32)
+#if XSERVER_WIN32
     do {
         ret = send(writeHead, &byte, 1, 0);
     } while (ret == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK);
@@ -190,7 +196,7 @@ InputThreadReadPipe(PIPE_FD readHead)
     int ret;
     char array[10];
 
-#if defined(_WIN32)
+#if XSERVER_WIN32
     ret = recv(readHead, array, sizeof(array), 0);
     if (ret >= 0)
         return ret;
@@ -353,7 +359,7 @@ InputThreadPipeNotify(int fd, int revents, void *data)
 static void*
 InputThreadDoWork(void *arg)
 {
-#if !defined(_WIN32)
+#if !XSERVER_WIN32
     sigset_t set;
 
     /* Don't handle any signals on this thread */
@@ -410,7 +416,7 @@ InputThreadDoWork(void *arg)
         }
 
         if (ospoll_wait(inputThreadInfo->fds, -1) < 0) {
-#if defined(_WIN32)
+#if XSERVER_WIN32
             int err = WSAGetLastError();
             if (err == WSAEINVAL)
                 FatalError("input-thread: %s (%d)", __func__, err);
@@ -452,7 +458,7 @@ InputThreadPreInit(void)
     if (!InputThreadEnable)
         return;
 
-#if defined(_WIN32)
+#if XSERVER_WIN32
     /* Windows doesn't have socketpair(), emulate with loopback connect */
     {
         struct sockaddr_in addr;
