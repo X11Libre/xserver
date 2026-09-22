@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -31,6 +32,7 @@ is" without express or implied warranty.
 #include "pixmapstr.h"
 #include "scrnintstr.h"
 
+#include "xnest-screen_priv.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"

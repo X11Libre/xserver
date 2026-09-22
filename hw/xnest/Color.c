@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -28,6 +29,7 @@ is" without express or implied warranty.
 #include "windowstr.h"
 #include "resource.h"
 
+#include "xnest-screen_priv.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -88,6 +90,12 @@ static Bool load_colormap(ColormapPtr pCmap, int ncolors, uint32_t *colors)
 Bool
 xnestCreateColormap(ColormapPtr pCmap)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pCmap->pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestCreateColormap() cmap is not on xnest screen\n");
+        return FALSE;
+    }
+
     VisualPtr pVisual = pCmap->pVisual;
     int ncolors = pVisual->ColormapEntries;
 
@@ -97,7 +105,7 @@ xnestCreateColormap(ColormapPtr pCmap)
     xcb_create_colormap(xnestUpstreamInfo.conn,
                         (pVisual->class & DynamicClass) ? XCB_COLORMAP_ALLOC_ALL : XCB_COLORMAP_ALLOC_NONE,
                         cmap,
-                        xnestDefaultWindows[pCmap->pScreen->myNum],
+                        screenPriv->defaultWindow,
                         xnest_visual_map_to_upstream(pVisual->vid));
 
     switch (pVisual->class) {
@@ -211,6 +219,12 @@ xnestSameInstalledColormapWindows(xcb_window_t *windows, int numWindows)
 void
 xnestSetInstalledColormapWindows(ScreenPtr pScreen)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestSetInstalledColormapWindows() not on xnest screen\n");
+        return;
+    }
+
     xnestInstalledColormapWindows icws;
     int numWindows;
 
@@ -223,7 +237,7 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
         icws.windows = calloc(icws.numWindows + 1, sizeof(xcb_window_t));
         icws.index = 0;
         WalkTree(pScreen, xnestGetInstalledColormapWindows, (void *) &icws);
-        icws.windows[icws.numWindows] = xnestDefaultWindows[pScreen->myNum];
+        icws.windows[icws.numWindows] = screenPriv->defaultWindow;
         numWindows = icws.numWindows + 1;
     }
     else {
@@ -237,7 +251,7 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
         free(xnestOldInstalledColormapWindows);
 
         xnest_wm_colormap_windows(xnestUpstreamInfo.conn,
-                                  xnestDefaultWindows[pScreen->myNum],
+                                  screenPriv->defaultWindow,
                                   icws.windows,
                                   numWindows);
 
@@ -267,7 +281,7 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
 
             uint32_t cmap = xnestColormap(pCmap);
             xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[pScreen->myNum],
+                                         screenPriv->defaultWindow,
                                          XCB_CW_COLORMAP,
                                          &cmap);
         }
@@ -280,11 +294,17 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
 void
 xnestSetScreenSaverColormapWindow(ScreenPtr pScreen)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestSetScreenSaverColormapWindow() not on xnest screen\n");
+        return;
+    }
+
     free(xnestOldInstalledColormapWindows);
 
     xnest_wm_colormap_windows(xnestUpstreamInfo.conn,
-                              xnestDefaultWindows[pScreen->myNum],
-                              &xnestScreenSaverWindows[pScreen->myNum],
+                              screenPriv->defaultWindow,
+                              &screenPriv->screenSaverWindow,
                               1);
 
     xnestOldInstalledColormapWindows = NULL;

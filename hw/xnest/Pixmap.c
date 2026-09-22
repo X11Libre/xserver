@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -25,6 +26,7 @@ is" without express or implied warranty.
 #include "privates.h"
 #include "mi.h"
 
+#include "xnest-screen_priv.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -37,6 +39,12 @@ PixmapPtr
 xnestCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
                   unsigned usage_hint)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestCreatePixmap() not on xnest screen\n");
+        return NullPixmap;
+    }
+
     PixmapPtr pPixmap;
 
     pPixmap = AllocatePixmap(pScreen, 0);
@@ -55,7 +63,7 @@ xnestCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     if (width && height) {
         uint32_t pixmap = xcb_generate_id(xnestUpstreamInfo.conn);
         xcb_create_pixmap(xnestUpstreamInfo.conn, depth, pixmap,
-                          xnestDefaultWindows[pScreen->myNum], width, height);
+                          screenPriv->defaultWindow, width, height);
         xnestPixmapPriv(pPixmap)->pixmap = pixmap;
     }
     else
@@ -78,10 +86,16 @@ Bool
 xnestModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
                         int bitsPerPixel, int devKind, void *pPixData)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pPixmap->drawable.pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestModifyPixmapHeader() pixmap not on xnest screen\n");
+        return FALSE;
+    }
+
   if(!xnestPixmapPriv(pPixmap)->pixmap && width > 0 && height > 0) {
         uint32_t pixmap = xcb_generate_id(xnestUpstreamInfo.conn);
         xcb_create_pixmap(xnestUpstreamInfo.conn, depth, pixmap,
-                          xnestDefaultWindows[pPixmap->drawable.pScreen->myNum],
+                          screenPriv->defaultWindow,
                           width, height);
         xnestPixmapPriv(pPixmap)->pixmap = pixmap;
   }

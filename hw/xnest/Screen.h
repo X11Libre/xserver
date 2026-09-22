@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -19,9 +20,6 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 
 #include <xcb/xcb.h>
-
-extern xcb_window_t xnestDefaultWindows[MAXSCREENS];
-extern xcb_window_t xnestScreenSaverWindows[MAXSCREENS];
 
 ScreenPtr xnestScreen(xcb_window_t window);
 bool xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[], void *closure);

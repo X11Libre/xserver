@@ -4,6 +4,7 @@ srcs = [
     'Cursor.c',
     'Display.c',
     'Events.c',
+    'eventmask.c',
     'Font.c',
     'GC.c',
     'GCOps.c',

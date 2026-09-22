@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -30,6 +31,7 @@ is" without express or implied warranty.
 #include "pixmapstr.h"
 #include "servermd.h"
 
+#include "xnest-screen_priv.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -64,13 +66,19 @@ void
 xnestQueryBestSize(int class, unsigned short *pWidth, unsigned short *pHeight,
                    ScreenPtr pScreen)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestQueryBestSize() not on xnest screen\n");
+        return;
+    }
+
     xcb_generic_error_t *err = NULL;
     xcb_query_best_size_reply_t *reply = xcb_query_best_size_reply(
         xnestUpstreamInfo.conn,
         xcb_query_best_size(
             xnestUpstreamInfo.conn,
             class,
-            xnestDefaultWindows[pScreen->myNum],
+            screenPriv->defaultWindow,
             *pWidth,
             *pHeight),
         &err);
