@@ -43,6 +43,25 @@
 #include "opaque.h"
 #include "osdep.h"
 
+#if defined(_WIN32)
+#include <winsock2.h>
+#include <windows.h>
+#include <io.h>
+#define PIPE_FD SOCKET
+#define PIPE_CLOSE closesocket
+#define PIPE_INVALID INVALID_SOCKET
+#define PIPE_NONBLOCK(fd) do { u_long nonblock = 1; ioctlsocket((SOCKET)(fd), FIONBIO, &nonblock); } while(0)
+#define PIPE_MAKE_INHERIT(fd) SetHandleInformation((HANDLE)(fd), HANDLE_FLAG_INHERIT, 0)
+#else
+#include <fcntl.h>
+#include <signal.h>
+#define PIPE_FD int
+#define PIPE_CLOSE close
+#define PIPE_INVALID -1
+#define PIPE_NONBLOCK(fd) do { fcntl((fd), F_SETFL, O_NONBLOCK); } while(0)
+#define PIPE_MAKE_INHERIT(fd) do { int flags = fcntl((fd), F_GETFD); if (flags != -1) { flags |= FD_CLOEXEC; fcntl((fd), F_SETFD, flags); } } while(0)
+#endif
+
 #if INPUTTHREAD
 
 Bool InputThreadEnable = TRUE;
@@ -74,16 +93,16 @@ typedef struct {
     pthread_t thread;
     struct xorg_list devs;
     struct ospoll *fds;
-    int readPipe;
-    int writePipe;
+    PIPE_FD readPipe;
+    PIPE_FD writePipe;
     bool changed;
     bool running;
 } InputThreadInfo;
 
 static InputThreadInfo *inputThreadInfo;
 
-static int hotplugPipeRead = -1;
-static int hotplugPipeWrite = -1;
+static PIPE_FD hotplugPipeRead = PIPE_INVALID;
+static PIPE_FD hotplugPipeWrite = PIPE_INVALID;
 
 static int input_mutex_count;
 
@@ -143,14 +162,20 @@ input_force_unlock(void)
  * @see WaitForSomething()
  */
 static void
-InputThreadFillPipe(int writeHead)
+InputThreadFillPipe(PIPE_FD writeHead)
 {
     int ret;
     char byte = 0;
 
+#if defined(_WIN32)
+    do {
+        ret = send(writeHead, &byte, 1, 0);
+    } while (ret == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK);
+#else
     do {
         ret = write(writeHead, &byte, 1);
     } while (ret < 0 && ossock_wouldblock(errno));
+#endif
 }
 
 /**
@@ -160,10 +185,21 @@ InputThreadFillPipe(int writeHead)
  * @see InputThreadFillPipe()
  */
 static int
-InputThreadReadPipe(int readHead)
+InputThreadReadPipe(PIPE_FD readHead)
 {
-    int ret, array[10];
+    int ret;
+    char array[10];
 
+#if defined(_WIN32)
+    ret = recv(readHead, array, sizeof(array), 0);
+    if (ret >= 0)
+        return ret;
+
+    if (WSAGetLastError() != WSAEWOULDBLOCK)
+        FatalError("input-thread: draining socket (%d)", WSAGetLastError());
+
+    return 1;
+#else
     ret = read(readHead, &array, sizeof(array));
     if (ret >= 0)
         return ret;
@@ -172,6 +208,7 @@ InputThreadReadPipe(int readHead)
         FatalError("input-thread: draining pipe (%d)", errno);
 
     return 1;
+#endif
 }
 
 static void
@@ -316,11 +353,13 @@ InputThreadPipeNotify(int fd, int revents, void *data)
 static void*
 InputThreadDoWork(void *arg)
 {
+#if !defined(_WIN32)
     sigset_t set;
 
     /* Don't handle any signals on this thread */
     sigfillset(&set);
     pthread_sigmask(SIG_BLOCK, &set, NULL);
+#endif
 
     ddxInputThreadInit();
 
@@ -371,10 +410,18 @@ InputThreadDoWork(void *arg)
         }
 
         if (ospoll_wait(inputThreadInfo->fds, -1) < 0) {
+#if defined(_WIN32)
+            int err = WSAGetLastError();
+            if (err == WSAEINVAL)
+                FatalError("input-thread: %s (%d)", __func__, err);
+            else if (err != WSAEINTR)
+                ErrorF("input-thread: %s (%d)\n", __func__, err);
+#else
             if (errno == EINVAL)
                 FatalError("input-thread: %s (%s)", __func__, strerror(errno));
             else if (errno != EINTR)
                 ErrorF("input-thread: %s (%s)\n", __func__, strerror(errno));
+#endif
         }
 
         /* Kick main thread to process the generated input events and drain
@@ -400,17 +447,86 @@ InputThreadNotifyPipe(int fd, int mask, void *data)
 void
 InputThreadPreInit(void)
 {
-    int fds[2], hotplugPipe[2];
-    int flags;
+    PIPE_FD fds[2], hotplugPipe[2];
 
     if (!InputThreadEnable)
         return;
 
+#if defined(_WIN32)
+    /* Windows doesn't have socketpair(), emulate with loopback connect */
+    {
+        struct sockaddr_in addr;
+        int addr_len = sizeof(addr);
+        SOCKET listen_sock = PIPE_INVALID;
+
+        fds[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+        fds[1] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+        hotplugPipe[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+        hotplugPipe[1] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+        if (fds[0] == INVALID_SOCKET || fds[1] == INVALID_SOCKET ||
+            hotplugPipe[0] == INVALID_SOCKET || hotplugPipe[1] == INVALID_SOCKET) {
+            FatalError("input-thread: could not create socketpair");
+        }
+
+        /* Make all sockets non-blocking and non-inheritable */
+        PIPE_NONBLOCK(fds[0]);
+        PIPE_NONBLOCK(fds[1]);
+        PIPE_NONBLOCK(hotplugPipe[0]);
+        PIPE_NONBLOCK(hotplugPipe[1]);
+        PIPE_MAKE_INHERIT(fds[0]);
+        PIPE_MAKE_INHERIT(fds[1]);
+        PIPE_MAKE_INHERIT(hotplugPipe[0]);
+        PIPE_MAKE_INHERIT(hotplugPipe[1]);
+
+        /* Create connected pairs via loopback */
+        memset(&addr, 0, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        addr.sin_port = 0;
+
+        listen_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+        if (listen_sock == INVALID_SOCKET ||
+            bind(listen_sock, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR ||
+            listen(listen_sock, 1) == SOCKET_ERROR ||
+            getsockname(listen_sock, (struct sockaddr*)&addr, &addr_len) == SOCKET_ERROR) {
+            FatalError("input-thread: socketpair emulation setup failed");
+        }
+
+        /* Connect first pair (fds) */
+        if (connect(fds[0], (struct sockaddr*)&addr, addr_len) == SOCKET_ERROR ||
+            (fds[1] = accept(listen_sock, NULL, NULL)) == INVALID_SOCKET) {
+            FatalError("input-thread: socketpair emulation connect failed");
+        }
+
+        /* Connect second pair (hotplugPipe) */
+        if (getsockname(listen_sock, (struct sockaddr*)&addr, &addr_len) == SOCKET_ERROR) {
+            FatalError("input-thread: socketpair emulation getsockname failed");
+        }
+        if (connect(hotplugPipe[0], (struct sockaddr*)&addr, addr_len) == SOCKET_ERROR ||
+            (hotplugPipe[1] = accept(listen_sock, NULL, NULL)) == INVALID_SOCKET) {
+            FatalError("input-thread: socketpair emulation connect 2 failed");
+        }
+
+        PIPE_CLOSE(listen_sock);
+    }
+#else
     if (pipe(fds) < 0)
         FatalError("input-thread: could not create pipe");
 
-     if (pipe(hotplugPipe) < 0)
+    if (pipe(hotplugPipe) < 0)
         FatalError("input-thread: could not create pipe");
+
+    /* Make pipes non-blocking and close-on-exec */
+    PIPE_NONBLOCK(fds[0]);
+    PIPE_MAKE_INHERIT(fds[0]);
+    PIPE_NONBLOCK(fds[1]);
+    PIPE_MAKE_INHERIT(fds[1]);
+    PIPE_NONBLOCK(hotplugPipe[0]);
+    PIPE_MAKE_INHERIT(hotplugPipe[0]);
+    PIPE_NONBLOCK(hotplugPipe[1]);
+    PIPE_MAKE_INHERIT(hotplugPipe[1]);
+#endif
 
     inputThreadInfo = calloc(1, sizeof(InputThreadInfo));
     if (!inputThreadInfo)
@@ -427,23 +543,11 @@ InputThreadPreInit(void)
      * in parallel.
      */
     inputThreadInfo->readPipe = fds[0];
-    fcntl(inputThreadInfo->readPipe, F_SETFL, O_NONBLOCK);
-    flags = fcntl(inputThreadInfo->readPipe, F_GETFD);
-    if (flags != -1) {
-        flags |= FD_CLOEXEC;
-        (void)fcntl(inputThreadInfo->readPipe, F_SETFD, flags);
-    }
     SetNotifyFd(inputThreadInfo->readPipe, InputThreadNotifyPipe, X_NOTIFY_READ, NULL);
 
     inputThreadInfo->writePipe = fds[1];
 
     hotplugPipeRead = hotplugPipe[0];
-    fcntl(hotplugPipeRead, F_SETFL, O_NONBLOCK);
-    flags = fcntl(hotplugPipeRead, F_GETFD);
-    if (flags != -1) {
-        flags |= FD_CLOEXEC;
-        (void)fcntl(hotplugPipeRead, F_SETFD, flags);
-    }
     hotplugPipeWrite = hotplugPipe[1];
 
 #ifndef __linux__ /* Linux does not deal well with renaming the main thread */
@@ -504,7 +608,7 @@ InputThreadFinish(void)
         return;
 
     /* Close the pipe to get the input thread to shut down */
-    close(hotplugPipeWrite);
+    PIPE_CLOSE(hotplugPipeWrite);
     input_force_unlock();
     pthread_join(inputThreadInfo->thread, NULL);
 
@@ -516,14 +620,14 @@ InputThreadFinish(void)
     ospoll_destroy(inputThreadInfo->fds);
 
     RemoveNotifyFd(inputThreadInfo->readPipe);
-    close(inputThreadInfo->readPipe);
-    close(inputThreadInfo->writePipe);
-    inputThreadInfo->readPipe = -1;
-    inputThreadInfo->writePipe = -1;
+    PIPE_CLOSE(inputThreadInfo->readPipe);
+    PIPE_CLOSE(inputThreadInfo->writePipe);
+    inputThreadInfo->readPipe = PIPE_INVALID;
+    inputThreadInfo->writePipe = PIPE_INVALID;
 
-    close(hotplugPipeRead);
-    hotplugPipeRead = -1;
-    hotplugPipeWrite = -1;
+    PIPE_CLOSE(hotplugPipeRead);
+    hotplugPipeRead = PIPE_INVALID;
+    hotplugPipeWrite = PIPE_INVALID;
 
     free(inputThreadInfo);
     inputThreadInfo = NULL;
