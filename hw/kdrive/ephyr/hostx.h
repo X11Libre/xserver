@@ -112,7 +112,7 @@ int
  hostx_init(void);
 
 void
-hostx_add_screen(KdScreenInfo *screen, unsigned long win_id, int screen_num, Bool use_geometry, const char *output);
+hostx_add_screen(KdScreenInfo *screen, unsigned long win_id, Bool use_geometry, const char *output);
 
 void
  hostx_set_display_name(char *name);
