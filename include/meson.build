@@ -59,7 +59,9 @@ else
   if not enable_input_thread and get_option('input_thread') == 'true'
     error('Input thread enabled and PTHREAD_MUTEX_RECURSIVE not found')
   endif
-  /* Windows now supported via socketpair emulation in inputthread.c */
+  if host_machine.system() == 'windows' and get_option('input_thread') == 'auto'
+      enable_input_thread = false
+  endif
 endif
 conf_data.set('INPUTTHREAD', enable_input_thread ? '1' : false)
 
