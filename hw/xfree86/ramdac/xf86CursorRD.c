@@ -428,13 +428,19 @@ xf86CursorMoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
         if (ScreenPriv->CursorToRestore)
             xf86CursorSetCursor(pDev, pScreen, ScreenPriv->CursorToRestore, x,
                                 y);
-        else if (ScreenPriv->SWCursor)
-            (*ScreenPriv->spriteFuncs->MoveCursor) (pDev, pScreen, x, y);
+        else if (ScreenPriv->SWCursor) {
+            if (ScreenPriv->spriteFuncs->MoveCursor)
+                ScreenPriv->spriteFuncs->MoveCursor(pDev, pScreen, x, y);
+        }
         else if (ScreenPriv->isUp)
             xf86MoveCursor(pScreen, x, y);
     }
     else
-        (*ScreenPriv->spriteFuncs->MoveCursor) (pDev, pScreen, x, y);
+    {
+        if (ScreenPriv->spriteFuncs->MoveCursor)
+            ScreenPriv->spriteFuncs->MoveCursor(pDev, pScreen, x, y);
+        }
+    }
 }
 
 void

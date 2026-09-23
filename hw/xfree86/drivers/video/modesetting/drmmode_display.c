@@ -5038,7 +5038,8 @@ static void drmmode_sprite_move_cursor(DeviceIntPtr pDev, ScreenPtr pScreen,
 
     drmmode_sprite_do_set_cursor(sprite_priv, scrn, x, y);
 
-    ms->SpriteFuncs->MoveCursor(pDev, pScreen, x, y);
+    if (ms->SpriteFuncs->MoveCursor)
+        ms->SpriteFuncs->MoveCursor(pDev, pScreen, x, y);
 }
 
 static Bool drmmode_sprite_realize_realize_cursor(DeviceIntPtr pDev,

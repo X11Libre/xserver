@@ -499,7 +499,8 @@ miPointerUpdateSprite(DeviceIntPtr pDev)
     else if (x != devx || y != devy) {
         pPointer->devx = x;
         pPointer->devy = y;
-        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask)
+        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask
+                              && pScreenPriv->spriteFuncs->MoveCursor)
             (*pScreenPriv->spriteFuncs->MoveCursor) (pDev, pScreen, x, y);
     }
 }
@@ -595,7 +596,8 @@ miPointerMoveNoEvent(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
         &&!pScreenPriv->waitForUpdate && pScreen == pPointer->pSpriteScreen) {
         pPointer->devx = x;
         pPointer->devy = y;
-        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask)
+        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask
+                              && pScreenPriv->spriteFuncs->MoveCursor)
             (*pScreenPriv->spriteFuncs->MoveCursor) (pDev, pScreen, x, y);
     }
 

@@ -937,7 +937,8 @@ VGAarbiterSpriteMoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
 {
     SPRITE_PROLOG;
     VGAGet(pScreen);
-    PointPriv->spriteFuncs->MoveCursor(pDev, pScreen, x, y);
+    if (PointPriv->spriteFuncs->MoveCursor)
+        PointPriv->spriteFuncs->MoveCursor(pDev, pScreen, x, y);
     VGAPut();
     SPRITE_EPILOG;
 }
