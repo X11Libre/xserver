@@ -3840,7 +3840,6 @@ static int
 SendConnSetup(ClientPtr client, const char *reason)
 {
     xWindowRoot *root;
-    int numScreens;
     char *lConnectionInfo;
     xConnSetupPrefix *lconnSetupPrefix;
 
@@ -3860,7 +3859,6 @@ SendConnSetup(ClientPtr client, const char *reason)
         return client->noClientException = -1;
     }
 
-    numScreens = screenInfo.numScreens;
     lConnectionInfo = ConnectionInfo;
     lconnSetupPrefix = &connSetupPrefix;
 
@@ -3881,12 +3879,8 @@ SendConnSetup(ClientPtr client, const char *reason)
 #endif
     /* fill in the "currentInputMask" */
     root = (xWindowRoot *) (lConnectionInfo + connBlockScreenStart);
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled())
-        numScreens = screenInfo.numScreens;
-    else
-        numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
-#endif /* XINERAMA */
+
+    int numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
