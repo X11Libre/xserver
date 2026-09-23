@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -48,7 +49,7 @@ extern DevPrivateKeyRec xnestWindowPrivateKeyRec;
 #define xnestWindowParent(pWin) \
   ((pWin)->parent ? \
    xnestWindow((pWin)->parent) : \
-   xnestDefaultWindows[(pWin)->drawable.pScreen->myNum])
+   xnestGetScreenPrivate((pWin)->drawable.pScreen)->defaultWindow)
 
 #define xnestWindowSiblingAbove(pWin) \
   ((pWin)->prevSib ? xnestWindow((pWin)->prevSib) : XCB_WINDOW_NONE)
