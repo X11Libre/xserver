@@ -275,7 +275,7 @@ dix_main(int argc, char *argv[], char *envp[])
     else
 #endif /* XINERAMA */
     {
-        if (!CreateConnectionBlock()) {
+        if (!CreateConnectionBlock(0)) {
             FatalError("could not create connection block info");
         }
     }

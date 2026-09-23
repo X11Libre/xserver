@@ -574,7 +574,7 @@ PanoramiXExtensionInit(void)
 Bool
 PanoramiXCreateConnectionBlock(void)
 {
-    int i, j, length;
+    int j, length;
     bool disable_backing_store = FALSE;
     int old_width, old_height;
     float width_mult, height_mult;
@@ -612,14 +612,9 @@ PanoramiXCreateConnectionBlock(void)
         });
     }
 
-    i = screenInfo.numScreens;
-    screenInfo.numScreens = 1;
-    if (!CreateConnectionBlock()) {
-        screenInfo.numScreens = i;
+    if (!CreateConnectionBlock(1)) {
         return FALSE;
     }
-
-    screenInfo.numScreens = i;
 
     root = (xWindowRoot *) (ConnectionInfo + connBlockScreenStart);
     length = connBlockScreenStart + sizeof(xWindowRoot);

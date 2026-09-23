@@ -600,8 +600,7 @@ Dispatch(void)
     ResetOsBuffers();
 }
 
-Bool
-CreateConnectionBlock(void)
+bool CreateConnectionBlock(int maxscreens)
 {
     xConnSetup setup;
     xDepth depth;
@@ -611,6 +610,10 @@ CreateConnectionBlock(void)
     int paddingforint32, lenofblock, sizesofar = 0;
     char *pBuf;
     const char VendorString[] = "XLibre";
+
+    if (!maxscreens) {
+        maxscreens = screenInfo.numScreens;
+    }
 
     memset(&setup, 0, sizeof(xConnSetup));
     /* Leave off the ridBase and ridMask, these must be sent with
@@ -627,7 +630,7 @@ CreateConnectionBlock(void)
 
     setup.bitmapBitOrder = screenInfo.bitmapBitOrder;
     setup.motionBufferSize = NumMotionEvents();
-    setup.numRoots = screenInfo.numScreens;
+    setup.numRoots = maxscreens;
     setup.nbytesVendor = strlen(VendorString);
     setup.numFormats = screenInfo.numPixmapFormats;
     setup.maxRequestSize = MAX_REQUEST_SIZE;
@@ -667,7 +670,7 @@ CreateConnectionBlock(void)
     memset(&depth, 0, sizeof(xDepth));
     memset(&visual, 0, sizeof(xVisualType));
 
-    DIX_FOR_EACH_SCREEN({
+    DIX_FOR_N_SCREENS(0, maxscreens, {
         DepthPtr pDepth;
         VisualPtr pVisual;
 
