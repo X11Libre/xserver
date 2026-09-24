@@ -74,6 +74,23 @@ static inline bool dixScreenExists(unsigned int idx) {
     } while (0);
 
 /*
+ * macro for looping over all screens (up to `screenInfo.numScreens`).
+ * Makes a new scopes and declares `walkScreenIdx` as the current screen's
+ * index number as well as `walkScreen` as poiner to current ScreenRec
+ *
+ * @param __LAMBDA__ the code to be executed in each iteration step.
+ */
+#define DIX_FOR_N_SCREENS(start, num, __LAMBDA__) \
+    do { \
+        int walkStop = MIN(start + num, screenInfo.numScreens); \
+        for (unsigned walkScreenIdx = start; walkScreenIdx < walkStop; walkScreenIdx++) { \
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
+            (void)walkScreen; \
+            __LAMBDA__; \
+        } \
+    } while (0);
+
+/*
  * macro for looping over all screens (up to `screenInfo.numScreens`),
  * but if XINERAMA enabled only hit the first screen.
  *
