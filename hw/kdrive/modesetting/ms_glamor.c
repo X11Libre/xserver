@@ -13,7 +13,84 @@
 #include <drm_fourcc.h>
 
 static Bool
-msGlamorMapFront(ScreenPtr pScreen);
+msGlamorTryNewFront(ScreenPtr pScreen, Bool strip_modifiers, Bool need_map)
+{
+    KdScreenPriv(pScreen);
+    KdScreenInfo *screen = pScreenPriv->screen;
+    msPriv *priv = screen->card->driver;
+    msScrPriv *scrpriv = screen->driver;
+    KdFrameBuffer saved_framebuffer = screen->fb;
+
+    /* TODO: query glamor */
+    MsScreenConf *config = screen->closure;
+    Bool is_gles = config->glamor_info.force_es;
+
+    struct gbm_bo *old_front;
+    struct gbm_bo *new_front = NULL;
+
+    if (strip_modifiers) {
+        if (!need_map && !scrpriv->allow_modifier_strip) {
+            return FALSE;
+        }
+        screen->driver = NULL;
+    }
+
+    old_front = scrpriv->front;
+    new_front = modesetting_open(priv, screen, need_map, TRUE /* keep_depth */);
+    screen->driver = scrpriv;
+    if (!new_front) {
+        return FALSE;
+    }
+
+    gbm_bo_set_screen_fb_info(new_front, screen, is_gles);
+    if (memcmp(&saved_framebuffer, &screen->fb, sizeof(screen->fb))) {
+        /* Visual masks changed, the bo is unusable */
+        /* XXX We could still use this if we had a way to change visual masks this late */
+        screen->fb = saved_framebuffer;
+        gbm_bo_destroy(new_front);
+        LogMessage(X_ERROR, "Xmodesetting(%d): Cannot use a new front with different visual masks\n", pScreen->myNum);
+        return FALSE;
+    }
+
+    if (!msSetScreenBo(pScreen, new_front, TRUE /* flip */)) {
+        gbm_bo_destroy(new_front);
+        LogMessage(X_ERROR, "Xmodesetting(%d): Could not flip to the new front bo\n", pScreen->myNum);
+        return FALSE;
+    }
+
+    if (!gbm_bo_get_map(new_front)) {
+        PixmapPtr rootPixmap = (*pScreen->GetScreenPixmap)(pScreen);
+        Bool used_modifiers = gbm_bo_get_used_modifiers(new_front);
+
+        if (!glamor_egl_create_textured_pixmap_from_gbm_bo(rootPixmap, new_front, used_modifiers)) {
+            /* Put the old front back, destroy the new front */
+            msSetScreenBo(pScreen, old_front, FALSE /* flip */);
+            LogMessage(X_ERROR, "Xmodesetting(%d): Could not texture the front bo\n", pScreen->myNum);
+            return FALSE;
+        }
+    }
+
+    gbm_bo_destroy(old_front);
+    return TRUE;
+}
+
+static Bool
+msGlamorTileFront(ScreenPtr pScreen, Bool map_fallback)
+{
+    if (msGlamorTryNewFront(pScreen, FALSE /* strip_modifiers */, FALSE /* need_map */) ||
+        msGlamorTryNewFront(pScreen, TRUE /* strip_modifiers */, FALSE /* need_map */)) {
+        return TRUE;
+    }
+
+    LogMessage(X_ERROR, "Xmodesetting(%d): Cannot use a textured gbm front, using a cpu-mapped front buffer\n", pScreen->myNum);
+
+    if (map_fallback) {
+        if (!msGlamorTryNewFront(pScreen, FALSE /* strip_modifiers */, TRUE /* need_map */)) {
+            msGlamorTryNewFront(pScreen, TRUE /* strip_modifiers */, TRUE /* need_map */);
+        }
+    }
+    return FALSE;
+}
 
 Bool
 msGlamorCreateRes(ScreenPtr pScreen)
@@ -21,31 +98,25 @@ msGlamorCreateRes(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
-    PixmapPtr rootPixmap;
 
     struct gbm_format_name_desc desc = {0};
     uint32_t format;
     uint64_t modifier;
     const char *format_name;
 
-    rootPixmap = (*pScreen->GetScreenPixmap)(pScreen);
-
-    if (!gbm_bo_get_map(scrpriv->front)) {
-        Bool used_modifiers = gbm_bo_get_used_modifiers(scrpriv->front);
-        if (!screen->dumb &&
-            glamor_egl_create_textured_pixmap_from_gbm_bo(rootPixmap, scrpriv->front, used_modifiers)) {
-            LogMessage(X_INFO, "Xmodesetting(%d): Using a tiled front buffer\n", pScreen->myNum);
-        } else {
-            if (!msGlamorMapFront(pScreen)) {
-                LogMessage(X_ERROR, "Xmodesetting(%d): Could not map the front buffer\n",
-                           pScreen->myNum);
-                return FALSE;
-            }
-
-            LogMessage(X_INFO, "Xmodesetting(%d): Using a cpu mapped front buffer\n", pScreen->myNum);
+    if (!screen->dumb) {
+        Bool map_fallback = !gbm_bo_get_map(scrpriv->front);
+        if (!msGlamorTileFront(pScreen, map_fallback) &&
+            !gbm_bo_get_map(scrpriv->front)) {
+            LogMessage(X_ERROR, "Xmodesetting(%d): Could not create a usable front buffer\n", pScreen->myNum);
+            return FALSE;
         }
-    } else {
+    }
+
+    if (gbm_bo_get_map(scrpriv->front)) {
         LogMessage(X_INFO, "Xmodesetting(%d): Using a cpu mapped front buffer\n", pScreen->myNum);
+    } else {
+        LogMessage(X_INFO, "Xmodesetting(%d): Using a textured front buffer\n", pScreen->myNum);
     }
 
     format = gbm_bo_get_format(scrpriv->front);
@@ -53,33 +124,7 @@ msGlamorCreateRes(ScreenPtr pScreen)
     format_name = gbm_format_get_name(format, &desc);
     LogMessage(X_INFO, "Xmodesetting(%d): Front buffer depth: %d, bpp: %d, format: %s, modifier: 0x%lx\n",
                pScreen->myNum, screen->fb.depth, screen->fb.bitsPerPixel, format_name, modifier);
-
     return TRUE;
-}
-
-static Bool
-msGlamorMapFront(ScreenPtr pScreen)
-{
-    KdScreenPriv(pScreen);
-    KdScreenInfo *screen = pScreenPriv->screen;
-    msPriv *priv = screen->card->driver;
-    struct gbm_bo *new_front = NULL;
-
-    LogMessage(X_ERROR, "Xmodesetting(%d): Cannot use tiled gbm front, trying to use a mapped front bo\n", pScreen->myNum);
-
-    new_front = modesetting_open(priv, screen, TRUE /* need_map */);
-    if (!new_front ||
-        !msSetScreenBo(pScreen, new_front, FALSE /* flip */)) {
-        goto bail;
-    }
-
-    return TRUE;
-
-bail:
-    if (new_front) {
-        gbm_bo_destroy(new_front);
-    }
-    return FALSE;
 }
 
 Bool
@@ -91,6 +136,7 @@ msGlamorInit(ScreenPtr pScreen)
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
     uint32_t format;
+    int caps = GLAMOR_EGL_CAP_NONE;
 
     if (!config->glamor_info.dri_path) {
         config->glamor_info.dri_fd = dup(gbm_device_get_fd(priv->gbm));
@@ -101,9 +147,12 @@ msGlamorInit(ScreenPtr pScreen)
         }
     }
 
-    if (!KdGlamorInit(pScreen, &config->glamor_info, NULL)) {
+    if (!KdGlamorInit(pScreen, &config->glamor_info, &caps)) {
         return FALSE;
     }
+
+    /* Workaround for https://gitlab.freedesktop.org/mesa/mesa/-/work_items/14475#note_3659774 */
+    scrpriv->allow_modifier_strip = !!(caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO);
 
     /*
      * TODO: Don't assume all formats support the same modifiers
@@ -118,6 +167,9 @@ msGlamorInit(ScreenPtr pScreen)
         scrpriv->render_modifiers = NULL;
     }
 
+    /* TODO: Query scanout modifiers in CardInit,
+     * intersect with the render modifiers, and cache them
+     */
     if (scrpriv->num_render_modifiers == 1 &&
         scrpriv->render_modifiers[0] == DRM_FORMAT_MOD_INVALID) {
         free(scrpriv->render_modifiers);

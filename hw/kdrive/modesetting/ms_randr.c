@@ -20,6 +20,12 @@ msSetMode(ScreenPtr pScreen, int width, int height, int rate)
     drmModeModeInfo *old_mode;
     int old_width, old_height, old_rate;
 
+    /* TODO: Query scanout modifiers in CardInit,
+     * intersect with render modifiers queried in msGlamorInit
+     */
+    uint64_t *modifiers = scrpriv->render_modifiers;
+    int num_modifiers = scrpriv->num_render_modifiers;
+
     old_mode = scrpriv->mode;
 
     old_width = screen->width;
@@ -41,7 +47,8 @@ msSetMode(ScreenPtr pScreen, int width, int height, int rate)
         height != screen->height) {
         uint32_t format = gbm_bo_get_format(scrpriv->front);
         Bool do_map = !!gbm_bo_get_map(scrpriv->front);
-        new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format);
+        new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format,
+                                        modifiers, num_modifiers);
         if (!new_front ||
             !msSetScreenBo(pScreen, new_front, FALSE /* flip */)) {
             goto bail;
