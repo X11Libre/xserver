@@ -188,7 +188,7 @@ glamor_font_get(ScreenPtr screen, FontPtr font)
     glamor_priv->suppress_gl_out_of_memory_logging = false;
     free(bits);
 
-    if (glGetError() == GL_OUT_OF_MEMORY) {
+    if (glGetError() != GL_NO_ERROR) {
         glDeleteTextures(1, &glamor_font->texture_id);
         glamor_font->texture_id = 0;
         return NULL;

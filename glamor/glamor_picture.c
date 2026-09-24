@@ -368,7 +368,7 @@ glamor_upload_picture_to_texture(PicturePtr picture)
     }
 
     glamor_priv->suppress_gl_out_of_memory_logging = false;
-    if (glGetError() == GL_OUT_OF_MEMORY) {
+    if (glGetError() != GL_NO_ERROR) {
         ret = FALSE;
     }
 
