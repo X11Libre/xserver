@@ -80,16 +80,15 @@ void msCardFini(KdCardInfo * card);
 
 /* ms_gamma.c */
 
+Bool
+msGetGamma(ScreenPtr pScreen, int size, uint16_t *r, uint16_t *g, uint16_t *b);
+
+Bool
+msSetGamma(ScreenPtr pScreen, int size, uint16_t *r, uint16_t *g, uint16_t *b);
+
 void msGetColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 
 void msPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
-
-#ifdef RANDR
-#if RANDR_12_INTERFACE
-Bool msRandRCrtcSetGamma(ScreenPtr pScreen, RRCrtcPtr crtc);
-#endif
-Bool msRandRGammaInit(ScreenPtr pScreen);
-#endif
 
 #ifdef GLAMOR
 /* ms_glamor.c */
@@ -103,7 +102,7 @@ void msEnableAccel(ScreenPtr screen);
 void msDisableAccel(ScreenPtr screen);
 
 void msFiniAccel(ScreenPtr screen);
-#endif
+#endif /* GLAMOR */
 
 void msCloseScreen(ScreenPtr pScreen);
 
@@ -146,6 +145,12 @@ modesetting_find_connector(msPriv *priv, int fd, uint32_t *conn_id);
 
 int
 modeseting_find_crtc(msPriv *priv, int fd, drmModeConnector *conn);
+
+#ifdef RANDR
+/* ms_randr.c */
+
+Bool msRandRInit(ScreenPtr pScreen);
+#endif /* RANDR */
 
 /* ms_util.c */
 

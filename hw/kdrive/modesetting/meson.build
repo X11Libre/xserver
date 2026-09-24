@@ -4,6 +4,7 @@ srcs = [
     'ms_gamma.c',
     'ms_gbm.c',
     'ms_query.c',
+    'ms_randr.c',
     'ms_util.c',
     '../../stubs/ddxBeforeReset.c',
 ]
