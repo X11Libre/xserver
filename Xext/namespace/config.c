@@ -45,6 +45,7 @@ static struct Xnamespace* select_ns(const char* name)
     struct Xnamespace *newns = calloc(1, sizeof(struct Xnamespace));
     newns->name = strdup(name);
     xorg_list_init(&newns->auth_tokens);
+    XblindInitContext(&newns->blind, newns->name);
     xorg_list_append(&newns->entry, &ns_list);
     return newns;
 }
@@ -134,6 +135,13 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         return;
     }
 
+    if (strcmp(token, "blind") == 0 || strcmp(token, "xblind") == 0)
+    {
+        XblindEnable(&curr->blind, TRUE);
+        XblindAssignToken(&curr->blind, curr->name ? curr->name : "blind");
+        return;
+    }
+
     if (strcmp(token, "allow") == 0)
     {
         while ((token = strtok(NULL, " \t")) != NULL)
@@ -169,6 +177,8 @@ Bool XnsLoadConfig(void)
     xorg_list_append_ndup(&ns_anon.entry, &ns_list);
     xorg_list_init(&ns_root.auth_tokens);
     xorg_list_init(&ns_anon.auth_tokens);
+    XblindInitContext(&ns_root.blind, ns_root.name);
+    XblindInitContext(&ns_anon.blind, ns_anon.name);
 
     if (!namespaceConfigFile) {
         XNS_LOG("no namespace config given - Xnamespace disabled\n");
@@ -421,6 +431,7 @@ struct Xnamespace *XnsCreate(const char *name, size_t namelen,
         return NULL;
     }
     xorg_list_init(&ns->auth_tokens);
+    XblindInitContext(&ns->blind, ns->name);
     capsToFields(ns, caps);
     ns->autoRemove = !!(attrs & XNS_ATTR_TRANSIENT);
 

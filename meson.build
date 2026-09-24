@@ -593,6 +593,7 @@ endif
 build_xinerama = get_option('xinerama')
 build_xsecurity = get_option('xcsecurity')
 build_namespace = get_option('namespace')
+build_xblind = get_option('xblind')
 
 build_xv = get_option('xv')
 build_xvmc = get_option('xvmc')

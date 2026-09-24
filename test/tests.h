@@ -33,6 +33,7 @@ const testfunc_t* sha1_test(void);
 const testfunc_t* signal_logging_test(void);
 const testfunc_t* string_test(void);
 const testfunc_t* touch_test(void);
+const testfunc_t* xblind_test(void);
 const testfunc_t* xfree86_test(void);
 const testfunc_t* xkb_test(void);
 const testfunc_t* xtest_test(void);

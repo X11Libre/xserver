@@ -55,6 +55,7 @@ NamespaceExtensionInit(void)
     /* Do the serverClient */
     struct XnamespaceClientPriv *srv = XnsClientPriv(serverClient);
     *srv = (struct XnamespaceClientPriv) { .isServer = TRUE };
+    XblindInitContext(&srv->blind, ns_root.name);
     XnamespaceAssignClient(srv, &ns_root);
 
     /* register the runtime management protocol extension. It is gated to
@@ -81,6 +82,10 @@ void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace
         oldns->refcnt--;
 
     priv->ns = newns;
+    if (newns != NULL)
+        priv->blind = newns->blind;
+    else
+        XblindInitContext(&priv->blind, "anon");
 
     if (newns != NULL)
         newns->refcnt++;

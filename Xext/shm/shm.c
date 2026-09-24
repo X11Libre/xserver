@@ -68,6 +68,7 @@ in this Software without prior written authorization from The Open Group.
 #include "resource.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
+#include "Xext/namespace/xblind.h"
 #include "pixmapstr.h"
 #include "gcstruct.h"
 #include "extnsionst.h"
@@ -647,6 +648,8 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
                                      stuff->width, stuff->height,
                                      stuff->format, stuff->planeMask,
                                      shmdesc->addr + stuff->offset);
+        if (XblindShouldBlankImageForDrawable(pDraw))
+            memset(shmdesc->addr + stuff->offset, 0, length);
         if (pVisibleRegion)
             XaceCensorImage(client, pVisibleRegion,
                     PixmapBytePad(stuff->width, pDraw->depth), pDraw,
@@ -662,6 +665,8 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
                                              stuff->width, stuff->height,
                                              stuff->format, plane,
                                              shmdesc->addr + len2);
+                if (XblindShouldBlankImageForDrawable(pDraw))
+                    memset(shmdesc->addr + len2, 0, lenPer);
                 if (pVisibleRegion)
                     XaceCensorImage(client, pVisibleRegion,
                             BitmapBytePad(stuff->width), pDraw,

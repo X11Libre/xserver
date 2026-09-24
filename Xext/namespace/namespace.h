@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <X11/Xmd.h>
 
+#include "Xext/namespace/xblind.h"
 #include "include/dixstruct.h"
 #include "include/list.h"
 #include "include/privates.h"
@@ -32,6 +33,7 @@ struct Xnamespace {
     Bool allowXKeyboard;
     Bool superPower;
     Bool autoRemove;           /* destroy when the last client exits */
+    XBlindContext blind;
     struct xorg_list auth_tokens;
     CARD32 tokenHandleSeq;      /* monotonic per-namespace handle counter */
     size_t refcnt;
@@ -46,6 +48,7 @@ struct XnamespaceClientPriv {
     Bool isServer;
     XID authId;
     struct Xnamespace* ns;
+    XBlindContext blind;
 };
 
 #define NS_NAME_ROOT      "root"

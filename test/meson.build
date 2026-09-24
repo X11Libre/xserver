@@ -202,6 +202,7 @@ if build_xorg
      'tests-common.c',
      'tests.c',
      'touch.c',
+     'xblind.c',
      'xfree86.c',
      'xtest.c',
      'ddc-tests.c',

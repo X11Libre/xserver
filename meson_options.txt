@@ -103,6 +103,8 @@ option('xselinux', type: 'combo', choices: ['true', 'false', 'auto'], value: 'au
        description: 'XSELINUX extension')
 option('namespace', type: 'boolean', value: true,
        description: 'Container/namespace extension')
+option('xblind', type: 'boolean', value: false,
+       description: 'Enable the XBlind alpha input fencing and blind render isolation layer')
 option('xinerama', type: 'boolean', value: true,
        description: 'Xinerama extension')
 option('xcsecurity', type: 'boolean', value: false,

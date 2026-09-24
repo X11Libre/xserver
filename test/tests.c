@@ -11,6 +11,7 @@ main(int argc, char **argv)
     run_test(list_zeroinit_test);
     run_test(sha1_test);
     run_test(string_test);
+    run_test(xblind_test);
 
 #ifdef XORG_TESTS
     run_test(fixes_test);

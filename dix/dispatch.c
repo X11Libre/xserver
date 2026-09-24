@@ -133,6 +133,7 @@ Equipment Corporation.
 #include "os/probes_priv.h"
 #include "os/screensaver.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
+#include "Xext/namespace/xblind.h"
 #include "Xext/xfixes/xfixesint.h"
 
 #include "windowstr.h"
@@ -2359,6 +2360,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                          width,
                                          nlines,
                                          format, planemask, (void *) pBuf);
+            if (XblindShouldBlankImageForDrawable(pDraw))
+                memset(pBuf, 0, nlines * widthBytesLine);
             if (pVisibleRegion)
                 XaceCensorImage(client, pVisibleRegion, widthBytesLine,
                                 pDraw, x, y + linesDone, width,
@@ -2391,6 +2394,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                                  width,
                                                  nlines,
                                                  format, plane, (void *) pBuf);
+                    if (XblindShouldBlankImageForDrawable(pDraw))
+                        memset(pBuf, 0, nlines * widthBytesLine);
                     if (pVisibleRegion)
                         XaceCensorImage(client, pVisibleRegion,
                                         widthBytesLine,
