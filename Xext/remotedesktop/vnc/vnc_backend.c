@@ -32,6 +32,7 @@
 #endif
 
 /* SSL/TLS support */
+#ifdef HAVE_OPENSSL
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/x509.h>
@@ -40,6 +41,7 @@
 /* Global SSL context for TLS */
 static SSL_CTX *vnc_ssl_ctx = NULL;
 static Bool vnc_ssl_initialized = FALSE;
+#endif
 
 /* VNC encoding types */
 #define RFB_ENCODING_RAW        0
@@ -264,6 +266,7 @@ VNCFreeConfig(VNCConfigPtr config)
  * SSL/TLS Initialization
  * ================================================================ */
 
+#ifdef HAVE_OPENSSL
 static Bool
 VNCSSLInit(VNCConfigPtr config)
 {
@@ -331,6 +334,7 @@ VNCSSLFini(void)
     EVP_cleanup();
     ERR_free_strings();
 }
+#endif /* HAVE_OPENSSL */
 
 /* ================================================================
  * Backend Lifecycle
