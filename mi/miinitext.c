@@ -130,6 +130,7 @@ static const ExtensionModule staticExtensions[] = {
     {CompositeExtensionInit, "COMPOSITE", &noCompositeExtension},
 #endif
     {DamageExtensionInit, "DAMAGE", &noDamageExtension},
+    {RemoteDesktopExtensionInit, "REMOTEDESKTOP", &noRemoteDesktopExtension},
 #ifdef SCREENSAVER
     {ScreenSaverExtensionInit, "MIT-SCREEN-SAVER", &noScreenSaverExtension},
 #endif

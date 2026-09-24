@@ -100,19 +100,21 @@ option('screensaver', type: 'boolean', value: true,
 option('xres', type: 'boolean', value: true,
        description: 'XRes extension')
 option('xselinux', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
-       description: 'XSELINUX extension')
+        description: 'XSELINUX extension')
 option('namespace', type: 'boolean', value: true,
-       description: 'Container/namespace extension')
+        description: 'Container/namespace extension')
 option('xinerama', type: 'boolean', value: true,
-       description: 'Xinerama extension')
+        description: 'Xinerama extension')
 option('xcsecurity', type: 'boolean', value: false,
-       description: 'Security extension')
+        description: 'Security extension')
 option('xv', type: 'boolean', value: true,
-       description: 'Xv extension')
+        description: 'Xv extension')
 option('xvmc', type: 'boolean', value: true,
-       description: 'XvMC extension')
+        description: 'XvMC extension')
+option('remote_desktop', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
+        description: 'Remote Desktop extension (VNC/RDP)')
 option('dga', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
-       description: 'DGA extension')
+        description: 'DGA extension')
 option('linux_apm', type: 'boolean', value: true,
        description: 'APM support on Linux')
 option('linux_acpi', type: 'boolean', value: true,

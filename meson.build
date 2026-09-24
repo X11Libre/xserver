@@ -710,6 +710,12 @@ if get_option('xselinux') != 'false'
     endif
 endif
 
+remote_desktop_opt = get_option('remote_desktop')
+build_remotedesktop = remote_desktop_opt != 'false'
+if remote_desktop_opt == 'auto'
+    build_remotedesktop = true
+endif
+
 socket_dep = []
 if host_machine.system() == 'windows'
     socket_dep = meson.get_compiler('c').find_library('ws2_32')
@@ -832,6 +838,11 @@ if build_xserver
         libxserver_bigreq,
         libxserver_geext
     ]
+
+    if build_remotedesktop
+        subdir('Xext/remotedesktop')
+        libxserver += libxserver_remotedesktop
+    endif
 
     if build_xselinux
         libxserver += libxserver_xselinux

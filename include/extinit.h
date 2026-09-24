@@ -65,4 +65,7 @@ extern _X_EXPORT Bool noPanoramiXExtension;
 extern _X_EXPORT Bool noXvExtension;
 #endif
 
+extern _X_EXPORT Bool noRemoteDesktopExtension;
+extern void RemoteDesktopExtensionInit(void);
+
 #endif
