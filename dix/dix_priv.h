@@ -841,4 +841,9 @@ bool dixAnyOtherGrabbed(ClientPtr client);
  */
 void dixSendConnAbort(ClientPtr pClient, const char *reason);
 
+/*
+ * create ConnectionInfo block. aborts the server on failure
+ */
+void dixInitConnectionBlock(void);
+
 #endif /* _XSERVER_DIX_PRIV_H */
