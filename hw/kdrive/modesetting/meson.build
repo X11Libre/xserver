@@ -1,6 +1,7 @@
 srcs = [
     'modesetting.c',
     'msinit.c',
+    'ms_damage.c',
     'ms_gamma.c',
     'ms_gbm.c',
     'ms_query.c',

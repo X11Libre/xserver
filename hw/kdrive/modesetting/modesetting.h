@@ -78,6 +78,21 @@ void msScreenFini(KdScreenInfo * screen);
 
 void msCardFini(KdCardInfo * card);
 
+Bool msMapFramebuffer(KdScreenInfo * screen);
+
+Bool msUnmapFramebuffer(KdScreenInfo * screen);
+
+Bool msSetShadow(ScreenPtr pScreen);
+
+struct gbm_bo*
+modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map);
+
+/* ms_damage.c */
+
+Bool msDamageCreateRes(ScreenPtr pScreen);
+
+void msDamageCloseScreen(ScreenPtr pScreen);
+
 /* ms_gamma.c */
 
 Bool
@@ -103,17 +118,6 @@ void msDisableAccel(ScreenPtr screen);
 
 void msFiniAccel(ScreenPtr screen);
 #endif /* GLAMOR */
-
-void msCloseScreen(ScreenPtr pScreen);
-
-Bool msMapFramebuffer(KdScreenInfo * screen);
-
-Bool msUnmapFramebuffer(KdScreenInfo * screen);
-
-Bool msSetShadow(ScreenPtr pScreen);
-
-struct gbm_bo*
-modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map);
 
 /* ms_gbm.c */
 
