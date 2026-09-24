@@ -7,7 +7,7 @@
 
 #include "modesetting.h"
 
-static Bool
+Bool
 msGetGamma(ScreenPtr pScreen, int size, uint16_t *r, uint16_t *g, uint16_t *b)
 {
     KdScreenPriv(pScreen);
@@ -39,7 +39,7 @@ msGetGamma(ScreenPtr pScreen, int size, uint16_t *r, uint16_t *g, uint16_t *b)
     return FALSE;
 }
 
-static Bool
+Bool
 msSetGamma(ScreenPtr pScreen, int size, uint16_t *r, uint16_t *g, uint16_t *b)
 {
     KdScreenPriv(pScreen);
@@ -115,76 +115,3 @@ msPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs)
 
     msSetGamma(pScreen, max, r, g, b);
 }
-
-#ifdef RANDR
-#if RANDR_12_INTERFACE
-Bool
-msRandRCrtcSetGamma(ScreenPtr pScreen, RRCrtcPtr crtc)
-{
-    return msSetGamma(pScreen, crtc->gammaSize, crtc->gammaRed, crtc->gammaGreen, crtc->gammaBlue);
-}
-#endif
-Bool
-msRandRGammaInit(ScreenPtr pScreen)
-{
-#if RANDR_12_INTERFACE
-    KdScreenPriv(pScreen);
-    KdScreenInfo *screen = pScreenPriv->screen;
-    msScrPriv *priv = screen->driver;
-    RROutputPtr pOutput;
-    RRCrtcPtr crtc;
-
-    uint16_t *gamma;
-    int gamma_size;
-
-    pOutput = RRFirstOutput(pScreen);
-    if (!pOutput) {
-        return FALSE;
-    }
-
-    if (!pOutput->numCrtcs || !pOutput->crtcs) {
-        return FALSE;
-    }
-
-    crtc = pOutput->crtc ? pOutput->crtc : pOutput->crtcs[0];
-    if (!crtc) {
-        return FALSE;
-    }
-
-    if (priv->crtc && priv->crtc->gamma_size) {
-        gamma_size = priv->crtc->gamma_size;
-    } else {
-        switch (screen->fb.depth) {
-        case 8:
-            gamma_size = 1 << 8;
-        case 15:
-            gamma_size = 1 << 5;
-        case 16:
-            gamma_size = 1 << 6;
-        case 24:
-            gamma_size = 1 << 8;
-        case 30:
-        default:
-            gamma_size = 1 << 10;
-        }
-    }
-
-    gamma = calloc(3 * gamma_size, sizeof(*gamma));
-    if (!gamma) {
-        return FALSE;
-    }
-
-    if (!RRCrtcGammaSetSize(crtc, gamma_size)) {
-        return FALSE;
-    }
-
-    msGetGamma(pScreen, gamma_size, gamma, gamma + gamma_size, gamma + 2 * gamma_size);
-    RRCrtcGammaSet(crtc, gamma, gamma + gamma_size, gamma + 2 * gamma_size);
-
-    free(gamma);
-    return TRUE;
-#else /* RANDR_12_INTERFACE */
-    return FALSE;
-#endif
-}
-#endif /* RANDR */
