@@ -287,8 +287,22 @@ RemoteDesktopDamageReportPerScreen(DamagePtr pDamage, RegionPtr pRegion, void *c
     if (!session || session->state != RD_STATE_RUNNING || !session->protocol)
         return;
 
-    if (session->protocol->DamageNotify) {
-        session->protocol->DamageNotify(session->protocol, pRegion);
+    ScreenPtr scr = session->pScreen;
+    if (scr && (scr->x != 0 || scr->y != 0)) {
+        /* Translate region from screen-local to global Xinerama coordinates */
+        RegionPtr translated = RegionCreate(NULL, 0);
+        if (translated) {
+            RegionCopy(translated, pRegion);
+            RegionTranslate(translated, scr->x, scr->y);
+            if (session->protocol->DamageNotify) {
+                session->protocol->DamageNotify(session->protocol, translated);
+            }
+            RegionDestroy(translated);
+        }
+    } else {
+        if (session->protocol->DamageNotify) {
+            session->protocol->DamageNotify(session->protocol, pRegion);
+        }
     }
 }
 
