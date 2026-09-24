@@ -1302,9 +1302,14 @@ matchAdaptor(ScreenPtr pScreen, XvAdaptorPtr refAdapt, Bool isOverlay)
     return NULL;
 }
 
+static bool didXineramifyXv = false;
+
 void
 XineramifyXv(void)
 {
+    if (didXineramifyXv)
+        return;
+
     XvScreenPtr xvsp0 =
         dixLookupPrivate(&(dixGetMasterScreen()->devPrivates), XvGetScreenKey());
     XvAdaptorPtr MatchingAdaptors[MAXSCREENS];
@@ -1349,5 +1354,6 @@ XineramifyXv(void)
     }
 
     xvUseXinerama = 1;
+    didXineramifyXv = true;
 }
 #endif /* XINERAMA */
