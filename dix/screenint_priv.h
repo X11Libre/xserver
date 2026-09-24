@@ -74,15 +74,20 @@ static inline bool dixScreenExists(unsigned int idx) {
     } while (0);
 
 /*
- * macro for looping over all screens (up to `screenInfo.numScreens`).
- * Makes a new scopes and declares `walkScreenIdx` as the current screen's
- * index number as well as `walkScreen` as poiner to current ScreenRec
+ * macro for looping over a range of screens (up to `start + num`,
+ * limited by `screenInfo.numScreens`).
+ * Makes a new scope and declares `walkScreenIdx` as the current screen's
+ * index number as well as `walkScreen` as pointer to current ScreenRec
  *
+ * @param start starting screen index
+ * @param num number of screens to walk (limited by screenInfo.numScreens)
  * @param __LAMBDA__ the code to be executed in each iteration step.
  */
 #define DIX_FOR_N_SCREENS(start, num, __LAMBDA__) \
     do { \
-        int walkStop = MIN(start + num, screenInfo.numScreens); \
+        unsigned walkStop = (unsigned)(start + num); \
+        if (walkStop > screenInfo.numScreens) \
+            walkStop = screenInfo.numScreens; \
         for (unsigned walkScreenIdx = start; walkScreenIdx < walkStop; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
