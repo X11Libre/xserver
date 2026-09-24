@@ -10,6 +10,8 @@
 
 #include "glamor.h"
 
+#include <drm_fourcc.h>
+
 static Bool
 msGlamorMapFront(ScreenPtr pScreen);
 
@@ -87,6 +89,8 @@ msGlamorInit(ScreenPtr pScreen)
     KdScreenInfo *screen = pScreenPriv->screen;
     MsScreenConf *config = screen->closure;
     msPriv *priv = screen->card->driver;
+    msScrPriv *scrpriv = screen->driver;
+    uint32_t format;
 
     if (!config->glamor_info.dri_path) {
         config->glamor_info.dri_fd = dup(gbm_device_get_fd(priv->gbm));
@@ -99,6 +103,25 @@ msGlamorInit(ScreenPtr pScreen)
 
     if (!KdGlamorInit(pScreen, &config->glamor_info, NULL)) {
         return FALSE;
+    }
+
+    /*
+     * TODO: Don't assume all formats support the same modifiers
+     *
+     * Not that we can do much if we are forced to chose a different format
+     */
+    format = gbm_bo_get_format(scrpriv->front);
+    if (!glamor_get_modifiers(pScreen, format,
+                              &scrpriv->num_render_modifiers,
+                              &scrpriv->render_modifiers)) {
+        scrpriv->num_render_modifiers = 0;
+        scrpriv->render_modifiers = NULL;
+    }
+
+    if (scrpriv->num_render_modifiers == 1 &&
+        scrpriv->render_modifiers[0] == DRM_FORMAT_MOD_INVALID) {
+        free(scrpriv->render_modifiers);
+        scrpriv->num_render_modifiers = 0;
     }
 
     return TRUE;
@@ -122,6 +145,10 @@ msGlamorFini(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     MsScreenConf *config = screen->closure;
+    msScrPriv *scrpriv = screen->driver;
 
+    free(scrpriv->render_modifiers);
+    scrpriv->render_modifiers = NULL;
+    scrpriv->num_render_modifiers = 0;
     KdGlamorFini(pScreen, &config->glamor_info);
 }

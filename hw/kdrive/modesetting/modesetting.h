@@ -44,6 +44,9 @@ typedef struct _msScrPriv {
 
     Bool error;
     Bool setPixmapBits;
+
+    uint32_t num_render_modifiers;
+    uint64_t *render_modifiers;
 } msScrPriv;
 
 typedef struct _msScreenConf {
