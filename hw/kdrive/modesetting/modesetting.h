@@ -139,6 +139,9 @@ gbm_format_get_depth(uint32_t format);
 struct gbm_bo*
 gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_t height, uint32_t format);
 
+void
+gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles);
+
 /* ms_query.c */
 
 drmModeModeInfo*
