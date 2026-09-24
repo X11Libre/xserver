@@ -160,8 +160,6 @@ Equipment Corporation.
 #define BITCLEAR(buf, i) MASKWORD((buf), (i)) &= ~BITMASK((i))
 #define GETBIT(buf, i) (MASKWORD((buf), (i)) & BITMASK((i)))
 
-xConnSetupPrefix connSetupPrefix;
-
 PaddingInfo PixmapWidthPaddingInfo[33];
 
 static ClientPtr grabClient;
@@ -730,11 +728,6 @@ bool CreateConnectionBlock(int maxscreens)
     });
 
     ConnectionInfoSize = lenofblock;
-
-    connSetupPrefix.success = xTrue;
-    connSetupPrefix.length = bytes_to_int32(ConnectionInfoSize);
-    connSetupPrefix.majorVersion = X_PROTOCOL;
-    connSetupPrefix.minorVersion = X_PROTOCOL_REVISION;
     return TRUE;
 }
 
@@ -3840,10 +3833,8 @@ static void SendConnSetup(ClientPtr client)
 {
     xWindowRoot *root;
     char *lConnectionInfo;
-    xConnSetupPrefix *lconnSetupPrefix;
 
     lConnectionInfo = ConnectionInfo;
-    lconnSetupPrefix = &connSetupPrefix;
 
     /* We're about to start speaking X protocol back to the client by
      * sending the connection setup info.  This means the authorization
@@ -3879,22 +3870,35 @@ static void SendConnSetup(ClientPtr client)
         root = (xWindowRoot *) pDepth;
     }
 
+    xConnSetupPrefix csp = {
+        .success = xTrue,
+        .length = bytes_to_int32(ConnectionInfoSize),
+        .majorVersion = X_PROTOCOL,
+        .minorVersion = X_PROTOCOL_REVISION,
+    };
+
+    /* keep an unswapped copy for the ClientStateCallback */
+    xConnSetupPrefix csp2 = csp;
+
     if (client->swapped) {
-        WriteSConnSetupPrefix(client, lconnSetupPrefix);
-        WriteSConnectionInfo(client,
-                             (unsigned long) (lconnSetupPrefix->length << 2),
-                             lConnectionInfo);
+        swaps(&csp.majorVersion);
+        swaps(&csp.minorVersion);
+        swaps(&csp.length);
+    }
+
+    dixWriteToClient(client, sizeof(csp), &csp);
+
+    if (client->swapped) {
+        WriteSConnectionInfo(client, ConnectionInfoSize, lConnectionInfo);
     }
     else {
-        dixWriteToClient(client, sizeof(xConnSetupPrefix), lconnSetupPrefix);
-        dixWriteToClient(client, (int) (lconnSetupPrefix->length << 2),
-		      lConnectionInfo);
+        dixWriteToClient(client, ConnectionInfoSize, lConnectionInfo);
     }
     client->clientState = ClientStateRunning;
     if (ClientStateCallback) {
         NewClientInfoRec clientinfo = {
             .client = client,
-            .prefix = lconnSetupPrefix,
+            .prefix = &csp2, /* needs to be the unswapped one */
             .setup = (xConnSetup *) lConnectionInfo,
         };
         CallCallbacks((&ClientStateCallback), (void *) &clientinfo);

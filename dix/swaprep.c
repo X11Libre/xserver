@@ -605,15 +605,6 @@ SwapConnSetupPrefix(xConnSetupPrefix * pcspFrom, xConnSetupPrefix * pcspTo)
     cpswaps(pcspFrom->length, pcspTo->length);
 }
 
-void _X_COLD
-WriteSConnSetupPrefix(ClientPtr pClient, xConnSetupPrefix * pcsp)
-{
-    xConnSetupPrefix cspT;
-
-    SwapConnSetupPrefix(pcsp, &cspT);
-    dixWriteToClient(pClient, sizeof(cspT), &cspT);
-}
-
 /*
  * Dummy entry for ReplySwapVector[]
  */
