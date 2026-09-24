@@ -81,7 +81,7 @@ bail:
 }
 
 Bool
-msInitAccel(ScreenPtr pScreen)
+msGlamorInit(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -105,19 +105,19 @@ msInitAccel(ScreenPtr pScreen)
 }
 
 void
-msEnableAccel(ScreenPtr pScreen)
+msGlamorEnable(ScreenPtr pScreen)
 {
     KdGlamorEnable(pScreen);
 }
 
 void
-msDisableAccel(ScreenPtr pScreen)
+msGlamorDisable(ScreenPtr pScreen)
 {
     KdGlamorDisable(pScreen);
 }
 
 void
-msFiniAccel(ScreenPtr pScreen)
+msGlamorFini(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;

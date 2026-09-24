@@ -312,10 +312,10 @@ KdCardFuncs msFuncs = {
     /* no cursor funcs */
 
 #ifdef GLAMOR
-    .initAccel        = msInitAccel,
-    .enableAccel      = msEnableAccel,
-    .disableAccel     = msDisableAccel,
-    .finiAccel        = msFiniAccel,
+    .initAccel        = msGlamorInit,
+    .enableAccel      = msGlamorEnable,
+    .disableAccel     = msGlamorDisable,
+    .finiAccel        = msGlamorFini,
 #endif
 
     .getColors        = msGetColors,
