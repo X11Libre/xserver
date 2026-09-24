@@ -330,3 +330,85 @@ fail:
 
     return NULL;
 }
+
+void
+gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles)
+{
+    uint32_t format = gbm_bo_get_format(bo);
+    Bool rb_swap = FALSE;
+
+    switch (format) {
+    case GBM_FORMAT_C8:
+    case GBM_FORMAT_R8:
+        screen->fb.depth = 8;
+        screen->fb.bitsPerPixel = 8;
+        screen->fb.visuals = (1 << GrayScale);
+        screen->fb.redMask = 0xff;
+        screen->fb.greenMask = 0x00;
+        screen->fb.blueMask = 0x00;
+        break;
+    case GBM_FORMAT_XBGR1555:
+        rb_swap = TRUE;
+    case GBM_FORMAT_XRGB1555:
+        screen->fb.depth = 15;
+        screen->fb.bitsPerPixel = 16;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0x1f << 10;
+        screen->fb.greenMask = 0x1f << 5;
+        screen->fb.blueMask = 0x1f;
+        break;
+    case GBM_FORMAT_BGR565:
+        rb_swap = TRUE;
+    case GBM_FORMAT_RGB565:
+        screen->fb.depth = 16;
+        screen->fb.bitsPerPixel = 16;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0x1f << 11;
+        screen->fb.greenMask = 0x3f << 5;
+        screen->fb.blueMask = 0x1f;
+        break;
+    case GBM_FORMAT_BGR888:
+        rb_swap = TRUE;
+    case GBM_FORMAT_RGB888:
+        screen->fb.depth = 24;
+        screen->fb.bitsPerPixel = 24;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0xff << 16;
+        screen->fb.greenMask = 0xff << 8;
+        screen->fb.blueMask = 0xff;
+        break;
+    case GBM_FORMAT_XBGR8888:
+        rb_swap = TRUE;
+    case GBM_FORMAT_XRGB8888:
+        screen->fb.depth = 24;
+        screen->fb.bitsPerPixel = 32;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0xff << 16;
+        screen->fb.greenMask = 0xff << 8;
+        screen->fb.blueMask = 0xff;
+        break;
+    case GBM_FORMAT_XBGR2101010:
+        rb_swap = TRUE;
+    case GBM_FORMAT_XRGB2101010:
+        screen->fb.depth = 30;
+        screen->fb.bitsPerPixel = 32;
+        screen->fb.visuals = (1 << TrueColor);
+        screen->fb.redMask = 0x3ff << 20;
+        screen->fb.greenMask = 0x3ff <<10;
+        screen->fb.blueMask = 0x3ff;
+        break;
+    }
+
+    /* XXX Tiled buffers don't need r-b swap, unless it's depth 30 on gles */
+    if (!gbm_bo_get_map(bo)) {
+        if (screen->fb.depth != 30 || !is_gles) {
+            rb_swap = FALSE;
+        }
+    }
+
+    if (rb_swap) {
+        int tmp = screen->fb.blueMask;
+        screen->fb.blueMask = screen->fb.redMask;
+        screen->fb.redMask = tmp;
+    }
+}
