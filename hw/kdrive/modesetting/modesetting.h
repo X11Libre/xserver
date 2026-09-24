@@ -54,8 +54,6 @@ typedef struct _msScreenConf {
 
 extern KdCardFuncs msFuncs;
 
-KdCardInfo* msFindMatchingCard(const char *card_path);
-
 Bool msCardInit(KdCardInfo * card);
 
 Bool msScreenInit(KdScreenInfo * screen);
@@ -79,8 +77,6 @@ void msRestore(KdCardInfo * card);
 void msScreenFini(KdScreenInfo * screen);
 
 void msCardFini(KdCardInfo * card);
-
-Bool msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip);
 
 /* ms_gamma.c */
 
@@ -151,4 +147,11 @@ modesetting_find_connector(msPriv *priv, int fd, uint32_t *conn_id);
 int
 modeseting_find_crtc(msPriv *priv, int fd, drmModeConnector *conn);
 
+/* ms_util.c */
+
+Bool msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip);
+
+Bool msFdMatch(int fd1, int fd2);
+
+KdCardInfo* msFindMatchingCard(const char *card_path);
 #endif				/* _MODESETTING_H_ */
