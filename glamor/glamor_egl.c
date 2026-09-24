@@ -518,6 +518,12 @@ glamor_egl_image_from_gbm_bo(ScreenPtr screen, struct gbm_bo *bo)
         uint32_t width = gbm_bo_get_width(bo);
         uint32_t height = gbm_bo_get_height(bo);
 
+        /* XXX See: https://gitlab.freedesktop.org/xorg/xserver/-/merge_requests/934 XXX */
+        if (glamor_egl->is_gles &&
+            format == GBM_FORMAT_XRGB8888) {
+            format = GBM_FORMAT_ARGB8888;
+        }
+
 #ifdef GBM_BO_FD_FOR_PLANE
         if (num_planes > GBM_MAX_PLANES) {
             goto fallback;
@@ -1131,8 +1137,9 @@ glamor_egl_fd_name_from_pixmap(ScreenPtr screen,
 #endif
 }
 
+/* XXX See: https://gitlab.freedesktop.org/xorg/xserver/-/merge_requests/934 XXX */
 static uint32_t
-glamor_drm_format_for_depth(CARD8 depth)
+glamor_drm_format_for_depth(CARD8 depth, int is_gles)
 {
     switch (depth) {
     case 15:
@@ -1140,9 +1147,10 @@ glamor_drm_format_for_depth(CARD8 depth)
     case 16:
         return DRM_FORMAT_RGB565;
     case 24:
-        return DRM_FORMAT_XRGB8888;
+        return is_gles ? DRM_FORMAT_ARGB8888 : DRM_FORMAT_XRGB8888;
     case 30:
-        return DRM_FORMAT_ARGB2101010;
+        /* Match the format chosen in glamor_setup_formats */
+        return is_gles ? DRM_FORMAT_ABGR2101010 : DRM_FORMAT_ARGB2101010;
     default:
         GLAMOR_LOG_MESSAGE(-1, X_ERROR, "unexpected depth: %d\n", depth);
     case 32:
@@ -1158,6 +1166,7 @@ glamor_back_pixmap_from_fd_direct(PixmapPtr pixmap,
                                   CARD16 _stride, CARD8 depth, CARD8 bpp)
 {
     ScreenPtr screen = pixmap->drawable.pScreen;
+    glamor_egl_priv_t *glamor_egl = glamor_egl_get_screen_private(screen);
     uint32_t format;
     const int stride = _stride;
     const int offset = 0;
@@ -1166,7 +1175,7 @@ glamor_back_pixmap_from_fd_direct(PixmapPtr pixmap,
         return FALSE;
     }
 
-    format = glamor_drm_format_for_depth(depth);
+    format = glamor_drm_format_for_depth(depth, glamor_egl->is_gles);
 
     screen->ModifyPixmapHeader(pixmap, width, height, 0, 0, stride, NULL);
 
@@ -1201,7 +1210,7 @@ glamor_back_pixmap_from_fd_gbm(PixmapPtr pixmap,
     import_data.width = width;
     import_data.height = height;
     import_data.stride = stride;
-    import_data.format = glamor_drm_format_for_depth(depth);
+    import_data.format = glamor_drm_format_for_depth(depth, glamor_egl->is_gles);
     bo = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD, &import_data,
                        GBM_BO_USE_RENDERING);
     if (!bo) {
@@ -1280,7 +1289,7 @@ glamor_pixmap_from_fds_direct(ScreenPtr screen,
             goto error;
         }
 
-        format = glamor_drm_format_for_depth(depth);
+        format = glamor_drm_format_for_depth(depth, glamor_egl->is_gles);
 
         /* XXX Could we do this at compile-time? XXX */
         if (sizeof(int) == sizeof(CARD32)) {
@@ -1349,7 +1358,7 @@ glamor_pixmap_from_fds_gbm(ScreenPtr screen,
 
         import_data.width = width;
         import_data.height = height;
-        import_data.format = glamor_drm_format_for_depth(depth);
+        import_data.format = glamor_drm_format_for_depth(depth, glamor_egl->is_gles);
         import_data.num_fds = num_fds;
         import_data.modifier = modifier;
         for (i = 0; i < num_fds; i++) {
@@ -2781,6 +2790,8 @@ glamor_egl_check_renderer(glamor_egl_priv_t* glamor_egl, int platform,
     const char* vendor;
     int is_nvidia;
 
+    glamor_egl->is_gles = !epoxy_is_desktop_gl();
+
     renderer = (const char*)glGetString(GL_RENDERER);
     vendor = (const char*)glGetString(GL_VENDOR);
 
@@ -2837,7 +2848,7 @@ glamor_egl_check_renderer(glamor_egl_priv_t* glamor_egl, int platform,
     }
 
 #ifdef GLAMOR_HAS_GBM
-    glamor_egl->fast_gbm_import = renderer && vendor && !is_nvidia && (platform == EGL_PLATFORM_GBM_KHR);
+    glamor_egl->fast_gbm_import = renderer && vendor && !is_nvidia && !glamor_egl->is_gles && (platform == EGL_PLATFORM_GBM_KHR);
     if (glamor_egl->gbm) {
         glamor_egl->can_texture_gbm_bo = glamor_egl_can_texture_gbm_bo(glamor_egl, is_nvidia);
     }
