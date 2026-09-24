@@ -140,4 +140,15 @@ gbm_format_get_depth(uint32_t format);
 struct gbm_bo*
 gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_t height, uint32_t format);
 
+/* ms_query.c */
+
+drmModeModeInfo*
+modesetting_find_mode(drmModeConnector *conn, uint32_t req_w, uint32_t req_h, uint32_t req_rate);
+
+drmModeConnector*
+modesetting_find_connector(msPriv *priv, int fd, uint32_t *conn_id);
+
+int
+modeseting_find_crtc(msPriv *priv, int fd, drmModeConnector *conn);
+
 #endif				/* _MODESETTING_H_ */
