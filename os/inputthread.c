@@ -43,7 +43,8 @@
 #include "opaque.h"
 #include "osdep.h"
 
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__)
+/* Windows native (mingw) only - Cygwin uses POSIX APIs */
+#if (defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__CYGWIN__)
 #define XSERVER_WIN32 1
 #else
 #define XSERVER_WIN32 0
