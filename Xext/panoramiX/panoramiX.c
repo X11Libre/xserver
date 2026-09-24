@@ -648,8 +648,6 @@ PanoramiXCreateConnectionBlock(void)
 
     ConnectionInfoSize = length;
 
-    connSetupPrefix.length = bytes_to_int32(ConnectionInfoSize);
-
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths; walkScreenIdx++)
         free(PanoramiXDepths[walkScreenIdx].vids);
     free(PanoramiXDepths);
