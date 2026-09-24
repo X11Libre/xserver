@@ -321,5 +321,5 @@ KdCardFuncs msFuncs = {
     .getColors        = msGetColors,
     .putColors        = msPutColors,
 
-    .closeScreen      = msCloseScreen,
+    .closeScreen      = msDamageCloseScreen,
 };
