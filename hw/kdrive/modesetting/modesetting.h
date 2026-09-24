@@ -110,13 +110,13 @@ void msPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 
 Bool msGlamorCreateRes(ScreenPtr pScreen);
 
-Bool msInitAccel(ScreenPtr screen);
+Bool msGlamorInit(ScreenPtr screen);
 
-void msEnableAccel(ScreenPtr screen);
+void msGlamorEnable(ScreenPtr screen);
 
-void msDisableAccel(ScreenPtr screen);
+void msGlamorDisable(ScreenPtr screen);
 
-void msFiniAccel(ScreenPtr screen);
+void msGlamorFini(ScreenPtr screen);
 #endif /* GLAMOR */
 
 /* ms_gbm.c */
