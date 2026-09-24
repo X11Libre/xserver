@@ -829,4 +829,12 @@ ClientPtr dixGetGrabClient(void);
  */
 bool dixAnyOtherGrabbed(ClientPtr client);
 
+/*
+ * send an aborting connection setup packet to given client
+ *
+ * @param client    the client to send to
+ * @param reason    the abort reason
+ */
+void dixSendConnAbort(ClientPtr pClient, const char *reason);
+
 #endif /* _XSERVER_DIX_PRIV_H */
