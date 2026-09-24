@@ -231,18 +231,15 @@ ms_get_kernel_ust_msc(xf86CrtcPtr crtc,
     drmVBlank vbl;
     int ret;
 
-    if (ms->has_queue_sequence || !ms->tried_queue_sequence) {
+    if (ms->has_queue_sequence) {
         uint64_t ns;
-        ms->tried_queue_sequence = TRUE;
 
         ret = drmCrtcGetSequence(ms->fd, drmmode_crtc->mode_crtc->crtc_id,
                                  msc, &ns);
-        if (ret != -1 || (errno != ENOTTY && errno != EINVAL)) {
-            ms->has_queue_sequence = TRUE;
-            if (ret == 0)
-                *ust = ns / 1000;
-            return ret == 0;
-        }
+        if (ret)
+            return FALSE;
+        *ust = ns / 1000;
+        return TRUE;
     }
     /* Get current count */
     vbl.request.type = DRM_VBLANK_RELATIVE | drmmode_crtc->vblank_pipe;
@@ -316,17 +313,28 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
     drmVBlank vbl;
     int ret;
 
+    if (!(flags & MS_QUEUE_RELATIVE)) {
+        if (drmmode_crtc->msc_seen == UINT64_MAX) {
+            /* No observed position for this CRTC yet, so nothing to verify against */
+            flags = MS_QUEUE_RELATIVE;
+            msc = 1;
+        } else if ((int64_t)(msc - drmmode_crtc->msc_seen) <= 0) {
+            /* drm_vblank_passed() looks back only 2^23 seqs, so an older target
+             * parks forever; relative 0 fires now, as the kernel would have */
+            flags = MS_QUEUE_RELATIVE | (flags & MS_QUEUE_NEXT_ON_MISS);
+            msc = 0;
+        }
+    }
+
     /* Try coalescing this event into another to avoid event queue exhaustion */
     if (flags == MS_QUEUE_ABSOLUTE && ms_queue_coalesce(crtc, seq, msc))
         return TRUE;
 
     for (;;) {
         /* Queue an event at the specified sequence */
-        if (ms->has_queue_sequence || !ms->tried_queue_sequence) {
+        if (ms->has_queue_sequence) {
             uint32_t drm_flags = 0;
             uint64_t kernel_queued;
-
-            ms->tried_queue_sequence = TRUE;
 
             if (flags & MS_QUEUE_RELATIVE)
                 drm_flags |= DRM_CRTC_SEQUENCE_RELATIVE;
@@ -340,34 +348,28 @@ ms_queue_vblank(xf86CrtcPtr crtc, ms_queue_flag flags,
                 ms_drm_set_seq_queued(seq, msc);
                 if (msc_queued)
                     *msc_queued = msc;
-                ms->has_queue_sequence = TRUE;
                 return TRUE;
             }
+        } else {
+            vbl.request.type = DRM_VBLANK_EVENT | drmmode_crtc->vblank_pipe;
+            if (flags & MS_QUEUE_RELATIVE)
+                vbl.request.type |= DRM_VBLANK_RELATIVE;
+            else
+                vbl.request.type |= DRM_VBLANK_ABSOLUTE;
+            if (flags & MS_QUEUE_NEXT_ON_MISS)
+                vbl.request.type |= DRM_VBLANK_NEXTONMISS;
 
-            if (ret != -1 || (errno != ENOTTY && errno != EINVAL)) {
-                ms->has_queue_sequence = TRUE;
-                goto check;
+            vbl.request.sequence = msc;
+            vbl.request.signal = seq;
+            ret = drmWaitVBlank(ms->fd, &vbl);
+            if (ret == 0) {
+                msc = ms_kernel_msc_to_crtc_msc(crtc, vbl.reply.sequence, FALSE);
+                ms_drm_set_seq_queued(seq, msc);
+                if (msc_queued)
+                    *msc_queued = msc;
+                return TRUE;
             }
         }
-        vbl.request.type = DRM_VBLANK_EVENT | drmmode_crtc->vblank_pipe;
-        if (flags & MS_QUEUE_RELATIVE)
-            vbl.request.type |= DRM_VBLANK_RELATIVE;
-        else
-            vbl.request.type |= DRM_VBLANK_ABSOLUTE;
-        if (flags & MS_QUEUE_NEXT_ON_MISS)
-            vbl.request.type |= DRM_VBLANK_NEXTONMISS;
-
-        vbl.request.sequence = msc;
-        vbl.request.signal = seq;
-        ret = drmWaitVBlank(ms->fd, &vbl);
-        if (ret == 0) {
-            msc = ms_kernel_msc_to_crtc_msc(crtc, vbl.reply.sequence, FALSE);
-            ms_drm_set_seq_queued(seq, msc);
-            if (msc_queued)
-                *msc_queued = msc;
-            return TRUE;
-        }
-    check:
         if (errno != EBUSY) {
             ms_drm_abort_seq(scrn, seq);
             return FALSE;
@@ -425,11 +427,13 @@ ms_get_crtc_ust_msc(xf86CrtcPtr crtc, CARD64 *ust, CARD64 *msc)
     ScreenPtr screen = crtc->randr_crtc->pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
+    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     uint64_t kernel_msc;
 
     if (!ms_get_kernel_ust_msc(crtc, &kernel_msc, ust))
         return BadMatch;
     *msc = ms_kernel_msc_to_crtc_msc(crtc, kernel_msc, ms->has_queue_sequence);
+    drmmode_crtc->msc_seen = *msc;
 
     return Success;
 }
@@ -589,6 +593,9 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     if (!crtc)
         return;
 
+    drmmode_crtc = crtc->driver_private;
+    drmmode_crtc->msc_seen = msc;
+
     /* Now run all of the vblank events for this CRTC with an expired MSC */
     xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
         if (q->crtc == crtc && q->msc <= msc) {
@@ -614,7 +621,6 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     }
 
     /* Queue an event if the next queued MSC isn't soon enough */
-    drmmode_crtc = crtc->driver_private;
     drmmode_crtc->next_msc = next_msc;
     if (msc < next_msc && !ms_queue_vblank(crtc, MS_QUEUE_ABSOLUTE, msc, NULL, seq)) {
         xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
@@ -654,6 +660,8 @@ ms_vblank_screen_init(ScreenPtr screen)
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
     modesettingEntPtr ms_ent = ms_ent_priv(scrn);
+    uint64_t dummy_msc, dummy_ns;
+
     xorg_list_init(&ms_drm_queue);
 
     ms->event_context.version = 4;
@@ -671,6 +679,10 @@ ms_vblank_screen_init(ScreenPtr screen)
         ms_ent->fd_wakeup_ref = 1;
     } else
         ms_ent->fd_wakeup_ref++;
+
+    /* ID 0 is never valid and fails with ENOENT when the ioctl is available */
+    ms->has_queue_sequence =
+        !drmCrtcGetSequence(ms->fd, 0, &dummy_msc, &dummy_ns) || errno == ENOENT;
 
     return TRUE;
 }
