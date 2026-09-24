@@ -3,12 +3,15 @@
 
 #include <dix-config.h>
 
+#include "include/callback.h"
+
 #include "panoramiX.h"
 
 extern int PanoramiXNumScreens;
 extern int PanoramiXPixWidth;
 extern int PanoramiXPixHeight;
 extern RegionRec PanoramiXScreenRegion;
+extern CallbackListPtr PanoramiXConsolidateCallback;
 
 // exported for nvidia
 _X_EXPORT VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
@@ -16,7 +19,6 @@ _X_EXPORT VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
 void PanoramiXConsolidate(void);
 Bool PanoramiXCreateConnectionBlock(void);
 PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
-Bool XineramaRegisterConnectionBlockCallback(void (*func) (void));
 int XineramaDeleteResource(void *, XID);
 
 /* only exported for Nvidia legacy. This really shouldn't be used by drivers */
