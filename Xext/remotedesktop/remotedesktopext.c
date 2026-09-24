@@ -534,17 +534,74 @@ RemoteDesktopConfigGetBool(RemoteDesktopConfigPtr config, const char *key)
 static void *
 RemoteDesktopDefaultFramebufferAccessor(ScreenPtr pScreen, int *stride, int *bpp)
 {
-    /* Default implementation using GetImage */
     WindowPtr pRoot = pScreen->root;
     if (!pRoot)
         return NULL;
 
-    /* For now, return a cached framebuffer if available */
+    /* Check for cached framebuffer first */
     RemoteDesktopScreenPrivatePtr priv = RemoteDesktopGetScreenPrivate(pScreen);
     if (priv && priv->fb_valid && priv->framebuffer) {
         if (stride) *stride = priv->fb_stride;
         if (bpp) *bpp = priv->fb_bpp;
         return priv->framebuffer;
+    }
+
+    /* Use GetImage/GetSpans fallback for DDX-agnostic access */
+    int width = pRoot->drawable.width;
+    int height = pRoot->drawable.height;
+    int depth = pRoot->drawable.depth;
+    
+    if (width <= 0 || height <= 0 || depth <= 0)
+        return NULL;
+
+    /* Try to use GetImage if available */
+    if (pScreen->GetImage) {
+        unsigned int format = (depth == 24) ? ZPixmap : ZPixmap;
+        unsigned long planeMask = 0xFFFFFFFF;
+        char *image_data = malloc(width * height * 4); /* Max 32bpp */
+        if (!image_data)
+            return NULL;
+
+        pScreen->GetImage((DrawablePtr)pRoot, 0, 0, width, height, format, planeMask, image_data);
+
+        if (priv) {
+            priv->framebuffer = image_data;
+            priv->fb_stride = width * 4; /* Assuming 32bpp for cache */
+            priv->fb_bpp = 32;
+            priv->fb_valid = TRUE;
+        }
+
+        if (stride) *stride = width * 4;
+        if (bpp) *bpp = 32;
+        return image_data;
+    }
+
+    /* Fallback to GetSpans if GetImage not available */
+    if (pScreen->GetSpans) {
+        DDXPointRec pt = {0, 0};
+        int widths[1] = {width};
+        char *span_data = malloc(width * height * 4);
+        if (!span_data)
+            return NULL;
+
+        char *dst = span_data;
+        for (int y = 0; y < height; y++) {
+            pt.x = 0;
+            pt.y = y;
+            pScreen->GetSpans((DrawablePtr)pRoot, width, &pt, &widths[0], 1, dst);
+            dst += width * 4;
+        }
+
+        if (priv) {
+            priv->framebuffer = span_data;
+            priv->fb_stride = width * 4;
+            priv->fb_bpp = 32;
+            priv->fb_valid = TRUE;
+        }
+
+        if (stride) *stride = width * 4;
+        if (bpp) *bpp = 32;
+        return span_data;
     }
 
     return NULL;
