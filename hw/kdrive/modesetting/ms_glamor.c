@@ -137,6 +137,7 @@ msGlamorInit(ScreenPtr pScreen)
     msScrPriv *scrpriv = screen->driver;
     uint32_t format;
     int caps = GLAMOR_EGL_CAP_NONE;
+    int write_pos = 0;
 
     if (!config->glamor_info.dri_path) {
         config->glamor_info.dri_fd = dup(gbm_device_get_fd(priv->gbm));
@@ -170,10 +171,30 @@ msGlamorInit(ScreenPtr pScreen)
     /* TODO: Query scanout modifiers in CardInit,
      * intersect with the render modifiers, and cache them
      */
-    if (scrpriv->num_render_modifiers == 1 &&
-        scrpriv->render_modifiers[0] == DRM_FORMAT_MOD_INVALID) {
+
+    /* Don't choose multi-plane formats for our screen pixmap.
+     * These will get used with frontbuffer rendering, which will
+     * lead to worse-than-tearing with multi-plane formats, as the
+     * primary and auxiliary planes go out of sync. */
+    for (int i = 0; i < scrpriv->num_render_modifiers; i++) {
+        if (gbm_device_get_format_modifier_plane_count(priv->gbm, format, scrpriv->render_modifiers[i]) > 1) {
+            continue;
+        }
+        scrpriv->render_modifiers[write_pos++] = scrpriv->render_modifiers[i];
+    }
+
+    if (write_pos == 0 ||
+        (scrpriv->num_render_modifiers == 1 &&
+         scrpriv->render_modifiers[0] == DRM_FORMAT_MOD_INVALID)) {
         free(scrpriv->render_modifiers);
+        scrpriv->render_modifiers = NULL;
         scrpriv->num_render_modifiers = 0;
+    } else if (write_pos < scrpriv->num_render_modifiers) {
+        void* tmp = realloc(scrpriv->render_modifiers,
+                            write_pos * sizeof(scrpriv->render_modifiers));
+        if (tmp) {
+            scrpriv->render_modifiers = tmp;
+        }
     }
 
     return TRUE;
