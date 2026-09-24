@@ -722,6 +722,11 @@ if host_machine.system() == 'windows'
     common_dep += socket_dep
 endif
 
+pthread_dep = cc.find_library('pthread', required: true)
+if pthread_dep.found()
+    common_dep += pthread_dep
+endif
+
 if get_option('libunwind')
     common_dep += dependency('libunwind', required: true)
 endif
