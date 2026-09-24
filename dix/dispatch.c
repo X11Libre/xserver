@@ -728,8 +728,11 @@ bool CreateConnectionBlock(int maxscreens)
             }
         }
     });
+
+    ConnectionInfoSize = lenofblock;
+
     connSetupPrefix.success = xTrue;
-    connSetupPrefix.length = lenofblock / 4;
+    connSetupPrefix.length = bytes_to_int32(ConnectionInfoSize);
     connSetupPrefix.majorVersion = X_PROTOCOL;
     connSetupPrefix.minorVersion = X_PROTOCOL_REVISION;
     return TRUE;

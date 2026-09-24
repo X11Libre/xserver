@@ -351,6 +351,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
     free(ConnectionInfo);
     ConnectionInfo = NULL;
+    ConnectionInfoSize = 0;
 
     return 0;
 }

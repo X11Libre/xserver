@@ -5,6 +5,7 @@
 #include <dix-config.h>
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <version-config.h>
 
 #include <X11/Xproto.h>
@@ -12,6 +13,8 @@
 #include "include/misc.h"
 #include "dix/client_priv.h"
 #include "dix/dix_priv.h"
+
+size_t ConnectionInfoSize = 0;
 
 void dixSendConnAbort(ClientPtr pClient, const char *reason)
 {
