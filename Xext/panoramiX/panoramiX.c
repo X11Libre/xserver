@@ -39,6 +39,7 @@ Equipment Corporation.
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/server_priv.h"
+#include "include/callback.h"
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
@@ -355,27 +356,7 @@ PanoramiXFindIDByScrnum(RESTYPE type, XID id, int screen)
                                        XineramaFindIDByScrnum, &data);
 }
 
-typedef struct _connect_callback_list {
-    void (*func) (void);
-    struct _connect_callback_list *next;
-} XineramaConnectionCallbackList;
-
-static XineramaConnectionCallbackList *ConnectionCallbackList = NULL;
-
-Bool
-XineramaRegisterConnectionBlockCallback(void (*func) (void))
-{
-    XineramaConnectionCallbackList *newlist;
-
-    if (!(newlist = calloc(1, sizeof(XineramaConnectionCallbackList))))
-        return FALSE;
-
-    newlist->next = ConnectionCallbackList;
-    newlist->func = func;
-    ConnectionCallbackList = newlist;
-
-    return TRUE;
-}
+CallbackListPtr PanoramiXConsolidateCallback = NULL;
 
 static void
 XineramaInitData(void)
@@ -669,15 +650,6 @@ PanoramiXCreateConnectionBlock(void)
     root->mmWidth *= width_mult;
     root->mmHeight *= height_mult;
 
-    while (ConnectionCallbackList) {
-        void *tmp;
-
-        tmp = (void *) ConnectionCallbackList;
-        (*ConnectionCallbackList->func) ();
-        ConnectionCallbackList = ConnectionCallbackList->next;
-        free(tmp);
-    }
-
     return TRUE;
 }
 
@@ -821,6 +793,8 @@ PanoramiXConsolidate(void)
     AddResource(root->info[0].id, XRT_WINDOW, root);
     AddResource(saver->info[0].id, XRT_WINDOW, saver);
     AddResource(defmap->info[0].id, XRT_COLORMAP, defmap);
+
+    CallCallbacks(&PanoramiXConsolidateCallback, NULL);
 }
 
 VisualID

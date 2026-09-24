@@ -84,6 +84,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "include/callback.h"
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
@@ -174,7 +175,7 @@ XvExtensionInit(void)
             return;
         }
 #ifdef XINERAMA
-        XineramaRegisterConnectionBlockCallback(XineramifyXv);
+        AddCallback(&PanoramiXConsolidateCallback, XineramifyXv, NULL);
 #endif /* XINERAMA */
         XvScreenGeneration = serverGeneration;
     }
@@ -275,7 +276,7 @@ XvScreenInit(ScreenPtr pScreen)
             return BadAlloc;
         }
 #ifdef XINERAMA
-        XineramaRegisterConnectionBlockCallback(XineramifyXv);
+        AddCallback(&PanoramiXConsolidateCallback, XineramifyXv, NULL);
 #endif /* XINERAMA */
         XvScreenGeneration = serverGeneration;
     }
