@@ -126,14 +126,19 @@ struct _RemoteDesktopSession {
 struct _RemoteDesktopScreenPrivate {
     struct xorg_list protocol_list;    /* Registered protocols for this screen */
     struct xorg_list session_list;     /* Active sessions on this screen */
-    DamagePtr pDamage;                 /* Shared damage object for root window */
+
+    /* Per-screen damage objects (for Xinerama multi-screen support) */
+    DamagePtr *damage_array;           /* Array of DamagePtr per screen */
+    int num_damage_screens;            /* Number of screens in damage_array */
+
     RegionRec last_damage;             /* Last reported damage region */
     Bool damage_active;                /* Whether damage tracking is active */
 
     /* Wrapped CloseScreen for cleanup */
     CloseScreenProcPtr CloseScreen;
 
-    /* Framebuffer cache */
+    /* Framebuffer access helpers */
+    void *(*GetFramebuffer)(ScreenPtr pScreen, int *stride, int *bpp);
     void *framebuffer;
     int fb_stride;
     int fb_bpp;
@@ -169,6 +174,11 @@ void RemoteDesktopDamageReport(DamagePtr pDamage, RegionPtr pRegion, void *closu
 void RemoteDesktopDamageDestroy(DamagePtr pDamage, void *closure);
 Bool RemoteDesktopSetupDamage(ScreenPtr pScreen, RemoteDesktopSessionPtr session);
 void RemoteDesktopTeardownDamage(RemoteDesktopSessionPtr session);
+
+/* Framebuffer access */
+Bool RemoteDesktopGetScreenFramebuffer(ScreenPtr pScreen, void **fb_addr, int *stride, int *bpp);
+void RemoteDesktopSetFramebufferAccessor(ScreenPtr pScreen,
+                                         void *(*accessor)(ScreenPtr, int*, int*));
 
 /* Configuration parsing */
 RemoteDesktopConfigPtr RemoteDesktopParseConfig(const char *data, int len);

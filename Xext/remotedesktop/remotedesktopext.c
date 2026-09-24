@@ -280,8 +280,8 @@ RemoteDesktopSetSessionState(RemoteDesktopSessionPtr session, int state)
  * Damage Handling
  * ================================================================ */
 
-void
-RemoteDesktopDamageReport(DamagePtr pDamage, RegionPtr pRegion, void *closure)
+static void
+RemoteDesktopDamageReportPerScreen(DamagePtr pDamage, RegionPtr pRegion, void *closure)
 {
     RemoteDesktopSessionPtr session = (RemoteDesktopSessionPtr)closure;
     if (!session || session->state != RD_STATE_RUNNING || !session->protocol)
@@ -292,13 +292,10 @@ RemoteDesktopDamageReport(DamagePtr pDamage, RegionPtr pRegion, void *closure)
     }
 }
 
-void
-RemoteDesktopDamageDestroy(DamagePtr pDamage, void *closure)
+static void
+RemoteDesktopDamageDestroyPerScreen(DamagePtr pDamage, void *closure)
 {
-    RemoteDesktopSessionPtr session = (RemoteDesktopSessionPtr)closure;
-    if (session) {
-        session->pDamage = NULL;
-    }
+    /* The session's pDamage pointer is set to NULL in TeardownDamage */
 }
 
 Bool
@@ -308,8 +305,62 @@ RemoteDesktopSetupDamage(ScreenPtr pScreen, RemoteDesktopSessionPtr session)
     if (!pRoot)
         return FALSE;
 
-    session->pDamage = DamageCreate(RemoteDesktopDamageReport,
-                                     RemoteDesktopDamageDestroy,
+    RemoteDesktopScreenPrivatePtr screen_priv = RemoteDesktopGetScreenPrivate(pScreen);
+    if (!screen_priv)
+        return FALSE;
+
+#ifdef XINERAMA
+    if (PanoramiXIsEnabled()) {
+        /* For Xinerama, create damage object per screen */
+        int num_screens = screenInfo.numScreens;
+        screen_priv->damage_array = calloc(num_screens, sizeof(DamagePtr));
+        if (!screen_priv->damage_array)
+            return FALSE;
+        screen_priv->num_damage_screens = num_screens;
+
+        for (int i = 0; i < num_screens; i++) {
+            ScreenPtr scr = screenInfo.screens[i];
+            if (!scr || !scr->root)
+                continue;
+
+            DamagePtr dmg = DamageCreate(RemoteDesktopDamageReportPerScreen,
+                                          RemoteDesktopDamageDestroyPerScreen,
+                                          DamageReportRawRegion,
+                                          FALSE,
+                                          scr,
+                                          session);
+            if (!dmg) {
+                /* Cleanup on failure */
+                for (int j = 0; j < i; j++) {
+                    if (screen_priv->damage_array[j]) {
+                        DamageDestroy(screen_priv->damage_array[j]);
+                    }
+                }
+                free(screen_priv->damage_array);
+                screen_priv->damage_array = NULL;
+                screen_priv->num_damage_screens = 0;
+                return FALSE;
+            }
+
+            DamageRegister(&scr->root->drawable, dmg);
+            screen_priv->damage_array[i] = dmg;
+
+            /* Report initial full-screen damage for this screen */
+            RegionPtr pRegion = &scr->root->borderClip;
+            DamageReportDamage(dmg, pRegion);
+        }
+
+        /* Keep first damage as primary for backward compatibility */
+        session->pDamage = screen_priv->damage_array[0];
+        screen_priv->damage_active = TRUE;
+
+        return TRUE;
+    }
+#endif
+
+    /* Single screen (non-Xinerama) */
+    session->pDamage = DamageCreate(RemoteDesktopDamageReportPerScreen,
+                                     RemoteDesktopDamageDestroyPerScreen,
                                      DamageReportRawRegion,
                                      FALSE,
                                      pScreen,
@@ -323,17 +374,42 @@ RemoteDesktopSetupDamage(ScreenPtr pScreen, RemoteDesktopSessionPtr session)
     RegionPtr pRegion = &pRoot->borderClip;
     DamageReportDamage(session->pDamage, pRegion);
 
+    screen_priv->damage_active = TRUE;
+
     return TRUE;
 }
 
 void
 RemoteDesktopTeardownDamage(RemoteDesktopSessionPtr session)
 {
+    if (!session || !session->pScreen)
+        return;
+
+    RemoteDesktopScreenPrivatePtr screen_priv = RemoteDesktopGetScreenPrivate(session->pScreen);
+    if (!screen_priv)
+        return;
+
+    /* Cleanup per-screen damage objects */
+    if (screen_priv->damage_array) {
+        for (int i = 0; i < screen_priv->num_damage_screens; i++) {
+            if (screen_priv->damage_array[i]) {
+                DamageUnregister(screen_priv->damage_array[i]);
+                DamageDestroy(screen_priv->damage_array[i]);
+            }
+        }
+        free(screen_priv->damage_array);
+        screen_priv->damage_array = NULL;
+        screen_priv->num_damage_screens = 0;
+    }
+
+    /* Cleanup primary damage (for non-Xinerama) */
     if (session->pDamage) {
         DamageUnregister(session->pDamage);
         DamageDestroy(session->pDamage);
         session->pDamage = NULL;
     }
+
+    screen_priv->damage_active = FALSE;
 }
 
 /* ================================================================
@@ -452,8 +528,59 @@ RemoteDesktopConfigGetBool(RemoteDesktopConfigPtr config, const char *key)
 }
 
 /* ================================================================
- * Event Sending
+ * Framebuffer Access
  * ================================================================ */
+
+static void *
+RemoteDesktopDefaultFramebufferAccessor(ScreenPtr pScreen, int *stride, int *bpp)
+{
+    /* Default implementation using GetImage */
+    WindowPtr pRoot = pScreen->root;
+    if (!pRoot)
+        return NULL;
+
+    /* For now, return a cached framebuffer if available */
+    RemoteDesktopScreenPrivatePtr priv = RemoteDesktopGetScreenPrivate(pScreen);
+    if (priv && priv->fb_valid && priv->framebuffer) {
+        if (stride) *stride = priv->fb_stride;
+        if (bpp) *bpp = priv->fb_bpp;
+        return priv->framebuffer;
+    }
+
+    return NULL;
+}
+
+void
+RemoteDesktopSetFramebufferAccessor(ScreenPtr pScreen,
+                                    void *(*accessor)(ScreenPtr, int*, int*))
+{
+    RemoteDesktopScreenPrivatePtr priv = RemoteDesktopGetScreenPrivate(pScreen);
+    if (priv) {
+        priv->GetFramebuffer = accessor;
+    }
+}
+
+Bool
+RemoteDesktopGetScreenFramebuffer(ScreenPtr pScreen, void **fb_addr, int *stride, int *bpp)
+{
+    RemoteDesktopScreenPrivatePtr priv = RemoteDesktopGetScreenPrivate(pScreen);
+    if (!priv)
+        return FALSE;
+
+    if (priv->GetFramebuffer) {
+        void *fb = priv->GetFramebuffer(pScreen, stride, bpp);
+        if (fb) {
+            if (fb_addr) *fb_addr = fb;
+            return TRUE;
+        }
+    }
+
+    /* Fallback to default */
+    void *fb = RemoteDesktopDefaultFramebufferAccessor(pScreen, stride, bpp);
+    if (fb && fb_addr) *fb_addr = fb;
+
+    return fb != NULL;
+}
 
 void
 RemoteDesktopSendNotifyEvent(RemoteDesktopSessionPtr session, int subtype, int detail)
@@ -494,12 +621,15 @@ RemoteDesktopScreenInit(ScreenPtr pScreen)
     xorg_list_init(&priv->session_list);
     RegionNull(&priv->last_damage);
     priv->damage_active = FALSE;
+    priv->damage_array = NULL;
+    priv->num_damage_screens = 0;
     priv->framebuffer = NULL;
     priv->fb_stride = 0;
     priv->fb_bpp = 0;
     priv->fb_valid = FALSE;
+    priv->GetFramebuffer = RemoteDesktopDefaultFramebufferAccessor;
 
-    /* Wrap CloseScreen */
+    /* Wrap CloseScreen - standard save-and-chain pattern */
     priv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = RemoteDesktopCloseScreen;
 
@@ -520,11 +650,19 @@ RemoteDesktopCloseScreen(ScreenPtr pScreen)
         RemoteDesktopDestroySession(session);
     }
 
-    /* Destroy damage */
-    if (priv->pDamage) {
-        DamageDestroy(priv->pDamage);
-        priv->pDamage = NULL;
+    /* Destroy per-screen damage objects */
+    if (priv->damage_array) {
+        for (int i = 0; i < priv->num_damage_screens; i++) {
+            if (priv->damage_array[i]) {
+                DamageUnregister(priv->damage_array[i]);
+                DamageDestroy(priv->damage_array[i]);
+            }
+        }
+        free(priv->damage_array);
+        priv->damage_array = NULL;
+        priv->num_damage_screens = 0;
     }
+
     RegionUninit(&priv->last_damage);
 
     /* Restore CloseScreen */
