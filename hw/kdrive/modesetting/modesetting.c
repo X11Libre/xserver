@@ -15,30 +15,26 @@
 #endif
 
 struct gbm_bo*
-modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
+modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map, Bool keep_depth)
 {
-#ifdef GLAMOR
-    MsScreenConf *config = screen->closure;
-#endif
     struct gbm_bo *ret = NULL;
     uint32_t format, format_swap;
 
-    /*
-     *  XXX This all simplifies with modifier support
-     *
-     * Just query the renderable modifiers on the render card,
-     * and allocate a gbm bo on the scanout card using those modifiers.
-     *
-     * If that fails, fall back to dumb buffers.
+    MsScreenConf *config = screen->closure;
+    msScrPriv *scrpriv = screen->driver;
+    /* TODO: Query scanout modifiers in CardInit,
+     * intersect with render modifiers queried in msGlamorInit
      */
+    uint64_t *modifiers = scrpriv ? scrpriv->render_modifiers : NULL;
+    int num_modifiers = scrpriv ? scrpriv->num_render_modifiers : 0;
 
+    /* XXX depth 30 needs more care because of the visual mask swap */
+    Bool careful = screen->fb.depth == 30 && !config->glamor_info.force_es;
 #ifdef GLAMOR
     if (screen->dumb) {
         need_map = TRUE;
-    } else if (config->glamor_info.dri_path) {
+    } else if (careful && config->glamor_info.dri_path) {
         /*
-         * Until modifier support, we want to be conservative here.
-         *
          * If the render card is different fron the scanout card, assume the modifier sets are disjoint.
          * If the cards are the same, and it is from nvidia, and the gbm backend is mesa or dumb,
          * assume that buffers are not renderable.
@@ -51,7 +47,7 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
         if (dri_fd >= 0) {
             close(dri_fd);
         }
-    } else {
+    } else if (careful) {
         drmVersionPtr version;
         Bool is_nvidia = TRUE;
         Bool backend_is_mesa = FALSE;
@@ -83,6 +79,8 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
             }
         }
     }
+#else
+    need_map = TRUE;
 #endif
 
     while (!ret) {
@@ -95,28 +93,27 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map)
             format_swap = tmp;
         }
 
-#ifdef GLAMOR
-        if (!need_map) {
-            if (!ret) {
-                ret = gbm_create_front_bo(priv->gbm, FALSE /* do map */, screen->width, screen->height, format);
-            }
-            if (!ret) {
-                ret = gbm_create_front_bo(priv->gbm, FALSE /* do map */, screen->width, screen->height, format_swap);
-            }
+        if (!ret) {
+            ret = gbm_create_front_bo(priv->gbm, need_map, screen->width, screen->height, format, modifiers, num_modifiers);
         }
-#endif
+        if (!ret) {
+            ret = gbm_create_front_bo(priv->gbm, need_map, screen->width, screen->height, format_swap, modifiers, num_modifiers);
+        }
 
         if (!ret) {
-            ret = gbm_create_front_bo(priv->gbm, TRUE /* do map */, screen->width, screen->height, format);
+            ret = gbm_create_front_bo(priv->gbm, !need_map, screen->width, screen->height, format, modifiers, num_modifiers);
         }
         if (!ret) {
-            ret = gbm_create_front_bo(priv->gbm, TRUE /* do map */, screen->width, screen->height, format_swap);
+            ret = gbm_create_front_bo(priv->gbm, !need_map, screen->width, screen->height, format_swap, modifiers, num_modifiers);
         }
 
         if (!ret) {
             int old_depth = screen->fb.depth;
             int old_bpp = screen->fb.bitsPerPixel;
-            if (screen->fb.depth > 30) {
+
+            if (keep_depth) {
+                break;
+            } else if (screen->fb.depth > 30) {
                 screen->fb.depth = 30;
                 screen->fb.bitsPerPixel = 24;
             } else if (screen->fb.depth > 24) {
@@ -304,7 +301,7 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         screen->height = scrpriv->mode ? scrpriv->mode->vdisplay : 1080;
     }
 
-    scrpriv->front = modesetting_open(priv, screen, FALSE /* need_map */);
+    scrpriv->front = modesetting_open(priv, screen, screen->dumb /* need_map */, FALSE /* keep_depth */);
     if (!scrpriv->front) {
         LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not create a front buffer\n",
                    screen->card->mynum, screen->mynum);

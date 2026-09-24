@@ -7,6 +7,8 @@
 
 #include "modesetting.h"
 
+#include <drm_fourcc.h>
+
 /* TODO: Stuff that should be in msutil */
 
 typedef struct {
@@ -121,7 +123,8 @@ gbm_bo_create_and_map_once(struct gbm_device *gbm,
 }
 
 static struct gbm_bo*
-gbm_bo_create_and_map(struct gbm_device *gbm, gbm_user_data_t *data, uint32_t width, uint32_t height, uint32_t format)
+gbm_bo_create_and_map(struct gbm_device *gbm, gbm_user_data_t *data, uint32_t width, uint32_t height, uint32_t format,
+                      uint64_t *modifiers, int num_modifiers)
 {
 #if 0
     uint32_t flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING | GBM_BO_USE_FRONT_RENDERING;
@@ -130,6 +133,21 @@ gbm_bo_create_and_map(struct gbm_device *gbm, gbm_user_data_t *data, uint32_t wi
     uint32_t flags_dumb = GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE;
 
     struct gbm_bo *bo = NULL;
+
+    /* Implicit modifiers are ok */
+    Bool modifiers_ok = !num_modifiers;
+
+    for (int i = 0; !modifiers_ok && i < num_modifiers; i++) {
+        switch (modifiers[i]) {
+        case DRM_FORMAT_MOD_LINEAR:
+        case DRM_FORMAT_MOD_INVALID:
+            modifiers_ok = TRUE;
+        }
+    }
+
+    if (!modifiers_ok) {
+        return NULL;
+    }
 
 #if 0 /* non-dumb buffers require unmap + map to flush writes, which is far slower than ShadowFB */
     bo = gbm_bo_create_and_map_once(gbm, data, width, height, format, flags);
@@ -145,7 +163,8 @@ gbm_bo_create_and_map(struct gbm_device *gbm, gbm_user_data_t *data, uint32_t wi
 }
 
 static struct gbm_bo*
-gbm_bo_create_tiled(struct gbm_device *gbm, uint32_t width, uint32_t height, uint32_t format)
+gbm_bo_create_tiled(struct gbm_device *gbm, uint32_t width, uint32_t height, uint32_t format,
+                    uint64_t *modifiers, int num_modifiers)
 {
     struct gbm_bo *bo = NULL;
 
@@ -156,11 +175,17 @@ gbm_bo_create_tiled(struct gbm_device *gbm, uint32_t width, uint32_t height, uin
     uint32_t flags2 = GBM_BO_USE_SCANOUT;
 
     if (!bo) {
-        bo = gbm_bo_create(gbm, width, height, format, flags);
+        bo = gbm_bo_create_with_modifiers2(gbm, width, height, format,
+                                           modifiers, num_modifiers, flags);
     }
 
     if (!bo) {
-        bo = gbm_bo_create(gbm, width, height, format, flags2);
+        bo = gbm_bo_create_with_modifiers2(gbm, width, height, format,
+                                           modifiers, num_modifiers, flags2);
+    }
+
+    if (num_modifiers &&
+        !(num_modifiers == 1 && modifiers[0] == DRM_FORMAT_MOD_INVALID)) {
     }
 
     return bo;
@@ -292,7 +317,8 @@ gbm_format_get_depth(uint32_t format)
 }
 
 struct gbm_bo*
-gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_t height, uint32_t format)
+gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_t height, uint32_t format,
+                    uint64_t *modifiers, int num_modifiers)
 {
     struct gbm_bo *ret = NULL;
     gbm_user_data_t *data = NULL;
@@ -302,8 +328,8 @@ gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_
         goto fail;
     }
 
-    ret = do_map ? gbm_bo_create_and_map(gbm, data, width, height, format) :
-                   gbm_bo_create_tiled(gbm, width, height, format);
+    ret = do_map ? gbm_bo_create_and_map(gbm, data, width, height, format, modifiers, num_modifiers) :
+                   gbm_bo_create_tiled(gbm, width, height, format, modifiers, num_modifiers);
     if (!ret) {
         goto fail;
     }
@@ -313,6 +339,11 @@ gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_
     data->fb_id = gbm_bo_create_fb(ret);
     if (!data->fb_id) {
         goto fail;
+    }
+
+    if (!do_map && num_modifiers &&
+        !(num_modifiers == 1 && modifiers[0] == DRM_FORMAT_MOD_INVALID)) {
+        data->used_modifiers = TRUE;
     }
 
     return ret;
