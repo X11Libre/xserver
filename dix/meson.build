@@ -3,6 +3,7 @@ srcs_dix = [
     'client.c',
     'colormap.c',
     'color.c',
+    'connsetup.c',
     'cursor.c',
     'devices.c',
     'dispatch.c',

@@ -3833,28 +3833,11 @@ ProcInitialConnection(ClientPtr client)
     return Success;
 }
 
-static int
-SendConnSetup(ClientPtr client, const char *reason)
+static void SendConnSetup(ClientPtr client)
 {
     xWindowRoot *root;
     char *lConnectionInfo;
     xConnSetupPrefix *lconnSetupPrefix;
-
-    if (reason) {
-        xConnSetupPrefix csp;
-
-        csp.success = xFalse;
-        csp.lengthReason = strlen(reason);
-        csp.length = bytes_to_int32(csp.lengthReason);
-        csp.majorVersion = X_PROTOCOL;
-        csp.minorVersion = X_PROTOCOL_REVISION;
-        if (client->swapped)
-            WriteSConnSetupPrefix(client, &csp);
-        else
-            dixWriteToClient(client, sz_xConnSetupPrefix, &csp);
-        dixWriteToClient(client, (int) csp.lengthReason, reason);
-        return client->noClientException = -1;
-    }
 
     lConnectionInfo = ConnectionInfo;
     lconnSetupPrefix = &connSetupPrefix;
@@ -3914,18 +3897,16 @@ SendConnSetup(ClientPtr client, const char *reason)
         CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
     }
     CancelDispatchExceptionTimer();
-    return Success;
 }
 
 int
 ProcEstablishConnection(ClientPtr client)
 {
-    const char *reason;
-    xConnClientPrefix *prefix;
-
     REQUEST(xReq);
 
-    prefix = (xConnClientPrefix *) ((char *) stuff + sz_xReq);
+    xConnClientPrefix *prefix = (xConnClientPrefix *) ((char *) stuff + sz_xReq);
+
+    const char *reason = NULL;
 
     if (client->swapped && !dixSettingAllowByteSwappedClients) {
         reason = "Prohibited client endianness, see the Xserver man page ";
@@ -3946,7 +3927,13 @@ ProcEstablishConnection(ClientPtr client)
                                   auth_string);
     }
 
-    return (SendConnSetup(client, reason));
+    if (reason) {
+        dixSendConnAbort(client, reason);
+        return -1;
+    }
+
+    SendConnSetup(client);
+    return Success;
 }
 
 void
