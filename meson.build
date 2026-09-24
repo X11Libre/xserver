@@ -727,6 +727,12 @@ if pthread_dep.found()
     common_dep += pthread_dep
 endif
 
+# OpenSSL for VNC TLS support
+openssl_dep = dependency('openssl', required: false)
+if openssl_dep.found()
+    common_dep += openssl_dep
+endif
+
 if get_option('libunwind')
     common_dep += dependency('libunwind', required: true)
 endif

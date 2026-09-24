@@ -31,17 +31,42 @@
 #include <rfb/rfbregion.h>
 #endif
 
+/* SSL/TLS support */
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+
+/* Global SSL context for TLS */
+static SSL_CTX *vnc_ssl_ctx = NULL;
+static Bool vnc_ssl_initialized = FALSE;
+
+/* VNC encoding types */
+#define RFB_ENCODING_RAW        0
+#define RFB_ENCODING_COPYRECT   1
+#define RFB_ENCODING_RRE        2
+#define RFB_ENCODING_HEXTILE    5
+#define RFB_ENCODING_ZRLE       16
+#define RFB_ENCODING_TIGHT      7
+
+/* Security types */
+#define RFB_SECURITY_TYPE_NONE  1
+#define RFB_SECURITY_TYPE_VNC   2
+#define RFB_SECURITY_TYPE_TLS   19  /* TLS security type */
+
 /* VNC-specific configuration */
 typedef struct _VNCConfig {
     uint16_t port;
     char *password;
     Bool view_only;
     Bool localhost_only;
+    Bool ipv6_enabled;
     char *tls_cert_path;
     char *tls_key_path;
     char *allowed_encodings;
     int quality_level;
     Bool use_damage;
+    Bool force_tls_non_localhost;
 } VNCConfigRec, *VNCConfigPtr;
 
 /* VNC backend private data */
@@ -81,9 +106,12 @@ typedef struct _VNCBackendPrivate {
 /* VNC client connection */
 typedef struct _VNCClient {
     int fd;
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;  /* IPv4 or IPv6 */
+    socklen_t addr_len;
     Bool authenticated;
     Bool view_only;
+    Bool use_tls;
+    void *ssl;  /* SSL context for TLS */
     pthread_t thread;
     struct xorg_list entry;
 } VNCClientRec, *VNCClientPtr;
@@ -125,7 +153,10 @@ static RemoteDesktopProtocolRec vnc_protocol = {
     .name = "VNC",
     .vendor = "XLibre",
     .version = 1,
-    .capabilities = RD_CAP_AUTH_NONE | RD_CAP_AUTH_PASSWORD | RD_CAP_ENCODING_RAW | RD_CAP_VIEW_ONLY,
+    .capabilities = RD_CAP_AUTH_NONE | RD_CAP_AUTH_PASSWORD | RD_CAP_AUTH_TLS_CERT |
+                    RD_CAP_ENCRYPTION_TLS | RD_CAP_ENCODING_RAW |
+                    RD_CAP_ENCODING_HEXTILE | RD_CAP_ENCODING_TIGHT |
+                    RD_CAP_VIEW_ONLY,
     
     .Init = VNCBackendInit,
     .Fini = VNCBackendFini,
@@ -181,6 +212,10 @@ VNCParseConfig(RemoteDesktopConfigPtr config)
     if (!vnc->localhost_only)
         vnc->localhost_only = TRUE; /* Default to localhost only for security */
 
+    vnc->ipv6_enabled = RemoteDesktopConfigGetBool(config, "ipv6");
+    if (!vnc->ipv6_enabled)
+        vnc->ipv6_enabled = FALSE; /* Default to IPv4 only */
+
     vnc->tls_cert_path = RemoteDesktopConfigGetString(config, "tls_cert");
     if (vnc->tls_cert_path)
         vnc->tls_cert_path = strdup(vnc->tls_cert_path);
@@ -189,9 +224,15 @@ VNCParseConfig(RemoteDesktopConfigPtr config)
     if (vnc->tls_key_path)
         vnc->tls_key_path = strdup(vnc->tls_key_path);
 
+    vnc->force_tls_non_localhost = RemoteDesktopConfigGetBool(config, "force_tls");
+    if (!vnc->force_tls_non_localhost)
+        vnc->force_tls_non_localhost = TRUE; /* Default to force TLS for non-localhost */
+
     vnc->allowed_encodings = RemoteDesktopConfigGetString(config, "encodings");
     if (vnc->allowed_encodings)
         vnc->allowed_encodings = strdup(vnc->allowed_encodings);
+    else
+        vnc->allowed_encodings = strdup("raw,hextile,tight"); /* Default encodings */
 
     vnc->quality_level = RemoteDesktopConfigGetInt(config, "quality");
     if (vnc->quality_level < 0)
@@ -220,6 +261,78 @@ VNCFreeConfig(VNCConfigPtr config)
 }
 
 /* ================================================================
+ * SSL/TLS Initialization
+ * ================================================================ */
+
+static Bool
+VNCSSLInit(VNCConfigPtr config)
+{
+    if (vnc_ssl_initialized)
+        return TRUE;
+
+    SSL_library_init();
+    SSL_load_error_strings();
+    OpenSSL_add_all_algorithms();
+
+    vnc_ssl_ctx = SSL_CTX_new(TLS_server_method());
+    if (!vnc_ssl_ctx) {
+        LogMessage(X_ERROR, "VNC: Failed to create SSL context\n");
+        return FALSE;
+    }
+
+    /* Set minimum TLS version to 1.2 */
+    SSL_CTX_set_min_proto_version(vnc_ssl_ctx, TLS1_2_VERSION);
+
+    /* Load certificate and key */
+    if (config && config->tls_cert_path && config->tls_key_path) {
+        if (SSL_CTX_use_certificate_file(vnc_ssl_ctx, config->tls_cert_path, SSL_FILETYPE_PEM) <= 0) {
+            LogMessage(X_ERROR, "VNC: Failed to load TLS certificate: %s\n", config->tls_cert_path);
+            ERR_print_errors_fp(stderr);
+            SSL_CTX_free(vnc_ssl_ctx);
+            vnc_ssl_ctx = NULL;
+            return FALSE;
+        }
+
+        if (SSL_CTX_use_PrivateKey_file(vnc_ssl_ctx, config->tls_key_path, SSL_FILETYPE_PEM) <= 0) {
+            LogMessage(X_ERROR, "VNC: Failed to load TLS private key: %s\n", config->tls_key_path);
+            ERR_print_errors_fp(stderr);
+            SSL_CTX_free(vnc_ssl_ctx);
+            vnc_ssl_ctx = NULL;
+            return FALSE;
+        }
+
+        if (!SSL_CTX_check_private_key(vnc_ssl_ctx)) {
+            LogMessage(X_ERROR, "VNC: TLS private key does not match certificate\n");
+            SSL_CTX_free(vnc_ssl_ctx);
+            vnc_ssl_ctx = NULL;
+            return FALSE;
+        }
+
+        LogMessage(X_INFO, "VNC: TLS enabled with certificate: %s\n", config->tls_cert_path);
+    } else {
+        LogMessage(X_WARNING, "VNC: TLS certificate/key not configured, TLS disabled\n");
+        SSL_CTX_free(vnc_ssl_ctx);
+        vnc_ssl_ctx = NULL;
+        return FALSE;
+    }
+
+    vnc_ssl_initialized = TRUE;
+    return TRUE;
+}
+
+static void
+VNCSSLFini(void)
+{
+    if (vnc_ssl_ctx) {
+        SSL_CTX_free(vnc_ssl_ctx);
+        vnc_ssl_ctx = NULL;
+    }
+    vnc_ssl_initialized = FALSE;
+    EVP_cleanup();
+    ERR_free_strings();
+}
+
+/* ================================================================
  * Backend Lifecycle
  * ================================================================ */
 
@@ -240,6 +353,14 @@ VNCBackendInit(ScreenPtr pScreen, RemoteDesktopProtocolPtr self, RemoteDesktopCo
         pthread_mutex_destroy(&priv->mutex);
         free(priv);
         return FALSE;
+    }
+
+    /* Initialize SSL if TLS cert/key configured */
+    if (priv->config->tls_cert_path && priv->config->tls_key_path) {
+        if (!VNCSSLInit(priv->config)) {
+            /* SSL init failed, continue without TLS */
+            LogMessage(X_WARNING, "VNC: Continuing without TLS\n");
+        }
     }
 
     /* Get initial framebuffer info */
@@ -276,6 +397,9 @@ VNCBackendFini(ScreenPtr pScreen, RemoteDesktopProtocolPtr self)
     VNCClientPtr client, next;
     xorg_list_for_each_entry_safe(client, next, &priv->client_list, entry) {
         xorg_list_del(&client->entry);
+        if (client->ssl) {
+            SSL_free(client->ssl);
+        }
         close(client->fd);
         free(client);
     }
