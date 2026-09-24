@@ -3,6 +3,7 @@ srcs = [
     'msinit.c',
     'ms_gamma.c',
     'ms_gbm.c',
+    'ms_query.c',
     '../../stubs/ddxBeforeReset.c',
 ]
 
