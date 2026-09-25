@@ -67,8 +67,6 @@ int ProcPanoramiXGetScreenSize(ClientPtr client);
 int ProcXineramaQueryScreens(ClientPtr client);
 int ProcXineramaIsActive(ClientPtr client);
 
-extern int connBlockScreenStart;
-
 extern int (*SavedProcVector[256]) (ClientPtr client);
 
 #endif /* XSERVER_PANORAMIXH_H */

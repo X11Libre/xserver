@@ -68,6 +68,8 @@ extern _X_EXPORT Bool enableIndirectGLX;
 /* length of ConnectionInfo block, MUST be multiple of 4 */
 extern size_t ConnectionInfoSize;
 
+extern int connBlockScreenStart;
+
 /*
  * @brief callback right after one screen's root window has been initialized
  *

@@ -598,27 +598,6 @@ Dispatch(void)
     ResetOsBuffers();
 }
 
-bool CreateConnectionBlock(int maxscreens)
-{
-    if (!maxscreens) {
-        maxscreens = screenInfo.numScreens;
-    }
-
-    size_t screenDataOffset = 0;
-    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(maxscreens, &screenDataOffset);
-
-    /* record this for other parts which later going to manipulate the data */
-    connBlockScreenStart = screenDataOffset;
-
-    if (rpcbuf.error)
-        return false;
-
-    /* must not free the rpcbuf here, because we store the data elsewhere */
-    ConnectionInfo = rpcbuf.buffer;
-    ConnectionInfoSize = rpcbuf.wpos;
-    return true;
-}
-
 int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids)
 {
     LEGAL_NEW_RESOURCE(stuff->wid, client);
