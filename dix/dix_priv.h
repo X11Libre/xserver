@@ -866,4 +866,13 @@ void x_rpcbuf_write_xVisualInfo(x_rpcbuf_t *rpcbuf, VisualPtr pVisual);
  */
 void x_rpcbuf_write_xPixmapFormat(x_rpcbuf_t *rpcbuf, PixmapFormatPtr pPixmapFormat);
 
+/*
+ * build the connection info block and return it as x_rpcbuf_t
+ *
+ * @param   maxscreens       only process so much screens (=0 -> do them all)
+ * @param   screenDataOffset offset where the first per-screen data starts
+ * @return  x_rpcbuf_t holding the connection info data (caller has ownerhip)
+ */
+x_rpcbuf_t dixBuildConnectionBlock(int maxscreens, size_t *screenDataOffset);
+
 #endif /* _XSERVER_DIX_PRIV_H */
