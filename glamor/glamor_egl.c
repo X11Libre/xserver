@@ -635,8 +635,19 @@ glamor_egl_create_textured_pixmap_from_gbm_bo(PixmapPtr pixmap,
 {
 #ifdef GLAMOR_HAS_GBM
     ScreenPtr screen = pixmap->drawable.pScreen;
-    EGLImageKHR image = glamor_egl_image_from_gbm_bo(screen, bo);
+    glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
+    struct glamor_format *f = &glamor_priv->formats[pixmap->drawable.depth];
+    EGLImageKHR image;
 
+    /*
+     * If we can't render to this depth, refuse to texture the pixmap,
+     * so that the DDX knows it needs to map this pixmap
+     */
+    if (!f->rendering_supported || f->texture_only) {
+        return FALSE;
+    }
+
+    image = glamor_egl_image_from_gbm_bo(screen, bo);
     return glamor_egl_create_textured_pixmap_from_egl_image(pixmap, image,
                                                             used_modifiers);
 #else

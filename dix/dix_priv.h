@@ -11,6 +11,7 @@
  *  Xserver's module API/ABI.
  */
 #include <stdbool.h>
+#include <stddef.h>
 
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
@@ -63,6 +64,11 @@ extern Bool party_like_its_1989;
 
 /* needed by libglx and libglamor (server modules) */
 extern _X_EXPORT Bool enableIndirectGLX;
+
+/* length of ConnectionInfo block, MUST be multiple of 4 */
+extern size_t ConnectionInfoSize;
+
+extern int connBlockScreenStart;
 
 /*
  * @brief callback right after one screen's root window has been initialized
@@ -133,7 +139,7 @@ int dixLookupResourceOwner(ClientPtr *result,
                     ClientPtr client,
                     Mask access_mode);
 
-Bool CreateConnectionBlock(void);
+bool CreateConnectionBlock(int maxscreens);
 
 void EnableLimitedSchedulingLatency(void);
 
@@ -828,5 +834,47 @@ ClientPtr dixGetGrabClient(void);
  * @return          TRUE if any client, except the given one, has grabbed
  */
 bool dixAnyOtherGrabbed(ClientPtr client);
+
+/*
+ * send an aborting connection setup packet to given client
+ *
+ * @param client    the client to send to
+ * @param reason    the abort reason
+ */
+void dixSendConnAbort(ClientPtr pClient, const char *reason);
+
+/*
+ * create ConnectionInfo block. aborts the server on failure
+ */
+void dixInitConnectionBlock(void);
+
+/*
+ * write xWindowRoot protocol structure into rpcbuf
+ */
+void x_rpcbuf_write_xWindowRoot(x_rpcbuf_t *rpcbuf, ScreenPtr pScreen);
+
+/*
+ * write xDepth protocol structure into rpcbuf
+ */
+void x_rpcbuf_write_xDepth(x_rpcbuf_t *rpcbuf, DepthPtr pDepth);
+
+/*
+ * write xVisualInfo protocol structure into rpcbuf
+ */
+void x_rpcbuf_write_xVisualInfo(x_rpcbuf_t *rpcbuf, VisualPtr pVisual);
+
+/*
+ * write xPixmapFormat protocol structure into rpcbuf
+ */
+void x_rpcbuf_write_xPixmapFormat(x_rpcbuf_t *rpcbuf, PixmapFormatPtr pPixmapFormat);
+
+/*
+ * build the connection info block and return it as x_rpcbuf_t
+ *
+ * @param   maxscreens       only process so much screens (=0 -> do them all)
+ * @param   screenDataOffset offset where the first per-screen data starts
+ * @return  x_rpcbuf_t holding the connection info data (caller has ownerhip)
+ */
+x_rpcbuf_t dixBuildConnectionBlock(int maxscreens, size_t *screenDataOffset);
 
 #endif /* _XSERVER_DIX_PRIV_H */

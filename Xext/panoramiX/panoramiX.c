@@ -39,6 +39,7 @@ Equipment Corporation.
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/server_priv.h"
+#include "include/callback.h"
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
@@ -355,27 +356,7 @@ PanoramiXFindIDByScrnum(RESTYPE type, XID id, int screen)
                                        XineramaFindIDByScrnum, &data);
 }
 
-typedef struct _connect_callback_list {
-    void (*func) (void);
-    struct _connect_callback_list *next;
-} XineramaConnectionCallbackList;
-
-static XineramaConnectionCallbackList *ConnectionCallbackList = NULL;
-
-Bool
-XineramaRegisterConnectionBlockCallback(void (*func) (void))
-{
-    XineramaConnectionCallbackList *newlist;
-
-    if (!(newlist = calloc(1, sizeof(XineramaConnectionCallbackList))))
-        return FALSE;
-
-    newlist->next = ConnectionCallbackList;
-    newlist->func = func;
-    ConnectionCallbackList = newlist;
-
-    return TRUE;
-}
+CallbackListPtr PanoramiXConsolidateCallback = NULL;
 
 static void
 XineramaInitData(void)
@@ -574,7 +555,7 @@ PanoramiXExtensionInit(void)
 Bool
 PanoramiXCreateConnectionBlock(void)
 {
-    int i, j, length;
+    int j, length;
     bool disable_backing_store = FALSE;
     int old_width, old_height;
     float width_mult, height_mult;
@@ -612,14 +593,9 @@ PanoramiXCreateConnectionBlock(void)
         });
     }
 
-    i = screenInfo.numScreens;
-    screenInfo.numScreens = 1;
-    if (!CreateConnectionBlock()) {
-        screenInfo.numScreens = i;
+    if (!CreateConnectionBlock(1)) {
         return FALSE;
     }
-
-    screenInfo.numScreens = i;
 
     root = (xWindowRoot *) (ConnectionInfo + connBlockScreenStart);
     length = connBlockScreenStart + sizeof(xWindowRoot);
@@ -651,7 +627,7 @@ PanoramiXCreateConnectionBlock(void)
         length += (depth->nVisuals * sizeof(xVisualType));
     }
 
-    connSetupPrefix.length = bytes_to_int32(length);
+    ConnectionInfoSize = length;
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths; walkScreenIdx++)
         free(PanoramiXDepths[walkScreenIdx].vids);
@@ -671,15 +647,6 @@ PanoramiXCreateConnectionBlock(void)
     height_mult = (1.0 * root->pixHeight) / old_height;
     root->mmWidth *= width_mult;
     root->mmHeight *= height_mult;
-
-    while (ConnectionCallbackList) {
-        void *tmp;
-
-        tmp = (void *) ConnectionCallbackList;
-        (*ConnectionCallbackList->func) ();
-        ConnectionCallbackList = ConnectionCallbackList->next;
-        free(tmp);
-    }
 
     return TRUE;
 }
@@ -824,6 +791,8 @@ PanoramiXConsolidate(void)
     AddResource(root->info[0].id, XRT_WINDOW, root);
     AddResource(saver->info[0].id, XRT_WINDOW, saver);
     AddResource(defmap->info[0].id, XRT_COLORMAP, defmap);
+
+    CallCallbacks(&PanoramiXConsolidateCallback, NULL);
 }
 
 VisualID

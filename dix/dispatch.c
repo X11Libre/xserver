@@ -161,8 +161,6 @@ Equipment Corporation.
 #define BITCLEAR(buf, i) MASKWORD((buf), (i)) &= ~BITMASK((i))
 #define GETBIT(buf, i) (MASKWORD((buf), (i)) & BITMASK((i)))
 
-xConnSetupPrefix connSetupPrefix;
-
 PaddingInfo PixmapWidthPaddingInfo[33];
 
 static ClientPtr grabClient;
@@ -599,138 +597,6 @@ Dispatch(void)
     KillAllClients();
     SmartScheduleLatencyLimited = 0;
     ResetOsBuffers();
-}
-
-Bool
-CreateConnectionBlock(void)
-{
-    xConnSetup setup;
-    xDepth depth;
-    xVisualType visual;
-    xPixmapFormat format;
-    unsigned long vid;
-    int paddingforint32, lenofblock, sizesofar = 0;
-    char *pBuf;
-    const char VendorString[] = "XLibre";
-
-    memset(&setup, 0, sizeof(xConnSetup));
-    /* Leave off the ridBase and ridMask, these must be sent with
-       connection */
-
-    setup.release = VENDOR_RELEASE;
-    /*
-     * per-server image and bitmap parameters are defined in Xmd.h
-     */
-    setup.imageByteOrder = screenInfo.imageByteOrder;
-
-    setup.bitmapScanlineUnit = screenInfo.bitmapScanlineUnit;
-    setup.bitmapScanlinePad = screenInfo.bitmapScanlinePad;
-
-    setup.bitmapBitOrder = screenInfo.bitmapBitOrder;
-    setup.motionBufferSize = NumMotionEvents();
-    setup.numRoots = screenInfo.numScreens;
-    setup.nbytesVendor = strlen(VendorString);
-    setup.numFormats = screenInfo.numPixmapFormats;
-    setup.maxRequestSize = MAX_REQUEST_SIZE;
-    QueryMinMaxKeyCodes(&setup.minKeyCode, &setup.maxKeyCode);
-
-    lenofblock = sizeof(xConnSetup) +
-        pad_to_int32(setup.nbytesVendor) +
-        (setup.numFormats * sizeof(xPixmapFormat)) +
-        (setup.numRoots * sizeof(xWindowRoot));
-    ConnectionInfo = calloc(1, lenofblock);
-    if (!ConnectionInfo)
-        return FALSE;
-
-    memcpy(ConnectionInfo, &setup, sizeof(xConnSetup));
-    sizesofar = sizeof(xConnSetup);
-    pBuf = ConnectionInfo + sizeof(xConnSetup);
-
-    memcpy(pBuf, VendorString, (size_t) setup.nbytesVendor);
-    sizesofar += setup.nbytesVendor;
-    pBuf += setup.nbytesVendor;
-    paddingforint32 = padding_for_int32(setup.nbytesVendor);
-    sizesofar += paddingforint32;
-    while (--paddingforint32 >= 0)
-        *pBuf++ = 0;
-
-    memset(&format, 0, sizeof(xPixmapFormat));
-    for (int i = 0; i < screenInfo.numPixmapFormats; i++) {
-        format.depth = screenInfo.formats[i].depth;
-        format.bitsPerPixel = screenInfo.formats[i].bitsPerPixel;
-        format.scanLinePad = screenInfo.formats[i].scanlinePad;
-        memcpy(pBuf, &format, sizeof(xPixmapFormat));
-        pBuf += sizeof(xPixmapFormat);
-        sizesofar += sizeof(xPixmapFormat);
-    }
-
-    connBlockScreenStart = sizesofar;
-    memset(&depth, 0, sizeof(xDepth));
-    memset(&visual, 0, sizeof(xVisualType));
-
-    DIX_FOR_EACH_SCREEN({
-        DepthPtr pDepth;
-        VisualPtr pVisual;
-
-        xWindowRoot *root = (xWindowRoot*)pBuf;
-        root->windowId = walkScreen->root->drawable.id;
-        root->defaultColormap = walkScreen->defColormap;
-        root->whitePixel = walkScreen->whitePixel;
-        root->blackPixel = walkScreen->blackPixel;
-        root->currentInputMask = 0;      /* filled in when sent */
-        root->pixWidth = walkScreen->width;
-        root->pixHeight = walkScreen->height;
-        root->mmWidth = walkScreen->mmWidth;
-        root->mmHeight = walkScreen->mmHeight;
-        root->minInstalledMaps = walkScreen->minInstalledCmaps;
-        root->maxInstalledMaps = walkScreen->maxInstalledCmaps;
-        root->rootVisualID = walkScreen->rootVisual;
-        root->backingStore = walkScreen->backingStoreSupport;
-        root->saveUnders = FALSE;
-        root->rootDepth = walkScreen->rootDepth;
-        root->nDepths = walkScreen->numDepths;
-
-        sizesofar += sizeof(xWindowRoot);
-        pBuf += sizeof(xWindowRoot);
-
-        pDepth = walkScreen->allowedDepths;
-        for (int j = 0; j < walkScreen->numDepths; j++, pDepth++) {
-            lenofblock += sizeof(xDepth) +
-                (pDepth->numVids * sizeof(xVisualType));
-            pBuf = (char *) realloc(ConnectionInfo, lenofblock);
-            if (!pBuf) {
-                free(ConnectionInfo);
-                return FALSE;
-            }
-            ConnectionInfo = pBuf;
-            pBuf += sizesofar;
-            depth.depth = pDepth->depth;
-            depth.nVisuals = pDepth->numVids;
-            memcpy(pBuf, &depth, sizeof(xDepth));
-            pBuf += sizeof(xDepth);
-            sizesofar += sizeof(xDepth);
-            for (int k = 0; k < pDepth->numVids; k++) {
-                vid = pDepth->vids[k];
-                for (pVisual = walkScreen->visuals;
-                     pVisual->vid != vid; pVisual++);
-                visual.visualID = vid;
-                visual.class = pVisual->class;
-                visual.bitsPerRGB = pVisual->bitsPerRGBValue;
-                visual.colormapEntries = pVisual->ColormapEntries;
-                visual.redMask = pVisual->redMask;
-                visual.greenMask = pVisual->greenMask;
-                visual.blueMask = pVisual->blueMask;
-                memcpy(pBuf, &visual, sizeof(xVisualType));
-                pBuf += sizeof(xVisualType);
-                sizesofar += sizeof(xVisualType);
-            }
-        }
-    });
-    connSetupPrefix.success = xTrue;
-    connSetupPrefix.length = lenofblock / 4;
-    connSetupPrefix.majorVersion = X_PROTOCOL;
-    connSetupPrefix.minorVersion = X_PROTOCOL_REVISION;
-    return TRUE;
 }
 
 int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids)
@@ -2095,49 +1961,6 @@ ProcPolyFillArc(ClientPtr client)
     return Success;
 }
 
-#ifdef MATCH_CLIENT_ENDIAN
-
-int
-ServerOrder(void)
-{
-    int whichbyte = 1;
-
-    if (*((char *) &whichbyte))
-        return LSBFirst;
-    return MSBFirst;
-}
-
-#define ClientOrder(client) ((client)->swapped ? !ServerOrder() : ServerOrder())
-
-void
-ReformatImage(char *base, int nbytes, int bpp, int order)
-{
-    switch (bpp) {
-    case 1:                    /* yuck */
-        if (BITMAP_BIT_ORDER != order)
-            BitOrderInvert((unsigned char *) base, nbytes);
-#if IMAGE_BYTE_ORDER != BITMAP_BIT_ORDER && BITMAP_SCANLINE_UNIT != 8
-        ReformatImage(base, nbytes, BITMAP_SCANLINE_UNIT, order);
-#endif
-        break;
-    case 4:
-        break;                  /* yuck */
-    case 8:
-        break;
-    case 16:
-        if (IMAGE_BYTE_ORDER != order)
-            TwoByteSwap((unsigned char *) base, nbytes);
-        break;
-    case 32:
-        if (IMAGE_BYTE_ORDER != order)
-            FourByteSwap((unsigned char *) base, nbytes);
-        break;
-    }
-}
-#else
-#define ReformatImage(b,n,bpp,o)
-#endif
-
 /* 64-bit server notes: the protocol restricts padding of images to
  * 8-, 16-, or 32-bits. We would like to have 64-bits for the server
  * to use internally. Removes need for internal alignment checking.
@@ -2195,10 +2018,6 @@ ProcPutImage(ClientPtr client)
     if ((bytes_to_int32(lengthProto * stuff->height) +
          bytes_to_int32(sizeof(xPutImageReq))) != client->req_len)
         return BadLength;
-
-    ReformatImage(tmpImage, lengthProto * stuff->height,
-                  stuff->format == ZPixmap ? BitsPerPixel(stuff->depth) : 1,
-                  ClientOrder(client));
 
     (*pGC->ops->PutImage) (pDraw, pGC, stuff->depth, stuff->dstX, stuff->dstY,
                            stuff->width, stuff->height,
@@ -2368,9 +2187,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                 nlines, format, pBuf);
 
             /* Note that we DO NOT byte swap here */
-            ReformatImage(pBuf, (int) (nlines * widthBytesLine),
-                          BitsPerPixel(pDraw->depth), ClientOrder(client));
-
             linesDone += nlines;
         }
     }
@@ -2403,9 +2219,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                         nlines, format, pBuf);
 
                     /* Note that we DO NOT byte swap here */
-                    ReformatImage(pBuf, (int) (nlines * widthBytesLine),
-                                  1, ClientOrder(client));
-
                     linesDone += nlines;
                 }
             }
@@ -3667,11 +3480,9 @@ CloseDownClient(ClientPtr client)
             FreeClientNeverRetainResources(client);
             client->clientState = ClientStateRetained;
             if (ClientStateCallback) {
-                NewClientInfoRec clientinfo;
-
-                clientinfo.client = client;
-                clientinfo.prefix = (xConnSetupPrefix *) NULL;
-                clientinfo.setup = (xConnSetup *) NULL;
+                NewClientInfoRec clientinfo = {
+                    .client = client,
+                };
                 CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
             }
         }
@@ -3699,11 +3510,9 @@ CloseDownClient(ClientPtr client)
 
         client->clientState = ClientStateGone;
         if (ClientStateCallback) {
-            NewClientInfoRec clientinfo;
-
-            clientinfo.client = client;
-            clientinfo.prefix = (xConnSetupPrefix *) NULL;
-            clientinfo.setup = (xConnSetup *) NULL;
+            NewClientInfoRec clientinfo = {
+                .client = client,
+            };
             CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
         }
         TouchListenerGone(client->clientAsMask);
@@ -3801,11 +3610,9 @@ NextAvailableClient(void *ospriv)
     ReserveClientIds(client);
 
     if (ClientStateCallback) {
-        NewClientInfoRec clientinfo;
-
-        clientinfo.client = client;
-        clientinfo.prefix = (xConnSetupPrefix *) NULL;
-        clientinfo.setup = (xConnSetup *) NULL;
+        NewClientInfoRec clientinfo = {
+            .client = client,
+        };
         CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
     }
     return client;
@@ -3841,33 +3648,12 @@ ProcInitialConnection(ClientPtr client)
     return Success;
 }
 
-static int
-SendConnSetup(ClientPtr client, const char *reason)
+static void SendConnSetup(ClientPtr client)
 {
     xWindowRoot *root;
-    int numScreens;
     char *lConnectionInfo;
-    xConnSetupPrefix *lconnSetupPrefix;
 
-    if (reason) {
-        xConnSetupPrefix csp;
-
-        csp.success = xFalse;
-        csp.lengthReason = strlen(reason);
-        csp.length = bytes_to_int32(csp.lengthReason);
-        csp.majorVersion = X_PROTOCOL;
-        csp.minorVersion = X_PROTOCOL_REVISION;
-        if (client->swapped)
-            WriteSConnSetupPrefix(client, &csp);
-        else
-            dixWriteToClient(client, sz_xConnSetupPrefix, &csp);
-        dixWriteToClient(client, (int) csp.lengthReason, reason);
-        return client->noClientException = -1;
-    }
-
-    numScreens = screenInfo.numScreens;
     lConnectionInfo = ConnectionInfo;
-    lconnSetupPrefix = &connSetupPrefix;
 
     /* We're about to start speaking X protocol back to the client by
      * sending the connection setup info.  This means the authorization
@@ -3880,18 +3666,11 @@ SendConnSetup(ClientPtr client, const char *reason)
     client->sequence = 0;
     ((xConnSetup *) lConnectionInfo)->ridBase = client->clientAsMask;
     ((xConnSetup *) lConnectionInfo)->ridMask = RESOURCE_ID_MASK;
-#ifdef MATCH_CLIENT_ENDIAN
-    ((xConnSetup *) lConnectionInfo)->imageByteOrder = ClientOrder(client);
-    ((xConnSetup *) lConnectionInfo)->bitmapBitOrder = ClientOrder(client);
-#endif
+
     /* fill in the "currentInputMask" */
     root = (xWindowRoot *) (lConnectionInfo + connBlockScreenStart);
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled())
-        numScreens = screenInfo.numScreens;
-    else
-        numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
-#endif /* XINERAMA */
+
+    int numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
@@ -3907,39 +3686,50 @@ SendConnSetup(ClientPtr client, const char *reason)
         root = (xWindowRoot *) pDepth;
     }
 
+    xConnSetupPrefix csp = {
+        .success = xTrue,
+        .length = bytes_to_int32(ConnectionInfoSize),
+        .majorVersion = X_PROTOCOL,
+        .minorVersion = X_PROTOCOL_REVISION,
+    };
+
+    /* keep an unswapped copy for the ClientStateCallback */
+    xConnSetupPrefix csp2 = csp;
+
     if (client->swapped) {
-        WriteSConnSetupPrefix(client, lconnSetupPrefix);
-        WriteSConnectionInfo(client,
-                             (unsigned long) (lconnSetupPrefix->length << 2),
-                             lConnectionInfo);
+        swaps(&csp.majorVersion);
+        swaps(&csp.minorVersion);
+        swaps(&csp.length);
+    }
+
+    dixWriteToClient(client, sizeof(csp), &csp);
+
+    if (client->swapped) {
+        WriteSConnectionInfo(client, ConnectionInfoSize, lConnectionInfo);
     }
     else {
-        dixWriteToClient(client, sizeof(xConnSetupPrefix), lconnSetupPrefix);
-        dixWriteToClient(client, (int) (lconnSetupPrefix->length << 2),
-		      lConnectionInfo);
+        dixWriteToClient(client, ConnectionInfoSize, lConnectionInfo);
     }
     client->clientState = ClientStateRunning;
     if (ClientStateCallback) {
-        NewClientInfoRec clientinfo;
-
-        clientinfo.client = client;
-        clientinfo.prefix = lconnSetupPrefix;
-        clientinfo.setup = (xConnSetup *) lConnectionInfo;
+        NewClientInfoRec clientinfo = {
+            .client = client,
+            .prefix = &csp2, /* needs to be the unswapped one */
+            .setup = (xConnSetup *) lConnectionInfo,
+        };
         CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
     }
     CancelDispatchExceptionTimer();
-    return Success;
 }
 
 int
 ProcEstablishConnection(ClientPtr client)
 {
-    const char *reason;
-    xConnClientPrefix *prefix;
-
     REQUEST(xReq);
 
-    prefix = (xConnClientPrefix *) ((char *) stuff + sz_xReq);
+    xConnClientPrefix *prefix = (xConnClientPrefix *) ((char *) stuff + sz_xReq);
+
+    const char *reason = NULL;
 
     if (client->swapped && !dixSettingAllowByteSwappedClients) {
         reason = "Prohibited client endianness, see the Xserver man page ";
@@ -3960,7 +3750,13 @@ ProcEstablishConnection(ClientPtr client)
                                   auth_string);
     }
 
-    return (SendConnSetup(client, reason));
+    if (reason) {
+        dixSendConnAbort(client, reason);
+        return -1;
+    }
+
+    SendConnSetup(client);
+    return Success;
 }
 
 void
