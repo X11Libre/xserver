@@ -196,19 +196,14 @@ ProcRenderQueryPictFormats(ClientPtr client)
     int ndepth;
     int nvisual;
     int rlength;
-    int numScreens;
     int numSubpixel;
 
     X_REQUEST_HEAD_STRUCT(xRenderQueryPictFormatsReq);
 
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled())
-        numScreens = screenInfo.numScreens;
-    else
-        numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
-#else
-    numScreens = screenInfo.numScreens;
-#endif /* XINERAMA */
+    /* that's the user-visible number of roots instead of number of actual
+       screens present in the server (eg. for Xinerama or NEXUS). */
+    int numScreens = screenInfo.numRoots;
+
     ndepth = nformat = nvisual = 0;
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
