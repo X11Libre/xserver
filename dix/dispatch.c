@@ -600,41 +600,35 @@ Dispatch(void)
 
 bool CreateConnectionBlock(int maxscreens)
 {
-    xConnSetup setup;
-    xDepth depth;
-    xVisualType visual;
-    xPixmapFormat format;
-    unsigned long vid;
-    int paddingforint32, lenofblock, sizesofar = 0;
-    char *pBuf;
     const char VendorString[] = "XLibre";
 
     if (!maxscreens) {
         maxscreens = screenInfo.numScreens;
     }
 
-    memset(&setup, 0, sizeof(xConnSetup));
-    /* Leave off the ridBase and ridMask, these must be sent with
-       connection */
+    xConnSetup setup = {
+        /* Leave off the ridBase and ridMask, these must be sent with
+           connection */
+        .release = VENDOR_RELEASE,
+        /*
+         * per-server image and bitmap parameters are defined in Xmd.h
+         */
+        .imageByteOrder = screenInfo.imageByteOrder,
 
-    setup.release = VENDOR_RELEASE;
-    /*
-     * per-server image and bitmap parameters are defined in Xmd.h
-     */
-    setup.imageByteOrder = screenInfo.imageByteOrder;
+        .bitmapScanlineUnit = screenInfo.bitmapScanlineUnit,
+        .bitmapScanlinePad = screenInfo.bitmapScanlinePad,
 
-    setup.bitmapScanlineUnit = screenInfo.bitmapScanlineUnit;
-    setup.bitmapScanlinePad = screenInfo.bitmapScanlinePad;
+        .bitmapBitOrder = screenInfo.bitmapBitOrder,
+        .motionBufferSize = NumMotionEvents(),
+        .numRoots = maxscreens,
+        .nbytesVendor = strlen(VendorString),
+        .numFormats = screenInfo.numPixmapFormats,
+        .maxRequestSize = MAX_REQUEST_SIZE,
+    };
 
-    setup.bitmapBitOrder = screenInfo.bitmapBitOrder;
-    setup.motionBufferSize = NumMotionEvents();
-    setup.numRoots = maxscreens;
-    setup.nbytesVendor = strlen(VendorString);
-    setup.numFormats = screenInfo.numPixmapFormats;
-    setup.maxRequestSize = MAX_REQUEST_SIZE;
     QueryMinMaxKeyCodes(&setup.minKeyCode, &setup.maxKeyCode);
 
-    lenofblock = sizeof(xConnSetup) +
+    int lenofblock = sizeof(xConnSetup) +
         pad_to_int32(setup.nbytesVendor) +
         (setup.numFormats * sizeof(xPixmapFormat)) +
         (setup.numRoots * sizeof(xWindowRoot));
@@ -643,35 +637,32 @@ bool CreateConnectionBlock(int maxscreens)
         return FALSE;
 
     memcpy(ConnectionInfo, &setup, sizeof(xConnSetup));
-    sizesofar = sizeof(xConnSetup);
-    pBuf = ConnectionInfo + sizeof(xConnSetup);
+    int sizesofar = sizeof(xConnSetup);
+    char *pBuf = ConnectionInfo + sizeof(xConnSetup);
 
     memcpy(pBuf, VendorString, (size_t) setup.nbytesVendor);
     sizesofar += setup.nbytesVendor;
     pBuf += setup.nbytesVendor;
-    paddingforint32 = padding_for_int32(setup.nbytesVendor);
+
+    int paddingforint32 = padding_for_int32(setup.nbytesVendor);
     sizesofar += paddingforint32;
     while (--paddingforint32 >= 0)
         *pBuf++ = 0;
 
-    memset(&format, 0, sizeof(xPixmapFormat));
     for (int i = 0; i < screenInfo.numPixmapFormats; i++) {
-        format.depth = screenInfo.formats[i].depth;
-        format.bitsPerPixel = screenInfo.formats[i].bitsPerPixel;
-        format.scanLinePad = screenInfo.formats[i].scanlinePad;
+        xPixmapFormat format = {
+            .depth = screenInfo.formats[i].depth,
+            .bitsPerPixel = screenInfo.formats[i].bitsPerPixel,
+            .scanLinePad = screenInfo.formats[i].scanlinePad,
+        };
         memcpy(pBuf, &format, sizeof(xPixmapFormat));
         pBuf += sizeof(xPixmapFormat);
         sizesofar += sizeof(xPixmapFormat);
     }
 
     connBlockScreenStart = sizesofar;
-    memset(&depth, 0, sizeof(xDepth));
-    memset(&visual, 0, sizeof(xVisualType));
 
     DIX_FOR_N_SCREENS(0, maxscreens, {
-        DepthPtr pDepth;
-        VisualPtr pVisual;
-
         xWindowRoot *root = (xWindowRoot*)pBuf;
         root->windowId = walkScreen->root->drawable.id;
         root->defaultColormap = walkScreen->defColormap;
@@ -693,7 +684,7 @@ bool CreateConnectionBlock(int maxscreens)
         sizesofar += sizeof(xWindowRoot);
         pBuf += sizeof(xWindowRoot);
 
-        pDepth = walkScreen->allowedDepths;
+        DepthPtr pDepth = walkScreen->allowedDepths;
         for (int j = 0; j < walkScreen->numDepths; j++, pDepth++) {
             lenofblock += sizeof(xDepth) +
                 (pDepth->numVids * sizeof(xVisualType));
@@ -704,25 +695,28 @@ bool CreateConnectionBlock(int maxscreens)
             }
             ConnectionInfo = pBuf;
             pBuf += sizesofar;
-            depth.depth = pDepth->depth;
-            depth.nVisuals = pDepth->numVids;
-            memcpy(pBuf, &depth, sizeof(xDepth));
-            pBuf += sizeof(xDepth);
-            sizesofar += sizeof(xDepth);
+
+            xDepth depth = { .depth = pDepth->depth };
+            depth.nVisuals = pDepth->numVids; /* can't have braces with commas within the lambda */
+
+            memcpy(pBuf, &depth, sizeof(depth));
+            pBuf += sizeof(depth);
+            sizesofar += sizeof(depth);
             for (int k = 0; k < pDepth->numVids; k++) {
-                vid = pDepth->vids[k];
+                unsigned long vid = pDepth->vids[k];
+                VisualPtr pVisual;
                 for (pVisual = walkScreen->visuals;
                      pVisual->vid != vid; pVisual++);
-                visual.visualID = vid;
+                xVisualType visual = { .visualID = vid };
                 visual.class = pVisual->class;
                 visual.bitsPerRGB = pVisual->bitsPerRGBValue;
                 visual.colormapEntries = pVisual->ColormapEntries;
                 visual.redMask = pVisual->redMask;
                 visual.greenMask = pVisual->greenMask;
                 visual.blueMask = pVisual->blueMask;
-                memcpy(pBuf, &visual, sizeof(xVisualType));
-                pBuf += sizeof(xVisualType);
-                sizesofar += sizeof(xVisualType);
+                memcpy(pBuf, &visual, sizeof(visual));
+                pBuf += sizeof(visual);
+                sizesofar += sizeof(visual);
             }
         }
     });
