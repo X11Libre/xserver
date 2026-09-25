@@ -13,10 +13,11 @@
 #include "include/misc.h"
 #include "include/windowstr.h"
 #include "dix/client_priv.h"
+#include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/server_priv.h"
-#include "dix/dix_priv.h"
+#include "dix/window_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
 
@@ -200,4 +201,43 @@ bool CreateConnectionBlock(int maxscreens)
     ConnectionInfo = rpcbuf.buffer;
     ConnectionInfoSize = rpcbuf.wpos;
     return true;
+}
+
+char *dixNewConnectionInfoBlock(ClientPtr pClient, size_t *sz, size_t *scrOffset)
+{
+    if (!ConnectionInfo)
+        return NULL;
+
+    char *newone = malloc(ConnectionInfoSize);
+    if (!newone)
+        return NULL;
+
+    memcpy(newone, ConnectionInfo, ConnectionInfoSize);
+
+    ((xConnSetup *)newone)->ridBase = pClient->clientAsMask;
+    ((xConnSetup *)newone)->ridMask = RESOURCE_ID_MASK;
+
+    /* fill in the "currentInputMask" */
+    /* attention: this still depends on setup block screens matching screenInfo.screens */
+    xWindowRoot *root = (xWindowRoot *) (newone + connBlockScreenStart);
+    int numScreens = ((xConnSetup *) newone)->numRoots;
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        WindowPtr pRoot = walkScreen->root;
+
+        root->currentInputMask = pRoot->eventMask | wOtherEventMasks(pRoot);
+        xDepth *pDepth = (xDepth *) (root + 1);
+        for (unsigned int j = 0; j < root->nDepths; j++) {
+            pDepth = (xDepth *) (((char *) (pDepth + 1)) +
+                                 pDepth->nVisuals * sizeof(xVisualType));
+        }
+        root = (xWindowRoot *) pDepth;
+    }
+
+    if (sz)
+        *sz = ConnectionInfoSize;
+    if (scrOffset)
+        *scrOffset = connBlockScreenStart;
+
+    return newone;
 }

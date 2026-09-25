@@ -3645,11 +3645,6 @@ ProcInitialConnection(ClientPtr client)
 
 static void SendConnSetup(ClientPtr client)
 {
-    xWindowRoot *root;
-    char *lConnectionInfo;
-
-    lConnectionInfo = ConnectionInfo;
-
     /* We're about to start speaking X protocol back to the client by
      * sending the connection setup info.  This means the authorization
      * step is complete, and we can count the client as an
@@ -3659,27 +3654,12 @@ static void SendConnSetup(ClientPtr client)
 
     client->requestVector = client->swapped ? SwappedProcVector : ProcVector;
     client->sequence = 0;
-    ((xConnSetup *) lConnectionInfo)->ridBase = client->clientAsMask;
-    ((xConnSetup *) lConnectionInfo)->ridMask = RESOURCE_ID_MASK;
 
-    /* fill in the "currentInputMask" */
-    root = (xWindowRoot *) (lConnectionInfo + connBlockScreenStart);
-
-    int numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
-
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        xDepth *pDepth;
-        WindowPtr pRoot = walkScreen->root;
-
-        root->currentInputMask = pRoot->eventMask | wOtherEventMasks(pRoot);
-        pDepth = (xDepth *) (root + 1);
-        for (unsigned int j = 0; j < root->nDepths; j++) {
-            pDepth = (xDepth *) (((char *) (pDepth + 1)) +
-                                 pDepth->nVisuals * sizeof(xVisualType));
-        }
-        root = (xWindowRoot *) pDepth;
-    }
+    size_t blocksize = 0;
+    size_t scrOffset = 0;
+    char *lConnectionInfo = dixNewConnectionInfoBlock(client, &blocksize, &scrOffset);
+    if (!lConnectionInfo)
+        FatalError("failed to allocate connection info block for new client\n");
 
     xConnSetupPrefix csp = {
         .success = xTrue,
@@ -3715,6 +3695,8 @@ static void SendConnSetup(ClientPtr client)
         CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
     }
     CancelDispatchExceptionTimer();
+
+    free(lConnectionInfo);
 }
 
 int
