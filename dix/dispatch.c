@@ -171,7 +171,6 @@ static int grabState = GrabNone;
 static long grabWaiters[mskcnt];
 CallbackListPtr ServerGrabCallback = NULL;
 HWEventQueuePtr checkForInput[2];
-int connBlockScreenStart;
 
 static void KillAllClients(void);
 
