@@ -1981,49 +1981,6 @@ ProcPolyFillArc(ClientPtr client)
     return Success;
 }
 
-#ifdef MATCH_CLIENT_ENDIAN
-
-int
-ServerOrder(void)
-{
-    int whichbyte = 1;
-
-    if (*((char *) &whichbyte))
-        return LSBFirst;
-    return MSBFirst;
-}
-
-#define ClientOrder(client) ((client)->swapped ? !ServerOrder() : ServerOrder())
-
-void
-ReformatImage(char *base, int nbytes, int bpp, int order)
-{
-    switch (bpp) {
-    case 1:                    /* yuck */
-        if (BITMAP_BIT_ORDER != order)
-            BitOrderInvert((unsigned char *) base, nbytes);
-#if IMAGE_BYTE_ORDER != BITMAP_BIT_ORDER && BITMAP_SCANLINE_UNIT != 8
-        ReformatImage(base, nbytes, BITMAP_SCANLINE_UNIT, order);
-#endif
-        break;
-    case 4:
-        break;                  /* yuck */
-    case 8:
-        break;
-    case 16:
-        if (IMAGE_BYTE_ORDER != order)
-            TwoByteSwap((unsigned char *) base, nbytes);
-        break;
-    case 32:
-        if (IMAGE_BYTE_ORDER != order)
-            FourByteSwap((unsigned char *) base, nbytes);
-        break;
-    }
-}
-#else
-#define ReformatImage(b,n,bpp,o)
-#endif
-
 /* 64-bit server notes: the protocol restricts padding of images to
  * 8-, 16-, or 32-bits. We would like to have 64-bits for the server
  * to use internally. Removes need for internal alignment checking.
@@ -2081,10 +2038,6 @@ ProcPutImage(ClientPtr client)
     if ((bytes_to_int32(lengthProto * stuff->height) +
          bytes_to_int32(sizeof(xPutImageReq))) != client->req_len)
         return BadLength;
-
-    ReformatImage(tmpImage, lengthProto * stuff->height,
-                  stuff->format == ZPixmap ? BitsPerPixel(stuff->depth) : 1,
-                  ClientOrder(client));
 
     (*pGC->ops->PutImage) (pDraw, pGC, stuff->depth, stuff->dstX, stuff->dstY,
                            stuff->width, stuff->height,
@@ -2252,9 +2205,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                 nlines, format, pBuf);
 
             /* Note that we DO NOT byte swap here */
-            ReformatImage(pBuf, (int) (nlines * widthBytesLine),
-                          BitsPerPixel(pDraw->depth), ClientOrder(client));
-
             linesDone += nlines;
         }
     }
@@ -2285,9 +2235,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                         nlines, format, pBuf);
 
                     /* Note that we DO NOT byte swap here */
-                    ReformatImage(pBuf, (int) (nlines * widthBytesLine),
-                                  1, ClientOrder(client));
-
                     linesDone += nlines;
                 }
             }
@@ -3735,10 +3682,7 @@ static void SendConnSetup(ClientPtr client)
     client->sequence = 0;
     ((xConnSetup *) lConnectionInfo)->ridBase = client->clientAsMask;
     ((xConnSetup *) lConnectionInfo)->ridMask = RESOURCE_ID_MASK;
-#ifdef MATCH_CLIENT_ENDIAN
-    ((xConnSetup *) lConnectionInfo)->imageByteOrder = ClientOrder(client);
-    ((xConnSetup *) lConnectionInfo)->bitmapBitOrder = ClientOrder(client);
-#endif
+
     /* fill in the "currentInputMask" */
     root = (xWindowRoot *) (lConnectionInfo + connBlockScreenStart);
 
