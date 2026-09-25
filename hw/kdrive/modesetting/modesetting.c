@@ -301,7 +301,7 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         screen->height = scrpriv->mode ? scrpriv->mode->vdisplay : 1080;
     }
 
-    scrpriv->front = modesetting_open(priv, screen, screen->dumb /* need_map */, FALSE /* keep_depth */);
+    scrpriv->front = modesetting_open(priv, screen, screen->dumb || screen->randr != RR_Rotate_0 /* need_map */, FALSE /* keep_depth */);
     if (!scrpriv->front) {
         LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not create a front buffer\n",
                    screen->card->mynum, screen->mynum);
@@ -380,6 +380,10 @@ msMapFramebuffer(KdScreenInfo * screen)
     MsScreenConf *config = screen->closure;
 
     if (!gbm_bo_get_map(scrpriv->front)) {
+        /* TODO: Do something useful */
+        if (scrpriv->randr != RR_Rotate_0) {
+            return FALSE;
+        }
         scrpriv->shadow = FALSE;
     } else if (config->shadow >= 0) {
         scrpriv->shadow = config->shadow;
@@ -433,7 +437,7 @@ msSetShadow(ScreenPtr pScreen)
 
     if (screen->fb.bitsPerPixel == 24)
         update = shadowUpdate32to24;
-    else if (scrpriv->randr)
+    else if (scrpriv->randr != RR_Rotate_0)
         update = shadowUpdateRotatePacked;
     else
         update = shadowUpdatePacked;

@@ -7,6 +7,10 @@
 
 #include "modesetting.h"
 
+#ifdef GLAMOR
+#include "glamor.h"
+#endif
+
 /* XXX This really belongs in os/, like the version from glamor_egl */
 Bool
 msFdMatch(int fd1, int fd2)
@@ -96,6 +100,9 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     struct gbm_bo *old_front;
     Bool wasEnabled = pScreenPriv->enabled;
     msScrPriv oldscr;
+    PixmapPtr rootPixmap;
+
+    rootPixmap = (*pScreen->GetScreenPixmap)(pScreen);
 
     if (wasEnabled) {
         KdDisableScreen(pScreen);
@@ -124,7 +131,7 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     /*
      * Set frame buffer mapping
      */
-    (*pScreen->ModifyPixmapHeader) ((*pScreen->GetScreenPixmap)(pScreen),
+    (*pScreen->ModifyPixmapHeader) (rootPixmap,
                                     pScreen->width,
                                     pScreen->height,
                                     screen->fb.depth,
@@ -135,6 +142,18 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     /* set the subpixel order */
 
     KdSetSubpixelOrder(pScreen, scrpriv->randr);
+
+    /* Texture the front if needed */
+    if (!flip && !gbm_bo_get_map(bo)) {
+#ifdef GLAMOR
+        Bool used_modifiers = gbm_bo_get_used_modifiers(bo);
+        if (screen->dumb ||
+            !glamor_egl_create_textured_pixmap_from_gbm_bo(rootPixmap, bo, used_modifiers))
+#endif
+        {
+            goto bail;
+        }
+    }
 
     /* Scan out the new bo on the screen's crtc */
     if (wasEnabled) {
@@ -153,6 +172,16 @@ bail:
     msMapFramebuffer(screen);
     msSetScreenSizes(screen->pScreen);
 
+    /*
+     * Set frame buffer mapping
+     */
+    (*pScreen->ModifyPixmapHeader) (rootPixmap,
+                                    pScreen->width,
+                                    pScreen->height,
+                                    screen->fb.depth,
+                                    screen->fb.bitsPerPixel,
+                                    screen->fb.byteStride,
+                                    screen->fb.frameBuffer);
     if (wasEnabled) {
         KdEnableScreen(pScreen);
     }
