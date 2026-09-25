@@ -188,6 +188,8 @@ bool CreateConnectionBlock(int maxscreens)
         maxscreens = screenInfo.numScreens;
     }
 
+    screenInfo.numRoots = maxscreens;
+
     size_t screenDataOffset = 0;
     x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(maxscreens, &screenDataOffset);
 

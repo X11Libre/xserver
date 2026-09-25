@@ -737,6 +737,9 @@ typedef struct _ScreenInfo {
     int y;                      /* origin */
     int width;                  /* total width of all screens together */
     int height;                 /* total height of all screens together */
+
+    /* beyond here, NOT part of ABI */
+    int numRoots; /* client-visible numer, usually equals numScreens, except for Xinerama etc */
 } ScreenInfo;
 
 extern _X_EXPORT ScreenInfo screenInfo;
