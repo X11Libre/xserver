@@ -877,4 +877,9 @@ void x_rpcbuf_write_xPixmapFormat(x_rpcbuf_t *rpcbuf, PixmapFormatPtr pPixmapFor
  */
 x_rpcbuf_t dixBuildConnectionBlock(int maxscreens, size_t *screenDataOffset);
 
+/*
+ * generate a ConnectionInfo block and return it as a separate malloc'ed buffer
+ */
+char *dixNewConnectionInfoBlock(ClientPtr pClient, size_t *sz, size_t *scrOffset);
+
 #endif /* _XSERVER_DIX_PRIV_H */
