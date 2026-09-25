@@ -95,6 +95,7 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
         RegionInit(&priv->prepare_region, box, 1);
 
         if (glamor_priv->has_rw_pbo) {
+            GLenum error;
             if (priv->pbo == 0)
                 glGenBuffers(1, &priv->pbo);
 
@@ -108,9 +109,11 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
                          gl_usage);
 
             glamor_priv->suppress_gl_out_of_memory_logging = false;
+            error = glGetError();
 
-            if (glGetError() == GL_OUT_OF_MEMORY) {
-                if (!glamor_priv->logged_any_pbo_allocation_failure) {
+            if (error != GL_NO_ERROR) {
+                if (error == GL_OUT_OF_MEMORY &&
+                    !glamor_priv->logged_any_pbo_allocation_failure) {
                     LogMessageVerb(X_WARNING, 0, "glamor: Failed to allocate %d "
                                    "bytes PBO due to GL_OUT_OF_MEMORY.\n",
                                    pixmap->devKind * pixmap->drawable.height);
