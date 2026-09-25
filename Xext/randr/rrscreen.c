@@ -39,29 +39,22 @@ static CARD16
 static void
 RREditConnectionInfo(ScreenPtr pScreen)
 {
-    xConnSetup *connSetup;
-    char *vendor;
-    xPixmapFormat *formats;
-    xWindowRoot *root;
-    xDepth *depth;
-    xVisualType *visual;
-    int screen = 0;
-    int d;
-
     if (ConnectionInfo == NULL)
         return;
 
-    connSetup = (xConnSetup *) ConnectionInfo;
-    vendor = (char *) connSetup + sizeof(xConnSetup);
-    formats = (xPixmapFormat *) ((char *) vendor +
+    xConnSetup *connSetup = (xConnSetup *) ConnectionInfo;
+    char *vendor = (char *) connSetup + sizeof(xConnSetup);
+    xPixmapFormat *formats = (xPixmapFormat *) ((char *) vendor +
                                  pad_to_int32(connSetup->nbytesVendor));
-    root = (xWindowRoot *) ((char *) formats +
+    xWindowRoot *root = (xWindowRoot *) ((char *) formats +
                             sizeof(xPixmapFormat) *
                             screenInfo.numPixmapFormats);
+
+    int screen = 0;
     while (screen != pScreen->myNum) {
-        depth = (xDepth *) ((char *) root + sizeof(xWindowRoot));
-        for (d = 0; d < root->nDepths; d++) {
-            visual = (xVisualType *) ((char *) depth + sizeof(xDepth));
+        xDepth *depth = (xDepth *) ((char *) root + sizeof(xWindowRoot));
+        for (int d = 0; d < root->nDepths; d++) {
+            xVisualType *visual = (xVisualType *) ((char *) depth + sizeof(xDepth));
             depth = (xDepth *) ((char *) visual +
                                 depth->nVisuals * sizeof(xVisualType));
         }
