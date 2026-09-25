@@ -593,22 +593,24 @@ PanoramiXCreateConnectionBlock(void)
         });
     }
 
-    if (!CreateConnectionBlock(1)) {
-        return FALSE;
-    }
+    size_t screenDataOffset = 0;
+    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(1, &screenDataOffset);
 
-    root = (xWindowRoot *) (ConnectionInfo + connBlockScreenStart);
-    length = connBlockScreenStart + sizeof(xWindowRoot);
+    if (rpcbuf.error)
+        return FALSE;
+
+    root = (xWindowRoot *) (rpcbuf.buffer + screenDataOffset);
+    length = screenDataOffset + sizeof(xWindowRoot);
 
     /* overwrite the connection block */
     root->nDepths = PanoramiXNumDepths;
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths; walkScreenIdx++) {
-        depth = (xDepth *) (ConnectionInfo + length);
+        depth = (xDepth *) (rpcbuf.buffer + length);
         depth->depth = PanoramiXDepths[walkScreenIdx].depth;
         depth->nVisuals = PanoramiXDepths[walkScreenIdx].numVids;
         length += sizeof(xDepth);
-        visual = (xVisualType *) (ConnectionInfo + length);
+        visual = (xVisualType *) (rpcbuf.buffer + length);
 
         for (j = 0; j < depth->nVisuals; j++, visual++) {
             visual->visualID = PanoramiXDepths[walkScreenIdx].vids[j];
@@ -626,8 +628,6 @@ PanoramiXCreateConnectionBlock(void)
 
         length += (depth->nVisuals * sizeof(xVisualType));
     }
-
-    ConnectionInfoSize = length;
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths; walkScreenIdx++)
         free(PanoramiXDepths[walkScreenIdx].vids);
@@ -647,6 +647,13 @@ PanoramiXCreateConnectionBlock(void)
     height_mult = (1.0 * root->pixHeight) / old_height;
     root->mmWidth *= width_mult;
     root->mmHeight *= height_mult;
+
+    /* must not free the rpcbuf here, because we store the data elsewhere */
+    /* record this for other parts which later going to manipulate the data */
+    ConnectionInfo = rpcbuf.buffer;
+    ConnectionInfoSize = length;
+    screenInfo.numRoots = 1;
+    connBlockScreenStart = screenDataOffset;
 
     return TRUE;
 }
