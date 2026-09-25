@@ -76,12 +76,6 @@ doWriteConfigFile(const char *filename, XF86ConfigPtr cptr)
 
     xf86printLayoutSection(cf, cptr->conf_layout_lst);
 
-    if (cptr->conf_files != NULL) {
-        fprintf(cf, "Section \"Files\"\n");
-        xf86printFileSection(cf, cptr->conf_files);
-        fprintf(cf, "EndSection\n\n");
-    }
-
     if (cptr->conf_modules != NULL) {
         fprintf(cf, "Section \"Module\"\n");
         xf86printModuleSection(cf, cptr->conf_modules);

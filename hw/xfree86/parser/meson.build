@@ -1,6 +1,5 @@
 srcs_xorg_parser = [
     'Device.c',
-    'Files.c',
     'Flags.c',
     'Input.c',
     'InputClass.c',

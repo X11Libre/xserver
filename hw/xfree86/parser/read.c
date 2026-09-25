@@ -107,12 +107,7 @@ xf86readConfigFile(void)
                 return NULL;
             }
             xf86setSection(xf86_lex_val.str);
-            if (xf86nameCompare(xf86_lex_val.str, "files") == 0) {
-                free(xf86_lex_val.str);
-                xf86_lex_val.str = NULL;
-                HANDLE_RETURN(conf_files, xf86parseFilesSection(ptr->conf_files));
-            }
-            else if (xf86nameCompare(xf86_lex_val.str, "serverflags") == 0) {
+            if (xf86nameCompare(xf86_lex_val.str, "serverflags") == 0) {
                 free(xf86_lex_val.str);
                 xf86_lex_val.str = NULL;
                 HANDLE_RETURN(conf_flags, xf86parseFlagsSection(ptr->conf_flags));
@@ -289,7 +284,6 @@ xf86freeConfig(XF86ConfigPtr p)
     if (p == NULL)
         return;
 
-    xf86freeFiles(p->conf_files);
     xf86freeModules(p->conf_modules);
     xf86freeFlags(p->conf_flags);
     xf86freeMonitorList(p->conf_monitor_lst);
