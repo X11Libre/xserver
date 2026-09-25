@@ -846,4 +846,24 @@ void dixSendConnAbort(ClientPtr pClient, const char *reason);
  */
 void dixInitConnectionBlock(void);
 
+/*
+ * write xWindowRoot protocol structure into rpcbuf
+ */
+void x_rpcbuf_write_xWindowRoot(x_rpcbuf_t *rpcbuf, ScreenPtr pScreen);
+
+/*
+ * write xDepth protocol structure into rpcbuf
+ */
+void x_rpcbuf_write_xDepth(x_rpcbuf_t *rpcbuf, DepthPtr pDepth);
+
+/*
+ * write xVisualInfo protocol structure into rpcbuf
+ */
+void x_rpcbuf_write_xVisualInfo(x_rpcbuf_t *rpcbuf, VisualPtr pVisual);
+
+/*
+ * write xPixmapFormat protocol structure into rpcbuf
+ */
+void x_rpcbuf_write_xPixmapFormat(x_rpcbuf_t *rpcbuf, PixmapFormatPtr pPixmapFormat);
+
 #endif /* _XSERVER_DIX_PRIV_H */

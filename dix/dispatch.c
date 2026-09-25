@@ -606,6 +606,8 @@ bool CreateConnectionBlock(int maxscreens)
         maxscreens = screenInfo.numScreens;
     }
 
+    x_rpcbuf_t rpcbuf = { 0 };
+
     xConnSetup setup = {
         /* Leave off the ridBase and ridMask, these must be sent with
            connection */
@@ -625,103 +627,40 @@ bool CreateConnectionBlock(int maxscreens)
         .numFormats = screenInfo.numPixmapFormats,
         .maxRequestSize = MAX_REQUEST_SIZE,
     };
-
     QueryMinMaxKeyCodes(&setup.minKeyCode, &setup.maxKeyCode);
+    x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)&setup, sizeof(setup));
 
-    int lenofblock = sizeof(xConnSetup) +
-        pad_to_int32(setup.nbytesVendor) +
-        (setup.numFormats * sizeof(xPixmapFormat)) +
-        (setup.numRoots * sizeof(xWindowRoot));
-    ConnectionInfo = calloc(1, lenofblock);
-    if (!ConnectionInfo)
-        return FALSE;
-
-    memcpy(ConnectionInfo, &setup, sizeof(xConnSetup));
-    int sizesofar = sizeof(xConnSetup);
-    char *pBuf = ConnectionInfo + sizeof(xConnSetup);
-
-    memcpy(pBuf, VendorString, (size_t) setup.nbytesVendor);
-    sizesofar += setup.nbytesVendor;
-    pBuf += setup.nbytesVendor;
-
-    int paddingforint32 = padding_for_int32(setup.nbytesVendor);
-    sizesofar += paddingforint32;
-    while (--paddingforint32 >= 0)
-        *pBuf++ = 0;
+    x_rpcbuf_write_string_pad(&rpcbuf, VendorString);
 
     for (int i = 0; i < screenInfo.numPixmapFormats; i++) {
-        xPixmapFormat format = {
-            .depth = screenInfo.formats[i].depth,
-            .bitsPerPixel = screenInfo.formats[i].bitsPerPixel,
-            .scanLinePad = screenInfo.formats[i].scanlinePad,
-        };
-        memcpy(pBuf, &format, sizeof(xPixmapFormat));
-        pBuf += sizeof(xPixmapFormat);
-        sizesofar += sizeof(xPixmapFormat);
+        x_rpcbuf_write_xPixmapFormat(&rpcbuf, &(screenInfo.formats[i]));
     }
 
-    connBlockScreenStart = sizesofar;
+    /* record this for other parts which later going to manipulate the data */
+    connBlockScreenStart = rpcbuf.wpos;
 
     DIX_FOR_N_SCREENS(0, maxscreens, {
-        xWindowRoot *root = (xWindowRoot*)pBuf;
-        root->windowId = walkScreen->root->drawable.id;
-        root->defaultColormap = walkScreen->defColormap;
-        root->whitePixel = walkScreen->whitePixel;
-        root->blackPixel = walkScreen->blackPixel;
-        root->currentInputMask = 0;      /* filled in when sent */
-        root->pixWidth = walkScreen->width;
-        root->pixHeight = walkScreen->height;
-        root->mmWidth = walkScreen->mmWidth;
-        root->mmHeight = walkScreen->mmHeight;
-        root->minInstalledMaps = walkScreen->minInstalledCmaps;
-        root->maxInstalledMaps = walkScreen->maxInstalledCmaps;
-        root->rootVisualID = walkScreen->rootVisual;
-        root->backingStore = walkScreen->backingStoreSupport;
-        root->saveUnders = FALSE;
-        root->rootDepth = walkScreen->rootDepth;
-        root->nDepths = walkScreen->numDepths;
-
-        sizesofar += sizeof(xWindowRoot);
-        pBuf += sizeof(xWindowRoot);
+        x_rpcbuf_write_xWindowRoot(&rpcbuf, walkScreen);
 
         DepthPtr pDepth = walkScreen->allowedDepths;
         for (int j = 0; j < walkScreen->numDepths; j++, pDepth++) {
-            lenofblock += sizeof(xDepth) +
-                (pDepth->numVids * sizeof(xVisualType));
-            pBuf = (char *) realloc(ConnectionInfo, lenofblock);
-            if (!pBuf) {
-                free(ConnectionInfo);
-                return FALSE;
-            }
-            ConnectionInfo = pBuf;
-            pBuf += sizesofar;
-
-            xDepth depth = { .depth = pDepth->depth };
-            depth.nVisuals = pDepth->numVids; /* can't have braces with commas within the lambda */
-
-            memcpy(pBuf, &depth, sizeof(depth));
-            pBuf += sizeof(depth);
-            sizesofar += sizeof(depth);
+            x_rpcbuf_write_xDepth(&rpcbuf, pDepth);
             for (int k = 0; k < pDepth->numVids; k++) {
                 unsigned long vid = pDepth->vids[k];
                 VisualPtr pVisual;
                 for (pVisual = walkScreen->visuals;
                      pVisual->vid != vid; pVisual++);
-                xVisualType visual = { .visualID = vid };
-                visual.class = pVisual->class;
-                visual.bitsPerRGB = pVisual->bitsPerRGBValue;
-                visual.colormapEntries = pVisual->ColormapEntries;
-                visual.redMask = pVisual->redMask;
-                visual.greenMask = pVisual->greenMask;
-                visual.blueMask = pVisual->blueMask;
-                memcpy(pBuf, &visual, sizeof(visual));
-                pBuf += sizeof(visual);
-                sizesofar += sizeof(visual);
+                x_rpcbuf_write_xVisualInfo(&rpcbuf, pVisual);
             }
         }
     });
 
-    ConnectionInfoSize = lenofblock;
+    if (rpcbuf.error)
+        return false;
+
+    /* must not free the rpcbuf here, because we store the data elsewhere */
+    ConnectionInfo = rpcbuf.buffer;
+    ConnectionInfoSize = rpcbuf.wpos;
     return TRUE;
 }
 
