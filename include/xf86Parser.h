@@ -425,13 +425,6 @@ typedef struct {
 } XF86ConfVendorRec, *XF86ConfVendorPtr;
 
 typedef struct {
-    const char *dri_group_name;
-    int dri_group;
-    int dri_mode;
-    char *dri_comment;
-} XF86ConfDRIRec, *XF86ConfDRIPtr;
-
-typedef struct {
     XF86OptionPtr ext_option_lst;
     char *extensions_comment;
 } XF86ConfExtensionsRec, *XF86ConfExtensionsPtr;
@@ -450,7 +443,7 @@ typedef struct {
     XF86ConfOutputClassPtr conf_outputclass_lst;
     XF86ConfLayoutPtr conf_layout_lst;
     XF86ConfVendorPtr conf_vendor_lst;
-    XF86ConfDRIPtr conf_dri;
+    void *padding0;
     XF86ConfExtensionsPtr conf_extensions;
     char *conf_comment;
 } XF86ConfigRec, *XF86ConfigPtr;
