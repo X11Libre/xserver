@@ -115,7 +115,7 @@ modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map, Bool keep_de
                 break;
             } else if (screen->fb.depth > 30) {
                 screen->fb.depth = 30;
-                screen->fb.bitsPerPixel = 24;
+                screen->fb.bitsPerPixel = 32;
             } else if (screen->fb.depth > 24) {
                 screen->fb.depth = 24;
                 screen->fb.bitsPerPixel = 32;
@@ -314,6 +314,12 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
 
     gbm_bo_set_screen_fb_info(scrpriv->front, screen, config->glamor_info.force_es);
 
+    /* Make fbSetupScreen happy */
+    if (screen->fb.bitsPerPixel == 24) {
+        screen->fb.bitsPerPixel = 32;
+        scrpriv->is_24bpp = TRUE;
+    }
+
     scrpriv->randr = screen->randr;
     if (!msMapFramebuffer(screen)) {
         goto fail;
@@ -385,6 +391,8 @@ msMapFramebuffer(KdScreenInfo * screen)
             return FALSE;
         }
         scrpriv->shadow = FALSE;
+    } else if (scrpriv->is_24bpp) {
+        scrpriv->shadow = TRUE;
     } else if (config->shadow >= 0) {
         scrpriv->shadow = config->shadow;
     } else if (scrpriv->randr != RR_Rotate_0) {
@@ -435,7 +443,7 @@ msSetShadow(ScreenPtr pScreen)
     window = msWindowLinear;
     update = 0;
 
-    if (screen->fb.bitsPerPixel == 24)
+    if (scrpriv->is_24bpp == 24)
         update = shadowUpdate32to24;
     else if (scrpriv->randr != RR_Rotate_0)
         update = shadowUpdateRotatePacked;

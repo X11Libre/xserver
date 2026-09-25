@@ -42,6 +42,8 @@ typedef struct _msScrPriv {
     Bool blockHandler;
     Bool shadow;
 
+    Bool is_24bpp;
+
     Bool allow_modifier_strip;
 
     uint32_t num_render_modifiers;
