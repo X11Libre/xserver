@@ -29,43 +29,7 @@
 #include "Xext/randr/randrstr_priv.h"
 #include "Xext/randr/rrdispatch_priv.h"
 
-static CARD16
- RR10CurrentSizeID(ScreenPtr pScreen);
-
-/*
- * Edit connection information block so that new clients
- * see the current screen size on connect
- */
-static void
-RREditConnectionInfo(ScreenPtr pScreen)
-{
-    if (ConnectionInfo == NULL)
-        return;
-
-    xConnSetup *connSetup = (xConnSetup *) ConnectionInfo;
-    char *vendor = (char *) connSetup + sizeof(xConnSetup);
-    xPixmapFormat *formats = (xPixmapFormat *) ((char *) vendor +
-                                 pad_to_int32(connSetup->nbytesVendor));
-    xWindowRoot *root = (xWindowRoot *) ((char *) formats +
-                            sizeof(xPixmapFormat) *
-                            screenInfo.numPixmapFormats);
-
-    int screen = 0;
-    while (screen != pScreen->myNum) {
-        xDepth *depth = (xDepth *) ((char *) root + sizeof(xWindowRoot));
-        for (int d = 0; d < root->nDepths; d++) {
-            xVisualType *visual = (xVisualType *) ((char *) depth + sizeof(xDepth));
-            depth = (xDepth *) ((char *) visual +
-                                depth->nVisuals * sizeof(xVisualType));
-        }
-        root = (xWindowRoot *) ((char *) depth);
-        screen++;
-    }
-    root->pixWidth = pScreen->width;
-    root->pixHeight = pScreen->height;
-    root->mmWidth = pScreen->mmWidth;
-    root->mmHeight = pScreen->mmHeight;
-}
+static CARD16 RR10CurrentSizeID(ScreenPtr pScreen);
 
 void
 RRSendConfigNotify(ScreenPtr pScreen)
@@ -149,7 +113,7 @@ RRScreenSizeNotify(ScreenPtr pScreen)
 
     RRTellChanged(pScreen);
     RRSendConfigNotify(pScreen);
-    RREditConnectionInfo(pScreen);
+    dixInitConnectionBlock();
 
     RRPointerScreenConfigured(pScreen);
     /*
