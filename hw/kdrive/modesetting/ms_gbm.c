@@ -174,6 +174,13 @@ gbm_bo_create_tiled(struct gbm_device *gbm, uint32_t width, uint32_t height, uin
     /* Used by nvidia */
     uint32_t flags2 = GBM_BO_USE_SCANOUT;
 
+    /* We can't use a tiled buffer for these formats */
+    switch (format) {
+    case GBM_FORMAT_RGB888:
+    case GBM_FORMAT_BGR888:
+        return NULL;
+    }
+
     if (!bo) {
         bo = gbm_bo_create_with_modifiers2(gbm, width, height, format,
                                            modifiers, num_modifiers, flags);
