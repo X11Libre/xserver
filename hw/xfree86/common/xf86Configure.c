@@ -684,7 +684,7 @@ DoConfigure(void)
     xf86config->conf_flags = configureFlagsSection();
     xf86config->conf_videoadaptor_lst = NULL;
     xf86config->conf_modes_lst = NULL;
-    xf86config->conf_vendor_lst = NULL;
+    xf86config->padding0 = NULL;
     xf86config->conf_dri = NULL;
     xf86config->conf_input_lst = configureInputSection();
     xf86config->conf_layout_lst = configureLayoutSection();
