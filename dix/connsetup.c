@@ -23,6 +23,8 @@
 
 size_t ConnectionInfoSize = 0;
 
+int connBlockScreenStart;
+
 void dixSendConnAbort(ClientPtr pClient, const char *reason)
 {
     xConnSetupPrefix csp = {
