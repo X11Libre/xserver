@@ -43,14 +43,25 @@ msSetMode(ScreenPtr pScreen, int width, int height, int rate)
     screen->rate = rate;
 
     /* Create a new front with the new sizes */
-    if (width != screen->width ||
-        height != screen->height) {
+    if (width != old_width ||
+        height != old_height) {
         uint32_t format = gbm_bo_get_format(scrpriv->front);
         Bool do_map = !!gbm_bo_get_map(scrpriv->front);
+        uint64_t modifier = gbm_bo_get_modifier(scrpriv->front);
+
+        /* Try the current modifier first */
         new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format,
-                                        modifiers, num_modifiers);
+                                        &modifier, 1);
+        if (!new_front) {
+            new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format,
+                                            modifiers, num_modifiers);
+        }
         if (!new_front ||
             !msSetScreenBo(pScreen, new_front, FALSE /* flip */)) {
+            goto bail;
+        }
+    } else {
+        if (!msSetScreenBo(pScreen, scrpriv->front, TRUE /* flip */)) {
             goto bail;
         }
     }

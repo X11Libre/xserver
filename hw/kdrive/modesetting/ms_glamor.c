@@ -25,7 +25,6 @@ msGlamorTryNewFront(ScreenPtr pScreen, Bool strip_modifiers, Bool need_map)
     MsScreenConf *config = screen->closure;
     Bool is_gles = config->glamor_info.force_es;
 
-    struct gbm_bo *old_front;
     struct gbm_bo *new_front = NULL;
 
     if (strip_modifiers) {
@@ -35,7 +34,6 @@ msGlamorTryNewFront(ScreenPtr pScreen, Bool strip_modifiers, Bool need_map)
         screen->driver = NULL;
     }
 
-    old_front = scrpriv->front;
     new_front = modesetting_open(priv, screen, need_map, TRUE /* keep_depth */);
     screen->driver = scrpriv;
     if (!new_front) {
@@ -52,25 +50,12 @@ msGlamorTryNewFront(ScreenPtr pScreen, Bool strip_modifiers, Bool need_map)
         return FALSE;
     }
 
-    if (!msSetScreenBo(pScreen, new_front, TRUE /* flip */)) {
+    if (!msSetScreenBo(pScreen, new_front, FALSE /* flip */)) {
         gbm_bo_destroy(new_front);
-        LogMessage(X_ERROR, "Xmodesetting(%d): Could not flip to the new front bo\n", pScreen->myNum);
+        LogMessage(X_ERROR, "Xmodesetting(%d): Could not swap to the new front bo\n", pScreen->myNum);
         return FALSE;
     }
 
-    if (!gbm_bo_get_map(new_front)) {
-        PixmapPtr rootPixmap = (*pScreen->GetScreenPixmap)(pScreen);
-        Bool used_modifiers = gbm_bo_get_used_modifiers(new_front);
-
-        if (!glamor_egl_create_textured_pixmap_from_gbm_bo(rootPixmap, new_front, used_modifiers)) {
-            /* Put the old front back, destroy the new front */
-            msSetScreenBo(pScreen, old_front, FALSE /* flip */);
-            LogMessage(X_ERROR, "Xmodesetting(%d): Could not texture the front bo\n", pScreen->myNum);
-            return FALSE;
-        }
-    }
-
-    gbm_bo_destroy(old_front);
     return TRUE;
 }
 
