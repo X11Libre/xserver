@@ -369,6 +369,31 @@ fail:
     return NULL;
 }
 
+struct gbm_bo*
+gbm_create_front_for_screen(KdScreenInfo *screen, Bool do_map, Bool do_swap)
+{
+    msPriv *priv = screen->card->driver;
+    msScrPriv *scrpriv = screen->driver;
+    uint32_t format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, do_swap /* rb_swap */);
+    uint32_t format_swap = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, !do_swap /* rb_swap */);
+    struct gbm_bo *ret = NULL;
+
+    /* TODO: Query scanout modifiers in CardInit,
+     * intersect with render modifiers queried in msGlamorInit
+     */
+    uint64_t *modifiers = scrpriv ? scrpriv->render_modifiers : NULL;
+    int num_modifiers = scrpriv ? scrpriv->num_render_modifiers : 0;
+
+    if (!ret) {
+        ret = gbm_create_front_bo(priv->gbm, do_map, screen->width, screen->height, format, modifiers, num_modifiers);
+    }
+    if (!ret) {
+        ret = gbm_create_front_bo(priv->gbm, do_map, screen->width, screen->height, format_swap, modifiers, num_modifiers);
+    }
+
+    return ret;
+}
+
 void
 gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles)
 {

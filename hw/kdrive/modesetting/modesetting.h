@@ -89,7 +89,7 @@ Bool msUnmapFramebuffer(KdScreenInfo * screen);
 Bool msSetShadow(ScreenPtr pScreen);
 
 struct gbm_bo*
-modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map, Bool keep_depth);
+modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth);
 
 /* ms_damage.c */
 
@@ -143,6 +143,9 @@ gbm_format_get_depth(uint32_t format);
 struct gbm_bo*
 gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_t height, uint32_t format,
                     uint64_t *modifiers, int num_modifiers);
+
+struct gbm_bo*
+gbm_create_front_for_screen(KdScreenInfo *screen, Bool do_map, Bool do_swap);
 
 void
 gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles);
