@@ -22,6 +22,7 @@
 #include "Xext/panoramiX/panoramiX_priv.h"
 #include <assert.h>
 
+size_t ConnectionInfoSize = 0;
 
 
 void dixSendConnAbort(ClientPtr pClient, const char *reason)
