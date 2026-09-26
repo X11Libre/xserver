@@ -20,10 +20,9 @@
 #include "dix/window_priv.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
+#include <assert.h>
 
-size_t ConnectionInfoSize = 0;
 
-int connBlockScreenStart;
 
 void dixSendConnAbort(ClientPtr pClient, const char *reason)
 {
@@ -44,6 +43,19 @@ void dixSendConnAbort(ClientPtr pClient, const char *reason)
     dixWriteToClient(pClient, sizeof(csp), &csp);
     dixWriteToClient(pClient, (int) csp.lengthReason, reason);
     pClient->noClientException = -1;
+}
+size_t
+dixConnBlockScreenStart(const char *connInfo)
+{
+    const xConnSetup *setup = (const xConnSetup *)connInfo;
+    size_t offset = sizeof(xConnSetup);
+
+    offset += setup->nbytesVendor;
+    offset = (offset + 3) & ~3;  // pad to multiple of 4
+
+    offset += setup->numFormats * sizeof(xPixmapFormat);
+
+    return offset;
 }
 
 void dixInitConnectionBlock(void)
@@ -194,21 +206,20 @@ bool CreateConnectionBlock(int maxscreens)
 
     size_t screenDataOffset = 0;
     x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(maxscreens, &screenDataOffset);
-
-    /* record this for other parts which later going to manipulate the data */
-    connBlockScreenStart = screenDataOffset;
-
     if (rpcbuf.error)
         return false;
-
+    /* the screen offset is derived from the block itself; make sure the
+       derivation agrees with what the builder actually wrote */
+    assert(dixConnBlockScreenStart((const char *) rpcbuf.buffer) == screenDataOffset);
     /* must not free the rpcbuf here, because we store the data elsewhere */
     ConnectionInfo = rpcbuf.buffer;
     ConnectionInfoSize = rpcbuf.wpos;
     return true;
 }
-
 char *dixNewConnectionInfoBlock(ClientPtr pClient, size_t *sz, size_t *scrOffset)
+
 {
+
     if (!ConnectionInfo)
         return NULL;
 
@@ -223,7 +234,7 @@ char *dixNewConnectionInfoBlock(ClientPtr pClient, size_t *sz, size_t *scrOffset
 
     /* fill in the "currentInputMask" */
     /* attention: this still depends on setup block screens matching screenInfo.screens */
-    xWindowRoot *root = (xWindowRoot *) (newone + connBlockScreenStart);
+    xWindowRoot *root = (xWindowRoot *) (newone + dixConnBlockScreenStart(newone));
     int numScreens = ((xConnSetup *) newone)->numRoots;
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
@@ -241,7 +252,7 @@ char *dixNewConnectionInfoBlock(ClientPtr pClient, size_t *sz, size_t *scrOffset
     if (sz)
         *sz = ConnectionInfoSize;
     if (scrOffset)
-        *scrOffset = connBlockScreenStart;
+        *scrOffset = dixConnBlockScreenStart(newone);
 
     return newone;
 }
