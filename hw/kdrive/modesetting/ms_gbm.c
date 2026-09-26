@@ -395,7 +395,7 @@ gbm_create_front_for_screen(KdScreenInfo *screen, Bool do_map, Bool do_swap)
 }
 
 void
-gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles)
+gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles, Bool gl_masks)
 {
     uint32_t format = gbm_bo_get_format(bo);
     Bool rb_swap = FALSE;
@@ -463,7 +463,7 @@ gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles)
     }
 
     /* XXX Tiled buffers don't need r-b swap, unless it's depth 30 on gles */
-    if (!gbm_bo_get_map(bo)) {
+    if (gl_masks || !gbm_bo_get_map(bo)) {
         if (screen->fb.depth != 30 || !is_gles) {
             rb_swap = FALSE;
         }

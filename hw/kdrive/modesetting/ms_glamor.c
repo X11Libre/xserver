@@ -13,39 +13,21 @@
 #include <drm_fourcc.h>
 
 static Bool
-msGlamorTryNewFront(ScreenPtr pScreen, Bool strip_modifiers, Bool need_map)
+msGlamorTileFront(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    msScrPriv *scrpriv = screen->driver;
-    KdFrameBuffer saved_framebuffer = screen->fb;
-
-    /* TODO: query glamor */
-    MsScreenConf *config = screen->closure;
-    Bool is_gles = config->glamor_info.force_es;
 
     struct gbm_bo *new_front = NULL;
 
-    if (strip_modifiers) {
-        if (!need_map && !scrpriv->allow_modifier_strip) {
-            return FALSE;
-        }
-        screen->driver = NULL;
-    }
-
-    new_front = modesetting_open(screen, need_map, TRUE /* keep_depth */);
-    screen->driver = scrpriv;
+    new_front = modesetting_open(screen, FALSE /* need_map */, TRUE /* keep_depth */);
     if (!new_front) {
         return FALSE;
     }
 
-    gbm_bo_set_screen_fb_info(new_front, screen, is_gles);
-    if (memcmp(&saved_framebuffer, &screen->fb, sizeof(screen->fb))) {
-        /* Visual masks changed, the bo is unusable */
-        /* XXX We could still use this if we had a way to change visual masks this late */
-        screen->fb = saved_framebuffer;
+    /* Maybe we could switch to this bo, but why? */
+    if (gbm_bo_get_map(new_front)) {
         gbm_bo_destroy(new_front);
-        LogMessage(X_ERROR, "Xmodesetting(%d): Cannot use a new front with different visual masks\n", pScreen->myNum);
         return FALSE;
     }
 
@@ -56,24 +38,6 @@ msGlamorTryNewFront(ScreenPtr pScreen, Bool strip_modifiers, Bool need_map)
     }
 
     return TRUE;
-}
-
-static Bool
-msGlamorTileFront(ScreenPtr pScreen, Bool map_fallback)
-{
-    if (msGlamorTryNewFront(pScreen, FALSE /* strip_modifiers */, FALSE /* need_map */) ||
-        msGlamorTryNewFront(pScreen, TRUE /* strip_modifiers */, FALSE /* need_map */)) {
-        return TRUE;
-    }
-
-    LogMessage(X_ERROR, "Xmodesetting(%d): Cannot use a textured gbm front, using a cpu-mapped front buffer\n", pScreen->myNum);
-
-    if (map_fallback) {
-        if (!msGlamorTryNewFront(pScreen, FALSE /* strip_modifiers */, TRUE /* need_map */)) {
-            msGlamorTryNewFront(pScreen, TRUE /* strip_modifiers */, TRUE /* need_map */);
-        }
-    }
-    return FALSE;
 }
 
 Bool
@@ -89,18 +53,15 @@ msGlamorCreateRes(ScreenPtr pScreen)
     const char *format_name;
 
     if (!screen->dumb) {
-        Bool map_fallback = !gbm_bo_get_map(scrpriv->front);
-        if (!msGlamorTileFront(pScreen, map_fallback) &&
-            !gbm_bo_get_map(scrpriv->front)) {
-            LogMessage(X_ERROR, "Xmodesetting(%d): Could not create a usable front buffer\n", pScreen->myNum);
-            return FALSE;
+        if (!msGlamorTileFront(pScreen)) {
+            LogMessage(X_INFO, "Xmodesetting(%d): Could not create a usable tiled front buffer\n", pScreen->myNum);
         }
     }
 
     if (gbm_bo_get_map(scrpriv->front)) {
         LogMessage(X_INFO, "Xmodesetting(%d): Using a cpu mapped front buffer\n", pScreen->myNum);
     } else {
-        LogMessage(X_INFO, "Xmodesetting(%d): Using a textured front buffer\n", pScreen->myNum);
+        LogMessage(X_INFO, "Xmodesetting(%d): Using a tiled front buffer\n", pScreen->myNum);
     }
 
     format = gbm_bo_get_format(scrpriv->front);
@@ -120,7 +81,6 @@ msGlamorInit(ScreenPtr pScreen)
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
     uint32_t format;
-    int caps = GLAMOR_EGL_CAP_NONE;
     int write_pos = 0;
 
     if (!config->glamor_info.dri_path) {
@@ -132,12 +92,9 @@ msGlamorInit(ScreenPtr pScreen)
         }
     }
 
-    if (!KdGlamorInit(pScreen, &config->glamor_info, &caps)) {
+    if (!KdGlamorInit(pScreen, &config->glamor_info, NULL)) {
         return FALSE;
     }
-
-    /* Workaround for https://gitlab.freedesktop.org/mesa/mesa/-/work_items/14475#note_3659774 */
-    scrpriv->allow_modifier_strip = !!(caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO);
 
     /*
      * TODO: Don't assume all formats support the same modifiers

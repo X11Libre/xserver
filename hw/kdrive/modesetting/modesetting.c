@@ -243,7 +243,7 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         screen->height = scrpriv->mode ? scrpriv->mode->vdisplay : 1080;
     }
 
-    scrpriv->front = modesetting_open(screen, FALSE /* need_map */, FALSE /* keep_depth */);
+    scrpriv->front = modesetting_open(screen, TRUE /* need_map */, FALSE /* keep_depth */);
     if (!scrpriv->front) {
         LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not create a front buffer\n",
                    screen->card->mynum, screen->mynum);
@@ -254,7 +254,10 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
     screen->height = gbm_bo_get_height(scrpriv->front);
     screen->rate = scrpriv->mode ? scrpriv->mode->vrefresh : 0; /* XXX 0 means accept any rate on msEnable */
 
-    gbm_bo_set_screen_fb_info(scrpriv->front, screen, config->glamor_info.force_es);
+    /* Set the visual masks assuming we will be able to texture this bo
+     * This allows us to create a mapped front here, and have glamor texture it if it can
+     */
+    gbm_bo_set_screen_fb_info(scrpriv->front, screen, config->glamor_info.force_es, TRUE /* gl_masks */);
 
     /* Make fbSetupScreen happy */
     if (screen->fb.bitsPerPixel == 24) {

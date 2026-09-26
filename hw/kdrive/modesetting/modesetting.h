@@ -44,8 +44,6 @@ typedef struct _msScrPriv {
 
     Bool is_24bpp;
 
-    Bool allow_modifier_strip;
-
     uint32_t num_render_modifiers;
     uint64_t *render_modifiers;
 } msScrPriv;
@@ -148,7 +146,7 @@ struct gbm_bo*
 gbm_create_front_for_screen(KdScreenInfo *screen, Bool do_map, Bool do_swap);
 
 void
-gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles);
+gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles, Bool gl_masks);
 
 /* ms_query.c */
 
