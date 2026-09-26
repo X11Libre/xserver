@@ -17,7 +17,6 @@ msGlamorTryNewFront(ScreenPtr pScreen, Bool strip_modifiers, Bool need_map)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
     KdFrameBuffer saved_framebuffer = screen->fb;
 
@@ -34,7 +33,7 @@ msGlamorTryNewFront(ScreenPtr pScreen, Bool strip_modifiers, Bool need_map)
         screen->driver = NULL;
     }
 
-    new_front = modesetting_open(priv, screen, need_map, TRUE /* keep_depth */);
+    new_front = modesetting_open(screen, need_map, TRUE /* keep_depth */);
     screen->driver = scrpriv;
     if (!new_front) {
         return FALSE;

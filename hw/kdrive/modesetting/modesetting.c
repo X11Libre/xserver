@@ -15,96 +15,38 @@
 #endif
 
 struct gbm_bo*
-modesetting_open(msPriv *priv, KdScreenInfo *screen, Bool need_map, Bool keep_depth)
+modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth)
 {
     struct gbm_bo *ret = NULL;
-    uint32_t format, format_swap;
 
-    MsScreenConf *config = screen->closure;
-    msScrPriv *scrpriv = screen->driver;
-    /* TODO: Query scanout modifiers in CardInit,
-     * intersect with render modifiers queried in msGlamorInit
-     */
-    uint64_t *modifiers = scrpriv ? scrpriv->render_modifiers : NULL;
-    int num_modifiers = scrpriv ? scrpriv->num_render_modifiers : 0;
-
-    /* XXX depth 30 needs more care because of the visual mask swap */
-    Bool careful = screen->fb.depth == 30 && !config->glamor_info.force_es;
 #ifdef GLAMOR
+    msScrPriv *scrpriv = screen->driver;
+    MsScreenConf *config = screen->closure;
+    Rotation randr = scrpriv ? scrpriv->randr : screen->randr;
+
     if (screen->dumb) {
         need_map = TRUE;
-    } else if (careful && config->glamor_info.dri_path) {
-        /*
-         * If the render card is different fron the scanout card, assume the modifier sets are disjoint.
-         * If the cards are the same, and it is from nvidia, and the gbm backend is mesa or dumb,
-         * assume that buffers are not renderable.
-         */
-        int dri_fd = open(config->glamor_info.dri_path, O_RDWR);
-        if (!msFdMatch(gbm_device_get_fd(priv->gbm), dri_fd)) {
-            need_map = TRUE;
-        }
-
-        if (dri_fd >= 0) {
-            close(dri_fd);
-        }
-    } else if (careful) {
-        drmVersionPtr version;
-        Bool is_nvidia = TRUE;
-        Bool backend_is_mesa = FALSE;
-        Bool linear_only = FALSE;
-        const char *backend_name;
-
-        version = drmGetVersion(gbm_device_get_fd(priv->gbm));
-        if (version) {
-            is_nvidia = !version->name || !strcmp(version->name, "nvidia-drm");
-            drmFreeVersion(version);
-        }
-        backend_name = gbm_device_get_backend_name(priv->gbm);
-        if (!backend_name) {
-            linear_only = TRUE;
-        } else if (!strcmp(backend_name, "dumb")) {
-            linear_only = TRUE;
-        } else if (!strcmp(backend_name, "drm")) {
-            backend_is_mesa = TRUE;
-        }
-
-        /**
-         * Nvidia's egl libraries do not allow creating GL_TEXTURE_2D textures from linear buffers.
+    } else if (randr != RR_Rotate_0) {
+        need_map = TRUE;
+    } else if (screen->fb.depth == 30 && config->glamor_info.force_es) {
+        /* TODO: depth 30 needs more care because of the visual mask swap
+         * Is it worth it to actually do this?
+         * if yes, check the commit history for how to do this
          *
-         * See: https://gitlab.freedesktop.org/xorg/xserver/-/work_items/1444
+         * For now, just assume that we can texture it
+         * It makes things a lot simpler
          */
-        if (is_nvidia) {
-            if (linear_only || backend_is_mesa) {
-                need_map = TRUE;
-            }
-        }
     }
-#else
-    need_map = TRUE;
 #endif
 
     while (!ret) {
-        format = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, FALSE /* rb_swap */);
-        format_swap = gbm_front_format_for_depth(screen->fb.depth, screen->fb.bitsPerPixel, TRUE /* rb_swap */);
-
-        if (config->format_swap) {
-            uint32_t tmp = format;
-            format = format_swap;
-            format_swap = tmp;
+#ifdef GLAMOR
+        if (!need_map) {
+            ret = gbm_create_front_for_screen(screen, FALSE /* do_map */, config->format_swap);
         }
-
+#endif
         if (!ret) {
-            ret = gbm_create_front_bo(priv->gbm, need_map, screen->width, screen->height, format, modifiers, num_modifiers);
-        }
-        if (!ret) {
-            ret = gbm_create_front_bo(priv->gbm, need_map, screen->width, screen->height, format_swap, modifiers, num_modifiers);
-        }
-
-        if (!ret) {
-            ret = gbm_create_front_bo(priv->gbm, !need_map, screen->width, screen->height, format, modifiers, num_modifiers);
-        }
-        if (!ret) {
-            ret = gbm_create_front_bo(priv->gbm, !need_map, screen->width, screen->height, format_swap, modifiers, num_modifiers);
+            ret = gbm_create_front_for_screen(screen, TRUE /* do_map */, config->format_swap);
         }
 
         if (!ret) {
@@ -301,7 +243,7 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         screen->height = scrpriv->mode ? scrpriv->mode->vdisplay : 1080;
     }
 
-    scrpriv->front = modesetting_open(priv, screen, screen->dumb || screen->randr != RR_Rotate_0 /* need_map */, FALSE /* keep_depth */);
+    scrpriv->front = modesetting_open(screen, FALSE /* need_map */, FALSE /* keep_depth */);
     if (!scrpriv->front) {
         LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not create a front buffer\n",
                    screen->card->mynum, screen->mynum);
