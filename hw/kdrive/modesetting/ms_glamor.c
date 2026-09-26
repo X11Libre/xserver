@@ -18,8 +18,17 @@ msGlamorTileFront(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
 
+    KdFrameBuffer saved_framebuffer = screen->fb;
+
+    /* TODO: query glamor */
+    MsScreenConf *config = screen->closure;
+    Bool is_gles = config->glamor_info.force_es;
+
     struct gbm_bo *new_front = NULL;
 
+    /* By design, kdrive depth and bpp can't change between initAccel and finiAccel
+     * https://www.x.org/Development/Documentation/KdriveDrivers/
+     */
     new_front = modesetting_open(screen, FALSE /* need_map */, TRUE /* keep_depth */);
     if (!new_front) {
         return FALSE;
@@ -37,6 +46,25 @@ msGlamorTileFront(ScreenPtr pScreen)
         return FALSE;
     }
 
+    /* Update visual masks if needed */
+    gbm_bo_set_screen_fb_info(new_front, screen, is_gles);
+    if (memcmp(&saved_framebuffer, &screen->fb, sizeof(screen->fb))) {
+        /* TODO: Make this generic
+         * For now, the only thing that can happen is r-b masks need swapping
+         */
+
+        for (int i = 0; i < pScreen->numVisuals; i++) {
+            VisualPtr pVisual = &pScreen->visuals[i];
+            if (pVisual->redMask == screen->fb.blueMask &&
+                pVisual->blueMask == screen->fb.redMask) {
+                int off = pVisual->offsetRed;
+                pVisual->offsetRed = pVisual->offsetBlue;
+                pVisual->offsetBlue = off;
+                pVisual->redMask = screen->fb.redMask;
+                pVisual->blueMask = screen->fb.blueMask;
+            }
+        }
+    }
     return TRUE;
 }
 

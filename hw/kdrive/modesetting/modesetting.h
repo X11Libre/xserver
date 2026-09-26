@@ -146,7 +146,7 @@ struct gbm_bo*
 gbm_create_front_for_screen(KdScreenInfo *screen, Bool do_map, Bool do_swap);
 
 void
-gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles, Bool gl_masks);
+gbm_bo_set_screen_fb_info(struct gbm_bo *bo, KdScreenInfo *screen, Bool is_gles);
 
 /* ms_query.c */
 
