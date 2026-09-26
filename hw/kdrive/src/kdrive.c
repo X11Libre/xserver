@@ -80,7 +80,7 @@ KdDepths kdDepths[] = {
 DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 Bool kdVideoTest;
-unsigned long kdVideoTestTime;
+unsigned long kdVideoTestTime = 5000; /* miliseconds */
 Bool kdEmulateMiddleButton;
 Bool kdRawPointerCoordinates;
 Bool kdDisableZaphod;
@@ -106,6 +106,13 @@ static Bool kdCaughtSignal = FALSE;
  * to KdScreenInit
  */
 const KdOsFuncs *kdOsFuncs = NULL;
+
+static CARD32
+KdVideoTestFunc(OsTimerPtr timer, CARD32 time, void *arg)
+{
+    dispatchException |= DE_TERMINATE;
+    return 0;
+}
 
 static void
 KdDPMS(ScreenPtr pScreen, int mode)
@@ -160,7 +167,7 @@ KdDoSwitchCmd(const char *reason)
     }
 }
 
-void KdSuspend(int ddxAbort)
+void KdSuspend(void)
 {
     KdCardInfo *card;
     KdScreenInfo *screen;
@@ -169,20 +176,19 @@ void KdSuspend(int ddxAbort)
         for (card = kdCardInfo; card; card = card->next) {
             for (screen = card->screenList; screen; screen = screen->next)
                 if (screen->mynum == card->selected && screen->pScreen)
-                    KdDisableScreen(screen->pScreen);
+                    if (screen->initialized)
+                        KdDisableScreen(screen->pScreen);
             if (card->driver && card->cfuncs->restore)
                 (*card->cfuncs->restore) (card);
         }
-        if (!ddxAbort) {
-            KdDisableInput();
-        }
+        KdDisableInput();
         KdDoSwitchCmd("suspend");
     }
 }
 
-void KdDisableScreens(int ddxAbort)
+void KdDisableScreens(void)
 {
-    KdSuspend(ddxAbort);
+    KdSuspend();
     if (kdEnabled && (kdOsFuncs->Disable))
         kdOsFuncs->Disable();
     kdEnabled = FALSE;
@@ -246,7 +252,7 @@ void
 KdProcessSwitch(void)
 {
     if (kdEnabled)
-        KdDisableScreens(FALSE);
+        KdDisableScreens();
     else
         KdEnableScreens();
 }
@@ -254,7 +260,7 @@ KdProcessSwitch(void)
 static void
 AbortDDX(enum ExitCode error)
 {
-    KdDisableScreens(TRUE);
+    KdDisableScreens();
     if (kdOsFuncs) {
         if (kdEnabled && kdOsFuncs->Disable)
             (*kdOsFuncs->Disable) ();
@@ -495,7 +501,7 @@ KdProcessArgument(int argc, char **argv, int i)
             card = KdCardInfoLast();
         }
         if (card) {
-            screen = KdScreenInfoAdd(card);
+            screen = KdScreenInfoAdd(card, NULL);
             KdParseScreen(screen, screen_arg);
         } else {
             ErrorF("No matching card found!\n");
@@ -972,6 +978,9 @@ bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
     kdEnabled = TRUE;
 
     if (screen->mynum == card->selected) {
+        if (kdVideoTest) {
+            TimerSet(NULL, 0, kdVideoTestTime, KdVideoTestFunc, NULL);
+        }
         if (card->cfuncs->preserve)
             (*card->cfuncs->preserve) (card);
         if (card->cfuncs->enable)
@@ -994,6 +1003,7 @@ bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
     }
 #endif
 
+    screen->initialized = TRUE;
     return TRUE;
 }
 
@@ -1085,7 +1095,9 @@ static void KdAddScreen(KdScreenInfo * screen, int argc, char **argv)
             bm = screen->fb.blueMask;
         }
         fbSetVisualTypesAndMasks(screenInfo.formats[i].depth,
-                                 visuals, 8, rm, gm, bm);
+                                 visuals,
+                                 screenInfo.formats[i].depth == 30 ? 10 : 8, /* XXX bitsPerRGB */
+                                 rm, gm, bm);
     }
 
     AddScreen(KdScreenInit, argc, argv, screen);
@@ -1127,7 +1139,7 @@ KdInitOutput(int argc, char **argv)
 
     /* Add at least one screen */
     if (!card->screenList) {
-        screen = KdScreenInfoAdd(card);
+        screen = KdScreenInfoAdd(card, NULL);
         KdParseScreen(screen, 0);
     }
 

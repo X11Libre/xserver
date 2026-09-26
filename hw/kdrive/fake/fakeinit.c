@@ -32,6 +32,7 @@ static FakeScreenConf *fakeCurrScreen = NULL;
 
 static const FakeScreenConf fakeDefaultConfig = {
                                                  .shadow = -1,
+                                                 .glamor_info = {.fake_rate = -1, .drop_master = TRUE,},
                                                 };
 
 void
@@ -39,7 +40,6 @@ InitCard(char *name)
 {
     fakeCurrScreen = XNFalloc(sizeof(*fakeCurrScreen));
     *fakeCurrScreen = fakeDefaultConfig;
-    fakeCurrScreen->glamor_info = kdGlamorDefault;
     KdCardInfoAdd(&fakeFuncs, fakeCurrScreen);
 }
 
@@ -100,7 +100,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
-    glamor_arg = KdGlamorParse(&fakeCurrScreen->glamor_info, &fakeCurrScreen->dri_path, argc, argv, i);
+    glamor_arg = KdGlamorParse(&fakeCurrScreen->glamor_info, argc, argv, i);
     if (glamor_arg) {
         return glamor_arg;
     }

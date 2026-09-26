@@ -91,6 +91,7 @@ typedef struct _KdScreenInfo {
     struct _KdScreenInfo *next;
     KdCardInfo *card;
     ScreenPtr pScreen;
+    void *closure;
     void *driver;
     Rotation randr;             /* rotation and reflection */
     int x;
@@ -104,6 +105,7 @@ typedef struct _KdScreenInfo {
     int subpixel_order;
     Bool dumb;
     Bool softCursor;
+    Bool initialized; /* If KdScreenInit succeeded */
     int mynum;
     xPoint origin;
     KdFrameBuffer fb;
@@ -378,14 +380,14 @@ void KdSetColormap(ScreenPtr pScreen);
 /* kdrive.c */
 extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
-void KdSuspend(int ddxAbort);
+void KdSuspend(void);
 
 void KdInitScreen(KdScreenInfo * screen, int argc, char **argv);
 
 void
  KdDisableScreen(ScreenPtr pScreen);
 
-void KdDisableScreens(int ddxAbort);
+void KdDisableScreens(void);
 
 Bool
  KdEnableScreen(ScreenPtr pScreen);
@@ -455,7 +457,7 @@ KdCardInfo *KdCardInfoLast(void);
 void
  KdCardInfoDispose(KdCardInfo * ci);
 
-KdScreenInfo *KdScreenInfoAdd(KdCardInfo * ci);
+KdScreenInfo *KdScreenInfoAdd(KdCardInfo * ci, void *closure);
 
 void
  KdScreenInfoDispose(KdScreenInfo * si);

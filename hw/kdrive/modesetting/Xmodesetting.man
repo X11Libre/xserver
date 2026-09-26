@@ -1,0 +1,94 @@
+.TH Xmodesetting 1 __vendorversion__
+.SH NAME
+Xmodesetting \- KMS device tiny X server
+.SH SYNOPSIS
+.B Xmodesetting
+.RI [ :display ]
+.RI [ option ...]
+.SH DESCRIPTION
+.B Xmodesetting
+is a generic X server for KMS devices.
+.SH OPTIONS
+.B Xmodesetting
+accepts the common options of the Xkdrive family of servers.  Please
+see Xkdrive(@appmansuffix@).
+
+.B Xmodesetting
+also accepts the following additional options:
+.TP 8
+.B -dev "</dev/dri/cardxx>"
+sets the KMS scanout device path the X server will use.
+If no -dri option was passed, this device will also be used for rendering
+.TP 8
+.B -noshadow
+disables the ShadowFB layer on supported hw, may slightly increase performance.
+May also lead to flickering.
+.TP 8
+.B -swap
+Sets the prefered format color ordering to BGR instead of RGB.
+.TP 8
+.B -notile
+Don't use a tiled front buffer. Needed to support rotations.
+.TP 8
+.B -planar
+Allow creating a front buffer with planar modifiers.
+Could potentially increase performance on hw that supports planar front buffers.
+Will most likely lead to bad rendering artifacts on such hw.
+.SH CONFIGURATION
+.
+Like all kdrive X servers,
+.B Xmodesetting
+doesn't read any configuration file.
+Instead, all configuration is done via command-line arguments.
+
+.B Xmodesetting
+is intended to provide a reasonable configuration out-of-the-box, with no special configuration.
+Simply running
+.B xinit -- /path/to/Xmodesetting
+should provide a default configuration that is able to provide a usable display.
+This default configuration is rather simplistic, with the aim of working
+almost anywhere, while sacrificing performance.
+
+For regular use, a shell script or similar can be created to invoke xinit and pass all the necessary command-line arguments.
+
+In the most general form, the configuration of
+.B Xmodesetting
+looks like this:
+.B xinit -- /path/to/Xmodesetting [server_args] [screen_0_args] -screen [geom] [screen_1_args] -screen [geom] ... [screen_n_args] -screen [geom] [screen_n_args]
+
+Arguments whose effect is intended to affect the entire X server instead of a particular screen (e.g. +xinerama) can be added anywhere,
+but they are usually added before the arguments of the first screen.
+
+If a single X11 screen is desired, with no special geometry,
+.B Xmodesetting
+supports using an implicit first screen, like so:
+.B xinit -- /path/to/Xmodesetting [server_args] [screen_args]
+
+Below are listed some example configurations, intended to serve as a guide for configuring
+.B Xmodesetting.
+
+A single X11 screen with DRI3 running on a different card than the framebuffer, with an explicit glvendor and with only OpenGL ES contexts allowed:
+.B xinit  --  /usr/bin/Xmodesetting :1 -fb /dev/fb0 -glvendor nvidia -dri /dev/dri/card1 -force-es
+
+Two X11 screens with DRI3 support, with the first screen on the left, the second screen on the right:
+.B xinit -- /usr/bin/Xmodesetting -dri /dev/dri/card1 -fb /dev/fb0 -screen 1920x1080 -fb /dev/fb1 -dri /dev/dri/card1 -screen 1920x1080
+
+Two X11 screens with DRI3 support, with the first screen on the left, the second screen on the right, using xinerama:
+.B xinit -- /usr/bin/Xmodesetting +xinerama -dri /dev/dri/card1 -fb /dev/fb0 -screen 1920x1080 -fb /dev/fb1 -dri /dev/dri/card1 -screen 1920x1080
+
+Two X11 screens, the first one below the second one:
+.B xinit -- /usr/bin/Xmodesetting -fb /dev/fb0 -origin 0,1080 -screen 1920x1080 -fb /dev/fb1 -origin 0,0 -screen 1920x1080
+
+.SH KEYBOARD
+.B Xmodesetting
+supports the common special key combinations of the Xkdrive family of servers.  Please
+see Xkdrive(@appmansuffix@).
+
+.SH SEE ALSO
+X(@miscmansuffix@), Xserver(@appmansuffix@), Xkdrive(@appmansuffix@), xdm(@appmansuffix@), xinit(@appmansuffix@).
+.SH AUTHORS
+The
+.B Xmodesetting
+server was written by stefan11111.
+
+Is was inspired by the Xfbdev X server, written by Keith Packard.

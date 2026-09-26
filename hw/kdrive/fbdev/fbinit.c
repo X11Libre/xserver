@@ -36,6 +36,7 @@ static FbScreenConf *fbCurrScreen = NULL;
 static const FbScreenConf fbDefaultConfig = {
                                              .fb_path = NULL,
                                              .shadow = TRUE,
+                                             .glamor_info = {.fake_rate = -1, .drop_master = TRUE,},
                                             };
 
 static void fbdevLogScreenInfo(const FbScreenConf *config, int screen_num);
@@ -65,7 +66,6 @@ FbdevLogInit(void)
         }
     } else {
         FbScreenConf fbDummyConfig = fbDefaultConfig;
-        fbDummyConfig.glamor_info = kdGlamorDefault;
         fbdevLogScreenInfo(&fbDummyConfig, 0);
     }
 }
@@ -75,7 +75,6 @@ InitCard(char *name)
 {
     fbCurrScreen = XNFalloc(sizeof(*fbCurrScreen));
     *fbCurrScreen = fbDefaultConfig;
-    fbCurrScreen->glamor_info = kdGlamorDefault;
     KdCardInfoAdd(&fbdevFuncs, fbCurrScreen);
 }
 
@@ -89,26 +88,7 @@ fbdevLogScreenInfo(const FbScreenConf *config, int screen_num)
     LogMessage(X_INFO, "Xfbdev(%d): ShadowFB %s\n", screen_num,
                config->shadow ? "enabled" : "disabled");
 
-    LogMessage(X_INFO, "Xfbdev(%d): glvnd library: %s\n", screen_num,
-               config->glamor_info.glvnd ? config->glamor_info.glvnd : "not passed");
-
-    LogMessage(X_INFO, "Xfbdev(%d): dri device: %s\n", screen_num,
-               config->dri_path ? config->dri_path : "none");
-
-    LogMessage(X_INFO, "Xfbdev(%d): glamor OpenGL contexts %s\n", screen_num,
-               !config->glamor_info.force_es ? "allowed" : "forbidden");
-    LogMessage(X_INFO, "Xfbdev(%d): glamor GLES contexts %s\n", screen_num,
-               !config->glamor_info.force_gl ? "allowed" : "forbidden");
-
-    LogMessage(X_INFO, "Xfbdev(%d): glamor render acceleration %s\n", screen_num,
-               !config->glamor_info.no_render_accel ? "enabled" : "disabled");
-    LogMessage(X_INFO, "Xfbdev(%d): glamor render acceleration %s on software renderers\n", screen_num,
-               config->glamor_info.force_render_accel ? "allowed" : "forbidden");
-    LogMessage(X_INFO, "Xfbdev(%d): glamor is %s libgbm \n", screen_num,
-               config->glamor_info.use_gbm ? "allowed to use" : "forbidden from using");
-
-    LogMessage(X_INFO, "Xfbdev(%d): glamor X-Video support %s\n", screen_num,
-               config->glamor_info.use_xv ? "allowed" : "forbidden");
+    KdGlamorLogScreenInfo(&config->glamor_info, screen_num);
     LogMessage(X_INFO, "\n");
 }
 
@@ -173,7 +153,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
-    glamor_arg = KdGlamorParse(&fbCurrScreen->glamor_info, &fbCurrScreen->dri_path, argc, argv, i);
+    glamor_arg = KdGlamorParse(&fbCurrScreen->glamor_info, argc, argv, i);
     if (glamor_arg) {
         return glamor_arg;
     }

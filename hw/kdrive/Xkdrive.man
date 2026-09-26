@@ -57,7 +57,10 @@ enables DRI3 support for the X server.
 force enables glamor render acceleration (even on top of sw renderers like softpipe/llvmpipe).
 .TP 8
 .B -gbm
-allows glamor to use libgbm (it is only used for matching EGLDeviceEXT's to dri fd's).
+allows glamor to use libgbm.
+.TP 8
+.B -nogbm
+forces glamor to not use libgbm.
 .TP 8
 .B -direct-dri3
 Forces glamor to use the direct implementation of DRI3.

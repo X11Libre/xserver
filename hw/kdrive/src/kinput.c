@@ -220,6 +220,10 @@ KdDisableInput(void)
     KdPointerInfo *pi;
     int found = 0, i = 0;
 
+    if (!kdInputEnabled) {
+        return;
+    }
+
     /**
      * When we're doing something that causes a vt switch,
      * if that action is a key press, the X server doesn't see
