@@ -240,6 +240,10 @@ ddxUseMsg(void)
         ("-noshadow            Disable the ShadowFB layer if possible\n");
     ErrorF
         ("-swap                Prefer BGR format color ordering instead of RGB\n");
+    ErrorF
+        ("-notile              Don't use a tiled front buffer\n");
+    ErrorF
+        ("-planar              Allow planar modifiers for the front bo\n");
     ErrorF("\n");
 }
 
@@ -273,6 +277,16 @@ ddxProcessArgument(int argc, char **argv, int i)
 
     if (!strcmp(argv[i], "-swap")) {
         msCurrScreen->format_swap = TRUE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-notile")) {
+        msCurrScreen->no_tile = TRUE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-planar")) {
+        msCurrScreen->planar = TRUE;
         return 1;
     }
 
