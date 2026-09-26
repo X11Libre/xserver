@@ -28,14 +28,6 @@ modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth)
         need_map = TRUE;
     } else if (randr != RR_Rotate_0) {
         need_map = TRUE;
-    } else if (screen->fb.depth == 30 && config->glamor_info.force_es) {
-        /* TODO: depth 30 needs more care because of the visual mask swap
-         * Is it worth it to actually do this?
-         * if yes, check the commit history for how to do this
-         *
-         * For now, just assume that we can texture it
-         * It makes things a lot simpler
-         */
     }
 #endif
 
@@ -209,7 +201,6 @@ modesetting_claim_connector_crtc(msPriv *priv, uint32_t conn, int crtc)
 static Bool
 msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
 {
-    MsScreenConf *config = screen->closure;
     msPriv *priv = screen->card->driver;
     int fd = gbm_device_get_fd(priv->gbm);
 
@@ -254,10 +245,7 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
     screen->height = gbm_bo_get_height(scrpriv->front);
     screen->rate = scrpriv->mode ? scrpriv->mode->vrefresh : 0; /* XXX 0 means accept any rate on msEnable */
 
-    /* Set the visual masks assuming we will be able to texture this bo
-     * This allows us to create a mapped front here, and have glamor texture it if it can
-     */
-    gbm_bo_set_screen_fb_info(scrpriv->front, screen, config->glamor_info.force_es, TRUE /* gl_masks */);
+    gbm_bo_set_screen_fb_info(scrpriv->front, screen, FALSE /* is_gles */);
 
     /* Make fbSetupScreen happy */
     if (screen->fb.bitsPerPixel == 24) {
