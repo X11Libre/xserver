@@ -26,6 +26,14 @@ May also lead to flickering.
 .TP 8
 .B -swap
 Sets the prefered format color ordering to BGR instead of RGB.
+.TP 8
+.B -notile
+Don't use a tiled front buffer. Needed to support rotations.
+.TP 8
+.B -planar
+Allow creating a front buffer with planar modifiers.
+Could potentially increase performance on hw that supports planar front buffers.
+Will most likely lead to bad rendering artifacts on such hw.
 .SH CONFIGURATION
 .
 Like all kdrive X servers,

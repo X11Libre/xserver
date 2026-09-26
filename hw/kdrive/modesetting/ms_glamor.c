@@ -145,11 +145,13 @@ msGlamorInit(ScreenPtr pScreen)
      * These will get used with frontbuffer rendering, which will
      * lead to worse-than-tearing with multi-plane formats, as the
      * primary and auxiliary planes go out of sync. */
-    for (int i = 0; i < scrpriv->num_render_modifiers; i++) {
-        if (gbm_device_get_format_modifier_plane_count(priv->gbm, format, scrpriv->render_modifiers[i]) > 1) {
-            continue;
+    if (!config->planar) {
+        for (int i = 0; i < scrpriv->num_render_modifiers; i++) {
+            if (gbm_device_get_format_modifier_plane_count(priv->gbm, format, scrpriv->render_modifiers[i]) > 1) {
+                continue;
+            }
+            scrpriv->render_modifiers[write_pos++] = scrpriv->render_modifiers[i];
         }
-        scrpriv->render_modifiers[write_pos++] = scrpriv->render_modifiers[i];
     }
 
     if (write_pos == 0 ||
