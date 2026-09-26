@@ -94,6 +94,7 @@ typedef struct {
     drmEventContext event_context;
     struct gbm_bo *front_bo;
     Bool sw_cursor;
+    Bool fixed_size_cursor;
     Bool set_cursor_failed;
 
     /* Broken-out options. */
