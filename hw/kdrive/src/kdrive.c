@@ -1095,7 +1095,9 @@ static void KdAddScreen(KdScreenInfo * screen, int argc, char **argv)
             bm = screen->fb.blueMask;
         }
         fbSetVisualTypesAndMasks(screenInfo.formats[i].depth,
-                                 visuals, 8, rm, gm, bm);
+                                 visuals,
+                                 screenInfo.formats[i].depth == 30 ? 10 : 8, /* XXX bitsPerRGB */
+                                 rm, gm, bm);
     }
 
     AddScreen(KdScreenInit, argc, argv, screen);
