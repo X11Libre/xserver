@@ -4428,12 +4428,19 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
     ms->min_cursor_width = ms->max_cursor_width;
     ms->min_cursor_height = ms->max_cursor_height;
 
-    if (drmmode_legacy_cursor_probe_allowed(drmmode)) {
+    if (drmmode->fixed_size_cursor) {
+        return;
+    }
 
+    xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
+               "Probing the cursor size using the old method\n");
+
+    if (drmmode_legacy_cursor_probe_allowed(drmmode)) {
       /* probe square min first */
       for (size = 1; size <= ms->max_cursor_width &&
                size <= ms->max_cursor_height; size *= 2) {
           int ret;
+
 
           ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
                                 handle, size, size, 0, 0);
