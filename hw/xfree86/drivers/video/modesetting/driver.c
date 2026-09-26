@@ -1046,6 +1046,46 @@ ms_is_running_virtual_gpu(drmmode_ptr drmmode)
     return false;
 }
 
+/**
+ * @brief ms_is_running_single_size_hwcursor_gpu
+ * reported https://gitlab.freedesktop.org/xorg/xserver/-/work_items/1922 hardware cursor on amdgpu is problematic too
+ * implying on report older amd hardware working correctly with only 128x128 and 64x128 cursor.
+ *
+ * until we collect which hardware is affected assume only single cursor size
+ * @param drmmode
+ */
+static inline void
+probe_if_is_running_single_size_hwcursor_gpu(drmmode_ptr drmmode){
+
+    drmVersionPtr version = drmGetVersion(drmmode->fd);
+
+    bool borked_cursor = false;
+
+    if (strstr(version->name, "amdgpu")){
+
+        uint64_t cursor_width,cursor_height;
+
+        int ret1 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &cursor_width);
+        int ret2 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &cursor_height);
+
+        if (ret1 || ret2){  /* lets fallback code deal with it */
+            drmmode->fixed_size_cursor = borked_cursor;
+            drmFreeVersion(version);
+            return;
+        }
+
+        /* assume only older gpu devices experience this problem */
+        if ( cursor_width == 64 || cursor_width == 128 ||
+             cursor_height == 64 || cursor_height == 128) {
+
+            borked_cursor = true;
+        }
+
+    }
+
+    drmFreeVersion(version);
+    drmmode->fixed_size_cursor = borked_cursor;
+}
 
 static void
 FreeScreen(ScrnInfoPtr pScrn)
@@ -1389,6 +1429,18 @@ PreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
+    probe_if_is_running_single_size_hwcursor_gpu(&ms->drmmode);
+
+    if (ms->drmmode.fixed_size_cursor){
+        drmVersionPtr version = drmGetVersion(ms->drmmode.fd);
+        const char *name="N/A";
+        if (version){
+            name = version->name;
+        }
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Forcing fixed hardware cursor on driver %s due to known issues\n", name);
+        drmFreeVersion(version);
+
+    }
     try_enable_glamor(pScrn);
 
     if (!ms->drmmode.glamor_gbm) {
