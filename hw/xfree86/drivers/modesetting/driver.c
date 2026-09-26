@@ -917,6 +917,112 @@ msSetWindowVRRMode(WindowPtr window, WindowVRRMode mode)
         ms_present_set_screen_vrr(scrn, variable_refresh);
 }
 
+
+Bool
+ms_window_has_async_flip(WindowPtr win)
+{
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &asyncFlipPrivateKeyRec);
+
+    return priv->async_flip;
+}
+
+void
+ms_window_update_async_flip(WindowPtr win, Bool async_flip)
+{
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &asyncFlipPrivateKeyRec);
+
+    priv->async_flip = async_flip;
+}
+
+Bool
+ms_window_has_async_flip_modifiers(WindowPtr win)
+{
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &asyncFlipPrivateKeyRec);
+
+    return priv->async_flip_modifiers;
+}
+
+void
+ms_window_update_async_flip_modifiers(WindowPtr win, Bool async_flip)
+{
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &asyncFlipPrivateKeyRec);
+
+    priv->async_flip_modifiers = async_flip;
+}
+
+/**
+ * This function exist because there are necesary extra work around for correct behaviour,
+ * for example: force software rendering for cursor.
+ */
+static inline bool
+ms_is_running_virtual_gpu(drmmode_ptr drmmode)
+{
+    drmVersionPtr version = drmGetVersion(drmmode->fd);
+    if (!version) {
+        return false;
+    }
+
+    if (!version->name ||
+        strstr(version->name, "bochs-drm") ||
+        strstr(version->name, "evdi") ||
+        strstr(version->name, "vboxvideo") ||
+        strstr(version->name, "virtio_gpu") ||
+        strstr(version->name, "vkms") ||
+        strstr(version->name, "vmwgfx") ||
+        strstr(version->name, "qxl" )) {
+        drmFreeVersion(version);
+        return true;
+    }
+
+    drmFreeVersion(version);
+    return false;
+}
+
+/**
+ * @brief ms_is_running_single_size_hwcursor_gpu
+ * reported https://gitlab.freedesktop.org/xorg/xserver/-/work_items/1922 hardware cursor on amdgpu is problematic too
+ * implying on report older amd hardware working correctly with only 128x128 and 64x128 cursor.
+ *
+ * until we collect which hardware is affected assume only single cursor size
+ * @param drmmode
+ */
+static inline void
+probe_if_is_running_single_size_hwcursor_gpu(drmmode_ptr drmmode){
+
+    drmVersionPtr version = drmGetVersion(drmmode->fd);
+
+    bool borked_cursor = false;
+
+    if (strstr(version->name, "amdgpu")){
+
+        uint64_t cursor_width,cursor_height;
+
+        int ret1 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &cursor_width);
+        int ret2 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &cursor_height);
+
+        if (ret1 || ret2){  /* lets fallback code deal with it */
+            drmmode->fixed_size_cursor = borked_cursor;
+            drmFreeVersion(version);
+            return;
+        }
+
+        /* assume only older gpu devices experience this problem */
+        if ( cursor_width == 64 || cursor_width == 128 ||
+             cursor_height == 64 || cursor_height == 128) {
+
+            borked_cursor = true;
+        }
+
+    }
+
+    drmFreeVersion(version);
+    drmmode->fixed_size_cursor = borked_cursor;
+}
+
 static void
 FreeScreen(ScrnInfoPtr pScrn)
 {
@@ -1243,6 +1349,18 @@ PreInit(ScrnInfoPtr pScrn, int flags)
         ms->max_cursor_height = value;
     }
 
+    probe_if_is_running_single_size_hwcursor_gpu(&ms->drmmode);
+
+    if (ms->drmmode.fixed_size_cursor){
+        drmVersionPtr version = drmGetVersion(ms->drmmode.fd);
+        const char *name="N/A";
+        if (version){
+            name = version->name;
+        }
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Forcing fixed hardware cursor on driver %s due to known issues\n", name);
+        drmFreeVersion(version);
+
+    }
     try_enable_glamor(pScrn);
 
     if (!ms->drmmode.glamor) {
