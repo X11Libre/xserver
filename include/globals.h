@@ -11,4 +11,6 @@ extern _X_EXPORT int monitorResolution;
 extern _X_EXPORT Bool autosetDPI;
 extern _X_EXPORT int defaultColorVisualClass;
 
+extern Bool globalIsolateKeyboard;
+
 #endif                          /* !_XSERV_GLOBAL_H_ */
