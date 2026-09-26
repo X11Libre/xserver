@@ -370,6 +370,42 @@ fail:
 }
 
 struct gbm_bo*
+gbm_create_cursor_bo(struct gbm_device *gbm, uint32_t width, uint32_t height)
+{
+    struct gbm_bo *ret = NULL;
+    gbm_user_data_t *data = NULL;
+
+    data = calloc(1, sizeof(*data));
+    if (!data) {
+        goto fail;
+    }
+
+    ret = gbm_bo_create_and_map_once(gbm, data,
+                                     width, height,
+                                     GBM_FORMAT_ARGB8888,
+                                     GBM_BO_USE_CURSOR | GBM_BO_USE_WRITE);
+    if (!ret) {
+        goto fail;
+    }
+
+    gbm_bo_set_user_data(ret, data, destroy_user_data);
+    return ret;
+
+fail:
+    if (ret) {
+        gbm_bo_destroy(ret);
+        /* destroy_user_data takes care of the rest */
+        return NULL;
+    }
+
+    if (data) {
+        free(data);
+    }
+
+    return NULL;
+}
+
+struct gbm_bo*
 gbm_create_front_for_screen(KdScreenInfo *screen, Bool do_map, Bool do_swap)
 {
     msPriv *priv = screen->card->driver;
