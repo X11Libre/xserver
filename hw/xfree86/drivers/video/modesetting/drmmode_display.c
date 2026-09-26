@@ -4918,6 +4918,10 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
         return;
     }
 
+    if (drmmode->fixed_size_cursor) {
+        return;
+    }
+
     xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
                "Probing the cursor size using the old method\n");
 
