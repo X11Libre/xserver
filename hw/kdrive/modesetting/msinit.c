@@ -323,7 +323,11 @@ KdCardFuncs msFuncs = {
     .scrfini          = msScreenFini,
     .cardfini         = msCardFini,
 
-    /* no cursor funcs */
+    .initCursor       = msCursorInit,
+    .enableCursor     = msCursorEnable,
+    .disableCursor    = msCursorDisable,
+    .finiCursor       = msCursorFini,
+    .recolorCursor    = msRecolorCursor,
 
 #ifdef GLAMOR
     .initAccel        = msGlamorInit,

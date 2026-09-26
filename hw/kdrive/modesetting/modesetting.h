@@ -18,6 +18,8 @@
 #include "randrstr.h"
 #endif
 
+#include "mipointrst.h"
+
 typedef struct _msPriv {
     struct gbm_device *gbm;
     drmModeRes *resources;
@@ -29,6 +31,12 @@ typedef struct _msPriv {
     uint32_t *used_connectors;
 } msPriv;
 
+typedef struct _msCursPriv {
+    struct gbm_bo *bo;
+
+    QueryBestSizeProcPtr QueryBestSize;
+} msCursPriv;
+
 typedef struct _msScrPriv {
     struct gbm_bo *front;
     drmModeConnector *connector;
@@ -36,6 +44,8 @@ typedef struct _msScrPriv {
     drmModeCrtcPtr crtc;
     uint32_t conn_id;
     uint32_t crtc_id;
+
+    msCursPriv cursor;
 
     DamagePtr damage;
     Rotation randr;
@@ -91,6 +101,18 @@ Bool msSetShadow(ScreenPtr pScreen);
 struct gbm_bo*
 modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth);
 
+/* ms_cursor.c */
+
+Bool msCursorInit(ScreenPtr pScreen);
+
+void msCursorEnable(ScreenPtr pScreen);
+
+void msCursorDisable(ScreenPtr pScreen);
+
+void msRecolorCursor(ScreenPtr pScreen, int ndef, xColorItem *pdef);
+
+void msCursorFini(ScreenPtr pScreen);
+
 /* ms_damage.c */
 
 Bool msDamageCreateRes(ScreenPtr pScreen);
@@ -143,6 +165,9 @@ gbm_format_get_depth(uint32_t format);
 struct gbm_bo*
 gbm_create_front_bo(struct gbm_device *gbm, Bool do_map, uint32_t width, uint32_t height, uint32_t format,
                     uint64_t *modifiers, int num_modifiers);
+
+struct gbm_bo*
+gbm_create_cursor_bo(struct gbm_device *gbm, uint32_t width, uint32_t height);
 
 struct gbm_bo*
 gbm_create_front_for_screen(KdScreenInfo *screen, Bool do_map, Bool do_swap);
