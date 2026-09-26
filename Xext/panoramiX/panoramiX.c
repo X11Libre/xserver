@@ -653,7 +653,6 @@ PanoramiXCreateConnectionBlock(void)
     ConnectionInfo = rpcbuf.buffer;
     ConnectionInfoSize = length;
     screenInfo.numRoots = 1;
-    connBlockScreenStart = screenDataOffset;
 
     return TRUE;
 }

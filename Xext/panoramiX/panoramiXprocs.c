@@ -592,7 +592,7 @@ PanoramiXGetGeometry(ClientPtr client)
 
     if (stuff->id == reply.root) {
         xWindowRoot *root = (xWindowRoot *)
-            (ConnectionInfo + connBlockScreenStart);
+            (ConnectionInfo + dixConnBlockScreenStart(ConnectionInfo));
 
         reply.width = root->pixWidth;
         reply.height = root->pixHeight;
