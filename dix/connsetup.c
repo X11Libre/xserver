@@ -131,7 +131,7 @@ void x_rpcbuf_write_xPixmapFormat(x_rpcbuf_t *rpcbuf, PixmapFormatPtr pPixmapFor
     x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)&format, sizeof(format));
 }
 
-x_rpcbuf_t dixBuildConnectionBlock(int maxscreens, size_t *screenDataOffset)
+x_rpcbuf_t dixBuildConnectionBlock(int maxscreens)
 {
     const char VendorString[] = "XLibre";
 
@@ -169,9 +169,6 @@ x_rpcbuf_t dixBuildConnectionBlock(int maxscreens, size_t *screenDataOffset)
         x_rpcbuf_write_xPixmapFormat(&rpcbuf, &(screenInfo.formats[i]));
     }
 
-    /* record this for other parts which later going to manipulate the data */
-    *screenDataOffset = rpcbuf.wpos;
-
     DIX_FOR_N_SCREENS(0, maxscreens, {
         x_rpcbuf_write_xWindowRoot(&rpcbuf, walkScreen);
 
@@ -199,8 +196,7 @@ bool CreateConnectionBlock(int maxscreens)
 
     screenInfo.numRoots = maxscreens;
 
-    size_t screenDataOffset = 0;
-    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(maxscreens, &screenDataOffset);
+    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(maxscreens);
     if (rpcbuf.error)
         return false;
 
