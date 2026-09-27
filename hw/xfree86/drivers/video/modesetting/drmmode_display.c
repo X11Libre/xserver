@@ -4257,11 +4257,15 @@ drmmode_create_lease(RRLeasePtr lease, int *fd)
     int lease_fd;
     uint32_t *objects;
     drmmode_lease_private_ptr   lease_private;
+    Bool universalplanes = FALSE;
 
     nobjects = ncrtc + noutput;
 
-    if (ms->atomic_modeset)
+    /* Atomic modesetting, or tearfree with pageflipping, enables universal planes */
+    if (ms->atomic_modeset || (ms->drmmode.pageflip && ms->drmmode.tearfree_enable)) {
+        universalplanes = TRUE;
         nobjects += ncrtc; /* account for planes as well */
+    }
 
     if (nobjects == 0)
         return BadValue;
@@ -4285,7 +4289,7 @@ drmmode_create_lease(RRLeasePtr lease, int *fd)
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 
         objects[i++] = drmmode_crtc->mode_crtc->crtc_id;
-        if (ms->atomic_modeset)
+        if (universalplanes)
             objects[i++] = drmmode_crtc->plane_id;
     }
 
