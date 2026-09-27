@@ -43,9 +43,6 @@ static uint64_t present_scmd_event_id;
 static struct xorg_list present_exec_queue;
 static struct xorg_list present_flip_queue;
 
-static void
-present_execute(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc);
-
 static inline PixmapPtr
 present_flip_pending_pixmap(ScreenPtr screen)
 {
@@ -155,19 +152,6 @@ present_check_flip(RRCrtcPtr            crtc,
     return TRUE;
 }
 
-static Bool
-present_flip(RRCrtcPtr crtc,
-             uint64_t event_id,
-             uint64_t target_msc,
-             PixmapPtr pixmap,
-             Bool sync_flip)
-{
-    ScreenPtr                   screen = crtc->pScreen;
-    present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
-
-    return (*screen_priv->info->flip) (crtc, event_id, target_msc, pixmap, sync_flip);
-}
-
 static RRCrtcPtr
 present_scmd_get_crtc(present_screen_priv_ptr screen_priv, WindowPtr window)
 {
@@ -238,6 +222,198 @@ present_queue_vblank(ScreenPtr screen,
         ret = (*screen_priv->info->queue_vblank) (crtc, event_id, msc);
     }
     return ret;
+}
+
+static Bool
+present_flip(RRCrtcPtr crtc,
+             uint64_t event_id,
+             uint64_t target_msc,
+             PixmapPtr pixmap,
+             Bool sync_flip)
+{
+    ScreenPtr                   screen = crtc->pScreen;
+    present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
+
+    return (*screen_priv->info->flip) (crtc, event_id, target_msc, pixmap, sync_flip);
+}
+
+static void
+present_unflip(ScreenPtr screen)
+{
+    present_screen_priv_ptr screen_priv = present_screen_priv(screen);
+
+    assert (!screen_priv->unflip_event_id);
+    assert (!screen_priv->flip_pending);
+
+    present_restore_screen_pixmap(screen);
+
+    screen_priv->unflip_event_id = ++present_scmd_event_id;
+    DebugPresent(("u %" PRIu64 "\n", screen_priv->unflip_event_id));
+    (*screen_priv->info->unflip) (screen, screen_priv->unflip_event_id);
+}
+
+/*
+ * Once the required MSC has been reached, execute the pending request.
+ *
+ * For requests to actually present something, either blit contents to
+ * the screen or queue a frame buffer swap.
+ *
+ * For requests to just get the current MSC/UST combo, skip that part and
+ * go straight to event delivery
+ */
+
+static void
+present_execute(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc)
+{
+    WindowPtr                   window = vblank->window;
+    ScreenPtr                   screen = window->drawable.pScreen;
+    present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
+    if (vblank && vblank->crtc) {
+        screen_priv=present_screen_priv(vblank->crtc->pScreen);
+    }
+
+    if (present_execute_wait(vblank, crtc_msc))
+        return;
+
+    if (vblank->flip && vblank->pixmap && vblank->window) {
+        if (screen_priv->flip_pending || screen_priv->unflip_event_id) {
+            DebugPresent(("\tr %" PRIu64 " %p (pending %p unflip %" PRIu64 ")\n",
+                          vblank->event_id, vblank,
+                          screen_priv->flip_pending, screen_priv->unflip_event_id));
+            xorg_list_del(&vblank->event_queue);
+            xorg_list_append(&vblank->event_queue, &present_flip_queue);
+            vblank->flip_ready = TRUE;
+            return;
+        }
+    }
+
+    xorg_list_del(&vblank->event_queue);
+    xorg_list_del(&vblank->window_list);
+    vblank->queued = FALSE;
+
+    if (vblank->pixmap && vblank->window &&
+        (vblank->reason < PRESENT_FLIP_REASON_DRIVER_TEARFREE ||
+         vblank->exec_msc != vblank->target_msc)) {
+
+        if (vblank->flip) {
+
+            DebugPresent(("\tf %" PRIu64 " %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
+                          vblank->event_id, vblank, crtc_msc,
+                          vblank->pixmap->drawable.id, vblank->window->drawable.id));
+
+            /* Prepare to flip by placing it in the flip queue and
+             * and sticking it into the flip_pending field
+             */
+            screen_priv->flip_pending = vblank;
+
+            xorg_list_add(&vblank->event_queue, &present_flip_queue);
+            /* Try to flip
+             */
+            if (present_flip(vblank->crtc, vblank->event_id, vblank->target_msc, vblank->pixmap, vblank->sync_flip)) {
+                RegionPtr damage;
+
+                /* Fix window pixmaps:
+                 *  1) Restore previous flip window pixmap
+                 *  2) Set current flip window pixmap to the new pixmap
+                 */
+                if (screen_priv->flip_window && screen_priv->flip_window != window)
+                    present_set_tree_pixmap(screen_priv->flip_window,
+                                            screen_priv->flip_pixmap,
+                                            (*screen->GetScreenPixmap)(screen));
+                present_set_tree_pixmap(vblank->window, NULL, vblank->pixmap);
+                present_set_tree_pixmap(screen->root, NULL, vblank->pixmap);
+
+                /* Report update region as damaged
+                 */
+                if (vblank->update) {
+                    damage = vblank->update;
+                    RegionIntersect(damage, damage, &window->clipList);
+                } else
+                    damage = &window->clipList;
+
+                DamageDamageRegion(&vblank->window->drawable, damage);
+                return;
+            }
+
+            xorg_list_del(&vblank->event_queue);
+            /* Oops, flip failed. Clear the flip_pending field
+              */
+            screen_priv->flip_pending = NULL;
+            vblank->flip = FALSE;
+            vblank->exec_msc = vblank->target_msc;
+        }
+        DebugPresent(("\tc %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
+                      vblank, crtc_msc, vblank->pixmap->drawable.id, vblank->window->drawable.id));
+        if (screen_priv->flip_pending) {
+
+            /* Check pending flip
+             */
+            if (window == screen_priv->flip_pending->window)
+                present_set_abort_flip(screen);
+        } else if (!screen_priv->unflip_event_id) {
+
+            /* Check current flip
+             */
+            if (window == screen_priv->flip_window)
+                present_unflip(screen);
+        }
+
+        present_execute_copy(vblank, crtc_msc);
+
+        /* With TearFree, there's no way to tell exactly when the presentation
+         * will be visible except by waiting for a notification from the kernel
+         * driver indicating that the page flip is complete. This is because the
+         * CRTC's MSC can change while the target MSC is calculated and even
+         * while the page flip IOCTL is sent to the kernel due to scheduling
+         * delays and/or unfortunate timing. Even worse, a page flip isn't
+         * actually guaranteed to be finished after one vblank; it may be
+         * several MSCs until a flip actually finishes depending on delays and
+         * load in hardware.
+         *
+         * So, to get a notification from the driver with TearFree active, the
+         * driver expects a present_flip() call with a NULL pixmap to indicate
+         * that this is a fake flip for a pixmap that's already been copied to
+         * the primary scanout, which will then be flipped by TearFree. TearFree
+         * will then send a notification once the flip containing this pixmap is
+         * complete.
+         *
+         * If the fake flip attempt fails, then fall back to just enqueuing a
+         * vblank event targeting the next MSC.
+         */
+        if (!vblank->queued &&
+            vblank->reason >= PRESENT_FLIP_REASON_DRIVER_TEARFREE) {
+            uint64_t completion_msc = crtc_msc + 1;
+
+            /* If TearFree is already flipping then the presentation will be
+             * visible at the *next* next vblank. This calculation only matters
+             * for the vblank event fallback.
+             */
+            if (vblank->reason == PRESENT_FLIP_REASON_DRIVER_TEARFREE_FLIPPING &&
+                vblank->exec_msc < crtc_msc)
+                    completion_msc++;
+
+            /* Try the fake flip first and then fall back to a vblank event */
+            if (present_flip(vblank->crtc, vblank->event_id, 0, NULL, TRUE) ||
+                Success == screen_priv->queue_vblank(screen,
+                                                     window,
+                                                     vblank->crtc,
+                                                     vblank->event_id,
+                                                     completion_msc)) {
+                /* Ensure present_execute_post() runs at the next execution */
+                vblank->exec_msc = vblank->target_msc;
+                vblank->queued = TRUE;
+            }
+        }
+
+        if (vblank->queued) {
+            xorg_list_add(&vblank->event_queue, &present_exec_queue);
+            xorg_list_append(&vblank->window_list,
+                             &present_get_window_priv(window, TRUE)->vblank);
+            return;
+        }
+    }
+
+    present_execute_post(vblank, ust, crtc_msc);
 }
 
 /*
@@ -330,21 +506,6 @@ present_set_abort_flip(ScreenPtr screen)
         present_restore_screen_pixmap(screen);
         screen_priv->flip_pending->abort_flip = TRUE;
     }
-}
-
-static void
-present_unflip(ScreenPtr screen)
-{
-    present_screen_priv_ptr screen_priv = present_screen_priv(screen);
-
-    assert (!screen_priv->unflip_event_id);
-    assert (!screen_priv->flip_pending);
-
-    present_restore_screen_pixmap(screen);
-
-    screen_priv->unflip_event_id = ++present_scmd_event_id;
-    DebugPresent(("u %" PRIu64 "\n", screen_priv->unflip_event_id));
-    (*screen_priv->info->unflip) (screen, screen_priv->unflip_event_id);
 }
 
 static void
@@ -535,170 +696,6 @@ present_scmd_clear_window_flip(WindowPtr window)
         present_restore_screen_pixmap(screen);
         screen_priv->flip_window = NULL;
     }
-}
-
-/*
- * Once the required MSC has been reached, execute the pending request.
- *
- * For requests to actually present something, either blt contents to
- * the screen or queue a frame buffer swap.
- *
- * For requests to just get the current MSC/UST combo, skip that part and
- * go straight to event delivery
- */
-
-static void
-present_execute(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc)
-{
-    WindowPtr                   window = vblank->window;
-    ScreenPtr                   screen = window->drawable.pScreen;
-    present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
-    if (vblank && vblank->crtc) {
-        screen_priv=present_screen_priv(vblank->crtc->pScreen);
-    }
-
-    if (present_execute_wait(vblank, crtc_msc))
-        return;
-
-    if (vblank->flip && vblank->pixmap && vblank->window) {
-        if (screen_priv->flip_pending || screen_priv->unflip_event_id) {
-            DebugPresent(("\tr %" PRIu64 " %p (pending %p unflip %" PRIu64 ")\n",
-                          vblank->event_id, vblank,
-                          screen_priv->flip_pending, screen_priv->unflip_event_id));
-            xorg_list_del(&vblank->event_queue);
-            xorg_list_append(&vblank->event_queue, &present_flip_queue);
-            vblank->flip_ready = TRUE;
-            return;
-        }
-    }
-
-    xorg_list_del(&vblank->event_queue);
-    xorg_list_del(&vblank->window_list);
-    vblank->queued = FALSE;
-
-    if (vblank->pixmap && vblank->window &&
-        (vblank->reason < PRESENT_FLIP_REASON_DRIVER_TEARFREE ||
-         vblank->exec_msc != vblank->target_msc)) {
-
-        if (vblank->flip) {
-
-            DebugPresent(("\tf %" PRIu64 " %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
-                          vblank->event_id, vblank, crtc_msc,
-                          vblank->pixmap->drawable.id, vblank->window->drawable.id));
-
-            /* Prepare to flip by placing it in the flip queue and
-             * and sticking it into the flip_pending field
-             */
-            screen_priv->flip_pending = vblank;
-
-            xorg_list_add(&vblank->event_queue, &present_flip_queue);
-            /* Try to flip
-             */
-            if (present_flip(vblank->crtc, vblank->event_id, vblank->target_msc, vblank->pixmap, vblank->sync_flip)) {
-                RegionPtr damage;
-
-                /* Fix window pixmaps:
-                 *  1) Restore previous flip window pixmap
-                 *  2) Set current flip window pixmap to the new pixmap
-                 */
-                if (screen_priv->flip_window && screen_priv->flip_window != window)
-                    present_set_tree_pixmap(screen_priv->flip_window,
-                                            screen_priv->flip_pixmap,
-                                            (*screen->GetScreenPixmap)(screen));
-                present_set_tree_pixmap(vblank->window, NULL, vblank->pixmap);
-                present_set_tree_pixmap(screen->root, NULL, vblank->pixmap);
-
-                /* Report update region as damaged
-                 */
-                if (vblank->update) {
-                    damage = vblank->update;
-                    RegionIntersect(damage, damage, &window->clipList);
-                } else
-                    damage = &window->clipList;
-
-                DamageDamageRegion(&vblank->window->drawable, damage);
-                return;
-            }
-
-            xorg_list_del(&vblank->event_queue);
-            /* Oops, flip failed. Clear the flip_pending field
-              */
-            screen_priv->flip_pending = NULL;
-            vblank->flip = FALSE;
-            vblank->exec_msc = vblank->target_msc;
-        }
-        DebugPresent(("\tc %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
-                      vblank, crtc_msc, vblank->pixmap->drawable.id, vblank->window->drawable.id));
-        if (screen_priv->flip_pending) {
-
-            /* Check pending flip
-             */
-            if (window == screen_priv->flip_pending->window)
-                present_set_abort_flip(screen);
-        } else if (!screen_priv->unflip_event_id) {
-
-            /* Check current flip
-             */
-            if (window == screen_priv->flip_window)
-                present_unflip(screen);
-        }
-
-        present_execute_copy(vblank, crtc_msc);
-
-        /* With TearFree, there's no way to tell exactly when the presentation
-         * will be visible except by waiting for a notification from the kernel
-         * driver indicating that the page flip is complete. This is because the
-         * CRTC's MSC can change while the target MSC is calculated and even
-         * while the page flip IOCTL is sent to the kernel due to scheduling
-         * delays and/or unfortunate timing. Even worse, a page flip isn't
-         * actually guaranteed to be finished after one vblank; it may be
-         * several MSCs until a flip actually finishes depending on delays and
-         * load in hardware.
-         *
-         * So, to get a notification from the driver with TearFree active, the
-         * driver expects a present_flip() call with a NULL pixmap to indicate
-         * that this is a fake flip for a pixmap that's already been copied to
-         * the primary scanout, which will then be flipped by TearFree. TearFree
-         * will then send a notification once the flip containing this pixmap is
-         * complete.
-         *
-         * If the fake flip attempt fails, then fall back to just enqueuing a
-         * vblank event targeting the next MSC.
-         */
-        if (!vblank->queued &&
-            vblank->reason >= PRESENT_FLIP_REASON_DRIVER_TEARFREE) {
-            uint64_t completion_msc = crtc_msc + 1;
-
-            /* If TearFree is already flipping then the presentation will be
-             * visible at the *next* next vblank. This calculation only matters
-             * for the vblank event fallback.
-             */
-            if (vblank->reason == PRESENT_FLIP_REASON_DRIVER_TEARFREE_FLIPPING &&
-                vblank->exec_msc < crtc_msc)
-                    completion_msc++;
-
-            /* Try the fake flip first and then fall back to a vblank event */
-            if (present_flip(vblank->crtc, vblank->event_id, 0, NULL, TRUE) ||
-                Success == screen_priv->queue_vblank(screen,
-                                                     window,
-                                                     vblank->crtc,
-                                                     vblank->event_id,
-                                                     completion_msc)) {
-                /* Ensure present_execute_post() runs at the next execution */
-                vblank->exec_msc = vblank->target_msc;
-                vblank->queued = TRUE;
-            }
-        }
-
-        if (vblank->queued) {
-            xorg_list_add(&vblank->event_queue, &present_exec_queue);
-            xorg_list_append(&vblank->window_list,
-                             &present_get_window_priv(window, TRUE)->vblank);
-            return;
-        }
-    }
-
-    present_execute_post(vblank, ust, crtc_msc);
 }
 
 static void
