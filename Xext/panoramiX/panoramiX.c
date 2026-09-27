@@ -593,11 +593,11 @@ PanoramiXCreateConnectionBlock(void)
         });
     }
 
-    size_t screenDataOffset = 0;
-    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(1, &screenDataOffset);
-
+    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(1);
     if (rpcbuf.error)
         return FALSE;
+
+    size_t screenDataOffset = dixConnBlockScreenStart(rpcbuf.buffer);
 
     root = (xWindowRoot *) (rpcbuf.buffer + screenDataOffset);
     length = screenDataOffset + sizeof(xWindowRoot);

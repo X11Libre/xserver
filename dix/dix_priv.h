@@ -871,10 +871,9 @@ void x_rpcbuf_write_xPixmapFormat(x_rpcbuf_t *rpcbuf, PixmapFormatPtr pPixmapFor
  * build the connection info block and return it as x_rpcbuf_t
  *
  * @param   maxscreens       only process so much screens (=0 -> do them all)
- * @param   screenDataOffset offset where the first per-screen data starts
  * @return  x_rpcbuf_t holding the connection info data (caller has ownerhip)
  */
-x_rpcbuf_t dixBuildConnectionBlock(int maxscreens, size_t *screenDataOffset);
+x_rpcbuf_t dixBuildConnectionBlock(int maxscreens);
 
 /*
  * generate a ConnectionInfo block and return it as a separate malloc'ed buffer
