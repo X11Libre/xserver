@@ -16,7 +16,16 @@ extern CallbackListPtr PanoramiXConsolidateCallback;
 // exported for nvidia
 _X_EXPORT VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
 
+#ifdef XINERAMA
+
 void PanoramiXConsolidate(void);
+
+#else /* XINERAMA */
+
+static void PanoramiXConsolidate(void) { }
+
+#endif /* XINERAMA */
+
 Bool PanoramiXCreateConnectionBlock(void);
 PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
 int XineramaDeleteResource(void *, XID);

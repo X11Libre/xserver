@@ -752,6 +752,9 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
 extern void
 PanoramiXConsolidate(void)
 {
+    if (!PanoramiXIsEnabled())
+        return;
+
     ScreenPtr masterScreen = dixGetMasterScreen();
     DepthPtr pDepth = masterScreen->allowedDepths;
     VisualPtr pVisual = masterScreen->visuals;
