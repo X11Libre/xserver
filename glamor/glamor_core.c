@@ -111,9 +111,13 @@ glamor_link_glsl_prog(ScreenPtr screen, GLint prog, const char *format, ...)
 
         glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &size);
         GLchar *info = calloc(1, size);
-
+        if (!info) {
+            ErrorF("Failed to link AND out of memory on retrieving the reason\n");
+            return FALSE;
+        }
         glGetProgramInfoLog(prog, size, NULL, info);
         ErrorF("Failed to link: %s\n", info);
+        free(info);
         return FALSE;
     }
     return TRUE;
