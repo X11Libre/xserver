@@ -552,8 +552,7 @@ PanoramiXExtensionInit(void)
     PanoramiXCompositeInit();
 }
 
-Bool
-PanoramiXCreateConnectionBlock(void)
+x_rpcbuf_t PanoramiXCreateConnectionBlock(void)
 {
     int j, length;
     bool disable_backing_store = FALSE;
@@ -570,7 +569,7 @@ PanoramiXCreateConnectionBlock(void)
 
     if (!PanoramiXNumDepths) {
         ErrorF("Xinerama error: No common visuals\n");
-        return FALSE;
+        return (x_rpcbuf_t) { .error = true };
     }
 
     ScreenPtr masterScreen = dixGetMasterScreen();
@@ -580,7 +579,7 @@ PanoramiXCreateConnectionBlock(void)
 
         if (walkScreen->rootDepth != masterScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
-            return FALSE;
+            return (x_rpcbuf_t) { .error = true };
         }
         if (walkScreen->backingStoreSupport !=
             masterScreen->backingStoreSupport)
@@ -595,7 +594,7 @@ PanoramiXCreateConnectionBlock(void)
 
     x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(1);
     if (rpcbuf.error)
-        return FALSE;
+        return rpcbuf;
 
     size_t screenDataOffset = dixConnBlockScreenStart(rpcbuf.buffer);
 
@@ -648,13 +647,7 @@ PanoramiXCreateConnectionBlock(void)
     root->mmWidth *= width_mult;
     root->mmHeight *= height_mult;
 
-    /* must not free the rpcbuf here, because we store the data elsewhere */
-    /* record this for other parts which later going to manipulate the data */
-    ConnectionInfo = rpcbuf.buffer;
-    ConnectionInfoSize = length;
-    screenInfo.numRoots = 1;
-
-    return TRUE;
+    return rpcbuf;
 }
 
 /*

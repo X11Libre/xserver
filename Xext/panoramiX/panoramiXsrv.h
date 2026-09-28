@@ -3,6 +3,7 @@
 
 #include <dix-config.h>
 
+#include "dix/rpcbuf_priv.h"
 #include "include/callback.h"
 
 #include "panoramiX.h"
@@ -26,7 +27,7 @@ static void PanoramiXConsolidate(void) { }
 
 #endif /* XINERAMA */
 
-Bool PanoramiXCreateConnectionBlock(void);
+x_rpcbuf_t PanoramiXCreateConnectionBlock(void);
 PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
 int XineramaDeleteResource(void *, XID);
 
