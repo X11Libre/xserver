@@ -997,6 +997,12 @@ probe_if_is_running_single_size_hwcursor_gpu(drmmode_ptr drmmode){
 
     bool borked_cursor = false;
 
+    if (version == NULL || version->name == NULL) {
+        /* can't tell, let the normal probing handle it */
+        drmmode->fixed_size_cursor = borked_cursor;
+        return;
+    }
+
     if (strstr(version->name, "amdgpu")){
 
         uint64_t cursor_width,cursor_height;
