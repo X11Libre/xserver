@@ -918,69 +918,7 @@ msSetWindowVRRMode(WindowPtr window, WindowVRRMode mode)
 }
 
 
-Bool
-ms_window_has_async_flip(WindowPtr win)
-{
-    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
-                                                       &asyncFlipPrivateKeyRec);
 
-    return priv->async_flip;
-}
-
-void
-ms_window_update_async_flip(WindowPtr win, Bool async_flip)
-{
-    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
-                                                       &asyncFlipPrivateKeyRec);
-
-    priv->async_flip = async_flip;
-}
-
-Bool
-ms_window_has_async_flip_modifiers(WindowPtr win)
-{
-    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
-                                                       &asyncFlipPrivateKeyRec);
-
-    return priv->async_flip_modifiers;
-}
-
-void
-ms_window_update_async_flip_modifiers(WindowPtr win, Bool async_flip)
-{
-    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
-                                                       &asyncFlipPrivateKeyRec);
-
-    priv->async_flip_modifiers = async_flip;
-}
-
-/**
- * This function exist because there are necesary extra work around for correct behaviour,
- * for example: force software rendering for cursor.
- */
-static inline bool
-ms_is_running_virtual_gpu(drmmode_ptr drmmode)
-{
-    drmVersionPtr version = drmGetVersion(drmmode->fd);
-    if (!version) {
-        return false;
-    }
-
-    if (!version->name ||
-        strstr(version->name, "bochs-drm") ||
-        strstr(version->name, "evdi") ||
-        strstr(version->name, "vboxvideo") ||
-        strstr(version->name, "virtio_gpu") ||
-        strstr(version->name, "vkms") ||
-        strstr(version->name, "vmwgfx") ||
-        strstr(version->name, "qxl" )) {
-        drmFreeVersion(version);
-        return true;
-    }
-
-    drmFreeVersion(version);
-    return false;
-}
 
 /**
  * @brief ms_is_running_single_size_hwcursor_gpu
