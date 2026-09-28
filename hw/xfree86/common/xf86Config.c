@@ -654,6 +654,7 @@ typedef enum {
     FLAG_DEBUG,
     FLAG_ALLOW_BYTE_SWAPPED_CLIENTS,
     FLAG_SINGLE_DRIVER,
+    FLAG_ISOLATE_KEYBOARD,
 } FlagValues;
 
 /**
@@ -716,6 +717,8 @@ static OptionInfoRec FlagOptions[] = {
     {FLAG_ALLOW_BYTE_SWAPPED_CLIENTS, "AllowByteSwappedClients", OPTV_BOOLEAN,
      {0}, FALSE},
     {FLAG_SINGLE_DRIVER, "SingleDriver", OPTV_BOOLEAN,
+     {0}, FALSE},
+    {FLAG_ISOLATE_KEYBOARD, "IsolateKeyboard", OPTV_BOOLEAN,
      {0}, FALSE},
     {-1, NULL, OPTV_NONE,
      {0}, FALSE},
@@ -824,6 +827,16 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     }
     LogMessageVerb(from, 1, "Allowing %s one driver to add non-GPU screens\n",
                    xf86Info.singleDriver ? "only" : "more than");
+
+    if (xf86IsOptionSet(FlagOptions, FLAG_ISOLATE_KEYBOARD)) {
+        xf86GetOptValBool(FlagOptions, FLAG_ISOLATE_KEYBOARD,
+                          &globalIsolateKeyboard);
+        from = X_CONFIG;
+    } else {
+        from = X_DEFAULT;
+    }
+    LogMessageVerb(from, 1, "Keyboard isolation is turned %s\n",
+                   globalIsolateKeyboard ? "on" : "off");
 
     /*
      * Set things up based on the config file information.  Some of these
