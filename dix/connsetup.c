@@ -59,17 +59,19 @@ void dixInitConnectionBlock(void)
     ConnectionInfo = NULL;
     ConnectionInfoSize = 0;
 
+    x_rpcbuf_t rpcbuf = { 0 };
+
 #ifdef XINERAMA
     if (PanoramiXIsEnabled()) {
-        if (!PanoramiXCreateConnectionBlock()) {
-            FatalError("could not create panoramix connection block info");
-        }
-        return;
-    }
+        screenInfo.numRoots = 1;
+        rpcbuf = PanoramiXCreateConnectionBlock();
+    } else
 #endif /* XINERAMA */
+    {
+        screenInfo.numRoots = screenInfo.numScreens;
+        rpcbuf = dixBuildConnectionBlock(screenInfo.numScreens);
+    }
 
-    screenInfo.numRoots = screenInfo.numScreens;
-    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(screenInfo.numScreens);
     if (rpcbuf.error)
         FatalError("could not create connection block info");
 
