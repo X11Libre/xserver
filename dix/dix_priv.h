@@ -138,8 +138,6 @@ int dixLookupResourceOwner(ClientPtr *result,
                     ClientPtr client,
                     Mask access_mode);
 
-bool CreateConnectionBlock(int maxscreens);
-
 void EnableLimitedSchedulingLatency(void);
 
 void DisableLimitedSchedulingLatency(void);

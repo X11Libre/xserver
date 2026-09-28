@@ -64,14 +64,18 @@ void dixInitConnectionBlock(void)
         if (!PanoramiXCreateConnectionBlock()) {
             FatalError("could not create panoramix connection block info");
         }
+        return;
     }
-    else
 #endif /* XINERAMA */
-    {
-        if (!CreateConnectionBlock(0)) {
-            FatalError("could not create connection block info");
-        }
-    }
+
+    screenInfo.numRoots = screenInfo.numScreens;
+    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(screenInfo.numScreens);
+    if (rpcbuf.error)
+        FatalError("could not create connection block info");
+
+    /* must not free the rpcbuf here, because we store the data elsewhere */
+    ConnectionInfo = rpcbuf.buffer;
+    ConnectionInfoSize = rpcbuf.wpos;
 }
 
 void x_rpcbuf_write_xWindowRoot(x_rpcbuf_t *rpcbuf, ScreenPtr pScreen)
@@ -186,24 +190,6 @@ x_rpcbuf_t dixBuildConnectionBlock(int maxscreens)
     });
 
     return rpcbuf;
-}
-
-bool CreateConnectionBlock(int maxscreens)
-{
-    if (!maxscreens) {
-        maxscreens = screenInfo.numScreens;
-    }
-
-    screenInfo.numRoots = maxscreens;
-
-    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(maxscreens);
-    if (rpcbuf.error)
-        return false;
-
-    /* must not free the rpcbuf here, because we store the data elsewhere */
-    ConnectionInfo = rpcbuf.buffer;
-    ConnectionInfoSize = rpcbuf.wpos;
-    return true;
 }
 
 char *dixNewConnectionInfoBlock(ClientPtr pClient, size_t *sz, size_t *scrOffset)
