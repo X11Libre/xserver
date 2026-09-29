@@ -333,7 +333,6 @@ int10 = get_option('int10')
 if int10 == 'auto'
     int10 = 'x86emu'
     if host_machine.cpu_family() in ['ppc', 'ppc64'] and host_machine.system() == 'freebsd'
-    if host_machine.cpu_family() == 'ppc' and host_machine.system() == 'freebsd'
         int10 = 'stub'
     endif
     if host_machine.cpu_family() == 'arm'
@@ -624,9 +623,6 @@ build_acpi = false
 if (get_option('linux_acpi') == true and
    host_machine.system() == 'linux')
     if host_machine.cpu_family() in ['x86', 'x86_64', 'ia64']
-    if (host_machine.cpu_family() == 'x86' or
-       host_machine.cpu_family() == 'x86_64' or
-       host_machine.cpu_family() == 'ia64')
         build_acpi = true
     endif
 endif

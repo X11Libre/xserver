@@ -67,50 +67,12 @@ SOFTWARE.
 #include "exglobals.h"
 #include "exevents.h"
 
-#include "chgdctl.h"
-
 /***********************************************************************
  *
  * This procedure changes the control attributes for an extension device,
  * for clients on machines with a different byte ordering than the server.
  *
  */
-
-int _X_COLD
-SProcXChangeDeviceControl(ClientPtr client)
-{
-    xDeviceCtl *ctl;
-
-    REQUEST(xChangeDeviceControlReq);
-    REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
-    swaps(&stuff->control);
-    ctl = (xDeviceCtl *) &stuff[1];
-    swaps(&ctl->control);
-    swaps(&ctl->length);
-    switch (stuff->control) {
-    case DEVICE_ABS_CALIB:
-    case DEVICE_ABS_AREA:
-    case DEVICE_CORE:
-    case DEVICE_ENABLE:
-        break;
-    case DEVICE_RESOLUTION:
-    {
-        xDeviceResolutionCtl *r;
-        unsigned int extra;
-
-        extra = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
-        if (extra < bytes_to_int32(sizeof(xDeviceResolutionCtl)))
-            return BadLength;
-        r = (xDeviceResolutionCtl *) &stuff[1];
-        if (extra != bytes_to_int32(sizeof(xDeviceResolutionCtl)) + r->num_valuators)
-            return BadLength;
-        SwapLongs((CARD32 *) (r + 1), r->num_valuators);
-        break;
-    }
-    }
-    return (ProcXChangeDeviceControl(client));
-}
-
 /***********************************************************************
  *
  * Change the control attributes.
@@ -128,6 +90,15 @@ ProcXChangeDeviceControl(ClientPtr client)
         xDeviceCtl *ctl = (xDeviceCtl *) &stuff[1];
         swaps(&ctl->control);
         swaps(&ctl->length);
+        if (stuff->control == DEVICE_RESOLUTION) {
+            xDeviceResolutionCtl *r = (xDeviceResolutionCtl *) &stuff[1];
+            unsigned int extra = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
+            if (extra < bytes_to_int32(sizeof(xDeviceResolutionCtl)))
+                return BadLength;
+            if (extra != bytes_to_int32(sizeof(xDeviceResolutionCtl)) + r->num_valuators)
+                return BadLength;
+            SwapLongs((CARD32 *) (r + 1), r->num_valuators);
+        }
     }
 
     unsigned len = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
