@@ -6053,6 +6053,9 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
     xEvent *eventTo, *eventFrom;
     int eventlength = sizeof(xEvent);
 
+    if (dispatchException & DE_DROP_EVENTS)
+        return;
+
     if (!pClient || pClient == serverClient || pClient->clientGone)
         return;
 

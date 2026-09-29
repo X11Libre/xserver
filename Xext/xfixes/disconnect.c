@@ -46,6 +46,8 @@
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "dix/server_priv.h"
+#include "Xext/xfixes/xfixes_priv.h"
 
 #include "xfixesint.h"
 
@@ -60,6 +62,7 @@ typedef struct _ClientDisconnect {
 #define GetClientDisconnect(s) \
     ((ClientDisconnectPtr) dixLookupPrivate(&(s)->devPrivates, \
                                             ClientDisconnectPrivateKey))
+bool XFixesAllowForceTerminate;
 
 int
 ProcXFixesSetClientDisconnectMode(ClientPtr client)
@@ -68,9 +71,24 @@ ProcXFixesSetClientDisconnectMode(ClientPtr client)
     X_REQUEST_FIELD_CARD32(disconnect_mode);
 
     ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
+
+    int rc = Success;
+
+    if (stuff->disconnect_mode &
+        ~(CARD32)(XFixesClientDisconnectFlagTerminate |
+                  XFixesClientDisconnectFlagForceTerminate))
+        return BadValue;
+
+    if (stuff->disconnect_mode & XFixesClientDisconnectFlagForceTerminate) {
+        if ((rc = dixCallServerAccessCallback(client, DixManageAccess)))
+            return rc;
+        if (!XFixesAllowForceTerminate)
+            return BadAccess;
+    }
+
     pDisconnect->disconnect_mode = stuff->disconnect_mode;
 
-    return Success;
+    return rc;
 }
 
 int
@@ -101,6 +119,16 @@ XFixesShouldDisconnectClient(ClientPtr client)
         return (pDisconnect->disconnect_mode & XFixesClientDisconnectFlagTerminate);
 
     return FALSE;
+}
+
+bool XFixesMustTerminateServerOnDisconnect(ClientPtr client)
+{
+    ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
+
+    if (!pDisconnect)
+        return FALSE;
+
+    return (pDisconnect->disconnect_mode & XFixesClientDisconnectFlagForceTerminate);
 }
 
 Bool

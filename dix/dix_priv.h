@@ -290,8 +290,9 @@ extern Bool whiteRoot;
 extern volatile char isItTimeToYield;
 
 /* bit values for dispatchException */
-#define DE_TERMINATE 2
+#define DE_TERMINATE      2
 #define DE_PRIORITYCHANGE 4     /* set when a client's priority changes */
+#define DE_DROP_EVENTS    8     /* drop all events */
 
 extern volatile char dispatchException;
 
