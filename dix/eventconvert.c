@@ -121,7 +121,7 @@ EventToCore(InternalEvent *event, xEvent **core_out, int *count_out)
             goto out;
         }
     }
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     case ET_ButtonPress:
     case ET_ButtonRelease:
     case ET_KeyPress:

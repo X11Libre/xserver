@@ -408,13 +408,13 @@ NextDPMSTimeout(INT32 timeout)
     switch (DPMSPowerLevel) {
     case DPMSModeOn:
         DPMS_CHECK_TIMEOUT(DPMSStandbyTime)
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     case DPMSModeStandby:
         DPMS_CHECK_TIMEOUT(DPMSSuspendTime)
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     case DPMSModeSuspend:
         DPMS_CHECK_TIMEOUT(DPMSOffTime)
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     default:                   /* DPMSModeOff */
         return 0;
     }

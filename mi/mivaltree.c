@@ -317,7 +317,7 @@ miComputeClips(WindowPtr pParent,
             }
             return;
         }
-        /* fall through */
+        _X_FALLTHROUGH; /* fallthrough */
     default:
         /*
          * To calculate exposures correctly, we have to translate the old
@@ -714,7 +714,7 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
          */
         RegionSubtract(&pParent->valdata->after.exposed,
                        &totalClip, &pParent->clipList);
-        /* fall through */
+        _X_FALLTHROUGH; /* fallthrough */
     case VTMap:
         RegionCopy(&pParent->clipList, &totalClip);
         pParent->drawable.serialNumber = NEXT_SERIAL_NUMBER;

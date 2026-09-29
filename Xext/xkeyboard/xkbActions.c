@@ -667,7 +667,7 @@ _XkbFilterPointerBtn(XkbSrvInfoPtr xkbi,
                     break;
             }
 
-            /* fallthrough */
+            _X_FALLTHROUGH; /* fallthrough */
         case XkbSA_PtrBtn:
             XkbFakeDeviceButton(xkbi->device, 0, button);
             break;

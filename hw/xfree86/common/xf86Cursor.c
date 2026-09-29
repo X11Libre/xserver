@@ -643,7 +643,7 @@ xf86InitOrigins(void)
                 /* we could also try to place it based on those
                    relative locations if we wanted to */
                 screen->x = screen->y = 0;
-                /* FALLTHROUGH */
+                _X_FALLTHROUGH; /* fallthrough */
             case PosAbsolute:
                 pScreen->x = screen->x;
                 pScreen->y = screen->y;

@@ -225,7 +225,7 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
                 }
 
             }
-                /* fall through */
+                _X_FALLTHROUGH; /* fallthrough */
             case 2:            /* VCP and mouse have the same properties except for scroll */
             {
                 if (info->deviceid == 2)        /* VCP */

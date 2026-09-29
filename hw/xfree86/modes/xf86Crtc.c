@@ -1365,17 +1365,17 @@ xf86InitialPanning(ScrnInfoPtr scrn)
             output->initialBorder[1] = brdr[1];
             output->initialBorder[2] = brdr[2];
             output->initialBorder[3] = brdr[3];
-            /* fall through */
+            _X_FALLTHROUGH; /* fallthrough */
         case 8:
             output->initialTrackingArea.x1 = track_left;
             output->initialTrackingArea.y1 = track_top;
             output->initialTrackingArea.x2 = track_left + track_width;
             output->initialTrackingArea.y2 = track_top + track_height;
-            /* fall through */
+            _X_FALLTHROUGH; /* fallthrough */
         case 4:
             output->initialTotalArea.x1 = left;
             output->initialTotalArea.y1 = top;
-            /* fall through */
+            _X_FALLTHROUGH; /* fallthrough */
         case 2:
             output->initialTotalArea.x2 = output->initialTotalArea.x1 + width;
             output->initialTotalArea.y2 = output->initialTotalArea.y1 + height;

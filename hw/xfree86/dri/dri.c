@@ -616,7 +616,7 @@ DRIScreenInit(ScreenPtr pScreen, DRIInfoPtr pDRIInfo, int *pDRMFD)
                                       pDRIPriv->hiddenContextStore,
                                       DRI_NO_CONTEXT, NULL);
         }
-        /* fall through */
+        _X_FALLTHROUGH; /* fallthrough */
 
     case DRI_SERVER_SWAP:
         /* For swap methods of DRI_SERVER_SWAP and DRI_HIDE_X_CONTEXT

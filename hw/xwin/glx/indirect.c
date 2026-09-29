@@ -1665,7 +1665,7 @@ fbConfigToPixelFormatIndex(HDC hdc, __GLXconfig * mode,
 
         default:
             ErrorF("unexpected renderType %x\n", mode->renderType);
-            /* fall-through */
+            _X_FALLTHROUGH; /* fallthrough */
         case GLX_RGBA_BIT:
             SET_ATTR_VALUE(WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB);
             SET_ATTR_VALUE(WGL_COLOR_BITS_ARB, mode->rgbBits);

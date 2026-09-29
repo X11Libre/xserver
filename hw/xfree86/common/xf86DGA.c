@@ -671,7 +671,7 @@ DGACreateColormap(int index, ClientPtr client, int id, int mode, int alloc)
     case DirectColor:
     case TrueColor:
         pVisual->ColormapEntries = 1 << pVisual->bitsPerRGBValue;
-        /* fall through */
+        _X_FALLTHROUGH; /* fallthrough */
     case StaticColor:
         pVisual->redMask = pMode->red_mask;
         pVisual->greenMask = pMode->green_mask;

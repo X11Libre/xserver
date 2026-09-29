@@ -615,19 +615,19 @@ FixDeviceValuator(DeviceIntPtr dev, deviceValuator * ev, ValuatorClassPtr v,
     switch (ev->num_valuators) {
     case 6:
         ev->valuator5 = v->axisVal[first + 5];
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     case 5:
         ev->valuator4 = v->axisVal[first + 4];
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     case 4:
         ev->valuator3 = v->axisVal[first + 3];
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     case 3:
         ev->valuator2 = v->axisVal[first + 2];
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     case 2:
         ev->valuator1 = v->axisVal[first + 1];
-        /* fallthrough */
+        _X_FALLTHROUGH; /* fallthrough */
     case 1:
         ev->valuator0 = v->axisVal[first];
         break;
@@ -666,10 +666,10 @@ FixDeviceStateNotify(DeviceIntPtr dev, deviceStateNotify * ev, KeyClassPtr k,
         switch (ev->num_valuators) {
         case 3:
             ev->valuator2 = v->axisVal[first + 2];
-            /* fallthrough */
+            _X_FALLTHROUGH; /* fallthrough */
         case 2:
             ev->valuator1 = v->axisVal[first + 1];
-            /* fallthrough */
+            _X_FALLTHROUGH; /* fallthrough */
         case 1:
             ev->valuator0 = v->axisVal[first];
             break;
