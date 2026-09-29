@@ -24,6 +24,8 @@
  */
 #include <xorg-config.h>
 
+#include "include/fallthrough.h"
+
 #include <stdbool.h>
 #include <string.h>
 

@@ -33,6 +33,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <xorg-config.h>
 
+#include "include/fallthrough.h"
+
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>

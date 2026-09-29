@@ -26,6 +26,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
+#include "include/fallthrough.h"
+
 #include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>

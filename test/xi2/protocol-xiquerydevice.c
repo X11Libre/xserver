@@ -26,6 +26,8 @@
 
 #include <dix-config.h>
 
+#include "include/fallthrough.h"
+
 #include <assert.h>
 #include <stdint.h>
 #include <X11/X.h>

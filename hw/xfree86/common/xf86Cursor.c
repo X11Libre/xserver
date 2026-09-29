@@ -26,6 +26,8 @@
  */
 #include <xorg-config.h>
 
+#include "include/fallthrough.h"
+
 #include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>

@@ -91,6 +91,8 @@ Equipment Corporation.
   */
 #include <dix-config.h>
 
+#include "include/fallthrough.h"
+
 #include <stddef.h>             /* For NULL */
 #include <X11/X.h>
 

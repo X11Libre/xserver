@@ -56,6 +56,7 @@ SOFTWARE.
 #include "include/extinit.h"
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
+#include "include/fallthrough.h"
 #include "dix/resource_priv.h"
 #include "dix/window_priv.h"
 #include "include/misc.h"

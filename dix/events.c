@@ -123,6 +123,7 @@ Equipment Corporation.
 #include "dix/cursor_priv.h"
 #include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
+#include "include/fallthrough.h"
 #include "dix/dixgrabs_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"

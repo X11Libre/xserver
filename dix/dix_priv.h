@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
 #include <X11/extensions/XI.h>

@@ -54,6 +54,8 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include "include/fallthrough.h"
+
 #include <stdbool.h>
 #include <errno.h>
 #include <stdio.h>
