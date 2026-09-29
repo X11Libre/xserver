@@ -1235,6 +1235,22 @@ InitOutput(int argc, char **argv)
         vfbScreens = &defaultScreenInfo;
         vfbNumScreens = 1;
     }
+
+    /* CRTC size must not exceed the screen size.  Enforced here, after all
+       arguments have been processed, so it holds regardless of the order in
+       which -screen and -crtcs appear on the command line. */
+    for (i = 0; i < vfbNumScreens; i++) {
+        for (int c = 0; c < vfbScreens[i].numCrtcs; c++) {
+            vfbCrtcInfoPtr crtc = &vfbScreens[i].crtcs[c];
+            if (crtc->width > vfbScreens[i].width ||
+                crtc->height > vfbScreens[i].height) {
+                FatalError("CRTC %d size %dx%d exceeds screen %d's size %dx%d\n",
+                           c, crtc->width, crtc->height, i,
+                           vfbScreens[i].width, vfbScreens[i].height);
+            }
+        }
+    }
+
     for (i = 0; i < vfbNumScreens; i++) {
         if (-1 == AddScreen(vfbScreenInit, argc, argv, &vfbScreens[i])) {
             FatalError("Couldn't add screen %d", i);
