@@ -1160,7 +1160,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
     if (!strcmp(argv[i], "-fontserverconnections") || !strcmp(argv[i], "+fontserverconnections")) {
-        xf86Info.fontserverFrom = X_CMDLINE;
+        xf86FontserverFrom = X_CMDLINE;
         return 0;
     }
     if (!strcmp(argv[i], "-iglx") || !strcmp(argv[i], "+iglx")) {

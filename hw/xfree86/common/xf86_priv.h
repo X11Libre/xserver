@@ -82,6 +82,8 @@ void xf86CloseLog(enum ExitCode error);
 Bool xf86LoadModules(const char **list, void **optlist);
 Bool xf86HasTTYs(void);
 
+extern MessageType xf86FontserverFrom;
+
 /* xf86Mode.c */
 _X_EXPORT /* only for int10 module, not supposed to be used by OOT modules */
 const char * xf86ModeStatusToString(ModeStatus status);
