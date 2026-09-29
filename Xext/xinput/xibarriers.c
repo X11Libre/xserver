@@ -86,16 +86,13 @@ struct PointerBarrierDevice {
 };
 
 struct PointerBarrierClient {
-    XID id;
     ScreenPtr pScreen;
+    int *device_ids; /* num_devices */
+    XID id;
+    int num_devices;
     Window window;
     struct PointerBarrier barrier;
     struct xorg_list entry;
-    /* num_devices/device_ids are devices the barrier applies to */
-    int num_devices;
-    int *device_ids; /* num_devices */
-
-    /* per_device keeps track of devices actually blocked by barriers */
     struct xorg_list per_device;
 };
 
