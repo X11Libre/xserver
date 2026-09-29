@@ -112,18 +112,18 @@ struct _XtransConnFd {
 
 struct _XtransConnInfo {
     struct _Xtransport     *transptr;
-    int		index;
     char	*priv;
     int		flags;
     int		fd;
-    char	*port;
+    int		index;
     int		family;
+    char	*port;
     char	*addr;
-    int		addrlen;
     char	*peeraddr;
-    int		peeraddrlen;
     struct _XtransConnFd        *recv_fds;
     struct _XtransConnFd        *send_fds;
+    int		addrlen;
+    int		peeraddrlen;
 };
 
 #define XTRANS_OPEN_COTS_CLIENT       1
