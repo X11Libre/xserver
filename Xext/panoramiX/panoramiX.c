@@ -554,15 +554,6 @@ PanoramiXExtensionInit(void)
 
 x_rpcbuf_t PanoramiXCreateConnectionBlock(void)
 {
-    int j, length;
-    bool disable_backing_store = FALSE;
-    int old_width, old_height;
-    float width_mult, height_mult;
-    xWindowRoot *root;
-    xVisualType *visual;
-    xDepth *depth;
-    VisualPtr pVisual;
-
     /*
      *  Do normal CreateConnectionBlock but faking it for only one screen
      */
@@ -571,6 +562,8 @@ x_rpcbuf_t PanoramiXCreateConnectionBlock(void)
         ErrorF("Xinerama error: No common visuals\n");
         return (x_rpcbuf_t) { .error = true };
     }
+
+    bool disable_backing_store = FALSE;
 
     ScreenPtr masterScreen = dixGetMasterScreen();
     DIX_FOR_EACH_SCREEN({
@@ -598,22 +591,23 @@ x_rpcbuf_t PanoramiXCreateConnectionBlock(void)
 
     size_t screenDataOffset = dixConnBlockScreenStart(rpcbuf.buffer);
 
-    root = (xWindowRoot *) (rpcbuf.buffer + screenDataOffset);
-    length = screenDataOffset + sizeof(xWindowRoot);
+    xWindowRoot *root = (xWindowRoot *) (rpcbuf.buffer + screenDataOffset);
+    int length = screenDataOffset + sizeof(xWindowRoot);
 
     /* overwrite the connection block */
     root->nDepths = PanoramiXNumDepths;
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths; walkScreenIdx++) {
-        depth = (xDepth *) (rpcbuf.buffer + length);
+        xDepth *depth = (xDepth *) (rpcbuf.buffer + length);
         depth->depth = PanoramiXDepths[walkScreenIdx].depth;
         depth->nVisuals = PanoramiXDepths[walkScreenIdx].numVids;
         length += sizeof(xDepth);
-        visual = (xVisualType *) (rpcbuf.buffer + length);
+        xVisualType *visual = (xVisualType *) (rpcbuf.buffer + length);
 
-        for (j = 0; j < depth->nVisuals; j++, visual++) {
+        for (int j = 0; j < depth->nVisuals; j++, visual++) {
             visual->visualID = PanoramiXDepths[walkScreenIdx].vids[j];
 
+            VisualPtr pVisual;
             for (pVisual = PanoramiXVisuals;
                  pVisual->vid != visual->visualID; pVisual++);
 
@@ -637,13 +631,13 @@ x_rpcbuf_t PanoramiXCreateConnectionBlock(void)
      *  OK, change some dimensions so it looks as if it were one big screen
      */
 
-    old_width = root->pixWidth;
-    old_height = root->pixHeight;
+    int old_width = root->pixWidth;
+    int old_height = root->pixHeight;
 
     root->pixWidth = PanoramiXPixWidth;
     root->pixHeight = PanoramiXPixHeight;
-    width_mult = (1.0 * root->pixWidth) / old_width;
-    height_mult = (1.0 * root->pixHeight) / old_height;
+    float width_mult = (1.0 * root->pixWidth) / old_width;
+    float height_mult = (1.0 * root->pixHeight) / old_height;
     root->mmWidth *= width_mult;
     root->mmHeight *= height_mult;
 
