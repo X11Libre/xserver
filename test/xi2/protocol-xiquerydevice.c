@@ -37,8 +37,7 @@
 #include "Xext/xinput/handlers.h"
 
 #include "inputstr.h"
-#include "inpututils.h"
-#include "extinit.h"
+#include "dix/inpututils_priv.h"
 #include "Xext/xinput/exglobals.h"
 
 #include "scrnintstr.h"
