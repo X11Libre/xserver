@@ -43,7 +43,6 @@
 #include "Xext/randr/randrstr_priv.h"
 
 #include "os.h"
-#include "../os-support/linux/systemd-logind.h"
 
 #include "xf86_pci_priv.h"
 #include "loaderProcs.h"
@@ -547,7 +546,7 @@ static Bool doPlatformProbe(struct xf86_platform_device *dev, DriverPtr drvp,
     if (entity != -1) {
         if ((dev->flags & XF86_PDEV_SERVER_FD) && (!drvp->driverFunc ||
                 !drvp->driverFunc(NULL, SUPPORTS_SERVER_FDS, NULL))) {
-            systemd_logind_release_fd(dev->attribs->major, dev->attribs->minor, dev->attribs->fd);
+            close(dev->attribs->fd);
             dev->attribs->fd = -1;
             dev->flags &= ~XF86_PDEV_SERVER_FD;
         }

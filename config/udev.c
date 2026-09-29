@@ -36,12 +36,9 @@
 #include "os/fmt.h"
 
 #include "input.h"
-#include "inputstr.h"
 #include "config-backends.h"
 #include "os.h"
 #include "globals.h"
-
-#include "../hw/xfree86/os-support/linux/systemd-logind.h"
 
 #ifdef HAVE_SYS_SYSMACROS_H
 #include <sys/sysmacros.h>
@@ -336,8 +333,6 @@ device_removed(struct udev_device *device)
                    syspath, path);
         config_udev_odev_setup_attribs(device, path, syspath, major(devnum),
                                        minor(devnum), DeleteGPUDeviceRequest);
-        /* Retry vtenter after a drm node removal */
-        systemd_logind_vtenter();
         return;
     }
 #endif

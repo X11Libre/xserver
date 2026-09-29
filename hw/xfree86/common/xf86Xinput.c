@@ -69,7 +69,6 @@
 #include "xf86Optrec.h"
 #include "mipointer.h"
 #include "loaderProcs.h"
-#include "../os-support/linux/systemd-logind.h"
 #include "seatd-libseat.h"
 
 #include "exevents.h"           /* AddInputDevice */
@@ -860,7 +859,6 @@ xf86DeleteInput(InputInfoPtr pInp, int flags)
 
     if (pInp->flags & XI86_SERVER_FD){
         seatd_libseat_close_device(pInp);
-        systemd_logind_release_fd(pInp->major, pInp->minor, pInp->fd);
     }
     /* Remove the entry from the list. */
     if (pInp == xf86InputDevs)
@@ -986,8 +984,7 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
         xf86stat(path, &pInfo->major, &pInfo->minor);
 
     if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)) {
-        int fd = systemd_logind_take_fd(pInfo->major, pInfo->minor,
-                                        path, &paused);
+        int fd = -1;
         seatd_libseat_open_device(pInfo, &fd, &paused);
         if (fd != -1) {
             if (paused) {
@@ -996,7 +993,6 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
                 new_device->pInfo = pInfo;
 
                 xorg_list_append(&new_device->node, &new_input_devices_list);
-                systemd_logind_release_fd(pInfo->major, pInfo->minor, fd);
                 free(path);
                 return BadMatch;
             }

@@ -156,7 +156,7 @@ explanation.
     timers, and authentication (e.g., `connection.c` and `xdmcp.c` if enabled).
     It interconnects as the foundational bridge for all upper layers, supporting
     DIX events and extensions via polling (`ospoll.c`). Optionally depends on
-    SHA1 providers for authentication and dbus for systemd integration.
+    SHA1 providers for authentication and libseat for seat management.
 
 ### Rendering Acceleration
 

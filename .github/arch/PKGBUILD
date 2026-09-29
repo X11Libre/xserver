@@ -54,7 +54,6 @@ build() {
     -D glamor=true
     -D udev=true
     -D dtrace=false
-    -D systemd_logind=true
     -D suid_wrapper=true
     -D xkb_dir='/usr/share/X11/xkb'
     -D xkb_output_dir='/var/lib/xkb'
@@ -68,7 +67,7 @@ build() {
 
 package_xlibre-xserver() {
   pkgdesc="XLibre X server"
-  depends=('dbus' 'glibc' 'libdrm' 'libepoxy' 'libgl' 'libpciaccess' 'libtirpc'
+  depends=('libseat' 'glibc' 'libdrm' 'libepoxy' 'libgl' 'libpciaccess' 'libtirpc'
            'libunwind' 'libxau' 'libxcvt' 'libxdmcp' 'libxfont2' 'libbsd'
            'libxshmfence>=1.1' 'nettle' 'pixman>=0.27.2' 'sh' 'libbsd'
            'systemd-libs>=209' 'xlibre-xserver-common' 'xlibre-input-libinput'
@@ -98,7 +97,7 @@ package_xlibre-xserver() {
 
 package_xlibre-xserver-bootstrap() {
   pkgdesc="XLibre X server (bootstrap)"
-  depends=('dbus' 'glibc' 'libdrm' 'libepoxy' 'libgl' 'libpciaccess' 'libtirpc'
+  depends=('libseat' 'glibc' 'libdrm' 'libepoxy' 'libgl' 'libpciaccess' 'libtirpc'
            'libunwind' 'libxau' 'libxcvt' 'libxdmcp' 'libxfont2' 'libmd'
            'libxshmfence>=1.1' 'nettle' 'pixman>=0.27.2' 'sh'
            'systemd-libs>=209'
