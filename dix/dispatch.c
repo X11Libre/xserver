@@ -134,6 +134,7 @@ Equipment Corporation.
 #include "os/screensaver.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/xfixes/xfixesint.h"
+#include "Xext/xfixes/xfixes_priv.h"
 
 #include "windowstr.h"
 #include "dixfontstr.h"
@@ -3452,6 +3453,11 @@ CloseDownClient(ClientPtr client)
 {
     Bool really_close_down = client->clientGone ||
         client->closeDownMode == DestroyAll;
+
+    if (XFixesMustTerminateServerOnDisconnect(client)) {
+        ErrorF("Critical client disconnected, aborting the server.");
+        dispatchException |= DE_TERMINATE | DE_DROP_EVENTS;
+    }
 
     if (!client->clientGone) {
         /* ungrab server if grabbing client dies */
