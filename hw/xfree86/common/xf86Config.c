@@ -919,10 +919,9 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     }
 #endif
 
-    if (xf86Info.fontserverFrom != X_CMDLINE) {
+    if (xf86FontserverFrom != X_CMDLINE) {
         if (xf86GetOptValBool(FlagOptions, FLAG_FONTSERVER, &value)) {
-            enableFontServerConnections = !!value;
-            xf86Info.fontserverFrom = X_CONFIG;
+            xf86FontserverFrom = X_CONFIG;
         }
     }
 
