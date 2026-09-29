@@ -80,7 +80,7 @@ struct _Client {
     XID errorValue;
     int sequence;
     int ignoreCount;            /* count for Attend/IgnoreClient */
-    int __dummy0;                       /* used to be numSave */
+    int req_fds;                /* request fds count (replaces unused __dummy0/numSave) */
     void *__dummy1;                     /* used to be saveSet */
     int (**requestVector) (ClientPtr /* pClient */ );
     CARD32 req_len;             /* length of current request */
@@ -96,7 +96,6 @@ struct _Client {
 
     DeviceIntPtr clientPtr;
     struct _ClientId *clientIds;
-    int req_fds;
 
     /* driver should never ever touch anything beyond here */
     struct xorg_list saveSets;
