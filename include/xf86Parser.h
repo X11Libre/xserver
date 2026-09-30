@@ -417,14 +417,6 @@ typedef struct {
 } XF86ConfVendSubRec, *XF86ConfVendSubPtr;
 
 typedef struct {
-    GenericListRec list;
-    const char *vnd_identifier;
-    XF86OptionPtr vnd_option_lst;
-    XF86ConfVendSubPtr vnd_sub_lst;
-    char *vnd_comment;
-} XF86ConfVendorRec, *XF86ConfVendorPtr;
-
-typedef struct {
     const char *dri_group_name;
     int dri_group;
     int dri_mode;
@@ -449,7 +441,7 @@ typedef struct {
     XF86ConfInputClassPtr conf_inputclass_lst;
     XF86ConfOutputClassPtr conf_outputclass_lst;
     XF86ConfLayoutPtr conf_layout_lst;
-    XF86ConfVendorPtr conf_vendor_lst;
+    void *padding0;
     XF86ConfDRIPtr conf_dri;
     XF86ConfExtensionsPtr conf_extensions;
     char *conf_comment;
