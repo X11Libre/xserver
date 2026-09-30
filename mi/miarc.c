@@ -1434,6 +1434,7 @@ miArcJoin(DrawablePtr pDraw, GCPtr pGC, miArcFacePtr pLeft,
             polyLen = 5;
             break;
         }
+        /* fallthrough */
     case JoinBevel:
         poly[0] = corner;
         poly[1] = center;
