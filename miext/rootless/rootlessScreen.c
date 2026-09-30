@@ -127,19 +127,15 @@ RootlessUpdateScreenPixmap(ScreenPtr pScreen)
          * rowbytes as false and skip reallocating forever, pinning the
          * dangling state permanently.
          */
-        void *new_data = calloc(1, rowbytes);
-        if (new_data == NULL)
-            return;
+void *new_data = calloc(1, rowbytes);
+         if (new_data == NULL)
+             return;
 
-        free(s->pixmap_data);
-        s->pixmap_data_size = rowbytes;
-        s->pixmap_data = new_data;
+         free(s->pixmap_data);
+         s->pixmap_data_size = rowbytes;
+         s->pixmap_data = new_data;
 
-        memset(s->pixmap_data, 0xFF, s->pixmap_data_size);
-
-        free(s->pixmap_data);
-        s->pixmap_data = data;
-        s->pixmap_data_size = rowbytes;
+         memset(s->pixmap_data, 0xFF, s->pixmap_data_size);
     }
 
     if (s->pixmap_data == NULL)
