@@ -137,9 +137,6 @@ RootlessUpdateScreenPixmap(ScreenPtr pScreen)
 
         memset(s->pixmap_data, 0xFF, s->pixmap_data_size);
 
-        free(s->pixmap_data);
-        s->pixmap_data = data;
-        s->pixmap_data_size = rowbytes;
     }
 
     if (s->pixmap_data == NULL)
