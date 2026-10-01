@@ -18,9 +18,7 @@ on:
     pull_request:
       branches:
         - master
-        - release/25.0
-        - release/25.1
-        - release/25.2
+        - release/**
 
 # If a ref is pushed again (or a PR gets a new commit) while its previous run is
 # still in flight, cancel the stale run — only the newest commit needs building.
