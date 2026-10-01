@@ -471,7 +471,6 @@ if build_xorg_sdk
             'dixstruct.h',
             'dri.h',
             'dri2.h',
-            'dri3.h',
             'dristruct.h',
             'edid.h',
             'events.h',
@@ -582,6 +581,10 @@ if build_xorg_sdk
         ],
         install_dir: xorgsdkdir,
     )
+
+    if build_dri3
+        install_data(['dri3.h'], install_dir: xorgsdkdir)
+    endif
 
     if build_dga
         install_data(['dgaproc.h'], install_dir: xorgsdkdir)
