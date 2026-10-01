@@ -304,11 +304,13 @@ msCursorInit(ScreenPtr pScreen)
 void
 msCursorEnable(ScreenPtr pScreen)
 {
+    msShowCursor(pScreen, 0 /* xhot */, 0 /* yhot */);
 }
 
 void
 msCursorDisable(ScreenPtr pScreen)
 {
+    msUnloadCursor(pScreen);
 }
 
 void
