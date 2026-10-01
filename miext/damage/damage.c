@@ -1446,8 +1446,10 @@ damagePushPixels(GCPtr pGC,
 }
 
 static void
-damageRemoveDamage(DamagePtr * pPrev, DamagePtr pDamage)
+damageRemoveDamage(DrawablePtr pListDrawable, DamagePtr pDamage)
 {
+    DamagePtr *pPrev = getDrawableDamageRef(pListDrawable);
+
     while (*pPrev) {
         if (*pPrev == pDamage) {
             *pPrev = pDamage->pNext;
@@ -1475,15 +1477,16 @@ damageInsertDamage(DamagePtr * pPrev, DamagePtr pDamage)
 #endif
     pDamage->pNext = *pPrev;
     *pPrev = pDamage;
+    pDamage->pListDrawable = pDamage->pDrawable;
 }
-
-static void damagePixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
+static void
+damagePixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
     DamagePtr *pPrev = getPixmapDamageRef(pPixmap);
     DamagePtr pDamage;
 
     while ((pDamage = *pPrev)) {
-        damageRemoveDamage(pPrev, pDamage);
+        damageRemoveDamage((DrawablePtr)pPixmap, pDamage);
         if (!pDamage->isWindow)
             DamageDestroy(pDamage);
     }
@@ -1536,11 +1539,9 @@ damageSetWindowPixmap(WindowPtr pWindow, PixmapPtr pPixmap)
     damageScrPriv(pScreen);
 
     if ((pDamage = damageGetWinPriv(pWindow))) {
-        PixmapPtr pOldPixmap = (*pScreen->GetWindowPixmap) (pWindow);
-        DamagePtr *pPrev = getPixmapDamageRef(pOldPixmap);
-
         while (pDamage) {
-            damageRemoveDamage(pPrev, pDamage);
+            if (pDamage->pListDrawable)
+                damageRemoveDamage(pDamage->pListDrawable, pDamage);
             pDamage = pDamage->pNextWin;
         }
     }
@@ -1700,6 +1701,7 @@ DamageCreate(DamageReportFunc damageReport,
         return 0;
     pDamage->pNext = 0;
     pDamage->pNextWin = 0;
+    pDamage->pListDrawable = NULL;
     RegionNull(&pDamage->damage);
     RegionNull(&pDamage->pendingDamage);
 
@@ -1804,8 +1806,9 @@ DamageUnregister(DamagePtr pDamage)
         }
 #endif
     }
+    if (pDamage->pListDrawable)
+        damageRemoveDamage(pDamage->pListDrawable, pDamage);
     pDamage->pDrawable = 0;
-    damageRemoveDamage(getDrawableDamageRef(pDrawable), pDamage);
 }
 
 void
