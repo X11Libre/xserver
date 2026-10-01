@@ -397,21 +397,6 @@ typedef struct _serverlayoutrec {
     void *options;
 } serverLayoutRec, *serverLayoutPtr;
 
-typedef struct _confdribufferrec {
-    int count;
-    int size;
-    enum {
-        XF86DRI_WC_HINT = 0x0001        /* Placeholder: not implemented */
-    } flags;
-} confDRIBufferRec, *confDRIBufferPtr;
-
-typedef struct _confdrirec {
-    int group;
-    int mode;
-    int bufs_count;
-    confDRIBufferRec *bufs;
-} confDRIRec, *confDRIPtr;
-
 #define NUM_RESERVED_INTS		4
 #define NUM_RESERVED_POINTERS		4
 #define NUM_RESERVED_FUNCS		4
