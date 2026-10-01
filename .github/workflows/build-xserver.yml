@@ -639,7 +639,7 @@ jobs:
             - name: run in DragonFlyBSD VM (attempt 1)
               id: dfly-1
               continue-on-error: true
-              uses: vmactions/dragonflybsd-vm@v1.1.4
+              uses: vmactions/dragonflybsd-vm@v1.3.4
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
@@ -656,7 +656,7 @@ jobs:
               id: dfly-2
               if: steps.dfly-1.outcome == 'failure'
               continue-on-error: true
-              uses: vmactions/dragonflybsd-vm@v1.1.4
+              uses: vmactions/dragonflybsd-vm@v1.3.4
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
@@ -671,7 +671,7 @@ jobs:
 
             - name: run in DragonFlyBSD VM (attempt 3)
               if: steps.dfly-1.outcome == 'failure' && steps.dfly-2.outcome == 'failure'
-              uses: vmactions/dragonflybsd-vm@v1.1.4
+              uses: vmactions/dragonflybsd-vm@v1.3.4
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
