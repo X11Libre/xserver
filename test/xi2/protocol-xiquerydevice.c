@@ -201,6 +201,7 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
                     if (client->swapped) {
                         swaps(&si->number);
                         swaps(&si->scroll_type);
+                        swapl(&si->flags);
                         swapl(&si->increment.integral);
                         swapl(&si->increment.frac);
                     }

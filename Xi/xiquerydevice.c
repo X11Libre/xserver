@@ -432,6 +432,7 @@ SwapScrollInfo(DeviceIntPtr dev, xXIScrollInfo * info)
     swaps(&info->number);
     swaps(&info->sourceid);
     swaps(&info->scroll_type);
+    swapl(&info->flags);
     swapl(&info->increment.integral);
     swapl(&info->increment.frac);
 }
