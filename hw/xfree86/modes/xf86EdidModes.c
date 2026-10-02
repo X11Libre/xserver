@@ -1127,14 +1127,16 @@ handle_detailed_monset(struct detailed_monitor_section *det_mon, void *data)
     switch (det_mon->type) {
     case DS_RANGES:
         if (!p->have_hsync) {
-            if (!p->Monitor->nHsync)
-                xf86DrvMsg(scrnIndex, X_INFO,
-                           "Using EDID range info for horizontal sync\n");
-            p->Monitor->hsync[p->Monitor->nHsync].lo =
-                det_mon->section.ranges.min_h;
-            p->Monitor->hsync[p->Monitor->nHsync].hi =
-                det_mon->section.ranges.max_h;
-            p->Monitor->nHsync++;
+            if (p->Monitor->nHsync < MAX_HSYNC) {
+                if (!p->Monitor->nHsync)
+                    xf86DrvMsg(scrnIndex, X_INFO,
+                               "Using EDID range info for horizontal sync\n");
+                p->Monitor->hsync[p->Monitor->nHsync].lo =
+                    det_mon->section.ranges.min_h;
+                p->Monitor->hsync[p->Monitor->nHsync].hi =
+                    det_mon->section.ranges.max_h;
+                p->Monitor->nHsync++;
+            }
         }
         else {
             xf86DrvMsg(scrnIndex, X_INFO,
@@ -1142,14 +1144,16 @@ handle_detailed_monset(struct detailed_monitor_section *det_mon, void *data)
         }
 
         if (!p->have_vrefresh) {
-            if (!p->Monitor->nVrefresh)
-                xf86DrvMsg(scrnIndex, X_INFO,
-                           "Using EDID range info for vertical refresh\n");
-            p->Monitor->vrefresh[p->Monitor->nVrefresh].lo =
-                det_mon->section.ranges.min_v;
-            p->Monitor->vrefresh[p->Monitor->nVrefresh].hi =
-                det_mon->section.ranges.max_v;
-            p->Monitor->nVrefresh++;
+            if (p->Monitor->nVrefresh < MAX_VREFRESH) {
+                if (!p->Monitor->nVrefresh)
+                    xf86DrvMsg(scrnIndex, X_INFO,
+                               "Using EDID range info for vertical refresh\n");
+                p->Monitor->vrefresh[p->Monitor->nVrefresh].lo =
+                    det_mon->section.ranges.min_v;
+                p->Monitor->vrefresh[p->Monitor->nVrefresh].hi =
+                    det_mon->section.ranges.max_v;
+                p->Monitor->nVrefresh++;
+            }
         }
         else {
             xf86DrvMsg(scrnIndex, X_INFO,
