@@ -5001,7 +5001,7 @@ drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled)
 static msSpritePrivPtr
 msGetSpritePriv(DeviceIntPtr pDev, modesettingPtr ms, ScreenPtr pScreen)
 {
-    if (!IsFloating(pDev))
+    if (!InputDevIsFloating(pDev))
         pDev = GetMaster(pDev, MASTER_POINTER);
     return dixLookupScreenPrivate(&(pDev)->devPrivates,
                                   &(ms)->drmmode.spritePrivateKeyRec,
