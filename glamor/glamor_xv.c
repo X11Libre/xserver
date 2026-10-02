@@ -330,7 +330,7 @@ glamor_xv_query_image_attributes(int id,
                                  unsigned short *w, unsigned short *h,
                                  int *pitches, int *offsets)
 {
-    int size = 0, tmp;
+    int64_t size = 0, tmp;
 
     if (offsets)
         offsets[0] = 0;
@@ -343,6 +343,8 @@ glamor_xv_query_image_attributes(int id,
         if (pitches)
             pitches[0] = size;
         size *= *h;
+        if (size > INT_MAX)
+            return -1;
         if (offsets)
             offsets[1] = size;
         tmp = ALIGN(*w >> 1, 4);
@@ -350,6 +352,8 @@ glamor_xv_query_image_attributes(int id,
             pitches[1] = pitches[2] = tmp;
         tmp *= (*h >> 1);
         size += tmp;
+        if (size > INT_MAX)
+            return -1;
         if (offsets)
             offsets[2] = size;
         size += tmp;
@@ -361,6 +365,8 @@ glamor_xv_query_image_attributes(int id,
         if (pitches)
             pitches[0] = size;
         size *= *h;
+        if (size > INT_MAX)
+            return -1;
         if (offsets)
             offsets[1] = size;
         tmp = ALIGN(*w, 4);
@@ -395,6 +401,8 @@ glamor_xv_query_image_attributes(int id,
         size *= *h;
         break;
     }
+    if (size > INT_MAX)
+        return -1;
     return size;
 }
 
