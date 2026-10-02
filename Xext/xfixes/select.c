@@ -45,9 +45,9 @@ typedef struct _SelectionEvent {
     SelectionEventPtr next;
     Selection *selection;
     CARD32 eventMask;
+    XID clientResource;
     ClientPtr pClient;
     WindowPtr pWindow;
-    XID clientResource;
 } SelectionEventRec;
 
 static SelectionEventPtr selectionEvents;
