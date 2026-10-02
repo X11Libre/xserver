@@ -712,20 +712,41 @@ test_values_XIDeviceChangedEvent(DeviceChangedEvent *in,
         case XIValuatorClass:
         {
             xXIValuatorInfo *v = (xXIValuatorInfo *) any;
+            FP3232 expected;
+
+            if (swap) {
+                swaps(&v->number);
+                swapl(&v->value.integral);
+                swapl(&v->value.frac);
+            }
 
             assert(v->length == bytes_to_int32(sizeof(xXIValuatorInfo)));
+            assert(v->number < in->num_valuators);
 
+            expected = double_to_fp3232(in->valuators[v->number].value);
+            assert(v->value.integral == expected.integral);
+            assert(v->value.frac == expected.frac);
         }
             break;
         case XIScrollClass:
         {
             xXIScrollInfo *s = (xXIScrollInfo *) any;
+            FP3232 expected;
+            uint32_t expected_flags = 0;
+
+            if (swap) {
+                swaps(&s->number);
+                swaps(&s->scroll_type);
+                swapl(&s->flags);
+                swapl(&s->increment.integral);
+                swapl(&s->increment.frac);
+            }
 
             assert(s->length == bytes_to_int32(sizeof(xXIScrollInfo)));
 
             assert(s->sourceid == in->sourceid);
             assert(s->number < in->num_valuators);
-            switch (s->type) {
+            switch (s->scroll_type) {
             case XIScrollTypeVertical:
                 assert(in->valuators[s->number].scroll.type ==
                        SCROLL_TYPE_VERTICAL);
@@ -734,11 +755,22 @@ test_values_XIDeviceChangedEvent(DeviceChangedEvent *in,
                 assert(in->valuators[s->number].scroll.type ==
                        SCROLL_TYPE_HORIZONTAL);
                 break;
+            default:
+                assert(0);
             }
-            if (s->flags & XIScrollFlagPreferred)
-                assert(in->valuators[s->number].scroll.
-                       flags & SCROLL_FLAG_PREFERRED);
+
+            if (in->valuators[s->number].scroll.flags & SCROLL_FLAG_DONT_EMULATE)
+                expected_flags |= XIScrollFlagNoEmulation;
+            if (in->valuators[s->number].scroll.flags & SCROLL_FLAG_PREFERRED)
+                expected_flags |= XIScrollFlagPreferred;
+            assert(s->flags == expected_flags);
+
+            expected = double_to_fp3232(
+                in->valuators[s->number].scroll.increment);
+            assert(s->increment.integral == expected.integral);
+            assert(s->increment.frac == expected.frac);
         }
+            break;
         default:
             dbg("Invalid class type.\n\n");
             assert(1);
@@ -897,6 +929,23 @@ test_convert_XIDeviceChangedEvent(void)
         in.valuators[i].mode = Absolute;
         test_XIDeviceChangedEvent(&in);
     }
+
+    memset(in.valuators, 0, sizeof(in.valuators));
+    in.num_valuators = 2;
+
+    in.valuators[0].mode = Relative;
+    in.valuators[0].value = 240.5;
+    in.valuators[0].scroll.type = SCROLL_TYPE_VERTICAL;
+    in.valuators[0].scroll.increment = 2.5;
+    in.valuators[0].scroll.flags = SCROLL_FLAG_PREFERRED;
+
+    in.valuators[1].mode = Relative;
+    in.valuators[1].value = -350.25;
+    in.valuators[1].scroll.type = SCROLL_TYPE_HORIZONTAL;
+    in.valuators[1].scroll.increment = 3.25;
+    in.valuators[1].scroll.flags = SCROLL_FLAG_DONT_EMULATE;
+
+    test_XIDeviceChangedEvent(&in);
 }
 
 static void

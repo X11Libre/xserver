@@ -772,8 +772,8 @@ ProcCompositeReleaseOverlayWindow(ClientPtr client)
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         if ((rc = dixLookupResourceByType((void **) &pWin, win->info[walkScreenIdx].id,
-                                          XRT_WINDOW, client,
-                                          DixUnknownAccess))) {
+                                          X11_RESTYPE_WINDOW, client,
+                                          DixGetAttrAccess))) {
             client->errorValue = stuff->window;
             return rc;
         }

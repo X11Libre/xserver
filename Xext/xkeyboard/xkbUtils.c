@@ -663,6 +663,13 @@ XkbAdjustGroup(int group, XkbControlsPtr ctrls)
 {
     unsigned act;
 
+    /* A keymap with no groups leaves nothing to adjust into, and every action
+     * below misbehaves: wrapping divides by zero, clamping underflows to -1,
+     * and the negative-group loop never terminates.
+     */
+    if (ctrls->num_groups == 0)
+        return XkbGroup1Index;
+
     act = XkbOutOfRangeGroupAction(ctrls->groups_wrap);
     if (group < 0) {
         while (group < 0) {
@@ -2138,5 +2145,8 @@ XkbCopyControls(XkbDescPtr dst, XkbDescPtr src)
             nTG = nG;
         }
     }
+    /* A keymap always has at least one group, even when no key defines any symbols */
+    if (nTG == 0)
+        nTG = 1;
     dst->ctrls->num_groups = nTG;
 }
