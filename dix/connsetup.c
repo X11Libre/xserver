@@ -13,6 +13,7 @@
 #include "include/misc.h"
 #include "include/windowstr.h"
 #include "dix/client_priv.h"
+#include "dix/connsetup_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"

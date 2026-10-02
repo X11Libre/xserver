@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/Xarch.h>
 #include <X11/extensions/panoramiXproto.h>
 
+#include "dix/connsetup_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"

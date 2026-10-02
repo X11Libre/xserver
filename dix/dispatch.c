@@ -108,6 +108,7 @@ Equipment Corporation.
 
 #include "dix/client_priv.h"
 #include "dix/colormap_priv.h"
+#include "dix/connsetup_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
