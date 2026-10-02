@@ -37,7 +37,10 @@
 #include "Xext/xinput/handlers.h"
 
 #include "inputstr.h"
+#include "inpututils.h"
+#include "extinit.h"
 #include "Xext/xinput/exglobals.h"
+
 #include "scrnintstr.h"
 #include "xkbsrv.h"
 
@@ -256,6 +259,8 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
                         swapl(&vi->min.frac);
                         swapl(&vi->max.integral);
                         swapl(&vi->max.frac);
+                        swapl(&vi->value.integral);
+                        swapl(&vi->value.frac);
                         swapl(&vi->resolution);
                     }
 
@@ -273,6 +278,15 @@ reply_XIQueryDevice_data(ClientPtr client, int len, void *data)
                     assert(vi->max.integral == -1);
                     assert(vi->max.frac == 0);
                     assert(vi->resolution == 0);
+
+                    if (info->deviceid == devices.mouse->id &&
+                        (vi->number == 2 || vi->number == 3)) {
+                        FP3232 expected = double_to_fp3232(
+                            devices.mouse->valuator->axisVal[vi->number]);
+
+                        assert(vi->value.integral == expected.integral);
+                        assert(vi->value.frac == expected.frac);
+                    }
                 }
             }
                 break;
@@ -323,6 +337,9 @@ test_XIQueryDevice(void)
     xXIQueryDeviceReq request;
 
     init_simple();
+
+    devices.mouse->valuator->axisVal[2] = 240.5;
+    devices.mouse->valuator->axisVal[3] = -350.25;
 
     wrapped_dixWriteToClient = reply_XIQueryDevice;
     request_init(&request, XIQueryDevice);
