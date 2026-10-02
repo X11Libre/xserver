@@ -12,8 +12,7 @@
 
 #include <errno.h>
 
-static Bool
-msShowCursor(ScreenPtr pScreen, int xhot, int yhot);
+static Bool msShowCursor(ScreenPtr pScreen);
 
 static void
 msGetCursorSizes(int fd, int *w, int *h)
@@ -76,7 +75,6 @@ msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
-    msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
     msCursPriv *pCurPriv = &scrpriv->cursor;
     CursorBitsPtr bits = pCursor->bits;
@@ -159,11 +157,15 @@ msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
         }
     }
 
-    return msShowCursor(pScreen, bits->xhot, bits->yhot);
+    /* Save the cursor glyph hotspot */
+    pCurPriv->xhot = bits->xhot;
+    pCurPriv->yhot = bits->yhot;
+
+    return msShowCursor(pScreen);
 }
 
 static Bool
-msShowCursor(ScreenPtr pScreen, int xhot, int yhot)
+msShowCursor(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -175,8 +177,8 @@ msShowCursor(ScreenPtr pScreen, int xhot, int yhot)
     int fd = gbm_device_get_fd(priv->gbm);
     uint32_t handle = gbm_bo_get_handle(pCurPriv->bo).u32;
 
-    return !drmModeSetCursor2(fd, scrpriv->crtc_id, handle, width, height, xhot, yhot) ||
-           !drmModeSetCursor(fd, scrpriv->crtc_id, handle, width, height);
+    return !drmModeSetCursor(fd, scrpriv->crtc_id, handle, width, height) ||
+           !drmModeSetCursor2(fd, scrpriv->crtc_id, handle, width, height, 0 /* xhot */, 0 /* yhot */);
 }
 
 static Bool
@@ -188,9 +190,10 @@ msUnloadCursor(ScreenPtr pScreen)
     msScrPriv *scrpriv = screen->driver;
     int fd = gbm_device_get_fd(priv->gbm);
 
-    return !drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0) ||
-           !drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0);
+    return !drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0) ||
+           !drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0);
 }
+
 
 static Bool
 msRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCurs)
@@ -211,8 +214,21 @@ msMoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
     KdScreenInfo *screen = pScreenPriv->screen;
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
+    msCursPriv *pCurPriv = &scrpriv->cursor;
 
     int fd = gbm_device_get_fd(priv->gbm);
+
+    /* Offset the cursor position, so that the cursor hotspot looks right */
+    x -= pCurPriv->xhot;
+    y -= pCurPriv->yhot;
+
+    if (x < 0) {
+        x = 0;
+    }
+
+    if (y < 0) {
+        y = 0;
+    }
 
     drmModeMoveCursor(fd, scrpriv->crtc_id, x, y);
 }
@@ -274,8 +290,8 @@ msCursorInit(ScreenPtr pScreen)
     }
 
     /* See if hw cursor is supported */
-    if (drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0) && errno == ENOSYS) {
-        if (drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0) && (errno == ENOSYS || errno == ENXIO)) {
+    if (drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0) && (errno == ENOSYS || errno == ENXIO)) {
+        if (drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0) && (errno == ENOSYS)) {
             return FALSE;
         }
     }
@@ -304,7 +320,7 @@ msCursorInit(ScreenPtr pScreen)
 void
 msCursorEnable(ScreenPtr pScreen)
 {
-    msShowCursor(pScreen, 0 /* xhot */, 0 /* yhot */);
+    msShowCursor(pScreen);
 }
 
 void

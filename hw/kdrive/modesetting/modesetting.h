@@ -34,6 +34,9 @@ typedef struct _msPriv {
 typedef struct _msCursPriv {
     struct gbm_bo *bo;
 
+    int xhot;
+    int yhot;
+
     QueryBestSizeProcPtr QueryBestSize;
 } msCursPriv;
 
