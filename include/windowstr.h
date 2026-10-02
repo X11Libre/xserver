@@ -131,10 +131,13 @@ struct _Window {
     xPoint origin;         /* position relative to parent */
     unsigned short borderWidth;
     unsigned short deliverableEvents;   /* all masks from all clients */
-    Mask eventMask;             /* mask from the creating client */
-    PixUnion background;
+    PixUnion background;        /* moved before eventMask: PixUnion (8B) at 8-aligned offset,
+                                 * eliminating 4B alignment gap that followed eventMask(4B) */
     PixUnion border;
     WindowOptPtr optional;
+    PropertyPtr properties;     /* default: NULL; moved before bitfields to eliminate
+                                 * 4B gap between bitfields(4B) and ptr-aligned properties */
+    Mask eventMask;             /* mask from the creating client */
     unsigned backgroundState:2; /* None, Relative, Pixel, Pixmap */
     unsigned borderIsPixel:1;
     unsigned cursorIsNone:1;    /* else real cursor (might inherit) */
@@ -153,8 +156,6 @@ struct _Window {
     unsigned unhittable:1;      /* doesn't hit-test, for rootless */
     unsigned damagedDescendants:1;      /* some descendants are damaged */
     unsigned inhibitBGPaint:1;  /* paint the background? */
-
-    PropertyPtr properties;     /* default: NULL */
 };
 
 extern _X_EXPORT Mask DontPropagateMasks[];
