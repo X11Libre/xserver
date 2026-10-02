@@ -636,52 +636,106 @@ jobs:
             - uses: actions/checkout@v6
             - uses: ./.github/actions/ubuntu-pkg-cache
 
-            # VM boot / image provisioning flakes transiently; retry the whole
-            # VM step up to 3x, tearing down the leftover domain between tries
-            # (see .github/actions/libvirt-cleanup). Without that teardown the
-            # retry collides with attempt 1's leftover VM
-            # ("Guest name 'dragonflybsd' is already in use") and times out.
+            # Retry on the build marker, not on the step outcome.
+            # vmactions/dragonflybsd-vm loses the exit code of the command it
+            # runs over SSH, so "outcome == failure" is false both when the
+            # build broke and when nothing ran. The marker written by
+            # run-xserver-build.sh tells the two apart:
+            #   started missing          -> guest never ran the build, retry
+            #   started, complete missing-> build ran and broke, stop retrying
+            #   complete present         -> done
+            # GITHUB_SHA must be in envs, or the marker is written empty and
+            # the check below cannot compare it against anything.
             - name: run in DragonFlyBSD VM (attempt 1)
               id: dfly-1
               continue-on-error: true
               uses: vmactions/dragonflybsd-vm@v1.3.4
               with:
-                  envs: 'MESON_ARGS'
+                  envs: 'MESON_ARGS GITHUB_SHA'
                   usesh: true
                   release: "6.4.2"
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
 
+            - name: did the build complete after attempt 1
+              id: dfly-1-check
+              if: always()
+              # Must not fail the job: an if: without a status check function
+              # is evaluated under an implicit success(), and a failing step
+              # would skip every retry below.
+              continue-on-error: true
+              run: |
+                  if [ ! -f /tmp/xsbuild-complete ]; then
+                    echo "build did not complete in attempt 1"
+                    [ -f /tmp/xsbuild-started ] || echo "  (guest never started the build)"
+                    exit 1
+                  fi
+                  if [ "$(cat /tmp/xsbuild-complete)" != "$GITHUB_SHA" ]; then
+                    echo "::error::completion marker does not match this commit"
+                    exit 1
+                  fi
+
             - name: cleanup stale VM before retry
-              if: steps.dfly-1.outcome == 'failure'
+              if: steps.dfly-1-check.outcome == 'failure'
               uses: ./.github/actions/libvirt-cleanup
               with:
                   guest: dragonflybsd
 
             - name: run in DragonFlyBSD VM (attempt 2)
               id: dfly-2
-              if: steps.dfly-1.outcome == 'failure'
+              if: steps.dfly-1-check.outcome == 'failure'
               continue-on-error: true
               uses: vmactions/dragonflybsd-vm@v1.3.4
               with:
-                  envs: 'MESON_ARGS'
+                  envs: 'MESON_ARGS GITHUB_SHA'
                   usesh: true
                   release: "6.4.2"
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
 
+            - name: did the build complete after attempt 2
+              id: dfly-2-check
+              if: always()
+              continue-on-error: true
+              run: |
+                  if [ ! -f /tmp/xsbuild-complete ]; then
+                    echo "build did not complete in attempt 2"
+                    [ -f /tmp/xsbuild-started ] || echo "  (guest never started the build)"
+                    exit 1
+                  fi
+                  if [ "$(cat /tmp/xsbuild-complete)" != "$GITHUB_SHA" ]; then
+                    echo "::error::completion marker does not match this commit"
+                    exit 1
+                  fi
+
             - name: cleanup stale VM before final retry
-              if: steps.dfly-1.outcome == 'failure' && steps.dfly-2.outcome == 'failure'
+              if: steps.dfly-2-check.outcome == 'failure'
               uses: ./.github/actions/libvirt-cleanup
               with:
                   guest: dragonflybsd
 
             - name: run in DragonFlyBSD VM (attempt 3)
-              if: steps.dfly-1.outcome == 'failure' && steps.dfly-2.outcome == 'failure'
+              if: steps.dfly-2-check.outcome == 'failure'
               uses: vmactions/dragonflybsd-vm@v1.3.4
               with:
-                  envs: 'MESON_ARGS'
+                  envs: 'MESON_ARGS GITHUB_SHA'
                   usesh: true
                   release: "6.4.2"
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
+
+            # The single decisive step: no continue-on-error here.
+            - name: verify the build actually ran
+              if: always()
+              env:
+                  GITHUB_SHA: ${{ github.sha }}
+              run: |
+                  if [ ! -f /tmp/xsbuild-complete ]; then
+                      echo "::error::dragonflybsd lane never completed a build"
+                      exit 1
+                  fi
+                  if [ "$(cat /tmp/xsbuild-complete)" != "$GITHUB_SHA" ]; then
+                      echo "::error::completion marker does not match this commit"
+                      exit 1
+                  fi
+                  echo "dragonflybsd build completed for $GITHUB_SHA"
 
     xserver-build-netbsd:
         runs-on: ubuntu-latest
