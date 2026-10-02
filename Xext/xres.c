@@ -1070,6 +1070,8 @@ SProcXResQueryResourceBytes (ClientPtr client)
 
     REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
     swapl(&stuff->numSpecs);
+    if (stuff->numSpecs > UINT32_MAX / sizeof(specs[0]))
+        return BadLength;
     REQUEST_FIXED_SIZE(xXResQueryResourceBytesReq,
                        stuff->numSpecs * sizeof(specs[0]));
 
