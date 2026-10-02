@@ -2,40 +2,37 @@
    Copyright (c) 2002  XFree86 Inc
 */
 
+#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
+#endif
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#include <X11/extensions/XResproto.h>
-
-#include "dix/client_priv.h"
-#include "dix/dix_priv.h"
-#include "dix/registry_priv.h"
-#include "dix/request_priv.h"
-#include "dix/resource_priv.h"
-#include "os/client_priv.h"
-#include "miext/extinit_priv.h"
-#include "Xext/xace.h"
-
+#include <assert.h>
 #include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "swaprep.h"
+#include "registry.h"
+#include <X11/extensions/XResproto.h>
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "gcstruct.h"
+#include "extinit.h"
 #include "protocol-versions.h"
+#include "client.h"
 #include "list.h"
 #include "misc.h"
+#include <string.h>
 #include "hashtable.h"
 #include "picturestr.h"
-#include "compint.h"
 
-Bool noResExtension = FALSE;
+#ifdef COMPOSITE
+#include "compint.h"
+#endif
 
 /** @brief Holds fragments of responses for ConstructClientIds.
  *
@@ -104,13 +101,28 @@ typedef struct {
 static void *
 AddFragment(struct xorg_list *frags, int bytes)
 {
-    FragmentList *f = calloc(1, sizeof(FragmentList) + bytes);
+    FragmentList *f = malloc(sizeof(FragmentList) + bytes);
     if (!f) {
         return NULL;
     } else {
         f->bytes = bytes;
         xorg_list_add(&f->l, frags->prev);
         return (char*) f + sizeof(*f);
+    }
+}
+
+/** @brief Sends all fragments in the list to the client. Does not
+           free anything.
+
+    @param client The client to send the fragments to
+    @param frags The head of the list of fragments
+*/
+static void
+WriteFragmentsToClient(ClientPtr client, struct xorg_list *frags)
+{
+    FragmentList *it;
+    xorg_list_for_each_entry(it, frags, l) {
+        WriteToClient(client, it->bytes, (char*) it + sizeof(*it));
     }
 }
 
@@ -122,11 +134,9 @@ static void
 DestroyFragments(struct xorg_list *frags)
 {
     FragmentList *it, *tmp;
-    if (!xorg_list_is_empty(frags)) {
-        xorg_list_for_each_entry_safe(it, tmp, frags, l) {
-            xorg_list_del(&it->l);
-            free(it);
-        }
+    xorg_list_for_each_entry_safe(it, tmp, frags, l) {
+        xorg_list_del(&it->l);
+        free(it);
     }
 }
 
@@ -183,48 +193,79 @@ DestroyConstructResourceBytesCtx(ConstructResourceBytesCtx *ctx)
 static int
 ProcXResQueryVersion(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xXResQueryVersionReq);
-
-    xXResQueryVersionReply reply = {
+    xXResQueryVersionReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
         .server_major = SERVER_XRES_MAJOR_VERSION,
         .server_minor = SERVER_XRES_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.server_major);
-        swaps(&reply.server_minor);
-    }
+    REQUEST_SIZE_MATCH(xXResQueryVersionReq);
 
-    return X_SEND_REPLY_SIMPLE(client, reply);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.server_major);
+        swaps(&rep.server_minor);
+    }
+    WriteToClient(client, sizeof(xXResQueryVersionReply), &rep);
+    return Success;
 }
 
 static int
 ProcXResQueryClients(ClientPtr client)
 {
+    /* REQUEST(xXResQueryClientsReq); */
+    xXResQueryClientsReply rep;
+    int *current_clients;
+    int i, num_clients;
+
     REQUEST_SIZE_MATCH(xXResQueryClientsReq);
 
-    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    current_clients = xallocarray(currentMaxClients, sizeof(int));
+    if (current_clients == NULL)
+        return BadAlloc;
 
-    int num_clients = 0;
-    for (int i = 0; i < currentMaxClients; i++) {
-        ClientPtr walkClient = clients[i];
-        if (walkClient &&
-            (dixCallClientAccessCallback(client, walkClient, DixReadAccess) == Success)) {
-            x_rpcbuf_write_CARD32(&rpcbuf, walkClient->clientAsMask); /* resource_base */
-            x_rpcbuf_write_CARD32(&rpcbuf, RESOURCE_ID_MASK);         /* resource_mask */
+    num_clients = 0;
+    for (i = 0; i < currentMaxClients; i++) {
+        if (clients[i]) {
+            current_clients[num_clients] = i;
             num_clients++;
         }
     }
 
-    xXResQueryClientsReply reply = {
+    rep = (xXResQueryClientsReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = bytes_to_int32(num_clients * sz_xXResClient),
         .num_clients = num_clients
     };
-
     if (client->swapped) {
-        swapl(&reply.num_clients);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.num_clients);
+    }
+    WriteToClient(client, sizeof(xXResQueryClientsReply), &rep);
+
+    if (num_clients) {
+        xXResClient scratch;
+
+        for (i = 0; i < num_clients; i++) {
+            scratch.resource_base = clients[current_clients[i]]->clientAsMask;
+            scratch.resource_mask = RESOURCE_ID_MASK;
+
+            if (client->swapped) {
+                swapl(&scratch.resource_base);
+                swapl(&scratch.resource_mask);
+            }
+            WriteToClient(client, sz_xXResClient, &scratch);
+        }
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
+    free(current_clients);
+
+    return Success;
 }
 
 static void
@@ -242,12 +283,12 @@ resourceTypeAtom(int i)
 
     const char *name = LookupResourceName(i);
     if (strcmp(name, XREGISTRY_UNKNOWN))
-        ret = dixAddAtom(name);
+        ret = MakeAtom(name, strlen(name), TRUE);
     else {
         char buf[40];
 
         snprintf(buf, sizeof(buf), "Unregistered resource %i", i + 1);
-        ret = dixAddAtom(buf);
+        ret = MakeAtom(buf, strlen(buf), TRUE);
     }
 
     return ret;
@@ -257,52 +298,67 @@ static int
 ProcXResQueryClientResources(ClientPtr client)
 {
     REQUEST(xXResQueryClientResourcesReq);
+    xXResQueryClientResourcesReply rep;
+    int i, clientID, num_types;
+    int *counts;
+
     REQUEST_SIZE_MATCH(xXResQueryClientResourcesReq);
 
-    if (client->swapped)
-        swapl(&stuff->xid);
+    clientID = CLIENT_ID(stuff->xid);
 
-    ClientPtr resClient = dixClientForXID(stuff->xid);
-
-    if ((!resClient) ||
-        (dixCallClientAccessCallback(client, resClient, DixReadAccess)
-                              != Success)) {
+    if ((clientID >= currentMaxClients) || !clients[clientID]) {
         client->errorValue = stuff->xid;
         return BadValue;
     }
 
-    int *counts = calloc(lastResourceType + 1, sizeof(int));
+    counts = calloc(lastResourceType + 1, sizeof(int));
     if (!counts)
         return BadAlloc;
 
-    FindAllClientResources(resClient, ResFindAllRes, counts);
+    FindAllClientResources(clients[clientID], ResFindAllRes, counts);
 
-    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    num_types = 0;
 
-    int num_types = 0;
-    for (int i = 0; i <= lastResourceType; i++) {
-        /* dont report currently unused resource types */
-        if (!(counts[i]))
-            continue;
+    for (i = 0; i <= lastResourceType; i++) {
+        if (counts[i])
+            num_types++;
+    }
 
-        /* write xXResType */
-        x_rpcbuf_write_CARD32(&rpcbuf, resourceTypeAtom(i + 1));
-        x_rpcbuf_write_CARD32(&rpcbuf, counts[i]);
+    rep = (xXResQueryClientResourcesReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = bytes_to_int32(num_types * sz_xXResType),
+        .num_types = num_types
+    };
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.num_types);
+    }
 
-        num_types++;
+    WriteToClient(client, sizeof(xXResQueryClientResourcesReply), &rep);
+
+    if (num_types) {
+        xXResType scratch;
+
+        for (i = 0; i < lastResourceType; i++) {
+            if (!counts[i])
+                continue;
+
+            scratch.resource_type = resourceTypeAtom(i + 1);
+            scratch.count = counts[i];
+
+            if (client->swapped) {
+                swapl(&scratch.resource_type);
+                swapl(&scratch.count);
+            }
+            WriteToClient(client, sz_xXResType, &scratch);
+        }
     }
 
     free(counts);
 
-    xXResQueryClientResourcesReply reply = {
-        .num_types = num_types
-    };
-
-    if (client->swapped) {
-        swapl(&reply.num_types);
-    }
-
-    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
+    return Success;
 }
 
 static void
@@ -320,35 +376,44 @@ static int
 ProcXResQueryClientPixmapBytes(ClientPtr client)
 {
     REQUEST(xXResQueryClientPixmapBytesReq);
+    xXResQueryClientPixmapBytesReply rep;
+    int clientID;
+    unsigned long bytes;
+
     REQUEST_SIZE_MATCH(xXResQueryClientPixmapBytesReq);
 
-    if (client->swapped)
-        swapl(&stuff->xid);
+    clientID = CLIENT_ID(stuff->xid);
 
-    ClientPtr owner = dixClientForXID(stuff->xid);
-    if ((!owner) ||
-        (dixCallClientAccessCallback(client, owner, DixReadAccess)
-                              != Success)) {
+    if ((clientID >= currentMaxClients) || !clients[clientID]) {
         client->errorValue = stuff->xid;
         return BadValue;
     }
 
-    unsigned long bytes = 0;
-    FindAllClientResources(owner, ResFindResourcePixmaps,
+    bytes = 0;
+
+    FindAllClientResources(clients[clientID], ResFindResourcePixmaps,
                            (void *) (&bytes));
 
-    xXResQueryClientPixmapBytesReply reply = {
+    rep = (xXResQueryClientPixmapBytesReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
         .bytes = bytes,
 #ifdef _XSERVER64
         .bytes_overflow = bytes >> 32
+#else
+        .bytes_overflow = 0
 #endif
     };
     if (client->swapped) {
-        swapl(&reply.bytes);
-        swapl(&reply.bytes_overflow);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.bytes);
+        swapl(&rep.bytes_overflow);
     }
+    WriteToClient(client, sizeof(xXResQueryClientPixmapBytesReply), &rep);
 
-    return X_SEND_REPLY_SIMPLE(client, reply);
+    return Success;
 }
 
 /** @brief Finds out if a client's information need to be put into the
@@ -396,29 +461,29 @@ static Bool
 ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
                        ConstructClientIdCtx *ctx)
 {
-    xXResClientIdValue reply = {
-        .spec.client = client->clientAsMask,
-    };
+    xXResClientIdValue rep;
 
+    rep.spec.client = client->clientAsMask;
     if (sendClient->swapped) {
-        swapl (&reply.spec.client);
+        swapl (&rep.spec.client);
     }
 
     if (WillConstructMask(client, mask, ctx, X_XResClientXIDMask)) {
-        void *ptr = AddFragment(&ctx->response, sizeof(reply));
+        void *ptr = AddFragment(&ctx->response, sizeof(rep));
         if (!ptr) {
             return FALSE;
         }
 
-        reply.spec.mask = X_XResClientXIDMask;
+        rep.spec.mask = X_XResClientXIDMask;
+        rep.length = 0;
         if (sendClient->swapped) {
-            swapl (&reply.spec.mask);
-            /* swapl (&reply.length, n); - not required for reply.length = 0 */
+            swapl (&rep.spec.mask);
+            /* swapl (&rep.length, n); - not required for rep.length = 0 */
         }
 
-        memcpy(ptr, &reply, sizeof(reply));
+        memcpy(ptr, &rep, sizeof(rep));
 
-        ctx->resultBytes += sizeof(reply);
+        ctx->resultBytes += sizeof(rep);
         ++ctx->numIds;
     }
     if (WillConstructMask(client, mask, ctx, X_XResLocalClientPIDMask)) {
@@ -426,25 +491,30 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
 
         if (pid != -1) {
             void *ptr = AddFragment(&ctx->response,
-                                    sizeof(reply) + sizeof(CARD32));
+                                    sizeof(rep) + sizeof(CARD32));
+            CARD32 *value;
+
             if (!ptr) {
                 return FALSE;
             }
 
-            CARD32 *value = (void*) ((char*) ptr + sizeof(reply));
-            *value = pid;
+            value = (void*) ((char*) ptr + sizeof(rep));
 
-            reply.spec.mask = X_XResLocalClientPIDMask;
-            reply.length = 4;
+            rep.spec.mask = X_XResLocalClientPIDMask;
+            rep.length = 4;
 
             if (sendClient->swapped) {
-                swapl (&reply.spec.mask);
-                swapl (&reply.length);
+                swapl (&rep.spec.mask);
+                swapl (&rep.length);
+            }
+
+            memcpy(ptr, &rep, sizeof(rep));
+            *value = pid;
+            if (sendClient->swapped) {
                 swapl (value);
             }
-            memcpy(ptr, &reply, sizeof(reply));
 
-            ctx->resultBytes += sizeof(reply) + sizeof(CARD32);
+            ctx->resultBytes += sizeof(rep) + sizeof(CARD32);
             ++ctx->numIds;
         }
     }
@@ -467,13 +537,13 @@ ConstructClientIds(ClientPtr client,
                    int numSpecs, xXResClientIdSpec* specs,
                    ConstructClientIdCtx *ctx)
 {
-    for (int specIdx = 0; specIdx < numSpecs; ++specIdx) {
+    int specIdx;
+
+    for (specIdx = 0; specIdx < numSpecs; ++specIdx) {
         if (specs[specIdx].client == 0) {
             int c;
             for (c = 0; c < currentMaxClients; ++c) {
-                if (clients[c] &&
-                    (dixCallClientAccessCallback(client, clients[c], DixReadAccess)
-                                          == Success)) {
+                if (clients[c]) {
                     if (!ConstructClientIdValue(client, clients[c],
                                                 specs[specIdx].mask, ctx)) {
                         return BadAlloc;
@@ -481,11 +551,10 @@ ConstructClientIds(ClientPtr client,
                 }
             }
         } else {
-            ClientPtr owner = dixClientForXID(specs[specIdx].client);
-            if (owner &&
-                (dixCallClientAccessCallback(client, owner, DixReadAccess)
-                                      == Success)) {
-                if (!ConstructClientIdValue(client, owner,
+            int clientID = CLIENT_ID(specs[specIdx].client);
+
+            if ((clientID < currentMaxClients) && clients[clientID]) {
+                if (!ConstructClientIdValue(client, clients[clientID],
                                             specs[specIdx].mask, ctx)) {
                     return BadAlloc;
                 }
@@ -508,49 +577,43 @@ static int
 ProcXResQueryClientIds (ClientPtr client)
 {
     REQUEST(xXResQueryClientIdsReq);
-    REQUEST_AT_LEAST_SIZE(xXResQueryClientIdsReq);
 
-    if (client->swapped)
-        swapl(&stuff->numSpecs);
-
-    REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
-                       (uint64_t)stuff->numSpecs * sizeof(xXResClientIdSpec));
-
-    xXResClientIdSpec        *specs = (void*) ((char*) stuff + sizeof(xXResQueryClientIdsReq));
+    xXResClientIdSpec        *specs = (void*) ((char*) stuff + sizeof(*stuff));
+    int                       rc;
     ConstructClientIdCtx      ctx;
-
-    if (client->swapped) {
-        /* each spec is made of two CARD32's */
-        SwapLongs((CARD32*)specs, stuff->numSpecs * 2);
-    }
 
     InitConstructClientIdCtx(&ctx);
 
-    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    REQUEST_AT_LEAST_SIZE(xXResQueryClientIdsReq);
+    if (stuff->numSpecs > UINT32_MAX / sizeof(specs[0]))
+        return BadLength;
+    REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
+                       stuff->numSpecs * sizeof(specs[0]));
 
-    int rc = ConstructClientIds(client, stuff->numSpecs, specs, &ctx);
+    rc = ConstructClientIds(client, stuff->numSpecs, specs, &ctx);
+
     if (rc == Success) {
-        FragmentList *it;
-        xorg_list_for_each_entry(it, &ctx.response, l) {
-            x_rpcbuf_write_CARD8s(&rpcbuf, FRAGMENT_DATA(it), it->bytes);
-        }
-
-        if (rpcbuf.wpos != ctx.resultBytes)
-            LogMessage(X_WARNING, "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
-                       (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
-
-        xXResQueryClientIdsReply reply = {
+        xXResQueryClientIdsReply  rep = {
+            .type = X_Reply,
+            .sequenceNumber = client->sequence,
+            .length = bytes_to_int32(ctx.resultBytes),
             .numIds = ctx.numIds
         };
 
+        assert((ctx.resultBytes & 3) == 0);
+
         if (client->swapped) {
-            swapl (&reply.numIds);
+            swaps (&rep.sequenceNumber);
+            swapl (&rep.length);
+            swapl (&rep.numIds);
         }
 
-        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
+        WriteToClient(client, sizeof(rep), &rep);
+        WriteFragmentsToClient(client, &ctx.response);
     }
 
     DestroyConstructClientIdCtx(&ctx);
+
     return rc;
 }
 
@@ -574,10 +637,10 @@ SwapXResResourceSizeSpec(xXResResourceSizeSpec *size)
 
 /** @brief Swaps xXResResourceSizeValue endianness */
 static void
-SwapXResResourceSizeValue(xXResResourceSizeValue *reply)
+SwapXResResourceSizeValue(xXResResourceSizeValue *rep)
 {
-    SwapXResResourceSizeSpec(&reply->size);
-    swapl(&reply->numCrossReferences);
+    SwapXResResourceSizeSpec(&rep->size);
+    swapl(&rep->numCrossReferences);
 }
 
 /** @brief Swaps the response bytes */
@@ -585,11 +648,12 @@ static void
 SwapXResQueryResourceBytes(struct xorg_list *response)
 {
     struct xorg_list *it = response->next;
+    int c;
 
     while (it != response) {
         xXResResourceSizeValue *value = FRAGMENT_DATA(it);
         it = it->next;
-        for (int c = 0; c < value->numCrossReferences; ++c) {
+        for (c = 0; c < value->numCrossReferences; ++c) {
             xXResResourceSizeSpec *spec = FRAGMENT_DATA(it);
             SwapXResResourceSizeSpec(spec);
             it = it->next;
@@ -792,7 +856,8 @@ static void
 ConstructClientResourceBytes(ClientPtr aboutClient,
                              ConstructResourceBytesCtx *ctx)
 {
-    for (int specIdx = 0; specIdx < ctx->numSpecs; ++specIdx) {
+    int specIdx;
+    for (specIdx = 0; specIdx < ctx->numSpecs; ++specIdx) {
         xXResResourceIdSpec* spec = ctx->specs + specIdx;
         if (spec->resource) {
             /* these specs are handled elsewhere */
@@ -824,15 +889,20 @@ ConstructClientResourceBytes(ClientPtr aboutClient,
 static void
 ConstructResourceBytesByResource(XID aboutClient, ConstructResourceBytesCtx *ctx)
 {
-    for (int specIdx = 0; specIdx < ctx->numSpecs; ++specIdx) {
+    int specIdx;
+    for (specIdx = 0; specIdx < ctx->numSpecs; ++specIdx) {
         xXResResourceIdSpec *spec = ctx->specs + specIdx;
         if (spec->resource) {
-            ClientPtr client = dixClientForXID(spec->resource);
-            if (client && (aboutClient == None || aboutClient == client->index)) {
-                ctx->curSpec = spec;
-                FindAllClientResources(client,
-                                       AddResourceSizeValueByResource,
-                                       ctx);
+            int cid = CLIENT_ID(spec->resource);
+            if (cid < currentMaxClients &&
+                (aboutClient == None || cid == aboutClient)) {
+                ClientPtr client = clients[cid];
+                if (client) {
+                    ctx->curSpec = spec;
+                    FindAllClientResources(client,
+                                           AddResourceSizeValueByResource,
+                                           ctx);
+                }
             }
         }
     }
@@ -851,11 +921,15 @@ ConstructResourceBytes(XID aboutClient,
                        ConstructResourceBytesCtx *ctx)
 {
     if (aboutClient) {
-        ClientPtr client = dixClientForXID(aboutClient);
-        if (!client) {
+        int clientIdx = CLIENT_ID(aboutClient);
+        ClientPtr client = NullClient;
+
+        if ((clientIdx >= currentMaxClients) || !clients[clientIdx]) {
             ctx->sendClient->errorValue = aboutClient;
             return BadValue;
         }
+
+        client = clients[clientIdx];
 
         ConstructClientResourceBytes(client, ctx);
         ConstructResourceBytesByResource(aboutClient, ctx);
@@ -884,22 +958,16 @@ static int
 ProcXResQueryResourceBytes (ClientPtr client)
 {
     REQUEST(xXResQueryResourceBytesReq);
+
+    int                          rc;
+    ConstructResourceBytesCtx    ctx;
+
     REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
-
-    if (client->swapped) {
-        swapl(&stuff->numSpecs);
-    }
-
+    if (stuff->numSpecs > UINT32_MAX / sizeof(ctx.specs[0]))
+        return BadLength;
     REQUEST_FIXED_SIZE(xXResQueryResourceBytesReq,
-                       ((uint64_t)stuff->numSpecs) * sizeof(xXResResourceIdSpec));
+                       stuff->numSpecs * sizeof(ctx.specs[0]));
 
-    if (client->swapped) {
-        xXResResourceIdSpec *specs = (void*) ((char*) stuff + sizeof(*stuff));
-        for (int c = 0; c < stuff->numSpecs; ++c)
-            SwapXResResourceIdSpec(specs + c);
-    }
-
-    ConstructResourceBytesCtx ctx;
     if (!InitConstructResourceBytesCtx(&ctx, client,
                                        stuff->numSpecs,
                                        (void*) ((char*) stuff +
@@ -907,33 +975,30 @@ ProcXResQueryResourceBytes (ClientPtr client)
         return BadAlloc;
     }
 
-    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-
-    int rc = ConstructResourceBytes(stuff->client, &ctx);
+    rc = ConstructResourceBytes(stuff->client, &ctx);
 
     if (rc == Success) {
-        xXResQueryResourceBytesReply reply = {
+        xXResQueryResourceBytesReply rep = {
+            .type = X_Reply,
+            .sequenceNumber = client->sequence,
+            .length = bytes_to_int32(ctx.resultBytes),
             .numSizes = ctx.numSizes
         };
 
         if (client->swapped) {
-            swapl (&reply.numSizes);
+            swaps (&rep.sequenceNumber);
+            swapl (&rep.length);
+            swapl (&rep.numSizes);
+
             SwapXResQueryResourceBytes(&ctx.response);
         }
 
-        FragmentList *it;
-        xorg_list_for_each_entry(it, &ctx.response, l) {
-            x_rpcbuf_write_CARD8s(&rpcbuf, FRAGMENT_DATA(it), it->bytes);
-        }
-
-        if (rpcbuf.wpos != ctx.resultBytes)
-            LogMessage(X_WARNING, "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
-                       (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
-
-        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
+        WriteToClient(client, sizeof(rep), &rep);
+        WriteFragmentsToClient(client, &ctx.response);
     }
 
     DestroyConstructResourceBytesCtx(&ctx);
+
     return rc;
 }
 
@@ -960,10 +1025,107 @@ ProcResDispatch(ClientPtr client)
     return BadRequest;
 }
 
+static int _X_COLD
+SProcXResQueryVersion(ClientPtr client)
+{
+    REQUEST_SIZE_MATCH(xXResQueryVersionReq);
+    return ProcXResQueryVersion(client);
+}
+
+static int _X_COLD
+SProcXResQueryClientResources(ClientPtr client)
+{
+    REQUEST(xXResQueryClientResourcesReq);
+    REQUEST_SIZE_MATCH(xXResQueryClientResourcesReq);
+    swapl(&stuff->xid);
+    return ProcXResQueryClientResources(client);
+}
+
+static int _X_COLD
+SProcXResQueryClientPixmapBytes(ClientPtr client)
+{
+    REQUEST(xXResQueryClientPixmapBytesReq);
+    REQUEST_SIZE_MATCH(xXResQueryClientPixmapBytesReq);
+    swapl(&stuff->xid);
+    return ProcXResQueryClientPixmapBytes(client);
+}
+
+static int _X_COLD
+SProcXResQueryClientIds (ClientPtr client)
+{
+    int i;
+    xXResClientIdSpec *specs;
+
+    REQUEST(xXResQueryClientIdsReq);
+
+    REQUEST_AT_LEAST_SIZE (xXResQueryClientIdsReq);
+    swapl(&stuff->numSpecs);
+    if (stuff->numSpecs > UINT32_MAX / sizeof(*specs))
+        return BadLength;
+    REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
+                       stuff->numSpecs * sizeof(xXResClientIdSpec));
+
+    specs = (xXResClientIdSpec *) (stuff + 1);
+    for (i = 0; i < stuff->numSpecs; i++) {
+        swapl(&specs[i].client);
+        swapl(&specs[i].mask);
+    }
+
+    return ProcXResQueryClientIds(client);
+}
+
+/** @brief Implements the XResQueryResourceBytes of XResProto v1.2.
+    This variant byteswaps request contents before issuing the
+    rest of the work to ProcXResQueryResourceBytes */
+static int _X_COLD
+SProcXResQueryResourceBytes (ClientPtr client)
+{
+    REQUEST(xXResQueryResourceBytesReq);
+    int c;
+    xXResResourceIdSpec *specs = (void*) ((char*) stuff + sizeof(*stuff));
+
+    REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
+    swapl(&stuff->numSpecs);
+    if (stuff->numSpecs > UINT32_MAX / sizeof(specs[0]))
+        return BadLength;
+    REQUEST_FIXED_SIZE(xXResQueryResourceBytesReq,
+                       stuff->numSpecs * sizeof(specs[0]));
+
+    for (c = 0; c < stuff->numSpecs; ++c) {
+        SwapXResResourceIdSpec(specs + c);
+    }
+
+    return ProcXResQueryResourceBytes(client);
+}
+
+static int _X_COLD
+SProcResDispatch (ClientPtr client)
+{
+    REQUEST(xReq);
+
+    switch (stuff->data) {
+    case X_XResQueryVersion:
+        return SProcXResQueryVersion(client);
+    case X_XResQueryClients:   /* nothing to swap */
+        return ProcXResQueryClients(client);
+    case X_XResQueryClientResources:
+        return SProcXResQueryClientResources(client);
+    case X_XResQueryClientPixmapBytes:
+        return SProcXResQueryClientPixmapBytes(client);
+    case X_XResQueryClientIds:
+        return SProcXResQueryClientIds(client);
+    case X_XResQueryResourceBytes:
+        return SProcXResQueryResourceBytes(client);
+    default: break;
+    }
+
+    return BadRequest;
+}
+
 void
 ResExtensionInit(void)
 {
     (void) AddExtension(XRES_NAME, 0, 0,
-                        ProcResDispatch, ProcResDispatch,
+                        ProcResDispatch, SProcResDispatch,
                         NULL, StandardMinorOpcode);
 }
