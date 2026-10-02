@@ -882,6 +882,9 @@ SingleXvPutImage(ClientPtr client)
     height = stuff->height;
     size = (*pPort->pAdaptor->ddQueryImageAttributes) (pPort, pImage, &width,
                                                        &height, NULL, NULL);
+    if (size < 0)
+        return BadValue;
+
     size += sizeof(xvPutImageReq);
     size = bytes_to_int32(size);
 
