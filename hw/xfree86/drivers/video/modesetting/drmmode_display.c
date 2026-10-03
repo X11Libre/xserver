@@ -35,6 +35,7 @@
 #include <unistd.h>
 
 #include "dix/dix_priv.h"
+#include "dix/input_priv.h"
 #include "os/fmt.h"
 #include "present/present_priv.h"
 
@@ -5247,7 +5248,7 @@ drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled)
 static msSpritePrivPtr
 msGetSpritePriv(DeviceIntPtr pDev, modesettingPtr ms, ScreenPtr pScreen)
 {
-    if (!IsFloating(pDev))
+    if (!InputDevIsFloating(pDev))
         pDev = GetMaster(pDev, MASTER_POINTER);
     return dixLookupScreenPrivate(&(pDev)->devPrivates,
                                   &(ms)->drmmode.spritePrivateKeyRec,
