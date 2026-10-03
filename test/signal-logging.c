@@ -212,15 +212,11 @@ static void logging_format(void)
     /* long buf is truncated to "....en\n" */
     LogMessageVerb(X_ERROR, 1, buf);
     read_log_msg(logmsg);
-    /* Set locale to C to ensure consistent behavior across locales */
-    setlocale(LC_ALL, "C");
     assert(strcmp(&logmsg[strlen(logmsg) - 3], "en\n") == 0);
 
     /* same thing, this time as string substitution */
     LogMessageVerb(X_ERROR, 1, "%s", buf);
     read_log_msg(logmsg);
-    /* Set locale to C to ensure consistent behavior across locales */
-    setlocale(LC_ALL, "C");
     assert(strcmp(&logmsg[strlen(logmsg) - 3], "en\n") == 0);
 
     /* strings containing placeholders should just work */
