@@ -170,7 +170,7 @@ number_formatting(void)
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
 static void logging_format(void)
 {
-setlocale(LC_ALL, "C");
+    setlocale(LC_ALL, "C");
     const char *log_file_path = "/tmp/Xorg-logging-test.log";
     const char *str = "%s %d %u %% %p %i";
     char buf[1024];
