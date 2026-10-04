@@ -170,7 +170,6 @@ number_formatting(void)
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
 static void logging_format(void)
 {
-    setlocale(LC_ALL, "C");
     const char *log_file_path = "/tmp/Xorg-logging-test.log";
     const char *str = "%s %d %u %% %p %i";
     char buf[1024];
@@ -419,5 +418,17 @@ signal_logging_test(void)
         logging_format,
         NULL,
     };
+
+    /* This test compares against strings built with the C library's printf
+     * formatting (sprintf("%.2f", ...) in check_float_format_test, and the
+     * "[time.stamp]" prefix parsed in read_log_msg), so it only produces the
+     * same bytes everywhere if the locale is the C locale. It has to be set
+     * here, before the test list is handed back, and not inside an individual
+     * test function: run_test() invokes the functions in list order, so a
+     * setlocale() in the second test would leave every earlier test running
+     * under whatever locale the process inherited.
+     */
+    setlocale(LC_ALL, "C");
+
     return testfuncs;
 }
