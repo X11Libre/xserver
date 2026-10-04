@@ -170,7 +170,6 @@ number_formatting(void)
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
 static void logging_format(void)
 {
-    setlocale(LC_ALL, "C");
     const char *log_file_path = "/tmp/Xorg-logging-test.log";
     const char *str = "%s %d %u %% %p %i";
     char buf[1024];
@@ -419,5 +418,20 @@ signal_logging_test(void)
         logging_format,
         NULL,
     };
+
+    /* A C program starts out in the "C" locale, and nothing here ever
+     * calls setlocale(LC_ALL, ""), so the environment currently has no
+     * effect at all.  That is what keeps the assertions in this file
+     * working, but it is accidental: as soon as somebody imports the
+     * environment to actually exercise a non-C locale,
+     * number_formatting() - which runs first - starts comparing against
+     * locale-dependent output.
+     *
+     * So force the C locale here, in signal_logging_test(), which runs
+     * before any of the test functions.  Putting it into logging_format()
+     * instead would come too late.
+     */
+    setlocale(LC_ALL, "C");
+
     return testfuncs;
 }
