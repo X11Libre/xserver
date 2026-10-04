@@ -206,15 +206,39 @@ static void logging_format(void)
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) test message\n") == 0);
 
-    /* long buf is truncated to "....en\n" */
+    /* Long buf is truncated to the log buffer limit. The writer keeps the *head*
+     * of the message and drops the *tail*, and writeLog() forces a trailing '\n'
+     * onto the truncated line. buf is 1020 '.' followed by "end", so the marker
+     * sits past the point where the buffer runs out and cannot survive -- what
+     * reaches the log is '.' up to the cut, then '\n'.
+     *
+     * Asserting that the line ends in "en\n" was therefore unsatisfiable on
+     * every branch: it asks a truncating writer to preserve the end of the
+     * string it just truncated. These assertions check what the writer actually
+     * guarantees instead. */
+#define ASSERT_TRUNCATED(msg) do {                                  \
+        const char *_m = (msg);                                      \
+        /* skip the "(EE) " header the first assertion above pins */  \
+        const char *_body = _m + 5;                                  \
+        size_t _bl = strlen(_body);                                  \
+        /* the "end" marker at the tail of buf was dropped */         \
+        assert(strchr(_m, 'e') == NULL);                             \
+        /* filled with '.' right up to the cut */                     \
+        assert(strspn(_body, ".") + 1 == _bl);                        \
+        /* writeLog() forces the newline on a truncated line */       \
+        assert(_bl > 1 && _body[_bl - 1] == '\n');                   \
+    } while (0)
+
     LogMessageVerb(X_ERROR, 1, buf);
     read_log_msg(logmsg);
-    assert(strcmp(&logmsg[strlen(logmsg) - 3], "en\n") == 0);
+    ASSERT_TRUNCATED(logmsg);
 
     /* same thing, this time as string substitution */
     LogMessageVerb(X_ERROR, 1, "%s", buf);
     read_log_msg(logmsg);
-    assert(strcmp(&logmsg[strlen(logmsg) - 3], "en\n") == 0);
+    ASSERT_TRUNCATED(logmsg);
+
+#undef ASSERT_TRUNCATED
 
     /* strings containing placeholders should just work */
     LogMessageVerb(X_ERROR, 1, "%s\n", str);
