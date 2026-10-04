@@ -89,6 +89,9 @@ msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
                       scrpriv->randr, &pCurPriv->shadow,
                       &pCurPriv->xhot, &pCurPriv->yhot);
 
+    pCurPriv->pCursor = pCursor;
+    pCurPriv->randr = scrpriv->randr;
+
     return msShowCursor(pScreen);
 }
 
@@ -110,13 +113,18 @@ msShowCursor(ScreenPtr pScreen)
 }
 
 static Bool
-msUnloadCursor(ScreenPtr pScreen)
+msUnloadCursor(ScreenPtr pScreen, Bool clear)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
+    msCursPriv *pCurPriv = &scrpriv->cursor;
     int fd = gbm_device_get_fd(priv->gbm);
+
+    if (clear) {
+        pCurPriv->pCursor = NULL;
+    }
 
     return !drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0) ||
            !drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0);
@@ -146,6 +154,9 @@ msMoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
 
     int fd = gbm_device_get_fd(priv->gbm);
 
+    pCurPriv->x = x;
+    pCurPriv->y = y;
+
     KdGetCursorPosition(pScreen, scrpriv->randr,
                         pCurPriv->xhot, pCurPriv->yhot,
                         &x, &y);
@@ -166,7 +177,7 @@ msSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor, int x, int 
         msLoadCursor(pScreen, pCursor);
         msMoveCursor(pDev, pScreen, x, y);
     } else {
-        msUnloadCursor(pScreen);
+        msUnloadCursor(pScreen, TRUE /* clear */);
     }
 }
 
@@ -233,6 +244,8 @@ msCursorInit(ScreenPtr pScreen)
         return FALSE;
     }
 
+    pCurPriv->randr = scrpriv->randr;
+
     LogMessage(X_INFO, "Xmodesetting(%d): Using a %dx%d hw cursor\n", pScreen->myNum, width, height);
     return TRUE;
 }
@@ -240,13 +253,24 @@ msCursorInit(ScreenPtr pScreen)
 void
 msCursorEnable(ScreenPtr pScreen)
 {
-    msShowCursor(pScreen);
+    KdScreenPriv(pScreen);
+    KdScreenInfo *screen = pScreenPriv->screen;
+    msScrPriv *scrpriv = screen->driver;
+    msCursPriv *pCurPriv = &scrpriv->cursor;
+
+    if (pCurPriv->pCursor &&
+        scrpriv->randr == pCurPriv->randr) {
+        msShowCursor(pScreen);
+    } else {
+        /* Repaint the cursor glyph */
+        msSetCursor(NULL /* pDev */, pScreen, pCurPriv->pCursor, pCurPriv->x, pCurPriv->y);
+    }
 }
 
 void
 msCursorDisable(ScreenPtr pScreen)
 {
-    msUnloadCursor(pScreen);
+    msUnloadCursor(pScreen, FALSE /* clear */);
 }
 
 void

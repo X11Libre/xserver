@@ -36,6 +36,10 @@ typedef struct _msCursPriv {
 
     /* For RandR */
     uint32_t *shadow;
+    CursorPtr pCursor;
+    Rotation randr;
+    int x;
+    int y;
 
     int xhot;
     int yhot;
