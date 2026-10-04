@@ -12,6 +12,8 @@
 
 #include <errno.h>
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 static Bool msShowCursor(ScreenPtr pScreen);
 
 static void
@@ -84,6 +86,16 @@ msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
     uint32_t *map = gbm_bo_get_map(pCurPriv->bo);
     uint32_t *ram = map;
 
+    if (scrpriv->randr == RR_Rotate_0 &&
+        pCurPriv->randr == RR_Rotate_0 &&
+        pCurPriv->old_width && pCurPriv->old_height &&
+        (pCursor->bits->width <= width) &&
+        (pCursor->bits->height <= height)) {
+        width = MAX(pCursor->bits->width, pCurPriv->old_width);
+        width = ((width + 31) / 32) * 32;
+        height = MAX(pCursor->bits->height, pCurPriv->old_height);
+    }
+
     KdLoadCursorRandR(ram, pCursor,
                       width, height, stride,
                       scrpriv->randr, &pCurPriv->shadow,
@@ -91,6 +103,9 @@ msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
 
     pCurPriv->pCursor = pCursor;
     pCurPriv->randr = scrpriv->randr;
+
+    pCurPriv->old_width = pCursor->bits->width;
+    pCurPriv->old_height = pCursor->bits->height;
 
     return msShowCursor(pScreen);
 }

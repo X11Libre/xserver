@@ -41,6 +41,10 @@ typedef struct _msCursPriv {
     int x;
     int y;
 
+    /* Damage Tracking */
+    int old_width;
+    int old_height;
+
     int xhot;
     int yhot;
 
