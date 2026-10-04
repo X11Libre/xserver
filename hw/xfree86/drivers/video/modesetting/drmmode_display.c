@@ -5244,16 +5244,6 @@ drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled)
  * is active. When a swcursor is active we disable page-flipping.
  */
 
-static msSpritePrivPtr
-msGetSpritePriv(DeviceIntPtr pDev, modesettingPtr ms, ScreenPtr pScreen)
-{
-    if (!IsFloating(pDev))
-        pDev = GetMaster(pDev, MASTER_POINTER);
-    return dixLookupScreenPrivate(&(pDev)->devPrivates,
-                                  &(ms)->drmmode.spritePrivateKeyRec,
-                                  pScreen);
-}
-
 static void drmmode_sprite_do_set_cursor(msSpritePrivPtr sprite_priv,
                                          ScrnInfoPtr scrn, int x, int y)
 {
