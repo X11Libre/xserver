@@ -290,8 +290,6 @@ typedef struct _msSpritePriv {
     Bool sprite_visible;
 } msSpritePrivRec, *msSpritePrivPtr;
 
-#define msGetSpritePriv(dev, ms, screen) dixLookupScreenPrivate(&(dev)->devPrivates, &(ms)->drmmode.spritePrivateKeyRec, screen)
-
 extern miPointerSpriteFuncRec drmmode_sprite_funcs;
 
 Bool drmmode_is_format_supported(ScrnInfoPtr scrn, uint32_t format,
