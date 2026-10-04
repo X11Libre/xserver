@@ -34,6 +34,9 @@ typedef struct _msPriv {
 typedef struct _msCursPriv {
     struct gbm_bo *bo;
 
+    /* For RandR */
+    uint32_t *shadow;
+
     int xhot;
     int yhot;
 
