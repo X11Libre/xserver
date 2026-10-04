@@ -418,9 +418,6 @@ ephyrRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     Rotation randr;
     int n = 0;
 
-    /* Dummy refresh rate so that new proton (>= 8) works */
-    int rate = screen->rate ? screen->rate : 60;
-
     struct {
         int width, height;
     } sizes[] = {
@@ -449,13 +446,12 @@ ephyrRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     if (!hostx_want_preexisting_window(screen)
         && !hostx_want_fullscreen()) {  /* only if no -parent switch */
         while (sizes[n].width != 0 && sizes[n].height != 0) {
-            pSize = RRRegisterSize(pScreen,
-                                   sizes[n].width,
-                                   sizes[n].height,
-                                   (sizes[n].width * screen->width_mm) / screen->width,
-                                   (sizes[n].height * screen->height_mm) /
-                                   screen->height);
-            RRRegisterRate(pScreen, pSize, rate);
+            RRRegisterSize(pScreen,
+                           sizes[n].width,
+                           sizes[n].height,
+                           (sizes[n].width * screen->width_mm) / screen->width,
+                           (sizes[n].height * screen->height_mm) /
+                           screen->height);
             n++;
         }
     }
@@ -474,8 +470,7 @@ ephyrRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
 
     randr = KdSubRotation(scrpriv->randr, screen->randr);
 
-    RRRegisterRate(pScreen, pSize, rate);
-    RRSetCurrentConfig(pScreen, randr, rate, pSize);
+    RRSetCurrentConfig(pScreen, randr, 0, pSize);
 
     return TRUE;
 }
