@@ -486,8 +486,10 @@ static inline Bool InputDevIsMaster(DeviceIntPtr dev)
  * @param dev   device to check
  * @return TRUE if the device is in `floating` state
  */
-Bool InputDevIsFloating(DeviceIntPtr dev)
-    _X_ATTRIBUTE_NONNULL_ARG(1);
+static inline Bool InputDevIsFloating(DeviceIntPtr dev)
+{
+    return !InputDevIsMaster(dev) && GetMaster(dev, MASTER_KEYBOARD) == NULL;
+}
 
 /*
  * @brief store timestamp as the device's last event time
