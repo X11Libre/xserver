@@ -282,6 +282,27 @@ msRandRGammaInit(ScreenPtr pScreen)
 }
 #endif /* RANDR_12_INTERFACE */
 
+static void
+msConstrainCursorHarder(DeviceIntPtr pDev, ScreenPtr pScreen,
+                           int mode, int *x, int *y)
+{
+    KdScreenPriv(pScreen);
+    KdScreenInfo *screen = pScreenPriv->screen;
+    msScrPriv *scrpriv = screen->driver;
+
+    if (screen->randr) {
+        /*
+         * We don't tell RandR about out initial rotation,
+         * which makes it constrain our cursor position harder than it needs to
+         */
+        return;
+    }
+
+    pScreen->ConstrainCursorHarder = scrpriv->ConstrainCursorHarder;
+    (*pScreen->ConstrainCursorHarder)(pDev, pScreen, mode, x, y);
+    pScreen->ConstrainCursorHarder = msConstrainCursorHarder;
+}
+
 Bool
 msRandRInit(ScreenPtr pScreen)
 {
@@ -305,6 +326,14 @@ msRandRInit(ScreenPtr pScreen)
         pScrPriv->rrCrtcSetGamma = msRandRCrtcSetGamma;
     }
 #endif
+
+    if (pScreen->ConstrainCursorHarder) {
+        KdScreenPriv(pScreen);
+        KdScreenInfo *screen = pScreenPriv->screen;
+        msScrPriv *scrpriv = screen->driver;
+        scrpriv->ConstrainCursorHarder = pScreen->ConstrainCursorHarder;
+        pScreen->ConstrainCursorHarder = msConstrainCursorHarder;
+    }
     return TRUE;
 }
 #endif /* RANDR */

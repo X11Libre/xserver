@@ -48,6 +48,8 @@ typedef struct _fbdevScrPriv {
     Bool shadow;
     int max_width;
     int max_height;
+
+    ConstrainCursorHarderProcPtr ConstrainCursorHarder;
 } FbdevScrPriv;
 
 typedef struct _fbScreenConf {

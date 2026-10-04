@@ -62,6 +62,8 @@ typedef struct _msScrPriv {
 
     uint32_t num_render_modifiers;
     uint64_t *render_modifiers;
+
+    ConstrainCursorHarderProcPtr ConstrainCursorHarder;
 } msScrPriv;
 
 typedef struct _msScreenConf {
