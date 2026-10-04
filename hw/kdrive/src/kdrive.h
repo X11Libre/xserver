@@ -377,6 +377,34 @@ void
 
 void KdSetColormap(ScreenPtr pScreen);
 
+/* kcurs.c */
+void
+KdRotateCoord(Rotation rotation,
+              int width, int height,
+              int x_dst, int y_dst,
+              int *x_src, int *y_src);
+
+void
+KdRotateCoordBack(Rotation rotation,
+                  int width, int height,
+                  int x_dst, int y_dst,
+                  int *x_src, int *y_src);
+
+void
+KdLoadCursor(uint32_t *ram, CursorPtr pCursor,
+             int width, int height, int stride);
+
+void
+KdLoadCursorRandR(uint32_t *ram, CursorPtr pCursor,
+                  int width, int height, int stride,
+                  Rotation randr, uint32_t **shadow,
+                  int *xhot, int *yhot);
+
+void
+KdGetCursorPosition(ScreenPtr pScreen, Rotation randr,
+                    int xhot, int yhot,
+                    int *x, int *y);
+
 /* kdrive.c */
 extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
