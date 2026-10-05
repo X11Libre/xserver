@@ -20,9 +20,7 @@ msGlamorTileFront(ScreenPtr pScreen)
 
     KdFrameBuffer saved_framebuffer = screen->fb;
 
-    /* TODO: query glamor */
-    MsScreenConf *config = screen->closure;
-    Bool is_gles = config->glamor_info.force_es;
+    Bool is_gles = glamor_is_gles(pScreen);
 
     struct gbm_bo *new_front = NULL;
 
