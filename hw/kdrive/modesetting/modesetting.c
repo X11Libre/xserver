@@ -29,6 +29,7 @@ modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth)
     } else if (config->no_tile) {
         need_map = TRUE;
     } else if (randr != RR_Rotate_0) {
+        /* TODO: Can we do better? */
         need_map = TRUE;
     }
 #endif
