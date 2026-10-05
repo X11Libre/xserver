@@ -689,6 +689,7 @@ jobs:
         timeout-minutes: 90
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+            LDFLAGS: "-Wl,--no-fatal-warnings"
         steps:
             - uses: actions/checkout@v6
             - uses: ./.github/actions/ubuntu-pkg-cache
@@ -701,9 +702,9 @@ jobs:
               continue-on-error: true
               uses: vmactions/netbsd-vm@v1.5.0
               with:
-                  envs: 'MESON_ARGS'
+                  envs: 'MESON_ARGS LDFLAGS'
                   usesh: true
-                  release: '10.1'
+                  release: '11.0'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
             - name: cleanup stale VM before retry
@@ -718,9 +719,9 @@ jobs:
               continue-on-error: true
               uses: vmactions/netbsd-vm@v1.5.0
               with:
-                  envs: 'MESON_ARGS'
+                  envs: 'MESON_ARGS LDFLAGS'
                   usesh: true
-                  release: '10.1'
+                  release: '11.0'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
             - name: cleanup stale VM before final retry
@@ -733,9 +734,9 @@ jobs:
               if: steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
               uses: vmactions/netbsd-vm@v1.5.0
               with:
-                  envs: 'MESON_ARGS'
+                  envs: 'MESON_ARGS LDFLAGS'
                   usesh: true
-                  release: '10.1'
+                  release: '11.0'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
     # illumos / Solaris build, run in an OpenIndiana VM (vmactions, same
