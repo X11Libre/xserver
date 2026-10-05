@@ -98,7 +98,7 @@ msGlamorCreateRes(ScreenPtr pScreen)
     format_name = gbm_format_get_name(format, &desc);
     LogMessage(X_INFO, "Xmodesetting(%d): Front buffer depth: %d, bpp: %d, format: %s, modifier: 0x%lx\n",
                pScreen->myNum, screen->fb.depth, screen->fb.bitsPerPixel, format_name, modifier);
-    if (config->planar) {
+    if (config->planar || (config->modifier != ~0)) {
         msPriv *priv = screen->card->driver;
         int num_planes = gbm_device_get_format_modifier_plane_count(priv->gbm, format, modifier);
         LogMessage(X_INFO, "Xmodesetting(%d): Number of front buffer planes: %d\n", pScreen->myNum, num_planes);
@@ -173,6 +173,16 @@ msGlamorInit(ScreenPtr pScreen)
                             write_pos * sizeof(scrpriv->render_modifiers));
         if (tmp) {
             scrpriv->render_modifiers = tmp;
+        }
+    }
+
+    if (config->modifier != ~0) {
+        void *tmp = calloc(1, sizeof(scrpriv->render_modifiers));
+        if (tmp) {
+            free(scrpriv->render_modifiers);
+            scrpriv->render_modifiers = tmp;
+            scrpriv->render_modifiers[0] = config->modifier;
+            scrpriv->num_render_modifiers = 1;
         }
     }
 

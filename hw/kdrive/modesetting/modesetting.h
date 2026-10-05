@@ -83,6 +83,7 @@ typedef struct _msScreenConf {
     Bool format_swap;
     Bool no_tile;
     Bool planar;
+    uint64_t modifier;
     KdGlamorInfo glamor_info;
 } MsScreenConf;
 

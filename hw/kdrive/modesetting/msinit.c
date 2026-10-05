@@ -27,6 +27,7 @@ static MsScreenConf *msCurrScreen = NULL;
 
 static const MsScreenConf msDefaultConfig = {
                                              .shadow = TRUE,
+                                             .modifier = ~0,
                                              .glamor_info = {.fake_rate = -1, .use_gbm = TRUE,},
                                             };
 
@@ -177,6 +178,10 @@ msLogScreenInfo(const MsScreenConf *config, const char *dev_path, int screen_num
                !config->no_tile ? "Try to" : "Do not");
     LogMessage(X_INFO, "Xmodesetting(%d): %s planar front buffer modifiers\n", screen_num,
                config->planar ? "Allow" : "Reject");
+    if (config->modifier != ~0) {
+        LogMessage(X_INFO, "Xmodesetting(%d): Requested front buffer modifier: 0x%lx\n", screen_num,
+                   config->modifier);
+    }
     KdGlamorLogScreenInfo(&config->glamor_info, screen_num);
     LogMessage(X_INFO, "\n");
 }
@@ -248,6 +253,8 @@ ddxUseMsg(void)
         ("-notile              Don't use a tiled front buffer\n");
     ErrorF
         ("-planar              Allow planar modifiers for the front bo\n");
+    ErrorF
+        ("-modifier <val>      Request a particular modifier for the front bo\n");
     ErrorF("\n");
 }
 
@@ -292,6 +299,15 @@ ddxProcessArgument(int argc, char **argv, int i)
     if (!strcmp(argv[i], "-planar")) {
         msCurrScreen->planar = TRUE;
         return 1;
+    }
+
+    if (!strcmp(argv[i], "-modifier")) {
+        if ((i + 1 < argc) && (argv[i + 1][0] != '-')) {
+            msCurrScreen->modifier = strtol(argv[i + 1], NULL, 0);
+            return 2;
+        }
+        UseMsg();
+        exit(1);
     }
 
     glamor_arg = KdGlamorParse(&msCurrScreen->glamor_info, argc, argv, i);
