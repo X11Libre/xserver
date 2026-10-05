@@ -120,7 +120,7 @@ Bool msUnmapFramebuffer(KdScreenInfo * screen);
 Bool msSetShadow(ScreenPtr pScreen);
 
 struct gbm_bo*
-modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth);
+modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth, Bool probe);
 
 /* ms_cursor.c */
 
