@@ -152,6 +152,8 @@ msGlamorInit(ScreenPtr pScreen)
             }
             scrpriv->render_modifiers[write_pos++] = scrpriv->render_modifiers[i];
         }
+    } else {
+        write_pos = scrpriv->num_render_modifiers;
     }
 
     if (write_pos == 0 ||
