@@ -643,6 +643,14 @@ static void glamor_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, Pixm
     glamor_pixmap_destroy_fbo(pPixmap);
 }
 
+Bool
+glamor_is_gles(ScreenPtr screen)
+{
+    glamor_screen_private *glamor_priv;
+    glamor_priv = glamor_get_screen_private(screen);
+    return glamor_priv->is_gles;
+}
+
 /* This function is used to free the glamor private screen's
  * resources. If the DDX driver is not set GLAMOR_USE_SCREEN,
  * then, DDX need to call this function at proper stage, if
