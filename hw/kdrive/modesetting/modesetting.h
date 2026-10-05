@@ -45,6 +45,10 @@ typedef struct _msCursPriv {
     int old_width;
     int old_height;
 
+    /* Size/Power Optimization */
+    int max_w;
+    int max_h;
+
     int xhot;
     int yhot;
 

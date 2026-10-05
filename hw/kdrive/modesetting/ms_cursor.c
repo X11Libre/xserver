@@ -51,8 +51,8 @@ msQueryBestSize(int class, unsigned short *pwidth, unsigned short *pheight,
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
     msCursPriv *pCurPriv = &scrpriv->cursor;
-    uint32_t width = gbm_bo_get_width(pCurPriv->bo);
-    uint32_t height = gbm_bo_get_width(pCurPriv->bo);
+    uint32_t width = pCurPriv->max_w;
+    uint32_t height = pCurPriv->max_h;
 
     switch (class) {
     case CursorShape:
@@ -71,26 +71,56 @@ msQueryBestSize(int class, unsigned short *pwidth, unsigned short *pheight,
     }
 }
 
-/* Adapted from kdrive ati_cursor.c RadeonLoadCursor */
+static void
+msResetCursor(msCursPriv *pCurPriv)
+{
+    gbm_bo_destroy(pCurPriv->bo);
+    free(pCurPriv->shadow);
+
+    pCurPriv->bo = NULL;
+    pCurPriv->shadow = NULL;
+    pCurPriv->pCursor = NULL;
+    pCurPriv->x = 0;
+    pCurPriv->y = 0;
+    pCurPriv->old_width = 0;
+    pCurPriv->old_height = 0;
+    pCurPriv->xhot = 0;
+    pCurPriv->yhot = 0;
+}
+
 static Bool
 msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
+    msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
     msCursPriv *pCurPriv = &scrpriv->cursor;
 
     uint32_t width = gbm_bo_get_width(pCurPriv->bo);
-    uint32_t height = gbm_bo_get_width(pCurPriv->bo);
+    uint32_t height = gbm_bo_get_height(pCurPriv->bo);
     uint32_t stride = gbm_bo_get_stride(pCurPriv->bo) / sizeof(uint32_t);
-    uint32_t *map = gbm_bo_get_map(pCurPriv->bo);
-    uint32_t *ram = map;
+    uint32_t *ram = gbm_bo_get_map(pCurPriv->bo);
 
-    if (scrpriv->randr == RR_Rotate_0 &&
+    if (pCursor->bits->width > width ||
+        pCursor->bits->height > height) {
+        if (pCurPriv->max_w > width || pCurPriv->max_h > height) {
+            struct gbm_bo *bo;
+again:
+            bo = gbm_create_cursor_bo(priv->gbm, pCurPriv->max_w, pCurPriv->max_h);
+            if (bo) {
+                msResetCursor(pCurPriv);
+                pCurPriv->bo = bo;
+                width = pCurPriv->max_w;
+                height = pCurPriv->max_h;
+                stride = gbm_bo_get_stride(pCurPriv->bo) / sizeof(uint32_t);
+                ram = gbm_bo_get_map(pCurPriv->bo);
+                LogMessage(X_INFO, "Xmodesetting(%d): Using a larger %dx%d hw cursor\n", pScreen->myNum, width, height);
+            }
+        }
+    } else if (scrpriv->randr == RR_Rotate_0 &&
         pCurPriv->randr == RR_Rotate_0 &&
-        pCurPriv->old_width && pCurPriv->old_height &&
-        (pCursor->bits->width <= width) &&
-        (pCursor->bits->height <= height)) {
+        pCurPriv->old_width && pCurPriv->old_height) {
         width = MAX(pCursor->bits->width, pCurPriv->old_width);
         width = ((width + 31) / 32) * 32;
         height = MAX(pCursor->bits->height, pCurPriv->old_height);
@@ -107,7 +137,17 @@ msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
     pCurPriv->old_width = pCursor->bits->width;
     pCurPriv->old_height = pCursor->bits->height;
 
-    return msShowCursor(pScreen);
+    if (!msShowCursor(pScreen)) {
+        if (pCurPriv->max_w > width || pCurPriv->max_h> height) {
+            /*
+             * There is no guarantee that the 64x64 cursor is supported.
+             * Try again with the largest cursor.
+             */
+            goto again;
+        }
+        return FALSE;
+    }
+    return TRUE;
 }
 
 static Bool
@@ -119,7 +159,7 @@ msShowCursor(ScreenPtr pScreen)
     msScrPriv *scrpriv = screen->driver;
     msCursPriv *pCurPriv = &scrpriv->cursor;
     uint32_t width = gbm_bo_get_width(pCurPriv->bo);
-    uint32_t height = gbm_bo_get_width(pCurPriv->bo);
+    uint32_t height = gbm_bo_get_height(pCurPriv->bo);
     int fd = gbm_device_get_fd(priv->gbm);
     uint32_t handle = gbm_bo_get_handle(pCurPriv->bo).u32;
 
@@ -229,9 +269,10 @@ msCursorInit(ScreenPtr pScreen)
     int fd = gbm_device_get_fd(priv->gbm);
     int width, height;
 
-    msGetCursorSizes(fd, &width, &height);
+    msGetCursorSizes(fd, &pCurPriv->max_w, &pCurPriv->max_h);
 
-    if (width <= 0 || height <= 0) {
+    /* Don't use such small hw cursors */
+    if (pCurPriv->max_w < 64 || pCurPriv->max_h < 64) {
         return FALSE;
     }
 
@@ -242,8 +283,13 @@ msCursorInit(ScreenPtr pScreen)
         }
     }
 
-    pCurPriv->bo = gbm_create_cursor_bo(priv->gbm, width, height);
-    if (!pCurPriv->bo) {
+    if ((pCurPriv->bo = gbm_create_cursor_bo(priv->gbm, 64, 64))) {
+        width = 64;
+        height = 64;
+    } else if ((pCurPriv->bo = gbm_create_cursor_bo(priv->gbm, pCurPriv->max_w, pCurPriv->max_h))) {
+        width = pCurPriv->max_w;
+        height = pCurPriv->max_h;
+    } else {
         return FALSE;
     }
 
