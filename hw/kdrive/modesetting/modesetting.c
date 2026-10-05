@@ -328,12 +328,10 @@ msMapFramebuffer(KdScreenInfo * screen)
         scrpriv->shadow = FALSE;
     } else if (scrpriv->is_24bpp) {
         scrpriv->shadow = TRUE;
-    } else if (config->shadow >= 0) {
-        scrpriv->shadow = config->shadow;
     } else if (scrpriv->randr != RR_Rotate_0) {
         scrpriv->shadow = TRUE;
     } else {
-        scrpriv->shadow = FALSE;
+        scrpriv->shadow = config->shadow;
     }
 
     KdComputePointerMatrix(&m, scrpriv->randr, screen->width, screen->height);

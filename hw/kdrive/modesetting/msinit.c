@@ -169,7 +169,7 @@ msLogScreenInfo(const MsScreenConf *config, const char *dev_path, int screen_num
 
     LogMessage(X_INFO, "Xmodesetting(%d): KMS device: %s\n", screen_num,
                dev_path ? dev_path : "not passed");
-    LogMessage(X_INFO, "Xmodesetting(%d): ShadowFB %s\n", screen_num,
+    LogMessage(X_INFO, "Xmodesetting(%d): ShadowFB %s for cpu-mapped front buffers\n", screen_num,
                config->shadow ? "enabled" : "disabled");
     LogMessage(X_INFO, "Xmodesetting(%d): Preferred format color ordering %s\n", screen_num,
                config->format_swap ? "BGR" : "RGB");
