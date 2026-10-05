@@ -138,6 +138,10 @@ glamor_set_pixmap_texture(PixmapPtr pixmap, unsigned int tex)
         glamor_destroy_fbo(glamor_priv, fbo);
     }
 
+    if (!tex) {
+        return TRUE;
+    }
+
     fbo = glamor_create_fbo_from_tex(glamor_priv, pixmap,
                                      pixmap->drawable.width,
                                      pixmap->drawable.height, tex, 0);

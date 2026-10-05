@@ -131,4 +131,8 @@ glamor_egl_get_display(EGLint type, void *native)
 
 int glamor_egl_get_fd(ScreenPtr screen);
 
+/* This should probably be _X_EXPORT'ed */
+void
+glamor_egl_untexture_pixmap(PixmapPtr pixmap, int type);
+
 #endif

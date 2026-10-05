@@ -655,6 +655,14 @@ glamor_egl_create_textured_pixmap_from_gbm_bo(PixmapPtr pixmap,
 #endif
 }
 
+void
+glamor_egl_untexture_pixmap(PixmapPtr pixmap, int type)
+{
+    glamor_egl_set_pixmap_image(pixmap, EGL_NO_IMAGE_KHR, FALSE /* used_modifiers */);
+    glamor_set_pixmap_texture(pixmap, 0);
+    glamor_set_pixmap_type(pixmap, type);
+}
+
 #if defined(GLAMOR_HAS_GBM) && defined(WITH_LIBDRM)
 static void
 glamor_get_name_from_bo(int gbm_fd, struct gbm_bo *bo, int *name)
