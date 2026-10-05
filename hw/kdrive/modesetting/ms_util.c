@@ -97,7 +97,6 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
-    struct gbm_bo *old_front;
     Bool wasEnabled = pScreenPriv->enabled;
     msScrPriv oldscr;
     PixmapPtr rootPixmap;
@@ -109,8 +108,6 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     }
 
     oldscr = *scrpriv;
-
-    old_front = scrpriv->front;
 
     msUnmapFramebuffer(screen);
 
@@ -161,15 +158,19 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     }
 
     if (!flip) {
-        gbm_bo_destroy(old_front);
+        gbm_bo_destroy(oldscr.front);
     }
     return TRUE;
 
 bail:
     msUnmapFramebuffer(screen);
-    old_front = scrpriv->front;
     *scrpriv = oldscr;
     msMapFramebuffer(screen);
+
+    /* Re-enable ShadowFB */
+    KdShadowUnset(screen->pScreen);
+    msSetShadow(screen->pScreen);
+
     msSetScreenSizes(screen->pScreen);
 
     /*
