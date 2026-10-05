@@ -352,15 +352,16 @@ jobs:
         needs: ubuntu-fetch-pkg
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+            LDFLAGS: "-Wl,--no-fatal-warnings"
         steps:
             - uses: actions/checkout@v6
             - uses: ./.github/actions/ubuntu-pkg-cache
-            - uses: vmactions/netbsd-vm@v1.2.3
+            - uses: vmactions/netbsd-vm@v1.5.0
               id: vm
               with:
-                  envs: 'MESON_ARGS'
+                  envs: 'MESON_ARGS LDFLAGS'
                   usesh: true
-                  release: '10.1'
+                  release: '11.0'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
     xserver-build-alpine:
