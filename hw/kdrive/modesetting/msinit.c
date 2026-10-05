@@ -173,6 +173,10 @@ msLogScreenInfo(const MsScreenConf *config, const char *dev_path, int screen_num
                config->shadow ? "enabled" : "disabled");
     LogMessage(X_INFO, "Xmodesetting(%d): Preferred format color ordering %s\n", screen_num,
                config->format_swap ? "BGR" : "RGB");
+    LogMessage(X_INFO, "Xmodesetting(%d): %s tile the front buffer\n", screen_num,
+               !config->no_tile ? "Try to" : "Do not");
+    LogMessage(X_INFO, "Xmodesetting(%d): %s planar front buffer modifiers\n", screen_num,
+               config->planar ? "Allow" : "Reject");
     KdGlamorLogScreenInfo(&config->glamor_info, screen_num);
     LogMessage(X_INFO, "\n");
 }

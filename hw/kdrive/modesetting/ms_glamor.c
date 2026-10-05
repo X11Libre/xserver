@@ -74,6 +74,7 @@ msGlamorCreateRes(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
+    MsScreenConf *config = screen->closure;
 
     struct gbm_format_name_desc desc = {0};
     uint32_t format;
@@ -97,6 +98,11 @@ msGlamorCreateRes(ScreenPtr pScreen)
     format_name = gbm_format_get_name(format, &desc);
     LogMessage(X_INFO, "Xmodesetting(%d): Front buffer depth: %d, bpp: %d, format: %s, modifier: 0x%lx\n",
                pScreen->myNum, screen->fb.depth, screen->fb.bitsPerPixel, format_name, modifier);
+    if (config->planar) {
+        msPriv *priv = screen->card->driver;
+        int num_planes = gbm_device_get_format_modifier_plane_count(priv->gbm, format, modifier);
+        LogMessage(X_INFO, "Xmodesetting(%d): Number of front buffer planes: %d\n", pScreen->myNum, num_planes);
+    }
     return TRUE;
 }
 
