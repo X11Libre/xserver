@@ -171,6 +171,7 @@ msGlamorInit(ScreenPtr pScreen)
                             write_pos * sizeof(scrpriv->render_modifiers));
         if (tmp) {
             scrpriv->render_modifiers = tmp;
+            scrpriv->num_render_modifiers = write_pos;
         }
     }
 

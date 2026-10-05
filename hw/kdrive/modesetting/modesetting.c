@@ -22,7 +22,7 @@ modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth)
 #ifdef GLAMOR
     msScrPriv *scrpriv = screen->driver;
     MsScreenConf *config = screen->closure;
-    Rotation randr = scrpriv ? scrpriv->randr : screen->randr;
+    Rotation randr = (scrpriv && scrpriv->randr) ? scrpriv->randr : screen->randr;
 
     if (screen->dumb) {
         need_map = TRUE;
