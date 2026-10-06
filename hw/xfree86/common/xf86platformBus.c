@@ -85,6 +85,7 @@ xf86_remove_platform_device(int dev_index)
 {
     int j;
 
+    seatd_libseat_close_graphics(xf86_platform_devices[dev_index].attribs->fd);
     config_odev_free_attributes(xf86_platform_devices[dev_index].attribs);
 
     for (j = dev_index; j < xf86_num_platform_devices - 1; j++)
