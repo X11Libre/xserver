@@ -51,6 +51,8 @@ SOFTWARE.
 #ifndef _XSERVER_INPUT_PRIV_H
 #define _XSERVER_INPUT_PRIV_H
 
+#include <stdbool.h>
+
 #include "include/cursor.h"
 #include "include/input.h"
 #include "include/inputstr.h"
@@ -472,8 +474,10 @@ Bool IsKeyboardDevice(DeviceIntPtr dev)
  * @param dev   device to be checked
  * @return TRUE if the device is a master
  */
-Bool InputDevIsMaster(DeviceIntPtr dev)
-    _X_ATTRIBUTE_NONNULL_ARG(1);
+static inline bool InputDevIsMaster(DeviceIntPtr dev)
+{
+    return dev->type == MASTER_POINTER || dev->type == MASTER_KEYBOARD;
+}
 
 /*
  * @brief check whether input device is floating
@@ -485,8 +489,10 @@ Bool InputDevIsMaster(DeviceIntPtr dev)
  * @param dev   device to check
  * @return TRUE if the device is in `floating` state
  */
-Bool InputDevIsFloating(DeviceIntPtr dev)
-    _X_ATTRIBUTE_NONNULL_ARG(1);
+static inline bool InputDevIsFloating(DeviceIntPtr dev)
+{
+    return !InputDevIsMaster(dev) && GetMaster(dev, MASTER_KEYBOARD) == NULL;
+}
 
 /*
  * @brief store timestamp as the device's last event time
