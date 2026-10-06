@@ -507,7 +507,7 @@ ProcessCommandLine(int argc, char *argv[])
         else if (strcmp(argv[i], "-dpi") == 0) {
             if (++i < argc)
                 if (strcmp(argv[i], "auto") == 0)
-                    autosetDPI = TRUE;
+                    autosetDPI = true;
                 else
                     monitorResolution = atoi(argv[i]);
             else
