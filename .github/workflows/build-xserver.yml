@@ -115,7 +115,7 @@ jobs:
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
                     ${{ env.X11_BUILD_DIR }}/goxproto
-                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
+                key: ${{ runner.name }}-x11-deps-mpbt
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: build and test
@@ -192,28 +192,6 @@ jobs:
                       "$runner" || rc=1
                   echo "::endgroup::"
                   exit "$rc"
-
-    abi-changes-check:
-        runs-on: ubuntu-latest
-        outputs:
-            abi_changed: ${{ steps.filter.outputs.abi_changed }}
-        steps:
-            - uses: actions/checkout@v6
-              with:
-                  fetch-depth: 0
-            - uses: dorny/paths-filter@v3
-              id: filter
-              with:
-                  filters: |
-                      abi_changed:
-                          - 'include/**'
-                          - 'meson.build'
-                          - 'meson_options.txt'
-                          - 'xorg-server.pc.in'
-                          - 'xlibre-server.pc.in'
-                          - 'xorg-server.m4'
-                          - 'hw/xfree86/xlibre-server.h.meson.in'
-                          - 'hw/xfree86/drivers/input/inputtest/xf86-input-inputtest-protocol.h'
 
     xserver-build-ubuntu-debug:
         env:
@@ -311,165 +289,6 @@ jobs:
                   path: |
                       valgrind-logs/*
                   if-no-files-found: ignore
-
-    ubuntu-deps-image:
-        # Content-addressed base image (apt deps + from-source prereqs baked in),
-        # consumed by build-sdk-image below. The tag is a hash of the image's
-        # build inputs (Dockerfile + the install scripts + conf.sh/util.sh), and
-        # we build only if that tag is missing — an unchanged image is reused on
-        # ANY branch (a few-second existence check, no ~15min rebuild); a branch
-        # that changes the deps automatically gets its own image, so the SDK it
-        # builds is never stale. :latest is only moved by master. Replaces the
-        # standalone ubuntu-deps-image.yml. Gated like build-sdk-image since the
-        # SDK is its only consumer.
-        runs-on: ubuntu-latest
-        needs: abi-changes-check
-        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
-        permissions:
-            contents: read
-            packages: write
-        outputs:
-            tag: ${{ steps.tag.outputs.tag }}
-        steps:
-            - uses: actions/checkout@v6
-            - id: tag
-              run: |
-                  echo "tag=$(cat .github/docker/ubuntu/Dockerfile \
-                                   .github/scripts/ubuntu/install-pkg.sh \
-                                   .github/scripts/ubuntu/install-prereq.sh \
-                                   .github/scripts/conf.sh \
-                                   .github/scripts/util.sh \
-                               | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
-            - name: Log in to GHCR
-              run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-            - name: Build ubuntu deps image if missing
-              run: |
-                  set -eux
-                  img="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/xserver-ubuntu-build"
-                  tag="${{ steps.tag.outputs.tag }}"
-                  if docker manifest inspect "$img:$tag" >/dev/null 2>&1; then
-                      echo "image $img:$tag already exists — reusing"
-                  else
-                      docker build -t "$img:$tag" -f .github/docker/ubuntu/Dockerfile .
-                      docker push "$img:$tag"
-                      if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-                          docker tag "$img:$tag" "$img:latest"
-                          docker push "$img:latest"
-                      fi
-                  fi
-
-    build-sdk-image:
-        # Build the X-server + SDK from this commit and push it to GHCR as
-        # xserver-sdk:<sha>; the driver builds below run in that image. Replaces
-        # the old drivers-prepare-ubuntu + actions/cache, whose SDK cache could
-        # be evicted under load before the queued driver jobs restored it (then
-        # the whole pipeline had to be re-run by hand). A registry image is not
-        # subject to that LRU eviction.
-        runs-on: ubuntu-latest
-        needs:
-            - ubuntu-fetch-pkg
-            - abi-changes-check
-            - ubuntu-deps-image
-        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
-        permissions:
-            contents: read
-            packages: write
-        steps:
-            - name: Check out repository code
-              uses: actions/checkout@v6
-
-            - name: Log in to GHCR
-              run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
-            - name: Build and push SDK image (xserver-sdk:<sha>)
-              run: |
-                  set -eux
-                  owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
-                  base="ghcr.io/$owner/xserver-ubuntu-build:${{ needs.ubuntu-deps-image.outputs.tag }}"
-                  img="ghcr.io/$owner/xserver-sdk"
-                  docker build --build-arg BASE="$base" -t "$img:${GITHUB_SHA}" -f .github/docker/sdk/Dockerfile .
-                  docker push "$img:${GITHUB_SHA}"
-
-    drivers-build-ubuntu:
-        needs:
-            - build-sdk-image
-            - abi-changes-check
-        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
-        runs-on: ubuntu-latest
-        # The SDK + prereqs live at /opt/x11 in the image; override the
-        # workflow-level X11_PREFIX (which points at the host /home/runner path)
-        # so conf.sh derives PKG_CONFIG_PATH from the in-image prefix.
-        env:
-            X11_PREFIX: /opt/x11
-            X11_BUILD_DIR: /opt/x11-build
-        # Run in the per-commit SDK image: the xserver SDK + all build deps are
-        # baked in under /opt/x11, so each driver job only compiles the driver
-        # (no apt, no prereq build, no cache restore). The image is public, so it
-        # pulls anonymously — no credentials / packages permission needed.
-        container:
-            image: ghcr.io/x11libre/xserver-sdk:${{ github.sha }}
-        strategy:
-            matrix:
-                driver:
-                    - input-elographics:25.0.0
-                    - input-evdev:25.0.0
-                    - input-joystick:25.0.0
-                    - input-keyboard:25.0.0
-                    - input-libinput:25.0.0
-                    - input-mouse:25.0.0
-                    - input-synaptics:25.0.0
-                    - input-vmmouse:25.0.0
-                    - input-void:25.0.0
-                    - input-wacom:25.0.0
-                    - video-amdgpu:25.0.0
-                    - video-apm:25.0.0
-                    - video-ark:25.0.0
-                    - video-ast:25.0.0
-                    - video-ati:25.0.0
-                    - video-chips:25.0.0
-                    - video-cirrus:25.0.0
-                    - video-dummy:25.0.0
-                    - video-fbdev:25.0.0
-                    - video-freedreno:25.0.0
-                    - video-geode:25.0.0
-                    - video-i128:25.0.0
-                    - video-i740:25.0.0
-                    - video-intel:25.0.1
-                    - video-mach64:25.0.0
-                    - video-mga:25.0.0
-                    - video-neomagic:25.0.0
-                    - video-nested:25.0.0
-                    - video-nouveau:25.0.0
-                    - video-nv:25.0.0
-                    - video-omap:25.0.0
-                    - video-qxl:25.0.0
-                    - video-r128:25.0.0
-                    - video-rendition:25.0.0
-                    - video-s3virge:25.0.0
-                    - video-savage:25.0.0
-                    - video-siliconmotion:25.0.0
-                    - video-sis:25.0.0
-                    - video-sisusb:25.0.0
-                    - video-suncg14:25.0.0
-                    - video-suncg3:25.0.0
-                    - video-suncg6:25.0.0
-                    - video-sunffb:25.0.0
-                    - video-suntcx:25.0.0
-                    - video-sunleo:25.0.0
-                    - video-tdfx:25.0.0
-                    - video-trident:25.0.0
-                    - video-vesa:25.0.0
-                    - video-vmware:25.0.0
-                    - video-v4l:25.0.1
-                    - video-vbox:25.0.0
-                    - video-voodoo:25.0.0
-                    - video-xgi:25.0.0
-        steps:
-            - name: Check out repository code
-              uses: actions/checkout@v4
-
-            - name: compile driver ${{ matrix.driver }}
-              run: .github/scripts/ubuntu/compile-driver-single.sh ${{ matrix.driver }}
 
     xserver-build-mingw32-ubuntu:
         runs-on: ubuntu-latest
@@ -1100,7 +919,7 @@ jobs:
             - xserver-build-alpine
             - xserver-build-ubuntu
             - xserver-build-ubuntu-debug
-            - drivers-build-ubuntu
+            - xserver-and-drivers-mpbt
             - xserver-build-mingw32-ubuntu
             - xserver-build-macos
             - xserver-build-freebsd
@@ -1117,3 +936,80 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   tag: ${{ github.ref_name }}
               run: .github/scripts/github/make-release
+
+    xserver-and-drivers-mpbt:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                package:
+                    - input-elographics
+                    - input-evdev
+                    - input-joystick
+                    - input-keyboard
+                    - input-libinput
+                    - input-mouse
+                    - input-synaptics
+                    - input-vmmouse
+                    - input-void
+                    - input-wacom
+                    - video-amdgpu
+                    - video-apm
+                    - video-ark
+                    - video-ast
+                    - video-ati
+                    - video-chips
+                    - video-cirrus
+                    - video-dummy
+                    - video-fbdev
+                    - video-freedreno
+                    - video-geode
+                    - video-i128
+                    - video-i740
+                    - video-intel
+                    - video-mach64
+                    - video-mga
+                    - video-neomagic
+                    - video-nested
+                    - video-nouveau
+                    - video-nv
+                    - video-omap
+                    - video-qxl
+                    - video-r128
+                    - video-rendition
+                    - video-s3virge
+                    - video-savage
+                    - video-siliconmotion
+                    - video-sisusb
+                    - video-sis
+                    - video-suncg14
+                    - video-suncg3
+                    - video-suncg6
+                    - video-sunffb
+                    - video-sunleo
+                    - video-suntcx
+                    - video-tdfx
+                    - video-trident
+                    - video-v4l
+                    - video-vbox
+                    - video-vesa
+                    - video-vmware
+                    - video-voodoo
+                    - video-xgi
+        name: Driver ${{ matrix.package }} (MPBT)
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: install mpbt package
+              run: go install github.com/metux/mpbt/cmd/mpbt-builder@v0.1.2
+
+            - name: build driver ${{ matrix.package }}
+              run: |
+                    ~/go/bin/mpbt-builder \
+                        -root . \
+                        -solution .mpbt/cf/xlibre/solutions/github-ubuntu-drivers.yaml \
+                        -solution-define build=xserver/xf86-${{ matrix.package }} \
+                        build

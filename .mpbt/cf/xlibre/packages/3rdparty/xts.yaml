@@ -1,0 +1,11 @@
+provides: x11/xts
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xlibre_git}/mirror.fdo.xts
+        ref:    ${ref}
+        depth:  100
+        fetch:
+          - refs/heads/*:refs/remotes/origin/*
+buildsystem: autotools
+ref: aae51229af810efba24412511f60602fab53eded

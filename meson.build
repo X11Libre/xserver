@@ -917,7 +917,9 @@ if build_xorg_sdk
     if host_machine.system() in ['cygwin', 'windows']
         sdkconfig.set('XORG_DRIVER_LIBS', '-lXorg.exe -L\${moduledir} -lshadow -no-undefined')
     endif
+endif
 
+if build_xorg_sdk
     configure_file(
         input: 'xorg-server.pc.in',
         output: 'xorg-server.pc',

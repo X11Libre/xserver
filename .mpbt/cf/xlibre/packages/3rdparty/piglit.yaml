@@ -1,0 +1,10 @@
+provides: x11/piglit
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xlibre_git}/mirror.fdo.piglit
+        ref:    ${ref}
+        fetch:
+          - refs/heads/*:refs/remotes/origin/*
+buildsystem: none
+ref: 28d1349844eacda869f0f82f551bcd4ac0c4edfe
