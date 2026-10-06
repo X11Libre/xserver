@@ -32,6 +32,44 @@ class QueryVersionRequest:
 
 
 @dataclass
+class AttachRequest:
+    """ShmAttach request (SysV shared memory)."""
+
+    opcode: int
+    shmseg: int
+    shmid: int
+    read_only: bool = False
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH II Bxxx",
+            self.opcode,
+            ShmAttach,
+            4,
+            self.shmseg,
+            self.shmid,
+            1 if self.read_only else 0,
+        )
+
+
+@dataclass
+class DetachRequest:
+    """ShmDetach request."""
+
+    opcode: int
+    shmseg: int
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH I",
+            self.opcode,
+            ShmDetach,
+            2,
+            self.shmseg,
+        )
+
+
+@dataclass
 class CreateSegmentRequest:
     """ShmCreateSegment request.
 
