@@ -83,3 +83,42 @@ class QueryClientIdsRequest:
             num_specs,
         )
         return header + spec_data + b"\x00" * pad_len
+
+
+@dataclass
+class QueryResourceBytesRequest:
+    """XResQueryResourceBytes request.
+
+    Followed by numSpecs xXResResourceIdSpec entries (8 bytes each:
+    resource CARD32 + type CARD32).
+    """
+
+    opcode: int
+    client: int = 0
+    specs: list[tuple[int, int]] = field(default_factory=list)  # (resource, type)
+    num_specs_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        num_specs = (
+            self.num_specs_override
+            if self.num_specs_override is not None
+            else len(self.specs)
+        )
+
+        spec_data = b""
+        for resource, rtype in self.specs:
+            spec_data += struct.pack(f"{byte_order}II", resource, rtype)
+
+        total = 12 + len(spec_data)
+        pad_len = (4 - total % 4) % 4
+        length = (total + pad_len) // 4
+
+        header = struct.pack(
+            f"{byte_order}BBH II",
+            self.opcode,
+            XResQueryResourceBytes,
+            length,
+            self.client,
+            num_specs,
+        )
+        return header + spec_data + b"\x00" * pad_len
