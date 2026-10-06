@@ -352,18 +352,6 @@ IsKeyboardDevice(DeviceIntPtr dev)
         ((dev->key && dev->kbdfeed) && !IsPointerDevice(dev));
 }
 
-Bool
-InputDevIsMaster(DeviceIntPtr dev)
-{
-    return dev->type == MASTER_POINTER || dev->type == MASTER_KEYBOARD;
-}
-
-Bool
-InputDevIsFloating(DeviceIntPtr dev)
-{
-    return !InputDevIsMaster(dev) && GetMaster(dev, MASTER_KEYBOARD) == NULL;
-}
-
 /**
  * Max event opcode.
  */
