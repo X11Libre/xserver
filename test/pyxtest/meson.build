@@ -22,7 +22,7 @@ if pytest.found()
     endif
 
     # Tell the test suite if the server was built with AddressSanitizer
-    if get_option('b_sanitize').contains('address')
+    if 'address' in get_option('b_sanitize')
         pyxtest_env.set('XSERVER_ASAN', '1')
     endif
 
@@ -67,6 +67,8 @@ if pytest.found()
         'test_xi.py',
         'test_xkb.py',
         'test_xres.py',
+        'test_xtest.py',
+        'test_xv.py',
     ]
 
     test_list_data = configuration_data()
