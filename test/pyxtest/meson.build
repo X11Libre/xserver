@@ -50,7 +50,7 @@ if pytest.found()
     endif
 
     # This needs to be kept in sync with the test_foo.py files in the tree
-    tests_pyxtest = [
+tests_pyxtest = [
         'test_fb.py',
         'test_font.py',
         'test_glamor.py',
@@ -68,6 +68,7 @@ if pytest.found()
         'test_xkb.py',
         'test_xres.py',
         'test_xtest.py',
+        'test_xv.py',
     ]
 
     test_list_data = configuration_data()
