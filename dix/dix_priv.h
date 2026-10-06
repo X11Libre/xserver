@@ -72,6 +72,9 @@ extern bool enableFontServerConnections;
 extern size_t ConnectionInfoSize;
 extern size_t dixConnBlockScreenStart(const char *connInfo);
 
+/* only exported for in-tree drivers, not part of public SDK */
+extern _X_EXPORT bool autosetDPI;
+
 /*
  * @brief callback right after one screen's root window has been initialized
  *
