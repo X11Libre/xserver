@@ -67,6 +67,7 @@ if pytest.found()
         'test_xi.py',
         'test_xkb.py',
         'test_xres.py',
+        'test_xtest.py',
     ]
 
     test_list_data = configuration_data()
