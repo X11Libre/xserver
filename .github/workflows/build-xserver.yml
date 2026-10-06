@@ -13,8 +13,8 @@ env:
 
 on:
     push:
-      branches-ignore:
-        - 'pr/**'
+      branches:
+        - '**'
     pull_request:
       branches:
         - master
