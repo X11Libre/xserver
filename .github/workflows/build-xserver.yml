@@ -13,12 +13,7 @@ env:
 
 on:
     push:
-      branches-ignore:
-        - 'pr/**'
     pull_request:
-      branches:
-        - master
-        - release/**
 
 # If a ref is pushed again (or a PR gets a new commit) while its previous run is
 # still in flight, cancel the stale run — only the newest commit needs building.
