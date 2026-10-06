@@ -59,6 +59,7 @@
 /* This stub can be safely removed once we can
  * split input and GPU parts in hotplug.h et al. */
 #include "../../xfree86/os-support/linux/systemd-logind.h"
+#include "../../xfree86/common/seatd-libseat.h"
 
 typedef struct _kdDepths {
     CARD8 depth;
@@ -1216,5 +1217,12 @@ void
 systemd_logind_release_fd(int major, int minor, int fd)
 {
     close(fd);
+}
+#endif
+
+#ifdef SEATD_LIBSEAT
+void
+seatd_libseat_close_graphics(int fd)
+{
 }
 #endif

@@ -38,6 +38,7 @@
 #include "config-backends.h"
 
 #include "../hw/xfree86/os-support/linux/systemd-logind.h"
+#include "../hw/xfree86/common/seatd-libseat.h"
 
 void
 config_pre_init(void)
@@ -118,8 +119,10 @@ config_odev_allocate_attributes(void)
 void
 config_odev_free_attributes(struct OdevAttributes *attribs)
 {
-    if (attribs->fd != -1)
+    if (attribs->fd != -1) {
+        seatd_libseat_close_graphics(attribs->fd);
         systemd_logind_release_fd(attribs->major, attribs->minor, attribs->fd);
+    }
     free(attribs->path);
     free(attribs->syspath);
     free(attribs->busid);
