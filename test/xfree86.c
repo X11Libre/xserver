@@ -27,11 +27,112 @@
 #include <dix-config.h>
 
 #include <assert.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "xf86.h"
 #include "xf86Parser.h"
+#include "xf86DDC.h"
+#include "edid.h"
 
 #include "tests-common.h"
+
+static void
+edid_set_checksum(unsigned char *block)
+{
+    int i, sum = 0;
+
+    for (i = 0; i < 127; i++)
+        sum += block[i];
+    block[127] = (unsigned char) ((256 - (sum & 0xff)) & 0xff);
+}
+
+static void
+fill_range_descriptor(unsigned char *d, int min_h, int max_h, int min_v, int max_v)
+{
+    memset(d, 0, 18);
+    d[3] = 0xFD;                /* DS_RANGES */
+    d[5] = (unsigned char) min_v;
+    d[6] = (unsigned char) max_v;
+    d[7] = (unsigned char) min_h;
+    d[8] = (unsigned char) max_h;
+    d[9] = 20;                  /* max pixel clock ~205 MHz */
+    d[11] = 0x0A;               /* padded with spaces per EDID */
+    memset(d + 12, 0x20, 6);
+}
+
+/*
+ * Craft an EDID with more Display-Range (DS_RANGES) descriptors than
+ * MonRec.hsync[] / vrefresh[] can hold: 4 in the base block plus 6 in a
+ * CEA-861 extension (CEA_EXT_DET_TIMING_NUM).
+ */
+static void
+build_overlong_ranges_edid(unsigned char *edid)
+{
+    int i;
+
+    memset(edid, 0, 256);
+
+    /* Header */
+    edid[0] = 0x00;
+    memset(edid + 1, 0xFF, 6);
+    edid[7] = 0x00;
+
+    /* EDID 1.3 */
+    edid[18] = 1;
+    edid[19] = 3;
+
+    /* Digital input, 30x20 cm */
+    edid[20] = 0x80;
+    edid[21] = 30;
+    edid[22] = 20;
+    edid[23] = 0x78;
+
+    /* Four range descriptors in the base detailed-timing slots (offset 54) */
+    for (i = 0; i < 4; i++)
+        fill_range_descriptor(edid + 54 + i * 18, 30 + i, 80 + i, 50 + i, 75 + i);
+
+    edid[126] = 1;              /* one extension block */
+    edid_set_checksum(edid);
+
+    /* CEA-861 extension: no data blocks, six detailed descriptors */
+    edid[128] = 0x02;           /* CEA_EXT */
+    edid[129] = 0x03;
+    edid[130] = 4;              /* dt_offset: descriptors start immediately */
+    edid[131] = 0;
+    for (i = 0; i < 6; i++)
+        fill_range_descriptor(edid + 132 + i * 18,
+                              40 + i, 90 + i, 60 + i, 85 + i);
+    edid_set_checksum(edid + 128);
+}
+
+static void
+xfree86_edid_ds_ranges_array_bound(void)
+{
+    unsigned char edid[256];
+    xf86MonPtr ddc;
+    MonRec monitor = { 0 };
+    DisplayModePtr mode;
+
+    build_overlong_ranges_edid(edid);
+
+    ddc = xf86InterpretEEDID(0, edid);
+    assert(ddc);
+    assert(ddc->no_sections == 1);
+
+    xf86EdidMonitorSet(0, &monitor, ddc);
+
+    assert(monitor.nHsync <= MAX_HSYNC);
+    assert(monitor.nVrefresh <= MAX_VREFRESH);
+    assert(monitor.nHsync == MAX_HSYNC);
+    assert(monitor.nVrefresh == MAX_VREFRESH);
+
+    while (monitor.Modes) {
+        mode = monitor.Modes;
+        xf86DeleteMode(&monitor.Modes, mode);
+    }
+    free(ddc);
+}
 
 static void
 xfree86_option_list_duplicate(void)
@@ -112,6 +213,7 @@ xfree86_test(void)
     static const testfunc_t testfuncs[] = {
         xfree86_option_list_duplicate,
         xfree86_add_comment,
+        xfree86_edid_ds_ranges_array_bound,
         NULL,
     };
     return testfuncs;
