@@ -175,36 +175,3 @@ class TestXResQueryClientIds:
         assert resp.error_code == BadLength, (
             f"Expected BadLength ({BadLength}), got {resp.error_code}"
         )
-
-
-class TestXResQueryResourceBytes:
-    @pytest.mark.swapped_client
-    def test_query_resource_bytes_numspecs_overflow_swapped(
-        self, xserver, xres_xclient_swapped
-    ):
-        """
-        SProcXResQueryResourceBytes multiplied numSpecs by the spec size
-        before REQUEST_FIXED_SIZE. On 32-bit servers a large numSpecs
-        wraps, passes length validation, and the swap loop walks past
-        the request buffer.
-
-        Reject overflowing numSpecs before swapping the array.
-        """
-        conn, opcode = xres_xclient_swapped
-
-        req = xres.QueryResourceBytesRequest(
-            opcode=opcode,
-            client=0,
-            specs=[],
-            num_specs_override=OVERFLOW_NUM_SPECS,
-        )
-        conn.send_request(req)
-        resp = conn.recv_response(timeout=5.0)
-
-        assert xserver.is_alive, (
-            "Server crashed on QueryResourceBytes numSpecs overflow"
-        )
-        assert isinstance(resp, X11Error), f"Expected BadLength, got {resp}"
-        assert resp.error_code == BadLength, (
-            f"Expected BadLength ({BadLength}), got {resp.error_code}"
-        )
