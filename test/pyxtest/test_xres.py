@@ -6,23 +6,38 @@ import struct
 
 import pytest
 from proto import xres
-from xclient import Extension, X11Reply
+from proto.x11 import BadLength
+from xclient import Extension, X11Error, X11Reply
+
+# numSpecs just past UINT32_MAX / sizeof(xXResClientIdSpec|xXResResourceIdSpec)
+# (both specs are 8 bytes). On 32-bit this wraps the request-size multiply.
+OVERFLOW_NUM_SPECS = 0x20000000
+
+
+def init_xres(conn):
+    ext = conn.query_extension(Extension.XRES)
+    if not ext:
+        pytest.skip("X-Resource extension not available")
+
+    req = xres.QueryVersionRequest(opcode=ext.opcode)
+    conn.send_request(req)
+    resp = conn.recv_response(timeout=5.0)
+    if not isinstance(resp, X11Reply):
+        pytest.skip("XRes QueryVersion failed")
+
+    return conn, ext.opcode
+
+
+@pytest.fixture
+def xres_xclient(xclient):
+    """Provide an xclient with X-Resource initialized."""
+    return init_xres(xclient)
 
 
 @pytest.fixture
 def xres_xclient_swapped(xclient_swapped):
     """Provide a byte-swapped xclient with X-Resource initialized."""
-    ext = xclient_swapped.query_extension(Extension.XRES)
-    if not ext:
-        pytest.skip("X-Resource extension not available")
-
-    req = xres.QueryVersionRequest(opcode=ext.opcode)
-    xclient_swapped.send_request(req)
-    resp = xclient_swapped.recv_response(timeout=5.0)
-    if not isinstance(resp, X11Reply):
-        pytest.skip("XRes QueryVersion failed")
-
-    return xclient_swapped, ext.opcode
+    return init_xres(xclient_swapped)
 
 
 class TestXResQueryClientIds:
@@ -135,4 +150,61 @@ class TestXResQueryClientIds:
             f"expected {target_xid:#010x}. "
             f"The swap check used client->swapped instead of "
             f"sendClient->swapped."
+        )
+
+    def test_query_client_ids_numspecs_overflow(self, xserver, xres_xclient):
+        """
+        On 32-bit servers, numSpecs * sizeof(xXResClientIdSpec) can wrap
+        before REQUEST_FIXED_SIZE. A header-only request with a huge
+        numSpecs then walks past the request buffer in Proc or SProc.
+
+        Reject numSpecs that cannot be represented in the size calculation.
+        """
+        conn, opcode = xres_xclient
+
+        req = xres.QueryClientIdsRequest(
+            opcode=opcode,
+            specs=[],
+            num_specs_override=OVERFLOW_NUM_SPECS,
+        )
+        conn.send_request(req)
+        resp = conn.recv_response(timeout=5.0)
+
+        assert xserver.is_alive, "Server crashed on QueryClientIds numSpecs overflow"
+        assert isinstance(resp, X11Error), f"Expected BadLength, got {resp}"
+        assert resp.error_code == BadLength, (
+            f"Expected BadLength ({BadLength}), got {resp.error_code}"
+        )
+
+
+class TestXResQueryResourceBytes:
+    @pytest.mark.swapped_client
+    def test_query_resource_bytes_numspecs_overflow_swapped(
+        self, xserver, xres_xclient_swapped
+    ):
+        """
+        SProcXResQueryResourceBytes multiplied numSpecs by the spec size
+        before REQUEST_FIXED_SIZE. On 32-bit servers a large numSpecs
+        wraps, passes length validation, and the swap loop walks past
+        the request buffer.
+
+        Reject overflowing numSpecs before swapping the array.
+        """
+        conn, opcode = xres_xclient_swapped
+
+        req = xres.QueryResourceBytesRequest(
+            opcode=opcode,
+            client=0,
+            specs=[],
+            num_specs_override=OVERFLOW_NUM_SPECS,
+        )
+        conn.send_request(req)
+        resp = conn.recv_response(timeout=5.0)
+
+        assert xserver.is_alive, (
+            "Server crashed on QueryResourceBytes numSpecs overflow"
+        )
+        assert isinstance(resp, X11Error), f"Expected BadLength, got {resp}"
+        assert resp.error_code == BadLength, (
+            f"Expected BadLength ({BadLength}), got {resp.error_code}"
         )
