@@ -46,6 +46,7 @@ extern void seatd_libseat_fini(void);
  **/
 _X_EXPORT
 extern int seatd_libseat_open_graphics(const char *path);
+_X_EXPORT
 extern void seatd_libseat_close_graphics(int fd);
 extern void seatd_libseat_open_device(InputInfoPtr p, int *fd, Bool *paus);
 extern void seatd_libseat_close_device(InputInfoPtr p);
