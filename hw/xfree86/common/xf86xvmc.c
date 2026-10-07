@@ -43,6 +43,7 @@
 #include "xf86xvpriv.h"
 #include "xf86xvmc.h"
 
+#ifdef XvMCExtension
 typedef struct {
     int num_adaptors;
     XF86MCAdaptorPtr *adaptors;
@@ -206,6 +207,16 @@ xf86XvMCScreenInit(ScreenPtr pScreen,
 
     return TRUE;
 }
+#else /* !XvMCExtension */
+Bool
+xf86XvMCScreenInit(ScreenPtr pScreen, int num_adaptors, XF86MCAdaptorPtr *adaptors)
+{
+    (void) pScreen;
+    (void) num_adaptors;
+    (void) adaptors;
+    return FALSE;
+}
+#endif /* XvMCExtension */
 
 XF86MCAdaptorPtr
 xf86XvMCCreateAdaptorRec(void)
