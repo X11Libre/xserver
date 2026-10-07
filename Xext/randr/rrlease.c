@@ -331,6 +331,18 @@ leaseReturned:
     xorg_list_add(&lease->list, &scr_priv->leases);
 
     if (!AddResource(stuff->lid, RRLeaseType, lease)) {
+        /*
+         * lease was already linked into scr_priv->leases above.
+         * RRLeaseDestroyResource() (the delete callback AddResource()
+         * would invoke on a *successfully-registered* resource) only
+         * clears lease->id -- it doesn't unlink or free the lease, so
+         * without this, a lease that never got a live XID would stay on
+         * scr_priv->leases forever, permanently marking its outputs/crtcs
+         * as leased (RROutputIsLeased()/RRCrtcIsLeased()) with no way for
+         * the client to free it. Mirror the WriteFdToClient() failure
+         * branch below, which already does this correctly.
+         */
+        RRTerminateLease(lease);
         close(fd);
         return BadAlloc;
     }
