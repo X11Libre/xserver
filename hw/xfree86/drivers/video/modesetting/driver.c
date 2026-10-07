@@ -261,6 +261,15 @@ ms_try_open(const char *dev)
 }
 
 static int
+ms_close_hw(int fd)
+{
+#ifdef SEATD_LIBSEAT
+    seatd_libseat_close_graphics(fd);
+#endif
+    return close(fd);
+}
+
+static int
 open_hw(const char *dev)
 {
     int fd;
@@ -286,7 +295,7 @@ open_hw(const char *dev)
                         break;
                     }
 
-                    close(fd);
+                    ms_close_hw(fd);
                     fd = -1;
                 }
             }
@@ -345,7 +354,7 @@ probe_hw(const char *dev, struct xf86_platform_device *platform_dev)
     if (fd != -1) {
         int ret = check_outputs(fd, NULL);
 
-        close(fd);
+        ms_close_hw(fd);
         return ret;
     }
     return FALSE;
@@ -380,7 +389,7 @@ probe_hw_pci(const char *dev, struct pci_device *pdev)
     sv.drm_dd_major = -1;
     sv.drm_dd_minor = -1;
     if (drmSetInterfaceVersion(fd, &sv)) {
-        close(fd);
+        ms_close_hw(fd);
         return FALSE;
     }
 
@@ -390,7 +399,7 @@ probe_hw_pci(const char *dev, struct pci_device *pdev)
     if (id && devid && !strcmp(id, devid))
         ret = check_outputs(fd, NULL);
 
-    close(fd);
+    ms_close_hw(fd);
     free(id);
     free(devid);
     return ret;
@@ -1119,7 +1128,7 @@ FreeScreen(ScrnInfoPtr pScrn)
                 if (!(ms->pEnt->location.type == BUS_PLATFORM &&
                       (ms->pEnt->location.id.plat->flags & XF86_PDEV_SERVER_FD)))
 #endif
-                    ret = close(ms->fd);
+                    ret = ms_close_hw(ms->fd);
             (void) ret;
             ms_ent->fd = 0;
         }
