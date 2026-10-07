@@ -456,6 +456,81 @@ class TestXkbSetGeometry:
         )
 
 
+class TestXkbChangeKeycodeRange:
+    """Tests for XKB ChangeKeycodeRange vulnerabilities."""
+
+    @pytest.mark.asan
+    def test_names_keys_oob_write(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-31941: Incomplete fix regression in XkbChangeKeycodeRange.
+
+        Commit a3171732d ("xkb: Always use MAP_LENGTH keymap size")
+        converted most XKB allocations to use MAP_LENGTH (256) but missed
+        XkbAllocNames(), which still allocates names->keys to
+        max_key_code + 1. XkbChangeKeycodeRange() assumes MAP_LENGTH and
+        memsets up to index 255, overflowing the undersized buffer.
+
+        The test loads a keycodes component with max_key_code < 255 via
+        GetKbdByName, then sends SetMap with maxKeyCode=255 to trigger the
+        grow branch in XkbChangeKeycodeRange.
+        """
+        xclient, opcode = xkb_xclient
+
+        # XkbGBN_AllComponentsMask
+        XkbGBN_AllComponentsMask = 0x00FF
+
+        # Build GetKbdByName request with sun(type6) keycodes
+        # Component names: keymap(empty), keycodes=sun(type6), types(empty),
+        #                  compat(empty), symbols(empty), geometry(empty)
+        kc_name = b"sun(type6)"
+        names = (
+            b"\x00"  # keymap (empty)
+            + bytes([len(kc_name)])
+            + kc_name  # keycodes
+            + b"\x00"  # types (empty)
+            + b"\x00"  # compat (empty)
+            + b"\x00"  # symbols (empty)
+            + b"\x00"  # geometry (empty)
+        )
+
+        req = xkb.GetKbdByNameRequest(
+            opcode=opcode,
+            need=XkbGBN_AllComponentsMask,
+            want=XkbGBN_AllComponentsMask,
+            load=1,
+            payload=names,
+        )
+        xclient.send_request(req)
+        resp = xclient.recv_response(timeout=5.0)
+
+        if isinstance(resp, X11Error):
+            pytest.skip(
+                f"GetKbdByName failed with error {resp.error_code} - "
+                "sun(type6) keycodes may not be available"
+            )
+
+        assert xserver.is_alive, "Server crashed during GetKbdByName"
+
+        # Now send SetMap with maxKeyCode=255 to trigger XkbChangeKeycodeRange
+        # present=0 means no actual map data, just triggers the grow
+        setmap_body = struct.pack("<HHH BB", xkb.XkbUseCoreKbd, 0, 0, 8, 255)
+        setmap_body += b"\x00" * 24  # remaining SetMap header fields
+        req2 = xkb.SetMapRequest(
+            opcode=opcode,
+            present=0,
+            min_key_code=8,
+            max_key_code=255,
+            payload=b"",
+        )
+        xclient.send_request(req2)
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - XkbChangeKeycodeRange names->keys OOB write: "
+            "XkbAllocNames allocates max_key_code+1 but memset uses MAP_LENGTH"
+        )
+
+
 class TestXkbSetCompatMap:
     """Tests for XKB SetCompatMap vulnerabilities."""
 
