@@ -28,6 +28,7 @@
 #include <X11/Xdefs.h>
 
 #include "include/misc.h"                         /* for TRUE/FALSE */
+#include <setjmp.h>
 
 typedef void (*busfault_notify_ptr) (void *context);
 
@@ -40,6 +41,15 @@ busfault_register_mmap(void *addr, size_t size, busfault_notify_ptr notify, void
 
 void
 busfault_unregister(struct busfault *busfault);
+
+/*
+ * If jmp is non-NULL when a SIGBUS hits this mapping, the handler
+ * siglongjmps there instead of remapping and retrying the faulting
+ * instruction. Callers must use sigsetjmp(..., 1).
+ * Pass NULL to clear.
+ */
+void
+busfault_set_jmp(struct busfault *busfault, sigjmp_buf *jmp);
 
 void
 busfault_check(void);
