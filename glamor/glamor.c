@@ -960,6 +960,7 @@ static void glamor_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *u
     if (!(glamor_priv->flags & GLAMOR_NO_RENDER_ACCEL)) {
         glamor_sync_close(screen);
         glamor_composite_glyphs_fini(screen);
+        screen->GetImage = glamor_priv->saved_procs.get_image;
     }
 
     glamor_set_glvnd_vendor(screen, NULL);
