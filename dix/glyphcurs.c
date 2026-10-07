@@ -86,6 +86,10 @@ ServerBitsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm,
     char2b[1] = (unsigned char) (ch & 0xff);
 
     ScreenPtr masterScreen = dixGetMasterScreen();
+
+    if (!masterScreen)
+        return BadDrawable;
+
     pbits = calloc(BitmapBytePad(cm->width), cm->height);
     if (!pbits)
         return BadAlloc;
