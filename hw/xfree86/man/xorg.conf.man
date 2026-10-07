@@ -1957,6 +1957,14 @@ options mentioned above in the
 entry description can also be used here.
 .RE
 .TP 7
+.BI "Option \*qDPI\*q \*q" "resolution" \*q
+.TP 7
+.BI "Option \*qDPI\*q \*q" "xdpi ydpi" \*q
+This optional entry specifies the screen resolution in dots per inch (DPI).
+It may be specified either as a single value for both horizontal and vertical
+resolutions, or as two values specifying the horizontal and vertical DPI
+separately (delimited by whitespace, a comma, or 'x').
+.TP 7
 .BI "Option \*qDPMS\*q \*q" bool \*q
 This option controls whether the server should enable the DPMS extension
 for power management for this screen.  The default is to enable the

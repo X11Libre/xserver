@@ -842,6 +842,29 @@ xf86SetGamma(ScrnInfoPtr scrp, Gamma gamma)
 #undef MMPERINCH
 #define MMPERINCH 25.4
 
+Bool
+xf86ParseDpi(const char *str, int *x, int *y)
+{
+    int xval = 0, yval = 0;
+    int count;
+
+    if (!str)
+        return FALSE;
+
+    count = sscanf(str, "%d%*[,xX/ ]%d", &xval, &yval);
+    if (count <= 0 || xval <= 0)
+        return FALSE;
+
+    if (count == 1)
+        yval = xval;
+    else if (yval <= 0)
+        return FALSE;
+
+    *x = xval;
+    *y = yval;
+    return TRUE;
+}
+
 void
 xf86SetDpi(ScrnInfoPtr pScrn, int x, int y)
 {
@@ -850,6 +873,8 @@ xf86SetDpi(ScrnInfoPtr pScrn, int x, int y)
     int ddcWidthmm, ddcHeightmm;
     int widthErr, heightErr;
     xf86OutputPtr compat = xf86CompatOutput(pScrn);
+    const char *opt_dpi = NULL;
+    int opt_xdpi = 0, opt_ydpi = 0;
 
     /* XXX Maybe there is no need for widthmm/heightmm in ScrnInfoRec */
     pScrn->widthmm = pScrn->monitor->widthmm;
@@ -870,10 +895,27 @@ xf86SetDpi(ScrnInfoPtr pScrn, int x, int y)
         ddcWidthmm = ddcHeightmm = 0;
     }
 
+    if (pScrn->options)
+        opt_dpi = xf86FindOptionValue(pScrn->options, "DPI");
+    if (!opt_dpi && pScrn->monitor && pScrn->monitor->options)
+        opt_dpi = xf86FindOptionValue(pScrn->monitor->options, "DPI");
+    if (!opt_dpi && pScrn->confScreen && pScrn->confScreen->options)
+        opt_dpi = xf86FindOptionValue(pScrn->confScreen->options, "DPI");
+
+    if (opt_dpi && !xf86ParseDpi(opt_dpi, &opt_xdpi, &opt_ydpi)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "Invalid DPI option: \"%s\"\n", opt_dpi);
+    }
+
     if (monitorResolution > 0) {
         pScrn->xDpi = monitorResolution;
         pScrn->yDpi = monitorResolution;
         from = X_CMDLINE;
+    }
+    else if (opt_xdpi > 0 && opt_ydpi > 0) {
+        pScrn->xDpi = opt_xdpi;
+        pScrn->yDpi = opt_ydpi;
+        from = X_CONFIG;
     }
     else if (pScrn->widthmm > 0 || pScrn->heightmm > 0) {
         from = X_CONFIG;

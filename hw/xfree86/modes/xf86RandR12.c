@@ -806,6 +806,15 @@ xf86RandR12CreateScreenResources(ScreenPtr pScreen)
                 mmWidth = output->conf_monitor->mon_width;
                 mmHeight = output->conf_monitor->mon_height;
             }
+            else if (pScrn->xDpi > 0 && pScrn->yDpi > 0 &&
+                     (xf86FindOption(pScrn->options, "DPI") ||
+                      (output && output->conf_monitor &&
+                       xf86FindOption(output->conf_monitor->mon_option_lst, "DPI")) ||
+                      (pScrn->monitor &&
+                       xf86FindOption(pScrn->monitor->options, "DPI")))) {
+                mmWidth = width * 25.4 / pScrn->xDpi;
+                mmHeight = height * 25.4 / pScrn->yDpi;
+            }
             else if (autosetDPI && output &&
                 (output->mm_width > 0 &&
                  output->mm_height > 0)) {
