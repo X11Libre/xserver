@@ -2,9 +2,10 @@
 #
 # Tests for Present extension.
 
-import pytest
+import time
 
-from proto import present
+import pytest
+from proto import present, sync, x11
 from xclient import BadWindow, Extension, X11Error
 
 
@@ -131,4 +132,87 @@ class TestPresentNotify:
             f"PresentPixmap returned BadWindow error(s): "
             f"{bad_window_errors} - notify window IDs not "
             "byte-swapped in sproc_present_pixmap"
+        )
+
+    @pytest.mark.asan
+    def test_cross_window_notify_uaf(self, xserver, present_xclient):
+        """
+        ZDI-CAN-31830: Use-after-free write in Present cross-window
+        notify teardown.
+
+        A PresentPixmap request can include a notify list referencing
+        windows other than the target window. Each notify entry is
+        linked into both the vblank's notifies array and the
+        referenced window's notify list. When the notify-target
+        window (winB) is destroyed, we expect the notifies
+        to be cleaned up so that when the vblank is later torn
+        down (e.g. by destroying winA), we don't run into
+        any dangling pointers.
+
+        The bug requires an untriggered wait_fence to keep the vblank
+        alive across the window destructions.
+        """
+        conn = present_xclient
+        present_ext = conn.query_extension(Extension.PRESENT)
+        if not present_ext:
+            pytest.skip("Present extension not available")
+
+        sync_ext = conn.query_extension(Extension.SYNC)
+        if not sync_ext:
+            pytest.skip("SYNC extension not available")
+
+        # Negotiate SYNC version
+        req = sync.InitializeRequest(opcode=sync_ext.opcode)
+        conn.send_request(req)
+        conn.recv_response(timeout=5.0)
+
+        # Create two windows and a pixmap
+        win_a = conn.create_window()
+        win_b = conn.create_window()
+        pixmap = conn.create_pixmap()
+
+        # Create an untriggered fence to keep the vblank alive
+        fence_id = conn.alloc_id()
+        req = sync.CreateFenceRequest(
+            opcode=sync_ext.opcode,
+            drawable=conn.root_window,
+            fence_id=fence_id,
+            initially_triggered=0,
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # PresentPixmap on winA with notify targeting winB and an
+        # untriggered wait_fence. The fence prevents the vblank from
+        # completing, keeping the notify entries alive.
+        notify = present.PresentNotify(window=win_b, serial=1)
+        req = present.PixmapRequest(
+            opcode=present_ext.opcode,
+            window=win_a,
+            pixmap=pixmap,
+            serial=0,
+            wait_fence=fence_id,
+            notifies=[notify],
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # Destroy winB: present_clear_window_notifies runs, but
+        # without the fix it does not unlink the notify node.
+        req = x11.DestroyWindowRequest(window=win_b)
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # Destroy winA: triggers vblank teardown which calls
+        # present_destroy_notifies -> xorg_list_del on the dangling
+        # node -> UAF write.
+        req = x11.DestroyWindowRequest(window=win_a)
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - Present cross-window notify "
+            "use-after-free (ZDI-CAN-31830)"
         )
