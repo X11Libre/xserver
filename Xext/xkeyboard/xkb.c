@@ -1793,6 +1793,7 @@ CheckKeySyms(ClientPtr client,
         wire = (xkbSymMapWireDesc *) &pSyms[wire->nSyms];
     }
 
+    i = req->firstKeySym + req->nKeySyms;
     map = &xkb->map->key_sym_map[i];
     for (; i <= (unsigned) xkb->max_key_code; i++, map++) {
         register int g, nG, w;
