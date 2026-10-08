@@ -13,6 +13,7 @@ EPHEMERAL="
 	xvfb
 "
 
+apt-get update
 apt-get install -y \
 	$EPHEMERAL \
 	autoconf \
