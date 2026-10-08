@@ -59,6 +59,7 @@
 #include "xf86Xinput_priv.h"
 #include "xf86Config.h"
 #include "xf86Crtc.h"
+#include "seatd-libseat.h"
 
 int xf86_num_platform_devices;
 
@@ -547,6 +548,7 @@ static Bool doPlatformProbe(struct xf86_platform_device *dev, DriverPtr drvp,
     if (entity != -1) {
         if ((dev->flags & XF86_PDEV_SERVER_FD) && (!drvp->driverFunc ||
                 !drvp->driverFunc(NULL, SUPPORTS_SERVER_FDS, NULL))) {
+            seatd_libseat_close_graphics(dev->attribs->fd);
             systemd_logind_release_fd(dev->attribs->major, dev->attribs->minor, dev->attribs->fd);
             dev->attribs->fd = -1;
             dev->flags &= ~XF86_PDEV_SERVER_FD;

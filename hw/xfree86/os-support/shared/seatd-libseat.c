@@ -60,9 +60,15 @@ struct libseat_info {
      * provided by libseat_open_seat.
      */
     struct libseat *client;
-    int graphics_id;
 };
 static struct libseat_info seat_info;
+
+struct libseat_graphics {
+    struct xorg_list entry;
+    int fd;
+    int id;
+};
+static struct xorg_list graphics_devices;
 
 /*
  * The seat has been enabled, and is now valid for use. Re-open all
@@ -224,7 +230,6 @@ seatd_libseat_init(Bool KeepTty_state)
         LogMessage(X_ERROR, "seatd_libseat already initialised\n");
         return -EPERM;
     }
-    seat_info.graphics_id = -1;
     seat_info.client = libseat_open_seat(&client_callbacks, NULL);
     if (!seat_info.client) {
         LogMessage(X_ERROR, "Cannot set up seatd_libseat client\n");
@@ -246,11 +251,16 @@ seatd_libseat_init(Bool KeepTty_state)
 void
 seatd_libseat_fini(void)
 {
+    struct libseat_graphics *g, *tmp;
+
     if (seat_info.client) {
         LogMessage(X_INFO, "seatd_libseat finish\n");
         libseat_close_seat(seat_info.client);
     }
-    seat_info.graphics_id = -1;
+    xorg_list_for_each_entry_safe(g, tmp, &graphics_devices, entry) {
+        xorg_list_del(&g->entry);
+        free(g);
+    }
     seat_info.active = FALSE;
     seat_info.client = NULL;
 }
@@ -266,6 +276,7 @@ seatd_libseat_fini(void)
 int
 seatd_libseat_open_graphics(const char *path)
 {
+    struct libseat_graphics *g;
     int fd, id;
 
     if (!libseat_active()) {
@@ -280,9 +291,31 @@ seatd_libseat_open_graphics(const char *path)
     else {
         LogMessage(X_INFO, "seatd_libseat opened graphics: %s (%d:%d)\n", path,
                    id, fd);
+        g = XNFcallocarray(1, sizeof(*g));
+        g->fd = fd;
+        g->id = id;
+        xorg_list_append(&g->entry, &graphics_devices);
     }
-    seat_info.graphics_id = id;
     return fd;
+}
+
+void
+seatd_libseat_close_graphics(int fd)
+{
+    struct libseat_graphics *g;
+
+    if (!libseat_active())
+        return;
+    xorg_list_for_each_entry(g, &graphics_devices, entry) {
+        if (g->fd != fd)
+            continue;
+        LogMessage(X_INFO, "seatd_libseat close graphics (%d:%d)\n", g->id, fd);
+        if (libseat_close_device(seat_info.client, g->id))
+            LogMessage(X_ERROR, "seatd_libseat close graphics failed %d\n", -errno);
+        xorg_list_del(&g->entry);
+        free(g);
+        return;
+    }
 }
 
 /*

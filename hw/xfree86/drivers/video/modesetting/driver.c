@@ -261,6 +261,15 @@ ms_try_open(const char *dev)
 }
 
 static int
+ms_close_hw(int fd)
+{
+#ifdef SEATD_LIBSEAT
+    seatd_libseat_close_graphics(fd);
+#endif
+    return close(fd);
+}
+
+static int
 open_hw(const char *dev)
 {
     int fd;
@@ -268,7 +277,7 @@ open_hw(const char *dev)
     if ((fd = get_passed_fd()) != -1)
         return fd;
 
-    if (dev){
+    if (dev) {
         fd = ms_try_open(dev);
     } else {
         dev = getenv("KMSDEVICE");
@@ -286,7 +295,7 @@ open_hw(const char *dev)
                         break;
                     }
 
-                    close(fd);
+                    ms_close_hw(fd);
                     fd = -1;
                 }
             }
@@ -295,8 +304,8 @@ open_hw(const char *dev)
     if (fd == -1) {
         xf86DrvMsg(-1, X_ERROR, "open %s: %s\n", dev, strerror(errno));
     } else if (fd < -1) {
-        xf86DrvMsg(-1, X_ERROR, "open %s: failed to open, tried seatd_libseat_open_graphics and opening node directly",dev);
-	fd = -1;
+        xf86DrvMsg(-1, X_ERROR, "open %s: failed to open, tried seatd_libseat_open_graphics and opening node directly\n", dev);
+        fd = -1;
     }
 
     return fd;
@@ -345,7 +354,7 @@ probe_hw(const char *dev, struct xf86_platform_device *platform_dev)
     if (fd != -1) {
         int ret = check_outputs(fd, NULL);
 
-        close(fd);
+        ms_close_hw(fd);
         return ret;
     }
     return FALSE;
@@ -380,7 +389,7 @@ probe_hw_pci(const char *dev, struct pci_device *pdev)
     sv.drm_dd_major = -1;
     sv.drm_dd_minor = -1;
     if (drmSetInterfaceVersion(fd, &sv)) {
-        close(fd);
+        ms_close_hw(fd);
         return FALSE;
     }
 
@@ -390,7 +399,7 @@ probe_hw_pci(const char *dev, struct pci_device *pdev)
     if (id && devid && !strcmp(id, devid))
         ret = check_outputs(fd, NULL);
 
-    close(fd);
+    ms_close_hw(fd);
     free(id);
     free(devid);
     return ret;
@@ -1055,8 +1064,8 @@ ms_is_running_virtual_gpu(drmmode_ptr drmmode)
  * @param drmmode
  */
 static inline void
-probe_if_is_running_single_size_hwcursor_gpu(drmmode_ptr drmmode){
-
+probe_if_is_running_single_size_hwcursor_gpu(drmmode_ptr drmmode)
+{
     drmVersionPtr version = drmGetVersion(drmmode->fd);
 
     bool borked_cursor = false;
@@ -1067,26 +1076,23 @@ probe_if_is_running_single_size_hwcursor_gpu(drmmode_ptr drmmode){
         return;
     }
 
-    if (strstr(version->name, "amdgpu")){
-
-        uint64_t cursor_width,cursor_height;
+    if (strstr(version->name, "amdgpu")) {
+        uint64_t cursor_width, cursor_height;
 
         int ret1 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &cursor_width);
         int ret2 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &cursor_height);
 
-        if (ret1 || ret2){  /* lets fallback code deal with it */
+        if (ret1 || ret2) {  /* lets fallback code deal with it */
             drmmode->fixed_size_cursor = borked_cursor;
             drmFreeVersion(version);
             return;
         }
 
         /* assume only older gpu devices experience this problem */
-        if ( cursor_width == 64 || cursor_width == 128 ||
-             cursor_height == 64 || cursor_height == 128) {
-
+        if (cursor_width == 64 || cursor_width == 128 ||
+            cursor_height == 64 || cursor_height == 128) {
             borked_cursor = true;
         }
-
     }
 
     drmFreeVersion(version);
@@ -1119,7 +1125,7 @@ FreeScreen(ScrnInfoPtr pScrn)
                 if (!(ms->pEnt->location.type == BUS_PLATFORM &&
                       (ms->pEnt->location.id.plat->flags & XF86_PDEV_SERVER_FD)))
 #endif
-                    ret = close(ms->fd);
+                    ret = ms_close_hw(ms->fd);
             (void) ret;
             ms_ent->fd = 0;
         }
@@ -1420,12 +1426,11 @@ PreInit(ScrnInfoPtr pScrn, int flags)
          *  for more detail see : https://www.qemu.org/docs/master/system/qemu-manpage.html search `show-cursor`
          *
          *  until better solution is found, force software cursor
-        */
-        if (ms_is_running_virtual_gpu(&ms->drmmode)){
-
+         */
+        if (ms_is_running_virtual_gpu(&ms->drmmode)) {
             drmVersionPtr version = drmGetVersion(ms->drmmode.fd);
-            const char *name="N/A";
-            if (version){
+            const char *name = "N/A";
+            if (version) {
                 name = version->name;
             }
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Forcing software cursor on virtual machine driver %s due to known issues\n", name);
@@ -1437,15 +1442,14 @@ PreInit(ScrnInfoPtr pScrn, int flags)
 
     probe_if_is_running_single_size_hwcursor_gpu(&ms->drmmode);
 
-    if (ms->drmmode.fixed_size_cursor){
+    if (ms->drmmode.fixed_size_cursor) {
         drmVersionPtr version = drmGetVersion(ms->drmmode.fd);
-        const char *name="N/A";
-        if (version){
+        const char *name = "N/A";
+        if (version) {
             name = version->name;
         }
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Forcing fixed hardware cursor on driver %s due to known issues\n", name);
         drmFreeVersion(version);
-
     }
     try_enable_glamor(pScrn);
 

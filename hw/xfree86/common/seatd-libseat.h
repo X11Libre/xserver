@@ -46,6 +46,8 @@ extern void seatd_libseat_fini(void);
  **/
 _X_EXPORT
 extern int seatd_libseat_open_graphics(const char *path);
+_X_EXPORT
+extern void seatd_libseat_close_graphics(int fd);
 extern void seatd_libseat_open_device(InputInfoPtr p, int *fd, Bool *paus);
 extern void seatd_libseat_close_device(InputInfoPtr p);
 extern int seatd_libseat_switch_session(int session);
@@ -55,6 +57,7 @@ extern Bool seatd_libseat_controls_session(void);
 static inline int seatd_libseat_init(bool KeepTty_state) {(void)KeepTty_state; return -1; }
 static inline void seatd_libseat_fini(void) {};
 static inline int seatd_libseat_open_graphics(const char *path) {(void)path; return -1; }
+static inline void seatd_libseat_close_graphics(int fd) { (void)fd; }
 static inline void seatd_libseat_open_device(void *p, int *fd, Bool *paus) { (void)p;(void)fd;(void)paus; }
 static inline void seatd_libseat_close_device(void *p) { (void)p;}
 static inline int seatd_libseat_switch_session(int session) { return -1; }
