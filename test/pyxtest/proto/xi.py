@@ -6,17 +6,40 @@ import struct
 from dataclasses import dataclass
 
 # XI (v1) minor opcodes
+XGrabDeviceButton = 17
 XChangeDeviceControl = 35
 XChangeDeviceProperty = 37
 XGetDeviceProperty = 39
 
 # XI2 minor opcodes
+XIChangeCursor = 42
+XIChangeHierarchy = 43
 XIQueryVersion = 47
+XIQueryDevice = 48
 XIPassiveGrabDevice = 54
 XIPassiveUngrabDevice = 55
 XIChangeProperty = 57
 XIGetProperty = 59
 XIBarrierReleasePointer = 61
+
+# XIChangeHierarchy change types
+XIAddMaster = 1
+XIRemoveMaster = 2
+
+# XIRemoveMaster return modes
+XIAttachToMaster = 1
+XIFloating = 2
+
+# XIQueryDevice special device IDs
+# XIAllDevices = 0  (already defined below)
+# XIAllMasterDevices = 1  (already defined below)
+
+# XI device use types (from xXIDeviceInfo)
+XIMasterPointer = 1
+XIMasterKeyboard = 2
+XISlavePointer = 3
+XISlaveKeyboard = 4
+XIFloatingSlave = 5
 
 XI2_MAJOR = 2
 XI2_MINOR = 4
@@ -75,6 +98,28 @@ class XIQueryVersionRequest:
             self.minor,
         )
 
+
+
+@dataclass
+class XIChangeCursorRequest:
+    """XIChangeCursor request."""
+
+    opcode: int
+    window: int
+    cursor: int
+    deviceid: int = XIAllMasterDevices
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH II HH",
+            self.opcode,
+            XIChangeCursor,
+            4,
+            self.window,
+            self.cursor,
+            self.deviceid,
+            0,  # pad
+        )
 
 @dataclass
 class XIPassiveGrabDeviceRequest:
@@ -372,7 +417,6 @@ class DeviceResolutionCtl:
             self.num_valuators,
         )
         return header + val_data
-
 
 
 @dataclass
@@ -708,4 +752,5 @@ class XIBarrierReleasePointerRequest:
             )
 
         return header + payload
+
 
