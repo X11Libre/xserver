@@ -47,6 +47,10 @@
 #include "windowstr.h"          /* window structure  */
 #include "swaprep.h"
 #include "exglobals.h"          /* BadDevice */
+#define AllModifiersMask ( \
+\tShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | \
+\tMod3Mask | Mod4Mask | Mod5Mask )
+
 
 int
 ProcXIPassiveGrabDevice(ClientPtr client)
@@ -292,6 +296,14 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
     rc = dixLookupWindow(&win, stuff->grab_window, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
+
+    modifiers = (uint32_t *) &stuff[1];
+    for (i = 0; i < stuff->num_modifiers; i++, modifiers++) {
+        if (*modifiers != XIAnyModifier && (*modifiers & ~AllModifiersMask)) {
+            client->errorValue = *modifiers;
+            return BadValue;
+        }
+    }
 
     mod_dev = (InputDevIsFloating(dev)) ? dev : GetMaster(dev, MASTER_KEYBOARD);
 
