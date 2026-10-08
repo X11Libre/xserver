@@ -48,8 +48,8 @@
 #include "swaprep.h"
 #include "exglobals.h"          /* BadDevice */
 #define AllModifiersMask ( \
-\tShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | \
-\tMod3Mask | Mod4Mask | Mod5Mask )
+	ShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | \
+	Mod3Mask | Mod4Mask | Mod5Mask )
 
 
 int
