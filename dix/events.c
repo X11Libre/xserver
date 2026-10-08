@@ -3378,6 +3378,9 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
 void FreeSprite(DeviceIntPtr dev)
 {
     if (DevHasCursor(dev) && dev->spriteInfo->sprite) {
+        /* Stop animation callbacks before destroying their sprite. */
+        if (dev->spriteInfo->anim.pScreen)
+            dixScreenRaiseDisplayCursor(dev->spriteInfo->anim.pScreen, dev, NullCursor);
         FreeCursor(dev->spriteInfo->sprite->current, None);
         free(dev->spriteInfo->sprite->spriteTrace);
         free(dev->spriteInfo->sprite);
