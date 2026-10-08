@@ -240,9 +240,11 @@ AnimCurUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
         AnimCurPtr ac = GetAnimCur(pCursor);
         int i;
 
-        if (pScreen->myNum == 0)
+        if (pScreen->myNum == 0) {
+            TimerFree(ac->timer);
             for (i = 0; i < ac->nelt; i++)
                 FreeCursor(ac->elts[i].pCursor, 0);
+        }
         ret = TRUE;
     }
     else
