@@ -172,6 +172,100 @@ class TestGLXChangeDrawableAttributesSwap:
         )
 
 
+class TestGLXRenderLarge:
+    """Tests for GLX RenderLarge buffer overflow."""
+
+    @pytest.mark.asan
+    def test_render_large_databytes_exceeds_cmdlen(self, xserver, glx_xclient):
+        """
+        ZDI-CAN-31833: Heap buffer overflow in __glXDisp_RenderLarge
+        from unchecked dataBytes vs cmdlen.
+
+        ``__glXDisp_RenderLarge`` reassembles large GL commands split
+        across multiple sub-requests. On the first sub-request
+        (requestNumber=1), the large command buffer is allocated to
+        ``cmdlen`` bytes (from ``hdr->length``, the GL rendering
+        command header inside the payload). However, the subsequent
+        ``memcpy`` copies ``dataBytes`` (from ``req->dataBytes``, the
+        X11 request payload size) into the buffer. The existing
+        validation only checks that the X11 request length is
+        consistent with dataBytes, not that dataBytes fits within the
+        cmdlen-sized buffer.
+
+        A malicious client sends RenderLarge with requestNumber=1
+        and a small GL opcode (cmdlen=12 bytes from hdr->length)
+        but a large dataBytes (e.g. 4096). The buffer is allocated
+        at 12 bytes but 4096 bytes are copied into it.
+
+        Fixed in commit 04c67974f8 ("glx: validate dataBytes against
+        cmdlen in RenderLarge first request").
+        """
+        xclient, opcode = glx_xclient
+
+        # Step 1: Create a GLX context on the root visual
+        ctx_id = xclient.alloc_id()
+        req = glx.CreateContextRequest(
+            opcode=opcode,
+            context_id=ctx_id,
+            visual=xclient.root_visual,
+            screen=0,
+            share_list=0,
+            is_direct=1,
+        )
+        xclient.send_request(req.to_bytes())
+        resp = xclient.recv_response(timeout=2.0)
+        if isinstance(resp, X11Error):
+            pytest.skip("GLX CreateContext failed (no GLX support for root visual)")
+
+        # Step 2: MakeCurrent to get a context tag
+        req = glx.MakeCurrentRequest(
+            opcode=opcode,
+            drawable=xclient.root_window,
+            context_id=ctx_id,
+            old_context_tag=0,
+        )
+        xclient.send_request(req.to_bytes())
+        resp = xclient.recv_response(timeout=2.0)
+        if isinstance(resp, X11Error):
+            pytest.skip("GLX MakeCurrent failed")
+        assert isinstance(resp, X11Reply), f"Expected MakeCurrent reply, got {resp}"
+        context_tag = struct.unpack_from("<I", resp.data, 8)[0]
+
+        # Step 3: Send RenderLarge with small cmdlen but large dataBytes.
+        #
+        # The GL render large header is 8 bytes:
+        #   length (CARD32): total command size = 12 (small)
+        #   opcode (CARD32): GL opcode = 1 (glCallList, fixed size 8+4=12)
+        #
+        # We set dataBytes to a large value (4096) but the actual data
+        # in the X11 request is also 4096 bytes. The GL header says
+        # the total command is only 12 bytes. Without the fix, the
+        # server allocates 12 bytes then copies 4096 bytes into it.
+        gl_cmdlen = 12  # small GL command
+        gl_opcode = 1  # glCallList
+        gl_header = struct.pack("<II", gl_cmdlen, gl_opcode)
+
+        overflow_size = 4096
+        # Fill payload: GL header + padding to overflow_size
+        payload = gl_header + b"\x41" * (overflow_size - len(gl_header))
+
+        req = glx.RenderLargeRequest(
+            opcode=opcode,
+            context_tag=context_tag,
+            request_number=1,
+            request_total=2,  # claim there will be 2 sub-requests
+            data_bytes=overflow_size,
+            data=payload,
+        )
+        xclient.send_request(req.to_bytes())
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - GLX RenderLarge dataBytes > cmdlen "
+            "heap buffer overflow (ZDI-CAN-31833)"
+        )
+
+
 class TestGlxMakeCurrent:
     """Tests for CommonMakeCurrent vulnerabilities."""
 
