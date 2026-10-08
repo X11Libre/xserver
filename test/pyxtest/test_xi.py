@@ -6,8 +6,7 @@ import struct
 import time
 
 import pytest
-
-from proto import xi
+from proto import x11, xfixes, xi, xtest
 from xclient import BadLength, BadValue, Extension, X11Error, X11Reply
 
 
@@ -440,3 +439,168 @@ class TestXIChangeDeviceControl:
                 "ChangeDeviceControl returned BadValue - "
                 "resolution values not byte-swapped"
             )
+
+
+    @pytest.mark.swapped_client
+    def test_change_device_control_resolution_unbounded_swap(
+        self, xserver, xi_xclient_swapped
+    ):
+        """Unbounded SwapLongs of DEVICE_RESOLUTION valuators."""
+        conn = xi_xclient_swapped
+        opcode = conn.query_extension(Extension.XI).opcode
+        bo = conn._byte_order
+
+        ctl = xi.DeviceResolutionCtl(
+            first_valuator=0,
+            num_valuators=255,
+            resolutions=[],
+        )
+        bad = xi.XChangeDeviceControlRequest(
+            opcode=opcode,
+            control=xi.DEVICE_RESOLUTION,
+            deviceid=xi.VirtualCorePointer,
+            control_data=ctl.to_bytes(bo),
+        )
+        canary = x11.InternAtomRequest(name="_TEST_CDC_UNBOUNDED_SWAP")
+
+        conn.send_request(bad.to_bytes(bo) + canary.to_bytes(bo))
+        conn.seq += 1
+
+        resp_bad = conn.recv_response(timeout=2.0)
+        resp_canary = conn.recv_response(timeout=2.0)
+
+        assert xserver.is_alive, "Server crashed"
+        assert isinstance(resp_bad, X11Error), f"Expected error, got {resp_bad}"
+        assert resp_bad.error_code == x11.BadLength, (
+            f"Expected BadLength (16), got {resp_bad.error_code}"
+        )
+        assert isinstance(resp_canary, X11Reply), (
+            f"InternAtom canary corrupted, got {resp_canary}"
+        )
+        atom = struct.unpack_from(f"{bo}I", resp_canary.data, 8)[0]
+        assert atom != 0, "InternAtom canary returned None atom"
+
+
+class TestXIChangeCursor:
+    def test_change_cursor_null_window(self, xserver, xi_xclient):
+        """
+        XIChangeCursor dereferences pWin even if it's not set
+        """
+        opcode = xi_xclient.query_extension(Extension.XI).opcode
+        req = xi.XIChangeCursorRequest(
+            opcode=opcode,
+            window=0,
+            cursor=0,
+            deviceid=xi.VirtualCorePointer,
+        )
+        xi_xclient.send_request(req)
+        resp = xi_xclient.recv_response(timeout=5.0)
+
+        assert xserver.is_alive, "Server crashed"
+
+        # Without the fix: SegFault on a NULL WindowPtr
+        # With the fix: BadWindow
+        assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
+        assert resp.error_code == x11.BadWindow, (
+            "ChangeCursor didn't return BadWindow for Window 0"
+        )
+
+
+class TestXIBarrier:
+    @pytest.mark.asan
+    def test_barrier_leave_event_buffer_overflow(self, xserver, xi_xclient):
+        """
+        ZDI-CAN-31938: Heap buffer overflow in input_constrain_cursor
+        from too many barrier leave events.
+
+        input_constrain_cursor() writes barrier hit/leave events
+        into a fixed-size internal event buffer (GetMaximumEventsNum()
+        = 100 slots). When all barriers are in the "released" state,
+        the first loop marks every barrier as hit (released barriers
+        skip the clamp, so dir never clears and iteration
+        continues). The second loop emits one event per hit barrier
+        with no capacity check.
+
+        Creating >100 barriers at the same position, releasing all
+        of them (by setting eventid=1 which matches the initial
+        barrier_event_id), and driving pointer motion across them
+        causes 200+ events to be written into the 100-slot buffer
+        which is generally considered a bad idea..
+        """
+        conn = xi_xclient
+        xi_opcode = conn.query_extension(Extension.XI).opcode
+
+        xf = conn.query_extension(Extension.XFIXES)
+        if not xf:
+            pytest.skip("XFIXES extension not available")
+
+        xt = conn.query_extension(Extension.XTEST)
+        if not xt:
+            pytest.skip("XTEST extension not available")
+
+        req = xfixes.XFixesQueryVersionRequest(
+            opcode=xf.opcode, major_version=5, minor_version=0
+        )
+        conn.send_request(req)
+        resp = conn.recv_response(timeout=5.0)
+        if resp is None:
+            pytest.fail("XFixesQueryVersion got no response")
+
+        # Create 200 barriers at x=500, vertical line y=[0,4000].
+        # All at the same position so pointer motion crosses them all.
+        barriers = []
+        for _ in range(200):
+            bid = conn.alloc_id()
+            req = xfixes.XFixesCreatePointerBarrierRequest(
+                opcode=xf.opcode,
+                barrier=bid,
+                window=conn.root_window,
+                x1=500,
+                y1=0,
+                x2=500,
+                y2=4000,
+                directions=0,
+                num_devices=0,
+            )
+            conn.send_request(req)
+            barriers.append(bid)
+        conn.flush_responses(timeout=1.0)
+
+        # Release all barriers by sending XIBarrierReleasePointer
+        # with eventid=1 (matching the initial barrier_event_id).
+        # This puts all barriers into the "released" state.
+        req = xi.XIBarrierReleasePointerRequest(
+            opcode=xi_opcode,
+            barriers=[(xi.VirtualCorePointer, bid, 1) for bid in barriers],
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # Position the pointer to the left of the barriers
+        req = x11.WarpPointerRequest(
+            dst_window=conn.root_window,
+            dst_x=100,
+            dst_y=2000,
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        # Use xtest to generate relative pointer motion
+        # crossing the barrier line at x=500 (motion dx=+500).
+        # This will trigger a BarrierHit on all 200 barriers.
+        req = xtest.XTestFakeInputRequest(
+            opcode=xt.opcode,
+            event_type=xtest.MotionNotify,
+            detail=1,  # relative motion
+            root_x=500,
+            root_y=0,
+        )
+        conn.send_request(req)
+        conn.flush_responses(timeout=0.5)
+
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - barrier leave event buffer overflow (ZDI-CAN-31938)"
+        )
+
