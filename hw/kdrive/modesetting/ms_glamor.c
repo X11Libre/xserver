@@ -17,37 +17,44 @@ msGlamorTileFront(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
+    msScrPriv *scrpriv = screen->driver;
 
     KdFrameBuffer saved_framebuffer = screen->fb;
 
-    /* TODO: query glamor */
-    MsScreenConf *config = screen->closure;
-    Bool is_gles = config->glamor_info.force_es;
+    Bool is_gles = glamor_is_gles(pScreen);
+    Bool flip = FALSE;
 
     struct gbm_bo *new_front = NULL;
 
     /* By design, kdrive depth and bpp can't change between initAccel and finiAccel
      * https://www.x.org/Development/Documentation/KdriveDrivers/
      */
-    new_front = modesetting_open(screen, FALSE /* need_map */, TRUE /* keep_depth */);
+    new_front = modesetting_open(screen, FALSE /* need_map */, TRUE /* keep_depth */, FALSE /* probe */);
     if (!new_front) {
-        return FALSE;
+        if (!gbm_bo_get_map(scrpriv->front)) {
+            /* Try to texture the old front */
+            flip = TRUE;
+        } else {
+            return FALSE;
+        }
     }
 
     /* Maybe we could switch to this bo, but why? */
-    if (gbm_bo_get_map(new_front)) {
+    if (new_front && gbm_bo_get_map(new_front)) {
         gbm_bo_destroy(new_front);
         return FALSE;
     }
 
-    if (!msSetScreenBo(pScreen, new_front, FALSE /* flip */)) {
-        gbm_bo_destroy(new_front);
+    if (!msSetScreenBo(pScreen, new_front ? new_front : scrpriv->front, flip)) {
+        if (new_front) {
+            gbm_bo_destroy(new_front);
+        }
         LogMessage(X_ERROR, "Xmodesetting(%d): Could not swap to the new front bo\n", pScreen->myNum);
         return FALSE;
     }
 
     /* Update visual masks if needed */
-    gbm_bo_set_screen_fb_info(new_front, screen, is_gles);
+    gbm_bo_set_screen_fb_info(new_front ? new_front : scrpriv->front, screen, is_gles);
     if (memcmp(&saved_framebuffer, &screen->fb, sizeof(screen->fb))) {
         /* TODO: Make this generic
          * For now, the only thing that can happen is r-b masks need swapping
@@ -74,6 +81,7 @@ msGlamorCreateRes(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
+    MsScreenConf *config = screen->closure;
 
     struct gbm_format_name_desc desc = {0};
     uint32_t format;
@@ -83,6 +91,11 @@ msGlamorCreateRes(ScreenPtr pScreen)
     if (!screen->dumb) {
         if (!msGlamorTileFront(pScreen)) {
             LogMessage(X_INFO, "Xmodesetting(%d): Could not create a usable tiled front buffer\n", pScreen->myNum);
+            if (!gbm_bo_get_map(scrpriv->front)) {
+                LogMessage(X_ERROR, "Xmodesetting(%d): Cannot run at this depth/bpp\n", pScreen->myNum);
+                LogMessage(X_ERROR, "Xmodesetting(%d): Choose a different depth/bpp or use the dumb gbm backend\n", pScreen->myNum);
+                return FALSE;
+            }
         }
     }
 
@@ -97,6 +110,11 @@ msGlamorCreateRes(ScreenPtr pScreen)
     format_name = gbm_format_get_name(format, &desc);
     LogMessage(X_INFO, "Xmodesetting(%d): Front buffer depth: %d, bpp: %d, format: %s, modifier: 0x%lx\n",
                pScreen->myNum, screen->fb.depth, screen->fb.bitsPerPixel, format_name, modifier);
+    if (config->planar || (config->modifier != ~0)) {
+        msPriv *priv = screen->card->driver;
+        int num_planes = gbm_device_get_format_modifier_plane_count(priv->gbm, format, modifier);
+        LogMessage(X_INFO, "Xmodesetting(%d): Number of front buffer planes: %d\n", pScreen->myNum, num_planes);
+    }
     return TRUE;
 }
 
@@ -152,6 +170,8 @@ msGlamorInit(ScreenPtr pScreen)
             }
             scrpriv->render_modifiers[write_pos++] = scrpriv->render_modifiers[i];
         }
+    } else {
+        write_pos = scrpriv->num_render_modifiers;
     }
 
     if (write_pos == 0 ||
@@ -165,6 +185,17 @@ msGlamorInit(ScreenPtr pScreen)
                             write_pos * sizeof(scrpriv->render_modifiers));
         if (tmp) {
             scrpriv->render_modifiers = tmp;
+            scrpriv->num_render_modifiers = write_pos;
+        }
+    }
+
+    if (config->modifier != ~0) {
+        void *tmp = calloc(1, sizeof(scrpriv->render_modifiers));
+        if (tmp) {
+            free(scrpriv->render_modifiers);
+            scrpriv->render_modifiers = tmp;
+            scrpriv->render_modifiers[0] = config->modifier;
+            scrpriv->num_render_modifiers = 1;
         }
     }
 

@@ -138,6 +138,10 @@ glamor_set_pixmap_texture(PixmapPtr pixmap, unsigned int tex)
         glamor_destroy_fbo(glamor_priv, fbo);
     }
 
+    if (!tex) {
+        return TRUE;
+    }
+
     fbo = glamor_create_fbo_from_tex(glamor_priv, pixmap,
                                      pixmap->drawable.width,
                                      pixmap->drawable.height, tex, 0);
@@ -637,6 +641,14 @@ glamor_setup_formats(ScreenPtr screen)
 static void glamor_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
     glamor_pixmap_destroy_fbo(pPixmap);
+}
+
+Bool
+glamor_is_gles(ScreenPtr screen)
+{
+    glamor_screen_private *glamor_priv;
+    glamor_priv = glamor_get_screen_private(screen);
+    return glamor_priv->is_gles;
 }
 
 /* This function is used to free the glamor private screen's

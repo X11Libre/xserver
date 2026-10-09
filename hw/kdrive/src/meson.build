@@ -1,5 +1,6 @@
 srcs_kdrive = [
     'kcmap.c',
+    'kcurs.c',
     'kdrive.c',
     'kglamor.c',
     'kinfo.c',

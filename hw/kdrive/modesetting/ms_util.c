@@ -9,6 +9,7 @@
 
 #ifdef GLAMOR
 #include "glamor.h"
+#include "glamor_egl.h" /* for glamor_egl_untexture_pixmap */
 #endif
 
 /* XXX This really belongs in os/, like the version from glamor_egl */
@@ -97,8 +98,9 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
-    struct gbm_bo *old_front;
     Bool wasEnabled = pScreenPriv->enabled;
+    Bool wasMapped;
+    Bool isMapped;
     msScrPriv oldscr;
     PixmapPtr rootPixmap;
 
@@ -110,11 +112,20 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
 
     oldscr = *scrpriv;
 
-    old_front = scrpriv->front;
+    wasMapped = !!gbm_bo_get_map(scrpriv->front);
+    isMapped = !!gbm_bo_get_map(bo);
 
     msUnmapFramebuffer(screen);
 
     scrpriv->front = bo;
+
+    if (isMapped && !wasMapped) {
+#ifdef GLAMOR
+        glamor_egl_untexture_pixmap(rootPixmap, GLAMOR_MEMORY);
+#else
+        goto bail;
+#endif
+    }
 
     if (!msMapFramebuffer(screen)) {
         goto bail;
@@ -144,7 +155,7 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     KdSetSubpixelOrder(pScreen, scrpriv->randr);
 
     /* Texture the front if needed */
-    if (!flip && !gbm_bo_get_map(bo)) {
+    if (!isMapped) {
 #ifdef GLAMOR
         Bool used_modifiers = gbm_bo_get_used_modifiers(bo);
         if (screen->dumb ||
@@ -161,15 +172,19 @@ msSetScreenBo(ScreenPtr pScreen, struct gbm_bo *bo, Bool flip)
     }
 
     if (!flip) {
-        gbm_bo_destroy(old_front);
+        gbm_bo_destroy(oldscr.front);
     }
     return TRUE;
 
 bail:
     msUnmapFramebuffer(screen);
-    old_front = scrpriv->front;
     *scrpriv = oldscr;
     msMapFramebuffer(screen);
+
+    /* Re-enable ShadowFB */
+    KdShadowUnset(screen->pScreen);
+    msSetShadow(screen->pScreen);
+
     msSetScreenSizes(screen->pScreen);
 
     /*
@@ -182,6 +197,14 @@ bail:
                                     screen->fb.bitsPerPixel,
                                     screen->fb.byteStride,
                                     screen->fb.frameBuffer);
+
+#ifdef GLAMOR
+    if (isMapped && !wasMapped && !screen->dumb) {
+        Bool used_modifiers = gbm_bo_get_used_modifiers(scrpriv->front);
+        glamor_egl_create_textured_pixmap_from_gbm_bo(rootPixmap, scrpriv->front, used_modifiers);
+    }
+#endif
+
     if (wasEnabled) {
         KdEnableScreen(pScreen);
     }

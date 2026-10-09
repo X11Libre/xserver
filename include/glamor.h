@@ -98,6 +98,11 @@ typedef Bool (*GetDrawableModifiersFuncPtr) (DrawablePtr draw,
 extern _X_EXPORT Bool glamor_init(ScreenPtr screen, unsigned int flags);
 extern _X_EXPORT void glamor_fini(ScreenPtr screen);
 
+/* Returns is the initialized gl context is gles
+ * Must not be called before glamor_init
+ */
+extern _X_EXPORT Bool glamor_is_gles(ScreenPtr screen);
+
 /* This function is used to free the glamor private screen's
  * resources. If the DDX driver is not set GLAMOR_USE_SCREEN,
  * then, DDX need to call this function at proper stage, if

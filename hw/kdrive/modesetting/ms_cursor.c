@@ -12,8 +12,9 @@
 
 #include <errno.h>
 
-static Bool
-msShowCursor(ScreenPtr pScreen, int xhot, int yhot);
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static Bool msShowCursor(ScreenPtr pScreen);
 
 static void
 msGetCursorSizes(int fd, int *w, int *h)
@@ -50,8 +51,8 @@ msQueryBestSize(int class, unsigned short *pwidth, unsigned short *pheight,
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
     msCursPriv *pCurPriv = &scrpriv->cursor;
-    uint32_t width = gbm_bo_get_width(pCurPriv->bo);
-    uint32_t height = gbm_bo_get_width(pCurPriv->bo);
+    uint32_t width = pCurPriv->max_w;
+    uint32_t height = pCurPriv->max_h;
 
     switch (class) {
     case CursorShape:
@@ -70,7 +71,23 @@ msQueryBestSize(int class, unsigned short *pwidth, unsigned short *pheight,
     }
 }
 
-/* Adapted from kdrive ati_cursor.c RadeonLoadCursor */
+static void
+msResetCursor(msCursPriv *pCurPriv)
+{
+    gbm_bo_destroy(pCurPriv->bo);
+    free(pCurPriv->shadow);
+
+    pCurPriv->bo = NULL;
+    pCurPriv->shadow = NULL;
+    pCurPriv->pCursor = NULL;
+    pCurPriv->x = 0;
+    pCurPriv->y = 0;
+    pCurPriv->old_width = 0;
+    pCurPriv->old_height = 0;
+    pCurPriv->xhot = 0;
+    pCurPriv->yhot = 0;
+}
+
 static Bool
 msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
 {
@@ -79,91 +96,62 @@ msLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
     msCursPriv *pCurPriv = &scrpriv->cursor;
-    CursorBitsPtr bits = pCursor->bits;
-    uint32_t *msk, *mskLine, *src, *srcLine;
 
     uint32_t width = gbm_bo_get_width(pCurPriv->bo);
-    uint32_t height = gbm_bo_get_width(pCurPriv->bo);
+    uint32_t height = gbm_bo_get_height(pCurPriv->bo);
     uint32_t stride = gbm_bo_get_stride(pCurPriv->bo) / sizeof(uint32_t);
     uint32_t *ram = gbm_bo_get_map(pCurPriv->bo);
 
-    int x, y;
-
-    int w = bits->width;
-    int h = bits->height;
-
-    if (w > width) {
-        w = width;
-    }
-    if (h > height) {
-        h = height;
-    }
-
-    /* TODO: Deal with rotations */
-
-    if (bits->argb) {
-        srcLine = bits->argb;
-        for (y = 0; y < h; y++) {
-            src = srcLine;
-            srcLine += bits->width;
-            for (x = 0; x < w; x++) {
-                ram[y * stride + x] = *src++;
-            }
-            memset(ram + y * stride + x, 0, (width - x) * sizeof(*ram));
-        }
-        for (; y < height; y++) {
-            memset(ram + y * stride, 0, width * sizeof(*ram));
-        }
-    } else {
-        uint32_t colors[4];
-        colors[0] = 0;
-        colors[1] = 0;
-        colors[2] = (((pCursor->backRed   >> 8) << 16) |
-                     ((pCursor->backGreen >> 8) <<  8) |
-                     ((pCursor->backBlue  >> 8) <<  0) |
-                     0xff000000);
-        colors[3] = (((pCursor->foreRed   >> 8) << 16) |
-                     ((pCursor->foreGreen >> 8) <<  8) |
-                     ((pCursor->foreBlue  >> 8) <<  0) |
-                     0xff000000);
-        mskLine = (uint32_t*)bits->mask;
-        srcLine = (uint32_t*)bits->source;
-
-        /* words per line */
-        int lwsrc = BitmapBytePad(bits->width) / sizeof(uint32_t);
-
-        for (y = 0; y < height; y++) {
-            uint32_t m, s;
-
-            msk = mskLine;
-            src = srcLine;
-            mskLine += lwsrc;
-            srcLine += lwsrc;
-
-            for (x = 0; x < width / 32; x++) {
-                if (y < h && x < lwsrc) {
-                    m = *msk++;
-                    s = *src++;
-                } else {
-                    m = 0;
-                    s = 0;
-                }
-
-                for (int k = 0; k < 32; k++) {
-                    uint32_t val = (s & 1) | ((m & 1) << 1);
-                    ram[y * stride + x * 32 + k] = colors[val];
-                    s >>= 1;
-                    m >>= 1;
-                }
+    if (pCursor->bits->width > width ||
+        pCursor->bits->height > height) {
+        if (pCurPriv->max_w > width || pCurPriv->max_h > height) {
+            struct gbm_bo *bo;
+again:
+            bo = gbm_create_cursor_bo(priv->gbm, pCurPriv->max_w, pCurPriv->max_h);
+            if (bo) {
+                msResetCursor(pCurPriv);
+                pCurPriv->bo = bo;
+                width = pCurPriv->max_w;
+                height = pCurPriv->max_h;
+                stride = gbm_bo_get_stride(pCurPriv->bo) / sizeof(uint32_t);
+                ram = gbm_bo_get_map(pCurPriv->bo);
+                LogMessage(X_INFO, "Xmodesetting(%d): Using a larger %dx%d hw cursor\n", pScreen->myNum, width, height);
             }
         }
+    } else if (scrpriv->randr == RR_Rotate_0 &&
+        pCurPriv->randr == RR_Rotate_0 &&
+        pCurPriv->old_width && pCurPriv->old_height) {
+        width = MAX(pCursor->bits->width, pCurPriv->old_width);
+        width = ((width + 31) / 32) * 32;
+        height = MAX(pCursor->bits->height, pCurPriv->old_height);
     }
 
-    return msShowCursor(pScreen, bits->xhot, bits->yhot);
+    KdLoadCursorRandR(ram, pCursor,
+                      width, height, stride,
+                      scrpriv->randr, &pCurPriv->shadow,
+                      &pCurPriv->xhot, &pCurPriv->yhot);
+
+    pCurPriv->pCursor = pCursor;
+    pCurPriv->randr = scrpriv->randr;
+
+    pCurPriv->old_width = pCursor->bits->width;
+    pCurPriv->old_height = pCursor->bits->height;
+
+    if (!msShowCursor(pScreen)) {
+        if (pCurPriv->max_w > width || pCurPriv->max_h> height) {
+            /*
+             * There is no guarantee that the 64x64 cursor is supported.
+             * Try again with the largest cursor.
+             */
+            goto again;
+        }
+        return FALSE;
+    }
+    return TRUE;
 }
 
 static Bool
-msShowCursor(ScreenPtr pScreen, int xhot, int yhot)
+msShowCursor(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -171,26 +159,32 @@ msShowCursor(ScreenPtr pScreen, int xhot, int yhot)
     msScrPriv *scrpriv = screen->driver;
     msCursPriv *pCurPriv = &scrpriv->cursor;
     uint32_t width = gbm_bo_get_width(pCurPriv->bo);
-    uint32_t height = gbm_bo_get_width(pCurPriv->bo);
+    uint32_t height = gbm_bo_get_height(pCurPriv->bo);
     int fd = gbm_device_get_fd(priv->gbm);
     uint32_t handle = gbm_bo_get_handle(pCurPriv->bo).u32;
 
-    return !drmModeSetCursor2(fd, scrpriv->crtc_id, handle, width, height, xhot, yhot) ||
-           !drmModeSetCursor(fd, scrpriv->crtc_id, handle, width, height);
+    return !drmModeSetCursor(fd, scrpriv->crtc_id, handle, width, height) ||
+           !drmModeSetCursor2(fd, scrpriv->crtc_id, handle, width, height, 0 /* xhot */, 0 /* yhot */);
 }
 
 static Bool
-msUnloadCursor(ScreenPtr pScreen)
+msUnloadCursor(ScreenPtr pScreen, Bool clear)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
+    msCursPriv *pCurPriv = &scrpriv->cursor;
     int fd = gbm_device_get_fd(priv->gbm);
 
-    return !drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0) ||
-           !drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0);
+    if (clear) {
+        pCurPriv->pCursor = NULL;
+    }
+
+    return !drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0) ||
+           !drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0);
 }
+
 
 static Bool
 msRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCurs)
@@ -211,8 +205,16 @@ msMoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
     KdScreenInfo *screen = pScreenPriv->screen;
     msPriv *priv = screen->card->driver;
     msScrPriv *scrpriv = screen->driver;
+    msCursPriv *pCurPriv = &scrpriv->cursor;
 
     int fd = gbm_device_get_fd(priv->gbm);
+
+    pCurPriv->x = x;
+    pCurPriv->y = y;
+
+    KdGetCursorPosition(pScreen, scrpriv->randr,
+                        pCurPriv->xhot, pCurPriv->yhot,
+                        &x, &y);
 
     drmModeMoveCursor(fd, scrpriv->crtc_id, x, y);
 }
@@ -230,7 +232,7 @@ msSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor, int x, int 
         msLoadCursor(pScreen, pCursor);
         msMoveCursor(pDev, pScreen, x, y);
     } else {
-        msUnloadCursor(pScreen);
+        msUnloadCursor(pScreen, TRUE /* clear */);
     }
 }
 
@@ -267,21 +269,27 @@ msCursorInit(ScreenPtr pScreen)
     int fd = gbm_device_get_fd(priv->gbm);
     int width, height;
 
-    msGetCursorSizes(fd, &width, &height);
+    msGetCursorSizes(fd, &pCurPriv->max_w, &pCurPriv->max_h);
 
-    if (width <= 0 || height <= 0) {
+    /* Don't use such small hw cursors */
+    if (pCurPriv->max_w < 64 || pCurPriv->max_h < 64) {
         return FALSE;
     }
 
     /* See if hw cursor is supported */
-    if (drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0) && errno == ENOSYS) {
-        if (drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0) && (errno == ENOSYS || errno == ENXIO)) {
+    if (drmModeSetCursor(fd, scrpriv->crtc_id, 0, 0, 0) && (errno == ENOSYS || errno == ENXIO)) {
+        if (drmModeSetCursor2(fd, scrpriv->crtc_id, 0, 0, 0, 0, 0) && (errno == ENOSYS)) {
             return FALSE;
         }
     }
 
-    pCurPriv->bo = gbm_create_cursor_bo(priv->gbm, width, height);
-    if (!pCurPriv->bo) {
+    if ((pCurPriv->bo = gbm_create_cursor_bo(priv->gbm, 64, 64))) {
+        width = 64;
+        height = 64;
+    } else if ((pCurPriv->bo = gbm_create_cursor_bo(priv->gbm, pCurPriv->max_w, pCurPriv->max_h))) {
+        width = pCurPriv->max_w;
+        height = pCurPriv->max_h;
+    } else {
         return FALSE;
     }
 
@@ -297,6 +305,8 @@ msCursorInit(ScreenPtr pScreen)
         return FALSE;
     }
 
+    pCurPriv->randr = scrpriv->randr;
+
     LogMessage(X_INFO, "Xmodesetting(%d): Using a %dx%d hw cursor\n", pScreen->myNum, width, height);
     return TRUE;
 }
@@ -304,13 +314,24 @@ msCursorInit(ScreenPtr pScreen)
 void
 msCursorEnable(ScreenPtr pScreen)
 {
-    msShowCursor(pScreen, 0 /* xhot */, 0 /* yhot */);
+    KdScreenPriv(pScreen);
+    KdScreenInfo *screen = pScreenPriv->screen;
+    msScrPriv *scrpriv = screen->driver;
+    msCursPriv *pCurPriv = &scrpriv->cursor;
+
+    if (pCurPriv->pCursor &&
+        scrpriv->randr == pCurPriv->randr) {
+        msShowCursor(pScreen);
+    } else {
+        /* Repaint the cursor glyph */
+        msSetCursor(NULL /* pDev */, pScreen, pCurPriv->pCursor, pCurPriv->x, pCurPriv->y);
+    }
 }
 
 void
 msCursorDisable(ScreenPtr pScreen)
 {
-    msUnloadCursor(pScreen);
+    msUnloadCursor(pScreen, FALSE /* clear */);
 }
 
 void
@@ -325,6 +346,8 @@ msCursorFini(ScreenPtr pScreen)
     KdScreenInfo *screen = pScreenPriv->screen;
     msScrPriv *scrpriv = screen->driver;
     msCursPriv *pCurPriv = &scrpriv->cursor;
+
+    free(pCurPriv->shadow);
 
     pScreen->QueryBestSize = pCurPriv->QueryBestSize;
 

@@ -42,26 +42,43 @@ msSetMode(ScreenPtr pScreen, int width, int height, int rate)
     screen->height = height;
     screen->rate = rate;
 
-    /* Create a new front with the new sizes */
-    if (width != old_width ||
-        height != old_height) {
+    /*
+     * Create a new front with the new sizes
+     * XXX At least for now we need a new bo even for same-size rotations
+     */
+    {
         uint32_t format = gbm_bo_get_format(scrpriv->front);
-        Bool do_map = !!gbm_bo_get_map(scrpriv->front);
+        Bool do_map = (scrpriv->randr != RR_Rotate_0) || !!gbm_bo_get_map(scrpriv->front);
         uint64_t modifier = gbm_bo_get_modifier(scrpriv->front);
+        Bool used_modifiers = gbm_bo_get_used_modifiers(scrpriv->front);
 
         /* Try the current modifier first */
-        new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format,
-                                        &modifier, 1);
+        if (used_modifiers && !new_front) {
+            new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format,
+                                            &modifier, 1);
+        }
+
         if (!new_front) {
             new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format,
                                             modifiers, num_modifiers);
         }
+
+        if (!used_modifiers && !new_front) {
+            new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format,
+                                            &modifier, 1);
+        }
+
+        /*
+         * If we need to map, we don't need the video card to be able to render to this bo
+         * XXX What should we do if we don't?
+         */
+        if (!new_front) {
+            new_front = gbm_create_front_bo(priv->gbm, do_map, width, height, format,
+                                            NULL, 0);
+        }
+
         if (!new_front ||
             !msSetScreenBo(pScreen, new_front, FALSE /* flip */)) {
-            goto bail;
-        }
-    } else {
-        if (!msSetScreenBo(pScreen, scrpriv->front, TRUE /* flip */)) {
             goto bail;
         }
     }
@@ -282,6 +299,27 @@ msRandRGammaInit(ScreenPtr pScreen)
 }
 #endif /* RANDR_12_INTERFACE */
 
+static void
+msConstrainCursorHarder(DeviceIntPtr pDev, ScreenPtr pScreen,
+                           int mode, int *x, int *y)
+{
+    KdScreenPriv(pScreen);
+    KdScreenInfo *screen = pScreenPriv->screen;
+    msScrPriv *scrpriv = screen->driver;
+
+    if (screen->randr) {
+        /*
+         * We don't tell RandR about out initial rotation,
+         * which makes it constrain our cursor position harder than it needs to
+         */
+        return;
+    }
+
+    pScreen->ConstrainCursorHarder = scrpriv->ConstrainCursorHarder;
+    (*pScreen->ConstrainCursorHarder)(pDev, pScreen, mode, x, y);
+    pScreen->ConstrainCursorHarder = msConstrainCursorHarder;
+}
+
 Bool
 msRandRInit(ScreenPtr pScreen)
 {
@@ -305,6 +343,14 @@ msRandRInit(ScreenPtr pScreen)
         pScrPriv->rrCrtcSetGamma = msRandRCrtcSetGamma;
     }
 #endif
+
+    if (pScreen->ConstrainCursorHarder) {
+        KdScreenPriv(pScreen);
+        KdScreenInfo *screen = pScreenPriv->screen;
+        msScrPriv *scrpriv = screen->driver;
+        scrpriv->ConstrainCursorHarder = pScreen->ConstrainCursorHarder;
+        pScreen->ConstrainCursorHarder = msConstrainCursorHarder;
+    }
     return TRUE;
 }
 #endif /* RANDR */

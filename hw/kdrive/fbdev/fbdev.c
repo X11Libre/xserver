@@ -878,6 +878,27 @@ fbdevGetPhysicalScreenSizes(KdScreenInfo *screen, int *mmWidth, int *mmHeight)
     return FALSE;
 }
 
+static void
+fbdevConstrainCursorHarder(DeviceIntPtr pDev, ScreenPtr pScreen,
+                           int mode, int *x, int *y)
+{
+    KdScreenPriv(pScreen);
+    KdScreenInfo *screen = pScreenPriv->screen;
+    FbdevScrPriv *scrpriv = screen->driver;
+
+    if (screen->randr) {
+        /*
+         * We don't tell RandR about out initial rotation,
+         * which makes it constrain our cursor position harder than it needs to
+         */
+        return;
+    }
+
+    pScreen->ConstrainCursorHarder = scrpriv->ConstrainCursorHarder;
+    (*pScreen->ConstrainCursorHarder)(pDev, pScreen, mode, x, y);
+    pScreen->ConstrainCursorHarder = fbdevConstrainCursorHarder;
+}
+
 static Bool
 fbdevRandRInit(ScreenPtr pScreen)
 {
@@ -905,6 +926,12 @@ fbdevRandRInit(ScreenPtr pScreen)
             RROutputSetPhysicalSize(pOutput,
                                     mmWidth,
                                     mmHeight);
+        }
+
+        if (pScreen->ConstrainCursorHarder) {
+            FbdevScrPriv *scrpriv = screen->driver;
+            scrpriv->ConstrainCursorHarder = pScreen->ConstrainCursorHarder;
+            pScreen->ConstrainCursorHarder = fbdevConstrainCursorHarder;
         }
     }
 

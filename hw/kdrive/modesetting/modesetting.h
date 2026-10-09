@@ -34,6 +34,24 @@ typedef struct _msPriv {
 typedef struct _msCursPriv {
     struct gbm_bo *bo;
 
+    /* For RandR */
+    uint32_t *shadow;
+    CursorPtr pCursor;
+    Rotation randr;
+    int x;
+    int y;
+
+    /* Damage Tracking */
+    int old_width;
+    int old_height;
+
+    /* Size/Power Optimization */
+    int max_w;
+    int max_h;
+
+    int xhot;
+    int yhot;
+
     QueryBestSizeProcPtr QueryBestSize;
 } msCursPriv;
 
@@ -56,6 +74,8 @@ typedef struct _msScrPriv {
 
     uint32_t num_render_modifiers;
     uint64_t *render_modifiers;
+
+    ConstrainCursorHarderProcPtr ConstrainCursorHarder;
 } msScrPriv;
 
 typedef struct _msScreenConf {
@@ -63,6 +83,7 @@ typedef struct _msScreenConf {
     Bool format_swap;
     Bool no_tile;
     Bool planar;
+    uint64_t modifier;
     KdGlamorInfo glamor_info;
 } MsScreenConf;
 
@@ -99,7 +120,7 @@ Bool msUnmapFramebuffer(KdScreenInfo * screen);
 Bool msSetShadow(ScreenPtr pScreen);
 
 struct gbm_bo*
-modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth);
+modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth, Bool probe);
 
 /* ms_cursor.c */
 

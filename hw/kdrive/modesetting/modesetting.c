@@ -15,21 +15,31 @@
 #endif
 
 struct gbm_bo*
-modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth)
+modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth, Bool probe)
 {
     struct gbm_bo *ret = NULL;
 
 #ifdef GLAMOR
     msScrPriv *scrpriv = screen->driver;
     MsScreenConf *config = screen->closure;
-    Rotation randr = scrpriv ? scrpriv->randr : screen->randr;
+    Rotation randr = (scrpriv && scrpriv->randr) ? scrpriv->randr : screen->randr;
 
     if (screen->dumb) {
         need_map = TRUE;
+        probe = FALSE;
     } else if (config->no_tile) {
         need_map = TRUE;
+        probe = FALSE;
     } else if (randr != RR_Rotate_0) {
+        /* TODO: Can we do better? */
         need_map = TRUE;
+        probe = FALSE;
+    } else {
+        msPriv *priv = screen->card->driver;
+        const char *name = gbm_device_get_backend_name(priv->gbm);
+        if (!name || strcmp(name, "drm")) {
+            probe = FALSE;
+        }
     }
 #endif
 
@@ -42,6 +52,18 @@ modesetting_open(KdScreenInfo *screen, Bool need_map, Bool keep_depth)
         if (!ret) {
             ret = gbm_create_front_for_screen(screen, TRUE /* do_map */, config->format_swap);
         }
+
+        /*
+         * Mesa's gbm backend does not currently allow creating dumb buffers
+         * with format other than GBM_FORMAT_{X,A}RGB8888
+         *
+         * See if a tiled front buffer can be created, and hope that it will work with glamor.
+         */
+#ifdef GLAMOR
+        if (!ret && probe && need_map) {
+            ret = gbm_create_front_for_screen(screen, FALSE /* do_map */, config->format_swap);
+        }
+#endif
 
         if (!ret) {
             int old_depth = screen->fb.depth;
@@ -236,7 +258,7 @@ msScreenInitialize(KdScreenInfo * screen, msScrPriv * scrpriv)
         screen->height = scrpriv->mode ? scrpriv->mode->vdisplay : 1080;
     }
 
-    scrpriv->front = modesetting_open(screen, TRUE /* need_map */, FALSE /* keep_depth */);
+    scrpriv->front = modesetting_open(screen, TRUE /* need_map */, FALSE /* keep_depth */, TRUE /* probe */);
     if (!scrpriv->front) {
         LogMessage(X_ERROR, "Xmodesetting(card %d, screen %d): Could not create a front buffer\n",
                    screen->card->mynum, screen->mynum);
@@ -328,12 +350,10 @@ msMapFramebuffer(KdScreenInfo * screen)
         scrpriv->shadow = FALSE;
     } else if (scrpriv->is_24bpp) {
         scrpriv->shadow = TRUE;
-    } else if (config->shadow >= 0) {
-        scrpriv->shadow = config->shadow;
     } else if (scrpriv->randr != RR_Rotate_0) {
         scrpriv->shadow = TRUE;
     } else {
-        scrpriv->shadow = FALSE;
+        scrpriv->shadow = config->shadow;
     }
 
     KdComputePointerMatrix(&m, scrpriv->randr, screen->width, screen->height);

@@ -34,6 +34,12 @@ Don't use a tiled front buffer. Needed to support rotations.
 Allow creating a front buffer with planar modifiers.
 Could potentially increase performance on hw that supports planar front buffers.
 Will most likely lead to bad rendering artifacts on such hw.
+.TP 8
+.B -modifier <val>
+Request a particular modifier for the front buffer.
+Mostly intended for testing. Users should not need to set this.
+If the modifier Xmodesetting picks is suboptimal for whatever reason,
+this can be used to override it.
 .SH CONFIGURATION
 .
 Like all kdrive X servers,
