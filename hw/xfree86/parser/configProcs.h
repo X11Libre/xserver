@@ -96,11 +96,6 @@ void xf86printScreenSection(FILE * cf, XF86ConfScreenPtr ptr);
 extern _X_EXPORT void xf86freeScreenList(XF86ConfScreenPtr ptr);
 int xf86validateScreen(XF86ConfigPtr p);
 
-/* Vendor.c */
-XF86ConfVendorPtr xf86parseVendorSection(void);
-void xf86freeVendorList(XF86ConfVendorPtr p);
-void xf86printVendorSection(FILE * cf, XF86ConfVendorPtr ptr);
-
 /* Video.c */
 XF86ConfVideoAdaptorPtr xf86parseVideoAdaptorSection(void);
 void xf86printVideoAdaptorSection(FILE * cf, XF86ConfVideoAdaptorPtr ptr);
