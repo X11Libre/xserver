@@ -533,10 +533,10 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
             goto bailout;
     }
 
-    if (!AddResource(authId, SecurityAuthorizationResType, pAuth)) {
-        err = BadAlloc;
-        goto bailout;
-    }
+    /* on failure, AddResource() has already called SecurityDeleteAuthorization(),
+       which removed the authorization and freed pAuth */
+    if (!AddResource(authId, SecurityAuthorizationResType, pAuth))
+        return BadAlloc;
 
     /* start the timer ticking */
 
