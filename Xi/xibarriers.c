@@ -421,7 +421,7 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
     DeviceIntPtr master;
 
     /* We cannot know how many events are available in *events, but
-     * we know it all DDX very protbably allocated them with
+     * we know that all DDX very probably allocated them with
      * GetMaximumEventsNum() and fill_pointer_events() may have added one.
      *
      * Let's cap at a maximum of 64 barrier events which is way more than
@@ -521,10 +521,6 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
             continue;
 
         pbd->hit = FALSE;
-        pbd->last_timestamp = ms;
-        /* If we've left the hit box, this is the
-         * start of a new event ID. */
-        pbd->barrier_event_id++;
 
         if (*nevents < MAX_BARRIER_EVENTS) {
             ev.type = ET_BarrierLeave;
@@ -546,6 +542,10 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
             *nevents += 1;
         }
 
+        pbd->last_timestamp = ms;
+        /* If we've left the hit box, this is the
+         * start of a new event ID. */
+        pbd->barrier_event_id++;
     }
 
  out:
