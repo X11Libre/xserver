@@ -637,12 +637,14 @@ ProcCompositeNameWindowPixmap(ClientPtr client)
             return BadMatch;
         }
 
+        /* take our reference first: on failure, AddResource() drops it again
+           through the pixmap delete function */
+        ++pPixmap->refcnt;
+
         if (!AddResource(newPix->info[walkScreenIdx].id, X11_RESTYPE_PIXMAP, (void *) pPixmap)) {
             free(newPix);
             return BadAlloc;
         }
-
-        ++pPixmap->refcnt;
     });
 
     if (!AddResource(stuff->pixmap, XRT_PIXMAP, (void *) newPix))
