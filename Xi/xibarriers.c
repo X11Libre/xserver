@@ -604,8 +604,10 @@ CreatePointerBarrierClient(ClientPtr client,
      * function */
     xorg_list_for_each_entry(counter, &cs->barriers, entry) {
         nbarriers++;
-        if (nbarriers >= 32)
-            return BadAlloc;
+        if (nbarriers >= 32) {
+            err = BadAlloc;
+            goto error;
+        }
     }
 
     ret->screen = screen;
