@@ -700,8 +700,7 @@ ProcDestroySubwindows(ClientPtr client)
     rc = dixLookupWindow(&pWin, stuff->id, client, DixRemoveAccess);
     if (rc != Success)
         return rc;
-    DestroySubwindows(pWin, client);
-    return Success;
+    return DestroySubwindows(pWin, client);
 }
 
 int
