@@ -46,6 +46,7 @@ const testfunc_t* protocol_xipassivegrabdevice_test(void);
 const testfunc_t* protocol_xiquerypointer_test(void);
 const testfunc_t* protocol_xiwarppointer_test(void);
 const testfunc_t* protocol_eventconvert_test(void);
+const testfunc_t* protocol_xkbgetkbdbyname_test(void);
 const testfunc_t* xi2_test(void);
 
 #endif /* TESTS_H */
