@@ -452,6 +452,96 @@ class PolyText8Request:
 
 
 @dataclass
+class DestroyWindowRequest:
+    """X11 DestroyWindow request (opcode 4).
+
+    Wire format:
+        CARD8    opcode      (4)
+        CARD8    unused
+        CARD16   length      (2)
+        CARD32   window
+    """
+
+    window: int
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH I",
+            4,  # DestroyWindow opcode
+            0,
+            2,  # length = 2 words
+            self.window,
+        )
+
+
+@dataclass
+class MapWindowRequest:
+    """X11 MapWindow request (opcode 8).
+
+    Wire format:
+        CARD8    opcode      (8)
+        CARD8    unused
+        CARD16   length      (2)
+        CARD32   window
+    """
+
+    window: int
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH I",
+            8,  # MapWindow opcode
+            0,
+            2,  # length = 2 words
+            self.window,
+        )
+
+
+@dataclass
+class WarpPointerRequest:
+    """X11 WarpPointer request (opcode 41).
+
+    Wire format:
+        CARD8    opcode      (41)
+        CARD8    unused
+        CARD16   length      (6)
+        CARD32   srcWindow   (None = 0)
+        CARD32   dstWindow   (None = 0)
+        INT16    srcX
+        INT16    srcY
+        CARD16   srcWidth
+        CARD16   srcHeight
+        INT16    dstX
+        INT16    dstY
+    """
+
+    dst_window: int = 0
+    dst_x: int = 0
+    dst_y: int = 0
+    src_window: int = 0
+    src_x: int = 0
+    src_y: int = 0
+    src_width: int = 0
+    src_height: int = 0
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH II hh HH hh",
+            41,  # WarpPointer opcode
+            0,
+            6,  # length = 6 words (24 bytes)
+            self.src_window,
+            self.dst_window,
+            self.src_x,
+            self.src_y,
+            self.src_width,
+            self.src_height,
+            self.dst_x,
+            self.dst_y,
+        )
+
+
+@dataclass
 class ForceScreenSaver:
     """X11 ForceScreenSaver request."""
 

