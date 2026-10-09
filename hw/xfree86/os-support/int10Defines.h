@@ -30,13 +30,14 @@
 
 #ifdef _VM86_LINUX
 
+#include <stdint.h>
 #include <asm/vm86.h>
 
 #define CPU_R(type,name,num) \
 	(((type *)&(((struct vm86_struct *)REG->cpuRegs)->regs.name))[(num)])
-#define CPU_RD(name,num) CPU_R(CARD32,name,(num))
-#define CPU_RW(name,num) CPU_R(CARD16,name,(num))
-#define CPU_RB(name,num) CPU_R(CARD8,name,(num))
+#define CPU_RD(name,num) CPU_R(uint32_t,name,(num))
+#define CPU_RW(name,num) CPU_R(uint16_t,name,(num))
+#define CPU_RB(name,num) CPU_R(uint8_t,name,(num))
 
 #define X86_EAX CPU_RD(eax,0)
 #define X86_EBX CPU_RD(ebx,0)
