@@ -335,7 +335,7 @@ xf86platformProbe(void)
                         curr = NULL;
                     }
                     free(copy);
-                } else {
+                } else if (cl->modulepath) {
                         driver_path = path; /* Reuse for temporary storage */
                         if (*(cl->modulepath)) {
                             XNFasprintf(&path, "%s,%s", cl->modulepath,
