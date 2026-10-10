@@ -86,9 +86,9 @@ struct _glamor_program {
     GLint                       atlas_uniform;
     glamor_program_location     locations;
     glamor_program_flag         flags;
+    glamor_program_alpha        alpha;
     glamor_use                  prim_use;
     glamor_use                  fill_use;
-    glamor_program_alpha        alpha;
     glamor_use_render           prim_use_render;
     glamor_use_render           fill_use_render;
 };

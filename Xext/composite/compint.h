@@ -147,10 +147,10 @@ typedef struct _CompScreen {
     int numAlternateVisuals;
     VisualID *alternateVisuals;
     int numImplicitRedirectExceptions;
+    Window overlayWid;
     CompImplicitRedirectException *implicitRedirectExceptions;
 
     WindowPtr pOverlayWin;
-    Window overlayWid;
     CompOverlayClientPtr pOverlayClients;
 
     SourceValidateProcPtr SourceValidate;
