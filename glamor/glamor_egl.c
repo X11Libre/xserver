@@ -775,18 +775,14 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
     if (!bo)
     {
         bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
-#ifdef GBM_BO_USE_LINEAR
                 (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
                  GBM_BO_USE_LINEAR : 0) |
-#endif
                 GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
         if (!bo) {
             /* Try allocating a buffer that cannot be scanned out */
             bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
-#ifdef GBM_BO_USE_LINEAR
                     (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
                      GBM_BO_USE_LINEAR : 0) |
-#endif
                      GBM_BO_USE_RENDERING);
 #if 0
             if (bo) {
