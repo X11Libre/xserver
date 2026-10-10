@@ -283,14 +283,16 @@ xf86platformProbe(void)
 
             if (xf86ModPathFrom != X_CMDLINE) {
                 if (cl->driver) {
-                    char driver_path[PATH_MAX] = { 0 };
+                    char driver_path_buf[PATH_MAX] = { 0 };
+                    const char *driver_path = NULL;
                     if (cl->modulepath) {
+                        driver_path = driver_path_buf;
                         if (*(cl->modulepath)) {
-                            snprintf(driver_path, sizeof(driver_path)-1, "%s,%s", cl->modulepath, xf86ModulePath);
+                            snprintf(driver_path_buf, sizeof(driver_path_buf)-1, "%s,%s", cl->modulepath, xf86ModulePath);
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for driver %s overridden with \"%s\"\n",
                                     cl->identifier, cl->driver, driver_path);
                         } else {
-                            snprintf(driver_path, sizeof(driver_path)-1, "%s", xf86ModulePath);
+                            snprintf(driver_path_buf, sizeof(driver_path_buf)-1, "%s", xf86ModulePath);
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for driver %s reset to standard \"%s\"\n",
                                     cl->identifier, cl->driver, driver_path);
                         }
@@ -313,14 +315,16 @@ xf86platformProbe(void)
                     }
                 }
                 else if (cl->modules) {
-                    char driver_path[PATH_MAX] = { 0 };
+                    char driver_path_buf[PATH_MAX] = { 0 };
+                    const char *driver_path = NULL;
                     if (cl->modulepath) {
+                        driver_path = driver_path_buf;
                         if (*(cl->modulepath)) {
-                            snprintf(driver_path, sizeof(driver_path)-1, "%s,%s", cl->modulepath, xf86ModulePath);
+                            snprintf(driver_path_buf, sizeof(driver_path_buf)-1, "%s,%s", cl->modulepath, xf86ModulePath);
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for modules %s overridden with \"%s\"\n",
                                     cl->identifier, cl->modules, driver_path);
                         } else {
-                            snprintf(driver_path, sizeof(driver_path)-1, "%s", xf86ModulePath);
+                            snprintf(driver_path_buf, sizeof(driver_path_buf)-1, "%s", xf86ModulePath);
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for modules %s reset to standard \"%s\"\n",
                                     cl->identifier, cl->modules, driver_path);
                         }
