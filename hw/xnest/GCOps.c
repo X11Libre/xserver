@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -30,6 +31,7 @@ is" without express or implied warranty.
 #include "pixmapstr.h"
 #include "servermd.h"
 
+#include "xnest-screen_priv.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -64,13 +66,19 @@ void
 xnestQueryBestSize(int class, unsigned short *pWidth, unsigned short *pHeight,
                    ScreenPtr pScreen)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestQueryBestSize() not on xnest screen\n");
+        return;
+    }
+
     xcb_generic_error_t *err = NULL;
     xcb_query_best_size_reply_t *reply = xcb_query_best_size_reply(
         xnestUpstreamInfo.conn,
         xcb_query_best_size(
             xnestUpstreamInfo.conn,
             class,
-            xnestDefaultWindows[pScreen->myNum],
+            screenPriv->defaultWindow,
             *pWidth,
             *pHeight),
         &err);
@@ -189,8 +197,14 @@ xnestBitBlitHelper(GCPtr pGC)
                 default:
                 {
                     struct xnest_event_queue *q = malloc(sizeof(struct xnest_event_queue));
-                    q->event = event;
-                    xorg_list_add(&q->entry, &xnestUpstreamInfo.eventQueue.entry);
+                    if (q) {
+                        q->event = event;
+                        xorg_list_add(&q->entry, &xnestUpstreamInfo.eventQueue.entry);
+                    }
+                    else {
+                        free(event);
+                    }
+                    break;
                 }
             }
         }
@@ -343,6 +357,8 @@ xnestPolyText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
     // won't get more than 254 elements, since it's already processed by doPolyText()
     int const bufsize = sizeof(xTextElt) + count;
     uint8_t *buffer = malloc(bufsize);
+    if (!buffer)
+        return x;
     xTextElt *elt = (xTextElt*)buffer;
     elt->len = count;
     elt->delta = 0;
@@ -369,6 +385,8 @@ xnestPolyText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
     // won't get more than 254 elements, since it's already processed by doPolyText()
     int const bufsize = sizeof(xTextElt) + count*2;
     uint8_t *buffer = malloc(bufsize);
+    if (!buffer)
+        return x;
     xTextElt *elt = (xTextElt*)buffer;
     elt->len = count;
     elt->delta = 0;

@@ -4,10 +4,8 @@ srcs = [
     '../../stubs/ddxBeforeReset.c',
 ]
 
-fbdev_glamor = []
 if build_glamor
     srcs += 'fb_glamor.c'
-    fbdev_glamor += glamor
 endif
 
 xfbdev_server = executable(
@@ -16,12 +14,11 @@ xfbdev_server = executable(
     include_directories: [
         inc,
         include_directories('../src'),
-        include_directories('../linux'),
+        include_directories('../os/linux'),
     ],
-    dependencies: [ common_dep, libdrm_dep ],
+    dependencies: common_dep,
     link_with: [
         libxserver_main,
-        fbdev_glamor,
         kdrive,
         linux,
         libxserver_fb,

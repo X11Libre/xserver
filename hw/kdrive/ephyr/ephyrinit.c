@@ -72,27 +72,11 @@ InitOutput(int argc, char **argv)
 void
 InitInput(int argc, char **argv)
 {
-    KdKeyboardInfo *ki;
-    KdPointerInfo *pi;
-
     KdAddKeyboardDriver(&EphyrKeyboardDriver);
     KdAddPointerDriver(&EphyrMouseDriver);
 
-    if (!kdHasKbd) {
-        ki = KdNewKeyboard();
-        if (!ki)
-            FatalError("Couldn't create Xephyr keyboard\n");
-        ki->driver = &EphyrKeyboardDriver;
-        KdAddKeyboard(ki);
-    }
-
-    if (!kdHasPointer) {
-        pi = KdNewPointer();
-        if (!pi)
-            FatalError("Couldn't create Xephyr pointer\n");
-        pi->driver = &EphyrMouseDriver;
-        KdAddPointer(pi);
-    }
+    KdAddDefaultKeyboard("ephyr");
+    KdAddDefaultPointer("ephyr");
 
     KdInitInput();
 }
@@ -155,7 +139,7 @@ processScreenOrOutputArg(const char *screen_size, const char *output, char *pare
         unsigned long p_id = 0;
         Bool use_geometry;
 
-        screen = KdScreenInfoAdd(card);
+        screen = KdScreenInfoAdd(card, NULL);
         KdParseScreen(screen, screen_size);
         screen->driver = calloc(1, sizeof(EphyrScrPriv));
         if (!screen->driver)
@@ -167,7 +151,7 @@ processScreenOrOutputArg(const char *screen_size, const char *output, char *pare
 
         use_geometry = (strchr(screen_size, '+') != NULL);
         EPHYR_DBG("screen number:%d\n", screen->mynum);
-        hostx_add_screen(screen, p_id, screen->mynum, use_geometry, output);
+        hostx_add_screen(screen, p_id, use_geometry, output);
     }
     else {
         ErrorF("No matching card found!\n");

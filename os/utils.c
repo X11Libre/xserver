@@ -49,6 +49,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <dix-config.h>
+#include <stdbool.h>
 
 #ifdef __CYGWIN__
 #include <stdlib.h>
@@ -136,6 +137,7 @@ __stdcall unsigned long GetTickCount(void);
 Bool CoreDump;
 
 Bool enableIndirectGLX = FALSE;
+bool enableFontServerConnections = false;
 
 #ifdef XINERAMA
 Bool PanoramiXExtensionDisabledHack = FALSE;
@@ -288,6 +290,8 @@ UseMsg(void)
     ErrorF("-f #                   bell base (0-100)\n");
     ErrorF("-fakescreenfps #       fake screen default fps (1-600)\n");
     ErrorF("-fp string             default font path\n");
+    ErrorF("+fontserverconnections Allow font server connections in the font path\n");
+    ErrorF("-fontserverconnections Prohibit font server connections in the font path (default)\n");
     ErrorF("-help                  prints message with these options\n");
     ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
     ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
@@ -502,7 +506,10 @@ ProcessCommandLine(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "-dpi") == 0) {
             if (++i < argc)
-                monitorResolution = atoi(argv[i]);
+                if (strcmp(argv[i], "auto") == 0)
+                    autosetDPI = true;
+                else
+                    monitorResolution = atoi(argv[i]);
             else
                 UseMsg();
         }
@@ -550,6 +557,10 @@ ProcessCommandLine(int argc, char *argv[])
             UseMsg();
             exit(0);
         }
+        else if (strcmp(argv[i], "+fontserverconnections") == 0)
+            enableFontServerConnections = true;
+        else if (strcmp(argv[i], "-fontserverconnections") == 0)
+            enableFontServerConnections = false;
         else if (strcmp(argv[i], "+iglx") == 0)
             enableIndirectGLX = TRUE;
         else if (strcmp(argv[i], "-iglx") == 0)

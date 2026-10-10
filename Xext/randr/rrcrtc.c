@@ -143,6 +143,8 @@ RRCrtcNotify(RRCrtcPtr crtc,
 {
     int i, j;
 
+    BUG_RETURN_VAL(numOutputs != 0 && outputs == NULL, FALSE);
+
     /*
      * Check to see if any of the new outputs were
      * not in the old list and mark them as changed
@@ -198,8 +200,8 @@ RRCrtcNotify(RRCrtcPtr crtc,
     /*
      * Copy the new list of outputs into the crtc
      */
-    BUG_RETURN_VAL(numOutputs != 0 && outputs == NULL, FALSE);
-    memcpy(crtc->outputs, outputs, numOutputs * sizeof(RROutputPtr));
+    if (numOutputs > 0)
+        memcpy(crtc->outputs, outputs, numOutputs * sizeof(RROutputPtr));
 
     /*
      * Update remaining crtc fields

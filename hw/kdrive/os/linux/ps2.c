@@ -111,7 +111,7 @@ Ps2Init(KdPointerInfo * pi)
 
     if (!pi->path) {
         for (i = 0; i < NUM_PS2_NAMES; i++) {
-            ps2Port = open(Ps2Names[i], 0);
+            ps2Port = open(Ps2Names[i], O_RDONLY);
             if (ps2Port >= 0) {
                 pi->path = strdup(Ps2Names[i]);
                 break;
@@ -119,7 +119,7 @@ Ps2Init(KdPointerInfo * pi)
         }
     }
     else {
-        ps2Port = open(pi->path, 0);
+        ps2Port = open(pi->path, O_RDONLY);
     }
 
     if (ps2Port < 0)
@@ -140,7 +140,7 @@ Ps2Enable(KdPointerInfo * pi)
     if (!pi)
         return BadImplementation;
 
-    fd = open(pi->path, 0);
+    fd = open(pi->path, O_RDONLY);
     if (fd < 0)
         return BadMatch;
 

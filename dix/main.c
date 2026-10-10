@@ -239,14 +239,10 @@ dix_main(int argc, char *argv[], char *envp[])
 
     rootCursor = RefCursor(rootCursor);
 
-#ifdef XINERAMA
     /*
      * Consolidate window and colourmap information for each screen
      */
-    if (PanoramiXIsEnabled()) {
-        PanoramiXConsolidate();
-    }
-#endif /* XINERAMA */
+    PanoramiXConsolidate();
 
     DIX_FOR_EACH_SCREEN({
         InitRootWindow(walkScreen->root);
@@ -265,20 +261,7 @@ dix_main(int argc, char *argv[], char *envp[])
     dixSaveScreens(serverClient, SCREEN_SAVER_FORCER, ScreenSaverReset);
 
     dixCloseRegistry();
-
-#ifdef XINERAMA
-    if (PanoramiXIsEnabled()) {
-        if (!PanoramiXCreateConnectionBlock()) {
-            FatalError("could not create connection block info");
-        }
-    }
-    else
-#endif /* XINERAMA */
-    {
-        if (!CreateConnectionBlock()) {
-            FatalError("could not create connection block info");
-        }
-    }
+    dixInitConnectionBlock();
 
     NotifyParentProcess();
     InputThreadInit();
@@ -351,6 +334,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
     free(ConnectionInfo);
     ConnectionInfo = NULL;
+    ConnectionInfoSize = 0;
 
     return 0;
 }

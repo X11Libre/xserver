@@ -169,7 +169,9 @@
 #include <machine/console.h>
 #endif                          /* FreeBSD 4.1 RELEASE or lator */
 #else
+#if !defined(__NetBSD__) && !defined(__OpenBSD__)
 #include <sys/console.h>
+#endif
 #endif
 #endif                          /* SYSCONS_SUPPORT */
 #if defined(PCVT_SUPPORT) && !defined(__NetBSD__) && !defined(__OpenBSD__)

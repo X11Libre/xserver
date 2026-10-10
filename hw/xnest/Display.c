@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -28,6 +29,7 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 #include "servermd.h"
 
+#include "xnest-eventmask.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -43,7 +45,6 @@ Drawable xnestDefaultDrawables[MAXDEPTH + 1];
 Pixmap xnestIconBitmap;
 Pixmap xnestScreenSaverPixmap;
 uint32_t xnestBitmapGC;
-uint32_t xnestEventMask;
 
 void
 xnestOpenDisplay(int argc, char *argv[])

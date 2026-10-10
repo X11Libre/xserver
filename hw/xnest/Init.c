@@ -103,7 +103,7 @@ InitOutput(int argc, char *argv[])
         xnestNumScreens = 1;
 
     for (i = 0; i < xnestNumScreens; i++)
-        AddScreen(xnestOpenScreen, argc, argv);
+        AddScreen(xnestOpenScreen, argc, argv, NULL);
 
     xnestNumScreens = screenInfo.numScreens;
 

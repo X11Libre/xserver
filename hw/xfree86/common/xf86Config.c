@@ -60,6 +60,7 @@
 #ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
 #endif
+#include "Xext/xfixes/xfixes_priv.h"
 
 #include "xf86_priv.h"
 #include "xf86Modes.h"
@@ -435,6 +436,7 @@ typedef enum {
     FLAG_DONTVTSWITCH,
     FLAG_DONTZAP,
     FLAG_DONTZOOM,
+    FLAG_ALLOW_FORCE_TERMINATE,
     FLAG_DISABLEVIDMODE,
     FLAG_ALLOWNONLOCAL,
     FLAG_ALLOWMOUSEOPENFAIL,
@@ -461,6 +463,7 @@ typedef enum {
     FLAG_DEBUG,
     FLAG_ALLOW_BYTE_SWAPPED_CLIENTS,
     FLAG_SINGLE_DRIVER,
+    FLAG_FONTSERVER,
 } FlagValues;
 
 /**
@@ -468,6 +471,8 @@ typedef enum {
  * if the parser found the option in the config file.
  */
 static OptionInfoRec FlagOptions[] = {
+    {FLAG_ALLOW_FORCE_TERMINATE, "AllowForceTerminate", OPTV_BOOLEAN,
+     {0}, FALSE},
     {FLAG_DONTVTSWITCH, "DontVTSwitch", OPTV_BOOLEAN,
      {0}, FALSE},
     {FLAG_DONTZAP, "DontZap", OPTV_BOOLEAN,
@@ -524,6 +529,8 @@ static OptionInfoRec FlagOptions[] = {
      {0}, FALSE},
     {FLAG_SINGLE_DRIVER, "SingleDriver", OPTV_BOOLEAN,
      {0}, FALSE},
+    {FLAG_FONTSERVER, "FontServerConnections", OPTV_BOOLEAN,
+     {0}, FALSE},
     {-1, NULL, OPTV_NONE,
      {0}, FALSE},
 };
@@ -559,6 +566,10 @@ const char *rules;
     xf86GetOptValBool(FlagOptions, FLAG_DONTVTSWITCH, &xf86Info.dontVTSwitch);
     xf86GetOptValBool(FlagOptions, FLAG_DONTZAP, &xf86Info.dontZap);
     xf86GetOptValBool(FlagOptions, FLAG_DONTZOOM, &xf86Info.dontZoom);
+
+    Bool b = FALSE;
+    xf86GetOptValBool(FlagOptions, FLAG_ALLOW_FORCE_TERMINATE, &b);
+    XFixesAllowForceTerminate = !!b;
 
     xf86GetOptValBool(FlagOptions, FLAG_IGNORE_ABI, &xf86Info.ignoreABI);
     if (xf86Info.ignoreABI) {
@@ -703,6 +714,12 @@ const char *rules;
         }
     }
 #endif
+
+    if (xf86FontserverFrom != X_CMDLINE) {
+        if (xf86GetOptValBool(FlagOptions, FLAG_FONTSERVER, &value)) {
+            xf86FontserverFrom = X_CONFIG;
+        }
+    }
 
     xf86Info.debug = xf86GetOptValString(FlagOptions, FLAG_DEBUG);
 

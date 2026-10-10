@@ -117,7 +117,7 @@ TslibEnable(KdPointerInfo * pi)
                pi->path);
     }
 
-    private->tsDev = ts_open(pi->path, 0);
+    private->tsDev = ts_open(pi->path, O_RDONLY);
     if (!private->tsDev) {
         ErrorF("[tslib/TslibEnable] failed to open %s\n", pi->path);
         return BadAlloc;

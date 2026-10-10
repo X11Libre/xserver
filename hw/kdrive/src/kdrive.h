@@ -91,6 +91,7 @@ typedef struct _KdScreenInfo {
     struct _KdScreenInfo *next;
     KdCardInfo *card;
     ScreenPtr pScreen;
+    void *closure;
     void *driver;
     Rotation randr;             /* rotation and reflection */
     int x;
@@ -98,11 +99,13 @@ typedef struct _KdScreenInfo {
     int width;
     int height;
     int rate;
+    int requested_mm;
     int width_mm;
     int height_mm;
     int subpixel_order;
     Bool dumb;
     Bool softCursor;
+    Bool initialized; /* If KdScreenInit succeeded */
     int mynum;
     xPoint origin;
     KdFrameBuffer fb;
@@ -234,6 +237,7 @@ KdPointerInfo *KdNewPointer(void);
 void KdFreePointer(KdPointerInfo *);
 int KdAddPointer(KdPointerInfo * ki);
 int KdAddConfigPointer(const char *pointer);
+int KdAddDefaultPointer(const char *pointer);
 void KdRemovePointer(KdPointerInfo * ki);
 
 typedef struct {
@@ -285,7 +289,8 @@ void KdAddKeyboardDriver(KdKeyboardDriver * driver);
 void KdRemoveKeyboardDriver(KdKeyboardDriver * driver);
 KdKeyboardInfo *KdNewKeyboard(void);
 void KdFreeKeyboard(KdKeyboardInfo * ki);
-int KdAddConfigKeyboard(const char *pointer);
+int KdAddConfigKeyboard(const char *keyboard);
+int KdAddDefaultKeyboard(const char *keyboard);
 int KdAddKeyboard(KdKeyboardInfo * ki);
 void KdRemoveKeyboard(KdKeyboardInfo * ki);
 
@@ -375,14 +380,14 @@ void KdSetColormap(ScreenPtr pScreen);
 /* kdrive.c */
 extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
-void KdSuspend(int ddxAbort);
+void KdSuspend(void);
 
 void KdInitScreen(KdScreenInfo * screen, int argc, char **argv);
 
 void
  KdDisableScreen(ScreenPtr pScreen);
 
-void KdDisableScreens(int ddxAbort);
+void KdDisableScreens(void);
 
 Bool
  KdEnableScreen(ScreenPtr pScreen);
@@ -426,14 +431,12 @@ int
  */
 void KdOsInit(const KdOsFuncs * pOsFuncs);
 
-void
- KdOsAddInputDrivers(void);
 
 Bool KdCreateScreenResources(ScreenPtr pScreen);
 
 Bool KdSaveScreen(ScreenPtr pScreen, int on);
 
-Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv);
+bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure);
 
 void
  KdInitCard(ScreenInfo * pScreenInfo, KdCardInfo * card, int argc, char **argv);
@@ -454,7 +457,7 @@ KdCardInfo *KdCardInfoLast(void);
 void
  KdCardInfoDispose(KdCardInfo * ci);
 
-KdScreenInfo *KdScreenInfoAdd(KdCardInfo * ci);
+KdScreenInfo *KdScreenInfoAdd(KdCardInfo * ci, void *closure);
 
 void
  KdScreenInfoDispose(KdScreenInfo * si);
@@ -462,8 +465,7 @@ void
 /* kinput.c */
 void
  KdInitInput(void);
- void
- KdAddConfigInputDrivers(void);
+
 void
  KdCloseInput(void);
 

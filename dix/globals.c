@@ -46,6 +46,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xmd.h>
 
@@ -119,6 +120,7 @@ TimeStamp currentTime;
 
 int defaultColorVisualClass = -1;
 int monitorResolution = 0;
+bool autosetDPI = false;
 
 Bool explicit_display = FALSE;
 char *ConnectionInfo;

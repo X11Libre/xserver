@@ -56,6 +56,8 @@ typedef struct {
     int fd; /* /dev/dri/cardxx */
     int gbm_forbidden; /* If glamor should not use libgbm, even if available */
 
+    int direct_dri3_only; /* If glamor should only use the direct DRI3 implementation */
+
     int auto_dri; /* If glamor should try to automatically enable DRI3 support */
     int partial_dri_allowed; /* If glamor should initialize DRI3, even if only some operations are available */
 
@@ -77,7 +79,7 @@ typedef struct {
  * If caps is not NULL, it will be set to a bitmask containing
  * information about glamor.
  */
-Bool glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps);
+Bool glamor_egl_init_internal(const glamor_egl_conf_t* glamor_egl_conf, int *caps);
 
 /*
  * Create an EGLDisplay from a native display type. This is a little quirky

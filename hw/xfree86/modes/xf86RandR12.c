@@ -806,6 +806,12 @@ xf86RandR12CreateScreenResources(ScreenPtr pScreen)
                 mmWidth = output->conf_monitor->mon_width;
                 mmHeight = output->conf_monitor->mon_height;
             }
+            else if (autosetDPI && output &&
+                (output->mm_width > 0 &&
+                 output->mm_height > 0)) {
+                mmWidth = output->mm_width;
+                mmHeight = output->mm_height;
+            }
             else {
                 /*
                  * Otherwise, just set the screen to DEFAULT_DPI

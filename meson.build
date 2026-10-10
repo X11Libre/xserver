@@ -34,7 +34,7 @@ add_project_link_arguments('-fvisibility=hidden', language : 'c')
 conf_data = configuration_data()
 conf_data.set('_DIX_CONFIG_H_', '1')
 
-if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+if cc.get_id() in ['gcc', 'clang']
     test_wflags = [
         '-Wchar-subscripts',
         '-Wpointer-arith',
@@ -98,7 +98,7 @@ xextproto_dep = dependency('xextproto', version: '>= 7.2.99.901', fallback: ['xo
 inputproto_dep = dependency('inputproto', version: '>= 2.3.99.1', fallback: ['xorgproto', 'ext_xorgproto'])
 kbproto_dep = dependency('kbproto', version: '>= 1.0.3', fallback: ['xorgproto', 'ext_xorgproto'])
 fontsproto_dep = dependency('fontsproto', version: '>= 2.1.3', fallback: ['xorgproto', 'ext_xorgproto'])
-fixesproto_dep = dependency('fixesproto', version: '>= 6.0', fallback: ['xorgproto', 'ext_xorgproto'])
+fixesproto_dep = dependency('fixesproto', version: '>= 6.1', fallback: ['xorgproto', 'ext_xorgproto'])
 damageproto_dep = dependency('damageproto', version: '>= 1.1', fallback: ['xorgproto', 'ext_xorgproto'])
 xcmiscproto_dep = dependency('xcmiscproto', version: '>= 1.2.0', fallback: ['xorgproto', 'ext_xorgproto'])
 bigreqsproto_dep = dependency('bigreqsproto', version: '>= 1.1.0', fallback: ['xorgproto', 'ext_xorgproto'])
@@ -198,7 +198,7 @@ endif
 glamor_option = get_option('glamor')
 
 hal_option = get_option('hal')
-if ['windows', 'darwin', 'cygwin'].contains(host_machine.system())
+if host_machine.system() in ['windows', 'darwin', 'cygwin']
     hal_option = 'false'
 endif
 
@@ -217,7 +217,6 @@ if get_option('seatd_libseat') == 'auto'
 else
     build_seatd_libseat = get_option('seatd_libseat') == 'true'
 endif
-
 
 if get_option('systemd_logind') == 'auto'
     build_systemd_logind = build_udev_kms and dbus_dep.found() and not build_seatd_libseat
@@ -239,8 +238,7 @@ build_xorg_sdk = get_option('xorg-sdk')
 build_xorg = false
 if (host_machine.system() != 'windows')
     if get_option('xorg') == 'auto'
-        build_xorg = (host_machine.system() != 'darwin' and
-                      host_machine.system() != 'windows')
+        build_xorg = host_machine.system() not in ['darwin', 'windows']
     else
         build_xorg = get_option('xorg') == 'true'
     endif
@@ -258,8 +256,7 @@ build_xnest = get_option('xnest') != 'false'
 
 build_xwin = false
 if get_option('xwin') == 'auto'
-    if (host_machine.system() == 'cygwin' or
-        host_machine.system() == 'windows')
+    if host_machine.system() in ['cygwin', 'windows']
             build_xwin = true
     endif
 else
@@ -284,14 +281,20 @@ build_xvfb = get_option('xvfb')
 
 build_xephyr = get_option('xephyr')
 
+build_xfake = get_option('xfake')
+
 build_xfbdev = get_option('xfbdev')
+
+build_xmodesetting = get_option('xmodesetting')
 
 build_xserver = (build_xorg or
                  build_xnest or
                  build_xvfb or
                  build_xquartz or
                  build_xephyr or
-                 build_xfbdev)
+                 build_xfake or
+                 build_xfbdev or
+                 build_xmodesetting)
 
 summary({
         'Xorg': build_xorg,
@@ -300,7 +303,9 @@ summary({
         'Xwin': build_xwin,
         'Xquartz': build_xquartz,
         'Xephyr': build_xephyr,
+        'Xfake': build_xfake,
         'Xfbdev': build_xfbdev,
+        'Xmodesetting': build_xmodesetting,
     },
     section: 'DDX',
     bool_yn: true,
@@ -327,10 +332,10 @@ message('IPv6 support: ' + (build_ipv6 ? 'YES' : 'NO'))
 int10 = get_option('int10')
 if int10 == 'auto'
     int10 = 'x86emu'
-    if host_machine.cpu() == 'ppc' and host_machine.system() == 'freebsd'
+    if host_machine.cpu_family() in ['ppc', 'ppc64'] and host_machine.system() == 'freebsd'
         int10 = 'stub'
     endif
-    if host_machine.cpu() == 'arm'
+    if host_machine.cpu_family() == 'arm'
         int10 = 'stub'
     endif
 endif
@@ -566,9 +571,7 @@ build_modesetting = libdrm_dep.found() and dri2proto_dep.found() and build_gbm
 
 build_vgahw = false
 if get_option('vgahw') == 'auto'
-    if (host_machine.system() != 'darwin' and
-        host_machine.system() != 'windows' and
-        host_machine.system() != 'cygwin')
+    if host_machine.system() not in ['darwin', 'windows', 'cygwin']
         build_vgahw = true
     endif
 else
@@ -619,9 +622,7 @@ endif
 build_acpi = false
 if (get_option('linux_acpi') == true and
    host_machine.system() == 'linux')
-    if (host_machine.cpu() == 'x86' or
-       host_machine.cpu() == 'x86_64' or
-       host_machine.cpu() == 'ia64')
+    if host_machine.cpu_family() in ['x86', 'x86_64', 'ia64']
         build_acpi = true
     endif
 endif
@@ -685,6 +686,7 @@ inc = include_directories(
     'miext/damage',
     'miext/shadow',
     'miext/sync',
+    'msutil',
     'dix',
     'include',
     epoll_inc,
@@ -912,8 +914,7 @@ if build_xorg_sdk
 
     # On Windows, modules built with the SDK will need to link with server and
     # module implibs to resolve symbols
-    if (host_machine.system() == 'cygwin' or
-        host_machine.system() == 'windows')
+    if host_machine.system() in ['cygwin', 'windows']
         sdkconfig.set('XORG_DRIVER_LIBS', '-lXorg.exe -L\${moduledir} -lshadow -no-undefined')
     endif
 

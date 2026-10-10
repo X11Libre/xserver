@@ -43,9 +43,6 @@ extern void WriteSConnectionInfo(ClientPtr /* pClient */ ,
 extern void SwapConnSetupPrefix(xConnSetupPrefix * /* pcspFrom */ ,
                                 xConnSetupPrefix * /* pcspTo */ );
 
-extern void WriteSConnSetupPrefix(ClientPtr /* pClient */ ,
-                                  xConnSetupPrefix * /* pcsp */ );
-
 #undef SWAPREP_PROC
 #define SWAPREP_PROC(func) extern void (func)(xEvent * /* from */, xEvent * /* to */)
 

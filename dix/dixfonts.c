@@ -2011,6 +2011,13 @@ adjust_fs_wait_for_delay(void *wt, unsigned long newdelay)
 static int
 _init_fs_handlers(FontPathElementPtr fpe, FontBlockHandlerProcPtr block_handler)
 {
+    if (!enableFontServerConnections) {
+        LogMessage(X_WARNING,
+                   "Ignoring font server \"%s\", font server connections "
+                   "are disabled.\n", fpe->name);
+        return AllocError;
+    }
+
     /* if server has reset, make sure the b&w handlers are reinstalled */
     if (last_server_gen < serverGeneration) {
         last_server_gen = serverGeneration;

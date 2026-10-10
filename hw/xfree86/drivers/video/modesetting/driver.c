@@ -60,6 +60,7 @@
 #include "fb.h"
 #include "xf86i2c.h"
 #include "xf86Crtc.h"
+#include "xf86RandR12.h"
 #include "miscstruct.h"
 #include "dixstruct.h"
 #include "xf86xv.h"
@@ -1017,6 +1018,81 @@ ms_window_update_async_flip_modifiers(WindowPtr win, Bool async_flip)
     priv->async_flip_modifiers = async_flip;
 }
 
+/**
+ * This function exist because there are necesary extra work around for correct behaviour,
+ * for example: force software rendering for cursor.
+ */
+static inline bool
+ms_is_running_virtual_gpu(drmmode_ptr drmmode)
+{
+    drmVersionPtr version = drmGetVersion(drmmode->fd);
+    if (!version) {
+        return false;
+    }
+
+    if (!version->name ||
+        strstr(version->name, "bochs-drm") ||
+        strstr(version->name, "evdi") ||
+        strstr(version->name, "vboxvideo") ||
+        strstr(version->name, "virtio_gpu") ||
+        strstr(version->name, "vkms") ||
+        strstr(version->name, "vmwgfx") ||
+        strstr(version->name, "qxl" )) {
+        drmFreeVersion(version);
+        return true;
+    }
+
+    drmFreeVersion(version);
+    return false;
+}
+
+/**
+ * @brief ms_is_running_single_size_hwcursor_gpu
+ * reported https://gitlab.freedesktop.org/xorg/xserver/-/work_items/1922 hardware cursor on amdgpu is problematic too
+ * implying on report older amd hardware working correctly with only 128x128 and 64x128 cursor.
+ *
+ * until we collect which hardware is affected assume only single cursor size
+ * @param drmmode
+ */
+static inline void
+probe_if_is_running_single_size_hwcursor_gpu(drmmode_ptr drmmode){
+
+    drmVersionPtr version = drmGetVersion(drmmode->fd);
+
+    bool borked_cursor = false;
+
+    if (version == NULL || version->name == NULL) {
+        /* can't tell, let the normal probing handle it */
+        drmmode->fixed_size_cursor = borked_cursor;
+        return;
+    }
+
+    if (strstr(version->name, "amdgpu")){
+
+        uint64_t cursor_width,cursor_height;
+
+        int ret1 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &cursor_width);
+        int ret2 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &cursor_height);
+
+        if (ret1 || ret2){  /* lets fallback code deal with it */
+            drmmode->fixed_size_cursor = borked_cursor;
+            drmFreeVersion(version);
+            return;
+        }
+
+        /* assume only older gpu devices experience this problem */
+        if ( cursor_width == 64 || cursor_width == 128 ||
+             cursor_height == 64 || cursor_height == 128) {
+
+            borked_cursor = true;
+        }
+
+    }
+
+    drmFreeVersion(version);
+    drmmode->fixed_size_cursor = borked_cursor;
+}
+
 static void
 FreeScreen(ScrnInfoPtr pScrn)
 {
@@ -1094,9 +1170,14 @@ try_enable_glamor(ScrnInfoPtr pScrn)
     modesettingPtr ms = modesettingPTR(pScrn);
     const char *accel_method_str = xf86GetOptValString(ms->drmmode.Options,
                                                        OPTION_ACCEL_METHOD);
-    Bool do_glamor = (!accel_method_str ||
-                      strcmp(accel_method_str, "glamor") == 0);
 
+    Bool no_accel = accel_method_str && !strcmp(accel_method_str, "dri3_only");
+
+    Bool do_glamor = (!accel_method_str ||
+                      no_accel ||
+                      !strcmp(accel_method_str, "glamor"));
+
+    ms->drmmode.no_accel = no_accel;
     ms->drmmode.glamor = FALSE;
     ms->drmmode.glamor_gbm = FALSE;
 
@@ -1114,8 +1195,9 @@ try_enable_glamor(ScrnInfoPtr pScrn)
     if (load_glamor(pScrn)) {
         int caps = GLAMOR_EGL_CAP_NONE;
         if (ms->glamor.egl_init2(pScrn, ms->fd, &caps, 0)) {
-            ms->drmmode.glamor_gbm = !!(caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO);
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO, "glamor initialized\n");
+            ms->drmmode.glamor_gbm = !no_accel && (caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO);
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO, "glamor initialized%s\n",
+                       no_accel ? " without render acceleration" : "");
             ms->drmmode.glamor = TRUE;
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1330,8 +1412,41 @@ PreInit(ScrnInfoPtr pScrn, int flags)
 
     if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_SW_CURSOR, FALSE)) {
         ms->drmmode.sw_cursor = TRUE;
+    } else {
+        /* we have situation where cursor in virtual envirioment doesn't work as expected and can be confusing for users, for example under qemu:
+         * - if display backend is `gtk`, by default cursor is showed when window is out of focus and hidden when in focus (it have to be rendered by vm gpu in software).
+         * - if display backend us `sdl` it always shows cursor regardless of drmModeSetCursor2 & friends settings
+         * - if vm run under spice backed using qxl display, the rendering application (remote-viewer) behaves correctly
+         *  for more detail see : https://www.qemu.org/docs/master/system/qemu-manpage.html search `show-cursor`
+         *
+         *  until better solution is found, force software cursor
+        */
+        if (ms_is_running_virtual_gpu(&ms->drmmode)){
+
+            drmVersionPtr version = drmGetVersion(ms->drmmode.fd);
+            const char *name="N/A";
+            if (version){
+                name = version->name;
+            }
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Forcing software cursor on virtual machine driver %s due to known issues\n", name);
+            drmFreeVersion(version);
+
+            ms->drmmode.sw_cursor = TRUE;
+        }
     }
 
+    probe_if_is_running_single_size_hwcursor_gpu(&ms->drmmode);
+
+    if (ms->drmmode.fixed_size_cursor){
+        drmVersionPtr version = drmGetVersion(ms->drmmode.fd);
+        const char *name="N/A";
+        if (version){
+            name = version->name;
+        }
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Forcing fixed hardware cursor on driver %s due to known issues\n", name);
+        drmFreeVersion(version);
+
+    }
     try_enable_glamor(pScrn);
 
     if (!ms->drmmode.glamor_gbm) {
@@ -1409,15 +1524,19 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Atomic modesetting %sabled\n", ms->atomic_modeset ? "en" : "dis");
 
+    /* Atomic modesetting implicitly enables universal planes */
+    Bool cap_universal_planes = ms->atomic_modeset;
+    if (!cap_universal_planes) {
+        cap_universal_planes = !drmSetClientCap(ms->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
+    }
+
     /* TearFree requires glamor and, if PageFlip is enabled, universal planes */
     if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_TEARFREE, TRUE)) {
         if (pScrn->is_gpu) {
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                        "TearFree cannot synchronize PRIME; use 'PRIME Synchronization' instead\n");
         } else if (ms->drmmode.glamor_gbm) {
-            /* Atomic modesetting implicitly enables universal planes */
-            if (!ms->drmmode.pageflip || ms->atomic_modeset ||
-                !drmSetClientCap(ms->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1)) {
+            if (!ms->drmmode.pageflip || cap_universal_planes) {
                 ms->drmmode.tearfree_enable = TRUE;
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO, "TearFree: enabled\n");
             } else {
@@ -1435,6 +1554,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     if (ret == 0 && value != 0)
         ms->kms_has_modifiers = TRUE;
 
+    /* Must be called after attempting to enable universal planes */
     if (drmmode_pre_init(pScrn, &ms->drmmode, pScrn->bitsPerPixel / 8) == FALSE) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "KMS setup failed\n");
         goto fail;
@@ -2167,7 +2287,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         xf86DPMSInit(pScreen, xf86DPMSSet, 0);
 
 #if defined(GLAMOR) && defined(XV)
-    if (ms->drmmode.glamor) {
+    if (ms->drmmode.glamor && !ms->drmmode.no_accel) {
         XF86VideoAdaptorPtr     glamor_adaptor;
 
         glamor_adaptor = ms->glamor.xv_init(pScreen, 16);
@@ -2273,7 +2393,7 @@ LeaveVT(ScrnInfoPtr pScrn)
 }
 
 /*
- * This gets called when gaining control of the VT, and from ScreenInit().
+ * This gets called when gaining control of the VT.
  */
 static Bool
 EnterVT(ScrnInfoPtr pScrn)
@@ -2301,7 +2421,7 @@ EnterVT(ScrnInfoPtr pScrn)
          * can hopefully correct the situation
          */
         RRSetChanged(xf86ScrnToScreen(pScrn));
-        RRTellChanged(xf86ScrnToScreen(pScrn));
+        xf86RandR12TellChanged(xf86ScrnToScreen(pScrn));
     }
 
     return TRUE;
@@ -2338,7 +2458,6 @@ CloseScreen(ScreenPtr pScreen)
     }
 
     if (ms->drmmode.shadow_enable) {
-        ms->shadow.Remove(pScreen, pScreen->GetScreenPixmap(pScreen));
         free(ms->drmmode.shadow_fb);
         ms->drmmode.shadow_fb = NULL;
         free(ms->drmmode.shadow_fb2);

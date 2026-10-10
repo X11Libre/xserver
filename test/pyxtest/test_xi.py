@@ -5,9 +5,8 @@
 import struct
 
 import pytest
-
-from proto import xi
-from xclient import BadLength, BadWindow, BadValue, Extension, X11Error, X11Reply
+from proto import x11, xi
+from xclient import Extension, X11Error, X11Reply
 
 
 @pytest.fixture
@@ -116,8 +115,8 @@ class TestXIPassiveGrab:
         )
         # The fix returns BadValue (error code 2)
         assert isinstance(resp, X11Error), f"Expected an error reply, got {resp}"
-        assert resp.error_code == BadValue, (
-            f"Expected BadValue ({BadValue}), got error code {resp.error_code}"
+        assert resp.error_code == x11.BadValue, (
+            f"Expected BadValue ({x11.BadValue}), got error code {resp.error_code}"
         )
 
 
@@ -168,8 +167,8 @@ class TestXIChangeProperty:
         # server tries to allocate 4 GB, failing with BadAlloc (11)
         # instead.
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
-        assert resp.error_code == BadLength, (
-            f"Expected BadLength ({BadLength}), got error code {resp.error_code} - "
+        assert resp.error_code == x11.BadLength, (
+            f"Expected BadLength ({x11.BadLength}), got error code {resp.error_code} - "
             f"integer truncation not caught by length check"
         )
 
@@ -385,10 +384,49 @@ class TestXIChangeDeviceControl:
         # With the fix: either a reply (success) or BadMatch (device
         # doesn't support resolution control), but NOT BadValue.
         if isinstance(resp, X11Error):
-            assert resp.error_code != BadValue, (
+            assert resp.error_code != x11.BadValue, (
                 "ChangeDeviceControl returned BadValue - "
                 "resolution values not byte-swapped"
             )
+
+    @pytest.mark.swapped_client
+    def test_change_device_control_resolution_unbounded_swap(
+        self, xserver, xi_xclient_swapped
+    ):
+        """Unbounded SwapLongs of DEVICE_RESOLUTION valuators."""
+        conn = xi_xclient_swapped
+        opcode = conn.query_extension(Extension.XI).opcode
+        bo = conn._byte_order
+
+        ctl = xi.DeviceResolutionCtl(
+            first_valuator=0,
+            num_valuators=255,
+            resolutions=[],
+        )
+        bad = xi.XChangeDeviceControlRequest(
+            opcode=opcode,
+            control=xi.DEVICE_RESOLUTION,
+            deviceid=xi.VirtualCorePointer,
+            control_data=ctl.to_bytes(bo),
+        )
+        canary = x11.InternAtomRequest(name="_TEST_CDC_UNBOUNDED_SWAP")
+
+        conn.send_request(bad.to_bytes(bo) + canary.to_bytes(bo))
+        conn.seq += 1
+
+        resp_bad = conn.recv_response(timeout=2.0)
+        resp_canary = conn.recv_response(timeout=2.0)
+
+        assert xserver.is_alive, "Server crashed"
+        assert isinstance(resp_bad, X11Error), f"Expected error, got {resp_bad}"
+        assert resp_bad.error_code == x11.BadLength, (
+            f"Expected BadLength (16), got {resp_bad.error_code}"
+        )
+        assert isinstance(resp_canary, X11Reply), (
+            f"InternAtom canary corrupted, got {resp_canary}"
+        )
+        atom = struct.unpack_from(f"{bo}I", resp_canary.data, 8)[0]
+        assert atom != 0, "InternAtom canary returned None atom"
 
 
 class TestXIChangeCursor:
@@ -411,6 +449,6 @@ class TestXIChangeCursor:
         # Without the fix: SegFault on a NULL WindowPtr
         # With the fix: BadWindow
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
-        assert resp.error_code == BadWindow, (
+        assert resp.error_code == x11.BadWindow, (
             "ChangeCursor didn't return BadWindow for Window 0"
         )

@@ -5,7 +5,6 @@
 import struct
 
 import pytest
-
 from proto import xres
 from xclient import Extension, X11Reply
 

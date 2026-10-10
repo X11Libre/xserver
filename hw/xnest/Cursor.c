@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -31,6 +32,7 @@ is" without express or implied warranty.
 #include "servermd.h"
 #include "mipointrst.h"
 
+#include "xnest-screen_priv.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -44,6 +46,12 @@ xnestCursorFuncRec xnestCursorFuncs = { NULL };
 Bool
 xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestRealizeCursor() not on xnest screen\n");
+        return FALSE;
+    }
+
     uint32_t valuemask = XCB_GC_FUNCTION | XCB_GC_PLANE_MASK | XCB_GC_FOREGROUND
                          | XCB_GC_BACKGROUND | XCB_GC_CLIP_MASK;
 
@@ -55,7 +63,7 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 
     xcb_aux_change_gc(xnestUpstreamInfo.conn, xnestBitmapGC, valuemask, &values);
 
-    uint32_t const winId = xnestDefaultWindows[pScreen->myNum];
+    uint32_t const winId = screenPriv->defaultWindow;
 
     Pixmap const source = xcb_generate_id(xnestUpstreamInfo.conn);
     xcb_create_pixmap(xnestUpstreamInfo.conn, 1, source, winId, pCursor->bits->width, pCursor->bits->height);
@@ -131,11 +139,16 @@ void
 xnestSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor, int x,
                int y)
 {
+    XnestScreenPrivate *screenPriv = xnestGetScreenPrivate(pScreen);
+    if (!screenPriv) {
+        LogMessage(X_WARNING, "xnestSetCursor() not on xnest screen\n");
+    }
+
     if (pCursor) {
         uint32_t cursor = xnestCursor(pCursor, pScreen);
 
         xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                     xnestDefaultWindows[pScreen->myNum],
+                                     screenPriv->defaultWindow,
                                      XCB_CW_CURSOR,
                                      &cursor);
     }

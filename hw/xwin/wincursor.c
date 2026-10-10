@@ -145,7 +145,7 @@ reverse(unsigned char c)
  * FIXME: Perhaps there are more smart code
  */
 static HCURSOR
-winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
+winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor)
 {
     winScreenPriv(pScreen);
     HCURSOR hCursor = NULL;
@@ -507,7 +507,7 @@ winSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor, int x,
             pScreenPriv->cursor.handle = NULL;
         }
         pScreenPriv->cursor.handle =
-            winLoadCursor(pScreen, pCursor, pScreen->myNum);
+            winLoadCursor(pScreen, pCursor);
         WIN_DEBUG_MSG("winSetCursor: handle=%p\n", pScreenPriv->cursor.handle);
 
         if (!bInhibit)

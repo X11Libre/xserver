@@ -1,6 +1,7 @@
 /*
 
 Copyright 1993 by Davor Matic
+Copyright 2026 by Enrico Weigelt, metux IT consult
 
 Permission to use, copy, modify, distribute, and sell this software
 and its documentation for any purpose is hereby granted without fee,
@@ -25,9 +26,11 @@ is" without express or implied warranty.
 #include "servermd.h"
 #include "mipointer.h"
 
+#include "xnest-eventmask.h"
+#include "xnest-screen_priv.h"
 #include "xnest-xcb.h"
 
-#include "Display.h"
+#include "Events.h"
 #include "Screen.h"
 #include "Pointer.h"
 #include "Args.h"
@@ -107,19 +110,11 @@ xnestPointerProc(DeviceIntPtr pDev, int onoff)
     }
     case DEVICE_ON:
         xnestEventMask |= XNEST_POINTER_EVENT_MASK;
-        for (i = 0; i < xnestNumScreens; i++)
-            xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[i],
-                                         XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+        xnestUpdateEventMask();
         break;
     case DEVICE_OFF:
         xnestEventMask &= ~XNEST_POINTER_EVENT_MASK;
-        for (i = 0; i < xnestNumScreens; i++)
-            xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[i],
-                                         XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+        xnestUpdateEventMask();
         break;
     case DEVICE_CLOSE:
         break;

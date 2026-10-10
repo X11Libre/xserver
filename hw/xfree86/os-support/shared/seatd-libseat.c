@@ -82,7 +82,7 @@ enable_seat(struct libseat *seat, void *userdata)
     /* Reactivate all input devices */
     for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next)
         if (pInfo->flags & XI86_SERVER_FD){
-            if (xf86CheckIntOption(pInfo->options, "libseat_id", -1) > 0){
+            if (xf86CheckIntOption(pInfo->options, "libseat_id", -1) >= 0){
                 int fd = -1, paused = FALSE;
                 seatd_libseat_open_device(pInfo, &fd, &paused);
                 xf86EnableInputDeviceForVTSwitch(pInfo);
@@ -261,7 +261,6 @@ seatd_libseat_fini(void)
  * Return
  *   file descriptor (>=0) if all is ok.
  *   -EPERM (-1) if the libseat client is not activated
- *   -EAGAIN (-11) if the VT is not active
  *   -errno from libseat_open_device if device access failed
  */
 int
@@ -317,22 +316,22 @@ seatd_libseat_open_device(InputInfoPtr p, int *pfd, Bool *paused)
     char *path = xf86CheckStrOption(p->options, "Device", NULL);
 
     if (!libseat_active()) {
-        return;
+        goto out;
     }
     if (!seat_info.vt_active) {
         *pfd = -2; /* Invalid, but not -1. See xf86NewInputDevice() */
         *paused = TRUE;
         LogMessage(X_INFO, "seatd_libseat paused %s\n", path);
-        return;
+        goto out;
     }
-    fd = check_duplicate_device(p->major,p->minor);
+    fd = check_duplicate_device(p->major, p->minor);
     if (fd < 0) {
         LogMessage(X_INFO, "seatd_libseat try open %s\n", path);
         if ((id = libseat_open_device(seat_info.client, path, &fd)) == -1) {
             fd = -errno;
             LogMessage(X_ERROR, "seatd_libseat open %s (%d) failed: %d\n",
                        path, id, fd);
-            return;
+            goto out;
         }
     }
     else {
@@ -343,6 +342,8 @@ seatd_libseat_open_device(InputInfoPtr p, int *pfd, Bool *paused)
     p->options = xf86ReplaceIntOption(p->options, "fd", fd);
     p->options = xf86ReplaceIntOption(p->options, "libseat_id", id);
     LogMessage(X_INFO, "seatd_libseat opened %s (%d:%d)\n", path, id, fd);
+out:
+    free(path);
 }
 
 /*
@@ -356,24 +357,24 @@ seatd_libseat_close_device(InputInfoPtr p)
     int id = xf86CheckIntOption(p->options, "libseat_id", -1);
 
     if (!libseat_active())
-        return;
+        goto out;
     LogMessage(X_INFO, "seatd_libseat try close %s (%d:%d)\n", path, id, fd);
     if (fd < 0) {
         LogMessage(X_ERROR, "seatd_libseat device not open (%s)\n", path);
-        return;
+        goto out;
     }
     if (id < 0) {
         LogMessage(X_ERROR, "seatd_libseat no libseat ID\n");
-        return;
+        goto out;
     }
     if (libseat_close_device(seat_info.client, id)) {
         LogMessage(X_ERROR, "seatd_libseat close failed %d\n", -errno);
     }
-    else {
-        close(fd);
-        p->fd = -1;
-        p->options = xf86ReplaceIntOption(p->options, "fd", -1);
-    }
+    close(fd);
+    p->fd = -1;
+    p->options = xf86ReplaceIntOption(p->options, "fd", -1);
+out:
+    free(path);
 }
 
 /*
@@ -391,13 +392,13 @@ seatd_libseat_controls_session(void){
 int
 seatd_libseat_switch_session(int session)
 {
-    int ret=0;
+    int ret = 0;
 
     LogMessage(X_INFO, "seatd_libseat switch VT %d\n", session);
     if ((ret = libseat_switch_session(seat_info.client, session)) < 0) {
         LogMessage(X_ERROR, "seatd_libseat switch VT failed with %d\n", -errno);
         goto ret;
     }
- ret:
+ret:
     return ret;
 }

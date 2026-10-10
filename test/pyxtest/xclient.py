@@ -8,8 +8,9 @@ import struct
 import time
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Protocol, runtime_checkable
+from typing import Protocol, Self, runtime_checkable
 
+from proto import xkb
 from proto.bigrequests import BigRequestsEnableRequest
 from proto.x11 import (
     ChangeKeyboardMappingRequest,
@@ -18,13 +19,10 @@ from proto.x11 import (
     InternAtomRequest,
     QueryExtensionRequest,
 )
-from proto import xkb
 
 
 class X11ConnectionError(Exception):
     """Raised when the X11 connection fails."""
-
-    pass
 
 
 @dataclass
@@ -80,24 +78,27 @@ class Extension(StrEnum):
     XVIDEO_MC = "XVideo-MotionCompensation"
 
 
-# X11 core protocol error codes (from X.h)
-BadRequest = 1
-BadValue = 2
-BadWindow = 3
-BadPixmap = 4
-BadAtom = 5
-BadCursor = 6
-BadFont = 7
-BadMatch = 8
-BadDrawable = 9
-BadAccess = 10
-BadAlloc = 11
-BadColor = 12
-BadGC = 13
-BadIDChoice = 14
-BadName = 15
-BadLength = 16
-BadImplementation = 17
+# X11 core protocol error codes -- canonical definitions are in proto/x11.py,
+# re-exported here for backward compatibility.
+from proto.x11 import (  # noqa: F401
+    BadAccess,
+    BadAlloc,
+    BadAtom,
+    BadColor,
+    BadCursor,
+    BadDrawable,
+    BadFont,
+    BadGC,
+    BadIDChoice,
+    BadImplementation,
+    BadLength,
+    BadMatch,
+    BadName,
+    BadPixmap,
+    BadRequest,
+    BadValue,
+    BadWindow,
+)
 
 
 @dataclass
@@ -525,7 +526,7 @@ class RawX11Connection:
                 data += chunk
         return data
 
-    def __enter__(self) -> "RawX11Connection":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args) -> bool:
@@ -575,10 +576,11 @@ class XlibConnection:
     def close(self):
         try:
             self.display.close()
-        except Exception:
+        except OSError:
+            # Display may already be closed (e.g. server gone).
             pass
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *args):

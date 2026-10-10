@@ -293,7 +293,6 @@ conf_data.set('DEBUG', enable_debugging ? '1' : false)
 
 if build_rootless
     conf_data.set('ROOTLESS', build_rootless ? '1' : false)
-    conf_data.set('ROOTLESS_WORKAROUND', 1)
     conf_data.set('ROOTLESS_SAFEALPHA', 1)
 endif
 
@@ -311,7 +310,7 @@ supports_syscons = false
 supports_wscons = false
 csrg_based = false
 
-if host_machine.system() == 'freebsd' or host_machine.system() == 'dragonfly'
+if host_machine.system() in ['freebsd', 'dragonfly']
   supports_pcvt = true
   supports_syscons = true
   csrg_based = true
@@ -344,16 +343,14 @@ conf_data.set('XORGSERVER', build_xorg ? '1' : false)
 conf_data.set_quoted('XCONFIGFILE', 'xorg.conf')
 conf_data.set_quoted('__XSERVERNAME__', 'Xorg')
 conf_data.set('WITH_VGAHW', build_vgahw ? '1' : false)
+
 conf_data.set('CSRG_BASED', csrg_based ? '1' : false)
-# BSD console-driver support (the xf86Info.consType machinery + the
-# hw/xfree86/os-support/bsd/ console_*.c backends). True on the BSD-derived
-# systems (csrg_based) plus GNU/kFreeBSD, matching the old
-# `CSRG_BASED || __FreeBSD_kernel__` guard exactly.
 conf_data.set('CONFIG_BSD_CONSOLE',
-              (csrg_based or host_machine.system() == 'kfreebsd') ? '1' : false)
+                  (csrg_based or host_machine.system() == 'kfreebsd') ? '1' : false)
 conf_data.set('PCVT_SUPPORT', supports_pcvt ? '1' : false)
 conf_data.set('SYSCONS_SUPPORT', supports_syscons ? '1' : false)
 conf_data.set('WSCONS_SUPPORT', supports_wscons ? '1' : false)
+
 conf_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
 if get_option('pciaccess')
     pciaccess_dep = dependency('pciaccess', required: build_xorg)
@@ -403,17 +400,26 @@ xorg_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
 xorg_data.set_quoted('PCI_TXT_IDS_PATH', '')
 xorg_data.set('XSERVER_PLATFORM_BUS', build_udev_kms ? '1' : false)
 xorg_data.set('WSCONS_SUPPORT',
-              host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd' ? '1' : false)
+              host_machine.system() in ['netbsd', 'openbsd'] ? '1' : false)
+
+# those still are used somewhere in the SDK headers - FIXME
+xorg_data.set('CSRG_BASED', csrg_based ? '1' : false)
+xorg_data.set('CONFIG_BSD_CONSOLE',
+                  (csrg_based or host_machine.system() == 'kfreebsd') ? '1' : false)
+xorg_data.set('PCVT_SUPPORT', supports_pcvt ? '1' : false)
+xorg_data.set('SYSCONS_SUPPORT', supports_syscons ? '1' : false)
+xorg_data.set('WSCONS_SUPPORT', supports_wscons ? '1' : false)
+
 xorg_data.set('HAVE_STROPTS_H', cc.has_header('stropts.h') ? '1' : false)
 xorg_data.set('HAVE_SYS_KD_H', cc.has_header('sys/kd.h') ? '1' : false)
 xorg_data.set('HAVE_SYS_VT_H', cc.has_header('sys/vt.h') ? '1' : false)
 xorg_data.set('HAVE_MODESETTING_DRIVER', build_modesetting ? '1' : false)
 
-if host_machine.system() == 'freebsd' or host_machine.system() == 'dragonfly'
-    if host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64' or host_machine.cpu_family() == 'aarch64'
+if host_machine.system() in ['freebsd', 'dragonfly']
+    if host_machine.cpu_family() in ['x86', 'x86_64', 'aarch64']
         xorg_data.set('USE_DEV_IO', '1')
     endif
-elif host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd'
+elif host_machine.system() in ['netbsd', 'openbsd']
     if host_machine.cpu_family() == 'x86'
         xorg_data.set('USE_I386_IOPL', '1')
     endif
@@ -464,7 +470,6 @@ if build_xorg_sdk
             'dixstruct.h',
             'dri.h',
             'dri2.h',
-            'dri3.h',
             'dristruct.h',
             'edid.h',
             'events.h',
@@ -575,6 +580,10 @@ if build_xorg_sdk
         ],
         install_dir: xorgsdkdir,
     )
+
+    if build_dri3
+        install_data(['dri3.h'], install_dir: xorgsdkdir)
+    endif
 
     if build_dga
         install_data(['dgaproc.h'], install_dir: xorgsdkdir)

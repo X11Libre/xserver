@@ -36,6 +36,7 @@ SOFTWARE.
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/callback.h"
 #include "include/shmint.h"
 #include "include/misc.h"
 #include "include/xvmcext.h"
@@ -1302,9 +1303,13 @@ matchAdaptor(ScreenPtr pScreen, XvAdaptorPtr refAdapt, Bool isOverlay)
     return NULL;
 }
 
-void
-XineramifyXv(void)
+static bool didXineramifyXv = false;
+
+void XineramifyXv(CallbackListPtr *pcbl, void *unused, void *data)
 {
+    if (didXineramifyXv)
+        return;
+
     XvScreenPtr xvsp0 =
         dixLookupPrivate(&(dixGetMasterScreen()->devPrivates), XvGetScreenKey());
     XvAdaptorPtr MatchingAdaptors[MAXSCREENS];
@@ -1349,5 +1354,6 @@ XineramifyXv(void)
     }
 
     xvUseXinerama = 1;
+    didXineramifyXv = true;
 }
 #endif /* XINERAMA */

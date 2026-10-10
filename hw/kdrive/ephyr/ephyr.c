@@ -29,7 +29,6 @@
 #include <xcb/xcb_keysyms.h>
 #include <X11/keysym.h>
 
-#include "fb/fb_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
@@ -420,7 +419,7 @@ ephyrRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     int n = 0;
 
     /* Dummy refresh rate so that new proton (>= 8) works */
-    int rate = 60;
+    int rate = screen->rate ? screen->rate : 60;
 
     struct {
         int width, height;
@@ -464,6 +463,14 @@ ephyrRandRGetInfo(ScreenPtr pScreen, Rotation * rotations)
     pSize = RRRegisterSize(pScreen,
                            screen->width,
                            screen->height, screen->width_mm, screen->height_mm);
+
+    if (hostx_want_fullscreen()) {
+        RROutputPtr pOutput = RRFirstOutput(pScreen);
+        if (pOutput)
+            RROutputSetPhysicalSize(pOutput,
+                                    scrpriv->win_width_mm,
+                                    scrpriv->win_height_mm);
+    }
 
     randr = KdSubRotation(scrpriv->randr, screen->randr);
 
@@ -566,7 +573,7 @@ ephyrRandRSetConfig(ScreenPtr pScreen,
     /*
      * Set frame buffer mapping
      */
-    (*pScreen->ModifyPixmapHeader) (fbGetScreenPixmap(pScreen),
+    (*pScreen->ModifyPixmapHeader) ((*pScreen->GetScreenPixmap)(pScreen),
                                     pScreen->width,
                                     pScreen->height,
                                     screen->fb.depth,
@@ -864,7 +871,8 @@ ephyrScreenFini(KdScreenInfo * screen)
     if (scrpriv->shadow) {
         KdShadowFbFree(screen);
     }
-    scrpriv->BlockHandler = NULL;
+    free(screen->driver);
+    screen->driver = NULL;
 }
 
 void

@@ -591,11 +591,8 @@ PanoramiXGetGeometry(ClientPtr client)
     };
 
     if (stuff->id == reply.root) {
-        xWindowRoot *root = (xWindowRoot *)
-            (ConnectionInfo + connBlockScreenStart);
-
-        reply.width = root->pixWidth;
-        reply.height = root->pixHeight;
+        reply.width = PanoramiXPixWidth;
+        reply.height = PanoramiXPixHeight;
     }
     else if (WindowDrawable(pDraw->type)) {
         WindowPtr pWin = (WindowPtr) pDraw;

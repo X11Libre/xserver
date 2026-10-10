@@ -136,6 +136,7 @@ const char *xf86ModulePath = DEFAULT_MODULE_PATH;
 MessageType xf86ModPathFrom = X_DEFAULT;
 const char *xf86LogFile = DEFAULT_LOGDIR "/" DEFAULT_LOGPREFIX;
 MessageType xf86LogFileFrom = X_DEFAULT;
+MessageType xf86FontserverFrom = X_DEFAULT;
 Bool xf86LogFileWasOpened = FALSE;
 serverLayoutRec xf86ConfigLayout = { NULL, };
 confDRIRec xf86ConfigDRI = { 0, };

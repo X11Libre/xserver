@@ -34,7 +34,7 @@
 #include "Xext/sync/syncsrv.h"
 #include <xace.h>
 #include <protocol-versions.h>
-#include <drm_fourcc.h>
+#include "drm_defines.h"
 #include "dixstruct_priv.h"
 
 static Bool

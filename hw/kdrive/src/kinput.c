@@ -220,6 +220,10 @@ KdDisableInput(void)
     KdPointerInfo *pi;
     int found = 0, i = 0;
 
+    if (!kdInputEnabled) {
+        return;
+    }
+
     /**
      * When we're doing something that causes a vt switch,
      * if that action is a key press, the X server doesn't see
@@ -423,18 +427,25 @@ KdPointerProc(DeviceIntPtr pDevice, int onoff)
         default:
         case 7:
             btn_labels[6] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_HWHEEL_RIGHT);
+            /* fallthrough */
         case 6:
             btn_labels[5] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_HWHEEL_LEFT);
+            /* fallthrough */
         case 5:
             btn_labels[4] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_DOWN);
+            /* fallthrough */
         case 4:
             btn_labels[3] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_UP);
+            /* fallthrough */
         case 3:
             btn_labels[2] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_RIGHT);
+            /* fallthrough */
         case 2:
             btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
+            /* fallthrough */
         case 1:
             btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
+            /* fallthrough */
         case 0:
             break;
         }
@@ -910,6 +921,12 @@ KdAddConfigKeyboard(const char *keyboard)
 }
 
 int
+KdAddDefaultKeyboard(const char *keyboard)
+{
+    return kdConfigKeyboards ? Success : KdAddConfigKeyboard(keyboard);
+}
+
+int
 KdAddKeyboard(KdKeyboardInfo * ki)
 {
     KdKeyboardInfo **prev;
@@ -971,6 +988,12 @@ KdAddConfigPointer(const char *pointer)
     *prev = new;
 
     return Success;
+}
+
+int
+KdAddDefaultPointer(const char *pointer)
+{
+    return kdConfigPointers ? Success : KdAddConfigPointer(pointer);
 }
 
 int
@@ -1329,38 +1352,6 @@ KdPointerInfo *KdParsePointer(const char *arg)
     }
 
     return pi;
-}
-
-#ifdef KDRIVE_KBD
-#define DEFAULT_KEYBOARD "keyboard"
-#else
-#ifdef KDRIVE_EVDEV
-#define DEFAULT_KEYBOARD "evdev"
-#endif
-#endif
-
-#ifdef KDRIVE_MOUSE
-#define DEFAULT_MOUSE "mouse"
-#else
-#ifdef KDRIVE_EVDEV
-#define DEFAULT_MOUSE "evdev"
-#endif
-#endif
-
-void
-KdAddConfigInputDrivers(void)
-{
-    #ifdef DEFAULT_KEYBOARD
-    if (!kdConfigKeyboards) {
-        KdAddConfigKeyboard(DEFAULT_KEYBOARD);
-    }
-    #endif
-
-    #ifdef DEFAULT_MOUSE
-    if (!kdConfigPointers) {
-        KdAddConfigPointer(DEFAULT_MOUSE);
-    }
-    #endif
 }
 
 void

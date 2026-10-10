@@ -14,10 +14,10 @@
 
 #include "Xext/panoramiX/panoramiX_priv.h"
 
-typedef Bool (*ScreenInitProcPtr)(ScreenPtr pScreen, int argc, char **argv);
+typedef bool (*ScreenInitProcPtr)(ScreenPtr pScreen, int argc, char **argv, void *closure);
 
-int AddScreen(ScreenInitProcPtr pfnInit, int argc, char **argv);
-int AddGPUScreen(ScreenInitProcPtr pfnInit, int argc, char **argv);
+int AddScreen(ScreenInitProcPtr pfnInit, int argc, char **argv, void *closure);
+int AddGPUScreen(ScreenInitProcPtr pfnInit, int argc, char **argv, void *closure);
 
 void RemoveGPUScreen(ScreenPtr pScreen);
 
@@ -67,6 +67,28 @@ static inline bool dixScreenExists(unsigned int idx) {
 #define DIX_FOR_EACH_SCREEN(__LAMBDA__) \
     do { \
         for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) { \
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
+            (void)walkScreen; \
+            __LAMBDA__; \
+        } \
+    } while (0);
+
+/*
+ * macro for looping over a range of screens (up to `start + num`,
+ * limited by `screenInfo.numScreens`).
+ * Makes a new scope and declares `walkScreenIdx` as the current screen's
+ * index number as well as `walkScreen` as pointer to current ScreenRec
+ *
+ * @param start starting screen index
+ * @param num number of screens to walk (limited by screenInfo.numScreens)
+ * @param __LAMBDA__ the code to be executed in each iteration step.
+ */
+#define DIX_FOR_N_SCREENS(start, num, __LAMBDA__) \
+    do { \
+        unsigned walkStop = (unsigned)(start + num); \
+        if (walkStop > screenInfo.numScreens) \
+            walkStop = screenInfo.numScreens; \
+        for (unsigned walkScreenIdx = start; walkScreenIdx < walkStop; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
             __LAMBDA__; \

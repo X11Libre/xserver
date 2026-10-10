@@ -27,7 +27,7 @@
 #include <linux/fb.h>
 #include <unistd.h>
 #include <sys/mman.h>
-#include "kdrive.h"
+#include "kglamor.h"
 
 #include "include/randrstr.h"
 
@@ -48,30 +48,12 @@ typedef struct _fbdevScrPriv {
     Bool shadow;
     int max_width;
     int max_height;
-#ifdef GLAMOR
-    int dri_fd;
-#endif
 } FbdevScrPriv;
 
 typedef struct _fbScreenConf {
-const char *fbdevDevicePath;
-bool fbDisableShadow;
-
-char *fbdev_glvnd_provider;
-
-char *fbdev_dri_path;
-bool fbdev_auto_dri3;
-bool fbdev_drm_master;
-bool partial_dri_allowed;
-
-bool es_allowed;
-bool force_es;
-
-bool fbGlamorAllowed;
-bool fbForceGlamor;
-bool gbm_allowed;
-
-bool fbXVAllowed;
+    const char *fb_path;
+    Bool shadow;
+    KdGlamorInfo glamor_info;
 } FbScreenConf;
 
 extern KdCardFuncs fbdevFuncs;

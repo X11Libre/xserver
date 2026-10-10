@@ -8,7 +8,7 @@ set -ex
 
 export PATH="$PATH:/usr/sbin:/sbin:/usr/local/sbin"
 
-NETBSD_RELEASE="10.1"
+NETBSD_RELEASE="11.0"
 NETBSD_ARCH="amd64"
 PKGSRC_ARCH="x86_64"
 

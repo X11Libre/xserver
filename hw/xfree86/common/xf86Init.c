@@ -254,8 +254,7 @@ AddVTAtoms(CallbackListPtr *pcbl, void *data, void *screen)
                    "Failed to register VT properties\n");
 }
 
-static Bool
-xf86ScreenInit(ScreenPtr pScreen, int argc, char **argv)
+static bool xf86ScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 
@@ -635,7 +634,7 @@ InitOutput(int argc, char **argv)
 #ifdef XFreeXDGA
         xf86Screens[i]->SetDGAMode = xf86SetDGAMode;
 #endif
-        scr_index = AddScreen(xf86ScreenInit, argc, argv);
+        scr_index = AddScreen(xf86ScreenInit, argc, argv, xf86Screens[i]);
         xf86VGAarbiterUnlock(xf86Screens[i]);
         if (scr_index == i) {
             /*
@@ -682,16 +681,21 @@ InitOutput(int argc, char **argv)
 #ifdef XFreeXDGA
         pScrn->SetDGAMode = xf86SetDGAMode;
 #endif
-        scr_index = AddGPUScreen(xf86ScreenInit, argc, argv);
+        scr_index = AddGPUScreen(xf86ScreenInit, argc, argv, pScrn);
         xf86VGAarbiterUnlock(pScrn);
-        if (scr_index == i) {
+        if (scr_index >= 0) {
             dixSetPrivate(&screenInfo.gpuscreens[scr_index]->devPrivates,
                           xf86ScreenKey, xf86GPUScreens[i]);
             pScrn->pScreen = screenInfo.gpuscreens[scr_index];
             /* The driver should set this, but make sure it is set anyway */
             pScrn->vtSema = TRUE;
         } else {
-            FatalError("AddScreen/ScreenInit failed for gpu driver %d %d\n", i, scr_index);
+            xf86Msg(X_ERROR, "AddScreen/ScreenInit failed for gpu driver %d %s; ignoring it and continuing\n",
+                    i, pScrn->driverName);
+            xf86DeleteScreen(pScrn);
+            /* Since the screen was not valid and we're skipping it, we need to also decrement i.
+               xf86DeleteScreen() compacted the array, so the next screen is now at this index */
+            --i;
         }
     }
 
@@ -1159,6 +1163,10 @@ ddxProcessArgument(int argc, char **argv, int i)
     if (!strcmp(argv[i], "-sharevts")) {
         xf86Info.ShareVTs = TRUE;
         return 1;
+    }
+    if (!strcmp(argv[i], "-fontserverconnections") || !strcmp(argv[i], "+fontserverconnections")) {
+        xf86FontserverFrom = X_CMDLINE;
+        return 0;
     }
     if (!strcmp(argv[i], "-iglx") || !strcmp(argv[i], "+iglx")) {
         xf86Info.iglxFrom = X_CMDLINE;

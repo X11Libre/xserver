@@ -135,6 +135,16 @@ typedef struct {
 #endif
 } vfbScreenInfo, *vfbScreenInfoPtr;
 
+static DevPrivateKeyRec vfbScreenPrivateKeyRec = { 0 };
+
+static inline vfbScreenInfoPtr vfbGetScreenPriv(ScreenPtr pScreen) {
+    return dixLookupPrivate(&pScreen->devPrivates, &vfbScreenPrivateKeyRec);
+}
+
+static inline void vfbSetScreenPriv(ScreenPtr pScreen, vfbScreenInfoPtr priv) {
+    dixSetPrivate(&pScreen->devPrivates, &vfbScreenPrivateKeyRec, priv);
+}
+
 static int vfbNumScreens;
 static vfbScreenInfo *vfbScreens;
 
@@ -170,38 +180,40 @@ static char *render_node = NULL;
     else (_dst) = (_src);
 
 static void
-vfbAddCrtcInfo(vfbScreenInfoPtr screen, int numCrtcs)
+vfbSetCrtcInfo(vfbScreenInfoPtr screen, int numCrtcs, int crtcWidth,
+               int crtcHeight)
 {
     int i;
-    int count = numCrtcs - screen->numCrtcs;
 
-    if (count > 0) {
-        vfbCrtcInfoPtr crtcs =
-            reallocarray(screen->crtcs, numCrtcs, sizeof(*crtcs));
-        if (!crtcs)
-            FatalError("Not enough memory for %d CRTCs", numCrtcs);
+    vfbCrtcInfoPtr crtcs =
+        reallocarray(screen->crtcs, numCrtcs, sizeof(*crtcs));
+    if (!crtcs)
+        FatalError("Not enough memory for %d CRTCs", numCrtcs);
 
-        memset(crtcs + screen->numCrtcs, 0, count * sizeof(*crtcs));
+    memset(crtcs, 0, numCrtcs * sizeof(*crtcs));
 
-        for (i = screen->numCrtcs; i < numCrtcs; ++i) {
-            crtcs[i].width = screen->width;
-            crtcs[i].height = screen->height;
-        }
-
-        screen->crtcs = crtcs;
-        screen->numCrtcs = numCrtcs;
+    for (i = 0; i < numCrtcs; ++i) {
+        crtcs[i].width = crtcWidth;
+        crtcs[i].height = crtcHeight;
     }
+
+    /* First CRTC starts with one output */
+    if (numCrtcs > 0)
+        crtcs[0].numOutputs = 1;
+
+    screen->crtcs = crtcs;
+    screen->numCrtcs = numCrtcs;
 }
 
 static vfbScreenInfoPtr
 vfbInitializeScreenInfo(vfbScreenInfoPtr screen)
 {
     *screen = defaultScreenInfo;
-    vfbAddCrtcInfo(screen, VFB_DEFAULT_NUM_CRTCS);
 
-    /* First CRTC initializes with one output */
-    if (screen->numCrtcs > 0)
-        screen->crtcs[0].numOutputs = 1;
+    if (screen->numCrtcs == 0) {
+        vfbSetCrtcInfo(screen, VFB_DEFAULT_NUM_CRTCS, screen->width,
+                       screen->height);
+    }
 
     return screen;
 }
@@ -319,7 +331,8 @@ ddxUseMsg(void)
     ErrorF("-dri </dev/dri/renderDxxx>  render device to use\n");
 #endif
 
-    ErrorF("-crtcs n               number of CRTCs per screen (default: %d)\n",
+    ErrorF("-crtcs n[@WxH]         CRTC count with optional size "
+           "(default: %d @ screen's WxH)\n",
            VFB_DEFAULT_NUM_CRTCS);
 }
 
@@ -455,11 +468,32 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
 #endif
 
-    if (strcmp(argv[i], "-crtcs") == 0) {       /* -crtcs n */
-        int numCrtcs;
-
+    if (strcmp(argv[i], "-crtcs") == 0) {       /* -crtcs N[@WxH] */
         CHECK_FOR_REQUIRED_ARGUMENTS(1);
-        numCrtcs = atoi(argv[i + 1]);
+
+        int numCrtcs = VFB_DEFAULT_NUM_CRTCS;
+        int crtcWidth = currentScreen->width;
+        int crtcHeight = currentScreen->height;
+
+        if (strchr(argv[i + 1], '@')) {
+            if (sscanf(argv[i + 1], "%d@%dx%d",
+                       &numCrtcs, &crtcWidth, &crtcHeight) != 3 ||
+                crtcWidth <= 0 || crtcHeight <= 0) {
+                ErrorF("Invalid -crtcs argument '%s'\n", argv[i + 1]);
+                UseMsg();
+                FatalError("Invalid -crtcs argument '%s', expected N@WxH\n",
+                           argv[i + 1]);
+            }
+        }
+        else {
+            if (strchr(argv[i + 1], 'x')) {
+                ErrorF("Invalid -crtcs argument '%s'\n", argv[i + 1]);
+                UseMsg();
+                FatalError("Invalid -crtcs argument '%s', expected N or N@WxH\n",
+                           argv[i + 1]);
+            }
+            numCrtcs = atoi(argv[i + 1]);
+        }
 
         if (numCrtcs < 1) {
             ErrorF("Invalid number of CRTCs %d\n", numCrtcs);
@@ -469,10 +503,27 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
         }
 
-        vfbAddCrtcInfo(currentScreen, numCrtcs);
+        if (crtcWidth > currentScreen->width ||
+            crtcHeight > currentScreen->height) {
+            ErrorF("CRTC size cannot exceed screen size\n");
+            UseMsg();
+            FatalError("CRTC size %dx%d exceeds screen size %dx%d\n",
+                       crtcWidth, crtcHeight,
+                       currentScreen->width, currentScreen->height);
+        }
+
+        vfbSetCrtcInfo(currentScreen, numCrtcs, crtcWidth, crtcHeight);
         return 2;
     }
 
+    if (strcmp(argv[i], "+fontserverconnections") == 0) {
+        enableFontServerConnections = true;
+        return 1;
+    }
+    if (strcmp(argv[i], "-fontserverconnections") == 0) {
+        enableFontServerConnections = false;
+        return 1;
+    }
     return 0;
 }
 
@@ -483,7 +534,6 @@ vfbInstallColormap(ColormapPtr pmap)
 
     if (pmap != oldpmap) {
         int entries;
-        XWDFileHeader *pXWDHeader;
         VisualPtr pVisual;
         Pixel *ppix;
         xrgb *prgb;
@@ -493,8 +543,9 @@ vfbInstallColormap(ColormapPtr pmap)
         miInstallColormap(pmap);
 
         entries = pmap->pVisual->ColormapEntries;
-        pXWDHeader = vfbScreens[pmap->pScreen->myNum].pXWDHeader;
         pVisual = pmap->pVisual;
+
+        XWDFileHeader *pXWDHeader = vfbGetScreenPriv(pmap->pScreen)->pXWDHeader;
 
         swapcopy32(pXWDHeader->visual_class, pVisual->class);
         swapcopy32(pXWDHeader->red_mask, pVisual->redMask);
@@ -533,20 +584,17 @@ out:
 static void
 vfbStoreColors(ColormapPtr pmap, int ndef, xColorItem * pdefs)
 {
-    XWDColor *pXWDCmap;
-    int i;
-
     if (pmap != GetInstalledmiColormap(pmap->pScreen)) {
         return;
     }
-
-    pXWDCmap = vfbScreens[pmap->pScreen->myNum].pXWDCmap;
 
     if ((pmap->pVisual->class | DynamicClass) == DirectColor) {
         return;
     }
 
-    for (i = 0; i < ndef; i++) {
+    XWDColor *pXWDCmap = vfbGetScreenPriv(pmap->pScreen)->pXWDCmap;
+
+    for (int i = 0; i < ndef; i++) {
         if (pdefs[i].flags & DoRed) {
             swapcopy16(pXWDCmap[pdefs[i].pixel].red, pdefs[i].red);
         }
@@ -736,7 +784,7 @@ vfbAllocateFramebufferMemory(vfbScreenInfoPtr pvfb)
 static void
 vfbWriteXWDFileHeader(ScreenPtr pScreen)
 {
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = vfbGetScreenPriv(pScreen);
     XWDFileHeader *pXWDHeader = pvfb->pXWDHeader;
     unsigned long swaptest = 1;
     int i;
@@ -753,15 +801,9 @@ vfbWriteXWDFileHeader(ScreenPtr pScreen)
     pXWDHeader->xoffset = 0;
     pXWDHeader->byte_order = IMAGE_BYTE_ORDER;
     pXWDHeader->bitmap_bit_order = BITMAP_BIT_ORDER;
-#ifndef INTERNAL_VS_EXTERNAL_PADDING
     pXWDHeader->pixmap_width = pXWDHeader->window_width = pvfb->width;
     pXWDHeader->bitmap_unit = BITMAP_SCANLINE_UNIT;
     pXWDHeader->bitmap_pad = BITMAP_SCANLINE_PAD;
-#else
-    pXWDHeader->pixmap_width = pXWDHeader->window_width = pvfb->paddedWidth;
-    pXWDHeader->bitmap_unit = BITMAP_SCANLINE_UNIT_PROTO;
-    pXWDHeader->bitmap_pad = BITMAP_SCANLINE_PAD_PROTO;
-#endif
     pXWDHeader->bits_per_pixel = pvfb->bitsPerPixel;
     pXWDHeader->bytes_per_line = pvfb->paddedBytesWidth;
     pXWDHeader->ncolors = pvfb->ncolors;
@@ -814,7 +856,7 @@ static miPointerScreenFuncRec vfbPointerCursorFuncs = {
 static Bool
 vfbCloseScreen(ScreenPtr pScreen)
 {
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = vfbGetScreenPriv(pScreen);
 
     pScreen->CloseScreen = pvfb->closeScreen;
 
@@ -838,7 +880,7 @@ vfbCloseScreen(ScreenPtr pScreen)
 static Bool
 vfbGlamorInit(ScreenPtr pScreen)
 {
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = vfbGetScreenPriv(pScreen);
 
     if (!use_glamor && !render_node) {
         return FALSE;
@@ -967,7 +1009,7 @@ vfbRandRInit(ScreenPtr pScreen)
     xRRModeInfo modeInfo;
     char name[64];
     int i;
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = vfbGetScreenPriv(pScreen);
     int mmWidth, mmHeight;
 
     if (!RRScreenInit(pScreen))
@@ -1033,10 +1075,13 @@ vfbRandRInit(ScreenPtr pScreen)
     return TRUE;
 }
 
-static Bool
-vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
+static bool vfbScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure)
 {
-    vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
+    vfbScreenInfoPtr pvfb = (vfbScreenInfoPtr)closure;
+    assert(pvfb);
+
+    vfbSetScreenPriv(pScreen, pvfb);
+
     int dpix = monitorResolution, dpiy = monitorResolution;
     int ret;
     char *pbits;
@@ -1138,6 +1183,11 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 void
 InitOutput(int argc, char **argv)
 {
+    if (!dixRegisterPrivateKey(&vfbScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+        FatalError("vfb: failed register screen private key\n");
+        return;
+    }
+
     int i;
     int NumFormats = 0;
 
@@ -1193,8 +1243,24 @@ InitOutput(int argc, char **argv)
         vfbScreens = &defaultScreenInfo;
         vfbNumScreens = 1;
     }
+
+    /* CRTC size must not exceed the screen size.  Enforced here, after all
+       arguments have been processed, so it holds regardless of the order in
+       which -screen and -crtcs appear on the command line. */
     for (i = 0; i < vfbNumScreens; i++) {
-        if (-1 == AddScreen(vfbScreenInit, argc, argv)) {
+        for (int c = 0; c < vfbScreens[i].numCrtcs; c++) {
+            vfbCrtcInfoPtr crtc = &vfbScreens[i].crtcs[c];
+            if (crtc->width > vfbScreens[i].width ||
+                crtc->height > vfbScreens[i].height) {
+                FatalError("CRTC %d size %dx%d exceeds screen %d's size %dx%d\n",
+                           c, crtc->width, crtc->height, i,
+                           vfbScreens[i].width, vfbScreens[i].height);
+            }
+        }
+    }
+
+    for (i = 0; i < vfbNumScreens; i++) {
+        if (-1 == AddScreen(vfbScreenInit, argc, argv, &vfbScreens[i])) {
             FatalError("Couldn't add screen %d", i);
         }
     }

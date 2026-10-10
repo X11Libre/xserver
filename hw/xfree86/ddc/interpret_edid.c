@@ -53,6 +53,10 @@
 #define CEA_VIDEO_BLK   2
 #define CEA_VENDOR_BLK  3
 
+#define CTA_EXTENDED_BLK 7 /* formerly CEA */
+#define CTA_EXTENDED_BLK_TAG_COLORIMETRY 5
+#define CTA_EXTENDED_BLK_TAG_HDR_STATIC_METADATA 6
+
 struct cea_ext_body {
     uint8_t tag;
     uint8_t rev;
@@ -80,6 +84,9 @@ static void get_monitor_ranges(uint8_t *, struct monitor_ranges *);
 static void get_whitepoint_section(uint8_t *, struct whitePoints *);
 static void get_detailed_timing_section(uint8_t *, struct detailed_timings *);
 static Bool validate_version(int scrnIndex, struct edid_version *);
+
+static int cea_db_len(uint8_t *db);
+static int cea_db_tag(uint8_t *db);
 
 static void
 find_ranges_section(struct detailed_monitor_section *det, void *ranges)
@@ -118,6 +125,49 @@ handle_edid_quirks(xf86MonPtr m)
             LogMessageVerb(X_WARNING, 1, "EDID timing clock %.2f exceeds claimed max "
                            "%dMHz, fixing\n", clock / 1.0e6, ranges->max_clock);
             ranges->max_clock = (clock + 999999) / 1e6;
+        }
+    }
+}
+
+static void
+find_hdr_colorimetry_blocks(uint8_t *db, void *data)
+{
+    xf86MonPtr m = (xf86MonPtr) data;
+
+    if (cea_db_tag(db) != CTA_EXTENDED_BLK)
+        return;
+
+    if (cea_db_len(db) < 3)
+        return;
+
+    if (db[1] == CTA_EXTENDED_BLK_TAG_COLORIMETRY) {
+        m->hdr.colorimetry_valid = true;
+        m->hdr.colorimetry_profiles = (unsigned int) (db[2] << 8) | (unsigned int) (db[3]);
+    } else if (db[1] == CTA_EXTENDED_BLK_TAG_HDR_STATIC_METADATA) {
+        /* minimum CTA_EXTENDED_BLK_TAG_HDR_STATIC_METADATA is 3 bytes like COLORIMETRY */
+        m->hdr.hdr_valid = true;
+
+        m->hdr.resv = (db[2] >> 6) & 0x3;
+        m->hdr.tf_5 = (db[2] >> 5) & 0x1;
+        m->hdr.tf_4 = (db[2] >> 4) & 0x1;
+        m->hdr.tf_traditional_sdr = (db[2] & CTA_HDR_SMDB_TF_SDR) == CTA_HDR_SMDB_TF_SDR;
+        m->hdr.tf_traditional_hdr = (db[2] & CTA_HDR_SMDB_TF_HDR) == CTA_HDR_SMDB_TF_HDR;
+        m->hdr.tf_pq = (db[2] & CTA_HDR_SMDB_TF_ST2084) == CTA_HDR_SMDB_TF_ST2084;
+        m->hdr.tf_hlg = (db[2] & CTA_HDR_SMDB_TF_HLG) == CTA_HDR_SMDB_TF_HLG;
+
+        m->hdr.sm_1_7 = (db[3] >> 1) & 0x7f;
+        m->hdr.sm_static_metadata_type1 = db[3] & CTA_HDR_SMDB_SM_TYPE1;
+
+        if (cea_db_len(db) > 3) {
+            m->hdr.desired_content_max_luminance = db[4] == 0 ? 0 : (50 * powf(2, (float) db[4] / 32));
+        }
+
+        if (cea_db_len(db) > 4) {
+            m->hdr.desired_content_max_frame_avg_luminance = db[5] == 0 ? 0 : (50 * powf(2, (float) db[5] / 32));
+        }
+
+        if (cea_db_len(db) > 5) {
+            m->hdr.desired_content_min_luminance = db[6] == 0 ? 0 : m->hdr.desired_content_max_luminance * powf((float) db[6] / 255, 2) / 100;
         }
     }
 }
@@ -828,4 +878,12 @@ bool xf86Monitor_gtf_supported(xf86MonPtr monitor)
         return false;
 
     return GTF_SUPPORTED(monitor->features.msc);
+}
+
+bool xf86DoInterpretHDRMetadata(xf86MonPtr monPtr)
+{
+    /* parse hdr metadata */
+    cea_for_each_db(monPtr, find_hdr_colorimetry_blocks, monPtr);
+
+    return monPtr->hdr.colorimetry_valid && monPtr->hdr.hdr_valid;
 }

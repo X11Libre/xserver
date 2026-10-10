@@ -7,9 +7,10 @@ import struct
 import time
 
 import pytest
+from proto import x11, xkb
+from xclient import X11Error, X11Reply
 
-from proto import xkb
-from xclient import BadLength, BadMatch, BadValue, X11Error, X11Reply
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -156,7 +157,7 @@ class TestXkbSetMapOverflows:
         # error code 0x25 in the resource_id.  Without the fix, the
         # wire pointer advances past the buffer and a later check
         # returns BadLength (16).
-        bad_value_errors = [e for e in errors if e.error_code == BadValue]
+        bad_value_errors = [e for e in errors if e.error_code == x11.BadValue]
         assert bad_value_errors, (
             "SetMap with totalActs=0 but nonzero per-key action counts "
             "was not rejected with BadValue - server is missing the "
@@ -214,8 +215,8 @@ class TestXkbSetGeometry:
 
         assert xserver.is_alive, "Server crashed - truncated sections in SetGeometry"
         assert isinstance(resp, X11Error), f"Expected an error, got {resp}"
-        assert resp.error_code == BadLength, (
-            f"Expected BadLength ({BadLength}), got error code {resp.error_code} - "
+        assert resp.error_code == x11.BadLength, (
+            f"Expected BadLength ({x11.BadLength}), got error code {resp.error_code} - "
             f"missing bounds check in SetGeometry section parsing"
         )
 
@@ -264,7 +265,7 @@ class TestXkbSetGeometry:
         resps = xclient.flush_responses(timeout=0.5)
         errors = [r for r in resps if isinstance(r, X11Error)]
 
-        bad_value_errors = [e for e in errors if e.error_code == BadValue]
+        bad_value_errors = [e for e in errors if e.error_code == x11.BadValue]
         assert bad_value_errors, (
             f"SetGeometry with {which_ndx}=200 nOutlines=1 was not rejected "
             f"with BadValue - server is missing the {which_ndx} bounds check"
@@ -321,7 +322,7 @@ class TestXkbSetGeometry:
         # With the fix, we get BadMatch (8) from the color index check.
         # Without the fix, the OOB access happens silently and the
         # request succeeds (no error), so valgrind catches it.
-        match_errors = [e for e in errors if e.error_code == BadMatch]
+        match_errors = [e for e in errors if e.error_code == x11.BadMatch]
         assert match_errors, (
             f"SetGeometry with {which_color}ColorNdx=nColors was not rejected with "
             f"BadMatch - server is missing the off-by-one check"
@@ -385,7 +386,7 @@ class TestXkbSetGeometry:
         # With the fix, we get BadMatch (8) from the rowUnder >= num_rows check.
         # Without the fix, rowUnder == num_rows passes the '>' check and
         # the OOB access happens in XkbAddGeomOverlayRow().
-        match_errors = [e for e in errors if e.error_code == BadMatch]
+        match_errors = [e for e in errors if e.error_code == x11.BadMatch]
         assert match_errors, (
             "SetGeometry with rowUnder=1 num_rows=1 was not rejected with "
             "BadMatch - server is missing the off-by-one check"
@@ -523,12 +524,12 @@ class TestXkbSetMapNumLevels:
         sym_maps = map_reply.sym_maps
         explicit_map = map_reply.explicit_map
 
-        logging.debug(
+        logger.debug(
             f"We have {len(types)} types, keycodes are {map_reply.min_key_code}-{map_reply.max_key_code}"
         )
-        logging.debug("Types:")
+        logger.debug("Types:")
         for idx, t in enumerate(types):
-            logging.debug(
+            logger.debug(
                 f"type[{idx:02d}]: num_levels={t.num_levels} {'canonical' if idx < 4 else ''}"
             )
 
@@ -539,7 +540,7 @@ class TestXkbSetMapNumLevels:
         target_group = -1
         has_explicit = False
 
-        logging.debug("Scanning keys for non-canonical type with explicit flag")
+        logger.debug("Scanning keys for non-canonical type with explicit flag")
         for i, sm in enumerate(sym_maps):
             keycode = map_reply.first_key_sym + i
             n_groups = sm.group_info & 0x0F
@@ -548,7 +549,7 @@ class TestXkbSetMapNumLevels:
             for g in range(min(n_groups, 4)):
                 kt = sm.kt_index[g]
                 if kt >= 4 and (expl & (1 << g)):
-                    logging.debug(
+                    logger.debug(
                         f"FOUND: key={keycode} group={g} kt_index={kt} num_levels={types[kt].num_levels} explicit=0x{expl:02x}"
                     )
                     # Found a key with explicit flag already set.
@@ -560,7 +561,7 @@ class TestXkbSetMapNumLevels:
 
         # If none found with explicit flag, find any key using type >= 4.
         if target_key < 0:
-            logging.debug(
+            logger.debug(
                 "No key with explicit + non-canonical type found. Scanning for any type >=4"
             )
             for i, sm in enumerate(sym_maps):
@@ -569,7 +570,7 @@ class TestXkbSetMapNumLevels:
                 for g in range(min(n_groups, 4)):
                     kt = sm.kt_index[g]
                     if kt >= 4:
-                        logging.debug(
+                        logger.debug(
                             f"FOUND: key={keycode} group={g} type={kt} num_levels={types[kt].num_levels}"
                         )
                         target_key = keycode
@@ -582,7 +583,7 @@ class TestXkbSetMapNumLevels:
         if target_key < 0:
             pytest.skip("No key using non-canonical type found")
 
-        logging.debug(
+        logger.debug(
             f"Target: key={target_key} group={target_group} type={target_type}"
         )
 
@@ -623,7 +624,7 @@ class TestXkbSetMapNumLevels:
         types_payload = b""
         for i, t in enumerate(types):
             if i == target_type:
-                logging.debug(
+                logger.debug(
                     f"Modifying key type {i} to have num_levels {EVIL_NUM_LEVELS}"
                 )
                 types_payload += t.to_set_map_wire(num_levels=EVIL_NUM_LEVELS)
@@ -649,7 +650,7 @@ class TestXkbSetMapNumLevels:
             f"SetMap with num_levels={EVIL_NUM_LEVELS} was accepted - "
             "server is missing the numLevels upper bound check (ZDI-CAN-30160)"
         )
-        logging.debug(f"SetMap correctly rejected: {errors}")
+        logger.debug(f"SetMap correctly rejected: {errors}")
 
         # Step 4: Trigger via ChangeKeyboardMapping on the target key.
         # On an unpatched server where the evil num_levels was accepted,

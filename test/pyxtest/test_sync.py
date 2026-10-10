@@ -6,9 +6,8 @@ import struct
 import time
 
 import pytest
-
 from proto import sync
-from xclient import Extension, X11Error, X11Reply, RawX11Connection
+from xclient import Extension, RawX11Connection, X11Error, X11Reply
 
 
 @pytest.fixture

@@ -38,6 +38,8 @@
 
 #include <gbm.h>
 
+#include "drm_defines.h"
+
 enum drmmode_plane_property {
     DRMMODE_PLANE_TYPE = 0,
     DRMMODE_PLANE_FB_ID,
@@ -94,11 +96,13 @@ typedef struct {
     drmEventContext event_context;
     struct gbm_bo *front_bo;
     Bool sw_cursor;
+    Bool fixed_size_cursor;
     Bool set_cursor_failed;
 
     /* Broken-out options. */
     OptionInfoPtr Options;
 
+    Bool no_accel;
     Bool glamor;
     Bool glamor_gbm;
     Bool glamor_gbm_device;
@@ -309,8 +313,6 @@ typedef struct _msSpritePriv {
     CursorPtr cursor;
     Bool sprite_visible;
 } msSpritePrivRec, *msSpritePrivPtr;
-
-#define msGetSpritePriv(dev, ms, screen) dixLookupScreenPrivate(&(dev)->devPrivates, &(ms)->drmmode.spritePrivateKeyRec, (screen))
 
 extern miPointerSpriteFuncRec drmmode_sprite_funcs;
 

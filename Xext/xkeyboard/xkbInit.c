@@ -479,7 +479,7 @@ XkbInitControls(DeviceIntPtr pXDev, XkbSrvInfoPtr xkbi)
     if (XkbAllocControls(xkb, XkbAllControlsMask) != Success)
         FatalError("Couldn't allocate keyboard controls\n");
     ctrls = xkb->ctrls;
-    if (!(xkb->defined & XkmSymbolsMask))
+    if (!(xkb->defined & XkmSymbolsMask) || ctrls->num_groups == 0)
         ctrls->num_groups = 1;
     ctrls->groups_wrap = XkbSetGroupInfo(1, XkbWrapIntoRange, 0);
     ctrls->internal.mask = 0;

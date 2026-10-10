@@ -352,18 +352,6 @@ IsKeyboardDevice(DeviceIntPtr dev)
         ((dev->key && dev->kbdfeed) && !IsPointerDevice(dev));
 }
 
-Bool
-InputDevIsMaster(DeviceIntPtr dev)
-{
-    return dev->type == MASTER_POINTER || dev->type == MASTER_KEYBOARD;
-}
-
-Bool
-InputDevIsFloating(DeviceIntPtr dev)
-{
-    return !InputDevIsMaster(dev) && GetMaster(dev, MASTER_KEYBOARD) == NULL;
-}
-
 /**
  * Max event opcode.
  */
@@ -6052,6 +6040,9 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
 #endif /* XINERAMA */
     xEvent *eventTo, *eventFrom;
     int eventlength = sizeof(xEvent);
+
+    if (dispatchException & DE_DROP_EVENTS)
+        return;
 
     if (!pClient || pClient == serverClient || pClient->clientGone)
         return;

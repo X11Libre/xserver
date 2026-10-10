@@ -1489,6 +1489,34 @@ drmmode_create_tearfree_shadow(xf86CrtcPtr crtc)
     if (!drmmode->tearfree_enable)
         return TRUE;
 
+    /*
+     * A modeset that doesn't change the scanout dimensions — a position change,
+     * a refresh rate change, re-asserting the same mode — can keep the buffers
+     * it already has. Tearing them down and rebuilding them leaves the CRTC
+     * with nothing valid to scan out until the new ones are painted, which
+     * shows up as the display blanking on every RandR change. xf86-video-amdgpu
+     * takes the same shortcut in drmmode_crtc_scanout_create().
+     *
+     * The buffers are kept, but their contents are not: drmmode_copy_damage()
+     * reads the screen pixmap at the CRTC's position, so a CRTC that moved has
+     * to be re-seeded from its new bounds, exactly as if the buffers had just
+     * been allocated.
+     */
+    if (trf->buf[0].px && trf->buf[1].px &&
+        trf->buf[0].px->drawable.width == w &&
+        trf->buf[0].px->drawable.height == h &&
+        trf->buf[0].px->drawable.depth == crtc->scrn->depth &&
+        trf->buf[0].px->drawable.bitsPerPixel == drmmode->kbpp) {
+        for (i = 0; i < ARRAY_SIZE(trf->buf); i++) {
+            RegionUninit(&trf->buf[i].dmg);
+            RegionInit(&trf->buf[i].dmg, &crtc->bounds, 0);
+        }
+
+        drmmode_copy_damage(crtc, trf->buf[trf->back_idx ^ 1].px,
+                            &trf->buf[trf->back_idx ^ 1].dmg, TRUE);
+        return TRUE;
+    }
+
     /* Destroy the old mode's buffers and make new ones */
     drmmode_destroy_tearfree_shadow(crtc);
     for (i = 0; i < ARRAY_SIZE(trf->buf); i++) {
@@ -2575,7 +2603,6 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
         return;
     }
 
-    drmSetClientCap(drmmode->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
     kplane_res = drmModeGetPlaneResources(drmmode->fd);
     if (!kplane_res) {
         xf86DrvMsg(drmmode->scrn->scrnIndex, X_ERROR,
@@ -4201,7 +4228,9 @@ drmmode_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     modesettingPtr ms = modesettingPTR(pScrn);
 
     if (drmmode->glamor) {
-        if (!ms->glamor.init(pScreen, GLAMOR_USE_EGL_SCREEN)) {
+        if (!ms->glamor.init(pScreen, drmmode->no_accel ?
+                                      GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_RENDER_ACCEL :
+                                      GLAMOR_USE_EGL_SCREEN)) {
             return FALSE;
         }
 #ifdef GBM_BO_WITH_MODIFIERS
@@ -4655,39 +4684,6 @@ drmmode_reset_cursor(drmmode_crtc_private_ptr drmmode_crtc)
     drmmode_crtc->cursor_pitches = NULL;
 }
 
-/**
- * Some setups have different requirements for the
- * cursor pitch compared to intel and nvidia.
- *
- * See: https://github.com/X11Libre/xserver/issues/1816
- *
- * This function detects whether we are running in a vm,
- * or on bare metal.
- *
- * Driver names are taken from https://drmdb.emersion.fr/drivers
- */
-static inline Bool
-drmmode_legacy_cursor_probe_allowed(drmmode_ptr drmmode)
-{
-    drmVersionPtr version = drmGetVersion(drmmode->fd);
-    if (!version) {
-        return FALSE;
-    }
-
-    if (!version->name ||
-        strstr(version->name, "bochs-drm") ||
-        strstr(version->name, "evdi") ||
-        strstr(version->name, "vboxvideo") ||
-        strstr(version->name, "virtio_gpu") ||
-        strstr(version->name, "vkms") ||
-        strstr(version->name, "vmwgfx")) {
-        drmFreeVersion(version);
-        return FALSE;
-    }
-
-    drmFreeVersion(version);
-    return TRUE;
-}
 
 /*
  * This is the old probe method for the minimum cursor size.
@@ -4709,7 +4705,7 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
 
     drmmode_crtc->cursor_probed = TRUE;
 
-    if (!drmmode_legacy_cursor_probe_allowed(drmmode)) {
+    if (drmmode->fixed_size_cursor){
         return;
     }
 
@@ -5001,6 +4997,16 @@ drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled)
  * We hook the screen's cursor-sprite (swcursor) functions to see if a swcursor
  * is active. When a swcursor is active we disable page-flipping.
  */
+
+static msSpritePrivPtr
+msGetSpritePriv(DeviceIntPtr pDev, modesettingPtr ms, ScreenPtr pScreen)
+{
+    if (!InputDevIsFloating(pDev))
+        pDev = GetMaster(pDev, MASTER_POINTER);
+    return dixLookupScreenPrivate(&(pDev)->devPrivates,
+                                  &(ms)->drmmode.spritePrivateKeyRec,
+                                  pScreen);
+}
 
 static void drmmode_sprite_do_set_cursor(msSpritePrivPtr sprite_priv,
                                          ScrnInfoPtr scrn, int x, int y)

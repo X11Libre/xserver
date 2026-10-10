@@ -39,6 +39,7 @@ Equipment Corporation.
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/server_priv.h"
+#include "include/callback.h"
 #include "include/misc.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
@@ -355,27 +356,7 @@ PanoramiXFindIDByScrnum(RESTYPE type, XID id, int screen)
                                        XineramaFindIDByScrnum, &data);
 }
 
-typedef struct _connect_callback_list {
-    void (*func) (void);
-    struct _connect_callback_list *next;
-} XineramaConnectionCallbackList;
-
-static XineramaConnectionCallbackList *ConnectionCallbackList = NULL;
-
-Bool
-XineramaRegisterConnectionBlockCallback(void (*func) (void))
-{
-    XineramaConnectionCallbackList *newlist;
-
-    if (!(newlist = calloc(1, sizeof(XineramaConnectionCallbackList))))
-        return FALSE;
-
-    newlist->next = ConnectionCallbackList;
-    newlist->func = func;
-    ConnectionCallbackList = newlist;
-
-    return TRUE;
-}
+CallbackListPtr PanoramiXConsolidateCallback = NULL;
 
 static void
 XineramaInitData(void)
@@ -571,26 +552,18 @@ PanoramiXExtensionInit(void)
     PanoramiXCompositeInit();
 }
 
-Bool
-PanoramiXCreateConnectionBlock(void)
+x_rpcbuf_t PanoramiXCreateConnectionBlock(void)
 {
-    int i, j, length;
-    bool disable_backing_store = FALSE;
-    int old_width, old_height;
-    float width_mult, height_mult;
-    xWindowRoot *root;
-    xVisualType *visual;
-    xDepth *depth;
-    VisualPtr pVisual;
-
     /*
      *  Do normal CreateConnectionBlock but faking it for only one screen
      */
 
     if (!PanoramiXNumDepths) {
         ErrorF("Xinerama error: No common visuals\n");
-        return FALSE;
+        return (x_rpcbuf_t) { .error = true };
     }
+
+    bool disable_backing_store = FALSE;
 
     ScreenPtr masterScreen = dixGetMasterScreen();
     DIX_FOR_EACH_SCREEN({
@@ -599,7 +572,7 @@ PanoramiXCreateConnectionBlock(void)
 
         if (walkScreen->rootDepth != masterScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
-            return FALSE;
+            return (x_rpcbuf_t) { .error = true };
         }
         if (walkScreen->backingStoreSupport !=
             masterScreen->backingStoreSupport)
@@ -612,31 +585,29 @@ PanoramiXCreateConnectionBlock(void)
         });
     }
 
-    i = screenInfo.numScreens;
-    screenInfo.numScreens = 1;
-    if (!CreateConnectionBlock()) {
-        screenInfo.numScreens = i;
-        return FALSE;
-    }
+    x_rpcbuf_t rpcbuf = dixBuildConnectionBlock(1);
+    if (rpcbuf.error)
+        return rpcbuf;
 
-    screenInfo.numScreens = i;
+    size_t screenDataOffset = dixConnBlockScreenStart(rpcbuf.buffer);
 
-    root = (xWindowRoot *) (ConnectionInfo + connBlockScreenStart);
-    length = connBlockScreenStart + sizeof(xWindowRoot);
+    xWindowRoot *root = (xWindowRoot *) (rpcbuf.buffer + screenDataOffset);
+    int length = screenDataOffset + sizeof(xWindowRoot);
 
     /* overwrite the connection block */
     root->nDepths = PanoramiXNumDepths;
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths; walkScreenIdx++) {
-        depth = (xDepth *) (ConnectionInfo + length);
+        xDepth *depth = (xDepth *) (rpcbuf.buffer + length);
         depth->depth = PanoramiXDepths[walkScreenIdx].depth;
         depth->nVisuals = PanoramiXDepths[walkScreenIdx].numVids;
         length += sizeof(xDepth);
-        visual = (xVisualType *) (ConnectionInfo + length);
+        xVisualType *visual = (xVisualType *) (rpcbuf.buffer + length);
 
-        for (j = 0; j < depth->nVisuals; j++, visual++) {
+        for (int j = 0; j < depth->nVisuals; j++, visual++) {
             visual->visualID = PanoramiXDepths[walkScreenIdx].vids[j];
 
+            VisualPtr pVisual;
             for (pVisual = PanoramiXVisuals;
                  pVisual->vid != visual->visualID; pVisual++);
 
@@ -651,8 +622,6 @@ PanoramiXCreateConnectionBlock(void)
         length += (depth->nVisuals * sizeof(xVisualType));
     }
 
-    connSetupPrefix.length = bytes_to_int32(length);
-
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < PanoramiXNumDepths; walkScreenIdx++)
         free(PanoramiXDepths[walkScreenIdx].vids);
     free(PanoramiXDepths);
@@ -662,26 +631,17 @@ PanoramiXCreateConnectionBlock(void)
      *  OK, change some dimensions so it looks as if it were one big screen
      */
 
-    old_width = root->pixWidth;
-    old_height = root->pixHeight;
+    int old_width = root->pixWidth;
+    int old_height = root->pixHeight;
 
     root->pixWidth = PanoramiXPixWidth;
     root->pixHeight = PanoramiXPixHeight;
-    width_mult = (1.0 * root->pixWidth) / old_width;
-    height_mult = (1.0 * root->pixHeight) / old_height;
+    float width_mult = (1.0 * root->pixWidth) / old_width;
+    float height_mult = (1.0 * root->pixHeight) / old_height;
     root->mmWidth *= width_mult;
     root->mmHeight *= height_mult;
 
-    while (ConnectionCallbackList) {
-        void *tmp;
-
-        tmp = (void *) ConnectionCallbackList;
-        (*ConnectionCallbackList->func) ();
-        ConnectionCallbackList = ConnectionCallbackList->next;
-        free(tmp);
-    }
-
-    return TRUE;
+    return rpcbuf;
 }
 
 /*
@@ -779,6 +739,9 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
 extern void
 PanoramiXConsolidate(void)
 {
+    if (!PanoramiXIsEnabled())
+        return;
+
     ScreenPtr masterScreen = dixGetMasterScreen();
     DepthPtr pDepth = masterScreen->allowedDepths;
     VisualPtr pVisual = masterScreen->visuals;
@@ -824,6 +787,8 @@ PanoramiXConsolidate(void)
     AddResource(root->info[0].id, XRT_WINDOW, root);
     AddResource(saver->info[0].id, XRT_WINDOW, saver);
     AddResource(defmap->info[0].id, XRT_COLORMAP, defmap);
+
+    CallCallbacks(&PanoramiXConsolidateCallback, NULL);
 }
 
 VisualID

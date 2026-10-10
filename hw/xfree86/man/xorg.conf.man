@@ -652,6 +652,15 @@ Include the default font path even if other paths are specified in
 xorg.conf. If enabled, other font paths are included as well. Enabled by
 default.
 .TP 7
+.BI "Option \*qFontServerConnections\*q \*q" boolean \*q
+Allow connections to font servers (e.g.\&
+.BR tcp/fontserver:7100 )
+in the font path. Font servers are rarely used and are a source of
+security vulnerabilities. Disabled by default.
+Can also be set with the
+.B +fontserverconnections
+command line option.
+.TP 7
 .BI "Option \*qIgnoreABI\*q \*q" boolean \*q
 Allow modules built for a different, potentially incompatible version of
 the X server to load. Disabled by default.
@@ -2245,6 +2254,10 @@ value "es", and the default is both, when Glamor fallbacks to GLES if GL 2.1 is
 not available. This may be useful for embedded and old cards, where GL ES
 feature set works faster than GL feature set.
 Default: gl.
+.TP 7
+.BI "Option \*qDirectDRI3\*q \*q"  boolean \*q
+This option tells glamor to use the direct implementation of DRI3.
+This option is experimental, and there are known bugs with it.
 .TP 7
 .BI "Option \*qInitPrimary\*q \*q" boolean \*q
 Use the Int10 module to initialize the primary graphics card.

@@ -35,6 +35,8 @@
 #ifndef _WIN_H_
 #define _WIN_H_
 
+#include <stdbool.h>
+
 #ifndef NO
 #define NO					0
 #endif
@@ -260,8 +262,6 @@ typedef Bool (*winInitVisualsProcPtr) (ScreenPtr);
 typedef Bool (*winAdjustVideoModeProcPtr) (ScreenPtr);
 
 typedef Bool (*winCreateBoundingWindowProcPtr) (ScreenPtr);
-
-typedef Bool (*winFinishScreenInitProcPtr) (int, ScreenPtr, int, char **);
 
 typedef Bool (*winBltExposedRegionsProcPtr) (ScreenPtr);
 
@@ -800,12 +800,7 @@ winMouseButtonsHandle(ScreenPtr pScreen,
 void
  winEnqueueMotion(int x, int y);
 
-/*
- * winscrinit.c
- */
-
-Bool
- winScreenInit(ScreenPtr pScreen, int argc, char **argv);
+bool winScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closure);
 
 /*
  * winshadddnl.c

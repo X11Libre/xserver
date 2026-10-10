@@ -22,7 +22,7 @@
 #include <dix-config.h>
 
 #include <assert.h>
-#include <drm_fourcc.h>
+#include "drm_defines.h"
 #include <unistd.h>
 
 #include "include/syncsdk.h"

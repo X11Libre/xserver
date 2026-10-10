@@ -1,22 +1,24 @@
 srcs_xorg_int10 = [
     'vbe.c',
     'vbeModes.c',
-    'helper_exec.c',
-    'helper_mem.c',
-    'xf86int10.c',
     'xf86int10module.c',
 ]
 
 int10_c_args = [xorg_c_args]
 int10_link = []
 
-if host_machine.cpu() == 'i386' or host_machine.cpu() == 'x86_64'
+if host_machine.cpu_family() in ['x86', 'x86_64']
     int10_c_args += '-D_PC'
 endif
 
 if int10 == 'stub'
     srcs_xorg_int10 += 'stub.c'
-    int10_c_args += '-D_VM86_LINUX'
+else
+    srcs_xorg_int10 += [
+        'helper_exec.c',
+        'helper_mem.c',
+        'xf86int10.c',
+    ]
 endif
 
 if int10 == 'x86emu'

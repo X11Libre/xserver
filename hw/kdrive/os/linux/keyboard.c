@@ -31,7 +31,7 @@
  */
 
 #include <kdrive-config.h>
-#include "kdrive.h"
+#include "klinux.h"
 #include <linux/keyboard.h>
 #include <linux/kd.h>
 #define XK_PUBLISHING
@@ -40,8 +40,6 @@
 #include <sys/ioctl.h>
 
 #include "os/xserver_poll.h"
-
-extern int LinuxConsoleFd;
 
 /*
  * We need these to handle extended scancodes correctly (I could just use the
@@ -329,20 +327,38 @@ LinuxKeyboardDisable(KdKeyboardInfo * ki)
 static Status
 LinuxKeyboardPreInit(KdKeyboardInfo * ki)
 {
-    ki->xkbRules = strdup("base");
+    char *tmp = NULL;
+
+    if (!ki)
+        return !Success;
+
+    tmp = strdup("base");
+    if (tmp) {
+        free(ki->xkbRules);
+        ki->xkbRules = tmp;
+    }
     return Success;
 }
 
 static Status
 LinuxKeyboardInit(KdKeyboardInfo * ki)
 {
+    char *tmp = NULL;
+
     if (!ki)
         return !Success;
 
-    free(ki->path);
-    ki->path = strdup("console");
-    free(ki->name);
-    ki->name = strdup("Linux console keyboard");
+    tmp = strdup("console");
+    if (tmp) {
+        free(ki->path);
+        ki->path = tmp;
+    }
+
+    tmp = strdup("Linux console keyboard");
+    if (tmp) {
+        free(ki->name);
+        ki->name = tmp;
+    }
 
     ki->minScanCode = 0;
     ki->maxScanCode = 255;
@@ -358,6 +374,11 @@ LinuxKeyboardLeds(KdKeyboardInfo * ki, int leds)
     ioctl((int) (intptr_t) ki->driverPrivate, KDSETLED, leds & 7);
 }
 
+static void
+LinuxKeyboardFini(KdKeyboardInfo *ki)
+{
+}
+
 KdKeyboardDriver LinuxKeyboardDriver = {
     .name = "keyboard",
     .PreInit = LinuxKeyboardPreInit,
@@ -365,4 +386,5 @@ KdKeyboardDriver LinuxKeyboardDriver = {
     .Enable = LinuxKeyboardEnable,
     .Leds = LinuxKeyboardLeds,
     .Disable = LinuxKeyboardDisable,
+    .Fini = LinuxKeyboardFini,
 };

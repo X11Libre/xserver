@@ -29,18 +29,6 @@ typedef struct {
     bool used_modifiers;
 } bo_priv_t;
 
-#ifndef GBM_HAVE_BO_USE_LINEAR
-#define GBM_BO_USE_LINEAR 0
-#endif
-
-#ifndef GBM_HAVE_BO_USE_FRONT_RENDERING
-#define GBM_BO_USE_FRONT_RENDERING 0
-#endif
-
-#ifndef GBM_MAX_PLANES
-#define GBM_MAX_PLANES 4
-#endif
-
 /**
  * Thin wrapper around gbm_bo_{create,map,unmap}
  * that creates and maps (if necessary) the "best"
@@ -219,10 +207,17 @@ gbm_create_front_bo(drmmode_ptr drmmode, Bool do_map,
                                                 GBM_BO_USE_WRITE | GBM_BO_USE_SCANOUT,
                                               };
 
+    const int dumb_offset = ARRAY_SIZE(front_flag_list) - 1;
+    int offset = 0;
+
 #ifdef GBM_BO_WITH_MODIFIERS
     num_modifiers = get_modifiers_set(drmmode->scrn, format, &modifiers,
                                       FALSE, TRUE, TRUE);
 #endif
+
+    if (do_map) {
+        offset = dumb_offset;
+    }
 
     ret = gbm_bo_create_and_map_with_flag_list(drmmode->gbm,
                                                data,
@@ -230,8 +225,8 @@ gbm_create_front_bo(drmmode_ptr drmmode, Bool do_map,
                                                width, height,
                                                format,
                                                modifiers, num_modifiers,
-                                               front_flag_list,
-                                               ARRAY_SIZE(front_flag_list));
+                                               front_flag_list + offset,
+                                               ARRAY_SIZE(front_flag_list) - offset);
 
 #ifdef GBM_BO_WITH_MODIFIERS
     free(modifiers);
@@ -307,9 +302,25 @@ gbm_create_best_bo(drmmode_ptr drmmode, Bool do_map,
 }
 
 /* dmabuf import */
+static struct gbm_bo*
+gbm_back_bo_from_fd_internal(drmmode_ptr drmmode, bo_priv_t *data, Bool do_map, struct gbm_import_fd_data *import_data)
+{
+    TRY_CREATE(gbm_bo_import, data, do_map,
+               drmmode->gbm, GBM_BO_IMPORT_FD, import_data,
+               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+
+    TRY_CREATE(gbm_bo_import, data, do_map,
+               drmmode->gbm, GBM_BO_IMPORT_FD, import_data,
+               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);
+
+    return NULL;
+}
+
 struct gbm_bo*
 gbm_back_bo_from_fd(drmmode_ptr drmmode, Bool do_map, int fd_handle, uint32_t pitch, uint32_t size)
 {
+    struct gbm_bo *ret;
+
     /* pitch == width * cpp */
     int width = pitch / drmmode->cpp;
     /* size == pitch * height */
@@ -334,15 +345,13 @@ gbm_back_bo_from_fd(drmmode_ptr drmmode, Bool do_map, int fd_handle, uint32_t pi
 
     data->used_modifiers = FALSE;
 
-    TRY_CREATE(gbm_bo_import, data, do_map,
-               drmmode->gbm, GBM_BO_IMPORT_FD, &import_data,
-               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+    ret = gbm_back_bo_from_fd_internal(drmmode, data, do_map, &import_data);
+    if (!ret) {
+        return NULL;
+    }
 
-    TRY_CREATE(gbm_bo_import, data, do_map,
-               drmmode->gbm, GBM_BO_IMPORT_FD, &import_data,
-               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);
-
-    return NULL;
+    gbm_bo_set_user_data(ret, data, destroy_user_data);
+    return ret;
 }
 
 /* A bit of a misnomer, this is a dmabuf export */
