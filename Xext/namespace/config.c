@@ -38,7 +38,14 @@ static struct Xnamespace* select_ns(const char* name)
     }
 
     struct Xnamespace *newns = calloc(1, sizeof(struct Xnamespace));
+    if (!newns) {
+        FatalError("Xnamespace: failed allocating namespace configuration struct\n");
+    }
     newns->name = strdup(name);
+    if (!newns->name) {
+        free(newns);
+        FatalError("Xnamespace: failed allocating namespace name copy\n");
+    }
     xorg_list_append(&newns->entry, &ns_list);
     return newns;
 }
