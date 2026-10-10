@@ -336,7 +336,7 @@ xf86platformProbe(void)
                         curr = NULL;
                     }
                     free(copy);
-                } else {
+                } else if (cl->modulepath) {
                     if (*(cl->modulepath)) {
                         char *path2;
                         if (asprintf(&path2, "%s,%s", cl->modulepath,
