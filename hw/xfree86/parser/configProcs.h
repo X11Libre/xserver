@@ -40,11 +40,6 @@ void xf86printDeviceSection(FILE * cf, XF86ConfDevicePtr ptr);
 void xf86freeDeviceList(XF86ConfDevicePtr ptr);
 int xf86validateDevice(XF86ConfigPtr p);
 
-/* Files.c */
-XF86ConfFilesPtr xf86parseFilesSection(XF86ConfFilesPtr ptr);
-void xf86printFileSection(FILE * cf, XF86ConfFilesPtr ptr);
-void xf86freeFiles(XF86ConfFilesPtr p);
-
 /* Flags.c */
 XF86ConfFlagsPtr xf86parseFlagsSection(XF86ConfFlagsPtr ptr);
 void xf86printServerFlagsSection(FILE * f, XF86ConfFlagsPtr flags);
