@@ -499,6 +499,66 @@ class TestXkbSetGeometry:
             "Server crashed - SetGeometry overlay rowUnder off-by-one"
         )
 
+    @pytest.mark.asan
+    def test_text_doodad_double_free(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-31221: _CheckSetDoodad() frees doodad->text.text on error
+        when the subsequent font string parse fails, but does not NULL the
+        pointer. The doodad has already been added to the geometry by
+        XkbAddGeomDoodad, so XkbFreeGeometry() → _XkbClearDoodad() frees
+        the same pointer again, causing a double-free.
+
+        The request provides a valid text string ("AAAA") followed by a
+        font string with length=200 but no data, causing _GetCountedString
+        to fail the bounds check and triggering the error path.
+        """
+        xclient, opcode = xkb_xclient
+
+        n_colors = 2
+        color_data = self._build_colors(n_colors)
+        name_atom = xclient.intern_atom("TestGeomDoubleFree")
+        shape_atom = xclient.intern_atom("TestShapeDF")
+        doodad_atom = xclient.intern_atom("TestDoodadDF")
+
+        label_font = xkb.build_counted_string("")
+
+        # 1 shape with 0 outlines (minimal valid shape)
+        shape_data = xkb.ShapeWire(
+            name=shape_atom,
+            n_outlines=0,
+            primary_ndx=xkb.XkbNoShape,
+            approx_ndx=xkb.XkbNoShape,
+        ).to_bytes()
+
+        # TextDoodad with valid text but malformed font (length=200, no data)
+        doodad_data = xkb.TextDoodadWire(
+            name=doodad_atom,
+            color_ndx=0,
+            text="AAAA",
+            font_length_override=200,  # extends past request → bounds check fails
+        ).to_bytes()
+
+        payload = label_font + color_data + shape_data + doodad_data
+
+        req = xkb.SetGeometryRequest(
+            opcode=opcode,
+            n_shapes=1,
+            n_sections=0,
+            n_colors=n_colors,
+            n_doodads=1,
+            base_color_ndx=0,
+            label_color_ndx=1,
+            name_atom=name_atom,
+            payload=payload,
+        )
+        xclient.send_request(req)
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - TextDoodad double-free: _CheckSetDoodad frees "
+            "text.text on error without NULLing, then _XkbClearDoodad frees again"
+        )
+
 
 class TestXkbChangeKeycodeRange:
     """Tests for XKB ChangeKeycodeRange vulnerabilities."""
