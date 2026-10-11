@@ -9,6 +9,8 @@
 
 #include <drm_fourcc.h>
 
+#include "drm_defines.h"
+
 /* TODO: Stuff that should be in msutil */
 
 typedef struct {
