@@ -141,112 +141,6 @@ static Bool addDefaultModes(MonPtr monitorp);
 
 static void configExtensions(XF86ConfExtensionsPtr conf_ext);
 
-/*
- * xf86GetPathElem --
- *	Extract a single element from the font path string starting at
- *	pnt.  The font path element will be returned, and pnt will be
- *	updated to point to the start of the next element, or set to
- *	NULL if there are no more.
- */
-static char *
-xf86GetPathElem(char **pnt)
-{
-    char *p1;
-
-    p1 = *pnt;
-    *pnt = index(*pnt, ',');
-    if (*pnt != NULL) {
-        **pnt = '\0';
-        *pnt += 1;
-    }
-    return p1;
-}
-
-/*
- * xf86ValidateFontPath --
- *	Validates the user-specified font path.  Each element that
- *	begins with a '/' is checked to make sure the directory exists.
- *	If the directory exists, the existence of a file named 'fonts.dir'
- *	is checked.  If either check fails, an error is printed and the
- *	element is removed from the font path.
- */
-
-#define DIR_FILE "/fonts.dir"
-static char *
-xf86ValidateFontPath(char *path)
-{
-    char *next, *tmp_path, *out_pnt, *path_elem, *p1, *dir_elem;
-    struct stat stat_buf;
-    int flag;
-    int dirlen;
-
-    tmp_path = calloc(1, strlen(path) + 1);
-    out_pnt = tmp_path;
-    path_elem = NULL;
-    next = path;
-    while (next != NULL) {
-        path_elem = xf86GetPathElem(&next);
-        if (*path_elem == '/') {
-            dir_elem = XNFcallocarray(1, strlen(path_elem) + 1);
-            if ((p1 = strchr(path_elem, ':')) != 0)
-                dirlen = p1 - path_elem;
-            else
-                dirlen = strlen(path_elem);
-            strlcpy(dir_elem, path_elem, dirlen + 1);
-            flag = stat(dir_elem, &stat_buf);
-            if (flag == 0)
-                if (!S_ISDIR(stat_buf.st_mode))
-                    flag = -1;
-            if (flag != 0) {
-                LogMessageVerb(X_WARNING, 1, "The directory \"%s\" does not exist.\n",
-                               dir_elem);
-                xf86ErrorF("\tEntry deleted from font path.\n");
-                free(dir_elem);
-                continue;
-            }
-            else {
-                char pbuf1[PATH_MAX] = { 0 };
-                snprintf(pbuf1, sizeof(pbuf1)-1, "%s%s", dir_elem, DIR_FILE);
-                flag = stat(pbuf1, &stat_buf);
-                if (flag == 0)
-                    if (!S_ISREG(stat_buf.st_mode))
-                        flag = -1;
-                if (flag != 0) {
-                    LogMessageVerb(X_WARNING, 1,
-                                   "`fonts.dir' not found (or not valid) in \"%s\".\n",
-                                   dir_elem);
-                    xf86ErrorF("\tEntry deleted from font path.\n");
-                    xf86ErrorF("\t(Run 'mkfontdir' on \"%s\").\n", dir_elem);
-                    free(dir_elem);
-                    continue;
-                }
-            }
-            free(dir_elem);
-        }
-
-        /*
-         * Either an OK directory, or a font server name.  So add it to
-         * the path.
-         */
-        if (*path_elem != '/' &&
-            strcmp(path_elem, "built-ins") != 0 &&
-            strncmp(path_elem, "catalogue:", strlen("catalogue:")) != 0 &&
-            !enableFontServerConnections) {
-            xf86Msg(X_WARNING,
-                    "Ignoring font server entry \"%s\" in font path.\n",
-                    path_elem);
-            xf86ErrorF("\tFont server connections are disabled.\n");
-            xf86ErrorF("\tUse +fontserverconnections to allow them.\n");
-            continue;
-        }
-        if (out_pnt != tmp_path)
-            *out_pnt++ = ',';
-        strcat(out_pnt, path_elem);
-        out_pnt += strlen(path_elem);
-    }
-    return tmp_path;
-}
-
 #define FIND_SUITABLE(pointertype, listhead, ptr)                                            \
     do {                                                                                     \
         pointertype _l, _p;                                                                  \
@@ -2474,7 +2368,6 @@ xf86HandleConfigFile(Bool autoconfig)
     }
 #endif
     /* Now process everything else */
-    configFiles(xf86configptr->conf_files);
     configExtensions(xf86configptr->conf_extensions);
 
     checkInput(&xf86ConfigLayout, implicit_layout);
