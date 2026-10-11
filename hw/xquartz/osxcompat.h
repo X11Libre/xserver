@@ -40,6 +40,10 @@
 #define HAS_ASL_LOG_DESCRIPTOR
 #endif
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 101200
+#define HAS_OS_LOG
+#endif
+
 #if __OBJC__
 #ifdef __clang__
   #define OBJC_AUTORELEASEPOOL_BEGIN @autoreleasepool {
