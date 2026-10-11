@@ -1673,6 +1673,13 @@ ProcCopyArea(ClientPtr client)
                                DixReadAccess);
         if (rc != Success)
             return rc;
+        if (pSrc->type == DRAWABLE_WINDOW &&
+            pGC->subWindowMode == IncludeInferiors &&
+            XaceHookIsSet(XACE_DRAWABLE_ACCESS)) {
+            rc = XaceHookDrawableAccess(client, pSrc, pGC, DixReadAccess);
+            if (rc != Success)
+                return rc;
+        }
         if ((pDst->pScreen != pSrc->pScreen) || (pDst->depth != pSrc->depth)) {
             client->errorValue = stuff->dstDrawable;
             return BadMatch;
@@ -1711,6 +1718,14 @@ ProcCopyPlane(ClientPtr client)
                                DixReadAccess);
         if (rc != Success)
             return rc;
+
+        if (psrcDraw->type == DRAWABLE_WINDOW &&
+            pGC->subWindowMode == IncludeInferiors &&
+            XaceHookIsSet(XACE_DRAWABLE_ACCESS)) {
+            rc = XaceHookDrawableAccess(client, psrcDraw, pGC, DixReadAccess);
+            if (rc != Success)
+                return rc;
+        }
 
         if (pdstDraw->pScreen != psrcDraw->pScreen) {
             client->errorValue = stuff->dstDrawable;
@@ -2044,6 +2059,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     int relx, rely;
     Mask plane = 0;
     RegionPtr pVisibleRegion = NULL;
+    RegionRec visibleRegion;
+    bool visibleRegionOwned = false;
 
     if ((format != XYPixmap) && (format != ZPixmap)) {
         client->errorValue = format;
@@ -2151,9 +2168,25 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     }
 
     if (pDraw->type == DRAWABLE_WINDOW) {
-        pVisibleRegion = &((WindowPtr) pDraw)->borderClip;
+        WindowPtr pWin = (WindowPtr) pDraw;
+
+        pVisibleRegion = &pWin->borderClip;
         pDraw->pScreen->SourceValidate(pDraw, x, y, width, height,
                                        IncludeInferiors);
+        if (XaceHookIsSet(XACE_WINDOW_IMAGE_ACCESS)) {
+            RegionNull(&visibleRegion);
+            if (!RegionCopy(&visibleRegion, pVisibleRegion)) {
+                RegionUninit(&visibleRegion);
+                return BadAlloc;
+            }
+            pVisibleRegion = &visibleRegion;
+            visibleRegionOwned = true;
+            rc = XaceHookWindowImageAccess(client, pWin, pVisibleRegion);
+            if (rc != Success) {
+                RegionUninit(&visibleRegion);
+                return rc;
+            }
+        }
     }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
@@ -2169,6 +2202,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
             char *pBuf = x_rpcbuf_reserve(&rpcbuf, (nlines * widthBytesLine));
             if (!pBuf) {
                 x_rpcbuf_clear(&rpcbuf);
+                if (visibleRegionOwned)
+                    RegionUninit(&visibleRegion);
                 return BadAlloc;
             }
 
@@ -2198,6 +2233,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                     char *pBuf = x_rpcbuf_reserve(&rpcbuf, (nlines * widthBytesLine));
                     if (!pBuf) {
                         x_rpcbuf_clear(&rpcbuf);
+                        if (visibleRegionOwned)
+                            RegionUninit(&visibleRegion);
                         return BadAlloc;
                     }
 
@@ -2219,6 +2256,9 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
             }
         }
     }
+
+    if (visibleRegionOwned)
+        RegionUninit(&visibleRegion);
 
     if (client->swapped) {
         swapl(&reply.visual);

@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dix.h"
 #include "resource.h"
 #include "extnsionst.h"
+#include "gcstruct.h"
 #include "window.h"
 #include "input.h"
 #include "property.h"
@@ -77,5 +78,22 @@ typedef struct {
     Mask access_mode;
     int status;
 } XaceSelectionAccessRec;
+
+/* XACE_WINDOW_IMAGE_ACCESS */
+typedef struct {
+    ClientPtr client;
+    WindowPtr pWin;
+    RegionPtr pVisibleRegion;
+    int status;
+} XaceWindowImageAccessRec;
+
+/* XACE_DRAWABLE_ACCESS */
+typedef struct {
+    ClientPtr client;
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    Mask access_mode;
+    int status;
+} XaceDrawableAccessRec;
 
 #endif                          /* _XACESTR_H */

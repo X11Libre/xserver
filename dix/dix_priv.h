@@ -132,7 +132,17 @@ void DeleteWindowFromAnySaveSet(WindowPtr pWin);
             return BadMatch;                                            \
         if (pGC->serialNumber != (pDraw)->serialNumber)                   \
             ValidateGC((pDraw), pGC);                                     \
+        if ((pDraw)->type == DRAWABLE_WINDOW &&                           \
+            pGC->subWindowMode == IncludeInferiors &&                     \
+            XaceHookIsSet(XACE_DRAWABLE_ACCESS)) {                        \
+            tmprc = XaceHookDrawableAccess(client, (pDraw), pGC, (mode));  \
+            if (tmprc != Success)                                         \
+                return tmprc;                                             \
+        }                                                                  \
     } while (0)
+
+int XaceHookDrawableAccess(ClientPtr client, DrawablePtr pDraw, GCPtr pGC,
+                           Mask access_mode);
 
 int dixLookupGC(GCPtr *result,
                 XID id,

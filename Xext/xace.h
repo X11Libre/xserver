@@ -28,6 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "include/regionstr.h"
 
 #include "extnsionst.h"
+#include "gcstruct.h"
 #include "pixmap.h"
 #include "window.h"
 #include "property.h"
@@ -43,7 +44,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define XACE_SEND_ACCESS		5
 #define XACE_RECEIVE_ACCESS		6
 #define XACE_SELECTION_ACCESS		10
-#define XACE_NUM_HOOKS			13
+#define XACE_WINDOW_IMAGE_ACCESS	13
+#define XACE_DRAWABLE_ACCESS		14
+#define XACE_NUM_HOOKS			15
 
 extern CallbackListPtr XaceHooks[XACE_NUM_HOOKS];
 
@@ -69,6 +72,14 @@ _X_EXPORT int XaceHookResourceAccess(ClientPtr client, XID id, RESTYPE rtype, vo
 int XaceHookSendAccess(ClientPtr client, DeviceIntPtr dev, WindowPtr win,
                        xEventPtr ev, int count);
 int XaceHookReceiveAccess(ClientPtr client, WindowPtr win, xEventPtr ev, int count);
+int XaceHookWindowImageAccess(ClientPtr client, WindowPtr pWin,
+                              RegionPtr pVisibleRegion);
+int XaceHookDrawableAccess(ClientPtr client, DrawablePtr pDraw, GCPtr pGC,
+                           Mask access_mode);
+
+/* XACE_WINDOW_IMAGE_ACCESS callbacks may reduce pVisibleRegion. They must not
+ * destroy it or add pixels that are outside the window's original borderClip.
+ */
 
 /* Register / unregister a callback for a given hook. */
 

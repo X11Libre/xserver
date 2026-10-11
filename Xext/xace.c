@@ -77,6 +77,24 @@ int XaceHookReceiveAccess(ClientPtr client, WindowPtr win,
     return rec.status;
 }
 
+int
+XaceHookWindowImageAccess(ClientPtr client, WindowPtr pWin,
+                          RegionPtr pVisibleRegion)
+{
+    XaceWindowImageAccessRec rec = { client, pWin, pVisibleRegion, Success };
+    CallCallbacks(&XaceHooks[XACE_WINDOW_IMAGE_ACCESS], &rec);
+    return rec.status;
+}
+
+int
+XaceHookDrawableAccess(ClientPtr client, DrawablePtr pDraw, GCPtr pGC,
+                       Mask access_mode)
+{
+    XaceDrawableAccessRec rec = { client, pDraw, pGC, access_mode, Success };
+    CallCallbacks(&XaceHooks[XACE_DRAWABLE_ACCESS], &rec);
+    return rec.status;
+}
+
 /* XaceHookIsSet
  *
  * Utility function to determine whether there are any callbacks listening on a
