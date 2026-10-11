@@ -647,7 +647,7 @@ x11_front_window_id(void)
 
 /* Helper function for X11ApplicationSetWindowMenu */
 static void
-setWindowMenuOnMain_fptr(void *arg)
+setWindowMenuOnMain(void *arg)
 {
     NSArray *items = arg;
     [X11App.controller set_window_menu:items];
@@ -682,7 +682,7 @@ X11ApplicationSetWindowMenu(int nitems, const char **items,
 #ifdef HAS_LIBDISPATCH
         dispatch_async_f(dispatch_get_main_queue(),
                          allMenuItems,
-                         setWindowMenuOnMain_fptr);
+                         setWindowMenuOnMain);
 #else
         [X11App performSelectorOnMainThread:@selector(setWindowMenuCompat:)
                                   withObject:allMenuItems
@@ -692,7 +692,7 @@ X11ApplicationSetWindowMenu(int nitems, const char **items,
 }
 
 static void
-setWindowMenuCheck_fptr(void *arg)
+setWindowMenuCheck(void *arg)
 {
     NSNumber *idx = arg;
     [X11App.controller set_window_menu_check:idx];
@@ -704,7 +704,7 @@ X11ApplicationSetWindowMenuCheck(int idx)
 {
     NSNumber *num = [[NSNumber alloc] initWithInt:idx];
 #ifdef HAS_LIBDISPATCH
-    dispatch_async_f(dispatch_get_main_queue(), num, setWindowMenuCheck_fptr);
+    dispatch_async_f(dispatch_get_main_queue(), num, setWindowMenuCheck);
 #else
     [X11App performSelectorOnMainThread:@selector(setWindowMenuCheckCompat:)
                               withObject:num
@@ -713,7 +713,7 @@ X11ApplicationSetWindowMenuCheck(int idx)
 }
 
 static void
-appSetFrontProcess_fptr(void* unused)
+appSetFrontProcess(void* unused)
 {
     (void) unused;
     [X11App set_front_process:nil];
@@ -722,7 +722,7 @@ void
 X11ApplicationSetFrontProcess(void)
 {
 #ifdef HAS_LIBDISPATCH
-    dispatch_async_f(dispatch_get_main_queue(), NULL, appSetFrontProcess_fptr);
+    dispatch_async_f(dispatch_get_main_queue(), NULL, appSetFrontProcess);
 #else
     [X11App performSelectorOnMainThread:@selector(setFrontProcessCompat:)
                               withObject:nil
@@ -731,7 +731,7 @@ X11ApplicationSetFrontProcess(void)
 }
 
 static void
-appSetCanQuit_fptr(void *__state)
+appSetCanQuit(void *__state)
 {
     NSNumber *state = __state;
     X11App.controller.can_quit = [state boolValue];
@@ -742,7 +742,7 @@ X11ApplicationSetCanQuit(int state)
 {
     NSNumber *state_alloc = [[NSNumber alloc] initWithInt:state];
 #ifdef HAS_LIBDISPATCH
-    dispatch_async_f(dispatch_get_main_queue(), state_alloc, appSetCanQuit_fptr);
+    dispatch_async_f(dispatch_get_main_queue(), state_alloc, appSetCanQuit);
 #else
     [X11App performSelectorOnMainThread:@selector(setCanQuitCompat:)
                               withObject:state_alloc
@@ -751,7 +751,7 @@ X11ApplicationSetCanQuit(int state)
 }
 
 static void
-appServerReady_fptr(void* unused)
+appServerReady(void* unused)
 {
     (void) unused;
     [X11App.controller server_ready];
@@ -760,7 +760,7 @@ void
 X11ApplicationServerReady(void)
 {
 #ifdef HAS_LIBDISPATCH
-    dispatch_async_f(dispatch_get_main_queue(), NULL, appServerReady_fptr);
+    dispatch_async_f(dispatch_get_main_queue(), NULL, appServerReady);
 #else
     [X11App performSelectorOnMainThread:@selector(serverReadyCompat:)
                               withObject:nil
@@ -769,7 +769,7 @@ X11ApplicationServerReady(void)
 }
 
 static void
-appShowHideMenubar_fptr(void *state_ptr)
+appShowHideMenubar(void *state_ptr)
 {
     NSNumber *state = state_ptr;
     [X11App show_hide_menubar:state];
@@ -780,7 +780,7 @@ X11ApplicationShowHideMenubar(int state)
 {
     NSNumber *state_alloc = [[NSNumber alloc] initWithInt:state];
 #ifdef HAS_LIBDISPATCH
-    dispatch_async_f(dispatch_get_main_queue(), state_alloc, appShowHideMenubar_fptr);
+    dispatch_async_f(dispatch_get_main_queue(), state_alloc, appShowHideMenubar);
 #else
     [X11App performSelectorOnMainThread:@selector(showHideMenubarCompat:)
                               withObject:state_alloc
@@ -789,7 +789,7 @@ X11ApplicationShowHideMenubar(int state)
 }
 
 static void
-appLaunchClient_fptr(void *string_ptr)
+appLaunchClient(void *string_ptr)
 {
     NSString *string = string_ptr;
     [X11App launch_client:string];
@@ -801,7 +801,7 @@ X11ApplicationLaunchClient(const char *cmd)
     OBJC_AUTORELEASEPOOL_BEGIN
         NSString *string_alloc = [[NSString alloc] initWithUTF8String:cmd];
 #ifdef HAS_LIBDISPATCH
-        dispatch_async_f(dispatch_get_main_queue(), string_alloc, appLaunchClient_fptr);
+        dispatch_async_f(dispatch_get_main_queue(), string_alloc, appLaunchClient);
 #else
         [X11App performSelectorOnMainThread:@selector(launchClientCompat:)
                                   withObject:string_alloc
@@ -1019,25 +1019,25 @@ X11ApplicationMain(int argc, char **argv, char **envp)
 
 #ifndef HAS_LIBDISPATCH
 - (void)setWindowMenuCompat:(NSArray *)items {
-    setWindowMenuOnMain_fptr(items);
+    setWindowMenuOnMain(items);
 }
 - (void)setWindowMenuCheckCompat:(NSNumber *)idx {
-    setWindowMenuCheck_fptr(idx);
+    setWindowMenuCheck(idx);
 }
 - (void)setFrontProcessCompat:(id)unused {
-    appSetFrontProcess_fptr(NULL);
+    appSetFrontProcess(NULL);
 }
 - (void)setCanQuitCompat:(NSNumber *)state {
-    appSetCanQuit_fptr(state);
+    appSetCanQuit(state);
 }
 - (void)serverReadyCompat:(id)unused {
-    appServerReady_fptr(NULL);
+    appServerReady(NULL);
 }
 - (void)showHideMenubarCompat:(NSNumber *)state {
-    appShowHideMenubar_fptr(state);
+    appShowHideMenubar(state);
 }
 - (void)launchClientCompat:(NSString *)cmd {
-    appLaunchClient_fptr(cmd);
+    appLaunchClient(cmd);
 }
 - (void)runAlertPanelCompat:(NSMutableDictionary *)ctx {
     NSInteger *result = [[ctx objectForKey:@"result"] pointerValue];
@@ -1106,7 +1106,7 @@ typedef struct _CopyKeyboardLayoutCtx {
 } CopyKeyboardLayoutCtx;
 
 static void
-copyKeyboardLayout_fptr(void *arg)
+copyKeyboardLayout(void *arg)
 {
     CopyKeyboardLayoutCtx *ctx = arg;
     *(ctx->key_layout) = TISCopyCurrentKeyboardLayoutInputSource();
@@ -1567,12 +1567,12 @@ handle_mouse:
 
             /* This is an ugly ant-pattern, but it is more expedient to address the problem right now. */
             if (pthread_main_np()) {
-                copyKeyboardLayout_fptr(&ctx);
+                copyKeyboardLayout(&ctx);
             } else {
 #ifdef HAS_LIBDISPATCH
-                dispatch_sync_f(dispatch_get_main_queue(), &ctx, copyKeyboardLayout_fptr);
+                dispatch_sync_f(dispatch_get_main_queue(), &ctx, copyKeyboardLayout);
 #else
-                copyKeyboardLayout_fptr(&ctx);
+                copyKeyboardLayout(&ctx);
 #endif
             }
 
