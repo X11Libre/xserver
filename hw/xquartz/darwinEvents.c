@@ -129,9 +129,11 @@ create_thread(void *(*func)(void *), void *arg)
     pthread_attr_init(&attr);
     pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+#ifdef QOS_CLASS_USER_INITIATED
     if (&pthread_attr_set_qos_class_np) {
         pthread_attr_set_qos_class_np(&attr, QOS_CLASS_USER_INITIATED, 0);
     }
+#endif
     pthread_create(&tid, &attr, func, arg);
     pthread_attr_destroy(&attr);
 
