@@ -350,11 +350,13 @@ create_socket(char *filename_out)
 
 static int launchd_socket_handed_off = 0;
 
+#ifdef HAS_LIBDISPATCH
 static void socketHandoff_fptr(void *arg) {
     socket_handoff_t *handoff_data = (socket_handoff_t *)arg;
     socket_handoff(handoff_data);
     free(handoff_data);
 }
+#endif
 
 kern_return_t
 do_request_fd_handoff_socket(mach_port_t port, string_t filename)

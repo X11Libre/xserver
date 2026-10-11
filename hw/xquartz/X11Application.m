@@ -260,6 +260,7 @@ QuartzModeBundleInit(void);
     [self activateX:NO];
 }
 
+#ifdef HAS_LIBDISPATCH
 static void
 sendX11NSEvent_fptr(void *e_ptr)
 {
@@ -267,6 +268,7 @@ sendX11NSEvent_fptr(void *e_ptr)
     [X11App sendX11NSEvent:e];
     [e release];
 }
+#endif
 
 - (void) sendEvent:(NSEvent *)e
 {

@@ -153,6 +153,7 @@ xprColormapCallback(void *data, int first_color, int n_colors,
                                     colors) ? XP_Success : XP_BadMatch);
 }
 
+#ifdef HAS_LIBDISPATCH
 static void
 windowHashInsert(void *arg)
 {
@@ -160,6 +161,7 @@ windowHashInsert(void *arg)
     x_hash_table_insert(window_hash, x_cvt_uint_to_vptr(ctx->wid), ctx->frame);
     free(ctx);
 }
+#endif
 
 /*
  * Create and display a new frame.
@@ -262,6 +264,7 @@ typedef struct _WindowLookupCtx {
 /* the members are gonna be the same, so no reason to duplicate code */
 typedef WindowLookupCtx WindowGetCtx;
 
+#ifdef HAS_LIBDISPATCH
 static void windowHashRemove(void *arg) {
     WindowHashRemoveCtx *ctx = arg;
     x_hash_table_remove(window_hash, ctx->wid);
@@ -272,6 +275,7 @@ static void windowLookup(void *arg) {
     WindowLookupCtx *ctx = (WindowLookupCtx *)arg;
     *(ctx->winrec) = x_hash_table_lookup(window_hash, ctx->wid, NULL);
 }
+#endif
 
 /*
  * Destroy a frame.
@@ -345,11 +349,6 @@ xprRestackFrame(RootlessFrameID wid, RootlessFrameID nextWid)
     unsigned int mask = XP_STACKING;
     RootlessWindowRec * winRec;
 
-    WindowLookupCtx ctx = {
-        .wid = wid,
-        .winrec = &winRec
-    };
-
     /* Stack frame below nextWid it if it exists, or raise
        frame above everything otherwise. */
 
@@ -363,6 +362,11 @@ xprRestackFrame(RootlessFrameID wid, RootlessFrameID nextWid)
     }
 
 #ifdef HAS_LIBDISPATCH
+    WindowLookupCtx ctx = {
+        .wid = wid,
+        .winrec = &winRec
+    };
+
     dispatch_sync_f(window_hash_serial_q, &ctx, windowLookup);
 #else
     pthread_rwlock_rdlock(&window_hash_rwlock);
@@ -570,10 +574,12 @@ xprInit(ScreenPtr pScreen)
     return TRUE;
 }
 
+#ifdef HAS_LIBDISPATCH
 static void windowGet(void *arg) {
     WindowGetCtx *ctx = arg;
     *(ctx->winrec) = x_hash_table_lookup(window_hash, ctx->wid, NULL);
 }
+#endif
 
 /*
  * Given the id of a physical window, try to find the top-level (or root)
