@@ -68,10 +68,6 @@ libxquartz_defs = [
     sparkle_defs,
 ]
 
-if cc.has_function('dispatch_async')
-    libxquartz_defs += '-DHAS_LIBDISPATCH'
-endif
-
 libXquartz = static_library('Xquartz',
     srcs_libxquartz,
     c_args: libxquartz_defs,
