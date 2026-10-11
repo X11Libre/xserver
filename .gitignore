@@ -5,3 +5,4 @@ tags
 compile_commands.json
 .vscode/*
 !.vscode/tasks.json
+.cache/
