@@ -99,6 +99,7 @@ x11 = executable('X11',
      [
       'bundle_trampoline.c',
      ],
+     include_directories: ['..'],
      c_args: xquartz_defs,
      link_args: execlinkargs,
      install: true,
