@@ -74,8 +74,6 @@ int XaceHookSendAccess(ClientPtr client, DeviceIntPtr dev, WindowPtr win,
 int XaceHookReceiveAccess(ClientPtr client, WindowPtr win, xEventPtr ev, int count);
 int XaceHookWindowImageAccess(ClientPtr client, WindowPtr pWin,
                               RegionPtr pVisibleRegion);
-int XaceHookDrawableAccess(ClientPtr client, DrawablePtr pDraw, GCPtr pGC,
-                           Mask access_mode);
 
 /* XACE_WINDOW_IMAGE_ACCESS callbacks may reduce pVisibleRegion. They must not
  * destroy it or add pixels that are outside the window's original borderClip.

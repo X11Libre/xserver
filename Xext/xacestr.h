@@ -96,4 +96,7 @@ typedef struct {
     int status;
 } XaceDrawableAccessRec;
 
+int XaceHookDrawableAccess(ClientPtr client, DrawablePtr pDraw, GCPtr pGC,
+                           Mask access_mode);
+
 #endif                          /* _XACESTR_H */
