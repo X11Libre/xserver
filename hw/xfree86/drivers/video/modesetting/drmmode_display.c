@@ -61,10 +61,6 @@
 
 #include "driver.h"
 
-#ifndef GBM_BO_USE_FRONT_RENDERING
-#define GBM_BO_USE_FRONT_RENDERING 0
-#endif
-
 static Bool drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height);
 static PixmapPtr drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int height,
                                               int depth, int bitsPerPixel, int devKind,
