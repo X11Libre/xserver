@@ -21,7 +21,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define _XACE_H
 
 #define XACE_MAJOR_VERSION		2
-#define XACE_MINOR_VERSION		0
+#define XACE_MINOR_VERSION		1
 
 #include "dix/selection_priv.h"
 #include "include/callback.h"
