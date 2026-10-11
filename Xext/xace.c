@@ -90,6 +90,9 @@ int
 XaceHookDrawableAccess(ClientPtr client, DrawablePtr pDraw, GCPtr pGC,
                        Mask access_mode)
 {
+    if (!XaceHookIsSet(XACE_DRAWABLE_ACCESS))
+        return Success;
+
     XaceDrawableAccessRec rec = { client, pDraw, pGC, access_mode, Success };
     CallCallbacks(&XaceHooks[XACE_DRAWABLE_ACCESS], &rec);
     return rec.status;

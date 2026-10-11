@@ -2186,6 +2186,11 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                 RegionUninit(&visibleRegion);
                 return rc;
             }
+            if (!RegionIntersect(pVisibleRegion, pVisibleRegion,
+                                 &pWin->borderClip)) {
+                RegionUninit(&visibleRegion);
+                return BadAlloc;
+            }
         }
     }
 
