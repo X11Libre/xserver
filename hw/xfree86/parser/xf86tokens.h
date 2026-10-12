@@ -150,6 +150,7 @@ typedef enum {
     LOAD,
     LOAD_DRIVER,
     DISABLE,
+    MODULEPATH,
 
     /* Device tokens */
     DRIVER,

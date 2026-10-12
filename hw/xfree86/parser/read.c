@@ -279,7 +279,6 @@ xf86freeConfig(XF86ConfigPtr p)
     if (p == NULL)
         return;
 
-    xf86freeFiles(p->conf_files);
     xf86freeModules(p->conf_modules);
     xf86freeFlags(p->conf_flags);
     xf86freeMonitorList(p->conf_monitor_lst);
