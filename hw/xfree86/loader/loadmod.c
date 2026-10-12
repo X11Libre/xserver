@@ -189,12 +189,14 @@ InitPathList(const char *path)
     return list;
 }
 
-/*
- * Set a default search path or a search path for a specific driver
- */
 void
 LoaderSetPath(const char *driver, const char *path)
 {
+    /* treat empty string like NULL -> not present */
+    if (path && path[0] == 0) {
+        path = NULL;
+    }
+
     LoaderModulePathListItem *item;
 
     if (!driver) {
