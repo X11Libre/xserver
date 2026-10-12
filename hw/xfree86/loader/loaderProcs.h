@@ -72,7 +72,15 @@ ModuleDescPtr LoadModule(const char *, void *, const XF86ModReqInfo *, int *);
 ModuleDescPtr DuplicateModule(ModuleDescPtr mod, ModuleDescPtr parent);
 void UnloadDriver(ModuleDescPtr);
 
+/*
+ * Initialize search path for driver module. If path is NULL or empty,
+ * set a default module search path instead
+ *
+ * @param     the driver to set the path for.
+ * @param     module search path to set (comma-separted list)
+ */
 void LoaderSetPath(const char *driver, const char *path);
+
 void LoaderInitPath(void);
 void LoaderClosePath(void);
 
