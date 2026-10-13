@@ -43,6 +43,7 @@
 #ifndef _COMPINT_H_
 #define _COMPINT_H_
 
+#include <stdbool.h>
 #include <X11/extensions/compositeproto.h>
 
 #include "dix/screen_hooks_priv.h"
@@ -77,8 +78,8 @@ typedef struct _CompClientWindow {
 typedef struct _CompWindow {
     RegionRec borderClip;
     DamagePtr damage;           /* for automatic update mode */
-    Bool damageRegistered;
-    Bool damaged;
+    bool damageRegistered;
+    bool damaged;
     int update;
     CompClientWindowPtr clients;
     int oldx;

@@ -89,7 +89,7 @@ compReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
         QueueWorkProc(compScreenUpdate, serverClient, pScreen);
         cs->pendingScreenUpdate = TRUE;
     }
-    cw->damaged = TRUE;
+    cw->damaged = false;
 
     compMarkAncestors(pWin);
 }
@@ -100,9 +100,9 @@ compDestroyDamage(DamagePtr pDamage, void *closure)
     WindowPtr pWin = (WindowPtr) closure;
     CompWindowPtr cw = GetCompWindow(pWin);
 
-    cw->damage = 0;
-    cw->damaged = 0;
-    cw->damageRegistered = 0;
+    cw->damage = NULL;
+    cw->damaged = false;
+    cw->damageRegistered = false;
 }
 
 static bool compMarkWindows(WindowPtr pWin, WindowPtr *ppLayerWin)
@@ -198,8 +198,8 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
         cw->clients = 0;
         cw->oldx = COMP_ORIGIN_INVALID;
         cw->oldy = COMP_ORIGIN_INVALID;
-        cw->damageRegistered = FALSE;
-        cw->damaged = FALSE;
+        cw->damageRegistered = false;
+        cw->damaged = false;
         cw->pOldPixmap = NullPixmap;
         dixSetPrivate(&pWin->devPrivates, CompWindowPrivateKey, cw);
     }
@@ -213,7 +213,7 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
 
         if (cw->damageRegistered) {
             DamageUnregister(cw->damage);
-            cw->damageRegistered = FALSE;
+            cw->damageRegistered = false;
         }
         cw->update = CompositeRedirectManual;
     }
@@ -307,7 +307,7 @@ compFreeClientWindow(WindowPtr pWin, XID id)
         anyMarked = compMarkWindows(pWin, &pLayerWin);
 
         DamageRegister(&pWin->drawable, cw->damage);
-        cw->damageRegistered = TRUE;
+        cw->damageRegistered = true;
         pWin->redirectDraw = RedirectDrawAutomatic;
         DamageDamageRegion(&pWin->drawable, &pWin->borderSize);
     }
@@ -636,10 +636,10 @@ bool compAllocPixmap(WindowPtr pWin)
     compSetPixmap(pWin, pPixmap, bw);
     cw->oldx = COMP_ORIGIN_INVALID;
     cw->oldy = COMP_ORIGIN_INVALID;
-    cw->damageRegistered = FALSE;
+    cw->damageRegistered = false;
     if (cw->update == CompositeRedirectAutomatic) {
         DamageRegister(&pWin->drawable, cw->damage);
-        cw->damageRegistered = TRUE;
+        cw->damageRegistered = true;
     }
     status = TRUE;
 
@@ -662,7 +662,7 @@ compSetParentPixmap(WindowPtr pWin)
 
     if (cw->damageRegistered) {
         DamageUnregister(cw->damage);
-        cw->damageRegistered = FALSE;
+        cw->damageRegistered = false;
         DamageEmpty(cw->damage);
     }
     /*
