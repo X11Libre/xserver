@@ -141,11 +141,11 @@ enum DRI2WakeType {
 
 #define Wake(c, t) (void *)((uintptr_t)(c) | (t))
 
-static Bool
+static bool
 dri2WakeClient(ClientPtr client, void *closure)
 {
     ClientWakeup(client);
-    return TRUE;
+    return true;
 }
 
 static Bool

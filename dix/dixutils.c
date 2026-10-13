@@ -580,7 +580,9 @@ Bool dixClientSignal(ClientPtr client)
 {
     for (SleepQueuePtr q = sleepQueue; q; q = q->next)
         if (q->client == client) {
-            return QueueWorkProc(q->function, q->client, q->closure);
+            /* keep QueueWorkProc's Bool signature: it is part of the
+             * nvidia-ABI-linked export surface (do-not-break) */
+            return QueueWorkProc((Bool (*)(ClientPtr, void *)) q->function, q->client, q->closure);
         }
     return FALSE;
 }
@@ -600,7 +602,7 @@ ClientSignalAll(ClientPtr client, ClientSleepProcPtr function, void *closure)
         if (!(closure == CLIENT_SIGNAL_ANY || q->closure == closure))
             continue;
 
-        count += QueueWorkProc(q->function, q->client, q->closure);
+        count += QueueWorkProc((Bool (*)(ClientPtr, void *)) q->function, q->client, q->closure);
     }
 
     return count;

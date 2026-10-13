@@ -284,9 +284,10 @@ FreeFPE(FontPathElementPtr fpe)
     }
 }
 
-static Bool
-doOpenFont(ClientPtr client, struct open_font_closure *c)
+static bool
+doOpenFont(ClientPtr client, void *closure)
 {
+    struct open_font_closure *c = (struct open_font_closure *) closure;
     FontPtr pfont = NullFont;
     FontPathElementPtr fpe = NULL;
     int err = Successful;
@@ -355,8 +356,8 @@ doOpenFont(ClientPtr client, struct open_font_closure *c)
         }
         if (err == Suspended) {
             if (!ClientIsAsleep(client))
-                ClientSleep(client, (ClientSleepProcPtr) doOpenFont, c);
-            return TRUE;
+                ClientSleep(client, doOpenFont, c);
+            return true;
         }
         break;
     }
@@ -408,7 +409,7 @@ doOpenFont(ClientPtr client, struct open_font_closure *c)
     free(c->fpe_list);
     free((void *) c->fontname);
     free(c);
-    return TRUE;
+    return true;
 }
 
 int
@@ -581,9 +582,10 @@ QueryFont(FontPtr pFont, xQueryFontReply * pReply, int nProtoCCIStructs)
     return;
 }
 
-static Bool
-doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
+static bool
+doListFontsAndAliases(ClientPtr client, void *closure)
 {
+    struct list_fonts_closure *c = (struct list_fonts_closure *) closure;
     FontPathElementPtr fpe;
     int err = Successful;
     FontNamesPtr names = NULL;
@@ -618,8 +620,8 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
             if (err == Suspended) {
                 if (!ClientIsAsleep(client))
                     ClientSleep(client,
-                                (ClientSleepProcPtr) doListFontsAndAliases, c);
-                return TRUE;
+                                doListFontsAndAliases, c);
+                return true;
             }
 
             err = BadFontName;
@@ -642,9 +644,9 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
                 if (err == Suspended) {
                     if (!ClientIsAsleep(client))
                         ClientSleep(client,
-                                    (ClientSleepProcPtr) doListFontsAndAliases,
+                                    doListFontsAndAliases,
                                     c);
-                    return TRUE;
+                    return true;
                 }
                 if (err == Successful)
                     c->current.list_started = TRUE;
@@ -659,9 +661,9 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
                 if (err == Suspended) {
                     if (!ClientIsAsleep(client))
                         ClientSleep(client,
-                                    (ClientSleepProcPtr) doListFontsAndAliases,
+                                    doListFontsAndAliases,
                                     c);
-                    return TRUE;
+                    return true;
                 }
                 if (err == FontNameAlias) {
                     free(resolved);
@@ -804,7 +806,7 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
     xfont2_free_font_names(names);
     free(c);
     free(resolved);
-    return TRUE;
+    return true;
 }
 
 int
@@ -858,9 +860,10 @@ ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
     return Success;
 }
 
-static int
-doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
+static bool
+doListFontsWithInfo(ClientPtr client, void *closure)
 {
+    struct list_fonts_with_info_closure *c = (struct list_fonts_with_info_closure *) closure;
     FontPathElementPtr fpe;
     int err = Successful;
     char *name = NULL;
@@ -891,8 +894,8 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
             if (err == Suspended) {
                 if (!ClientIsAsleep(client))
                     ClientSleep(client,
-                                (ClientSleepProcPtr) doListFontsWithInfo, c);
-                return TRUE;
+                                doListFontsWithInfo, c);
+                return true;
             }
             if (err == Successful)
                 c->current.list_started = TRUE;
@@ -906,8 +909,8 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
             if (err == Suspended) {
                 if (!ClientIsAsleep(client))
                     ClientSleep(client,
-                                (ClientSleepProcPtr) doListFontsWithInfo, c);
-                return TRUE;
+                                doListFontsWithInfo, c);
+                return true;
             }
         }
         /*
@@ -1088,7 +1091,7 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
     free(c->fpe_list);
     free(c->savedName);
     free(c);
-    return TRUE;
+    return true;
 }
 
 int
@@ -1147,9 +1150,10 @@ static ChangeGCVal clearGC[] = { {.ptr = NullPixmap} };
 
 #define clearGCmask (GCClipMask)
 
-static int
-doPolyText(ClientPtr client, struct poly_text_closure *c)
+static bool
+doPolyText(ClientPtr client, void *closure)
 {
+    struct poly_text_closure *c = (struct poly_text_closure *) closure;
     FontPtr pFont = c->pGC->font, oldpFont;
     int err = Success, lgerr;   /* err is in X error, not font error, space */
     enum { NEVER_SLEPT, START_SLEEP, SLEEPING } client_state = NEVER_SLEPT;
@@ -1331,13 +1335,13 @@ doPolyText(ClientPtr client, struct poly_text_closure *c)
                     c->pGC = pGC;
                     ValidateGC(c->pDraw, c->pGC);
 
-                    ClientSleep(client, (ClientSleepProcPtr) doPolyText, c);
+                    ClientSleep(client, doPolyText, c);
 
                     /* Set up to perform steps 3 and 4 */
                     client_state = START_SLEEP;
                     continue;   /* on to steps 3 and 4 */
                 }
-                return TRUE;
+                return true;
             }
             else if (lgerr != Successful) {
                 err = FontToXError(lgerr);
@@ -1377,7 +1381,7 @@ doPolyText(ClientPtr client, struct poly_text_closure *c)
 
         /* restore pElt pointer for execution of remainder of the request */
         c->pElt = c->data;
-        return TRUE;
+        return true;
     }
 
     if (c->err != Success)
@@ -1404,7 +1408,7 @@ doPolyText(ClientPtr client, struct poly_text_closure *c)
            from PolyText(). */
         free(c);
     }
-    return TRUE;
+    return true;
 }
 
 int
@@ -1431,9 +1435,10 @@ PolyText(ClientPtr client, DrawablePtr pDraw, GCPtr pGC, unsigned char *pElt,
 #undef TextEltHeader
 #undef FontShiftSize
 
-static int
-doImageText(ClientPtr client, struct image_text_closure *c)
+static bool
+doImageText(ClientPtr client, void *closure)
 {
+    struct image_text_closure *c = (struct image_text_closure *) closure;
     int err = Success, lgerr;   /* err is in X error, not font error, space */
     FontPathElementPtr fpe;
     int itemSize = c->reqType == X_ImageText8 ? 1 : 2;
@@ -1515,9 +1520,9 @@ doImageText(ClientPtr client, struct image_text_closure *c)
             c->pGC = pGC;
             ValidateGC(c->pDraw, c->pGC);
 
-            ClientSleep(client, (ClientSleepProcPtr) doImageText, c);
+            ClientSleep(client, doImageText, c);
         }
-        return TRUE;
+        return true;
     }
     else if (lgerr != Successful) {
         err = FontToXError(lgerr);
@@ -1552,7 +1557,7 @@ doImageText(ClientPtr client, struct image_text_closure *c)
            from PolyText(). */
         free(c);
     }
-    return TRUE;
+    return true;
 }
 
 int
@@ -1974,17 +1979,17 @@ add_fs_fd(int fd, FontFdHandlerProcPtr handler, void *data)
     struct fs_fd_entry  *entry = calloc(1, sizeof (struct fs_fd_entry));
 
     if (!entry)
-        return FALSE;
+        return false;
 
     entry->fd = fd;
     entry->data = data;
     entry->handler = handler;
     if (!SetNotifyFd(fd, fs_fd_handler, X_NOTIFY_READ, entry)) {
         free(entry);
-        return FALSE;
+        return false;
     }
     xorg_list_add(&entry->entry, &fs_fd_list);
-    return TRUE;
+    return true;
 }
 
 static void

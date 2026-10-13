@@ -465,7 +465,7 @@ ClientPtr NextAvailableClient(void *ospriv);
 void dixMarkClientException(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
-typedef Bool (*ClientSleepProcPtr) (ClientPtr client, void *closure);
+typedef bool (*ClientSleepProcPtr) (ClientPtr client, void *closure);
 
 /*
  * @brief put a client to sleep
