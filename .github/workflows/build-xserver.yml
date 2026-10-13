@@ -236,13 +236,46 @@ jobs:
             MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
-            - name: run in freebsd VM
-              id: xserver-build
+            # VM boot / image provisioning flakes transiently. Retry the whole
+            # VM step up to 3x; each attempt uses its own guest name so a
+            # leftover domain does not collide with the next attempt. The retry
+            # `if:` must NOT rely on the implicit success() status function -
+            # after attempt 1 fails (continue-on-error) that is false and
+            # silently skips the later attempts. Use !cancelled().
+            - name: run in freebsd VM (attempt 1)
+              id: fbsd-1
+              continue-on-error: true
               uses: vmactions/freebsd-vm@v1
               with:
                   envs: 'MYTOKEN MESON_ARGS'
                   usesh: true
                   release: "14.3"
+                  guest: freebsd-1
+                  run:     ./.github/scripts/freebsd/run-xserver-build.sh
+
+
+            - name: run in freebsd VM (attempt 2)
+              id: fbsd-2
+              if: ${{ !cancelled() && steps.fbsd-1.outcome == 'failure' }}
+              continue-on-error: true
+              uses: vmactions/freebsd-vm@v1
+              with:
+                  envs: 'MYTOKEN MESON_ARGS'
+                  usesh: true
+                  release: "14.3"
+                  guest: freebsd-2
+                  run:     ./.github/scripts/freebsd/run-xserver-build.sh
+
+
+            - name: run in freebsd VM (attempt 3)
+              id: fbsd-3
+              if: ${{ !cancelled() && steps.fbsd-1.outcome == 'failure' && steps.fbsd-2.outcome == 'failure' }}
+              uses: vmactions/freebsd-vm@v1
+              with:
+                  envs: 'MYTOKEN MESON_ARGS'
+                  usesh: true
+                  release: "14.3"
+                  guest: freebsd-3
                   run:     ./.github/scripts/freebsd/run-xserver-build.sh
 
     xserver-build-dragonflybsd:
