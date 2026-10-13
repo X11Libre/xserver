@@ -266,13 +266,46 @@ jobs:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
-            - uses: vmactions/netbsd-vm@v1
-              id: vm
+            # VM boot / image provisioning flakes transiently. Retry the whole
+            # VM step up to 3x; each attempt uses its own guest name so a
+            # leftover domain does not collide with the next attempt. The retry
+            # `if:` must NOT rely on the implicit success() status function -
+            # after attempt 1 fails (continue-on-error) that is false and
+            # silently skips the later attempts. Use !cancelled().
+            - name: run in netbsd VM (attempt 1)
+              id: netbsd-1
+              continue-on-error: true
+              uses: vmactions/netbsd-vm@v1
               with:
-                  envs: 'MESON_ARGS'
-                  usesh: true
+                  envs:    'MESON_ARGS'
+                  usesh:   true
                   release: '10.1'
+                  guest:   netbsd-1
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
+            - name: run in netbsd VM (attempt 2)
+              id: netbsd-2
+              if: ${{ !cancelled() && steps.netbsd-1.outcome == 'failure' }}
+              continue-on-error: true
+              uses: vmactions/netbsd-vm@v1
+              with:
+                  envs:    'MESON_ARGS'
+                  usesh:   true
+                  release: '10.1'
+                  guest:   netbsd-2
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
+            - name: run in netbsd VM (attempt 3)
+              id: netbsd-3
+              if: ${{ !cancelled() && steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure' }}
+              uses: vmactions/netbsd-vm@v1
+              with:
+                  envs:    'MESON_ARGS'
+                  usesh:   true
+                  release: '10.1'
+                  guest:   netbsd-3
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
     xserver-build-cygwin:
         runs-on: windows-latest
         steps:
