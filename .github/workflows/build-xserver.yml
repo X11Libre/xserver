@@ -284,13 +284,45 @@ jobs:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
-            - name: run in DragonFlyBSD VM
-              id: xserver-build
+            # VM boot / image provisioning flakes transiently (SSH hostname not
+            # resolvable). Retry the whole VM step up to 3x; each attempt uses its
+            # own guest name so a leftover domain from a failed boot does not
+            # collide with the next attempt ("Guest name ... is already in use").
+            # The retry `if:` must NOT rely on the implicit success() status
+            # function - after attempt 1 fails (continue-on-error) that is false
+            # and silently skips the later attempts. Use !cancelled().
+            - name: run in DragonFlyBSD VM (attempt 1)
+              id: dfly-1
+              continue-on-error: true
               uses: vmactions/dragonflybsd-vm@v1
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
                   release: "6.4.2"
+                  guest: dragonflybsd-1
+                  run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
+
+            - name: run in DragonFlyBSD VM (attempt 2)
+              id: dfly-2
+              if: ${{ !cancelled() && steps.dfly-1.outcome == 'failure' }}
+              continue-on-error: true
+              uses: vmactions/dragonflybsd-vm@v1
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  release: "6.4.2"
+                  guest: dragonflybsd-2
+                  run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
+
+            - name: run in DragonFlyBSD VM (attempt 3)
+              id: dfly-3
+              if: ${{ !cancelled() && steps.dfly-1.outcome == 'failure' && steps.dfly-2.outcome == 'failure' }}
+              uses: vmactions/dragonflybsd-vm@v1
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  release: "6.4.2"
+                  guest: dragonflybsd-3
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
 
     xserver-build-netbsd:
