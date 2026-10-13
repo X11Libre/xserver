@@ -209,36 +209,20 @@ void compWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWind
     updateOverlayWindow(pScreen);
 }
 
-Bool
-compRealizeWindow(WindowPtr pWin)
+void
+compRealizeWindow(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-    bool ret = TRUE;
-
-    pScreen->RealizeWindow = cs->RealizeWindow;
+    (void) pcbl;
+    (void) pScreen;
     compCheckRedirect(pWin);
-    if (!(*pScreen->RealizeWindow) (pWin))
-        ret = FALSE;
-    cs->RealizeWindow = pScreen->RealizeWindow;
-    pScreen->RealizeWindow = compRealizeWindow;
-    return ret;
 }
 
-Bool
-compUnrealizeWindow(WindowPtr pWin)
+void
+compUnrealizeWindow(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-    bool ret = TRUE;
-
-    pScreen->UnrealizeWindow = cs->UnrealizeWindow;
+    (void) pcbl;
+    (void) pScreen;
     compCheckRedirect(pWin);
-    if (!(*pScreen->UnrealizeWindow) (pWin))
-        ret = FALSE;
-    cs->UnrealizeWindow = pScreen->UnrealizeWindow;
-    pScreen->UnrealizeWindow = compUnrealizeWindow;
-    return ret;
 }
 
 /*
