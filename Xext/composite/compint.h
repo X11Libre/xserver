@@ -142,7 +142,7 @@ typedef struct _CompScreen {
      */
     ChangeWindowAttributesProcPtr ChangeWindowAttributes;
 
-    Bool pendingScreenUpdate;
+    bool pendingScreenUpdate;
 
     int numAlternateVisuals;
     VisualID *alternateVisuals;

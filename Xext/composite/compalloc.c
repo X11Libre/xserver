@@ -61,7 +61,7 @@ compScreenUpdate(ClientPtr pClient, void *closure)
     compPaintChildrenToWindow(pScreen->root);
 
     /* Next damage will restore the worker */
-    cs->pendingScreenUpdate = FALSE;
+    cs->pendingScreenUpdate = false;
     return TRUE;
 }
 
@@ -87,7 +87,7 @@ compReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
 
     if (!cs->pendingScreenUpdate) {
         QueueWorkProc(compScreenUpdate, serverClient, pScreen);
-        cs->pendingScreenUpdate = TRUE;
+        cs->pendingScreenUpdate = true;
     }
     cw->damaged = TRUE;
 
