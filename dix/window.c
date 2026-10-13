@@ -2372,17 +2372,16 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
                  (beforeX + wBorderWidth(pWin) == x + (int) bw) &&
                  (beforeY + wBorderWidth(pWin) == y + (int) bw)) {
             action = REBORDER_WIN;
-            (*pWin->drawable.pScreen->ChangeBorderWidth) (pWin, bw);
+            dixScreenRaiseChangeBorderWidth(pWin, bw);
         }
         else
             pWin->borderWidth = bw;
     }
     if (action == MOVE_WIN)
-        (*pWin->drawable.pScreen->MoveWindow) (pWin, x, y, pSib,
-                                               (mask & CWBorderWidth) ? VTOther
-                                               : VTMove);
+        dixScreenRaiseMoveWindow(pWin, x, y, pSib,
+                                 (mask & CWBorderWidth) ? VTOther : VTMove);
     else if (action == RESIZE_WIN)
-        (*pWin->drawable.pScreen->ResizeWindow) (pWin, x, y, w, h, pSib);
+        dixScreenRaiseResizeWindow(pWin, x, y, w, h, pSib);
     else if (mask & CWStackMode)
         ReflectStackChange(pWin, pSib, VTOther);
 

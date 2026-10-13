@@ -29,6 +29,7 @@
 #include "include/input.h"
 #include "include/os.h"
 #include "include/resource.h"
+#include "include/validate.h" /* VTKind */
 #include "include/window.h"
 #include "os/io_priv.h"       /* dixWriteToClient */
 
@@ -333,6 +334,26 @@ void dixScreenRaiseUnrealizeWindow(WindowPtr pWin);
  * @return the screen proc's result
  */
 Bool dixScreenRaiseRealizeWindow(WindowPtr pWin);
+
+/*
+ * @brief call the screen's MoveWindow proc, running move/pre + post hooks
+ * @see dixScreenHookWindowMove dixScreenHookPostWindowMove
+ */
+void dixScreenRaiseMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pSib,
+                              VTKind kind);
+
+/*
+ * @brief call the screen's ResizeWindow proc, running pre + post hooks
+ * @see dixScreenHookWindowResize dixScreenHookPostWindowResize
+ */
+void dixScreenRaiseResizeWindow(WindowPtr pWin, int x, int y,
+                                unsigned int w, unsigned int h, WindowPtr pSib);
+
+/*
+ * @brief call the screen's ChangeBorderWidth proc, running pre + post hooks
+ * @see dixScreenHookWindowChangeBorderWidth dixScreenHookPostWindowChangeBorderWidth
+ */
+void dixScreenRaiseChangeBorderWidth(WindowPtr pWin, unsigned int bw);
 
 /*
  * @brief call screen's window destructors

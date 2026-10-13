@@ -29,6 +29,12 @@ DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcP
 DECLARE_HOOK_PROC(WindowPosition, hookWindowPosition, XorgScreenWindowPositionProcPtr)
 DECLARE_HOOK_PROC(WindowRealize, hookWindowRealize, XorgScreenWindowRealizeProcPtr)
 DECLARE_HOOK_PROC(WindowUnrealize, hookWindowUnrealize, XorgScreenWindowUnrealizeProcPtr)
+DECLARE_HOOK_PROC(WindowMove, hookWindowMove, XorgScreenWindowMoveProcPtr)
+DECLARE_HOOK_PROC(PostWindowMove, hookPostWindowMove, XorgScreenWindowMoveProcPtr)
+DECLARE_HOOK_PROC(WindowResize, hookWindowResize, XorgScreenWindowResizeProcPtr)
+DECLARE_HOOK_PROC(PostWindowResize, hookPostWindowResize, XorgScreenWindowResizeProcPtr)
+DECLARE_HOOK_PROC(WindowChangeBorderWidth, hookWindowChangeBorderWidth, XorgScreenWindowChangeBorderWidthProcPtr)
+DECLARE_HOOK_PROC(PostWindowChangeBorderWidth, hookPostWindowChangeBorderWidth, XorgScreenWindowChangeBorderWidthProcPtr)
 DECLARE_HOOK_PROC(Close, hookClose, XorgScreenCloseProcPtr)
 DECLARE_HOOK_PROC(PostClose, hookPostClose, XorgScreenCloseProcPtr)
 DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr)
@@ -126,6 +132,63 @@ void dixScreenRaiseUnrealizeWindow(WindowPtr pWin)
     CallCallbacks(&pScreen->hookWindowUnrealize, pWin);
     if (pScreen->UnrealizeWindow)
         pScreen->UnrealizeWindow(pWin);
+}
+
+void dixScreenRaiseMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pSib,
+                              VTKind kind)
+{
+    if (!pWin)
+        return;
+
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
+    XorgScreenWindowMoveParamRec param = {
+        .window = pWin,
+        .x = x,
+        .y = y,
+        .sibling = pSib,
+        .kind = kind,
+    };
+
+    CallCallbacks(&pScreen->hookWindowMove, &param);
+    if (pScreen->MoveWindow)
+        pScreen->MoveWindow(pWin, x, y, pSib, kind);
+    CallCallbacks(&pScreen->hookPostWindowMove, &param);
+}
+
+void dixScreenRaiseResizeWindow(WindowPtr pWin, int x, int y,
+                                unsigned int w, unsigned int h, WindowPtr pSib)
+{
+    if (!pWin)
+        return;
+
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
+    XorgScreenWindowResizeParamRec param = {
+        .window = pWin, .x = x, .y = y, .w = w, .h = h, .sibling = pSib,
+    };
+
+    CallCallbacks(&pScreen->hookWindowResize, &param);
+    if (pScreen->ResizeWindow)
+        pScreen->ResizeWindow(pWin, x, y, w, h, pSib);
+    CallCallbacks(&pScreen->hookPostWindowResize, &param);
+}
+
+void dixScreenRaiseChangeBorderWidth(WindowPtr pWin, unsigned int bw)
+{
+    if (!pWin)
+        return;
+
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
+    XorgScreenWindowChangeBorderWidthParamRec param = {
+        .window = pWin, .borderWidth = bw,
+    };
+
+    CallCallbacks(&pScreen->hookWindowChangeBorderWidth, &param);
+    if (pScreen->ChangeBorderWidth)
+        pScreen->ChangeBorderWidth(pWin, bw);
+    CallCallbacks(&pScreen->hookPostWindowChangeBorderWidth, &param);
 }
 
 Bool dixScreenRaiseDisplayCursor(ScreenPtr pScreen, DeviceIntPtr pDev, CursorPtr pCursor)

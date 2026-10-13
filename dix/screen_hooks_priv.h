@@ -26,6 +26,7 @@
 #include "include/callback.h" /* CallbackListPtr */
 #include "include/pixmap.h" /* PixmapPtr */
 #include "include/screenint.h" /* ScreenPtr */
+#include "include/validate.h" /* VTKind */
 #include "include/window.h" /* WindowPtr */
 
 /* prototype of a window destructor */
@@ -160,6 +161,58 @@ void dixScreenHookWindowUnrealize(ScreenPtr pScreen,
  **/
 void dixScreenUnhookWindowUnrealize(ScreenPtr pScreen,
                                     XorgScreenWindowUnrealizeProcPtr func);
+
+/* pre/post hook for window moves (replaces wrapping MoveWindow) */
+typedef struct {
+    WindowPtr window;
+    int32_t x;
+    int32_t y;
+    WindowPtr sibling;
+    VTKind kind;
+} XorgScreenWindowMoveParamRec;
+
+typedef void (*XorgScreenWindowMoveProcPtr)(CallbackListPtr *pcbl,
+                                            ScreenPtr pScreen,
+                                            XorgScreenWindowMoveParamRec *param);
+
+void dixScreenHookWindowMove(ScreenPtr pScreen, XorgScreenWindowMoveProcPtr func);
+void dixScreenUnhookWindowMove(ScreenPtr pScreen, XorgScreenWindowMoveProcPtr func);
+void dixScreenHookPostWindowMove(ScreenPtr pScreen, XorgScreenWindowMoveProcPtr func);
+void dixScreenUnhookPostWindowMove(ScreenPtr pScreen, XorgScreenWindowMoveProcPtr func);
+
+/* pre/post hook for window resizes (replaces wrapping ResizeWindow) */
+typedef struct {
+    WindowPtr window;
+    int32_t x;
+    int32_t y;
+    uint32_t w;
+    uint32_t h;
+    WindowPtr sibling;
+} XorgScreenWindowResizeParamRec;
+
+typedef void (*XorgScreenWindowResizeProcPtr)(CallbackListPtr *pcbl,
+                                              ScreenPtr pScreen,
+                                              XorgScreenWindowResizeParamRec *param);
+
+void dixScreenHookWindowResize(ScreenPtr pScreen, XorgScreenWindowResizeProcPtr func);
+void dixScreenUnhookWindowResize(ScreenPtr pScreen, XorgScreenWindowResizeProcPtr func);
+void dixScreenHookPostWindowResize(ScreenPtr pScreen, XorgScreenWindowResizeProcPtr func);
+void dixScreenUnhookPostWindowResize(ScreenPtr pScreen, XorgScreenWindowResizeProcPtr func);
+
+/* pre/post hook for window border-width changes (replaces wrapping ChangeBorderWidth) */
+typedef struct {
+    WindowPtr window;
+    uint32_t borderWidth;
+} XorgScreenWindowChangeBorderWidthParamRec;
+
+typedef void (*XorgScreenWindowChangeBorderWidthProcPtr)(CallbackListPtr *pcbl,
+                                                         ScreenPtr pScreen,
+                                                         XorgScreenWindowChangeBorderWidthParamRec *param);
+
+void dixScreenHookWindowChangeBorderWidth(ScreenPtr pScreen, XorgScreenWindowChangeBorderWidthProcPtr func);
+void dixScreenUnhookWindowChangeBorderWidth(ScreenPtr pScreen, XorgScreenWindowChangeBorderWidthProcPtr func);
+void dixScreenHookPostWindowChangeBorderWidth(ScreenPtr pScreen, XorgScreenWindowChangeBorderWidthProcPtr func);
+void dixScreenUnhookPostWindowChangeBorderWidth(ScreenPtr pScreen, XorgScreenWindowChangeBorderWidthProcPtr func);
 
 /* prototype of screen close notification handler */
 typedef void (*XorgScreenCloseProcPtr)(CallbackListPtr *pcbl,
