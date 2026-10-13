@@ -388,12 +388,44 @@ jobs:
         steps:
             - uses: actions/checkout@v6
             - uses: ./.github/actions/ubuntu-pkg-cache
-            - uses: vmactions/netbsd-vm@v1.5.0
-              id: vm
+            # VM boot / image provisioning flakes transiently. Retry the whole
+            # VM step up to 3x; each attempt uses its own guest name so a
+            # leftover domain does not collide with the next attempt. The retry
+            # `if:` must NOT rely on the implicit success() status function -
+            # after attempt 1 fails (continue-on-error) that is false and
+            # silently skips the later attempts. Use !cancelled().
+            - name: run in netbsd VM (attempt 1)
+              id: nbsd-1
+              continue-on-error: true
+              uses: vmactions/netbsd-vm@v1.5.0
               with:
-                  envs: 'MESON_ARGS LDFLAGS'
-                  usesh: true
+                  envs:    'MESON_ARGS LDFLAGS'
+                  usesh:   true
                   release: '11.0'
+                  guest:   netbsd-1
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
+            - name: run in netbsd VM (attempt 2)
+              id: nbsd-2
+              if: !cancelled() && steps.nbsd-1.outcome == 'failure'
+              continue-on-error: true
+              uses: vmactions/netbsd-vm@v1.5.0
+              with:
+                  envs:    'MESON_ARGS LDFLAGS'
+                  usesh:   true
+                  release: '11.0'
+                  guest:   netbsd-2
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
+            - name: run in netbsd VM (attempt 3)
+              id: nbsd-3
+              if: !cancelled() && steps.nbsd-1.outcome == 'failure' && steps.nbsd-2.outcome == 'failure'
+              uses: vmactions/netbsd-vm@v1.5.0
+              with:
+                  envs:    'MESON_ARGS LDFLAGS'
+                  usesh:   true
+                  release: '11.0'
+                  guest:   netbsd-3
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
     xserver-build-alpine:
