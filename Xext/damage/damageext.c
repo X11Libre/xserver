@@ -599,7 +599,7 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     int rc = doDamageCreate(client, &(damage->ext), stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
         XINERAMA_FOR_EACH_SCREEN_FORWARD({
-            DrawablePtr pDrawable;
+            DrawablePtr pDrawable = NULL;
             DamagePtr pDamage = DamageCreate(PanoramiXDamageReport,
                                              PanoramiXDamageExtDestroy,
                                              DamageReportRawRegion,

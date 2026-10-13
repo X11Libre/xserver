@@ -877,7 +877,7 @@ FindColor(ColormapPtr pmap, EntryPtr pentFirst, int size, xrgb * prgb,
         return Success;
 
     /* Now remember the pixel, for freeing later */
-    int *nump;
+    int *nump = NULL;
     Pixel **pixp = NULL;
     switch (channel) {
     case PSEUDOMAP:
