@@ -655,7 +655,7 @@ InitRootWindow(WindowPtr pWin)
     ScreenPtr pScreen = pWin->drawable.pScreen;
     int backFlag = CWBorderPixel | CWCursor | CWBackingStore;
 
-    if (!(*pScreen->CreateWindow) (pWin))
+    if (!dixScreenRaiseCreateWindow(pWin))
         return;                 /* XXX */
 
     dixScreenRaiseWindowPosition(pWin, 0, 0);
@@ -898,7 +898,7 @@ dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
     SetBorderSize(pWin);
 
     /* We SHOULD check for an error value here XXX */
-    if (!(*pScreen->CreateWindow) (pWin)) {
+    if (!dixScreenRaiseCreateWindow(pWin)) {
         *error = BadAlloc;
         DeleteWindow(pWin, None);
         return NullWindow;

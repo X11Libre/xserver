@@ -229,6 +229,14 @@ void dixScreenUnhookWindowReparent(ScreenPtr pScreen, XorgScreenWindowReparentPr
 void dixScreenHookPostWindowReparent(ScreenPtr pScreen, XorgScreenWindowReparentProcPtr func);
 void dixScreenUnhookPostWindowReparent(ScreenPtr pScreen, XorgScreenWindowReparentProcPtr func);
 
+/* hook run right after a successful window creation (replaces wrapping CreateWindow) */
+typedef void (*XorgScreenWindowCreateProcPtr)(CallbackListPtr *pcbl,
+                                              ScreenPtr pScreen,
+                                              WindowPtr pWindow);
+
+void dixScreenHookPostWindowCreate(ScreenPtr pScreen, XorgScreenWindowCreateProcPtr func);
+void dixScreenUnhookPostWindowCreate(ScreenPtr pScreen, XorgScreenWindowCreateProcPtr func);
+
 /* prototype of screen close notification handler */
 typedef void (*XorgScreenCloseProcPtr)(CallbackListPtr *pcbl,
                                        ScreenPtr pScreen,

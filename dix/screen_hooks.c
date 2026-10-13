@@ -37,6 +37,7 @@ DECLARE_HOOK_PROC(WindowChangeBorderWidth, hookWindowChangeBorderWidth, XorgScre
 DECLARE_HOOK_PROC(PostWindowChangeBorderWidth, hookPostWindowChangeBorderWidth, XorgScreenWindowChangeBorderWidthProcPtr)
 DECLARE_HOOK_PROC(WindowReparent, hookWindowReparent, XorgScreenWindowReparentProcPtr)
 DECLARE_HOOK_PROC(PostWindowReparent, hookPostWindowReparent, XorgScreenWindowReparentProcPtr)
+DECLARE_HOOK_PROC(PostWindowCreate, hookPostWindowCreate, XorgScreenWindowCreateProcPtr)
 DECLARE_HOOK_PROC(Close, hookClose, XorgScreenCloseProcPtr)
 DECLARE_HOOK_PROC(PostClose, hookPostClose, XorgScreenCloseProcPtr)
 DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr)
@@ -208,6 +209,21 @@ void dixScreenRaiseReparentWindow(WindowPtr pWin, WindowPtr pPriorParent)
     if (pScreen->ReparentWindow)
         pScreen->ReparentWindow(pWin, pPriorParent);
     CallCallbacks(&pScreen->hookPostWindowReparent, &param);
+}
+
+Bool dixScreenRaiseCreateWindow(WindowPtr pWin)
+{
+    if (!pWin)
+        return FALSE;
+
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
+    Bool ret = (pScreen->CreateWindow ? pScreen->CreateWindow(pWin) : TRUE);
+
+    if (ret)
+        CallCallbacks(&pScreen->hookPostWindowCreate, pWin);
+
+    return ret;
 }
 
 Bool dixScreenRaiseDisplayCursor(ScreenPtr pScreen, DeviceIntPtr pDev, CursorPtr pCursor)

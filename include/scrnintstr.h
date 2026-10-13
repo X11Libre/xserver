@@ -719,6 +719,11 @@ typedef struct _Screen {
     CallbackListPtr hookWindowReparent;
     CallbackListPtr hookPostWindowReparent;
 
+    /* window create hook, run right after a successful CreateWindow
+       (replaces wrapping CreateWindow).
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookPostWindowCreate;
+
     /* additional screen close notify hooks (replaces wrapping CloseScreen)
        should NOT be touched outside of DIX core */
     CallbackListPtr hookClose;
