@@ -285,7 +285,7 @@ jobs:
 
             - name: run in netbsd VM (attempt 2)
               id: netbsd-2
-              if: !cancelled() && steps.netbsd-1.outcome == 'failure'
+              if: ${{ !cancelled() && steps.netbsd-1.outcome == 'failure' }}
               continue-on-error: true
               uses: vmactions/netbsd-vm@v1
               with:
@@ -297,7 +297,7 @@ jobs:
 
             - name: run in netbsd VM (attempt 3)
               id: netbsd-3
-              if: !cancelled() && steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
+              if: ${{ !cancelled() && steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure' }}
               uses: vmactions/netbsd-vm@v1
               with:
                   envs:    'MESON_ARGS'
