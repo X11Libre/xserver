@@ -195,6 +195,33 @@ mieqFini(void)
     free(miEventQueue.events);
 }
 
+void
+mieqTrimQueue(void)
+{
+    input_lock();
+    if (miEventQueue.events && miEventQueue.nevents > QUEUE_INITIAL_SIZE &&
+        mieqNumEnqueued(&miEventQueue) == 0) {
+        EventRec *new_events = calloc(QUEUE_INITIAL_SIZE, sizeof(EventRec));
+        if (new_events) {
+            for (size_t i = 0; i < QUEUE_INITIAL_SIZE; i++) {
+                new_events[i] = miEventQueue.events[i];
+            }
+            for (size_t i = QUEUE_INITIAL_SIZE; i < miEventQueue.nevents; i++) {
+                if (miEventQueue.events[i].events != NULL) {
+                    FreeEventList(miEventQueue.events[i].events, 1);
+                    miEventQueue.events[i].events = NULL;
+                }
+            }
+            free(miEventQueue.events);
+            miEventQueue.events = new_events;
+            miEventQueue.nevents = QUEUE_INITIAL_SIZE;
+            miEventQueue.head = 0;
+            miEventQueue.tail = 0;
+        }
+    }
+    input_unlock();
+}
+
 /*
  * Must be reentrant with ProcessInputEvents.  Assumption: mieqEnqueue
  * will never be interrupted. Must be called with input_lock held
