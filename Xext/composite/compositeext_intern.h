@@ -17,5 +17,6 @@ bool compCheckRedirect(WindowPtr pWin);
 bool compReallocPixmap(WindowPtr pWin, int x, int y, unsigned int w, unsigned int h, int bw);
 bool compCreateOverlayWindow(ScreenPtr pScreen);
 bool compScreenInit(ScreenPtr pScreen);
+int compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update);
 
 #endif /* _XSERVER_COMPOSITEEXT_INTERN_H_ */

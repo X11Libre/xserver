@@ -179,13 +179,6 @@ extern DevPrivateKeyRec CompSubwindowsPrivateKeyRec;
 extern RESTYPE CompositeClientSubwindowsType;
 extern RESTYPE CompositeClientOverlayType;
 
-/*
- * compalloc.c
- */
-
-Bool
- compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update);
-
 void
  compFreeClientWindow(WindowPtr pWin, XID id);
 
