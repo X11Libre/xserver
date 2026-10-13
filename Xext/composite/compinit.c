@@ -71,7 +71,6 @@ static void compCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unus
 
     pScreen->InstallColormap = cs->InstallColormap;
     pScreen->ChangeWindowAttributes = cs->ChangeWindowAttributes;
-    pScreen->ReparentWindow = cs->ReparentWindow;
     pScreen->ConfigNotify = cs->ConfigNotify;
 
     pScreen->ClipNotify = cs->ClipNotify;
@@ -87,6 +86,8 @@ static void compCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unus
     dixScreenUnhookPostWindowMove(pScreen, compMoveWindow);
     dixScreenUnhookPostWindowResize(pScreen, compResizeWindow);
     dixScreenUnhookPostWindowChangeBorderWidth(pScreen, compChangeBorderWidth);
+    dixScreenUnhookWindowReparent(pScreen, compReparentWindow);
+    dixScreenUnhookPostWindowReparent(pScreen, compPostReparentWindow);
 
     free(cs);
     dixSetPrivate(&pScreen->devPrivates, CompScreenPrivateKey, NULL);
@@ -363,8 +364,8 @@ bool compScreenInit(ScreenPtr pScreen)
     dixScreenHookPostWindowResize(pScreen, compResizeWindow);
     dixScreenHookPostWindowChangeBorderWidth(pScreen, compChangeBorderWidth);
 
-    cs->ReparentWindow = pScreen->ReparentWindow;
-    pScreen->ReparentWindow = compReparentWindow;
+    dixScreenHookWindowReparent(pScreen, compReparentWindow);
+    dixScreenHookPostWindowReparent(pScreen, compPostReparentWindow);
 
     cs->InstallColormap = pScreen->InstallColormap;
     pScreen->InstallColormap = compInstallColormap;

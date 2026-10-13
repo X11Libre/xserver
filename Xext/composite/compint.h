@@ -123,10 +123,6 @@ typedef struct _CompScreen {
      * geometry
      */
     ConfigNotifyProcPtr ConfigNotify;
-    /*
-     * Reparenting has an effect on Subwindows redirect
-     */
-    ReparentWindowProcPtr ReparentWindow;
 
     /*
      * Colormaps for new visuals better not get installed
@@ -249,7 +245,12 @@ void
                        XorgScreenWindowChangeBorderWidthParamRec *param);
 
 void
- compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent);
+ compReparentWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                    XorgScreenWindowReparentParamRec *param);
+
+void
+ compPostReparentWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                        XorgScreenWindowReparentParamRec *param);
 
 Bool
  compCreateWindow(WindowPtr pWin);

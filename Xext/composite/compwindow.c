@@ -339,13 +339,13 @@ compChangeBorderWidth(CallbackListPtr *pcbl, ScreenPtr pScreen,
 }
 
 void
-compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent)
+compReparentWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                   XorgScreenWindowReparentParamRec *param)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-    CompWindowPtr cw;
+    WindowPtr pWin = param->window;
+    WindowPtr pPriorParent = param->priorParent;
 
-    pScreen->ReparentWindow = cs->ReparentWindow;
+    (void) pcbl;
     /*
      * Remove any implicit redirect due to synthesized visual
      */
@@ -374,13 +374,17 @@ compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent)
     if (pWin->parent && pWin->redirectDraw == RedirectDrawNone)
         compSetPixmap(pWin, (*pScreen->GetWindowPixmap) (pWin->parent),
                       pWin->borderWidth);
-    /*
-     * Call down to next function
-     */
-    if (pScreen->ReparentWindow)
-        (*pScreen->ReparentWindow) (pWin, pPriorParent);
-    cs->ReparentWindow = pScreen->ReparentWindow;
-    pScreen->ReparentWindow = compReparentWindow;
+}
+
+void
+compPostReparentWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                       XorgScreenWindowReparentParamRec *param)
+{
+    WindowPtr pWin = param->window;
+    CompWindowPtr cw;
+
+    (void) pcbl;
+    (void) pScreen;
 
     cw = GetCompWindow(pWin);
     if (pWin->damagedDescendants || (cw && cw->damaged))
