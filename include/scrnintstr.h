@@ -503,12 +503,6 @@ typedef void (*DPMSProcPtr)(ScreenPtr pScreen, int level);
     use dixScreenHookWindowDestroy() instead.
  */
 
-#define _SCREEN_HOOK_TYPE(NAME, FUNCTYPE, ARRSIZE) \
-    struct { \
-        FUNCTYPE func; \
-        void *arg; \
-    } NAME[(ARRSIZE)];
-
 typedef struct _Screen {
     int myNum;                  /* index of this instance in Screens[] */
     ATOM id;
