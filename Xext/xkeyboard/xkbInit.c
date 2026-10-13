@@ -527,6 +527,22 @@ XkbSetLockModsOnPressProperty(DeviceIntPtr dev, Atom atom,
     return Success;
 }
 
+/* The flag is server-global but each master keeps its own property copy;
+ * refresh it from the global on every read so they never go stale. */
+static int
+XkbGetLockModsOnPressProperty(DeviceIntPtr dev, Atom atom)
+{
+    CARD8 val = xkbLockModsOnPress;
+
+    if (atom != XIGetKnownProperty(XKB_PROP_LOCK_MODS_ON_PRESS))
+        return Success;
+
+    XIChangeDeviceProperty(dev, atom, XA_INTEGER, 8,
+                           PropModeReplace, 1, &val, FALSE);
+
+    return Success;
+}
+
 static void
 XkbInitLockModsOnPressProperty(DeviceIntPtr dev)
 {
@@ -536,7 +552,8 @@ XkbInitLockModsOnPressProperty(DeviceIntPtr dev)
     XIChangeDeviceProperty(dev, prop, XA_INTEGER, 8,
                            PropModeReplace, 1, &val, FALSE);
     XISetDevicePropertyDeletable(dev, prop, FALSE);
-    XIRegisterPropertyHandler(dev, XkbSetLockModsOnPressProperty, NULL, NULL);
+    XIRegisterPropertyHandler(dev, XkbSetLockModsOnPressProperty,
+                               XkbGetLockModsOnPressProperty, NULL);
 }
 
 static Bool
