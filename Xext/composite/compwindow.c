@@ -469,16 +469,12 @@ compCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
     pScreen->CopyWindow = compCopyWindow;
 }
 
-Bool
-compCreateWindow(WindowPtr pWin)
+void
+compCreateWindow(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-    bool ret;
+    (void) pcbl;
 
-    pScreen->CreateWindow = cs->CreateWindow;
-    ret = (*pScreen->CreateWindow) (pWin);
-    if (pWin->parent && ret) {
+    if (pWin->parent) {
         CompSubwindowsPtr csw = GetCompSubwindows(pWin->parent);
         PixmapPtr parent_pixmap = (*pScreen->GetWindowPixmap)(pWin->parent);
         PixmapPtr window_pixmap = (*pScreen->GetWindowPixmap)(pWin);
@@ -492,9 +488,6 @@ compCreateWindow(WindowPtr pWin)
         if (compImplicitRedirect(pWin, pWin->parent))
             compRedirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
     }
-    cs->CreateWindow = pScreen->CreateWindow;
-    pScreen->CreateWindow = compCreateWindow;
-    return ret;
 }
 
 void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)

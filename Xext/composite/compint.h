@@ -115,7 +115,6 @@ typedef struct _CompImplicitRedirectException {
 
 typedef struct _CompScreen {
     CopyWindowProcPtr CopyWindow;
-    CreateWindowProcPtr CreateWindow;
     ClipNotifyProcPtr ClipNotify;
     /*
      * Called from ConfigureWindow, these
@@ -252,8 +251,8 @@ void
  compPostReparentWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
                         XorgScreenWindowReparentParamRec *param);
 
-Bool
- compCreateWindow(WindowPtr pWin);
+void
+ compCreateWindow(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
 
 void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
 

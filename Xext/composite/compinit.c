@@ -74,7 +74,6 @@ static void compCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unus
     pScreen->ConfigNotify = cs->ConfigNotify;
 
     pScreen->ClipNotify = cs->ClipNotify;
-    pScreen->CreateWindow = cs->CreateWindow;
     pScreen->CopyWindow = cs->CopyWindow;
     pScreen->SourceValidate = cs->SourceValidate;
 
@@ -88,6 +87,7 @@ static void compCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unus
     dixScreenUnhookPostWindowChangeBorderWidth(pScreen, compChangeBorderWidth);
     dixScreenUnhookWindowReparent(pScreen, compReparentWindow);
     dixScreenUnhookPostWindowReparent(pScreen, compPostReparentWindow);
+    dixScreenUnhookPostWindowCreate(pScreen, compCreateWindow);
 
     free(cs);
     dixSetPrivate(&pScreen->devPrivates, CompScreenPrivateKey, NULL);
@@ -348,8 +348,7 @@ bool compScreenInit(ScreenPtr pScreen)
     cs->CopyWindow = pScreen->CopyWindow;
     pScreen->CopyWindow = compCopyWindow;
 
-    cs->CreateWindow = pScreen->CreateWindow;
-    pScreen->CreateWindow = compCreateWindow;
+    dixScreenHookPostWindowCreate(pScreen, compCreateWindow);
 
     dixScreenHookWindowRealize(pScreen, compRealizeWindow);
     dixScreenHookWindowUnrealize(pScreen, compUnrealizeWindow);
