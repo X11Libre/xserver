@@ -38,6 +38,7 @@ void miStepDash(int dist, int * pDashIndex, unsigned char * pDash,
 
 Bool mieqInit(void);
 void mieqFini(void);
+void mieqTrimQueue(void);
 void mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e);
 void mieqSwitchScreen(DeviceIntPtr pDev, ScreenPtr pScreen, Bool set_dequeue_screen);
 void mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen);
