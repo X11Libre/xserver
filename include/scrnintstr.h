@@ -713,6 +713,12 @@ typedef struct _Screen {
     CallbackListPtr hookWindowChangeBorderWidth;
     CallbackListPtr hookPostWindowChangeBorderWidth;
 
+    /* window reparent hooks, run right before / after the screen's
+       ReparentWindow proc (replaces wrapping ReparentWindow).
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookWindowReparent;
+    CallbackListPtr hookPostWindowReparent;
+
     /* additional screen close notify hooks (replaces wrapping CloseScreen)
        should NOT be touched outside of DIX core */
     CallbackListPtr hookClose;

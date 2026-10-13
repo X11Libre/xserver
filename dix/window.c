@@ -2479,9 +2479,6 @@ ReparentWindow(WindowPtr pWin, WindowPtr pParent,
     Bool WasMapped = (Bool) (pWin->mapped);
     xEvent event;
     int bw = wBorderWidth(pWin);
-    ScreenPtr pScreen;
-
-    pScreen = pWin->drawable.pScreen;
     if (TraverseTree(pWin, CompareWIDs, (void *) &pParent->drawable.id) ==
         WT_STOPWALKING)
         return BadMatch;
@@ -2552,8 +2549,7 @@ ReparentWindow(WindowPtr pWin, WindowPtr pParent,
     SetWinSize(pWin);
     SetBorderSize(pWin);
 
-    if (pScreen->ReparentWindow)
-        (*pScreen->ReparentWindow) (pWin, pPriorParent);
+    dixScreenRaiseReparentWindow(pWin, pPriorParent);
 
     dixScreenRaiseWindowPosition(pWin, pWin->drawable.x, pWin->drawable.y);
     ResizeChildrenWinSize(pWin, 0, 0, 0, 0);

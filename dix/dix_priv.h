@@ -356,6 +356,12 @@ void dixScreenRaiseResizeWindow(WindowPtr pWin, int x, int y,
 void dixScreenRaiseChangeBorderWidth(WindowPtr pWin, unsigned int bw);
 
 /*
+ * @brief call the screen's ReparentWindow proc, running pre + post hooks
+ * @see dixScreenHookWindowReparent dixScreenHookPostWindowReparent
+ */
+void dixScreenRaiseReparentWindow(WindowPtr pWin, WindowPtr pPriorParent);
+
+/*
  * @brief call screen's window destructors
  * @see dixScreenHookWindowDestroy
  * @param pWin the window thats being destroyed

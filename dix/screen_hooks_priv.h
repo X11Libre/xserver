@@ -214,6 +214,21 @@ void dixScreenUnhookWindowChangeBorderWidth(ScreenPtr pScreen, XorgScreenWindowC
 void dixScreenHookPostWindowChangeBorderWidth(ScreenPtr pScreen, XorgScreenWindowChangeBorderWidthProcPtr func);
 void dixScreenUnhookPostWindowChangeBorderWidth(ScreenPtr pScreen, XorgScreenWindowChangeBorderWidthProcPtr func);
 
+/* pre/post hook for window reparent (replaces wrapping ReparentWindow) */
+typedef struct {
+    WindowPtr window;
+    WindowPtr priorParent;
+} XorgScreenWindowReparentParamRec;
+
+typedef void (*XorgScreenWindowReparentProcPtr)(CallbackListPtr *pcbl,
+                                                ScreenPtr pScreen,
+                                                XorgScreenWindowReparentParamRec *param);
+
+void dixScreenHookWindowReparent(ScreenPtr pScreen, XorgScreenWindowReparentProcPtr func);
+void dixScreenUnhookWindowReparent(ScreenPtr pScreen, XorgScreenWindowReparentProcPtr func);
+void dixScreenHookPostWindowReparent(ScreenPtr pScreen, XorgScreenWindowReparentProcPtr func);
+void dixScreenUnhookPostWindowReparent(ScreenPtr pScreen, XorgScreenWindowReparentProcPtr func);
+
 /* prototype of screen close notification handler */
 typedef void (*XorgScreenCloseProcPtr)(CallbackListPtr *pcbl,
                                        ScreenPtr pScreen,
