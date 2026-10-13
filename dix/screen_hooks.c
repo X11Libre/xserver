@@ -27,6 +27,8 @@
 
 DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcPtr)
 DECLARE_HOOK_PROC(WindowPosition, hookWindowPosition, XorgScreenWindowPositionProcPtr)
+DECLARE_HOOK_PROC(WindowRealize, hookWindowRealize, XorgScreenWindowRealizeProcPtr)
+DECLARE_HOOK_PROC(WindowUnrealize, hookWindowUnrealize, XorgScreenWindowUnrealizeProcPtr)
 DECLARE_HOOK_PROC(Close, hookClose, XorgScreenCloseProcPtr)
 DECLARE_HOOK_PROC(PostClose, hookPostClose, XorgScreenCloseProcPtr)
 DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr)
@@ -101,14 +103,29 @@ Bool dixScreenRaiseCreateResources(ScreenPtr pScreen)
     return ret;
 }
 
+Bool dixScreenRaiseRealizeWindow(WindowPtr pWin)
+{
+    if (!pWin)
+        return FALSE;
+
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
+    CallCallbacks(&pScreen->hookWindowRealize, pWin);
+
+    return (pScreen->RealizeWindow ? pScreen->RealizeWindow(pWin) : TRUE);
+}
+
 void dixScreenRaiseUnrealizeWindow(WindowPtr pWin)
 {
     if (!pWin)
         return;
 
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
     pWin->realized = FALSE;
-    if (pWin->drawable.pScreen->UnrealizeWindow)
-        pWin->drawable.pScreen->UnrealizeWindow(pWin);
+    CallCallbacks(&pScreen->hookWindowUnrealize, pWin);
+    if (pScreen->UnrealizeWindow)
+        pScreen->UnrealizeWindow(pWin);
 }
 
 Bool dixScreenRaiseDisplayCursor(ScreenPtr pScreen, DeviceIntPtr pDev, CursorPtr pCursor)

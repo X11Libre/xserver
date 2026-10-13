@@ -327,6 +327,14 @@ void dixFreeScreen(ScreenPtr pScreen);
 void dixScreenRaiseUnrealizeWindow(WindowPtr pWin);
 
 /*
+ * @brief call the screen's RealizeWindow proc, running realize hooks first
+ * @see dixScreenHookWindowRealize
+ * @param pWin the window that's being realized
+ * @return the screen proc's result
+ */
+Bool dixScreenRaiseRealizeWindow(WindowPtr pWin);
+
+/*
  * @brief call screen's window destructors
  * @see dixScreenHookWindowDestroy
  * @param pWin the window thats being destroyed

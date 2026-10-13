@@ -685,6 +685,16 @@ typedef struct _Screen {
        should NOT be touched outside of DIX core */
     CallbackListPtr hookWindowPosition;
 
+    /* additional window realize hooks, called right before the screen's
+       RealizeWindow proc (replaces wrapping RealizeWindow).
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookWindowRealize;
+
+    /* additional window unrealize hooks, called right before the screen's
+       UnrealizeWindow proc (replaces wrapping UnrealizeWindow).
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookWindowUnrealize;
+
     /* additional screen close notify hooks (replaces wrapping CloseScreen)
        should NOT be touched outside of DIX core */
     CallbackListPtr hookClose;

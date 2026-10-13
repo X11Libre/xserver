@@ -2677,7 +2677,7 @@ MapWindow(WindowPtr pWin, ClientPtr client)
         pWin->realized = TRUE;  /* for roots */
         pWin->viewable = pWin->drawable.class == InputOutput;
         /* We SHOULD check for an error value here XXX */
-        (*pScreen->RealizeWindow) (pWin);
+        dixScreenRaiseRealizeWindow(pWin);
         if (pScreen->ClipNotify)
             (*pScreen->ClipNotify) (pWin, 0, 0);
         if (pScreen->PostValidateTree)

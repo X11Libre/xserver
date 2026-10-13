@@ -111,6 +111,56 @@ void dixScreenHookWindowPosition(ScreenPtr pScreen,
 void dixScreenUnhookWindowPosition(ScreenPtr pScreen,
                                              XorgScreenWindowPositionProcPtr func);
 
+/* prototype of a window realize hook */
+typedef void (*XorgScreenWindowRealizeProcPtr)(CallbackListPtr *pcbl,
+                                               ScreenPtr pScreen,
+                                               WindowPtr pWindow);
+
+/**
+ * @brief register a window realize hook on the given screen
+ *
+ * Window realize hooks are the replacement for fragile and complicated wrapping of
+ * pScreen->RealizeWindow(): extensions can safely register there custom handlers
+ * here, without ever caring about anybody else. They are called right before the
+ * actual pScreen->RealizeWindow proc runs.
+ *
+ * When registration fails, the server aborts.
+ **/
+void dixScreenHookWindowRealize(ScreenPtr pScreen,
+                                XorgScreenWindowRealizeProcPtr func);
+
+/**
+ * @brief unregister a window realize hook on the given screen
+ * @see dixScreenHookWindowRealize
+ **/
+void dixScreenUnhookWindowRealize(ScreenPtr pScreen,
+                                  XorgScreenWindowRealizeProcPtr func);
+
+/* prototype of a window unrealize hook */
+typedef void (*XorgScreenWindowUnrealizeProcPtr)(CallbackListPtr *pcbl,
+                                                 ScreenPtr pScreen,
+                                                 WindowPtr pWindow);
+
+/**
+ * @brief register a window unrealize hook on the given screen
+ *
+ * Window unrealize hooks are the replacement for fragile and complicated wrapping of
+ * pScreen->UnrealizeWindow(): extensions can safely register there custom handlers
+ * here, without ever caring about anybody else. They are called right before the
+ * actual pScreen->UnrealizeWindow proc runs.
+ *
+ * When registration fails, the server aborts.
+ **/
+void dixScreenHookWindowUnrealize(ScreenPtr pScreen,
+                                  XorgScreenWindowUnrealizeProcPtr func);
+
+/**
+ * @brief unregister a window unrealize hook on the given screen
+ * @see dixScreenHookWindowUnrealize
+ **/
+void dixScreenUnhookWindowUnrealize(ScreenPtr pScreen,
+                                    XorgScreenWindowUnrealizeProcPtr func);
+
 /* prototype of screen close notification handler */
 typedef void (*XorgScreenCloseProcPtr)(CallbackListPtr *pcbl,
                                        ScreenPtr pScreen,
