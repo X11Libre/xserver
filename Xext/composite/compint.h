@@ -123,9 +123,6 @@ typedef struct _CompScreen {
      * geometry
      */
     ConfigNotifyProcPtr ConfigNotify;
-    MoveWindowProcPtr MoveWindow;
-    ResizeWindowProcPtr ResizeWindow;
-    ChangeBorderWidthProcPtr ChangeBorderWidth;
     /*
      * Reparenting has an effect on Subwindows redirect
      */
@@ -240,15 +237,16 @@ void
  compClipNotify(WindowPtr pWin, int dx, int dy);
 
 void
- compMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pSib, VTKind kind);
+ compMoveWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                XorgScreenWindowMoveParamRec *param);
 
 void
-
-compResizeWindow(WindowPtr pWin, int x, int y,
-                 unsigned int w, unsigned int h, WindowPtr pSib);
+ compResizeWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                  XorgScreenWindowResizeParamRec *param);
 
 void
- compChangeBorderWidth(WindowPtr pWin, unsigned int border_width);
+ compChangeBorderWidth(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                       XorgScreenWindowChangeBorderWidthParamRec *param);
 
 void
  compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent);

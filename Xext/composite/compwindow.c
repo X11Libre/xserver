@@ -312,46 +312,30 @@ compFreeOldPixmap(WindowPtr pWin)
 }
 
 void
-compMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pSib, VTKind kind)
+compMoveWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
+               XorgScreenWindowMoveParamRec *param)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-
-    pScreen->MoveWindow = cs->MoveWindow;
-    (*pScreen->MoveWindow) (pWin, x, y, pSib, kind);
-    cs->MoveWindow = pScreen->MoveWindow;
-    pScreen->MoveWindow = compMoveWindow;
-
-    compFreeOldPixmap(pWin);
+    (void) pcbl;
+    (void) pScreen;
+    compFreeOldPixmap(param->window);
 }
 
 void
-compResizeWindow(WindowPtr pWin, int x, int y,
-                 unsigned int w, unsigned int h, WindowPtr pSib)
+compResizeWindow(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                 XorgScreenWindowResizeParamRec *param)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-
-    pScreen->ResizeWindow = cs->ResizeWindow;
-    (*pScreen->ResizeWindow) (pWin, x, y, w, h, pSib);
-    cs->ResizeWindow = pScreen->ResizeWindow;
-    pScreen->ResizeWindow = compResizeWindow;
-
-    compFreeOldPixmap(pWin);
+    (void) pcbl;
+    (void) pScreen;
+    compFreeOldPixmap(param->window);
 }
 
 void
-compChangeBorderWidth(WindowPtr pWin, unsigned int bw)
+compChangeBorderWidth(CallbackListPtr *pcbl, ScreenPtr pScreen,
+                      XorgScreenWindowChangeBorderWidthParamRec *param)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-
-    pScreen->ChangeBorderWidth = cs->ChangeBorderWidth;
-    (*pScreen->ChangeBorderWidth) (pWin, bw);
-    cs->ChangeBorderWidth = pScreen->ChangeBorderWidth;
-    pScreen->ChangeBorderWidth = compChangeBorderWidth;
-
-    compFreeOldPixmap(pWin);
+    (void) pcbl;
+    (void) pScreen;
+    compFreeOldPixmap(param->window);
 }
 
 void

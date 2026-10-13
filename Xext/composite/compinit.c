@@ -73,9 +73,6 @@ static void compCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unus
     pScreen->ChangeWindowAttributes = cs->ChangeWindowAttributes;
     pScreen->ReparentWindow = cs->ReparentWindow;
     pScreen->ConfigNotify = cs->ConfigNotify;
-    pScreen->MoveWindow = cs->MoveWindow;
-    pScreen->ResizeWindow = cs->ResizeWindow;
-    pScreen->ChangeBorderWidth = cs->ChangeBorderWidth;
 
     pScreen->ClipNotify = cs->ClipNotify;
     pScreen->CreateWindow = cs->CreateWindow;
@@ -87,6 +84,9 @@ static void compCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unus
     dixScreenUnhookWindowPosition(pScreen, compWindowPosition);
     dixScreenUnhookWindowRealize(pScreen, compRealizeWindow);
     dixScreenUnhookWindowUnrealize(pScreen, compUnrealizeWindow);
+    dixScreenUnhookPostWindowMove(pScreen, compMoveWindow);
+    dixScreenUnhookPostWindowResize(pScreen, compResizeWindow);
+    dixScreenUnhookPostWindowChangeBorderWidth(pScreen, compChangeBorderWidth);
 
     free(cs);
     dixSetPrivate(&pScreen->devPrivates, CompScreenPrivateKey, NULL);
@@ -359,14 +359,9 @@ bool compScreenInit(ScreenPtr pScreen)
     cs->ConfigNotify = pScreen->ConfigNotify;
     pScreen->ConfigNotify = compConfigNotify;
 
-    cs->MoveWindow = pScreen->MoveWindow;
-    pScreen->MoveWindow = compMoveWindow;
-
-    cs->ResizeWindow = pScreen->ResizeWindow;
-    pScreen->ResizeWindow = compResizeWindow;
-
-    cs->ChangeBorderWidth = pScreen->ChangeBorderWidth;
-    pScreen->ChangeBorderWidth = compChangeBorderWidth;
+    dixScreenHookPostWindowMove(pScreen, compMoveWindow);
+    dixScreenHookPostWindowResize(pScreen, compResizeWindow);
+    dixScreenHookPostWindowChangeBorderWidth(pScreen, compChangeBorderWidth);
 
     cs->ReparentWindow = pScreen->ReparentWindow;
     pScreen->ReparentWindow = compReparentWindow;
