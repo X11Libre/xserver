@@ -24,8 +24,8 @@ jobs:
               with:
                 token: ${{ github.token }}
                 repository: ${{ github.repository }}
-                retain_days: 14
-                keep_minimum_runs: 2
+                retain_days: 30
+                keep_minimum_runs: 5
 
     purge_deleted_branch_workflows:
         runs-on: ubuntu-latest
