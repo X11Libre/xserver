@@ -78,6 +78,7 @@ KdGlamorInit(ScreenPtr pScreen, KdGlamorInfo *info, int *caps)
                                          .glvnd_vendor = info->glvnd,
                                          .fd = -1,
                                          .gbm_forbidden = !info->use_gbm,
+                                         .gbm = info->gbm,
                                          .direct_dri3_only = info->direct_dri3,
                                          .auto_dri = FALSE, /* deprecated */
                                          .partial_dri_allowed = FALSE, /* deprecated */

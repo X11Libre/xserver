@@ -129,6 +129,8 @@ msGlamorInit(ScreenPtr pScreen)
     uint32_t format;
     int write_pos = 0;
 
+    config->glamor_info.gbm = priv->gbm;
+
     if (!config->glamor_info.dri_path) {
         config->glamor_info.dri_fd = dup(gbm_device_get_fd(priv->gbm));
         if (config->glamor_info.dri_fd >= 0) {
