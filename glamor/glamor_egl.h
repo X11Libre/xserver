@@ -56,6 +56,8 @@ typedef struct {
     int fd; /* /dev/dri/cardxx */
     int gbm_forbidden; /* If glamor should not use libgbm, even if available */
 
+    void* gbm; /* An optional gbm device for glamor to use instead of opening it */
+
     int direct_dri3_only; /* If glamor should only use the direct DRI3 implementation */
 
     int auto_dri; /* If glamor should try to automatically enable DRI3 support */
