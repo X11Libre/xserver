@@ -23,22 +23,6 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    ubuntu-fetch-pkg:
-        # De-duplicate PR runs without a branch-name convention: on a same-repo
-        # pull_request the branch's own push event already builds it, so skip the
-        # redundant build here. Fork PRs raise no push event in this repo, so
-        # they still build. Every build job chains off this root (and the three
-        # other no-needs roots below), so skipping it skips them too. Normal
-        # branch pushes are unaffected — they build exactly as before, and the
-        # push run's checks still populate the PR's status indicator.
-        if: >-
-            github.event_name != 'pull_request' ||
-            github.event.pull_request.head.repo.full_name != github.repository
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v6
-            - uses: ./.github/actions/ubuntu-fetch-pkg
-
     xserver-build-ubuntu-no-gbm:
         env:
             MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dgbm=false -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
@@ -46,7 +30,6 @@ jobs:
             GALLIUM_DRIVER: llvmpipe
             PIGLIT_PLATFORM: x11_egl
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
@@ -89,7 +72,6 @@ jobs:
             GALLIUM_DRIVER: llvmpipe
             PIGLIT_PLATFORM: x11_egl
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -217,7 +199,6 @@ jobs:
             GALLIUM_DRIVER: llvmpipe
             PIGLIT_PLATFORM: x11_egl
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -259,7 +240,6 @@ jobs:
         env:
             MESON_ARGS: --buildtype=debug -Dprefix=/usr -Dxorg=false -Dxvfb=true -Dxnest=false -Dxephyr=false -Dwerror=true
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -362,7 +342,6 @@ jobs:
         # subject to that LRU eviction.
         runs-on: ubuntu-latest
         needs:
-            - ubuntu-fetch-pkg
             - abi-changes-check
             - ubuntu-deps-image
         if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
@@ -470,7 +449,6 @@ jobs:
         runs-on: ubuntu-latest
         env:
             MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dwerror=true -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -503,7 +481,7 @@ jobs:
               run: .github/scripts/meson-build.sh --run-install
 
     xserver-build-macos:
-        # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
+        # skip the redundant same-repo PR rebuild (see ubuntu-install-pkg + ubuntu-apt-cache.yml)
         if: >-
             github.event_name != 'pull_request' ||
             github.event.pull_request.head.repo.full_name != github.repository
@@ -566,7 +544,6 @@ jobs:
 
     xserver-build-freebsd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         timeout-minutes: 90
         env:
             MYTOKEN : ${{ secrets.MYTOKEN }}
@@ -623,7 +600,6 @@ jobs:
 
     xserver-build-dragonflybsd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         timeout-minutes: 90
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
@@ -680,7 +656,6 @@ jobs:
 
     xserver-build-netbsd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         timeout-minutes: 90
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
@@ -740,7 +715,6 @@ jobs:
     # OpenIndiana packages the full X stack incl. Mesa, so GLX stays enabled.
     xserver-build-solaris:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         env:
             MESON_ARGS: -Dwerror=true -Dxvfb=true -Dxnest=true -Dxorg=false -Dxephyr=false -Dxfbdev=false -Ddrm=false -Ddri1=false -Ddri2=true -Ddri3=true
         steps:
@@ -764,7 +738,6 @@ jobs:
     # (direct rendering needs a working DRM/KMS, n/a in the headless VM).
     xserver-build-openbsd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         timeout-minutes: 90
         env:
             MESON_ARGS: -Dwerror=true -Dxvfb=true -Dxnest=true -Dxorg=false -Dxephyr=false -Dxfbdev=false -Ddri2=false -Ddri3=false
@@ -817,7 +790,6 @@ jobs:
 
     xserver-build-hurd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         timeout-minutes: 120
         env:
             REPO: ${{ github.repository }}
@@ -833,7 +805,6 @@ jobs:
 
     xserver-build-alpine:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         container:
             image: alpine:latest
         env:
@@ -860,7 +831,6 @@ jobs:
         # edits the Dockerfile automatically gets a fresh image — no waste and no
         # staleness. :latest is only moved by master.
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         permissions:
             contents: read
             packages: write
@@ -906,7 +876,6 @@ jobs:
 
     xserver-build-rhel:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         strategy:
             fail-fast: false
             matrix:
@@ -925,7 +894,7 @@ jobs:
               run: ./.github/scripts/rhel/run-xserver-build.sh
 
     xserver-build-cygwin:
-        # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
+        # skip the redundant same-repo PR rebuild (see ubuntu-install-pkg + ubuntu-apt-cache.yml)
         if: >-
             github.event_name != 'pull_request' ||
             github.event.pull_request.head.repo.full_name != github.repository
@@ -987,7 +956,7 @@ jobs:
               run: bash -c 'ninja -C build test'
 
     xserver-build-arch:
-        # skip the redundant same-repo PR rebuild (see ubuntu-fetch-pkg)
+        # skip the redundant same-repo PR rebuild (see ubuntu-install-pkg + ubuntu-apt-cache.yml)
         if: >-
             github.event_name != 'pull_request' ||
             github.event.pull_request.head.repo.full_name != github.repository
