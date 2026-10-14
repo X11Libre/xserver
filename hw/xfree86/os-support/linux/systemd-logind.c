@@ -349,8 +349,9 @@ message_filter(DBusConnection * connection, DBusMessage * message, void *data)
     DBusError error;
     dbus_int32_t major, minor;
     char *pause_str;
+    const char *path = dbus_message_get_path(message);
 
-    if (strcmp(dbus_message_get_path(message), info->session) != 0)
+    if (!path || strcmp(path, info->session) != 0)
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 
     dbus_error_init(&error);
