@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
+name: ubuntu apt cache population
+
+on:
+    schedule:
+        - cron: '0 2 * * *'  # daily at 02:00 UTC
+    push:
+        branches:
+            - master
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    populate-apt-cache:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - uses: ./.github/actions/ubuntu-save-apt-cache

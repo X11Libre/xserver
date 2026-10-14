@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
+name: ubuntu save apt cache
+description: save apt cache for reuse by build jobs
+runs:
+    using: "composite"
+    steps:
+        - name: root suid tar for apt caching
+          run:  sudo chmod u+s /bin/tar
+          shell: bash
+
+        - uses: actions/cache/save@v5
+          with:
+            path: /var/cache/apt
+            key:  ${{ runner.os }}-apt-cache-v4

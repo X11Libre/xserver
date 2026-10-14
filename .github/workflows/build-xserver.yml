@@ -13,12 +13,6 @@ on:
     pull_request:
 
 jobs:
-    ubuntu-fetch-pkg:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v6
-            - uses: ./.github/actions/ubuntu-fetch-pkg
-
     xserver-build-ubuntu-no-gbm:
         env:
             MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dgbm=false -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
@@ -26,7 +20,6 @@ jobs:
             GALLIUM_DRIVER: llvmpipe
             PIGLIT_PLATFORM: x11_egl
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
@@ -68,7 +61,6 @@ jobs:
             GALLIUM_DRIVER: llvmpipe
             PIGLIT_PLATFORM: x11_egl
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -106,7 +98,6 @@ jobs:
         env:
             MESON_ARGS: -Dprefix=/home/runner/x11 -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -134,7 +125,6 @@ jobs:
 
     drivers-build-ubuntu:
         needs:
-            - ubuntu-fetch-pkg
             - drivers-prepare-ubuntu
         runs-on: ubuntu-latest
         strategy:
@@ -222,7 +212,6 @@ jobs:
         runs-on: ubuntu-latest
         env:
             MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dwerror=true -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false
-        needs: ubuntu-fetch-pkg
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -314,7 +303,6 @@ jobs:
 
     xserver-build-freebsd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         env:
             MYTOKEN : ${{ secrets.MYTOKEN }}
             MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
@@ -365,7 +353,6 @@ jobs:
 
     xserver-build-dragonflybsd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
@@ -414,7 +401,6 @@ jobs:
 
     xserver-build-netbsd:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
             LDFLAGS: "-Wl,--no-fatal-warnings"
@@ -463,7 +449,6 @@ jobs:
 
     xserver-build-alpine:
         runs-on: ubuntu-latest
-        needs: ubuntu-fetch-pkg
         container:
             image: alpine:latest
         env:
