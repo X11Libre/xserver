@@ -1,5 +1,7 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Enrico Weigelt, metux IT consult <info@metux.net>
 name: ubuntu package install
-description: install required packages and cache apt downloads
+description: install required packages and optionally use apt cache
 runs:
     using: "composite"
     steps:
@@ -7,10 +9,10 @@ runs:
           run:  sudo chmod u+s /bin/tar
           shell: bash
 
-        - name: apt cache pull
+        - name: apt cache pull (optional)
           uses: actions/cache/restore@v5
           with:
-            fail-on-cache-miss: true
+            fail-on-cache-miss: false
             path: /var/cache/apt
             key:  ${{ runner.os }}-apt-cache-v4
 
