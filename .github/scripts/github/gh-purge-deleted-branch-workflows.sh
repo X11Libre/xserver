@@ -77,19 +77,28 @@ log_info "Found $(echo "$existing_branches" | wc -l) branches."
 log_info "Fetching workflow runs..."
 gh api -H "Accept: application/vnd.github+json" \
     "/repos/${REPO}/actions/runs?per_page=100" --paginate \
-    | jq -c '.workflow_runs[] | {id: .id, branch: .head_branch, workflow: .name}' \
+    | jq -c '.workflow_runs[] | {id: .id, branch: .head_branch, workflow: .name, pull_requests: .pull_requests, head_repository: .head_repository}' \
     | while read -r run; do
         run_id=$(echo "$run" | jq -r '.id')
         run_branch=$(echo "$run" | jq -r '.branch')
         workflow_name=$(echo "$run" | jq -r '.workflow')
+        pull_requests=$(echo "$run" | jq -c '.pull_requests')
+        head_repo=$(echo "$run" | jq -r '.head_repository.full_name // empty')
 
         if [[ -z "$run_branch" ]]; then
             log_warn "Run $run_id has no branch (skipping)."
             continue
         fi
 
-        # Skip if branch exists
+        # Skip if branch exists in main repo
         if echo "$existing_branches" | grep -qx "$run_branch"; then
+            continue
+        fi
+
+        # Skip if run is associated with an OPEN pull request
+        # (pull_requests array contains PR objects with .state field)
+        if echo "$pull_requests" | jq -e 'any(.state == "open")' >/dev/null 2>&1; then
+            log_info "Skipping run $run_id (branch: $run_branch) — associated with open PR"
             continue
         fi
 
