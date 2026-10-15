@@ -56,16 +56,14 @@ in this Software without prior written authorization from The Open Group.
 #include "gcstruct.h"
 #include "protocol-versions.h"
 
+#include "shape_intern.h"
+
 Bool noShapeExtension = FALSE;
 
 typedef RegionPtr (*CreateDftPtr) (WindowPtr    /* pWin */
     );
 
 static DevPrivateKeyRec ShapeWindowPrivateKeyRec;
-
-static void SShapeNotifyEvent(xShapeNotifyEvent * /* from */ ,
-                              xShapeNotifyEvent *       /* to */
-    );
 
 /* SendShapeNotify, CreateBoundingShape and CreateClipShape are used
  * externally by the Xfixes extension and are now defined in window.h
@@ -961,21 +959,6 @@ ProcShapeDispatch(ClientPtr client)
     }
 }
 
-static void _X_COLD
-SShapeNotifyEvent(xShapeNotifyEvent * from, xShapeNotifyEvent * to)
-{
-    to->type = from->type;
-    to->kind = from->kind;
-    cpswapl(from->window, to->window);
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswaps(from->x, to->x);
-    cpswaps(from->y, to->y);
-    cpswaps(from->width, to->width);
-    cpswaps(from->height, to->height);
-    cpswapl(from->time, to->time);
-    to->shaped = from->shaped;
-}
-
 static void
 ShapeWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
@@ -1019,6 +1002,6 @@ ShapeExtensionInit(void)
                                  ProcShapeDispatch, ProcShapeDispatch,
                                  NULL, StandardMinorOpcode))) {
         ShapeEventBase = extEntry->eventBase;
-        EventSwapVector[ShapeEventBase] = (EventSwapPtr) SShapeNotifyEvent;
+        EventSwapVector[ShapeEventBase] = ShapeSwapNotifyEvent;
     }
 }
