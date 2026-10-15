@@ -153,7 +153,7 @@ GEExtensionInit(void)
         FatalError("GEInit: AddExtensions failed.\n");
 
     memset(GEExtensions, 0, sizeof(GEExtensions));
-    EventSwapVector[GenericEvent] = (EventSwapPtr) SGEGenericEvent;
+    EventSwapVector[GenericEvent] = SGEGenericEvent;
 }
 
 /************************************************************/

@@ -692,7 +692,7 @@ AppleWMExtensionInit(AppleWMProcsPtr procsPtr)
         WMErrorBase = extEntry->errorBase;
         WMEventBase = extEntry->eventBase;
         for (i = 0; i < AppleWMNumberEvents; i++)
-            EventSwapVector[WMEventBase + i] = (EventSwapPtr)SNotifyEvent;
+            EventSwapVector[WMEventBase + i] = SNotifyEvent;
         appleWMProcs = procsPtr;
     }
 }

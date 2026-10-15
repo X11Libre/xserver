@@ -187,6 +187,6 @@ WindowsDRIExtensionInit(void)
         WindowsDRIErrorBase = extEntry->errorBase;
         WindowsDRIEventBase = extEntry->eventBase;
         for (i = 0; i < WindowsDRINumberEvents; i++)
-            EventSwapVector[WindowsDRIEventBase + i] = (EventSwapPtr)SNotifyEvent;
+            EventSwapVector[WindowsDRIEventBase + i] = SNotifyEvent;
     }
 }

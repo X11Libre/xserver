@@ -1,5 +1,6 @@
 srcs_saver = [
-    'saver.c',
+    'byteswap.c',
+    'saver.c'
 ]
 
 libxserver_saver = []

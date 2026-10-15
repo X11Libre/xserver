@@ -412,6 +412,6 @@ AppleDRIExtensionInit(void)
         DRIErrorBase = extEntry->errorBase;
         DRIEventBase = extEntry->eventBase;
         for (i = 0; i < AppleDRINumberEvents; i++)
-            EventSwapVector[DRIEventBase + i] = (EventSwapPtr)SNotifyEvent;
+            EventSwapVector[DRIEventBase + i] = SNotifyEvent;
     }
 }

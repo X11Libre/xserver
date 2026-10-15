@@ -1024,8 +1024,7 @@ SecurityExtensionInit(void)
     SecurityErrorBase = extEntry->errorBase;
     SecurityEventBase = extEntry->eventBase;
 
-    EventSwapVector[SecurityEventBase + XSecurityAuthorizationRevoked] =
-        (EventSwapPtr) SwapSecurityAuthorizationRevokedEvent;
+    EventSwapVector[SecurityEventBase + XSecurityAuthorizationRevoked] = SwapSecurityAuthorizationRevokedEvent;
 
     SetResourceTypeErrorValue(SecurityAuthorizationResType,
                               SecurityErrorBase + XSecurityBadAuthorization);
