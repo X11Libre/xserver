@@ -89,7 +89,7 @@ compReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
         QueueWorkProc(compScreenUpdate, serverClient, pScreen);
         cs->pendingScreenUpdate = true;
     }
-    cw->damaged = false;
+    cw->damaged = true;
 
     compMarkAncestors(pWin);
 }
