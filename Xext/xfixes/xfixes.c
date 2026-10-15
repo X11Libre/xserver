@@ -52,6 +52,7 @@
 #include "Xext/xinput/xibarriers.h"
 
 #include "xfixesint.h"
+#include "xfixes_intern.h"
 #include "protocol-versions.h"
 
 Bool noXFixesExtension = FALSE;
@@ -223,10 +224,8 @@ XFixesExtensionInit(void)
         XFixesReqCode = (unsigned char) extEntry->base;
         XFixesEventBase = extEntry->eventBase;
         XFixesErrorBase = extEntry->errorBase;
-        EventSwapVector[XFixesEventBase + XFixesSelectionNotify] =
-            (EventSwapPtr) SXFixesSelectionNotifyEvent;
-        EventSwapVector[XFixesEventBase + XFixesCursorNotify] =
-            (EventSwapPtr) SXFixesCursorNotifyEvent;
+        EventSwapVector[XFixesEventBase + XFixesSelectionNotify] = XFixesSwapSelectionNotifyEvent;
+        EventSwapVector[XFixesEventBase + XFixesCursorNotify] = XFixesSwapCursorNotifyEvent;
         SetResourceTypeErrorValue(RegionResType, XFixesErrorBase + BadRegion);
         SetResourceTypeErrorValue(PointerBarrierType,
                                   XFixesErrorBase + BadBarrier);

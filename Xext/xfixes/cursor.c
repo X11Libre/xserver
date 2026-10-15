@@ -290,18 +290,6 @@ GetBit(unsigned char *line, int x)
     return 0;
 }
 
-void _X_COLD
-SXFixesCursorNotifyEvent(xXFixesCursorNotifyEvent * from,
-                         xXFixesCursorNotifyEvent * to)
-{
-    to->type = from->type;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->window, to->window);
-    cpswapl(from->cursorSerial, to->cursorSerial);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->name, to->name);
-}
-
 static void
 CopyCursorToImage(CursorPtr pCursor, CARD32 *image)
 {

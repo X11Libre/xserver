@@ -26,6 +26,7 @@
 #include "dix/request_priv.h"
 #include "dix/selection_priv.h"
 
+#include "xfixes_intern.h"
 #include "xfixesint.h"
 #include "xace.h"
 
@@ -215,19 +216,6 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
     }
     e->eventMask = stuff->eventMask;
     return Success;
-}
-
-void _X_COLD
-SXFixesSelectionNotifyEvent(xXFixesSelectionNotifyEvent * from,
-                            xXFixesSelectionNotifyEvent * to)
-{
-    to->type = from->type;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->window, to->window);
-    cpswapl(from->owner, to->owner);
-    cpswapl(from->selection, to->selection);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->selectionTimestamp, to->selectionTimestamp);
 }
 
 static int

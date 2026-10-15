@@ -75,10 +75,6 @@ int
 int
  ProcXFixesSelectSelectionInput(ClientPtr client);
 
-void
-
-SXFixesSelectionNotifyEvent(xXFixesSelectionNotifyEvent * from,
-                            xXFixesSelectionNotifyEvent * to);
 Bool
  XFixesSelectionInit(void);
 
@@ -88,11 +84,6 @@ Bool
 
 int
  ProcXFixesSelectCursorInput(ClientPtr client);
-
-void
-
-SXFixesCursorNotifyEvent(xXFixesCursorNotifyEvent * from,
-                         xXFixesCursorNotifyEvent * to);
 
 int
  ProcXFixesGetCursorImage(ClientPtr client);
