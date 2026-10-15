@@ -1,4 +1,5 @@
 srcs_sync = [
+    'byteswap.c',
     'sync.c',
 ]
 
