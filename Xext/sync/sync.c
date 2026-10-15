@@ -78,6 +78,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "inputstr.h"
 #include "misync_priv.h"
 
+#include "sync_intern.h"
+
 /*
  * Local Global Variables
  */
@@ -2133,42 +2135,6 @@ ProcSyncDispatch(ClientPtr client)
 }
 
 /*
- * Event Swapping
- */
-
-static void _X_COLD
-SCounterNotifyEvent(xSyncCounterNotifyEvent * from,
-                    xSyncCounterNotifyEvent * to)
-{
-    to->type = from->type;
-    to->kind = from->kind;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->counter, to->counter);
-    cpswapl(from->wait_value_lo, to->wait_value_lo);
-    cpswapl(from->wait_value_hi, to->wait_value_hi);
-    cpswapl(from->counter_value_lo, to->counter_value_lo);
-    cpswapl(from->counter_value_hi, to->counter_value_hi);
-    cpswapl(from->time, to->time);
-    cpswaps(from->count, to->count);
-    to->destroyed = from->destroyed;
-}
-
-static void _X_COLD
-SAlarmNotifyEvent(xSyncAlarmNotifyEvent * from, xSyncAlarmNotifyEvent * to)
-{
-    to->type = from->type;
-    to->kind = from->kind;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->alarm, to->alarm);
-    cpswapl(from->counter_value_lo, to->counter_value_lo);
-    cpswapl(from->counter_value_hi, to->counter_value_hi);
-    cpswapl(from->alarm_value_lo, to->alarm_value_lo);
-    cpswapl(from->alarm_value_hi, to->alarm_value_hi);
-    cpswapl(from->time, to->time);
-    to->state = from->state;
-}
-
-/*
  * ** Close everything down. ** This is fairly simple for now.
  */
 /* ARGSUSED */
@@ -2214,10 +2180,8 @@ SyncExtensionInit(void)
 
     SyncEventBase = extEntry->eventBase;
     SyncErrorBase = extEntry->errorBase;
-    EventSwapVector[SyncEventBase + XSyncCounterNotify] =
-        (EventSwapPtr) SCounterNotifyEvent;
-    EventSwapVector[SyncEventBase + XSyncAlarmNotify] =
-        (EventSwapPtr) SAlarmNotifyEvent;
+    EventSwapVector[SyncEventBase + XSyncCounterNotify] = SyncSwapCounterNotifyEvent;
+    EventSwapVector[SyncEventBase + XSyncAlarmNotify] = SyncSwapAlarmNotifyEvent;
 
     SetResourceTypeErrorValue(RTCounter, SyncErrorBase + XSyncBadCounter);
     SetResourceTypeErrorValue(RTAlarm, SyncErrorBase + XSyncBadAlarm);
