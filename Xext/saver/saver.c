@@ -65,6 +65,8 @@ in this Software without prior written authorization from the X Consortium.
 #endif
 #include "protocol-versions.h"
 
+#include "saver_intern.h"
+
 Bool noScreenSaverExtension = FALSE;
 
 static int ScreenSaverEventBase = 0;
@@ -73,8 +75,6 @@ static Bool ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force);
 static Bool CreateSaverWindow(ScreenPtr pScreen);
 static Bool DestroySaverWindow(ScreenPtr pScreen);
 static void CheckScreenPrivate(ScreenPtr pScreen);
-static void SScreenSaverNotifyEvent(xScreenSaverNotifyEvent *from,
-                                    xScreenSaverNotifyEvent *to);
 
 static RESTYPE SuspendType;     /* resource type for suspension records */
 
@@ -429,20 +429,6 @@ SendScreenSaverNotify(ScreenPtr pScreen, int state, Bool forced)
             WriteEventsToClient(pEv->client, 1, (xEvent *) &ev);
         }
     }
-}
-
-static void _X_COLD
-SScreenSaverNotifyEvent(xScreenSaverNotifyEvent * from,
-                        xScreenSaverNotifyEvent * to)
-{
-    to->type = from->type;
-    to->state = from->state;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->root, to->root);
-    cpswapl(from->window, to->window);
-    to->kind = from->kind;
-    to->forced = from->forced;
 }
 
 static void
@@ -1342,7 +1328,6 @@ ScreenSaverExtensionInit(void)
                                  ProcScreenSaverDispatch, NULL,
                                  StandardMinorOpcode))) {
         ScreenSaverEventBase = extEntry->eventBase;
-        EventSwapVector[ScreenSaverEventBase] =
-            (EventSwapPtr) SScreenSaverNotifyEvent;
+        EventSwapVector[ScreenSaverEventBase] = ScreenSaverSwapNotifyEvent;
     }
 }
