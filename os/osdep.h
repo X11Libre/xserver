@@ -127,7 +127,7 @@ extern Bool ComputeLocalClient(ClientPtr client);
 void TimerInit(void);
 Bool TimerForce(OsTimerPtr timer);
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__CYGWIN__)
 #include <X11/Xwinsock.h>
 struct utsname {
     char nodename[512];
