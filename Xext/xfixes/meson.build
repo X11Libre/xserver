@@ -1,4 +1,5 @@
 srcs_xfixes = [
+    'byteswap.c',
     'cursor.c',
     'disconnect.c',
     'region.c',
