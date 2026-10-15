@@ -1,4 +1,5 @@
 srcs_shm = [
+    'byteswap.c',
     'shm.c',
 ]
 
