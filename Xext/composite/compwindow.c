@@ -658,7 +658,7 @@ compPaintWindowToParent(WindowPtr pWin)
 
         if (cw->damaged) {
             compWindowUpdateAutomatic(pWin);
-            cw->damaged = FALSE;
+            cw->damaged = false;
         }
     }
 }
