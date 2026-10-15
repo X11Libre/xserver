@@ -86,9 +86,7 @@
 #include "xkbsrv.h"
 #include "xkbstr.h"
 
-#ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
-#endif
 
 #include "../os-support/linux/systemd-logind.h"
 #include "seatd-libseat.h"
@@ -384,10 +382,8 @@ xf86VTLeave(void)
 
     DebugF("xf86VTSwitch: Leaving, xf86Exiting is %s\n",
            (dispatchException & DE_TERMINATE) ? "TRUE" : "FALSE");
-#ifdef DPMSExtension
     if (DPMSPowerLevel != DPMSModeOn)
         DPMSSet(serverClient, DPMSModeOn);
-#endif
     for (i = 0; i < xf86NumScreens; i++) {
         if (!(dispatchException & DE_TERMINATE))
             if (xf86Screens[i]->EnableDisableFBAccess)
