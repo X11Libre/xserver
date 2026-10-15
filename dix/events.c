@@ -284,9 +284,6 @@ static struct DeviceEventTime {
  */
 #define RootWindow(sprite) (sprite)->spriteTrace[0]
 
-static xEvent *swapEvent = NULL;
-static int swapEventLen = 0;
-
 void
 NotImplemented(xEvent *from, xEvent *to)
 {
@@ -6041,7 +6038,6 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
 #ifdef XINERAMA
     xEvent eventCopy;
 #endif /* XINERAMA */
-    xEvent *eventTo, *eventFrom;
     int eventlength = sizeof(xEvent);
 
     if (dispatchException & DE_DROP_EVENTS)
@@ -6119,18 +6115,15 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
     }
 
     if (pClient->swapped) {
-        if (eventlength > swapEventLen) {
-            swapEventLen = eventlength;
-            swapEvent = realloc(swapEvent, swapEventLen);
-            if (!swapEvent) {
-                FatalError("WriteEventsToClient: Out of memory.\n");
-                return;
-            }
+        xEvent *swapEvent = calloc(1, eventlength);
+        if (!swapEvent) {
+            FatalError("WriteEventsToClient: Out of memory.\n");
+            return;
         }
 
         for (int i = 0; i < count; i++) {
-            eventFrom = &events[i];
-            eventTo = swapEvent;
+            xEvent *eventFrom = &events[i];
+            xEvent *eventTo = swapEvent;
 
             /* Remember to strip off the leading bit of type in case
                this event was sent with "SendEvent." */
@@ -6139,6 +6132,8 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
 
             dixWriteToClient(pClient, eventlength, eventTo);
         }
+
+        free(swapEvent);
     }
     else {
         /* only one GenericEvent, remember? that means either count is 1 and
