@@ -1,4 +1,5 @@
 srcs_randr = [
+    'byteswap.c',
     'randr.c',
     'rrcrtc.c',
     'rrdispatch.c',
