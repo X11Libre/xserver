@@ -36,6 +36,8 @@
 #include "Xext/randr/randrstr_priv.h"
 #include "Xext/randr/rrdispatch_priv.h"
 
+#include "randr_intern.h"
+
 /* From render.h */
 #ifndef SubPixelUnknown
 #define SubPixelUnknown 0
@@ -107,171 +109,6 @@ static void RRCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused
     free(pScrPriv->outputs);
     free(pScrPriv);
     RRNScreens -= 1;            /* ok, one fewer screen with RandR running */
-}
-
-static void
-SRRScreenChangeNotifyEvent(xRRScreenChangeNotifyEvent * from,
-                           xRRScreenChangeNotifyEvent * to)
-{
-    to->type = from->type;
-    to->rotation = from->rotation;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->configTimestamp, to->configTimestamp);
-    cpswapl(from->root, to->root);
-    cpswapl(from->window, to->window);
-    cpswaps(from->sizeID, to->sizeID);
-    cpswaps(from->subpixelOrder, to->subpixelOrder);
-    cpswaps(from->widthInPixels, to->widthInPixels);
-    cpswaps(from->heightInPixels, to->heightInPixels);
-    cpswaps(from->widthInMillimeters, to->widthInMillimeters);
-    cpswaps(from->heightInMillimeters, to->heightInMillimeters);
-}
-
-static void
-SRRCrtcChangeNotifyEvent(xRRCrtcChangeNotifyEvent * from,
-                         xRRCrtcChangeNotifyEvent * to)
-{
-    to->type = from->type;
-    to->subCode = from->subCode;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->window, to->window);
-    cpswapl(from->crtc, to->crtc);
-    cpswapl(from->mode, to->mode);
-    cpswaps(from->rotation, to->rotation);
-    /* pad1 */
-    cpswaps(from->x, to->x);
-    cpswaps(from->y, to->y);
-    cpswaps(from->width, to->width);
-    cpswaps(from->height, to->height);
-}
-
-static void
-SRROutputChangeNotifyEvent(xRROutputChangeNotifyEvent * from,
-                           xRROutputChangeNotifyEvent * to)
-{
-    to->type = from->type;
-    to->subCode = from->subCode;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->configTimestamp, to->configTimestamp);
-    cpswapl(from->window, to->window);
-    cpswapl(from->output, to->output);
-    cpswapl(from->crtc, to->crtc);
-    cpswapl(from->mode, to->mode);
-    cpswaps(from->rotation, to->rotation);
-    to->connection = from->connection;
-    to->subpixelOrder = from->subpixelOrder;
-}
-
-static void
-SRROutputPropertyNotifyEvent(xRROutputPropertyNotifyEvent * from,
-                             xRROutputPropertyNotifyEvent * to)
-{
-    to->type = from->type;
-    to->subCode = from->subCode;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->window, to->window);
-    cpswapl(from->output, to->output);
-    cpswapl(from->atom, to->atom);
-    cpswapl(from->timestamp, to->timestamp);
-    to->state = from->state;
-    /* pad1 */
-    /* pad2 */
-    /* pad3 */
-    /* pad4 */
-}
-
-static void
-SRRProviderChangeNotifyEvent(xRRProviderChangeNotifyEvent * from,
-                         xRRProviderChangeNotifyEvent * to)
-{
-    to->type = from->type;
-    to->subCode = from->subCode;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->window, to->window);
-    cpswapl(from->provider, to->provider);
-}
-
-static void
-SRRProviderPropertyNotifyEvent(xRRProviderPropertyNotifyEvent * from,
-                               xRRProviderPropertyNotifyEvent * to)
-{
-    to->type = from->type;
-    to->subCode = from->subCode;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->window, to->window);
-    cpswapl(from->provider, to->provider);
-    cpswapl(from->atom, to->atom);
-    cpswapl(from->timestamp, to->timestamp);
-    to->state = from->state;
-    /* pad1 */
-    /* pad2 */
-    /* pad3 */
-    /* pad4 */
-}
-
-static void _X_COLD
-SRRResourceChangeNotifyEvent(xRRResourceChangeNotifyEvent * from,
-                             xRRResourceChangeNotifyEvent * to)
-{
-    to->type = from->type;
-    to->subCode = from->subCode;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->window, to->window);
-}
-
-static void _X_COLD
-SRRLeaseNotifyEvent(xRRLeaseNotifyEvent * from,
-                    xRRLeaseNotifyEvent * to)
-{
-    to->type = from->type;
-    to->subCode = from->subCode;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->timestamp, to->timestamp);
-    cpswapl(from->window, to->window);
-    cpswapl(from->lease, to->lease);
-    to->created = from->created;
-}
-
-static void _X_COLD
-SRRNotifyEvent(xEvent *from, xEvent *to)
-{
-    switch (from->u.u.detail) {
-    case RRNotify_CrtcChange:
-        SRRCrtcChangeNotifyEvent((xRRCrtcChangeNotifyEvent *) from,
-                                 (xRRCrtcChangeNotifyEvent *) to);
-        break;
-    case RRNotify_OutputChange:
-        SRROutputChangeNotifyEvent((xRROutputChangeNotifyEvent *) from,
-                                   (xRROutputChangeNotifyEvent *) to);
-        break;
-    case RRNotify_OutputProperty:
-        SRROutputPropertyNotifyEvent((xRROutputPropertyNotifyEvent *) from,
-                                     (xRROutputPropertyNotifyEvent *) to);
-        break;
-    case RRNotify_ProviderChange:
-        SRRProviderChangeNotifyEvent((xRRProviderChangeNotifyEvent *) from,
-                                   (xRRProviderChangeNotifyEvent *) to);
-        break;
-    case RRNotify_ProviderProperty:
-        SRRProviderPropertyNotifyEvent((xRRProviderPropertyNotifyEvent *) from,
-                                       (xRRProviderPropertyNotifyEvent *) to);
-        break;
-    case RRNotify_ResourceChange:
-        SRRResourceChangeNotifyEvent((xRRResourceChangeNotifyEvent *) from,
-                                   (xRRResourceChangeNotifyEvent *) to);
-        break;
-    case RRNotify_Lease:
-        SRRLeaseNotifyEvent((xRRLeaseNotifyEvent *) from,
-                            (xRRLeaseNotifyEvent *) to);
-        break;
-    default:
-        break;
-    }
 }
 
 static bool initialized = false;
@@ -420,10 +257,8 @@ RRExtensionInit(void)
         return;
     RRErrorBase = extEntry->errorBase;
     RREventBase = extEntry->eventBase;
-    EventSwapVector[RREventBase + RRScreenChangeNotify] = (EventSwapPtr)
-        SRRScreenChangeNotifyEvent;
-    EventSwapVector[RREventBase + RRNotify] = (EventSwapPtr)
-        SRRNotifyEvent;
+    EventSwapVector[RREventBase + RRScreenChangeNotify] = RRSwapScreenChangeNotifyEvent;
+    EventSwapVector[RREventBase + RRNotify] = RRSwapNotifyEvent;
 
     RRModeInitErrorValue();
     RRCrtcInitErrorValue();
