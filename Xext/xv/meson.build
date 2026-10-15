@@ -1,4 +1,5 @@
 srcs_xv = [
+    'byteswap.c',
     'xvmain.c',
     'xvdisp.c',
 ]
