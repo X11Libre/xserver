@@ -38,6 +38,7 @@ if get_option('xvfb')
             ],
             suite: 'xvfb display info',
             timeout: 300,
+            is_parallel: false,
         )
     endforeach
 
@@ -57,6 +58,7 @@ if get_option('xvfb')
                 ],
                 suite: 'xehypr info',
                 timeout: 300,
+                is_parallel: false,
             )
         endforeach
     endif
@@ -76,6 +78,7 @@ if get_option('xvfb')
                 ],
                 suite: 'xehypr-glamor display info',
                 timeout: 300,
+                is_parallel: false,
             )
         endforeach
     endif

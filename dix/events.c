@@ -6143,6 +6143,16 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
     }
 }
 
+void
+dixTrimEvents(void)
+{
+    if (swapEvent) {
+        free(swapEvent);
+        swapEvent = NULL;
+        swapEventLen = 0;
+    }
+}
+
 /*
  * Set the client pointer for the given client.
  *

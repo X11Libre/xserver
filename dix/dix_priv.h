@@ -885,4 +885,24 @@ x_rpcbuf_t dixBuildConnectionBlock(int maxscreens);
  */
 char *dixNewConnectionInfoBlock(ClientPtr pClient, size_t *sz, size_t *scrOffset);
 
+/*
+ * empty the font pattern cache
+ */
+void dixEmptyFontPatternCache(void);
+
+/*
+ * trim resource tables for idle clients
+ */
+void dixTrimResourceTables(void);
+
+/*
+ * trim global glyph hash tables
+ */
+void dixTrimGlyphHash(void);
+
+/*
+ * trim byte swap event buffer
+ */
+void dixTrimEvents(void);
+
 #endif /* _XSERVER_DIX_PRIV_H */

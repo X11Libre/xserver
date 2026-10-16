@@ -326,10 +326,14 @@ jobs:
                       echo "image $img:$tag already exists — reusing"
                   else
                       docker build -t "$img:$tag" -f .github/docker/ubuntu/Dockerfile .
-                      docker push "$img:$tag"
-                      if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-                          docker tag "$img:$tag" "$img:latest"
-                          docker push "$img:latest"
+                      if [ "${{ github.repository }}" = "X11Libre/xserver" ] && [ "${{ github.event_name }}" != "pull_request" ]; then
+                          docker push "$img:$tag"
+                          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+                              docker tag "$img:$tag" "$img:latest"
+                              docker push "$img:latest"
+                          fi
+                      else
+                          echo "Skipping docker push: write permissions to GHCR unavailable on pull requests or forks"
                       fi
                   fi
 
@@ -348,6 +352,8 @@ jobs:
         permissions:
             contents: read
             packages: write
+        outputs:
+            pushed: ${{ steps.build-push.outputs.pushed }}
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -356,19 +362,26 @@ jobs:
               run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
             - name: Build and push SDK image (xserver-sdk:<sha>)
+              id: build-push
               run: |
                   set -eux
                   owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
                   base="ghcr.io/$owner/xserver-ubuntu-build:${{ needs.ubuntu-deps-image.outputs.tag }}"
                   img="ghcr.io/$owner/xserver-sdk"
                   docker build --build-arg BASE="$base" -t "$img:${GITHUB_SHA}" -f .github/docker/sdk/Dockerfile .
-                  docker push "$img:${GITHUB_SHA}"
+                  if [ "${{ github.repository }}" = "X11Libre/xserver" ] && [ "${{ github.event_name }}" != "pull_request" ]; then
+                      docker push "$img:${GITHUB_SHA}"
+                      echo "pushed=true" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "Skipping docker push: write permissions to GHCR unavailable on pull requests or forks"
+                      echo "pushed=false" >> "$GITHUB_OUTPUT"
+                  fi
 
     drivers-build-ubuntu:
         needs:
             - build-sdk-image
             - abi-changes-check
-        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+        if: (needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')) && needs.build-sdk-image.outputs.pushed == 'true'
         runs-on: ubuntu-latest
         # The SDK + prereqs live at /opt/x11 in the image; override the
         # workflow-level X11_PREFIX (which points at the host /home/runner path)
@@ -851,10 +864,14 @@ jobs:
                       echo "image $img:$tag already exists — reusing"
                   else
                       docker build -t "$img:$tag" -f .github/docker/gentoo/Dockerfile .github/docker/gentoo
-                      docker push "$img:$tag"
-                      if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-                          docker tag "$img:$tag" "$img:latest"
-                          docker push "$img:latest"
+                      if [ "${{ github.repository }}" = "X11Libre/xserver" ] && [ "${{ github.event_name }}" != "pull_request" ]; then
+                          docker push "$img:$tag"
+                          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+                              docker tag "$img:$tag" "$img:latest"
+                              docker push "$img:latest"
+                          fi
+                      else
+                          echo "Skipping docker push: write permissions to GHCR unavailable on pull requests or forks"
                       fi
                   fi
 
