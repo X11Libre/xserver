@@ -15,6 +15,14 @@ if get_option('xvfb')
         ['xvinfo',   ['xvinfo']],
     ]
 
+    # These tests each start their own X server (Xvfb, or Xephyr nested inside
+    # Xvfb) via simple-xinit -displayfd. When several of them start at the same
+    # instant the servers race on the same display numbers ("/tmp/.X11-unix/Xn
+    # already in use" / "server already running"), and the losing client ends up
+    # with a display it cannot open ("unable to open display :N"). Run them
+    # serialised so the display allocation can't collide. They are short, so the
+    # lost parallelism is negligible.
+    is_parallel_info = false
     # run tests on xvfb
     foreach test_walk: testlist
         test(test_walk[0],
@@ -26,6 +34,7 @@ if get_option('xvfb')
             ],
             suite: 'xvfb display info',
             timeout: 300,
+            is_parallel: is_parallel_info,
         )
     endforeach
 
@@ -43,9 +52,10 @@ if get_option('xvfb')
                     '--',
                     xvfb_args
                 ],
-                suite: 'xehypr info',
-                timeout: 300,
-            )
+            suite: 'xehypr info',
+            timeout: 300,
+            is_parallel: is_parallel_info,
+        )
         endforeach
     endif
     if get_option('xephyr') and build_glamor
@@ -62,9 +72,10 @@ if get_option('xvfb')
                     '--',
                     xvfb_args
                 ],
-                suite: 'xehypr-glamor display info',
-                timeout: 300,
-            )
+            suite: 'xehypr-glamor display info',
+            timeout: 300,
+            is_parallel: is_parallel_info,
+        )
         endforeach
     endif
 endif
