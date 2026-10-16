@@ -6,7 +6,6 @@ srcs_xorg_parser = [
     'InputClass.c',
     'OutputClass.c',
     'Layout.c',
-    'Module.c',
     'Video.c',
     'Monitor.c',
     'Pointer.c',

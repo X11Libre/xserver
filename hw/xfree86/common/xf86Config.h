@@ -52,7 +52,6 @@ typedef struct _ModuleDefault {
 /*
  * prototypes
  */
-const char **xf86ModulelistFromConfig(void ***);
 const char **xf86DriverlistFromConfig(void);
 const char **xf86InputDriverlistFromConfig(void);
 Bool xf86BuiltinInputDriver(const char *);
