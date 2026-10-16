@@ -47,6 +47,10 @@
 #include "windowstr.h"          /* window structure  */
 #include "swaprep.h"
 #include "exglobals.h"          /* BadDevice */
+#define AllModifiersMask ( \
+	ShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | \
+	Mod3Mask | Mod4Mask | Mod5Mask )
+
 
 #define AllModifiersMask ( \
     ShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | \
