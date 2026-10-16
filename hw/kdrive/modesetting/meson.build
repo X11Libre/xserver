@@ -15,6 +15,11 @@ if build_glamor
     srcs += 'ms_glamor.c'
 endif
 
+modesetting_os = stub
+if build_kdrive_linux
+    modesetting_os = linux
+endif
+
 xmodesetting_server = executable(
     'Xmodesetting',
     srcs,
@@ -28,7 +33,7 @@ xmodesetting_server = executable(
     link_with: [
         libxserver_main,
         kdrive,
-        linux,
+        modesetting_os,
         libxserver_fb,
         libxserver,
         libxserver_glx,
