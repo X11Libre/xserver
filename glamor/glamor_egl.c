@@ -1734,7 +1734,8 @@ glamor_egl_post_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unus
 #ifdef GLAMOR_HAS_GBM
     glamor_egl_priv_t *glamor_egl = glamor_egl_get_screen_private(screen);
 
-    if (glamor_egl->gbm)
+    if (!glamor_egl->gbm_borrowed &&
+        glamor_egl->gbm)
         gbm_device_destroy(glamor_egl->gbm);
 #endif
 
@@ -2279,8 +2280,10 @@ void glamor_egl_cleanup(glamor_egl_priv_t *glamor_egl)
     glamor_egl_pre_close_screen_cleanup(glamor_egl);
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->gbm)
+    if (!glamor_egl->gbm_borrowed &&
+        glamor_egl->gbm) {
         gbm_device_destroy(glamor_egl->gbm);
+    }
 #endif
 }
 
@@ -2764,7 +2767,10 @@ glamor_egl_prepare_and_init_display(glamor_egl_priv_t* glamor_egl, int *platform
     glamor_egl->fd = glamor_egl_conf->fd;
 
 #ifdef GLAMOR_HAS_GBM
-    if (glamor_egl->fd >= 0 && !glamor_egl_conf->gbm_forbidden) {
+    if (glamor_egl_conf->gbm && !glamor_egl_conf->gbm_forbidden) {
+        glamor_egl->gbm = glamor_egl_conf->gbm;
+        glamor_egl->gbm_borrowed = TRUE;
+    } else if (glamor_egl->fd >= 0 && !glamor_egl_conf->gbm_forbidden) {
         glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
         if (!glamor_egl->gbm) {
             glamor_egl->gbm = gbm_create_device_by_name(glamor_egl->fd, "dumb");

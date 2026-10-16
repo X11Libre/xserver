@@ -12,6 +12,7 @@ typedef struct {
     /* Passed to glamor_egl */
     const char* glvnd; /* glvnd vendor library or driver name */
     const char* dri_path; /* /dev/dri/[cardxx|renderDxxx] */
+    void* gbm; /* Optional gbm device to pass to glamor */
     Bool use_gbm; /* If glamor should try to use libgbm */
     Bool direct_dri3; /* If glamor should only use the direct DRI3 implementation */
     Bool force_gl; /* If glamor should only create desktop gl contexts */
