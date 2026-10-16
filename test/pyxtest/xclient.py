@@ -180,6 +180,7 @@ class RawX11Connection:
 
     def _connect(self):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self._peer_pid = None
         path = f"/tmp/.X11-unix/X{self.display_num}"
         try:
             self.sock.connect(path)
@@ -187,6 +188,18 @@ class RawX11Connection:
             self.sock.close()
             self.sock = None
             raise X11ConnectionError(f"Cannot connect to {path}: {e}")
+        # Record who actually owns this socket.  Under concurrent tests the
+        # display socket can be taken over by another server, in which case the
+        # client ends up talking to the wrong server and sees its connection
+        # die mid-test (BrokenPipeError).
+        try:
+            import struct as _struct
+            cred = self.sock.getsockopt(
+                socket.SOL_SOCKET, socket.SO_PEERCRED, _struct.calcsize("iii")
+            )
+            self._peer_pid, _, _ = _struct.unpack("iii", cred)
+        except OSError:
+            self._peer_pid = None
         try:
             self._handshake()
         except Exception:
