@@ -413,8 +413,29 @@ def xorg(request, tmp_path, xserver_args):
 def xclient(xserver):
     """Create a raw X11 connection to the test server."""
     conn = RawX11Connection(xserver.display_num)
+    _check_peer_is_test_server(conn, xserver)
     yield conn
     conn.close()
+
+
+def _check_peer_is_test_server(conn, xserver):
+    """Make sure the client talks to the server this fixture started.
+
+    With several tests starting servers concurrently, a display socket can be
+    taken over by another server.  The client would then handshake against the
+    wrong server and see that server die mid-test, surfacing as an opaque
+    BrokenPipeError on the next send instead of the real cause.
+    """
+    proc = getattr(xserver, "_process", None)
+    expected = proc.pid if proc is not None else None
+    actual = getattr(conn, "_peer_pid", None)
+    if expected is not None and actual is not None and actual != expected:
+        conn.close()
+        pytest.fail(
+            f"client connected to PID {actual} instead of the test server "
+            f"(PID {expected}) on display :{xserver.display_num} — "
+            f"another test's server owns this display socket"
+        )
 
 
 @pytest.fixture
