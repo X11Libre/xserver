@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright © 2026 Enrico Weigelt, metux IT consult
+#
+# Refresh the scoped NetBSD build-dependency mirror used by the
+# xserver-build-netbsd lane.
+#
+# Why: that lane installs its deps from ftp/cdn.netbsd.org, which flake
+# intermittently (e.g. `pkg_add: ... Undefined error: 0`) and red an
+# otherwise-green PR for reasons unrelated to its diff. We host a scoped mirror
+# (just the ~230 MB this job needs, not the ~65 GB full pkgsrc archive) as
+# GitHub Release assets and point install-pkg.sh at it (mirror first, official
+# fallback — see .github/scripts/netbsd/mirror-conf.sh).
+#
+# How: boot the SAME NetBSD VM the build lane uses, drive the real pkgin
+# download-only path to get the authoritative dependency closure (no hand-rolled
+# resolver), build a trimmed pkg_summary.gz, fetch the X11 sets, then publish
+# everything to the stable `netbsd-pkgsrc-mirror` release.
+
+name: Refresh NetBSD pkg mirror
+
+on:
+    workflow_dispatch:
+    schedule:
+        # Weekly, Sunday 04:00 UTC. pkgsrc quarterly branches move slowly, so
+        # weekly is ample; install-pkg.sh falls back to official mirrors for
+        # anything not (yet) mirrored, so a missed run only costs the fallback.
+        - cron: '0 4 * * 0'
+
+# Don't overlap two syncs (each boots a VM and rewrites the same release).
+concurrency:
+    group: netbsd-pkg-mirror
+    cancel-in-progress: false
+
+permissions:
+    contents: write   # create/upload/delete release assets
+
+jobs:
+    refresh-netbsd-mirror:
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        steps:
+            - uses: actions/checkout@v6
+
+            # Resolve + download the dependency closure and stage the mirror
+            # inside the workspace (copied back to the host afterwards).
+            - name: resolve + stage mirror in NetBSD VM
+              uses: vmactions/netbsd-vm@v1.2.3
+              with:
+                  release: '10.1'          # MUST match the build lane's VM
+                  usesh: true
+                  copyback: true
+                  mem: 4096
+                  run: ./.github/scripts/netbsd/sync-pkg-mirror.sh
+
+            - name: publish + prune GitHub Release assets
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: ./.github/scripts/netbsd/publish-mirror.sh
