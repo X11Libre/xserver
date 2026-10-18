@@ -244,14 +244,15 @@ ProcRotateProperties(ClientPtr client)
             delta += p.nAtoms;
         for (int i = 0; i < p.nAtoms; i++) {
             int j = (i + delta) % p.nAtoms;
-            deliverPropertyNotifyEvent(pWin, PropertyNewValue, props[i]);
-            notifyVRRMode(client, pWin, PropertyNewValue, props[i]);
-
             /* Preserve name and devPrivates */
             props[j]->type = saved[i].type;
             props[j]->format = saved[i].format;
             props[j]->size = saved[i].size;
             props[j]->data = saved[i].data;
+        }
+        for (int i = 0; i < p.nAtoms; i++) {
+            deliverPropertyNotifyEvent(pWin, PropertyNewValue, props[i]);
+            notifyVRRMode(client, pWin, PropertyNewValue, props[i]);
         }
     }
  out:
