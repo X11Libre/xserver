@@ -636,7 +636,7 @@ LogSyslogWrite(int verb, const char *buf, size_t len, Bool end_line) {
     if (verb >= 0 && xorgSyslogVerbosity < verb)
         return;
 
-    syslog(LOG_PID, "%.*s", (int)len, buf);
+    syslog(LOG_INFO, "%.*s", (int)len, buf);
 #endif
 }
 
