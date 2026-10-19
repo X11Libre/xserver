@@ -6,19 +6,51 @@
 # optionally under valgrind or with AddressSanitizer (ASAN) support,
 # with automatic display number allocation via the -displayfd mechanism.
 
-from typing import Iterator
-
+import fcntl
 import os
 import select
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import warnings
 from pathlib import Path
+from typing import Iterator
 
 from asan import AsanError
 from valgrind import ValgrindError
+
+# Serializes the display-allocation window of concurrently started servers.
+#
+# Several tests (and pytest-xdist workers) start their own X servers at the
+# same time.  Each of them scans for a free display number via -displayfd, and
+# two servers racing through the same number can both end up believing they own
+# it: the loser's client then connects to the winner's server.  When the winner
+# is torn down at the end of its own test, the loser's client sees its
+# connection die mid-test (BrokenPipeError), which looks like a flaky test
+# rather than a display-socket takeover.
+#
+# The lock is held only for the short startup window (Popen plus reading the
+# display number), not for the lifetime of the server: once a server has
+# announced its display it holds the socket and the lock file, so later servers
+# skip that number.
+_DISPLAY_LOCK_PATH = os.path.join(
+    tempfile.gettempdir(), "pyxtest-xserver-display.lock"
+)
+
+
+def _acquire_display_lock() -> int:
+    fd = os.open(_DISPLAY_LOCK_PATH, os.O_CREAT | os.O_RDWR, 0o666)
+    fcntl.flock(fd, fcntl.LOCK_EX)
+    return fd
+
+
+def _release_display_lock(fd: int) -> None:
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
 
 
 class XServerProcess:
@@ -152,6 +184,15 @@ class XServerProcess:
 
     def start(self, timeout=10):
         """Start the X server and wait for it to be ready."""
+        # Hold the display-allocation lock for the whole startup, so that
+        # concurrently starting servers cannot pick the same display number.
+        lock_fd = _acquire_display_lock()
+        try:
+            return self._start_locked(timeout)
+        finally:
+            _release_display_lock(lock_fd)
+
+    def _start_locked(self, timeout=10):
         read_fd, write_fd = os.pipe()
 
         cmd = self._build_command(write_fd)
