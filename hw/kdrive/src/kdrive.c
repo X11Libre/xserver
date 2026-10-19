@@ -907,7 +907,9 @@ KdAddScreen(ScreenInfo * pScreenInfo,
             bm = screen->fb.blueMask;
         }
         fbSetVisualTypesAndMasks(pScreenInfo->formats[i].depth,
-                                 visuals, 8, rm, gm, bm);
+                                 visuals,
+                                 pScreenInfo->formats[i].depth == 30 ? 10 : 8, /* XXX bitsPerRGB */
+                                 rm, gm, bm);
     }
 
     kdCurrentScreen = screen;
