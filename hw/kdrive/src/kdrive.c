@@ -645,16 +645,23 @@ Bool KdAllocatePrivates(ScreenPtr pScreen)
 
 Bool KdCreateScreenResources(ScreenPtr pScreen)
 {
+>>>>>>> 550b9ed0dd (kdrive: Don't assign `ret = -1` in `KdCreateScreenResources`)
+Bool KdCreateScreenResources(ScreenPtr pScreen)
+{
     KdScreenPriv(pScreen);
     KdCardInfo *card = pScreenPriv->card;
 
-    if (!miCreateScreenResources(pScreen))
-        return FALSE;
-
-    if (card->cfuncs->createRes)
-        return card->cfuncs->createRes(pScreen);
-
-    return TRUE;
+    pScreen->CreateScreenResources = pScreenPriv->CreateScreenResources;
+    if (pScreen->CreateScreenResources)
+        ret = (*pScreen->CreateScreenResources) (pScreen);
+    else
+        ret = TRUE;
+    pScreenPriv->CreateScreenResources = pScreen->CreateScreenResources;
+    pScreen->CreateScreenResources = KdCreateScreenResources;
+    if (ret && card->cfuncs->createRes)
+        ret = (*card->cfuncs->createRes) (pScreen);
+    return ret;
+}
 }
 
 Bool KdCloseScreen(ScreenPtr pScreen)
