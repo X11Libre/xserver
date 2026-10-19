@@ -1047,6 +1047,7 @@ static void KdAddScreen(KdScreenInfo * screen, int argc, char **argv)
         Pixel rm, gm, bm;
 
         visuals = 0;
+    }
         rm = gm = bm = 0;
         if (screenInfo.formats[i].depth == screen->fb.depth) {
             visuals = screen->fb.visuals;
@@ -1054,9 +1055,15 @@ static void KdAddScreen(KdScreenInfo * screen, int argc, char **argv)
             gm = screen->fb.greenMask;
             bm = screen->fb.blueMask;
         }
-        fbSetVisualTypesAndMasks(screenInfo.formats[i].depth,
-                                 visuals, 8, rm, gm, bm);
+        fbSetVisualTypesAndMasks(pScreenInfo->formats[i].depth,
+                                 visuals,
+                                 pScreenInfo->formats[i].depth == 30 ? 10 : 8, /* XXX bitsPerRGB */
+                                 rm, gm, bm);
     }
+
+    kdCurrentScreen = screen;
+
+    AddScreen(KdScreenInit, argc, argv);
 
     kdCurrentScreen = screen;
 
