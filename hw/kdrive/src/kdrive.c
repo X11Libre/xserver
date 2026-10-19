@@ -544,13 +544,6 @@ KdCreateScreenResources(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdCardInfo *card = pScreenPriv->card;
 
-    if (!miCreateScreenResources(pScreen))
-        return FALSE;
-
-    if (card->cfuncs->createRes)
-        return card->cfuncs->createRes(pScreen);
-
-    return TRUE;
 }
 
 Bool KdCloseScreen(ScreenPtr pScreen)
