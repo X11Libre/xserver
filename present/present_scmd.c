@@ -924,7 +924,7 @@ present_scmd_abort_vblank(ScreenPtr screen, WindowPtr window, RRCrtcPtr crtc, ui
         present_fake_abort_vblank(screen, event_id, msc);
     else
     {
-        present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
+        present_screen_priv_ptr     screen_priv = present_screen_priv(crtc->pScreen);
 
         (*screen_priv->info->abort_vblank) (crtc, event_id, msc);
     }
