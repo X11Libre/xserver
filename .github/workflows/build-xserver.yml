@@ -567,14 +567,14 @@ jobs:
                   run:     ./.github/scripts/freebsd/run-xserver-build.sh
 
             - name: cleanup stale VM before retry
-              if: steps.freebsd-1.outcome == 'failure'
+              if: ${{ !cancelled() && steps.freebsd-1.outcome == 'failure' }}
               uses: ./.github/actions/libvirt-cleanup
               with:
                   guest: freebsd
 
             - name: run in freebsd VM (attempt 2)
               id: freebsd-2
-              if: steps.freebsd-1.outcome == 'failure'
+              if: ${{ !cancelled() && steps.freebsd-1.outcome == 'failure' }}
               continue-on-error: true
               uses: vmactions/freebsd-vm@v1
               with:
@@ -584,13 +584,13 @@ jobs:
                   run:     ./.github/scripts/freebsd/run-xserver-build.sh
 
             - name: cleanup stale VM before final retry
-              if: steps.freebsd-1.outcome == 'failure' && steps.freebsd-2.outcome == 'failure'
+              if: ${{ !cancelled() && steps.freebsd-1.outcome == 'failure' && steps.freebsd-2.outcome == 'failure' }}
               uses: ./.github/actions/libvirt-cleanup
               with:
                   guest: freebsd
 
             - name: run in freebsd VM (attempt 3)
-              if: steps.freebsd-1.outcome == 'failure' && steps.freebsd-2.outcome == 'failure'
+              if: ${{ !cancelled() && steps.freebsd-1.outcome == 'failure' && steps.freebsd-2.outcome == 'failure' }}
               uses: vmactions/freebsd-vm@v1
               with:
                   envs: 'MYTOKEN MESON_ARGS'
@@ -612,6 +612,11 @@ jobs:
             # (see .github/actions/libvirt-cleanup). Without that teardown the
             # retry collides with attempt 1's leftover VM
             # ("Guest name 'dragonflybsd' is already in use") and times out.
+            #
+            # NOTE: the retry `if:` MUST NOT rely on the implicit success()
+            # status function - after attempt 1 fails (continue-on-error) that
+            # is false and silently skips every later step. Use !cancelled()
+            # so the retries actually run on a VM boot flake.
             - name: run in DragonFlyBSD VM (attempt 1)
               id: dfly-1
               continue-on-error: true
@@ -623,14 +628,14 @@ jobs:
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
 
             - name: cleanup stale VM before retry
-              if: steps.dfly-1.outcome == 'failure'
+              if: ${{ !cancelled() && steps.dfly-1.outcome == 'failure' }}
               uses: ./.github/actions/libvirt-cleanup
               with:
                   guest: dragonflybsd
 
             - name: run in DragonFlyBSD VM (attempt 2)
               id: dfly-2
-              if: steps.dfly-1.outcome == 'failure'
+              if: ${{ !cancelled() && steps.dfly-1.outcome == 'failure' }}
               continue-on-error: true
               uses: vmactions/dragonflybsd-vm@v1.3.4
               with:
@@ -640,13 +645,13 @@ jobs:
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
 
             - name: cleanup stale VM before final retry
-              if: steps.dfly-1.outcome == 'failure' && steps.dfly-2.outcome == 'failure'
+              if: ${{ !cancelled() && steps.dfly-1.outcome == 'failure' && steps.dfly-2.outcome == 'failure' }}
               uses: ./.github/actions/libvirt-cleanup
               with:
                   guest: dragonflybsd
 
             - name: run in DragonFlyBSD VM (attempt 3)
-              if: steps.dfly-1.outcome == 'failure' && steps.dfly-2.outcome == 'failure'
+              if: ${{ !cancelled() && steps.dfly-1.outcome == 'failure' && steps.dfly-2.outcome == 'failure' }}
               uses: vmactions/dragonflybsd-vm@v1.3.4
               with:
                   envs: 'MESON_ARGS'
@@ -678,14 +683,14 @@ jobs:
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
             - name: cleanup stale VM before retry
-              if: steps.netbsd-1.outcome == 'failure'
+              if: ${{ !cancelled() && steps.netbsd-1.outcome == 'failure' }}
               uses: ./.github/actions/libvirt-cleanup
               with:
                   guest: netbsd
 
             - name: run in netbsd VM (attempt 2)
               id: netbsd-2
-              if: steps.netbsd-1.outcome == 'failure'
+              if: ${{ !cancelled() && steps.netbsd-1.outcome == 'failure' }}
               continue-on-error: true
               uses: vmactions/netbsd-vm@v1.5.0
               with:
@@ -695,13 +700,13 @@ jobs:
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
 
             - name: cleanup stale VM before final retry
-              if: steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
+              if: ${{ !cancelled() && steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure' }}
               uses: ./.github/actions/libvirt-cleanup
               with:
                   guest: netbsd
 
             - name: run in netbsd VM (attempt 3)
-              if: steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure'
+              if: ${{ !cancelled() && steps.netbsd-1.outcome == 'failure' && steps.netbsd-2.outcome == 'failure' }}
               uses: vmactions/netbsd-vm@v1.5.0
               with:
                   envs: 'MESON_ARGS LDFLAGS'
