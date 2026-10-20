@@ -50,6 +50,7 @@ SOFTWARE.
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/reqhandlers_priv.h"
 
 #include "windowstr.h"
