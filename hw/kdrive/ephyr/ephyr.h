@@ -81,7 +81,6 @@ typedef struct _ephyrScrPriv {
     size_t shmsize;
 
     KdScreenInfo *screen;
-    int mynum;                  /* Screen number */
     unsigned long cmap[256];
 
     ScreenBlockHandlerProcPtr   BlockHandler;
