@@ -425,6 +425,18 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
     DeviceIntPtr master;
     bool can_emit = events && nevents;
 
+    /* We cannot know how many events are available in *events, but
+     * we know it all DDX very protbably allocated them with
+     * GetMaximumEventsNum() and fill_pointer_events() may have added one.
+     *
+     * Let's cap at a maximum of 64 barrier events which is way more than
+     * we'll need but low enough that we shouldn't OOB on *events.
+     *
+     * Changing the signatures to get some sz_events in here is an ABI change
+     * through miPointerSetPosition so... weeping face.
+     */
+    const int MAX_BARRIER_EVENTS = 64;
+
     if (nevents)
         *nevents = 0;
 
@@ -491,7 +503,7 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
 
         /* root x/y is filled in later */
 
-        if (can_emit) {
+        if (can_emit && *nevents < MAX_BARRIER_EVENTS) {
             barrier_events->barrier_event = ev;
             barrier_events++;
             *nevents += 1;
@@ -530,7 +542,7 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
 
         /* root x/y is filled in later */
 
-        if (can_emit) {
+        if (can_emit && *nevents < MAX_BARRIER_EVENTS) {
             barrier_events->barrier_event = ev;
             barrier_events++;
             *nevents += 1;
@@ -587,6 +599,20 @@ CreatePointerBarrierClient(ClientPtr client,
 
     ScreenPtr pScreen = pWin->drawable.pScreen;
     cs = GetBarrierScreen(pScreen);
+
+    /* Only allow for a maximum of 32 barriers to be created. This
+     * should be more than enough and prevents issues in
+     * input_constrain_cursor, see MAX_BARRIER_EVENTS in that
+     * function */
+    struct PointerBarrierClient *counter;
+    size_t nbarriers = 0;
+    xorg_list_for_each_entry(counter, &cs->barriers, entry) {
+        nbarriers++;
+        if (nbarriers >= 32) {
+            err = BadAlloc;
+            goto error;
+        }
+    }
 
     ret->pScreen = pScreen;
     ret->window = stuff->window;
