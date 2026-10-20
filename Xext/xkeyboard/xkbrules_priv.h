@@ -22,6 +22,7 @@ typedef struct _XkbRF_Rule {
     int number;
     int layout_num;
     int variant_num;
+    unsigned flags;
     const char *model;
     const char *layout;
     const char *variant;
@@ -32,7 +33,6 @@ typedef struct _XkbRF_Rule {
     const char *types;
     const char *compat;
     const char *geometry;
-    unsigned flags;
 } XkbRF_RuleRec, *XkbRF_RulePtr;
 
 typedef struct _XkbRF_Group {
@@ -42,12 +42,12 @@ typedef struct _XkbRF_Group {
 } XkbRF_GroupRec, *XkbRF_GroupPtr;
 
 typedef struct _XkbRF_Rules {
+    XkbRF_RulePtr rules;
+    XkbRF_GroupPtr groups;
     unsigned short sz_rules;
     unsigned short num_rules;
-    XkbRF_RulePtr rules;
     unsigned short sz_groups;
     unsigned short num_groups;
-    XkbRF_GroupPtr groups;
 } XkbRF_RulesRec, *XkbRF_RulesPtr;
 
 struct _XkbComponentNames;
