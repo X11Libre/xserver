@@ -2591,13 +2591,11 @@ ProcAllocNamedColor(ClientPtr client)
     }
 
     /* if PanoramiX is active, and this isn't the master screen, keep radio silence */
-#ifdef XINERAMA
-    if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
-        return X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
-#else
+    if (PanoramiXIsSlaveScreen(pcmp->pScreen)) {
+        return Success;
+    }
+
     return X_SEND_REPLY_SIMPLE(client, reply);
-#endif /* XINERAMA */
 }
 
 int
@@ -2640,9 +2638,8 @@ ProcAllocColorCells(ClientPtr client)
             x_rpcbuf_clear(&rpcbuf);
             return rc;
         }
-#ifdef XINERAMA
-        if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
-#endif /* XINERAMA */
+
+        if (PanoramiXIsMasterScreen(pcmp->pScreen))
         {
             xAllocColorCellsReply reply = {
                 .nPixels = npixels,
@@ -2716,12 +2713,10 @@ ProcAllocColorPlanes(ClientPtr client)
             swapl(&reply.blueMask);
         }
 
-#ifdef XINERAMA
-        if (PanoramiXIsDisabled() || !pcmp->pScreen->myNum)
-#endif /* XINERAMA */
-        {
+        if (PanoramiXIsMasterScreen(pcmp->pScreen)) {
             return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
         }
+
         x_rpcbuf_clear(&rpcbuf);
         return Success;
     }
