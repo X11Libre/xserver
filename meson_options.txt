@@ -68,7 +68,7 @@ option('listen_unix', type: 'boolean', value: true,
 option('listen_local', type: 'boolean', value: true,
        description: 'Listen on local by default')
 
-option('int10', type: 'combo', choices: ['stub', 'x86emu', 'vm86', 'auto', 'false'],
+option('int10', type: 'combo', choices: ['stub', 'x86emu', 'auto', 'false'],
        value: 'auto',
        description: 'Xorg int10 backend (default: usually x86emu)')
 option('suid_wrapper', type: 'boolean', value: false,
