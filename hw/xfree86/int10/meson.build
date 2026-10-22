@@ -36,14 +36,6 @@ if int10 == 'x86emu'
     int10_link += xorg_x86emu
 endif
 
-if int10 == 'vm86'
-    srcs_xorg_int10 += [
-        'vm86/linux_vm86.c',
-        'linux.c',
-    ]
-    int10_c_args += '-D_VM86_LINUX'
-endif
-
 xorg_int10 = shared_module('int10',
     srcs_xorg_int10,
     include_directories: [
