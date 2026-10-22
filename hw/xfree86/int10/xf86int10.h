@@ -1,4 +1,3 @@
-
 /*
  *                   XFree86 int10 module
  *   execute BIOS int 10h calls in x86 real mode environment
