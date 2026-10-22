@@ -116,10 +116,7 @@ If the  vm86() is to be used  no memory access functions  can be used.
 Therefore the layout of the real mode memory image has to meet certain
 requirements. Therefore  when porting to  other platforms a  new setup
 code may  have to  be designed, too.  The following section  will give
-guidelines how  this may be  done. A sample implementation  using SysV
-IPC to  map the  appropriate real  mode memory image  to address  0 in
-virtual  address  space  just  prior  to execution  may  be  found  in
-xfree86/os-support/linux/int10/linux.c.
+guidelines how  this may be  done.
 
 On  non-PC like  platforms emulation  of certain  PC features  such as
 initialization of  BIOS int vectors, sys_BIOS constants  or PCI config
@@ -289,23 +286,6 @@ the resulting register values back to the xf86Int10InfoRec structure
 
 should be called. 
 
-Helper  functions are  provided to  aid the  implementation of  a vm86
-call:
-
-  Bool vm86_GP_fault(xf86Int10InfoPtr pInt);
-
-This  function  handles  instructions  which  cause  a  vm86  call  to
-trap.  PIO  access  is handled  by  the  in/out  calls as  defined  in
-compiler.h. Optionally the PIO  instructions can be logged by defining
-PRINT_PORT in xf86int10.h. This is meant for debugging purposes.
-
-Unknown  instructions  and   'hlt'  cause  vm86_GP_fault()  to  return
-FALSE. Otherwise TRUE is returned.
-
-Note: This  function is  currently based on  the Linux vm86  call.  It
-might have  to be modified  or even rewritten  for other OS.   So your
-mileage may vary.
-
 Functions to dump memory, code, xf86 CPU register values and stack are
 also provided.  Take a  look at  helper.c To view  a memory  range the
 function
@@ -325,8 +305,7 @@ provided     for    memory     byte/work/long     read/write    access
 MEM_WB(name,addr,val),MEM_WL(name,addr,val),MEM_WL(name,addr,val))   of
 the real mode memory environment. 'name' will contain a pointer to the
 current   xf86Int10InfoRec.  Currently   defines  are   available  for
-vm86-mode under  Linux and x86emu.  They may be activated  by defining
-_X86EMU or _VM86_LINUX respectively.
+x86emu. They may be activated by defining _X86EMU.
 
 Note: Emulators usually are not able to pass this pointer when calling
 memory  access functions.  In this  case a  global variable  should be
