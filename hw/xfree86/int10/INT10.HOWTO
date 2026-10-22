@@ -161,7 +161,7 @@ specific execute environment the function
 
      Bool xf86Int10ExecSetup(xf86Int10InfoPtr pInt)
 
-should be called. If this function returns FALSE any already allocated
+should be called.If this function returns FALSE any already allocated
 memory should be freed and xf86Int10Init(0 should exit returning NULL.
 
 If the  platform has  a PC  like system BIOS  it may  be copied  to or
@@ -287,7 +287,11 @@ the resulting register values back to the xf86Int10InfoRec structure
 
      void finish_int(xf86Int10InfoPtr pInt);
 
-should be called. 
+<<<<<<< HEAD
+should be called.
+=======
+should be called.
+>>>>>>> 173c0d170f (xfree86: remove the vm86 int10 backend)
 
 Helper  functions are  provided to  aid the  implementation of  a vm86
 call:
