@@ -8,10 +8,6 @@
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice (including the next
- * paragraph) shall be included in all copies or substantial portions of the
- * Software.
- *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -32,6 +28,11 @@
 #include <epoxy/gl.h>
 #include <epoxy/egl.h>
 #include <glamor_egl_ext.h>
+
+#include "scrnintstr.h"
+#include "pixmap.h"
+
+Bool glamor_egl_create_textured_screen(ScreenPtr screen, int handle, int stride);
 
 /*
  * Create an EGLDisplay from a native display type. This is a little quirky
