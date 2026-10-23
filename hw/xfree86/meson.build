@@ -58,6 +58,7 @@ srcs_xorg = [
 xorg_link = [
     libxserver,
     libglxvnd,
+    libxserver_glx,
     xorg_common,
     xorg_compat,
     xorg_loader,
