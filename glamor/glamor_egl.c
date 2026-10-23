@@ -42,6 +42,10 @@
 #include <gbm.h>
 #include <drm_fourcc.h>
 
+
+#ifndef GBM_MAX_PLANES
+#define GBM_MAX_PLANES 4
+#endif
 #include "glamor_egl.h"
 
 #include "glamor.h"
