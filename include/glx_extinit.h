@@ -44,6 +44,7 @@ extern __GLXprovider __glXDRISWRastProvider;
 /* exported for glamor */
 _X_EXPORT
 void GlxPushProvider(__GLXprovider * provider);
+_X_EXPORT
 Bool xorgGlxCreateVendor(void);
 #else
 static inline Bool xorgGlxCreateVendor(void) { return TRUE; }
