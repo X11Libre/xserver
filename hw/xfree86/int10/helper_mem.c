@@ -25,30 +25,6 @@ static const OptionInfoRec INT10Options[] = {
     {-1, NULL, OPTV_NONE, {0}, FALSE},
 };
 
-#ifdef DEBUG
-void
-dprint(unsigned long start, unsigned long size)
-{
-    int i, j;
-    char *c = (char *) start;
-
-    for (j = 0; j < (size >> 4); j++) {
-        char *d = c;
-
-        ErrorF("\n0x%lx:  ", (unsigned long) c);
-        for (i = 0; i < 16; i++)
-            ErrorF("%2.2x ", (unsigned char) (*(c++)));
-        c = d;
-        for (i = 0; i < 16; i++) {
-            ErrorF("%c", ((((CARD8) (*c)) > 32) && (((CARD8) (*c)) < 128)) ?
-                   (unsigned char) (*(c)) : '.');
-            c++;
-        }
-    }
-    ErrorF("\n");
-}
-#endif
-
 #ifndef _PC
 /*
  * here we are really paranoid about faking a "real"
