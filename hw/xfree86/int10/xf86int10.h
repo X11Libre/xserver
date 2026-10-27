@@ -141,44 +141,6 @@ void UnlockLegacyVGA(xf86Int10InfoPtr pInt, legacyVGAPtr vga);
 extern _X_EXPORT void xf86Int10SaveRestoreBIOSVars(xf86Int10InfoPtr pInt,
                                                    Bool save);
 #endif
-int port_rep_inb(xf86Int10InfoPtr pInt,
-                 uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_inw(xf86Int10InfoPtr pInt,
-                 uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_inl(xf86Int10InfoPtr pInt,
-                 uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_outb(xf86Int10InfoPtr pInt,
-                  uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_outw(xf86Int10InfoPtr pInt,
-                  uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_outl(xf86Int10InfoPtr pInt,
-                  uint16_t port, uint32_t base, int d_f, uint32_t count);
-
-uint8_t x_inb(uint16_t port);
-uint16_t x_inw(uint16_t port);
-void x_outb(uint16_t port, uint8_t val);
-void x_outw(uint16_t port, uint16_t val);
-uint32_t x_inl(uint16_t port);
-void x_outl(uint16_t port, uint32_t val);
-
-uint8_t Mem_rb(uint32_t addr);
-uint16_t Mem_rw(uint32_t addr);
-uint32_t Mem_rl(uint32_t addr);
-void Mem_wb(uint32_t addr, uint8_t val);
-void Mem_ww(uint32_t addr, uint16_t val);
-void Mem_wl(uint32_t addr, uint32_t val);
-
-/* helper_mem.c */
-void setup_int_vect(xf86Int10InfoPtr pInt);
-int setup_system_bios(void *base_addr);
-void reset_int_vect(xf86Int10InfoPtr pInt);
-void set_return_trap(xf86Int10InfoPtr pInt);
-extern _X_EXPORT void *xf86HandleInt10Options(ScrnInfoPtr pScrn,
-                                              int entityIndex);
-Bool int10skip(const void *options);
-Bool int10_check_bios(int scrnIndex, int codeSeg,
-                      const unsigned char *vbiosMem);
-Bool initPrimary(const void *options);
 extern _X_EXPORT BusType xf86int10GetBiosLocationType(const xf86Int10InfoPtr
                                                       pInt);
 extern _X_EXPORT Bool xf86int10GetBiosSegment(xf86Int10InfoPtr pInt,
