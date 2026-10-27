@@ -145,10 +145,6 @@ run_bios_int(int num, xf86Int10InfoPtr pInt)
     ErrorF("calling card BIOS at: ");
 #endif
     eflags = X86_EFLAGS;
-#if 0
-    eflags = eflags | IF_MASK;
-    X86_EFLAGS = X86_EFLAGS & ~(VIF_MASK | TF_MASK | IF_MASK | NT_MASK);
-#endif
     pushw(pInt, eflags);
     pushw(pInt, X86_CS);
     pushw(pInt, X86_IP);
