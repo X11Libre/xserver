@@ -89,9 +89,6 @@ Bool int10skip(const void *options);
 Bool int10_check_bios(int scrnIndex, int codeSeg,
                       const unsigned char *vbiosMem);
 Bool initPrimary(const void *options);
-#ifdef DEBUG
-void dprint(unsigned long start, unsigned long size);
-#endif
 
 /* OS dependent functions */
 _X_EXPORT Bool MapCurrentInt10(xf86Int10InfoPtr pInt);

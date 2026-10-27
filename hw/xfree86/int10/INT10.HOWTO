@@ -286,14 +286,6 @@ the resulting register values back to the xf86Int10InfoRec structure
 
 should be called. 
 
-Functions to dump memory, code, xf86 CPU register values and stack are
-also provided.  Take a  look at  helper.c To view  a memory  range the
-function
-
-    void dprint(unsigned long start, unsigned long size)
-
-is provided. The use should be self explanatory.
-
 Register  and memory  access functions  are provided  in helper_mem.c.
 The PIO register access functions  can trap access to PCI config space
 access register (config method 1) if _PC is not defined.
