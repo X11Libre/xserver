@@ -70,7 +70,7 @@ static void
 test_xorg_list_add(void)
 {
     struct parent parent = { 0 };
-    struct child child[3];
+    struct child child[3] = { 0 };
     struct child *c;
 
     xorg_list_init(&parent.children);
@@ -98,7 +98,7 @@ static void
 test_xorg_list_append(void)
 {
     struct parent parent = { 0 };
-    struct child child[3];
+    struct child child[3] = { 0 };
     struct child *c;
     int i;
 
@@ -140,7 +140,7 @@ static void
 test_xorg_list_del(void)
 {
     struct parent parent = { 0 };
-    struct child child[2];
+    struct child child[2] = { 0 };
     struct child *c;
 
     xorg_list_init(&parent.children);
@@ -189,7 +189,7 @@ static void
 test_xorg_list_for_each(void)
 {
     struct parent parent = { 0 };
-    struct child child[3];
+    struct child child[3] = { 0 };
     struct child *c;
     int i = 0;
 
