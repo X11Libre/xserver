@@ -45,6 +45,8 @@ typedef struct {
 #define SEG_ADR(type, seg, reg)  type((seg << 4) + (X86_##reg))
 #define SEG_EADR(type, seg, reg) type((seg << 4) + (X86_E##reg))
 
+/* EFLAGS register bit masks */
+#define X86_CARRY_MASK		0x00000001
 #define X86_TF_MASK		0x00000100
 #define X86_IF_MASK		0x00000200
 #define X86_IOPL_MASK		0x00003000

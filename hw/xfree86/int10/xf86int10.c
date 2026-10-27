@@ -697,7 +697,7 @@ int1A_handler(xf86Int10InfoPtr pInt)
         X86_EBX = 0x0210;       /* Version 2.10 */
         X86_ECX &= 0xFF00;
         X86_ECX |= int1A_last_bus_number(pvp);
-        X86_EFLAGS &= ~((unsigned long) 0x01);  /* clear carry flag */
+        X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
 #ifdef PRINT_INT
         ErrorF("ax=0x%x dx=0x%x bx=0x%x cx=0x%x flags=0x%x\n",
                X86_EAX, X86_EDX, X86_EBX, X86_ECX, X86_EFLAGS);
@@ -708,19 +708,19 @@ int1A_handler(xf86Int10InfoPtr pInt)
             && (X86_CX == pvp->device_id)
             && (X86_ESI == 0)) {
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
             X86_EBX = pciSlotBX(pvp);
         }
 #ifdef SHOW_ALL_DEVICES
         else if ((dev = find_pci_device_vendor(X86_EDX, X86_ECX, X86_ESI, pvp))) {
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
             X86_EBX = pciSlotBX(dev);
         }
 #endif
         else {
             X86_EAX = X86_AL | (DEVICE_NOT_FOUND << 8);
-            X86_EFLAGS |= ((unsigned long) 0x01);       /* set carry flag */
+            X86_EFLAGS |= ((unsigned long) X86_CARRY_MASK);
         }
 #ifdef PRINT_INT
         ErrorF("ax=0x%x bx=0x%x flags=0x%x\n", X86_EAX, X86_EBX, X86_EFLAGS);
@@ -730,20 +730,20 @@ int1A_handler(xf86Int10InfoPtr pInt)
         if ((X86_ECX & 0x00FFFFFF) == pvp->device_class) {
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
             X86_EBX = pciSlotBX(pvp);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
         }
 #ifdef SHOW_ALL_DEVICES
         else if ((dev = find_pci_class(X86_CL, X86_CH,
                                        (X86_ECX & 0xffff0000) >> 16,
                                        X86_ESI, pvp))) {
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
             X86_EBX = pciSlotBX(dev);
         }
 #endif
         else {
             X86_EAX = X86_AL | (DEVICE_NOT_FOUND << 8);
-            X86_EFLAGS |= ((unsigned long) 0x01);       /* set carry flag */
+            X86_EFLAGS |= ((unsigned long) X86_CARRY_MASK);
         }
 #ifdef PRINT_INT
         ErrorF("ax=0x%x flags=0x%x\n", X86_EAX, X86_EFLAGS);
@@ -753,11 +753,11 @@ int1A_handler(xf86Int10InfoPtr pInt)
         if ((dev = findPci(pInt, X86_EBX)) != NULL) {
             pci_device_cfg_read_u8(dev, &X86_CL, X86_DI);
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
         }
         else {
             X86_EAX = X86_AL | (BAD_REGISTER_NUMBER << 8);
-            X86_EFLAGS |= ((unsigned long) 0x01);       /* set carry flag */
+            X86_EFLAGS |= ((unsigned long) X86_CARRY_MASK);
         }
 #ifdef PRINT_INT
         ErrorF("ax=0x%x cx=0x%x flags=0x%x\n", X86_EAX, X86_ECX, X86_EFLAGS);
@@ -767,11 +767,11 @@ int1A_handler(xf86Int10InfoPtr pInt)
         if ((dev = findPci(pInt, X86_EBX)) != NULL) {
             pci_device_cfg_read_u16(dev, &X86_CX, X86_DI);
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
         }
         else {
             X86_EAX = X86_AL | (BAD_REGISTER_NUMBER << 8);
-            X86_EFLAGS |= ((unsigned long) 0x01);       /* set carry flag */
+            X86_EFLAGS |= ((unsigned long) X86_CARRY_MASK);
         }
 #ifdef PRINT_INT
         ErrorF("ax=0x%x cx=0x%x flags=0x%x\n", X86_EAX, X86_ECX, X86_EFLAGS);
@@ -781,11 +781,11 @@ int1A_handler(xf86Int10InfoPtr pInt)
         if ((dev = findPci(pInt, X86_EBX)) != NULL) {
             pci_device_cfg_read_u32(dev, &X86_ECX, X86_DI);
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
         }
         else {
             X86_EAX = X86_AL | (BAD_REGISTER_NUMBER << 8);
-            X86_EFLAGS |= ((unsigned long) 0x01);       /* set carry flag */
+            X86_EFLAGS |= ((unsigned long) X86_CARRY_MASK);
         }
 #ifdef PRINT_INT
         ErrorF("ax=0x%x cx=0x%x flags=0x%x\n", X86_EAX, X86_ECX, X86_EFLAGS);
@@ -795,11 +795,11 @@ int1A_handler(xf86Int10InfoPtr pInt)
         if ((dev = findPci(pInt, X86_EBX)) != NULL) {
             pci_device_cfg_write_u8(dev, X86_CL, X86_DI);
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
         }
         else {
             X86_EAX = X86_AL | (BAD_REGISTER_NUMBER << 8);
-            X86_EFLAGS |= ((unsigned long) 0x01);       /* set carry flag */
+            X86_EFLAGS |= ((unsigned long) X86_CARRY_MASK);
         }
 #ifdef PRINT_INT
         ErrorF("ax=0x%x flags=0x%x\n", X86_EAX, X86_EFLAGS);
@@ -809,11 +809,11 @@ int1A_handler(xf86Int10InfoPtr pInt)
         if ((dev = findPci(pInt, X86_EBX)) != NULL) {
             pci_device_cfg_write_u16(dev, X86_CX, X86_DI);
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
         }
         else {
             X86_EAX = X86_AL | (BAD_REGISTER_NUMBER << 8);
-            X86_EFLAGS |= ((unsigned long) 0x01);       /* set carry flag */
+            X86_EFLAGS |= ((unsigned long) X86_CARRY_MASK);
         }
 #ifdef PRINT_INT
         ErrorF("ax=0x%x flags=0x%x\n", X86_EAX, X86_EFLAGS);
@@ -823,11 +823,11 @@ int1A_handler(xf86Int10InfoPtr pInt)
         if ((dev = findPci(pInt, X86_EBX)) != NULL) {
             pci_device_cfg_write_u32(dev, X86_ECX, X86_DI);
             X86_EAX = X86_AL | (SUCCESSFUL << 8);
-            X86_EFLAGS &= ~((unsigned long) 0x01);      /* clear carry flag */
+            X86_EFLAGS &= ~((unsigned long) X86_CARRY_MASK);
         }
         else {
             X86_EAX = X86_AL | (BAD_REGISTER_NUMBER << 8);
-            X86_EFLAGS |= ((unsigned long) 0x01);       /* set carry flag */
+            X86_EFLAGS |= ((unsigned long) X86_CARRY_MASK);
         }
 #ifdef PRINT_INT
         ErrorF("ax=0x%x flags=0x%x\n", X86_EAX, X86_EFLAGS);
