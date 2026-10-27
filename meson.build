@@ -4,10 +4,10 @@ project('xserver', 'c',
             'c_std=gnu99',
             'warning_level=1',
         ],
-        version: '25.2.2',
+        version: '25.2.3',
         meson_version: '>= 0.61.0',
 )
-release_date = '2026-07-23'
+release_date = '2026-10-27'
 
 cc = meson.get_compiler('c')
 
