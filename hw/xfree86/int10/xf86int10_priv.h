@@ -40,10 +40,7 @@ typedef struct {
 #define BIOS_SCRATCH_OFF 0x449
 #define BIOS_SCRATCH_END 0x466
 #define BIOS_SCRATCH_LEN (BIOS_SCRATCH_END - BIOS_SCRATCH_OFF + 1)
-#define HIGH_MEM V_BIOS
-#define HIGH_MEM_SIZE (SYS_BIOS - HIGH_MEM)
 #define SEG_ADR(type, seg, reg)  type((seg << 4) + (X86_##reg))
-#define SEG_EADR(type, seg, reg) type((seg << 4) + (X86_E##reg))
 
 /* EFLAGS register bit masks */
 #define X86_CARRY_MASK		0x00000001
@@ -53,12 +50,9 @@ typedef struct {
 
 #define MEM_RB(name, addr)      (*(name)->mem->rb)((name), (addr))
 #define MEM_RW(name, addr)      (*(name)->mem->rw)((name), (addr))
-#define MEM_RL(name, addr)      (*(name)->mem->rl)((name), (addr))
 #define MEM_WB(name, addr, val) (*(name)->mem->wb)((name), (addr), (val))
 #define MEM_WW(name, addr, val) (*(name)->mem->ww)((name), (addr), (val))
 #define MEM_WL(name, addr, val) (*(name)->mem->wl)((name), (addr), (val))
-
-/* Private function declarations */
 
 /* int.c */
 int int_handler(xf86Int10InfoPtr pInt);

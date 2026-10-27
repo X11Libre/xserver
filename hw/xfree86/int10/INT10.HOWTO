@@ -321,8 +321,7 @@ access register (config method 1) if _PC is not defined.
 A header  file 'defines.h' is required to  define OS/emulator specific
 ways  to access  memory and  xf86 CPU  registers: Defines  need  to be
 provided     for    memory     byte/work/long     read/write    access
-(MEM_RB(name,addr),MEM_RW(name,addr),MEM_RL(name,addr),
-MEM_WB(name,addr,val),MEM_WL(name,addr,val),MEM_WL(name,addr,val))   of
+(MEM_WB(name,addr,val),MEM_RB(name,addr),MEM_RW(name,addr),MEM_WB(name,addr,val) of
 the real mode memory environment. 'name' will contain a pointer to the
 current   xf86Int10InfoRec.  Currently   defines  are   available  for
 vm86-mode under  Linux and x86emu.  They may be activated  by defining
