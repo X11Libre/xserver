@@ -184,6 +184,7 @@ xf86parseLayoutSection(void)
                     aptr->adj_where = CONF_ADJ_OBSOLETE;
                 else
                     aptr->adj_where = CONF_ADJ_ABSOLUTE;
+                break;
             }
             switch (aptr->adj_where) {
             case CONF_ADJ_ABSOLUTE:
@@ -257,7 +258,9 @@ xf86parseLayoutSection(void)
                     Error(SCREEN_MSG);
                 }
                 aptr->adj_right_str = xf86_lex_val.str;
-
+                break;
+            default:
+                break;
             }
             ptr->lay_adjacency_lst = (XF86ConfAdjacencyPtr)
                 xf86addListItem((glp) ptr->lay_adjacency_lst, (glp) aptr);
@@ -358,6 +361,8 @@ xf86printLayoutSection(FILE * cf, XF86ConfLayoutPtr ptr)
             case CONF_ADJ_RELATIVE:
                 fprintf(cf, " Relative \"%s\" %d %d\n", aptr->adj_refscreen,
                         aptr->adj_x, aptr->adj_y);
+                break;
+            default:
                 break;
             }
         }
