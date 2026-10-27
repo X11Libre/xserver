@@ -846,7 +846,7 @@ ephyrCreateResources(ScreenPtr pScreen)
     EphyrScrPriv *scrpriv = screen->driver;
 
     EPHYR_LOG("mark pScreen=%p mynum=%d shadow=%d",
-              pScreen, pScreen->myNum, scrpriv->shadow);
+              pScreen, scrpriv->mynum, scrpriv->shadow);
 
     if (scrpriv->shadow)
         return KdShadowSet(pScreen,
@@ -1039,21 +1039,21 @@ ephyrProcessMouseMotion(xcb_generic_event_t *xev)
 
     if (!ephyrMouse ||
         !((EphyrPointerPrivate *) ephyrMouse->driverPrivate)->enabled) {
-        EPHYR_LOG("skipping mouse motion:%d\n", screen->pScreen->myNum);
+        EPHYR_LOG("skipping mouse motion:%d\n", screen->pScreen->driver->mynum);
         return;
     }
 
     if (ephyrCursorScreen != screen->pScreen) {
         EPHYR_LOG("warping mouse cursor. "
                   "cur_screen:%d, motion_screen:%d\n",
-                  ephyrCursorScreen ? ephyrCursorScreen->myNum : -1, screen->pScreen->myNum);
+                  ephyrCursorScreen ? ephyrCursorScreen->driver->mynum : -1, screen->pScreen->driver->mynum);
         ephyrWarpCursor(inputInfo.pointer, screen->pScreen,
                         motion->event_x, motion->event_y);
     }
     else {
         int x = 0, y = 0;
 
-        EPHYR_LOG("enqueuing mouse motion:%d\n", screen->pScreen->myNum);
+        EPHYR_LOG("enqueuing mouse motion:%d\n", screen->pScreen->driver->mynum);
         x = motion->event_x;
         y = motion->event_y;
         EPHYR_LOG("initial (x,y):(%d,%d)\n", x, y);
@@ -1075,7 +1075,7 @@ ephyrProcessButtonPress(xcb_generic_event_t *xev)
 
     if (!ephyrMouse ||
         !((EphyrPointerPrivate *) ephyrMouse->driverPrivate)->enabled) {
-        EPHYR_LOG("skipping mouse press:%d\n", screen_from_window(button->event)->pScreen->myNum);
+        EPHYR_LOG("skipping mouse press:%d\n", screen_from_window(button->event)->pScreen->driver->mynum);
         return;
     }
 
@@ -1085,7 +1085,7 @@ ephyrProcessButtonPress(xcb_generic_event_t *xev)
      */
     mouseState |= 1 << (button->detail - 1);
 
-    EPHYR_LOG("enqueuing mouse press:%d\n", screen_from_window(button->event)->pScreen->myNum);
+    EPHYR_LOG("enqueuing mouse press:%d\n", screen_from_window(button->event)->pScreen->driver->mynum);
     KdEnqueuePointerEvent(ephyrMouse, mouseState | KD_MOUSE_DELTA, 0, 0, 0);
 }
 
@@ -1102,7 +1102,7 @@ ephyrProcessButtonRelease(xcb_generic_event_t *xev)
     ephyrUpdateModifierState(button->state);
     mouseState &= ~(1 << (button->detail - 1));
 
-    EPHYR_LOG("enqueuing mouse release:%d\n", screen_from_window(button->event)->pScreen->myNum);
+    EPHYR_LOG("enqueuing mouse release:%d\n", screen_from_window(button->event)->pScreen->driver->mynum);
     KdEnqueuePointerEvent(ephyrMouse, mouseState | KD_MOUSE_DELTA, 0, 0, 0);
 }
 
