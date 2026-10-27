@@ -8,7 +8,7 @@
 #include "xf86.h"
 #include "compiler.h"
 #include "xf86int10_priv.h"
-#include "int10Defines.h"
+#include "xf86x86emu.h"
 #include "Pci.h"
 
 xf86Int10InfoPtr Int10Current = NULL;
