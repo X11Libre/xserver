@@ -53,17 +53,17 @@ typedef struct _int10Mem {
 } int10MemRec, *int10MemPtr;
 
 /* OS dependent functions */
-extern _X_EXPORT xf86Int10InfoPtr xf86InitInt10(int entityIndex);
-extern _X_EXPORT xf86Int10InfoPtr xf86ExtendedInitInt10(int entityIndex,
+extern xf86Int10InfoPtr xf86InitInt10(int entityIndex);
+extern xf86Int10InfoPtr xf86ExtendedInitInt10(int entityIndex,
                                                         int Flags);
-extern _X_EXPORT void xf86FreeInt10(xf86Int10InfoPtr pInt);
-extern _X_EXPORT void *xf86Int10AllocPages(xf86Int10InfoPtr pInt, int num,
+extern void xf86FreeInt10(xf86Int10InfoPtr pInt);
+extern void *xf86Int10AllocPages(xf86Int10InfoPtr pInt, int num,
                                            int *off);
-extern _X_EXPORT void xf86Int10FreePages(xf86Int10InfoPtr pInt, void *pbase,
+extern void xf86Int10FreePages(xf86Int10InfoPtr pInt, void *pbase,
                                          int num);
-extern _X_EXPORT void *xf86int10Addr(xf86Int10InfoPtr pInt, uint32_t addr);
+extern void *xf86int10Addr(xf86Int10InfoPtr pInt, uint32_t addr);
 
 /* x86 executor related functions */
-extern _X_EXPORT void xf86ExecX86int10(xf86Int10InfoPtr pInt);
+extern void xf86ExecX86int10(xf86Int10InfoPtr pInt);
 
 #endif                          /* _XF86INT10_H */

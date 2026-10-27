@@ -52,7 +52,7 @@ typedef struct {
 
 /* int.c */
 int int_handler(xf86Int10InfoPtr pInt);
-extern _X_EXPORT xf86Int10InfoPtr Int10Current;
+extern xf86Int10InfoPtr Int10Current;
 
 /* helper_exec.c */
 int setup_int(xf86Int10InfoPtr pInt);
@@ -108,13 +108,13 @@ void dprint(unsigned long start, unsigned long size);
 #endif
 
 /* OS dependent functions */
-_X_EXPORT Bool MapCurrentInt10(xf86Int10InfoPtr pInt);
+Bool MapCurrentInt10(xf86Int10InfoPtr pInt);
 
 /* x86 executor related functions */
-_X_EXPORT Bool xf86Int10ExecSetup(xf86Int10InfoPtr pInt);
-_X_EXPORT void xf86Int10SaveRestoreBIOSVars(xf86Int10InfoPtr pInt, Bool save);
-_X_EXPORT void *xf86HandleInt10Options(ScrnInfoPtr pScrn, int entityIndex);
-_X_EXPORT BusType xf86int10GetBiosLocationType(const xf86Int10InfoPtr pInt);
-_X_EXPORT Bool xf86int10GetBiosSegment(xf86Int10InfoPtr pInt, void *base);
+Bool xf86Int10ExecSetup(xf86Int10InfoPtr pInt);
+void xf86Int10SaveRestoreBIOSVars(xf86Int10InfoPtr pInt, Bool save);
+void *xf86HandleInt10Options(ScrnInfoPtr pScrn, int entityIndex);
+BusType xf86int10GetBiosLocationType(const xf86Int10InfoPtr pInt);
+Bool xf86int10GetBiosSegment(xf86Int10InfoPtr pInt, void *base);
 
 #endif /* _XSERVER_XF86INT10_PRIV_H */
