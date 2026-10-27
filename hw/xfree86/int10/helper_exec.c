@@ -331,17 +331,6 @@ x_inb(uint16_t port)
                        ((Int10Current->inb40time & 1) << 3));
         if (PRINT_PORT && DEBUG_IO_TRACE())
             ErrorF(" inb(%#x) = %2.2x\n", port, val);
-#ifdef __NOT_YET__
-    }
-    else if (port < 0x0100) {   /* Don't interfere with mainboard */
-        val = 0;
-        xf86DrvMsgVerb(Int10Current->pScrn->scrnIndex, X_NOT_IMPLEMENTED, 2,
-                       "inb 0x%4.4x\n", port);
-        if (xf86GetVerbosity() > 3) {
-            dump_registers(Int10Current);
-            stack_trace(Int10Current);
-        }
-#endif                          /* __NOT_YET__ */
     }
     else if (!pciCfg1inb(port, &val)) {
         val = pci_io_read8(Int10Current->io, port);
@@ -390,16 +379,6 @@ x_outb(uint16_t port, uint8_t val)
         Int10Current->inb40time = (uint16_t) (tv.tv_usec | 1);
         if (PRINT_PORT && DEBUG_IO_TRACE())
             ErrorF(" outb(%#x, %2.2x)\n", port, val);
-#ifdef __NOT_YET__
-    }
-    else if (port < 0x0100) {   /* Don't interfere with mainboard */
-        xf86DrvMsgVerb(Int10Current->pScrn->scrnIndex, X_NOT_IMPLEMENTED, 2,
-                       "outb 0x%4.4x,0x%2.2x\n", port, val);
-        if (xf86GetVerbosity() > 3) {
-            dump_registers(Int10Current);
-            stack_trace(Int10Current);
-        }
-#endif                          /* __NOT_YET__ */
     }
     else if (!pciCfg1outb(port, val)) {
         if (PRINT_PORT && DEBUG_IO_TRACE())
