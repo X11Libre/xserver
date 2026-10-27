@@ -74,25 +74,11 @@ void finish_int(xf86Int10InfoPtr, int sig);
 uint32_t getIntVect(xf86Int10InfoPtr pInt, int num);
 void pushw(xf86Int10InfoPtr pInt, uint16_t val);
 int run_bios_int(int num, xf86Int10InfoPtr pInt);
-void dump_code(xf86Int10InfoPtr pInt);
 void dump_registers(xf86Int10InfoPtr pInt);
 void stack_trace(xf86Int10InfoPtr pInt);
 uint8_t bios_checksum(const uint8_t *start, int size);
 void LockLegacyVGA(xf86Int10InfoPtr pInt, legacyVGAPtr vga);
 void UnlockLegacyVGA(xf86Int10InfoPtr pInt, legacyVGAPtr vga);
-
-int port_rep_inb(xf86Int10InfoPtr pInt,
-                 uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_inw(xf86Int10InfoPtr pInt,
-                 uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_inl(xf86Int10InfoPtr pInt,
-                 uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_outb(xf86Int10InfoPtr pInt,
-                  uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_outw(xf86Int10InfoPtr pInt,
-                  uint16_t port, uint32_t base, int d_f, uint32_t count);
-int port_rep_outl(xf86Int10InfoPtr pInt,
-                  uint16_t port, uint32_t base, int d_f, uint32_t count);
 
 uint8_t x_inb(uint16_t port);
 uint16_t x_inw(uint16_t port);
