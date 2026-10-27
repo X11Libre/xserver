@@ -25,7 +25,7 @@
 #include "xf86_OSproc.h"
 #include "xf86Bus.h"
 #include "compiler.h"
-#include "int10Defines.h"
+#include "xf86x86emu.h"
 #include "xf86int10_priv.h"
 #include "Pci.h"
 #ifdef _X86EMU
@@ -158,22 +158,6 @@ run_bios_int(int num, xf86Int10InfoPtr pInt)
 
 /* Debugging stuff */
 void
-dump_code(xf86Int10InfoPtr pInt)
-{
-    int i;
-    uint32_t lina = SEG_ADR((uint32_t), X86_CS, IP);
-
-    xf86DrvMsgVerb(pInt->pScrn->scrnIndex, X_INFO, 3, "code at 0x%8.8" PRIx32 ":\n",
-                   (unsigned) lina);
-    for (i = 0; i < 0x10; i++)
-        xf86ErrorFVerb(3, " %2.2x", MEM_RB(pInt, lina + i));
-    xf86ErrorFVerb(3, "\n");
-    for (; i < 0x20; i++)
-        xf86ErrorFVerb(3, " %2.2x", MEM_RB(pInt, lina + i));
-    xf86ErrorFVerb(3, "\n");
-}
-
-void
 dump_registers(xf86Int10InfoPtr pInt)
 {
     xf86DrvMsgVerb(pInt->pScrn->scrnIndex, X_INFO, 3,
@@ -212,108 +196,6 @@ stack_trace(xf86Int10InfoPtr pInt)
     }
     if (i)
         xf86ErrorFVerb(3, "\n");
-}
-
-int
-port_rep_inb(xf86Int10InfoPtr pInt,
-             uint16_t port, uint32_t base, int d_f, uint32_t count)
-{
-    register int inc = d_f ? -1 : 1;
-    uint32_t dst = base;
-
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_insb(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
-    while (count--) {
-        MEM_WB(pInt, dst, x_inb(port));
-        dst += inc;
-    }
-    return dst - base;
-}
-
-int
-port_rep_inw(xf86Int10InfoPtr pInt,
-             uint16_t port, uint32_t base, int d_f, uint32_t count)
-{
-    register int inc = d_f ? -2 : 2;
-    uint32_t dst = base;
-
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_insw(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
-    while (count--) {
-        MEM_WW(pInt, dst, x_inw(port));
-        dst += inc;
-    }
-    return dst - base;
-}
-
-int
-port_rep_inl(xf86Int10InfoPtr pInt,
-             uint16_t port, uint32_t base, int d_f, uint32_t count)
-{
-    register int inc = d_f ? -4 : 4;
-    uint32_t dst = base;
-
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_insl(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
-    while (count--) {
-        MEM_WL(pInt, dst, x_inl(port));
-        dst += inc;
-    }
-    return dst - base;
-}
-
-int
-port_rep_outb(xf86Int10InfoPtr pInt,
-              uint16_t port, uint32_t base, int d_f, uint32_t count)
-{
-    register int inc = d_f ? -1 : 1;
-    uint32_t dst = base;
-
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_outb(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
-    while (count--) {
-        x_outb(port, MEM_RB(pInt, dst));
-        dst += inc;
-    }
-    return dst - base;
-}
-
-int
-port_rep_outw(xf86Int10InfoPtr pInt,
-              uint16_t port, uint32_t base, int d_f, uint32_t count)
-{
-    register int inc = d_f ? -2 : 2;
-    uint32_t dst = base;
-
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_outw(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
-    while (count--) {
-        x_outw(port, MEM_RW(pInt, dst));
-        dst += inc;
-    }
-    return dst - base;
-}
-
-int
-port_rep_outl(xf86Int10InfoPtr pInt,
-              uint16_t port, uint32_t base, int d_f, uint32_t count)
-{
-    register int inc = d_f ? -4 : 4;
-    uint32_t dst = base;
-
-    if (PRINT_PORT && DEBUG_IO_TRACE())
-        ErrorF(" rep_outl(%#x) %" PRIu32 " bytes at %8.8" PRIx32 " %s\n",
-               port, (unsigned) count, (unsigned) base, d_f ? "up" : "down");
-    while (count--) {
-        x_outl(port, MEM_RL(pInt, dst));
-        dst += inc;
-    }
-    return dst - base;
 }
 
 uint8_t
