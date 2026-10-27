@@ -9,7 +9,7 @@
 #include "xf86_OSproc.h"
 #include "xf86Pci.h"
 #include "xf86int10_priv.h"
-#include "int10Defines.h"
+#include "xf86x86emu.h"
 #include <x86emu.h>
 
 #define M _X86EMU_env
