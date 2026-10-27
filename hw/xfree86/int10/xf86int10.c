@@ -11,8 +11,6 @@
 #include "int10Defines.h"
 #include "Pci.h"
 
-#define REG pInt
-
 xf86Int10InfoPtr Int10Current = NULL;
 
 static int int1A_handler(xf86Int10InfoPtr pInt);
