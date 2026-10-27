@@ -14,8 +14,6 @@
 #include "xf86Pci.h"
 #include "xf86int10_priv.h"
 
-#define REG pInt
-
 typedef enum {
     OPT_NOINT10,
     OPT_INIT_PRIMARY,

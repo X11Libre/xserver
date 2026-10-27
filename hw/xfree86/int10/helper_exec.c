@@ -46,8 +46,6 @@ static int pciCfg1outb(uint16_t addr, uint8_t val);
 static void SetResetBIOSVars(xf86Int10InfoPtr pInt, Bool set);
 #endif
 
-#define REG pInt
-
 int
 setup_int(xf86Int10InfoPtr pInt)
 {
