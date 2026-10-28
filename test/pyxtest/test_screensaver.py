@@ -125,7 +125,7 @@ class TestCreateSaverWindow:
 class TestScreenSaverFreeAttr:
     """Tests for ScreenSaverFreeAttr stale pPriv after CheckScreenPrivate."""
 
-    @pytest.mark.valgrind
+    @pytest.mark.asan
     def test_free_attr_with_active_saver(self, xserver, screensaver_xclient):
         """
         ScreenSaverFreeAttr calls CheckScreenPrivate() which may free
