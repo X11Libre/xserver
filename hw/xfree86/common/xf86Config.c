@@ -53,6 +53,7 @@
 #include "dix/settings_priv.h"
 #include "dix/screensaver_priv.h"
 #include "include/extinit.h"
+#include "miext/extinit_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
@@ -664,6 +665,9 @@ typedef enum {
     FLAG_ALLOW_BYTE_SWAPPED_CLIENTS,
     FLAG_SINGLE_DRIVER,
     FLAG_FONTSERVER,
+#ifdef CONFIG_NAMESPACE
+    FLAG_NAMESPACE_CONFIG,
+#endif
 } FlagValues;
 
 /**
@@ -731,6 +735,10 @@ static OptionInfoRec FlagOptions[] = {
      {0}, FALSE},
     {FLAG_FONTSERVER, "FontServerConnections", OPTV_BOOLEAN,
      {0}, FALSE},
+#ifdef CONFIG_NAMESPACE
+    {FLAG_NAMESPACE_CONFIG, "NamespaceConfig", OPTV_STRING,
+     {0}, FALSE},
+#endif
     {-1, NULL, OPTV_NONE,
      {0}, FALSE},
 };
@@ -1017,6 +1025,16 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     }
     LogMessageVerb(from, 1, "Max clients allowed: %i, resource mask: 0x%x\n",
 	    LimitClients, RESOURCE_ID_MASK);
+
+#ifdef CONFIG_NAMESPACE
+    if (!namespaceConfigFile &&
+        (s = xf86GetOptValString(FlagOptions, FLAG_NAMESPACE_CONFIG))) {
+        namespaceConfigFile = strdup(s);
+        noNamespaceExtension = FALSE;
+        LogMessageVerb(X_CONFIG, 1, "Xnamespace config set to \"%s\"\n",
+                       namespaceConfigFile);
+    }
+#endif
 }
 
 /**

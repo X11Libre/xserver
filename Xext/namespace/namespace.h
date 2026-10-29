@@ -41,6 +41,9 @@ struct Xnamespace {
 extern struct xorg_list ns_list;
 extern struct Xnamespace ns_root;
 extern struct Xnamespace ns_anon;
+extern struct Xnamespace ns_cgroup_tmpl;
+extern Bool namespaceDefaultRoot;
+extern char *namespaceCgroupPrefix;
 
 struct XnamespaceClientPriv {
     Bool isServer;

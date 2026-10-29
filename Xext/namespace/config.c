@@ -34,7 +34,33 @@ struct Xnamespace ns_anon = {
 
 struct xorg_list ns_list = { 0 };
 
+struct Xnamespace ns_cgroup_tmpl = { 0 };
+
 char *namespaceConfigFile = NULL;
+Bool namespaceDefaultRoot = FALSE;
+char *namespaceCgroupPrefix = NULL;
+
+static void setCgroupPrefix(const char *raw)
+{
+    if (!raw || !*raw)
+        return;
+    while (*raw == '/')
+        raw++;
+    size_t len = strlen(raw);
+    while (len > 0 && raw[len - 1] == '/')
+        len--;
+    if (len == 0)
+        return;
+    char *norm = calloc(1, len + 3);
+    if (!norm)
+        FatalError("Xnamespace: failed allocating cgroup prefix\n");
+    norm[0] = '/';
+    memcpy(norm + 1, raw, len);
+    norm[len + 1] = '/';
+    norm[len + 2] = '\0';
+    free(namespaceCgroupPrefix);
+    namespaceCgroupPrefix = norm;
+}
 
 static struct Xnamespace* select_ns(const char* name)
 {
@@ -167,8 +193,38 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         return;
     }
 
+    if (strcmp(token, "default") == 0)
+    {
+        char *def = strtok(NULL, " \t");
+        if (!def) {
+            XNS_LOG("default missing namespace name\n");
+            return;
+        }
+        if (strcmp(def, "root") == 0)
+            namespaceDefaultRoot = TRUE;
+        else if (strcmp(def, "anon") == 0)
+            namespaceDefaultRoot = FALSE;
+        else
+            XNS_LOG("unknown default namespace \"%s\" (expected root or anon)\n", def);
+        return;
+    }
+
+    if (strcmp(token, "cgroup") == 0 || strcmp(token, "cgroup-prefix") == 0)
+    {
+        char *pfx = strtok(NULL, " \t");
+        if (!pfx) {
+            XNS_LOG("cgroup missing path prefix\n");
+            return;
+        }
+        setCgroupPrefix(pfx);
+        *walk_ns = &ns_cgroup_tmpl;
+        return;
+    }
+
     XNS_LOG("unknown token \"%s\"\n", token);
 }
+
+#define XNS_DEFAULT_CONFIG_FILE "/etc/X11/xnamespace.conf"
 
 Bool XnsLoadConfig(void)
 {
@@ -177,14 +233,16 @@ Bool XnsLoadConfig(void)
     xorg_list_init(&ns_root.auth_tokens);
     xorg_list_init(&ns_anon.auth_tokens);
 
-    if (!namespaceConfigFile) {
-        XNS_LOG("no namespace config given - Xnamespace disabled\n");
-        return FALSE;
-    }
+    const char *cfg = namespaceConfigFile ? namespaceConfigFile
+                                          : XNS_DEFAULT_CONFIG_FILE;
 
-    FILE *fp = fopen(namespaceConfigFile, "r");
+    FILE *fp = fopen(cfg, "r");
     if (fp == NULL) {
-        FatalError("failed loading namespace config: %s\n", namespaceConfigFile);
+        if (!namespaceConfigFile) {
+            XNS_LOG("no namespace config given - Xnamespace disabled\n");
+            return FALSE;
+        }
+        FatalError("failed loading namespace config: %s\n", cfg);
         return FALSE;
     }
 
@@ -195,7 +253,7 @@ Bool XnsLoadConfig(void)
 
     fclose(fp);
 
-    XNS_LOG("loaded namespace config file: %s\n", namespaceConfigFile);
+    XNS_LOG("loaded namespace config file: %s\n", cfg);
 
     struct Xnamespace *ns;
     xorg_list_for_each_entry(ns, &ns_list, entry) {

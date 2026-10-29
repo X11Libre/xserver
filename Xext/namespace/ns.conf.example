@@ -16,3 +16,10 @@ namespace xclock root
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad91b7
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad92b7
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad93b7
+
+# Dynamic cgroup-based transient namespaces (optional):
+# default root
+# cgroup /xns
+#   allow shape
+#   allow xinput
+#   allow clipboard-auto
