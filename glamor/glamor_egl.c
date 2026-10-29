@@ -454,7 +454,7 @@ glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
                            uint32_t *strides, uint32_t *offsets,
                            uint64_t *modifier)
 {
-#ifdef HAVE_GBM
+#ifdef GLAMOR_HAS_GBM
     struct gbm_bo *bo;
     int num_fds;
 #ifdef GBM_BO_WITH_MODIFIERS
@@ -522,7 +522,7 @@ int
 glamor_egl_fd_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
                           CARD16 *stride, CARD32 *size)
 {
-#ifdef HAVE_GBM
+#ifdef GLAMOR_HAS_GBM
     struct gbm_bo *bo;
     int fd;
 
