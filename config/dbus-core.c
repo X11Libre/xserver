@@ -26,7 +26,12 @@
 #include <dix-config.h>
 
 #include <dbus/dbus.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdbool.h>
+#include <string.h>
 #include <sys/select.h>
+#include <unistd.h>
 
 #include "os/log_priv.h"
 
@@ -43,6 +48,7 @@ struct dbus_core_info {
     DBusConnection *connection;
     OsTimerPtr timer;
     struct dbus_core_hook *hooks;
+    bool dispatch_queued;
 };
 static struct dbus_core_info bus_info = { .fd = -1 };
 
@@ -61,6 +67,30 @@ socket_handler(int fd, int ready, void *data)
                  dbus_connection_get_dispatch_status(info->connection) ==
                  DBUS_DISPATCH_DATA_REMAINS);
     }
+}
+
+static Bool
+dispatch_work(ClientPtr client, void *data)
+{
+    struct dbus_core_info *info = data;
+
+    info->dispatch_queued = false;
+    while (info->connection &&
+           dbus_connection_dispatch(info->connection) ==
+           DBUS_DISPATCH_DATA_REMAINS)
+        ;
+    return TRUE;
+}
+
+/* A blocking call elsewhere can queue messages after draining the socket. */
+static void
+dispatch_status_changed(DBusConnection *connection, DBusDispatchStatus status,
+                        void *data)
+{
+    struct dbus_core_info *info = data;
+
+    if (status == DBUS_DISPATCH_DATA_REMAINS && !info->dispatch_queued)
+        info->dispatch_queued = QueueWorkProc(dispatch_work, NULL, info);
 }
 
 /**
@@ -83,8 +113,10 @@ teardown(void)
     if (bus_info.connection)
         dbus_connection_unref(bus_info.connection);
 
-    if (bus_info.fd != -1)
+    if (bus_info.fd != -1) {
         RemoveNotifyFd(bus_info.fd);
+        close(bus_info.fd);
+    }
     bus_info.fd = -1;
     bus_info.connection = NULL;
 
@@ -132,6 +164,7 @@ connect_to_bus(void)
 {
     DBusError error;
     struct dbus_core_hook *hook;
+    int fd;
 
     dbus_error_init(&error);
     bus_info.connection = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
@@ -144,8 +177,16 @@ connect_to_bus(void)
     /* Thankyou.  Really, thankyou. */
     dbus_connection_set_exit_on_disconnect(bus_info.connection, FALSE);
 
-    if (!dbus_connection_get_unix_fd(bus_info.connection, &bus_info.fd)) {
-        ErrorF("[dbus-core] couldn't get fd for system bus\n");
+    if (!dbus_connection_get_unix_fd(bus_info.connection, &fd)) {
+        ErrorF("[dbus-core] couldn't get FD for system bus\n");
+        goto err_unref;
+    }
+
+    /* libdbus closes its FD on disconnect, before teardown() unregisters it. */
+    bus_info.fd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
+    if (bus_info.fd == -1) {
+        ErrorF("[dbus-core] couldn't duplicate system bus FD: %s\n",
+               strerror(errno));
         goto err_unref;
     }
 
@@ -156,6 +197,10 @@ connect_to_bus(void)
         goto err_fd;
     }
 
+    dbus_connection_set_dispatch_status_function(bus_info.connection,
+                                                 dispatch_status_changed,
+                                                 &bus_info, NULL);
+
     dbus_error_free(&error);
     SetNotifyFd(bus_info.fd, socket_handler, X_NOTIFY_READ, &bus_info);
 
@@ -164,9 +209,14 @@ connect_to_bus(void)
             hook->connect(bus_info.connection, hook->data);
     }
 
+    dispatch_status_changed(bus_info.connection,
+                            dbus_connection_get_dispatch_status(bus_info.connection),
+                            &bus_info);
+
     return 1;
 
  err_fd:
+    close(bus_info.fd);
     bus_info.fd = -1;
  err_unref:
     dbus_connection_unref(bus_info.connection);
