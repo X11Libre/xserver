@@ -28,6 +28,7 @@
 #include <X11/extensions/ge.h>
 #include <X11/extensions/geproto.h>
 
+#include "dix/extension_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
