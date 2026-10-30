@@ -394,3 +394,44 @@ class DeviceResolutionCtl:
             self.num_valuators,
         )
         return header + val_data
+
+
+# XI (v1) minor opcode for XSelectExtensionEvent
+XSelectExtensionEvent = 6
+
+# Event type offset of DevicePropertyNotify from the extension's first_event
+# (see FixExtensionEvents() in Xext/xinput/extinit.c: it is the 17th device
+# event, i.e. DeviceValuator + 16).
+DevicePropertyNotify_offset = 16
+
+
+@dataclass
+class XSelectExtensionEventRequest:
+    """XSelectExtensionEvent request (XI v1, minor opcode 6).
+
+    Wire format (xSelectExtensionEventReq):
+        opcode(1) + ReqType(1) + length(2) + window(4) + count(2) + pad(2)
+        followed by ``count`` XEventClass (CARD32) values.
+
+    An XEventClass is ``(device_id << 8) | (event_type & 0xff)``.
+    """
+
+    opcode: int
+    window: int
+    event_classes: list[int]
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        count = len(self.event_classes)
+        header = struct.pack(
+            f"{byte_order}BBH I HH",
+            self.opcode,
+            XSelectExtensionEvent,
+            3 + count,
+            self.window,
+            count,
+            0,
+        )
+        body = b"".join(
+            struct.pack(f"{byte_order}I", c) for c in self.event_classes
+        )
+        return header + body
