@@ -2095,3 +2095,12 @@ InitFonts(void)
     fontPatternCache = xfont2_make_font_pattern_cache();
     xfont2_init(&xfont2_client_funcs);
 }
+
+void
+dixEmptyFontPatternCache(void)
+{
+    if (patternCache)
+        xfont2_empty_font_pattern_cache(patternCache);
+    if (fontPatternCache)
+        xfont2_empty_font_pattern_cache(fontPatternCache);
+}
