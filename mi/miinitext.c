@@ -145,6 +145,7 @@ static const ExtensionModule staticExtensions[] = {
 #ifdef PRESENT
     {present_extension_init, "Present", NULL},
 #endif
+    {xaverius_extension_init, "XAVERIUS", NULL},
 #ifdef DRI2
     {DRI2ExtensionInit, DRI2_NAME, &noDRI2Extension},
 #endif
