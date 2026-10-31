@@ -1,4 +1,7 @@
 srcs_xaverius = [
+    'xaverius.c',
+    'xaverius_request.c',
+    'xaverius_device.c',
     'init.c',
     'dispatch.c',
 ]
