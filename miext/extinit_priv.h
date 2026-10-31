@@ -53,6 +53,7 @@ void ScreenSaverExtensionInit(void);
 void ShapeExtensionInit(void);
 void ShmExtensionInit(void);
 void SyncExtensionInit(void);
+void XAveriusExtensionInit(void);
 void XCMiscExtensionInit(void);
 void SecurityExtensionInit(void);
 void BigReqExtensionInit(void);
