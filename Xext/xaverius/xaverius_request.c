@@ -31,6 +31,20 @@ ProcXAveriusDispatchInternal(ClientPtr client)
         return ProcXAveriusDestroyDevice(client);
     case XAVERIUS_SUBOPCODE_GET_PHYSICAL_DEVICE_MEMORY_PROPERTIES:
         return ProcXAveriusGetPhysicalDeviceMemoryProperties(client);
+    case XAVERIUS_SUBOPCODE_CREATE_SURFACE:
+        return ProcXAveriusCreateSurface(client);
+    case XAVERIUS_SUBOPCODE_DESTROY_SURFACE:
+        return ProcXAveriusDestroySurface(client);
+    case XAVERIUS_SUBOPCODE_GET_SURFACE_CAPABILITIES:
+        return ProcXAveriusGetSurfaceCapabilities(client);
+    case XAVERIUS_SUBOPCODE_CREATE_SWAPCHAIN:
+        return ProcXAveriusCreateSwapchain(client);
+    case XAVERIUS_SUBOPCODE_DESTROY_SWAPCHAIN:
+        return ProcXAveriusDestroySwapchain(client);
+    case XAVERIUS_SUBOPCODE_ACQUIRE_NEXT_IMAGE:
+        return ProcXAveriusAcquireNextImage(client);
+    case XAVERIUS_SUBOPCODE_QUEUE_PRESENT:
+        return ProcXAveriusQueuePresent(client);
     default:
         return BadRequest;
     }

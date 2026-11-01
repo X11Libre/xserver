@@ -9,9 +9,12 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "os/fmt.h"
+#include <string.h>
 
 #define XAVERIUS_DEVICE_TYPE_PHYSICAL    1
 #define XAVERIUS_DEVICE_TYPE_LOGICAL     2
+#define XAVERIUS_DEVICE_TYPE_SURFACE     3
+#define XAVERIUS_DEVICE_TYPE_SWAPCHAIN   4
 
 #define ValidateXID(x) ((x) != 0)
 
@@ -38,8 +41,30 @@ typedef struct {
     uint32_t queue_family_count;
 } XaveriusPhysicalDeviceRec, *XaveriusPhysicalDevicePtr;
 
+typedef struct {
+    XID xid;
+    uint32_t type;
+    XID window_xid;
+    XID owner_device_xid;
+} XaveriusSurfaceRec, *XaveriusSurfacePtr;
+
+typedef struct {
+    XID xid;
+    uint32_t type;
+    XID surface_xid;
+    uint32_t image_count;
+    uint32_t format_id;
+    uint32_t color_space_id;
+    uint32_t width;
+    uint32_t height;
+    uint32_t present_mode_id;
+    uint32_t image_usage_flags;
+} XaveriusSwapchainRec, *XaveriusSwapchainPtr;
+
 static RESTYPE XaveriusLogicalDeviceType = 0;
 static RESTYPE XaveriusPhysicalDeviceType = 0;
+static RESTYPE XaveriusSurfaceType = 0;
+static RESTYPE XaveriusSwapchainType = 0;
 
 #define XAVERIUS_MAX_PHYSICAL_DEVICES 4
 
@@ -237,6 +262,22 @@ xaverius_free_logical_device(void *value, XID id)
     return Success;
 }
 
+static int
+xaverius_free_surface(void *value, XID id)
+{
+    XaveriusSurfacePtr surface = (XaveriusSurfacePtr)value;
+    free(surface);
+    return Success;
+}
+
+static int
+xaverius_free_swapchain(void *value, XID id)
+{
+    XaveriusSwapchainPtr swapchain = (XaveriusSwapchainPtr)value;
+    free(swapchain);
+    return Success;
+}
+
 int
 ProcXAveriusCreateDevice(ClientPtr client)
 {
@@ -365,6 +406,8 @@ xaverius_device_init(void)
 {
     XaveriusLogicalDeviceType = CreateNewResourceType(xaverius_free_logical_device, "XAveriusLogicalDevice");
     XaveriusPhysicalDeviceType = CreateNewResourceType(NULL, "XAveriusPhysicalDevice");
+    XaveriusSurfaceType = CreateNewResourceType(xaverius_free_surface, "XAveriusSurface");
+    XaveriusSwapchainType = CreateNewResourceType(xaverius_free_swapchain, "XAveriusSwapchain");
 
     xaverius_register_physical_device(0x1001, 0x10DE, 0x2204, 0x00010000, 0x000F0000,
                                       1, "NVIDIA GV100");
@@ -385,6 +428,10 @@ xaverius_device_fini(void)
         FreeResourceByType(0, XaveriusLogicalDeviceType, TRUE);
     if (XaveriusPhysicalDeviceType)
         FreeResourceByType(0, XaveriusPhysicalDeviceType, TRUE);
+    if (XaveriusSurfaceType)
+        FreeResourceByType(0, XaveriusSurfaceType, TRUE);
+    if (XaveriusSwapchainType)
+        FreeResourceByType(0, XaveriusSwapchainType, TRUE);
 
     for (i = 0; i < xaverius_physical_device_count; i++) {
         free(xaverius_physical_devices[i].queue_family_indices);
@@ -457,5 +504,437 @@ ProcXAveriusGetPhysicalDeviceMemoryProperties(ClientPtr client)
 
     /* MEMORYTYPEINFO[] and MEMORYHEAPINFO[] are empty in v0.1 stub. */
 
+    return Success;
+}
+
+int
+ProcXAveriusCreateSurface(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + surface_xid + window_xid (8 bytes) = 16 bytes */
+    if (client->req_len < 16 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 surface_xid = *(CARD32 *)(payload + 0);
+    CARD32 window_xid = *(CARD32 *)(payload + 4);
+
+    if (client->swapped) {
+        swapl(&surface_xid);
+        swapl(&window_xid);
+    }
+
+    if (!ValidateXID(surface_xid))
+        return BadIDChoice;
+
+    /* Validate surface_xid as create-XID: not already occupied */
+    void *existing;
+    if (dixLookupResourceByType((void **)&existing, surface_xid,
+                                XaveriusSurfaceType, client, DixWriteAccess) == Success)
+        return BadIDChoice;
+
+    /* Validate window_xid as a live core Window owned by this connection */
+    void *window;
+    int rc = dixLookupResourceByType((void **)&window, window_xid,
+                                     XRT_WINDOW, client, DixReadAccess);
+    if (rc != Success)
+        return BadWindow;
+
+    XaveriusSurfacePtr surface = calloc(1, sizeof(XaveriusSurfaceRec));
+    if (!surface)
+        return BadAlloc;
+
+    surface->xid = surface_xid;
+    surface->type = XAVERIUS_DEVICE_TYPE_SURFACE;
+    surface->window_xid = window_xid;
+    surface->owner_device_xid = 0; /* connection-owned, not device-owned */
+
+    if (!AddResource(surface_xid, XaveriusSurfaceType, surface)) {
+        free(surface);
+        return BadAlloc;
+    }
+
+    return Success;
+}
+
+int
+ProcXAveriusDestroySurface(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + surface_xid (4 bytes) = 12 bytes */
+    if (client->req_len < 12 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 surface_xid = *(CARD32 *)(payload + 0);
+
+    if (client->swapped)
+        swapl(&surface_xid);
+
+    if (!ValidateXID(surface_xid))
+        return BadValue;
+
+    void *surface;
+    int rc = dixLookupResourceByType((void **)&surface, surface_xid,
+                                     XaveriusSurfaceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    FreeResource(surface_xid, XaveriusSurfaceType);
+    return Success;
+}
+
+int
+ProcXAveriusGetSurfaceCapabilities(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + device_xid + surface_xid (8 bytes) = 16 bytes */
+    if (client->req_len < 16 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 device_xid = *(CARD32 *)(payload + 0);
+    CARD32 surface_xid = *(CARD32 *)(payload + 4);
+
+    if (client->swapped) {
+        swapl(&device_xid);
+        swapl(&surface_xid);
+    }
+
+    if (!ValidateXID(device_xid) || !ValidateXID(surface_xid))
+        return BadValue;
+
+    void *device;
+    int rc = dixLookupResourceByType((void **)&device, device_xid,
+                                     XaveriusLogicalDeviceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    void *surface;
+    rc = dixLookupResourceByType((void **)&surface, surface_xid,
+                                 XaveriusSurfaceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Stub: return success with zero capabilities (no presentation support yet) */
+    xAveriusGetSurfaceCapabilitiesReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = (CARD16)client->sequence,
+        .length = bytes_to_int32(32), /* fixed part only, no variable records */
+        .status = 0, /* SUCCESS */
+        .present_supported = 0,
+        .current_width = 0,
+        .current_height = 0,
+        .min_image_count = 0,
+        .max_image_count = 0,
+        .min_width = 0,
+        .min_height = 0,
+        .max_width = 0,
+        .max_height = 0,
+        .format_pair_count = 0,
+        .present_mode_count = 0,
+        .image_usage_flags = 0,
+        .queue_family_count = 0,
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.status);
+        swapl(&reply.present_supported);
+        swapl(&reply.current_width);
+        swapl(&reply.current_height);
+        swapl(&reply.min_image_count);
+        swapl(&reply.max_image_count);
+        swapl(&reply.min_width);
+        swapl(&reply.min_height);
+        swapl(&reply.max_width);
+        swapl(&reply.max_height);
+        swapl(&reply.format_pair_count);
+        swapl(&reply.present_mode_count);
+        swapl(&reply.image_usage_flags);
+        swapl(&reply.queue_family_count);
+    }
+
+    dixWriteToClient(client, sizeof(reply), &reply);
+    return Success;
+}
+
+int
+ProcXAveriusCreateSwapchain(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + 10 CARD32 fields (40 bytes) = 48 bytes */
+    if (client->req_len < 48 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 device_xid = *(CARD32 *)(payload + 0);
+    CARD32 swapchain_xid = *(CARD32 *)(payload + 4);
+    CARD32 surface_xid = *(CARD32 *)(payload + 8);
+    CARD32 image_count = *(CARD32 *)(payload + 12);
+    CARD32 format_id = *(CARD32 *)(payload + 16);
+    CARD32 color_space_id = *(CARD32 *)(payload + 20);
+    CARD32 width = *(CARD32 *)(payload + 24);
+    CARD32 height = *(CARD32 *)(payload + 28);
+    CARD32 present_mode_id = *(CARD32 *)(payload + 32);
+    CARD32 image_usage_flags = *(CARD32 *)(payload + 36);
+
+    if (client->swapped) {
+        swapl(&device_xid);
+        swapl(&swapchain_xid);
+        swapl(&surface_xid);
+        swapl(&image_count);
+        swapl(&format_id);
+        swapl(&color_space_id);
+        swapl(&width);
+        swapl(&height);
+        swapl(&present_mode_id);
+        swapl(&image_usage_flags);
+    }
+
+    if (!ValidateXID(device_xid) || !ValidateXID(swapchain_xid) || !ValidateXID(surface_xid))
+        return BadValue;
+
+    if (width == 0 || height == 0)
+        return BadValue;
+
+    void *device;
+    int rc = dixLookupResourceByType((void **)&device, device_xid,
+                                     XaveriusLogicalDeviceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    void *surface;
+    rc = dixLookupResourceByType((void **)&surface, surface_xid,
+                                 XaveriusSurfaceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Validate swapchain_xid as create-XID */
+    void *existing;
+    if (dixLookupResourceByType((void **)&existing, swapchain_xid,
+                                XaveriusSwapchainType, client, DixWriteAccess) == Success)
+        return BadIDChoice;
+
+    /* Stub: no presentation support → UNSUPPORTED_CONFIGURATION status reply */
+    xAveriusCreateSwapchainReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = (CARD16)client->sequence,
+        .length = bytes_to_int32(8),
+        .status = XAVERIUS_SWAPCHAIN_UNSUPPORTED_CONFIG,
+        .actual_image_count = 0,
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.status);
+        swapl(&reply.actual_image_count);
+    }
+
+    dixWriteToClient(client, sizeof(reply), &reply);
+    return Success;
+}
+
+int
+ProcXAveriusDestroySwapchain(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + swapchain_xid (4 bytes) = 12 bytes */
+    if (client->req_len < 12 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 swapchain_xid = *(CARD32 *)(payload + 0);
+
+    if (client->swapped)
+        swapl(&swapchain_xid);
+
+    if (!ValidateXID(swapchain_xid))
+        return BadValue;
+
+    void *swapchain;
+    int rc = dixLookupResourceByType((void **)&swapchain, swapchain_xid,
+                                     XaveriusSwapchainType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Stub: no pending operations, accept destruction */
+    FreeResource(swapchain_xid, XaveriusSwapchainType);
+    return Success;
+}
+
+int
+ProcXAveriusAcquireNextImage(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + 5 fields (24 bytes) = 32 bytes */
+    if (client->req_len < 32 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 device_xid = *(CARD32 *)(payload + 0);
+    CARD32 swapchain_xid = *(CARD32 *)(payload + 4);
+    CARD64 timeout_ns = *(CARD64 *)(payload + 8);
+    CARD32 semaphore_xid = *(CARD32 *)(payload + 16);
+    CARD32 fence_xid = *(CARD32 *)(payload + 20);
+
+    if (client->swapped) {
+        swapl(&device_xid);
+        swapl(&swapchain_xid);
+        swapll(&timeout_ns);
+        swapl(&semaphore_xid);
+        swapl(&fence_xid);
+    }
+
+    if (!ValidateXID(device_xid) || !ValidateXID(swapchain_xid))
+        return BadValue;
+
+    void *device;
+    int rc = dixLookupResourceByType((void **)&device, device_xid,
+                                     XaveriusLogicalDeviceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    void *swapchain;
+    rc = dixLookupResourceByType((void **)&swapchain, swapchain_xid,
+                                 XaveriusSwapchainType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Stub: no images available → NOT_READY status reply (zero timeout poll) */
+    xAveriusAcquireNextImageReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = (CARD16)client->sequence,
+        .length = bytes_to_int32(12),
+        .status = XAVERIUS_ACQUIRE_NOT_READY,
+        .image_index = 0,
+        .reserved = 0,
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.status);
+        swapl(&reply.image_index);
+        swapl(&reply.reserved);
+    }
+
+    dixWriteToClient(client, sizeof(reply), &reply);
+    return Success;
+}
+
+int
+ProcXAveriusQueuePresent(ClientPtr client)
+{
+    REQUEST_AT_LEAST_SIZE(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + 7 fields (28 bytes) + wait semaphore XIDs */
+    if (client->req_len < 40 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 device_xid = *(CARD32 *)(payload + 0);
+    CARD32 queue_family_index = *(CARD32 *)(payload + 4);
+    CARD32 queue_index = *(CARD32 *)(payload + 8);
+    CARD32 swapchain_xid = *(CARD32 *)(payload + 12);
+    CARD32 image_index = *(CARD32 *)(payload + 16);
+    CARD32 wait_semaphore_count = *(CARD32 *)(payload + 20);
+    CARD64 presentation_token = *(CARD64 *)(payload + 24);
+
+    if (client->swapped) {
+        swapl(&device_xid);
+        swapl(&queue_family_index);
+        swapl(&queue_index);
+        swapl(&swapchain_xid);
+        swapl(&image_index);
+        swapl(&wait_semaphore_count);
+        swapll(&presentation_token);
+    }
+
+    if (!ValidateXID(device_xid) || !ValidateXID(swapchain_xid))
+        return BadValue;
+
+    if (presentation_token == 0)
+        return BadValue;
+
+    if (wait_semaphore_count > 0) {
+        /* Variable-length wait semaphore XIDs at offset 40 */
+        size_t needed = 40 + (size_t)wait_semaphore_count * 4;
+        if ((size_t)(client->req_len << 2) < needed)
+            return BadLength;
+
+        /* Check for duplicate semaphore XIDs */
+        for (uint32_t i = 0; i < wait_semaphore_count; i++) {
+            CARD32 sem_xid;
+            memcpy(&sem_xid, payload + 28 + i * 4, 4);
+            if (client->swapped)
+                swapl(&sem_xid);
+            for (uint32_t j = i + 1; j < wait_semaphore_count; j++) {
+                CARD32 sem_xid2;
+                memcpy(&sem_xid2, payload + 28 + j * 4, 4);
+                if (client->swapped)
+                    swapl(&sem_xid2);
+                if (sem_xid == sem_xid2)
+                    return BadValue;
+            }
+        }
+    }
+
+    void *device;
+    int rc = dixLookupResourceByType((void **)&device, device_xid,
+                                     XaveriusLogicalDeviceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    void *swapchain;
+    rc = dixLookupResourceByType((void **)&swapchain, swapchain_xid,
+                                 XaveriusSwapchainType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Stub: no presentation support → OUT_OF_DATE status reply */
+    xAveriusQueuePresentReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = (CARD16)client->sequence,
+        .length = bytes_to_int32(4),
+        .status = XAVERIUS_PRESENT_OUT_OF_DATE,
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.status);
+    }
+
+    dixWriteToClient(client, sizeof(reply), &reply);
     return Success;
 }
