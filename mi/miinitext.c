@@ -109,6 +109,7 @@ static const ExtensionModule staticExtensions[] = {
 #endif
     {BigReqExtensionInit, "BIG-REQUESTS", NULL},
     {SyncExtensionInit, "SYNC", NULL},
+    {XAveriusExtensionInit, "XAverius", NULL},
     {XkbExtensionInit, "XKEYBOARD", NULL},
     {XCMiscExtensionInit, "XC-MISC", NULL},
 #ifdef XCSECURITY
