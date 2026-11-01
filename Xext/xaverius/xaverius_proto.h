@@ -162,4 +162,163 @@ typedef struct {
 } xAveriusPhysicalDeviceInfo;
 
 #define sz_xAveriusPhysicalDeviceInfo 32
+
+/* Sync subopcodes 34-40 */
+#define XAVERIUS_SUBOPCODE_CREATE_SEMAPHORE           34
+#define XAVERIUS_SUBOPCODE_GET_SEMAPHORE_COUNTER_VALUE 35
+#define XAVERIUS_SUBOPCODE_WAIT_SEMAPHORES             36
+#define XAVERIUS_SUBOPCODE_SIGNAL_SEMAPHORE            37
+#define XAVERIUS_SUBOPCODE_DESTROY_SEMAPHORE           38
+#define XAVERIUS_SUBOPCODE_CREATE_FENCE                39
+#define XAVERIUS_SUBOPCODE_GET_FENCE_STATUS            40
+
+/* Semaphore types */
+#define XAVERIUS_SEMAPHORE_TYPE_BINARY     0
+#define XAVERIUS_SEMAPHORE_TYPE_TIMELINE   1
+
+/* Semaphore states */
+#define XAVERIUS_SEMAPHORE_STATE_UNSIGNALED 0
+#define XAVERIUS_SEMAPHORE_STATE_PENDING    1
+#define XAVERIUS_SEMAPHORE_STATE_SIGNALED   2
+#define XAVERIUS_SEMAPHORE_STATE_FAILED     3
+
+/* Wait modes */
+#define XAVERIUS_WAIT_MODE_ANY   0
+#define XAVERIUS_WAIT_MODE_ALL   1
+
+/* Fence states */
+#define XAVERIUS_FENCE_STATE_UNSIGNALED 0
+#define XAVERIUS_FENCE_STATE_PENDING    1
+#define XAVERIUS_FENCE_STATE_SIGNALED   2
+#define XAVERIUS_FENCE_STATE_FAILED     3
+
+typedef struct {
+    CARD8 reqType;
+    CARD8 data;
+    CARD16 length;
+    CARD8 subopcode;
+    CARD8 flags;
+    CARD16 reserved;
+    XID device_xid;
+    XID semaphore_xid;
+    CARD32 semaphore_type;
+    CARD64 initial_value;
+} xAveriusCreateSemaphoreReq;
+
+#define sz_xAveriusCreateSemaphoreReq 28
+
+typedef struct {
+    CARD8 reqType;
+    CARD8 data;
+    CARD16 length;
+    CARD8 subopcode;
+    CARD8 flags;
+    CARD16 reserved;
+    XID device_xid;
+    XID semaphore_xid;
+} xAveriusGetSemaphoreCounterValueReq;
+
+#define sz_xAveriusGetSemaphoreCounterValueReq 16
+
+typedef struct {
+    BYTE type;
+    BYTE pad1;
+    CARD16 sequenceNumber;
+    CARD32 length;
+    CARD64 counter_value;
+    CARD32 reserved[2];
+} xAveriusGetSemaphoreCounterValueReply;
+
+#define sz_xAveriusGetSemaphoreCounterValueReply 32
+
+typedef struct {
+    CARD8 reqType;
+    CARD8 data;
+    CARD16 length;
+    CARD8 subopcode;
+    CARD8 flags;
+    CARD16 reserved;
+    XID device_xid;
+    CARD32 semaphore_count;
+    CARD32 wait_mode;
+    CARD64 timeout_ns;
+} xAveriusWaitSemaphoresReq;
+
+#define sz_xAveriusWaitSemaphoresReq 28
+
+typedef struct {
+    BYTE type;
+    BYTE pad1;
+    CARD16 sequenceNumber;
+    CARD32 length;
+    CARD32 status;
+    CARD32 reserved[3];
+} xAveriusWaitSemaphoresReply;
+
+#define sz_xAveriusWaitSemaphoresReply 32
+
+typedef struct {
+    CARD8 reqType;
+    CARD8 data;
+    CARD16 length;
+    CARD8 subopcode;
+    CARD8 flags;
+    CARD16 reserved;
+    XID device_xid;
+    XID semaphore_xid;
+    CARD64 signal_value;
+} xAveriusSignalSemaphoreReq;
+
+#define sz_xAveriusSignalSemaphoreReq 24
+
+typedef struct {
+    CARD8 reqType;
+    CARD8 data;
+    CARD16 length;
+    CARD8 subopcode;
+    CARD8 flags;
+    CARD16 reserved;
+    XID device_xid;
+    XID semaphore_xid;
+} xAveriusDestroySemaphoreReq;
+
+#define sz_xAveriusDestroySemaphoreReq 16
+
+typedef struct {
+    CARD8 reqType;
+    CARD8 data;
+    CARD16 length;
+    CARD8 subopcode;
+    CARD8 flags;
+    CARD16 reserved;
+    XID device_xid;
+    XID fence_xid;
+    CARD32 create_flags;
+    CARD32 reserved2;
+} xAveriusCreateFenceReq;
+
+#define sz_xAveriusCreateFenceReq 24
+
+typedef struct {
+    CARD8 reqType;
+    CARD8 data;
+    CARD16 length;
+    CARD8 subopcode;
+    CARD8 flags;
+    CARD16 reserved;
+    XID device_xid;
+    XID fence_xid;
+} xAveriusGetFenceStatusReq;
+
+#define sz_xAveriusGetFenceStatusReq 16
+
+typedef struct {
+    BYTE type;
+    BYTE fence_state;
+    CARD16 sequenceNumber;
+    CARD32 length;
+    CARD32 reserved[6];
+} xAveriusGetFenceStatusReply;
+
+#define sz_xAveriusGetFenceStatusReply 32
 #endif

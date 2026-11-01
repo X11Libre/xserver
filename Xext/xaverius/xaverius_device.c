@@ -8,6 +8,7 @@
 #include "dixstruct.h"
 #include "dix/dix_priv.h"
 #include "os.h"
+#include "dix/dix_priv.h"
 
 #define XAVERIUS_DEVICE_TYPE_PHYSICAL    1
 #define XAVERIUS_DEVICE_TYPE_LOGICAL     2
@@ -573,38 +574,392 @@ ProcXAveriusDispatchDeviceLifecycle(ClientPtr client)
     }
 }
 
-int
-ProcXAveriusDispatch(ClientPtr client)
+/* Sync subopcode 34-40 resource tracking */
+typedef struct {
+    XID xid;
+    XID device_xid;
+    uint32_t semaphore_type;   /* BINARY or TIMELINE */
+    uint32_t state;            /* UNSIGNALED, PENDING, SIGNALED, FAILED */
+    uint64_t counter_value;    /* for timeline semaphores */
+    void *vk_semaphore;        /* backend handle */
+} XaveriusSemaphoreRec, *XaveriusSemaphorePtr;
+
+typedef struct {
+    XID xid;
+    XID device_xid;
+    uint32_t state;            /* UNSIGNALED, PENDING, SIGNALED, FAILED */
+    void *vk_fence;            /* backend handle */
+} XaveriusFenceRec, *XaveriusFencePtr;
+
+static RESTYPE XaveriusSemaphoreType = 0;
+static RESTYPE XaveriusFenceType = 0;
+
+static int __attribute__((unused))
+xaverius_free_semaphore(void *value, XID id)
 {
-    REQUEST(xAveriusReq);
-    (void)stuff;
+    XaveriusSemaphoreRec *sem = (XaveriusSemaphoreRec *)value;
+    if (sem->vk_semaphore)
+        free(sem->vk_semaphore);
+    free(sem);
+    return Success;
+}
+
+static int __attribute__((unused))
+xaverius_free_fence(void *value, XID id)
+{
+    XaveriusFenceRec *fence = (XaveriusFenceRec *)value;
+    if (fence->vk_fence)
+        free(fence->vk_fence);
+    free(fence);
+    return Success;
+}
+
+/* Subopcode 34: CreateSemaphore */
+int
+ProcXAveriusCreateSemaphore(ClientPtr client)
+{
+    REQUEST(xAveriusCreateSemaphoreReq);
 
     if (stuff->data != 0)
         return BadValue;
 
-    if (!XAveriusExtensionMajorOpcode)
-        return BadRequest;
+    if (client->req_len != sz_xAveriusCreateSemaphoreReq / 4)
+        return BadLength;
 
-    uint8_t subopcode = stuff->subopcode;
+    XID device_xid = stuff->device_xid;
+    XID semaphore_xid = stuff->semaphore_xid;
+    CARD32 semaphore_type = stuff->semaphore_type;
+    CARD64 initial_value = stuff->initial_value;
 
-    switch (subopcode) {
-    case XAVERIUS_SUBOPCODE_CREATE_DEVICE:
-        return ProcXAveriusCreateDevice(client);
-    case XAVERIUS_SUBOPCODE_CREATE_DEFAULT_DEVICE:
-        return ProcXAveriusCreateDefaultDevice(client);
-    case XAVERIUS_SUBOPCODE_DESTROY_DEVICE:
-        return ProcXAveriusDestroyDevice(client);
-    default:
-        return BadRequest;
+    if (semaphore_type != XAVERIUS_SEMAPHORE_TYPE_BINARY &&
+        semaphore_type != XAVERIUS_SEMAPHORE_TYPE_TIMELINE)
+        return BadValue;
+
+    if (semaphore_type == XAVERIUS_SEMAPHORE_TYPE_BINARY &&
+        initial_value != 0)
+        return BadValue;
+
+    if (semaphore_xid == 0)
+        return BadIDChoice;
+
+    XaveriusSemaphorePtr existing;
+    if (dixLookupResourceByType((void **)&existing, semaphore_xid,
+                                XaveriusSemaphoreType, client, DixWriteAccess) == Success)
+        return BadIDChoice;
+
+    XaveriusSemaphoreRec *sem = calloc(1, sizeof(XaveriusSemaphoreRec));
+    if (!sem)
+        return BadAlloc;
+
+    sem->xid = semaphore_xid;
+    sem->device_xid = device_xid;
+    sem->semaphore_type = semaphore_type;
+    sem->state = XAVERIUS_SEMAPHORE_STATE_UNSIGNALED;
+    sem->counter_value = initial_value;
+
+    if (!AddResource(semaphore_xid, XaveriusSemaphoreType, sem)) {
+        free(sem);
+        return BadAlloc;
     }
+
+    return Success;
+}
+
+/* Subopcode 35: GetSemaphoreCounterValue */
+int
+ProcXAveriusGetSemaphoreCounterValue(ClientPtr client)
+{
+    REQUEST(xAveriusGetSemaphoreCounterValueReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (client->req_len != sz_xAveriusGetSemaphoreCounterValueReq / 4)
+        return BadLength;
+
+    XID device_xid = stuff->device_xid;
+    XID semaphore_xid = stuff->semaphore_xid;
+
+    if (device_xid == 0 || semaphore_xid == 0)
+        return BadValue;
+
+    XaveriusSemaphorePtr sem;
+    if (dixLookupResourceByType((void **)&sem, semaphore_xid,
+                                XaveriusSemaphoreType, client, DixReadAccess) != Success)
+        return BadValue;
+
+    xAveriusGetSemaphoreCounterValueReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .counter_value = sem->counter_value,
+        .reserved = {0, 0}
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapll(&reply.counter_value);
+    }
+    dixWriteToClient(client, sz_xAveriusGetSemaphoreCounterValueReply, &reply);
+
+    return Success;
+}
+
+/* Subopcode 36: WaitSemaphores */
+int
+ProcXAveriusWaitSemaphores(ClientPtr client)
+{
+    REQUEST(xAveriusWaitSemaphoresReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (client->req_len < sz_xAveriusWaitSemaphoresReq / 4)
+        return BadLength;
+
+    CARD32 semaphore_count = stuff->semaphore_count;
+    CARD32 wait_mode = stuff->wait_mode;
+    CARD64 timeout_ns = stuff->timeout_ns;
+    (void)timeout_ns;
+
+    if (semaphore_count == 0)
+        return BadValue;
+
+    if (wait_mode != XAVERIUS_WAIT_MODE_ANY && wait_mode != XAVERIUS_WAIT_MODE_ALL)
+        return BadValue;
+
+    size_t expected_len = sz_xAveriusWaitSemaphoresReq +
+        (size_t)semaphore_count * (sizeof(XID) + sizeof(CARD64));
+    if (client->req_len != expected_len / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + sz_xAveriusWaitSemaphoresReq;
+    XID *semaphores = calloc(semaphore_count, sizeof(XID));
+    CARD64 *wait_values = calloc(semaphore_count, sizeof(CARD64));
+    if (!semaphores || !wait_values) {
+        free(semaphores);
+        free(wait_values);
+        return BadAlloc;
+    }
+
+    for (CARD32 i = 0; i < semaphore_count; i++) {
+        semaphores[i] = *(XID *)(payload + i * (sizeof(XID) + sizeof(CARD64)));
+        wait_values[i] = *(CARD64 *)(payload + i * (sizeof(XID) + sizeof(CARD64)) + sizeof(XID));
+    }
+
+    XID device_xid = stuff->device_xid;
+    if (device_xid == 0) {
+        free(semaphores);
+        free(wait_values);
+        return BadValue;
+    }
+
+    for (CARD32 i = 0; i < semaphore_count; i++) {
+        XaveriusSemaphorePtr sem;
+        if (dixLookupResourceByType((void **)&sem, semaphores[i],
+                                    XaveriusSemaphoreType, client, DixReadAccess) != Success) {
+            free(semaphores);
+            free(wait_values);
+            return BadValue;
+        }
+    }
+
+    /* Simple stub: check if all waits are immediately satisfied */
+    CARD32 satisfied_count = 0;
+    for (CARD32 i = 0; i < semaphore_count; i++) {
+        XaveriusSemaphorePtr sem;
+        dixLookupResourceByType((void **)&sem, semaphores[i],
+                                XaveriusSemaphoreType, client, DixReadAccess);
+        if (sem->state == XAVERIUS_SEMAPHORE_STATE_SIGNALED &&
+            sem->counter_value >= wait_values[i]) {
+            satisfied_count++;
+        }
+    }
+
+    CARD32 status;
+    if (wait_mode == XAVERIUS_WAIT_MODE_ALL) {
+        status = (satisfied_count == semaphore_count) ? 0 : 1; /* SUCCESS or TIMEOUT */
+    } else {
+        status = (satisfied_count > 0) ? 0 : 1;
+    }
+
+    xAveriusWaitSemaphoresReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .status = status,
+        .reserved = {0, 0}
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.status);
+    }
+    dixWriteToClient(client, sz_xAveriusWaitSemaphoresReply, &reply);
+
+    free(semaphores);
+    free(wait_values);
+
+    return Success;
+}
+
+/* Subopcode 37: SignalSemaphore */
+int
+ProcXAveriusSignalSemaphore(ClientPtr client)
+{
+    REQUEST(xAveriusSignalSemaphoreReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (client->req_len != sz_xAveriusSignalSemaphoreReq / 4)
+        return BadLength;
+
+    XID device_xid = stuff->device_xid;
+    XID semaphore_xid = stuff->semaphore_xid;
+    CARD64 signal_value = stuff->signal_value;
+
+if (device_xid == 0 || semaphore_xid == 0)
+        return BadValue;
+
+    XaveriusSemaphorePtr sem;
+    if (dixLookupResourceByType((void **)&sem, semaphore_xid,
+                                XaveriusSemaphoreType, client, DixWriteAccess) != Success)
+        return BadValue;
+
+    if (sem->semaphore_type == XAVERIUS_SEMAPHORE_TYPE_BINARY) {
+        if (signal_value != 0)
+            return BadValue;
+        sem->state = XAVERIUS_SEMAPHORE_STATE_SIGNALED;
+        sem->counter_value = 1;
+    } else {
+        if (signal_value <= sem->counter_value)
+            return BadValue;
+        sem->counter_value = signal_value;
+        sem->state = XAVERIUS_SEMAPHORE_STATE_SIGNALED;
+    }
+
+    return Success;
+}
+
+/* Subopcode 38: DestroySemaphore */
+int
+ProcXAveriusDestroySemaphore(ClientPtr client)
+{
+    REQUEST(xAveriusDestroySemaphoreReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (client->req_len != sz_xAveriusDestroySemaphoreReq / 4)
+        return BadLength;
+
+    XID device_xid = stuff->device_xid;
+    XID semaphore_xid = stuff->semaphore_xid;
+
+    if (device_xid == 0 || semaphore_xid == 0)
+        return BadValue;
+
+    XaveriusSemaphorePtr sem;
+    if (dixLookupResourceByType((void **)&sem, semaphore_xid,
+                                XaveriusSemaphoreType, client, DixWriteAccess) != Success)
+        return BadValue;
+
+    FreeResource(semaphore_xid, XaveriusSemaphoreType);
+
+    return Success;
+}
+
+/* Subopcode 39: CreateFence */
+int
+ProcXAveriusCreateFence(ClientPtr client)
+{
+    REQUEST(xAveriusCreateFenceReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (client->req_len != sz_xAveriusCreateFenceReq / 4)
+        return BadLength;
+
+    XID device_xid = stuff->device_xid;
+    XID fence_xid = stuff->fence_xid;
+    CARD32 create_flags = stuff->create_flags;
+    CARD32 reserved2 = stuff->reserved2;
+
+    if (create_flags != 0 || reserved2 != 0)
+        return BadValue;
+
+    if (device_xid == 0 || fence_xid == 0)
+        return BadValue;
+
+    XaveriusFencePtr existing;
+    if (dixLookupResourceByType((void **)&existing, fence_xid,
+                                XaveriusFenceType, client, DixWriteAccess) == Success)
+        return BadIDChoice;
+
+    XaveriusFenceRec *fence = calloc(1, sizeof(XaveriusFenceRec));
+    if (!fence)
+        return BadAlloc;
+
+    fence->xid = fence_xid;
+    fence->device_xid = device_xid;
+    fence->state = XAVERIUS_FENCE_STATE_UNSIGNALED;
+
+    if (!AddResource(fence_xid, XaveriusFenceType, fence)) {
+        free(fence);
+        return BadAlloc;
+    }
+
+    return Success;
+}
+
+/* Subopcode 40: GetFenceStatus */
+int
+ProcXAveriusGetFenceStatus(ClientPtr client)
+{
+    REQUEST(xAveriusGetFenceStatusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (client->req_len != sz_xAveriusGetFenceStatusReq / 4)
+        return BadLength;
+
+    XID device_xid = stuff->device_xid;
+    XID fence_xid = stuff->fence_xid;
+
+    if (device_xid == 0 || fence_xid == 0)
+        return BadValue;
+
+    XaveriusFencePtr fence;
+    if (dixLookupResourceByType((void **)&fence, fence_xid,
+                                XaveriusFenceType, client, DixReadAccess) != Success)
+        return BadValue;
+
+    xAveriusGetFenceStatusReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .fence_state = fence->state,
+        .reserved = {0}
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+    }
+    dixWriteToClient(client, sz_xAveriusGetFenceStatusReply, &reply);
+
+    return Success;
 }
 
 int
-SProcXAveriusDispatch(ClientPtr client)
+ProcXAveriusDispatchComputeSync(ClientPtr client)
 {
     REQUEST(xAveriusReq);
-    (void)stuff;
-    (void)stuff;
 
     if (stuff->data != 0)
         return BadValue;
@@ -615,12 +970,20 @@ SProcXAveriusDispatch(ClientPtr client)
     uint8_t subopcode = stuff->subopcode;
 
     switch (subopcode) {
-    case XAVERIUS_SUBOPCODE_CREATE_DEVICE:
-        return ProcXAveriusCreateDevice(client);
-    case XAVERIUS_SUBOPCODE_CREATE_DEFAULT_DEVICE:
-        return ProcXAveriusCreateDefaultDevice(client);
-    case XAVERIUS_SUBOPCODE_DESTROY_DEVICE:
-        return ProcXAveriusDestroyDevice(client);
+    case XAVERIUS_SUBOPCODE_CREATE_SEMAPHORE:
+        return ProcXAveriusCreateSemaphore(client);
+    case XAVERIUS_SUBOPCODE_GET_SEMAPHORE_COUNTER_VALUE:
+        return ProcXAveriusGetSemaphoreCounterValue(client);
+    case XAVERIUS_SUBOPCODE_WAIT_SEMAPHORES:
+        return ProcXAveriusWaitSemaphores(client);
+    case XAVERIUS_SUBOPCODE_SIGNAL_SEMAPHORE:
+        return ProcXAveriusSignalSemaphore(client);
+    case XAVERIUS_SUBOPCODE_DESTROY_SEMAPHORE:
+        return ProcXAveriusDestroySemaphore(client);
+    case XAVERIUS_SUBOPCODE_CREATE_FENCE:
+        return ProcXAveriusCreateFence(client);
+    case XAVERIUS_SUBOPCODE_GET_FENCE_STATUS:
+        return ProcXAveriusGetFenceStatus(client);
     default:
         return BadRequest;
     }
