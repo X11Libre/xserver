@@ -592,6 +592,7 @@ endif
 build_xinerama = get_option('xinerama')
 build_xsecurity = get_option('xcsecurity')
 build_namespace = get_option('namespace')
+build_xaverius = get_option('xaverius')
 
 build_xv = get_option('xv')
 build_xvmc = get_option('xvmc')
@@ -829,7 +830,7 @@ if build_xserver
         libxserver_shape,
         libxserver_saver,
         libxserver_bigreq,
-        libxserver_geext
+        libxserver_geext,
     ]
 
     if build_xselinux
@@ -839,6 +840,11 @@ if build_xserver
     if build_namespace
         subdir('Xext/namespace')
         libxserver += libxserver_namespace
+    endif
+
+    if build_xaverius
+        subdir('Xext/xaverius')
+        libxserver += libxserver_xaverius
     endif
 endif
 
