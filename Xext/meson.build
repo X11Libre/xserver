@@ -16,6 +16,7 @@ libxserver_xext = static_library('xserver_xext',
 
 subdir('bigreq')
 subdir('geext')
+subdir('xaverius')
 subdir('xfixes')
 subdir('xinput')
 subdir('xkeyboard')

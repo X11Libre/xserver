@@ -9,6 +9,7 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "os/fmt.h"
+#include "extension.h"
 
 #define XAVERIUS_DEVICE_TYPE_PHYSICAL    1
 #define XAVERIUS_DEVICE_TYPE_LOGICAL     2
@@ -40,6 +41,10 @@ typedef struct {
 
 static RESTYPE XaveriusLogicalDeviceType = 0;
 static RESTYPE XaveriusPhysicalDeviceType = 0;
+static RESTYPE XaveriusCommandPoolType = 0;
+static RESTYPE XaveriusCommandBufferType = 0;
+static RESTYPE XaveriusSemaphoreType = 0;
+static RESTYPE XaveriusFenceType = 0;
 
 #define XAVERIUS_MAX_PHYSICAL_DEVICES 4
 
@@ -237,6 +242,36 @@ xaverius_free_logical_device(void *value, XID id)
     return Success;
 }
 
+static int
+xaverius_free_physical_device(void *value, XID id)
+{
+    XaveriusPhysicalDevicePtr dev = (XaveriusPhysicalDevicePtr)value;
+
+    free(dev);
+    return Success;
+}
+
+int
+xaverius_register_physical_device(XaveriusPhysicalDevicePtr dev)
+{
+    if (!AddResource(dev->physical_device_xid, XaveriusPhysicalDeviceType, dev))
+        return BadAlloc;
+    return Success;
+}
+
+XaveriusPhysicalDevicePtr
+xaverius_lookup_physical_device(XID xid)
+{
+    XaveriusPhysicalDevicePtr dev;
+    void *result = NULL;
+    int rc = dixLookupResourceByType(&result, xid, XaveriusPhysicalDeviceType,
+                                     NULL, DixReadAccess);
+    if (rc != Success)
+        return NULL;
+    dev = (XaveriusPhysicalDevicePtr)result;
+    return dev;
+}
+
 int
 ProcXAveriusCreateDevice(ClientPtr client)
 {
@@ -364,7 +399,11 @@ void
 xaverius_device_init(void)
 {
     XaveriusLogicalDeviceType = CreateNewResourceType(xaverius_free_logical_device, "XAveriusLogicalDevice");
-    XaveriusPhysicalDeviceType = CreateNewResourceType(NULL, "XAveriusPhysicalDevice");
+    XaveriusPhysicalDeviceType = CreateNewResourceType(xaverius_free_physical_device, "XAveriusPhysicalDevice");
+    XaveriusCommandPoolType = CreateNewResourceType(NULL, "XAveriusCommandPool");
+    XaveriusCommandBufferType = CreateNewResourceType(NULL, "XAveriusCommandBuffer");
+    XaveriusSemaphoreType = CreateNewResourceType(NULL, "XAveriusSemaphore");
+    XaveriusFenceType = CreateNewResourceType(NULL, "XAveriusFence");
 
     xaverius_register_physical_device(0x1001, 0x10DE, 0x2204, 0x00010000, 0x000F0000,
                                       1, "NVIDIA GV100");
