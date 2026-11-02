@@ -67,6 +67,9 @@
 #include "include/os.h"
 #include "include/Xprintf.h"
 
+static int XNFvasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, va_list va)
+_X_ATTRIBUTE_PRINTF(2, 0);
+
 /**
  * Varargs sprintf that allocates a string buffer the right size for
  * the pattern & data provided and prints the requested data to it.
@@ -78,7 +81,7 @@
  * @param va      variable argument list
  * @return        size of allocated buffer
  */
-int
+static int
 XNFvasprintf(char **ret, const char *_X_RESTRICT_KYWD format, va_list va)
 {
     int size = vasprintf(ret, format, va);
