@@ -9,6 +9,7 @@
 #include "include/xlibre_ptrtypes.h"
 
 #include "xaverius.h"
+#include "xaverius_proto.h"
 
 int ProcXaveriusDispatch(ClientPtr client)
 {
