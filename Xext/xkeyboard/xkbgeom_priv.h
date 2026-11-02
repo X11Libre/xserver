@@ -209,9 +209,9 @@ typedef struct _XkbOverlayRow {
 
 typedef struct _XkbOverlay {
     Atom name;
-    XkbSectionPtr section_under;
     unsigned short num_rows;
     unsigned short sz_rows;
+    XkbSectionPtr section_under;
     XkbOverlayRowPtr rows;
     XkbBoundsPtr bounds;
 } XkbOverlayRec, *XkbOverlayPtr;

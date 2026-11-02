@@ -78,6 +78,9 @@ struct present_vblank {
     int16_t             x_off;
     int16_t             y_off;
     CARD16              kind;
+#ifdef DRI3
+    int                 efd;
+#endif
     uint64_t            event_id;
     uint64_t            target_msc;     /* target MSC when present should complete */
     uint64_t            exec_msc;       /* MSC at which present can be executed */
@@ -98,7 +101,6 @@ struct present_vblank {
     struct dri3_syncobj *release_syncobj;
     uint64_t            acquire_point;
     uint64_t            release_point;
-    int                 efd;
 #endif /* DRI3 */
 };
 
@@ -171,17 +173,16 @@ struct present_screen_priv {
     present_vblank_ptr          flip_pending;
     uint64_t                    unflip_event_id;
 
-    uint32_t                    fake_interval;
-
     /* Currently active flipped pixmap and fence */
     RRCrtcPtr                   flip_crtc;
     WindowPtr                   flip_window;
-    uint32_t                    flip_serial;
     PixmapPtr                   flip_pixmap;
     present_fence_ptr           flip_idle_fence;
-    Bool                        flip_sync;
-
     present_screen_info_ptr     info;
+
+    uint32_t                    fake_interval;
+    uint32_t                    flip_serial;
+    Bool                        flip_sync;
 
     /* Mode hooks */
     present_priv_query_capabilities_ptr query_capabilities;
