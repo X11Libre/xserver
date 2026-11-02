@@ -13,13 +13,10 @@
 #include "globals.h"
 #include "dixstruct.h"
 #include "dix/dix_priv.h"
-#include "dix/request_priv.h"
-#include "os/fmt.h"
+#include "os.h"
 
 #define XAVERIUS_DEVICE_TYPE_PHYSICAL    1
 #define XAVERIUS_DEVICE_TYPE_LOGICAL     2
-
-#define ValidateXID(x) ((x) != 0)
 
 typedef struct {
     XID xid;
@@ -77,9 +74,26 @@ xaverius_register_physical_device(XID xid, uint32_t vendor_id, uint32_t device_i
     AddResource(xid, XaveriusPhysicalDeviceType, dev);
 }
 
+static int
+xaverius_free_logical_device(void *value, XID id)
+{
+    XaveriusLogicalDevicePtr device = (XaveriusLogicalDevicePtr)value;
+
+    if (device->queue_family_indices)
+        free(device->queue_family_indices);
+    if (device->queue_priorities)
+        free(device->queue_priorities);
+
+    free(device);
+    return Success;
+}
+
 int
 ProcXAveriusEnumeratePhysicalDevices(ClientPtr client)
 {
+    REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
     xAveriusEnumeratePhysicalDevicesReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -89,6 +103,9 @@ ProcXAveriusEnumeratePhysicalDevices(ClientPtr client)
     };
     int i;
 
+    if (stuff->data != 0)
+        return BadValue;
+
     if (client->swapped) {
         swaps(&reply.sequenceNumber);
         swapl(&reply.length);
@@ -97,26 +114,54 @@ ProcXAveriusEnumeratePhysicalDevices(ClientPtr client)
     dixWriteToClient(client, sz_xAveriusEnumeratePhysicalDevicesReply, &reply);
 
     for (i = 0; i < xaverius_physical_device_count; i++) {
-        xAveriusPhysicalDeviceInfo info = {
-            .physical_device_xid = xaverius_physical_devices[i].xid,
-            .device_type = xaverius_physical_devices[i].device_type,
-            .vendor_id = xaverius_physical_devices[i].vendor_id,
-            .device_id = xaverius_physical_devices[i].device_id,
-            .api_version = xaverius_physical_devices[i].api_version,
-            .driver_version = xaverius_physical_devices[i].driver_version,
-            .compute_queue_family_count = xaverius_physical_devices[i].compute_queue_family_count,
-        };
+        CARD32 name_len = strlen(xaverius_physical_devices[i].name);
+        CARD32 padded_name = (name_len + 3) & ~3;
+        CARD32 rec_len = 32 + padded_name;
+        CARD8 record[256];
 
-        if (client->swapped) {
-            swapl(&info.physical_device_xid);
-            swapl(&info.device_type);
-            swapl(&info.vendor_id);
-            swapl(&info.device_id);
-            swapl(&info.api_version);
-            swapl(&info.driver_version);
-            swapl(&info.compute_queue_family_count);
-        }
-        dixWriteToClient(client, sz_xAveriusPhysicalDeviceInfo, &info);
+        record[0]  = xaverius_physical_devices[i].xid >> 24;
+        record[1]  = xaverius_physical_devices[i].xid >> 16;
+        record[2]  = xaverius_physical_devices[i].xid >> 8;
+        record[3]  = xaverius_physical_devices[i].xid & 0xFF;
+
+        record[4]  = xaverius_physical_devices[i].device_type >> 24;
+        record[5]  = xaverius_physical_devices[i].device_type >> 16;
+        record[6]  = xaverius_physical_devices[i].device_type >> 8;
+        record[7]  = xaverius_physical_devices[i].device_type & 0xFF;
+
+        record[8]  = xaverius_physical_devices[i].vendor_id >> 24;
+        record[9]  = xaverius_physical_devices[i].vendor_id >> 16;
+        record[10] = xaverius_physical_devices[i].vendor_id >> 8;
+        record[11] = xaverius_physical_devices[i].vendor_id & 0xFF;
+
+        record[12] = xaverius_physical_devices[i].device_id >> 24;
+        record[13] = xaverius_physical_devices[i].device_id >> 16;
+        record[14] = xaverius_physical_devices[i].device_id >> 8;
+        record[15] = xaverius_physical_devices[i].device_id & 0xFF;
+
+        record[16] = xaverius_physical_devices[i].api_version >> 24;
+        record[17] = xaverius_physical_devices[i].api_version >> 16;
+        record[18] = xaverius_physical_devices[i].api_version >> 8;
+        record[19] = xaverius_physical_devices[i].api_version & 0xFF;
+
+        record[20] = xaverius_physical_devices[i].driver_version >> 24;
+        record[21] = xaverius_physical_devices[i].driver_version >> 16;
+        record[22] = xaverius_physical_devices[i].driver_version >> 8;
+        record[23] = xaverius_physical_devices[i].driver_version & 0xFF;
+
+        record[24] = xaverius_physical_devices[i].compute_queue_family_count >> 24;
+        record[25] = xaverius_physical_devices[i].compute_queue_family_count >> 16;
+        record[26] = xaverius_physical_devices[i].compute_queue_family_count >> 8;
+        record[27] = xaverius_physical_devices[i].compute_queue_family_count & 0xFF;
+
+        record[28] = name_len >> 8;
+        record[29] = name_len & 0xFF;
+        record[30] = 0;
+        record[31] = 0;
+
+        memcpy(record + 32, xaverius_physical_devices[i].name, name_len);
+
+        dixWriteToClient(client, rec_len, record);
     }
 
     return Success;
@@ -125,6 +170,9 @@ ProcXAveriusEnumeratePhysicalDevices(ClientPtr client)
 int
 ProcXAveriusGetPhysicalDeviceProperty(ClientPtr client)
 {
+    REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
     CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
     XID device_xid = *(XID *)payload;
     CARD32 property_id = *(CARD32 *)(payload + 4);
@@ -132,13 +180,13 @@ ProcXAveriusGetPhysicalDeviceProperty(ClientPtr client)
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
-        .property_id = property_id,
+        .property_type = property_id,
         .property_value = 0
     };
     XaveriusPhysicalDevicePtr dev = NULL;
     int i;
 
-    if (!ValidateXID(device_xid))
+    if (device_xid == 0)
         return BadValue;
 
     for (i = 0; i < xaverius_physical_device_count; i++) {
@@ -175,7 +223,7 @@ ProcXAveriusGetPhysicalDeviceProperty(ClientPtr client)
     if (client->swapped) {
         swaps(&reply.sequenceNumber);
         swapl(&reply.length);
-        swapl(&reply.property_id);
+        swapl(&reply.property_type);
         swapl(&reply.property_value);
     }
     dixWriteToClient(client, sz_xAveriusGetPhysicalDevicePropertyReply, &reply);
@@ -186,6 +234,9 @@ ProcXAveriusGetPhysicalDeviceProperty(ClientPtr client)
 int
 ProcXAveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client)
 {
+    REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
     CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
     XID device_xid = *(XID *)payload;
     xAveriusGetPhysicalDeviceQueueFamilyPropertiesReply reply = {
@@ -199,7 +250,7 @@ ProcXAveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client)
     XaveriusPhysicalDevicePtr dev = NULL;
     int i;
 
-    if (!ValidateXID(device_xid))
+    if (device_xid == 0)
         return BadValue;
 
     for (i = 0; i < xaverius_physical_device_count; i++) {
@@ -229,24 +280,12 @@ ProcXAveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client)
     return Success;
 }
 
-static int
-xaverius_free_logical_device(void *value, XID id)
-{
-    XaveriusLogicalDevicePtr device = (XaveriusLogicalDevicePtr)value;
-
-    if (device->queue_family_indices)
-        free(device->queue_family_indices);
-    if (device->queue_priorities)
-        free(device->queue_priorities);
-
-    free(device);
-    return Success;
-}
-
 int
 ProcXAveriusCreateDevice(ClientPtr client)
 {
     REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
 
     if (stuff->data != 0)
         return BadValue;
@@ -295,6 +334,8 @@ int
 ProcXAveriusCreateDefaultDevice(ClientPtr client)
 {
     REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
 
     if (stuff->data != 0)
         return BadValue;
@@ -314,8 +355,8 @@ ProcXAveriusCreateDefaultDevice(ClientPtr client)
     if (queue_count == 0)
         return BadValue;
 
-    if (!ValidateXID(device_xid))
-        return BadIDChoice;
+    if (device_xid == 0)
+        return BadValue;
 
     XaveriusLogicalDevicePtr existing;
     if (dixLookupResourceByType((void **)&existing, device_xid, XaveriusLogicalDeviceType, client, DixWriteAccess) == Success)
@@ -340,6 +381,8 @@ int
 ProcXAveriusDestroyDevice(ClientPtr client)
 {
     REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
 
     if (stuff->data != 0)
         return BadValue;
@@ -351,7 +394,7 @@ ProcXAveriusDestroyDevice(ClientPtr client)
     CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
     XID device_xid = *(XID *)(payload + 0);
 
-    if (!ValidateXID(device_xid))
+    if (device_xid == 0)
         return BadValue;
 
     XaveriusLogicalDevicePtr device;
@@ -366,42 +409,12 @@ ProcXAveriusDestroyDevice(ClientPtr client)
     return Success;
 }
 
-void
-xaverius_device_init(void)
-{
-    XaveriusLogicalDeviceType = CreateNewResourceType(xaverius_free_logical_device, "XAveriusLogicalDevice");
-    XaveriusPhysicalDeviceType = CreateNewResourceType(NULL, "XAveriusPhysicalDevice");
-
-    xaverius_register_physical_device(0x1001, 0x10DE, 0x2204, 0x00010000, 0x000F0000,
-                                      1, "NVIDIA GV100");
-    xaverius_register_physical_device(0x1002, 0x10DE, 0x2206, 0x00010000, 0x000F0000,
-                                      2, "NVIDIA GV100");
-    xaverius_register_physical_device(0x1003, 0x1002, 0x15D6, 0x00010006, 0x00170000,
-                                      1, "AMD Radeon RX 6800");
-    xaverius_register_physical_device(0x1004, 0x8086, 0x5668, 0x00020000, 0x000A0000,
-                                      1, "Intel Iris Xe");
-}
-
-void
-xaverius_device_fini(void)
-{
-    int i;
-
-    if (XaveriusLogicalDeviceType)
-        FreeResourceByType(0, XaveriusLogicalDeviceType, TRUE);
-    if (XaveriusPhysicalDeviceType)
-        FreeResourceByType(0, XaveriusPhysicalDeviceType, TRUE);
-
-    for (i = 0; i < xaverius_physical_device_count; i++) {
-        free(xaverius_physical_devices[i].queue_family_indices);
-    }
-    xaverius_physical_device_count = 0;
-}
-
 int
 ProcXAveriusGetPhysicalDeviceMemoryProperties(ClientPtr client)
 {
     REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
 
     if (stuff->data != 0)
         return BadValue;
@@ -414,16 +427,19 @@ ProcXAveriusGetPhysicalDeviceMemoryProperties(ClientPtr client)
     CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
     CARD32 physical_device_xid = *(CARD32 *)(payload + 0);
 
-    CARD32 memory_type_count = 0;
-    CARD32 memory_heap_count = 0;
+    /* Realistic memory properties for v0.1 stub:
+     * 2 memory types: DEVICE_LOCAL (heap 0) and HOST_VISIBLE|HOST_COHERENT (heap 1)
+     * 2 memory heaps: DEVICE_LOCAL (VRAM) and HOST_LOCAL (system RAM) */
+    CARD32 memory_type_count = 2;
+    CARD32 memory_heap_count = 2;
 
-    if (!ValidateXID(physical_device_xid))
+    if (physical_device_xid == 0)
         return BadValue;
 
     /* Validate physical-device XID: unknown or non-live -> BadValue,
      * wrong live type -> BadMatch. */
-    void *value;
-    int rc = dixLookupResourceByType((void **)&value, physical_device_xid,
+    void *pvalue;
+    int rc = dixLookupResourceByType((void **)&pvalue, physical_device_xid,
                                      XaveriusPhysicalDeviceType,
                                      client, DixReadAccess);
     if (rc != Success)
@@ -461,7 +477,157 @@ ProcXAveriusGetPhysicalDeviceMemoryProperties(ClientPtr client)
 
     dixWriteToClient(client, sizeof(header_payload), header_payload);
 
-    /* MEMORYTYPEINFO[] and MEMORYHEAPINFO[] are empty in v0.1 stub. */
+    /* MEMORYTYPEINFO[] - 2 types x 8 bytes each */
+    CARD32 memtype_payload[4] = {
+        0x00000001,  /* DEVICE_LOCAL */
+        0,           /* heap_index = 0 (VRAM) */
+        0x00000003,  /* HOST_VISIBLE | HOST_COHERENT */
+        1,           /* heap_index = 1 (system RAM) */
+    };
+
+    if (client->swapped) {
+        for (int i = 0; i < 4; i++)
+            swapl(&memtype_payload[i]);
+    }
+
+    dixWriteToClient(client, sizeof(memtype_payload), memtype_payload);
+
+    /* MEMORYHEAPINFO[] - 2 heaps x 16 bytes each */
+    CARD64 heap_size[2] = {
+        0x40000000ULL,  /* 1 GB VRAM */
+        0x80000000ULL,  /* 2 GB system RAM */
+    };
+    CARD32 heap_flags[2] = {
+        0x00000001,  /* DEVICE_LOCAL */
+        0x00000001,  /* DEVICE_LOCAL for system RAM too (simplified) */
+    };
+    CARD32 heap_reserved[2] = { 0, 0 };
+
+    if (client->swapped) {
+        for (int i = 0; i < 2; i++) {
+            swapll(&heap_size[i]);
+            swapl(&heap_flags[i]);
+            swapl(&heap_reserved[i]);
+        }
+    }
+
+    for (int i = 0; i < 2; i++) {
+        dixWriteToClient(client, sizeof(heap_size[0]), &heap_size[i]);
+        dixWriteToClient(client, sizeof(heap_flags[0]), &heap_flags[i]);
+        dixWriteToClient(client, sizeof(heap_reserved[0]), &heap_reserved[i]);
+    }
 
     return Success;
+}
+
+void
+xaverius_device_init(void)
+{
+    XaveriusLogicalDeviceType = CreateNewResourceType(xaverius_free_logical_device, "XAveriusLogicalDevice");
+    XaveriusPhysicalDeviceType = CreateNewResourceType(NULL, "XAveriusPhysicalDevice");
+
+    xaverius_register_physical_device(0x1001, 0x10DE, 0x2204, 0x00010000, 0x000F0000,
+                                      1, "NVIDIA GV100");
+    xaverius_register_physical_device(0x1002, 0x10DE, 0x2206, 0x00010000, 0x000F0000,
+                                      2, "NVIDIA GV100");
+    xaverius_register_physical_device(0x1003, 0x1002, 0x15D6, 0x00010006, 0x00170000,
+                                      1, "AMD Radeon RX 6800");
+    xaverius_register_physical_device(0x1004, 0x8086, 0x5668, 0x00020000, 0x000A0000,
+                                      1, "Intel Iris Xe");
+}
+
+void
+xaverius_device_fini(void)
+{
+    int i;
+
+    if (XaveriusLogicalDeviceType)
+        FreeResourceByType(0, XaveriusLogicalDeviceType, TRUE);
+    if (XaveriusPhysicalDeviceType)
+        FreeResourceByType(0, XaveriusPhysicalDeviceType, TRUE);
+
+    for (i = 0; i < xaverius_physical_device_count; i++) {
+        free(xaverius_physical_devices[i].queue_family_indices);
+    }
+    xaverius_physical_device_count = 0;
+}
+
+int
+ProcXAveriusDispatchDeviceLifecycle(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (!XAveriusExtensionMajorOpcode)
+        return BadRequest;
+
+    uint8_t subopcode = stuff->subopcode;
+
+    switch (subopcode) {
+    case XAVERIUS_SUBOPCODE_CREATE_DEVICE:
+        return ProcXAveriusCreateDevice(client);
+    case XAVERIUS_SUBOPCODE_CREATE_DEFAULT_DEVICE:
+        return ProcXAveriusCreateDefaultDevice(client);
+    case XAVERIUS_SUBOPCODE_DESTROY_DEVICE:
+        return ProcXAveriusDestroyDevice(client);
+    default:
+        return BadRequest;
+    }
+}
+
+int
+ProcXAveriusDispatch(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+    (void)stuff;
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (!XAveriusExtensionMajorOpcode)
+        return BadRequest;
+
+    uint8_t subopcode = stuff->subopcode;
+
+    switch (subopcode) {
+    case XAVERIUS_SUBOPCODE_CREATE_DEVICE:
+        return ProcXAveriusCreateDevice(client);
+    case XAVERIUS_SUBOPCODE_CREATE_DEFAULT_DEVICE:
+        return ProcXAveriusCreateDefaultDevice(client);
+    case XAVERIUS_SUBOPCODE_DESTROY_DEVICE:
+        return ProcXAveriusDestroyDevice(client);
+    default:
+        return BadRequest;
+    }
+}
+
+int
+SProcXAveriusDispatch(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+    (void)stuff;
+    (void)stuff;
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    if (!XAveriusExtensionMajorOpcode)
+        return BadRequest;
+
+    uint8_t subopcode = stuff->subopcode;
+
+    switch (subopcode) {
+    case XAVERIUS_SUBOPCODE_CREATE_DEVICE:
+        return ProcXAveriusCreateDevice(client);
+    case XAVERIUS_SUBOPCODE_CREATE_DEFAULT_DEVICE:
+        return ProcXAveriusCreateDefaultDevice(client);
+    case XAVERIUS_SUBOPCODE_DESTROY_DEVICE:
+        return ProcXAveriusDestroyDevice(client);
+    default:
+        return BadRequest;
+    }
 }
