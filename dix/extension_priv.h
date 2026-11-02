@@ -44,6 +44,7 @@
 #define EXTENSION_MAJOR_XTEST               (EXTENSION_BASE + 32)
 #define EXTENSION_MAJOR_XVIDEO              (EXTENSION_BASE + 33)
 #define EXTENSION_MAJOR_XVMC                (EXTENSION_BASE + 34)
+#define EXTENSION_MAJOR_XAVERIUS            (EXTENSION_BASE + 35)
 
 #define RESERVED_EXTENSIONS                 37
 
