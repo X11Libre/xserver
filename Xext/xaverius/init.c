@@ -8,6 +8,7 @@
 #include "miext/extinit_priv.h"
 
 #include "xaverius_intern.h"
+#include "xaverius_proto.h"
 
 Bool noXaveriusExtension = TRUE;
 

@@ -9,8 +9,6 @@
 
 #include "include/xlibre_ptrtypes.h"
 
-#define XAVERIUS_EXTENSION_NAME "XAVERIUS"
-
 extern int XaveriusEventBase;
 
 int ProcXaveriusDispatch(ClientPtr client);
