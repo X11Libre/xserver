@@ -25,6 +25,7 @@ XAveriusExtensionInit(ExtensionEntry *extEntry)
     extEntry->eventBase = XAveriusEventBase;
 
     xaverius_device_init();
+    xaverius_init_property_atoms();
 }
 
 static void
@@ -50,4 +51,5 @@ xaverius_extension_init(void)
 void
 xaverius_extension_fini(void)
 {
+    xaverius_device_fini();
 }

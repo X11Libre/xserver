@@ -13,8 +13,9 @@
 #include "globals.h"
 #include "dixstruct.h"
 #include "dix/dix_priv.h"
-#include "os.h"
-#include "dix/dix_priv.h"
+#include "dix/request_priv.h"
+#include "os/fmt.h"
+#include "extension.h"
 
 #define XAVERIUS_DEVICE_TYPE_PHYSICAL    1
 #define XAVERIUS_DEVICE_TYPE_LOGICAL     2
@@ -44,6 +45,10 @@ typedef struct {
 
 static RESTYPE XaveriusLogicalDeviceType = 0;
 static RESTYPE XaveriusPhysicalDeviceType = 0;
+static RESTYPE XaveriusCommandPoolType = 0;
+static RESTYPE XaveriusCommandBufferType = 0;
+static RESTYPE XaveriusSemaphoreType = 0;
+static RESTYPE XaveriusFenceType = 0;
 
 #define XAVERIUS_MAX_PHYSICAL_DEVICES 4
 
@@ -281,6 +286,50 @@ ProcXAveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client)
     return Success;
 }
 
+static int
+xaverius_free_logical_device(void *value, XID id)
+{
+    XaveriusLogicalDevicePtr device = (XaveriusLogicalDevicePtr)value;
+
+    if (device->queue_family_indices)
+        free(device->queue_family_indices);
+    if (device->queue_priorities)
+        free(device->queue_priorities);
+
+    free(device);
+    return Success;
+}
+
+static int
+xaverius_free_physical_device(void *value, XID id)
+{
+    XaveriusPhysicalDevicePtr dev = (XaveriusPhysicalDevicePtr)value;
+
+    free(dev);
+    return Success;
+}
+
+int
+xaverius_register_physical_device(XaveriusPhysicalDevicePtr dev)
+{
+    if (!AddResource(dev->physical_device_xid, XaveriusPhysicalDeviceType, dev))
+        return BadAlloc;
+    return Success;
+}
+
+XaveriusPhysicalDevicePtr
+xaverius_lookup_physical_device(XID xid)
+{
+    XaveriusPhysicalDevicePtr dev;
+    void *result = NULL;
+    int rc = dixLookupResourceByType(&result, xid, XaveriusPhysicalDeviceType,
+                                     NULL, DixReadAccess);
+    if (rc != Success)
+        return NULL;
+    dev = (XaveriusPhysicalDevicePtr)result;
+    return dev;
+}
+
 int
 ProcXAveriusCreateDevice(ClientPtr client)
 {
@@ -408,6 +457,42 @@ ProcXAveriusDestroyDevice(ClientPtr client)
     FreeResource(device_xid, XaveriusLogicalDeviceType);
 
     return Success;
+}
+
+void
+xaverius_device_init(void)
+{
+    XaveriusLogicalDeviceType = CreateNewResourceType(xaverius_free_logical_device, "XAveriusLogicalDevice");
+    XaveriusPhysicalDeviceType = CreateNewResourceType(xaverius_free_physical_device, "XAveriusPhysicalDevice");
+    XaveriusCommandPoolType = CreateNewResourceType(NULL, "XAveriusCommandPool");
+    XaveriusCommandBufferType = CreateNewResourceType(NULL, "XAveriusCommandBuffer");
+    XaveriusSemaphoreType = CreateNewResourceType(NULL, "XAveriusSemaphore");
+    XaveriusFenceType = CreateNewResourceType(NULL, "XAveriusFence");
+
+    xaverius_register_physical_device(0x1001, 0x10DE, 0x2204, 0x00010000, 0x000F0000,
+                                      1, "NVIDIA GV100");
+    xaverius_register_physical_device(0x1002, 0x10DE, 0x2206, 0x00010000, 0x000F0000,
+                                      2, "NVIDIA GV100");
+    xaverius_register_physical_device(0x1003, 0x1002, 0x15D6, 0x00010006, 0x00170000,
+                                      1, "AMD Radeon RX 6800");
+    xaverius_register_physical_device(0x1004, 0x8086, 0x5668, 0x00020000, 0x000A0000,
+                                      1, "Intel Iris Xe");
+}
+
+void
+xaverius_device_fini(void)
+{
+    int i;
+
+    if (XaveriusLogicalDeviceType)
+        FreeResourceByType(0, XaveriusLogicalDeviceType, TRUE);
+    if (XaveriusPhysicalDeviceType)
+        FreeResourceByType(0, XaveriusPhysicalDeviceType, TRUE);
+
+    for (i = 0; i < xaverius_physical_device_count; i++) {
+        free(xaverius_physical_devices[i].queue_family_indices);
+    }
+    xaverius_physical_device_count = 0;
 }
 
 int

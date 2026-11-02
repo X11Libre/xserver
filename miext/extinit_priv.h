@@ -45,6 +45,7 @@ void DbeExtensionInit(void);
 void DPMSExtensionInit(void);
 void GEExtensionInit(void);
 void GlxExtensionInit(void);
+void xaverius_extension_init(void);
 void PanoramiXExtensionInit(void);
 void RRExtensionInit(void);
 void RecordExtensionInit(void);

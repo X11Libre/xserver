@@ -7,7 +7,18 @@
 #include "xaverius.h"
 #include "xaverius_device.h"
 #include "xaverius_proto.h"
+#include "dix.h"
 #include "dixstruct.h"
+
+extern int ProcXAveriusDestroyCommandPool(ClientPtr client);
+extern int ProcXAveriusResetCommandBuffer(ClientPtr client);
+extern int ProcXAveriusCommandBufferData(ClientPtr client);
+extern int ProcXAveriusQueueSubmit(ClientPtr client);
+extern int ProcXAveriusCreateSemaphore(ClientPtr client);
+extern int ProcXAveriusGetSemaphoreCounterValue(ClientPtr client);
+extern int ProcXAveriusWaitSemaphores(ClientPtr client);
+extern int ProcXAveriusSignalSemaphore(ClientPtr client);
+extern int ProcXAveriusDestroySemaphore(ClientPtr client);
 
 static int
 ProcXAveriusDispatchInternal(ClientPtr client)
@@ -26,15 +37,27 @@ ProcXAveriusDispatchInternal(ClientPtr client)
     case XAVERIUS_SUBOPCODE_CREATE_DEVICE:
     case XAVERIUS_SUBOPCODE_CREATE_DEFAULT_DEVICE:
     case XAVERIUS_SUBOPCODE_DESTROY_DEVICE:
-        return ProcXAveriusDispatchDeviceLifecycle(client);
+        return ProcXAveriusDestroyDevice(client);
+    case XAVERIUS_SUBOPCODE_GET_PHYSICAL_DEVICE_MEMORY_PROPERTIES:
+        return ProcXAveriusGetPhysicalDeviceMemoryProperties(client);
+    case XAVERIUS_SUBOPCODE_DESTROY_COMMAND_POOL:
+        return ProcXAveriusDestroyCommandPool(client);
+    case XAVERIUS_SUBOPCODE_RESET_COMMAND_BUFFER:
+        return ProcXAveriusResetCommandBuffer(client);
+    case XAVERIUS_SUBOPCODE_COMMAND_BUFFER_DATA:
+        return ProcXAveriusCommandBufferData(client);
+    case XAVERIUS_SUBOPCODE_QUEUE_SUBMIT:
+        return ProcXAveriusQueueSubmit(client);
     case XAVERIUS_SUBOPCODE_CREATE_SEMAPHORE:
+        return ProcXAveriusCreateSemaphore(client);
     case XAVERIUS_SUBOPCODE_GET_SEMAPHORE_COUNTER_VALUE:
+        return ProcXAveriusGetSemaphoreCounterValue(client);
     case XAVERIUS_SUBOPCODE_WAIT_SEMAPHORES:
+        return ProcXAveriusWaitSemaphores(client);
     case XAVERIUS_SUBOPCODE_SIGNAL_SEMAPHORE:
+        return ProcXAveriusSignalSemaphore(client);
     case XAVERIUS_SUBOPCODE_DESTROY_SEMAPHORE:
-    case XAVERIUS_SUBOPCODE_CREATE_FENCE:
-    case XAVERIUS_SUBOPCODE_GET_FENCE_STATUS:
-        return ProcXAveriusDispatchComputeSync(client);
+        return ProcXAveriusDestroySemaphore(client);
     default:
         return BadRequest;
     }

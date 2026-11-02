@@ -99,6 +99,7 @@ SOFTWARE.
 /* List of built-in (statically linked) extensions */
 static const ExtensionModule staticExtensions[] = {
     {GEExtensionInit, "Generic Event Extension", NULL},
+    {xaverius_extension_init, "XAVERIUS", NULL},
     {ShapeExtensionInit, "SHAPE", &noShapeExtension},
 #ifdef CONFIG_MITSHM
     {ShmExtensionInit, "MIT-SHM", &noMITShmExtension},
