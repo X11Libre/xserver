@@ -12,32 +12,22 @@ extern void xaverius_device_fini(void);
 extern int ProcXAveriusEnumeratePhysicalDevices(ClientPtr client);
 extern int ProcXAveriusGetPhysicalDeviceProperty(ClientPtr client);
 extern int ProcXAveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client);
-extern int ProcXAveriusCreateDevice(ClientPtr client);
-extern int ProcXAveriusCreateDefaultDevice(ClientPtr client);
-extern int ProcXAveriusDestroyDevice(ClientPtr client);
-extern int ProcXAveriusGetPhysicalDeviceMemoryProperties(ClientPtr client);
-extern int ProcXAveriusDispatchDeviceLifecycle(ClientPtr client);
-extern int ProcXAveriusCreateSemaphore(ClientPtr client);
-extern int ProcXAveriusGetSemaphoreCounterValue(ClientPtr client);
-extern int ProcXAveriusWaitSemaphores(ClientPtr client);
-extern int ProcXAveriusSignalSemaphore(ClientPtr client);
-extern int ProcXAveriusDestroySemaphore(ClientPtr client);
-extern int ProcXAveriusCreateFence(ClientPtr client);
-extern int ProcXAveriusGetFenceStatus(ClientPtr client);
-extern int ProcXAveriusDispatchComputeSync(ClientPtr client);
+
+/* Presentation request handlers (subopcodes 41-47) */
+extern int ProcXAveriusCreateSurface(ClientPtr client);
+extern int ProcXAveriusDestroySurface(ClientPtr client);
+extern int ProcXAveriusGetSurfaceCapabilities(ClientPtr client);
+extern int ProcXAveriusCreateSwapchain(ClientPtr client);
+extern int ProcXAveriusDestroySwapchain(ClientPtr client);
+extern int ProcXAveriusAcquireNextImage(ClientPtr client);
+extern int ProcXAveriusQueuePresent(ClientPtr client);
 
 #define XAVERIUS_DEVICE_TYPE_PHYSICAL    1
 #define XAVERIUS_DEVICE_TYPE_LOGICAL     2
-#define XAVERIUS_SEMAPHORE_TYPE_BINARY   0
-#define XAVERIUS_SEMAPHORE_TYPE_TIMELINE 1
-#define XAVERIUS_SEMAPHORE_STATE_UNSIGNALED 0
-#define XAVERIUS_SEMAPHORE_STATE_PENDING    1
-#define XAVERIUS_SEMAPHORE_STATE_SIGNALED   2
-#define XAVERIUS_SEMAPHORE_STATE_FAILED     3
-#define XAVERIUS_WAIT_MODE_ANY   0
-#define XAVERIUS_WAIT_MODE_ALL   1
-#define XAVERIUS_FENCE_STATE_UNSIGNALED 0
-#define XAVERIUS_FENCE_STATE_PENDING    1
-#define XAVERIUS_FENCE_STATE_SIGNALED   2
-#define XAVERIUS_FENCE_STATE_FAILED     3
+#define XAVERIUS_DEVICE_TYPE_SURFACE     3
+#define XAVERIUS_DEVICE_TYPE_SWAPCHAIN   4
+
+extern RESTYPE XaveriusSurfaceType;
+extern RESTYPE XaveriusSwapchainType;
+
 #endif

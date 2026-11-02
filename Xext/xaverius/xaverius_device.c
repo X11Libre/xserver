@@ -15,10 +15,12 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "os/fmt.h"
-#include "extension.h"
+#include <string.h>
 
 #define XAVERIUS_DEVICE_TYPE_PHYSICAL    1
 #define XAVERIUS_DEVICE_TYPE_LOGICAL     2
+#define XAVERIUS_DEVICE_TYPE_SURFACE     3
+#define XAVERIUS_DEVICE_TYPE_SWAPCHAIN   4
 
 typedef struct {
     XID xid;
@@ -43,12 +45,30 @@ typedef struct {
     uint32_t queue_family_count;
 } XaveriusPhysicalDeviceRec, *XaveriusPhysicalDevicePtr;
 
+typedef struct {
+    XID xid;
+    uint32_t type;
+    XID window_xid;
+    XID owner_device_xid;
+} XaveriusSurfaceRec, *XaveriusSurfacePtr;
+
+typedef struct {
+    XID xid;
+    uint32_t type;
+    XID surface_xid;
+    uint32_t image_count;
+    uint32_t format_id;
+    uint32_t color_space_id;
+    uint32_t width;
+    uint32_t height;
+    uint32_t present_mode_id;
+    uint32_t image_usage_flags;
+} XaveriusSwapchainRec, *XaveriusSwapchainPtr;
+
 static RESTYPE XaveriusLogicalDeviceType = 0;
 static RESTYPE XaveriusPhysicalDeviceType = 0;
-static RESTYPE XaveriusCommandPoolType = 0;
-static RESTYPE XaveriusCommandBufferType = 0;
-static RESTYPE XaveriusSemaphoreType = 0;
-static RESTYPE XaveriusFenceType = 0;
+static RESTYPE XaveriusSurfaceType = 0;
+static RESTYPE XaveriusSwapchainType = 0;
 
 #define XAVERIUS_MAX_PHYSICAL_DEVICES 4
 
@@ -301,33 +321,19 @@ xaverius_free_logical_device(void *value, XID id)
 }
 
 static int
-xaverius_free_physical_device(void *value, XID id)
+xaverius_free_surface(void *value, XID id)
 {
-    XaveriusPhysicalDevicePtr dev = (XaveriusPhysicalDevicePtr)value;
-
-    free(dev);
+    XaveriusSurfacePtr surface = (XaveriusSurfacePtr)value;
+    free(surface);
     return Success;
 }
 
-int
-xaverius_register_physical_device(XaveriusPhysicalDevicePtr dev)
+static int
+xaverius_free_swapchain(void *value, XID id)
 {
-    if (!AddResource(dev->physical_device_xid, XaveriusPhysicalDeviceType, dev))
-        return BadAlloc;
+    XaveriusSwapchainPtr swapchain = (XaveriusSwapchainPtr)value;
+    free(swapchain);
     return Success;
-}
-
-XaveriusPhysicalDevicePtr
-xaverius_lookup_physical_device(XID xid)
-{
-    XaveriusPhysicalDevicePtr dev;
-    void *result = NULL;
-    int rc = dixLookupResourceByType(&result, xid, XaveriusPhysicalDeviceType,
-                                     NULL, DixReadAccess);
-    if (rc != Success)
-        return NULL;
-    dev = (XaveriusPhysicalDevicePtr)result;
-    return dev;
 }
 
 int
@@ -463,11 +469,9 @@ void
 xaverius_device_init(void)
 {
     XaveriusLogicalDeviceType = CreateNewResourceType(xaverius_free_logical_device, "XAveriusLogicalDevice");
-    XaveriusPhysicalDeviceType = CreateNewResourceType(xaverius_free_physical_device, "XAveriusPhysicalDevice");
-    XaveriusCommandPoolType = CreateNewResourceType(NULL, "XAveriusCommandPool");
-    XaveriusCommandBufferType = CreateNewResourceType(NULL, "XAveriusCommandBuffer");
-    XaveriusSemaphoreType = CreateNewResourceType(NULL, "XAveriusSemaphore");
-    XaveriusFenceType = CreateNewResourceType(NULL, "XAveriusFence");
+    XaveriusPhysicalDeviceType = CreateNewResourceType(NULL, "XAveriusPhysicalDevice");
+    XaveriusSurfaceType = CreateNewResourceType(xaverius_free_surface, "XAveriusSurface");
+    XaveriusSwapchainType = CreateNewResourceType(xaverius_free_swapchain, "XAveriusSwapchain");
 
     xaverius_register_physical_device(0x1001, 0x10DE, 0x2204, 0x00010000, 0x000F0000,
                                       1, "NVIDIA GV100");
@@ -488,6 +492,10 @@ xaverius_device_fini(void)
         FreeResourceByType(0, XaveriusLogicalDeviceType, TRUE);
     if (XaveriusPhysicalDeviceType)
         FreeResourceByType(0, XaveriusPhysicalDeviceType, TRUE);
+    if (XaveriusSurfaceType)
+        FreeResourceByType(0, XaveriusSurfaceType, TRUE);
+    if (XaveriusSwapchainType)
+        FreeResourceByType(0, XaveriusSwapchainType, TRUE);
 
     for (i = 0; i < xaverius_physical_device_count; i++) {
         free(xaverius_physical_devices[i].queue_family_indices);
@@ -606,281 +614,426 @@ ProcXAveriusGetPhysicalDeviceMemoryProperties(ClientPtr client)
     return Success;
 }
 
-void
-xaverius_device_init(void)
-{
-    XaveriusLogicalDeviceType = CreateNewResourceType(xaverius_free_logical_device, "XAveriusLogicalDevice");
-    XaveriusPhysicalDeviceType = CreateNewResourceType(NULL, "XAveriusPhysicalDevice");
-
-    xaverius_register_physical_device(0x1001, 0x10DE, 0x2204, 0x00010000, 0x000F0000,
-                                      1, "NVIDIA GV100");
-    xaverius_register_physical_device(0x1002, 0x10DE, 0x2206, 0x00010000, 0x000F0000,
-                                      2, "NVIDIA GV100");
-    xaverius_register_physical_device(0x1003, 0x1002, 0x15D6, 0x00010006, 0x00170000,
-                                      1, "AMD Radeon RX 6800");
-    xaverius_register_physical_device(0x1004, 0x8086, 0x5668, 0x00020000, 0x000A0000,
-                                      1, "Intel Iris Xe");
-}
-
-void
-xaverius_device_fini(void)
-{
-    int i;
-
-    if (XaveriusLogicalDeviceType)
-        FreeResourceByType(0, XaveriusLogicalDeviceType, TRUE);
-    if (XaveriusPhysicalDeviceType)
-        FreeResourceByType(0, XaveriusPhysicalDeviceType, TRUE);
-
-    for (i = 0; i < xaverius_physical_device_count; i++) {
-        free(xaverius_physical_devices[i].queue_family_indices);
-    }
-    xaverius_physical_device_count = 0;
-}
-
 int
-ProcXAveriusDispatchDeviceLifecycle(ClientPtr client)
+ProcXAveriusCreateSurface(ClientPtr client)
 {
     REQUEST(xAveriusReq);
-    (void)stuff;
-    (void)stuff;
 
     if (stuff->data != 0)
         return BadValue;
 
-    if (!XAveriusExtensionMajorOpcode)
-        return BadRequest;
-
-    uint8_t subopcode = stuff->subopcode;
-
-    switch (subopcode) {
-    case XAVERIUS_SUBOPCODE_CREATE_DEVICE:
-        return ProcXAveriusCreateDevice(client);
-    case XAVERIUS_SUBOPCODE_CREATE_DEFAULT_DEVICE:
-        return ProcXAveriusCreateDefaultDevice(client);
-    case XAVERIUS_SUBOPCODE_DESTROY_DEVICE:
-        return ProcXAveriusDestroyDevice(client);
-    default:
-        return BadRequest;
-    }
-}
-
-/* Sync subopcode 34-40 resource tracking */
-typedef struct {
-    XID xid;
-    XID device_xid;
-    uint32_t semaphore_type;   /* BINARY or TIMELINE */
-    uint32_t state;            /* UNSIGNALED, PENDING, SIGNALED, FAILED */
-    uint64_t counter_value;    /* for timeline semaphores */
-    void *vk_semaphore;        /* backend handle */
-} XaveriusSemaphoreRec, *XaveriusSemaphorePtr;
-
-typedef struct {
-    XID xid;
-    XID device_xid;
-    uint32_t state;            /* UNSIGNALED, PENDING, SIGNALED, FAILED */
-    void *vk_fence;            /* backend handle */
-} XaveriusFenceRec, *XaveriusFencePtr;
-
-static RESTYPE XaveriusSemaphoreType = 0;
-static RESTYPE XaveriusFenceType = 0;
-
-static int __attribute__((unused))
-xaverius_free_semaphore(void *value, XID id)
-{
-    XaveriusSemaphoreRec *sem = (XaveriusSemaphoreRec *)value;
-    if (sem->vk_semaphore)
-        free(sem->vk_semaphore);
-    free(sem);
-    return Success;
-}
-
-static int __attribute__((unused))
-xaverius_free_fence(void *value, XID id)
-{
-    XaveriusFenceRec *fence = (XaveriusFenceRec *)value;
-    if (fence->vk_fence)
-        free(fence->vk_fence);
-    free(fence);
-    return Success;
-}
-
-/* Subopcode 34: CreateSemaphore */
-int
-ProcXAveriusCreateSemaphore(ClientPtr client)
-{
-    REQUEST(xAveriusCreateSemaphoreReq);
-
-    if (stuff->data != 0)
-        return BadValue;
-
-    if (client->req_len != sz_xAveriusCreateSemaphoreReq / 4)
+    /* Fixed header (8 bytes) + surface_xid + window_xid (8 bytes) = 16 bytes */
+    if (client->req_len < 16 / 4)
         return BadLength;
 
-    XID device_xid = stuff->device_xid;
-    XID semaphore_xid = stuff->semaphore_xid;
-    CARD32 semaphore_type = stuff->semaphore_type;
-    CARD64 initial_value = stuff->initial_value;
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 surface_xid = *(CARD32 *)(payload + 0);
+    CARD32 window_xid = *(CARD32 *)(payload + 4);
 
-    if (semaphore_type != XAVERIUS_SEMAPHORE_TYPE_BINARY &&
-        semaphore_type != XAVERIUS_SEMAPHORE_TYPE_TIMELINE)
-        return BadValue;
+    if (client->swapped) {
+        swapl(&surface_xid);
+        swapl(&window_xid);
+    }
 
-    if (semaphore_type == XAVERIUS_SEMAPHORE_TYPE_BINARY &&
-        initial_value != 0)
-        return BadValue;
-
-    if (semaphore_xid == 0)
+    if (!ValidateXID(surface_xid))
         return BadIDChoice;
 
-    XaveriusSemaphorePtr existing;
-    if (dixLookupResourceByType((void **)&existing, semaphore_xid,
-                                XaveriusSemaphoreType, client, DixWriteAccess) == Success)
+    /* Validate surface_xid as create-XID: not already occupied */
+    void *existing;
+    if (dixLookupResourceByType((void **)&existing, surface_xid,
+                                XaveriusSurfaceType, client, DixWriteAccess) == Success)
         return BadIDChoice;
 
-    XaveriusSemaphoreRec *sem = calloc(1, sizeof(XaveriusSemaphoreRec));
-    if (!sem)
+    /* Validate window_xid as a live core Window owned by this connection */
+    void *window;
+    int rc = dixLookupResourceByType((void **)&window, window_xid,
+                                     XRT_WINDOW, client, DixReadAccess);
+    if (rc != Success)
+        return BadWindow;
+
+    XaveriusSurfacePtr surface = calloc(1, sizeof(XaveriusSurfaceRec));
+    if (!surface)
         return BadAlloc;
 
-    sem->xid = semaphore_xid;
-    sem->device_xid = device_xid;
-    sem->semaphore_type = semaphore_type;
-    sem->state = XAVERIUS_SEMAPHORE_STATE_UNSIGNALED;
-    sem->counter_value = initial_value;
+    surface->xid = surface_xid;
+    surface->type = XAVERIUS_DEVICE_TYPE_SURFACE;
+    surface->window_xid = window_xid;
+    surface->owner_device_xid = 0; /* connection-owned, not device-owned */
 
-    if (!AddResource(semaphore_xid, XaveriusSemaphoreType, sem)) {
-        free(sem);
+    if (!AddResource(surface_xid, XaveriusSurfaceType, surface)) {
+        free(surface);
         return BadAlloc;
     }
 
     return Success;
 }
 
-/* Subopcode 35: GetSemaphoreCounterValue */
 int
-ProcXAveriusGetSemaphoreCounterValue(ClientPtr client)
+ProcXAveriusDestroySurface(ClientPtr client)
 {
-    REQUEST(xAveriusGetSemaphoreCounterValueReq);
+    REQUEST(xAveriusReq);
 
     if (stuff->data != 0)
         return BadValue;
 
-    if (client->req_len != sz_xAveriusGetSemaphoreCounterValueReq / 4)
+    /* Fixed header (8 bytes) + surface_xid (4 bytes) = 12 bytes */
+    if (client->req_len < 12 / 4)
         return BadLength;
 
-    XID device_xid = stuff->device_xid;
-    XID semaphore_xid = stuff->semaphore_xid;
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 surface_xid = *(CARD32 *)(payload + 0);
 
-    if (device_xid == 0 || semaphore_xid == 0)
+    if (client->swapped)
+        swapl(&surface_xid);
+
+    if (!ValidateXID(surface_xid))
         return BadValue;
 
-    XaveriusSemaphorePtr sem;
-    if (dixLookupResourceByType((void **)&sem, semaphore_xid,
-                                XaveriusSemaphoreType, client, DixReadAccess) != Success)
+    void *surface;
+    int rc = dixLookupResourceByType((void **)&surface, surface_xid,
+                                     XaveriusSurfaceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    FreeResource(surface_xid, XaveriusSurfaceType);
+    return Success;
+}
+
+int
+ProcXAveriusGetSurfaceCapabilities(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
         return BadValue;
 
-    xAveriusGetSemaphoreCounterValueReply reply = {
+    /* Fixed header (8 bytes) + device_xid + surface_xid (8 bytes) = 16 bytes */
+    if (client->req_len < 16 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 device_xid = *(CARD32 *)(payload + 0);
+    CARD32 surface_xid = *(CARD32 *)(payload + 4);
+
+    if (client->swapped) {
+        swapl(&device_xid);
+        swapl(&surface_xid);
+    }
+
+    if (!ValidateXID(device_xid) || !ValidateXID(surface_xid))
+        return BadValue;
+
+    void *device;
+    int rc = dixLookupResourceByType((void **)&device, device_xid,
+                                     XaveriusLogicalDeviceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    void *surface;
+    rc = dixLookupResourceByType((void **)&surface, surface_xid,
+                                 XaveriusSurfaceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Stub: return success with zero capabilities (no presentation support yet) */
+    xAveriusGetSurfaceCapabilitiesReply reply = {
         .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .counter_value = sem->counter_value,
-        .reserved = {0, 0}
+        .sequenceNumber = (CARD16)client->sequence,
+        .length = bytes_to_int32(32), /* fixed part only, no variable records */
+        .status = 0, /* SUCCESS */
+        .present_supported = 0,
+        .current_width = 0,
+        .current_height = 0,
+        .min_image_count = 0,
+        .max_image_count = 0,
+        .min_width = 0,
+        .min_height = 0,
+        .max_width = 0,
+        .max_height = 0,
+        .format_pair_count = 0,
+        .present_mode_count = 0,
+        .image_usage_flags = 0,
+        .queue_family_count = 0,
     };
 
     if (client->swapped) {
         swaps(&reply.sequenceNumber);
         swapl(&reply.length);
-        swapll(&reply.counter_value);
+        swapl(&reply.status);
+        swapl(&reply.present_supported);
+        swapl(&reply.current_width);
+        swapl(&reply.current_height);
+        swapl(&reply.min_image_count);
+        swapl(&reply.max_image_count);
+        swapl(&reply.min_width);
+        swapl(&reply.min_height);
+        swapl(&reply.max_width);
+        swapl(&reply.max_height);
+        swapl(&reply.format_pair_count);
+        swapl(&reply.present_mode_count);
+        swapl(&reply.image_usage_flags);
+        swapl(&reply.queue_family_count);
     }
-    dixWriteToClient(client, sz_xAveriusGetSemaphoreCounterValueReply, &reply);
 
+    dixWriteToClient(client, sizeof(reply), &reply);
     return Success;
 }
 
-/* Subopcode 36: WaitSemaphores */
 int
-ProcXAveriusWaitSemaphores(ClientPtr client)
+ProcXAveriusCreateSwapchain(ClientPtr client)
 {
-    REQUEST(xAveriusWaitSemaphoresReq);
+    REQUEST(xAveriusReq);
 
     if (stuff->data != 0)
         return BadValue;
 
-    if (client->req_len < sz_xAveriusWaitSemaphoresReq / 4)
+    /* Fixed header (8 bytes) + 10 CARD32 fields (40 bytes) = 48 bytes */
+    if (client->req_len < 48 / 4)
         return BadLength;
 
-    CARD32 semaphore_count = stuff->semaphore_count;
-    CARD32 wait_mode = stuff->wait_mode;
-    CARD64 timeout_ns = stuff->timeout_ns;
-    (void)timeout_ns;
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 device_xid = *(CARD32 *)(payload + 0);
+    CARD32 swapchain_xid = *(CARD32 *)(payload + 4);
+    CARD32 surface_xid = *(CARD32 *)(payload + 8);
+    CARD32 image_count = *(CARD32 *)(payload + 12);
+    CARD32 format_id = *(CARD32 *)(payload + 16);
+    CARD32 color_space_id = *(CARD32 *)(payload + 20);
+    CARD32 width = *(CARD32 *)(payload + 24);
+    CARD32 height = *(CARD32 *)(payload + 28);
+    CARD32 present_mode_id = *(CARD32 *)(payload + 32);
+    CARD32 image_usage_flags = *(CARD32 *)(payload + 36);
 
-    if (semaphore_count == 0)
+    if (client->swapped) {
+        swapl(&device_xid);
+        swapl(&swapchain_xid);
+        swapl(&surface_xid);
+        swapl(&image_count);
+        swapl(&format_id);
+        swapl(&color_space_id);
+        swapl(&width);
+        swapl(&height);
+        swapl(&present_mode_id);
+        swapl(&image_usage_flags);
+    }
+
+    if (!ValidateXID(device_xid) || !ValidateXID(swapchain_xid) || !ValidateXID(surface_xid))
         return BadValue;
 
-    if (wait_mode != XAVERIUS_WAIT_MODE_ANY && wait_mode != XAVERIUS_WAIT_MODE_ALL)
+    if (width == 0 || height == 0)
         return BadValue;
 
-    size_t expected_len = sz_xAveriusWaitSemaphoresReq +
-        (size_t)semaphore_count * (sizeof(XID) + sizeof(CARD64));
-    if (client->req_len != expected_len / 4)
-        return BadLength;
+    void *device;
+    int rc = dixLookupResourceByType((void **)&device, device_xid,
+                                     XaveriusLogicalDeviceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
 
-    CARD8 *payload = (CARD8 *)client->requestBuffer + sz_xAveriusWaitSemaphoresReq;
-    XID *semaphores = calloc(semaphore_count, sizeof(XID));
-    CARD64 *wait_values = calloc(semaphore_count, sizeof(CARD64));
-    if (!semaphores || !wait_values) {
-        free(semaphores);
-        free(wait_values);
-        return BadAlloc;
-    }
+    void *surface;
+    rc = dixLookupResourceByType((void **)&surface, surface_xid,
+                                 XaveriusSurfaceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
 
-    for (CARD32 i = 0; i < semaphore_count; i++) {
-        semaphores[i] = *(XID *)(payload + i * (sizeof(XID) + sizeof(CARD64)));
-        wait_values[i] = *(CARD64 *)(payload + i * (sizeof(XID) + sizeof(CARD64)) + sizeof(XID));
-    }
+    /* Validate swapchain_xid as create-XID */
+    void *existing;
+    if (dixLookupResourceByType((void **)&existing, swapchain_xid,
+                                XaveriusSwapchainType, client, DixWriteAccess) == Success)
+        return BadIDChoice;
 
-    XID device_xid = stuff->device_xid;
-    if (device_xid == 0) {
-        free(semaphores);
-        free(wait_values);
-        return BadValue;
-    }
-
-    for (CARD32 i = 0; i < semaphore_count; i++) {
-        XaveriusSemaphorePtr sem;
-        if (dixLookupResourceByType((void **)&sem, semaphores[i],
-                                    XaveriusSemaphoreType, client, DixReadAccess) != Success) {
-            free(semaphores);
-            free(wait_values);
-            return BadValue;
-        }
-    }
-
-    /* Simple stub: check if all waits are immediately satisfied */
-    CARD32 satisfied_count = 0;
-    for (CARD32 i = 0; i < semaphore_count; i++) {
-        XaveriusSemaphorePtr sem;
-        dixLookupResourceByType((void **)&sem, semaphores[i],
-                                XaveriusSemaphoreType, client, DixReadAccess);
-        if (sem->state == XAVERIUS_SEMAPHORE_STATE_SIGNALED &&
-            sem->counter_value >= wait_values[i]) {
-            satisfied_count++;
-        }
-    }
-
-    CARD32 status;
-    if (wait_mode == XAVERIUS_WAIT_MODE_ALL) {
-        status = (satisfied_count == semaphore_count) ? 0 : 1; /* SUCCESS or TIMEOUT */
-    } else {
-        status = (satisfied_count > 0) ? 0 : 1;
-    }
-
-    xAveriusWaitSemaphoresReply reply = {
+    /* Stub: no presentation support → UNSUPPORTED_CONFIGURATION status reply */
+    xAveriusCreateSwapchainReply reply = {
         .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .status = status,
-        .reserved = {0, 0}
+        .sequenceNumber = (CARD16)client->sequence,
+        .length = bytes_to_int32(8),
+        .status = XAVERIUS_SWAPCHAIN_UNSUPPORTED_CONFIG,
+        .actual_image_count = 0,
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.status);
+        swapl(&reply.actual_image_count);
+    }
+
+    dixWriteToClient(client, sizeof(reply), &reply);
+    return Success;
+}
+
+int
+ProcXAveriusDestroySwapchain(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + swapchain_xid (4 bytes) = 12 bytes */
+    if (client->req_len < 12 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 swapchain_xid = *(CARD32 *)(payload + 0);
+
+    if (client->swapped)
+        swapl(&swapchain_xid);
+
+    if (!ValidateXID(swapchain_xid))
+        return BadValue;
+
+    void *swapchain;
+    int rc = dixLookupResourceByType((void **)&swapchain, swapchain_xid,
+                                     XaveriusSwapchainType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Stub: no pending operations, accept destruction */
+    FreeResource(swapchain_xid, XaveriusSwapchainType);
+    return Success;
+}
+
+int
+ProcXAveriusAcquireNextImage(ClientPtr client)
+{
+    REQUEST(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + 5 fields (24 bytes) = 32 bytes */
+    if (client->req_len < 32 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 device_xid = *(CARD32 *)(payload + 0);
+    CARD32 swapchain_xid = *(CARD32 *)(payload + 4);
+    CARD64 timeout_ns = *(CARD64 *)(payload + 8);
+    CARD32 semaphore_xid = *(CARD32 *)(payload + 16);
+    CARD32 fence_xid = *(CARD32 *)(payload + 20);
+
+    if (client->swapped) {
+        swapl(&device_xid);
+        swapl(&swapchain_xid);
+        swapll(&timeout_ns);
+        swapl(&semaphore_xid);
+        swapl(&fence_xid);
+    }
+
+    if (!ValidateXID(device_xid) || !ValidateXID(swapchain_xid))
+        return BadValue;
+
+    void *device;
+    int rc = dixLookupResourceByType((void **)&device, device_xid,
+                                     XaveriusLogicalDeviceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    void *swapchain;
+    rc = dixLookupResourceByType((void **)&swapchain, swapchain_xid,
+                                 XaveriusSwapchainType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Stub: no images available → NOT_READY status reply (zero timeout poll) */
+    xAveriusAcquireNextImageReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = (CARD16)client->sequence,
+        .length = bytes_to_int32(12),
+        .status = XAVERIUS_ACQUIRE_NOT_READY,
+        .image_index = 0,
+        .reserved = 0,
+    };
+
+    if (client->swapped) {
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.status);
+        swapl(&reply.image_index);
+        swapl(&reply.reserved);
+    }
+
+    dixWriteToClient(client, sizeof(reply), &reply);
+    return Success;
+}
+
+int
+ProcXAveriusQueuePresent(ClientPtr client)
+{
+    REQUEST_AT_LEAST_SIZE(xAveriusReq);
+
+    if (stuff->data != 0)
+        return BadValue;
+
+    /* Fixed header (8 bytes) + 7 fields (28 bytes) + wait semaphore XIDs */
+    if (client->req_len < 40 / 4)
+        return BadLength;
+
+    CARD8 *payload = (CARD8 *)client->requestBuffer + 8;
+    CARD32 device_xid = *(CARD32 *)(payload + 0);
+    CARD32 queue_family_index = *(CARD32 *)(payload + 4);
+    CARD32 queue_index = *(CARD32 *)(payload + 8);
+    CARD32 swapchain_xid = *(CARD32 *)(payload + 12);
+    CARD32 image_index = *(CARD32 *)(payload + 16);
+    CARD32 wait_semaphore_count = *(CARD32 *)(payload + 20);
+    CARD64 presentation_token = *(CARD64 *)(payload + 24);
+
+    if (client->swapped) {
+        swapl(&device_xid);
+        swapl(&queue_family_index);
+        swapl(&queue_index);
+        swapl(&swapchain_xid);
+        swapl(&image_index);
+        swapl(&wait_semaphore_count);
+        swapll(&presentation_token);
+    }
+
+    if (!ValidateXID(device_xid) || !ValidateXID(swapchain_xid))
+        return BadValue;
+
+    if (presentation_token == 0)
+        return BadValue;
+
+    if (wait_semaphore_count > 0) {
+        /* Variable-length wait semaphore XIDs at offset 40 */
+        size_t needed = 40 + (size_t)wait_semaphore_count * 4;
+        if ((size_t)(client->req_len << 2) < needed)
+            return BadLength;
+
+        /* Check for duplicate semaphore XIDs */
+        for (uint32_t i = 0; i < wait_semaphore_count; i++) {
+            CARD32 sem_xid;
+            memcpy(&sem_xid, payload + 28 + i * 4, 4);
+            if (client->swapped)
+                swapl(&sem_xid);
+            for (uint32_t j = i + 1; j < wait_semaphore_count; j++) {
+                CARD32 sem_xid2;
+                memcpy(&sem_xid2, payload + 28 + j * 4, 4);
+                if (client->swapped)
+                    swapl(&sem_xid2);
+                if (sem_xid == sem_xid2)
+                    return BadValue;
+            }
+        }
+    }
+
+    void *device;
+    int rc = dixLookupResourceByType((void **)&device, device_xid,
+                                     XaveriusLogicalDeviceType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    void *swapchain;
+    rc = dixLookupResourceByType((void **)&swapchain, swapchain_xid,
+                                 XaveriusSwapchainType, client, DixReadAccess);
+    if (rc != Success)
+        return rc;
+
+    /* Stub: no presentation support → OUT_OF_DATE status reply */
+    xAveriusQueuePresentReply reply = {
+        .type = X_Reply,
+        .sequenceNumber = (CARD16)client->sequence,
+        .length = bytes_to_int32(4),
+        .status = XAVERIUS_PRESENT_OUT_OF_DATE,
     };
 
     if (client->swapped) {
@@ -888,194 +1041,7 @@ ProcXAveriusWaitSemaphores(ClientPtr client)
         swapl(&reply.length);
         swapl(&reply.status);
     }
-    dixWriteToClient(client, sz_xAveriusWaitSemaphoresReply, &reply);
 
-    free(semaphores);
-    free(wait_values);
-
+    dixWriteToClient(client, sizeof(reply), &reply);
     return Success;
-}
-
-/* Subopcode 37: SignalSemaphore */
-int
-ProcXAveriusSignalSemaphore(ClientPtr client)
-{
-    REQUEST(xAveriusSignalSemaphoreReq);
-
-    if (stuff->data != 0)
-        return BadValue;
-
-    if (client->req_len != sz_xAveriusSignalSemaphoreReq / 4)
-        return BadLength;
-
-    XID device_xid = stuff->device_xid;
-    XID semaphore_xid = stuff->semaphore_xid;
-    CARD64 signal_value = stuff->signal_value;
-
-if (device_xid == 0 || semaphore_xid == 0)
-        return BadValue;
-
-    XaveriusSemaphorePtr sem;
-    if (dixLookupResourceByType((void **)&sem, semaphore_xid,
-                                XaveriusSemaphoreType, client, DixWriteAccess) != Success)
-        return BadValue;
-
-    if (sem->semaphore_type == XAVERIUS_SEMAPHORE_TYPE_BINARY) {
-        if (signal_value != 0)
-            return BadValue;
-        sem->state = XAVERIUS_SEMAPHORE_STATE_SIGNALED;
-        sem->counter_value = 1;
-    } else {
-        if (signal_value <= sem->counter_value)
-            return BadValue;
-        sem->counter_value = signal_value;
-        sem->state = XAVERIUS_SEMAPHORE_STATE_SIGNALED;
-    }
-
-    return Success;
-}
-
-/* Subopcode 38: DestroySemaphore */
-int
-ProcXAveriusDestroySemaphore(ClientPtr client)
-{
-    REQUEST(xAveriusDestroySemaphoreReq);
-
-    if (stuff->data != 0)
-        return BadValue;
-
-    if (client->req_len != sz_xAveriusDestroySemaphoreReq / 4)
-        return BadLength;
-
-    XID device_xid = stuff->device_xid;
-    XID semaphore_xid = stuff->semaphore_xid;
-
-    if (device_xid == 0 || semaphore_xid == 0)
-        return BadValue;
-
-    XaveriusSemaphorePtr sem;
-    if (dixLookupResourceByType((void **)&sem, semaphore_xid,
-                                XaveriusSemaphoreType, client, DixWriteAccess) != Success)
-        return BadValue;
-
-    FreeResource(semaphore_xid, XaveriusSemaphoreType);
-
-    return Success;
-}
-
-/* Subopcode 39: CreateFence */
-int
-ProcXAveriusCreateFence(ClientPtr client)
-{
-    REQUEST(xAveriusCreateFenceReq);
-
-    if (stuff->data != 0)
-        return BadValue;
-
-    if (client->req_len != sz_xAveriusCreateFenceReq / 4)
-        return BadLength;
-
-    XID device_xid = stuff->device_xid;
-    XID fence_xid = stuff->fence_xid;
-    CARD32 create_flags = stuff->create_flags;
-    CARD32 reserved2 = stuff->reserved2;
-
-    if (create_flags != 0 || reserved2 != 0)
-        return BadValue;
-
-    if (device_xid == 0 || fence_xid == 0)
-        return BadValue;
-
-    XaveriusFencePtr existing;
-    if (dixLookupResourceByType((void **)&existing, fence_xid,
-                                XaveriusFenceType, client, DixWriteAccess) == Success)
-        return BadIDChoice;
-
-    XaveriusFenceRec *fence = calloc(1, sizeof(XaveriusFenceRec));
-    if (!fence)
-        return BadAlloc;
-
-    fence->xid = fence_xid;
-    fence->device_xid = device_xid;
-    fence->state = XAVERIUS_FENCE_STATE_UNSIGNALED;
-
-    if (!AddResource(fence_xid, XaveriusFenceType, fence)) {
-        free(fence);
-        return BadAlloc;
-    }
-
-    return Success;
-}
-
-/* Subopcode 40: GetFenceStatus */
-int
-ProcXAveriusGetFenceStatus(ClientPtr client)
-{
-    REQUEST(xAveriusGetFenceStatusReq);
-
-    if (stuff->data != 0)
-        return BadValue;
-
-    if (client->req_len != sz_xAveriusGetFenceStatusReq / 4)
-        return BadLength;
-
-    XID device_xid = stuff->device_xid;
-    XID fence_xid = stuff->fence_xid;
-
-    if (device_xid == 0 || fence_xid == 0)
-        return BadValue;
-
-    XaveriusFencePtr fence;
-    if (dixLookupResourceByType((void **)&fence, fence_xid,
-                                XaveriusFenceType, client, DixReadAccess) != Success)
-        return BadValue;
-
-    xAveriusGetFenceStatusReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .fence_state = fence->state,
-        .reserved = {0}
-    };
-
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-    }
-    dixWriteToClient(client, sz_xAveriusGetFenceStatusReply, &reply);
-
-    return Success;
-}
-
-int
-ProcXAveriusDispatchComputeSync(ClientPtr client)
-{
-    REQUEST(xAveriusReq);
-
-    if (stuff->data != 0)
-        return BadValue;
-
-    if (!XAveriusExtensionMajorOpcode)
-        return BadRequest;
-
-    uint8_t subopcode = stuff->subopcode;
-
-    switch (subopcode) {
-    case XAVERIUS_SUBOPCODE_CREATE_SEMAPHORE:
-        return ProcXAveriusCreateSemaphore(client);
-    case XAVERIUS_SUBOPCODE_GET_SEMAPHORE_COUNTER_VALUE:
-        return ProcXAveriusGetSemaphoreCounterValue(client);
-    case XAVERIUS_SUBOPCODE_WAIT_SEMAPHORES:
-        return ProcXAveriusWaitSemaphores(client);
-    case XAVERIUS_SUBOPCODE_SIGNAL_SEMAPHORE:
-        return ProcXAveriusSignalSemaphore(client);
-    case XAVERIUS_SUBOPCODE_DESTROY_SEMAPHORE:
-        return ProcXAveriusDestroySemaphore(client);
-    case XAVERIUS_SUBOPCODE_CREATE_FENCE:
-        return ProcXAveriusCreateFence(client);
-    case XAVERIUS_SUBOPCODE_GET_FENCE_STATUS:
-        return ProcXAveriusGetFenceStatus(client);
-    default:
-        return BadRequest;
-    }
 }
