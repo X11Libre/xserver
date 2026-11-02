@@ -11,6 +11,9 @@
 #include "include/dix.h"
 #include "include/resource.h"
 
+extern RESTYPE lastResourceType;
+extern RESTYPE TypeMask;
+
 #define SameClient(obj,client) \
         (CLIENT_BITS((obj)->resource) == (client)->clientAsMask)
 
