@@ -5,36 +5,19 @@
 #include <dix-config.h>
 
 #include "xaverius.h"
-#include "xaverius_device.h"
-#include "xaverius_proto.h"
+#include "xaverius_compute.h"
 #include "extnsionst.h"
-#include "xf86.h"
-#include "dixstruct.h"
 
-static int XAveriusEventBase = 0;
 int XAveriusExtensionMajorOpcode = 0;
-
-static void
-XAveriusExtensionInit(ExtensionEntry *extEntry)
-{
-    XAveriusExtensionMajorOpcode = extEntry->base;
-    XAveriusEventBase = extEntry->eventBase;
-
-    extEntry->base = XAveriusExtensionMajorOpcode;
-    extEntry->errorBase = extEntry->errorBase;
-    extEntry->eventBase = XAveriusEventBase;
-
-    xaverius_device_init();
-    xaverius_init_property_atoms();
-}
+static int XAveriusEventBase = 0;
 
 static void
 XAveriusExtensionFini(ExtensionEntry *extEntry)
 {
-    xaverius_device_fini();
+    xaverius_compute_fini();
 }
 
-void
+int
 xaverius_extension_init(void)
 {
     ExtensionEntry *extEntry = AddExtension(XAVERIUS_EXTENSION_NAME, 0, 0,
@@ -43,13 +26,22 @@ xaverius_extension_init(void)
                                             XAveriusExtensionFini,
                                             StandardMinorOpcode);
     if (!extEntry)
-        return;
+        return -1;
 
-    XAveriusExtensionInit(extEntry);
+    XAveriusExtensionMajorOpcode = extEntry->base;
+    XAveriusEventBase = extEntry->eventBase;
+
+    extEntry->base = XAveriusExtensionMajorOpcode;
+    extEntry->errorBase = extEntry->errorBase;
+    extEntry->eventBase = XAveriusEventBase;
+
+    xaverius_compute_init();
+
+    return 0;
 }
 
 void
 xaverius_extension_fini(void)
 {
-    xaverius_device_fini();
+    XAveriusExtensionFini(NULL);
 }

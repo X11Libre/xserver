@@ -6,6 +6,7 @@ srcs_xaverius = [
     'xaverius_cmd.c',
     'xaverius_queue.c',
     'xaverius_sync.c',
+    'xaverius_compute.c',
     'init.c',
     'dispatch.c',
 ]

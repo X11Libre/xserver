@@ -5,20 +5,9 @@
 #include <dix-config.>
 
 #include "xaverius.h"
-#include "xaverius_device.h"
+#include "xaverius_compute.h"
 #include "xaverius_proto.h"
-#include "dix.h"
 #include "dixstruct.h"
-
-extern int ProcXAveriusDestroyCommandPool(ClientPtr client);
-extern int ProcXAveriusResetCommandBuffer(ClientPtr client);
-extern int ProcXAveriusCommandBufferData(ClientPtr client);
-extern int ProcXAveriusQueueSubmit(ClientPtr client);
-extern int ProcXAveriusCreateSemaphore(ClientPtr client);
-extern int ProcXAveriusGetSemaphoreCounterValue(ClientPtr client);
-extern int ProcXAveriusWaitSemaphores(ClientPtr client);
-extern int ProcXAveriusSignalSemaphore(ClientPtr client);
-extern int ProcXAveriusDestroySemaphore(ClientPtr client);
 
 static int
 ProcXAveriusDispatchInternal(ClientPtr client)
@@ -34,26 +23,24 @@ ProcXAveriusDispatchInternal(ClientPtr client)
     uint8_t subopcode = stuff->subopcode;
 
     switch (subopcode) {
-    case XAVERIUS_SUBOPCODE_CREATE_DEVICE:
-    case XAVERIUS_SUBOPCODE_CREATE_DEFAULT_DEVICE:
-    case XAVERIUS_SUBOPCODE_DESTROY_DEVICE:
-        return ProcXAveriusDestroyDevice(client);
-    case XAVERIUS_SUBOPCODE_GET_PHYSICAL_DEVICE_MEMORY_PROPERTIES:
-        return ProcXAveriusGetPhysicalDeviceMemoryProperties(client);
-    case XAVERIUS_SUBOPCODE_CREATE_SURFACE:
-        return ProcXAveriusCreateSurface(client);
-    case XAVERIUS_SUBOPCODE_DESTROY_SURFACE:
-        return ProcXAveriusDestroySurface(client);
-    case XAVERIUS_SUBOPCODE_GET_SURFACE_CAPABILITIES:
-        return ProcXAveriusGetSurfaceCapabilities(client);
-    case XAVERIUS_SUBOPCODE_CREATE_SWAPCHAIN:
-        return ProcXAveriusCreateSwapchain(client);
-    case XAVERIUS_SUBOPCODE_DESTROY_SWAPCHAIN:
-        return ProcXAveriusDestroySwapchain(client);
-    case XAVERIUS_SUBOPCODE_ACQUIRE_NEXT_IMAGE:
-        return ProcXAveriusAcquireNextImage(client);
-    case XAVERIUS_SUBOPCODE_QUEUE_PRESENT:
-        return ProcXAveriusQueuePresent(client);
+    case XAVERIUS_SUBOPCODE_CREATE_DESCRIPTOR_SET_LAYOUT:
+        return ProcXAveriusCreateDescriptorSetLayout(client);
+    case XAVERIUS_SUBOPCODE_CREATE_DESCRIPTOR_POOL:
+        return ProcXAveriusCreateDescriptorPool(client);
+    case XAVERIUS_SUBOPCODE_DESTROY_DESCRIPTOR_POOL:
+        return ProcXAveriusDestroyDescriptorPool(client);
+    case XAVERIUS_SUBOPCODE_ALLOCATE_DESCRIPTOR_SETS:
+        return ProcXAveriusAllocateDescriptorSets(client);
+    case XAVERIUS_SUBOPCODE_UPDATE_DESCRIPTOR_SETS:
+        return ProcXAveriusUpdateDescriptorSets(client);
+    case XAVERIUS_SUBOPCODE_FREE_DESCRIPTOR_SETS:
+        return ProcXAveriusFreeDescriptorSets(client);
+    case XAVERIUS_SUBOPCODE_CREATE_PIPELINE_LAYOUT:
+        return ProcXAveriusCreatePipelineLayout(client);
+    case XAVERIUS_SUBOPCODE_CREATE_COMPUTE_PIPELINE:
+        return ProcXAveriusCreateComputePipeline(client);
+    case XAVERIUS_SUBOPCODE_CREATE_COMMAND_POOL:
+        return ProcXAveriusCreateCommandPool(client);
     default:
         return BadRequest;
     }
@@ -67,9 +54,6 @@ ProcXAveriusDispatch(ClientPtr client)
     if (stuff->data != 0)
         return BadValue;
 
-    if (!XAveriusExtensionMajorOpcode)
-        return BadRequest;
-
     return ProcXAveriusDispatchInternal(client);
 }
 
@@ -80,9 +64,6 @@ SProcXAveriusDispatch(ClientPtr client)
 
     if (stuff->data != 0)
         return BadValue;
-
-    if (!XAveriusExtensionMajorOpcode)
-        return BadRequest;
 
     return ProcXAveriusDispatchInternal(client);
 }
