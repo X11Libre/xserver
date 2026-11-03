@@ -223,7 +223,7 @@ ephyrMapFramebuffer(KdScreenInfo * screen)
     int buffer_height;
 
     EPHYR_LOG("screen->width: %d, screen->height: %d index=%d",
-              screen->width, screen->height, screen->mynum);
+              screen->width, screen->height, screen->pScreen->myNum);
 
     /*
      * Use the rotation last applied to ourselves (in the Xephyr case the fb
@@ -785,8 +785,6 @@ ephyrInitScreen(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
 
-    EPHYR_LOG("pScreen->myNum:%d\n", pScreen->myNum);
-    hostx_set_screen_number(screen, pScreen->myNum);
     if (!EphyrHostGrabSet) {
         ephyrSetGrabShortcut("ctrl+shift");
     }
@@ -1046,7 +1044,7 @@ ephyrProcessMouseMotion(xcb_generic_event_t *xev)
     if (ephyrCursorScreen != screen->pScreen) {
         EPHYR_LOG("warping mouse cursor. "
                   "cur_screen:%d, motion_screen:%d\n",
-                  ephyrCursorScreen ? ephyrCursorScreen->myNum : -1, screen->pScreen->myNum);
+                  ephyrCursorScreen ? ephyrCursorScreen->myNum: -1, screen->pScreen->myNum);
         ephyrWarpCursor(inputInfo.pointer, screen->pScreen,
                         motion->event_x, motion->event_y);
     }
@@ -1214,7 +1212,7 @@ ephyrProcessKeyRelease(xcb_generic_event_t *xev)
                             xcb_ungrab_keyboard(conn,
                                                 XCB_TIME_CURRENT_TIME);
                         } else {
-                        grabbed_screen = scrpriv->mynum;
+                        grabbed_screen = screen->pScreen->myNum;
                     }
                 }
             }

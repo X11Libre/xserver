@@ -118,9 +118,6 @@ void
  hostx_set_display_name(char *name);
 
 void
-hostx_set_screen_number(KdScreenInfo *screen, int number);
-
-void
 hostx_set_win_title(KdScreenInfo *screen, const char *extra_text);
 
 int
