@@ -7,9 +7,12 @@
 #ifndef _XLIBRE_XAVERIUS_INTERN_H
 #define _XLIBRE_XAVERIUS_INTERN_H
 
+#include "include/privates.h"
 #include "include/xlibre_ptrtypes.h"
 
 extern int XaveriusEventBase;
+
+extern DevPrivateKeyRec XaveriusScreenPrivateKeyRec;
 
 int ProcXaveriusDispatch(ClientPtr client);
 
