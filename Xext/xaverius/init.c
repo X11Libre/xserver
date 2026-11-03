@@ -5,6 +5,7 @@
 #include <dix-config.h>
 
 #include "include/extnsionst.h"
+#include "include/privates.h"
 #include "miext/extinit_priv.h"
 
 #include "xaverius_intern.h"
@@ -30,5 +31,11 @@ void XaveriusExtensionInit(void)
     }
 
     XaveriusEventBase = extEntry->eventBase;
+
+    /* Register per-screen private key at extension init time */
+    if (!dixRegisterPrivateKey(&XaveriusScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
+        FatalError("failed to register Xaverius screen private key\n");
+    }
+
     LogMessage(X_INFO, "Xaverius extension initialized\n");
 }
