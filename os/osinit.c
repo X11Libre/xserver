@@ -46,6 +46,10 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
 #include <errno.h>
 #include <stdio.h>
 #include <signal.h>
@@ -182,6 +186,18 @@ OsInit(void)
         }
 #endif /* !WIN32 || __CYGWIN__ */
         busfault_init();
+#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLOC_TRIM) && defined(HAVE_MALLOPT)
+        /* Prevent runaway dynamic mmap/trim thresholds and limit arena fragmentation */
+#ifdef M_TRIM_THRESHOLD
+        mallopt(M_TRIM_THRESHOLD, 128 * 1024);
+#endif
+#ifdef M_MMAP_THRESHOLD
+        mallopt(M_MMAP_THRESHOLD, 128 * 1024);
+#endif
+#ifdef M_ARENA_MAX
+        mallopt(M_ARENA_MAX, 2);
+#endif
+#endif
         server_poll = ospoll_create();
         if (!server_poll)
             FatalError("failed to allocate poll structure");

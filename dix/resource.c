@@ -888,6 +888,60 @@ RebuildTable(int client)
 }
 
 static void
+ShrinkClientResourceTable(int client)
+{
+    int j, new_buckets;
+    ResourcePtr **tails, *resources;
+
+    if (clientTable[client].buckets <= INITBUCKETS ||
+        clientTable[client].hashsize <= INITHASHSIZE)
+        return;
+
+    new_buckets = clientTable[client].buckets / 2;
+    j = new_buckets;
+    tails = calloc(j, sizeof(ResourcePtr *));
+    if (!tails)
+        return;
+    resources = calloc(j, sizeof(ResourcePtr));
+    if (!resources) {
+        free(tails);
+        return;
+    }
+    for (ResourcePtr *rptr = resources, **tptr = tails; --j >= 0; rptr++, tptr++) {
+        *rptr = NULL;
+        *tptr = rptr;
+    }
+    clientTable[client].hashsize--;
+    j = clientTable[client].buckets;
+    for (ResourcePtr *rptr = clientTable[client].resources, **tptr; --j >= 0; rptr++) {
+        for (ResourcePtr res = *rptr, next; res; res = next) {
+            next = res->next;
+            res->next = NULL;
+            tptr = &tails[HashResourceID(res->id, clientTable[client].hashsize)];
+            **tptr = res;
+            *tptr = &res->next;
+        }
+    }
+    free(tails);
+    clientTable[client].buckets = new_buckets;
+    free(clientTable[client].resources);
+    clientTable[client].resources = resources;
+}
+
+void
+dixTrimResourceTables(void)
+{
+    for (int i = 1; i < currentMaxClients; i++) {
+        if (!clientTable[i].resources || !clientTable[i].buckets)
+            continue;
+        while (clientTable[i].buckets > INITBUCKETS &&
+               clientTable[i].elements <= (clientTable[i].buckets / 2)) {
+            ShrinkClientResourceTable(i);
+        }
+    }
+}
+
+static void
 doFreeResource(ResourcePtr res, Bool skip)
 {
     CallResourceStateCallback(ResourceStateFreeing, res);

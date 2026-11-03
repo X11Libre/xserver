@@ -899,20 +899,28 @@ static int _XSERVTransSocketUNIXCreateListener (
 #endif
 
     /*
-     * Don't blindly unlink a pre-existing socket file: it may belong to a
-     * server that's still running (see unix_socket_is_live()). Only clean
-     * up and rebind if nobody answers there.
+     * Try to bind directly without unlinking first. If the socket file does
+     * not exist, bind() will succeed immediately, avoiding races between
+     * concurrent servers.
+     * Only if bind() fails with EADDRINUSE / TRANS_ADDR_IN_USE do we check
+     * whether the socket is actually live; if dead/stale, unlink and retry.
      */
-    if (unix_socket_is_live(sockname.sun_path)) {
-	prmsg (1, "SocketUNIXCreateListener: %s already in use\n",
-	       sockname.sun_path);
-	(void) umask (oldUmask);
-	return TRANS_ADDR_IN_USE;
+    status = _XSERVTransSocketCreateListener (ciptr,
+	(struct sockaddr *) &sockname, namelen, flags);
+    if (status < 0) {
+	if (status == TRANS_ADDR_IN_USE || errno == EADDRINUSE) {
+	    if (unix_socket_is_live(sockname.sun_path)) {
+		prmsg (1, "SocketUNIXCreateListener: %s already in use\n",
+		       sockname.sun_path);
+		(void) umask (oldUmask);
+		return TRANS_ADDR_IN_USE;
+	    }
+	    unlink (sockname.sun_path);
+	    status = _XSERVTransSocketCreateListener (ciptr,
+		(struct sockaddr *) &sockname, namelen, flags);
+	}
     }
-    unlink (sockname.sun_path);
-
-    if ((status = _XSERVTransSocketCreateListener (ciptr,
-	(struct sockaddr *) &sockname, namelen, flags)) < 0)
+    if (status < 0)
     {
 	prmsg (1,
     "SocketUNIXCreateListener: ...SocketCreateListener() failed\n");
