@@ -70,14 +70,6 @@ void xf86printLayoutSection(FILE * cf, XF86ConfLayoutPtr ptr);
 void xf86freeLayoutList(XF86ConfLayoutPtr ptr);
 int xf86validateLayout(XF86ConfigPtr p);
 
-/* Module.c */
-XF86ConfModulePtr xf86parseModuleSection(XF86ConfModulePtr ptr);
-void xf86printModuleSection(FILE * cf, XF86ConfModulePtr ptr);
-extern _X_EXPORT XF86LoadPtr xf86addNewLoadDirective(XF86LoadPtr head,
-                                                     const char *name, int type,
-                                                     XF86OptionPtr opts);
-void xf86freeModules(XF86ConfModulePtr ptr);
-
 /* Monitor.c */
 XF86ConfMonitorPtr xf86parseMonitorSection(void);
 XF86ConfModesPtr xf86parseModesSection(void);
