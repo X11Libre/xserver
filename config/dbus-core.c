@@ -136,11 +136,9 @@ static DBusHandlerResult
 message_filter(DBusConnection * connection, DBusMessage * message, void *data)
 {
     /* If we get disconnected, then take everything down, and attempt to
-     * reconnect immediately (assuming it's just a restart).  The
-     * connection isn't valid at this point, so throw it out immediately. */
+     * reconnect immediately (assuming it's just a restart). */
     if (dbus_message_is_signal(message, DBUS_INTERFACE_LOCAL, "Disconnected")) {
         DebugF("[dbus-core] disconnected from bus\n");
-        bus_info.connection = NULL;
         teardown();
 
         if (bus_info.timer)
