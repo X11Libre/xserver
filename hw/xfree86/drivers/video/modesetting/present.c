@@ -348,7 +348,11 @@ ms_present_check_flip(RRCrtcPtr crtc,
         window->drawable.x != pixmap->screen_x || window->drawable.y != pixmap->screen_y ||
         window->drawable.width != pixmap->drawable.width ||
         window->drawable.height != pixmap->drawable.height) {
-        goto no_flip;
+        /*
+         * This skips ms_present_check_unflip(), so the pixmap itself is
+         * unverified: don't claim a TearFree flip for it below
+         */
+        return FALSE;
     }
 
     if (!ms_present_check_unflip(crtc, window, pixmap, sync_flip, reason)) {
