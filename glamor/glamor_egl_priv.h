@@ -45,6 +45,8 @@ typedef struct glamor_egl_screen_private {
     int gbm_borrowed; /* If glamor borrowed the gbm device, and should not destroy it */
 #endif
 
+    int is_gles;
+
     int has_image_dma_buf_export;
     int has_EXT_EGL_image_storage;
     int has_OES_EGL_image;
