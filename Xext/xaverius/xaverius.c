@@ -23,7 +23,7 @@ XAveriusExtensionFini(ExtensionEntry *extEntry)
     XaveriusRegistryFini();
 }
 
-void
+static void
 XaveriusExtensionInit(void)
 {
     ExtensionEntry *extEntry = AddExtension(XAVERIUS_EXTENSION_NAME, 0, 0,

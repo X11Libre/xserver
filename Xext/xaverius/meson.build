@@ -6,12 +6,10 @@ srcs_xaverius = [
     'registry.c',
     'xaverius.c',
     'xaverius_request.c',
-    'xaverius_property.c',
     'xaverius_cmd.c',
     'xaverius_queue.c',
     'xaverius_sync.c',
     'dispatch_memory.c',
-    'xaverius_registry.c',
 ]
 
 libxserver_xaverius = static_library('xserver_xaverius',
