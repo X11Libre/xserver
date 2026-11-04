@@ -5,11 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xdefs.h>
+#include <X11/keysym.h>
+#include <X11/extensions/XI2proto.h>
 
 #include "os/auth.h"
 #include "include/os.h"
 #include "include/dix.h"
+#include "include/inputstr.h"
+#include "include/xkbsrv.h"
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
+#include "dix/resource_priv.h"
 
 #include "namespace.h"
 #include "namespaceproto.h"
@@ -20,6 +26,7 @@ struct Xnamespace ns_root = {
     .allowTransparency = TRUE,
     .allowXInput = TRUE,
     .allowXKeyboard = TRUE,
+    .allowClipboard = TRUE,
     .builtin = TRUE,
     .name = NS_NAME_ROOT,
     .refcnt = 1,
@@ -181,6 +188,10 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
                 curr->allowXInput = TRUE;
             else if (strcmp(token, "xkeyboard") == 0)
                 curr->allowXKeyboard = TRUE;
+            else if (strcmp(token, "clipboard") == 0)
+                curr->allowClipboard = TRUE;
+            else if (strcmp(token, "clipboard-auto") == 0)
+                curr->allowClipboardAuto = TRUE;
             else
                 XNS_LOG("unknown allow: %s\n", token);
         }
@@ -379,12 +390,20 @@ static int validateName(const char *name, size_t len)
  */
 static void capsToFields(struct Xnamespace *ns, CARD32 caps)
 {
-    ns->allowMouseMotion  = !!(caps & XNS_CAPABILITY_MOUSE_MOTION);
-    ns->allowShape        = !!(caps & XNS_CAPABILITY_SHAPE);
-    ns->allowTransparency = !!(caps & XNS_CAPABILITY_TRANSPARENCY);
-    ns->allowXInput       = !!(caps & XNS_CAPABILITY_INPUT);
-    ns->allowXKeyboard    = !!(caps & XNS_CAPABILITY_KEYBOARD);
-    ns->superPower        = !!(caps & XNS_CAPABILITY_ADMIN);
+    ns->allowMouseMotion   = !!(caps & XNS_CAPABILITY_MOUSE_MOTION);
+    ns->allowShape         = !!(caps & XNS_CAPABILITY_SHAPE);
+    ns->allowTransparency  = !!(caps & XNS_CAPABILITY_TRANSPARENCY);
+    ns->allowXInput        = !!(caps & XNS_CAPABILITY_INPUT);
+    ns->allowXKeyboard     = !!(caps & XNS_CAPABILITY_KEYBOARD);
+    ns->superPower         = !!(caps & XNS_CAPABILITY_ADMIN);
+    ns->allowClipboard     = !!(caps & XNS_CAPABILITY_CLIPBOARD);
+    ns->allowClipboardAuto = !!(caps & XNS_CAPABILITY_CLIPBOARD_AUTO);
+    if (!ns->allowClipboard && !ns->allowClipboardAuto) {
+        ns->pasteAllowed = FALSE;
+        ns->pendingSelAtom = None;
+        ns->pendingSelRequestor = None;
+        ns->pendingSelProperty = None;
+    }
 }
 
 /**
@@ -394,12 +413,134 @@ static void capsToFields(struct Xnamespace *ns, CARD32 caps)
  */
 CARD32 XnsCaps(const struct Xnamespace *ns)
 {
-    return (ns->allowMouseMotion  ? XNS_CAPABILITY_MOUSE_MOTION : 0)
-         | (ns->allowShape        ? XNS_CAPABILITY_SHAPE        : 0)
-         | (ns->allowTransparency ? XNS_CAPABILITY_TRANSPARENCY : 0)
-         | (ns->allowXInput       ? XNS_CAPABILITY_INPUT        : 0)
-         | (ns->allowXKeyboard    ? XNS_CAPABILITY_KEYBOARD     : 0)
-         | (ns->superPower        ? XNS_CAPABILITY_ADMIN        : 0);
+    return (ns->allowMouseMotion   ? XNS_CAPABILITY_MOUSE_MOTION   : 0)
+         | (ns->allowShape         ? XNS_CAPABILITY_SHAPE          : 0)
+         | (ns->allowTransparency  ? XNS_CAPABILITY_TRANSPARENCY   : 0)
+         | (ns->allowXInput        ? XNS_CAPABILITY_INPUT          : 0)
+         | (ns->allowXKeyboard     ? XNS_CAPABILITY_KEYBOARD       : 0)
+         | (ns->superPower         ? XNS_CAPABILITY_ADMIN          : 0)
+         | (ns->allowClipboard     ? XNS_CAPABILITY_CLIPBOARD      : 0)
+         | (ns->allowClipboardAuto ? XNS_CAPABILITY_CLIPBOARD_AUTO : 0);
+}
+
+Bool XnsNamespaceHasFocus(const struct Xnamespace *ns)
+{
+    if (!ns)
+        return FALSE;
+    DeviceIntPtr kbd = inputInfo.keyboard;
+    WindowPtr win = (kbd && kbd->focus) ? kbd->focus->win : NullWindow;
+    if (!win || win == NoneWin || win == PointerRootWin || win == FollowKeyboardWin) {
+        DeviceIntPtr ptr = inputInfo.pointer;
+        if (ptr && ptr->spriteInfo && ptr->spriteInfo->sprite)
+            win = ptr->spriteInfo->sprite->win;
+    }
+    if (!win || win == NoneWin || win == PointerRootWin || win == FollowKeyboardWin)
+        return FALSE;
+    struct XnamespaceClientPriv *ownerPriv = XnsClientPriv(dixClientForWindow(win));
+    return (ownerPriv && ownerPriv->ns == ns);
+}
+
+Bool XnsOwnsGlobalSelection(const struct Xnamespace *ns, Atom selection)
+{
+    if (!ns)
+        return FALSE;
+    for (Selection *s = CurrentSelections; s; s = s->next) {
+        if (!s->client || !s->window)
+            continue;
+        if (selection != None && s->selection != selection)
+            continue;
+        const char *name = NameForAtom(s->selection);
+        if (name && name[0] == '<')
+            continue;
+        struct XnamespaceClientPriv *priv = XnsClientPriv(s->client);
+        if (priv && priv->ns == ns)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+Bool XnsHasPasteTicket(struct Xnamespace *ns)
+{
+    if (!ns || !ns->allowClipboardAuto || !ns->pasteAllowed)
+        return FALSE;
+    if (!XnsNamespaceHasFocus(ns)) {
+        ns->pasteAllowed = FALSE;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+Bool XnsClipboardAllowed(struct Xnamespace *ns)
+{
+    if (!ns)
+        return FALSE;
+    if (ns->superPower || ns->allowClipboard)
+        return TRUE;
+    if (ns->allowClipboardAuto) {
+        if (XnsOwnsGlobalSelection(ns, None) || XnsHasPasteTicket(ns))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+Bool XnsClipboardTargetAllowed(const struct Xnamespace *ns)
+{
+    if (!ns)
+        return FALSE;
+    return (ns->superPower || ns->allowClipboard || ns->allowClipboardAuto);
+}
+
+void XnsGrantPasteTicket(struct Xnamespace *ns)
+{
+    if (!ns || !ns->allowClipboardAuto || !XnsNamespaceHasFocus(ns))
+        return;
+    ns->pasteAllowed = TRUE;
+}
+
+void XnsRevokeAllPasteTickets(const struct Xnamespace *exceptNs)
+{
+    struct Xnamespace *walk;
+    xorg_list_for_each_entry(walk, &ns_list, entry) {
+        if (walk != exceptNs)
+            walk->pasteAllowed = FALSE;
+    }
+}
+
+void XnsGrantSelectionTransfer(struct Xnamespace *ownerNs, Atom selection, Window requestor, Atom prop)
+{
+    if (!ownerNs || selection == None || requestor == None || prop == None)
+        return;
+    ownerNs->pendingSelAtom = selection;
+    ownerNs->pendingSelRequestor = requestor;
+    ownerNs->pendingSelProperty = prop;
+}
+
+Bool XnsSelectionTransferAllowed(struct Xnamespace *ownerNs, Window requestor, Atom prop)
+{
+    if (!ownerNs || !XnsClipboardAllowed(ownerNs))
+        return FALSE;
+    if (requestor == None || ownerNs->pendingSelRequestor != requestor)
+        return FALSE;
+    if (ownerNs->pendingSelAtom == None ||
+        !XnsOwnsGlobalSelection(ownerNs, ownerNs->pendingSelAtom))
+        return FALSE;
+    if (prop != None && ownerNs->pendingSelProperty != prop)
+        return FALSE;
+    return TRUE;
+}
+
+Bool XnsIsPressEvent(const xEvent *ev)
+{
+    int type = ev->u.u.type & 0x7f;
+    if (type == ButtonPress || type == KeyPress)
+        return TRUE;
+    if (type == GenericEvent) {
+        const xGenericEvent *gev = (const xGenericEvent *)&ev->u;
+        if (gev->extension == EXTENSION_MAJOR_XINPUT &&
+            (gev->evtype == XI_ButtonPress || gev->evtype == XI_KeyPress))
+            return TRUE;
+    }
+    return FALSE;
 }
 
 /**

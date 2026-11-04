@@ -30,6 +30,12 @@ struct Xnamespace {
     Bool allowTransparency;
     Bool allowXInput;
     Bool allowXKeyboard;
+    Bool allowClipboard;
+    Bool allowClipboardAuto;
+    Bool pasteAllowed;          /* physical press received while focused; cleared on focus loss or new selection owner */
+    Atom pendingSelAtom;        /* selection atom of active SelectionRequest */
+    Window pendingSelRequestor; /* target window of active SelectionRequest */
+    Atom pendingSelProperty;    /* target property of active SelectionRequest */
     Bool superPower;
     Bool autoRemove;           /* destroy when the last client exits */
     struct xorg_list auth_tokens;
@@ -74,6 +80,16 @@ int  XnsRemoveToken(struct Xnamespace *ns, CARD32 handle);
 CARD32 XnsCountTokens(struct Xnamespace *ns);
 CARD32 XnsCaps(const struct Xnamespace *ns);
 CARD32 XnsAttrs(const struct Xnamespace *ns);
+Bool XnsNamespaceHasFocus(const struct Xnamespace *ns);
+Bool XnsHasPasteTicket(struct Xnamespace *ns);
+Bool XnsOwnsGlobalSelection(const struct Xnamespace *ns, Atom selection);
+Bool XnsClipboardAllowed(struct Xnamespace *ns);
+Bool XnsClipboardTargetAllowed(const struct Xnamespace *ns);
+void XnsGrantSelectionTransfer(struct Xnamespace *ownerNs, Atom selection, Window requestor, Atom prop);
+Bool XnsSelectionTransferAllowed(struct Xnamespace *ownerNs, Window requestor, Atom prop);
+Bool XnsIsPressEvent(const xEvent *ev);
+void XnsGrantPasteTicket(struct Xnamespace *ns);
+void XnsRevokeAllPasteTickets(const struct Xnamespace *exceptNs);
 struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken);
 void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *ns);
 void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name);

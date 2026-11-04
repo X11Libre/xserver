@@ -35,24 +35,74 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(SelectionFilterParamRec);
 
-    /* no rewrite if client is in root namespace */
-    if (subj->ns->superPower)
+    /* When the server dispatches SelectionRequest to a confined selection owner,
+       authorize that owner to write only the requested (requestor, property) pair. */
+    if (param->op == SELECTION_FILTER_EV_REQUEST) {
+        struct XnamespaceClientPriv *ownerPriv = XnsClientPriv(param->recvClient);
+        if (ownerPriv && ownerPriv->ns && !ownerPriv->ns->superPower &&
+            !XnsClientSameNS(subj, ownerPriv) &&
+            XnsClipboardAllowed(subj->ns) && XnsClipboardAllowed(ownerPriv->ns)) {
+            Atom prop = (param->property != None) ? param->property : param->target;
+            XnsGrantSelectionTransfer(ownerPriv->ns, param->selection, param->requestor, prop);
+        }
         return;
+    }
+
+    /* no rewrite if client is in root namespace or has unrestricted shared clipboard */
+    if (subj->ns->superPower || subj->ns->allowClipboard) {
+        if (param->op == SELECTION_FILTER_SETOWNER && param->owner != None)
+            XnsRevokeAllPasteTickets(subj->ns);
+        if (param->op == SELECTION_FILTER_NOTIFY) {
+            const char *orig = NameForAtom(param->selection);
+            const char *stripped = stripNS(orig);
+            if (stripped && stripped != orig)
+                param->selection = dixAddAtom(stripped);
+        }
+        return;
+    }
+
+    /* Smart auto-clipboard mode (focus-gated copy + physical press while focused) */
+    if (subj->ns->allowClipboardAuto) {
+        switch (param->op) {
+            case SELECTION_FILTER_SETOWNER:
+                if (XnsNamespaceHasFocus(subj->ns)) {
+                    if (param->owner != None)
+                        XnsRevokeAllPasteTickets(subj->ns);
+                    return;
+                }
+                if (param->owner == None &&
+                    XnsOwnsGlobalSelection(subj->ns, param->selection))
+                    return;
+                break;
+            case SELECTION_FILTER_GETOWNER:
+            case SELECTION_FILTER_CONVERT:
+                if (XnsHasPasteTicket(subj->ns) ||
+                    XnsOwnsGlobalSelection(subj->ns, param->selection))
+                    return;
+                break;
+            case SELECTION_FILTER_LISTEN:
+                return;
+            default:
+                break;
+        }
+    }
 
     const char *origSelectionName = NameForAtom(param->selection);
-
-    char selname[PATH_MAX] = { 0 };
-    snprintf(selname, sizeof(selname)-1, "<%s>%s", subj->ns->name, origSelectionName);
-    Atom realSelection = dixAddAtom(selname);
+    if (!origSelectionName)
+        return;
 
     switch (param->op) {
         case SELECTION_FILTER_GETOWNER:
         case SELECTION_FILTER_SETOWNER:
         case SELECTION_FILTER_CONVERT:
         case SELECTION_FILTER_LISTEN:
+        {
             // TODO: check whether window really belongs to the client
-            param->selection = realSelection;
-        break;
+            char selname[PATH_MAX] = { 0 };
+            snprintf(selname, sizeof(selname)-1, "<%s>%s", subj->ns->name, origSelectionName);
+            param->selection = dixAddAtom(selname);
+            break;
+        }
 
         case SELECTION_FILTER_NOTIFY:
         {
