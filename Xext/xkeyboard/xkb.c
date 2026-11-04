@@ -661,19 +661,20 @@ ProcXkbGetState(ClientPtr client)
     CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixGetAttrAccess);
 
     xkb = &dev->key->xkbInfo->state;
+    Bool allowState = (dixCallDeviceAccessCallback(client, dev, DixReadAccess) == Success);
 
     xkbGetStateReply reply = {
         .deviceID = dev->id,
-        .mods = XkbStateFieldFromRec(xkb) & 0xff,
-        .baseMods = xkb->base_mods,
-        .latchedMods = xkb->latched_mods,
-        .lockedMods = xkb->locked_mods,
+        .mods = allowState ? (XkbStateFieldFromRec(xkb) & 0xff) : 0,
+        .baseMods = allowState ? xkb->base_mods : 0,
+        .latchedMods = allowState ? xkb->latched_mods : 0,
+        .lockedMods = allowState ? xkb->locked_mods : 0,
         .group = xkb->group,
         .lockedGroup = xkb->locked_group,
         .baseGroup = xkb->base_group,
         .latchedGroup = xkb->latched_group,
-        .compatState = xkb->compat_state,
-        .ptrBtnState = xkb->ptr_buttons
+        .compatState = allowState ? xkb->compat_state : 0,
+        .ptrBtnState = allowState ? xkb->ptr_buttons : 0
     };
 
     X_REPLY_FIELD_CARD16(ptrBtnState);
@@ -3202,16 +3203,18 @@ ProcXkbGetIndicatorState(ClientPtr client)
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
-    CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixReadAccess);
+    CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixGetAttrAccess);
 
     sli = XkbFindSrvLedInfo(dev, XkbDfltXIClass, XkbDfltXIId,
                             XkbXI_IndicatorStateMask);
     if (!sli)
         return BadAlloc;
 
+    Bool allowState = (dixCallDeviceAccessCallback(client, dev, DixReadAccess) == Success);
+
     xkbGetIndicatorStateReply reply = {
         .deviceID = dev->id,
-        .state = sli->effectiveState
+        .state = allowState ? sli->effectiveState : 0
     };
 
     X_REPLY_FIELD_CARD32(state);
@@ -3426,12 +3429,14 @@ ProcXkbGetNamedIndicator(ClientPtr client)
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
-    CHK_LED_DEVICE(dev, stuff->deviceSpec, client, DixReadAccess);
+    CHK_LED_DEVICE(dev, stuff->deviceSpec, client, DixGetAttrAccess);
     CHK_ATOM_ONLY(stuff->indicator);
 
     sli = XkbFindSrvLedInfo(dev, stuff->ledClass, stuff->ledID, 0);
     if (!sli)
         return BadAlloc;
+
+    Bool allowState = (dixCallDeviceAccessCallback(client, dev, DixReadAccess) == Success);
 
     i = 0;
     map = NULL;
@@ -3452,7 +3457,7 @@ ProcXkbGetNamedIndicator(ClientPtr client)
     };
     if (map != NULL) {
         reply.found = TRUE;
-        reply.on = ((sli->effectiveState & (1 << i)) != 0);
+        reply.on = allowState ? ((sli->effectiveState & (1 << i)) != 0) : FALSE;
         reply.realIndicator = ((sli->physIndicators & (1 << i)) != 0);
         reply.ndx = i;
         reply.flags = map->flags;
