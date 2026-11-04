@@ -179,6 +179,7 @@ bool XaveriusRegisterDeviceDirect(const XaveriusDeviceIdentity *identity,
     dev->xid = xid;
     dev->identity = *identity;
     dev->status = XAVERIUS_DEVICE_STATUS_AVAILABLE;
+    dev->generation = 1;
     dev->native_handle = native_handle;
     dev->context = context;
     dev->caps = *caps;  /* Phase A: metadata snapshot; ops/generation in Phase B */
