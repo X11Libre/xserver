@@ -154,6 +154,19 @@ xf86BusConfig(Bool singleDriver)
     int i;
 
     /*
+     * Phase A: DDX-wide PhysicalDevice registration.
+     * Called once per module generation before Screen-oriented probes.
+     * Enumerates all PhysicalDevices served by each DDX and registers
+     * them with the Xaverius registry. Independent of ScreenPtr/ScrnInfoPtr
+     * and Screen creation. Covers headless/render-only/compute-only devices.
+     */
+    for (i = 0; i < xf86NumDrivers; i++) {
+        DriverPtr drv = xf86DriverList[i];
+        if (drv && drv->RegisterXaveriusDevices)
+            drv->RegisterXaveriusDevices(drv);
+    }
+
+    /*
      * 3 step probe to (hopefully) ensure that we always find at least 1
      * (non GPU) screen:
      *

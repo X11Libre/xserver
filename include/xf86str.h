@@ -230,6 +230,14 @@ typedef struct _DriverRec {
                       struct pci_device * dev, intptr_t match_data);
     Bool (*platformProbe) (struct _DriverRec * drv, int entity_num, int flags,
                            struct xf86_platform_device * dev, intptr_t match_data);
+
+    /* Phase A: DDX-wide PhysicalDevice registration callback.
+     * Called once per module generation from xf86BusConfig() before
+     * Screen-oriented probes. Enumerates all PhysicalDevices served by
+     * this DDX and registers them with the Xaverius registry.
+     * Must be independent of ScreenPtr/ScrnInfoPtr and Screen creation.
+     */
+    void (*RegisterXaveriusDevices) (struct _DriverRec * drv);
 } DriverRec, *DriverPtr;
 
 /*

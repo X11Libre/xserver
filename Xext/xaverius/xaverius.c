@@ -1,3 +1,10 @@
+/* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later
+ *
+ * Copyright © 2026 Enrico Weigelt, metux IT consult <info@metux.net>
+ *
+ * Xaverius extension entry point.
+ */
+
 #include "xaverius.h"
 #include "xaverius_device.h"
 #include "xaverius_registry.h"
@@ -8,30 +15,16 @@
 
 static int XAveriusEventBase = 0;
 int XAveriusExtensionMajorOpcode = 0;
-
-static void
-XAveriusExtensionInit(ExtensionEntry *extEntry)
-{
-    XAveriusExtensionMajorOpcode = extEntry->base;
-    XAveriusEventBase = extEntry->eventBase;
-
-    extEntry->base = XAveriusExtensionMajorOpcode;
-    extEntry->errorBase = extEntry->errorBase;
-    extEntry->eventBase = XAveriusEventBase;
-
-    xaverius_device_init();
-    XaveriusRegistryInit();
-}
+Bool noXaveriusExtension = TRUE;
 
 static void
 XAveriusExtensionFini(ExtensionEntry *extEntry)
 {
     XaveriusRegistryFini();
-    xaverius_device_fini();
 }
 
 void
-xaverius_extension_init(void)
+XaveriusExtensionInit(void)
 {
     ExtensionEntry *extEntry = AddExtension(XAVERIUS_EXTENSION_NAME, 0, 0,
                                             ProcXAveriusDispatch,
@@ -41,12 +34,20 @@ xaverius_extension_init(void)
     if (!extEntry)
         return;
 
-    XAveriusExtensionInit(extEntry);
+    XAveriusExtensionMajorOpcode = extEntry->base;
+    XAveriusEventBase = extEntry->eventBase;
+
+    XaveriusRegistryInit();
+}
+
+void
+xaverius_extension_init(void)
+{
+    XaveriusExtensionInit();
 }
 
 void
 xaverius_extension_fini(void)
 {
     XaveriusRegistryFini();
-    xaverius_device_fini();
 }

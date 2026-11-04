@@ -98,6 +98,9 @@ static Bool SwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 static Bool ScreenInit(ScreenPtr pScreen, int argc, char **argv);
 static Bool PreInit(ScrnInfoPtr pScrn, int flags);
 
+/* Phase A: DDX-wide PhysicalDevice registration callback. */
+static void modesetting_register_xaverius_devices(DriverPtr drv);
+
 static Bool Probe(DriverPtr drv, int flags);
 #ifdef XSERVER_LIBPCIACCESS
 static Bool ms_pci_probe(DriverPtr driver,
@@ -146,6 +149,7 @@ _X_EXPORT DriverRec modesetting = {
 #ifdef XSERVER_PLATFORM_BUS
     ms_platform_probe,
 #endif
+    modesetting_register_xaverius_devices,
 };
 
 static SymTabRec Chipsets[] = {
@@ -224,6 +228,124 @@ Identify(int flags)
 {
     xf86PrintChipsets("modesetting", "Driver for Modesetting Kernel Drivers",
                       Chipsets);
+}
+
+/*
+ * Phase A: DDX-wide PhysicalDevice registration.
+ * Called from xf86BusConfig() before Screen-oriented probes.
+ * Scans all DRM devices (card + render nodes), correlates by PCI
+ * bus ID, and registers each PhysicalDevice with the Xaverius registry.
+ * Must be independent of ScrnInfoPtr/ScreenPtr and Screen creation.
+ * Covers headless/render-only/compute-only devices with no connectors.
+ */
+static void
+modesetting_register_xaverius_devices(DriverPtr drv)
+{
+    int i;
+    char path[64];
+
+    for (i = 0; i < 32; i++) {
+        int fd_card = -1, fd_render = -1;
+        char *busid_card = NULL, *busid_render = NULL;
+        int has_card = 0, has_render = 0;
+
+        /* Open card device */
+        snprintf(path, sizeof(path), "/dev/dri/card%d", i);
+        fd_card = open(path, O_RDWR | O_CLOEXEC);
+        if (fd_card >= 0) {
+            busid_card = drmGetBusid(fd_card);
+            has_card = 1;
+        }
+
+        /* Open render device */
+        snprintf(path, sizeof(path), "/dev/dri/renderD%d", i);
+        fd_render = open(path, O_RDWR | O_CLOEXEC);
+        if (fd_render >= 0) {
+            busid_render = drmGetBusid(fd_render);
+            has_render = 1;
+        }
+
+        if (!has_card && !has_render) {
+            if (fd_card >= 0)
+                close(fd_card);
+            if (fd_render >= 0)
+                close(fd_render);
+            free(busid_card);
+            free(busid_render);
+            continue;
+        }
+
+        /* Deduplicate card + render for same PCI bus ID. */
+        if (has_card && has_render && busid_card && busid_render &&
+            strcmp(busid_card, busid_render) == 0) {
+            /* Same physical device — register once with card fd. */
+            XaveriusDeviceIdentity identity = { 0 };
+            XaveriusDeviceCapabilities caps = { 0 };
+            char *p = busid_card;
+
+            /* Parse pci:0000:01:00.0 -> domain:bus:device.function */
+            if (strncmp(p, "pci:", 4) == 0)
+                p += 4;
+            sscanf(p, "%x:%x:%x.%x",
+                   &identity.domain, &identity.bus,
+                   &identity.device, &identity.function);
+            identity.has_device_uuid = false;
+
+            caps.device_type = XAVERIUS_DEVICE_TYPE_PHYSICAL;
+            caps.device_name = "modesetting";
+
+            /* Register with card fd as native handle. */
+            XaveriusRegisterDeviceDirect(&identity, &caps, fd_card, NULL);
+            close(fd_render);  /* render fd not needed */
+
+        } else {
+            /* Separate devices or one missing. */
+            if (has_card) {
+                XaveriusDeviceIdentity identity = { 0 };
+                XaveriusDeviceCapabilities caps = { 0 };
+                char *p = busid_card;
+
+                if (p && strncmp(p, "pci:", 4) == 0)
+                    p += 4;
+                if (p)
+                    sscanf(p, "%x:%x:%x.%x",
+                           &identity.domain, &identity.bus,
+                           &identity.device, &identity.function);
+                identity.has_device_uuid = false;
+
+                caps.device_type = XAVERIUS_DEVICE_TYPE_PHYSICAL;
+                caps.device_name = "modesetting";
+
+                XaveriusRegisterDeviceDirect(&identity, &caps, fd_card, NULL);
+            } else if (fd_card >= 0) {
+                close(fd_card);
+            }
+
+            if (has_render) {
+                XaveriusDeviceIdentity identity = { 0 };
+                XaveriusDeviceCapabilities caps = { 0 };
+                char *p = busid_render;
+
+                if (p && strncmp(p, "pci:", 4) == 0)
+                    p += 4;
+                if (p)
+                    sscanf(p, "%x:%x:%x.%x",
+                           &identity.domain, &identity.bus,
+                           &identity.device, &identity.function);
+                identity.has_device_uuid = false;
+
+                caps.device_type = XAVERIUS_DEVICE_TYPE_PHYSICAL;
+                caps.device_name = "modesetting";
+
+                XaveriusRegisterDeviceDirect(&identity, &caps, fd_render, NULL);
+            } else if (fd_render >= 0) {
+                close(fd_render);
+            }
+        }
+
+        free(busid_card);
+        free(busid_render);
+    }
 }
 
 modesettingEntPtr ms_ent_priv(ScrnInfoPtr scrn)
@@ -1374,39 +1496,6 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     if (!ms_get_drm_master_fd(pScrn))
         return FALSE;
     ms->drmmode.fd = ms->fd;
-
-    /* Phase A: Register this PhysicalDevice with the Xaverius registry.
-     * This is independent of Screen creation: it happens as soon as the
-     * DRM device handle is available, and covers render-only/compute-only
-     * devices even when check_outputs() finds no connectors. Registration
-     * is idempotent for repeated calls (multiple ScrnInfo records,
-     * primary/render-node aliases, multi-screen). */
-    {
-        XaveriusDeviceIdentity identity = { 0 };
-        XaveriusDeviceCapabilities caps = { 0 };
-
-        identity.drm_fd = ms->fd;
-        identity.is_render_node = false;
-
-#ifdef XSERVER_LIBPCIACCESS
-        if (pEnt->location.type == BUS_PCI) {
-            struct pci_device *pdev = xf86GetPciInfoForEntity(ms->pEnt->index);
-            if (pdev) {
-                identity.domain = pdev->domain;
-                identity.bus = pdev->bus;
-                identity.device = pdev->dev;
-                identity.function = pdev->func;
-                caps.vendor_id = pdev->vendor_id;
-                caps.device_id = pdev->device_id;
-            }
-        }
-#endif
-
-        caps.device_type = XAVERIUS_DEVICE_TYPE_PHYSICAL;
-        caps.device_name = "modesetting";
-
-        XaveriusRegisterDeviceDirect(&identity, &caps);
-    }
 
     if (!check_outputs(ms->fd, &connector_count))
         return FALSE;

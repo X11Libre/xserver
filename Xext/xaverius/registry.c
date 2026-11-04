@@ -128,7 +128,10 @@ void XaveriusRegistryFini(void)
     xaverius_device_count = 0;
 }
 
-bool XaveriusRegisterDevice(const XaveriusDeviceCapabilities *caps)
+bool XaveriusRegisterDeviceDirect(const XaveriusDeviceIdentity *identity,
+                             const XaveriusDeviceCapabilities *caps,
+                             int native_handle,
+                             void *context)
 {
     XaveriusDevicePtr dev;
 
@@ -156,7 +159,7 @@ bool XaveriusRegisterDevice(const XaveriusDeviceCapabilities *caps)
 
     /* Idempotency: an already-registered device with the same identity
      * is not re-registered or overwritten ("last writer wins" forbidden). */
-    dev = xaverius_find_device_locked(&identity);
+    dev = xaverius_find_device_locked(identity);
     if (dev != NULL)
         return true;
 
@@ -174,9 +177,10 @@ bool XaveriusRegisterDevice(const XaveriusDeviceCapabilities *caps)
     }
 
     dev->xid = xid;
-    dev->identity = identity;
+    dev->identity = *identity;
     dev->status = XAVERIUS_DEVICE_STATUS_AVAILABLE;
-    dev->generation = 1;
+    dev->native_handle = native_handle;
+    dev->context = context;
     dev->caps = *caps;  /* Phase A: metadata snapshot; ops/generation in Phase B */
 
     if (!AddResource(xid, XaveriusPhysicalDeviceType, dev)) {

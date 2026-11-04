@@ -17,11 +17,17 @@ void XaveriusRegistryFini(void);
 
 /* Device registration and lookup */
 bool XaveriusRegisterDeviceDirect(const XaveriusDeviceIdentity *identity,
-                                  const XaveriusDeviceCapabilities *caps);
+                                  const XaveriusDeviceCapabilities *caps,
+                                  int native_handle,
+                                  void *context);
 XaveriusDevicePtr XaveriusFindDeviceByXid(XID xid);
 void XaveriusSetDeviceStatus(XaveriusDevicePtr device, XaveriusDeviceStatus status);
 XaveriusDevicePtr XaveriusFirstDevice(void);
 XaveriusDevicePtr XaveriusNextDevice(XaveriusDevicePtr device);
 uint32_t XaveriusDeviceCount(void);
+
+/* Native handle and context accessors for the device record. */
+int XaveriusDeviceNativeHandle(XaveriusDevicePtr device);
+void *XaveriusDeviceContext(XaveriusDevicePtr device);
 
 #endif /* XAVERIUS_REGISTRY_H */
