@@ -35,6 +35,13 @@ static void XaveriusScreenCloseHook(CallbackListPtr *pcbl, ScreenPtr pScreen, vo
     }
 }
 
+/*
+ * XaveriusScreenInit - register per-screen private state.
+ *
+ * Called by the DDX during ScreenInit. Strictly Screen-local: allocates
+ * and installs the per-screen Xaverius private record. Does not discover,
+ * register, or unregister any PhysicalDevice.
+ */
 bool XaveriusScreenInit(ScreenPtr pScreen, const XaveriusDDXOps *ops)
 {
     if (pScreen == NULL || ops == NULL)
@@ -46,13 +53,21 @@ bool XaveriusScreenInit(ScreenPtr pScreen, const XaveriusDDXOps *ops)
 
     xav_screen->pScreen = pScreen;
     xav_screen->ops = ops;
-    xav_screen->initialized = true;
+    xav_screen->initialized = false;
 
     dixSetPrivate(&pScreen->devPrivates,
                   &XaveriusScreenPrivateKeyRec, xav_screen);
 
+    /* Invoke the DDX's ScreenInit callback with the allocated screen record. */
+    if (ops->ScreenInit != NULL && !ops->ScreenInit(xav_screen)) {
+        dixSetPrivate(&pScreen->devPrivates, &XaveriusScreenPrivateKeyRec, NULL);
+        free(xav_screen);
+        return false;
+    }
+
     dixScreenHookClose(pScreen, XaveriusScreenCloseHook);
 
+    xav_screen->initialized = true;
     return true;
 }
 

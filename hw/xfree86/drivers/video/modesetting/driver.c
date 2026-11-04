@@ -79,6 +79,12 @@
 #include "driver.h"
 #include "drmmode_bo.h"
 
+#include "Xext/xaverius/xaverius_registry.h"
+
+#ifndef XAVERIUS_DEVICE_TYPE_PHYSICAL
+#define XAVERIUS_DEVICE_TYPE_PHYSICAL    1
+#endif
+
 static void AdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 static Bool CloseScreen(ScreenPtr pScreen);
 static Bool EnterVT(ScrnInfoPtr pScrn);
@@ -1368,6 +1374,39 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     if (!ms_get_drm_master_fd(pScrn))
         return FALSE;
     ms->drmmode.fd = ms->fd;
+
+    /* Phase A: Register this PhysicalDevice with the Xaverius registry.
+     * This is independent of Screen creation: it happens as soon as the
+     * DRM device handle is available, and covers render-only/compute-only
+     * devices even when check_outputs() finds no connectors. Registration
+     * is idempotent for repeated calls (multiple ScrnInfo records,
+     * primary/render-node aliases, multi-screen). */
+    {
+        XaveriusDeviceIdentity identity = { 0 };
+        XaveriusDeviceCapabilities caps = { 0 };
+
+        identity.drm_fd = ms->fd;
+        identity.is_render_node = false;
+
+#ifdef XSERVER_LIBPCIACCESS
+        if (pEnt->location.type == BUS_PCI) {
+            struct pci_device *pdev = xf86GetPciInfoForEntity(ms->pEnt->index);
+            if (pdev) {
+                identity.domain = pdev->domain;
+                identity.bus = pdev->bus;
+                identity.device = pdev->dev;
+                identity.function = pdev->func;
+                caps.vendor_id = pdev->vendor_id;
+                caps.device_id = pdev->device_id;
+            }
+        }
+#endif
+
+        caps.device_type = XAVERIUS_DEVICE_TYPE_PHYSICAL;
+        caps.device_name = "modesetting";
+
+        XaveriusRegisterDeviceDirect(&identity, &caps);
+    }
 
     if (!check_outputs(ms->fd, &connector_count))
         return FALSE;

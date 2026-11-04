@@ -16,6 +16,7 @@
 #include "include/xlibre_ptrtypes.h"
 
 #include "xaverius_priv.h"
+#include "xaverius_proto.h"
 
 extern int XaveriusEventBase;
 
@@ -48,10 +49,7 @@ int ProcXaveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client);
 void XaveriusRegistryInit(void);
 void XaveriusRegistryFini(void);
 
-XaveriusDevicePtr XaveriusRegisterDevice(XaveriusDeviceIdentity identity,
-                                         const XaveriusDeviceCapabilities *caps);
 XaveriusDevicePtr XaveriusFindDeviceByXid(XID xid);
-XaveriusDevicePtr XaveriusFindDeviceByIdentity(XaveriusDeviceIdentity identity);
 void XaveriusSetDeviceStatus(XaveriusDevicePtr device, XaveriusDeviceStatus status);
 XaveriusDevicePtr XaveriusFirstDevice(void);
 XaveriusDevicePtr XaveriusNextDevice(XaveriusDevicePtr device);
@@ -63,7 +61,9 @@ typedef struct _XaveriusDevice {
     XaveriusDeviceIdentity identity;
     XaveriusDeviceStatus status;
     uint64_t generation;
-    const XaveriusDeviceCapabilities *caps;
+    XaveriusDeviceCapabilities caps;
+    int native_handle;   /* exact native PhysicalDevice handle (e.g. DRM fd) */
+    void *context;       /* exact per-device context, or retained shared DDX context */
     struct xorg_list list;
 } XaveriusDeviceRec, *XaveriusDevicePtr;
 
