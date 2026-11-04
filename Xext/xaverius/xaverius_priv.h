@@ -17,6 +17,83 @@
 
 #include "include/xlibre_ptrtypes.h"
 
+#include "xaverius_proto.h"
+
+typedef enum {
+    XAVERIUS_DEVICE_STATUS_AVAILABLE   = 0,
+    XAVERIUS_DEVICE_STATUS_UNAVAILABLE = 1,
+    XAVERIUS_DEVICE_STATUS_REMOVED     = 2
+} XaveriusDeviceStatus;
+
+/* Device identity for canonicalization */
+typedef struct _XaveriusDeviceIdentity {
+    /* DRM/PCI bus identity */
+    uint32_t domain;
+    uint32_t bus;
+    uint32_t device;
+    uint32_t function;
+
+    /* Optional Vulkan device UUID (16 bytes) */
+    uint8_t device_uuid[16];
+    bool has_device_uuid;
+
+    /* Driver UUID (16 bytes) */
+    uint8_t driver_uuid[16];
+
+    /* Kernel DRM version info */
+    uint32_t drm_major;
+    uint32_t drm_minor;
+
+    /* Optional: render node vs primary node tracking */
+    bool is_render_node;
+    int drm_fd; /* -1 if not applicable */
+} XaveriusDeviceIdentity;
+
+/* Provider capabilities (immutable, taken at selection time) */
+typedef struct _XaveriusDeviceCapabilities {
+    /* Device properties */
+    uint32_t device_type;
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t api_version;
+    uint32_t driver_version;
+    uint32_t compute_queue_family_count;
+
+    /* Queue families */
+    xavQueueFamilyInfo *queue_families;
+    uint32_t queue_family_count;
+
+    /* Memory properties */
+    xavMemoryTypeInfo *memory_types;
+    uint32_t memory_type_count;
+    xavMemoryHeapInfo *memory_heaps;
+    uint32_t memory_heap_count;
+
+    /* Properties */
+    uint32_t max_work_group_invocations;
+    uint32_t max_work_group_size[3];
+    bool has_timeline_semaphore;
+
+    /* Device name */
+    char *device_name;
+
+    /* Provider-specific handle (opaque) */
+    void *provider_handle;
+} XaveriusDeviceCapabilities;
+
+/* Per-screen physical device info - filled by DDX during ScreenInit */
+typedef struct _XaveriusPhysicalDevice
+{
+    XID physical_device_xid;
+    uint32_t device_type;
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t api_version;
+    uint32_t driver_version;
+    uint32_t compute_queue_family_count;
+    const char *device_name;  /* NULL-terminated, DDX-owned */
+} XaveriusPhysicalDevice;
+
 /* Forward declaration for callback signatures */
 typedef struct _XaveriusScreen XaveriusScreenRec, *XaveriusScreenPtr;
 

@@ -24,6 +24,7 @@ Atom xaverius_atom_timeline_semaphore = 0;
 
 static void XaveriusExtensionFini(ExtensionEntry *extEntry)
 {
+    XaveriusRegistryFini();
 }
 
 void XaveriusExtensionInit(void)
@@ -50,6 +51,8 @@ void XaveriusExtensionInit(void)
     xaverius_atom_max_work_group_invocations = dixAddAtom("XAverius.compute.maxWorkGroupInvocations");
     xaverius_atom_max_work_group_size = dixAddAtom("XAverius.compute.maxWorkGroupSize");
     xaverius_atom_timeline_semaphore = dixAddAtom("XAverius.timelineSemaphore");
+
+    XaveriusRegistryInit();
 
     LogMessage(X_INFO, "Xaverius extension initialized\n");
 }
