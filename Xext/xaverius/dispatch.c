@@ -37,6 +37,15 @@ int ProcXaveriusDispatch(ClientPtr client)
     case XAV_REQ_QUERY_VERSION:
         return ProcXaveriusQueryVersion(client);
 
+    case XAV_REQ_ENUMERATE_PHYSICAL_DEVICES:
+        return ProcXaveriusEnumeratePhysicalDevices(client);
+
+    case XAV_REQ_GET_PHYSICAL_DEVICE_PROPERTY:
+        return ProcXaveriusGetPhysicalDeviceProperty(client);
+
+    case XAV_REQ_GET_PHYSICAL_DEVICE_QUEUE_FAMILY_PROPERTIES:
+        return ProcXaveriusGetPhysicalDeviceQueueFamilyProperties(client);
+
     default:
         return BadRequest;
     }

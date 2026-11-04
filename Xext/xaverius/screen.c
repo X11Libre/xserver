@@ -6,7 +6,6 @@
  * Xaverius allocates the structure, DDX fills in ops.
  * Uses screen close hook for automatic cleanup.
  */
-
 #include <dix-config.h>
 
 #include <stdbool.h>

@@ -8,6 +8,7 @@
 #define _XLIBRE_XAVERIUS_INTERN_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <X11/Xdefs.h>
 
 #include "include/list.h"
@@ -39,6 +40,9 @@ extern struct xorg_list xaverius_devices;
 extern uint32_t xaverius_device_count;
 
 int ProcXaveriusDispatch(ClientPtr client);
+int ProcXaveriusEnumeratePhysicalDevices(ClientPtr client);
+int ProcXaveriusGetPhysicalDeviceProperty(ClientPtr client);
+int ProcXaveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client);
 
 /* Registry functions */
 void XaveriusRegistryInit(void);
