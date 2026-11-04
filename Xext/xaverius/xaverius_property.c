@@ -24,17 +24,6 @@ static const XaveriusPropertyDefRec xaverius_property_registry[XAVERIUS_PROP_COU
     { 4, XAVERIUS_PROP_TYPE_CARD32, 4 },
 };
 
-static const XaveriusPropertyDefRec *
-xaverius_find_property_by_id(uint32_t property_id)
-{
-    int i;
-    for (i = 0; i < XAVERIUS_PROP_COUNT; i++) {
-        if (xaverius_property_registry[i].property_id == property_id)
-            return &xaverius_property_registry[i];
-    }
-    return NULL;
-}
-
 static int
 xaverius_send_property_reply(ClientPtr client, uint32_t status,
                              uint32_t property_type, uint32_t value_length,

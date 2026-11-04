@@ -257,7 +257,7 @@ typedef struct {
     uint64_t signal_value;
 } XaveriusSignalEntryRec;
 
-typedef struct _XaveriusMemoryRec XaveriusMemoryRec, *XaveriusMemoryPtr;
+typedef struct _XaveriusMemoryRec *XaveriusMemoryPtr;
 
 typedef struct {
     XID xid;
