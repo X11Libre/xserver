@@ -27,6 +27,17 @@ extern Atom xaverius_atom_max_work_group_invocations;
 extern Atom xaverius_atom_max_work_group_size;
 extern Atom xaverius_atom_timeline_semaphore;
 
+/* Forward declarations for internal types */
+struct _XaveriusDevice;
+typedef struct _XaveriusDevice XaveriusDeviceRec, *XaveriusDevicePtr;
+
+/*
+ * Global device registry (defined in xaverius_registry.c).
+ * Only one registry exists per server process.
+ */
+extern struct xorg_list xaverius_devices;
+extern uint32_t xaverius_device_count;
+
 int ProcXaveriusDispatch(ClientPtr client);
 
 /* Registry functions */
