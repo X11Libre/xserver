@@ -12,10 +12,13 @@
 #include "include/os.h"
 #include "include/dix.h"
 #include "include/inputstr.h"
+#include "include/propertyst.h"
 #include "include/xkbsrv.h"
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
+#include "dix/property_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/selection_priv.h"
 
 #include "namespace.h"
 #include "namespaceproto.h"
@@ -403,6 +406,7 @@ static void capsToFields(struct Xnamespace *ns, CARD32 caps)
         ns->pendingSelAtom = None;
         ns->pendingSelRequestor = None;
         ns->pendingSelProperty = None;
+        ns->xdndSourceWin = None;
     }
 }
 
@@ -427,10 +431,17 @@ Bool XnsNamespaceHasFocus(const struct Xnamespace *ns)
 {
     if (!ns)
         return FALSE;
+    if (ns->superPower)
+        return TRUE;
+    if (ns->inputFocusUntil &&
+        (int32_t)(ns->inputFocusUntil - GetTimeInMillis()) > 0)
+        return TRUE;
+
     DeviceIntPtr kbd = inputInfo.keyboard;
+    DeviceIntPtr ptr = inputInfo.pointer;
+
     WindowPtr win = (kbd && kbd->focus) ? kbd->focus->win : NullWindow;
     if (!win || win == NoneWin || win == PointerRootWin || win == FollowKeyboardWin) {
-        DeviceIntPtr ptr = inputInfo.pointer;
         if (ptr && ptr->spriteInfo && ptr->spriteInfo->sprite)
             win = ptr->spriteInfo->sprite->win;
     }
@@ -438,6 +449,149 @@ Bool XnsNamespaceHasFocus(const struct Xnamespace *ns)
         return FALSE;
     struct XnamespaceClientPriv *ownerPriv = XnsClientPriv(dixClientForWindow(win));
     return (ownerPriv && ownerPriv->ns == ns);
+}
+
+void XnsGrantInputFocusTicket(struct Xnamespace *ns)
+{
+    if (!ns)
+        return;
+    CARD32 until = GetTimeInMillis() + 1000;
+    if (!until)
+        until = 1;
+    ns->inputFocusUntil = until;
+}
+
+Bool XnsIsInputEvent(const xEvent *ev)
+{
+    int type = ev->u.u.type & 0x7f;
+    if (type == ButtonPress || type == ButtonRelease ||
+        type == KeyPress || type == KeyRelease)
+        return TRUE;
+    if (type == GenericEvent) {
+        const xGenericEvent *gev = (const xGenericEvent *)&ev->u;
+        if (gev->extension == EXTENSION_MAJOR_XINPUT &&
+            (gev->evtype == XI_ButtonPress || gev->evtype == XI_ButtonRelease ||
+             gev->evtype == XI_KeyPress || gev->evtype == XI_KeyRelease))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+Bool XnsIsSensitiveRootProperty(const struct Xnamespace *ns, Atom prop)
+{
+    const char *name = NameForAtom(prop);
+    if (!name)
+        return FALSE;
+    if (streq(name, "_NET_CLIENT_LIST") ||
+        streq(name, "_NET_CLIENT_LIST_STACKING") ||
+        streq(name, "_NET_ACTIVE_WINDOW") ||
+        streq(name, "_NET_SUPPORTING_WM_CHECK") ||
+        streq(name, "_WIN_CLIENT_LIST"))
+        return TRUE;
+    if (ns && !ns->allowClipboard && strncmp(name, "CUT_BUFFER", 10) == 0)
+        return TRUE;
+    return FALSE;
+}
+
+Bool XnsIsDesktopSelection(Atom selection)
+{
+    const char *name = NameForAtom(selection);
+    if (!name)
+        return FALSE;
+    if (strncmp(name, "_NET_SYSTEM_TRAY_S", 18) == 0 ||
+        strncmp(name, "_NET_WM_CM_S", 12) == 0 ||
+        strncmp(name, "WM_S", 4) == 0)
+        return TRUE;
+    return FALSE;
+}
+
+Bool XnsIsSystemTrayWindow(WindowPtr pWin)
+{
+    if (!pWin)
+        return FALSE;
+    for (Selection *s = CurrentSelections; s; s = s->next) {
+        if (s->window != pWin->drawable.id || !s->client)
+            continue;
+        struct XnamespaceClientPriv *priv = XnsClientPriv(s->client);
+        if (!priv || !priv->ns || !priv->ns->superPower)
+            continue;
+        const char *name = NameForAtom(s->selection);
+        if (name && strncmp(name, "_NET_SYSTEM_TRAY_S", 18) == 0)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+Bool XnsIsXdndProperty(Atom prop)
+{
+    const char *name = NameForAtom(prop);
+    if (!name)
+        return FALSE;
+    return (streq(name, "XdndTypeList") || streq(name, "XdndActionList"));
+}
+
+Bool XnsIsXdndSelection(Atom selection)
+{
+    const char *name = NameForAtom(selection);
+    return (name && streq(name, "XdndSelection"));
+}
+
+Bool XnsIsInternalSelection(Atom selection)
+{
+    const char *name = NameForAtom(selection);
+    return (name && strncmp(name, "_XNS_", 5) == 0);
+}
+
+Bool XnsHasActiveXdndSource(struct Xnamespace *ns, Window win)
+{
+    if (!ns || ns->xdndSourceWin == None)
+        return FALSE;
+    ClientPtr owner = dixLookupXIDOwner(ns->xdndSourceWin);
+    struct XnamespaceClientPriv *priv = XnsClientPriv(owner);
+    if (!owner || owner->clientGone || !priv || !priv->ns || !priv->ns->superPower) {
+        ns->xdndSourceWin = None;
+        return FALSE;
+    }
+    return (win == None || ns->xdndSourceWin == win);
+}
+
+void XnsClearXdndSource(Window sourceWin)
+{
+    struct Xnamespace *walk;
+    xorg_list_for_each_entry(walk, &ns_list, entry) {
+        if (sourceWin == None || walk->xdndSourceWin == sourceWin)
+            walk->xdndSourceWin = None;
+    }
+}
+
+ClientPtr XnsFindSelectionHelperClient(const struct Xnamespace *ns, Atom target)
+{
+    if (!ns || !ns->name || !ns->name[0] || target == None)
+        return NULL;
+    char selname[256];
+    snprintf(selname, sizeof(selname), "_XNS_SELECTION_HELPER_%s", ns->name);
+    Atom helperAtom = MakeAtom(selname, strlen(selname), FALSE);
+    Atom targetsAtom = MakeAtom("_XNS_SELECTION_TARGETS", 22, FALSE);
+    if (helperAtom == BAD_RESOURCE || helperAtom == None ||
+        targetsAtom == BAD_RESOURCE || targetsAtom == None)
+        return NULL;
+    for (Selection *s = CurrentSelections; s; s = s->next) {
+        if (s->selection != helperAtom || !s->client || s->client->clientGone || !s->pWin)
+            continue;
+        struct XnamespaceClientPriv *priv = XnsClientPriv(s->client);
+        if (!priv || !priv->ns || !priv->ns->superPower)
+            continue;
+        PropertyPtr pProp = NULL;
+        if (dixLookupProperty(&pProp, s->pWin, targetsAtom, serverClient, DixReadAccess) != Success ||
+            !pProp || pProp->format != 32 || !pProp->data || pProp->size <= 0)
+            continue;
+        const CARD32 *atoms = (const CARD32 *)pProp->data;
+        for (uint32_t i = 0; i < (uint32_t)pProp->size; i++) {
+            if ((Atom)atoms[i] == target)
+                return s->client;
+        }
+    }
+    return NULL;
 }
 
 Bool XnsOwnsGlobalSelection(const struct Xnamespace *ns, Atom selection)
