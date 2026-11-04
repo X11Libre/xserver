@@ -8,7 +8,9 @@
 #include <X11/Xdefs.h> // syncproto.h is broken
 #include <X11/Xmd.h>
 #include <X11/extensions/syncproto.h>
+#include <X11/extensions/shapeproto.h>
 #include <X11/extensions/XIproto.h>
+#include <X11/extensions/XI2proto.h>
 #include <X11/extensions/XKB.h>
 #include <X11/extensions/xfixeswire.h>
 
@@ -25,92 +27,47 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(ExtensionAccessCallbackParam);
 
-    /* root NS has super powers */
+    /* only the builtin root namespace may dispatch the X-NAMESPACE management
+       extension; granting ADMIN (superPower) to a sandbox disables its X11
+       isolation without letting it manage namespaces */
+    if (streq(param->ext->name, XNS_EXTENSION_NAME)) {
+        if (subj->ns == &ns_root)
+            goto pass;
+        goto reject;
+    }
+
+    /* root NS or ADMIN bypass has super powers */
     if (subj->ns->superPower)
         goto pass;
 
-    /* never dispatch the namespace management extension to non-superPower
-       clients (defence in depth; they cannot see it via QueryExtension) */
-    if (streq(param->ext->name, XNS_EXTENSION_NAME))
-        goto reject;
-
     switch (client->majorOp) {
-        /* unrestricted access to these */
-        case EXTENSION_MAJOR_BIG_REQUESTS:
-        case EXTENSION_MAJOR_DAMAGE:
-        case EXTENSION_MAJOR_DOUBLE_BUFFER:
-        case EXTENSION_MAJOR_GENERIC_EVENT:
-        case EXTENSION_MAJOR_PRESENT:
-        case EXTENSION_MAJOR_XC_MISC:
-        case EXTENSION_MAJOR_XRESOURCE:
-            goto pass;
-
-        /* allow several operations */
-        case EXTENSION_MAJOR_XKEYBOARD:
-            if (subj->ns->allowXKeyboard)
-                goto pass;
-            switch (client->minorOp) {
-                case X_kbUseExtension:
-                case X_kbGetMap:
-                case X_kbSelectEvents: // fixme: might need special filtering
-                case X_kbGetState:
-                case X_kbGetNames:
-                case X_kbGetControls:
-                case X_kbPerClientFlags:
-                    goto pass;
-            }
-            XNS_HOOK_LOG("BLOCKED unhandled XKEYBOARD call: %s\n", param->ext->name);
-            goto reject;
-
-        /* allow if namespace has flag set */
-        case EXTENSION_MAJOR_SHAPE:
-            if (subj->ns->allowShape)
-                goto pass;
-        break;
-        case EXTENSION_MAJOR_XINPUT:
-            if (subj->ns->allowXInput)
-                goto pass;
-            switch (client->minorOp) {
-                case X_ListInputDevices:
-                    goto pass;
-            }
-        break;
-
-        case EXTENSION_MAJOR_XFIXES:
-            switch (client->minorOp) {
-                case X_XFixesQueryVersion:
-                case X_XFixesCreateRegion:
-                case X_XFixesSetCursorName:
-                case X_XFixesSelectSelectionInput:
-                    goto pass;
-            }
-            XNS_HOOK_LOG("BLOCKED unhandled XFIXES call: %s\n", param->ext->name);
-            goto reject;
-        break;
-
-        case EXTENSION_MAJOR_SYNC:
-            switch (client->minorOp) {
-                case X_SyncCreateCounter:
-                case X_SyncDestroyCounter:
-                case X_SyncInitialize:
-                case X_SyncSetCounter:
-                    goto pass;
-            }
-            XNS_HOOK_LOG("REJECT unhandled SYNC call: %s\n", param->ext->name);
-            goto reject;
-        break;
-
-        /* really blacklisted */
+        /* Blacklisted extensions that allow global input spoofing or snooping */
+        case EXTENSION_MAJOR_COMPOSITE:
         case EXTENSION_MAJOR_MIT_SCREEN_SAVER:
         case EXTENSION_MAJOR_RECORD:
         case EXTENSION_MAJOR_SECURITY:
         case EXTENSION_MAJOR_XTEST:
             goto reject;
-        break;
+
+        /* Allow non-destructive shape queries always; shape modification requires allowShape */
+        case EXTENSION_MAJOR_SHAPE:
+            if (subj->ns->allowShape ||
+                client->minorOp == X_ShapeQueryVersion ||
+                client->minorOp == X_ShapeQueryExtents ||
+                client->minorOp == X_ShapeSelectInput ||
+                client->minorOp == X_ShapeInputSelected ||
+                client->minorOp == X_ShapeGetRectangles)
+                goto pass;
+            goto reject;
+
+        /* XKEYBOARD, XINPUT, XFIXES, SYNC, RANDR, RENDER, PRESENT, DRI2/3, SHM,
+           DAMAGE, etc. are enforced per-resource and per-access-mode in
+           hookResourceAccess, hookDevice, hookSelectionFilter, and hookServerAccess. */
+        default:
+            goto pass;
     }
 
-    XNS_HOOK_LOG("unhandled extension call: %s\n", param->ext->name);
-    return;
+    goto pass;
 
 reject:
     XNS_HOOK_LOG("rejecting extension call: %s\n", param->ext->name);

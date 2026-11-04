@@ -36,7 +36,9 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
     XNS_HOOK_HEAD(SelectionFilterParamRec);
 
     /* When the server dispatches SelectionRequest to a confined selection owner,
-       authorize that owner to write only the requested (requestor, property) pair. */
+       authorize that owner to write only the requested (requestor, property) pair.
+       When a confined sandbox requests a file-URI target from a host owner, route
+       the SelectionRequest through the namespace's URI helper if registered. */
     if (param->op == SELECTION_FILTER_EV_REQUEST) {
         struct XnamespaceClientPriv *ownerPriv = XnsClientPriv(param->recvClient);
         if (ownerPriv && ownerPriv->ns && !ownerPriv->ns->superPower &&
@@ -44,14 +46,36 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
             XnsClipboardAllowed(subj->ns) && XnsClipboardAllowed(ownerPriv->ns)) {
             Atom prop = (param->property != None) ? param->property : param->target;
             XnsGrantSelectionTransfer(ownerPriv->ns, param->selection, param->requestor, prop);
+        } else if (!subj->ns->superPower && ownerPriv && ownerPriv->ns &&
+                   ownerPriv->ns->superPower && XnsIsUriTarget(param->target)) {
+            ClientPtr helperClient = XnsFindUriHelperClient(subj->ns);
+            if (helperClient && helperClient != param->recvClient)
+                param->recvClient = helperClient;
+        }
+        return;
+    }
+
+    /* Never allow non-superPower clients to claim or inspect internal _XNS_* selections */
+    if (!subj->ns->superPower && XnsIsInternalSelection(param->selection)) {
+        const char *orig = NameForAtom(param->selection);
+        if (orig && (param->op == SELECTION_FILTER_GETOWNER ||
+                     param->op == SELECTION_FILTER_SETOWNER ||
+                     param->op == SELECTION_FILTER_CONVERT ||
+                     param->op == SELECTION_FILTER_LISTEN)) {
+            char selname[PATH_MAX] = { 0 };
+            snprintf(selname, sizeof(selname) - 1, "<%s>%s", subj->ns->name, orig);
+            param->selection = dixAddAtom(selname);
         }
         return;
     }
 
     /* no rewrite if client is in root namespace or has unrestricted shared clipboard */
     if (subj->ns->superPower || subj->ns->allowClipboard) {
-        if (param->op == SELECTION_FILTER_SETOWNER && param->owner != None)
+        if (param->op == SELECTION_FILTER_SETOWNER && param->owner != None) {
             XnsRevokeAllPasteTickets(subj->ns);
+            if (XnsIsXdndSelection(param->selection))
+                XnsClearXdndSource(None);
+        }
         if (param->op == SELECTION_FILTER_NOTIFY) {
             const char *orig = NameForAtom(param->selection);
             const char *stripped = stripNS(orig);
@@ -61,13 +85,23 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
         return;
     }
 
+    /* Allow confined clients to discover and watch host WM, compositor, and
+       system tray manager selections without allowing them to take ownership */
+    if ((param->op == SELECTION_FILTER_GETOWNER ||
+         param->op == SELECTION_FILTER_LISTEN) &&
+        XnsIsDesktopSelection(param->selection))
+        return;
+
     /* Smart auto-clipboard mode (focus-gated copy + physical press while focused) */
     if (subj->ns->allowClipboardAuto) {
         switch (param->op) {
             case SELECTION_FILTER_SETOWNER:
                 if (XnsNamespaceHasFocus(subj->ns)) {
-                    if (param->owner != None)
+                    if (param->owner != None) {
                         XnsRevokeAllPasteTickets(subj->ns);
+                        if (XnsIsXdndSelection(param->selection))
+                            XnsClearXdndSource(None);
+                    }
                     return;
                 }
                 if (param->owner == None &&
@@ -77,7 +111,9 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
             case SELECTION_FILTER_GETOWNER:
             case SELECTION_FILTER_CONVERT:
                 if (XnsHasPasteTicket(subj->ns) ||
-                    XnsOwnsGlobalSelection(subj->ns, param->selection))
+                    XnsOwnsGlobalSelection(subj->ns, param->selection) ||
+                    (XnsHasActiveXdndSource(subj->ns, None) &&
+                     XnsIsXdndSelection(param->selection)))
                     return;
                 break;
             case SELECTION_FILTER_LISTEN:

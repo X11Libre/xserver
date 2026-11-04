@@ -33,9 +33,11 @@ struct Xnamespace {
     Bool allowClipboard;
     Bool allowClipboardAuto;
     Bool pasteAllowed;          /* physical press received while focused; cleared on focus loss or new selection owner */
+    CARD32 inputFocusUntil;     /* GetTimeInMillis() deadline for physical click/key focus */
     Atom pendingSelAtom;        /* selection atom of active SelectionRequest */
     Window pendingSelRequestor; /* target window of active SelectionRequest */
     Atom pendingSelProperty;    /* target property of active SelectionRequest */
+    Window xdndSourceWin;       /* active host XDND source window ID */
     Bool superPower;
     Bool autoRemove;           /* destroy when the last client exits */
     struct xorg_list auth_tokens;
@@ -49,6 +51,7 @@ extern struct Xnamespace ns_root;
 extern struct Xnamespace ns_anon;
 extern struct Xnamespace ns_cgroup_tmpl;
 extern Bool namespaceDefaultRoot;
+extern Bool xnsDebugLog;
 extern char *namespaceCgroupPrefix;
 
 struct XnamespaceClientPriv {
@@ -88,8 +91,20 @@ Bool XnsClipboardTargetAllowed(const struct Xnamespace *ns);
 void XnsGrantSelectionTransfer(struct Xnamespace *ownerNs, Atom selection, Window requestor, Atom prop);
 Bool XnsSelectionTransferAllowed(struct Xnamespace *ownerNs, Window requestor, Atom prop);
 Bool XnsIsPressEvent(const xEvent *ev);
+Bool XnsIsInputEvent(const xEvent *ev);
 void XnsGrantPasteTicket(struct Xnamespace *ns);
 void XnsRevokeAllPasteTickets(const struct Xnamespace *exceptNs);
+void XnsGrantInputFocusTicket(struct Xnamespace *ns);
+Bool XnsIsSensitiveRootProperty(const struct Xnamespace *ns, Atom prop);
+Bool XnsIsDesktopSelection(Atom selection);
+Bool XnsIsSystemTrayWindow(WindowPtr pWin);
+Bool XnsIsXdndProperty(Atom prop);
+Bool XnsIsXdndSelection(Atom selection);
+Bool XnsIsInternalSelection(Atom selection);
+Bool XnsIsUriTarget(Atom target);
+Bool XnsHasActiveXdndSource(struct Xnamespace *ns, Window win);
+void XnsClearXdndSource(Window sourceWin);
+ClientPtr XnsFindUriHelperClient(const struct Xnamespace *ns);
 struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken);
 void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *ns);
 void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name);
