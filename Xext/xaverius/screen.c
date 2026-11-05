@@ -40,7 +40,8 @@ static void XaveriusScreenCloseHook(CallbackListPtr *pcbl, ScreenPtr pScreen, vo
  *
  * Called by the DDX during ScreenInit. Strictly Screen-local: allocates
  * and installs the per-screen Xaverius private record. Does not discover,
- * register, or unregister any PhysicalDevice.
+ * register, or unregister any PhysicalDevice. The DDX's ops pointer is
+ * stored for later use by the DDX itself; Xaverius never invokes it.
  */
 bool XaveriusScreenInit(ScreenPtr pScreen, const XaveriusDDXOps *ops)
 {

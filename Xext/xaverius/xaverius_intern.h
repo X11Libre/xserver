@@ -49,10 +49,6 @@ int ProcXaveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client);
 void XaveriusRegistryInit(void);
 void XaveriusRegistryFini(void);
 
-bool XaveriusRegisterDeviceDirect(const XaveriusDeviceIdentity *identity,
-                                  const XaveriusDeviceCapabilities *caps,
-                                  int native_handle,
-                                  void *context);
 XaveriusDevicePtr XaveriusFindDeviceByXid(XID xid);
 void XaveriusSetDeviceStatus(XaveriusDevicePtr device, XaveriusDeviceStatus status);
 XaveriusDevicePtr XaveriusFirstDevice(void);

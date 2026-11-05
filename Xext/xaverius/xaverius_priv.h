@@ -1,4 +1,5 @@
 /* SPDX-License-Identifier: X11 OR MIT OR AGPL-3.0-or-later
+
  *
  * Copyright © 2026 Enrico Weigelt, metux IT consult <info@metux.net>
  *
@@ -109,6 +110,13 @@ struct _XaveriusScreen
 _X_EXPORT bool XaveriusScreenInit(ScreenPtr pScreen);
 
 _X_EXPORT XaveriusScreenPtr XaveriusGetScreen(ScreenPtr pScreen);
+
+/* DDX-wide provider registration entry point (Phase A).
+ * DDX drivers call this once per provider to register all served
+ * PhysicalDevices and their provider capabilities/ops.
+ * Strictly DDX-wide; no ScreenPtr, no per-screen state.
+ */
+_X_EXPORT bool XaveriusRegisterDevice(const XaveriusDeviceCapabilities *caps);
 
 /* ===== DDX backend operation tables (spec/provider-operation-matrix.md §3) =====
  *

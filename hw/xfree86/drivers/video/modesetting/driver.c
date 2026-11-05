@@ -294,8 +294,8 @@ modesetting_register_xaverius_devices(DriverPtr drv)
             caps.device_type = XAVERIUS_DEVICE_TYPE_PHYSICAL;
             caps.device_name = "modesetting";
 
-            /* Register with card fd as native handle. */
-            XaveriusRegisterDeviceDirect(&identity, &caps, fd_card, NULL);
+            /* Xaverius registration deferred to Phase B */
+            (void)identity; (void)caps;
             close(fd_render);  /* render fd not needed */
 
         } else {
@@ -316,7 +316,8 @@ modesetting_register_xaverius_devices(DriverPtr drv)
                 caps.device_type = XAVERIUS_DEVICE_TYPE_PHYSICAL;
                 caps.device_name = "modesetting";
 
-                XaveriusRegisterDeviceDirect(&identity, &caps, fd_card, NULL);
+                /* Xaverius registration deferred to Phase B */
+                (void)identity; (void)caps;
             } else if (fd_card >= 0) {
                 close(fd_card);
             }
@@ -337,7 +338,8 @@ modesetting_register_xaverius_devices(DriverPtr drv)
                 caps.device_type = XAVERIUS_DEVICE_TYPE_PHYSICAL;
                 caps.device_name = "modesetting";
 
-                XaveriusRegisterDeviceDirect(&identity, &caps, fd_render, NULL);
+                /* Xaverius registration deferred to Phase B */
+                (void)identity; (void)caps;
             } else if (fd_render >= 0) {
                 close(fd_render);
             }
