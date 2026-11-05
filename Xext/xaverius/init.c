@@ -4,6 +4,7 @@
  */
 #include <dix-config.h>
 
+#include "dix/dix_priv.h"
 #include "include/extnsionst.h"
 #include "include/privates.h"
 #include "miext/extinit_priv.h"
@@ -14,6 +15,12 @@
 Bool noXaveriusExtension = TRUE;
 
 int XaveriusEventBase = 0;
+
+Atom xaverius_atom_device_uuid = 0;
+Atom xaverius_atom_driver_uuid = 0;
+Atom xaverius_atom_max_work_group_invocations = 0;
+Atom xaverius_atom_max_work_group_size = 0;
+Atom xaverius_atom_timeline_semaphore = 0;
 
 static void XaveriusExtensionFini(ExtensionEntry *extEntry)
 {
@@ -36,6 +43,13 @@ void XaveriusExtensionInit(void)
     if (!dixRegisterPrivateKey(&XaveriusScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
         FatalError("failed to register Xaverius screen private key\n");
     }
+
+    /* Initialize property atoms */
+    xaverius_atom_device_uuid = dixAddAtom("XAverius.deviceUUID");
+    xaverius_atom_driver_uuid = dixAddAtom("XAverius.driverUUID");
+    xaverius_atom_max_work_group_invocations = dixAddAtom("XAverius.compute.maxWorkGroupInvocations");
+    xaverius_atom_max_work_group_size = dixAddAtom("XAverius.compute.maxWorkGroupSize");
+    xaverius_atom_timeline_semaphore = dixAddAtom("XAverius.timelineSemaphore");
 
     LogMessage(X_INFO, "Xaverius extension initialized\n");
 }
