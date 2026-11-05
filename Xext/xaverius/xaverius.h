@@ -280,6 +280,8 @@ typedef struct _XaveriusMemoryRec {
 void xaverius_extension_init(void);
 void xaverius_extension_fini(void);
 
+void XaveriusExtensionInit(void);
+
 int ProcXAveriusDispatch(ClientPtr client);
 int SProcXAveriusDispatch(ClientPtr client);
 
