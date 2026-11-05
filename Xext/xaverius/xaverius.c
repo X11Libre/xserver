@@ -49,6 +49,6 @@ xaverius_extension_init(void)
 void
 xaverius_extension_fini(void)
 {
+    XaveriusDevicesFini();
     XaveriusRegistryFini();
-    xaverius_device_fini();
 }

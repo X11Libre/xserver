@@ -372,8 +372,7 @@ xaverius_device_init(void)
     XaveriusFenceType = CreateNewResourceType(NULL, "XAveriusFence");
 }
 
-void
-xaverius_device_fini(void)
+void XaveriusDevicesFini(void)
 {
     if (XaveriusLogicalDeviceType)
         FreeResourceByType(0, XaveriusLogicalDeviceType, TRUE);

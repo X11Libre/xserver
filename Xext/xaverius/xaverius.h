@@ -314,7 +314,6 @@ int ProcXAveriusShaderModuleData(ClientPtr client);
 int ProcXAveriusCreateCommandPool(ClientPtr client);
 
 void xaverius_device_init(void);
-void xaverius_device_fini(void);
 
 extern RESTYPE XaveriusPhysicalDeviceType;
 extern RESTYPE XaveriusLogicalDeviceType;

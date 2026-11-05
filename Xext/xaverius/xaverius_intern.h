@@ -45,6 +45,10 @@ int ProcXaveriusEnumeratePhysicalDevices(ClientPtr client);
 int ProcXaveriusGetPhysicalDeviceProperty(ClientPtr client);
 int ProcXaveriusGetPhysicalDeviceQueueFamilyProperties(ClientPtr client);
 
+/* Device resources */
+void XaveriusDevicesInit(void);
+void XaveriusDevicesFini(void);
+
 /* Registry functions */
 void XaveriusRegistryInit(void);
 void XaveriusRegistryFini(void);

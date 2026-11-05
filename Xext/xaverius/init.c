@@ -25,6 +25,7 @@ Atom xaverius_atom_timeline_semaphore = 0;
 static void XaveriusExtensionFini(ExtensionEntry *extEntry)
 {
     XaveriusRegistryFini();
+    XaveriusDevicesFini();
 }
 
 void XaveriusExtensionInit(void)
