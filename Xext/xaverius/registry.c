@@ -65,6 +65,11 @@ int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
     xorg_list_del(&dev->list);
     xaverius_physical_device_count--;
 
+    /* Release the binding and its ModuleRole reference. */
+    if (dev->binding != NULL) {
+        free(dev->binding);
+    }
+
     /* Free server-owned fields. */
     free(dev->identity_evidence);
     free(dev->snapshot);
@@ -584,6 +589,17 @@ XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry
 
     device->binding->availability = XAVERIUS_REGISTRY_UNAVAILABLE;
     device->status = XAVERIUS_REGISTRY_UNAVAILABLE;
+
+    /* Release the binding's ModuleRole reference. The Role is retired when
+     * all its bindings are retired. */
+    struct _XaveriusModuleRole *role = device->binding->module_role;
+
+    XaveriusModuleRoleRelease(role);
+    device->binding->module_role = NULL;
+
+    free(device->binding);
+    device->binding = NULL;
+
     return XAVERIUS_REGISTRY_SUCCESS;
 }
 
@@ -605,12 +621,35 @@ struct _XaveriusObservation {
     uint64_t observation_id;
     XaveriusDeviceIdentity identity;
     XaveriusPhysicalDevice *device; /* canonical record reference */
+    uint64_t device_generation; /* generation of the device at observation time */
     struct xorg_list list;
 };
 
 /* Process-wide discovery source and observation registries (Stage 3). */
 struct xorg_list xaverius_observations = { 0 };
 uint32_t xaverius_observation_count = 0;
+
+static XaveriusObservation *
+xaverius_find_observation_by_evidence(const void *evidence,
+                                      uint64_t evidence_size)
+{
+    XaveriusObservation *obs;
+
+    if (evidence == NULL || evidence_size == 0)
+        return NULL;
+
+    xorg_list_for_each_entry(obs, &xaverius_observations, list) {
+        if (obs->device == NULL)
+            continue;
+
+        /* Compare removal evidence against the stored identity evidence. */
+        if (evidence_size == sizeof(XaveriusDeviceIdentity) &&
+            memcmp(&obs->identity, evidence, evidence_size) == 0)
+            return obs;
+    }
+
+    return NULL;
+}
 
 static XaveriusDiscoverySource *
 xaverius_find_discovery_source(const void *source_key, uint64_t source_key_size)
@@ -631,6 +670,7 @@ XaveriusRegistryObserveDevice(void *registry,
     const XaveriusDeviceIdentity *identity_evidence,
     uint64_t identity_evidence_size,
     const void *source_key,
+    uint64_t source_key_size,
     uint64_t source_generation,
     uint64_t observation_id,
     XaveriusPhysicalDevice **out_device,
@@ -648,35 +688,54 @@ XaveriusRegistryObserveDevice(void *registry,
         return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
 
     /* Resolve or register the discovery source. */
-    src = xaverius_find_discovery_source(source_key, identity_evidence_size);
+    src = xaverius_find_discovery_source(source_key, source_key_size);
     if (src == NULL) {
         src = calloc(1, sizeof(*src));
         if (src == NULL)
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-        src->source_key = calloc(1, identity_evidence_size);
+        src->source_key = calloc(1, source_key_size);
         if (src->source_key == NULL) {
             free(src);
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
         }
-        memcpy(src->source_key, source_key, identity_evidence_size);
-        src->source_key_size = identity_evidence_size;
+        memcpy(src->source_key, source_key, source_key_size);
+        src->source_key_size = source_key_size;
         src->source_generation = source_generation;
         xorg_list_init(&src->list);
         xorg_list_append(&src->list, &xaverius_discovery_sources);
         xaverius_discovery_source_count++;
     } else {
-        /* Validate source generation: stale observations from an earlier
-         * incarnation must be rejected. */
-        if (source_generation < src->source_generation)
+        /* Validate source generation: only the exact active generation is
+         * accepted. Stale or future generations are rejected. */
+        if (source_generation != src->source_generation)
             return XAVERIUS_REGISTRY_STALE_EVENT;
-        src->source_generation = source_generation;
     }
 
     /* Canonicalize identity: find existing exact incarnation. */
     dev = xaverius_find_device_by_identity(identity_evidence);
 
     if (dev != NULL) {
-        /* Unambiguous match: return canonical record reference. */
+        /* Unambiguous match: store observation linking source to device,
+         * then return canonical record reference. */
+        obs = calloc(1, sizeof(*obs));
+        if (obs == NULL)
+            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+
+        obs->source_key = calloc(1, source_key_size);
+        if (obs->source_key == NULL) {
+            free(obs);
+            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+        }
+        memcpy(obs->source_key, source_key, source_key_size);
+        obs->source_key_size = source_key_size;
+        obs->source_generation = source_generation;
+        obs->observation_id = observation_id;
+        obs->identity = *identity_evidence;
+        obs->device = dev;
+        xorg_list_init(&obs->list);
+        xorg_list_append(&obs->list, &xaverius_observations);
+        xaverius_observation_count++;
+
         *out_device = dev;
         if (out_device_generation != NULL)
             *out_device_generation = dev->device_generation;
@@ -699,7 +758,8 @@ XaveriusRegistryObserveDevice(void *registry,
     obs->source_generation = source_generation;
     obs->observation_id = observation_id;
     obs->identity = *identity_evidence;
-    obs->device = NULL;
+    obs->device = dev;
+    obs->device_generation = dev ? dev->device_generation : 0;
     xorg_list_init(&obs->list);
     xorg_list_append(&obs->list, &xaverius_observations);
     xaverius_observation_count++;
@@ -724,6 +784,7 @@ XaveriusRegistryRemoveObservation(void *registry,
     xorg_list_for_each_entry_safe(obs, next, &xaverius_observations, list) {
         if (obs->source_key_size != 0 &&
             memcmp(obs->source_key, source_key, obs->source_key_size) == 0 &&
+            obs->source_generation == source_generation &&
             obs->observation_id == observation_id) {
             xorg_list_del(&obs->list);
             xaverius_observation_count--;
@@ -743,22 +804,33 @@ XaveriusRegistryConfirmDeviceRemoved(void *registry,
     const void *removal_evidence,
     uint64_t removal_evidence_size)
 {
+    XaveriusObservation *obs;
+
     if (device == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    /* Confirm terminal REMOVED only on authoritative evidence that the
-     * physical incarnation was removed. Removal authority comes from the
-     * server's source configuration, not from a caller-supplied authority
-     * flag. */
+    /* Removal evidence must be present and well-formed. */
+    if (removal_evidence == NULL || removal_evidence_size == 0)
+        return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
+
+    /* Generation must identify the current device incarnation. */
     if (device->device_generation != device_generation)
         return XAVERIUS_REGISTRY_STALE_GENERATION;
 
-    /* Mark terminal REMOVED; the record remains as a tombstone until
-     * ordered server shutdown. No XID reuse. */
-    device->status = XAVERIUS_REGISTRY_UNAVAILABLE; /* placeholder: terminal removed */
+    /* The evidence must reference a registered observation that references
+     * this exact device; authority comes from the registered source, not
+     * from any caller-supplied flag. */
+    obs = xaverius_find_observation_by_evidence(removal_evidence,
+                                                removal_evidence_size);
+    if (obs == NULL ||
+        obs->device != device ||
+        obs->device_generation != device_generation)
+        return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
 
-    (void)removal_evidence;
-    (void)removal_evidence_size;
+    /* Commit terminal REMOVED exactly once; the record remains as a
+     * tombstone until ordered server shutdown. No XID reuse. */
+    device->status = XAVERIUS_REGISTRY_REMOVED;
+
     return XAVERIUS_REGISTRY_SUCCESS;
 }
 

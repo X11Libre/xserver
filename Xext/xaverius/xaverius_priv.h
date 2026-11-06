@@ -44,7 +44,8 @@ typedef enum {
     XAVERIUS_REGISTRY_UNSUPPORTED        = 14,
     XAVERIUS_REGISTRY_QUARANTINED        = 15,
     XAVERIUS_REGISTRY_STALE_EVENT        = 16,
-    XAVERIUS_REGISTRY_INTERNAL_ERROR     = 17,
+    XAVERIUS_REGISTRY_REMOVED            = 17,
+    XAVERIUS_REGISTRY_INTERNAL_ERROR     = 18,
 } XaveriusRegistryResult;
 
 /* ---- Canonical PhysicalDevice identity (DDX-facing) ---- */
