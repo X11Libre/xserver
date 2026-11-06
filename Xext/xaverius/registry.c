@@ -517,19 +517,22 @@ XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device)
     if (device == NULL)
         return;
 
-    /* Drop list membership; this is the internal registry record, not a
-     * published DIX resource (Stage 4: XID/Alloc handled by Publish). */
-    xorg_list_del(&device->list);
-    xaverius_physical_device_count--;
-
-    /* Release the binding and its ModuleRole reference. */
-    if (device->binding != NULL) {
-        free(device->binding);
-    }
-
-    free(device->identity_evidence);
-    free(device->snapshot);
-    free(device);
+    /* Release the caller-owned immediate reference returned by
+     * XaveriusRegistryRegisterDdxDevice(). This releases only the caller's
+     * reference: it does NOT remove registry list membership, does NOT free
+     * the server-owned PhysicalDevice record, snapshot, identity evidence,
+     * or XID, does NOT free or retire the binding or its ModuleRole
+     * reference, and does NOT touch the DIX resource wrapper.
+     *
+     * Registry membership persists for the server lifetime; published
+     * records are retired exclusively through the canonical DIX destructor
+     * path (XaveriusPhysicalDeviceDIXDestroy via FreeResource).
+     *
+     * There is no explicit reference count on the PhysicalDevice record in
+      * this stage; the caller's "release" is a no-op with respect to the
+     * server-owned record. The caller must not dereference the pointer
+     * after this call returns.
+     */
 }
 
 XaveriusRegistryResult
