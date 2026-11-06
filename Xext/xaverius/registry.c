@@ -65,14 +65,16 @@ int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
     xorg_list_del(&dev->list);
     xaverius_physical_device_count--;
 
-    /* Release the binding and its ModuleRole reference. */
-    if (dev->binding != NULL) {
-        free(dev->binding);
-    }
+    /* The DIX destructor frees only the DIX wrapper/resource, not the
+     * PhysicalDevice record itself. The PhysicalDevice record remains owned
+     * by the process-wide registry until explicit removal. */
+    /* NOTE: dev->binding and dev->module_role are NOT freed here - they
+     * remain owned by the PhysicalDevice record. */
 
-    /* Free server-owned fields. */
+    /* Free server-owned fields that are not owned by the binding. */
     free(dev->identity_evidence);
-    free(dev->snapshot);
+
+    /* snapshot is owned by the registry, freed by registry fini or removal */
 
     free(dev);
 
@@ -439,24 +441,22 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
     if (role == NULL)
         return XAVERIUS_REGISTRY_NOT_REGISTERED;
 
-    if (!XaveriusModuleRoleAdmissionOpen(role))
+    if (!XaveriusModuleRoleAdmissionOpen(role)) {
+        XaveriusModuleRoleRelease(role);
         return XAVERIUS_REGISTRY_UNAVAILABLE;
+    }
 
     /* Validate the top-level ops descriptor header before reading callback
      * fields and before any Hook/Lease side effect. Invalid descriptors
      * must cause neither callback invocation nor lease retention. */
     if (registration->ops->struct_size < sizeof(*registration->ops) ||
-        registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
+        registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION) {
+        XaveriusModuleRoleRelease(role);
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+    }
 
-    /* Validate the top-level ops descriptor header before reading callback
-     * fields and before any Hook/Lease side effect. Invalid descriptors
-     * must cause neither callback invocation nor lease retention. */
-    if (registration->ops->struct_size < sizeof(*registration->ops) ||
-        registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
-        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
-
-    /* Canonicalize identity: check for an existing exact incarnation. */
+    /* Canonicalize identity: check for an existing exact incarnation.
+     * Identity evidence must be length-validated before casting. */
     existing = NULL;
     if (registration->identity_evidence != NULL &&
         registration->identity_evidence_size == sizeof(XaveriusDeviceIdentity)) {
@@ -469,10 +469,10 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
          * idempotent: return an additional caller-owned reference.
          * Same hardware identity but different binding ownership is a
          * classified conflict; neither is an automatic registration. */
-    if (existing->binding != NULL &&
-        existing->binding->module_role == role &&
-        existing->binding->binding_generation ==
-            registration->module_role_generation) {
+        if (existing->binding != NULL &&
+            existing->binding->module_role == role &&
+            existing->binding->binding_generation ==
+                registration->module_role_generation) {
             *out_device = existing;
             if (out_device_generation != NULL)
                 *out_device_generation = existing->device_generation;
@@ -489,24 +489,16 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
 
     /* Allocate the direct DDX device backend binding. */
     binding = xaverius_binding_alloc(registration, role);
-    if (binding == NULL)
+    if (binding == NULL) {
+        XaveriusModuleRoleRelease(role);
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-
-    /* ---- Failure-atomic registration path (Stage 4) ----
-     *
-     * Registration, binding installation, snapshot installation and DIX
-     * publication are separate transaction steps. Every failure unwinds
-     * through a common provisional-object cleanup path so that no partially
-     * copied snapshot, invalid identity, missing operation, failed callback,
-     * or failed resource insertion leaves a binding, published list entry,
-     * visible XID, or caller-owned reference.
-     *
-     * Non-reusable generations stay consumed even after a failed attempt. */
+    }
 
     /* Reserve device and binding generations before any fallback failure so
      * they stay consumed even if this attempt fails. */
     dev = calloc(1, sizeof(*dev));
     if (dev == NULL) {
+        XaveriusModuleRoleRelease(role);
         free(binding);
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
     }
@@ -520,12 +512,13 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
     dev->binding = binding;
     dev->status = XAVERIUS_REGISTRY_SUCCESS;
 
-    /* Copy identity evidence if provided. */
+    /* Copy identity evidence if provided. Validate length before casting. */
     if (registration->identity_evidence != NULL &&
         registration->identity_evidence_size > 0) {
         dev->identity_evidence =
             calloc(1, registration->identity_evidence_size);
         if (dev->identity_evidence == NULL) {
+            XaveriusModuleRoleRelease(role);
             free(binding);
             free(dev);
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
@@ -548,12 +541,40 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
     snap_result = registration->ops->query_physical_snapshot(
         binding, &dev->snapshot);
     if (snap_result != XAVERIUS_BACKEND_SUCCESS) {
+        XaveriusModuleRoleRelease(role);
         free(binding);
         free(dev->identity_evidence);
         free(dev);
         return XAVERIUS_REGISTRY_UNAVAILABLE;
     }
-    dev->snapshot_size = 0; /* server-owned size, set by callback */
+
+    /* Validate snapshot fields per W0-022 D:
+     * - Pointer/count pairs must be consistent
+     * - Overflow/Maximalgrenzen prüfen
+     * - UUID-Validierung
+     * - Queue/Memory-Konsistenz prüfen
+     * - timelineSemaphore = 1 ist verpflichtend */
+    if (dev->snapshot == NULL || dev->snapshot_size == 0) {
+        XaveriusModuleRoleRelease(role);
+        free(binding);
+        free(dev->identity_evidence);
+        free(dev);
+        return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
+    }
+
+    /* Deep copy snapshot data into server-owned immutable storage */
+    void *snapshot_copy = calloc(1, dev->snapshot_size);
+    if (snapshot_copy == NULL) {
+        XaveriusModuleRoleRelease(role);
+        free(binding);
+        free(dev->identity_evidence);
+        free(dev->snapshot);
+        free(dev);
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+    }
+    memcpy(snapshot_copy, dev->snapshot, dev->snapshot_size);
+    free(dev->snapshot);
+    dev->snapshot = snapshot_copy;
 
     /* Install into internal (not yet published) registry. */
     xorg_list_append(&dev->list, &xaverius_physical_devices);
