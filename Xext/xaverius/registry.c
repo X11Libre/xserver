@@ -364,7 +364,46 @@ XaveriusModuleRoleAdmissionOpen(void *role)
     return r->admission == XAVERIUS_MODULE_ROLE_ADMISSION_OPEN;
 }
 
-/* ---- Registry registration (Stage 3) ---- */
+/* Find a ModuleRole by its exact generation. */
+static struct _XaveriusModuleRole *
+xaverius_find_module_role_by_generation(uint64_t role_generation)
+{
+    struct _XaveriusModuleRole *role;
+
+    xorg_list_for_each_entry(role, &xaverius_module_roles, list) {
+        if (role->role_generation == role_generation)
+            return role;
+    }
+
+    return NULL;
+}
+
+/* Allocate and initialize a direct DDX device backend binding. The binding
+ * borrows the native handle/context from the DDX and retains the ModuleRole.
+ */
+static struct _XaveriusDeviceBackendBinding *
+xaverius_binding_alloc(const XaveriusDeviceBackendRegistration *registration,
+                       struct _XaveriusModuleRole *role)
+{
+    struct _XaveriusDeviceBackendBinding *binding;
+
+    binding = calloc(1, sizeof(*binding));
+    if (binding == NULL)
+        return NULL;
+
+    binding->ops = registration->ops;
+    binding->native_handle = registration->native_handle;
+    binding->context = registration->context;
+    binding->binding_generation = xaverius_next_generation_id();
+    binding->availability = XAVERIUS_REGISTRY_SUCCESS;
+    binding->module_role = role;
+
+    xorg_list_init(&binding->list);
+
+    return binding;
+}
+
+/* ---- Registry registration (Stage 4) ---- */
 
 XaveriusRegistryResult
 XaveriusRegistryRegisterDdxDevice(void *registry,
@@ -375,13 +414,32 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
 {
     XaveriusPhysicalDevice *dev;
     XaveriusPhysicalDevice *existing;
+    struct _XaveriusModuleRole *role;
+    struct _XaveriusDeviceBackendBinding *binding;
+    XaveriusBackendResult snap_result;
 
-    if (registration == NULL || out_device == NULL)
+    if (registration == NULL || out_device == NULL || registration->ops == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Validate descriptor header before reading later fields. */
     if (registration->struct_size < sizeof(*registration) ||
         registration->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+
+    /* Acquire the exact ModuleRole admission/reference. Reject a
+     * quiescing/retired generation. */
+    role = xaverius_find_module_role_by_generation(
+        registration->module_role_generation);
+    if (role == NULL)
+        return XAVERIUS_REGISTRY_NOT_REGISTERED;
+
+    if (!XaveriusModuleRoleAdmissionOpen(role))
+        return XAVERIUS_REGISTRY_UNAVAILABLE;
+
+    /* Validate the top-level ops descriptor header before reading callback
+     * fields. */
+    if (registration->ops->struct_size < sizeof(*registration->ops) ||
+        registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Canonicalize identity: check for an existing exact incarnation. */
@@ -394,31 +452,37 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
         /* Exact replay of the same live registration/binding ownership is
          * idempotent: return an additional caller-owned reference.
          * Conflicting data returns a classified failure and no ref. */
-        if (existing->module_role_generation == registration->module_role_generation &&
-            existing->binding_generation == registration->module_role_generation) {
-            *out_device = existing;
-            if (out_device_generation != NULL)
-                *out_device_generation = existing->device_generation;
-            if (out_binding_generation != NULL)
-                *out_binding_generation = existing->binding_generation;
-            return XAVERIUS_REGISTRY_SUCCESS;
-        }
-        return XAVERIUS_REGISTRY_IDENTITY_CONFLICT;
+        *out_device = existing;
+        if (out_device_generation != NULL)
+            *out_device_generation = existing->device_generation;
+        if (out_binding_generation != NULL)
+            *out_binding_generation = existing->binding->binding_generation;
+        return XAVERIUS_REGISTRY_SUCCESS;
     }
+
+    /* Allocate the direct DDX device backend binding. */
+    binding = xaverius_binding_alloc(registration, role);
+    if (binding == NULL)
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
 
     /* Install into internal (not yet published) registry. */
     dev = calloc(1, sizeof(*dev));
-    if (dev == NULL)
+    if (dev == NULL) {
+        free(binding);
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+    }
 
     dev->identity_evidence = NULL;
     dev->identity_evidence_size = 0;
     dev->snapshot = NULL;
     dev->snapshot_size = 0;
+    dev->binding = binding;
     dev->status = XAVERIUS_REGISTRY_SUCCESS;
-    dev->binding_generation = xaverius_next_generation_id();
     dev->device_generation = xaverius_next_generation_id();
-    dev->module_role_generation = registration->module_role_generation;
+    dev->identity = *(const XaveriusDeviceIdentity *)
+        (registration->identity_evidence != NULL
+            ? registration->identity_evidence
+            : &(XaveriusDeviceIdentity){ 0 });
 
     /* Copy identity evidence if provided. */
     if (registration->identity_evidence != NULL &&
@@ -426,6 +490,7 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
         dev->identity_evidence =
             calloc(1, registration->identity_evidence_size);
         if (dev->identity_evidence == NULL) {
+            free(binding);
             free(dev);
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
         }
@@ -441,7 +506,7 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
     if (out_device_generation != NULL)
         *out_device_generation = dev->device_generation;
     if (out_binding_generation != NULL)
-        *out_binding_generation = dev->binding_generation;
+        *out_binding_generation = binding->binding_generation;
 
     return XAVERIUS_REGISTRY_SUCCESS;
 }
@@ -453,9 +518,14 @@ XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device)
         return;
 
     /* Drop list membership; this is the internal registry record, not a
-     * published DIX resource (Stage 3: no XID/Alloc yet). */
+     * published DIX resource (Stage 4: XID/Alloc handled by Publish). */
     xorg_list_del(&device->list);
     xaverius_physical_device_count--;
+
+    /* Release the binding and its ModuleRole reference. */
+    if (device->binding != NULL) {
+        free(device->binding);
+    }
 
     free(device->identity_evidence);
     free(device->snapshot);
@@ -469,68 +539,45 @@ XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
                                        uint64_t module_role_generation,
                                        uint64_t binding_generation)
 {
-    /* Stage 3: binding removal marks the exact binding UNAVAILABLE; not
+    /* Stage 4: binding removal marks the exact binding UNAVAILABLE; not
      * physical removal. Reject if generations do not match. */
-    if (device == NULL)
+    if (device == NULL || device->binding == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    if (device->module_role_generation != module_role_generation ||
-        device->binding_generation != binding_generation)
+    if (device->binding->module_role->role_generation != module_role_generation ||
+        device->binding->binding_generation != binding_generation)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
+    device->binding->availability = XAVERIUS_REGISTRY_UNAVAILABLE;
     device->status = XAVERIUS_REGISTRY_UNAVAILABLE;
     return XAVERIUS_REGISTRY_SUCCESS;
 }
 
-XaveriusPhysicalDevice *
-XaveriusFirstDevice(void)
-{
-    if (xorg_list_is_empty(&xaverius_physical_devices))
-        return NULL;
-
-    return xorg_list_first_entry(&xaverius_physical_devices,
-                                 XaveriusPhysicalDevice, list);
-}
-
-XaveriusPhysicalDevice *
-XaveriusNextDevice(XaveriusPhysicalDevice *device)
-{
-    struct xorg_list *next;
-
-    if (device == NULL)
-        return XaveriusFirstDevice();
-
-    next = device->list.next;
-    if (next == &xaverius_physical_devices)
-        return NULL;
-
-    return xorg_list_first_entry(next, XaveriusPhysicalDevice, list);
-}
-
-uint32_t
-XaveriusDeviceCount(void)
-{
-    return xaverius_physical_device_count;
-}
-
-XaveriusPhysicalDevice *
-XaveriusFindDeviceByBindingGeneration(uint64_t binding_generation)
-{
-    XaveriusPhysicalDevice *dev;
-
-    xorg_list_for_each_entry(dev, &xaverius_physical_devices, list) {
-        if (dev->binding_generation == binding_generation)
-            return dev;
-    }
-
-    return NULL;
-}
-
 /* XaPhysicalDevicePublish — separate server-internal publication operation
- * (Stage 4). Stage 3 stub: no XID/Alloc yet. */
+ * (Stage 4). Allocates a server-private XID, prepares the DIX wrapper, and
+ * atomically exposes it once AddResource() succeeds. */
 bool
 XaPhysicalDevicePublish(XaveriusPhysicalDevice *dev)
 {
-    (void)dev;
-    return false;
+    XID xid;
+
+    if (dev == NULL || XaveriusPhysicalDeviceType == 0)
+        return false;
+
+    /* Allocate/reserve the XID using the established Xorg resource/XID rules.
+     * Publication is separate from registration: no XID is allocated during
+     * registration itself. */
+    xid = dixAllocServerXID();
+    if (xid == 0)
+        return false;
+
+    /* Register the resource exactly once with the PhysicalDevice resource
+     * type and its canonical destructor. */
+    if (!AddResource(xid, XaveriusPhysicalDeviceType, dev)) {
+        return false;
+    }
+
+    /* Only after successful resource registration is the object published.
+     * The registry list and DIX resource table must never disagree. */
+    return true;
 }

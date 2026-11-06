@@ -145,6 +145,17 @@ struct XaveriusDeviceBackendOps {
     const struct XaveriusDeviceBackendSynchronizationOps *synchronization;
 };
 
+/* ---- Direct DDX device backend binding ---- */
+struct _XaveriusDeviceBackendBinding {
+    const struct XaveriusDeviceBackendOps *ops;     /* immutable typed ops tables */
+    int native_handle;                         /* borrowed DDX-owned */
+    void *context;                             /* borrowed DDX-owned */
+    uint64_t binding_generation;
+    uint32_t availability;
+    struct _XaveriusModuleRole *module_role;   /* retained owning role */
+    struct xorg_list list;
+};
+
 /* ---- PhysicalDevice internal representation ---- */
 struct _XaveriusPhysicalDevice {
     /* Canonical identity evidence (structured, compared per §2.2). */
@@ -158,30 +169,15 @@ struct _XaveriusPhysicalDevice {
     void *snapshot;
     uint64_t snapshot_size;
 
+    /* Selected executable DDX device binding (direct dispatch target). */
+    struct _XaveriusDeviceBackendBinding *binding;
+
     /* Current discovery/availability status */
     uint32_t status;
-
-    /* Exact selected DDX binding generation */
-    uint64_t binding_generation;
 
     /* Exact device incarnation generation */
     uint64_t device_generation;
 
-    /* Owning ModuleRole generation */
-    uint64_t module_role_generation;
-
-    struct xorg_list list;
-};
-
-/* ---- Direct DDX device backend binding ---- */
-struct _XaveriusDeviceBackendBinding {
-    const struct XaveriusDeviceBackendOps *ops;     /* immutable typed ops tables */
-    int native_handle;                         /* borrowed DDX-owned */
-    void *context;                             /* borrowed DDX-owned */
-    uint64_t binding_generation;
-    uint32_t availability;
-    /* Retained references to reachable code/module/workers */
-    void *module_role_ref;
     struct xorg_list list;
 };
 
