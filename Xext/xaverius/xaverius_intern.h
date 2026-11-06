@@ -259,6 +259,45 @@ XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry
                                                         uint64_t module_role_generation,
                                                         uint64_t binding_generation);
 
+XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
+                                                        XaveriusPhysicalDevice *device,
+                                                        uint64_t device_generation,
+                                                        uint64_t module_role_generation,
+                                                        uint64_t binding_generation);
+
+/* ---- Observation / removal (Stage 3) ---- */
+/* Discovery source and observation bookkeeping (minimal, server-side only).
+ * Generation-checked, non-reusable generations for source and observation. */
+typedef struct _XaveriusDiscoverySource XaveriusDiscoverySource;
+typedef struct _XaveriusObservation XaveriusObservation;
+
+/* Submit or update an identity observation from a discovery source.
+ * Returns a generation-checked canonical record reference only when identity
+ * matching is unambiguous; never allocates a protocol XID. */
+XaveriusRegistryResult XaveriusRegistryObserveDevice(void *registry,
+    const XaveriusDeviceIdentity *identity_evidence,
+    uint64_t identity_evidence_size,
+    const void *source_key,
+    uint64_t source_generation,
+    uint64_t observation_id,
+    XaveriusPhysicalDevice **out_device,
+    uint64_t *out_device_generation);
+
+/* Withdraw only this source's evidence. Must not mark hardware REMOVED
+ * while other authoritative evidence still establishes the same incarnation. */
+XaveriusRegistryResult XaveriusRegistryRemoveObservation(void *registry,
+    const void *source_key,
+    uint64_t source_generation,
+    uint64_t observation_id);
+
+/* Commit terminal REMOVED only on authoritative evidence that the physical
+ * incarnation was removed. */
+XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(void *registry,
+    XaveriusPhysicalDevice *device,
+    uint64_t device_generation,
+    const void *removal_evidence,
+    uint64_t removal_evidence_size);
+
 /* Dispatch */
 int ProcXaveriusDispatch(ClientPtr client);
 

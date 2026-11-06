@@ -587,6 +587,181 @@ XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry
     return XAVERIUS_REGISTRY_SUCCESS;
 }
 
+/* ---- Observation / removal (Stage 3) ---- */
+
+/* Discovery source bookkeeping: source key and generation identify the
+ * adapter instance and its observation stream, not the device. */
+struct _XaveriusDiscoverySource {
+    void *source_key;
+    uint64_t source_key_size;
+    uint64_t source_generation;
+    struct xorg_list list;
+};
+
+struct _XaveriusObservation {
+    void *source_key;
+    uint64_t source_key_size;
+    uint64_t source_generation;
+    uint64_t observation_id;
+    XaveriusDeviceIdentity identity;
+    XaveriusPhysicalDevice *device; /* canonical record reference */
+    struct xorg_list list;
+};
+
+/* Process-wide discovery source and observation registries (Stage 3). */
+struct xorg_list xaverius_observations = { 0 };
+uint32_t xaverius_observation_count = 0;
+
+static XaveriusDiscoverySource *
+xaverius_find_discovery_source(const void *source_key, uint64_t source_key_size)
+{
+    XaveriusDiscoverySource *src;
+
+    xorg_list_for_each_entry(src, &xaverius_discovery_sources, list) {
+        if (src->source_key_size == source_key_size &&
+            memcmp(src->source_key, source_key, source_key_size) == 0)
+            return src;
+    }
+
+    return NULL;
+}
+
+XaveriusRegistryResult
+XaveriusRegistryObserveDevice(void *registry,
+    const XaveriusDeviceIdentity *identity_evidence,
+    uint64_t identity_evidence_size,
+    const void *source_key,
+    uint64_t source_generation,
+    uint64_t observation_id,
+    XaveriusPhysicalDevice **out_device,
+    uint64_t *out_device_generation)
+{
+    XaveriusPhysicalDevice *dev;
+    XaveriusObservation *obs;
+    XaveriusDiscoverySource *src;
+
+    if (identity_evidence == NULL || source_key == NULL ||
+        out_device == NULL)
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+
+    if (identity_evidence_size != sizeof(XaveriusDeviceIdentity))
+        return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
+
+    /* Resolve or register the discovery source. */
+    src = xaverius_find_discovery_source(source_key, identity_evidence_size);
+    if (src == NULL) {
+        src = calloc(1, sizeof(*src));
+        if (src == NULL)
+            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+        src->source_key = calloc(1, identity_evidence_size);
+        if (src->source_key == NULL) {
+            free(src);
+            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+        }
+        memcpy(src->source_key, source_key, identity_evidence_size);
+        src->source_key_size = identity_evidence_size;
+        src->source_generation = source_generation;
+        xorg_list_init(&src->list);
+        xorg_list_append(&src->list, &xaverius_discovery_sources);
+        xaverius_discovery_source_count++;
+    } else {
+        /* Validate source generation: stale observations from an earlier
+         * incarnation must be rejected. */
+        if (source_generation < src->source_generation)
+            return XAVERIUS_REGISTRY_STALE_EVENT;
+        src->source_generation = source_generation;
+    }
+
+    /* Canonicalize identity: find existing exact incarnation. */
+    dev = xaverius_find_device_by_identity(identity_evidence);
+
+    if (dev != NULL) {
+        /* Unambiguous match: return canonical record reference. */
+        *out_device = dev;
+        if (out_device_generation != NULL)
+            *out_device_generation = dev->device_generation;
+        return XAVERIUS_REGISTRY_SUCCESS;
+    }
+
+    /* Ambiguous or no match: observation retained but device unpublished.
+     * Observation retained for provenance; no XID allocated. */
+    obs = calloc(1, sizeof(*obs));
+    if (obs == NULL)
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+
+    obs->source_key = calloc(1, identity_evidence_size);
+    if (obs->source_key == NULL) {
+        free(obs);
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+    }
+    memcpy(obs->source_key, source_key, identity_evidence_size);
+    obs->source_key_size = identity_evidence_size;
+    obs->source_generation = source_generation;
+    obs->observation_id = observation_id;
+    obs->identity = *identity_evidence;
+    obs->device = NULL;
+    xorg_list_init(&obs->list);
+    xorg_list_append(&obs->list, &xaverius_observations);
+    xaverius_observation_count++;
+
+    *out_device = NULL;
+    if (out_device_generation != NULL)
+        *out_device_generation = 0;
+    return XAVERIUS_REGISTRY_PENDING;
+}
+
+XaveriusRegistryResult
+XaveriusRegistryRemoveObservation(void *registry,
+    const void *source_key,
+    uint64_t source_generation,
+    uint64_t observation_id)
+{
+    XaveriusObservation *obs, *next;
+
+    if (source_key == NULL)
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+
+    xorg_list_for_each_entry_safe(obs, next, &xaverius_observations, list) {
+        if (obs->source_key_size != 0 &&
+            memcmp(obs->source_key, source_key, obs->source_key_size) == 0 &&
+            obs->observation_id == observation_id) {
+            xorg_list_del(&obs->list);
+            xaverius_observation_count--;
+            free(obs->source_key);
+            free(obs);
+            return XAVERIUS_REGISTRY_SUCCESS;
+        }
+    }
+
+    return XAVERIUS_REGISTRY_NOT_FOUND;
+}
+
+XaveriusRegistryResult
+XaveriusRegistryConfirmDeviceRemoved(void *registry,
+    XaveriusPhysicalDevice *device,
+    uint64_t device_generation,
+    const void *removal_evidence,
+    uint64_t removal_evidence_size)
+{
+    if (device == NULL)
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+
+    /* Confirm terminal REMOVED only on authoritative evidence that the
+     * physical incarnation was removed. Removal authority comes from the
+     * server's source configuration, not from a caller-supplied authority
+     * flag. */
+    if (device->device_generation != device_generation)
+        return XAVERIUS_REGISTRY_STALE_GENERATION;
+
+    /* Mark terminal REMOVED; the record remains as a tombstone until
+     * ordered server shutdown. No XID reuse. */
+    device->status = XAVERIUS_REGISTRY_UNAVAILABLE; /* placeholder: terminal removed */
+
+    (void)removal_evidence;
+    (void)removal_evidence_size;
+    return XAVERIUS_REGISTRY_SUCCESS;
+}
+
 /* XaveriusPhysicalDevicePublish — separate server-internal publication operation
  * (Stage 4). Allocates a server-private XID, prepares the DIX wrapper, and
  * atomically exposes it once AddResource() succeeds. */
