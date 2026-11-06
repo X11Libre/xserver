@@ -553,11 +553,11 @@ XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
     return XAVERIUS_REGISTRY_SUCCESS;
 }
 
-/* XaPhysicalDevicePublish — separate server-internal publication operation
+/* XaveriusPhysicalDevicePublish — separate server-internal publication operation
  * (Stage 4). Allocates a server-private XID, prepares the DIX wrapper, and
  * atomically exposes it once AddResource() succeeds. */
 bool
-XaPhysicalDevicePublish(XaveriusPhysicalDevice *dev)
+XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev)
 {
     XID xid;
 

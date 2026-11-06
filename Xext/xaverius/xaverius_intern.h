@@ -234,10 +234,10 @@ void XaveriusModuleRoleFinalize(void *role);
 /* Is admission still open for this role? */
 bool XaveriusModuleRoleAdmissionOpen(void *role);
 
-/* ---- XaPhysicalDevicePublish — separate server-internal publication operation.
+/* ---- XaveriusPhysicalDevicePublish — separate server-internal publication operation.
  * Allocates a server-private XID, prepares the DIX wrapper, and atomically
  * exposes it once AddResource() succeeds. */
-bool XaPhysicalDevicePublish(XaveriusPhysicalDevice *dev);
+bool XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev);
 
 /* DIX resource destructor — canonical path, runs exactly once per published record. */
 int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid);

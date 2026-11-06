@@ -115,7 +115,7 @@ typedef struct _XaveriusPhysicalDevice XaveriusPhysicalDevice;
  * NOT retain or dereference the bare pointer after this call returns.
  *
  * Registration does NOT publish the PhysicalDevice or allocate its XID;
- * publication is a separate server-internal operation (XaPhysicalDevicePublish)
+ * publication is a separate server-internal operation (XaveriusPhysicalDevicePublish)
  * after identity resolution, eligible-binding selection, and the startup gate.
  */
 XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
