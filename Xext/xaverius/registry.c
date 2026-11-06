@@ -289,6 +289,9 @@ XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
 
     xorg_list_init(&role->list);
 
+    xorg_list_append(&role->list, &xaverius_module_roles);
+    xaverius_module_role_count++;
+
     *out_role = role;
     return XAVERIUS_REGISTRY_SUCCESS;
 }
@@ -436,8 +439,9 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
     if (!XaveriusModuleRoleAdmissionOpen(role))
         return XAVERIUS_REGISTRY_UNAVAILABLE;
 
-    /* Validate the top-level ops descriptor header before reading callback
-     * fields. */
+    /* Retain the ModuleRole for the lifetime of this binding. The binding
+     * keeps its role; the role retains its module lease. */
+    XaveriusModuleRoleRetain(role);
     if (registration->ops->struct_size < sizeof(*registration->ops) ||
         registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
