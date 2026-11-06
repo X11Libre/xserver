@@ -388,12 +388,22 @@ xaverius_binding_alloc(const XaveriusDeviceBackendRegistration *registration,
     if (binding == NULL)
         return NULL;
 
-    binding->ops = registration->ops;
     binding->native_handle = registration->native_handle;
     binding->context = registration->context;
     binding->binding_generation = xaverius_next_generation_id();
     binding->availability = XAVERIUS_REGISTRY_SUCCESS;
     binding->module_role = role;
+
+    /* Deep-copy the ops tables into server-owned immutable storage.
+     * The DDX may unload its module after registration; the binding must
+     * not hold a pointer into DDX memory. */
+    binding->ops = calloc(1, sizeof(*registration->ops));
+    if (binding->ops == NULL) {
+        free(binding);
+        return NULL;
+    }
+    /* Copy ops table contents into server-owned immutable storage. */
+    memcpy((void *)binding->ops, registration->ops, sizeof(*registration->ops));
 
     xorg_list_init(&binding->list);
 
@@ -447,21 +457,30 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Canonicalize identity: check for an existing exact incarnation. */
-    existing = xaverius_find_device_by_identity(
-        registration->identity_evidence != NULL
-            ? (const XaveriusDeviceIdentity *)registration->identity_evidence
-            : &(XaveriusDeviceIdentity){ 0 });
+    existing = NULL;
+    if (registration->identity_evidence != NULL &&
+        registration->identity_evidence_size == sizeof(XaveriusDeviceIdentity)) {
+        existing = xaverius_find_device_by_identity(
+            (const XaveriusDeviceIdentity *)registration->identity_evidence);
+    }
 
     if (existing != NULL) {
         /* Exact replay of the same live registration/binding ownership is
          * idempotent: return an additional caller-owned reference.
-         * Conflicting data returns a classified failure and no ref. */
-        *out_device = existing;
-        if (out_device_generation != NULL)
-            *out_device_generation = existing->device_generation;
-        if (out_binding_generation != NULL)
-            *out_binding_generation = existing->binding->binding_generation;
-        return XAVERIUS_REGISTRY_SUCCESS;
+         * Same hardware identity but different binding ownership is a
+         * classified conflict; neither is an automatic registration. */
+    if (existing->binding != NULL &&
+        existing->binding->module_role == role &&
+        existing->binding->binding_generation ==
+            registration->module_role_generation) {
+            *out_device = existing;
+            if (out_device_generation != NULL)
+                *out_device_generation = existing->device_generation;
+            if (out_binding_generation != NULL)
+                *out_binding_generation = existing->binding->binding_generation;
+            return XAVERIUS_REGISTRY_SUCCESS;
+        }
+        return XAVERIUS_REGISTRY_IDENTITY_CONFLICT;
     }
 
     /* Retain the ModuleRole for the lifetime of this binding. The binding
@@ -587,9 +606,6 @@ XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry
         device->binding->binding_generation != binding_generation)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    device->binding->availability = XAVERIUS_REGISTRY_UNAVAILABLE;
-    device->status = XAVERIUS_REGISTRY_UNAVAILABLE;
-
     /* Release the binding's ModuleRole reference. The Role is retired when
      * all its bindings are retired. */
     struct _XaveriusModuleRole *role = device->binding->module_role;
@@ -597,8 +613,10 @@ XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry
     XaveriusModuleRoleRelease(role);
     device->binding->module_role = NULL;
 
-    free(device->binding);
-    device->binding = NULL;
+    /* Mark binding unavailable. The binding record itself remains owned by
+     * the PhysicalDevice; only its availability changes. */
+    device->binding->availability = XAVERIUS_REGISTRY_UNAVAILABLE;
+    device->status = XAVERIUS_REGISTRY_UNAVAILABLE;
 
     return XAVERIUS_REGISTRY_SUCCESS;
 }

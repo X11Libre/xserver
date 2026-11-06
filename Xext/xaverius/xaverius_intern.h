@@ -247,23 +247,10 @@ XaveriusPhysicalDevice *XaveriusNextDevice(XaveriusPhysicalDevice *device);
 uint32_t XaveriusDeviceCount(void);
 
 /* Normative DDX-facing registration API (declared in xaverius_priv.h). */
-XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
-                                               const XaveriusDeviceBackendRegistration *registration,
-                                               XaveriusPhysicalDevice **out_device,
-                                               uint64_t *out_device_generation,
-                                               uint64_t *out_binding_generation);
-void XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device);
-XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
-                                                        XaveriusPhysicalDevice *device,
-                                                        uint64_t device_generation,
-                                                        uint64_t module_role_generation,
-                                                        uint64_t binding_generation);
-
-XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
-                                                        XaveriusPhysicalDevice *device,
-                                                        uint64_t device_generation,
-                                                        uint64_t module_role_generation,
-                                                        uint64_t binding_generation);
+XaveriusPhysicalDevice *XaveriusFindDeviceByBindingGeneration(uint64_t binding_generation);
+XaveriusPhysicalDevice *XaveriusFirstDevice(void);
+XaveriusPhysicalDevice *XaveriusNextDevice(XaveriusPhysicalDevice *device);
+uint32_t XaveriusDeviceCount(void);
 
 /* ---- Observation / removal (Stage 3) ---- */
 /* Discovery source and observation bookkeeping (minimal, server-side only).
