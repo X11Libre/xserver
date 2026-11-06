@@ -20,8 +20,8 @@
 #include "xaverius_proto.h"
 
 /* Forward declarations for internal types */
-struct _GpuPhysicalDevice;
-typedef struct _GpuPhysicalDevice XaveriusPhysicalDevice;
+struct _XaveriusPhysicalDevice;
+typedef struct _XaveriusPhysicalDevice XaveriusPhysicalDevice;
 
 extern int XaveriusEventBase;
 
@@ -146,7 +146,10 @@ struct XaveriusDeviceBackendOps {
 };
 
 /* ---- PhysicalDevice internal representation ---- */
-struct _GpuPhysicalDevice {
+struct _XaveriusPhysicalDevice {
+    /* Canonical identity evidence (structured, compared per §2.2). */
+    XaveriusDeviceIdentity identity;
+
     /* Immutable, server-owned identity evidence copy */
     void *identity_evidence;
     uint64_t identity_evidence_size;
@@ -171,7 +174,7 @@ struct _GpuPhysicalDevice {
 };
 
 /* ---- Direct DDX device backend binding ---- */
-struct _GpuDeviceBackendBinding {
+struct _XaveriusDeviceBackendBinding {
     const struct XaveriusDeviceBackendOps *ops;     /* immutable typed ops tables */
     int native_handle;                         /* borrowed DDX-owned */
     void *context;                             /* borrowed DDX-owned */
@@ -267,6 +270,6 @@ int ProcXaveriusDispatch(ClientPtr client);
 
 /* ---- Legacy names kept only for transitional reference; do not reuse ---- */
 /* XaveriusDevice, XaveriusDeviceCapabilities, XaveriusRegisterDevice,
- * XaveriusRegisterProvider are REMOVED — replaced by Gpu* model above. */
+ * XaveriusRegisterProvider are REMOVED — replaced by Xaverius* model above. */
 
 #endif /* _XLIBRE_XAVERIUS_INTERN_H */

@@ -47,8 +47,33 @@ typedef enum {
     XAVERIUS_REGISTRY_INTERNAL_ERROR     = 17,
 } XaveriusRegistryResult;
 
+/* ---- Canonical PhysicalDevice identity (DDX-facing) ---- */
+/* Matches spec/device-registry-architecture.md §2.2 identity evidence classes. */
+typedef struct _XaveriusDeviceIdentity {
+    /* DRM/PCI bus identity */
+    uint32_t domain;
+    uint32_t bus;
+    uint32_t device;
+    uint32_t function;
+
+    /* Optional Vulkan device UUID (16 bytes) */
+    uint8_t device_uuid[16];
+    bool has_device_uuid;
+
+    /* Driver UUID (16 bytes) */
+    uint8_t driver_uuid[16];
+
+    /* Kernel DRM version info */
+    uint32_t drm_major;
+    uint32_t drm_minor;
+
+    /* Optional: render node vs primary node tracking */
+    bool is_render_node;
+    int drm_fd; /* -1 if not applicable */
+} XaveriusDeviceIdentity;
+
 /* ---- DDX module-role descriptor (v1, size/versioned) ---- */
-typedef struct _GpuModuleRoleDescriptor {
+typedef struct _XaveriusModuleRoleDescriptor {
     uint64_t struct_size;
     uint64_t abi_version;
     const char *owner_key;          /* stable role key across reloads */
@@ -60,7 +85,7 @@ typedef struct _GpuModuleRoleDescriptor {
 } XaveriusModuleRoleDescriptor;
 
 /* ---- DDX device backend registration descriptor (v1, size/versioned) ---- */
-typedef struct _GpuDeviceBackendRegistration {
+typedef struct _XaveriusDeviceBackendRegistration {
     uint64_t struct_size;
     uint64_t abi_version;
     const void *identity_evidence;      /* structured canonical identity */
@@ -72,8 +97,8 @@ typedef struct _GpuDeviceBackendRegistration {
 } XaveriusDeviceBackendRegistration;
 
 /* ---- Forward declarations ---- */
-struct _GpuPhysicalDevice;
-typedef struct _GpuPhysicalDevice XaveriusPhysicalDevice;
+struct _XaveriusPhysicalDevice;
+typedef struct _XaveriusPhysicalDevice XaveriusPhysicalDevice;
 
 /* ---- Normative DDX-facing registration API ---- */
 
