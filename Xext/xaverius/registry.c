@@ -102,7 +102,7 @@ XaveriusRegistryFini(void)
 
 /* Validate a XaveriusModuleRoleDescriptor header before reading later fields. */
 static bool
-gpu_module_role_descriptor_valid(const XaveriusModuleRoleDescriptor *desc)
+xaverius_module_role_descriptor_valid(const XaveriusModuleRoleDescriptor *desc)
 {
     if (desc == NULL)
         return false;
@@ -118,13 +118,13 @@ XaveriusRegistryResult
 XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
                     void **out_role)
 {
-    struct _GpuModuleRole *role;
+    struct _XaveriusModuleRole *role;
 
     if (desc == NULL || out_role == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Validate header before reading later fields. */
-    if (!gpu_module_role_descriptor_valid(desc))
+    if (!xaverius_module_role_descriptor_valid(desc))
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Failed registration calls no role hook. */
@@ -162,7 +162,7 @@ XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
 void
 XaveriusModuleRoleRetain(void *role)
 {
-    struct _GpuModuleRole *r = (struct _GpuModuleRole *)role;
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
     if (r == NULL || r->retain_module_role == NULL)
         return;
@@ -174,7 +174,7 @@ XaveriusModuleRoleRetain(void *role)
 void
 XaveriusModuleRoleRelease(void *role)
 {
-    struct _GpuModuleRole *r = (struct _GpuModuleRole *)role;
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
     if (r == NULL || r->release_module_role == NULL)
         return;
@@ -187,7 +187,7 @@ XaveriusModuleRoleRelease(void *role)
 int
 XaveriusModuleRoleQuiesce(void *role)
 {
-    struct _GpuModuleRole *r = (struct _GpuModuleRole *)role;
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
     if (r == NULL || r->quiesce_module_role == NULL)
         return XAVERIUS_MODULE_ROLE_QUIESCE_FAILURE;
@@ -199,7 +199,7 @@ XaveriusModuleRoleQuiesce(void *role)
 void
 XaveriusModuleRoleFinalize(void *role)
 {
-    struct _GpuModuleRole *r = (struct _GpuModuleRole *)role;
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
     if (r == NULL)
         return;
@@ -222,7 +222,7 @@ XaveriusModuleRoleFinalize(void *role)
 bool
 XaveriusModuleRoleAdmissionOpen(void *role)
 {
-    struct _GpuModuleRole *r = (struct _GpuModuleRole *)role;
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
     if (r == NULL)
         return false;

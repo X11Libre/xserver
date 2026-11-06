@@ -183,7 +183,7 @@ struct _GpuDeviceBackendBinding {
 };
 
 /* ---- ModuleRole control record (shared code/module lifetime & quiescence) ---- */
-struct _GpuModuleRole {
+struct _XaveriusModuleRole {
     char *owner_key;
     bool is_permanent;
     void *module_lease_ref;            /* loader/module pin */
