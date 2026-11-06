@@ -554,7 +554,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
      * - UUID-Validierung
      * - Queue/Memory-Konsistenz prüfen
      * - timelineSemaphore = 1 ist verpflichtend */
-    if (dev->snapshot == NULL || dev->snapshot_size == 0) {
+    if (dev->snapshot == NULL) {
         XaveriusModuleRoleRelease(role);
         free(binding);
         free(dev->identity_evidence);
