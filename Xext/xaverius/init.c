@@ -53,7 +53,7 @@ void XaveriusExtensionInit(void)
     xaverius_atom_timeline_semaphore = dixAddAtom("XAverius.timelineSemaphore");
 
     /* Initialize process-wide PhysicalDevice registry. Must be called before
-     * any device registration so that XaveriusRegisterDevice() has a
+     * any device registration so that XaveriusRegistryRegisterDdxDevice() has a
      * valid registry to publish into. */
     if (!XaveriusRegistryInit()) {
         FatalError("failed to initialize Xaverius PhysicalDevice registry\n");

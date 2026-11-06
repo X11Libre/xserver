@@ -16,110 +16,125 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "include/dixstruct.h"
+#include "include/privates.h"
+#include "include/scrnintstr.h"
 #include "include/xlibre_ptrtypes.h"
+#include "compiler.h"
 
 #include "xaverius_proto.h"
 
-/* Device status (matches XAverius spec) */
+/* ---- Registry result (DDX-facing) ---- */
+/* Matches spec/device-registry-architecture.md §7 (XaveriusRegistryResult). */
 typedef enum {
-    XAVERIUS_DEVICE_STATUS_AVAILABLE   = 0,
-    XAVERIUS_DEVICE_STATUS_UNAVAILABLE = 1,
-    XAVERIUS_DEVICE_STATUS_REMOVED     = 2
-} XaveriusDeviceStatus;
+    XAVERIUS_REGISTRY_SUCCESS            = 0,
+    XAVERIUS_REGISTRY_PENDING            = 1,
+    XAVERIUS_REGISTRY_AMBIGUOUS          = 2,
+    XAVERIUS_REGISTRY_STALE_GENERATION   = 3,
+    XAVERIUS_REGISTRY_INVALID_EVIDENCE   = 4,
+    XAVERIUS_REGISTRY_IDENTITY_CONFLICT  = 5,
+    XAVERIUS_REGISTRY_OUT_OF_MEMORY      = 6,
+    XAVERIUS_REGISTRY_INVALID_ARGUMENT   = 7,
+    XAVERIUS_REGISTRY_NOT_FOUND          = 8,
+    XAVERIUS_REGISTRY_ALREADY_EXISTS     = 9,
+    XAVERIUS_REGISTRY_NOT_REGISTERED     = 10,
+    XAVERIUS_REGISTRY_SHUTTING_DOWN      = 11,
+    XAVERIUS_REGISTRY_BUSY               = 12,
+    XAVERIUS_REGISTRY_UNAVAILABLE        = 13,
+    XAVERIUS_REGISTRY_UNSUPPORTED        = 14,
+    XAVERIUS_REGISTRY_QUARANTINED        = 15,
+    XAVERIUS_REGISTRY_STALE_EVENT        = 16,
+    XAVERIUS_REGISTRY_INTERNAL_ERROR     = 17,
+} XaveriusRegistryResult;
 
-/* Device identity for canonicalization */
-typedef struct _XaveriusDeviceIdentity {
-    /* DRM/PCI bus identity */
-    uint32_t domain;
-    uint32_t bus;
-    uint32_t device;
-    uint32_t function;
+/* ---- DDX module-role descriptor (v1, size/versioned) ---- */
+typedef struct _GpuModuleRoleDescriptor {
+    uint64_t struct_size;
+    uint64_t abi_version;
+    const char *owner_key;          /* stable role key across reloads */
+    bool is_permanent;              /* no loader lease; active during server operation */
+    void (*retain_module_role)(void *role);
+    void (*release_module_role)(void *role);
+    int  (*quiesce_module_role)(void *role); /* PENDING/SUCCESS/FAILURE */
+    void *role_userdata;            /* DDX-owned */
+} XaveriusModuleRoleDescriptor;
 
-    /* Optional Vulkan device UUID (16 bytes) */
-    uint8_t device_uuid[16];
-    bool has_device_uuid;
+/* ---- DDX device backend registration descriptor (v1, size/versioned) ---- */
+typedef struct _GpuDeviceBackendRegistration {
+    uint64_t struct_size;
+    uint64_t abi_version;
+    const void *identity_evidence;      /* structured canonical identity */
+    uint64_t identity_evidence_size;
+    int native_handle;                  /* borrowed DDX-owned, exact native fd/handle */
+    void *context;                      /* borrowed DDX-owned per-device context */
+    const struct XaveriusDeviceBackendOps *ops; /* immutable typed ops tables */
+    uint64_t module_role_generation;    /* owning ModuleRole generation */
+} XaveriusDeviceBackendRegistration;
 
-    /* Driver UUID (16 bytes) */
-    uint8_t driver_uuid[16];
+/* ---- Forward declarations ---- */
+struct _GpuPhysicalDevice;
+typedef struct _GpuPhysicalDevice XaveriusPhysicalDevice;
 
-    /* Kernel DRM version info */
-    uint32_t drm_major;
-    uint32_t drm_minor;
+/* ---- Normative DDX-facing registration API ---- */
 
-    /* Optional: render node vs primary node tracking */
-    bool is_render_node;
-    int drm_fd; /* -1 if not applicable */
-} XaveriusDeviceIdentity;
+/*
+ * Register one PhysicalDevice served by this DDX.
+ *
+ * Supplies structured identity evidence, the exact native PhysicalDevice handle,
+ * per-device backend context, immutable typed operation vectors, and the owning
+ * DDX module-role generation.
+ *
+ * On XAVERIUS_REGISTRY_SUCCESS returns an immediate caller-owned opaque PhysicalDevice
+ * reference in *out_device plus exact device_generation and binding_generation.
+ * The caller must release the reference with XaveriusPhysicalDeviceRelease() and must
+ * NOT retain or dereference the bare pointer after this call returns.
+ *
+ * Registration does NOT publish the PhysicalDevice or allocate its XID;
+ * publication is a separate server-internal operation (XaPhysicalDevicePublish)
+ * after identity resolution, eligible-binding selection, and the startup gate.
+ */
+XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
+                                               const XaveriusDeviceBackendRegistration *registration,
+                                               XaveriusPhysicalDevice **out_device,
+                                               uint64_t *out_device_generation,
+                                               uint64_t *out_binding_generation);
 
-/* Provider capabilities (immutable snapshot, taken at registration time) */
-typedef struct _XaveriusDeviceCapabilities {
-    /* Device properties */
-    uint32_t device_type;
-    uint32_t vendor_id;
-    uint32_t device_id;
-    uint32_t api_version;
-    uint32_t driver_version;
-    uint32_t compute_queue_family_count;
+/*
+ * Release the caller-owned PhysicalDevice reference returned by registration.
+ * Not a retained DDX handle; NULL-safe.
+ */
+void XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device);
 
-    /* Queue families */
-    XaveriusQueueFamilyInfo *queue_families;
-    uint32_t queue_family_count;
+/*
+ * Stop new calls through the exact DDX/device binding and apply the selected
+ * binding unavailability rules; not physical removal.
+ */
+XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
+                                                        XaveriusPhysicalDevice *device,
+                                                        uint64_t device_generation,
+                                                        uint64_t module_role_generation,
+                                                        uint64_t binding_generation);
 
-    /* Memory properties */
-    XaveriusMemoryTypeInfo *memory_types;
-    uint32_t memory_type_count;
-    XaveriusMemoryHeapInfo *memory_heaps;
-    uint32_t memory_heap_count;
-
-    /* Properties */
-    uint32_t max_work_group_invocations;
-    uint32_t max_work_group_size[3];
-    bool has_timeline_semaphore;
-
-    /* Device name */
-    char *device_name;
-
-    /* Provider-specific handle (opaque) */
-    void *provider_handle;
-} XaveriusDeviceCapabilities;
-
-/* Forward declaration for callback signatures */
+/* ---- Per-screen private API (ScreenAttachment is separate, non-owning;
+ * kept minimal; expanded in a later stage) ---- */
+struct _XaveriusScreen;
 typedef struct _XaveriusScreen XaveriusScreenRec, *XaveriusScreenPtr;
 
-/* Called by DDX during screen initialization to register its callbacks.
- * Xaverius allocates the per-screen structure, DDX fills in the ops.
- */
 typedef struct _XaveriusDDXOps
 {
     bool (*ScreenInit)(XaveriusScreenPtr xav_screen);
     void (*ScreenFini)(XaveriusScreenPtr xav_screen);
 } XaveriusDDXOps;
 
-/* Per-screen state (internal, not exposed to DDX beyond the pointer) */
 struct _XaveriusScreen
 {
-    ScreenPtr pScreen;
-    const XaveriusDDXOps *ops;   /* callbacks provided by DDX, called by Xaverius */
-    void *driver_private;        /* DDX-owned private data */
+    void *pScreen;
+    const XaveriusDDXOps *ops;
+    void *driver_private;
     bool initialized;
 };
 
-/* Called by DDX during screen initialization to register its callbacks.
- * Xaverius allocates the per-screen structure, DDX fills in the ops.
- * Screen close cleanup is handled automatically via the screen close hook.
- */
 _X_EXPORT bool XaveriusScreenInit(ScreenPtr pScreen, const XaveriusDDXOps *ops);
-
 _X_EXPORT XaveriusScreenPtr XaveriusGetScreen(ScreenPtr pScreen);
-
-/* DDX-wide device registration entry point (Phase A).
- * DDX drivers call this once per provider to register all served
- * PhysicalDevices and their provider capabilities.
- * Strictly DDX-wide; no ScreenPtr, no per-screen state.
- */
-_X_EXPORT bool XaveriusRegisterDevice(const XaveriusDeviceIdentity identity,
-                                      const XaveriusDeviceCapabilities *caps,
-                                      int native_handle,
-                                      void *context);
 
 #endif /* _XLIBRE_XAVERIUS_PRIV_H */
