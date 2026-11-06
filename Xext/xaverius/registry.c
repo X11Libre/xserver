@@ -750,8 +750,14 @@ XaveriusRegistryObserveDevice(void *registry,
             return XAVERIUS_REGISTRY_STALE_EVENT;
     }
 
-    /* Canonicalize identity: find existing exact incarnation. */
-    dev = xaverius_find_device_by_identity(identity_evidence);
+    /* Canonicalize identity: find existing exact incarnation.
+     * Only search if we actually have identity evidence. */
+    dev = NULL;
+    if (registration->identity_evidence != NULL &&
+        registration->identity_evidence_size == sizeof(XaveriusDeviceIdentity)) {
+        dev = xaverius_find_device_by_identity(
+            (const XaveriusDeviceIdentity *)registration->identity_evidence);
+    }
 
     if (dev != NULL) {
         /* Unambiguous match: store observation linking source to device,
