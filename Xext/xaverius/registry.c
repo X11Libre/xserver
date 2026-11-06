@@ -439,12 +439,16 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
     if (!XaveriusModuleRoleAdmissionOpen(role))
         return XAVERIUS_REGISTRY_UNAVAILABLE;
 
-    /* Retain the ModuleRole for the lifetime of this binding. The binding
-     * keeps its role; the role retains its module lease. */
-    XaveriusModuleRoleRetain(role);
+    /* Validate the top-level ops descriptor header before reading callback
+     * fields and before any Hook/Lease side effect. Invalid descriptors
+     * must cause neither callback invocation nor lease retention. */
     if (registration->ops->struct_size < sizeof(*registration->ops) ||
         registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+
+    /* Retain the ModuleRole for the lifetime of this binding. The binding
+     * keeps its role; the role retains its module lease. */
+    XaveriusModuleRoleRetain(role);
 
     /* Canonicalize identity: check for an existing exact incarnation. */
     existing = xaverius_find_device_by_identity(
@@ -469,12 +473,26 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
     if (binding == NULL)
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
 
-    /* Install into internal (not yet published) registry. */
+    /* ---- Failure-atomic registration path (Stage 4) ----
+     *
+     * Registration, binding installation, snapshot installation and DIX
+     * publication are separate transaction steps. Every failure unwinds
+     * through a common provisional-object cleanup path so that no partially
+     * copied snapshot, invalid identity, missing operation, failed callback,
+     * or failed resource insertion leaves a binding, published list entry,
+     * visible XID, or caller-owned reference.
+     *
+     * Non-reusable generations stay consumed even after a failed attempt. */
+
+    /* Reserve device and binding generations before any fallback failure so
+     * they stay consumed even if this attempt fails. */
     dev = calloc(1, sizeof(*dev));
     if (dev == NULL) {
         free(binding);
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
     }
+    dev->device_generation = xaverius_next_generation_id();
+    binding->binding_generation = xaverius_next_generation_id();
 
     dev->identity_evidence = NULL;
     dev->identity_evidence_size = 0;
@@ -482,11 +500,6 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
     dev->snapshot_size = 0;
     dev->binding = binding;
     dev->status = XAVERIUS_REGISTRY_SUCCESS;
-    dev->device_generation = xaverius_next_generation_id();
-    dev->identity = *(const XaveriusDeviceIdentity *)
-        (registration->identity_evidence != NULL
-            ? registration->identity_evidence
-            : &(XaveriusDeviceIdentity){ 0 });
 
     /* Copy identity evidence if provided. */
     if (registration->identity_evidence != NULL &&
@@ -503,6 +516,27 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
         dev->identity_evidence_size = registration->identity_evidence_size;
     }
 
+    dev->identity = *(const XaveriusDeviceIdentity *)
+        (registration->identity_evidence != NULL
+            ? registration->identity_evidence
+            : &(XaveriusDeviceIdentity){ 0 });
+
+    /* Query the physical snapshot through the exact provisional binding's
+     * query_physical_snapshot callback. Initialize output fields to failure
+     * sentinels; validate all counts, pointer/count pairs, ranges, UUIDs,
+     * queue/memory consistency, and advertised features; deep copy the full
+     * snapshot into server-owned immutable storage before publication. */
+    snap_result = registration->ops->query_physical_snapshot(
+        binding, &dev->snapshot);
+    if (snap_result != XAVERIUS_BACKEND_SUCCESS) {
+        free(binding);
+        free(dev->identity_evidence);
+        free(dev);
+        return XAVERIUS_REGISTRY_UNAVAILABLE;
+    }
+    dev->snapshot_size = 0; /* server-owned size, set by callback */
+
+    /* Install into internal (not yet published) registry. */
     xorg_list_append(&dev->list, &xaverius_physical_devices);
     xaverius_physical_device_count++;
 
