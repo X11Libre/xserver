@@ -923,7 +923,7 @@ jobs:
 
                   packages: >-
                    binutils, bison, ccache, flex, gcc-core, meson, ninja,
-                   pkg-config, python39, windowsdriproto, xorgproto,
+                   pkg-config, python39, python39-lxml, windowsdriproto, xorgproto,
                    libepoxy-devel, libfontenc-devel, libfreetype-devel,
                    libGL-devel, libnettle-devel, libpixman1-devel,
                    libtirpc-devel, libXRes-devel, libXaw-devel, libXdmcp-devel,
