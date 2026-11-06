@@ -27,8 +27,7 @@
 /* ---- Process-wide generation counter (non-reusable generations) ---- */
 static uint64_t xaverius_next_generation = 1;
 
-static uint64_t
-xaverius_next_generation_id(void)
+static uint64_t xaverius_next_generation_id(void)
 {
     return xaverius_next_generation++;
 }
@@ -58,8 +57,7 @@ RESTYPE XaveriusPhysicalDeviceType = 0;
 
 /* Canonical DIX destructor for a published PhysicalDevice record.
  * Runs exactly once per published record via FreeResource. */
-int
-XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
+int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
 {
     XaveriusPhysicalDevice *dev = (XaveriusPhysicalDevice *)value;
 
@@ -78,8 +76,7 @@ XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
 
 /* Idempotently create the PhysicalDevice DIX resource type with its
  * canonical destructor (Stage 1: type registration only, no publication). */
-static bool
-XaveriusPhysicalDeviceTypeInit(void)
+static bool XaveriusPhysicalDeviceTypeInit(void)
 {
     if (XaveriusPhysicalDeviceType != 0)
         return true;
@@ -93,8 +90,7 @@ XaveriusPhysicalDeviceTypeInit(void)
     return true;
 }
 
-bool
-XaveriusRegistryInit(void)
+bool XaveriusRegistryInit(void)
 {
     if (!XaveriusPhysicalDeviceTypeInit())
         return false;
@@ -110,10 +106,9 @@ XaveriusRegistryInit(void)
     return true;
 }
 
-void
-XaveriusRegistryFini(void)
+void XaveriusRegistryFini(void)
 {
-    /* Stage 3: no published records yet. Keep the signature for later
+    /* Stage 4: no published records yet. Keep the signature for later
      * stages; the DIX destructor path handles published records. */
     xaverius_physical_device_count = 0;
     xaverius_tombstone_count = 0;
@@ -248,8 +243,7 @@ xaverius_module_role_descriptor_valid(const XaveriusModuleRoleDescriptor *desc)
     return true;
 }
 
-XaveriusRegistryResult
-XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
+XaveriusRegistryResult XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
                     void **out_role)
 {
     struct _XaveriusModuleRole *role;
@@ -296,8 +290,7 @@ XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
     return XAVERIUS_REGISTRY_SUCCESS;
 }
 
-void
-XaveriusModuleRoleRetain(void *role)
+void XaveriusModuleRoleRetain(void *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
@@ -308,8 +301,7 @@ XaveriusModuleRoleRetain(void *role)
     r->retain_module_role(r);
 }
 
-void
-XaveriusModuleRoleRelease(void *role)
+void XaveriusModuleRoleRelease(void *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
@@ -321,8 +313,7 @@ XaveriusModuleRoleRelease(void *role)
     r->release_module_role(r);
 }
 
-int
-XaveriusModuleRoleQuiesce(void *role)
+int XaveriusModuleRoleQuiesce(void *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
@@ -333,8 +324,7 @@ XaveriusModuleRoleQuiesce(void *role)
     return r->quiesce_module_role(r);
 }
 
-void
-XaveriusModuleRoleFinalize(void *role)
+void XaveriusModuleRoleFinalize(void *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
@@ -356,8 +346,7 @@ XaveriusModuleRoleFinalize(void *role)
     free(r);
 }
 
-bool
-XaveriusModuleRoleAdmissionOpen(void *role)
+bool XaveriusModuleRoleAdmissionOpen(void *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
@@ -408,8 +397,7 @@ xaverius_binding_alloc(const XaveriusDeviceBackendRegistration *registration,
 
 /* ---- Registry registration (Stage 4) ---- */
 
-XaveriusRegistryResult
-XaveriusRegistryRegisterDdxDevice(void *registry,
+XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
                              const XaveriusDeviceBackendRegistration *registration,
                              XaveriusPhysicalDevice **out_device,
                              uint64_t *out_device_generation,
@@ -556,8 +544,7 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
     return XAVERIUS_REGISTRY_SUCCESS;
 }
 
-void
-XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device)
+void XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device)
 {
     if (device == NULL)
         return;
@@ -574,18 +561,17 @@ XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device)
      * path (XaveriusPhysicalDeviceDIXDestroy via FreeResource).
      *
      * There is no explicit reference count on the PhysicalDevice record in
-      * this stage; the caller's "release" is a no-op with respect to the
+     * this stage; the caller's "release" is a no-op with respect to the
      * server-owned record. The caller must not dereference the pointer
      * after this call returns.
      */
 }
 
-XaveriusRegistryResult
-XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
-                                       XaveriusPhysicalDevice *device,
-                                       uint64_t device_generation,
-                                       uint64_t module_role_generation,
-                                       uint64_t binding_generation)
+XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
+                                        XaveriusPhysicalDevice *device,
+                                        uint64_t device_generation,
+                                        uint64_t module_role_generation,
+                                        uint64_t binding_generation)
 {
     /* Stage 4: binding removal marks the exact binding UNAVAILABLE; not
      * physical removal. Reject if generations do not match. */
@@ -604,8 +590,7 @@ XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
 /* XaveriusPhysicalDevicePublish — separate server-internal publication operation
  * (Stage 4). Allocates a server-private XID, prepares the DIX wrapper, and
  * atomically exposes it once AddResource() succeeds. */
-bool
-XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev)
+bool XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev)
 {
     XID xid;
 
