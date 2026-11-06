@@ -766,13 +766,13 @@ XaveriusRegistryObserveDevice(void *registry,
     if (obs == NULL)
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
 
-    obs->source_key = calloc(1, identity_evidence_size);
+    obs->source_key = calloc(1, source_key_size);
     if (obs->source_key == NULL) {
         free(obs);
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
     }
-    memcpy(obs->source_key, source_key, identity_evidence_size);
-    obs->source_key_size = identity_evidence_size;
+    memcpy(obs->source_key, source_key, source_key_size);
+    obs->source_key_size = source_key_size;
     obs->source_generation = source_generation;
     obs->observation_id = observation_id;
     obs->identity = *identity_evidence;
