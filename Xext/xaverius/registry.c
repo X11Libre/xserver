@@ -446,9 +446,12 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
         registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    /* Retain the ModuleRole for the lifetime of this binding. The binding
-     * keeps its role; the role retains its module lease. */
-    XaveriusModuleRoleRetain(role);
+    /* Validate the top-level ops descriptor header before reading callback
+     * fields and before any Hook/Lease side effect. Invalid descriptors
+     * must cause neither callback invocation nor lease retention. */
+    if (registration->ops->struct_size < sizeof(*registration->ops) ||
+        registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Canonicalize identity: check for an existing exact incarnation. */
     existing = xaverius_find_device_by_identity(
@@ -467,6 +470,10 @@ XaveriusRegistryRegisterDdxDevice(void *registry,
             *out_binding_generation = existing->binding->binding_generation;
         return XAVERIUS_REGISTRY_SUCCESS;
     }
+
+    /* Retain the ModuleRole for the lifetime of this binding. The binding
+     * keeps its role; the role retains its module lease. */
+    XaveriusModuleRoleRetain(role);
 
     /* Allocate the direct DDX device backend binding. */
     binding = xaverius_binding_alloc(registration, role);
