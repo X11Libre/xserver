@@ -25,8 +25,6 @@ typedef struct _XaveriusPhysicalDevice XaveriusPhysicalDevice;
 
 extern int XaveriusEventBase;
 
-extern DevPrivateKeyRec XaveriusScreenPrivateKeyRec;
-
 /* Global property atoms (initialized in init.c) */
 extern Atom xaverius_atom_device_uuid;
 extern Atom xaverius_atom_driver_uuid;

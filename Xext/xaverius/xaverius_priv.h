@@ -119,10 +119,10 @@ typedef struct _XaveriusPhysicalDevice XaveriusPhysicalDevice;
  * after identity resolution, eligible-binding selection, and the startup gate.
  */
 XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(void *registry,
-                                               const XaveriusDeviceBackendRegistration *registration,
-                                               XaveriusPhysicalDevice **out_device,
-                                               uint64_t *out_device_generation,
-                                               uint64_t *out_binding_generation);
+                                                const XaveriusDeviceBackendRegistration *registration,
+                                                XaveriusPhysicalDevice **out_device,
+                                                uint64_t *out_device_generation,
+                                                uint64_t *out_binding_generation);
 
 /*
  * Release the caller-owned PhysicalDevice reference returned by registration.
@@ -139,27 +139,5 @@ XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry
                                                         uint64_t device_generation,
                                                         uint64_t module_role_generation,
                                                         uint64_t binding_generation);
-
-/* ---- Per-screen private API (ScreenAttachment is separate, non-owning;
- * kept minimal; expanded in a later stage) ---- */
-struct _XaveriusScreen;
-typedef struct _XaveriusScreen XaveriusScreenRec, *XaveriusScreenPtr;
-
-typedef struct _XaveriusDDXOps
-{
-    bool (*ScreenInit)(XaveriusScreenPtr xav_screen);
-    void (*ScreenFini)(XaveriusScreenPtr xav_screen);
-} XaveriusDDXOps;
-
-struct _XaveriusScreen
-{
-    void *pScreen;
-    const XaveriusDDXOps *ops;
-    void *driver_private;
-    bool initialized;
-};
-
-_X_EXPORT bool XaveriusScreenInit(ScreenPtr pScreen, const XaveriusDDXOps *ops);
-_X_EXPORT XaveriusScreenPtr XaveriusGetScreen(ScreenPtr pScreen);
 
 #endif /* _XLIBRE_XAVERIUS_PRIV_H */

@@ -1,7 +1,6 @@
 srcs_xaverius = [
     'init.c',
     'dispatch.c',
-    'screen.c',
     'registry.c',
 ]
 

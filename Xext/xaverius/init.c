@@ -40,11 +40,6 @@ void XaveriusExtensionInit(void)
 
     XaveriusEventBase = extEntry->eventBase;
 
-    /* Register per-screen private key at extension init time */
-    if (!dixRegisterPrivateKey(&XaveriusScreenPrivateKeyRec, PRIVATE_SCREEN, 0)) {
-        FatalError("failed to register Xaverius screen private key\n");
-    }
-
     /* Initialize property atoms */
     xaverius_atom_device_uuid = dixAddAtom("XAverius.deviceUUID");
     xaverius_atom_driver_uuid = dixAddAtom("XAverius.driverUUID");
