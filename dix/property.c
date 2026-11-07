@@ -53,8 +53,10 @@ SOFTWARE.
 #include "dix/input_priv.h"
 #include "dix/property_priv.h"
 #include "dix/request_priv.h"
+#include "dix/resource_priv.h"
 #include "dix/window_priv.h"
 #include "include/extinit.h"
+#include "include/inputstr.h"
 #include "os/mathx_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
@@ -159,15 +161,31 @@ CallbackListPtr PropertyFilterCallback;
 static void
 deliverPropertyNotifyEvent(WindowPtr pWin, int state, PropertyPtr pProp)
 {
+    WindowPtr root = pWin->drawable.pScreen->root;
+    Bool isVirtRoot = (pWin != root && pWin->parent == root &&
+                       dixClientForWindow(pWin) == serverClient);
     xEvent event;
     UpdateCurrentTimeIf();
     event = (xEvent) {
-        .u.property.window = pWin->drawable.id,
+        .u.property.window = (isVirtRoot ? root : pWin)->drawable.id,
         .u.property.state = state,
         .u.property.atom = pProp->propertyName,
         .u.property.time = currentTime.milliseconds,
     };
     event.u.u.type = PropertyNotify;
+
+    if (isVirtRoot) {
+        for (OtherClients *oc = wOtherClients(root); oc; oc = oc->next) {
+            if (!(oc->mask & PropertyChangeMask))
+                continue;
+            ClientPtr c = dixClientForOtherClients(oc);
+            if (!c || c == serverClient || c->clientGone)
+                continue;
+            if (XaceHookReceiveAccess(c, pWin, &event, 1) == Success)
+                WriteEventsToClient(c, 1, &event);
+        }
+        return;
+    }
 
     DeliverEvents(pWin, &event, 1, (WindowPtr) NULL);
 }

@@ -4925,6 +4925,12 @@ SetInputFocus(ClientPtr client,
         for (WindowPtr pWin = focusWin; pWin; pWin = pWin->parent, depth--)
             focus->trace[depth] = pWin;
     }
+    for (DeviceIntPtr gdev = inputInfo.devices; gdev; gdev = gdev->next) {
+        if (gdev->deviceGrab.grab &&
+            dixCallDeviceAccessCallback(dixClientForGrab(gdev->deviceGrab.grab),
+                                        gdev, DixGrabAccess) != Success)
+            (*gdev->deviceGrab.DeactivateGrab)(gdev);
+    }
     return Success;
 }
 
@@ -5203,6 +5209,10 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
     if (keyboard_mode == GrabModeSync || pointer_mode == GrabModeSync)
         access_mode |= DixFreezeAccess;
     rc = dixCallDeviceAccessCallback(client, dev, access_mode);
+    if (rc == BadAccess) {
+        *status = AlreadyGrabbed;
+        return Success;
+    }
     if (rc != Success)
         return rc;
 
@@ -5347,13 +5357,15 @@ ProcQueryPointer(ClientPtr client)
         return rc;
 
     keyboard = GetMaster(mouse, MASTER_KEYBOARD);
+    int krc = keyboard ? dixCallDeviceAccessCallback(client, keyboard, DixReadAccess)
+                       : BadAccess;
 
     pSprite = mouse->spriteInfo->sprite;
     if (mouse->valuator->motionHintWindow)
         MaybeStopHint(mouse, client);
 
     xQueryPointerReply reply = {
-        .mask = event_get_corestate(mouse, keyboard),
+        .mask = (krc == Success) ? event_get_corestate(mouse, keyboard) : 0,
         .root = (InputDevCurrentRootWindow(mouse))->drawable.id,
         .rootX = pSprite->hot.x,
         .rootY = pSprite->hot.y,
@@ -5363,11 +5375,13 @@ ProcQueryPointer(ClientPtr client)
         reply.sameScreen = xTrue;
         reply.winX = pSprite->hot.x - pWin->drawable.x;
         reply.winY = pSprite->hot.y - pWin->drawable.y;
-        for (WindowPtr t = pSprite->win; t; t = t->parent)
-            if (t->parent == pWin) {
+        for (WindowPtr t = pSprite->win; t && t != pWin; t = t->parent) {
+            if (XaceHookResourceAccess(client, t->drawable.id,
+                                       X11_RESTYPE_WINDOW, t,
+                                       X11_RESTYPE_WINDOW, pWin,
+                                       DixGetAttrAccess) == Success)
                 reply.child = t->drawable.id;
-                break;
-            }
+        }
     }
     else {
         reply.sameScreen = xFalse;

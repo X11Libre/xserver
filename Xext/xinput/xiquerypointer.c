@@ -37,12 +37,14 @@
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XI2proto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/request_priv.h"
+#include "Xext/xacestr.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/extinit.h"
@@ -88,10 +90,16 @@ ProcXIQueryPointer(ClientPtr client)
                         xi_client->minor_version, 2, 2) >= 0)
         have_xi22 = TRUE;
 
-    rc = dixLookupDevice(&pDev, stuff->deviceid, client, DixReadAccess);
+    rc = dixLookupDevice(&pDev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success) {
         client->errorValue = stuff->deviceid;
         return rc;
+    }
+
+    int ptr_rc = dixCallDeviceAccessCallback(client, pDev, DixReadAccess);
+    if (ptr_rc != Success && ptr_rc != BadAccess) {
+        client->errorValue = stuff->deviceid;
+        return ptr_rc;
     }
 
     if (pDev->valuator == NULL || IsKeyboardDevice(pDev) ||
@@ -114,6 +122,9 @@ ProcXIQueryPointer(ClientPtr client)
     else
         kbd = (pDev->key) ? pDev : NULL;
 
+    int kbd_rc = kbd ? dixCallDeviceAccessCallback(client, kbd, DixReadAccess)
+                     : BadAccess;
+
     pSprite = pDev->spriteInfo->sprite;
 
     xXIQueryPointerReply reply = {
@@ -125,9 +136,11 @@ ProcXIQueryPointer(ClientPtr client)
 
     if (kbd) {
         state = &kbd->key->xkbInfo->state;
-        reply.mods.base_mods = state->base_mods;
-        reply.mods.latched_mods = state->latched_mods;
-        reply.mods.locked_mods = state->locked_mods;
+        if (kbd_rc == Success && ptr_rc == Success) {
+            reply.mods.base_mods = state->base_mods;
+            reply.mods.latched_mods = state->latched_mods;
+            reply.mods.locked_mods = state->locked_mods;
+        }
 
         reply.group.base_group = state->base_group;
         reply.group.latched_group = state->latched_group;
@@ -145,23 +158,27 @@ ProcXIQueryPointer(ClientPtr client)
         if (!buttons)
             return BadAlloc;
 
-        for (i = 1; i < pDev->button->numButtons; i++)
-            if (BitIsOn(pDev->button->down, i))
-                SetBit(buttons, pDev->button->map[i]);
+        if (kbd_rc == Success && ptr_rc == Success) {
+            for (i = 1; i < pDev->button->numButtons; i++)
+                if (BitIsOn(pDev->button->down, i))
+                    SetBit(buttons, pDev->button->map[i]);
 
-        if (!have_xi22 && pDev->touch && pDev->touch->buttonsDown > 0)
-            SetBit(buttons, pDev->button->map[1]);
+            if (!have_xi22 && pDev->touch && pDev->touch->buttonsDown > 0)
+                SetBit(buttons, pDev->button->map[1]);
+        }
     }
 
     if (pSprite->hot.pScreen == pWin->drawable.pScreen) {
         reply.same_screen = xTrue;
         reply.win_x = double_to_fp1616(pSprite->hot.x - pWin->drawable.x);
         reply.win_y = double_to_fp1616(pSprite->hot.y - pWin->drawable.y);
-        for (t = pSprite->win; t; t = t->parent)
-            if (t->parent == pWin) {
+        for (t = pSprite->win; t && t != pWin; t = t->parent) {
+            if (XaceHookResourceAccess(client, t->drawable.id,
+                                       X11_RESTYPE_WINDOW, t,
+                                       X11_RESTYPE_WINDOW, pWin,
+                                       DixGetAttrAccess) == Success)
                 reply.child = t->drawable.id;
-                break;
-            }
+        }
     }
 
 #ifdef XINERAMA
@@ -175,6 +192,14 @@ ProcXIQueryPointer(ClientPtr client)
         }
     }
 #endif /* XINERAMA */
+
+    if (ptr_rc == BadAccess) {
+        reply.child = None;
+        reply.root_x = 0;
+        reply.root_y = 0;
+        reply.win_x = 0;
+        reply.win_y = 0;
+    }
 
     X_REPLY_FIELD_CARD32(root);
     X_REPLY_FIELD_CARD32(child);

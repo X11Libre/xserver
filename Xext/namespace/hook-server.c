@@ -19,19 +19,14 @@ void hookServerAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (subj->ns->superPower)
         goto pass;
 
-    switch (client->majorOp) {
-        case X_ListFonts:
-        case X_ListFontsWithInfo:
-            goto pass;
-
-        case X_GrabServer:
-            goto reject;
-    }
+    /* Allow read-only server queries (ListFonts, ListFontsWithInfo, GetFontPath, ListHosts);
+       block server management, debug, and global server grab (GrabServer/SetFontPath/ChangeHosts). */
+    if ((param->access_mode & ~(DixReadAccess | DixGetAttrAccess)) == 0)
+        goto pass;
 
     XNS_HOOK_LOG("BLOCKED access to server configuration request %s\n",
         LookupRequestName(client->majorOp, client->minorOp));
 
-reject:
     param->status = BadAccess;
     return;
 

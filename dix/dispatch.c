@@ -900,8 +900,17 @@ ProcGetGeometry(ClientPtr client)
     if (WindowDrawable(pDraw->type)) {
         WindowPtr pWin = (WindowPtr) pDraw;
 
-        reply.x = pWin->origin.x - wBorderWidth(pWin);
-        reply.y = pWin->origin.y - wBorderWidth(pWin);
+        if (pWin->parent &&
+            XaceHookResourceAccess(client, pWin->parent->drawable.id,
+                                   X11_RESTYPE_WINDOW, pWin->parent,
+                                   X11_RESTYPE_WINDOW, pWin,
+                                   DixGetAttrAccess) != Success) {
+            reply.x = pWin->drawable.x - wBorderWidth(pWin);
+            reply.y = pWin->drawable.y - wBorderWidth(pWin);
+        } else {
+            reply.x = pWin->origin.x - wBorderWidth(pWin);
+            reply.y = pWin->origin.y - wBorderWidth(pWin);
+        }
         reply.borderWidth = pWin->borderWidth;
     }
 
@@ -915,6 +924,24 @@ ProcGetGeometry(ClientPtr client)
     }
 
     return X_SEND_REPLY_SIMPLE(client, reply);
+}
+
+static void
+queryTreeCollectReparented(ClientPtr client, WindowPtr pContainer,
+                           WindowPtr pParent, x_rpcbuf_t *rpcbuf,
+                           CARD32 *numChildren)
+{
+    WindowPtr pHead = RealChildHead(pContainer);
+    for (WindowPtr pChild = pContainer->lastChild; pChild != pHead; pChild = pChild->prevSib) {
+        if (XaceHookResourceAccess(client, pChild->drawable.id, X11_RESTYPE_WINDOW,
+                                   pChild, X11_RESTYPE_WINDOW, pParent,
+                                   DixGetAttrAccess) == Success) {
+            x_rpcbuf_write_CARD32(rpcbuf, pChild->drawable.id);
+            (*numChildren)++;
+        } else if (pChild->lastChild) {
+            queryTreeCollectReparented(client, pChild, pParent, rpcbuf, numChildren);
+        }
+    }
 }
 
 int
@@ -939,13 +966,28 @@ ProcQueryTree(ClientPtr client)
 
     CARD32 numChildren = 0;
     for (WindowPtr pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib) {
-        x_rpcbuf_write_CARD32(&rpcbuf, pChild->drawable.id);
-        numChildren++;
+        if (XaceHookResourceAccess(client, pChild->drawable.id, X11_RESTYPE_WINDOW,
+                                   pChild, X11_RESTYPE_WINDOW, pWin, DixGetAttrAccess) == Success) {
+            x_rpcbuf_write_CARD32(&rpcbuf, pChild->drawable.id);
+            numChildren++;
+        } else if (!pWin->parent && pChild->lastChild) {
+            queryTreeCollectReparented(client, pChild, pWin, &rpcbuf, &numChildren);
+        }
+    }
+
+    Window parentId = None;
+    if (pWin->parent) {
+        if (XaceHookResourceAccess(client, pWin->parent->drawable.id, X11_RESTYPE_WINDOW,
+                                   pWin->parent, X11_RESTYPE_WINDOW, pWin,
+                                   DixGetAttrAccess) == Success)
+            parentId = pWin->parent->drawable.id;
+        else
+            parentId = pWin->drawable.pScreen->root->drawable.id;
     }
 
     xQueryTreeReply reply = {
         .root = pWin->drawable.pScreen->root->drawable.id,
-        .parent = (pWin->parent) ? pWin->parent->drawable.id : (Window) None,
+        .parent = parentId,
         .nChildren = numChildren,
     };
 
@@ -1141,8 +1183,15 @@ ProcTranslateCoords(ClientPtr client)
                                         x - pWin->drawable.x,
                                         y - pWin->drawable.y, &box))
                 ) {
-                reply.child = pWin->drawable.id;
-                pWin = (WindowPtr) NULL;
+                if (XaceHookResourceAccess(client, pWin->drawable.id,
+                                           X11_RESTYPE_WINDOW, pWin,
+                                           X11_RESTYPE_WINDOW, pDst,
+                                           DixGetAttrAccess) == Success) {
+                    reply.child = pWin->drawable.id;
+                    pWin = (WindowPtr) NULL;
+                }
+                else
+                    pWin = pWin->firstChild;
             }
             else
                 pWin = pWin->nextSib;
@@ -3317,6 +3366,9 @@ ProcKillClient(ClientPtr client)
     int rc;
 
     if (stuff->id == AllTemporary) {
+        rc = dixCallServerAccessCallback(client, DixManageAccess);
+        if (rc != Success)
+            return rc;
         CloseDownRetainedResources();
         return Success;
     }
