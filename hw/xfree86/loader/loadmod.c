@@ -516,18 +516,20 @@ _LoaderListDir(const char *subdir, const char **patternlist, int *saved_len)
 const char **
 LoaderListDir(const char *subdir, const char **patternlist)
 {
-    int len = 0;
+    size_t len = 0;
     const char **ret = NULL;
-    int subdirlen = strlen(subdir);
-    for (int i = 0; i < sizeof(stdSubdirs) / sizeof(*stdSubdirs); i++) {
-        int prefixsize = sizeof(stdSubdirs[i]);
-        char* dir = malloc(prefixsize + subdirlen);
+    size_t subdirlen = strlen(subdir);
+
+    for (const char **s = stdSubdirs; *s; s++) {
+        size_t prefixsize = strlen(*s);
+        char* dir = malloc(prefixsize + subdirlen + 1);
         if (!dir) {
             free(ret);
             return NULL;
         }
-        memcpy(dir, stdSubdirs[i], prefixsize - 1);
-        memcpy(dir + prefixsize - 1, subdir, subdirlen + 1);
+
+        memcpy(dir, *s, prefixsize);
+        memcpy(dir + prefixsize, subdir, subdirlen + 1);
 
         int sublen = 0;
         const char **subret = _LoaderListDir(dir, patternlist, &sublen);
@@ -536,7 +538,7 @@ LoaderListDir(const char *subdir, const char **patternlist)
             continue;
         }
 
-        int oldlen = len;
+        size_t oldlen = len;
         len += sublen;
         void *tmp = reallocarray(ret, len + 1, sizeof(*ret));
         if (!tmp) {
@@ -545,7 +547,9 @@ LoaderListDir(const char *subdir, const char **patternlist)
         }
 
         ret = tmp;
-        memcpy(ret + oldlen, subret, sublen);
+        for (size_t i = 0; i < sublen; i++) {
+            ret[oldlen + i] = subret[i];
+	}
     }
     if (ret) {
         ret[len] = NULL;
