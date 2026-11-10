@@ -157,7 +157,7 @@ struct XaveriusDeviceBackendOps {
 /* ---- Direct DDX device backend binding ---- */
 struct _XaveriusDeviceBackendBinding {
     const struct XaveriusDeviceBackendOps *ops;     /* immutable typed ops tables */
-    int native_handle;                         /* borrowed DDX-owned */
+    void *native_handle;                         /* borrowed DDX-owned */
     void *context;                             /* borrowed DDX-owned */
     uint64_t binding_generation;
     uint32_t availability;
@@ -193,15 +193,13 @@ struct _XaveriusPhysicalDevice {
 /* ---- ModuleRole control record (shared code/module lifetime & quiescence) ---- */
 struct _XaveriusModuleRole {
     char *owner_key;
-    bool is_permanent;
-    void *module_lease_ref;            /* loader/module pin */
+    XaveriusModuleLease *module_lease;            /* server-owned module lease */
     uint64_t role_generation;
     uint32_t admission;                /* open / quiescing / closed */
     uint32_t quiesce_state;            /* PENDING / SUCCESS / FAILURE */
     void (*retain_module_role)(void *role);
     void (*release_module_role)(void *role);
     int  (*quiesce_module_role)(void *role);
-    void *role_userdata;
     struct xorg_list list;
 };
 
