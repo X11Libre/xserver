@@ -459,7 +459,8 @@ typedef struct { XaveriusReplyHeader header; CARD32 status; } XaveriusQueuePrese
 # define XAVERIUS_STATIC_ASSERT_HELPER(c, m, line) typedef char xav_static_assert_##line[(c) ? 1 : -1]
 # define XAVERIUS_STATIC_ASSERT_2(c, m, line) XAVERIUS_STATIC_ASSERT_HELPER(c, m, line)
 # define XAVERIUS_STATIC_ASSERT_3(c, m, line) XAVERIUS_STATIC_ASSERT_2(c, m, line)
-# define XAVERIUS_STATIC_ASSERT(c, m) XAVERIUS_STATIC_ASSERT_3(c, m, __LINE__)
+# define XAVERIUS_STATIC_ASSERT_4(c, m, line) XAVERIUS_STATIC_ASSERT_3(c, m, line)
+# define XAVERIUS_STATIC_ASSERT(c, m) XAVERIUS_STATIC_ASSERT_4(c, m, __LINE__)
 #endif
 XAVERIUS_STATIC_ASSERT(sizeof(XaveriusReqHeader) == 8, "request header size");
 XAVERIUS_STATIC_ASSERT(sizeof(XaveriusReplyHeader) == 32, "reply header size");
