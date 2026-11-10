@@ -41,9 +41,9 @@ from The Open Group.
 
 static struct auth {
     struct auth *next;
-    unsigned short len;
     char *data;
     XID id;
+    unsigned short len;
 } *mit_auth;
 
 XID

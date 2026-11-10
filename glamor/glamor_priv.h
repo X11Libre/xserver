@@ -381,35 +381,9 @@ typedef struct glamor_pixmap_clipped_regions {
 } glamor_pixmap_clipped_regions;
 
 typedef struct glamor_pixmap_private {
-    glamor_pixmap_type_t type;
-    enum glamor_fbo_state gl_fbo;
-    /**
-     * If devPrivate.ptr is non-NULL (meaning we're within
-     * glamor_prepare_access), determies whether we should re-upload
-     * that data on glamor_finish_access().
-     */
-    glamor_access_t map_access;
     glamor_pixmap_fbo *fbo;
-    /** current fbo's coords in the whole pixmap. */
-    BoxRec box;
-    GLuint pbo;
-    RegionRec prepare_region;
-    Bool prepared;
-
     /* For DRI3 */
     EGLImageKHR image;
-    Bool used_modifiers;
-
-    /** block width of this large pixmap. */
-    int block_w;
-    /** block height of this large pixmap. */
-    int block_h;
-
-    /** block_wcnt: block count in one block row. */
-    int block_wcnt;
-    /** block_hcnt: block count in one block column. */
-    int block_hcnt;
-
     /**
      * The list of boxes for the bounds of the FBOs making up the
      * pixmap.
@@ -429,13 +403,35 @@ typedef struct glamor_pixmap_private {
      * ...
      */
     BoxPtr box_array;
-
     /**
      * Array of fbo structs containing the actual GL texture/fbo
      * names.
      */
     glamor_pixmap_fbo **fbo_array;
 
+    RegionRec prepare_region;
+    /** current fbo's coords in the whole pixmap. */
+    BoxRec box;
+
+    glamor_pixmap_type_t type;
+    enum glamor_fbo_state gl_fbo;
+    /**
+     * If devPrivate.ptr is non-NULL (meaning we're within
+     * glamor_prepare_access), determies whether we should re-upload
+     * that data on glamor_finish_access().
+     */
+    glamor_access_t map_access;
+    GLuint pbo;
+    Bool prepared;
+    Bool used_modifiers;
+    /** block width of this large pixmap. */
+    int block_w;
+    /** block height of this large pixmap. */
+    int block_h;
+    /** block_wcnt: block count in one block row. */
+    int block_wcnt;
+    /** block_hcnt: block count in one block column. */
+    int block_hcnt;
     Bool is_cbcr;
 } glamor_pixmap_private;
 

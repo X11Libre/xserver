@@ -92,9 +92,9 @@ typedef struct _CursorEvent *CursorEventPtr;
 typedef struct _CursorEvent {
     struct xorg_list entry;
     CARD32 eventMask;
+    XID clientResource;
     ClientPtr pClient;
     WindowPtr pWindow;
-    XID clientResource;
 } CursorEventRec;
 
 static struct xorg_list cursorListeners;
