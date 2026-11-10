@@ -31,6 +31,7 @@ extern Atom xaverius_atom_driver_uuid;
 extern Atom xaverius_atom_max_work_group_invocations;
 extern Atom xaverius_atom_max_work_group_size;
 extern Atom xaverius_atom_timeline_semaphore;
+extern DevPrivateKeyRec XaveriusScreenPrivateKeyRec;
 
 /*
  * Device type values (xserver-internal, no separate xaverius_device.h header).
