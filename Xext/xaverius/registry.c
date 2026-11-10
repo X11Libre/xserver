@@ -261,15 +261,14 @@ XaveriusRegistryResult XaveriusModuleRoleCreate(
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
     }
 
-    role->is_permanent = desc->is_permanent;
-    role->module_lease_ref = NULL;           /* set by module owner later */
+    
+    role->module_lease = NULL;           /* set by module owner later */
     role->role_generation = xaverius_next_generation_id();
     role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_OPEN;
     role->quiesce_state = XAVERIUS_MODULE_ROLE_QUIESCE_PENDING;
     role->retain_module_role = desc->retain_module_role;
     role->release_module_role = desc->release_module_role;
     role->quiesce_module_role = desc->quiesce_module_role;
-    role->role_userdata = desc->role_userdata;
 
     xorg_list_init(&role->list);
 
@@ -323,7 +322,7 @@ void XaveriusModuleRoleFinalize(void *role)
 
     /* After quiescence, finalization calls release exactly once. Permanent
      * roles skip lease release. */
-    if (!r->is_permanent && r->module_lease_ref != NULL) {
+    if (r->module_lease != NULL) {
         /* Module owner releases its original reference after every role
          * for this module instance is finalized; handled by the module
          * owner, not here. */
@@ -375,8 +374,8 @@ struct _XaveriusDeviceBackendBinding *xaverius_binding_alloc(
     if (binding == NULL)
         return NULL;
 
-    binding->native_handle = registration->native_handle;
-    binding->context = registration->context;
+    binding->native_handle = registration->native_physical_device;;
+    binding->context = registration->device_context;
     binding->binding_generation = xaverius_next_generation_id();
     binding->availability = XAVERIUS_REGISTRY_SUCCESS;
     binding->module_role = role;
@@ -442,7 +441,7 @@ static XaveriusPhysicalDevice *xaverius_find_device_by_identity(
     XaveriusPhysicalDevice *dev;
 
     xorg_list_for_each_entry(dev, &xaverius_physical_devices, list) {
-        if (dev->identity_evidence_size == identity_size &&
+        if (memcmp(&dev->identity, identity, sizeof(XaveriusDeviceIdentity)) == 0 &&
             memcmp(dev->identity_evidence, identity, identity_size) == 0)
             return dev;
     }
@@ -476,7 +475,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     /* Acquire the exact ModuleRole admission/reference. Reject a
      * quiescing/retired generation. */
     role = xaverius_find_module_role_by_generation(
-        registration->module_role_generation);
+        registration->owner_role_generation);
     if (role == NULL)
         return XAVERIUS_REGISTRY_NOT_REGISTERED;
 
@@ -504,11 +503,11 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     /* Canonicalize identity: check for an existing exact incarnation.
      * Identity evidence must be length-validated before casting. */
     existing = NULL;
-    if (registration->identity_evidence != NULL &&
-        registration->identity_evidence_size == sizeof(XaveriusDeviceIdentity)) {
+    if (registration->identity != NULL &&
+        sizeof(XaveriusDeviceIdentity) == sizeof(XaveriusDeviceIdentity)) {
         existing = xaverius_find_device_by_identity(
-            (const XaveriusDeviceIdentity *)registration->identity_evidence,
-            registration->identity_evidence_size);
+            (const XaveriusDeviceIdentity *)registration->identity,
+            sizeof(XaveriusDeviceIdentity));
     }
 
     if (existing != NULL) {
@@ -518,7 +517,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
          * classified conflict; neither is an automatic registration.
          *
          * Exact replay compares existing->binding->binding_generation
-         * against registration->module_role_generation (not a newly
+         * against registration->owner_role_generation (not a newly
          * allocated binding).
          *
          * Binding preference is resolved through the ModuleRole's owner_key,
@@ -527,7 +526,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         if (existing->binding != NULL &&
             existing->binding->module_role == role &&
             existing->binding->binding_generation ==
-                registration->module_role_generation) {
+                registration->owner_role_generation) {
             *out_device = existing;
             if (out_device_generation != NULL)
                 *out_device_generation = existing->device_generation;
@@ -561,26 +560,26 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     binding->binding_generation = xaverius_next_generation_id();
 
     /* Copy identity evidence if provided. Validate length before casting. */
-    if (registration->identity_evidence != NULL &&
-        registration->identity_evidence_size > 0) {
+    if (registration->identity != NULL &&
+        sizeof(XaveriusDeviceIdentity) > 0) {
         dev->identity_evidence =
-            calloc(1, registration->identity_evidence_size);
+            calloc(1, sizeof(XaveriusDeviceIdentity));
         if (dev->identity_evidence == NULL) {
             XaveriusModuleRoleRelease(role);
             free(binding);
             free(dev);
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
         }
-        memcpy(dev->identity_evidence, registration->identity_evidence,
-               registration->identity_evidence_size);
-        dev->identity_evidence_size = registration->identity_evidence_size;
+        memcpy(dev->identity_evidence, registration->identity,
+               sizeof(XaveriusDeviceIdentity));
+        dev->identity_evidence_size = sizeof(XaveriusDeviceIdentity);
     }
 
-    dev->identity_evidence_size = registration->identity_evidence_size;
+    dev->identity_evidence_size = sizeof(XaveriusDeviceIdentity);
 
     /* Validate identity evidence size before casting to XaveriusDeviceIdentity. */
-    if (registration->identity_evidence != NULL &&
-        registration->identity_evidence_size != sizeof(XaveriusDeviceIdentity)) {
+    if (registration->identity != NULL &&
+        sizeof(XaveriusDeviceIdentity) != sizeof(XaveriusDeviceIdentity)) {
         XaveriusModuleRoleRelease(role);
         free(binding);
         free(dev->identity_evidence);
@@ -597,8 +596,8 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
                                  role->owner_key,
                                  strlen(role->owner_key));
 
-    dev->identity = registration->identity_evidence != NULL
-        ? *(const XaveriusDeviceIdentity *)registration->identity_evidence
+    dev->identity = registration->identity != NULL
+        ? *(const XaveriusDeviceIdentity *)registration->identity
         : (XaveriusDeviceIdentity){ 0 };
 
     /* Query the physical snapshot through the exact provisional binding's

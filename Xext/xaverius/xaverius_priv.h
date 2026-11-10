@@ -19,6 +19,20 @@
 
 #include "xaverius_proto.h"
 
+/* Forward declarations */
+struct _XaveriusModuleRole;
+typedef struct _XaveriusModuleRole XaveriusModuleRole;
+
+struct _XaveriusModuleLease;
+typedef struct _XaveriusModuleLease XaveriusModuleLease;
+
+/* ModuleRole quiescence result */
+typedef enum {
+    XAVERIUS_MODULE_QUIESCE_PENDING = 0,
+    XAVERIUS_MODULE_QUIESCE_SUCCESS = 1,
+    XAVERIUS_MODULE_QUIESCE_FAILURE = 2,
+} XaveriusModuleQuiescenceResult;
+
 /* Forward declaration for callback signatures */
 typedef struct _XaveriusScreen XaveriusScreenRec, *XaveriusScreenPtr;
 
@@ -73,28 +87,25 @@ typedef struct _XaveriusDeviceIdentity {
 
 /* ---- DDX module-role descriptor (v1, size/versioned) ---- */
 typedef struct _XaveriusModuleRoleDescriptor {
-    uint64_t struct_size;
-    uint64_t abi_version;
+    uint32_t struct_size;
+    uint32_t abi_version;
     const char *owner_key;          /* stable role key across reloads */
-    bool is_permanent;              /* no loader lease; active during server operation */
+    struct _XaveriusModuleLease *module_lease;  /* server-owned module lease */
     void (*retain_module_role)(void *role);
     void (*release_module_role)(void *role);
-    int  (*quiesce_module_role)(void *role); /* PENDING/SUCCESS/FAILURE */
-    void *role_userdata;            /* DDX-owned */
+    int (*quiesce_module_role)(void *role); /* PENDING/SUCCESS/FAILURE */
 } XaveriusModuleRoleDescriptor;
 
 /* ---- DDX device backend registration descriptor (v1, size/versioned) ---- */
 typedef struct _XaveriusDeviceBackendRegistration {
-    uint64_t struct_size;
-    uint64_t abi_version;
-    const void *identity_evidence;      /* structured canonical identity */
-    uint64_t identity_evidence_size;
-    int native_handle;                  /* borrowed DDX-owned, exact native fd/handle */
-    void *context;                      /* borrowed DDX-owned per-device context */
-    const struct XaveriusDeviceBackendOps *ops; /* immutable typed ops tables */
-    uint64_t module_role_generation;    /* owning ModuleRole generation */
-    const char *owner_key;              /* stable role key across reloads */
-    uint64_t owner_key_size;
+    uint32_t struct_size;
+    uint32_t abi_version;
+    const XaveriusDeviceIdentity *identity;
+    const struct XaveriusDeviceBackendOps *ops;
+    void *device_context;
+    void *native_physical_device;
+    XaveriusModuleRole *owner_role;
+    uint64_t owner_role_generation;
 } XaveriusDeviceBackendRegistration;
 
 struct _XaveriusPhysicalDevice;
