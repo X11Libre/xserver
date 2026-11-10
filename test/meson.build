@@ -207,7 +207,10 @@ if build_xorg
      'ddc-tests.c',
     ]
     unit_c_args = ['-DXORG_TESTS']
-    unit_includes = [inc, xorg_inc, include_directories('../Xext/xaverius')]
+    unit_includes = [inc, include_directories('../Xext/xaverius')]
+    if build_xorg
+        unit_includes += [xorg_inc]
+    endif
 
     if build_res
         unit_sources += ['hashtabletest.c']
