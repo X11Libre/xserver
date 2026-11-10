@@ -90,10 +90,10 @@ typedef struct _XaveriusModuleRoleDescriptor {
     uint32_t struct_size;
     uint32_t abi_version;
     const char *owner_key;          /* stable role key across reloads */
-    struct _XaveriusModuleLease *module_lease;  /* server-owned module lease */
-    void (*retain_module_role)(void *role);
-    void (*release_module_role)(void *role);
-    int (*quiesce_module_role)(void *role); /* PENDING/SUCCESS/FAILURE */
+    XaveriusModuleLease *module_lease;  /* server-owned module lease */
+    void (*retain_module_role)(XaveriusModuleRole *role);
+    void (*release_module_role)(XaveriusModuleRole *role);
+    XaveriusModuleQuiescenceResult (*quiesce_module_role)(XaveriusModuleRole *role);
 } XaveriusModuleRoleDescriptor;
 
 /* ---- DDX device backend registration descriptor (v1, size/versioned) ---- */

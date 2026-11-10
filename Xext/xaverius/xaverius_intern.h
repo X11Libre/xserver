@@ -21,7 +21,8 @@
 
 /* Forward declarations for internal types */
 struct _XaveriusPhysicalDevice;
-typedef struct _XaveriusPhysicalDevice XaveriusPhysicalDevice;
+/* XaveriusPhysicalDevice is fully defined in xaverius_priv.h (DDX-facing).
+ * Only forward declaration here to avoid duplicate typedef. */
 
 extern int XaveriusEventBase;
 
@@ -148,15 +149,15 @@ struct XaveriusDeviceBackendOps {
     XaveriusBackendResult (*retire_operation)(void *, void *);
 
     /* Typed operation tables */
-    const struct XaveriusDeviceBackendBufferMemoryOps *buffer_memory;
-    const struct XaveriusDeviceBackendShaderPipelineOps *shader_pipeline;
-    const struct XaveriusDeviceBackendCommandOps *commands;
-    const struct XaveriusDeviceBackendSynchronizationOps *synchronization;
+    struct XaveriusDeviceBackendBufferMemoryOps *buffer_memory;
+    struct XaveriusDeviceBackendShaderPipelineOps *shader_pipeline;
+    struct XaveriusDeviceBackendCommandOps *commands;
+    struct XaveriusDeviceBackendSynchronizationOps *synchronization;
 };
 
 /* ---- Direct DDX device backend binding ---- */
 struct _XaveriusDeviceBackendBinding {
-    const struct XaveriusDeviceBackendOps *ops;     /* immutable typed ops tables */
+    struct XaveriusDeviceBackendOps *ops;     /* server-owned deep-copied ops tables */
     void *native_handle;                         /* borrowed DDX-owned */
     void *context;                             /* borrowed DDX-owned */
     uint64_t binding_generation;
@@ -187,6 +188,12 @@ struct _XaveriusPhysicalDevice {
     uint64_t device_generation;
     char ordering_key[128];
 
+    /* Caller-owned reference count (from XaveriusRegistryRegisterDdxDevice).
+     * Each successful registration returns a caller-owned reference that must
+     * be released via XaveriusPhysicalDeviceRelease(). The registry itself
+     * holds one permanent reference for the lifetime of the record. */
+    uint32_t caller_refcount;
+
     struct xorg_list list;
 };
 
@@ -197,9 +204,9 @@ struct _XaveriusModuleRole {
     uint64_t role_generation;
     uint32_t admission;                /* open / quiescing / closed */
     uint32_t quiesce_state;            /* PENDING / SUCCESS / FAILURE */
-    void (*retain_module_role)(void *role);
-    void (*release_module_role)(void *role);
-    int  (*quiesce_module_role)(void *role);
+    void (*retain_module_role)(XaveriusModuleRole *role);
+    void (*release_module_role)(XaveriusModuleRole *role);
+    XaveriusModuleQuiescenceResult (*quiesce_module_role)(XaveriusModuleRole *role);
     struct xorg_list list;
 };
 
@@ -232,14 +239,14 @@ typedef enum {
  * These are infallible, non-blocking lifetime primitives except XaveriusModuleRoleCreate
  * which may fail on allocation/validation before any retain. */
 XaveriusRegistryResult XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
-                                      void **out_role);
-void XaveriusModuleRoleRetain(void *role);
-void XaveriusModuleRoleRelease(void *role);
-int XaveriusModuleRoleQuiesce(void *role); /* returns XaveriusModuleRoleQuiesceState */
-void XaveriusModuleRoleFinalize(void *role);
+                                      XaveriusModuleRole **out_role);
+void XaveriusModuleRoleRetain(XaveriusModuleRole *role);
+void XaveriusModuleRoleRelease(XaveriusModuleRole *role);
+XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *role);
+void XaveriusModuleRoleFinalize(XaveriusModuleRole *role);
 
 /* Is admission still open for this role? */
-bool XaveriusModuleRoleAdmissionOpen(void *role);
+bool XaveriusModuleRoleAdmissionOpen(XaveriusModuleRole *role);
 
 /* ---- XaveriusPhysicalDevicePublish — separate server-internal publication operation.
  * Allocates a server-private XID, prepares the DIX wrapper, and atomically
@@ -255,9 +262,15 @@ XaveriusPhysicalDevice *XaveriusFirstDevice(void);
 XaveriusPhysicalDevice *XaveriusNextDevice(XaveriusPhysicalDevice *device);
 uint32_t XaveriusDeviceCount(void);
 
-/* Canonical ordering key functions (W0-016 §6) */
+/* Internal validation and comparison functions (exposed for testing) */
+bool xaverius_module_role_descriptor_valid(const XaveriusModuleRoleDescriptor *desc);
+bool xaverius_identity_equal(const XaveriusDeviceIdentity *a, const XaveriusDeviceIdentity *b);
+bool xaverius_identity_has_pci(const XaveriusDeviceIdentity *id);
+
+/* Canonical ordering key functions (per normative spec device-registry-architecture.md §6) */
 void xaverius_create_ordering_key(char *out_buf, size_t out_buf_size,
-                                  const char *owner_key, uint64_t owner_key_size);
+                                  const XaveriusDeviceIdentity *identity,
+                                  const char *owner_key);
 int xaverius_compare_ordering_key(const char *a, const char *b);
 
 /* ---- Observation / removal (Stage 3) ---- */
