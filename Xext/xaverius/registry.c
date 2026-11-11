@@ -150,9 +150,10 @@ void XaveriusRegistryFini(void)
     struct _XaveriusDiscoverySource *src, *next_src;
     XaveriusObservation *obs, *next_obs;
 
-    /* Free all published PhysicalDevice records. The DIX wrapper resource is
-     * released explicitly if published; DIX destruction must not free registry
-     * identity/binding ownership. */
+    /* Free all active and tombstoned PhysicalDevice records. The DIX
+     * wrapper resource is released explicitly if published; DIX destruction
+     * must not free registry identity/binding ownership. XIDs remain assigned
+     * to their incarnation until shutdown (no reuse). */
     xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_physical_devices, list) {
         xorg_list_del(&dev->list);
         if (dev->xid != 0) {
@@ -167,10 +168,25 @@ void XaveriusRegistryFini(void)
     }
     xaverius_physical_device_count = 0;
 
+    xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_tombstones, list) {
+        xorg_list_del(&dev->list);
+        if (dev->xid != 0) {
+            FreeResource(dev->xid, RT_NONE);
+            dev->xid = 0;
+        }
+        free(dev->identity_evidence);
+        free(dev->snapshot.data);
+        xaverius_binding_free(dev->binding);
+        dev->binding = NULL;
+        free(dev);
+    }
+    xaverius_tombstone_count = 0;
+
+    /* Finalize remaining module roles through the canonical finalize path so
+     * the module-owner release hook is invoked exactly once per remaining
+     * role and registry storage is released consistently. */
     xorg_list_for_each_entry_safe(role, next_role, &xaverius_module_roles, list) {
-        xorg_list_del(&role->list);
-        free(role->owner_key);
-        free(role);
+        XaveriusModuleRoleFinalize(role);
     }
     xaverius_module_role_count = 0;
 
@@ -365,16 +381,18 @@ void XaveriusModuleRoleFinalize(XaveriusModuleRole *role)
     if (r == NULL)
         return;
 
-    /* After quiescence, finalization calls release exactly once. Permanent
-     * roles skip lease release. */
-    if (r->module_lease != NULL) {
-        /* Module owner releases its original reference after every role
-         * for this module instance is finalized; handled by the module
-         * owner, not here. */
-    }
-
+    /* Finalization releases the module owner's original role reference via
+     * the role hook and frees server-owned role storage. The caller (module
+     * owner/registry shutdown path) is responsible for invoking this exactly
+     * once after all binding references have been released. */
     if (r->release_module_role != NULL)
         r->release_module_role(r);
+
+    if (!xorg_list_is_empty(&r->list)) {
+        xorg_list_del(&r->list);
+        if (xaverius_module_role_count > 0)
+            xaverius_module_role_count--;
+    }
 
     free(r->owner_key);
     free(r);
@@ -648,7 +666,9 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Canonicalize identity: check for an existing exact incarnation.
-     * Identity evidence must be length-validated before casting. */
+     * registration->struct_size/abi_version validate the registration
+     * descriptor header; registration->identity is a typed
+     * XaveriusDeviceIdentity pointer (no separate length parameter). */
     existing = NULL;
     if (registration->identity != NULL) {
         existing = xaverius_find_device_by_identity(
@@ -1047,7 +1067,6 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
     uint64_t removal_evidence_size)
 {
     XaveriusObservation *obs = NULL;
-    XaveriusRegistryResult result = XAVERIUS_REGISTRY_INTERNAL_ERROR;
 
     if (device == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
@@ -1056,9 +1075,13 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
     if (removal_evidence == NULL || removal_evidence_size == 0)
         return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
 
-    /* Generation must identify the current device incarnation. */
+    /* Generation must identify the exact current device incarnation. */
     if (device->device_generation != device_generation)
         return XAVERIUS_REGISTRY_STALE_GENERATION;
+
+    /* Terminal REMOVED is committed exactly once per incarnation. */
+    if (device->status == XAVERIUS_REGISTRY_REMOVED)
+        return XAVERIUS_REGISTRY_STALE_EVENT;
 
     /* The evidence must reference a registered observation that references
      * this exact device; authority comes from the registered source, not
@@ -1067,16 +1090,20 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
                                                 removal_evidence_size);
     if (obs == NULL ||
         obs->device != device ||
-        obs->device_generation != device_generation) {
-        result = XAVERIUS_REGISTRY_INVALID_EVIDENCE;
-    } else {
-        /* Commit terminal REMOVED exactly once; the record remains as a
-         * tombstone until ordered server shutdown. No XID reuse. */
-        device->status = XAVERIUS_REGISTRY_REMOVED;
-        result = XAVERIUS_REGISTRY_SUCCESS;
-    }
+        obs->device_generation != device_generation)
+        return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
 
-    return result;
+    /* Move the record from the active device list to the tombstone list
+     * exactly once. The record (identity, generation, XID if published)
+     * remains owned by the registry until ordered server shutdown. */
+    xorg_list_del(&device->list);
+    if (xaverius_physical_device_count > 0)
+        xaverius_physical_device_count--;
+    xorg_list_append(&device->list, &xaverius_tombstones);
+    xaverius_tombstone_count++;
+    device->status = XAVERIUS_REGISTRY_REMOVED;
+
+    return XAVERIUS_REGISTRY_SUCCESS;
 }
 
 /* XaveriusPhysicalDevicePublish — separate server-internal publication operation

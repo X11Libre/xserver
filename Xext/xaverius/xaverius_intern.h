@@ -319,6 +319,8 @@ struct _XaveriusModuleRole {
  * exists per server process. */
 extern struct xorg_list xaverius_physical_devices;
 extern uint32_t xaverius_physical_device_count;
+extern struct xorg_list xaverius_tombstones;
+extern uint32_t xaverius_tombstone_count;
 
 /* DIX resource type for published PhysicalDevices (server-private). */
 extern RESTYPE XaveriusPhysicalDeviceType;
