@@ -15,6 +15,7 @@
 #include "include/globals.h"
 
 #include "xaverius_intern.h"
+#include "xaverius_priv.h"
 
 /* Forward declarations for internal functions */
 XaveriusObservation *
@@ -120,11 +121,17 @@ bool XaveriusRegistryInit(void)
     return true;
 }
 
-/* Helper to free a binding and all its nested operation tables. */
+/* Helper to free a binding and all its nested operation tables.
+ * Releases the binding's retained ModuleRole reference, if any. */
 static void xaverius_binding_free(struct _XaveriusDeviceBackendBinding *binding)
 {
     if (binding == NULL)
         return;
+
+    if (binding->module_role != NULL) {
+        XaveriusModuleRoleRelease(binding->module_role);
+        binding->module_role = NULL;
+    }
 
     if (binding->ops != NULL) {
         free(binding->ops->buffer_memory);
@@ -143,12 +150,19 @@ void XaveriusRegistryFini(void)
     struct _XaveriusDiscoverySource *src, *next_src;
     XaveriusObservation *obs, *next_obs;
 
-    /* Free all published PhysicalDevice records. */
+    /* Free all published PhysicalDevice records. The DIX wrapper resource is
+     * released explicitly if published; DIX destruction must not free registry
+     * identity/binding ownership. */
     xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_physical_devices, list) {
         xorg_list_del(&dev->list);
+        if (dev->xid != 0) {
+            FreeResource(dev->xid, RT_NONE);
+            dev->xid = 0;
+        }
         free(dev->identity_evidence);
         free(dev->snapshot.data);
         xaverius_binding_free(dev->binding);
+        dev->binding = NULL;
         free(dev);
     }
     xaverius_physical_device_count = 0;
@@ -190,6 +204,11 @@ bool xaverius_identity_equal(const XaveriusDeviceIdentity *a,
     bool a_has_pci = xaverius_identity_has_pci(a);
     bool b_has_pci = xaverius_identity_has_pci(b);
 
+    /* UUID presence must be consistent: if one side has a UUID and
+     * the other doesn't, they cannot be the same device. */
+    if (a->has_device_uuid != b->has_device_uuid)
+        return false;
+
     if (a_has_pci && b_has_pci) {
         if (a->domain != b->domain || a->bus != b->bus ||
             a->device != b->device || a->function != b->function)
@@ -210,8 +229,8 @@ bool xaverius_identity_equal(const XaveriusDeviceIdentity *a,
         }
     }
 
-    /* If both sides have UUIDs, compare them; if only one side has UUID,
-     * that side cannot match. */
+    /* If both sides have UUIDs, compare them. UUID presence was already
+     * validated as consistent above. */
     if (a->has_device_uuid && b->has_device_uuid &&
         memcmp(a->device_uuid, b->device_uuid, 16) != 0)
         return false;
@@ -225,20 +244,33 @@ bool xaverius_identity_equal(const XaveriusDeviceIdentity *a,
  * XaveriusModuleRoleCreate which may fail on allocation/validation before any
  * retain. */
 
-/* Validate a XaveriusModuleRoleDescriptor header before reading later fields. */
-bool xaverius_module_role_descriptor_valid(
+/* Validate a XaveriusModuleRoleDescriptor header before reading later fields.
+ * Returns XAVERIUS_REGISTRY_SUCCESS on success, or appropriate error code:
+ * - INVALID_ARGUMENT: struct_size too small or too large for known ABI version
+ * - UNSUPPORTED: unknown ABI version
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+XaveriusRegistryResult xaverius_module_role_descriptor_validate(
     const XaveriusModuleRoleDescriptor *desc)
 {
     if (desc == NULL)
-        return false;
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Size/version validation, exactly as specified for v1 descriptors. */
-    if (desc->struct_size < sizeof(*desc))
-        return false;
+    if (desc->abi_version == XAVERIUS_MODULE_ROLE_DESCRIPTOR_ABI_VERSION) {
+        if (desc->struct_size != sizeof(*desc))
+            return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+    } else {
+        return XAVERIUS_REGISTRY_UNSUPPORTED;
+    }
 
-    return true;
+    return XAVERIUS_REGISTRY_SUCCESS;
 }
+#pragma GCC diagnostic pop
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusRegistryResult XaveriusModuleRoleCreate(
     const XaveriusModuleRoleDescriptor *desc,
     XaveriusModuleRole **out_role)
@@ -249,8 +281,9 @@ XaveriusRegistryResult XaveriusModuleRoleCreate(
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Validate header before reading later fields. */
-    if (!xaverius_module_role_descriptor_valid(desc))
-        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+    XaveriusRegistryResult valid_result = xaverius_module_role_descriptor_validate(desc);
+    if (valid_result != XAVERIUS_REGISTRY_SUCCESS)
+        return valid_result;
 
     /* Failed registration calls no role hook. */
     if (desc->retain_module_role == NULL ||
@@ -273,7 +306,7 @@ XaveriusRegistryResult XaveriusModuleRoleCreate(
     role->module_lease = desc->module_lease;  /* Lease from descriptor */
     role->role_generation = xaverius_next_generation_id();
     role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_OPEN;
-    role->quiesce_state = XAVERIUS_MODULE_ROLE_QUIESCE_PENDING;
+    role->quiesce_state = XAVERIUS_MODULE_QUIESCE_PENDING;
     role->retain_module_role = desc->retain_module_role;
     role->release_module_role = desc->release_module_role;
     role->quiesce_module_role = desc->quiesce_module_role;
@@ -286,6 +319,7 @@ XaveriusRegistryResult XaveriusModuleRoleCreate(
     *out_role = role;
     return XAVERIUS_REGISTRY_SUCCESS;
 }
+#pragma GCC diagnostic pop
 
 void XaveriusModuleRoleRetain(XaveriusModuleRole *role)
 {
@@ -310,6 +344,8 @@ void XaveriusModuleRoleRelease(XaveriusModuleRole *role)
     r->release_module_role(r);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
@@ -320,6 +356,7 @@ XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *rol
     /* Returns PENDING/SUCCESS/FAILURE. */
     return r->quiesce_module_role(r);
 }
+#pragma GCC diagnostic pop
 
 void XaveriusModuleRoleFinalize(XaveriusModuleRole *role)
 {
@@ -371,6 +408,10 @@ struct _XaveriusModuleRole* xaverius_find_module_role_by_generation(uint64_t rol
  *
  * owner_key is resolved through the ModuleRole, NOT copied here from
  * registration - that would violate the ownership model.
+ *
+ * On success, the binding holds a retained reference to the ModuleRole.
+ * Callers must release that reference via xaverius_binding_free() on failure
+ * paths after a successful allocation.
  */
 struct _XaveriusDeviceBackendBinding *xaverius_binding_alloc(
     const XaveriusDeviceBackendRegistration *registration,
@@ -387,12 +428,14 @@ struct _XaveriusDeviceBackendBinding *xaverius_binding_alloc(
     binding->binding_generation = xaverius_next_generation_id();
     binding->availability = XAVERIUS_REGISTRY_SUCCESS;
     binding->module_role = role;
+    XaveriusModuleRoleRetain(role);
 
     /* Deep-copy the ops tables into server-owned immutable storage.
      * The DDX may unload its module after registration; the binding must
      * not hold a pointer into DDX memory. */
     binding->ops = calloc(1, sizeof(*registration->ops));
     if (binding->ops == NULL) {
+        XaveriusModuleRoleRelease(role);
         free(binding);
         return NULL;
     }
@@ -405,8 +448,7 @@ struct _XaveriusDeviceBackendBinding *xaverius_binding_alloc(
     if (registration->ops->buffer_memory != NULL) {
         binding->ops->buffer_memory = calloc(1, sizeof(*registration->ops->buffer_memory));
         if (binding->ops->buffer_memory == NULL) {
-            free(binding->ops);
-            free(binding);
+            xaverius_binding_free(binding);
             return NULL;
         }
         memcpy((void *)binding->ops->buffer_memory, registration->ops->buffer_memory,
@@ -416,9 +458,7 @@ struct _XaveriusDeviceBackendBinding *xaverius_binding_alloc(
     if (registration->ops->shader_pipeline != NULL) {
         binding->ops->shader_pipeline = calloc(1, sizeof(*registration->ops->shader_pipeline));
         if (binding->ops->shader_pipeline == NULL) {
-            free(binding->ops->buffer_memory);
-            free(binding->ops);
-            free(binding);
+            xaverius_binding_free(binding);
             return NULL;
         }
         memcpy((void *)binding->ops->shader_pipeline, registration->ops->shader_pipeline,
@@ -428,10 +468,7 @@ struct _XaveriusDeviceBackendBinding *xaverius_binding_alloc(
     if (registration->ops->commands != NULL) {
         binding->ops->commands = calloc(1, sizeof(*registration->ops->commands));
         if (binding->ops->commands == NULL) {
-            free(binding->ops->shader_pipeline);
-            free(binding->ops->buffer_memory);
-            free(binding->ops);
-            free(binding);
+            xaverius_binding_free(binding);
             return NULL;
         }
         memcpy((void *)binding->ops->commands, registration->ops->commands,
@@ -441,11 +478,7 @@ struct _XaveriusDeviceBackendBinding *xaverius_binding_alloc(
     if (registration->ops->synchronization != NULL) {
         binding->ops->synchronization = calloc(1, sizeof(*registration->ops->synchronization));
         if (binding->ops->synchronization == NULL) {
-            free(binding->ops->commands);
-            free(binding->ops->shader_pipeline);
-            free(binding->ops->buffer_memory);
-            free(binding->ops);
-            free(binding);
+            xaverius_binding_free(binding);
             return NULL;
         }
         memcpy((void *)binding->ops->synchronization, registration->ops->synchronization,
@@ -470,22 +503,19 @@ struct _XaveriusDeviceBackendBinding *xaverius_binding_alloc(
  * Keys longer than the buffer are silently truncated (caller must provide
  * adequate space; normative spec defines 128 bytes minimum).
  */
-void xaverius_create_ordering_key(char *out_buf, size_t out_buf_size,
-                                  const XaveriusDeviceIdentity *identity,
-                                  const char *owner_key)
+/* Create a canonical ordering tuple from identity and owner_key.
+ * Format: <identity_class>:<pci_or_drm>:<device_uuid>:<driver_uuid>:<owner_key>
+ * Returns XAVERIUS_REGISTRY_SUCCESS on success, or INVALID_ARGUMENT if the
+ * output buffer is too small (caller must provide adequate space; 128 bytes min).
+ * No silent truncation - a truncated key is never a valid ordering key.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+XaveriusRegistryResult xaverius_create_ordering_key(
+    char *out_buf, size_t out_buf_size,
+    const XaveriusDeviceIdentity *identity,
+    const char *owner_key)
 {
-    /* Canonical ordering tuple (per normative spec device-registry-architecture.md §6):
-     * Format: <identity_class>:<pci_or_drm>:<uuid>:<driver_uuid>:<owner_key>
-     * - identity_class: "pci" or "drm" or "uuid"
-     * - pci_or_drm: for PCI: "DDDD:BB:DD.F" (domain:bus:device.function)
-     *               for DRM: "MJR.MNR" (major.minor)
-     * - uuid: device UUID as 32 hex chars (if present), empty if not
-     * - driver_uuid: driver UUID as 32 hex chars
-     * - owner_key: the ModuleRole's owner_key string
-     * All fields are length-delimited with ':' separator, no padding.
-     * Bytewise lexicographic comparison on the full string.
-     * No silent truncation - caller must provide adequate buffer (128 bytes min).
-     */
     char identity_class[8] = {0};
     char pci_or_drm[32] = {0};
     char device_uuid_str[33] = {0};  /* 32 hex + null */
@@ -523,18 +553,23 @@ void xaverius_create_ordering_key(char *out_buf, size_t out_buf_size,
         snprintf(driver_uuid_str + i * 2, 3, "%02x", identity->driver_uuid[i]);
     }
 
-    /* Build canonical ordering key: class:pci_or_drm:device_uuid:driver_uuid:owner_key */
-    int written = snprintf(out_buf, out_buf_size,
-                           "%s:%s:%s:%s:%s",
-                           identity_class, pci_or_drm, device_uuid_str, driver_uuid_str,
-                           owner_key ? owner_key : "");
+    /* Check buffer size before writing - no silent truncation */
+    int needed = snprintf(NULL, 0,
+                          "%s:%s:%s:%s:%s",
+                          identity_class, pci_or_drm, device_uuid_str, driver_uuid_str,
+                          owner_key ? owner_key : "");
 
-    /* Ensure null-termination even if truncated (though normative spec requires
-     * adequate buffer; truncation indicates caller bug). */
-    if (written >= (int)out_buf_size) {
-        out_buf[out_buf_size - 1] = '\0';
-    }
+    if (needed < 0 || (size_t)needed >= out_buf_size)
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+
+    snprintf(out_buf, out_buf_size,
+             "%s:%s:%s:%s:%s",
+             identity_class, pci_or_drm, device_uuid_str, driver_uuid_str,
+             owner_key ? owner_key : "");
+
+    return XAVERIUS_REGISTRY_SUCCESS;
 }
+#pragma GCC diagnostic pop
 
 /* Bytewise lexicographic comparator (per normative spec):
  * - Compares ordering keys without involving Pointer/XID/DRM-minor/
@@ -562,6 +597,8 @@ static XaveriusPhysicalDevice *xaverius_find_device_by_identity(
 
 /* ---- Registry registration ---- */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     void *registry,
     const XaveriusDeviceBackendRegistration *registration,
@@ -580,36 +617,35 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
 
     /* Validate descriptor header before reading later fields. */
     if (registration->struct_size < sizeof(*registration) ||
-        registration->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
+        registration->abi_version != XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    /* Acquire the exact ModuleRole admission/reference. Reject a
-     * quiescing/retired generation. */
+    /* Resolve the exact ModuleRole generation. No retain happens on lookup;
+     * binding allocation retains the role for binding lifetime. */
     role = xaverius_find_module_role_by_generation(
         registration->owner_role_generation);
     if (role == NULL)
         return XAVERIUS_REGISTRY_NOT_REGISTERED;
 
-    if (!XaveriusModuleRoleAdmissionOpen(role)) {
-        XaveriusModuleRoleRelease(role);
+    if (!XaveriusModuleRoleAdmissionOpen(role))
         return XAVERIUS_REGISTRY_UNAVAILABLE;
-    }
 
     /* Validate the top-level ops descriptor header before reading callback
      * fields and before any Hook/Lease side effect. Invalid descriptors
      * must cause neither callback invocation nor lease retention. */
     if (registration->ops->struct_size < sizeof(*registration->ops) ||
-        registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION) {
-        XaveriusModuleRoleRelease(role);
+        registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
-    }
+
+    /* query_physical_snapshot is required for registration. Validate before
+     * allocating/retaining binding-side resources. */
+    if (registration->ops->query_physical_snapshot == NULL)
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* owner_key belongs to ModuleRole, resolved through role. Validate
      * that role has a non-empty owner_key. */
-    if (role->owner_key == NULL || role->owner_key[0] == '\0') {
-        XaveriusModuleRoleRelease(role);
+    if (role->owner_key == NULL || role->owner_key[0] == '\0')
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
-    }
 
     /* Canonicalize identity: check for an existing exact incarnation.
      * Identity evidence must be length-validated before casting. */
@@ -625,18 +661,12 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
          * Same hardware identity but different binding ownership is a
          * classified conflict; neither is an automatic registration.
          *
-         * Exact replay compares existing->binding->binding_generation
-         * against registration->owner_role_generation (not a newly
-         * allocated binding).
-         *
-         * Binding preference is resolved through the ModuleRole's owner_key,
-         * NOT by reading binding->binding_generation before allocation.
-         */
+         * Exact replay compares the existing binding's owning role/generation.
+         * No new binding is created and no extra role retain is taken. */
         if (existing->binding != NULL &&
             existing->binding->module_role == role &&
-            existing->binding->binding_generation ==
+            existing->binding->module_role->role_generation ==
                 registration->owner_role_generation) {
-            /* Exact replay: return an additional caller-owned reference. */
             existing->caller_refcount++;
             *out_device = existing;
             if (out_device_generation != NULL)
@@ -648,60 +678,54 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         return XAVERIUS_REGISTRY_IDENTITY_CONFLICT;
     }
 
-    /* Retain the ModuleRole for the lifetime of this binding. The binding
-     * keeps its role; the role retains its module lease. */
-    XaveriusModuleRoleRetain(role);
-
-    /* Allocate the direct DDX device backend binding. */
+    /* Allocate the direct DDX device backend binding. The binding retains
+     * the ModuleRole for its lifetime. */
     binding = xaverius_binding_alloc(registration, role);
-    if (binding == NULL) {
-        XaveriusModuleRoleRelease(role);
+    if (binding == NULL)
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-    }
 
     /* Reserve device generation before any fallback failure so
      * it stays consumed even if this attempt fails. */
     dev = calloc(1, sizeof(*dev));
     if (dev == NULL) {
-        XaveriusModuleRoleRelease(role);
-        free(binding);
+        xaverius_binding_free(binding);
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
     }
     dev->device_generation = xaverius_next_generation_id();
-    binding->binding_generation = xaverius_next_generation_id();
+    dev->xid = 0;
 
-    /* Copy identity evidence if provided. The identity pointer is
-     * validated by the struct_size check and must point to a complete
-     * XaveriusDeviceIdentity structure. */
+    /* Copy and validate identity evidence, then create ordering key from the
+     * canonical copied identity (never from an uninitialized device identity). */
     if (registration->identity != NULL) {
-        dev->identity_evidence =
-            calloc(1, sizeof(XaveriusDeviceIdentity));
+        dev->identity_evidence = calloc(1, sizeof(XaveriusDeviceIdentity));
         if (dev->identity_evidence == NULL) {
-            XaveriusModuleRoleRelease(role);
-            free(binding);
+            xaverius_binding_free(binding);
             free(dev);
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
         }
         memcpy(dev->identity_evidence, registration->identity,
                sizeof(XaveriusDeviceIdentity));
         dev->identity_evidence_size = sizeof(XaveriusDeviceIdentity);
+        dev->identity = *(const XaveriusDeviceIdentity *)registration->identity;
     } else {
-        dev->identity_evidence = NULL;
-        dev->identity_evidence_size = 0;
+        xaverius_binding_free(binding);
+        free(dev);
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
     }
 
-    /* Canonical ordering tuple (per normative spec): create a normalized, bytewise-
-     * lexicographic ordering key stored in device-owned storage.
-     * owner_key comes from ModuleRole (via role), NOT from registration.
-     */
-    xaverius_create_ordering_key(dev->ordering_key,
-                                 sizeof(dev->ordering_key),
-                                 &dev->identity,
-                                 role->owner_key);
-
-    dev->identity = registration->identity != NULL
-        ? *(const XaveriusDeviceIdentity *)registration->identity
-        : (XaveriusDeviceIdentity){ 0 };
+    {
+        XaveriusRegistryResult key_result = xaverius_create_ordering_key(
+            dev->ordering_key,
+            sizeof(dev->ordering_key),
+            &dev->identity,
+            role->owner_key);
+        if (key_result != XAVERIUS_REGISTRY_SUCCESS) {
+            xaverius_binding_free(binding);
+            free(dev->identity_evidence);
+            free(dev);
+            return key_result;
+        }
+    }
 
     /* Initialize caller reference count: registration returns a caller-owned
      * reference that must be released via XaveriusPhysicalDeviceRelease().
@@ -709,19 +733,11 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     dev->caller_refcount = 1;
 
     /* Query the physical snapshot through the exact provisional binding's
-     * query_physical_snapshot callback. Validate callback exists before
-     * calling. */
-    if (registration->ops->query_physical_snapshot == NULL) {
-        XaveriusModuleRoleRelease(role);
-        free(binding);
-        free(dev->identity_evidence);
-        free(dev);
-        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
-    }
+     * query_physical_snapshot callback. */
     snap_result = registration->ops->query_physical_snapshot(
-        binding, &dev->snapshot);    if (snap_result != XAVERIUS_BACKEND_SUCCESS) {
-        XaveriusModuleRoleRelease(role);
-        free(binding);
+        binding, &dev->snapshot);
+    if (snap_result != XAVERIUS_BACKEND_SUCCESS) {
+        xaverius_binding_free(binding);
         free(dev->identity_evidence);
         free(dev);
         return XAVERIUS_REGISTRY_UNAVAILABLE;
@@ -734,26 +750,26 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
      * - Queue/Memory-Konsistenz prüfen
      * - timelineSemaphore = 1 ist verpflichtend */
     if (dev->snapshot.data == NULL || dev->snapshot.size == 0) {
-        XaveriusModuleRoleRelease(role);
-        free(binding);
+        xaverius_binding_free(binding);
         free(dev->identity_evidence);
         free(dev);
         return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
     }
 
     /* Deep copy snapshot data into server-owned immutable storage */
-    void *snapshot_copy = calloc(1, dev->snapshot.size);
-    if (snapshot_copy == NULL) {
-        XaveriusModuleRoleRelease(role);
-        free(binding);
-        free(dev->identity_evidence);
+    {
+        void *snapshot_copy = calloc(1, dev->snapshot.size);
+        if (snapshot_copy == NULL) {
+            xaverius_binding_free(binding);
+            free(dev->identity_evidence);
+            free(dev->snapshot.data);
+            free(dev);
+            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+        }
+        memcpy(snapshot_copy, dev->snapshot.data, dev->snapshot.size);
         free(dev->snapshot.data);
-        free(dev);
-        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+        dev->snapshot.data = snapshot_copy;
     }
-    memcpy(snapshot_copy, dev->snapshot.data, dev->snapshot.size);
-    free(dev->snapshot.data);
-    dev->snapshot.data = snapshot_copy;
 
     /* Install binding into device BEFORE registry insertion - the device
      * must reference its binding so later APIs can dereference it. */
@@ -771,6 +787,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
 
     return XAVERIUS_REGISTRY_SUCCESS;
 }
+#pragma GCC diagnostic pop
 
 void XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device)
 {
@@ -795,6 +812,8 @@ void XaveriusPhysicalDeviceRelease(XaveriusPhysicalDevice *device)
     }
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry,
                                         XaveriusPhysicalDevice *device,
                                         uint64_t device_generation,
@@ -810,18 +829,13 @@ XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry
         device->binding->binding_generation != binding_generation)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    /* Release the binding's ModuleRole reference. The Role is retired when
-     * all its bindings are retired. */
-    struct _XaveriusModuleRole *mrole = device->binding->module_role;
-
-    XaveriusModuleRoleRelease(mrole);
-    device->binding->module_role = NULL;
-
     /* Mark binding unavailable. The binding record itself remains owned by
      * the PhysicalDevice; only its availability changes. */
     device->binding->availability = XAVERIUS_REGISTRY_UNAVAILABLE;
     device->status = XAVERIUS_REGISTRY_UNAVAILABLE;
 
+    /* Release the binding's retained ModuleRole reference and free all
+     * server-owned binding copies via the central cleanup path. */
     xaverius_binding_free(device->binding);
     device->binding = NULL;
 
@@ -873,6 +887,8 @@ XaveriusDiscoverySource *xaverius_find_discovery_source(
     return NULL;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusRegistryResult XaveriusRegistryObserveDevice(
     void *registry,
     const XaveriusDeviceIdentity *identity_evidence,
@@ -924,9 +940,10 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
     dev = NULL;
     if (identity_evidence != NULL &&
         identity_evidence_size == sizeof(XaveriusDeviceIdentity)) {
-        dev = xaverius_find_device_by_identity(
-            (const XaveriusDeviceIdentity *)identity_evidence);
+        dev = xaverius_find_device_by_identity(identity_evidence);
     }
+
+    XaveriusRegistryResult result = XAVERIUS_REGISTRY_INTERNAL_ERROR;
 
     if (dev != NULL) {
         /* Unambiguous match: store observation linking source to device,
@@ -954,44 +971,51 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
         *out_device = dev;
         if (out_device_generation != NULL)
             *out_device_generation = dev->device_generation;
-        return XAVERIUS_REGISTRY_SUCCESS;
-    }
+        result = XAVERIUS_REGISTRY_SUCCESS;
+    } else {
+        /* Ambiguous or no match: observation retained but device unpublished.
+         * Observation retained for provenance; no XID allocated. */
+        obs = calloc(1, sizeof(*obs));
+        if (obs == NULL)
+            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
 
-    /* Ambiguous or no match: observation retained but device unpublished.
-     * Observation retained for provenance; no XID allocated. */
-    obs = calloc(1, sizeof(*obs));
-    if (obs == NULL)
-        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-
-    obs->source_key = calloc(1, source_key_size);
-    if (obs->source_key == NULL) {
-        free(obs);
-        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-    }
-    memcpy(obs->source_key, source_key, source_key_size);
-    obs->source_key_size = source_key_size;
-    obs->source_generation = source_generation;
-    obs->observation_id = observation_id;
-    obs->identity = *identity_evidence;
-    obs->device = dev;
-    obs->device_generation = dev ? dev->device_generation : 0;
-    xorg_list_init(&obs->list);
-    xorg_list_append(&obs->list, &xaverius_observations);
-    xaverius_observation_count++;
+        obs->source_key = calloc(1, source_key_size);
+        if (obs->source_key == NULL) {
+            free(obs);
+            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+        }
+        memcpy(obs->source_key, source_key, source_key_size);
+        obs->source_key_size = source_key_size;
+        obs->source_generation = source_generation;
+        obs->observation_id = observation_id;
+        obs->identity = *identity_evidence;
+        obs->device = dev;
+        obs->device_generation = dev ? dev->device_generation : 0;
+        xorg_list_init(&obs->list);
+        xorg_list_append(&obs->list, &xaverius_observations);
+        xaverius_observation_count++;
 
     *out_device = NULL;
     if (out_device_generation != NULL)
         *out_device_generation = 0;
-    return XAVERIUS_REGISTRY_PENDING;
+    result = XAVERIUS_REGISTRY_PENDING;
+    }
+
+    return result;
 }
 
+#pragma GCC diagnostic pop
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusRegistryResult XaveriusRegistryRemoveObservation(
     void *registry,
     const void *source_key,
     uint64_t source_generation,
     uint64_t observation_id)
 {
-    XaveriusObservation *obs, *next_obs;
+    XaveriusObservation *obs = NULL, *next_obs = NULL;
+    XaveriusRegistryResult result = XAVERIUS_REGISTRY_NOT_FOUND;
 
     if (source_key == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
@@ -1005,13 +1029,16 @@ XaveriusRegistryResult XaveriusRegistryRemoveObservation(
             xaverius_observation_count--;
             free(obs->source_key);
             free(obs);
-            return XAVERIUS_REGISTRY_SUCCESS;
+            result = XAVERIUS_REGISTRY_SUCCESS;
+            break;
         }
     }
 
-    return XAVERIUS_REGISTRY_NOT_FOUND;
+    return result;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
     void *registry,
     XaveriusPhysicalDevice *device,
@@ -1019,7 +1046,8 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
     const void *removal_evidence,
     uint64_t removal_evidence_size)
 {
-    XaveriusObservation *obs;
+    XaveriusObservation *obs = NULL;
+    XaveriusRegistryResult result = XAVERIUS_REGISTRY_INTERNAL_ERROR;
 
     if (device == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
@@ -1039,14 +1067,16 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
                                                 removal_evidence_size);
     if (obs == NULL ||
         obs->device != device ||
-        obs->device_generation != device_generation)
-        return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
+        obs->device_generation != device_generation) {
+        result = XAVERIUS_REGISTRY_INVALID_EVIDENCE;
+    } else {
+        /* Commit terminal REMOVED exactly once; the record remains as a
+         * tombstone until ordered server shutdown. No XID reuse. */
+        device->status = XAVERIUS_REGISTRY_REMOVED;
+        result = XAVERIUS_REGISTRY_SUCCESS;
+    }
 
-    /* Commit terminal REMOVED exactly once; the record remains as a
-     * tombstone until ordered server shutdown. No XID reuse. */
-    device->status = XAVERIUS_REGISTRY_REMOVED;
-
-    return XAVERIUS_REGISTRY_SUCCESS;
+    return result;
 }
 
 /* XaveriusPhysicalDevicePublish — separate server-internal publication operation
@@ -1059,6 +1089,11 @@ bool XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev)
     if (dev == NULL || XaveriusPhysicalDeviceType == 0)
         return false;
 
+    /* Publication is separate from registration and must happen at most once.
+     * A published (or tombstoned) device retains its XID for the server lifetime. */
+    if (dev->xid != 0)
+        return false;
+
     /* Allocate/reserve the XID using the established Xorg resource/XID rules.
      * Publication is separate from registration: no XID is allocated during
      * registration itself. */
@@ -1067,12 +1102,11 @@ bool XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev)
         return false;
 
     /* Register the resource exactly once with the PhysicalDevice resource
-     * type and its canonical destructor. */
-    if (!AddResource(xid, XaveriusPhysicalDeviceType, dev)) {
+     * type and its canonical destructor. Only persist the XID after
+     * successful resource registration so registry and DIX stay consistent. */
+    if (!AddResource(xid, XaveriusPhysicalDeviceType, dev))
         return false;
-    }
 
-    /* Only after successful resource registration is the object published.
-     * The registry list and DIX resource table must never disagree. */
+    dev->xid = xid;
     return true;
 }

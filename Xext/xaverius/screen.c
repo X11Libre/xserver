@@ -36,10 +36,10 @@ static void XaveriusScreenCloseHook(CallbackListPtr *pcbl, ScreenPtr pScreen, vo
     }
 }
 
-bool XaveriusScreenInit(ScreenPtr pScreen, const XaveriusDDXOps *ops)
+int XaveriusScreenInit(ScreenPtr pScreen, const XaveriusDDXOps *ops)
 {
     if (pScreen == NULL || ops == NULL)
-        return false;
+        return 0;
 
     XaveriusScreenPtr xav_screen = calloc(1, sizeof(XaveriusScreenRec));
     if (!xav_screen)
