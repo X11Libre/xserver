@@ -11,12 +11,107 @@
 #include <stdint.h>
 
 #include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
 
 #include "include/list.h"
 #include "include/privates.h"
 #include "include/xlibre_ptrtypes.h"
 
-#include "xaverius_priv.h"
+#include "xaverius_proto.h"
+
+/* Forward declarations for internal types */
+struct _XaveriusPhysicalDevice;
+typedef struct _XaveriusPhysicalDevice XaveriusPhysicalDevice;
+/* XaveriusPhysicalDevice is fully defined in xaverius_priv.h (DDX-facing).
+ * Only forward declaration here to avoid duplicate typedef. */
+
+/* Matches spec/device-registry-architecture.md §7 (XaveriusRegistryResult). */
+typedef enum {
+    XAVERIUS_REGISTRY_SUCCESS            = 0,
+    XAVERIUS_REGISTRY_PENDING            = 1,
+    XAVERIUS_REGISTRY_AMBIGUOUS          = 2,
+    XAVERIUS_REGISTRY_STALE_GENERATION   = 3,
+    XAVERIUS_REGISTRY_INVALID_EVIDENCE   = 4,
+    XAVERIUS_REGISTRY_IDENTITY_CONFLICT  = 5,
+    XAVERIUS_REGISTRY_OUT_OF_MEMORY      = 6,
+    XAVERIUS_REGISTRY_INVALID_ARGUMENT   = 7,
+    XAVERIUS_REGISTRY_NOT_FOUND          = 8,
+    XAVERIUS_REGISTRY_ALREADY_EXISTS     = 9,
+    XAVERIUS_REGISTRY_NOT_REGISTERED     = 10,
+    XAVERIUS_REGISTRY_SHUTTING_DOWN      = 11,
+    XAVERIUS_REGISTRY_BUSY               = 12,
+    XAVERIUS_REGISTRY_UNAVAILABLE        = 13,
+    XAVERIUS_REGISTRY_UNSUPPORTED        = 14,
+    XAVERIUS_REGISTRY_QUARANTINED        = 15,
+    XAVERIUS_REGISTRY_STALE_EVENT        = 16,
+    XAVERIUS_REGISTRY_REMOVED            = 17,
+    XAVERIUS_REGISTRY_INTERNAL_ERROR     = 18,
+} XaveriusRegistryResult;
+
+/* ModuleRole quiescence result */
+typedef enum {
+    XAVERIUS_MODULE_QUIESCE_PENDING  = 0,
+    XAVERIUS_MODULE_QUIESCE_SUCCESS  = 1,
+    XAVERIUS_MODULE_QUIESCE_FAILURE  = 2,
+} XaveriusModuleQuiescenceResult;
+
+/* Forward declarations */
+struct _XaveriusModuleRole;
+typedef struct _XaveriusModuleRole XaveriusModuleRole;
+
+struct _XaveriusModuleLease;
+typedef struct _XaveriusModuleLease XaveriusModuleLease;
+
+/* ---- DDX module-role descriptor (v1, size/versioned) ---- */
+typedef struct _XaveriusModuleRoleDescriptor {
+    uint32_t struct_size;
+    uint32_t abi_version;
+    const char *owner_key;          /* stable role key across reloads */
+    XaveriusModuleLease *module_lease;  /* server-owned module lease */
+    void (*retain_module_role)(XaveriusModuleRole *role);
+    void (*release_module_role)(XaveriusModuleRole *role);
+    XaveriusModuleQuiescenceResult (*quiesce_module_role)(XaveriusModuleRole *role);
+} XaveriusModuleRoleDescriptor;
+
+/* ---- Canonical PhysicalDevice identity (shared with DDX-facing header) ----
+ * Matches spec/device-registry-architecture.md §2.2 identity evidence classes.
+ * This is defined here (not in xaverius_priv.h) so internal code and tests
+ * can use it without requiring Xorg headers. */
+typedef struct _XaveriusDeviceIdentity {
+    /* DRM/PCI bus identity */
+    uint32_t domain;
+    uint32_t bus;
+    uint32_t device;
+    uint32_t function;
+
+    /* Optional Vulkan device UUID (16 bytes) */
+    uint8_t device_uuid[16];
+    bool has_device_uuid;
+
+    /* Driver UUID (16 bytes) */
+    uint8_t driver_uuid[16];
+
+    /* Kernel DRM version info */
+    uint32_t drm_major;
+    uint32_t drm_minor;
+
+    /* Optional: render node vs primary node tracking */
+    bool is_render_node;
+    int drm_fd; /* -1 if not applicable */
+} XaveriusDeviceIdentity;
+
+/* ---- DDX device backend registration descriptor (v1, size/versioned) ---- */
+typedef struct _XaveriusDeviceBackendRegistration {
+    uint32_t struct_size;
+    uint32_t abi_version;
+    const XaveriusDeviceIdentity *identity;
+    const struct XaveriusDeviceBackendOps *ops;
+    void *device_context;
+    void *native_physical_device;
+    XaveriusModuleRole *owner_role;
+    uint64_t owner_role_generation;
+} XaveriusDeviceBackendRegistration;
+
 #include "xaverius_proto.h"
 
 /* Forward declarations for internal types */
@@ -42,6 +137,12 @@ extern DevPrivateKeyRec XaveriusScreenPrivateKeyRec;
 
 /* ---- DDX backend ABI version (v0.1) ---- */
 #define XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION 1
+
+/* ---- DDX device backend registration ABI version (v1) ---- */
+#define XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION 1
+
+/* ---- DDX module-role descriptor ABI version (v1) ---- */
+#define XAVERIUS_MODULE_ROLE_DESCRIPTOR_ABI_VERSION 1
 
 /* ---- DDX backend operation result ---- */
 typedef enum {
@@ -186,6 +287,10 @@ struct _XaveriusPhysicalDevice {
 
     /* Exact device incarnation generation */
     uint64_t device_generation;
+
+    /* Server-private DIX resource XID assigned on publication (0 if unpublished). */
+    XID xid;
+
     char ordering_key[128];
 
     /* Caller-owned reference count (from XaveriusRegistryRegisterDdxDevice).
@@ -229,12 +334,6 @@ typedef enum {
     XAVERIUS_MODULE_ROLE_ADMISSION_CLOSED = 1,
 } XaveriusModuleRoleAdmission;
 
-typedef enum {
-    XAVERIUS_MODULE_ROLE_QUIESCE_PENDING  = 0,
-    XAVERIUS_MODULE_ROLE_QUIESCE_SUCCESS  = 1,
-    XAVERIUS_MODULE_ROLE_QUIESCE_FAILURE  = 2,
-} XaveriusModuleRoleQuiesceState;
-
 /* Create / retain / release / quiesce / finalize a ModuleRole control record.
  * These are infallible, non-blocking lifetime primitives except XaveriusModuleRoleCreate
  * which may fail on allocation/validation before any retain. */
@@ -263,14 +362,16 @@ XaveriusPhysicalDevice *XaveriusNextDevice(XaveriusPhysicalDevice *device);
 uint32_t XaveriusDeviceCount(void);
 
 /* Internal validation and comparison functions (exposed for testing) */
-bool xaverius_module_role_descriptor_valid(const XaveriusModuleRoleDescriptor *desc);
+XaveriusRegistryResult xaverius_module_role_descriptor_validate(
+    const XaveriusModuleRoleDescriptor *desc);
 bool xaverius_identity_equal(const XaveriusDeviceIdentity *a, const XaveriusDeviceIdentity *b);
 bool xaverius_identity_has_pci(const XaveriusDeviceIdentity *id);
 
 /* Canonical ordering key functions (per normative spec device-registry-architecture.md §6) */
-void xaverius_create_ordering_key(char *out_buf, size_t out_buf_size,
-                                  const XaveriusDeviceIdentity *identity,
-                                  const char *owner_key);
+XaveriusRegistryResult xaverius_create_ordering_key(
+    char *out_buf, size_t out_buf_size,
+    const XaveriusDeviceIdentity *identity,
+    const char *owner_key);
 int xaverius_compare_ordering_key(const char *a, const char *b);
 
 /* ---- Observation / removal (Stage 3) ---- */
