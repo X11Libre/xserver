@@ -183,29 +183,28 @@ subdir('bugs')
 subdir('pyxtest')
 
 # Xaverius PhysicalDevice Registry unit tests
-# Built when xaverius AND xorg are enabled (Xaverius requires DIX)
-# DISABLED: causes main build link failures due to meson link ordering
-if false  # get_option('xaverius') and build_xorg
-    xaverius_test_sources = [
-        'xaverius-registry-test.c',
-    ]
-    xaverius_test_includes = [
-        inc,
-        include_directories('../Xext/xaverius'),
-        include_directories('../include'),
-    ]
-    xaverius_test_deps = [x11_dep, pixman_dep]
-
-    xaverius_test = executable('xaverius-registry-test',
-        xaverius_test_sources,
-        include_directories: xaverius_test_includes,
-        dependencies: xaverius_test_deps,
-        c_args: ['-DXAVERIUS_TESTS'],
-        link_with: [libxserver_xaverius, xorg_link],
-    )
-
-    test('xaverius-registry', xaverius_test)
-endif
+# Disabled: standalone linking against DIX/Xorg symbols is not reliable in all build configs.
+# if get_option('xaverius') and build_xorg
+#     xaverius_test_sources = [
+#         'xaverius-registry-test.c',
+#     ]
+#     xaverius_test_includes = [
+#         inc,
+#         include_directories('../Xext/xaverius'),
+#         include_directories('../include'),
+#     ]
+#     xaverius_test_deps = [x11_dep, pixman_dep]
+#
+#     xaverius_test = executable('xaverius-registry-test',
+#         xaverius_test_sources,
+#         include_directories: xaverius_test_includes,
+#         dependencies: xaverius_test_deps,
+#         c_args: ['-DXAVERIUS_TESTS'],
+#         link_with: [libxserver_xaverius, xorg_link],
+#     )
+#
+#     test('xaverius-registry', xaverius_test)
+# endif
 
 if build_xorg
 # Tests that require at least some DDX functions in order to fully link
@@ -240,6 +239,11 @@ if build_xorg
     if build_res
         unit_sources += ['hashtabletest.c']
         unit_c_args += ['-DRES_TESTS']
+    endif
+
+    if get_option('xaverius')
+        unit_sources += ['xaverius-registry.c']
+        unit_c_args += ['-DXAVERIUS_TESTS']
     endif
 
     if meson.get_compiler('c').has_link_argument('-Wl,-wrap')

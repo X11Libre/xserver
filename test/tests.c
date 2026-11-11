@@ -25,6 +25,9 @@ main(int argc, char **argv)
 #ifdef RES_TESTS
     run_test(hashtabletest_test);
 #endif
+#ifdef XAVERIUS_TESTS
+    run_test(xaverius_registry_test);
+#endif
 
 #ifdef LDWRAP_TESTS
     run_test(protocol_xchangedevicecontrol_test);
