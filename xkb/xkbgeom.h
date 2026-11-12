@@ -31,6 +31,54 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "xkbstr.h"
 
+#define XkbAddGeomKeyAlias 		SrvXkbAddGeomKeyAlias
+#define XkbAddGeomColor 		SrvXkbAddGeomColor
+#define XkbAddGeomDoodad		SrvXkbAddGeomDoodad
+#define XkbAddGeomKey			SrvXkbAddGeomKey
+#define XkbAddGeomOutline		SrvXkbAddGeomOutline
+#define XkbAddGeomOverlay		SrvXkbAddGeomOverlay
+#define XkbAddGeomOverlayRow		SrvXkbAddGeomOverlayRow
+#define	XkbAddGeomOverlayKey		SrvXkbAddGeomOverlayKey
+#define XkbAddGeomProperty		SrvXkbAddGeomProperty
+#define XkbAddGeomRow			SrvXkbAddGeomRow
+#define XkbAddGeomSection		SrvXkbAddGeomSection
+#define XkbAddGeomShape			SrvXkbAddGeomShape
+#define XkbGeomRealloc			SrvXkbGeomRealloc
+#define XkbAllocGeomProps		SrvXkbAllocGeomProps
+#define XkbAllocGeomKeyAliases		SrvXkbAllocGeomKeyAliases
+#define XkbAllocGeomColors		SrvXkbAllocGeomColors
+#define XkbAllocGeomShapes		SrvXkbAllocGeomShapes
+#define XkbAllocGeomSections		SrvXkbAllocGeomSections
+#define XkbAllocGeomOverlays		SrvXkbAllocGeomOverlays
+#define XkbAllocGeomOverlayRows		SrvXkbAllocGeomOverlayRows
+#define XkbAllocGeomOverlayKeys		SrvXkbAllocGeomOverlayKeys
+#define XkbAllocGeomDoodads		SrvXkbAllocGeomDoodads
+#define XkbAllocGeomSectionDoodads	SrvXkbAllocGeomSectionDoodads
+#define XkbAllocGeomOutlines		SrvXkbAllocGeomOutlines
+#define XkbAllocGeomRows		SrvXkbAllocGeomRows
+#define XkbAllocGeomPoints		SrvXkbAllocGeomPoints
+#define XkbAllocGeomKeys		SrvXkbAllocGeomKeys
+#define XkbAllocGeometry		SrvXkbAllocGeometry
+#define XkbComputeShapeTop		SrvXkbComputeShapeTop
+#define XkbComputeShapeBounds		SrvXkbComputeShapeBounds
+#define XkbComputeRowBounds		SrvXkbComputeRowBounds
+#define XkbComputeSectionBounds		SrvXkbComputeSectionBounds
+#define XkbFindOverlayForKey		SrvXkbFindOverlayForKey
+#define XkbFreeGeomKeyAliases		SrvXkbFreeGeomKeyAliases
+#define XkbFreeGeomColors		SrvXkbFreeGeomColors
+#define XkbFreeGeomDoodads		SrvXkbFreeGeomDoodads
+#define XkbFreeGeomProperties		SrvXkbFreeGeomProperties
+#define XkbFreeGeomOverlayKeys		SrvXkbFreeGeomOverlayKeys
+#define XkbFreeGeomOverlayRows		SrvXkbFreeGeomOverlayRows
+#define XkbFreeGeomOverlays		SrvXkbFreeGeomOverlays
+#define	XkbFreeGeomKeys			SrvXkbFreeGeomKeys
+#define	XkbFreeGeomRows			SrvXkbFreeGeomRows
+#define XkbFreeGeomSections		SrvXkbFreeGeomSections
+#define	XkbFreeGeomPoints		SrvXkbFreeGeomPoints
+#define	XkbFreeGeomOutlines		SrvXkbFreeGeomOutlines
+#define XkbFreeGeomShapes		SrvXkbFreeGeomShapes
+#define XkbFreeGeometry			SrvXkbFreeGeometry
+
 typedef struct _XkbProperty {
     char *name;
     char *value;
@@ -236,11 +284,11 @@ typedef struct _XkbGeometry {
     unsigned short num_doodads;
     unsigned short num_key_aliases;
     XkbPropertyPtr properties;
-    XkbColorPtr colors;
-    XkbShapePtr shapes;
-    XkbSectionPtr sections;
-    XkbDoodadPtr doodads;
-    XkbKeyAliasPtr key_aliases;
+    XkbColorPtr colors.
+    XkbShapePtr shapes.
+    XkbSectionPtr sections.
+    XkbDoodadPtr doodads.
+    XkbKeyAliasPtr key_aliases.
 } XkbGeometryRec;
 
 #define	XkbGeomColorIndex(g,c)	((int)((c)-&(g)->colors[0]))
