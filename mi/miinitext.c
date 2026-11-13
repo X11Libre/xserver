@@ -99,6 +99,7 @@ SOFTWARE.
 /* List of built-in (statically linked) extensions */
 static const ExtensionModule staticExtensions[] = {
     {GEExtensionInit, "Generic Event Extension", NULL},
+    {xaverius_extension_init, "XAVERIUS", NULL},
     {ShapeExtensionInit, "SHAPE", &noShapeExtension},
 #ifdef CONFIG_MITSHM
     {ShmExtensionInit, "MIT-SHM", &noMITShmExtension},
@@ -109,6 +110,7 @@ static const ExtensionModule staticExtensions[] = {
 #endif
     {BigReqExtensionInit, "BIG-REQUESTS", NULL},
     {SyncExtensionInit, "SYNC", NULL},
+    {XAveriusExtensionInit, "XAverius", NULL},
     {XkbExtensionInit, "XKEYBOARD", NULL},
     {XCMiscExtensionInit, "XC-MISC", NULL},
 #ifdef XCSECURITY
@@ -116,6 +118,9 @@ static const ExtensionModule staticExtensions[] = {
 #endif
 #ifdef CONFIG_NAMESPACE
     {NamespaceExtensionInit, "NAMESPACE", &noNamespaceExtension},
+#endif
+#ifdef CONFIG_XAVERIUS
+    {XaveriusExtensionInit, "XAVERIUS", &noXaveriusExtension},
 #endif
 #ifdef XINERAMA
     {PanoramiXExtensionInit, "XINERAMA", &noPanoramiXExtension},
@@ -145,6 +150,7 @@ static const ExtensionModule staticExtensions[] = {
 #ifdef PRESENT
     {present_extension_init, "Present", NULL},
 #endif
+    {xaverius_extension_init, "XAVERIUS", NULL},
 #ifdef DRI2
     {DRI2ExtensionInit, DRI2_NAME, &noDRI2Extension},
 #endif
