@@ -268,7 +268,7 @@ systemd_logind_vtenter(void)
 
 static void
 systemd_logind_ack_pause(struct systemd_logind_info *info,
-                         dbus_int32_t minor, dbus_int32_t major)
+                         dbus_int32_t major, dbus_int32_t minor)
 {
     DBusError error;
     DBusMessage *msg = NULL;
@@ -324,7 +324,7 @@ void systemd_logind_drop_master(void)
             minor = xf86_platform_odev_attributes(i)->minor;
             LogMessage(X_INFO, "systemd-logind: drop master for %u:%u\n",
                major, minor);
-            systemd_logind_ack_pause(info, minor, major);
+            systemd_logind_ack_pause(info, major, minor);
         }
     }
 }
@@ -349,8 +349,9 @@ message_filter(DBusConnection * connection, DBusMessage * message, void *data)
     DBusError error;
     dbus_int32_t major, minor;
     char *pause_str;
+    const char *path = dbus_message_get_path(message);
 
-    if (strcmp(dbus_message_get_path(message), info->session) != 0)
+    if (!path || strcmp(path, info->session) != 0)
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 
     dbus_error_init(&error);
