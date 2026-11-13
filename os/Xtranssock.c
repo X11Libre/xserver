@@ -610,7 +610,7 @@ static int
 set_sun_path(const char *port, const char *upath, char *path, int abstract)
 {
     struct sockaddr_un s;
-    ssize_t maxlen = sizeof(s.sun_path) - 1;
+    ssize_t maxlen = sizeof(s.sun_path) - 2;
     const char *at = "";
 
     if (!port || !*port || !path)

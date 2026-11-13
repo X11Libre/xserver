@@ -478,9 +478,9 @@ config_udev_fini(void)
 #ifdef CONFIG_UDEV_KMS
 
 /* Find the last occurrence of the needle in haystack */
-static char *strrstr(const char *haystack, const char *needle)
+static const char *strrstr(const char *haystack, const char *needle)
 {
-    char *prev, *last, *tmp;
+    const char *prev, *last, *tmp;
 
     prev = strstr(haystack, needle);
     if (!prev)
