@@ -6,6 +6,7 @@
 
 #include <inttypes.h>
 #include <X11/extensions/XI2proto.h>
+#include <X11/extensions/randrproto.h>
 
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
@@ -52,94 +53,141 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (param->rtype == X11_RESTYPE_WINDOW) {
         WindowPtr pWindow = (WindowPtr) param->res;
 
-        /* white-listed operations on namespace's virtual root window */
+        /* Namespace's own virtual root window: allow everything except destroy */
         if (pWindow == subj->ns->rootWindow) {
-            switch (client->majorOp) {
-                case X_DeleteProperty:
-                case X_ChangeProperty:
-                case X_GetProperty:
-                case X_RotateProperties:
-                case X_QueryTree:
-                    goto pass;
-            }
-            XNS_HOOK_LOG("unhandled access to NS' virtual root window 0x%0lx\n", (unsigned long)pWindow->drawable.id);
+            if (!(param->access_mode & DixDestroyAccess))
+                goto pass;
+            goto reject;
         }
 
-        /* white-listed operations on actual root window */
+        /* Delegate SendEvent checks to hookSend so disallowed events are
+           dropped cleanly by ProcSendEvent without raising a fatal BadAccess */
+        if (client->majorOp == X_SendEvent &&
+            checkAllowed(param->access_mode, DixSendAccess))
+            goto pass;
+
+        /* Operations on the actual screen root window */
         if (pWindow && (pWindow == pWindow->drawable.pScreen->root)) {
             switch (client->majorOp) {
-                case X_CreateWindow:
-                    if (checkAllowed(param->access_mode, DixAddAccess))
-                        goto pass;
-                break;
+                case X_GetImage:
+                case X_CopyArea:
+                case X_CopyPlane:
+                case EXTENSION_MAJOR_COMPOSITE:
+                case EXTENSION_MAJOR_DAMAGE:
+                    goto reject;
 
-                case X_CreateGC:
-                case X_CreatePixmap:
-                case X_CreateColormap:
-                    if (checkAllowed(param->access_mode, DixGetAttrAccess))
-                        goto pass;
-                break;
+                case EXTENSION_MAJOR_SHM:
+                    if (param->access_mode & DixReadAccess)
+                        goto reject;
+                    break;
 
-                // we reach here when destroying a top-level window:
-                // ProcDestroyWindow() checks whether one may remove a child
-                // from it's parent.
-                case X_DestroyWindow:
-                    if (param->access_mode == DixRemoveAccess)
-                        goto pass;
-                break;
-
-                case X_TranslateCoords:
                 case X_QueryTree:
                     goto pass;
 
-                case X_ChangeWindowAttributes:
                 case X_QueryPointer:
+                case X_WarpPointer:
+                    if (subj->ns->allowMouseMotion)
+                        goto pass;
                     goto reject;
-
-                case X_SendEvent:
-                    /* send hook needs to take care of this */
-                    goto pass;
 
                 case EXTENSION_MAJOR_XINPUT:
-                    switch(client->minorOp) {
-                        // needed by xeyes. we should filter the mask
-                        case X_XISelectEvents:
+                    if (client->minorOp == X_XIQueryPointer ||
+                        client->minorOp == X_XIWarpPointer) {
+                        if (subj->ns->allowMouseMotion)
                             goto pass;
+                        goto reject;
                     }
-                    XNS_HOOK_LOG("unhandled XI operation on (real) root window\n");
-                    goto reject;
+                    break;
             }
-        }
-    }
 
-    /* server resources */
-    if (obj->isServer) {
-        if (param->rtype == X11_RESTYPE_COLORMAP) {
-            if (checkAllowed(param->access_mode, DixReadAccess | DixGetPropAccess | DixUseAccess | DixGetAttrAccess | DixAddAccess))
+            /* Allow non-destructive queries, event subscriptions, and top-level
+               window creation/reparent/removal on the root window; block
+               attribute modification (DixSetAttrAccess/DixWriteAccess) and WM
+               redirection (DixManageAccess). */
+            if (checkAllowed(param->access_mode,
+                             DixReadAccess | DixGetAttrAccess | DixGetPropAccess |
+                             DixListPropAccess | DixReceiveAccess | DixAddAccess |
+                             DixRemoveAccess | DixUseAccess))
+                goto pass;
+
+            goto reject;
+        }
+
+        /* Selection owner inspecting the requestor window (toolkits such as
+           GTK wrap it via GetWindowAttributes/GetGeometry/QueryTree before
+           answering), writing converted data, or sending SelectionNotify to it */
+        if (obj && XnsClipboardTargetAllowed(obj->ns) &&
+            XnsSelectionTransferAllowed(subj->ns, pWindow->drawable.id, None)) {
+            if (client->majorOp == X_QueryTree &&
+                checkAllowed(param->access_mode, DixListAccess))
+                goto pass;
+            if (checkAllowed(param->access_mode,
+                             DixGetAttrAccess |
+                             DixSetPropAccess | DixGetPropAccess |
+                             DixReceiveAccess | DixSendAccess))
                 goto pass;
         }
 
+        /* Host system tray manager window (_NET_SYSTEM_TRAY_S0 owner): allow
+           visual/orientation property queries, StructureNotify subscription,
+           and SYSTEM_TRAY_REQUEST_DOCK ClientMessage delivery (checked in hookSend). */
+        if (XnsIsSystemTrayWindow(pWindow)) {
+            if (client->majorOp == X_QueryTree &&
+                checkAllowed(param->access_mode, DixListAccess))
+                goto pass;
+            if (checkAllowed(param->access_mode,
+                             DixGetAttrAccess | DixGetPropAccess |
+                             DixListPropAccess | DixReceiveAccess | DixSendAccess))
+                goto pass;
+        }
+
+        /* Active host XDND source window: allow target sandbox to inspect
+           XdndTypeList/XdndActionList and send XdndStatus/XdndFinished replies. */
+        if (pWindow && XnsHasActiveXdndSource(subj->ns, pWindow->drawable.id) &&
+            obj && obj->ns && obj->ns->superPower &&
+            XnsClipboardTargetAllowed(subj->ns)) {
+            if (checkAllowed(param->access_mode,
+                             DixGetAttrAccess | DixGetPropAccess |
+                             DixReceiveAccess | DixSendAccess))
+                goto pass;
+        }
+    }
+
+    /* Server-owned shared resources (colormaps, fonts, cursors, Render formats, Sync counters) */
+    if (obj->isServer) {
         if (param->rtype == X11_RESTYPE_WINDOW) {
-            /* allowed ones should already been catched above */
             XNS_HOOK_LOG("REJECT server owned window 0x%0lx!\n", (unsigned long)((WindowPtr)param->res)->drawable.id);
             goto reject;
         }
 
-        if (checkAllowed(param->access_mode, DixReadAccess))
+        /* ProcRRSelectInput attaches its per-window subscriber list (RREventType)
+           to rootWindow->drawable.id (owned by serverClient) and looks it up with
+           DixWriteAccess right after checking DixReceiveAccess on the window. */
+        if (client->majorOp == EXTENSION_MAJOR_RANDR &&
+            client->minorOp == X_RRSelectInput &&
+            checkAllowed(param->access_mode, DixWriteAccess))
+            goto pass;
+
+        if (checkAllowed(param->access_mode,
+                         DixReadAccess | DixGetPropAccess | DixListPropAccess |
+                         DixUseAccess | DixGetAttrAccess | DixListAccess |
+                         DixAddAccess | DixRemoveAccess | DixReceiveAccess))
             goto pass;
     }
 
-reject: ;
-    char accModeStr[128];
-    LookupDixAccessName(param->access_mode, (char*)&accModeStr, sizeof(accModeStr));
+reject:
+    if (xnsDebugLog) {
+        char accModeStr[128];
+        LookupDixAccessName(param->access_mode, (char*)&accModeStr, sizeof(accModeStr));
 
-    XNS_HOOK_LOG("BLOCKED access 0x%07lx %s to %s 0x%06lx of client %d @ %s\n",
-        (unsigned long)param->access_mode,
-        accModeStr,
-        LookupResourceName(param->rtype),
-        (unsigned long)param->id,
-        owner->index, // resource owner
-        obj->ns->name);
+        XNS_HOOK_LOG("BLOCKED access 0x%07lx %s to %s 0x%06lx of client %d @ %s\n",
+            (unsigned long)param->access_mode,
+            accModeStr,
+            LookupResourceName(param->rtype),
+            (unsigned long)param->id,
+            owner ? owner->index : -1,
+            (obj && obj->ns) ? obj->ns->name : "<none>");
+    }
 
     param->status = BadAccess;
     return;

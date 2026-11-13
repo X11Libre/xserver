@@ -41,7 +41,9 @@
 #define XNS_CAPABILITY_INPUT            (1u << 3)
 #define XNS_CAPABILITY_KEYBOARD         (1u << 4)
 #define XNS_CAPABILITY_ADMIN            (1u << 5)
-#define XNS_CAPABILITY_ALL              0x0000003fu
+#define XNS_CAPABILITY_CLIPBOARD        (1u << 6)
+#define XNS_CAPABILITY_CLIPBOARD_AUTO   (1u << 7)
+#define XNS_CAPABILITY_ALL              0x000000ffu
 
 /* namespace attribute bits */
 #define XNS_ATTR_IMMUTABLE              (1u << 0)   /* read-only (root/anon) */
