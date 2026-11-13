@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <stdbool.h>
 
+#include "dix/dix_priv.h"
 #include "include/misc.h"
 #include "os/ddx_priv.h"
 #include "os/mathx_priv.h"

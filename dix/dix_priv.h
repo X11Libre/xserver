@@ -75,6 +75,8 @@ extern size_t dixConnBlockScreenStart(const char *connInfo);
 /* only exported for in-tree drivers, not part of public SDK */
 extern _X_EXPORT bool autosetDPI;
 
+extern const char *defaultFontPath;
+
 /*
  * @brief callback right after one screen's root window has been initialized
  *
