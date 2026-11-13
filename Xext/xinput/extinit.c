@@ -1191,6 +1191,7 @@ XInputExtensionInit(void)
         EventSwapVector[DeviceMappingNotify] = SEventIDispatch;
         EventSwapVector[ChangeDeviceNotify] = SEventIDispatch;
         EventSwapVector[DevicePresenceNotify] = SEventIDispatch;
+        EventSwapVector[DevicePropertyNotify] = SEventIDispatch;
 
         GERegisterExtension(EXTENSION_MAJOR_XINPUT, XI2EventSwap);
 
