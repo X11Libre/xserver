@@ -38,6 +38,7 @@
 #include "Xext/panoramiX/panoramiXsrv.h"
 #include "Xext/xfixes/xfixes.h"
 
+#include "damageext_intern.h"
 #include "damagestr.h"
 #include "protocol-versions.h"
 #include "dixstruct_priv.h"
@@ -534,23 +535,6 @@ FreeDamageExt(void *value, XID did)
     return Success;
 }
 
-static void _X_COLD
-SDamageNotifyEvent(xDamageNotifyEvent * from, xDamageNotifyEvent * to)
-{
-    to->type = from->type;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->drawable, to->drawable);
-    cpswapl(from->damage, to->damage);
-    cpswaps(from->area.x, to->area.x);
-    cpswaps(from->area.y, to->area.y);
-    cpswaps(from->area.width, to->area.width);
-    cpswaps(from->area.height, to->area.height);
-    cpswaps(from->geometry.x, to->geometry.x);
-    cpswaps(from->geometry.y, to->geometry.y);
-    cpswaps(from->geometry.width, to->geometry.width);
-    cpswaps(from->geometry.height, to->geometry.height);
-}
-
 #ifdef XINERAMA
 
 static void
@@ -689,8 +673,7 @@ DamageExtensionInit(void)
                                  NULL, StandardMinorOpcode)) != 0) {
         DamageReqCode = (unsigned char) extEntry->base;
         DamageEventBase = extEntry->eventBase;
-        EventSwapVector[DamageEventBase + XDamageNotify] =
-            (EventSwapPtr) SDamageNotifyEvent;
+        EventSwapVector[DamageEventBase + XDamageNotify] = DamageSwapNotifyEvent;
         SetResourceTypeErrorValue(DamageExtType,
                                   extEntry->errorBase + BadDamage);
 #ifdef XINERAMA
