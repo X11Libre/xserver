@@ -610,7 +610,7 @@ static int
 set_sun_path(const char *port, const char *upath, char *path, int abstract)
 {
     struct sockaddr_un s;
-    ssize_t maxlen = sizeof(s.sun_path) - 1;
+    size_t atlen, upathlen, portlen, len;
     const char *at = "";
 
     if (!port || !*port || !path)
@@ -626,9 +626,16 @@ set_sun_path(const char *port, const char *upath, char *path, int abstract)
     if (*port == '/') /* a full pathname */
 	upath = "";
 
-    if ((ssize_t)(strlen(at) + strlen(upath) + strlen(port)) > maxlen)
+    atlen = strlen(at);
+    upathlen = strlen(upath);
+    portlen = strlen(port);
+    len = atlen + upathlen + portlen;
+    if (len >= sizeof(s.sun_path))
 	return -1;
-    snprintf(path, sizeof(s.sun_path), "%s%s%s", at, upath, port);
+
+    memcpy(path, at, atlen);
+    memcpy(path + atlen, upath, upathlen);
+    memcpy(path + atlen + upathlen, port, portlen + 1);
     return 0;
 }
 #endif
