@@ -709,7 +709,7 @@ LoadPreferences(void)
 {
     char *home;
     char fname[PATH_MAX + NAME_MAX + 2];
-    char szDisplay[512];
+    char szDisplay[600];
     char *szEnvDisplay;
     int i, j;
     char param[PARAM_MAX + 1];
@@ -753,7 +753,7 @@ LoadPreferences(void)
     winGetDisplayName(szDisplay, 0);
     szEnvDisplay = calloc(1, strlen(szDisplay) + strlen("DISPLAY=") + 1);
     if (szEnvDisplay) {
-        snprintf(szEnvDisplay, 512, "DISPLAY=%s", szDisplay);
+        snprintf(szEnvDisplay, sizeof(szEnvDisplay), "DISPLAY=%s", szDisplay);
         putenv(szEnvDisplay);
     }
 
