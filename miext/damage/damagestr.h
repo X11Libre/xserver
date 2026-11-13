@@ -1,3 +1,4 @@
+/* PART OF PUBLIC SDK */
 /*
  * Copyright © 2003 Keith Packard
  *
@@ -35,11 +36,6 @@
 typedef struct _damage {
     DamagePtr pNext;
     DamagePtr pNextWin;
-/*
-     * Drawable on which this damage was inserted. Used to re-derive the list head at removal time
-     * to avoid caching a pointer into a realloc()able privates array.
-     */
-    DrawablePtr pListDrawable;
     RegionRec damage;
 
     DamageReportLevel damageLevel;
@@ -54,6 +50,13 @@ typedef struct _damage {
     Bool reportAfter;
     RegionRec pendingDamage;    /* will be flushed post submission at the latest */
     ScreenPtr pScreen;
+
+    /* --- not part of ABI beyond here --- */
+    /*
+     * Drawable on which this damage was inserted. Used to re-derive the list head at removal time
+     * to avoid caching a pointer into a realloc()able privates array.
+     */
+    DrawablePtr pListDrawable;
 } DamageRec;
 
 typedef struct _damageScrPriv {
