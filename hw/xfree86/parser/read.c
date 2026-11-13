@@ -171,11 +171,6 @@ xf86readConfigFile(void)
                 HANDLE_LIST(conf_outputclass_lst, xf86parseOutputClassSection,
                             XF86ConfOutputClassPtr);
             }
-            else if (xf86nameCompare(xf86_lex_val.str, "module") == 0) {
-                free(xf86_lex_val.str);
-                xf86_lex_val.str = NULL;
-                HANDLE_RETURN(conf_modules, xf86parseModuleSection(ptr->conf_modules));
-            }
             else if (xf86nameCompare(xf86_lex_val.str, "serverlayout") == 0) {
                 free(xf86_lex_val.str);
                 xf86_lex_val.str = NULL;
@@ -285,7 +280,6 @@ xf86freeConfig(XF86ConfigPtr p)
         return;
 
     xf86freeFiles(p->conf_files);
-    xf86freeModules(p->conf_modules);
     xf86freeFlags(p->conf_flags);
     xf86freeMonitorList(p->conf_monitor_lst);
     xf86freeModesList(p->conf_modes_lst);
