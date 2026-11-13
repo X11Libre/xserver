@@ -1110,6 +1110,37 @@ ResetOsBuffers(void)
 {
     ConnectionInputPtr oci;
     ConnectionOutputPtr oco;
+    int i;
+
+    if (AvailableInput) {
+        ConnectionInputPtr aci = AvailableInput->input;
+        if (aci) {
+            free(aci->buffer);
+            free(aci);
+            AvailableInput->input = NULL;
+        }
+        AvailableInput = NULL;
+    }
+
+    for (i = 1; i < currentMaxClients; i++) {
+        ClientPtr client = clients[i];
+        if (client && !client->clientGone && client->osPrivate) {
+            OsCommPtr oc = (OsCommPtr) client->osPrivate;
+            if ((oci = oc->input)) {
+                int gotnow = oci->bufcnt + oci->buffer - (oci->bufptr + oci->lenLastReq);
+                if (gotnow <= 0 && oci->ignoreBytes == 0) {
+                    free(oci->buffer);
+                    free(oci);
+                    oc->input = NULL;
+                }
+            }
+            if ((oco = oc->output) && oco->count == 0) {
+                free(oco->buf);
+                free(oco);
+                oc->output = NULL;
+            }
+        }
+    }
 
     while ((oci = FreeInputs)) {
         FreeInputs = oci->next;
