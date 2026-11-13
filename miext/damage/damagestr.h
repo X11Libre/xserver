@@ -35,12 +35,6 @@
 typedef struct _damage {
     DamagePtr pNext;
     DamagePtr pNextWin;
-    /*
-     * Head of the pNext list this damage is currently linked on, or NULL if it is not linked on any list.  Recorded at
-     * insertion time so that removal always unlinks from the list the damage actually went onto; see
-     * damageInsertDamage().
-     */
-    DamagePtr *pListHead;
     RegionRec damage;
 
     DamageReportLevel damageLevel;
@@ -55,6 +49,15 @@ typedef struct _damage {
     Bool reportAfter;
     RegionRec pendingDamage;    /* will be flushed post submission at the latest */
     ScreenPtr pScreen;
+
+    /*
+     * Head of the pNext list this damage is currently linked on, or NULL if it is not linked on any list.  Recorded at
+     * insertion time so that removal always unlinks from the list the damage actually went onto; see
+     * damageInsertDamage().
+     *
+     * Kept last: out-of-tree drivers (e.g. amdgpu) access the fields above directly.
+     */
+    DamagePtr *pListHead;
 } DamageRec;
 
 typedef struct _damageScrPriv {
