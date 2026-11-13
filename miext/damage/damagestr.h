@@ -1,3 +1,4 @@
+/* PART OF PUBLIC SDK */
 /*
  * Copyright © 2003 Keith Packard
  *
@@ -35,12 +36,6 @@
 typedef struct _damage {
     DamagePtr pNext;
     DamagePtr pNextWin;
-    /*
-     * Head of the pNext list this damage is currently linked on, or NULL if it is not linked on any list.  Recorded at
-     * insertion time so that removal always unlinks from the list the damage actually went onto; see
-     * damageInsertDamage().
-     */
-    DamagePtr *pListHead;
     RegionRec damage;
 
     DamageReportLevel damageLevel;
@@ -55,6 +50,14 @@ typedef struct _damage {
     Bool reportAfter;
     RegionRec pendingDamage;    /* will be flushed post submission at the latest */
     ScreenPtr pScreen;
+
+    /* --- not part of ABI beyond here --- */
+    /*
+     * Head of the pNext list this damage is currently linked on, or NULL if it is not linked on any list.  Recorded at
+     * insertion time so that removal always unlinks from the list the damage actually went onto; see
+     * damageInsertDamage().
+     */
+    DamagePtr *pListHead;
 } DamageRec;
 
 typedef struct _damageScrPriv {
