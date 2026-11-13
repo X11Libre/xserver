@@ -141,12 +141,6 @@ xf86readConfigFile(void)
                 HANDLE_LIST(conf_monitor_lst, xf86parseMonitorSection,
                             XF86ConfMonitorPtr);
             }
-            else if (xf86nameCompare(xf86_lex_val.str, "modes") == 0) {
-                free(xf86_lex_val.str);
-                xf86_lex_val.str = NULL;
-                HANDLE_LIST(conf_modes_lst, xf86parseModesSection,
-                            XF86ConfModesPtr);
-            }
             else if (xf86nameCompare(xf86_lex_val.str, "screen") == 0) {
                 free(xf86_lex_val.str);
                 xf86_lex_val.str = NULL;
