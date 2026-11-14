@@ -673,6 +673,54 @@ xaverius_registry_observation_edge_cases(void)
     XaveriusRegistryFini();
 }
 
+static void
+xaverius_module_role_admission_gate(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+
+    assert(XaveriusRegistryInit());
+
+    /* NULL role => AdmissionOpen false. */
+    assert(XaveriusModuleRoleAdmissionOpen(NULL) == false);
+
+    /* Newly created role => AdmissionOpen true. */
+    make_valid_desc(&desc, "adm-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(role != NULL);
+    assert(XaveriusModuleRoleAdmissionOpen(role) == true);
+    assert(role->admission == XAVERIUS_MODULE_ROLE_ADMISSION_OPEN);
+
+    /* Close admission internally (no public mutator exists per spec). */
+    role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_CLOSED;
+    assert(XaveriusModuleRoleAdmissionOpen(role) == false);
+    assert(role->admission == XAVERIUS_MODULE_ROLE_ADMISSION_CLOSED);
+
+    /* Registration using a closed-admission role returns UNAVAILABLE,
+     * performs no retain/release/snapshot callback side effects, and
+     * does not create a device. */
+    id.bus = 21;
+    id.device = 31;
+    memset(id.driver_uuid, 0xdd, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+    reset_hook_counts();
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_UNAVAILABLE);
+    assert(dev == NULL);
+    assert(test_retain_calls == 0);
+    assert(test_release_calls == 0);
+
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
 const testfunc_t*
 xaverius_registry_test(void)
 {
@@ -686,6 +734,7 @@ xaverius_registry_test(void)
         xaverius_registry_publish_dix,
         xaverius_registry_registration_contract,
         xaverius_registry_observation_edge_cases,
+        xaverius_module_role_admission_gate,
         NULL,
     };
 

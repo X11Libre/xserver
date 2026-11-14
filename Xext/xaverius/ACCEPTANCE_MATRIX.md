@@ -172,7 +172,6 @@ All 11 test functions in `xaverius_registry_test()` pass.
 
 | Gap | Severity | Notes |
 |-----|----------|-------|
-| `XaveriusModuleRoleAdmissionOpen` not directly tested | Low | Covered indirectly via registration paths; gate logic exercised |
 | No integration test with real DDX driver (modesetting) | Medium | Unit tests use mock ops; DDX integration deferred per scope |
 | CI run IDs not captured (model-proxy transient failures) | Low | Build/test verified locally; CI pending |
 
@@ -228,7 +227,7 @@ ninja -C build-xaverius
 | **HEAD** | `6d213d1e4f` |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` success) |
-| **Unit Tests** | ✅ All 18 xaverius test functions pass (11 registry + 7 protocol) |
+| **Unit Tests** | ✅ All 19 xaverius test functions pass (12 registry + 7 protocol) |
 | **ABI-v1** | ✅ Conformant (all structs versioned, opaque handles, deep-copy ops, X_EXPORT) |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
 | **Blockers** | None |
