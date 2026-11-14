@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius`  
-**HEAD:** `dd82bc47ad`  
+**HEAD:** `12fe3a64b0`  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-12  
 **Auditor:** Defiant (fleet ship)
@@ -130,6 +130,15 @@ xaverius_registry_tombstone_lifecycle...
 xaverius_registry_publish_dix...
  Pass
 ---------------------
+xaverius_registry_registration_contract...
+ Pass
+---------------------
+xaverius_registry_observation_edge_cases...
+ Pass
+---------------------
+xaverius_module_role_admission_gate...
+ Pass
+---------------------
 ```
 All 10 test functions in `xaverius_registry_test()` pass.
 
@@ -148,6 +157,33 @@ All 10 test functions in `xaverius_registry_test()` pass.
 | **No XGE prerequisite** (wire-protocol.md §29, §52) | `ProcXaveriusQueryVersion` performs no XGE checks | Success path returns `Success` without XGE negotiation | ✅ |
 
 **Test file:** `test/xaverius-qv-protocol.c` — 7 test functions exercising `ProcXaveriusDispatch` directly.
+
+**Test Execution Proof:**
+```
+---------------------
+xaverius_qv_subopcode_zero_routes_to_queryversion...
+ Pass
+---------------------
+xaverius_qv_subopcode_forty_eight_does_not_route_to_queryversion...
+ Pass
+---------------------
+xaverius_qv_unsupported_subopcode_returns_badrequest...
+ Pass
+---------------------
+xaverius_qv_nonzero_data_returns_badvalue...
+ Pass
+---------------------
+xaverius_qv_nonzero_flags_returns_badvalue...
+ Pass
+---------------------
+xaverius_qv_nonzero_reserved_returns_badvalue...
+ Pass
+---------------------
+xaverius_qv_wrong_length_returns_badlength...
+ Pass
+---------------------
+```
+All 7 test functions in `xaverius_qv_protocol_test()` pass.
 
 ---
 
