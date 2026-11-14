@@ -4,25 +4,39 @@
 # Check that every server symbol a module needs is exported by a server.
 #
 #   check-symbols.sh <module.so> <server-workdir>
+#   check-symbols.sh --prefix <dir> <module.so>
 #
 # The module's strong undefined symbols, minus those its own libraries and
-# the server's libraries provide, must each be defined by the staged Xorg
-# or a module under the staged module directory. Exit 1 lists the rest.
+# the server's libraries provide, must each be defined by the server's Xorg
+# or a module under its module directory. Exit 1 lists the rest.
+#
+# The server is one staged by build-server.sh, or with --prefix one
+# installed in <dir> (<dir>/bin/Xorg, module directory from the
+# xorg-server.pc that pkg-config finds, which must be under <dir>).
 
 set -eu
 
-[ $# -eq 2 ] || {
+usage() {
 	echo "usage: $0 <module.so> <server-workdir>" >&2
+	echo "       $0 --prefix <dir> <module.so>" >&2
 	exit 2
 }
 
-drv=$1
-root=$(cd "$2/root" && pwd)
-xorg=$root/usr/bin/Xorg
+if [ "${1:-}" = --prefix ]; then
+	[ $# -eq 3 ] || usage
+	root=$(cd "$2" && pwd)
+	drv=$3
+	xorg=$root/bin/Xorg
+	moduledir=$(pkg-config --variable=moduledir xorg-server)
+else
+	[ $# -eq 2 ] || usage
+	drv=$1
+	root=$(cd "$2/root" && pwd)
+	xorg=$root/usr/bin/Xorg
+	pcdir=$("$(dirname "$0")/staged-pc.sh" "$2") || exit 2
+	moduledir=$(PKG_CONFIG_PATH=$pcdir pkg-config --variable=moduledir xorg-server)
+fi
 [ -f "$xorg" ] || { echo "check-symbols: no $xorg" >&2; exit 2; }
-
-pcdir=$("$(dirname "$0")/staged-pc.sh" "$2") || exit 2
-moduledir=$(PKG_CONFIG_PATH=$pcdir pkg-config --variable=moduledir xorg-server)
 case $moduledir in
 "$root"/*) ;;
 *) echo "check-symbols: moduledir '$moduledir' is outside $root" >&2

@@ -340,8 +340,6 @@ jobs:
         # be evicted under load before the queued driver jobs restored it (then
         # the whole pipeline had to be re-run by hand). A registry image is not
         # subject to that LRU eviction.
-        # A fork PR's token cannot write packages, so there the SDK (/opt/x11)
-        # goes to the driver jobs as an artifact, unpacked over the deps image.
         runs-on: ubuntu-latest
         needs:
             - abi-changes-check
@@ -406,7 +404,6 @@ jobs:
         # baked in under /opt/x11, so each driver job only compiles the driver
         # (no apt, no prereq build, no cache restore). The image is public, so it
         # pulls anonymously — no credentials / packages permission needed.
-        # On fork PRs this is the deps image, and the SDK comes as an artifact.
         container:
             image: ${{ needs.build-sdk-image.outputs.image }}
         strategy:
