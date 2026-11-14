@@ -14,7 +14,7 @@
 |-------|---------------|-------------------------|---------------|---------|
 | **Stage 1: ModuleRole** | Complete (spec §3–4, addendum §2–4) | Complete (`registry.c` + `xaverius_intern.h`) | Full (6 test functions in `xaverius-registry.c`) | ✅ PASS |
 | **Stage 2: Binding** | Complete (spec §5–6, addendum §3) | Complete (`registry.c` binding alloc/free + `XaveriusRegistryRegisterDdxDevice`) | Full (registration paths + ownership tests) | ✅ PASS |
-| **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove tests) | ✅ PASS |
+| **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove + multi-source observation tests) | ✅ PASS |
 | **Stage 4: DIX Publish/Remove/Shutdown** | Complete (addendum §3–4, spec §8) | Complete (`XaveriusPhysicalDevicePublish`, `DIXDestroy`, Observe/ConfirmRemoved, `RegistryFini`) | Full (publish + tombstone lifecycle tests) | ✅ PASS |
 | **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link against installed headers) | ✅ PASS |
 | **Build/CI** | N/A | Meson option `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
