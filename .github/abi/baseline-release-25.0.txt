@@ -6,17 +6,21 @@
 # Accepted: members appended to server-allocated structs (_Screen
 # hookPostClose, _damage pListDrawable) and the xkb counter widening for
 # CVE-2026-93518 (_XkbClientMapRec, _XkbServerMapRec).
+#
+# Entries are libabigail 2.4 output (Ubuntu 24.04 abigail-tools, as in CI),
+# taken from the job's abi-reports artifact; other libabigail versions word
+# some entries differently.
+bin_Xorg | 'struct _damage' changed: | type size changed from 896 to 960 (in bits); 1 data member insertion:; 'DrawablePtr pListDrawable', at offset 896 (in bits)
 bin_Xorg | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
 bin_Xorg | 'struct _XkbClientMapRec' changed: | type size hasn't changed; there are data member changes:; type 'unsigned short int' of '_XkbClientMapRec::size_syms' changed:; type name changed from 'unsigned short int' to 'unsigned int'; type size changed from 16 to 32 (in bits); type 'unsigned short int' of '_XkbClientMapRec::num_syms' changed:; type name changed from 'unsigned short int' to 'unsigned int'; type size changed from 16 to 32 (in bits); and offset changed from 144 to 160 (in bits) (by +16 bits)
 bin_Xorg | 'struct _XkbServerMapRec' changed: | type size hasn't changed; there are data member changes:; type 'unsigned short int' of '_XkbServerMapRec::num_acts' changed:; type name changed from 'unsigned short int' to 'unsigned int'; type size changed from 16 to 32 (in bits); type 'unsigned short int' of '_XkbServerMapRec::size_acts' changed:; type name changed from 'unsigned short int' to 'unsigned int'; type size changed from 16 to 32 (in bits); and offset changed from 16 to 32 (in bits) (by +16 bits)
-bin_Xorg | 'struct _damage' changed: | type size changed from 896 to 960 (in bits); 1 data member insertion:; 'DrawablePtr pListDrawable', at offset 896 (in bits)
-lib64_xorg_modules_extensions_libglx.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
-lib64_xorg_modules_libexa.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
-lib64_xorg_modules_libfbdevhw.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
-lib64_xorg_modules_libglamoregl.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
-lib64_xorg_modules_libint10.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
-lib64_xorg_modules_libshadow.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
-lib64_xorg_modules_libshadow.so | 'struct _damage' changed: | type size changed from 896 to 960 (in bits); 1 data member insertion:; 'DrawablePtr pListDrawable', at offset 896 (in bits)
-lib64_xorg_modules_libshadowfb.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
-lib64_xorg_modules_libvgahw.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
-lib64_xorg_modules_libwfb.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_extensions_libglx.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_libexa.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_libfbdevhw.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_libglamoregl.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_libint10.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_libshadowfb.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_libshadow.so | 'struct _damage' changed: | type size changed from 896 to 960 (in bits); 1 data member insertion:; 'DrawablePtr pListDrawable', at offset 896 (in bits)
+xorg_modules_libshadow.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_libvgahw.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
+xorg_modules_libwfb.so | 'struct _Screen' changed: | type size changed from 11008 to 11072 (in bits); 1 data member insertion:; 'CallbackListPtr hookPostClose', at offset 11008 (in bits)
