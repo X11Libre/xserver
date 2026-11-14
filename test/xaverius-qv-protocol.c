@@ -11,6 +11,7 @@
 #include <dix-config.h>
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <X11/X.h>
@@ -22,16 +23,25 @@
 #include "xaverius_intern.h"
 #include "xaverius_proto.h"
 
-/* Intercept dixWriteToClient so the success-path reply does not touch
- * an uninitialised client OS private area. */
+/* Intercept dixWriteToClient so the success-path reply can be inspected.
+ * Verifies the QueryVersion reply layout per wire-protocol.md §36-48:
+ * 32-byte standard reply, reply.length=0, major_version=0, minor_version=1,
+ * reserved bytes 12–31 all zero. */
 DECLARE_WRAP_FUNCTION(dixWriteToClient, void, ClientPtr, int, void *);
 
+static XaveriusQueryVersionReply captured_reply;
+static bool reply_captured;
+
 static void
-noop_dixWriteToClient(ClientPtr client, int len, void *data)
+check_dixWriteToClient(ClientPtr client, int len, void *data)
 {
     (void)client;
     (void)len;
-    (void)data;
+
+    if (len == sizeof(XaveriusQueryVersionReply)) {
+        memcpy(&captured_reply, data, sizeof(captured_reply));
+        reply_captured = true;
+    }
 }
 
 /* Build a minimal 8-byte XAverius QueryVersion request header. */
@@ -60,7 +70,8 @@ dispatch_qv(XaveriusReqHeader h)
     client.requestBuffer = &h;
     client.req_len = sz_XaveriusQueryVersionReq / 4;
 
-    wrapped_dixWriteToClient = noop_dixWriteToClient;
+    reply_captured = false;
+    wrapped_dixWriteToClient = check_dixWriteToClient;
     return ProcXaveriusDispatch(&client);
 }
 
@@ -70,6 +81,15 @@ xaverius_qv_subopcode_zero_routes_to_queryversion(void)
     XaveriusReqHeader h = make_qv_header(XAVERIUS_REQ_QUERY_VERSION, 0, 0, 0);
     int rc = dispatch_qv(h);
     assert(rc == Success);
+    assert(reply_captured);
+    assert(captured_reply.response_type == X_Reply);
+    assert(captured_reply.data == 0);
+    assert(captured_reply.length == 0);
+    assert(captured_reply.major_version == XAVERIUS_MAJOR_VERSION);
+    assert(captured_reply.minor_version == XAVERIUS_MINOR_VERSION);
+    /* reserved[20] bytes 12–31 must all be zero per wire-protocol.md §48 */
+    for (size_t i = 0; i < sizeof(captured_reply.reserved); i++)
+        assert(captured_reply.reserved[i] == 0);
 }
 
 static void
