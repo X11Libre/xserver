@@ -16,6 +16,7 @@
 | **Stage 2: Binding** | Complete (spec §5–6, addendum §3) | Complete (`registry.c` binding alloc/free + `XaveriusRegistryRegisterDdxDevice`) | Full (registration paths + ownership tests) | ✅ PASS |
 | **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove + multi-source observation + registration contract tests) | ✅ PASS |
 | **Stage 4: DIX Publish/Remove/Shutdown** | Complete (addendum §3–4, spec §8) | Complete (`XaveriusPhysicalDevicePublish`, `DIXDestroy`, Observe/ConfirmRemoved, `RegistryFini`) | Full (publish + tombstone lifecycle tests) | ✅ PASS |
+| **Protocol/Dispatch (QueryVersion)** | Complete (wire-protocol.md §25–35, errors.md §11, open-issues.md §26) | Complete (`dispatch.c`: subopcode 0 → QueryVersion, subopcode 48 unassigned → BadRequest, common-header validation, exact length check) | Full (7 protocol-level tests via `ProcXaveriusDispatch`) | ✅ PASS |
 | **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link against installed headers) | ✅ PASS |
 | **Build/CI** | N/A | Meson option `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
 
@@ -132,6 +133,22 @@ xaverius_registry_publish_dix...
 ```
 All 7 test functions in `xaverius_registry_test()` pass.
 
+### Protocol/Dispatch: QueryVersion Contract
+
+| Spec Requirement (source) | Implementation | Test Proof | Result |
+|---------------------------|----------------|------------|--------|
+| **QueryVersion subopcode 0** (wire-protocol.md §25, errors.md §11) | `xaverius_proto.h:24` `#define XAVERIUS_REQ_QUERY_VERSION 0`; `dispatch.c:42` `case XAVERIUS_REQ_QUERY_VERSION:` | `xaverius_qv_subopcode_zero_routes_to_queryversion` — `ProcXaveriusDispatch` returns `Success` | ✅ |
+| **Subopcode 48 unassigned → BadRequest** (open-issues.md §26) | `dispatch.c:45` `default: return BadRequest;` | `xaverius_qv_subopcode_forty_eight_does_not_route_to_queryversion` — returns `BadRequest` | ✅ |
+| **Unsupported subopcode → BadRequest** (wire-protocol.md §23) | `dispatch.c:45` `default: return BadRequest;` | `xaverius_qv_unsupported_subopcode_returns_badrequest` — subopcode 255 → `BadRequest` | ✅ |
+| **Nonzero data → BadValue** (wire-protocol.md §59) | `dispatch.c:20-22` checks `stuff->header.data != 0` | `xaverius_qv_nonzero_data_returns_badvalue` — returns `BadValue` | ✅ |
+| **Nonzero flags → BadValue** (wire-protocol.md §59) | `dispatch.c:20-22` checks `stuff->header.flags != 0` | `xaverius_qv_nonzero_flags_returns_badvalue` — returns `BadValue` | ✅ |
+| **Nonzero reserved → BadValue** (wire-protocol.md §59) | `dispatch.c:20-22` checks `stuff->header.reserved != 0` | `xaverius_qv_nonzero_reserved_returns_badvalue` — returns `BadValue` | ✅ |
+| **Wrong length → BadLength** (wire-protocol.md §29, §58) | `dispatch.c:25-26` checks `stuff->header.length != 2` | `xaverius_qv_wrong_length_returns_badlength` — returns `BadLength` | ✅ |
+| **Reply: version 0.1, reply.length=0** (wire-protocol.md §31, §46-48) | `dispatch.c:28-30` sets `major_version=0`, `minor_version=1`; `X_SEND_REPLY_SIMPLE` sends 32-byte reply with `length=0` | Verified via `noop_dixWriteToClient` intercept — reply struct has correct fields | ✅ |
+| **No XGE prerequisite** (wire-protocol.md §29, §52) | `ProcXaveriusQueryVersion` performs no XGE checks | Success path returns `Success` without XGE negotiation | ✅ |
+
+**Test file:** `test/xaverius-qv-protocol.c` — 7 test functions exercising `ProcXaveriusDispatch` directly.
+
 ---
 
 ### Ownership & Refcount Overview
@@ -169,13 +186,15 @@ Xext/xaverius/xaverius_intern.h      # Internal types, enums, ABI versions, regi
 Xext/xaverius/xaverius_priv.h        # DDX-facing ABI v1 (installed header)
 Xext/xaverius/xaverius_proto.h       # Wire protocol (complete, unchanged)
 Xext/xaverius/registry.c             # Core implementation (all 4 stages)
+Xext/xaverius/dispatch.c             # QueryVersion dispatch (+flags/length validation)
 Xext/xaverius/init.c                 # Extension init, atoms, screen private key
 Xext/xaverius/screen.c               # ScreenAttachment (DDX per-screen)
-Xext/xaverius/dispatch.c             # QueryVersion only
 Xext/xaverius/meson.build            # Static library build
-test/xaverius-registry.c             # Unit tests (7 test functions)
+test/xaverius-registry.c             # Unit tests (10 test functions)
+test/xaverius-qv-protocol.c          # Protocol contract tests (7 test functions)
 test/meson.build                     # Integrated into test/tests via XAVERIUS_TESTS
-test/tests.c                         # Test runner (calls xaverius_registry_test)
+test/tests.c                         # Test runner (calls xaverius_registry_test + xaverius_qv_protocol_test)
+test/tests.h                         # Declares xaverius_qv_protocol_test
 ```
 
 ---
@@ -207,10 +226,10 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `520cf5e7f33d0db7f43a0d816eb7d5b8f34db622` |
+| **HEAD** | `da5f3a842b` (pre-commit; will update after commit) |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` success) |
-| **Unit Tests** | ✅ All 7 xaverius tests pass (integrated in `test/tests`) |
+| **Unit Tests** | ✅ All 17 xaverius test functions pass (10 registry + 7 protocol) |
 | **ABI-v1** | ✅ Conformant (all structs versioned, opaque handles, deep-copy ops, X_EXPORT) |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
 | **Blockers** | None |

@@ -11,14 +11,19 @@
 
 #include "xaverius_intern.h"
 #include "xaverius_proto.h"
-
-static int ProcXaveriusQueryVersion(ClientPtr client)
+static int
+ProcXaveriusQueryVersion(ClientPtr client)
 {
     X_REQUEST_HEAD_STRUCT(XaveriusQueryVersionReq);
 
-    /* Common-header invariants: data and reserved must be zero. */
-    if (stuff->header.data != 0 || stuff->header.reserved != 0)
+    /* Common-header invariants: data, flags and reserved must be zero. */
+    if (stuff->header.data != 0 || stuff->header.flags != 0 ||
+        stuff->header.reserved != 0)
         return BadValue;
+
+    /* Request-specific exact length: QueryVersion is exactly 8 bytes. */
+    if (stuff->header.length != sz_XaveriusQueryVersionReq / 4)
+        return BadLength;
 
     XaveriusQueryVersionReply rep = {
         .major_version  = XAVERIUS_MAJOR_VERSION,
