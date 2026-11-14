@@ -437,7 +437,7 @@ jobs:
                     - video-v4l:25.0.1
                     - video-vbox:25.0.0
                     - video-voodoo:25.0.0
-                    - video-xgi:25.0.0
+                    - video-xgi:25.0.1
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
