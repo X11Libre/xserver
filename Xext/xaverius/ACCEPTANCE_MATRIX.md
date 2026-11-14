@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius`  
-**HEAD:** `8137cc1751`  
+**HEAD:** `bcd43ef29b`  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-12  
 **Auditor:** Defiant (fleet ship)
@@ -224,7 +224,7 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `8137cc1751` |
+| **HEAD** | `bcd43ef29b` |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` success) |
 | **Unit Tests** | ✅ All 17 xaverius test functions pass (10 registry + 7 protocol) |
