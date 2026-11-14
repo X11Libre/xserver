@@ -7,6 +7,7 @@ moduledir=@moduledir@
 input_drivers_dir=@moduledir@/drivers/input
 video_drivers_dir=@moduledir@/drivers/video
 sdkdir=@sdkdir@
+abi_tools_dir=${datarootdir}/xorg-server/abi
 sysconfigdir=@xserverconfigdir@
 xserverconfigdir=@xserverconfigdir@
 driver_man_dir=@driver_man_dir@
