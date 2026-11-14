@@ -51,8 +51,9 @@ mkdir -p "$work"
 "$top/abi/build-server.sh" "$(git rev-parse "$base^{commit}")" "$work/base"
 "$top/abi/build-server.sh" "$(git rev-parse HEAD)" "$work/head"
 
+# bin/Xorg, or xorg/modules/<path> without the libdir, which differs by distro
 key() {
-	echo "${1#*/root/usr/}" | sed -E 's#xorg/modules/xlibre-[0-9.]+/#xorg/modules/#'
+	echo "${1#*/root/usr/}" | sed -E 's#^.*/(xorg/modules/)(xlibre-[0-9.]+/)?#\1#'
 }
 binaries() {
 	find "$1/root/usr" \( -name '*.so' -o -path '*/bin/Xorg' \) -type f |
