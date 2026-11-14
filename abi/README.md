@@ -12,7 +12,7 @@ Each server is built with debug info and staged under `ABI_WORK` with
 | --- | --- |
 | `run-matrix.sh` | Builds the module against every server in `ABI_SERVERS` and checks that every server symbol it needs is exported by each of them (built for one release, loaded into another). |
 | `gate-driver.sh` | Builds the committed tree (`BEFORE_REF`, default `HEAD`) and the working tree against each server, and fails if libabigail reports a changed layout of a server type the module uses. |
-| `check-symbols.sh` | One module against one staged server, or with `--prefix <dir>` one installed in `<dir>`. |
+| `check-symbols.sh` | One module against one staged server, or with `--prefix <dir>` one installed in `<dir>`; also fails a module linked with BIND_NOW that needs symbols only other modules define. |
 | `abigail-compare.sh` | One libabigail comparison; added types pass, removed symbols and changed layouts fail; `--allow TYPE` accepts a known change. |
 | `check-private-includes.py` | For meson modules: every server-internal header a source file includes must be needed by it. |
 
