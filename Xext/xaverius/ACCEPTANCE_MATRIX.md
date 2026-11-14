@@ -35,7 +35,7 @@
 | **ModuleRoleRetain/Release** (addendum §2: hook primitives, infallible) | `registry.c:XaveriusModuleRoleRetain/Release()` — call hooks exactly once | `xaverius_module_role_ownership()` — retain/release increment counters exactly | ✅ |
 | **ModuleRoleQuiesce** (addendum §4: quiescence protocol) | `registry.c:XaveriusModuleRoleQuiesce()` — invokes `quiesce_module_role` hook | `xaverius_module_role_ownership()` — quiesce hook counted (returns SUCCESS) | ✅ |
 | **ModuleRoleFinalize** (addendum §2: releases original owner ref, frees server storage) | `registry.c:XaveriusModuleRoleFinalize()` — calls release hook once, removes from list, frees role | `xaverius_module_role_ownership()` — finalize increments release to 2 (owner + binding) | ✅ |
-| **ModuleRoleAdmissionOpen** (addendum §2: admission gate) | `registry.c:XaveriusModuleRoleAdmissionOpen()` — checks `admission == OPEN` | Not explicitly tested (gate logic covered by registration path) | ⚠️ Gap |
+| **ModuleRoleAdmissionOpen** (addendum §2: admission gate) | `registry.c:XaveriusModuleRoleAdmissionOpen()` — checks `admission == OPEN` | `xaverius_module_role_admission_gate()` — NULL→false, new→true, closed→false, closed+register→UNAVAILABLE no side effects | ✅ |
 | **Global role list & generation** (spec §3) | `xaverius_intern.h:306–316` `XaveriusModuleRole` with `role_generation`, `list` | Implicit via registration paths using `role_generation` | ✅ |
 
 ### Stage 2: Binding Substrate
@@ -227,7 +227,7 @@ ninja -C build-xaverius
 | **HEAD** | `3e536f4916` |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` success) |
-| **Unit Tests** | ✅ All 19 xaverius test functions pass (12 registry + 7 protocol) |
+| **Unit Tests** | ✅ All 20 xaverius test functions pass (13 registry + 7 protocol) |
 | **ABI-v1** | ✅ Conformant (all structs versioned, opaque handles, deep-copy ops, X_EXPORT) |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
 | **Blockers** | None |
