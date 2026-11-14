@@ -9,6 +9,8 @@
 # The module's strong undefined symbols, minus those its own libraries and
 # the server's libraries provide, must each be defined by the server's Xorg
 # or a module under its module directory. Exit 1 lists the rest.
+# A module linked with BIND_NOW (-z now) must not need symbols that only
+# other modules define: those are not loaded yet when it is dlopen()ed.
 #
 # The server is one staged by build-server.sh, or with --prefix one
 # installed in <dir> (<dir>/bin/Xorg, module directory from the
@@ -69,6 +71,18 @@ if [ -s "$tmp/missing" ]; then
 		"(modules from $moduledir):"
 	sed 's/^/  /' "$tmp/missing"
 	exit 1
+fi
+
+if readelf -d "$drv" |
+	grep -Eq '\(BIND_NOW\)|\(FLAGS\).*BIND_NOW|\(FLAGS_1\).*[[:space:]]NOW([[:space:]]|$)'; then
+	defined "$xorg" | sort -u >"$tmp/xorg"
+	comm -23 "$tmp/undef" "$tmp/libs" | comm -23 - "$tmp/xorg" >"$tmp/late"
+	if [ -s "$tmp/late" ]; then
+		echo "check-symbols: FAIL: $drv is linked with BIND_NOW but needs" \
+			"symbols only other modules define (link with -z lazy):"
+		sed 's/^/  /' "$tmp/late"
+		exit 1
+	fi
 fi
 echo "check-symbols: PASS ($(comm -12 "$tmp/undef" "$tmp/server" | wc -l)" \
 	"server symbols resolved)"
