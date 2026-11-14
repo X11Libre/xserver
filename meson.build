@@ -843,6 +843,7 @@ if build_xserver
 endif
 
 subdir('hw')
+subdir('abi')
 
 if (get_option('tests') and host_machine.system() != 'windows' and build_xserver)
     subdir('test')
