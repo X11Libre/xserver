@@ -131,7 +131,7 @@ xaverius_registry_publish_dix...
  Pass
 ---------------------
 ```
-All 7 test functions in `xaverius_registry_test()` pass.
+All 11 test functions in `xaverius_registry_test()` pass.
 
 ### Protocol/Dispatch: QueryVersion Contract
 
@@ -173,7 +173,9 @@ All 7 test functions in `xaverius_registry_test()` pass.
 | Gap | Severity | Notes |
 |-----|----------|-------|
 | `XaveriusModuleRoleAdmissionOpen` not directly tested | Low | Covered indirectly via registration paths; gate logic exercised |
-| Observation API (`ObserveDevice`, `RemoveObservation`) not tested | Medium | Core registry logic tested via `ConfirmDeviceRemoved`; observation path is separate discovery flow |
+| `ObserveDevice` missing `source_event_sequence` parameter | Medium | Spec §1037 requires nonzero source_event_sequence; current API has no parameter. Not implementable without spec/ABI change. |
+| `ObserveDevice` missing `out_observation_id` return value | Medium | Spec §1038 requires unique nonzero observation ID per new observation; current API has no output parameter. Not implementable without spec/ABI change. |
+| `ObserveDevice` no caller_refcount increment on repeated observation | Medium | Spec §1038 requires +1 caller-owned reference on SUCCESS replay; current implementation creates a new observation without incrementing caller_refcount. Not implemented; would require implementation change. |
 | No integration test with real DDX driver (modesetting) | Medium | Unit tests use mock ops; DDX integration deferred per scope |
 | CI run IDs not captured (model-proxy transient failures) | Low | Build/test verified locally; CI pending |
 
@@ -190,7 +192,7 @@ Xext/xaverius/dispatch.c             # QueryVersion dispatch (+flags/length vali
 Xext/xaverius/init.c                 # Extension init, atoms, screen private key
 Xext/xaverius/screen.c               # ScreenAttachment (DDX per-screen)
 Xext/xaverius/meson.build            # Static library build
-test/xaverius-registry.c             # Unit tests (10 test functions)
+test/xaverius-registry.c             # Unit tests (11 test functions)
 test/xaverius-qv-protocol.c          # Protocol contract tests (7 test functions)
 test/meson.build                     # Integrated into test/tests via XAVERIUS_TESTS
 test/tests.c                         # Test runner (calls xaverius_registry_test + xaverius_qv_protocol_test)
@@ -229,7 +231,7 @@ ninja -C build-xaverius
 | **HEAD** | `fe79f5bc3f` |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` success) |
-| **Unit Tests** | ✅ All 17 xaverius test functions pass (10 registry + 7 protocol) |
+| **Unit Tests** | ✅ All 18 xaverius test functions pass (11 registry + 7 protocol) |
 | **ABI-v1** | ✅ Conformant (all structs versioned, opaque handles, deep-copy ops, X_EXPORT) |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
 | **Blockers** | None |

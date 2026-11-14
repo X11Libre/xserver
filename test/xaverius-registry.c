@@ -834,6 +834,90 @@ xaverius_registry_registration_contract(void)
     XaveriusRegistryFini();
 }
 
+static void
+xaverius_registry_observation_edge_cases(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id_a = { 0 };
+    XaveriusDeviceIdentity id_b = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev_a = NULL;
+    XaveriusPhysicalDevice *dev_b = NULL;
+    XaveriusPhysicalDevice *obs_dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t obs_gen = 0;
+    const char source[] = "src-edge";
+    uint64_t obs_id = 4001;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "edge-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id_a.bus = 13;
+    id_a.device = 7;
+    memset(id_a.driver_uuid, 0xaa, sizeof(id_a.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id_a, &ops, role);
+
+    /* Register device A. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev_a, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev_a != NULL);
+
+    /* Observe an identity with no matching registered device → PENDING,
+     * no device reference, generation zero. */
+    id_b.bus = 17;
+    id_b.device = 11;
+    memset(id_b.driver_uuid, 0xbb, sizeof(id_b.driver_uuid));
+    assert(XaveriusRegistryObserveDevice(NULL, &id_b, sizeof(id_b),
+                                         source, sizeof(source),
+                                         1, obs_id,
+                                         &obs_dev, &obs_gen) == XAVERIUS_REGISTRY_PENDING);
+    assert(obs_dev == NULL);
+    assert(obs_gen == 0);
+
+    /* Observe the registered identity again → same canonical device,
+     * same generation (idempotent replay). */
+    assert(XaveriusRegistryObserveDevice(NULL, &id_a, sizeof(id_a),
+                                         source, sizeof(source),
+                                         1, obs_id + 1,
+                                         &obs_dev, &obs_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev == dev_a);
+    assert(obs_gen == dev_gen);
+
+    /* Observe a second, distinct identity → distinct canonical device. */
+    id_b.bus = 19;
+    id_b.device = 23;
+    memset(id_b.driver_uuid, 0xcc, sizeof(id_b.driver_uuid));
+    setup_min_reg(&reg, &id_b, &ops, role);
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev_b, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev_b != NULL);
+    assert(dev_b != dev_a);
+
+    assert(XaveriusRegistryObserveDevice(NULL, &id_b, sizeof(id_b),
+                                         source, sizeof(source),
+                                         1, obs_id + 2,
+                                         &obs_dev, &obs_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev == dev_b);
+    assert(obs_gen == dev_gen);
+    assert(dev_a != dev_b);
+
+    /* Remove observations for both sources. */
+    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id + 1) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id + 2) == XAVERIUS_REGISTRY_SUCCESS);
+
+    /* Removed observations are gone: repeat removal returns NOT_FOUND. */
+    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id) == XAVERIUS_REGISTRY_NOT_FOUND);
+
+    /* Ordered shutdown. */
+    XaveriusPhysicalDeviceRelease(dev_a);
+    XaveriusPhysicalDeviceRelease(dev_b);
+    XaveriusRegistryFini();
+}
+
 const testfunc_t*
 xaverius_registry_test(void)
 {
@@ -848,6 +932,7 @@ xaverius_registry_test(void)
         xaverius_registry_observe_and_remove,
         xaverius_registry_multi_source_observation,
         xaverius_registry_registration_contract,
+        xaverius_registry_observation_edge_cases,
         NULL,
     };
 
