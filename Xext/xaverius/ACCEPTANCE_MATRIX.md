@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius`  
-**HEAD:** `520cf5e7f33d0db7f43a0d816eb7d5b8f34db622`  
+**HEAD:** `7410bcef02b7ca0b1baab08d270a0ee8a27fe1cc`  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-12  
 **Auditor:** Defiant (fleet ship)
@@ -14,7 +14,7 @@
 |-------|---------------|-------------------------|---------------|---------|
 | **Stage 1: ModuleRole** | Complete (spec §3–4, addendum §2–4) | Complete (`registry.c` + `xaverius_intern.h`) | Full (6 test functions in `xaverius-registry.c`) | ✅ PASS |
 | **Stage 2: Binding** | Complete (spec §5–6, addendum §3) | Complete (`registry.c` binding alloc/free + `XaveriusRegistryRegisterDdxDevice`) | Full (registration paths + ownership tests) | ✅ PASS |
-| **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish tests) | ✅ PASS |
+| **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove tests) | ✅ PASS |
 | **Stage 4: DIX Publish/Remove/Shutdown** | Complete (addendum §3–4, spec §8) | Complete (`XaveriusPhysicalDevicePublish`, `DIXDestroy`, Observe/ConfirmRemoved, `RegistryFini`) | Full (publish + tombstone lifecycle tests) | ✅ PASS |
 | **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link against installed headers) | ✅ PASS |
 | **Build/CI** | N/A | Meson option `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
@@ -60,8 +60,8 @@
 | **Device registry list + generations** (spec §7) | `xaverius_intern.h:318–323` global `xaverius_physical_devices` list, `xaverius_physical_device_count`, `xaverius_tombstones`, `xaverius_tombstone_count` | `xaverius_registry_registration_paths()` — count=1 after reg; `xaverius_registry_tombstone_lifecycle()` — count transitions 0→1→0, tombstones 0→1 | ✅ |
 | **Device status states** (spec §7: ACTIVE/REMOVED) | `xaverius_intern.h:286` `status` field; `registry.c` sets `XAVERIUS_REGISTRY_REMOVED` on confirm | `xaverius_registry_tombstone_lifecycle()` — after confirm, status=REMOVED | ✅ |
 | **Tombstone lifecycle** (spec §8, addendum §3: removal moves to tombstone, second confirm = STALE_EVENT) | `registry.c:XaveriusRegistryConfirmDeviceRemoved()` — moves device from active to tombstone list, second call returns `STALE_EVENT` | `xaverius_registry_tombstone_lifecycle()` — confirm success, count 1→0 active, 0→1 tombstone; second confirm = `STALE_EVENT`, counts unchanged | ✅ |
-| **Observation API** (addendum §3: generation-checked, non-reusable, returns canonical ref, no XID) | `registry.c:XaveriusRegistryObserveDevice()` — validates source_generation, creates/updates Observation, returns device+generation | Not tested (only `ConfirmDeviceRemoved` tested) | ⚠️ Gap |
-| **Observation removal** (addendum §3: withdraw source evidence, no REMOVED while other evidence exists) | `registry.c:XaveriusRegistryRemoveObservation()` — removes specific observation by source+generation+id | Not tested | ⚠️ Gap |
+| **Observation API** (addendum §3: generation-checked, non-reusable, returns canonical ref, no XID) | `registry.c:XaveriusRegistryObserveDevice()` — validates source_generation, creates/updates Observation, returns device+generation | `xaverius_registry_observe_and_remove()` — SUCCESS/PENDING/STALE_EVENT/INVALID_ARGUMENT/INVALID_EVIDENCE paths | ✅ |
+| **Observation removal** (addendum §3: withdraw source evidence, no REMOVED while other evidence exists) | `registry.c:XaveriusRegistryRemoveObservation()` — removes specific observation by source+generation+id | `xaverius_registry_observe_and_remove()` — SUCCESS/NOT_FOUND/INVALID_ARGUMENT paths | ✅ |
 
 ### Stage 4: DIX Publishing, Removal, Shutdown
 
