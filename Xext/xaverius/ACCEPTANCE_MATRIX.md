@@ -173,9 +173,6 @@ All 11 test functions in `xaverius_registry_test()` pass.
 | Gap | Severity | Notes |
 |-----|----------|-------|
 | `XaveriusModuleRoleAdmissionOpen` not directly tested | Low | Covered indirectly via registration paths; gate logic exercised |
-| `ObserveDevice` missing `source_event_sequence` parameter | Medium | Spec §1037 requires nonzero source_event_sequence; current API has no parameter. Not implementable without spec/ABI change. |
-| `ObserveDevice` missing `out_observation_id` return value | Medium | Spec §1038 requires unique nonzero observation ID per new observation; current API has no output parameter. Not implementable without spec/ABI change. |
-| `ObserveDevice` no caller_refcount increment on repeated observation | Medium | Spec §1038 requires +1 caller-owned reference on SUCCESS replay; current implementation creates a new observation without incrementing caller_refcount. Not implemented; would require implementation change. |
 | No integration test with real DDX driver (modesetting) | Medium | Unit tests use mock ops; DDX integration deferred per scope |
 | CI run IDs not captured (model-proxy transient failures) | Low | Build/test verified locally; CI pending |
 
