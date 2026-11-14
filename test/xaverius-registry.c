@@ -734,6 +734,106 @@ xaverius_registry_multi_source_observation(void)
     XaveriusRegistryFini();
 }
 
+static void
+xaverius_registry_registration_contract(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *dev2 = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t dev_gen2 = 0, bind_gen2 = 0;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "contract-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 11;
+    id.device = 5;
+    memset(id.driver_uuid, 0x99, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    /* Register one PhysicalDevice successfully. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+    assert(xaverius_physical_device_count == 1);
+    assert(xaverius_tombstone_count == 0);
+    assert(dev->xid == 0); /* server owns XID allocation; none during registration */
+
+    /* Exact replay: same identity + same role -> additional caller ref, no new device. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev2, &dev_gen2, &bind_gen2) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev2 == dev);
+    assert(dev_gen2 == dev_gen);
+    assert(bind_gen2 == bind_gen);
+    assert(xaverius_physical_device_count == 1); /* no second canonical device */
+    XaveriusPhysicalDeviceRelease(dev2);
+    assert(xaverius_physical_device_count == 1);
+
+    /* Identity conflict: same identity, different owning role -> IDENTITY_CONFLICT,
+     * no second canonical device/resource created. */
+    {
+        XaveriusModuleRoleDescriptor desc2;
+        XaveriusModuleRole *role2 = NULL;
+        struct XaveriusDeviceBackendOps ops2;
+        XaveriusDeviceBackendRegistration reg2;
+        XaveriusPhysicalDevice *devc = NULL;
+        uint64_t dgc = 0, bgc = 0;
+        make_valid_desc(&desc2, "contract-owner-2");
+        assert(XaveriusModuleRoleCreate(&desc2, &role2) == XAVERIUS_REGISTRY_SUCCESS);
+        setup_min_ops(&ops2, true);
+        setup_min_reg(&reg2, &id, &ops2, role2);
+        assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg2, &devc, &dgc, &bgc) == XAVERIUS_REGISTRY_IDENTITY_CONFLICT);
+        assert(devc == NULL);
+        assert(xaverius_physical_device_count == 1); /* still exactly one canonical device */
+        assert(xaverius_tombstone_count == 0);
+        XaveriusModuleRoleFinalize(role2);
+    }
+
+    /* Invalid registration input: NULL ops -> INVALID_ARGUMENT, no side effects. */
+    {
+        XaveriusDeviceBackendRegistration bad = reg;
+        bad.ops = NULL;
+        XaveriusPhysicalDevice *devd = NULL;
+        uint64_t dgd = 0, bgd = 0;
+        uint32_t count_before = xaverius_physical_device_count;
+        assert(XaveriusRegistryRegisterDdxDevice(NULL, &bad, &devd, &dgd, &bgd) == XAVERIUS_REGISTRY_INVALID_ARGUMENT);
+        assert(devd == NULL);
+        assert(xaverius_physical_device_count == count_before); /* no side effects */
+    }
+
+    /* Invalid registration input: wrong abi_version -> INVALID_ARGUMENT, no side effects. */
+    {
+        XaveriusDeviceBackendRegistration bad = reg;
+        bad.abi_version = XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION + 1;
+        XaveriusPhysicalDevice *deve = NULL;
+        uint64_t dge = 0, bge = 0;
+        uint32_t count_before = xaverius_physical_device_count;
+        assert(XaveriusRegistryRegisterDdxDevice(NULL, &bad, &deve, &dge, &bge) == XAVERIUS_REGISTRY_INVALID_ARGUMENT);
+        assert(deve == NULL);
+        assert(xaverius_physical_device_count == count_before); /* no side effects */
+    }
+
+    /* Release the binding for the original device. */
+    assert(XaveriusRegistryRemoveDeviceBackendBinding(NULL, dev, dev_gen, role->role_generation, bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev->binding == NULL);
+
+    /* Re-register same identity + same role after binding removal -> new registration succeeds. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev2, &dev_gen2, &bind_gen2) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev2 != NULL);
+    assert(xaverius_physical_device_count == 1); /* still exactly one canonical device */
+    assert(dev2->xid == 0);
+    assert(bind_gen2 != bind_gen); /* new binding generation */
+    XaveriusPhysicalDeviceRelease(dev2);
+
+    /* Ordered shutdown. */
+    XaveriusRegistryFini();
+}
+
 const testfunc_t*
 xaverius_registry_test(void)
 {
@@ -747,6 +847,7 @@ xaverius_registry_test(void)
         xaverius_registry_publish_dix,
         xaverius_registry_observe_and_remove,
         xaverius_registry_multi_source_observation,
+        xaverius_registry_registration_contract,
         NULL,
     };
 

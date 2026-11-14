@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius`  
-**HEAD:** `7410bcef02b7ca0b1baab08d270a0ee8a27fe1cc`  
+**HEAD:** `5c1c934b20` (pre-commit; will update after commit)  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-12  
 **Auditor:** Defiant (fleet ship)
@@ -14,7 +14,7 @@
 |-------|---------------|-------------------------|---------------|---------|
 | **Stage 1: ModuleRole** | Complete (spec §3–4, addendum §2–4) | Complete (`registry.c` + `xaverius_intern.h`) | Full (6 test functions in `xaverius-registry.c`) | ✅ PASS |
 | **Stage 2: Binding** | Complete (spec §5–6, addendum §3) | Complete (`registry.c` binding alloc/free + `XaveriusRegistryRegisterDdxDevice`) | Full (registration paths + ownership tests) | ✅ PASS |
-| **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove + multi-source observation tests) | ✅ PASS |
+| **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove + multi-source observation + registration contract tests) | ✅ PASS |
 | **Stage 4: DIX Publish/Remove/Shutdown** | Complete (addendum §3–4, spec §8) | Complete (`XaveriusPhysicalDevicePublish`, `DIXDestroy`, Observe/ConfirmRemoved, `RegistryFini`) | Full (publish + tombstone lifecycle tests) | ✅ PASS |
 | **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link against installed headers) | ✅ PASS |
 | **Build/CI** | N/A | Meson option `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
@@ -49,7 +49,11 @@
 | **Snapshot callback on registration** (addendum §3: query_physical_snapshot invoked, result mapped) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — calls `query_physical_snapshot`, maps `UNAVAILABLE`→`UNAVAILABLE`, `SUCCESS`+bad content→`INVALID_EVIDENCE` | `xaverius_registry_registration_paths()` — snapshot UNAVAILABLE → `UNAVAILABLE` (retain=1 release=1); bad content → `INVALID_EVIDENCE` (retain=1 release=1) | ✅ |
 | **Successful registration** (addendum §3: returns device + generations, binding retained) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — allocates device, sets generations, retains role via binding | `xaverius_registry_registration_paths()` — success: dev≠NULL, snapshot=1, retain=1, release=0, xid=0 | ✅ |
 | **Exact replay / caller refcount** (addendum §3: same identity+role → same device, caller_refcount++) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — finds existing by identity+role, increments caller_refcount | `xaverius_registry_registration_paths()` — replay returns same dev, same gens, caller_refcount+1, Release decrements | ✅ |
-| **Identity conflict** (spec §2.2: same identity, different role → `IDENTITY_CONFLICT`) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — detects existing device with different owner_role | `xaverius_registry_registration_paths()` — conflict returns `IDENTITY_CONFLICT`, hooks=0 | ✅ |
+| **Identity conflict** (spec §2.2: same identity, different role → `IDENTITY_CONFLICT`) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — detects existing device with different owner_role | `xaverius_registry_registration_paths()` — conflict returns `IDENTITY_CONFLICT`, hooks=0; `xaverius_registry_registration_contract()` — conflict leaves device count=1, no second resource | ✅ |
+| **Registration contract — no side effects on failure** (addendum §3: size mismatch → `INVALID_ARGUMENT`, unknown ABI → `UNSUPPORTED`, no callback on failure) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — validates before allocating/retaining | `xaverius_registry_registration_contract()` — NULL ops/wrong abi_version return `INVALID_ARGUMENT`, device count unchanged | ✅ |
+| **Registration contract — server owns XID** (devices.md line 231: XID allocated by server; addendum §3: registration does not allocate XID) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — no XID allocated; `XaveriusPhysicalDevicePublish()` allocates XID | `xaverius_registry_registration_contract()` — `dev->xid == 0` after registration; `xaverius_registry_publish_dix()` — XID only after publish | ✅ |
+| **Registration contract — identity uniqueness** (devices.md lines 238-240: one canonical record per incarnation, no duplicates) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — finds existing by identity, replay = additional caller ref | `xaverius_registry_registration_contract()` — replay keeps count=1; identity conflict keeps count=1 | ✅ |
+| **Registration contract — re-registration after binding removal** (spec §2.1: late registration follows same sequence; no transparent failover) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — after binding removal, same identity+role creates new binding | `xaverius_registry_registration_contract()` — re-register after RemoveDeviceBackendBinding succeeds, new binding_generation | ✅ |
 
 ### Stage 3: PhysicalDevice Lifecycle
 
