@@ -644,6 +644,96 @@ xaverius_registry_observe_and_remove(void)
     XaveriusRegistryFini();
 }
 
+static void
+xaverius_registry_multi_source_observation(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    XaveriusPhysicalDevice *obs_dev_a = NULL;
+    XaveriusPhysicalDevice *obs_dev_b = NULL;
+    uint64_t obs_gen_a = 0, obs_gen_b = 0;
+    const char source_a[] = "src-a";
+    const char source_b[] = "src-b";
+    uint64_t obs_id_a = 3001;
+    uint64_t obs_id_b = 3002;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "multi-src-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 9;
+    id.device = 3;
+    memset(id.driver_uuid, 0x88, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    /* Register one PhysicalDevice. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+    assert(xaverius_physical_device_count == 1);
+    assert(xaverius_tombstone_count == 0);
+
+    /* Observe same identity from source A. */
+    assert(XaveriusRegistryObserveDevice(NULL, &id, sizeof(id),
+                                         source_a, sizeof(source_a),
+                                         1, obs_id_a,
+                                         &obs_dev_a, &obs_gen_a) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev_a == dev);
+    assert(obs_gen_a == dev_gen);
+
+    /* Observe same identity from source B -> same canonical device+generation. */
+    assert(XaveriusRegistryObserveDevice(NULL, &id, sizeof(id),
+                                         source_b, sizeof(source_b),
+                                         1, obs_id_b,
+                                         &obs_dev_b, &obs_gen_b) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev_b == dev);
+    assert(obs_gen_b == dev_gen);
+    assert(obs_dev_a == obs_dev_b);
+
+    /* Remove only source A's observation -> device must NOT be tombstoned. */
+    assert(XaveriusRegistryRemoveObservation(NULL, source_a, 1, obs_id_a) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(xaverius_physical_device_count == 1);
+    assert(xaverius_tombstone_count == 0);
+    assert(dev->status != XAVERIUS_REGISTRY_REMOVED);
+
+    /* Stale source generation removal -> NOT_FOUND, no side effects. */
+    assert(XaveriusRegistryRemoveObservation(NULL, source_a, 2, obs_id_a) == XAVERIUS_REGISTRY_NOT_FOUND);
+    assert(xaverius_physical_device_count == 1);
+    assert(xaverius_tombstone_count == 0);
+
+    /* Wrong observation ID removal -> NOT_FOUND, no side effects. */
+    assert(XaveriusRegistryRemoveObservation(NULL, source_a, 1, obs_id_a + 1) == XAVERIUS_REGISTRY_NOT_FOUND);
+    assert(xaverius_physical_device_count == 1);
+    assert(xaverius_tombstone_count == 0);
+
+    /* Unknown source key removal -> NOT_FOUND, no side effects. */
+    assert(XaveriusRegistryRemoveObservation(NULL, "unknown", 1, obs_id_a) == XAVERIUS_REGISTRY_NOT_FOUND);
+    assert(xaverius_physical_device_count == 1);
+    assert(xaverius_tombstone_count == 0);
+
+    /* Source B's observation still present; ConfirmDeviceRemoved works. */
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev, dev_gen, &id, sizeof(id)) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev->status == XAVERIUS_REGISTRY_REMOVED);
+    assert(xaverius_physical_device_count == 0);
+    assert(xaverius_tombstone_count == 1);
+
+    /* Remove source B's observation after device is tombstoned. */
+    assert(XaveriusRegistryRemoveObservation(NULL, source_b, 1, obs_id_b) == XAVERIUS_REGISTRY_SUCCESS);
+
+    /* Repeated confirmation -> STALE_EVENT. */
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev, dev_gen, &id, sizeof(id)) == XAVERIUS_REGISTRY_STALE_EVENT);
+    assert(xaverius_tombstone_count == 1);
+
+    /* Ordered shutdown. */
+    XaveriusRegistryFini();
+}
+
 const testfunc_t*
 xaverius_registry_test(void)
 {
@@ -656,6 +746,7 @@ xaverius_registry_test(void)
         xaverius_registry_tombstone_lifecycle,
         xaverius_registry_publish_dix,
         xaverius_registry_observe_and_remove,
+        xaverius_registry_multi_source_observation,
         NULL,
     };
 
