@@ -228,7 +228,7 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `fe79f5bc3f` |
+| **HEAD** | `5f89c9f28e` |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` success) |
 | **Unit Tests** | ✅ All 18 xaverius test functions pass (11 registry + 7 protocol) |
