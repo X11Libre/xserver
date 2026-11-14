@@ -818,6 +818,7 @@ if build_namespace
 endif
 
 subdir('hw')
+subdir('abi')
 
 build_tests = get_option('tests') and host_machine.system() != 'windows'
 if build_tests
