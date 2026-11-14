@@ -340,6 +340,8 @@ jobs:
         # be evicted under load before the queued driver jobs restored it (then
         # the whole pipeline had to be re-run by hand). A registry image is not
         # subject to that LRU eviction.
+        # A fork PR's token cannot write packages, so there the SDK (/opt/x11)
+        # goes to the driver jobs as an artifact, unpacked over the deps image.
         runs-on: ubuntu-latest
         needs:
             - abi-changes-check
@@ -348,6 +350,11 @@ jobs:
         permissions:
             contents: read
             packages: write
+        env:
+            FORK_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        outputs:
+            image: ${{ steps.sdk.outputs.image }}
+            artifact: ${{ steps.sdk.outputs.artifact }}
         steps:
             - name: Check out repository code
               uses: actions/checkout@v6
@@ -356,13 +363,32 @@ jobs:
               run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
             - name: Build and push SDK image (xserver-sdk:<sha>)
+              id: sdk
               run: |
                   set -eux
                   owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
                   base="ghcr.io/$owner/xserver-ubuntu-build:${{ needs.ubuntu-deps-image.outputs.tag }}"
                   img="ghcr.io/$owner/xserver-sdk"
                   docker build --build-arg BASE="$base" -t "$img:${GITHUB_SHA}" -f .github/docker/sdk/Dockerfile .
-                  docker push "$img:${GITHUB_SHA}"
+                  if [ "$FORK_PR" = true ]; then
+                      cid=$(docker create "$img:${GITHUB_SHA}")
+                      docker cp "$cid:/opt/x11" - > "$RUNNER_TEMP/xserver-sdk.tar"
+                      docker rm "$cid"
+                      echo "image=$base" >> "$GITHUB_OUTPUT"
+                      echo "artifact=true" >> "$GITHUB_OUTPUT"
+                  else
+                      docker push "$img:${GITHUB_SHA}"
+                      echo "image=$img:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+                      echo "artifact=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: Keep the SDK for the driver jobs (fork PRs)
+              if: steps.sdk.outputs.artifact == 'true'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: xserver-sdk
+                  path: ${{ runner.temp }}/xserver-sdk.tar
+                  retention-days: 1
 
     drivers-build-ubuntu:
         needs:
@@ -380,8 +406,9 @@ jobs:
         # baked in under /opt/x11, so each driver job only compiles the driver
         # (no apt, no prereq build, no cache restore). The image is public, so it
         # pulls anonymously — no credentials / packages permission needed.
+        # On fork PRs this is the deps image, and the SDK comes as an artifact.
         container:
-            image: ghcr.io/x11libre/xserver-sdk:${{ github.sha }}
+            image: ${{ needs.build-sdk-image.outputs.image }}
         strategy:
             matrix:
                 driver:
@@ -441,6 +468,17 @@ jobs:
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
+
+            - name: Fetch the SDK (fork PRs)
+              if: needs.build-sdk-image.outputs.artifact == 'true'
+              uses: actions/download-artifact@v4
+              with:
+                  name: xserver-sdk
+                  path: sdk-artifact
+
+            - name: Install the SDK (fork PRs)
+              if: needs.build-sdk-image.outputs.artifact == 'true'
+              run: tar -xf sdk-artifact/xserver-sdk.tar -C /opt
 
             - name: compile driver ${{ matrix.driver }}
               run: .github/scripts/ubuntu/compile-driver-single.sh ${{ matrix.driver }}
