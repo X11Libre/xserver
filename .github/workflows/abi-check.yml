@@ -1,0 +1,66 @@
+name: ABI check
+
+permissions:
+    contents: read
+
+env:
+    X11_PREFIX:      /home/runner/x11
+    X11_BUILD_DIR:   /home/runner/build-deps
+
+on:
+    push:
+        branches: [ 'release/**' ]
+    pull_request:
+        branches: [ 'release/**' ]
+
+jobs:
+    abi-check:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  fetch-tags: true
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
+
+            - name: apt cache
+              uses: actions/cache/restore@v4
+              with:
+                path: /var/cache/apt
+                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
+                restore-keys: apt-cache-
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: X11 prereq cache
+              uses: actions/cache/restore@v4
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
+
+            - name: generic prereq
+              run:  .github/scripts/install-prereq.sh
+
+            - name: install libabigail
+              run: sudo apt-get install -y abigail-tools
+
+            - name: ABI check against the base release
+              run: .github/scripts/abi-check.sh "$RUNNER_TEMP/abi"
+
+            - name: keep the abidiff reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: abi-reports
+                  path: ${{ runner.temp }}/abi/reports
