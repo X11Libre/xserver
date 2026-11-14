@@ -14,6 +14,7 @@ permissions:
 
 jobs:
     notify:
+        if: github.repository == 'X11Libre/xserver'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
