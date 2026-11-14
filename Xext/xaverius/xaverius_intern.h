@@ -322,6 +322,10 @@ extern uint32_t xaverius_physical_device_count;
 extern struct xorg_list xaverius_tombstones;
 extern uint32_t xaverius_tombstone_count;
 
+/* Observation ID counter (defined in xaverius_registry.c). */
+extern uint64_t xaverius_next_observation_id;
+uint64_t xaverius_next_observation_id_fn(void);
+
 /* DIX resource type for published PhysicalDevices (server-private). */
 extern RESTYPE XaveriusPhysicalDeviceType;
 
@@ -380,16 +384,16 @@ int xaverius_compare_ordering_key(const char *a, const char *b);
 /* Discovery source and observation bookkeeping (minimal, server-side only).
  * Generation-checked, non-reusable generations for source and observation. */
 typedef struct _XaveriusDiscoverySource {
-    void *source_key;
-    uint64_t source_key_size;
+    const char *source_key;   /* borrowed for the call only */
     uint64_t source_generation;
+    uint64_t last_event_sequence; /* last source_event_sequence accepted */
     struct xorg_list list;
 } XaveriusDiscoverySource;
 
 typedef struct _XaveriusObservation {
-    void *source_key;
-    uint64_t source_key_size;
+    const char *source_key;   /* borrowed for the call only */
     uint64_t source_generation;
+    uint64_t source_event_sequence; /* monotonically increasing per source */
     uint64_t observation_id;
     XaveriusDeviceIdentity identity;
     XaveriusPhysicalDevice *device; /* canonical record reference */
@@ -397,23 +401,37 @@ typedef struct _XaveriusObservation {
     struct xorg_list list;
 } XaveriusObservation;
 
+/* Removal evidence submitted to ConfirmDeviceRemoved. source_key is borrowed
+ * for this call only; the registry resolves it to its registered source
+ * identity before returning. */
+typedef struct {
+    const char *source_key;
+    uint64_t source_generation;
+    uint64_t observation_id;
+    uint64_t source_event_sequence;
+    uint64_t physical_device_generation;
+} XaveriusDeviceRemovalEvidence;
+
 /* Submit or update an identity observation from a discovery source.
  * Returns a generation-checked canonical record reference only when identity
- * matching is unambiguous; never allocates a protocol XID. */
+ * matching is unambiguous; never allocates a protocol XID.
+ * source_event_sequence is the monotonically increasing per-source sequence
+ * captured when the source event was observed. out_observation_id returns a
+ * unique nonzero observation ID per new observation.
+ */
 XaveriusRegistryResult XaveriusRegistryObserveDevice(void *registry,
-    const XaveriusDeviceIdentity *identity_evidence,
-    uint64_t identity_evidence_size,
-    const void *source_key,
-    uint64_t source_key_size,
+    const char *source_key,
     uint64_t source_generation,
-    uint64_t observation_id,
+    uint64_t source_event_sequence,
+    const XaveriusDeviceIdentity *identity_evidence,
     XaveriusPhysicalDevice **out_device,
-    uint64_t *out_device_generation);
+    uint64_t *out_device_generation,
+    uint64_t *out_observation_id);
 
 /* Withdraw only this source's evidence. Must not mark hardware REMOVED
  * while other authoritative evidence still establishes the same incarnation. */
 XaveriusRegistryResult XaveriusRegistryRemoveObservation(void *registry,
-    const void *source_key,
+    const char *source_key,
     uint64_t source_generation,
     uint64_t observation_id);
 
@@ -422,8 +440,7 @@ XaveriusRegistryResult XaveriusRegistryRemoveObservation(void *registry,
 XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(void *registry,
     XaveriusPhysicalDevice *device,
     uint64_t device_generation,
-    const void *removal_evidence,
-    uint64_t removal_evidence_size);
+    const XaveriusDeviceRemovalEvidence *removal_evidence);
 
 /* Dispatch */
 int ProcXaveriusDispatch(ClientPtr client);

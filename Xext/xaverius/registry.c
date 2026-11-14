@@ -22,7 +22,7 @@ XaveriusObservation *
 xaverius_find_observation_by_evidence(const void *evidence,
                                       uint64_t evidence_size);
 XaveriusDiscoverySource *
-xaverius_find_discovery_source(const void *source_key, uint64_t source_key_size);
+xaverius_find_discovery_source(const char *source_key);
 
 uint64_t xaverius_next_generation_id(void);
 bool XaveriusPhysicalDeviceTypeInit(void);
@@ -38,6 +38,14 @@ uint64_t xaverius_next_generation = 1;
 uint64_t xaverius_next_generation_id(void)
 {
     return xaverius_next_generation++;
+}
+
+/* ---- Process-wide observation ID counter (non-reusable) ---- */
+uint64_t xaverius_next_observation_id = 1;
+
+uint64_t xaverius_next_observation_id_fn(void)
+{
+    return xaverius_next_observation_id++;
 }
 
 /* ---- Process-wide PhysicalDevice registry ---- */
@@ -192,14 +200,14 @@ void XaveriusRegistryFini(void)
 
     xorg_list_for_each_entry_safe(src, next_src, &xaverius_discovery_sources, list) {
         xorg_list_del(&src->list);
-        free(src->source_key);
+        free((void *)src->source_key);
         free(src);
     }
     xaverius_discovery_source_count = 0;
 
     xorg_list_for_each_entry_safe(obs, next_obs, &xaverius_observations, list) {
         xorg_list_del(&obs->list);
-        free(obs->source_key);
+        free((void *)obs->source_key);
         free(obs);
     }
     xaverius_observation_count = 0;
@@ -893,15 +901,33 @@ XaveriusObservation *xaverius_find_observation_by_evidence(
 }
 
 XaveriusDiscoverySource *xaverius_find_discovery_source(
-    const void *source_key,
-    uint64_t source_key_size)
+    const char *source_key)
 {
     XaveriusDiscoverySource *src;
 
     xorg_list_for_each_entry(src, &xaverius_discovery_sources, list) {
-        if (src->source_key_size == source_key_size &&
-            memcmp(src->source_key, source_key, source_key_size) == 0)
+        if (strcmp(src->source_key, source_key) == 0)
             return src;
+    }
+
+    return NULL;
+}
+
+/* Find the latest observation for a given source + event sequence, used for
+ * idempotent replay detection. */
+static XaveriusObservation *
+xaverius_find_observation_by_sequence(
+    const char *source_key,
+    uint64_t source_generation,
+    uint64_t source_event_sequence)
+{
+    XaveriusObservation *obs;
+
+    xorg_list_for_each_entry(obs, &xaverius_observations, list) {
+        if (strcmp(obs->source_key, source_key) == 0 &&
+            obs->source_generation == source_generation &&
+            obs->source_event_sequence == source_event_sequence)
+            return obs;
     }
 
     return NULL;
@@ -911,40 +937,40 @@ XaveriusDiscoverySource *xaverius_find_discovery_source(
 #pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusRegistryResult XaveriusRegistryObserveDevice(
     void *registry,
-    const XaveriusDeviceIdentity *identity_evidence,
-    uint64_t identity_evidence_size,
-    const void *source_key,
-    uint64_t source_key_size,
+    const char *source_key,
     uint64_t source_generation,
-    uint64_t observation_id,
+    uint64_t source_event_sequence,
+    const XaveriusDeviceIdentity *identity_evidence,
     XaveriusPhysicalDevice **out_device,
-    uint64_t *out_device_generation)
+    uint64_t *out_device_generation,
+    uint64_t *out_observation_id)
 {
     XaveriusPhysicalDevice *dev;
     XaveriusObservation *obs;
     XaveriusDiscoverySource *src;
+    XaveriusRegistryResult result = XAVERIUS_REGISTRY_INTERNAL_ERROR;
+    uint64_t new_obs_id;
 
-    if (identity_evidence == NULL || source_key == NULL ||
-        out_device == NULL)
+    if (source_key == NULL || out_device == NULL || out_observation_id == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    if (identity_evidence_size != sizeof(XaveriusDeviceIdentity))
-        return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
+    /* source_event_sequence must be nonzero per spec §1037. */
+    if (source_event_sequence == 0)
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Resolve or register the discovery source. */
-    src = xaverius_find_discovery_source(source_key, source_key_size);
+    src = xaverius_find_discovery_source(source_key);
     if (src == NULL) {
         src = calloc(1, sizeof(*src));
         if (src == NULL)
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-        src->source_key = calloc(1, source_key_size);
+        src->source_key = strdup(source_key);
         if (src->source_key == NULL) {
             free(src);
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
         }
-        memcpy(src->source_key, source_key, source_key_size);
-        src->source_key_size = source_key_size;
         src->source_generation = source_generation;
+        src->last_event_sequence = 0;
         xorg_list_init(&src->list);
         xorg_list_append(&src->list, &xaverius_discovery_sources);
         xaverius_discovery_source_count++;
@@ -953,72 +979,88 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
          * accepted. Stale or future generations are rejected. */
         if (source_generation != src->source_generation)
             return XAVERIUS_REGISTRY_STALE_EVENT;
+
+        /* Validate source event sequence: must be strictly increasing
+         * within a source generation per spec §1037. */
+        if (source_event_sequence < src->last_event_sequence + 1)
+            return XAVERIUS_REGISTRY_STALE_EVENT;
     }
 
-    /* Canonicalize identity: find existing exact incarnation.
-     * Only search if we actually have identity evidence. */
+    /* Canonicalize identity: find existing exact incarnation. */
     dev = NULL;
-    if (identity_evidence != NULL &&
-        identity_evidence_size == sizeof(XaveriusDeviceIdentity)) {
+    if (identity_evidence != NULL) {
         dev = xaverius_find_device_by_identity(identity_evidence);
     }
 
-    XaveriusRegistryResult result = XAVERIUS_REGISTRY_INTERNAL_ERROR;
+    /* Idempotent replay detection: same source + same event sequence. */
+    if (src->last_event_sequence == source_event_sequence) {
+        XaveriusObservation *prev_obs =
+            xaverius_find_observation_by_sequence(source_key, source_generation,
+                                                  source_event_sequence);
+        if (prev_obs != NULL) {
+            /* Same payload → idempotent: return existing observation ID. */
+            if (identity_evidence != NULL &&
+                prev_obs->device != NULL &&
+                memcmp(&prev_obs->identity, identity_evidence,
+                       sizeof(XaveriusDeviceIdentity)) == 0) {
+                *out_observation_id = prev_obs->observation_id;
+                *out_device = prev_obs->device;
+                if (out_device_generation != NULL)
+                    *out_device_generation = prev_obs->device_generation;
+                /* Additional caller-owned reference for repeated success. */
+                prev_obs->device->caller_refcount++;
+                return XAVERIUS_REGISTRY_SUCCESS;
+            }
+            /* Different payload for same sequence → conflict. */
+            return XAVERIUS_REGISTRY_IDENTITY_CONFLICT;
+        }
+    }
+
+    /* Allocate a unique nonzero observation ID. */
+    new_obs_id = xaverius_next_observation_id_fn();
+
+    obs = calloc(1, sizeof(*obs));
+    if (obs == NULL)
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+
+    obs->source_key = strdup(source_key);
+    if (obs->source_key == NULL) {
+        free(obs);
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+    }
+    obs->source_generation = source_generation;
+    obs->source_event_sequence = source_event_sequence;
+    obs->observation_id = new_obs_id;
+    if (identity_evidence != NULL)
+        obs->identity = *identity_evidence;
+    else
+        memset(&obs->identity, 0, sizeof(obs->identity));
+    obs->device = dev;
+    obs->device_generation = dev ? dev->device_generation : 0;
+    xorg_list_init(&obs->list);
+    xorg_list_append(&obs->list, &xaverius_observations);
+    xaverius_observation_count++;
+
+    /* Update the source's last used event sequence. */
+    src->last_event_sequence = source_event_sequence;
+
+    *out_observation_id = new_obs_id;
 
     if (dev != NULL) {
-        /* Unambiguous match: store observation linking source to device,
-         * then return canonical record reference. */
-        obs = calloc(1, sizeof(*obs));
-        if (obs == NULL)
-            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-
-        obs->source_key = calloc(1, source_key_size);
-        if (obs->source_key == NULL) {
-            free(obs);
-            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-        }
-        memcpy(obs->source_key, source_key, source_key_size);
-        obs->source_key_size = source_key_size;
-        obs->source_generation = source_generation;
-        obs->observation_id = observation_id;
-        obs->identity = *identity_evidence;
-        obs->device = dev;
-        obs->device_generation = dev->device_generation;
-        xorg_list_init(&obs->list);
-        xorg_list_append(&obs->list, &xaverius_observations);
-        xaverius_observation_count++;
-
+        /* Unambiguous match: return canonical record reference. */
         *out_device = dev;
         if (out_device_generation != NULL)
             *out_device_generation = dev->device_generation;
+        /* Additional caller-owned reference on success. */
+        dev->caller_refcount++;
         result = XAVERIUS_REGISTRY_SUCCESS;
     } else {
         /* Ambiguous or no match: observation retained but device unpublished.
          * Observation retained for provenance; no XID allocated. */
-        obs = calloc(1, sizeof(*obs));
-        if (obs == NULL)
-            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-
-        obs->source_key = calloc(1, source_key_size);
-        if (obs->source_key == NULL) {
-            free(obs);
-            return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
-        }
-        memcpy(obs->source_key, source_key, source_key_size);
-        obs->source_key_size = source_key_size;
-        obs->source_generation = source_generation;
-        obs->observation_id = observation_id;
-        obs->identity = *identity_evidence;
-        obs->device = dev;
-        obs->device_generation = dev ? dev->device_generation : 0;
-        xorg_list_init(&obs->list);
-        xorg_list_append(&obs->list, &xaverius_observations);
-        xaverius_observation_count++;
-
-    *out_device = NULL;
-    if (out_device_generation != NULL)
-        *out_device_generation = 0;
-    result = XAVERIUS_REGISTRY_PENDING;
+        *out_device = NULL;
+        if (out_device_generation != NULL)
+            *out_device_generation = 0;
+        result = XAVERIUS_REGISTRY_PENDING;
     }
 
     return result;
@@ -1030,7 +1072,7 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
 #pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusRegistryResult XaveriusRegistryRemoveObservation(
     void *registry,
-    const void *source_key,
+    const char *source_key,
     uint64_t source_generation,
     uint64_t observation_id)
 {
@@ -1041,13 +1083,12 @@ XaveriusRegistryResult XaveriusRegistryRemoveObservation(
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     xorg_list_for_each_entry_safe(obs, next_obs, &xaverius_observations, list) {
-        if (obs->source_key_size != 0 &&
-            memcmp(obs->source_key, source_key, obs->source_key_size) == 0 &&
+        if (strcmp(obs->source_key, source_key) == 0 &&
             obs->source_generation == source_generation &&
             obs->observation_id == observation_id) {
             xorg_list_del(&obs->list);
             xaverius_observation_count--;
-            free(obs->source_key);
+            free((void *)obs->source_key);
             free(obs);
             result = XAVERIUS_REGISTRY_SUCCESS;
             break;
@@ -1063,8 +1104,7 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
     void *registry,
     XaveriusPhysicalDevice *device,
     uint64_t device_generation,
-    const void *removal_evidence,
-    uint64_t removal_evidence_size)
+    const XaveriusDeviceRemovalEvidence *removal_evidence)
 {
     XaveriusObservation *obs = NULL;
 
@@ -1072,7 +1112,7 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Removal evidence must be present and well-formed. */
-    if (removal_evidence == NULL || removal_evidence_size == 0)
+    if (removal_evidence == NULL)
         return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
 
     /* Generation must identify the exact current device incarnation. */
@@ -1087,10 +1127,18 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
      * this exact device; authority comes from the registered source, not
      * from any caller-supplied flag. */
     obs = xaverius_find_observation_by_evidence(removal_evidence,
-                                                removal_evidence_size);
+                                                sizeof(XaveriusDeviceRemovalEvidence));
     if (obs == NULL ||
         obs->device != device ||
         obs->device_generation != device_generation)
+        return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
+
+    /* Validate source generation, observation ID and event sequence match
+     * the removal evidence. */
+    if (strcmp(obs->source_key, removal_evidence->source_key) != 0 ||
+        obs->source_generation != removal_evidence->source_generation ||
+        obs->observation_id != removal_evidence->observation_id ||
+        obs->source_event_sequence != removal_evidence->source_event_sequence)
         return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
 
     /* Move the record from the active device list to the tombstone list
