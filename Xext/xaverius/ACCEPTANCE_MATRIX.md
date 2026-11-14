@@ -131,7 +131,7 @@ xaverius_registry_publish_dix...
  Pass
 ---------------------
 ```
-All 11 test functions in `xaverius_registry_test()` pass.
+All 10 test functions in `xaverius_registry_test()` pass.
 
 ### Protocol/Dispatch: QueryVersion Contract
 
@@ -227,7 +227,7 @@ ninja -C build-xaverius
 | **HEAD** | `58fe14b097` |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` success) |
-| **Unit Tests** | ✅ All 20 xaverius test functions pass (13 registry + 7 protocol) |
+| **Unit Tests** | ✅ All 17 xaverius test functions pass (10 registry + 7 protocol) |
 | **ABI-v1** | ✅ Conformant (all structs versioned, opaque handles, deep-copy ops, X_EXPORT) |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
 | **Blockers** | None |
