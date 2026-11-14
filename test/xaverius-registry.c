@@ -711,11 +711,13 @@ xaverius_module_role_admission_gate(void)
     snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
     setup_min_reg(&reg, &id, &ops, role);
     reset_hook_counts();
+    snapshot_calls = 0;
     assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
                                              &bind_gen) == XAVERIUS_REGISTRY_UNAVAILABLE);
     assert(dev == NULL);
     assert(test_retain_calls == 0);
     assert(test_release_calls == 0);
+    assert(snapshot_calls == 0);
 
     XaveriusModuleRoleFinalize(role);
     XaveriusRegistryFini();
