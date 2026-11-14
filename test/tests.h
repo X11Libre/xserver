@@ -50,6 +50,7 @@ const testfunc_t* protocol_eventconvert_test(void);
 const testfunc_t* xi2_test(void);
 const testfunc_t* ddc_tests(void);
 const testfunc_t* xaverius_registry_test(void);
+const testfunc_t* xaverius_qv_protocol_test(void);
 
 #endif /* TESTS_H */
 

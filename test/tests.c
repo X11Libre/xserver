@@ -27,6 +27,7 @@ main(int argc, char **argv)
 #endif
 #ifdef XAVERIUS_TESTS
     run_test(xaverius_registry_test);
+    run_test(xaverius_qv_protocol_test);
 #endif
 
 #ifdef LDWRAP_TESTS

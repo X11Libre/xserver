@@ -243,6 +243,7 @@ if build_xorg
 
     if get_option('xaverius')
         unit_sources += ['xaverius-registry.c']
+        unit_sources += ['xaverius-qv-protocol.c']
         unit_c_args += ['-DXAVERIUS_TESTS']
     endif
 
