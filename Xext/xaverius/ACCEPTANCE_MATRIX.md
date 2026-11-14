@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius`  
-**HEAD:** `57765cd71f`  
+**HEAD:** `6ab6d263e0`  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-12  
 **Auditor:** Defiant (fleet ship)
@@ -12,7 +12,7 @@
 
 | Stage | Spec Coverage | Implementation Coverage | Test Coverage | Verdict |
 |-------|---------------|-------------------------|---------------|---------|
-| **Stage 1: ModuleRole** | Complete (spec §3–4, addendum §2–4) | Complete (`registry.c` + `xaverius_intern.h`) | Full (6 test functions in `xaverius-registry.c`) | ✅ PASS |
+| **Stage 1: ModuleRole** | Complete (spec §3–4, addendum §2–4) | Complete (`registry.c` + `xaverius_intern.h`) | Full (10 test functions in `xaverius-registry.c`) | ✅ PASS |
 | **Stage 2: Binding** | Complete (spec §5–6, addendum §3) | Complete (`registry.c` binding alloc/free + `XaveriusRegistryRegisterDdxDevice`) | Full (registration paths + ownership tests) | ✅ PASS |
 | **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove + multi-source observation + registration contract tests) | ✅ PASS |
 | **Stage 4: DIX Publish/Remove/Shutdown** | Complete (addendum §3–4, spec §8) | Complete (`XaveriusPhysicalDevicePublish`, `DIXDestroy`, Observe/ConfirmRemoved, `RegistryFini`) | Full (publish + tombstone lifecycle tests) | ✅ PASS |
@@ -188,7 +188,7 @@ Xext/xaverius/dispatch.c             # QueryVersion dispatch (+flags/length vali
 Xext/xaverius/init.c                 # Extension init, atoms, screen private key
 Xext/xaverius/screen.c               # ScreenAttachment (DDX per-screen)
 Xext/xaverius/meson.build            # Static library build
-test/xaverius-registry.c             # Unit tests (11 test functions)
+test/xaverius-registry.c             # Unit tests (10 test functions)
 test/xaverius-qv-protocol.c          # Protocol contract tests (7 test functions)
 test/meson.build                     # Integrated into test/tests via XAVERIUS_TESTS
 test/tests.c                         # Test runner (calls xaverius_registry_test + xaverius_qv_protocol_test)
@@ -224,7 +224,7 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `57765cd71f` |
+| **HEAD** | `6ab6d263e0` |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` success) |
 | **Unit Tests** | ✅ All 17 xaverius test functions pass (10 registry + 7 protocol) |
