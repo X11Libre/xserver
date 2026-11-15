@@ -41,3 +41,4 @@ Example, from a meson driver's source tree:
 
 Needs meson, ninja, git, pkg-config, binutils (`nm`) and libabigail
 (`abidiff`); autotools modules also need autoconf, automake and libtool.
+
