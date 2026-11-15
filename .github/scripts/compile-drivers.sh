@@ -30,3 +30,25 @@ build_drv_ac xf86-video-vmware      $X11L_DRV_GIT/xf86-video-vmware      xf86-vi
 # doesn't compile on Linux
 # build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       master
 # build_drv_ac xf86-input-keyboard    $X11L_DRV_GIT/xf86-input-keyboard    master
+
+# every server symbol a module needs must be exported by this server;
+# libdrm and libxcvt are in $X11_PREFIX, outside the server's libdir
+abi_tools=$(pkg-config --variable=abi_tools_dir xorg-server)
+prefix=$(pkg-config --variable=prefix xorg-server)
+failed=
+for drv in xf86-*; do
+    modules=$(find "$drv" -path '*/.libs/*_drv.so')
+    if [ -z "$modules" ]; then
+        echo "no *_drv.so built for $drv" >&2
+        failed="$failed $drv"
+    fi
+    for mod in $modules; do
+        LD_LIBRARY_PATH=$X11_PREFIX/lib/$MACHINE \
+            "$abi_tools/check-symbols.sh" --prefix "$prefix" "$mod" ||
+            failed="$failed $mod"
+    done
+done
+if [ -n "$failed" ]; then
+    echo "symbol check failed:$failed" >&2
+    exit 1
+fi
