@@ -57,8 +57,9 @@ defined() {
 	nm -D --defined-only "$1" 2>/dev/null | tr -s ' ' | cut -d' ' -f3 | cut -d@ -f1
 }
 
+# sparc64 modules have a nameless undefined entry
 nm -D --undefined-only "$drv" | grep ' U ' | tr -s ' ' | cut -d' ' -f3 |
-	cut -d@ -f1 | sort -u >"$tmp/undef"
+	cut -d@ -f1 | sed '/^$/d' | sort -u >"$tmp/undef"
 
 # libraries installed with the server (e.g. libdrm in the same prefix)
 (LD_LIBRARY_PATH=$libdir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
