@@ -175,6 +175,7 @@ if build_xorg
      '../mi/miinitext.h',
      '../mi/micmap.c',
      '../mi/micmap.h',
+     'dri3.c',
      'fixes.c',
      'input.c',
      'list.c',

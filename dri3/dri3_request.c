@@ -37,29 +37,12 @@
 #include "randrstr_priv.h"
 #include "dixstruct_priv.h"
 
-static Bool
-dri3_screen_can_one_point_four(ScreenPtr screen)
+static CARD32
+dri3_screen_minor_version(ScreenPtr screen)
 {
     dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
 
-    return dri3 &&
-        dri3->info &&
-        dri3->info->version >= 4 &&
-        dri3->info->import_syncobj;
-}
-
-static Bool
-dri3_screen_can_one_point_two(ScreenPtr screen)
-{
-    dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
-
-    if (dri3 && dri3->info && dri3->info->version >= 2 &&
-        dri3->info->pixmap_from_fds && dri3->info->fds_from_pixmap &&
-        dri3->info->get_formats && dri3->info->get_modifiers &&
-        dri3->info->get_drawable_modifiers)
-        return TRUE;
-
-    return FALSE;
+    return dri3_info_minor_version(dri3 ? dri3->info : NULL);
 }
 
 static int
@@ -74,26 +57,15 @@ proc_dri3_query_version(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xDRI3QueryVersionReq);
 
+    /* the version every screen and GPU screen supports */
     DIX_FOR_EACH_SCREEN({
-        if (!dri3_screen_can_one_point_two(walkScreen)) {
-            reply.minorVersion = 0;
-            break;
-        }
-        if (!dri3_screen_can_one_point_four(walkScreen)) {
-            reply.minorVersion = 2;
-            break;
-        }
+        reply.minorVersion = min(reply.minorVersion,
+                                 dri3_screen_minor_version(walkScreen));
     });
 
     DIX_FOR_EACH_GPU_SCREEN({
-        if (!dri3_screen_can_one_point_two(walkScreen)) {
-            reply.minorVersion = 0;
-            break;
-        }
-        if (!dri3_screen_can_one_point_four(walkScreen)) {
-            reply.minorVersion = 2;
-            break;
-        }
+        reply.minorVersion = min(reply.minorVersion,
+                                 dri3_screen_minor_version(walkScreen));
     });
 
     /* From DRI3 proto:
