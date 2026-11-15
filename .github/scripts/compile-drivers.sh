@@ -22,9 +22,9 @@ build_xf86drv_ac    input-void              25.0.0
 build_xf86drv_ac    input-wacom             25.0.0
 
 build_xf86drv_ac    video-amdgpu            25.0.0
-build_xf86drv_ac    video-apm               25.0.0
+build_xf86drv_ac    video-apm               25.0.1
 build_xf86drv_ac    video-ark               25.0.0
-build_xf86drv_ac    video-ast               25.0.0
+build_xf86drv_ac    video-ast               25.0.1
 build_xf86drv_ac    video-ati               25.0.0
 build_xf86drv_ac    video-chips             25.0.0
 build_xf86drv_ac    video-cirrus            25.0.0
@@ -41,7 +41,7 @@ build_xf86drv_ac    video-neomagic          25.0.0
 build_xf86drv_ac    video-nested            25.0.0
 build_xf86drv_ac    video-nouveau           25.0.0
 build_xf86drv_ac    video-nv                25.0.0
-build_xf86drv_ac    video-omap              25.0.0
+build_xf86drv_ac    video-omap              25.0.1
 build_xf86drv_ac    video-qxl               25.0.0
 build_xf86drv_ac    video-r128              25.0.0
 build_xf86drv_ac    video-rendition         25.0.0
