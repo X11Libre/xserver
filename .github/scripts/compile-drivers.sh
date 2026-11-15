@@ -81,6 +81,10 @@ for drv in xf86-*; do
         annotate "no *_drv.so built for $drv"
         failed="$failed $drv"
     fi
+    # the SBUS API they use is built into the server only on SPARC
+    case $drv in
+    xf86-video-sun*) continue ;;
+    esac
     for mod in $modules; do
         if ! out=$(LD_LIBRARY_PATH=$X11_PREFIX/lib/$MACHINE \
                 "$abi_tools/check-symbols.sh" --prefix "$prefix" "$mod" 2>&1); then
