@@ -6,6 +6,7 @@
 #include <dix-config.h>
 
 #include <assert.h>
+#include <stddef.h>
 
 #include "tests-common.h"
 
