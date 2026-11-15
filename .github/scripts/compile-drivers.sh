@@ -70,16 +70,25 @@ build_xf86drv_ac    video-xgi               25.0.2
 abi_tools=$(pkg-config --variable=abi_tools_dir xorg-server)
 prefix=$(pkg-config --variable=prefix xorg-server)
 failed=
+# a GitHub annotation, shown at the top of the run and in its notification
+annotate() {
+    local msg=${1//'%'/%25}
+    echo "::error::${msg//$'\n'/%0A}"
+}
 for drv in xf86-*; do
     modules=$(find "$drv" -path '*/.libs/*_drv.so')
     if [ -z "$modules" ]; then
-        echo "no *_drv.so built for $drv" >&2
+        annotate "no *_drv.so built for $drv"
         failed="$failed $drv"
     fi
     for mod in $modules; do
-        LD_LIBRARY_PATH=$X11_PREFIX/lib/$MACHINE \
-            "$abi_tools/check-symbols.sh" --prefix "$prefix" "$mod" ||
+        if ! out=$(LD_LIBRARY_PATH=$X11_PREFIX/lib/$MACHINE \
+                "$abi_tools/check-symbols.sh" --prefix "$prefix" "$mod" 2>&1); then
+            annotate "$out"
             failed="$failed $mod"
+        else
+            echo "$out"
+        fi
     done
 done
 if [ -n "$failed" ]; then
