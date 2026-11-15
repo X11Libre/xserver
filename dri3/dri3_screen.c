@@ -296,3 +296,18 @@ int dri3_import_syncobj(ClientPtr client, ScreenPtr screen, XID id, int fd)
 
     return Success;
 }
+
+/* Highest DRI3 minor version a screen's provider supports. */
+CARD32
+dri3_info_minor_version(const dri3_screen_info_rec *info)
+{
+    if (!info || info->version < 1 || !info->fd_from_pixmap)
+        return 0;
+    if (info->version < 2 || !info->pixmap_from_fds ||
+        !info->fds_from_pixmap || !info->get_formats ||
+        !info->get_modifiers || !info->get_drawable_modifiers)
+        return 1;
+    if (info->version < 4 || !info->import_syncobj)
+        return 2;
+    return 4;
+}
