@@ -191,6 +191,8 @@ jobs:
                           - 'xorg-server.m4'
                           - 'hw/xfree86/xlibre-server.h.meson.in'
                           - 'hw/xfree86/drivers/input/inputtest/xf86-input-inputtest-protocol.h'
+                          - 'abi/**'
+                          - '.github/scripts/ubuntu/compile-driver-single.sh'
 
     xserver-build-ubuntu-debug:
         env:
