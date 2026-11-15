@@ -260,6 +260,24 @@ optionTypeToString(OptionValueType type)
     }
 }
 
+static XF86ConfFilesPtr
+configureFilesSection(void)
+{
+    parsePrologue(XF86ConfFilesPtr, XF86ConfFilesRec);
+
+    if(xf86ModulePath)
+    {
+        ptr->file_modulepath = XNFstrdup(xf86ModulePath);
+    }
+
+    if(defaultFontPath)
+    {
+        ptr->file_fontpath = XNFstrdup(defaultFontPath);
+    }
+
+    return ptr;
+}
+
 static XF86ConfDevicePtr
 configureDeviceSection(int screennum)
 {
@@ -427,19 +445,6 @@ configureModuleSection(void)
         }
         free(elist);
     }
-
-    return ptr;
-}
-
-static XF86ConfFilesPtr
-configureFilesSection(void)
-{
-    parsePrologue(XF86ConfFilesPtr, XF86ConfFilesRec);
-
-    if (xf86ModulePath)
-        ptr->file_modulepath = XNFstrdup(xf86ModulePath);
-    if (defaultFontPath)
-        ptr->file_fontpath = XNFstrdup(defaultFontPath);
 
     return ptr;
 }
