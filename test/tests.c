@@ -13,6 +13,7 @@ main(int argc, char **argv)
     run_test(string_test);
 
 #ifdef XORG_TESTS
+    run_test(dri3_test);
     run_test(fixes_test);
     run_test(input_test);
     run_test(misc_test);
