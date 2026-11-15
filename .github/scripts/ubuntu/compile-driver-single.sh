@@ -30,6 +30,10 @@ annotate() {
 abi_tools=$(pkg-config --variable=abi_tools_dir xorg-server)
 modules=$(find "xf86-$DRIVER_NAME" -path '*/.libs/*_drv.so')
 [ -n "$modules" ] || { annotate "no *_drv.so built for $DRIVER_NAME"; exit 1; }
+# the SBUS API they use is built into the server only on SPARC
+case $DRIVER_NAME in
+video-sun*) exit 0 ;;
+esac
 failed=
 for mod in $modules; do
     if ! out=$("$abi_tools/check-symbols.sh" --prefix "$X11_PREFIX" "$mod" 2>&1); then
