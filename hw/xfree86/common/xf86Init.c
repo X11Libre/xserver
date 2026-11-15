@@ -283,7 +283,6 @@ InitOutput(int argc, char **argv)
 {
     int i, j, k, scr_index;
     const char **modulelist;
-    void **optionlist;
     bool autoconfig = FALSE;
     bool sigio_blocked = FALSE;
     bool want_hw_access = FALSE;
@@ -354,17 +353,10 @@ InitOutput(int argc, char **argv)
 
         xf86ExtensionInit();
 
-        /* Load all modules specified explicitly in the config file */
-        if ((modulelist = xf86ModulelistFromConfig(&optionlist))) {
-            xf86LoadModules(modulelist, optionlist);
-            free(modulelist);
-            free(optionlist);
-        }
-
-        /* Load all driver modules specified in the config file */
-        /* If there aren't any specified in the config file, autoconfig them */
-        /* FIXME: Does not handle multiple active screen sections, but I'm not
-         * sure if we really want to handle that case*/
+        // Load all driver modules specified in the config file
+        // If there aren't any, autoconfig them.
+        // FIXME: Does not handle multiple active screen sections,
+        // but I'm not sure if we really want to handle that case
         configured_device = xf86ConfigLayout.screens->screen->device;
         if ((!configured_device) || (!configured_device->driver)) {
             if (!autoConfigDevice(configured_device)) {
@@ -1252,11 +1244,8 @@ ddxUseMsg(void)
     ErrorF("\n");
 }
 
-/*
- * xf86LoadModules iterates over a list that is being passed in.
- */
-Bool
-xf86LoadModules(const char **list, void **optlist)
+// Iterates over a list that is being passed in.
+Bool xf86LoadModules(const char **list, void **optlist)
 {
     int errmaj;
     void *opt;
