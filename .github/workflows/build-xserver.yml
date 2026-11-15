@@ -142,9 +142,9 @@ jobs:
                     - input-void:25.0.0
                     - input-wacom:25.0.0
                     - video-amdgpu:25.0.0
-                    - video-apm:25.0.0
+                    - video-apm:25.0.1
                     - video-ark:25.0.0
-                    - video-ast:25.0.0
+                    - video-ast:25.0.1
                     - video-ati:25.0.0
                     - video-chips:25.0.0
                     - video-cirrus:25.0.0
@@ -161,7 +161,7 @@ jobs:
                     - video-nested:25.0.0
                     - video-nouveau:25.0.0
                     - video-nv:25.0.0
-                    - video-omap:25.0.0
+                    - video-omap:25.0.1
                     - video-qxl:25.0.0
                     - video-r128:25.0.0
                     - video-rendition:25.0.0
