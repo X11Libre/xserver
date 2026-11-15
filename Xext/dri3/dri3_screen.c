@@ -310,7 +310,8 @@ dri3_info_minor_version(const dri3_screen_info_rec *info)
         !info->fds_from_pixmap || !info->get_formats ||
         !info->get_modifiers || !info->get_drawable_modifiers)
         return 1;
+    /* 1.3 only adds SetDRMDeviceInUse, which the server handles alone */
     if (info->version < 4 || !info->import_syncobj)
-        return 2;
+        return 3;
     return 4;
 }
