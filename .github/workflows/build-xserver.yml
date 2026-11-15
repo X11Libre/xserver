@@ -128,6 +128,7 @@ jobs:
             - drivers-prepare-ubuntu
         runs-on: ubuntu-latest
         strategy:
+            fail-fast: false
             matrix:
                 driver:
                     - input-elographics:25.0.0
