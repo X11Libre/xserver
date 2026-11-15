@@ -92,7 +92,8 @@ dri3_minor_version_test(void)
             Bool two = one && version >= 2 &&
                 (mask & 0x3e) == 0x3e;  /* the five 1.2 callbacks */
             Bool four = two && version >= 4 && (mask & (1 << 6));
-            CARD32 expected = four ? 4 : two ? 2 : one ? 1 : 0;
+            /* 1.3 needs nothing from the driver beyond 1.2 */
+            CARD32 expected = four ? 4 : two ? 3 : one ? 1 : 0;
 
             assert(dri3_info_minor_version(&info) == expected);
         }
