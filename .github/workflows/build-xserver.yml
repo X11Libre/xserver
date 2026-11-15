@@ -409,6 +409,7 @@ jobs:
         container:
             image: ${{ needs.build-sdk-image.outputs.image }}
         strategy:
+            fail-fast: false
             matrix:
                 driver:
                     - input-elographics:25.0.0
