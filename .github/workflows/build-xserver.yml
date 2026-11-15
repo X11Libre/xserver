@@ -170,29 +170,109 @@ jobs:
                   echo "::endgroup::"
                   exit "$rc"
 
+    # Decides whether the driver jobs run: compares the staged SDK headers,
+    # Xorg and the library modules of the base and head commits (warnings,
+    # green) and turns red when that comparison itself breaks. Tags skip it;
+    # the driver jobs always run for tags.
     abi-changes-check:
         runs-on: ubuntu-latest
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         outputs:
-            abi_changed: ${{ steps.filter.outputs.abi_changed }}
+            abi_changed: ${{ steps.detect.outputs.abi_changed }}
+        env:
+            BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         steps:
             - uses: actions/checkout@v6
               with:
                   fetch-depth: 0
-            - uses: dorny/paths-filter@v3
-              id: filter
+
+            - name: stage cache keys
+              id: keys
+              run: |
+                  prefix="abi-stage-$ImageOS-$(sha256sum abi/build-server.sh | cut -c1-16)"
+                  echo "base=$prefix-$BASE_SHA" >> "$GITHUB_OUTPUT"
+                  echo "head=$prefix-$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+
+            - uses: ./.github/actions/ubuntu-install-pkg
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+
+            - name: X11 prereq cache
+              uses: actions/cache/restore@v5
               with:
-                  filters: |
-                      abi_changed:
-                          - 'include/**'
-                          - 'meson.build'
-                          - 'meson_options.txt'
-                          - 'xorg-server.pc.in'
-                          - 'xlibre-server.pc.in'
-                          - 'xorg-server.m4'
-                          - 'hw/xfree86/xlibre-server.h.meson.in'
-                          - 'hw/xfree86/drivers/input/inputtest/xf86-input-inputtest-protocol.h'
-                          - 'abi/**'
-                          - '.github/scripts/ubuntu/compile-driver-single.sh'
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                    ${{ env.X11_BUILD_DIR }}/goxproto
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
+
+            - name: X11 prereqs
+              run: .github/scripts/ubuntu/install-prereq.sh
+
+            - name: install libabigail
+              run: sudo apt-get install -y abigail-tools
+
+            # A stage is cached as one tar file at a fixed path (the cache
+            # version includes the path), packed and unpacked here so that
+            # no stored permissions are applied.
+            - name: restore the base stage
+              id: base-cache
+              uses: actions/cache/restore@v5
+              with:
+                  path: abi-cache/stage.tar
+                  key: ${{ steps.keys.outputs.base }}
+
+            - name: unpack the base stage
+              if: steps.base-cache.outputs.cache-hit == 'true'
+              run: |
+                  mkdir -p abi-work/base
+                  tar -xf abi-cache/stage.tar -C abi-work/base \
+                      --no-same-permissions --no-same-owner
+
+            - name: compare base and head
+              id: detect
+              run: .github/scripts/abi-detect.sh abi-work "$BASE_SHA" "$GITHUB_SHA"
+
+            - name: pack the base stage
+              id: pack-base
+              if: always() && steps.detect.outputs.base_staged == 'true' && steps.base-cache.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p abi-cache
+                  tar -cf abi-cache/stage.tar -C abi-work/base --mode=u+rwX root
+
+            - name: save the base stage
+              if: always() && steps.pack-base.outcome == 'success'
+              uses: actions/cache/save@v5
+              with:
+                  path: abi-cache/stage.tar
+                  key: ${{ steps.keys.outputs.base }}
+
+            - name: pack the head stage
+              id: pack-head
+              if: always() && steps.detect.outputs.head_staged == 'true'
+              run: |
+                  mkdir -p abi-cache
+                  tar -cf abi-cache/stage.tar -C abi-work/head --mode=u+rwX root
+
+            - name: save the head stage
+              if: always() && steps.pack-head.outcome == 'success'
+              uses: actions/cache/save@v5
+              with:
+                  path: abi-cache/stage.tar
+                  key: ${{ steps.keys.outputs.head }}
+
+            - name: keep the reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: abi-detect
+                  path: abi-work/reports
+                  if-no-files-found: ignore
 
     xserver-build-ubuntu-debug:
         env:
@@ -301,7 +381,11 @@ jobs:
         # SDK is its only consumer.
         runs-on: ubuntu-latest
         needs: abi-changes-check
-        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+        if: >-
+            !cancelled() &&
+            (needs.abi-changes-check.outputs.abi_changed == 'true' ||
+             needs.abi-changes-check.result == 'failure' ||
+             startsWith(github.ref, 'refs/tags/'))
         permissions:
             contents: read
             packages: write
@@ -346,7 +430,11 @@ jobs:
         needs:
             - abi-changes-check
             - ubuntu-deps-image
-        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+        if: >-
+            !cancelled() && needs.ubuntu-deps-image.result == 'success' &&
+            (needs.abi-changes-check.outputs.abi_changed == 'true' ||
+             needs.abi-changes-check.result == 'failure' ||
+             startsWith(github.ref, 'refs/tags/'))
         permissions:
             contents: read
             packages: write
@@ -394,7 +482,11 @@ jobs:
         needs:
             - build-sdk-image
             - abi-changes-check
-        if: needs.abi-changes-check.outputs.abi_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+        if: >-
+            !cancelled() && needs.build-sdk-image.result == 'success' &&
+            (needs.abi-changes-check.outputs.abi_changed == 'true' ||
+             needs.abi-changes-check.result == 'failure' ||
+             startsWith(github.ref, 'refs/tags/'))
         runs-on: ubuntu-latest
         # The SDK + prereqs live at /opt/x11 in the image; override the
         # workflow-level X11_PREFIX (which points at the host /home/runner path)
