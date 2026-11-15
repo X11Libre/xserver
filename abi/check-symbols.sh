@@ -9,6 +9,8 @@
 # The module's strong undefined symbols, minus those its own libraries and
 # the server's libraries provide, must each be defined by the server's Xorg
 # or a module under its module directory. Exit 1 lists the rest.
+# Libraries are looked up with the server's libdir first; exit 2 if one
+# is not found.
 # A module linked with BIND_NOW (-z now) must not need symbols that only
 # other modules define: those are not loaded yet when it is dlopen()ed.
 #
@@ -30,6 +32,7 @@ if [ "${1:-}" = --prefix ]; then
 	drv=$3
 	xorg=$root/bin/Xorg
 	moduledir=$(pkg-config --variable=moduledir xorg-server)
+	libdir=$(pkg-config --variable=libdir xorg-server)
 else
 	[ $# -eq 2 ] || usage
 	drv=$1
@@ -37,6 +40,7 @@ else
 	xorg=$root/usr/bin/Xorg
 	pcdir=$("$(dirname "$0")/staged-pc.sh" "$2") || exit 2
 	moduledir=$(PKG_CONFIG_PATH=$pcdir pkg-config --variable=moduledir xorg-server)
+	libdir=$(PKG_CONFIG_PATH=$pcdir pkg-config --variable=libdir xorg-server)
 fi
 [ -f "$xorg" ] || { echo "check-symbols: no $xorg" >&2; exit 2; }
 case $moduledir in
@@ -56,7 +60,15 @@ defined() {
 nm -D --undefined-only "$drv" | grep ' U ' | tr -s ' ' | cut -d' ' -f3 |
 	cut -d@ -f1 | sort -u >"$tmp/undef"
 
-{ ldd "$drv"; ldd "$xorg"; } | grep '=> /' | tr -s ' \t' ' ' | cut -d' ' -f4 |
+# libraries installed with the server (e.g. libdrm in the same prefix)
+(LD_LIBRARY_PATH=$libdir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+ export LD_LIBRARY_PATH; ldd "$drv"; ldd "$xorg") >"$tmp/ldd"
+if grep -q 'not found' "$tmp/ldd"; then
+	echo "check-symbols: cannot find libraries of $drv or $xorg:" >&2
+	grep 'not found' "$tmp/ldd" | sort -u >&2
+	exit 2
+fi
+grep '=> /' "$tmp/ldd" | tr -s ' \t' ' ' | cut -d' ' -f4 |
 	sort -u | while read -r lib; do defined "$lib"; done | sort -u >"$tmp/libs"
 
 {
