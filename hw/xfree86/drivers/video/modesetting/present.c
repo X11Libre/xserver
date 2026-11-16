@@ -165,10 +165,20 @@ ms_present_abort_vblank(RRCrtcPtr crtc, uint64_t event_id, uint64_t msc)
     ScreenPtr screen = crtc->pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
 #ifdef GLAMOR
-    xf86CrtcPtr xf86_crtc = crtc->devPrivate;
+    xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(scrn);
+    xf86CrtcPtr xf86_crtc = NULL;
+
+    if (config && config->crtc) {
+        for (int i = 0; i < config->num_crtc; i++) {
+            if (config->crtc[i] == crtc->devPrivate) {
+                xf86_crtc = config->crtc[i];
+                break;
+            }
+        }
+    }
 
     /* Check if this is a fake flip routed through TearFree and abort it */
-    if (ms_tearfree_dri_abort(xf86_crtc, ms_present_event_match, &event_id))
+    if (xf86_crtc && ms_tearfree_dri_abort(xf86_crtc, ms_present_event_match, &event_id))
         return;
 #endif
 
