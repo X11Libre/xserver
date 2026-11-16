@@ -1,7 +1,7 @@
 # pytest-based test suite for the X server
 #
 # Uses pytest to launch X servers which allows us to e.g. send crafted protocol
-# requests that exercise specific security fixes. Supports Xvfb, Xwayland,
+# requests that exercise specific security fixes. Supports Xvfb
 # and Xorg, with optional valgrind and AddressSanitizer (ASAN) integration
 # for detecting use-after-free and out-of-bounds memory access.
 #
@@ -19,10 +19,6 @@ if pytest.found()
 
     if build_xvfb
         pyxtest_env.set('XVFB_PATH', xvfb_server.full_path())
-    endif
-
-    if build_xwayland
-        pyxtest_env.set('XWAYLAND_PATH', xwayland_server.full_path())
     endif
 
     # Tell the test suite if the server was built with AddressSanitizer
