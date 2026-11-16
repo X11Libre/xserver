@@ -27,6 +27,9 @@ static Bool clientAllowedOnClient(ClientPtr subj, ClientPtr obj) {
 
 void hookSend(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_EVENTS))
+        return;
+
     XNS_HOOK_HEAD(XaceSendAccessRec);
 
     /* if no sending client, then it's coming internally from the server itself */

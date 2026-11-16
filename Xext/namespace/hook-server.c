@@ -14,6 +14,9 @@
 
 void hookServerAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_SERVER))
+        return;
+
     XNS_HOOK_HEAD(ServerAccessCallbackParam);
 
     if (subj->ns->superPower)

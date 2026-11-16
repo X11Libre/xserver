@@ -16,6 +16,9 @@
 
 void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_PROPERTIES))
+        return;
+
     XNS_HOOK_HEAD(PropertyFilterParam);
 
     // no redirect on super power

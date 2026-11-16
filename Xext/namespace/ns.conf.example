@@ -1,3 +1,10 @@
+# Server-wide component switches (all enabled by default).
+# These directives apply globally, even inside a namespace stanza.
+# Components: clipboard properties clients devices extensions server resources events
+# disable clipboard
+# disable devices events
+# enable events
+
 
 # auth <proto> <hex-key>
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b0

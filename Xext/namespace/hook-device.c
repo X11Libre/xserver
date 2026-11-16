@@ -18,6 +18,9 @@
 
 void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_DEVICES))
+        return;
+
     XNS_HOOK_HEAD(DeviceAccessCallbackParam);
 
     if (subj->ns->superPower)
