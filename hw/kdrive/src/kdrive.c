@@ -647,14 +647,18 @@ Bool KdCreateScreenResources(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdCardInfo *card = pScreenPriv->card;
+    Bool ret;
 
-    if (!miCreateScreenResources(pScreen))
-        return FALSE;
-
-    if (card->cfuncs->createRes)
-        return card->cfuncs->createRes(pScreen);
-
-    return TRUE;
+    pScreen->CreateScreenResources = pScreenPriv->CreateScreenResources;
+    if (pScreen->CreateScreenResources)
+        ret = (*pScreen->CreateScreenResources) (pScreen);
+    else
+        ret = TRUE;
+    pScreenPriv->CreateScreenResources = pScreen->CreateScreenResources;
+    pScreen->CreateScreenResources = KdCreateScreenResources;
+    if (ret && card->cfuncs->createRes)
+        ret = (*card->cfuncs->createRes) (pScreen);
+    return ret;
 }
 
 Bool KdCloseScreen(ScreenPtr pScreen)
@@ -668,28 +672,18 @@ Bool KdCloseScreen(ScreenPtr pScreen)
         (*card->cfuncs->closeScreen)(pScreen);
 
     pScreenPriv->closed = TRUE;
+    pScreen->CloseScreen = pScreenPriv->CloseScreen;
 
-    ret = fbCloseScreen(pScreen);
-
-    if (pScreenPriv->dpmsState != KD_DPMS_NORMAL)
-        (*card->cfuncs->dpms) (pScreen, KD_DPMS_NORMAL);
+    if (pScreen->CloseScreen)
+        ret = (*pScreen->CloseScreen) (pScreen);
+    else
+        ret = TRUE;
 
     if (screen->mynum == card->selected)
         KdDisableScreen(pScreen);
 
-    /*
-     * Restore video hardware when last screen is closed
-     */
-    if (screen == card->screenList) {
-        if (kdEnabled && card->cfuncs->restore)
-            (*card->cfuncs->restore) (card);
-    }
-
     if (!pScreenPriv->screen->dumb && card->cfuncs->finiAccel)
         (*card->cfuncs->finiAccel) (pScreen);
-
-    if (!pScreenPriv->screen->softCursor && card->cfuncs->finiCursor)
-        (*card->cfuncs->finiCursor) (pScreen);
 
     if (card->cfuncs->scrfini)
         (*card->cfuncs->scrfini) (screen);
@@ -705,8 +699,6 @@ Bool KdCloseScreen(ScreenPtr pScreen)
          * Clean up OS when last card is closed
          */
         if (card == kdCardInfo) {
-            if (kdEnabled && (kdOsFuncs->Disable))
-                kdOsFuncs->Disable();
             kdEnabled = FALSE;
         }
     }
@@ -927,7 +919,10 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
         if (!(*card->cfuncs->finishInitScreen) (pScreen))
             return FALSE;
 
+    pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = KdCloseScreen;
+
+    pScreenPriv->CreateScreenResources = pScreen->CreateScreenResources;
     pScreen->CreateScreenResources = KdCreateScreenResources;
 
     if (screen->softCursor ||
