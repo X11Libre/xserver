@@ -980,6 +980,32 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
         if (source_generation != src->source_generation)
             return XAVERIUS_REGISTRY_STALE_EVENT;
 
+        /* Idempotent replay detection: same source + same event sequence.
+         * This MUST come before sequence validation to allow valid replays
+         * of the same sequence number. */
+        if (src->last_event_sequence == source_event_sequence) {
+            XaveriusObservation *prev_obs =
+                xaverius_find_observation_by_sequence(source_key, source_generation,
+                                                      source_event_sequence);
+            if (prev_obs != NULL) {
+                /* Same payload → idempotent: return existing observation ID. */
+                if (identity_evidence != NULL &&
+                    prev_obs->device != NULL &&
+                    memcmp(&prev_obs->identity, identity_evidence,
+                           sizeof(XaveriusDeviceIdentity)) == 0) {
+                    *out_observation_id = prev_obs->observation_id;
+                    *out_device = prev_obs->device;
+                    if (out_device_generation != NULL)
+                        *out_device_generation = prev_obs->device_generation;
+                    /* Additional caller-owned reference for repeated success. */
+                    prev_obs->device->caller_refcount++;
+                    return XAVERIUS_REGISTRY_SUCCESS;
+                }
+                /* Different payload for same sequence → conflict. */
+                return XAVERIUS_REGISTRY_IDENTITY_CONFLICT;
+            }
+        }
+
         /* Validate source event sequence: must be strictly increasing
          * within a source generation per spec §1037. */
         if (source_event_sequence < src->last_event_sequence + 1)
@@ -990,30 +1016,6 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
     dev = NULL;
     if (identity_evidence != NULL) {
         dev = xaverius_find_device_by_identity(identity_evidence);
-    }
-
-    /* Idempotent replay detection: same source + same event sequence. */
-    if (src->last_event_sequence == source_event_sequence) {
-        XaveriusObservation *prev_obs =
-            xaverius_find_observation_by_sequence(source_key, source_generation,
-                                                  source_event_sequence);
-        if (prev_obs != NULL) {
-            /* Same payload → idempotent: return existing observation ID. */
-            if (identity_evidence != NULL &&
-                prev_obs->device != NULL &&
-                memcmp(&prev_obs->identity, identity_evidence,
-                       sizeof(XaveriusDeviceIdentity)) == 0) {
-                *out_observation_id = prev_obs->observation_id;
-                *out_device = prev_obs->device;
-                if (out_device_generation != NULL)
-                    *out_device_generation = prev_obs->device_generation;
-                /* Additional caller-owned reference for repeated success. */
-                prev_obs->device->caller_refcount++;
-                return XAVERIUS_REGISTRY_SUCCESS;
-            }
-            /* Different payload for same sequence → conflict. */
-            return XAVERIUS_REGISTRY_IDENTITY_CONFLICT;
-        }
     }
 
     /* Allocate a unique nonzero observation ID. */
