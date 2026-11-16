@@ -484,6 +484,18 @@ ProcXTestGrabControl(ClientPtr client)
     return Success;
 }
 
+#ifndef X_XTestTrimMemory
+#define X_XTestTrimMemory 4
+#endif
+
+static int
+ProcXTestTrimMemory(ClientPtr client)
+{
+    REQUEST_SIZE_MATCH(xReq);
+    OsTrimMemory();
+    return Success;
+}
+
 static int
 ProcXTestDispatch(ClientPtr client)
 {
@@ -497,6 +509,8 @@ ProcXTestDispatch(ClientPtr client)
         return ProcXTestFakeInput(client);
     case X_XTestGrabControl:
         return ProcXTestGrabControl(client);
+    case X_XTestTrimMemory:
+        return ProcXTestTrimMemory(client);
     default:
         return BadRequest;
     }

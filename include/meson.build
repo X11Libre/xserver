@@ -182,6 +182,12 @@ conf_data.set('HAVE_WALKCONTEXT', cc.has_function('walkcontext') ? '1' : false)
 conf_data.set('HAVE_XUCRED_CR_PID', cc.has_member('struct xucred', 'cr_pid', prefix : '#include <sys/ucred.h>') ? '1' : false)
 conf_data.set('LOCK_SERVER', host_machine.system() != 'windows' ? '1' : false)
 
+if get_option('background_memory_trim')
+    conf_data.set('HAVE_MALLOC_TRIM', cc.has_function('malloc_trim', prefix: '#include <malloc.h>') ? '1' : false)
+    conf_data.set('HAVE_MALLOPT', cc.has_function('mallopt', prefix: '#include <malloc.h>') ? '1' : false)
+    conf_data.set('HAVE_MALLOC_H', cc.has_header('malloc.h') ? '1' : false)
+endif
+
 # Don't let X dependencies typedef 'pointer'
 conf_data.set('_XTYPEDEF_POINTER', '1')
 conf_data.set('_XITYPEDEF_POINTER', '1')
