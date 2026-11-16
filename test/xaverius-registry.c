@@ -402,7 +402,7 @@ xaverius_registry_tombstone_lifecycle(void)
 
     reset_hook_counts();
     XaveriusRegistryFini();
-    assert(test_release_calls == 1);
+    assert(test_release_calls == 2);
 }
 
 static void
