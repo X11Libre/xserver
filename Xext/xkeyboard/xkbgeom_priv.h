@@ -126,7 +126,7 @@ typedef struct _XkbLogoDoodad {
     unsigned short color_ndx;
     unsigned short shape_ndx;
     char *logo_name;
-} XkbLogoDoodadRec, *XkbLogoDoodadPtr;
+}; XkbLogoDoodadRec, *XkbLogoDoodadPtr;
 
 #define	XkbLogoDoodadColor(g,d)		(&(g)->colors[(d)->color_ndx])
 #define	XkbLogoDoodadShape(g,d)		(&(g)->shapes[(d)->shape_ndx])
