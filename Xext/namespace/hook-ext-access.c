@@ -27,6 +27,9 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (streq(param->ext->name, XNS_EXTENSION_NAME))
         goto reject;
 
+    if (!XnsComponentEnabled(XNS_COMPONENT_EXTENSIONS))
+        return;
+
     switch (param->ext->index + EXTENSION_BASE) {
         /* unrestricted access */
         case EXTENSION_MAJOR_BIG_REQUESTS:

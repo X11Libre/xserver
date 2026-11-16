@@ -38,6 +38,26 @@ struct Xnamespace {
     WindowPtr rootWindow;
 };
 
+/* Server-wide enforcement components, configured at startup. */
+enum XnsComponent {
+    XNS_COMPONENT_CLIPBOARD  = (1u << 0),
+    XNS_COMPONENT_PROPERTIES = (1u << 1),
+    XNS_COMPONENT_CLIENTS    = (1u << 2),
+    XNS_COMPONENT_DEVICES    = (1u << 3),
+    XNS_COMPONENT_EXTENSIONS = (1u << 4),
+    XNS_COMPONENT_SERVER     = (1u << 5),
+    XNS_COMPONENT_RESOURCES  = (1u << 6),
+    XNS_COMPONENT_EVENTS     = (1u << 7),
+    XNS_COMPONENT_ALL        = (1u << 8) - 1,
+};
+
+extern unsigned int XnsEnabledComponents;
+
+static inline Bool XnsComponentEnabled(enum XnsComponent component)
+{
+    return (XnsEnabledComponents & component) != 0;
+}
+
 extern struct xorg_list ns_list;
 extern struct Xnamespace ns_root;
 extern struct Xnamespace ns_anon;
