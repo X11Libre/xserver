@@ -1032,6 +1032,8 @@ load_glamor(ScrnInfoPtr pScrn)
     ms->glamor.supports_pixmap_import_export = LoaderSymbolFromModule(mod, "glamor_supports_pixmap_import_export");
     ms->glamor.xv_init = LoaderSymbolFromModule(mod, "glamor_xv_init");
     ms->glamor.egl_get_driver_name = LoaderSymbolFromModule(mod, "glamor_egl_get_driver_name");
+    ms->glamor.egl_flush_fence_fd = LoaderSymbolFromModule(mod, "glamor_egl_flush_fence_fd");
+    ms->glamor.egl_syncobj_supported = LoaderSymbolFromModule(mod, "glamor_egl_syncobj_supported");
 
     return TRUE;
 }
