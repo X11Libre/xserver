@@ -348,7 +348,7 @@ class XServerProcess:
                     server_args.extend(["-modulepath", str(modpath)])
                 server_args.extend(["-config", "/dev/null", "-configdir", "/dev/null"])
 
-        server_args.extend(["-noreset", "+byteswappedclients"])
+        server_args.extend(["+byteswappedclients", "-verbose", "5"])
 
         # Auto-detect xkb directory if the compiled-in default doesn't exist
         xkb_dir = os.environ.get("XKB_CONFIG_ROOT")
