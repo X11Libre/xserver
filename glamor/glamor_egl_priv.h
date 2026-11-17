@@ -52,6 +52,7 @@ typedef struct glamor_egl_screen_private {
 
     int fd;
     int dmabuf_capable;
+    int syncobj_supported; /* -1 until probed */
 } glamor_egl_priv_t;
 
 /**
