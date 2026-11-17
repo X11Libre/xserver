@@ -57,6 +57,7 @@ struct glamor_egl_screen_private {
 #ifdef EGL_MESA_image_dma_buf_export
     int has_image_dma_buf_export;
 #endif
+    int has_native_fence_sync;
     int fd;
     struct gbm_device *gbm;
     int dmabuf_capable;
@@ -885,6 +886,36 @@ glamor_egl_get_driver_name(ScreenPtr screen)
     return NULL;
 }
 
+int
+glamor_egl_flush_fence_fd(ScreenPtr screen)
+{
+    struct glamor_egl_screen_private *glamor_egl =
+        glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
+    const EGLint attribs[] = {
+        EGL_SYNC_NATIVE_FENCE_FD_ANDROID, EGL_NO_NATIVE_FENCE_FD_ANDROID,
+        EGL_NONE
+    };
+    EGLSyncKHR sync;
+    int fd;
+
+    if (!glamor_egl->has_native_fence_sync)
+        return -1;
+
+    glamor_make_current(glamor_get_screen_private(screen));
+
+    sync = eglCreateSyncKHR(glamor_egl->display, EGL_SYNC_NATIVE_FENCE_ANDROID,
+                            attribs);
+    if (sync == EGL_NO_SYNC_KHR)
+        return -1;
+
+    /* The fence fd exists only once the sync is flushed. */
+    glFlush();
+    fd = eglDupNativeFenceFDANDROID(glamor_egl->display, sync);
+    eglDestroySyncKHR(glamor_egl->display, sync);
+
+    return fd;
+}
+
 static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pixmap)
 {
     ScreenPtr screen = pixmap->drawable.pScreen;
@@ -1258,6 +1289,9 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
 #ifdef EGL_MESA_image_dma_buf_export
     glamor_egl->has_image_dma_buf_export = epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export");
 #endif
+    glamor_egl->has_native_fence_sync =
+        epoxy_has_egl_extension(glamor_egl->display, "EGL_ANDROID_native_fence_sync") &&
+        epoxy_has_egl_extension(glamor_egl->display, "EGL_KHR_fence_sync");
 
 #define GLAMOR_CHECK_EGL_EXTENSION(EXT)  \
 	if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_" #EXT)) {  \
