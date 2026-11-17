@@ -32,6 +32,7 @@
  * Protocol testing for XIPassiveGrab request.
  */
 #include <stdint.h>
+#include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2proto.h>
@@ -52,6 +53,11 @@ DECLARE_WRAP_FUNCTION(GrabButton, int,
                       DeviceIntPtr modifier_device, int button,
                       GrabParameters *param, enum InputLevel grabtype,
                       GrabMask *mask);
+DECLARE_WRAP_FUNCTION(GrabKey, int,
+                      ClientPtr client, DeviceIntPtr dev,
+                      DeviceIntPtr modifier_device, int button,
+                      GrabParameters *param, enum InputLevel grabtype,
+                      GrabMask *mask);
 
 extern ClientRec client_window;
 static ClientRec client_request;
@@ -67,12 +73,28 @@ static struct test_data {
 static void reply_XIPassiveGrabDevice_data(ClientPtr client, int len,
                                            void *data);
 
+static Bool check_modes;
+static int expected_keyboard_mode;
+static int expected_pointer_mode;
+static int grab_calls;
+
+static void
+check_grab_modes(GrabParameters *param)
+{
+    assert(param->this_device_mode == expected_keyboard_mode);
+    assert(param->other_devices_mode == expected_pointer_mode);
+    grab_calls++;
+}
+
 static int
 override_GrabButton(ClientPtr client, DeviceIntPtr dev,
                   DeviceIntPtr modifier_device, int button,
                   GrabParameters *param, enum InputLevel grabtype,
                   GrabMask *mask)
 {
+    if (check_modes)
+        check_grab_modes(param);
+
     /* Fail every odd modifier */
     if (param->modifiers % 2)
         return BadAccess;
@@ -265,11 +287,82 @@ test_XIPassiveGrabDevice(void)
     request_XIPassiveGrabDevice(&client_request, request, Success, 0);
 }
 
+/* Observe parameters at the real protocol handler's GrabKey boundary. */
+static int
+override_GrabKey(ClientPtr client, DeviceIntPtr dev,
+                 DeviceIntPtr modifier_device, int key,
+                 GrabParameters *param, enum InputLevel grabtype,
+                 GrabMask *mask)
+{
+    check_grab_modes(param);
+    return Success;
+}
+
+/* A successful reply may be followed by an empty RPC buffer. */
+static void
+reply_key_modes(ClientPtr client, int len, void *data)
+{
+    if (len != 0)
+        reply_XIPassiveGrabDevice(client, len, data);
+}
+
+static void
+test_XIPassiveGrabDevice_key_modes(void)
+{
+    xXIPassiveGrabDeviceReq *request = (xXIPassiveGrabDeviceReq *) data;
+    int ids[6];
+    int i, mode;
+    int total_calls = 0;
+
+    init_simple();
+    ids[0] = XIAllDevices;
+    ids[1] = XIAllMasterDevices;
+    ids[2] = devices.vck->id;
+    ids[3] = XIAllDevices;
+    ids[4] = XIAllMasterDevices;
+    ids[5] = devices.vcp->id;
+    wrapped_GrabKey = override_GrabKey;
+    wrapped_GrabButton = override_GrabButton;
+    check_modes = TRUE;
+    wrapped_WriteToClient = reply_key_modes;
+
+    for (i = 0; i < 6; i++) {
+        for (mode = 0; mode < 2; mode++) {
+            memset(data, 0, sizeof(data));
+            request_init(request, XIPassiveGrabDevice);
+            request->grab_window = CLIENT_WINDOW_ID;
+            request->deviceid = ids[i];
+            request->grab_type = i < 3 ? XIGrabtypeKeycode : XIGrabtypeButton;
+            request->detail = 38;
+            request->grab_mode = mode ? XIGrabModeSync : XIGrabModeAsync;
+            request->paired_device_mode = mode ? XIGrabModeAsync : XIGrabModeSync;
+            request->num_modifiers = 1;
+            request->length++;
+            *((uint32_t *) (request + 1)) = 0;
+            expected_keyboard_mode = i < 3 ? request->grab_mode :
+                                           request->paired_device_mode;
+            expected_pointer_mode = i < 3 ? request->paired_device_mode :
+                                          request->grab_mode;
+            grab_calls = 0;
+            client_request = init_client(request->length, request);
+            request_XIPassiveGrabDevice(&client_request, request, Success, 0);
+            /* Both request byte orders must reach the grab boundary. */
+            assert(grab_calls == 2);
+            total_calls += grab_calls;
+        }
+    }
+    assert(total_calls == 24);
+    printf("key mode regression: 24 handler calls passed (12 native, 12 swapped)\n");
+    wrapped_GrabKey = NULL;
+    check_modes = FALSE;
+}
+
 const testfunc_t*
 protocol_xipassivegrabdevice_test(void)
 {
     static const testfunc_t testfuncs[] = {
         test_XIPassiveGrabDevice,
+        test_XIPassiveGrabDevice_key_modes,
         NULL,
     };
 
