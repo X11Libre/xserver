@@ -82,10 +82,10 @@ present_execute_wait(present_vblank_ptr vblank, uint64_t crtc_msc)
     }
 
 #ifdef DRI3
-    /* Defer execution of explicitly synchronized copies.
-     * Flip synchronization is managed by the driver.
+    /* Defer execution of explicitly synchronized presents until the
+     * acquire point has signalled.
      */
-    if (!vblank->flip && vblank->acquire_syncobj &&
+    if (vblank->acquire_syncobj &&
         !vblank->acquire_syncobj->is_signaled(vblank->acquire_syncobj,
                                               vblank->acquire_point)) {
         vblank->efd = eventfd(0, EFD_CLOEXEC);
