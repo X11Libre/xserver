@@ -408,6 +408,11 @@ extern _X_EXPORT const char *glamor_egl_get_driver_name(ScreenPtr screen);
  */
 extern _X_EXPORT int glamor_egl_flush_fence_fd(ScreenPtr screen);
 
+/* TRUE if glamor's DRI3 imports timeline sync objects on this screen
+ * (DRI3 1.4). Probes the kernel once per screen and logs the result.
+ */
+extern _X_EXPORT Bool glamor_egl_syncobj_supported(ScreenPtr screen);
+
 
 extern _X_EXPORT int glamor_create_gc(GCPtr gc);
 
