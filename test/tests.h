@@ -43,6 +43,7 @@ const testfunc_t* protocol_xigetselectedevents_test(void);
 const testfunc_t* protocol_xisetclientpointer_test(void);
 const testfunc_t* protocol_xigetclientpointer_test(void);
 const testfunc_t* protocol_xipassivegrabdevice_test(void);
+const testfunc_t* protocol_xipassivegrabdevice_key_modes_test(void);
 const testfunc_t* protocol_xiquerypointer_test(void);
 const testfunc_t* protocol_xiwarppointer_test(void);
 const testfunc_t* protocol_eventconvert_test(void);
