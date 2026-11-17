@@ -187,6 +187,8 @@ typedef struct _modesettingRec {
         Bool (*supports_pixmap_import_export)(ScreenPtr);
         XF86VideoAdaptorPtr (*xv_init)(ScreenPtr, int);
         const char *(*egl_get_driver_name)(ScreenPtr);
+        int (*egl_flush_fence_fd)(ScreenPtr);
+        Bool (*egl_syncobj_supported)(ScreenPtr);
     } glamor;
 #endif
 } modesettingRec, *modesettingPtr;
