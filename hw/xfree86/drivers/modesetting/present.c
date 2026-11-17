@@ -191,6 +191,31 @@ ms_present_flush(WindowPtr window)
 }
 
 #ifdef GLAMOR_HAS_GBM
+/*
+ * Flush rendering for an explicitly synchronized copy. Returns a sync_file
+ * fd that signals when it completes, or -1 once it has completed.
+ */
+static int
+ms_present_flush_fenced(WindowPtr window)
+{
+    ScreenPtr screen = window->drawable.pScreen;
+    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
+    modesettingPtr ms = modesettingPTR(scrn);
+    int fd = -1;
+
+    if (!ms->drmmode.glamor)
+        return -1;
+
+    if (ms->glamor.egl_flush_fence_fd)
+        fd = ms->glamor.egl_flush_fence_fd(screen);
+    if (fd < 0)
+        glamor_finish(screen);
+
+    return fd;
+}
+#endif
+
+#ifdef GLAMOR_HAS_GBM
 
 /**
  * Callback for the DRM event queue when a flip has completed on all pipes
@@ -508,5 +533,12 @@ ms_present_screen_init(ScreenPtr screen)
         ms->drmmode.can_async_flip = TRUE;
     }
 
-    return present_screen_init(screen, &ms_present_screen_info);
+    if (!present_screen_init(screen, &ms_present_screen_info))
+        return FALSE;
+
+#ifdef GLAMOR_HAS_GBM
+    present_screen_set_flush_fenced(screen, ms_present_flush_fenced);
+#endif
+
+    return TRUE;
 }
