@@ -781,7 +781,9 @@ present_scmd_pixmap(WindowPtr window,
     present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
 
 #ifdef DRI3
-    if (acquire_syncobj || release_syncobj)
+    if ((acquire_syncobj || release_syncobj) &&
+        (!screen_priv ||
+         !(screen_priv->query_capabilities(screen_priv) & PresentCapabilitySyncobj)))
         return BadValue;
 #endif /* DRI3 */
 
