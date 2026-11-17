@@ -533,7 +533,31 @@ ms_present_screen_init(ScreenPtr screen)
         ms->drmmode.can_async_flip = TRUE;
     }
 
-    if (!present_screen_init(screen, &ms_present_screen_info))
+    /* Present keeps this pointer, so each screen needs its own copy. */
+    ms->present_info = ms_present_screen_info;
+
+#if defined(GLAMOR_HAS_GBM) && defined(DRI3)
+    {
+        const char *reason = NULL;
+
+        if (!ms->drmmode.glamor)
+            reason = "no glamor";
+        else if (!ms->glamor.egl_flush_fence_fd || !ms->glamor.egl_syncobj_supported)
+            reason = "glamor too old";
+        else if (!ms->glamor.egl_syncobj_supported(screen))
+            reason = "no DRI3 sync objects";
+
+        if (reason) {
+            xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                       "Present explicit sync: disabled (%s)\n", reason);
+        } else {
+            ms->present_info.capabilities |= PresentCapabilitySyncobj;
+            xf86DrvMsg(scrn->scrnIndex, X_INFO, "Present explicit sync: enabled\n");
+        }
+    }
+#endif
+
+    if (!present_screen_init(screen, &ms->present_info))
         return FALSE;
 
 #ifdef GLAMOR_HAS_GBM
