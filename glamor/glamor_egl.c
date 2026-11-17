@@ -1654,6 +1654,35 @@ glamor_egl_get_driver_name(ScreenPtr screen)
     return NULL;
 }
 
+int
+glamor_egl_flush_fence_fd(ScreenPtr screen)
+{
+    glamor_egl_priv_t *glamor_egl = glamor_egl_get_screen_private(screen);
+    const EGLint attribs[] = {
+        EGL_SYNC_NATIVE_FENCE_FD_ANDROID, EGL_NO_NATIVE_FENCE_FD_ANDROID,
+        EGL_NONE
+    };
+    EGLSyncKHR sync;
+    int fd;
+
+    if (!glamor_egl->has_native_fence_sync)
+        return -1;
+
+    glamor_make_current(glamor_get_screen_private(screen));
+
+    sync = eglCreateSyncKHR(glamor_egl->display, EGL_SYNC_NATIVE_FENCE_ANDROID,
+                            attribs);
+    if (sync == EGL_NO_SYNC_KHR)
+        return -1;
+
+    /* The fence fd exists only once the sync is flushed. */
+    glFlush();
+    fd = eglDupNativeFenceFDANDROID(glamor_egl->display, sync);
+    eglDestroySyncKHR(glamor_egl->display, sync);
+
+    return fd;
+}
+
 static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pixmap)
 {
     ScreenPtr screen = pixmap->drawable.pScreen;
@@ -2999,6 +3028,9 @@ glamor_egl_probe_dri3(glamor_egl_priv_t* glamor_egl, int *caps,
     glamor_egl->has_EXT_EGL_image_storage = epoxy_has_gl_extension("GL_EXT_EGL_image_storage");
     glamor_egl->has_OES_EGL_image = epoxy_has_gl_extension("GL_OES_EGL_image");
     glamor_egl->has_image_dma_buf_export = epoxy_has_egl_extension(glamor_egl->display, "EGL_MESA_image_dma_buf_export");
+    glamor_egl->has_native_fence_sync =
+        epoxy_has_egl_extension(glamor_egl->display, "EGL_ANDROID_native_fence_sync") &&
+        epoxy_has_egl_extension(glamor_egl->display, "EGL_KHR_fence_sync");
 
     if (glamor_egl->fd < 0) {
         return FALSE;
