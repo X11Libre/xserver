@@ -232,6 +232,20 @@ present_screen_init(ScreenPtr screen, present_screen_info_ptr info)
     return TRUE;
 }
 
+void
+present_screen_set_flush_fenced(ScreenPtr screen, present_flush_fenced_ptr func)
+{
+    present_screen_priv_ptr screen_priv;
+
+    /* Without present_screen_init, the key is not registered yet. */
+    if (!dixPrivateKeyRegistered(&present_screen_private_key))
+        return;
+
+    screen_priv = present_screen_priv(screen);
+    if (screen_priv)
+        screen_priv->driver_flush_fenced = func;
+}
+
 /*
  * Initialize the present extension
  */
