@@ -173,4 +173,11 @@ typedef int (*present_flush_fenced_ptr) (WindowPtr window);
 extern _X_EXPORT void
 present_screen_set_flush_fenced(ScreenPtr screen, present_flush_fenced_ptr func);
 
+/*
+ * TRUE when this server handles PresentPixmapSynced for both copies and
+ * flips, so drivers can check at run time before registering a fenced flush.
+ */
+extern _X_EXPORT Bool
+present_scmd_supports_syncobj(void);
+
 #endif /* _PRESENT_H_ */
