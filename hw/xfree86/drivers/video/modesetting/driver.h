@@ -39,6 +39,7 @@
 #include <damage.h>
 #include <X11/extensions/dpmsconst.h>
 #include <shadow.h>
+#include <present.h>
 #ifdef GLAMOR_HAS_GBM
 #define GLAMOR_FOR_XORG 1
 #include "glamor.h"
@@ -191,6 +192,8 @@ typedef struct _modesettingRec {
         Bool (*egl_syncobj_supported)(ScreenPtr);
     } glamor;
 #endif
+
+    present_screen_info_rec present_info;
 } modesettingRec, *modesettingPtr;
 
 #define glamor_finish(screen) ms->glamor.finish(screen)
