@@ -195,6 +195,7 @@ struct present_screen_priv {
     present_priv_queue_vblank_ptr       queue_vblank;
     present_priv_flush_ptr              flush;
     present_priv_flush_fenced_ptr       flush_fenced;
+    present_flush_fenced_ptr            driver_flush_fenced;
     present_priv_re_execute_ptr         re_execute;
 
     present_priv_abort_vblank_ptr       abort_vblank;
