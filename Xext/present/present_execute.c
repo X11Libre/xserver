@@ -89,6 +89,13 @@ present_execute_wait(present_vblank_ptr vblank, uint64_t crtc_msc)
         !vblank->acquire_syncobj->is_signaled(vblank->acquire_syncobj,
                                               vblank->acquire_point)) {
         vblank->efd = eventfd(0, EFD_CLOEXEC);
+        if (vblank->efd < 0) {
+            /* Check the acquire point again at the next MSC */
+            if (screen_priv->queue_vblank(screen, window, vblank->crtc,
+                                          vblank->event_id, crtc_msc + 1) == Success)
+                return TRUE;
+            return FALSE;
+        }
         SetNotifyFd(vblank->efd, present_syncobj_triggered, X_NOTIFY_READ, vblank);
         vblank->acquire_syncobj->signaled_eventfd(vblank->acquire_syncobj,
                                                   vblank->acquire_point,
