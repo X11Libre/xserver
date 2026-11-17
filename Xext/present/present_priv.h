@@ -180,6 +180,10 @@ struct present_screen_priv {
     PixmapPtr                   flip_pixmap;
     present_fence_ptr           flip_idle_fence;
     Bool                        flip_sync;
+#ifdef DRI3
+    struct dri3_syncobj         *flip_release_syncobj;
+    uint64_t                    flip_release_point;
+#endif /* DRI3 */
 
     present_screen_info_ptr     info;
 
