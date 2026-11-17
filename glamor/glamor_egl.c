@@ -53,6 +53,13 @@
 #include "glamor_glx_provider.h"
 #include "dri3.h"
 
+#if defined(DRI3) && defined(LIBDRM_HAS_SYNCOBJ_EVENTFD)
+#define GLAMOR_DRI3_SYNCOBJ 1
+#include <poll.h>
+#include <string.h>
+#include <sys/eventfd.h>
+#endif
+
 struct glamor_egl_screen_private {
     EGLDisplay display;
     EGLContext context;
@@ -67,6 +74,10 @@ struct glamor_egl_screen_private {
 
     int fd;
     int dmabuf_capable;
+    int syncobj_supported; /* -1 until probed */
+#ifdef DRI3
+    dri3_screen_info_rec dri3_info;
+#endif
 
     xf86FreeScreenProc *saved_free_screen;
 };
@@ -965,6 +976,45 @@ glamor_egl_flush_fence_fd(ScreenPtr screen)
     return fd;
 }
 
+Bool
+glamor_egl_syncobj_supported(ScreenPtr screen)
+{
+#ifdef GLAMOR_DRI3_SYNCOBJ
+    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
+    struct glamor_egl_screen_private *glamor_egl =
+        glamor_egl_get_screen_private(scrn);
+    const char *reason = NULL;
+    uint64_t cap = 0;
+
+    if (glamor_egl->syncobj_supported >= 0)
+        return glamor_egl->syncobj_supported;
+
+    if (glamor_egl->fd < 0)
+        reason = "no DRM device";
+    else if (drmGetCap(glamor_egl->fd, DRM_CAP_SYNCOBJ_TIMELINE, &cap) != 0 || !cap)
+        reason = "no timeline syncobjs";
+    else {
+        /* An invalid handle gives ENOENT only if eventfd is supported. */
+        errno = 0;
+        if (drmSyncobjEventfd(glamor_egl->fd, 0, 0, -1, 0) == 0 || errno != ENOENT)
+            reason = "no syncobj eventfd";
+    }
+
+    glamor_egl->syncobj_supported = reason == NULL;
+    if (reason)
+        xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                   "glamor: DRI3 sync objects: disabled (%s)\n", reason);
+    else
+        xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                   "glamor: DRI3 sync objects: enabled\n");
+
+    return glamor_egl->syncobj_supported;
+#else
+    (void) screen;
+    return FALSE;
+#endif /* GLAMOR_DRI3_SYNCOBJ */
+}
+
 static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pixmap)
 {
     ScreenPtr screen = pixmap->drawable.pScreen;
@@ -1078,6 +1128,251 @@ glamor_dri3_open_client(ClientPtr client,
     return Success;
 }
 
+#ifdef GLAMOR_DRI3_SYNCOBJ
+struct glamor_dri3_syncobj {
+    struct dri3_syncobj base;
+    uint32_t handle;
+};
+
+enum glamor_dri3_syncobj_op {
+    GLAMOR_SYNCOBJ_OP_IMPORT,
+    GLAMOR_SYNCOBJ_OP_WAIT,
+    GLAMOR_SYNCOBJ_OP_EXPORT_FENCE,
+    GLAMOR_SYNCOBJ_OP_IMPORT_FENCE,
+    GLAMOR_SYNCOBJ_OP_SIGNAL,
+    GLAMOR_SYNCOBJ_OP_EVENTFD,
+    GLAMOR_SYNCOBJ_OP_COUNT
+};
+
+/* These run for every presented frame, so only the first failure of each
+ * operation is logged.
+ */
+static void
+glamor_dri3_syncobj_warn(ScreenPtr screen, enum glamor_dri3_syncobj_op op,
+                         const char *call, int err)
+{
+    static Bool warned[GLAMOR_SYNCOBJ_OP_COUNT];
+
+    if (warned[op])
+        return;
+    warned[op] = TRUE;
+    xf86DrvMsg(xf86ScreenToScrn(screen)->scrnIndex, X_WARNING,
+               "glamor: DRI3 sync object: %s failed: %s\n", call, strerror(err));
+}
+
+static int
+glamor_dri3_syncobj_drm_fd(struct dri3_syncobj *syncobj)
+{
+    return glamor_egl_get_screen_private(xf86ScreenToScrn(syncobj->screen))->fd;
+}
+
+static uint32_t
+glamor_dri3_syncobj_handle(struct dri3_syncobj *syncobj)
+{
+    return ((struct glamor_dri3_syncobj *) syncobj)->handle;
+}
+
+static void
+glamor_dri3_syncobj_free(struct dri3_syncobj *syncobj)
+{
+    drmSyncobjDestroy(glamor_dri3_syncobj_drm_fd(syncobj),
+                      glamor_dri3_syncobj_handle(syncobj));
+    free(syncobj);
+}
+
+/* TRUE once the point has a fence (WAIT_AVAILABLE) or has signalled
+ * (WAIT_FOR_SUBMIT); ETIME just means "not yet".
+ */
+static Bool
+glamor_dri3_syncobj_check(struct dri3_syncobj *syncobj, uint64_t point,
+                          uint32_t flags)
+{
+    uint32_t handle = glamor_dri3_syncobj_handle(syncobj);
+
+    if (drmSyncobjTimelineWait(glamor_dri3_syncobj_drm_fd(syncobj),
+                               &handle, &point, 1, 0, flags, NULL) == 0)
+        return TRUE;
+
+    if (errno != ETIME)
+        glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_WAIT,
+                                 "drmSyncobjTimelineWait", errno);
+    return FALSE;
+}
+
+static Bool
+glamor_dri3_syncobj_has_fence(struct dri3_syncobj *syncobj, uint64_t point)
+{
+    return glamor_dri3_syncobj_check(syncobj, point,
+                                     DRM_SYNCOBJ_WAIT_FLAGS_WAIT_AVAILABLE);
+}
+
+static Bool
+glamor_dri3_syncobj_is_signaled(struct dri3_syncobj *syncobj, uint64_t point)
+{
+    return glamor_dri3_syncobj_check(syncobj, point,
+                                     DRM_SYNCOBJ_WAIT_FLAGS_WAIT_FOR_SUBMIT);
+}
+
+/* Returns a sync_file fd for the point, owned by the caller, or -1. */
+static int
+glamor_dri3_syncobj_export_fence(struct dri3_syncobj *syncobj, uint64_t point)
+{
+    int drm_fd = glamor_dri3_syncobj_drm_fd(syncobj);
+    uint32_t temp;
+    int fd = -1;
+
+    if (drmSyncobjCreate(drm_fd, 0, &temp)) {
+        glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_EXPORT_FENCE,
+                                 "drmSyncobjCreate", errno);
+        return -1;
+    }
+
+    if (drmSyncobjTransfer(drm_fd, temp, 0,
+                           glamor_dri3_syncobj_handle(syncobj), point, 0))
+        glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_EXPORT_FENCE,
+                                 "drmSyncobjTransfer", errno);
+    else if (drmSyncobjExportSyncFile(drm_fd, temp, &fd)) {
+        glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_EXPORT_FENCE,
+                                 "drmSyncobjExportSyncFile", errno);
+        fd = -1;
+    }
+
+    drmSyncobjDestroy(drm_fd, temp);
+    return fd;
+}
+
+static void
+glamor_dri3_syncobj_signal(struct dri3_syncobj *syncobj, uint64_t point)
+{
+    uint32_t handle = glamor_dri3_syncobj_handle(syncobj);
+
+    if (drmSyncobjTimelineSignal(glamor_dri3_syncobj_drm_fd(syncobj),
+                                 &handle, &point, 1))
+        glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_SIGNAL,
+                                 "drmSyncobjTimelineSignal", errno);
+}
+
+/* Attaches the sync_file fence_fd to the point and closes fence_fd.
+ * fence_fd -1 means the work is already complete.
+ */
+static void
+glamor_dri3_syncobj_import_fence(struct dri3_syncobj *syncobj, uint64_t point,
+                                 int fence_fd)
+{
+    int drm_fd = glamor_dri3_syncobj_drm_fd(syncobj);
+    struct pollfd pfd = { .fd = fence_fd, .events = POLLIN };
+    uint32_t temp;
+    int ret;
+
+    if (fence_fd < 0) {
+        glamor_dri3_syncobj_signal(syncobj, point);
+        return;
+    }
+
+    ret = drmSyncobjCreate(drm_fd, 0, &temp);
+    if (ret) {
+        glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_IMPORT_FENCE,
+                                 "drmSyncobjCreate", errno);
+    } else {
+        ret = drmSyncobjImportSyncFile(drm_fd, temp, fence_fd);
+        if (ret)
+            glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_IMPORT_FENCE,
+                                     "drmSyncobjImportSyncFile", errno);
+        else {
+            ret = drmSyncobjTransfer(drm_fd, glamor_dri3_syncobj_handle(syncobj),
+                                     point, temp, 0, 0);
+            if (ret)
+                glamor_dri3_syncobj_warn(syncobj->screen,
+                                         GLAMOR_SYNCOBJ_OP_IMPORT_FENCE,
+                                         "drmSyncobjTransfer", errno);
+        }
+        drmSyncobjDestroy(drm_fd, temp);
+    }
+
+    if (ret) {
+        /* The client must still see the point signalled: wait for the
+         * fence on the CPU instead.
+         */
+        while (poll(&pfd, 1, -1) < 0 && (errno == EINTR || errno == EAGAIN))
+            ;
+        glamor_dri3_syncobj_signal(syncobj, point);
+    }
+
+    close(fence_fd);
+}
+
+static void
+glamor_dri3_syncobj_eventfd(struct dri3_syncobj *syncobj, uint64_t point,
+                            int efd, uint32_t flags)
+{
+    if (drmSyncobjEventfd(glamor_dri3_syncobj_drm_fd(syncobj),
+                          glamor_dri3_syncobj_handle(syncobj), point, efd,
+                          flags) == 0)
+        return;
+
+    glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_EVENTFD,
+                             "drmSyncobjEventfd", errno);
+    /* Wake the waiter anyway; it checks the point again. */
+    if (eventfd_write(efd, 1) != 0)
+        glamor_dri3_syncobj_warn(syncobj->screen, GLAMOR_SYNCOBJ_OP_EVENTFD,
+                                 "eventfd_write", errno);
+}
+
+static void
+glamor_dri3_syncobj_submitted_eventfd(struct dri3_syncobj *syncobj,
+                                      uint64_t point, int efd)
+{
+    glamor_dri3_syncobj_eventfd(syncobj, point, efd,
+                                DRM_SYNCOBJ_WAIT_FLAGS_WAIT_AVAILABLE);
+}
+
+static void
+glamor_dri3_syncobj_signaled_eventfd(struct dri3_syncobj *syncobj,
+                                     uint64_t point, int efd)
+{
+    glamor_dri3_syncobj_eventfd(syncobj, point, efd, 0);
+}
+
+/* fd is the client's DRM timeline syncobj; the DRI3 core closes it. */
+static struct dri3_syncobj *
+glamor_dri3_import_syncobj(ClientPtr client, ScreenPtr screen, XID id, int fd)
+{
+    struct glamor_egl_screen_private *glamor_egl =
+        glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
+    struct glamor_dri3_syncobj *syncobj;
+    uint32_t handle;
+
+    if (drmSyncobjFDToHandle(glamor_egl->fd, fd, &handle)) {
+        glamor_dri3_syncobj_warn(screen, GLAMOR_SYNCOBJ_OP_IMPORT,
+                                 "drmSyncobjFDToHandle", errno);
+        return NULL;
+    }
+
+    syncobj = calloc(1, sizeof(*syncobj));
+    if (!syncobj) {
+        drmSyncobjDestroy(glamor_egl->fd, handle);
+        return NULL;
+    }
+
+    syncobj->base.id = id;
+    syncobj->base.screen = screen;
+    syncobj->base.refcount = 1;
+    syncobj->base.free = glamor_dri3_syncobj_free;
+    syncobj->base.has_fence = glamor_dri3_syncobj_has_fence;
+    syncobj->base.is_signaled = glamor_dri3_syncobj_is_signaled;
+    syncobj->base.export_fence = glamor_dri3_syncobj_export_fence;
+    syncobj->base.import_fence = glamor_dri3_syncobj_import_fence;
+    syncobj->base.signal = glamor_dri3_syncobj_signal;
+    syncobj->base.submitted_eventfd = glamor_dri3_syncobj_submitted_eventfd;
+    syncobj->base.signaled_eventfd = glamor_dri3_syncobj_signaled_eventfd;
+    syncobj->handle = handle;
+
+    (void) client;
+
+    return &syncobj->base;
+}
+#endif /* GLAMOR_DRI3_SYNCOBJ */
+
 static const dri3_screen_info_rec glamor_dri3_info = {
     .version = 2,
     .open_client = glamor_dri3_open_client,
@@ -1140,7 +1435,15 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
         if (!glamor_egl->device_path)
             glamor_egl->device_path = drmGetDeviceNameFromFd2(glamor_egl->fd);
 
-        if (!dri3_screen_init(screen, &glamor_dri3_info)) {
+        glamor_egl->dri3_info = glamor_dri3_info;
+#ifdef GLAMOR_DRI3_SYNCOBJ
+        if (glamor_egl_syncobj_supported(screen)) {
+            glamor_egl->dri3_info.version = 4;
+            glamor_egl->dri3_info.import_syncobj = glamor_dri3_import_syncobj;
+        }
+#endif
+
+        if (!dri3_screen_init(screen, &glamor_egl->dri3_info)) {
             xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                        "Failed to initialize DRI3.\n");
         }
@@ -1321,6 +1624,7 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
 
     scrn->privates[xf86GlamorEGLPrivateIndex].ptr = glamor_egl;
     glamor_egl->fd = fd;
+    glamor_egl->syncobj_supported = -1;
     glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
     if (glamor_egl->gbm == NULL) {
         ErrorF("couldn't get display device\n");
