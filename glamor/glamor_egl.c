@@ -1255,6 +1255,7 @@ glamor_back_pixmap_from_fd(PixmapPtr pixmap,
                                              stride, depth, bpp);
 }
 
+#ifdef DRI3
 static PixmapPtr
 glamor_pixmap_from_fds_noop(ScreenPtr screen,
                             CARD8 num_fds, const int *fds,
@@ -1265,6 +1266,7 @@ glamor_pixmap_from_fds_noop(ScreenPtr screen,
 {
     return NULL;
 }
+#endif
 
 static PixmapPtr
 glamor_pixmap_from_fds_direct(ScreenPtr screen,
