@@ -158,4 +158,18 @@ present_event_notify(uint64_t event_id, uint64_t ust, uint64_t msc);
 extern _X_EXPORT Bool
 present_screen_init(ScreenPtr screen, present_screen_info_ptr info);
 
+/*
+ * Returns a sync_file fd that signals when the rendering for this window's
+ * copy completes, with ownership passed to the caller, or -1 only after that
+ * rendering has completed.
+ */
+typedef int (*present_flush_fenced_ptr) (WindowPtr window);
+
+/*
+ * Registers the screen's fenced flush; call after present_screen_init.
+ * Only screens with one report PresentCapabilitySyncobj to clients.
+ */
+extern _X_EXPORT void
+present_screen_set_flush_fenced(ScreenPtr screen, present_flush_fenced_ptr func);
+
 #endif /* _PRESENT_H_ */

@@ -181,10 +181,20 @@ present_scmd_get_crtc(present_screen_priv_ptr screen_priv, WindowPtr window)
 static uint32_t
 present_scmd_query_capabilities(present_screen_priv_ptr screen_priv)
 {
+    uint32_t capabilities;
+
     if (!screen_priv->info)
         return 0;
 
-    return screen_priv->info->capabilities;
+    capabilities = screen_priv->info->capabilities;
+
+    /* Synced copies need the driver's fenced flush for the release point */
+#ifdef DRI3
+    if (!screen_priv->driver_flush_fenced)
+#endif
+        capabilities &= ~PresentCapabilitySyncobj;
+
+    return capabilities;
 }
 
 static int
@@ -217,6 +227,18 @@ present_flush(WindowPtr window)
         return;
 
     (*screen_priv->info->flush) (window);
+}
+
+static int
+present_scmd_flush_fenced(WindowPtr window)
+{
+    present_screen_priv_ptr screen_priv = present_screen_priv(window->drawable.pScreen);
+
+    if (screen_priv->driver_flush_fenced)
+        return screen_priv->driver_flush_fenced(window);
+
+    present_flush(window);
+    return -1;
 }
 
 static int
@@ -932,6 +954,7 @@ present_scmd_init_mode_hooks(present_screen_priv_ptr screen_priv)
 
     screen_priv->queue_vblank       =   &present_queue_vblank;
     screen_priv->flush              =   &present_flush;
+    screen_priv->flush_fenced       =   &present_scmd_flush_fenced;
     screen_priv->re_execute         =   &present_re_execute;
 
     screen_priv->abort_vblank       =   &present_scmd_abort_vblank;
