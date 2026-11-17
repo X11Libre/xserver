@@ -176,4 +176,18 @@ present_can_window_flip(WindowPtr window);
 
 extern _X_EXPORT uint32_t FakeScreenFps;
 
+/*
+ * Returns a sync_file fd that signals when the rendering for this window's
+ * copy completes, with ownership passed to the caller, or -1 only after that
+ * rendering has completed.
+ */
+typedef int (*present_flush_fenced_ptr) (WindowPtr window);
+
+/*
+ * Registers the screen's fenced flush; call after present_screen_init.
+ * Only screens with one report PresentCapabilitySyncobj to clients.
+ */
+extern _X_EXPORT void
+present_screen_set_flush_fenced(ScreenPtr screen, present_flush_fenced_ptr func);
+
 #endif /* _PRESENT_H_ */
