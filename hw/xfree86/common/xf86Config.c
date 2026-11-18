@@ -57,9 +57,7 @@
 #include "os/osdep.h"
 #include "Xext/panoramiX/panoramiX_priv.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
-#ifdef DPMSExtension
 #include "Xext/dpms/dpms_priv.h"
-#endif
 #include "Xext/xfixes/xfixes_priv.h"
 
 #include "xf86_priv.h"
@@ -957,7 +955,6 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
         ErrorF("BlankTime value %d outside legal range of 0 - %d minutes\n",
                i, MAX_TIME_IN_MIN);
 
-#ifdef DPMSExtension
     i = -1;
     xf86GetOptValInteger(FlagOptions, FLAG_DPMS_STANDBYTIME, &i);
     if ((i >= 0) && (i < MAX_TIME_IN_MIN))
@@ -979,7 +976,6 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     else if (i != -1)
         ErrorF("OffTime value %d outside legal range of 0 - %d minutes\n",
                i, MAX_TIME_IN_MIN);
-#endif
 
 #ifdef XINERAMA
     from = X_DEFAULT;
