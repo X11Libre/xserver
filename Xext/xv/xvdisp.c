@@ -616,7 +616,7 @@ SingleXvPutImage(ClientPtr client)
     XvPortPtr pPort;
     XvImagePtr pImage = NULL;
     GCPtr pGC;
-    int status, i, size;
+    int status, i;
     CARD16 width, height;
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
@@ -645,8 +645,11 @@ SingleXvPutImage(ClientPtr client)
 
     width = stuff->width;
     height = stuff->height;
-    size = (*pPort->pAdaptor->ddQueryImageAttributes) (pPort, pImage, &width,
-                                                       &height, NULL, NULL);
+    int size = (*pPort->pAdaptor->ddQueryImageAttributes) (pPort, pImage, &width,
+                                                           &height, NULL, NULL);
+    if (size < 0)
+        return BadValue;
+
     size += sizeof(xvPutImageReq);
     size = bytes_to_int32(size);
 
