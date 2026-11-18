@@ -37,34 +37,36 @@ rm -f /etc/pkgin/repositories.conf
 mkdir -p /usr/pkg/etc/pkgin
 mkdir -p /etc/pkgin
 
-{
-cat <<EOF
-https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
-https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/${NETBSD_RELEASE}/All
-EOF
-    } > /usr/pkg/etc/pkgin/repositories.conf
+# pkgin fails as a whole when one repository's summary cannot be fetched,
+# so list only mirrors that serve it. Base ftp(1) speaks https.
+reachable_repos() {
+    for base in https://ftp.netbsd.org https://cdn.netbsd.org; do
+        url="$base/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/$1/All"
+        if ftp -o /dev/null -q 30 "$url/pkg_summary.gz" >/dev/null 2>&1; then
+            echo "$url"
+        fi
+    done
+}
+
+repos=$(reachable_repos "$NETBSD_RELEASE")
+if [ -z "$repos" ]; then
+    echo "No NetBSD ${NETBSD_RELEASE} package mirror answered, falling back to NetBSD 10.0 repositories..."
+    repos=$(reachable_repos 10.0)
+fi
+if [ -z "$repos" ]; then
+    echo "ERROR: no NetBSD package mirror answered"
+    exit 1
+fi
+echo "$repos" > /usr/pkg/etc/pkgin/repositories.conf
 cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
 
 # Unset PKG_REPOS so pkgin reads repositories.conf (one URL per line)
 unset PKG_REPOS
 
 # Update package database
-echo "Updating pkgin..."
-if ! pkgin update; then
-    echo "pkgin update had partial mirror failures, falling back to NetBSD 10.0 repositories..."
-    {
-    cat <<EOF
-https://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
-https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGSRC_ARCH}/10.0/All
-EOF
-    } > /usr/pkg/etc/pkgin/repositories.conf
-    cp /usr/pkg/etc/pkgin/repositories.conf /etc/pkgin/repositories.conf
-    pkgin update || true
-fi
-
-# Install curl for downloading sets
-echo "Installing curl..."
-pkgin -y install curl || true
+echo "Updating pkgin from:"
+cat /usr/pkg/etc/pkgin/repositories.conf
+pkgin update
 
 # X11 binary sets
 SETS_MIRRORS="
@@ -79,7 +81,7 @@ for i in xbase xetc xfont xcomp xserver; do
     for urlbase in $SETS_MIRRORS; do
         url="$urlbase/$i.tar.xz"
         echo "Fetching $url"
-        if curl -L --retry 3 --connect-timeout 20 -f -o "/$i.tar.xz" "$url"; then
+        if ftp -o "/$i.tar.xz" -q 60 "$url"; then
             ok=1
             break
         fi
