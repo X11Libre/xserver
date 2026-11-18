@@ -73,16 +73,23 @@ if [[ -z "$existing_branches" ]]; then
 fi
 log_info "Found $(echo "$existing_branches" | wc -l) branches."
 
+# Open pull requests as "owner/repo:branch" of their head. A run's own
+# pull_requests list has no state and is empty for pull requests from forks.
+log_info "Fetching open pull requests..."
+open_pr_heads=$(gh api -H "Accept: application/vnd.github+json" \
+    "/repos/${REPO}/pulls?state=open&per_page=100" --paginate \
+    | jq -r '.[] | "\(.head.repo.full_name // ""):\(.head.ref)"' | sort -u)
+log_info "Found $(echo -n "$open_pr_heads" | grep -c '') open pull requests."
+
 # Fetch workflow runs
 log_info "Fetching workflow runs..."
 gh api -H "Accept: application/vnd.github+json" \
     "/repos/${REPO}/actions/runs?per_page=100" --paginate \
-    | jq -c '.workflow_runs[] | {id: .id, branch: .head_branch, workflow: .name, pull_requests: .pull_requests, head_repository: .head_repository}' \
+    | jq -c '.workflow_runs[] | {id: .id, branch: .head_branch, workflow: .name, head_repository: .head_repository}' \
     | while read -r run; do
         run_id=$(echo "$run" | jq -r '.id')
-        run_branch=$(echo "$run" | jq -r '.branch')
+        run_branch=$(echo "$run" | jq -r '.branch // empty')
         workflow_name=$(echo "$run" | jq -r '.workflow')
-        pull_requests=$(echo "$run" | jq -c '.pull_requests')
         head_repo=$(echo "$run" | jq -r '.head_repository.full_name // empty')
 
         if [[ -z "$run_branch" ]]; then
@@ -95,10 +102,9 @@ gh api -H "Accept: application/vnd.github+json" \
             continue
         fi
 
-        # Skip if run is associated with an OPEN pull request
-        # (pull_requests array contains PR objects with .state field)
-        if echo "$pull_requests" | jq -e 'any(.state == "open")' >/dev/null 2>&1; then
-            log_info "Skipping run $run_id (branch: $run_branch) — associated with open PR"
+        # Skip if the run's head is the head of an open pull request
+        if [[ -n "$open_pr_heads" ]] && grep -qxF "$head_repo:$run_branch" <<< "$open_pr_heads"; then
+            log_info "Skipping run $run_id (branch: $run_branch, repo: $head_repo) — head of open PR"
             continue
         fi
 
