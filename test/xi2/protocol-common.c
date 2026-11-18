@@ -207,6 +207,8 @@ init_client(int len, void *data)
     client.req_len = len;
 
     client.requestBuffer = data;
+    if (!InitClientResources(&client))
+        FatalError("init_client: InitClientResources failed\n");
     dixAllocatePrivates(&client.devPrivates, PRIVATE_CLIENT);
     return client;
 }
