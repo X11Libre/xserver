@@ -74,6 +74,22 @@ counting_quiesce(XaveriusModuleRole *role)
     return XAVERIUS_MODULE_QUIESCE_SUCCESS;
 }
 
+static XaveriusModuleQuiescenceResult
+quiesce_failure(XaveriusModuleRole *role)
+{
+    (void)role;
+    test_quiesce_calls++;
+    return XAVERIUS_MODULE_QUIESCE_FAILURE;
+}
+
+static XaveriusModuleQuiescenceResult
+quiesce_pending(XaveriusModuleRole *role)
+{
+    (void)role;
+    test_quiesce_calls++;
+    return XAVERIUS_MODULE_QUIESCE_PENDING;
+}
+
 static void
 reset_hook_counts(void)
 {
@@ -599,7 +615,7 @@ xaverius_registry_observation_edge_cases(void)
     assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev_a, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
     assert(dev_a != NULL);
 
-    obs_id = 0;
+obs_id = 0;
     assert(XaveriusRegistryObserveDevice(NULL, source, 1, 1, &id_b,
                                          &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_PENDING);
     assert(obs_dev == NULL);
@@ -609,7 +625,7 @@ xaverius_registry_observation_edge_cases(void)
     id_b.bus = 13;
     id_b.device = 7;
     memset(id_b.driver_uuid, 0xaa, sizeof(id_b.driver_uuid));
-    assert(XaveriusRegistryObserveDevice(NULL, source, 1, 1, &id_a,
+    assert(XaveriusRegistryObserveDevice(NULL, source, 1, 2, &id_a,
                                          &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_SUCCESS);
     assert(obs_dev == dev_a);
     assert(obs_gen == dev_gen);
@@ -617,13 +633,17 @@ xaverius_registry_observation_edge_cases(void)
 
     {
         uint64_t prev_obs_id = obs_id;
-        assert(XaveriusRegistryObserveDevice(NULL, source, 1, 1, &id_a,
+        assert(XaveriusRegistryObserveDevice(NULL, source, 1, 2, &id_a,
                                              &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_SUCCESS);
         assert(obs_dev == dev_a);
         assert(obs_gen == dev_gen);
         assert(obs_id == prev_obs_id);
-        assert(dev_a->caller_refcount == 2);
+        assert(dev_a->caller_refcount == 3);
     }
+
+    /* Save the observation ID and device generation for dev_a before registering device B. */
+    uint64_t dev_a_obs_id = obs_id;
+    uint64_t dev_a_gen = dev_gen;
 
     id_b.bus = 19;
     id_b.device = 23;
@@ -633,43 +653,320 @@ xaverius_registry_observation_edge_cases(void)
     assert(dev_b != NULL);
     assert(dev_b != dev_a);
 
-    assert(XaveriusRegistryObserveDevice(NULL, source, 1, 2, &id_b,
+    assert(XaveriusRegistryObserveDevice(NULL, source, 1, 3, &id_b,
                                          &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_SUCCESS);
     assert(obs_dev == dev_b);
     assert(obs_gen == dev_gen);
     assert(obs_id != 0);
     assert(dev_a != dev_b);
 
-    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id - 1) == XAVERIUS_REGISTRY_SUCCESS);
-    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id - 2) == XAVERIUS_REGISTRY_SUCCESS);
-    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id) == XAVERIUS_REGISTRY_SUCCESS);
-
-    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id) == XAVERIUS_REGISTRY_NOT_FOUND);
-
-    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev_a, dev_gen,
+    /* Confirm device A removed before removing observations. */
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev_a, dev_a_gen,
          &(XaveriusDeviceRemovalEvidence){
-             .source_key = source,
-             .source_generation = 1,
-             .observation_id = obs_id - 2,
-             .source_event_sequence = 1,
-             .physical_device_generation = dev_gen
-         }) == XAVERIUS_REGISTRY_SUCCESS);
+              .source_key = source,
+              .source_generation = 1,
+              .observation_id = dev_a_obs_id,
+              .source_event_sequence = 2,
+              .physical_device_generation = dev_a_gen
+          }) == XAVERIUS_REGISTRY_SUCCESS);
     assert(dev_a->status == XAVERIUS_REGISTRY_REMOVED);
-    assert(xaverius_physical_device_count == 0);
+    assert(xaverius_physical_device_count == 1); /* dev_b still active */
     assert(xaverius_tombstone_count == 1);
 
-    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev_a, dev_gen,
+    /* Now remove all observations. */
+    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, obs_id) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, dev_a_obs_id) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, dev_a_obs_id - 1) == XAVERIUS_REGISTRY_SUCCESS);
+
+    assert(XaveriusRegistryRemoveObservation(NULL, source, 1, dev_a_obs_id) == XAVERIUS_REGISTRY_NOT_FOUND);
+
+    /* Second confirm should return STALE_EVENT. */
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev_a, dev_a_gen,
          &(XaveriusDeviceRemovalEvidence){
-             .source_key = source,
-             .source_generation = 1,
-             .observation_id = obs_id - 2,
-             .source_event_sequence = 1,
-             .physical_device_generation = dev_gen
-         }) == XAVERIUS_REGISTRY_STALE_EVENT);
+              .source_key = source,
+              .source_generation = 1,
+              .observation_id = dev_a_obs_id,
+              .source_event_sequence = 2,
+              .physical_device_generation = dev_a_gen
+          }) == XAVERIUS_REGISTRY_STALE_EVENT);
+
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev_a, dev_a_gen,
+         &(XaveriusDeviceRemovalEvidence){
+              .source_key = source,
+              .source_generation = 1,
+              .observation_id = obs_id - 1,
+              .source_event_sequence = 2,
+              .physical_device_generation = dev_a_gen
+          }) == XAVERIUS_REGISTRY_STALE_EVENT);
     assert(xaverius_tombstone_count == 1);
 
     XaveriusPhysicalDeviceRelease(dev_a);
     XaveriusPhysicalDeviceRelease(dev_b);
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_role_validation_errors(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+
+    assert(XaveriusRegistryInit());
+
+    /* Test STALE_GENERATION: role quiesced SUCCESS (stale generation) */
+    make_valid_desc(&desc, "stale-owner");
+    desc.quiesce_module_role = counting_quiesce; /* returns SUCCESS */
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(role != NULL);
+
+    /* Manually quiesce to SUCCESS (simulates stale generation) */
+    role->quiesce_state = XAVERIUS_MODULE_QUIESCE_SUCCESS;
+
+    id.bus = 100;
+    id.device = 1;
+    memset(id.driver_uuid, 0x11, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+    reset_hook_counts();
+    snapshot_calls = 0;
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_STALE_GENERATION);
+    assert(dev == NULL);
+    assert(test_retain_calls == 0);
+    assert(test_release_calls == 0);
+    assert(snapshot_calls == 0);
+
+    XaveriusModuleRoleFinalize(role);
+    role = NULL;
+
+    /* Test QUARANTINED: role quiesced FAILURE */
+    make_valid_desc(&desc, "quarantine-owner");
+    desc.quiesce_module_role = quiesce_failure; /* returns FAILURE */
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(role != NULL);
+
+    /* Manually set quiesce state to FAILURE */
+    role->quiesce_state = XAVERIUS_MODULE_QUIESCE_FAILURE;
+
+    id.bus = 101;
+    id.device = 2;
+    memset(id.driver_uuid, 0x22, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+    reset_hook_counts();
+    snapshot_calls = 0;
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_QUARANTINED);
+    assert(dev == NULL);
+    assert(test_retain_calls == 0);
+    assert(test_release_calls == 0);
+    assert(snapshot_calls == 0);
+
+    XaveriusModuleRoleFinalize(role);
+    role = NULL;
+
+    /* Test UNAVAILABLE: role quiesced PENDING (temporarily unavailable) */
+    make_valid_desc(&desc, "pending-owner");
+    desc.quiesce_module_role = quiesce_pending; /* returns PENDING */
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(role != NULL);
+
+    /* Manually set quiesce state to PENDING */
+    role->quiesce_state = XAVERIUS_MODULE_QUIESCE_PENDING;
+
+    id.bus = 102;
+    id.device = 3;
+    memset(id.driver_uuid, 0x33, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+    reset_hook_counts();
+    snapshot_calls = 0;
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_UNAVAILABLE);
+    assert(dev == NULL);
+    assert(test_retain_calls == 0);
+    assert(test_release_calls == 0);
+    assert(snapshot_calls == 0);
+
+    XaveriusModuleRoleFinalize(role);
+    role = NULL;
+
+    /* Test SHUTTING_DOWN: admission CLOSED */
+    make_valid_desc(&desc, "shutdown-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(role != NULL);
+
+    /* Close admission */
+    role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_CLOSED;
+
+    id.bus = 103;
+    id.device = 4;
+    memset(id.driver_uuid, 0x44, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+    reset_hook_counts();
+    snapshot_calls = 0;
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SHUTTING_DOWN);
+    assert(dev == NULL);
+    assert(test_retain_calls == 0);
+    assert(test_release_calls == 0);
+    assert(snapshot_calls == 0);
+
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_sequence_exhaustion(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *obs_dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t obs_gen = 0;
+    uint64_t obs_id = 0;
+    const char source[] = "src-exhaust";
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "exhaust-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 200;
+    id.device = 1;
+    memset(id.driver_uuid, 0xee, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+
+    /* Exhaust the sequence: observe with UINT64_MAX - 1, then UINT64_MAX,
+     * then any further observe should fail with STALE_EVENT. */
+
+    /* First observe with sequence = UINT64_MAX - 1 */
+    obs_id = 0;
+    assert(XaveriusRegistryObserveDevice(NULL, source, 1, UINT64_MAX - 1, &id,
+                                         &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev == dev);
+
+    /* Next observe with sequence = UINT64_MAX (should succeed) */
+    obs_id = 0;
+    assert(XaveriusRegistryObserveDevice(NULL, source, 1, UINT64_MAX, &id,
+                                         &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev == dev);
+
+    /* Next observe with any sequence (should fail - exhausted) */
+    obs_id = 0;
+    obs_dev = NULL;
+    assert(XaveriusRegistryObserveDevice(NULL, source, 1, UINT64_MAX, &id,
+                                         &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_STALE_EVENT);
+    assert(obs_dev == NULL);
+
+    obs_id = 0;
+    assert(XaveriusRegistryObserveDevice(NULL, source, 1, 1, &id,
+                                         &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_STALE_EVENT);
+    assert(obs_dev == NULL);
+
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_multi_source_removal(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *obs_dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t obs_gen = 0;
+    uint64_t obs_id_a = 0, obs_id_b = 0;
+    const char source_a[] = "src-a";
+    const char source_b[] = "src-b";
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "multi-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 200;
+    id.device = 1;
+    memset(id.driver_uuid, 0xee, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+    assert(dev->active_observation_count == 0);
+
+    /* Source A observes the device. */
+    obs_id_a = 0;
+    assert(XaveriusRegistryObserveDevice(NULL, source_a, 1, 1, &id,
+                                         &obs_dev, &obs_gen, &obs_id_a) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev == dev);
+    assert(dev->active_observation_count == 1);
+
+    /* Source B observes the same device. */
+    obs_id_b = 0;
+    assert(XaveriusRegistryObserveDevice(NULL, source_b, 1, 1, &id,
+                                         &obs_dev, &obs_gen, &obs_id_b) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev == dev);
+    assert(dev->active_observation_count == 2);
+
+    /* Try to confirm removal with only source A's evidence - should fail BUSY
+     * because source B still has active evidence. */
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev, dev_gen,
+         &(XaveriusDeviceRemovalEvidence){
+              .source_key = source_a,
+              .source_generation = 1,
+              .observation_id = obs_id_a,
+              .source_event_sequence = 1,
+              .physical_device_generation = dev_gen
+          }) == XAVERIUS_REGISTRY_BUSY);
+    assert(dev->status != XAVERIUS_REGISTRY_REMOVED);
+    assert(xaverius_physical_device_count == 1);
+    assert(xaverius_tombstone_count == 0);
+    assert(dev->active_observation_count == 2); /* unchanged */
+
+    /* Remove source A's observation. */
+    assert(XaveriusRegistryRemoveObservation(NULL, source_a, 1, obs_id_a) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev->active_observation_count == 1);
+
+    /* Confirm removal with source B's evidence - should succeed as B's
+     * evidence is the only remaining observation for this device. */
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev, dev_gen,
+         &(XaveriusDeviceRemovalEvidence){
+              .source_key = source_b,
+              .source_generation = 1,
+              .observation_id = obs_id_b,
+              .source_event_sequence = 1,
+              .physical_device_generation = dev_gen
+          }) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev->status == XAVERIUS_REGISTRY_REMOVED);
+    assert(xaverius_physical_device_count == 0);
+    assert(xaverius_tombstone_count == 1);
+
+    /* Clean up source B's observation (now on removed device). */
+    assert(XaveriusRegistryRemoveObservation(NULL, source_b, 1, obs_id_b) == XAVERIUS_REGISTRY_SUCCESS);
+
+    XaveriusPhysicalDeviceRelease(dev);
     XaveriusRegistryFini();
 }
 
@@ -701,7 +998,7 @@ xaverius_module_role_admission_gate(void)
     assert(XaveriusModuleRoleAdmissionOpen(role) == false);
     assert(role->admission == XAVERIUS_MODULE_ROLE_ADMISSION_CLOSED);
 
-    /* Registration using a closed-admission role returns UNAVAILABLE,
+    /* Registration using a closed-admission role returns SHUTTING_DOWN,
      * performs no retain/release/snapshot callback side effects, and
      * does not create a device. */
     id.bus = 21;
@@ -713,7 +1010,7 @@ xaverius_module_role_admission_gate(void)
     reset_hook_counts();
     snapshot_calls = 0;
     assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
-                                             &bind_gen) == XAVERIUS_REGISTRY_UNAVAILABLE);
+                                             &bind_gen) == XAVERIUS_REGISTRY_SHUTTING_DOWN);
     assert(dev == NULL);
     assert(test_retain_calls == 0);
     assert(test_release_calls == 0);
@@ -736,6 +1033,9 @@ xaverius_registry_test(void)
         xaverius_registry_publish_dix,
         xaverius_registry_registration_contract,
         xaverius_registry_observation_edge_cases,
+        xaverius_registry_role_validation_errors,
+        xaverius_registry_sequence_exhaustion,
+        xaverius_registry_multi_source_removal,
         xaverius_module_role_admission_gate,
         NULL,
     };

@@ -53,6 +53,7 @@ typedef enum {
     XAVERIUS_MODULE_QUIESCE_PENDING  = 0,
     XAVERIUS_MODULE_QUIESCE_SUCCESS  = 1,
     XAVERIUS_MODULE_QUIESCE_FAILURE  = 2,
+    XAVERIUS_MODULE_QUIESCE_ACTIVE   = 3,  /* role is active, accepting registrations */
 } XaveriusModuleQuiescenceResult;
 
 /* Forward declarations */
@@ -298,6 +299,12 @@ struct _XaveriusPhysicalDevice {
      * be released via XaveriusPhysicalDeviceRelease(). The registry itself
      * holds one permanent reference for the lifetime of the record. */
     uint32_t caller_refcount;
+
+    /* Number of active observations referencing this device from all sources.
+     * Incremented on successful ObserveDevice match, decremented on
+     * RemoveObservation. Per spec §1038 and §1037: ConfirmDeviceRemoved
+     * MUST NOT transition to REMOVED while active_observation_count > 0. */
+    uint32_t active_observation_count;
 
     struct xorg_list list;
 };
