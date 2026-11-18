@@ -99,6 +99,9 @@
 #include <poll.h>
 #include <string.h>
 #include <sys/eventfd.h>
+#ifndef ETIME /* FreeBSD, DragonFly */
+#define ETIME ETIMEDOUT
+#endif
 #endif
 
 #define GLAMOR_LOG_STR(idx, type, str) \
