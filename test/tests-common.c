@@ -43,6 +43,11 @@ run_test_in_child(const testfunc_t* (*suite)(void), const char *funcname)
 
     printf("\n---------------------\n%s...\n", funcname);
 
+    if (!*func) {
+        printf(" Skipped\n");
+        return;
+    }
+
     while (*func)
     {
         cpid = fork();
