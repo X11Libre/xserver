@@ -58,6 +58,9 @@
 #include <poll.h>
 #include <string.h>
 #include <sys/eventfd.h>
+#ifndef ETIME /* FreeBSD, DragonFly */
+#define ETIME ETIMEDOUT
+#endif
 #endif
 
 struct glamor_egl_screen_private {
