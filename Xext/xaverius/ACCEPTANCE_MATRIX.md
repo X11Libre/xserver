@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius`  
-**HEAD:** `e9e7fce0b9`  
+**HEAD:** `2177a0779b`  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-16  
 **Auditor:** Defiant (fleet ship)
@@ -12,7 +12,7 @@
 
 | Stage | Spec Coverage | Implementation Coverage | Test Coverage | Verdict |
 |-------|---------------|-------------------------|---------------|---------|
-| **Stage 1: ModuleRole** | Complete (spec §3–4, addendum §2–4) | Complete (`registry.c` + `xaverius_intern.h`) | Full (10 test functions in `xaverius-registry.c`) | ✅ PASS |
+| **Stage 1: ModuleRole** | Complete (spec §3–4, addendum §2–4) | Complete (`registry.c` + `xaverius_intern.h`) | Full (13 test functions in `xaverius-registry.c`) | ✅ PASS |
 | **Stage 2: Binding** | Complete (spec §5–6, addendum §3) | Complete (`registry.c` binding alloc/free + `XaveriusRegistryRegisterDdxDevice`) | Full (registration paths + ownership tests) | ✅ PASS |
 | **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove + multi-source observation + registration contract tests) | ✅ PASS |
 | **Stage 4: DIX Publish/Remove/Shutdown** | Complete (addendum §3–4, spec §8) | Complete (`XaveriusPhysicalDevicePublish`, `DIXDestroy`, Observe/ConfirmRemoved, `RegistryFini`) | Full (publish + tombstone lifecycle tests) | ✅ PASS |
@@ -35,7 +35,11 @@
 | **ModuleRoleRetain/Release** (addendum §2: hook primitives, infallible) | `registry.c:XaveriusModuleRoleRetain/Release()` — call hooks exactly once | `xaverius_module_role_ownership()` — retain/release increment counters exactly | ✅ |
 | **ModuleRoleQuiesce** (addendum §4: quiescence protocol) | `registry.c:XaveriusModuleRoleQuiesce()` — invokes `quiesce_module_role` hook | `xaverius_module_role_ownership()` — quiesce hook counted (returns SUCCESS) | ✅ |
 | **ModuleRoleFinalize** (addendum §2: releases original owner ref, frees server storage) | `registry.c:XaveriusModuleRoleFinalize()` — calls release hook once, removes from list, frees role | `xaverius_module_role_ownership()` — finalize increments release to 2 (owner + binding) | ✅ |
-| **ModuleRoleAdmissionOpen** (addendum §2: admission gate) | `registry.c:XaveriusModuleRoleAdmissionOpen()` — checks `admission == OPEN` | `xaverius_module_role_admission_gate()` — NULL→false, new→true, closed→false, closed+register→UNAVAILABLE no side effects | ✅ |
+| **ModuleRoleAdmissionOpen** (addendum §2: admission gate) | `registry.c:XaveriusModuleRoleAdmissionOpen()` — checks `admission == OPEN` | `xaverius_module_role_admission_gate()` — NULL→false, new→true, closed→false, closed+register→SHUTTING_DOWN no side effects | ✅ |
+| **RegisterDdxDevice role validation — STALE_GENERATION** (spec §1041: stale role generation returns STALE_GENERATION) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — checks `quiesce_state == QUIESCE_SUCCESS` before admission | `xaverius_registry_role_validation_errors()` — quiesce SUCCESS → `STALE_GENERATION`, no retain/release/snapshot | ✅ |
+| **RegisterDdxDevice role validation — SHUTTING_DOWN** (spec §1041: admission closed returns SHUTTING_DOWN) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — checks `admission == CLOSED` → `SHUTTING_DOWN` | `xaverius_registry_role_validation_errors()` + `xaverius_module_role_admission_gate()` — CLOSED → `SHUTTING_DOWN`, no side effects | ✅ |
+| **RegisterDdxDevice role validation — QUARANTINED** (spec §1041: quarantined role returns QUARANTINED) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — checks `quiesce_state == QUIESCE_FAILURE` → `QUARANTINED` | `xaverius_registry_role_validation_errors()` — quiesce FAILURE → `QUARANTINED`, no side effects | ✅ |
+| **RegisterDdxDevice role validation — UNAVAILABLE** (spec §1041: temporarily unavailable returns UNAVAILABLE) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — checks `quiesce_state == QUIESCE_PENDING` → `UNAVAILABLE` | `xaverius_registry_role_validation_errors()` — quiesce PENDING → `UNAVAILABLE`, no side effects | ✅ |
 | **Global role list & generation** (spec §3) | `xaverius_intern.h:306–316` `XaveriusModuleRole` with `role_generation`, `list` | Implicit via registration paths using `role_generation` | ✅ |
 
 ### Stage 2: Binding Substrate
@@ -65,8 +69,10 @@
 | **Device registry list + generations** (spec §7) | `xaverius_intern.h:318–323` global `xaverius_physical_devices` list, `xaverius_physical_device_count`, `xaverius_tombstones`, `xaverius_tombstone_count` | `xaverius_registry_registration_paths()` — count=1 after reg; `xaverius_registry_tombstone_lifecycle()` — count transitions 0→1→0, tombstones 0→1 | ✅ |
 | **Device status states** (spec §7: ACTIVE/REMOVED) | `xaverius_intern.h:286` `status` field; `registry.c` sets `XAVERIUS_REGISTRY_REMOVED` on confirm | `xaverius_registry_tombstone_lifecycle()` — after confirm, status=REMOVED | ✅ |
 | **Tombstone lifecycle** (spec §8, addendum §3: removal moves to tombstone, second confirm = STALE_EVENT) | `registry.c:XaveriusRegistryConfirmDeviceRemoved()` — moves device from active to tombstone list, second call returns `STALE_EVENT` | `xaverius_registry_tombstone_lifecycle()` — confirm success, count 1→0 active, 0→1 tombstone; second confirm = `STALE_EVENT`, counts unchanged | ✅ |
-| **Observation API** (addendum §3: generation-checked, non-reusable, returns canonical ref, no XID) | `registry.c:XaveriusRegistryObserveDevice()` — validates source_generation, creates/updates Observation, returns device+generation | `xaverius_registry_observe_and_remove()` — SUCCESS/PENDING/STALE_EVENT/INVALID_ARGUMENT/INVALID_EVIDENCE paths | ✅ |
-| **Observation removal** (addendum §3: withdraw source evidence, no REMOVED while other evidence exists) | `registry.c:XaveriusRegistryRemoveObservation()` — removes specific observation by source+generation+id | `xaverius_registry_observe_and_remove()` — SUCCESS/NOT_FOUND/INVALID_ARGUMENT paths | ✅ |
+| **Observation API** (addendum §3: generation-checked, non-reusable, returns canonical ref, no XID) | `registry.c:XaveriusRegistryObserveDevice()` — validates source_generation, creates/updates Observation, returns device+generation | `xaverius_registry_observe_and_remove()` — SUCCESS/PENDING/STALE_EVENT/INVALID_ARGUMENT/INVALID_EVIDENCE paths; `xaverius_registry_sequence_exhaustion()` — UINT64_MAX exhaustion → STALE_EVENT | ✅ |
+| **Source event sequence exhaustion** (spec §1037: sequences start at 1, MUST NOT wrap/reuse; on exhaustion source generation retired) | `registry.c:XaveriusRegistryObserveDevice()` — checks `last_event_sequence == UINT64_MAX` before sequence validation | `xaverius_registry_sequence_exhaustion()` — observe at UINT64_MAX-1 succeeds, UINT64_MAX succeeds, next observe fails with STALE_EVENT | ✅ |
+| **Observation removal** (addendum §3: withdraw source evidence, no REMOVED while other evidence exists) | `registry.c:XaveriusRegistryRemoveObservation()` — removes specific observation by source+generation+id, decrements active_observation_count | `xaverius_registry_observe_and_remove()` — SUCCESS/NOT_FOUND/INVALID_ARGUMENT paths; `xaverius_registry_multi_source_removal()` — 2 sources observe, remove A only → BUSY, remove B → SUCCESS | ✅ |
+| **Multi-source observation evidence merging** (spec §1038, §1037, lines 74-75: withdrawal must not mark REMOVED while other authoritative evidence exists; ConfirmDeviceRemoved requires all sources withdrawn) | `registry.c` — `active_observation_count` on PhysicalDevice, incremented on ObserveDevice SUCCESS, decremented on RemoveObservation; ConfirmDeviceRemoved returns BUSY if count > 0 | `xaverius_registry_multi_source_removal()` — 2 sources observe same device, confirm with one source = BUSY, remove that source = BUSY, remove second source → SUCCESS | ✅ |
 
 ### Stage 4: DIX Publishing, Removal, Shutdown
 
