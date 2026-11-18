@@ -726,6 +726,8 @@ ms_dri2_schedule_wait_msc(ClientPtr client, DrawablePtr draw, CARD64 target_msc,
 
     /* Get current count */
     ret = ms_get_crtc_ust_msc(crtc, &current_ust, &current_msc);
+    if (ret)
+        goto out_free;
 
     /*
      * If divisor is zero, or current_msc is smaller than target_msc,
