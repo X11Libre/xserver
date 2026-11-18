@@ -345,7 +345,7 @@ xorg_list_append_ndup(struct xorg_list *entry, struct xorg_list *head)
     xorg_list_entry((ptr)->prev, type, member)
 
 #define __container_of(ptr, sample, member)			\
-    container_of((ptr), typeof(*(sample)), member)
+    ((ptr) ? container_of((ptr), typeof(*(sample)), member) : NULL)
 
 /**
  * Loop through the list given by head and set pos to struct in the list.
