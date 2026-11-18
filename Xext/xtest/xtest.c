@@ -284,17 +284,9 @@ ProcXTestFakeInput(ClientPtr client)
                 client->errorValue = dv->first_valuator;
                 return BadValue;
             }
-            if (dv->num_valuators < 1 || dv->num_valuators > 6) {
-                client->errorValue = dv->num_valuators;
-                return BadValue;
-            }
-
-            /* Validate that the valuators stay within the device's axis
-             * count *before* writing them, otherwise an attacker-controlled
-             * first_valuator/num_valuators combination writes past the end of
-             * the fixed-size valuators[MAX_VALUATORS] stack array. */
-            numValuators += dv->num_valuators;
-            if (firstValuator + numValuators > dev->valuator->numAxes) {
+            if (!dv->num_valuators || dv->num_valuators > 6 ||
+                base + dv->num_valuators > dev->valuator->numAxes ||
+                base + dv->num_valuators > MAX_VALUATORS) {
                 client->errorValue = dv->num_valuators;
                 return BadValue;
             }
