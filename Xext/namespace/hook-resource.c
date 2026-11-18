@@ -53,6 +53,15 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (param->rtype == X11_RESTYPE_WINDOW) {
         WindowPtr pWindow = (WindowPtr) param->res;
 
+        /* ProcDestroyWindow has already checked DixDestroyAccess on the target.
+           Removing that child from a host-owned WM frame does not destroy or
+           otherwise grant access to the frame. Preserve any previous XACE
+           denial; DestroySubwindows is not covered by this exception. */
+        if (client->majorOp == X_DestroyWindow &&
+            param->access_mode == DixRemoveAccess &&
+            obj && obj->ns && obj->ns->superPower)
+            return;
+
         /* Namespace's own virtual root window: allow everything except destroy */
         if (pWindow == subj->ns->rootWindow) {
             if (!(param->access_mode & DixDestroyAccess))

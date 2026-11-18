@@ -470,6 +470,37 @@ class TestIsolation:
 
 class TestTreeProjection:
     @pytest.mark.parametrize("swapped", [False, True], ids=["native", "swapped"])
+    @pytest.mark.parametrize("case", ["own", "frame", "host-child", "foreign-child", "subwindows", "foreign-parent"])
+    def test_destroy_reparented_window(self, xserver, swapped, case):
+        """Destroying an owned child must not grant destruction of its host frame."""
+        root = NsConn(xserver, COOKIE_ROOT)
+        a = NsConn(xserver, COOKIE_SBA, swapped=swapped)
+        b = NsConn(xserver, COOKIE_SBB)
+        try:
+            owner = b if case == "foreign-parent" else root
+            frame = owner.create_window(width=400, height=300)
+            assert owner.check() == []
+            own = a.create_window(width=100, height=100)
+            foreign = b.create_window(width=100, height=100)
+            host = root.create_window(width=100, height=100)
+            assert a.check() == []
+            assert b.check() == []
+            assert root.check() == []
+            for child in (own, foreign, host):
+                root.reparent_window(child, frame, 0, 0)
+            assert root.check() == []
+            target = {"frame": frame, "host-child": host, "foreign-child": foreign,
+                      "subwindows": frame}.get(case, own)
+            opcode = 5 if case == "subwindows" else 4
+            a.send_request(struct.pack(f"{a.bo}BxHI", opcode, 2, target))
+            assert _error_codes(a.check()) == ([] if case == "own" else [BadAccess])
+            _, children = root.query_tree(frame)
+            assert set(children) == ({foreign, host} if case == "own" else {own, foreign, host})
+        finally:
+            for c in (root, a, b):
+                c.close()
+
+    @pytest.mark.parametrize("swapped", [False, True], ids=["native", "swapped"])
     def test_reparented_hierarchy(self, xserver, swapped):
         """
         A host WM reparents sandbox windows into workspace -> split -> frame
