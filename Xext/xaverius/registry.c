@@ -329,7 +329,7 @@ XaveriusRegistryResult XaveriusModuleRoleCreate(
     role->module_lease = desc->module_lease;  /* Lease from descriptor */
     role->role_generation = xaverius_next_generation_id();
     role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_OPEN;
-    role->quiesce_state = XAVERIUS_MODULE_QUIESCE_PENDING;
+    role->quiesce_state = XAVERIUS_MODULE_QUIESCE_ACTIVE;
     role->retain_module_role = desc->retain_module_role;
     role->release_module_role = desc->release_module_role;
     role->quiesce_module_role = desc->quiesce_module_role;
@@ -631,7 +631,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     uint64_t *out_device_generation,
     uint64_t *out_binding_generation)
 {
-    XaveriusPhysicalDevice *dev;
+    XaveriusPhysicalDevice *dev = NULL;
     XaveriusPhysicalDevice *existing;
     struct _XaveriusModuleRole *role;
     struct _XaveriusDeviceBackendBinding *binding;
@@ -645,16 +645,6 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         registration->abi_version != XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    /* Resolve the exact ModuleRole generation. No retain happens on lookup;
-     * binding allocation retains the role for binding lifetime. */
-    role = xaverius_find_module_role_by_generation(
-        registration->owner_role_generation);
-    if (role == NULL)
-        return XAVERIUS_REGISTRY_NOT_REGISTERED;
-
-    if (!XaveriusModuleRoleAdmissionOpen(role))
-        return XAVERIUS_REGISTRY_UNAVAILABLE;
-
     /* Validate the top-level ops descriptor header before reading callback
      * fields and before any Hook/Lease side effect. Invalid descriptors
      * must cause neither callback invocation nor lease retention. */
@@ -667,10 +657,35 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     if (registration->ops->query_physical_snapshot == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
+    /* Resolve the exact ModuleRole generation. No retain happens on lookup;
+     * binding allocation retains the role for binding lifetime. */
+    role = xaverius_find_module_role_by_generation(
+        registration->owner_role_generation);
+    if (role == NULL)
+        return XAVERIUS_REGISTRY_NOT_REGISTERED;
+
     /* owner_key belongs to ModuleRole, resolved through role. Validate
      * that role has a non-empty owner_key. */
     if (role->owner_key == NULL || role->owner_key[0] == '\0')
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+
+    /* Per spec §1041: validate role state before installing binding.
+     * Order: most specific first (QUARANTINED, STALE_GENERATION),
+     * then admission-based (SHUTTING_DOWN, UNAVAILABLE). */
+    if (role->quiesce_state == XAVERIUS_MODULE_QUIESCE_FAILURE)
+        return XAVERIUS_REGISTRY_QUARANTINED;
+
+    if (role->quiesce_state == XAVERIUS_MODULE_QUIESCE_SUCCESS)
+        return XAVERIUS_REGISTRY_STALE_GENERATION;
+
+    if (role->admission == XAVERIUS_MODULE_ROLE_ADMISSION_CLOSED)
+        return XAVERIUS_REGISTRY_SHUTTING_DOWN;
+
+    if (role->quiesce_state == XAVERIUS_MODULE_QUIESCE_PENDING)
+        return XAVERIUS_REGISTRY_UNAVAILABLE;
+
+    if (!XaveriusModuleRoleAdmissionOpen(role))
+        return XAVERIUS_REGISTRY_UNAVAILABLE;
 
     /* Canonicalize identity: check for an existing exact incarnation.
      * registration->struct_size/abi_version validate the registration
@@ -717,7 +732,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     if (binding == NULL)
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
 
-    if (dev != existing) {
+    if (existing == NULL) {
         /* New device: allocate and initialize. */
         dev = calloc(1, sizeof(*dev));
         if (dev == NULL) {
@@ -779,7 +794,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         binding, &dev->snapshot);
     if (snap_result != XAVERIUS_BACKEND_SUCCESS) {
         xaverius_binding_free(binding);
-        if (dev != existing) {
+        if (existing == NULL) {
             free(dev->identity_evidence);
             free(dev);
         }
@@ -794,7 +809,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
      * - timelineSemaphore = 1 ist verpflichtend */
     if (dev->snapshot.data == NULL || dev->snapshot.size == 0) {
         xaverius_binding_free(binding);
-        if (dev != existing) {
+        if (existing == NULL) {
             free(dev->identity_evidence);
             free(dev);
         }
@@ -806,7 +821,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         void *snapshot_copy = calloc(1, dev->snapshot.size);
         if (snapshot_copy == NULL) {
             xaverius_binding_free(binding);
-            if (dev != existing) {
+            if (existing == NULL) {
                 free(dev->identity_evidence);
                 free(dev);
             }
@@ -823,7 +838,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
      * must reference its binding so later APIs can dereference it. */
     dev->binding = binding;
 
-    if (dev != existing) {
+    if (existing == NULL) {
         /* Install new device into internal (not yet published) registry. */
         xorg_list_append(&dev->list, &xaverius_physical_devices);
         xaverius_physical_device_count++;
@@ -1001,6 +1016,12 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
         if (source_generation != src->source_generation)
             return XAVERIUS_REGISTRY_STALE_EVENT;
 
+        /* Exhaustion check: if the source has reached UINT64_MAX, no further
+         * observations are accepted (including replays) per spec §1037:
+         * "On exhaustion the source generation is retired". */
+        if (src->last_event_sequence == UINT64_MAX)
+            return XAVERIUS_REGISTRY_STALE_EVENT; /* exhausted */
+
         /* Idempotent replay detection: same source + same event sequence.
          * This MUST come before sequence validation to allow valid replays
          * of the same sequence number. */
@@ -1028,7 +1049,8 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
         }
 
         /* Validate source event sequence: must be strictly increasing
-         * within a source generation per spec §1037. */
+         * within a source generation per spec §1037. Sequences start at 1,
+         * MUST NOT wrap or be reused. */
         if (source_event_sequence < src->last_event_sequence + 1)
             return XAVERIUS_REGISTRY_STALE_EVENT;
     }
@@ -1076,6 +1098,9 @@ XaveriusRegistryResult XaveriusRegistryObserveDevice(
             *out_device_generation = dev->device_generation;
         /* Additional caller-owned reference on success. */
         dev->caller_refcount++;
+        /* Track active observations per spec §1038: each source's
+         * evidence contributes to availability. */
+        dev->active_observation_count++;
         result = XAVERIUS_REGISTRY_SUCCESS;
     } else {
         /* Ambiguous or no match: observation retained but device unpublished.
@@ -1109,6 +1134,9 @@ XaveriusRegistryResult XaveriusRegistryRemoveObservation(
         if (strcmp(obs->source_key, source_key) == 0 &&
             obs->source_generation == source_generation &&
             obs->observation_id == observation_id) {
+            /* Decrement active observation count on referenced device. */
+            if (obs->device != NULL && obs->device->active_observation_count > 0)
+                obs->device->active_observation_count--;
             xorg_list_del(&obs->list);
             xaverius_observation_count--;
             free((void *)obs->source_key);
@@ -1154,6 +1182,20 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
         obs->device != device ||
         obs->device_generation != device_generation)
         return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
+
+    /* Per spec §1038: device removal requires ALL active sources to have
+     * withdrawn their evidence. Check if there are other active observations
+     * for this device (besides the one referenced by removal_evidence).
+     * If so, removal is deferred and returns BUSY. */
+    {
+        XaveriusObservation *other_obs;
+        xorg_list_for_each_entry(other_obs, &xaverius_observations, list) {
+            if (other_obs->device == device &&
+                other_obs->observation_id != removal_evidence->observation_id) {
+                return XAVERIUS_REGISTRY_BUSY;
+            }
+        }
+    }
 
     /* Move the record from the active device list to the tombstone list
      * exactly once. The record (identity, generation, XID if published)
