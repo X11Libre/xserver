@@ -946,7 +946,7 @@ ProcXvQueryImageAttributes(ClientPtr client)
                                                        &width, &height, offsets,
                                                        pitches);
     if (size < 0) {
-        free(offsets);
+        x_rpcbuf_clear(&rpcbuf);
         return BadValue;
     }
 
