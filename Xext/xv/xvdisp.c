@@ -862,6 +862,10 @@ ProcXvQueryImageAttributes(ClientPtr client)
     size = (*pPort->pAdaptor->ddQueryImageAttributes) (pPort, pImage,
                                                        &width, &height, offsets,
                                                        pitches);
+    if (size < 0) {
+        x_rpcbuf_clear(&rpcbuf);
+        return BadValue;
+    }
 
     xvQueryImageAttributesReply reply = {
         .num_planes = num_planes,
