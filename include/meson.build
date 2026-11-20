@@ -1,8 +1,8 @@
-version_split1 = meson.project_version().split('-')
-version_split = version_split1[0].split('.')
-major = version_split[0].to_int()
-minor = version_split[1].to_int()
-patch = version_split[2].to_int()
+version_parts = meson.project_version().split('-') # split on prerelease
+version_numbers = version_parts[0].split('.')
+major = version_numbers[0].to_int()
+minor = version_numbers[1].to_int()
+patch = version_numbers[2].to_int()
 
 # convert to the old-style 1.x.y version scheme used up to 1.20.x for backwards compatibility
 release = 1 * 10000000 + major * 100000 + minor * 1000 + patch
