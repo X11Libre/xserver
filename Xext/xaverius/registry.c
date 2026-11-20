@@ -891,6 +891,9 @@ XaveriusRegistryResult XaveriusRegistryRemoveDeviceBackendBinding(void *registry
     if (device == NULL || device->binding == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
+    if (device->device_generation != device_generation)
+        return XAVERIUS_REGISTRY_STALE_GENERATION;
+
     if (device->binding->module_role->role_generation != module_role_generation ||
         device->binding->binding_generation != binding_generation)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;

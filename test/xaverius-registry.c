@@ -52,6 +52,16 @@ test_query_snapshot_bad(struct _XaveriusDeviceBackendBinding *binding,
     return XAVERIUS_BACKEND_SUCCESS;
 }
 
+static XaveriusBackendResult
+test_query_snapshot_fail(struct _XaveriusDeviceBackendBinding *binding,
+                         XaveriusPhysicalDeviceSnapshot *out)
+{
+    (void)binding;
+    (void)out;
+    snapshot_calls++;
+    return XAVERIUS_BACKEND_EXECUTION_FAILURE;
+}
+
 static void
 counting_retain(XaveriusModuleRole *role)
 {
@@ -1020,6 +1030,259 @@ xaverius_module_role_admission_gate(void)
     XaveriusRegistryFini();
 }
 
+static void
+xaverius_registry_registration_null_identity(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "null-id-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    setup_min_ops(&ops, true);
+    setup_min_reg(&reg, NULL, &ops, role);
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_INVALID_ARGUMENT);
+    assert(dev == NULL);
+    assert(xaverius_physical_device_count == 0);
+
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_registration_snapshot_failure(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusDeviceIdentity id = { 0 };
+    XaveriusPhysicalDevice *dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "snap-fail-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 50;
+    id.device = 1;
+    memset(id.driver_uuid, 0x77, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    ops.query_physical_snapshot = test_query_snapshot_fail;
+    snapshot_calls = 0;
+    setup_min_reg(&reg, &id, &ops, role);
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_UNAVAILABLE);
+    assert(dev == NULL);
+    assert(snapshot_calls == 1);
+    assert(xaverius_physical_device_count == 0);
+    /* binding_alloc retained role; binding_free released it on failure path. */
+    assert(test_retain_calls == 1);
+    assert(test_release_calls == 1);
+
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_registration_snapshot_bad_data(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusDeviceIdentity id = { 0 };
+    XaveriusPhysicalDevice *dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "snap-bad-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 51;
+    id.device = 2;
+    memset(id.driver_uuid, 0x88, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, false);
+    snapshot_calls = 0;
+    setup_min_reg(&reg, &id, &ops, role);
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_INVALID_EVIDENCE);
+    assert(dev == NULL);
+    assert(snapshot_calls == 1);
+    assert(xaverius_physical_device_count == 0);
+
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_binding_remove_wrong_generation(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "bind-remove-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 60;
+    id.device = 1;
+    memset(id.driver_uuid, 0x99, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+
+    /* Wrong device generation -> STALE_GENERATION. */
+    assert(XaveriusRegistryRemoveDeviceBackendBinding(NULL, dev, dev_gen + 1,
+                                                      role->role_generation,
+                                                      bind_gen) == XAVERIUS_REGISTRY_STALE_GENERATION);
+    assert(dev->binding != NULL);
+
+    /* Wrong module role generation -> INVALID_ARGUMENT. */
+    assert(XaveriusRegistryRemoveDeviceBackendBinding(NULL, dev, dev_gen,
+                                                      role->role_generation + 1,
+                                                      bind_gen) == XAVERIUS_REGISTRY_INVALID_ARGUMENT);
+    assert(dev->binding != NULL);
+
+    /* Wrong binding generation -> INVALID_ARGUMENT. */
+    assert(XaveriusRegistryRemoveDeviceBackendBinding(NULL, dev, dev_gen,
+                                                      role->role_generation,
+                                                      bind_gen + 1) == XAVERIUS_REGISTRY_INVALID_ARGUMENT);
+    assert(dev->binding != NULL);
+
+    /* Correct generations -> SUCCESS. */
+    assert(XaveriusRegistryRemoveDeviceBackendBinding(NULL, dev, dev_gen,
+                                                      role->role_generation,
+                                                      bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev->binding == NULL);
+
+    XaveriusPhysicalDeviceRelease(dev);
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_observe_null_identity(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *obs_dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t obs_gen = 0;
+    uint64_t obs_id = 0;
+    const char source[] = "src-null-id";
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "null-id-obs-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 70;
+    id.device = 1;
+    memset(id.driver_uuid, 0xaa, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+
+    /* ObserveDevice with NULL identity_evidence -> PENDING (no match possible). */
+    assert(XaveriusRegistryObserveDevice(NULL, source, 1, 1, NULL,
+                                         &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_PENDING);
+    assert(obs_dev == NULL);
+    assert(obs_gen == 0);
+    assert(obs_id != 0);
+
+    XaveriusPhysicalDeviceRelease(dev);
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_confirm_removed_wrong_generation(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *obs_dev = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t obs_gen = 0;
+    uint64_t obs_id = 0;
+    const char source[] = "src-wrong-gen";
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "wrong-gen-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 80;
+    id.device = 1;
+    memset(id.driver_uuid, 0xbb, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+
+    obs_id = 1001;
+    assert(XaveriusRegistryObserveDevice(NULL, source, 1, 1, &id,
+                                         &obs_dev, &obs_gen, &obs_id) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(obs_dev == dev);
+
+    /* Wrong device generation -> STALE_GENERATION. */
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev, dev_gen + 1,
+         &(XaveriusDeviceRemovalEvidence){
+              .source_key = source,
+              .source_generation = 1,
+              .observation_id = obs_id,
+              .source_event_sequence = 1,
+              .physical_device_generation = dev_gen
+          }) == XAVERIUS_REGISTRY_STALE_GENERATION);
+    assert(dev->status != XAVERIUS_REGISTRY_REMOVED);
+    assert(xaverius_physical_device_count == 1);
+
+    /* Correct generation, valid evidence -> SUCCESS. */
+    assert(XaveriusRegistryConfirmDeviceRemoved(NULL, dev, dev_gen,
+         &(XaveriusDeviceRemovalEvidence){
+              .source_key = source,
+              .source_generation = 1,
+              .observation_id = obs_id,
+              .source_event_sequence = 1,
+              .physical_device_generation = dev_gen
+          }) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev->status == XAVERIUS_REGISTRY_REMOVED);
+    assert(xaverius_physical_device_count == 0);
+    assert(xaverius_tombstone_count == 1);
+
+    XaveriusPhysicalDeviceRelease(dev);
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
 const testfunc_t*
 xaverius_registry_test(void)
 {
@@ -1037,6 +1300,13 @@ xaverius_registry_test(void)
         xaverius_registry_sequence_exhaustion,
         xaverius_registry_multi_source_removal,
         xaverius_module_role_admission_gate,
+        /* New focused regression tests for genuine coverage gaps */
+        xaverius_registry_registration_null_identity,
+        xaverius_registry_registration_snapshot_failure,
+        xaverius_registry_registration_snapshot_bad_data,
+        xaverius_registry_binding_remove_wrong_generation,
+        xaverius_registry_observe_null_identity,
+        xaverius_registry_confirm_removed_wrong_generation,
         NULL,
     };
 
