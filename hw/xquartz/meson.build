@@ -13,11 +13,12 @@ endif
 
 bundle_version = get_option('bundle-version') # CFBundleVersion
 if bundle_version == 'auto'
-    version_arr = bundle_version_string.split('.')
-    version_major = version_arr[0].to_int()
-    version_minor = version_arr[1].to_int()
-    version_tiny = version_arr[2].to_int()
-    bundle_version = '@0@.@1@.@2@'.format(version_major, version_minor, version_tiny)
+    version_parts = bundle_version_string.split('-') # split on prerelease
+    version_numbers = version_parts[0].split('.')
+    version_major = version_numbers[0].to_int()
+    version_minor = version_numbers[1].to_int()
+    version_patch = version_numbers[2].to_int()
+    bundle_version = '@0@.@1@.@2@'.format(version_major, version_minor, version_patch)
 endif
 
 bundle_id_def = '-DBUNDLE_ID_PREFIX="@0@"'.format(bundle_id_prefix)
