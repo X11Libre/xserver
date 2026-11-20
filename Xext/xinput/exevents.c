@@ -2885,13 +2885,23 @@ WindowGone(WindowPtr win)
 
     for (dev = inputInfo.devices; dev; dev = dev->next) {
         TouchClassPtr t = dev->touch;
-        int i;
 
-        if (!t)
-            continue;
+        if (t) {
+            for (int i = 0; i < t->num_touches; i++) {
+                SpritePtr sprite = &t->touches[i].sprite;
+                int j;
 
-        for (i = 0; i < t->num_touches; i++) {
-            SpritePtr sprite = &t->touches[i].sprite;
+                for (j = 0; j < sprite->spriteTraceGood; j++) {
+                    if (sprite->spriteTrace[j] == win) {
+                        sprite->spriteTraceGood = j;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (dev->gesture) {
+            SpritePtr sprite = &dev->gesture->gesture.sprite;
             int j;
 
             for (j = 0; j < sprite->spriteTraceGood; j++) {
