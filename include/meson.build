@@ -1,4 +1,5 @@
-version_split = meson.project_version().split('.')
+version_split1 = meson.project_version().split('-')
+version_split = version_split1[0].split('.')
 major = version_split[0].to_int()
 minor = version_split[1].to_int()
 patch = version_split[2].to_int()
