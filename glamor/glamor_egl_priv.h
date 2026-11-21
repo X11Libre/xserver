@@ -16,6 +16,7 @@
 #include <epoxy/egl.h>
 
 #include "scrnintstr.h"
+#include "glamor_egl.h"
 #include "glamor_egl_ext.h"
 
 #ifdef DRI3
@@ -26,7 +27,7 @@
 #include <gbm.h>
 #endif
 
-typedef struct glamor_egl_screen_private {
+struct glamor_egl_screen_private {
     EGLDisplay display;
     EGLContext context;
     char *device_path;
@@ -53,7 +54,7 @@ typedef struct glamor_egl_screen_private {
     int fd;
     int dmabuf_capable;
     int syncobj_supported; /* -1 until probed */
-} glamor_egl_priv_t;
+};
 
 /**
  * Deinitialize an egl context created by glamor egl
