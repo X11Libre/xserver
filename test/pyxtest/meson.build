@@ -55,6 +55,7 @@ if pytest.found()
         'test_font.py',
         'test_glamor.py',
         'test_glx.py',
+        'test_namespace.py',
         'test_present.py',
         'test_randr.py',
         'test_record.py',
@@ -85,6 +86,9 @@ if pytest.found()
     # As part of the normal meson test run we only run the Xvfb tests
     if build_xvfb
         foreach t: tests_pyxtest
+            if t == 'test_namespace.py' and not get_option('namespace')
+                continue
+            endif
             test(f'pyxtest-@t@',
             pytest,
             args: pytest_args + [files(t)],

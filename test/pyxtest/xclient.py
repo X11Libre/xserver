@@ -161,10 +161,13 @@ class RawX11Connection:
     Minimal X11 connection for sending raw (possibly malformed) requests.
 
     Set swapped=True for testing byte-swap code paths (SProcXxx).
+    Supply auth_name and auth_data as bytes for authenticated connections.
     """
 
-    def __init__(self, display_num, swapped=False):
+    def __init__(self, display_num, swapped=False, auth_name=b"", auth_data=b""):
         self.display_num = display_num
+        self.auth_name = auth_name
+        self.auth_data = auth_data
         self.swapped = swapped
         self._byte_order = ">" if swapped else "<"
         self.sock = None
@@ -210,7 +213,12 @@ class RawX11Connection:
     def _handshake(self):
         byte_order = 0x42 if self.swapped else 0x6C
         bo = self._byte_order
-        setup = struct.pack(f"{bo}BxHHHHxx", byte_order, 11, 0, 0, 0)
+        setup = struct.pack(
+            f"{bo}BxHHHHxx", byte_order, 11, 0,
+            len(self.auth_name), len(self.auth_data),
+        )
+        setup += self.auth_name + bytes(-len(self.auth_name) % 4)
+        setup += self.auth_data + bytes(-len(self.auth_data) % 4)
         assert self.sock
         self.sock.sendall(setup)
 

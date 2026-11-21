@@ -36,6 +36,22 @@ struct xorg_list ns_list = { 0 };
 
 char *namespaceConfigFile = NULL;
 
+unsigned int XnsEnabledComponents = XNS_COMPONENT_ALL;
+
+static const struct {
+    const char *name;
+    enum XnsComponent component;
+} components[] = {
+    { "clipboard", XNS_COMPONENT_CLIPBOARD },
+    { "properties", XNS_COMPONENT_PROPERTIES },
+    { "clients", XNS_COMPONENT_CLIENTS },
+    { "devices", XNS_COMPONENT_DEVICES },
+    { "extensions", XNS_COMPONENT_EXTENSIONS },
+    { "server", XNS_COMPONENT_SERVER },
+    { "resources", XNS_COMPONENT_RESOURCES },
+    { "events", XNS_COMPONENT_EVENTS },
+};
+
 static struct Xnamespace* select_ns(const char* name)
 {
     struct Xnamespace *ns = XnsLookup(name, strlen(name));
@@ -91,7 +107,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         *c1 = 0;
 
     /* get the first token */
-    char *token = strtok(line, " \t");
+    char *token = strtok(line, " \t\r");
 
     if (token == NULL)
         return;
@@ -109,6 +125,31 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         }
 
         curr = *walk_ns = select_ns(token);
+        return;
+    }
+
+    /* Component switches are global, regardless of the current namespace. */
+    if (strcmp(token, "disable") == 0 || strcmp(token, "enable") == 0) {
+        Bool enable = strcmp(token, "enable") == 0;
+        char *name = strtok(NULL, " \t\r");
+
+        if (!name)
+            XNS_LOG("%s missing component name\n", token);
+        while (name) {
+            size_t i;
+            for (i = 0; i < ARRAY_SIZE(components); i++) {
+                if (strcmp(name, components[i].name) != 0)
+                    continue;
+                if (enable)
+                    XnsEnabledComponents |= components[i].component;
+                else
+                    XnsEnabledComponents &= ~components[i].component;
+                break;
+            }
+            if (i == ARRAY_SIZE(components))
+                XNS_LOG("unknown component: %s\n", name);
+            name = strtok(NULL, " \t\r");
+        }
         return;
     }
 
@@ -172,6 +213,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 
 Bool XnsLoadConfig(void)
 {
+    XnsEnabledComponents = XNS_COMPONENT_ALL;
     xorg_list_append_ndup(&ns_root.entry, &ns_list);
     xorg_list_append_ndup(&ns_anon.entry, &ns_list);
     xorg_list_init(&ns_root.auth_tokens);
