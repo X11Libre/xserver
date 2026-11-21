@@ -197,3 +197,5 @@ static XF86ModuleVersionInfo exaVersRec = {
 _X_EXPORT XF86ModuleData exaModuleData = {
     .vers = &exaVersRec
 };
+
+XF86_MODULE_VERSION_SUFFIX(exa, PACKAGE_VERSION_SUFFIX);

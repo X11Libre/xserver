@@ -55,6 +55,8 @@ _X_EXPORT XF86ModuleData fbdevhwModuleData = {
     .vers = &fbdevHWVersRec
 };
 
+XF86_MODULE_VERSION_SUFFIX(fbdevhw, PACKAGE_VERSION_SUFFIX);
+
 /* -------------------------------------------------------------------- */
 /* our private data, and two functions to allocate/free this            */
 
