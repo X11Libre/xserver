@@ -540,9 +540,17 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
         && (pDraw->height == pPriv->height);
 
     /* Since we deduplicate attachments in the buffers array, there cannot be
-     * more entries than there are attachments.
+     * more entries than there are attachments, plus one slot for a
+     * synthesized real/fake front buffer the client didn't explicitly
+     * request. 'count' is already capped at DRI2BufferHiz + 1 by the check
+     * above, so this is never a large allocation; clamping it again via
+     * min(count, DRI2BufferHiz) is wrong at that exact boundary (count ==
+     * DRI2BufferHiz + 1) -- it throws away the "+1" slack right when the
+     * loop below can legitimately use every one of the 'count' slots itself,
+     * leaving no room for the synthesized buffer and writing one past the
+     * end of this array.
      */
-    DRI2BufferPtr *buffers = calloc((min(count, DRI2BufferHiz) + 1), sizeof(buffers[0]));
+    DRI2BufferPtr *buffers = calloc(count + 1, sizeof(buffers[0]));
     if (!buffers)
         goto err_out;
 
