@@ -65,6 +65,7 @@
 #include "mipointer.h"
 #include "xserver-properties.h"
 #include "eventstr.h"
+#include "Xext/xtest/xtest_priv.h"
 
 Bool noTestExtensions = FALSE;
 
@@ -284,42 +285,14 @@ ProcXTestFakeInput(ClientPtr client)
                 client->errorValue = dv->first_valuator;
                 return BadValue;
             }
-            if (dv->num_valuators < 1 || dv->num_valuators > 6) {
+            if (XTestCopyValuators(valuators, firstValuator,
+                                   dev->valuator->numAxes, numValuators,
+                                   dv) != Success) {
                 client->errorValue = dv->num_valuators;
                 return BadValue;
             }
 
-            /* Validate that the valuators stay within the device's axis
-             * count *before* writing them, otherwise an attacker-controlled
-             * first_valuator/num_valuators combination writes past the end of
-             * the fixed-size valuators[MAX_VALUATORS] stack array. */
             numValuators += dv->num_valuators;
-            if (firstValuator + numValuators > dev->valuator->numAxes) {
-                client->errorValue = dv->num_valuators;
-                return BadValue;
-            }
-
-            switch (dv->num_valuators) {
-            case 6:
-                valuators[base + 5] = dv->valuator5;
-                /* fallthrough */
-            case 5:
-                valuators[base + 4] = dv->valuator4;
-                /* fallthrough */
-            case 4:
-                valuators[base + 3] = dv->valuator3;
-                /* fallthrough */
-            case 3:
-                valuators[base + 2] = dv->valuator2;
-                /* fallthrough */
-            case 2:
-                valuators[base + 1] = dv->valuator1;
-                /* fallthrough */
-            case 1:
-                valuators[base] = dv->valuator0;
-                break;
-            }
-
             base += dv->num_valuators;
         }
         type = type - XI_DeviceKeyPress + KeyPress;
