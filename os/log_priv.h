@@ -94,4 +94,10 @@ extern const char *xorgSyslogIdent;
  */
 void LogPrintMarkers(void);
 
+void LogHdrMessageVerb(MessageType type, int verb,
+                       const char *msg_format, va_list msg_args,
+                       const char *hdr_format, ...)
+    _X_ATTRIBUTE_PRINTF(3, 0)
+    _X_ATTRIBUTE_PRINTF(5, 6);
+
 #endif /* __XORG_OS_LOGGING_H */
