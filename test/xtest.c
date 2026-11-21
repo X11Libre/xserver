@@ -44,6 +44,7 @@
 #include "xserver-properties.h"
 #include "Xext/sync/syncsrv.h"
 #include "tests-common.h"
+#include "Xext/xtest/xtest_priv.h"
 
 /**
  */
@@ -155,12 +156,60 @@ xtest_properties(void)
     xtest_cleanup();
 }
 
+static void
+xtest_valuator_bounds(void)
+{
+    const int sentinel = 0x12345678;
+    int valuators[MAX_VALUATORS + 1];
+    deviceValuator dv = {
+        .num_valuators = 1,
+        .valuator0 = 0xdeadbeef,
+    };
+    int i;
+
+    for (i = 0; i <= MAX_VALUATORS; i++)
+        valuators[i] = sentinel;
+
+    /*
+     * This is the vulnerable equality boundary: firstValuator == numAxes
+     * == MAX_VALUATORS. The old code accepted it and wrote valuators[36]
+     * before rejecting the request. Keep a sentinel immediately after the
+     * real array to make that write observable in this unit test.
+     */
+    assert(XTestCopyValuators(valuators, MAX_VALUATORS, MAX_VALUATORS,
+                              0, &dv) == BadValue);
+    assert(valuators[MAX_VALUATORS] == sentinel);
+
+    /* The final six slots are valid, but the following slot is not. */
+    dv.num_valuators = 6;
+    dv.valuator0 = 10;
+    dv.valuator1 = 11;
+    dv.valuator2 = 12;
+    dv.valuator3 = 13;
+    dv.valuator4 = 14;
+    dv.valuator5 = 15;
+    assert(XTestCopyValuators(valuators, MAX_VALUATORS - 6,
+                              MAX_VALUATORS, 0, &dv) == Success);
+    for (i = 0; i < 6; i++)
+        assert(valuators[MAX_VALUATORS - 6 + i] == 10 + i);
+    assert(valuators[MAX_VALUATORS] == sentinel);
+
+    /* One more value would cross both the device and stack-array bounds. */
+    for (i = 0; i <= MAX_VALUATORS; i++)
+        valuators[i] = sentinel;
+    assert(XTestCopyValuators(valuators, MAX_VALUATORS - 5,
+                              MAX_VALUATORS, 0, &dv) == BadValue);
+    assert(valuators[MAX_VALUATORS - 5] == sentinel);
+    assert(valuators[MAX_VALUATORS] == sentinel);
+}
+
 const testfunc_t*
 xtest_test(void)
 {
     static const testfunc_t testfuncs[] = {
         xtest_init_devices,
         xtest_properties,
+        xtest_valuator_bounds,
         NULL,
     };
     return testfuncs;
