@@ -11,6 +11,13 @@
 #include "xf86x86emu.h"
 #include "Pci.h"
 
+#define I_S_DEFAULT_INT_VECT    0xFF065
+
+/* EFLAGS register bit masks */
+#define X86_CARRY_MASK          0x00000001
+#define X86_IF_MASK             0x00000200
+#define X86_IOPL_MASK           0x00003000
+
 xf86Int10InfoPtr Int10Current = NULL;
 
 static int int1A_handler(xf86Int10InfoPtr pInt);

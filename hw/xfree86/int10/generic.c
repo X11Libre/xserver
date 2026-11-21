@@ -18,6 +18,12 @@
 #include "xf86x86emu.h"
 #include "Pci.h"
 
+#define BIOS_SIZE       0x10000
+#define LOW_PAGE_SIZE   0x600
+#define V_RAM           0xA0000
+#define VRAM_SIZE       0x20000
+#define V_BIOS_SIZE     0x10000
+
 #define ALLOC_ENTRIES(x) ((V_RAM / (x)) - 1)
 
 #include <string.h>             /* needed for memmove */

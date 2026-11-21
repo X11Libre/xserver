@@ -24,25 +24,8 @@ typedef struct {
 } legacyVGARec, *legacyVGAPtr;
 
 /* Private macros and constants */
-#define I_S_DEFAULT_INT_VECT 0xFF065
-#define SYS_SIZE 0x100000
 #define SYS_BIOS 0xF0000
-#define BIOS_SIZE 0x10000
-#define LOW_PAGE_SIZE 0x600
-#define V_RAM 0xA0000
-#define VRAM_SIZE 0x20000
-#define V_BIOS_SIZE 0x10000
 #define V_BIOS 0xC0000
-#define BIOS_SCRATCH_OFF 0x449
-#define BIOS_SCRATCH_END 0x466
-#define BIOS_SCRATCH_LEN (BIOS_SCRATCH_END - BIOS_SCRATCH_OFF + 1)
-#define SEG_ADR(type, seg, reg)  type((seg << 4) + (X86_##reg))
-
-/* EFLAGS register bit masks */
-#define X86_CARRY_MASK		0x00000001
-#define X86_TF_MASK		0x00000100
-#define X86_IF_MASK		0x00000200
-#define X86_IOPL_MASK		0x00003000
 
 #define MEM_RB(name, addr)      (*(name)->mem->rb)((name), (addr))
 #define MEM_RW(name, addr)      (*(name)->mem->rw)((name), (addr))
