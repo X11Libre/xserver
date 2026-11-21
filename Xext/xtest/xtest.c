@@ -255,6 +255,10 @@ ProcXTestFakeInput(ClientPtr client)
 
         if (type == XI_DeviceMotionNotify) {
             firstValuator = ((deviceValuator *) (ev + 1))->first_valuator;
+            if (firstValuator >= dev->valuator->numAxes) {
+                client->errorValue = ev->u.u.type;
+                return BadValue;
+            }
 
             if (ev->u.u.detail == xFalse) {
                 flags |= POINTER_ABSOLUTE;
