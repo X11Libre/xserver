@@ -225,6 +225,7 @@ if build_xorg
         '-Wl,-wrap,XISetEventMask',
         '-Wl,-wrap,AddResource',
         '-Wl,-wrap,GrabButton',
+        '-Wl,-wrap,GrabKey',
        ]
     else
        ldwraps = []
