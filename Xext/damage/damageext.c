@@ -79,7 +79,6 @@ static int PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff);
 
 #endif /* XINERAMA */
 
-static unsigned char DamageReqCode;
 static int DamageEventBase;
 static RESTYPE DamageExtType;
 
@@ -690,7 +689,6 @@ DamageExtensionInit(void)
                                  XDamageNumberErrors,
                                  ProcDamageDispatch, ProcDamageDispatch,
                                  NULL, StandardMinorOpcode)) != 0) {
-        DamageReqCode = (unsigned char) extEntry->base;
         DamageEventBase = extEntry->eventBase;
         EventSwapVector[DamageEventBase + XDamageNotify] =
             (EventSwapPtr) SDamageNotifyEvent;
