@@ -37,6 +37,7 @@ from The Open Group.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
@@ -72,15 +73,12 @@ ProcXQueryDeviceState(ClientPtr client)
 
     X_REQUEST_HEAD_STRUCT(xQueryDeviceStateReq);
 
-    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
-    if (rc != Success && rc != BadAccess)
+    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
+    if (rc != Success)
         return rc;
 
-    /* dixLookupDevice() leaves dev NULL on anything other than Success,
-     * including BadAccess. The code below intentionally continues on
-     * BadAccess to blank out the state, but it cannot do so without a valid
-     * device, so bail out rather than dereferencing NULL. */
-    if (!dev)
+    rc = dixCallDeviceAccessCallback(client, dev, DixReadAccess);
+    if (rc != Success && rc != BadAccess)
         return rc;
 
     v = dev->valuator;

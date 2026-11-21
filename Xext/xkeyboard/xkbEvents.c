@@ -34,6 +34,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
@@ -240,15 +241,36 @@ XkbSendStateNotify(DeviceIntPtr kbd, xkbStateNotify * pSN)
         if ((!interest->client->clientGone) &&
             (interest->client->xkbClientFlags & _XkbClientInitialized) &&
             (interest->stateNotifyMask & changed)) {
-            pSN->time = time;
-            pSN->changed = changed;
-            pSN->ptrBtnState = bState;
-            if (interest->client->swapped) {
-                swapl(&pSN->time);
-                swaps(&pSN->changed);
-                swaps(&pSN->ptrBtnState);
+            Bool allowState = (dixCallDeviceAccessCallback(interest->client,
+                                                           kbd, DixReadAccess) == Success);
+            CARD16 effChanged = allowState ? changed :
+                (changed & (XkbGroupStateMask | XkbGroupBaseMask |
+                            XkbGroupLatchMask | XkbGroupLockMask));
+            if (interest->stateNotifyMask & effChanged) {
+                xkbStateNotify ev = *pSN;
+                ev.time = time;
+                ev.changed = effChanged;
+                ev.ptrBtnState = allowState ? bState : 0;
+                if (!allowState) {
+                    ev.keycode = 0;
+                    ev.eventType = 0;
+                    ev.mods = 0;
+                    ev.baseMods = 0;
+                    ev.latchedMods = 0;
+                    ev.lockedMods = 0;
+                    ev.compatState = 0;
+                    ev.grabMods = 0;
+                    ev.compatGrabMods = 0;
+                    ev.lookupMods = 0;
+                    ev.compatLookupMods = 0;
+                }
+                if (interest->client->swapped) {
+                    swapl(&ev.time);
+                    swaps(&ev.changed);
+                    swaps(&ev.ptrBtnState);
+                }
+                xmitClientEvent(interest->client, *(xEvent*)&ev);
             }
-            xmitClientEvent(interest->client, *(xEvent*)pSN);
         }
         interest = interest->next;
     }

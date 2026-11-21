@@ -55,10 +55,24 @@ WindowPtr XnsCreateVirtualRoot(WindowPtr realRoot, const char *name)
         return NULL;
     pWin->eventMask = mask;
 
-    // set window name
+    // set window name and EWMH supporting WM check properties
     char buf[PATH_MAX] = { 0 };
     snprintf(buf, sizeof(buf)-1, "XNS-ROOT:%s", name);
     setWinStrProp(pWin, XA_WM_NAME, buf);
+
+    XID rootId = pWin->drawable.id;
+    Atom netSupportingWmCheck = MakeAtom("_NET_SUPPORTING_WM_CHECK", 24, TRUE);
+    Atom netWmName = MakeAtom("_NET_WM_NAME", 12, TRUE);
+    Atom utf8String = MakeAtom("UTF8_STRING", 11, TRUE);
+    if (netSupportingWmCheck != BAD_RESOURCE)
+        dixChangeWindowProperty(serverClient, pWin, netSupportingWmCheck,
+                                XA_WINDOW, 32, PropModeReplace, 1, &rootId, TRUE);
+    if (netWmName != BAD_RESOURCE && utf8String != BAD_RESOURCE) {
+        const char *wmName = "i3";
+        dixChangeWindowProperty(serverClient, pWin, netWmName,
+                                utf8String, 8, PropModeReplace,
+                                strlen(wmName), wmName, TRUE);
+    }
 
     return pWin;
 }

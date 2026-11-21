@@ -3,6 +3,7 @@
 #include <dix-config.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <X11/Xmd.h>
 
 #include "dix/client_priv.h"
@@ -20,12 +21,38 @@
 #include "hooks.h"
 
 Bool noNamespaceExtension = TRUE;
+Bool xnsDebugLog = FALSE;
 
 DevPrivateKeyRec namespaceClientPrivKeyRec = { 0 };
+
+static int (*origProcGrabServer)(ClientPtr client);
+static int (*origProcUngrabServer)(ClientPtr client);
+
+static int
+XnsProcGrabServer(ClientPtr client)
+{
+    REQUEST_SIZE_MATCH(xReq);
+    struct XnamespaceClientPriv *subj = XnsClientPriv(client);
+    if (subj && subj->ns && !subj->ns->superPower)
+        return Success;
+    return origProcGrabServer(client);
+}
+
+static int
+XnsProcUngrabServer(ClientPtr client)
+{
+    REQUEST_SIZE_MATCH(xReq);
+    struct XnamespaceClientPriv *subj = XnsClientPriv(client);
+    if (subj && subj->ns && !subj->ns->superPower)
+        return Success;
+    return origProcUngrabServer(client);
+}
 
 void
 NamespaceExtensionInit(void)
 {
+    const char *dbg = getenv("XNS_DEBUG");
+    xnsDebugLog = (dbg && dbg[0] && dbg[0] != '0');
     XNS_LOG("initializing namespace extension ...\n");
 
     /* load configuration */
@@ -56,6 +83,18 @@ NamespaceExtensionInit(void)
     struct XnamespaceClientPriv *srv = XnsClientPriv(serverClient);
     *srv = (struct XnamespaceClientPriv) { .isServer = TRUE };
     XnamespaceAssignClient(srv, &ns_root);
+
+    /* Turn X_GrabServer / X_UngrabServer into a safe no-op for isolated
+       namespaces so toolkits (SDL3, GDK) do not abort on BadAccess while
+       preventing untrusted clients from freezing the host X server. */
+    if (ProcVector[X_GrabServer] != XnsProcGrabServer) {
+        origProcGrabServer = ProcVector[X_GrabServer];
+        ProcVector[X_GrabServer] = XnsProcGrabServer;
+    }
+    if (ProcVector[X_UngrabServer] != XnsProcUngrabServer) {
+        origProcUngrabServer = ProcVector[X_UngrabServer];
+        ProcVector[X_UngrabServer] = XnsProcUngrabServer;
+    }
 
     /* register the runtime management protocol extension. It is gated to
        superPower clients in hookExtAccess()/hookExtDispatch(), so it stays

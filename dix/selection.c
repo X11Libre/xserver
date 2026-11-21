@@ -375,6 +375,7 @@ ProcConvertSelection(ClientPtr client)
     /* If no owner for the specified selection exists, the X server generates
        a SelectionNotify event to the requestor with property None. */
     param.property = None;
+    param.op = SELECTION_FILTER_NOTIFY;
     CallCallbacks(&SelectionFilterCallback, &param);
     if (param.skip) {
         if (param.status != Success)

@@ -29,21 +29,42 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     ATOM name = (*param->ppProp)->propertyName;
 
+    if (subj->ns->superPower)
+        return;
+
     if (XnsClientSameNS(subj, obj))
         return;
 
     if (param->pWin == subj->ns->rootWindow)
         return;
 
-    if (winIsRoot(param->pWin)) {
-        XNS_HOOK_LOG("window is the screen's root window\n");
-    } else {
-        XNS_HOOK_LOG("not a root window\n");
-    }
+    /* Read-only access to non-sensitive properties on the real root window
+       (filtered by hookWindowProperty) or system tray manager window. */
+    if (((winIsRoot(param->pWin) && !XnsIsSensitiveRootProperty(subj->ns, name)) ||
+         XnsIsSystemTrayWindow(param->pWin)) &&
+        ((param->access_mode & ~(DixReadAccess | DixGetAttrAccess)) == 0))
+        return;
 
-    XNS_HOOK_LOG("access to property %s (atom 0x%x) window 0x%lx of client %d\n",
+    /* Active host XDND source window: read-only access to XdndTypeList / XdndActionList */
+    if (param->pWin && XnsHasActiveXdndSource(subj->ns, param->pWin->drawable.id) &&
+        obj && obj->ns && obj->ns->superPower &&
+        XnsClipboardTargetAllowed(subj->ns) &&
+        XnsIsXdndProperty(name) &&
+        ((param->access_mode & ~(DixReadAccess | DixGetAttrAccess)) == 0))
+        return;
+
+    /* Selection owner writing the requested target property onto requestor window */
+    if (obj && client->majorOp == X_ChangeProperty &&
+        ((param->access_mode & ~(DixWriteAccess | DixCreateAccess |
+                                 DixBlendAccess | DixPostAccess)) == 0) &&
+        XnsClipboardTargetAllowed(obj->ns) &&
+        XnsSelectionTransferAllowed(subj->ns, param->pWin->drawable.id, name))
+        return;
+
+    XNS_HOOK_LOG("BLOCKED access to property %s (atom 0x%x) window 0x%lx of client %d\n",
         NameForAtom(name),
         name,
         (unsigned long)param->pWin->drawable.id,
         dixClientForWindow(param->pWin)->index);
+    param->status = BadAccess;
 }
