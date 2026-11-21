@@ -310,4 +310,12 @@ static inline int System(const char* cmdline)
     return system(cmdline);
 }
 
+#ifdef HAVE_MALLOC_TRIM
+extern _X_EXPORT void
+OsTrimMemory(void);
+#else
+static inline void
+OsTrimMemory(void) {}
+#endif
+
 #endif                          /* OS_H */

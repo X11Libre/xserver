@@ -54,6 +54,10 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
 #include <stdbool.h>
 #include <errno.h>
 #include <stdio.h>
@@ -67,6 +71,7 @@ SOFTWARE.
 #include "dix/dixstruct_priv.h"
 #include "dix/screensaver_priv.h"
 #include "include/misc.h"
+#include "mi/mi_priv.h"
 #include "os/busfault.h"
 #include "os/client_priv.h"
 #include "os/mathx_priv.h"
@@ -164,6 +169,53 @@ check_timers(void)
  *     For more info on ClientsWithInput, see ReadRequestFromClient().
  *     pClientsReady is an array to store ready client->index values into.
  *****************/
+
+#ifdef HAVE_MALLOC_TRIM
+#if defined(__linux__)
+#include <sys/mman.h>
+#if defined(MADV_DONTNEED)
+
+static void
+OsTrimCleanLibraries(void)
+{
+    FILE *f = fopen("/proc/self/maps", "r");
+    if (!f)
+        return;
+    char line[1024];
+    while (fgets(line, sizeof(line), f)) {
+        unsigned long start, end, offset;
+        char perms[16], path[512] = "";
+        int n = sscanf(line, "%lx-%lx %15s %lx %*x:%*x %*u %511s", &start, &end, perms, &offset, path);
+        if (n >= 5 && path[0] == '/') {
+            Bool is_clean = (strncmp(perms, "r-xp", 4) == 0) ||
+                            (strncmp(perms, "r--p", 4) == 0 && offset == 0);
+            if (is_clean &&
+                (strstr(path, "libLLVM") || strstr(path, "libz3") ||
+                 strstr(path, "libstdc++") || strstr(path, "libxml2") ||
+                 strstr(path, "dri/"))) {
+                madvise((void *) start, end - start, MADV_DONTNEED);
+            }
+        }
+    }
+    fclose(f);
+}
+#endif
+#endif
+
+void
+OsTrimMemory(void)
+{
+    ResetOsBuffers();
+    dixEmptyFontPatternCache();
+    dixTrimResourceTables();
+    dixTrimGlyphHash();
+    mieqTrimQueue();
+    malloc_trim(0);
+#if defined(__linux__) && defined(MADV_DONTNEED)
+    OsTrimCleanLibraries();
+#endif
+}
+#endif
 
 Bool
 WaitForSomething(Bool are_ready)
@@ -457,7 +509,11 @@ ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
             ScreenSaverTime - timeout;
     }
 
+#ifdef HAVE_MALLOC_TRIM
+    OsTrimMemory();
+#else
     ResetOsBuffers();           /* not ideal, but better than nothing */
+#endif
     dixSaveScreens(serverClient, SCREEN_SAVER_ON, ScreenSaverActive);
 
     if (ScreenSaverInterval > 0) {
