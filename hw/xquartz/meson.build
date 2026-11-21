@@ -13,7 +13,7 @@ endif
 
 bundle_version = get_option('bundle-version') # CFBundleVersion
 if bundle_version == 'auto'
-    version_arr = bundle_version_string.split('.')
+    version_arr = bundle_version_string.split('-')[0].split('.')
     version_major = version_arr[0].to_int()
     version_minor = version_arr[1].to_int()
     version_tiny = version_arr[2].to_int()

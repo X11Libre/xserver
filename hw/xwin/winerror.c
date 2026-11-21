@@ -110,16 +110,14 @@ winMessageBoxF(const char *pszError, UINT uType, ...)
 #define MESSAGEBOXF \
 	"%s\n" \
 	"Vendor: %s\n" \
-	"Release: %d.%d.%d.%d\n" \
+	"Release: %s\n" \
 	"Contact: %s\n" \
 	"%s\n\n" \
 	"XWin was started with the following command-line:\n\n" \
 	"%s\n"
 
     size = asprintf(&pszMsgBox, MESSAGEBOXF,
-                    pszErrorF, XVENDORNAME,
-                    XORG_VERSION_MAJOR, XORG_VERSION_MINOR, XORG_VERSION_PATCH,
-                    XORG_VERSION_SNAP,
+                    pszErrorF, XVENDORNAME, XLIBRE_VERSION_STRING,
                     BUILDERADDR, BUILDERSTRING, g_pszCommandLine);
 
     if (size == -1) {

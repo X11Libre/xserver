@@ -168,6 +168,8 @@ _X_EXPORT XF86ModuleData modesettingModuleData = {
     .setup = Setup
 };
 
+XF86_MODULE_VERSION_SUFFIX(modesetting, PACKAGE_VERSION_SUFFIX);
+
 static void *
 Setup(void *module, void *opts, int *errmaj, int *errmin)
 {

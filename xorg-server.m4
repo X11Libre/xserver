@@ -50,7 +50,8 @@ AC_DEFUN([XORG_DRIVER_CHECK_EXT],[
 
 # XLIBRE_MODULE_VERSION
 # --------------------
-# Defines XLIBRE_MODULE_VERSION_{MAJOR|MINOR|PATCHLEVEL} for modules to use.
+# Defines XLIBRE_MODULE_VERSION_{MAJOR|MINOR|PATCHLEVEL} and the pre-release
+# suffix PACKAGE_VERSION_SUFFIX (such as "-rc1", or "") for modules to use.
 
 AC_DEFUN([XLIBRE_MODULE_VERSION],[
     AC_DEFINE_UNQUOTED([XLIBRE_MODULE_VERSION_MAJOR],
@@ -65,6 +66,8 @@ AC_DEFUN([XLIBRE_MODULE_VERSION],[
         PVP="0"
     fi
     AC_DEFINE_UNQUOTED([XLIBRE_MODULE_VERSION_PATCH], [$PVP], [patch version])
+    PVS=`echo $PACKAGE_VERSION | sed 's/^[[^-]]*//'`
+    AC_DEFINE_UNQUOTED([PACKAGE_VERSION_SUFFIX], ["$PVS"], [version suffix])
 ])
 
 AC_DEFUN([XLIBRE_SDK_VAR], [

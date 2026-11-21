@@ -39,6 +39,8 @@ _X_EXPORT XF86ModuleData fbdevhwModuleData = {
     .vers = &fbdevHWVersRec
 };
 
+XF86_MODULE_VERSION_SUFFIX(fbdevhw, PACKAGE_VERSION_SUFFIX);
+
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/mman.h>
