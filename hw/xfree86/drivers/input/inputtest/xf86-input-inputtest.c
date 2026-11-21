@@ -1130,3 +1130,5 @@ _X_EXPORT XF86ModuleData inputtestModuleData = {
     .vers = &version_info,
     .setup = &setup_proc,
 };
+
+XF86_MODULE_VERSION_SUFFIX(inputtest, PACKAGE_VERSION_SUFFIX);

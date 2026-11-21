@@ -23,3 +23,5 @@ static XF86ModuleVersionInfo VersRec = {
 _X_EXPORT XF86ModuleData int10ModuleData = {
     .vers = &VersRec
 };
+
+XF86_MODULE_VERSION_SUFFIX(int10, PACKAGE_VERSION_SUFFIX);

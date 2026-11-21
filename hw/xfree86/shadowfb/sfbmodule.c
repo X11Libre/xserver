@@ -18,3 +18,5 @@ static XF86ModuleVersionInfo VersRec = {
 _X_EXPORT XF86ModuleData shadowfbModuleData = {
     .vers = &VersRec
 };
+
+XF86_MODULE_VERSION_SUFFIX(shadowfb, PACKAGE_VERSION_SUFFIX);

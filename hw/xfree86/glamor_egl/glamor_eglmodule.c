@@ -49,3 +49,5 @@ static XF86ModuleVersionInfo VersRec = {
 _X_EXPORT XF86ModuleData glamoreglModuleData = {
     .vers = &VersRec
 };
+
+XF86_MODULE_VERSION_SUFFIX(glamoregl, PACKAGE_VERSION_SUFFIX);
