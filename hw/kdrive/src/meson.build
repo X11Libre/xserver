@@ -13,7 +13,7 @@ srcs_kdrive = [
 
 kdrive_glamor = []
 if build_glamor
-    kdrive_glamor += glamor
+    kdrive_glamor += [ glamor, glamor_ddxcomp_internal ]
 endif
 
 if build_xv

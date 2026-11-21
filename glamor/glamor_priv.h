@@ -1021,6 +1021,21 @@ Bool glamor_change_window_attributes(WindowPtr pWin, unsigned long mask);
 
 void glamor_copy_window(WindowPtr window, xPoint old_origin, RegionPtr src_region);
 
+/** \addtogroup glamor_ddxcomp function
+ *  Splitting futher glamor as it can be library and compiled in
+ * {@/ */
+
+
+/**
+ * @brief glamor_ddxcomp_egl_screen_init ddx specific egl_screen_init part
+ *
+ * @param screen
+ * @param glamor_ctx
+ */
+void
+glamor_ddxcomp_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx);
+
+/** @} */
 /*
  * unref a glamor pixmap (specialized form of fbPixmap) and free
  * if refcnt already had reached 1
