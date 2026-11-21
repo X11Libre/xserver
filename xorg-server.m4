@@ -108,7 +108,7 @@ AC_DEFUN([XLIBRE_INIT_MODULE], [
     dnl AC_CONFIG_AUX_DIR(build-aux)
     AC_CONFIG_AUX_DIR(.)
     AC_DISABLE_STATIC
-    AC_PROG_LIBTOOL
+    LT_INIT
     AC_PROG_CC
 
     AH_TOP([#include "xorg-server.h"])
