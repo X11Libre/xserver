@@ -21,16 +21,23 @@ ls -la "$img"
 
 echo "==> inject ssh key + route guest console to serial"
 ssh-keygen -t ed25519 -N '' -f hurd_key
-loop=$(sudo losetup -fP --show "$img")
 mkdir -p mnt
+# Mount the partitions by byte offset: the /dev/loopNpM nodes from
+# "losetup -P" can appear after it returns, leaving nothing to mount.
+starts=$(sfdisk -d "$img" | grep -o 'start= *[0-9]*' | grep -o '[0-9]*')
 mounted=""
-for part in "${loop}"p*; do
-    if sudo mount -t ext2 "$part" mnt 2>/dev/null; then
-        if [ -f mnt/etc/passwd ]; then mounted="$part"; break; fi
+for start in $starts; do
+    if sudo mount -t ext2 -o loop,offset=$((start * 512)) "$img" mnt 2>>mount.err; then
+        if [ -f mnt/etc/passwd ]; then mounted="$start"; break; fi
         sudo umount mnt
     fi
 done
-test -n "$mounted"
+if [ -z "$mounted" ]; then
+    echo "no partition with /etc/passwd could be mounted:"
+    sfdisk -d "$img" || true
+    cat mount.err || true
+    exit 1
+fi
 sudo mkdir -p mnt/root/.ssh
 sudo cp hurd_key.pub mnt/root/.ssh/authorized_keys
 sudo chmod 700 mnt/root/.ssh
@@ -46,7 +53,6 @@ if [ -f mnt/boot/grub/grub.cfg ]; then
     sudo sed -i '/^[[:space:]]*multiboot/ s/$/ console=com0/' mnt/boot/grub/grub.cfg
 fi
 sudo umount mnt
-sudo losetup -d "$loop"
 
 # /dev/kvm exists on GH runners but the runner user can't access it by default.
 accel="-accel tcg"
