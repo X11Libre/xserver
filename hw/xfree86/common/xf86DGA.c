@@ -93,7 +93,6 @@ static void DGAHandleEvent(int screen_num, InternalEvent *event,
 static void
  DGACopyModeInfo(DGAModePtr mode, XDGAModePtr xmode);
 
-static unsigned char DGAReqCode = 0;
 static int DGAErrorBase;
 static int DGAEventBase;
 
@@ -2185,7 +2184,6 @@ XFree86DGAExtensionInit(void)
                                  XDGAResetProc, StandardMinorOpcode))) {
         int i;
 
-        DGAReqCode = (unsigned char) extEntry->base;
         DGAErrorBase = extEntry->errorBase;
         DGAEventBase = extEntry->eventBase;
         for (i = KeyPress; i <= MotionNotify; i++)
