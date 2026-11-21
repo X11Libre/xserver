@@ -28,7 +28,6 @@
 #include "dri3_priv.h"
 #include "drm_defines.h"
 
-static int dri3_request;
 DevPrivateKeyRec dri3_screen_private_key;
 
 static x_server_generation_t dri3_screen_generation;
@@ -110,8 +109,6 @@ dri3_extension_init(void)
                              NULL, StandardMinorOpcode);
     if (!extension)
         goto bail;
-
-    dri3_request = extension->base;
 
     DIX_FOR_EACH_SCREEN({
         if (!dri3_screen_init(walkScreen, NULL))
