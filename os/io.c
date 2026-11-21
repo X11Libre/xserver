@@ -120,7 +120,6 @@ static ConnectionInputPtr AllocateInputBuffer(void);
 static ConnectionOutputPtr AllocateOutputBuffer(void);
 
 static Bool CriticalOutputPending;
-static int timesThisConnection = 0;
 static ConnectionInputPtr FreeInputs = (ConnectionInputPtr) NULL;
 static ConnectionOutputPtr FreeOutputs = (ConnectionOutputPtr) NULL;
 static OsCommPtr AvailableInput = (OsCommPtr) NULL;
@@ -197,7 +196,6 @@ static void
 YieldControl(void)
 {
     isItTimeToYield = TRUE;
-    timesThisConnection = 0;
 }
 
 static void
@@ -207,12 +205,6 @@ YieldControlNoInput(ClientPtr client)
     YieldControl();
     if (oc->trans_conn)
         ospoll_reset_events(server_poll, oc->fd);
-}
-
-static void
-YieldControlDeath(void)
-{
-    timesThisConnection = 0;
 }
 
 /* If an input buffer was empty, either free it if it is too big or link it
@@ -259,7 +251,6 @@ ReadRequestFromClient(ClientPtr client)
             FreeInputs = oci->next;
         }
         else if (!(oci = AllocateInputBuffer())) {
-            YieldControlDeath();
             return -1;
         }
         oc->input = oci;
@@ -348,7 +339,6 @@ ReadRequestFromClient(ClientPtr client)
 
                 ibuf = (char *) realloc(oci->buffer, needed);
                 if (!ibuf) {
-                    YieldControlDeath();
                     return -1;
                 }
                 oci->size = needed;
@@ -366,7 +356,6 @@ ReadRequestFromClient(ClientPtr client)
             /*  treat as if an error occurred on the read, which is what
              *  used to happen
              */
-            YieldControlDeath();
             return -1;
         }
         result = _XSERVTransRead(oc->trans_conn, oci->buffer + oci->bufcnt,
@@ -377,7 +366,6 @@ ReadRequestFromClient(ClientPtr client)
                 YieldControlNoInput(client);
                 return 0;
             }
-            YieldControlDeath();
             return -1;
         }
         oci->bufcnt += result;
@@ -459,7 +447,6 @@ ReadRequestFromClient(ClientPtr client)
         AvailableInput = oc;
     if (move_header) {
         if (client->req_len < bytes_to_int32(sizeof(xBigReq) - sizeof(xReq))) {
-            YieldControlDeath();
             return -1;
         }
 
