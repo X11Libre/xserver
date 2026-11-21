@@ -311,6 +311,16 @@ WRAP_FUNCTION(GrabButton, int,
                                         button, param, grabtype, mask);
 }
 
+WRAP_FUNCTION(GrabKey, int,
+              ClientPtr client, DeviceIntPtr dev,
+              DeviceIntPtr modifier_device, int button,
+              GrabParameters *param, enum InputLevel grabtype,
+              GrabMask *mask)
+{
+    IMPLEMENT_WRAP_FUNCTION_WITH_RETURN(GrabKey, client, dev, modifier_device,
+                                        button, param, grabtype, mask);
+}
+
 /* dixLookupWindow requires a lot of setup not necessary for this test.
  * Simple wrapper that returns either one of the fake root window or the
  * fake client window. If the requested ID is neither of those wanted,
