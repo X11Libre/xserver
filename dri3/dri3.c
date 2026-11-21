@@ -27,7 +27,6 @@
 #include "dri3_priv.h"
 #include <drm_fourcc.h>
 
-static int dri3_request;
 DevPrivateKeyRec dri3_screen_private_key;
 
 static int dri3_screen_generation;
@@ -105,8 +104,6 @@ dri3_extension_init(void)
                              NULL, StandardMinorOpcode);
     if (!extension)
         goto bail;
-
-    dri3_request = extension->base;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
         if (!dri3_screen_init(screenInfo.screens[i], NULL))
