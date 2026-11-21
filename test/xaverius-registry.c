@@ -1283,6 +1283,126 @@ xaverius_registry_confirm_removed_wrong_generation(void)
     XaveriusRegistryFini();
 }
 
+static void
+xaverius_registry_re_register_snapshot_failure(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *dev2 = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t dev_gen2 = 0, bind_gen2 = 0;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "re-reg-fail-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 90;
+    id.device = 1;
+    memset(id.driver_uuid, 0xdd, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    /* Initial registration succeeds with a working snapshot callback. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+    assert(xaverius_physical_device_count == 1);
+    assert(dev->binding != NULL);
+    assert(dev->caller_refcount == 1);
+
+    /* Save pre-re-registration state. */
+    uint64_t saved_gen = dev->device_generation;
+    uint64_t saved_refcount = dev->caller_refcount;
+
+    /* Remove the binding to enable re-registration. */
+    assert(XaveriusRegistryRemoveDeviceBackendBinding(NULL, dev, dev_gen,
+                                                      role->role_generation,
+                                                      bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev->binding == NULL);
+
+    /* Re-register with a snapshot callback that fails. Must leave the
+     * existing device record unchanged (failure-atomic). */
+    ops.query_physical_snapshot = test_query_snapshot_fail;
+    snapshot_calls = 0;
+    setup_min_reg(&reg, &id, &ops, role);
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev2, &dev_gen2,
+                                             &bind_gen2) == XAVERIUS_REGISTRY_UNAVAILABLE);
+    assert(dev2 == NULL);
+    assert(snapshot_calls == 1);
+
+    /* The existing device must be unchanged. */
+    assert(dev->binding == NULL); /* binding was removed, not replaced */
+    assert(dev->caller_refcount == saved_refcount);
+    assert(dev->device_generation == saved_gen);
+    assert(xaverius_physical_device_count == 1);
+
+    XaveriusPhysicalDeviceRelease(dev);
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
+static void
+xaverius_registry_re_register_snapshot_bad_data(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *dev2 = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t dev_gen2 = 0, bind_gen2 = 0;
+
+    assert(XaveriusRegistryInit());
+    make_valid_desc(&desc, "re-reg-bad-owner");
+    assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 91;
+    id.device = 1;
+    memset(id.driver_uuid, 0xee, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role);
+
+    /* Initial registration succeeds with a working snapshot callback. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+    assert(xaverius_physical_device_count == 1);
+
+    /* Remove the binding to enable re-registration. */
+    assert(XaveriusRegistryRemoveDeviceBackendBinding(NULL, dev, dev_gen,
+                                                      role->role_generation,
+                                                      bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev->binding == NULL);
+
+    /* Re-register with a snapshot callback that returns bad data.
+     * Must leave the existing device record unchanged. */
+    setup_min_ops(&ops, false);
+    snapshot_calls = 0;
+    setup_min_reg(&reg, &id, &ops, role);
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev2, &dev_gen2,
+                                             &bind_gen2) == XAVERIUS_REGISTRY_INVALID_EVIDENCE);
+    assert(dev2 == NULL);
+    assert(snapshot_calls == 1);
+
+    /* The existing device must be unchanged. */
+    assert(dev->binding == NULL);
+    assert(dev->caller_refcount == 1);
+    assert(dev->device_generation == dev_gen);
+    assert(xaverius_physical_device_count == 1);
+
+    XaveriusPhysicalDeviceRelease(dev);
+    XaveriusModuleRoleFinalize(role);
+    XaveriusRegistryFini();
+}
+
 const testfunc_t*
 xaverius_registry_test(void)
 {
@@ -1307,6 +1427,9 @@ xaverius_registry_test(void)
         xaverius_registry_binding_remove_wrong_generation,
         xaverius_registry_observe_null_identity,
         xaverius_registry_confirm_removed_wrong_generation,
+        /* Re-registration failure-atomicity tests */
+        xaverius_registry_re_register_snapshot_failure,
+        xaverius_registry_re_register_snapshot_bad_data,
         NULL,
     };
 

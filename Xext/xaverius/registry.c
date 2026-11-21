@@ -722,18 +722,21 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
             return XAVERIUS_REGISTRY_IDENTITY_CONFLICT;
         }
         /* binding == NULL: previous binding was removed, allow re-registration
-         * with a new binding on the existing device. */
+         * with a new binding on the existing device. dev is set here and used
+         * below only after successful snapshot validation (failure-atomic). */
         dev = existing;
     }
 
     /* Allocate the direct DDX device backend binding. The binding retains
-     * the ModuleRole for its lifetime. */
+     * the ModuleRole for its lifetime. Built provisionally; installed only
+     * after snapshot validation succeeds. */
     binding = xaverius_binding_alloc(registration, role);
     if (binding == NULL)
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
 
     if (existing == NULL) {
-        /* New device: allocate and initialize. */
+        /* New device: allocate and initialize. dev is explicitly assigned
+         * here so every compiler path provably initializes it before use. */
         dev = calloc(1, sizeof(*dev));
         if (dev == NULL) {
             xaverius_binding_free(binding);
@@ -779,14 +782,10 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
          * reference that must be released via XaveriusPhysicalDeviceRelease().
          * The registry holds its own permanent reference via list membership. */
         dev->caller_refcount = 1;
-    } else {
-        /* Re-registration on existing device: increment caller refcount,
-         * assign new binding, and generate new device generation. */
-        dev->caller_refcount++;
-        dev->device_generation = xaverius_next_generation_id();
-        dev->binding = binding;
-        binding->binding_generation = dev->device_generation;
     }
+    /* else: re-registration on existing device; dev == existing and is already
+     * fully initialized. Do NOT mutate caller_refcount/device_generation/binding
+     * until after snapshot validation succeeds (failure-atomic installation). */
 
     /* Query the physical snapshot through the exact provisional binding's
      * query_physical_snapshot callback. */
@@ -798,6 +797,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
             free(dev->identity_evidence);
             free(dev);
         }
+        /* Re-registration path: dev not mutated, binding NULL, clean state. */
         return XAVERIUS_REGISTRY_UNAVAILABLE;
     }
 
@@ -842,8 +842,13 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         /* Install new device into internal (not yet published) registry. */
         xorg_list_append(&dev->list, &xaverius_physical_devices);
         xaverius_physical_device_count++;
+    } else {
+        /* Re-registration: mutate existing device atomically now that all
+         * validation has succeeded. No partial state is visible on failure. */
+        dev->caller_refcount++;
+        dev->device_generation = xaverius_next_generation_id();
+        binding->binding_generation = dev->device_generation;
     }
-    /* For re-registration, device is already in the list. */
 
     *out_device = dev;
     if (out_device_generation != NULL)

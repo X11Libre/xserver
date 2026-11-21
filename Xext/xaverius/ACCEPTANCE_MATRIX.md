@@ -146,7 +146,7 @@ xaverius_module_role_admission_gate...
  Pass
 ---------------------
 ```
-All 16 test functions in `xaverius_registry_test()` pass (10 original + 6 new regression tests).
+All 18 test functions in `xaverius_registry_test()` pass (12 original + 6 regression from prior session + 2 new failure-atomicity tests).
 
 ### Protocol/Dispatch: QueryVersion Contract
 
@@ -225,12 +225,12 @@ All 7 test functions in `xaverius_qv_protocol_test()` pass.
 Xext/xaverius/xaverius_intern.h      # Internal types, enums, ABI versions, registry API
 Xext/xaverius/xaverius_priv.h        # DDX-facing ABI v1 (installed header)
 Xext/xaverius/xaverius_proto.h       # Wire protocol (complete, unchanged)
-Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed RemoveDeviceBackendBinding missing device_generation validation
+Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed uninitialized `dev` (CI blocker on 6 platforms) + failure-atomic re-registration (W0-153)
 Xext/xaverius/dispatch.c             # QueryVersion dispatch (+flags/length validation)
 Xext/xaverius/init.c                 # Extension init, atoms, screen private key
 Xext/xaverius/screen.c               # ScreenAttachment (DDX per-screen)
 Xext/xaverius/meson.build            # Static library build
-test/xaverius-registry.c             # Unit tests (16 test functions: 10 original + 6 regression)
+test/xaverius-registry.c             # Unit tests (18 test functions: 10 original + 6 regression + 2 failure-atomicity)
 test/xaverius-qv-protocol.c          # Protocol contract tests (7 test functions)
 test/meson.build                     # Integrated into test/tests via XAVERIUS_TESTS
 test/tests.c                         # Test runner (calls xaverius_registry_test + xaverius_qv_protocol_test)
@@ -266,13 +266,13 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `8efce1a8ae1f9fa76f373ecb0aab9415fc83e541` (working tree, uncommitted) |
+| **HEAD** | `76c5f0200e96a3db21555c8f9543c996f7c6a9d0` (origin) + uncommitted W0-153 fixes |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` with `-Dwerror=true`, all targets link) |
-| **Unit Tests** | ✅ All 23 xaverius test functions pass (16 registry + 7 protocol); pre-existing `signal_logging_test` FAIL unrelated to xaverius |
-| **ABI-v1** | ✅ Conformant (all structs versioned, opaque handles, deep-copy ops, X_EXPORT) |
+| **Unit Tests** | ✅ All 25 xaverius test functions pass (18 registry + 7 protocol); pre-existing `signal_logging_test` FAIL unrelated to xaverius |
+| **ABI-v1** | ⚠️ Not yet conformant — `XaveriusDeviceBackendOps` header and owner-key preference selection path still require reconciliation (W0-153 items 4–6) |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
-| **Blockers** | None |
+| **Blockers** | ABI-v1 header reconciliation; owner-key preference production selection path |
 
 ---
 
