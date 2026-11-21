@@ -163,7 +163,7 @@ xtest_valuator_bounds(void)
     int valuators[MAX_VALUATORS + 1];
     deviceValuator dv = {
         .num_valuators = 1,
-        .valuator0 = 0xdeadbeef,
+        .valuator0 = -12345,
     };
     int i;
 
