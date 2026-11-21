@@ -26,8 +26,6 @@
 #include "namespace.h"
 #include "namespaceproto.h"
 
-static unsigned char XnsReqCode = 0;
-
 /* The namespace-model setters (XnsCreate/XnsDelete/XnsSetCaps/XnsAddToken/
    XnsRemoveToken/XnsLookup/XnsCaps/XnsAttrs/XnsCountTokens) live in config.c
    and are shared with the config loader - declared in namespace.h. */
@@ -374,9 +372,7 @@ ProcXnsDispatch(ClientPtr client)
 void
 XnsProtoExtensionInit(void)
 {
-    ExtensionEntry *ext = AddExtension(XNS_EXTENSION_NAME, 0, 0,
-                                       ProcXnsDispatch, ProcXnsDispatch,
-                                       NULL, StandardMinorOpcode);
-    if (ext)
-        XnsReqCode = (unsigned char) ext->base;
+    AddExtension(XNS_EXTENSION_NAME, 0, 0,
+                 ProcXnsDispatch, ProcXnsDispatch,
+                 NULL, StandardMinorOpcode);
 }
