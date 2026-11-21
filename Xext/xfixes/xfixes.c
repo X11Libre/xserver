@@ -57,7 +57,6 @@
 
 Bool noXFixesExtension = FALSE;
 
-static unsigned char XFixesReqCode;
 int XFixesEventBase;
 int XFixesErrorBase;
 
@@ -221,7 +220,6 @@ XFixesExtensionInit(void)
                                  XFixesNumberErrors,
                                  ProcXFixesDispatch, ProcXFixesDispatch,
                                  NULL, StandardMinorOpcode)) != 0) {
-        XFixesReqCode = (unsigned char) extEntry->base;
         XFixesEventBase = extEntry->eventBase;
         XFixesErrorBase = extEntry->errorBase;
         EventSwapVector[XFixesEventBase + XFixesSelectionNotify] = XFixesSwapSelectionNotifyEvent;
