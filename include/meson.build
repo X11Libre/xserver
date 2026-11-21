@@ -1,4 +1,7 @@
-version_split = meson.project_version().split('.')
+# keep a pre-release suffix such as "-rc1" out of the version numbers
+version_number = meson.project_version().split('-')[0]
+version_suffix = meson.project_version().replace(version_number, '')
+version_split = version_number.split('.')
 major = version_split[0].to_int()
 minor = version_split[1].to_int()
 patch = version_split[2].to_int()
@@ -124,6 +127,8 @@ conf_data.set_quoted('SUID_WRAPPER_DIR', join_paths(get_option('prefix'), get_op
 conf_data.set_quoted('COMPILEDDEFAULTFONTPATH', default_font_path)
 
 conf_data.set('XORG_VERSION_CURRENT', release)
+conf_data.set_quoted('XLIBRE_VERSION_STRING', meson.project_version())
+conf_data.set_quoted('PACKAGE_VERSION_SUFFIX', version_suffix)
 
 conf_data.set('HASXDMAUTH', has_xdm_auth ? '1' : false)
 
@@ -366,7 +371,7 @@ conf_data.set_quoted('DEFAULT_LOGDIR', log_dir)
 
 version_data = configuration_data()
 version_data.set('VENDOR_RELEASE', '@0@'.format(release))
-version_data.set_quoted('VENDOR_MAN_VERSION', 'Version @0@.@1@.@2@'.format(major, minor, patch))
+version_data.set_quoted('VENDOR_MAN_VERSION', 'Version @0@'.format(meson.project_version()))
 configure_file(output : 'version-config.h',
                configuration : version_data)
 

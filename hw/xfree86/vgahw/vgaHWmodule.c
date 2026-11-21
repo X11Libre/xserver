@@ -21,3 +21,5 @@ static XF86ModuleVersionInfo VersRec = {
 _X_EXPORT XF86ModuleData vgahwModuleData = {
     .vers = &VersRec
 };
+
+XF86_MODULE_VERSION_SUFFIX(vgahw, PACKAGE_VERSION_SUFFIX);

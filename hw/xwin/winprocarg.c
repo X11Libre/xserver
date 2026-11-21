@@ -1123,8 +1123,7 @@ winLogVersionInfo(void)
     s_fBeenHere = TRUE;
 
     ErrorF("Welcome to the XLibre XWin X Server\n");
-    ErrorF("Release: %d.%d.%d.%d\n", XORG_VERSION_MAJOR,
-           XORG_VERSION_MINOR, XORG_VERSION_PATCH, XORG_VERSION_SNAP);
+    ErrorF("Release: %s\n", XLIBRE_VERSION_STRING);
 #ifdef HAVE_SYS_UTSNAME_H
     {
         struct utsname name;

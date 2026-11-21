@@ -60,6 +60,8 @@ _X_EXPORT XF86ModuleData glxModuleData = {
     .setup = glxSetup
 };
 
+XF86_MODULE_VERSION_SUFFIX(glx, PACKAGE_VERSION_SUFFIX);
+
 static void *
 glxSetup(void *module, void *opts, int *errmaj, int *errmin)
 {
