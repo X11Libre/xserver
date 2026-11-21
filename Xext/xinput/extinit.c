@@ -143,7 +143,6 @@ static DeviceIntRec xi_all_master_devices;
 
 int IEventBase = 0;
 int BadDevice = 0;
-static int BadEvent = 1;
 int BadMode = 2;
 int DeviceBusy = 3;
 int BadClass = 4;
@@ -908,7 +907,6 @@ FixExtensionEvents(ExtensionEntry * extEntry)
     event_base[OtherClass] = DeviceStateNotify;
 
     BadDevice += extEntry->errorBase;
-    BadEvent += extEntry->errorBase;
     BadMode += extEntry->errorBase;
     DeviceBusy += extEntry->errorBase;
     BadClass += extEntry->errorBase;
@@ -997,7 +995,6 @@ RestoreExtensionEvents(void)
     DevicePropertyNotify = 15;
 
     BadDevice = 0;
-    BadEvent = 1;
     BadMode = 2;
     DeviceBusy = 3;
     BadClass = 4;
