@@ -55,7 +55,6 @@
 #include "xace.h"
 #include "protocol-versions.h"
 
-static CARD8 CompositeReqCode;
 static DevPrivateKeyRec CompositeClientPrivateKeyRec;
 
 #ifdef XINERAMA
@@ -444,7 +443,6 @@ CompositeExtensionInit(void)
                             NULL, StandardMinorOpcode);
     if (!extEntry)
         return;
-    CompositeReqCode = (CARD8) extEntry->base;
 
     /* Initialization succeeded */
     noCompositeExtension = FALSE;
