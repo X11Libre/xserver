@@ -120,7 +120,7 @@ glamor_trapezoids(CARD8 op,
     if (!picture)
         return;
 
-    image = pixman_image_create_bits(picture->format,
+    image = pixman_image_create_bits((pixman_format_code_t) picture->format,
                                      width, height, NULL, stride);
     if (!image) {
         FreePicture(picture, 0);
