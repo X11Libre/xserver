@@ -8,7 +8,7 @@ srcs = [
 
 vfb_glamor = []
 if build_glamor
-    vfb_glamor += glamor
+    vfb_glamor += [ glamor, glamor_ddxcomp_internal ]
 endif
 
 xvfb_server = executable(
