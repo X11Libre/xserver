@@ -71,7 +71,7 @@ typedef struct _pattern {
 /* Prototypes for static functions */
 static char *FindModule(const char *, const char *, PatternPtr);
 static Bool CheckVersion(const char *, XF86ModuleVersionInfo *,
-                         const XF86ModReqInfo *);
+                         const char *, const XF86ModReqInfo *);
 static char *LoaderGetCanonicalName(const char *, PatternPtr);
 static void RemoveChild(ModuleDescPtr);
 
@@ -560,7 +560,7 @@ LoaderListDir(const char *subdir, const char **patternlist)
 
 static Bool
 CheckVersion(const char *module, XF86ModuleVersionInfo * data,
-             const XF86ModReqInfo * req)
+             const char *suffix, const XF86ModReqInfo * req)
 {
     int vercode[4];
     long ver = data->xf86version;
@@ -576,8 +576,8 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
     LogMessageVerb(X_NONE, 1, "\tcompiled for %d.%d.%d", vercode[0], vercode[1], vercode[2]);
     if (vercode[3] != 0)
         LogMessageVerb(X_NONE, 1, ".%d", vercode[3]);
-    LogMessageVerb(X_NONE, 1, ", module version = %d.%d.%d\n", data->majorversion,
-                   data->minorversion, data->patchlevel);
+    LogMessageVerb(X_NONE, 1, ", module version = %d.%d.%d%s\n", data->majorversion,
+                   data->minorversion, data->patchlevel, suffix ? suffix : "");
 
     if (data->moduleclass)
         LogMessageVerb(X_NONE, 2, "\tModule class: %s\n", data->moduleclass);
@@ -936,13 +936,21 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
         ModuleSetupProc setup;
         ModuleTearDownProc teardown;
         XF86ModuleVersionInfo *vers;
+        const char *suffix = NULL;
+        char *s;
 
         vers = initdata->vers;
         setup = initdata->setup;
         teardown = initdata->teardown;
 
+        /* optional, see XF86_MODULE_VERSION_SUFFIX */
+        if (asprintf(&s, "%sModuleVersionSuffix", name) != -1) {
+            suffix = LoaderSymbolFromModule(ret, s);
+            free(s);
+        }
+
         if (vers) {
-            if (!CheckVersion(module, vers, modreq)) {
+            if (!CheckVersion(module, vers, suffix, modreq)) {
                 if (errmaj)
                     *errmaj = LDR_MISMATCH;
                 goto LoadModule_fail;

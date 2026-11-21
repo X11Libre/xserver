@@ -178,6 +178,15 @@ typedef struct {
 } XF86ModuleData;
 
 /*
+ * Optional pre-release suffix of the module version, such as "-rc1". The
+ * loader looks it up as <modulename> + "ModuleVersionSuffix" and appends it
+ * where it reports the version. Servers without this lookup ignore it.
+ */
+#define XF86_MODULE_VERSION_SUFFIX(_modname, _suffix)                   \
+    extern _X_EXPORT const char _modname##ModuleVersionSuffix[];        \
+    _X_EXPORT const char _modname##ModuleVersionSuffix[] = _suffix
+
+/*
  * declare module version info structure for an input driver module
  */
 #define XF86_MODULE_VERSION_INPUT(_name, _major, _minor, _patchlevel)   \
