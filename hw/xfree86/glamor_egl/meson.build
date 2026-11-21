@@ -2,6 +2,7 @@ glamoregl_src = [
     'glamor_xf86_egl.c',
     'glamor_eglmodule.c',
     'glamor_xf86_xv.c',
+    'glamor_ddxcomp_xf86.c'
 ]
 
 shared_module(

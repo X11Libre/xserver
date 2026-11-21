@@ -34,6 +34,10 @@ srcs_glamor = [
     'glamor_sync.c',
 ]
 
+srcs_glamor_ddxcomp_internal = [
+    'glamor_ddxcomp_internal.c'
+]
+
 if build_glx
     srcs_glamor += 'glamor_glx_provider.c'
 endif
@@ -45,6 +49,19 @@ epoxy_dep = dependency('epoxy')
 
 glamor = static_library('glamor',
     srcs_glamor,
+    include_directories: [inc],
+    dependencies: [
+        common_dep,
+        libdrm_dep,
+        epoxy_dep,
+        gbm_dep,
+    ],
+)
+
+# glamor_ddxcomp_internal  - is ddx compability functions, it is indeded for cases when glamor is part of ddx
+
+glamor_ddxcomp_internal = static_library('glamor_ddxcomp_internal',
+    srcs_glamor_ddxcomp_internal,
     include_directories: [inc],
     dependencies: [
         common_dep,

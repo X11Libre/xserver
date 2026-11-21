@@ -64,7 +64,6 @@
 #include "glamor_egl.h"
 #include "glamor_egl_ext.h"
 #include "glamor_egl_priv.h"
-#include "glamor_glx_provider.h"
 
 #ifdef DRI3
 #include "dri3.h"
@@ -2243,9 +2242,6 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 #ifdef DRI3
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
 #endif
-#ifdef GLXEXT
-    static Bool vendor_initialized = FALSE;
-#endif
 
     dixScreenHookClose(screen, glamor_egl_close_screen);
     dixScreenHookPostClose(screen, glamor_egl_post_close_screen);
@@ -2294,12 +2290,9 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
         }
     }
 #endif
-#ifdef GLXEXT
-    if (!vendor_initialized) {
-        GlxPushProvider(&glamor_provider);
-        vendor_initialized = TRUE;
-    }
-#endif
+
+    glamor_ddxcomp_egl_screen_init(screen,glamor_ctx);
+
 }
 
 static Bool
