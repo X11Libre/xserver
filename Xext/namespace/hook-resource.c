@@ -155,6 +155,10 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         if (pWindow && XnsHasActiveXdndSource(subj->ns, pWindow->drawable.id) &&
             obj && obj->ns && obj->ns->superPower &&
             XnsClipboardTargetAllowed(subj->ns)) {
+            /* GTK wraps the source window before replying. ProcQueryTree
+               filters its parent and children separately. */
+            if (client->majorOp == X_QueryTree && param->access_mode == DixListAccess)
+                return;
             if (checkAllowed(param->access_mode,
                              DixGetAttrAccess | DixGetPropAccess |
                              DixReceiveAccess | DixSendAccess))

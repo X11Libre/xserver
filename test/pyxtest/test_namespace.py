@@ -1010,6 +1010,8 @@ class TestSystemTray:
             struct.pack("<BBHII5I", ClientMessage, 32, 0, desk.w_a, xdnd_enter, desk.w_root, 1, uri_list, 0, 0),
         )
         assert root.check() == []
+        # GTK wraps the active source before it replies with XdndStatus.
+        assert a.query_tree(desk.w_root) == (desk.root_id, [])
         assert a.get_property(desk.w_root, xdnd_typelist) == struct.pack("<I", uri_list)
         # Other host properties and writes remain blocked
         assert isinstance(raw_get_prop(a, desk.w_root, secret_prop), X11Error)
@@ -1118,6 +1120,7 @@ class TestSystemTray:
         assert isinstance(raw_get_prop(a, desk.w_root, xdnd_typelist), X11Error)
 
         # XdndLeave from host also closes the session
+        assert isinstance(a.reply(struct.pack(f"{a.bo}BxHI", 15, 2, desk.w_root)), X11Error)
         root.send_event(
             desk.w_a,
             struct.pack("<BBHII5I", ClientMessage, 32, 0, desk.w_a, xdnd_enter, desk.w_root, 1, uri_list, 0, 0),
