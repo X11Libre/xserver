@@ -22,6 +22,9 @@ static int checkAllowed(Mask requested, Mask allowed) {
 
 void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_RESOURCES))
+        return;
+
     XNS_HOOK_HEAD(XaceResourceAccessRec);
     ClientPtr owner = dixLookupXIDOwner(param->id);
     struct XnamespaceClientPriv *obj = XnsClientPriv(owner);

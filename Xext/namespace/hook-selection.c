@@ -33,6 +33,9 @@ static inline const char *stripNS(const char* name) {
  */
 void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_CLIPBOARD))
+        return;
+
     XNS_HOOK_HEAD(SelectionFilterParamRec);
 
     /* no rewrite if client is in root namespace */

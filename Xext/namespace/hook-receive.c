@@ -21,6 +21,9 @@ static inline Bool isRootWin(WindowPtr pWin) {
 void
 hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_EVENTS))
+        return;
+
     XNS_HOOK_HEAD(XaceReceiveAccessRec);
     struct XnamespaceClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
 

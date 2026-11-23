@@ -24,6 +24,9 @@ static inline Bool winIsRoot(WindowPtr pWin) {
 
 void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_PROPERTIES))
+        return;
+
     XNS_HOOK_HEAD(XacePropertyAccessRec);
     struct XnamespaceClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
 

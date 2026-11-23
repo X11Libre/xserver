@@ -23,6 +23,9 @@
 
 void hookClient(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
+    if (!XnsComponentEnabled(XNS_COMPONENT_CLIENTS))
+        return;
+
     XNS_HOOK_HEAD(ClientAccessCallbackParam);
     struct XnamespaceClientPriv *obj = XnsClientPriv(param->target);
 
