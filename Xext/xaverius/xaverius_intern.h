@@ -387,6 +387,11 @@ XaveriusRegistryResult xaverius_create_ordering_key(
     const char *owner_key);
 int xaverius_compare_ordering_key(const char *a, const char *b);
 
+/* Set the ordered owner_key preference list for binding selection (W0-153).
+ * Caller retains ownership of the array and its strings. Passing NULL clears
+ * the preference list (all owner_keys equal rank). */
+void xaverius_binding_preference_set(const char * const *preference_keys);
+
 /* ---- Observation / removal (Stage 3) ---- */
 /* Discovery source and observation bookkeeping (minimal, server-side only).
  * Generation-checked, non-reusable generations for source and observation. */

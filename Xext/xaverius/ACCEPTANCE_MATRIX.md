@@ -54,7 +54,7 @@
 | **Snapshot callback on registration** (addendum §3: query_physical_snapshot invoked, result mapped) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — calls `query_physical_snapshot`, maps `UNAVAILABLE`→`UNAVAILABLE`, `SUCCESS`+bad content→`INVALID_EVIDENCE` | `xaverius_registry_registration_paths()` — snapshot UNAVAILABLE → `UNAVAILABLE` (retain=1 release=1); bad content → `INVALID_EVIDENCE` (retain=1 release=1) | ✅ |
 | **Successful registration** (addendum §3: returns device + generations, binding retained) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — allocates device, sets generations, retains role via binding | `xaverius_registry_registration_paths()` — success: dev≠NULL, snapshot=1, retain=1, release=0, xid=0 | ✅ |
 | **Exact replay / caller refcount** (addendum §3: same identity+role → same device, caller_refcount++) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — finds existing by identity+role, increments caller_refcount | `xaverius_registry_registration_paths()` — replay returns same dev, same gens, caller_refcount+1, Release decrements | ✅ |
-| **Identity conflict** (spec §2.2: same identity, different role → `IDENTITY_CONFLICT`) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — detects existing device with different owner_role | `xaverius_registry_registration_paths()` — conflict returns `IDENTITY_CONFLICT`, hooks=0; `xaverius_registry_registration_contract()` — conflict leaves device count=1, no second resource | ✅ |
+| **Identity conflict / preference selection** (spec §2.2: same identity, different role → AMBIGUOUS unless owner-key preference resolves) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — applies owner-key preference (W0-153) to select between competing bindings; equal rank → AMBIGUOUS | `xaverius_registry_registration_contract()` — conflict leaves device count=1, no second resource; `xaverius_registry_preference_new_wins/existing_wins/ambiguous_no_pref` — preference resolution verified | ✅ |
 | **Registration contract — no side effects on failure** (addendum §3: size mismatch → `INVALID_ARGUMENT`, unknown ABI → `UNSUPPORTED`, no callback on failure) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — validates before allocating/retaining | `xaverius_registry_registration_contract()` — NULL ops/wrong abi_version return `INVALID_ARGUMENT`, device count unchanged | ✅ |
 | **Registration contract — server owns XID** (devices.md line 231: XID allocated by server; addendum §3: registration does not allocate XID) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — no XID allocated; `XaveriusPhysicalDevicePublish()` allocates XID | `xaverius_registry_registration_contract()` — `dev->xid == 0` after registration; `xaverius_registry_publish_dix()` — XID only after publish | ✅ |
 | **Registration contract — identity uniqueness** (devices.md lines 238-240: one canonical record per incarnation, no duplicates) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — finds existing by identity, replay = additional caller ref | `xaverius_registry_registration_contract()` — replay keeps count=1; identity conflict keeps count=1 | ✅ |
@@ -146,7 +146,7 @@ xaverius_module_role_admission_gate...
  Pass
 ---------------------
 ```
-All 18 test functions in `xaverius_registry_test()` pass (12 original + 6 regression from prior session + 2 new failure-atomicity tests).
+All 21 test functions in `xaverius_registry_test()` pass (18 original + 3 new owner-key preference selection tests).
 
 ### Protocol/Dispatch: QueryVersion Contract
 
@@ -222,15 +222,15 @@ All 7 test functions in `xaverius_qv_protocol_test()` pass.
 ### Changed Files (from base `xorg/main` or prior `wip/xaverius` state)
 
 ```
-Xext/xaverius/xaverius_intern.h      # Internal types, enums, ABI versions, registry API
+Xext/xaverius/xaverius_intern.h      # Internal types, enums, ABI versions, registry API; added xaverius_binding_preference_set() declaration (W0-153 item 4)
 Xext/xaverius/xaverius_priv.h        # DDX-facing ABI v1 (installed header)
 Xext/xaverius/xaverius_proto.h       # Wire protocol (complete, unchanged)
-Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed uninitialized `dev` (CI blocker on 6 platforms) + failure-atomic re-registration (W0-153)
+Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed uninitialized `dev` (CI blocker on 6 platforms) + failure-atomic re-registration + owner-key preference selection (W0-153 item 4)
 Xext/xaverius/dispatch.c             # QueryVersion dispatch (+flags/length validation)
 Xext/xaverius/init.c                 # Extension init, atoms, screen private key
 Xext/xaverius/screen.c               # ScreenAttachment (DDX per-screen)
 Xext/xaverius/meson.build            # Static library build
-test/xaverius-registry.c             # Unit tests (18 test functions: 10 original + 6 regression + 2 failure-atomicity)
+test/xaverius-registry.c             # Unit tests (21 test functions: 18 original + 3 owner-key preference selection tests)
 test/xaverius-qv-protocol.c          # Protocol contract tests (7 test functions)
 test/meson.build                     # Integrated into test/tests via XAVERIUS_TESTS
 test/tests.c                         # Test runner (calls xaverius_registry_test + xaverius_qv_protocol_test)
@@ -266,13 +266,13 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `76c5f0200e96a3db21555c8f9543c996f7c6a9d0` (origin) + uncommitted W0-153 fixes |
+| **HEAD** | `9d6018e10726e6fd0b628448b74b489f981283b0` (origin) + uncommitted W0-153 item 4-5 fixes |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` with `-Dwerror=true`, all targets link) |
-| **Unit Tests** | ✅ All 25 xaverius test functions pass (18 registry + 7 protocol); pre-existing `signal_logging_test` FAIL unrelated to xaverius |
-| **ABI-v1** | ⚠️ Not yet conformant — `XaveriusDeviceBackendOps` header and owner-key preference selection path still require reconciliation (W0-153 items 4–6) |
+| **Unit Tests** | ✅ All 28 xaverius test functions pass (21 registry + 7 protocol); pre-existing `signal_logging_test` FAIL unrelated to xaverius |
+| **ABI-v1** | ⚠️ Partially conformant — owner-key preference selection path implemented (W0-153 item 4-5); `XaveriusDeviceBackendOps` header reconciliation still pending (W0-153 item 6) |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
-| **Blockers** | ABI-v1 header reconciliation; owner-key preference production selection path |
+| **Blockers** | `XaveriusDeviceBackendOps` ABI-v1 header reconciliation |
 
 ---
 

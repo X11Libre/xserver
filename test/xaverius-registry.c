@@ -552,7 +552,7 @@ xaverius_registry_registration_contract(void)
         assert(XaveriusModuleRoleCreate(&desc2, &role2) == XAVERIUS_REGISTRY_SUCCESS);
         setup_min_ops(&ops2, true);
         setup_min_reg(&reg2, &id, &ops2, role2);
-        assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg2, &devc, &dgc, &bgc) == XAVERIUS_REGISTRY_IDENTITY_CONFLICT);
+        assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg2, &devc, &dgc, &bgc) == XAVERIUS_REGISTRY_AMBIGUOUS);
         assert(devc == NULL);
         assert(xaverius_physical_device_count == 1);
         assert(xaverius_tombstone_count == 0);
@@ -1403,6 +1403,165 @@ xaverius_registry_re_register_snapshot_bad_data(void)
     XaveriusRegistryFini();
 }
 
+static void
+xaverius_registry_preference_new_wins(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role1 = NULL;
+    XaveriusModuleRole *role2 = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *dev2 = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t dev_gen2 = 0, bind_gen2 = 0;
+    static const char *prefs[] = { "preferred-role", NULL };
+
+    assert(XaveriusRegistryInit());
+    xaverius_binding_preference_set(prefs);
+
+    /* Role 1: non-preferred owner_key */
+    make_valid_desc(&desc, "other-role");
+    assert(XaveriusModuleRoleCreate(&desc, &role1) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 95;
+    id.device = 1;
+    memset(id.driver_uuid, 0x11, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role1);
+
+    /* First registration with non-preferred role succeeds. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+    assert(xaverius_physical_device_count == 1);
+
+    /* Role 2: preferred owner_key */
+    make_valid_desc(&desc, "preferred-role");
+    assert(XaveriusModuleRoleCreate(&desc, &role2) == XAVERIUS_REGISTRY_SUCCESS);
+    setup_min_reg(&reg, &id, &ops, role2);
+
+    /* Second registration with preferred role replaces the binding. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev2, &dev_gen2,
+                                             &bind_gen2) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev2 == dev); /* same device */
+    assert(dev_gen2 != dev_gen); /* new device generation */
+    assert(bind_gen2 != bind_gen); /* new binding generation */
+    assert(dev->binding != NULL);
+    assert(xaverius_physical_device_count == 1);
+
+    XaveriusPhysicalDeviceRelease(dev2);
+    XaveriusModuleRoleFinalize(role1);
+    XaveriusModuleRoleFinalize(role2);
+    XaveriusRegistryFini();
+    xaverius_binding_preference_set(NULL);
+}
+
+static void
+xaverius_registry_preference_existing_wins(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role1 = NULL;
+    XaveriusModuleRole *role2 = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *dev2 = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t dev_gen2 = 0, bind_gen2 = 0;
+    static const char *prefs[] = { "preferred-role", NULL };
+
+    assert(XaveriusRegistryInit());
+    xaverius_binding_preference_set(prefs);
+
+    /* Role 1: preferred owner_key, registers first */
+    make_valid_desc(&desc, "preferred-role");
+    assert(XaveriusModuleRoleCreate(&desc, &role1) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 96;
+    id.device = 1;
+    memset(id.driver_uuid, 0x22, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role1);
+
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+    assert(xaverius_physical_device_count == 1);
+
+    /* Role 2: non-preferred owner_key, tries to register same identity */
+    make_valid_desc(&desc, "other-role");
+    assert(XaveriusModuleRoleCreate(&desc, &role2) == XAVERIUS_REGISTRY_SUCCESS);
+    setup_min_reg(&reg, &id, &ops, role2);
+
+    /* Non-preferred binding cannot replace preferred: AMBIGUOUS. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev2, &dev_gen2,
+                                             &bind_gen2) == XAVERIUS_REGISTRY_AMBIGUOUS);
+    assert(dev2 == NULL);
+    assert(dev->binding != NULL); /* existing binding unchanged */
+    assert(dev->device_generation == dev_gen); /* generation unchanged */
+    assert(xaverius_physical_device_count == 1);
+
+    XaveriusPhysicalDeviceRelease(dev);
+    XaveriusModuleRoleFinalize(role1);
+    XaveriusModuleRoleFinalize(role2);
+    XaveriusRegistryFini();
+    xaverius_binding_preference_set(NULL);
+}
+
+static void
+xaverius_registry_preference_ambiguous_no_pref(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role1 = NULL;
+    XaveriusModuleRole *role2 = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev = NULL;
+    XaveriusPhysicalDevice *dev2 = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t dev_gen2 = 0, bind_gen2 = 0;
+
+    assert(XaveriusRegistryInit());
+    /* No preference list configured. */
+
+    make_valid_desc(&desc, "role-a");
+    assert(XaveriusModuleRoleCreate(&desc, &role1) == XAVERIUS_REGISTRY_SUCCESS);
+
+    id.bus = 97;
+    id.device = 1;
+    memset(id.driver_uuid, 0x33, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+    setup_min_reg(&reg, &id, &ops, role1);
+
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev != NULL);
+    assert(xaverius_physical_device_count == 1);
+
+    make_valid_desc(&desc, "role-b");
+    assert(XaveriusModuleRoleCreate(&desc, &role2) == XAVERIUS_REGISTRY_SUCCESS);
+    setup_min_reg(&reg, &id, &ops, role2);
+
+    /* No preference → multiple eligible bindings → AMBIGUOUS. */
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev2, &dev_gen2,
+                                             &bind_gen2) == XAVERIUS_REGISTRY_AMBIGUOUS);
+    assert(dev2 == NULL);
+    assert(dev->binding != NULL); /* existing binding unchanged */
+    assert(xaverius_physical_device_count == 1);
+
+    XaveriusPhysicalDeviceRelease(dev);
+    XaveriusModuleRoleFinalize(role1);
+    XaveriusModuleRoleFinalize(role2);
+    XaveriusRegistryFini();
+}
+
 const testfunc_t*
 xaverius_registry_test(void)
 {
@@ -1430,6 +1589,10 @@ xaverius_registry_test(void)
         /* Re-registration failure-atomicity tests */
         xaverius_registry_re_register_snapshot_failure,
         xaverius_registry_re_register_snapshot_bad_data,
+        /* Owner-key preference selection tests (W0-153 item 4-5) */
+        xaverius_registry_preference_new_wins,
+        xaverius_registry_preference_existing_wins,
+        xaverius_registry_preference_ambiguous_no_pref,
         NULL,
     };
 

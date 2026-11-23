@@ -607,6 +607,53 @@ int xaverius_compare_ordering_key(const char *a, const char *b)
     return strcmp(a, b);
 }
 
+/* ---- Owner-key preference selection (spec: binding-selection and registry
+ * result closure) ----
+ *
+ * The server may configure an ordered preference list over stable owner_key
+ * values of XAVERIUS_MODULE_ROLE_DDX_BACKEND roles. Selection rules:
+ *   - The first eligible binding whose owner_key matches a preference entry
+ *     wins (lowest index = highest preference).
+ *   - If no preference entry matches any eligible binding's owner_key:
+ *     * A sole eligible binding is selected.
+ *     * Multiple eligible unlisted bindings remain unpublished as AMBIGUOUS.
+ * Ineligible bindings (failed snapshot, invalid descriptor, etc.) never block
+ * a later eligible preference.
+ *
+ * The preference list is NULL-terminated. It is NULL (unset) by default, in
+ * which case all owner_keys have equal rank.
+ */
+
+/* Server-configured ordered preference list of owner_key values (NULL-term).
+ * Set via xaverius_binding_preference_set(). */
+static const char * const *xaverius_binding_preference_owner_keys = NULL;
+
+/* Set the ordered owner_key preference list. Caller retains ownership of the
+ * array and its strings; they must outlive the registry. Passing NULL clears
+ * the preference list (all owner_keys equal rank). */
+void
+xaverius_binding_preference_set(const char * const *preference_keys)
+{
+    xaverius_binding_preference_owner_keys = preference_keys;
+}
+
+/* Return the preference rank of owner_key: index into the preference list
+ * (0 = highest preference), or a large value if not listed. */
+static int
+xaverius_owner_key_rank(const char *owner_key)
+{
+    int i;
+
+    if (owner_key == NULL || xaverius_binding_preference_owner_keys == NULL)
+        return 1000000;
+
+    for (i = 0; xaverius_binding_preference_owner_keys[i] != NULL; i++) {
+        if (strcmp(owner_key, xaverius_binding_preference_owner_keys[i]) == 0)
+            return i;
+    }
+    return 1000000;
+}
+
 static XaveriusPhysicalDevice *xaverius_find_device_by_identity(
     const XaveriusDeviceIdentity *identity)
 {
@@ -697,13 +744,18 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
             (const XaveriusDeviceIdentity *)registration->identity);
     }
 
+    int is_replacement = 0;
+
     if (existing != NULL) {
         /* Exact replay of the same live registration/binding ownership is
          * idempotent: return an additional caller-owned reference.
          * If binding was removed (NULL), allow re-registration with a new
          * binding on the SAME device. Same hardware identity but different
-         * binding ownership is a classified conflict; neither is an automatic
-         * registration.
+         * binding ownership is resolved by owner-key preference selection:
+         * the eligible binding with the highest-configured preference wins;
+         * if no preference is configured, multiple eligible bindings remain
+         * unpublished as AMBIGUOUS; ineligible bindings never block a later
+         * eligible preference.
          *
          * Exact replay compares the existing binding's owning role/generation.
          * No new binding is created and no extra role retain is taken. */
@@ -719,11 +771,25 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
                     *out_binding_generation = existing->binding->binding_generation;
                 return XAVERIUS_REGISTRY_SUCCESS;
             }
-            return XAVERIUS_REGISTRY_IDENTITY_CONFLICT;
+            /* Conflict: same identity, different role. Apply owner-key
+             * preference selection (W0-153 item 4). */
+            {
+                int existing_rank = xaverius_owner_key_rank(
+                    existing->binding->module_role->owner_key);
+                int new_rank = xaverius_owner_key_rank(role->owner_key);
+
+                if (existing_rank <= new_rank) {
+                    /* Existing binding wins (higher preference or equal
+                     * rank → ambiguous). New binding not selected. */
+                    return XAVERIUS_REGISTRY_AMBIGUOUS;
+                }
+                /* New binding wins: replace existing binding. */
+                xaverius_binding_free(existing->binding);
+                existing->binding = NULL;
+                is_replacement = 1;
+            }
         }
-        /* binding == NULL: previous binding was removed, allow re-registration
-         * with a new binding on the existing device. dev is set here and used
-         * below only after successful snapshot validation (failure-atomic). */
+        /* binding == NULL (or was just freed): re-register on existing device. */
         dev = existing;
     }
 
@@ -844,8 +910,15 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         xaverius_physical_device_count++;
     } else {
         /* Re-registration: mutate existing device atomically now that all
-         * validation has succeeded. No partial state is visible on failure. */
-        dev->caller_refcount++;
+         * validation has succeeded. No partial state is visible on failure.
+         * For a preference-driven binding replacement (is_replacement), set a
+         * fresh caller reference instead of incrementing, since this is a new
+         * selection through a different role, not a replay. */
+        if (is_replacement) {
+            dev->caller_refcount = 1;
+        } else {
+            dev->caller_refcount++;
+        }
         dev->device_generation = xaverius_next_generation_id();
         binding->binding_generation = dev->device_generation;
     }
