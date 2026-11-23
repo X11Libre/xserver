@@ -1,4 +1,5 @@
 srcs_damageext = [
+	'byteswap.c',
 	'damageext.c',
 ]
 
