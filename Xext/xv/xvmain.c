@@ -101,6 +101,8 @@ SOFTWARE.
 #include "input.h"
 #include "xvdisp.h"
 
+#include "xv_intern.h"
+
 #define SCREEN_PROLOGUE(pScreen, field) ((pScreen)->field = ((XvScreenPtr) \
     dixLookupPrivate(&(pScreen)->devPrivates, &XvScreenKeyRec))->field)
 
@@ -137,8 +139,6 @@ static RESTYPE XvRTPortNotify;
 
 /* EXTERNAL */
 
-static void WriteSwappedVideoNotifyEvent(xvEvent *, xvEvent *);
-static void WriteSwappedPortNotifyEvent(xvEvent *, xvEvent *);
 static Bool CreateResourceTypes(void);
 
 static void XvScreenClose(CallbackListPtr *pcbl, ScreenPtr, void *arg);
@@ -193,10 +193,8 @@ XvExtensionInit(void)
         XvEventBase = extEntry->eventBase;
         XvErrorBase = extEntry->errorBase;
 
-        EventSwapVector[XvEventBase + XvVideoNotify] =
-            (EventSwapPtr) WriteSwappedVideoNotifyEvent;
-        EventSwapVector[XvEventBase + XvPortNotify] =
-            (EventSwapPtr) WriteSwappedPortNotifyEvent;
+        EventSwapVector[XvEventBase + XvVideoNotify] = XvSwapVideoNotifyEvent;
+        EventSwapVector[XvEventBase + XvPortNotify] = XvSwapPortNotifyEvent;
 
         SetResourceTypeErrorValue(XvRTPort, _XvBadPort);
         (void) dixAddAtom(XvName);
@@ -936,33 +934,6 @@ XvdiGetPortAttribute(ClientPtr client,
     return
         (*pPort->pAdaptor->ddGetPortAttribute) (pPort, attribute,
                                                 p_value);
-
-}
-
-static void _X_COLD
-WriteSwappedVideoNotifyEvent(xvEvent * from, xvEvent * to)
-{
-
-    to->u.u.type = from->u.u.type;
-    to->u.u.detail = from->u.u.detail;
-    cpswaps(from->u.videoNotify.sequenceNumber,
-            to->u.videoNotify.sequenceNumber);
-    cpswapl(from->u.videoNotify.time, to->u.videoNotify.time);
-    cpswapl(from->u.videoNotify.drawable, to->u.videoNotify.drawable);
-    cpswapl(from->u.videoNotify.port, to->u.videoNotify.port);
-
-}
-
-static void _X_COLD
-WriteSwappedPortNotifyEvent(xvEvent * from, xvEvent * to)
-{
-
-    to->u.u.type = from->u.u.type;
-    to->u.u.detail = from->u.u.detail;
-    cpswaps(from->u.portNotify.sequenceNumber, to->u.portNotify.sequenceNumber);
-    cpswapl(from->u.portNotify.time, to->u.portNotify.time);
-    cpswapl(from->u.portNotify.port, to->u.portNotify.port);
-    cpswapl(from->u.portNotify.value, to->u.portNotify.value);
 
 }
 
