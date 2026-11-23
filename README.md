@@ -24,6 +24,20 @@ The XLibre Xserver is the community-managed display server for the [X Window Sys
 To learn more about the features and mission of XLibre, please [visit our homepage](https://xlibre.net).
 
 
+## Removed Features
+
+The following components and interfaces inherited from X.Org have been removed from the current XLibre source tree:
+
+* [Xwayland](https://github.com/X11Libre/xserver/commit/c8b81fdbc5bbc51e3c3c62ef8f2ac5c728bb57f7), the X server for running X11 applications under a Wayland compositor. It has its own release cycle; use the separately maintained upstream Xwayland for Wayland sessions.
+* [DGA 1.0](https://github.com/X11Libre/xserver/commit/46150672643721937a10cff4ad498474b2dc39b8), the legacy protocol for direct framebuffer access. DGA 2.0 remains available.
+* [XF86-BigFont](https://github.com/X11Libre/xserver/commit/4ebdb499dd0e0159cc5be60f85d60f9f4fa5b0d9), an optional extension for sharing or compressing core font metrics. It was disabled by default; ordinary core font support remains available.
+* [Internal server resets](https://github.com/X11Libre/xserver/commit/f27e12c918d2bfc26068313e715bed3c2d57fecc). The server now keeps running when the last client disconnects, or exits if `-terminate` is specified. Restart the server process when a fresh server state is needed. The `-reset` and `-noreset` options are [accepted for compatibility but ignored](https://github.com/X11Libre/xserver/commit/e00b4b55c85e3228f7d24ccca12bfec6c992ab4e); the XDMCP `-once` option was removed.
+* [Linux abstract sockets](https://github.com/X11Libre/xserver/commit/436458b5a3e678638e9a0724030d21f3f0bab4b5) for local connections. Local clients use filesystem Unix-domain sockets, normally `/tmp/.X11-unix/X<display-number>`; containers must be given access to that socket path.
+* [The `XORGCONFIG` environment variable](https://github.com/X11Libre/xserver/commit/a6710636a1546d5306a24b0099e55d9ebe54235a). Use the `-config` or `-configdir` command-line options to select a configuration file or directory.
+* [The legacy `Section "DRI"` configuration block](https://github.com/X11Libre/xserver/commit/e01f6a678fec8da2c31482e87fef3da2a90c0fdc) in `xorg.conf`. Remove this obsolete section from existing configurations; DRI support itself is still available.
+* [The Linux vm86 int10 backend](https://github.com/X11Libre/xserver/commit/483a1722f980c4f7ba0a1f36133b55494fbd683b) for executing video BIOS code on 32-bit x86. It had not compiled since 2014 and has been superseded by the `x86emu` backend.
+
+
 ## Switching to XLibre
 
 The easiest way to install and run XLibre is to use your distribution's provided packages. Please see the [Are We XLibre Yet? - (X11Libre/xserver Wiki)](https://github.com/X11Libre/xserver/wiki/Are-We-XLibre-Yet%3F) page for a list of the available options. If there is no option, then go on with building and installing XLibre from source.
