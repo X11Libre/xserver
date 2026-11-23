@@ -1,4 +1,5 @@
 srcs_shape = [
+    'byteswap.c',
     'shape.c',
 ]
 
