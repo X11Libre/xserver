@@ -161,100 +161,122 @@ typedef enum {
 } XaveriusBackendResult;
 
 /* ---- Typed DDX backend operation tables (provider-operation-matrix.md §3) ---- */
-struct XaveriusDeviceBackendBufferMemoryOps {
-    XaveriusBackendResult (*create_buffer)(void *, void *, void **);
-    XaveriusBackendResult (*free_buffer)(void *, void *);
-    XaveriusBackendResult (*get_buffer_memory_requirements)(void *, void *, void *);
-    XaveriusBackendResult (*allocate_memory)(void *, void *, void **);
-    XaveriusBackendResult (*free_memory)(void *, void *);
-    XaveriusBackendResult (*bind_buffer_memory)(void *, void *, void *, uint64_t);
-    XaveriusBackendResult (*write_buffer)(void *, void *, void *, const void *, void *);
-    XaveriusBackendResult (*read_buffer)(void *, void *, void *, const void *, void *);
-};
-
-struct XaveriusDeviceBackendShaderPipelineOps {
-    XaveriusBackendResult (*create_shader_module)(void *, void *, void **);
-    XaveriusBackendResult (*create_descriptor_set_layout)(void *, void *, void **);
-    XaveriusBackendResult (*create_descriptor_pool)(void *, void *, void **);
-    XaveriusBackendResult (*allocate_descriptor_sets)(void *, void *, const void *, uint32_t, void **);
-    XaveriusBackendResult (*update_descriptor_sets)(void *, const void *, uint32_t);
-    XaveriusBackendResult (*free_descriptor_sets)(void *, void *, void * const *, uint32_t);
-    XaveriusBackendResult (*create_pipeline_layout)(void *, void *, void **);
-    XaveriusBackendResult (*create_compute_pipeline)(void *, void *, void **);
-    XaveriusBackendResult (*destroy_shader_module)(void *, void *);
-    XaveriusBackendResult (*destroy_descriptor_set_layout)(void *, void *);
-    XaveriusBackendResult (*destroy_descriptor_pool)(void *, void *);
-    XaveriusBackendResult (*destroy_pipeline_layout)(void *, void *);
-    XaveriusBackendResult (*destroy_compute_pipeline)(void *, void *);
-};
-
-struct XaveriusDeviceBackendCommandOps {
-    XaveriusBackendResult (*create_command_pool)(void *, void *, void **);
-    XaveriusBackendResult (*destroy_command_pool)(void *, void *);
-    XaveriusBackendResult (*allocate_command_buffer)(void *, void *, const void *, void **);
-    XaveriusBackendResult (*free_command_buffer)(void *, void *, void *);
-    XaveriusBackendResult (*reset_command_buffer)(void *, void *);
-    XaveriusBackendResult (*begin_command_buffer)(void *, void *, const void *);
-    XaveriusBackendResult (*record_commands)(void *, void *, const void *, uint32_t);
-    XaveriusBackendResult (*end_command_buffer)(void *, void *);
-};
-
-struct XaveriusDeviceBackendSynchronizationOps {
-    XaveriusBackendResult (*create_semaphore)(void *, void *, void **);
-    XaveriusBackendResult (*host_signal_semaphore)(void *, void *, uint64_t, void *);
-    XaveriusBackendResult (*destroy_semaphore)(void *, void *);
-    XaveriusBackendResult (*create_fence)(void *, void *, void **);
-    XaveriusBackendResult (*reset_fence)(void *, void *);
-    XaveriusBackendResult (*destroy_fence)(void *, void *);
-};
-
 /* ---- Snapshot type (W0-138: ABI v1) ---- */
 typedef struct {
     void *data;
     uint64_t size;
 } XaveriusPhysicalDeviceSnapshot;
 
+/* ---- Opaque DDX backend object handles (ABI v1) ---- */
+/* DDX-owned object instances; server refers to them only through these
+ * opaque handles. Concrete types are defined by each DDX backend. */
+typedef struct _XaveriusDeviceBackendDevice XaveriusDeviceBackendDevice;
+typedef struct _XaveriusDeviceBackendQueue XaveriusDeviceBackendQueue;
+typedef struct _XaveriusDeviceBackendSurface XaveriusDeviceBackendSurface;
+typedef struct _XaveriusDeviceBackendSwapchain XaveriusDeviceBackendSwapchain;
+typedef struct _XaveriusDeviceBackendRoute XaveriusDeviceBackendRoute;
+typedef struct _XaveriusDeviceBackendSemaphore XaveriusDeviceBackendSemaphore;
+typedef struct _XaveriusDeviceBackendFence XaveriusDeviceBackendFence;
+typedef struct _XaveriusDeviceBackendCommandPool XaveriusDeviceBackendCommandPool;
+typedef struct _XaveriusDeviceBackendCommandBuffer XaveriusDeviceBackendCommandBuffer;
+typedef struct _XaveriusDeviceBackendShaderModule XaveriusDeviceBackendShaderModule;
+typedef struct _XaveriusDeviceBackendDescriptorSetLayout XaveriusDeviceBackendDescriptorSetLayout;
+typedef struct _XaveriusDeviceBackendDescriptorPool XaveriusDeviceBackendDescriptorPool;
+typedef struct _XaveriusDeviceBackendPipelineLayout XaveriusDeviceBackendPipelineLayout;
+typedef struct _XaveriusDeviceBackendComputePipeline XaveriusDeviceBackendComputePipeline;
+typedef struct _XaveriusDeviceBackendBuffer XaveriusDeviceBackendBuffer;
+typedef struct _XaveriusDeviceBackendDeviceMemory XaveriusDeviceBackendDeviceMemory;
+typedef struct _XaveriusDeviceBackendDescriptorSet XaveriusDeviceBackendDescriptorSet;
+typedef struct _XaveriusDeviceBackendOperation XaveriusDeviceBackendOperation;
+
 /* Forward declarations for XaveriusDeviceBackendOps */
 struct _XaveriusDeviceBackendBinding;
 typedef struct _XaveriusDeviceBackendBinding XaveriusDeviceBackendBinding;
 
-/* ---- Top-level DDX backend operations descriptor (v0.1) ---- */
-struct XaveriusDeviceBackendOps {
-    uint64_t struct_size;
-    uint64_t abi_version;
+struct XaveriusDeviceBackendBufferMemoryOps {
+    XaveriusBackendResult (*create_buffer)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendBuffer *);
+    XaveriusBackendResult (*free_buffer)(XaveriusDeviceBackendBuffer *);
+    XaveriusBackendResult (*get_buffer_memory_requirements)(XaveriusDeviceBackendBuffer *, void *, void *);
+    XaveriusBackendResult (*allocate_memory)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendDeviceMemory *);
+    XaveriusBackendResult (*free_memory)(XaveriusDeviceBackendDeviceMemory *);
+    XaveriusBackendResult (*bind_buffer_memory)(XaveriusDeviceBackendBuffer *, XaveriusDeviceBackendDeviceMemory *, uint64_t);
+    XaveriusBackendResult (*write_buffer)(XaveriusDeviceBackendBuffer *, const void *, void *, const void *, void *);
+    XaveriusBackendResult (*read_buffer)(XaveriusDeviceBackendBuffer *, const void *, void *, const void *, void *);
+};
 
-    /* Physical snapshot query */
+struct XaveriusDeviceBackendShaderPipelineOps {
+    XaveriusBackendResult (*create_shader_module)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendShaderModule *);
+    XaveriusBackendResult (*create_descriptor_set_layout)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendDescriptorSetLayout *);
+    XaveriusBackendResult (*create_descriptor_pool)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendDescriptorPool *);
+    XaveriusBackendResult (*allocate_descriptor_sets)(XaveriusDeviceBackendDescriptorPool *, const void *, uint32_t, XaveriusDeviceBackendDescriptorSet *);
+    XaveriusBackendResult (*update_descriptor_sets)(XaveriusDeviceBackendDevice *, const void *, uint32_t);
+    XaveriusBackendResult (*free_descriptor_sets)(XaveriusDeviceBackendDescriptorPool *, void * const *, uint32_t);
+    XaveriusBackendResult (*create_pipeline_layout)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendPipelineLayout *);
+    XaveriusBackendResult (*create_compute_pipeline)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendComputePipeline *);
+    XaveriusBackendResult (*destroy_shader_module)(XaveriusDeviceBackendShaderModule *);
+    XaveriusBackendResult (*destroy_descriptor_set_layout)(XaveriusDeviceBackendDescriptorSetLayout *);
+    XaveriusBackendResult (*destroy_descriptor_pool)(XaveriusDeviceBackendDescriptorPool *);
+    XaveriusBackendResult (*destroy_pipeline_layout)(XaveriusDeviceBackendPipelineLayout *);
+    XaveriusBackendResult (*destroy_compute_pipeline)(XaveriusDeviceBackendComputePipeline *);
+};
+
+struct XaveriusDeviceBackendCommandOps {
+    XaveriusBackendResult (*create_command_pool)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendCommandPool *);
+    XaveriusBackendResult (*destroy_command_pool)(XaveriusDeviceBackendCommandPool *);
+    XaveriusBackendResult (*allocate_command_buffer)(XaveriusDeviceBackendCommandPool *, const void *, XaveriusDeviceBackendCommandBuffer *);
+    XaveriusBackendResult (*free_command_buffer)(XaveriusDeviceBackendCommandBuffer *);
+    XaveriusBackendResult (*reset_command_buffer)(XaveriusDeviceBackendCommandBuffer *);
+    XaveriusBackendResult (*begin_command_buffer)(XaveriusDeviceBackendCommandBuffer *, const void *);
+    XaveriusBackendResult (*record_commands)(XaveriusDeviceBackendCommandBuffer *, const void *, uint32_t);
+    XaveriusBackendResult (*end_command_buffer)(XaveriusDeviceBackendCommandBuffer *);
+};
+
+struct XaveriusDeviceBackendSynchronizationOps {
+    XaveriusBackendResult (*create_semaphore)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendSemaphore *);
+    XaveriusBackendResult (*host_signal_semaphore)(XaveriusDeviceBackendSemaphore *, uint64_t, void *);
+    XaveriusBackendResult (*destroy_semaphore)(XaveriusDeviceBackendSemaphore *);
+    XaveriusBackendResult (*create_fence)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendFence *);
+    XaveriusBackendResult (*reset_fence)(XaveriusDeviceBackendFence *);
+    XaveriusBackendResult (*destroy_fence)(XaveriusDeviceBackendFence *);
+};
+
+/* ---- Direct DDX device backend binding ---- */
+struct XaveriusDeviceBackendOps {
+    uint32_t struct_size;
+    uint32_t abi_version;
+
+    /* Physical snapshot query (two-argument form, unchanged per W0-153). */
     XaveriusBackendResult (*query_physical_snapshot)(XaveriusDeviceBackendBinding *, XaveriusPhysicalDeviceSnapshot *);
 
     /* Logical device */
-    XaveriusBackendResult (*create_logical_device)(void *, void *, void **);
-    XaveriusBackendResult (*get_queue)(void *, void *, void **);
-    XaveriusBackendResult (*destroy_logical_device)(void *, void *);
+    XaveriusBackendResult (*create_logical_device)(XaveriusDeviceBackendDevice *, const void *, XaveriusDeviceBackendDevice *);
+    XaveriusBackendResult (*get_queue)(XaveriusDeviceBackendDevice *, uint32_t, uint32_t, XaveriusDeviceBackendQueue *);
+    XaveriusBackendResult (*destroy_logical_device)(XaveriusDeviceBackendDevice *);
 
     /* Queue submission */
-    XaveriusBackendResult (*queue_submit)(void *, void *);
+    XaveriusBackendResult (*queue_submit)(XaveriusDeviceBackendQueue *, XaveriusDeviceBackendOperation *);
 
     /* Surface / presentation route / swapchain */
-    XaveriusBackendResult (*create_surface)(void *, void *, void **);
-    XaveriusBackendResult (*destroy_surface)(void *, void *);
-    XaveriusBackendResult (*query_surface_support)(void *, void *, void *);
-    XaveriusBackendResult (*create_presentation_route)(void *, void *, void **);
-    XaveriusBackendResult (*destroy_presentation_route)(void *, void *);
-    XaveriusBackendResult (*create_swapchain)(void *, void *, void **);
-    XaveriusBackendResult (*destroy_swapchain)(void *, void *);
-    XaveriusBackendResult (*acquire_next_image)(void *, void *, void **);
-    XaveriusBackendResult (*queue_present)(void *, void *);
-    XaveriusBackendResult (*cancel_acquire)(void *, void *);
-    XaveriusBackendResult (*release_late_acquired_image)(void *, void *);
+    XaveriusBackendResult (*create_surface)(XaveriusDeviceBackendSurface *, const void *, void **);
+    XaveriusBackendResult (*destroy_surface)(XaveriusDeviceBackendSurface *);
+    XaveriusBackendResult (*query_surface_support)(XaveriusDeviceBackendDevice *, XaveriusDeviceBackendSurface *, uint32_t, void *);
+    XaveriusBackendResult (*create_presentation_route)(XaveriusDeviceBackendRoute *, XaveriusDeviceBackendDevice *, XaveriusDeviceBackendSurface *, uint64_t);
+    XaveriusBackendResult (*destroy_presentation_route)(XaveriusDeviceBackendRoute *);
+    XaveriusBackendResult (*create_swapchain)(XaveriusDeviceBackendSwapchain *, XaveriusDeviceBackendDevice *, XaveriusDeviceBackendRoute *, const void *);
+    XaveriusBackendResult (*destroy_swapchain)(XaveriusDeviceBackendSwapchain *);
+    XaveriusBackendResult (*acquire_next_image)(XaveriusDeviceBackendSwapchain *, void *);
+    XaveriusBackendResult (*queue_present)(XaveriusDeviceBackendQueue *, XaveriusDeviceBackendSwapchain *, uint32_t);
+    XaveriusBackendResult (*cancel_acquire)(XaveriusDeviceBackendSwapchain *, void *);
+    XaveriusBackendResult (*release_late_acquired_image)(XaveriusDeviceBackendSwapchain *, uint32_t);
 
     /* Operation retirement */
-    XaveriusBackendResult (*retire_operation)(void *, void *);
+    XaveriusBackendResult (*retire_operation)(XaveriusDeviceBackendOperation *);
 
-    /* Typed operation tables */
-    struct XaveriusDeviceBackendBufferMemoryOps *buffer_memory;
-    struct XaveriusDeviceBackendShaderPipelineOps *shader_pipeline;
-    struct XaveriusDeviceBackendCommandOps *commands;
-    struct XaveriusDeviceBackendSynchronizationOps *synchronization;
+    /* Typed operation tables (immutable, const-qualified per ABI v1). */
+    const struct XaveriusDeviceBackendBufferMemoryOps *buffer_memory;
+    const struct XaveriusDeviceBackendShaderPipelineOps *shader_pipeline;
+    const struct XaveriusDeviceBackendCommandOps *commands;
+    const struct XaveriusDeviceBackendSynchronizationOps *synchronization;
 };
 
 /* ---- Direct DDX device backend binding ---- */

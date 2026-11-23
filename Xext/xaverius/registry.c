@@ -141,10 +141,10 @@ static void xaverius_binding_free(struct _XaveriusDeviceBackendBinding *binding)
     }
 
     if (binding->ops != NULL) {
-        free(binding->ops->buffer_memory);
-        free(binding->ops->shader_pipeline);
-        free(binding->ops->commands);
-        free(binding->ops->synchronization);
+        free((void *)binding->ops->buffer_memory);
+        free((void *)binding->ops->shader_pipeline);
+        free((void *)binding->ops->commands);
+        free((void *)binding->ops->synchronization);
         free(binding->ops);
     }
     free(binding);

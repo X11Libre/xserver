@@ -222,15 +222,15 @@ All 7 test functions in `xaverius_qv_protocol_test()` pass.
 ### Changed Files (from base `xorg/main` or prior `wip/xaverius` state)
 
 ```
-Xext/xaverius/xaverius_intern.h      # Internal types, enums, ABI versions, registry API; added xaverius_binding_preference_set() declaration (W0-153 item 4)
+Xext/xaverius/xaverius_intern.h      # Internal types, enums, ABI versions, registry API; XaveriusDeviceBackendOps ABI-v1 reconciliation (W0-153 item 6): uint32_t struct_size/abi_version, const nested ops pointers, typed callback signatures, opaque handle types
 Xext/xaverius/xaverius_priv.h        # DDX-facing ABI v1 (installed header)
 Xext/xaverius/xaverius_proto.h       # Wire protocol (complete, unchanged)
-Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed uninitialized `dev` (CI blocker on 6 platforms) + failure-atomic re-registration + owner-key preference selection (W0-153 item 4)
+Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed uninitialized `dev` (CI blocker on 6 platforms) + failure-atomic re-registration + owner-key preference selection (W0-153 item 4) + const-cast fixes for const ops pointers (W0-153 item 6)
 Xext/xaverius/dispatch.c             # QueryVersion dispatch (+flags/length validation)
 Xext/xaverius/init.c                 # Extension init, atoms, screen private key
 Xext/xaverius/screen.c               # ScreenAttachment (DDX per-screen)
 Xext/xaverius/meson.build            # Static library build
-test/xaverius-registry.c             # Unit tests (21 test functions: 18 original + 3 owner-key preference selection tests)
+test/xaverius-registry.c             # Unit tests (21 test functions)
 test/xaverius-qv-protocol.c          # Protocol contract tests (7 test functions)
 test/meson.build                     # Integrated into test/tests via XAVERIUS_TESTS
 test/tests.c                         # Test runner (calls xaverius_registry_test + xaverius_qv_protocol_test)
@@ -266,13 +266,13 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `9d6018e10726e6fd0b628448b74b489f981283b0` (origin) + uncommitted W0-153 item 4-5 fixes |
+| **HEAD** | `51982623f308653c189b1d9c6376028f27a75516` (origin) + W0-153 item 6 fixes |
 | **Branch** | `wip/xaverius` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius` with `-Dwerror=true`, all targets link) |
 | **Unit Tests** | ✅ All 28 xaverius test functions pass (21 registry + 7 protocol); pre-existing `signal_logging_test` FAIL unrelated to xaverius |
-| **ABI-v1** | ⚠️ Partially conformant — owner-key preference selection path implemented (W0-153 item 4-5); `XaveriusDeviceBackendOps` header reconciliation still pending (W0-153 item 6) |
+| **ABI-v1** | ✅ Conformant — `XaveriusDeviceBackendOps` header reconciled (W0-153 item 6): uint32_t struct_size/abi_version, const-qualified nested ops pointers, typed callback signatures, two-argument query_physical_snapshot unchanged |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
-| **Blockers** | `XaveriusDeviceBackendOps` ABI-v1 header reconciliation |
+| **Blockers** | None |
 
 ---
 
