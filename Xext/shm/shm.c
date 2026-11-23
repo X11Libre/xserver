@@ -60,6 +60,7 @@ in this Software without prior written authorization from The Open Group.
 #include "Xext/panoramiX/panoramiXsrv.h"
 
 #include "shm_priv.h"
+#include "shm_intern.h"
 
 #include "os.h"
 #include "dixstruct_priv.h"
@@ -110,8 +111,6 @@ Bool noMITShmExtension = FALSE;
 static PixmapPtr fbShmCreatePixmap(XSHM_CREATE_PIXMAP_ARGS);
 static int ShmDetachSegment(void *value, XID shmseg);
 static void ShmResetProc(ExtensionEntry *extEntry);
-static void SShmCompletionEvent(xShmCompletionEvent *from,
-                                xShmCompletionEvent *to);
 
 static int ShmCreatePixmap(ClientPtr client, xShmCreatePixmapReq *stuff);
 
@@ -1357,18 +1356,6 @@ ProcShmDispatch(ClientPtr client)
     }
 }
 
-static void _X_COLD
-SShmCompletionEvent(xShmCompletionEvent * from, xShmCompletionEvent * to)
-{
-    to->type = from->type;
-    cpswaps(from->sequenceNumber, to->sequenceNumber);
-    cpswapl(from->drawable, to->drawable);
-    cpswaps(from->minorEvent, to->minorEvent);
-    to->majorEvent = from->majorEvent;
-    cpswapl(from->shmseg, to->shmseg);
-    cpswapl(from->offset, to->offset);
-}
-
 static void ShmPixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
     ShmDetachSegment(
@@ -1416,6 +1403,6 @@ ShmExtensionInit(void)
         ShmCompletionCode = extEntry->eventBase;
         BadShmSegCode = extEntry->errorBase;
         SetResourceTypeErrorValue(ShmSegType, BadShmSegCode);
-        EventSwapVector[ShmCompletionCode] = (EventSwapPtr) SShmCompletionEvent;
+        EventSwapVector[ShmCompletionCode] = ShmSwapCompletionEvent;
     }
 }
