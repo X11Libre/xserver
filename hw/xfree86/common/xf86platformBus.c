@@ -786,6 +786,7 @@ xf86platformAddDevice(const char *driver_name, int index)
     if (!xf86GPUScreens[i]->configured) {
         ErrorF("hotplugged device %d didn't configure\n", i);
         xf86DeleteScreen(xf86GPUScreens[i]);
+        xf86UnclaimPlatformSlot(&xf86_platform_devices[index], NULL);
         return FALSE;
     }
 
