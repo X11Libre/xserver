@@ -39,6 +39,10 @@
 #include "xf86platformBus_priv.h"
 #include "config/hotplug_priv.h"
 #endif
+#if defined(XSERVER_PLATFORM_BUS) && defined(XSERVER_LIBPCIACCESS)
+#include "xf86Bus.h"
+#include "xf86Priv.h"
+#endif
 
 #include "tests-common.h"
 
@@ -236,6 +240,73 @@ xfree86_platform_scan_no_busid(void)
 #endif
 }
 
+/*
+ * A GPU screen claims its card without a Device section (numInstances 0).
+ * Its slot must still count as claimed. Entities stay in xf86Entities after
+ * the test, so everything they point to is static and released at the end.
+ */
+static void
+xfree86_check_slot_gpu_screen(void)
+{
+#if defined(XSERVER_PLATFORM_BUS) && defined(XSERVER_LIBPCIACCESS)
+    static DriverRec testdrv = { .driverName = "testdrv" };
+    static DriverRec msdrv = { .driverName = "modesetting" };
+    static struct pci_device pci = { .domain = 0x7fff, .bus = 1, .dev = 2, .func = 0 };
+    static struct pci_device pci2 = { .domain = 0x7fff, .bus = 1, .dev = 2, .func = 0 };
+    static char path7[] = "/dev/dri/card7";
+    static char path9[] = "/dev/dri/card9";
+    static struct OdevAttributes attr7 = { .path = path7 };
+    static struct OdevAttributes attr9 = { .path = path9 };
+    static struct xf86_platform_device plat = { .attribs = &attr7, .pdev = &pci };
+    static struct xf86_platform_device plat2 = { .attribs = &attr9, .pdev = &pci2 };
+    static GDevRec fbms = { .identifier = "fb-ms", .driver = "modesetting" };
+    GDevRec ms = { .identifier = "ms", .driver = "modesetting" };
+    GDevRec ms8 = { .identifier = "ms8", .driver = "modesetting" };
+    GDevRec fbdev = { .identifier = "fbdev", .driver = "fbdev" };
+    int e, f;
+
+    ms.options = xf86AddNewOption(NULL, "kmsdev", "/dev/dri/card7");
+    ms8.options = xf86AddNewOption(NULL, "kmsdev", "/dev/dri/card8");
+    fbms.options = xf86AddNewOption(NULL, "kmsdev", "/dev/dri/card7");
+
+    /* A GPU screen: platform claim, no Device section */
+    e = xf86AllocateEntity();
+    xf86Entities[e]->driver = &testdrv;
+    xf86Entities[e]->bus.type = BUS_PLATFORM;
+    xf86Entities[e]->bus.id.plat = &plat;
+    assert(xf86Entities[e]->numInstances == 0);
+
+    /* Same PCI address through another node, and as a PCI device */
+    assert(!xf86CheckSlot(&plat2, BUS_PLATFORM));
+    assert(!xf86CheckPciSlot(&pci));
+    /* modesetting fb claim of the same node */
+    assert(!xf86CheckSlot(&ms, BUS_NONE));
+    /* autoconfigured fbdev must be alone */
+    assert(!xf86CheckSlot(&fbdev, BUS_NONE));
+    /* another node is free */
+    assert(xf86CheckSlot(&ms8, BUS_NONE));
+
+    /* Released: the slot is free again */
+    xf86Entities[e]->bus.type = BUS_NONE;
+    assert(xf86CheckSlot(&plat2, BUS_PLATFORM));
+    assert(xf86CheckSlot(&ms, BUS_NONE));
+
+    /* An fb claim of a node blocks a platform claim of it (#1505) */
+    f = xf86AllocateEntity();
+    xf86Entities[f]->driver = &msdrv;
+    xf86Entities[f]->bus.type = BUS_NONE;
+    xf86AddDevToEntity(f, &fbms);
+    assert(!xf86CheckSlot(&plat, BUS_PLATFORM));
+    xf86RemoveDevFromEntity(f, &fbms);
+    assert(xf86Entities[f]->numInstances == 0);
+    assert(xf86CheckSlot(&plat, BUS_PLATFORM));
+
+    xf86OptionListFree(fbms.options);
+    xf86OptionListFree(ms8.options);
+    xf86OptionListFree(ms.options);
+#endif
+}
+
 const testfunc_t*
 xfree86_test(void)
 {
@@ -244,6 +315,7 @@ xfree86_test(void)
         xfree86_add_comment,
         xfree86_edid_ds_ranges_array_bound,
         xfree86_platform_scan_no_busid,
+        xfree86_check_slot_gpu_screen,
         NULL,
     };
     return testfuncs;
