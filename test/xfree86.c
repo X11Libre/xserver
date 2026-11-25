@@ -35,6 +35,11 @@
 #include "xf86DDC_priv.h"
 #include "edid.h"
 
+#ifdef XSERVER_PLATFORM_BUS
+#include "xf86platformBus_priv.h"
+#include "config/hotplug_priv.h"
+#endif
+
 #include "tests-common.h"
 
 static void
@@ -207,6 +212,30 @@ xfree86_add_comment(void)
     free(current);
 }
 
+/*
+ * A platform device without a bus (e.g. vkms) has no busid. Scanning the
+ * PCI devices, as GPU hot-plug does, must skip it and not crash.
+ */
+static void
+xfree86_platform_scan_no_busid(void)
+{
+#ifdef XSERVER_PLATFORM_BUS
+    struct OdevAttributes *attribs = config_odev_allocate_attributes();
+    int n = xf86_num_platform_devices;
+
+    attribs->path = strdup("/dev/dri/card9");
+    assert(attribs->path);
+    assert(attribs->busid == NULL);
+    xf86_add_platform_device(attribs, FALSE);
+
+    xf86PlatformScanPciDev();
+    assert(xf86_platform_devices[n].pdev == NULL);
+
+    xf86_remove_platform_device(n);
+    assert(xf86_num_platform_devices == n);
+#endif
+}
+
 const testfunc_t*
 xfree86_test(void)
 {
@@ -214,6 +243,7 @@ xfree86_test(void)
         xfree86_option_list_duplicate,
         xfree86_add_comment,
         xfree86_edid_ds_ranges_array_bound,
+        xfree86_platform_scan_no_busid,
         NULL,
     };
     return testfuncs;
