@@ -45,6 +45,8 @@ run_test_in_child(const testfunc_t* (*suite)(void), const char *funcname)
 
     while (*func)
     {
+        /* or the child prints the unflushed output again when it exits */
+        fflush(stdout);
         cpid = fork();
         if (cpid) {
             waitpid(cpid, &csts, 0);
