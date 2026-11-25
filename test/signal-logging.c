@@ -208,15 +208,20 @@ static void logging_format(void)
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) test message\n") == 0);
 
-    /* long buf is truncated to "....en\n" */
+    /* long buf is truncated to fill the 1024-byte log buffer, header
+     * included, and still ends with a newline */
     LogMessageVerb(X_ERROR, 1, buf);
     read_log_msg(logmsg);
-    assert(strcmp(&logmsg[strlen(logmsg) - 3], "en\n") == 0);
+    assert(strlen(logmsg) == sizeof(buf) - 1);
+    assert(strncmp(logmsg, "(EE) ...", 8) == 0);
+    assert(strcmp(&logmsg[strlen(logmsg) - 2], ".\n") == 0);
 
     /* same thing, this time as string substitution */
     LogMessageVerb(X_ERROR, 1, "%s", buf);
     read_log_msg(logmsg);
-    assert(strcmp(&logmsg[strlen(logmsg) - 3], "en\n") == 0);
+    assert(strlen(logmsg) == sizeof(buf) - 1);
+    assert(strncmp(logmsg, "(EE) ...", 8) == 0);
+    assert(strcmp(&logmsg[strlen(logmsg) - 2], ".\n") == 0);
 
     /* strings containing placeholders should just work */
     LogMessageVerb(X_ERROR, 1, "%s\n", str);
