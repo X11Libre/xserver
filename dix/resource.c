@@ -787,12 +787,9 @@ FakeClientID(int client)
 
     id = clientTable[client].fakeID++;
 
-    // extra paranoid protection, because many places expect 0 as
-    // sign for resource not existing
-    if (!id)
-        return FakeClientID(client);
-
-    if (id != clientTable[client].endFakeID)
+    // many places expect 0 as sign for resource not existing; a 0 here
+    // gets a fresh range below, which keeps the client bits
+    if (id && id != clientTable[client].endFakeID)
         return id;
     GetXIDRange(client, TRUE, &id, &maxid);
     if (!id) {
