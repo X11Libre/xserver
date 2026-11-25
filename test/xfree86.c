@@ -233,7 +233,7 @@ xfree86_platform_scan_no_busid(void)
     xf86_add_platform_device(attribs, FALSE);
 
     xf86PlatformScanPciDev();
-    assert(xf86_platform_devices[n].pdev == NULL);
+    assert(xf86_platform_devices[n]->pdev == NULL);
 
     xf86_remove_platform_device(n);
     assert(xf86_num_platform_devices == n);
@@ -307,6 +307,49 @@ xfree86_check_slot_gpu_screen(void)
 #endif
 }
 
+/*
+ * Entities and drivers keep pointers to platform devices, so a device must
+ * keep its address while other devices are added (the list grows) and
+ * removed (the list shrinks).
+ */
+static void
+xfree86_platform_device_stable(void)
+{
+#ifdef XSERVER_PLATFORM_BUS
+    enum { NDEV = 64 };
+    struct xf86_platform_device *devs[NDEV];
+    int base = xf86_num_platform_devices;
+    int i;
+
+    for (i = 0; i < NDEV; i++) {
+        struct OdevAttributes *attribs = config_odev_allocate_attributes();
+
+        attribs->major = 226;
+        attribs->minor = 100 + i;
+        xf86_add_platform_device(attribs, FALSE);
+        devs[i] = xf86_platform_devices[base + i];
+    }
+
+    /* adding grew the list many times; earlier devices didn't move */
+    for (i = 0; i < NDEV; i++) {
+        assert(xf86_platform_devices[base + i] == devs[i]);
+        assert(devs[i]->attribs->minor == 100 + i);
+    }
+
+    /* removing one from the middle doesn't move the others either */
+    xf86_remove_platform_device(base + NDEV / 2);
+    for (i = 0; i < NDEV; i++) {
+        if (i == NDEV / 2)
+            continue;
+        assert(xf86_find_platform_device_by_devnum(226, 100 + i) == devs[i]);
+        assert(devs[i]->attribs->minor == 100 + i);
+    }
+
+    while (xf86_num_platform_devices > base)
+        xf86_remove_platform_device(base);
+#endif
+}
+
 const testfunc_t*
 xfree86_test(void)
 {
@@ -316,6 +359,7 @@ xfree86_test(void)
         xfree86_edid_ds_ranges_array_bound,
         xfree86_platform_scan_no_busid,
         xfree86_check_slot_gpu_screen,
+        xfree86_platform_device_stable,
         NULL,
     };
     return testfuncs;

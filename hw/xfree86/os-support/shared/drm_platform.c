@@ -66,7 +66,7 @@ get_drm_info(struct OdevAttributes *attribs, char *path, int delayed_index)
     }
 
     if (server_fd)
-        xf86_platform_devices[delayed_index].flags |= XF86_PDEV_SERVER_FD;
+        xf86_platform_devices[delayed_index]->flags |= XF86_PDEV_SERVER_FD;
 
     v = drmGetVersion(fd);
     if (!v) {
