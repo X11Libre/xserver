@@ -84,6 +84,12 @@ static void
 reply_XIPassiveGrabDevice(ClientPtr client, int len, void *data)
 {
     xXIPassiveGrabDeviceReply *repptr = (xXIPassiveGrabDeviceReply *) data;
+
+    /* the empty extra data after a reply without modifiers; the server
+     * ignores zero-length writes too */
+    if (len == 0)
+        return;
+
     xXIPassiveGrabDeviceReply reply = *repptr; /* copy so swapping doesn't touch the real reply */
 
     assert(len < 0xffff); /* suspicious size, swapping bug */
