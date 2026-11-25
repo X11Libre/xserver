@@ -339,7 +339,7 @@ check_outputs(int fd, int *count)
 }
 
 static Bool
-probe_hw(const char *dev, struct xf86_platform_device *platform_dev)
+probe_hw(const char *dev, struct xf86_platform_device *platform_dev, char **node)
 {
     int fd;
 
@@ -356,6 +356,8 @@ probe_hw(const char *dev, struct xf86_platform_device *platform_dev)
     if (fd != -1) {
         int ret = check_outputs(fd, NULL);
 
+        if (ret && node)
+            *node = drmGetDeviceNameFromFd2(fd);
         ms_close_hw(fd);
         return ret;
     }
@@ -513,7 +515,7 @@ ms_platform_probe(DriverPtr driver,
     if (flags & PLATFORM_PROBE_GPU_SCREEN)
         scr_flags = XF86_ALLOCATE_GPU_SCREEN;
 
-    if (probe_hw(path, dev)) {
+    if (probe_hw(path, dev, NULL)) {
         scrn = xf86AllocateScreen(driver, scr_flags);
         if (xf86IsEntitySharable(entity_num))
             xf86SetEntityShared(entity_num);
@@ -553,11 +555,19 @@ Probe(DriverPtr drv, int flags)
     for (i = 0; i < numDevSections; i++) {
         int entity_num = -1;
         ScrnInfoPtr scrn = NULL;
+        char *node = NULL;
         const char *dev = xf86FindOptionValue(devSections[i]->options, "kmsdev");
 
-        if (probe_hw(dev, NULL)) {
+        if (probe_hw(dev, NULL, dev ? NULL : &node)) {
+            /* the slot check assumes card0 unless kmsdev names the probed node */
+            if (node) {
+                devSections[i]->options =
+                    xf86ReplaceStrOption(devSections[i]->options, "kmsdev", node);
+                dev = xf86FindOptionValue(devSections[i]->options, "kmsdev");
+            }
             entity_num = xf86ClaimFbSlot(drv, 0, devSections[i], TRUE);
         }
+        free(node);
 
         if (entity_num != -1) {
             scrn = xf86ConfigFbEntity(scrn, 0, entity_num, NULL, NULL, NULL, NULL);
