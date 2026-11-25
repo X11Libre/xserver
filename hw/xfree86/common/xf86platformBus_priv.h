@@ -10,12 +10,14 @@
 #ifdef XSERVER_PLATFORM_BUS
 
 extern int xf86_num_platform_devices;
-extern struct xf86_platform_device *xf86_platform_devices;
+/* each device is allocated on its own: entities and drivers keep pointers
+ * to it, so it must not move while the list changes */
+extern struct xf86_platform_device **xf86_platform_devices;
 
 static inline struct OdevAttributes *
 xf86_platform_odev_attributes(int index)
 {
-    struct xf86_platform_device *device = &xf86_platform_devices[index];
+    struct xf86_platform_device *device = xf86_platform_devices[index];
     return device->attribs;
 }
 
