@@ -468,6 +468,8 @@ xf86MergeOutputClassOptions(int entityIndex, void **options)
                        cl->identifier, dev->attribs->path);
 
         classopts = xf86optionListDup(cl->option_lst);
+        /* the server reads HotplugDriver itself; drivers never do */
+        xf86MarkOptionUsedByName(classopts, "HotplugDriver");
         *options = xf86optionListMerge(*options, classopts);
     }
 }
@@ -715,7 +717,7 @@ xf86PlatformFindHotplugDriver(int dev_index)
 
         hp_driver = xf86FindOptionValue(cl->option_lst, "HotplugDriver");
         if (hp_driver)
-            xf86MarkOptionUsed(cl->option_lst);
+            xf86MarkOptionUsedByName(cl->option_lst, "HotplugDriver");
     }
 
     /* Return the first driver from the match list */
