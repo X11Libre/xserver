@@ -1921,16 +1921,20 @@ modesetCreateScreenResources(ScreenPtr pScreen)
         pScrPriv->rrStartFlippingPixmapTracking = msStartFlippingPixmapTracking;
     }
 
-    if (ms->vrr_support &&
-        !dixRegisterPrivateKey(&ms->drmmode.vrrPrivateKeyRec,
-                               PRIVATE_WINDOW,
-                               sizeof(struct ms_vrr_priv)))
-            return FALSE;
+    /* window keys: a GPU screen has no windows, and when it is hot-added
+     * windows already exist, so registering them would fail */
+    if (!pScrn->is_gpu) {
+        if (ms->vrr_support &&
+            !dixRegisterPrivateKey(&ms->drmmode.vrrPrivateKeyRec,
+                                   PRIVATE_WINDOW,
+                                   sizeof(struct ms_vrr_priv)))
+                return FALSE;
 
-    if (!dixRegisterPrivateKey(&asyncFlipPrivateKeyRec,
-                               PRIVATE_WINDOW,
-                               sizeof(struct ms_async_flip_priv)))
-            return FALSE;
+        if (!dixRegisterPrivateKey(&asyncFlipPrivateKeyRec,
+                                   PRIVATE_WINDOW,
+                                   sizeof(struct ms_async_flip_priv)))
+                return FALSE;
+    }
 
     return ret;
 }
@@ -2367,7 +2371,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
 
     pScrn->vtSema = TRUE;
 
-    if (ms->vrr_support)
+    if (ms->vrr_support && !pScrn->is_gpu)
         pScreen->SetWindowVRRMode = msSetWindowVRRMode;
 
     return TRUE;
