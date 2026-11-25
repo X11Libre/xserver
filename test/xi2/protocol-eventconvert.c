@@ -31,6 +31,7 @@
 
 #include "dix/exevents_priv.h"
 #include "dix/eventconvert.h"
+#include "dix/extension_priv.h"
 #include "dix/inpututils_priv.h"
 
 #include "inputstr.h"
@@ -61,7 +62,7 @@ test_values_XIRawEvent(RawDeviceEvent *in, xXIRawEvent * out, BOOL swap)
     }
 
     assert(out->type == GenericEvent);
-    assert(out->extension == 0);        /* IReqCode defaults to 0 */
+    assert(out->extension == EXTENSION_MAJOR_XINPUT);
     assert(out->evtype == GetXI2Type(in->type));
     assert(out->time == in->time);
     assert(out->detail == in->detail.button);
@@ -302,7 +303,7 @@ test_values_XIDeviceEvent(DeviceEvent *in, xXIDeviceEvent * out, BOOL swap)
         swapl(&out->flags);
     }
 
-    assert(out->extension == 0);        /* IReqCode defaults to 0 */
+    assert(out->extension == EXTENSION_MAJOR_XINPUT);
     assert(out->evtype == GetXI2Type(in->type));
     assert(out->time == in->time);
     assert(out->detail == in->detail.button);
@@ -643,7 +644,7 @@ test_values_XIDeviceChangedEvent(DeviceChangedEvent *in,
     }
 
     assert(out->type == GenericEvent);
-    assert(out->extension == 0);        /* IReqCode defaults to 0 */
+    assert(out->extension == EXTENSION_MAJOR_XINPUT);
     assert(out->evtype == GetXI2Type(in->type));
     assert(out->time == in->time);
     assert(out->deviceid == in->deviceid);
@@ -967,7 +968,7 @@ test_values_XITouchOwnershipEvent(TouchOwnershipEvent *in,
     }
 
     assert(out->type == GenericEvent);
-    assert(out->extension == 0);        /* IReqCode defaults to 0 */
+    assert(out->extension == EXTENSION_MAJOR_XINPUT);
     assert(out->evtype == GetXI2Type(in->type));
     assert(out->time == in->time);
     assert(out->deviceid == in->deviceid);
@@ -1056,7 +1057,7 @@ test_XIBarrierEvent(BarrierEvent *in)
     rc = EventToXI2((InternalEvent*)in, (xEvent**)&out);
 
     assert(out->type == GenericEvent);
-    assert(out->extension == 0); /* IReqCode defaults to 0 */
+    assert(out->extension == EXTENSION_MAJOR_XINPUT);
     assert(out->evtype == GetXI2Type(in->type));
     assert(out->time == in->time);
     assert(out->deviceid == in->deviceid);
