@@ -711,7 +711,8 @@ xf86PlatformFindHotplugDriver(int dev_index)
     const char *hp_driver = NULL;
     struct xf86_platform_device *dev = xf86_platform_devices[dev_index];
 
-    for (cl = xf86configptr->conf_outputclass_lst; cl; cl = cl->list.next) {
+    for (cl = xf86configptr->conf_outputclass_lst; cl && !hp_driver;
+         cl = cl->list.next) {
         if (!OutputClassMatches(cl, dev) || !cl->option_lst)
 	    continue;
 

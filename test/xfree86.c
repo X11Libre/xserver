@@ -36,12 +36,13 @@
 #include "edid.h"
 
 #ifdef XSERVER_PLATFORM_BUS
+#include "xf86Config.h"
+#include "xf86Priv.h"
 #include "xf86platformBus_priv.h"
 #include "config/hotplug_priv.h"
 #endif
 #if defined(XSERVER_PLATFORM_BUS) && defined(XSERVER_LIBPCIACCESS)
 #include "xf86Bus.h"
-#include "xf86Priv.h"
 #endif
 
 #include "tests-common.h"
@@ -350,6 +351,49 @@ xfree86_platform_device_stable(void)
 #endif
 }
 
+/* The first matching OutputClass that sets HotplugDriver decides, and later
+ * matching classes don't reset it. */
+static void
+xfree86_hotplug_driver_first_match(void)
+{
+#ifdef XSERVER_PLATFORM_BUS
+    XF86ConfOutputClassRec first = { 0 }, second = { 0 };
+    XF86ConfigRec config = { 0 };
+    XF86ConfigPtr saved_config = xf86configptr;
+    const char *saved_layout = xf86ConfigLayout.id;
+    int index = xf86_num_platform_devices;
+    const char *hp_driver;
+
+    xorg_list_init(&first.match_driver);
+    xorg_list_init(&first.match_layout);
+    xorg_list_init(&second.match_driver);
+    xorg_list_init(&second.match_layout);
+    first.list.next = &second;
+    first.option_lst = xf86addNewOption(NULL, strdup("HotplugDriver"), strdup("amdgpu"));
+    second.option_lst = xf86addNewOption(NULL, strdup("PrimaryGPU"), strdup("off"));
+    config.conf_outputclass_lst = &first;
+    xf86configptr = &config;
+    xf86ConfigLayout.id = "(implicit)";
+    xf86_add_platform_device(config_odev_allocate_attributes(), FALSE);
+
+    /* a later class without HotplugDriver */
+    hp_driver = xf86PlatformFindHotplugDriver(index);
+    assert(hp_driver && !strcmp(hp_driver, "amdgpu"));
+
+    /* a later class with another HotplugDriver */
+    xf86optionListFree(second.option_lst);
+    second.option_lst = xf86addNewOption(NULL, strdup("HotplugDriver"), strdup("modesetting"));
+    hp_driver = xf86PlatformFindHotplugDriver(index);
+    assert(hp_driver && !strcmp(hp_driver, "amdgpu"));
+
+    xf86_remove_platform_device(index);
+    xf86optionListFree(first.option_lst);
+    xf86optionListFree(second.option_lst);
+    xf86configptr = saved_config;
+    xf86ConfigLayout.id = saved_layout;
+#endif
+}
+
 const testfunc_t*
 xfree86_test(void)
 {
@@ -360,6 +404,7 @@ xfree86_test(void)
         xfree86_platform_scan_no_busid,
         xfree86_check_slot_gpu_screen,
         xfree86_platform_device_stable,
+        xfree86_hotplug_driver_first_match,
         NULL,
     };
     return testfuncs;
