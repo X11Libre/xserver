@@ -18,8 +18,10 @@ InputDriverPtr xf86LookupInputDriver(const char *name);
 
 InputInfoPtr xf86LookupInput(const char *name);
 
+_X_EXPORT /* only for the in-tree inputtest module, not supposed to be used by OOT modules */
 void xf86AddInputEventDrainCallback(CallbackProcPtr callback, void *param);
 
+_X_EXPORT /* only for the in-tree inputtest module, not supposed to be used by OOT modules */
 void xf86RemoveInputEventDrainCallback(CallbackProcPtr callback, void *param);
 
 Bool MatchAttrToken(const char *attr, struct xorg_list *groups);
