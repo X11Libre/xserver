@@ -277,7 +277,7 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
             if (numFiles > 0)
                 ret = xf86getNextLine();
             else {
-                if (builtinConfig[builtinIndex] == NULL)
+                if (!builtinConfig || builtinConfig[builtinIndex] == NULL)
                     ret = NULL;
                 else {
                     strlcpy(configBuf,
@@ -780,11 +780,13 @@ OpenConfigDir(const char *path, const char *cmdline, const char *projroot,
 
         /* match files named *.conf */
         num = scandir(dirpath, &list, ConfigFilter, alphasort);
+        /* a directory named on the command line counts even when empty */
+        found = cmdline && num >= 0;
         if (num < 0) {
             list = NULL;
             num = 0;
         }
-        found = AddConfigDirFiles(dirpath, list, num);
+        found = AddConfigDirFiles(dirpath, list, num) || found;
         if (!found) {
             free(dirpath);
             dirpath = NULL;

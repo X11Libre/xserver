@@ -29,9 +29,10 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "xf86.h"
-#include "xf86Parser.h"
+#include "xf86Parser_priv.h"
 #include "xf86DDC_priv.h"
 #include "edid.h"
 
@@ -394,6 +395,36 @@ xfree86_hotplug_driver_first_match(void)
 #endif
 }
 
+/* An existing config directory named on the command line is used even when
+ * it has no config files, and reading it alone gives an empty config. */
+static void
+xfree86_empty_configdir(void)
+{
+    char template[] = "configdir-XXXXXX";
+    char *dir, *opened;
+    XF86ConfigPtr config;
+
+    assert(mkdtemp(template));
+    dir = realpath(template, NULL);
+    assert(dir);
+
+    xf86initConfigFiles();
+    opened = xf86openConfigDirFiles("%A", dir, NULL);
+    assert(opened && !strcmp(opened, dir));
+    config = xf86readConfigFile();
+    assert(config);
+    assert(!config->conf_device_lst && !config->conf_screen_lst);
+    xf86freeConfig(config);
+    xf86closeConfigFile();
+    free(opened);
+
+    assert(rmdir(dir) == 0);
+    xf86initConfigFiles();
+    assert(!xf86openConfigDirFiles("%A", dir, NULL));
+    xf86closeConfigFile();
+    free(dir);
+}
+
 const testfunc_t*
 xfree86_test(void)
 {
@@ -405,6 +436,7 @@ xfree86_test(void)
         xfree86_check_slot_gpu_screen,
         xfree86_platform_device_stable,
         xfree86_hotplug_driver_first_match,
+        xfree86_empty_configdir,
         NULL,
     };
     return testfuncs;
