@@ -2409,11 +2409,24 @@ xf86HandleConfigFile(Bool autoconfig)
      * And while we are at it, we'll decode the rest of the stuff as well
      */
 
-    /* Global server options should go first, e.g., GPU devices probing depends on this */
-    configServerFlags(xf86configptr->conf_flags, xf86ConfigLayout.options);
-
     /* Check if a layout section is present, and if it is valid. */
     FIND_SUITABLE(XF86ConfLayoutPtr, xf86configptr->conf_layout_lst, layout);
+
+    /* Global server options should go first, e.g., GPU devices probing depends on this.
+     * configLayout() hasn't run yet, so find the layout it will pick for its options. */
+    XF86ConfLayoutPtr active_layout = NULL;
+
+    if (layout != NULL && xf86ScreenName == NULL) {
+        const char *name = xf86LayoutName;
+
+        if (!name && xf86configptr->conf_flags)
+            name = xf86FindOptionValue(xf86configptr->conf_flags->flg_option_lst,
+                                       "DefaultServerLayout");
+        active_layout = name ? xf86findLayout(name, layout) : layout;
+    }
+    configServerFlags(xf86configptr->conf_flags,
+                      active_layout ? active_layout->lay_option_lst : NULL);
+
     if (layout == NULL || xf86ScreenName != NULL) {
         XF86ConfScreenPtr screen;
 
