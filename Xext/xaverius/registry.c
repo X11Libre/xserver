@@ -85,11 +85,15 @@ RESTYPE XaveriusPhysicalDeviceType = 0;
  */
 int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
 {
+    XaveriusPhysicalDeviceDIXWrapper *wrapper = value;
+
     /* The DIX destructor must not modify XaveriusPhysicalDeviceType (the
-     * resource type ID). It only acknowledges the resource destruction.
-     * The PhysicalDevice record remains owned by the registry until
-     * explicit removal via XaveriusRegistryFini() or removal path. */
-    (void)value;
+     * resource type ID). It releases only the DIX wrapper reference. The
+     * PhysicalDevice record remains owned by the registry until explicit
+     * removal via XaveriusRegistryFini() or removal path. */
+    if (wrapper != NULL) {
+        free(wrapper);
+    }
     (void)xid;
     return 1;
 }
@@ -157,11 +161,40 @@ void XaveriusRegistryFini(void)
     struct _XaveriusDiscoverySource *src, *next_src;
     XaveriusObservation *obs, *next_obs;
 
-    /* Free all active and tombstoned PhysicalDevice records. The DIX
-     * wrapper resource is released explicitly if published; DIX destruction
-     * must not free registry identity/binding ownership. XIDs remain assigned
-     * to their incarnation until shutdown (no reuse). */
+    /* Step 1: Close admission on all roles — stop new callbacks. */
+    xorg_list_for_each_entry(role, &xaverius_module_roles, list) {
+        role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_CLOSED;
+    }
+
+    /* Step 2: Stop discovery sources — release discovery source records
+     * before role finalization so no new observations can be registered
+     * during quiescence. */
+    xorg_list_for_each_entry_safe(src, next_src, &xaverius_discovery_sources, list) {
+        xorg_list_del(&src->list);
+        free((void *)src->source_key);
+        free(src);
+    }
+    xaverius_discovery_source_count = 0;
+
+    /* Step 3: Quiesce all roles — drain accepted callbacks/operations.
+     * Record result in quiesce_state for later use. PENDING/FAILURE roles
+     * are retained/quarantined — their code and references stay. */
+    xorg_list_for_each_entry(role, &xaverius_module_roles, list) {
+        XaveriusModuleQuiescenceResult qr = XaveriusModuleRoleQuiesce(role);
+        if (qr == XAVERIUS_MODULE_QUIESCE_SUCCESS)
+            role->quiesce_state = XAVERIUS_MODULE_QUIESCE_SUCCESS;
+        else if (qr == XAVERIUS_MODULE_QUIESCE_FAILURE)
+            role->quiesce_state = XAVERIUS_MODULE_QUIESCE_FAILURE;
+        /* PENDING/ACTIVE: leave state unchanged — role is retained. */
+    }
+
+    /* Step 4: Release devices/bindings only for successfully quiesced roles.
+     * PENDING/FAILURE roles retain code and references. */
     xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_physical_devices, list) {
+        if (dev->binding != NULL && dev->binding->module_role != NULL &&
+            dev->binding->module_role->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS) {
+            continue; /* Role not quiesced — retain/quarantine device. */
+        }
         xorg_list_del(&dev->list);
         if (dev->xid != 0) {
             FreeResource(dev->xid, RT_NONE);
@@ -176,6 +209,10 @@ void XaveriusRegistryFini(void)
     xaverius_physical_device_count = 0;
 
     xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_tombstones, list) {
+        if (dev->binding != NULL && dev->binding->module_role != NULL &&
+            dev->binding->module_role->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS) {
+            continue; /* Role not quiesced — retain/quarantine tombstone. */
+        }
         xorg_list_del(&dev->list);
         if (dev->xid != 0) {
             FreeResource(dev->xid, RT_NONE);
@@ -189,20 +226,14 @@ void XaveriusRegistryFini(void)
     }
     xaverius_tombstone_count = 0;
 
-    /* Finalize remaining module roles through the canonical finalize path so
-     * the module-owner release hook is invoked exactly once per remaining
-     * role and registry storage is released consistently. */
+    /* Step 5: Finalize only successfully quiesced roles. PENDING/FAILURE/
+     * ACTIVE roles are retained/quarantined — their code and references stay. */
     xorg_list_for_each_entry_safe(role, next_role, &xaverius_module_roles, list) {
+        if (role->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS) {
+            continue; /* PENDING/FAILURE/ACTIVE — retain/quarantine role. */
+        }
         XaveriusModuleRoleFinalize(role);
     }
-    xaverius_module_role_count = 0;
-
-    xorg_list_for_each_entry_safe(src, next_src, &xaverius_discovery_sources, list) {
-        xorg_list_del(&src->list);
-        free((void *)src->source_key);
-        free(src);
-    }
-    xaverius_discovery_source_count = 0;
 
     xorg_list_for_each_entry_safe(obs, next_obs, &xaverius_observations, list) {
         xorg_list_del(&obs->list);
@@ -330,6 +361,9 @@ XaveriusRegistryResult XaveriusModuleRoleCreate(
     role->role_generation = xaverius_next_generation_id();
     role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_OPEN;
     role->quiesce_state = XAVERIUS_MODULE_QUIESCE_ACTIVE;
+    role->exec_ref = 0;
+    role->callback_admission_open = 1;
+    role->quarantined = 0;
     role->retain_module_role = desc->retain_module_role;
     role->release_module_role = desc->release_module_role;
     role->quiesce_module_role = desc->quiesce_module_role;
@@ -367,6 +401,42 @@ void XaveriusModuleRoleRelease(XaveriusModuleRole *role)
     r->release_module_role(r);
 }
 
+/* Acquire a callback-execution reference before entering DDX backend module
+ * code. A quarantined role rejects new execution references. */
+void XaveriusModuleRoleAcquireExecRef(XaveriusModuleRole *role)
+{
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
+
+    if (r == NULL || r->quarantined)
+        return;
+
+    r->exec_ref++;
+}
+
+/* Release a callback-execution reference after XaveriusBackendCompletionDispatch
+ * has copied/enqueued the immutable completion and returned. */
+void XaveriusModuleRoleReleaseExecRef(XaveriusModuleRole *role)
+{
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
+
+    if (r == NULL || r->exec_ref == 0)
+        return;
+
+    r->exec_ref--;
+}
+
+/* Close admission for callbacks. Atomically marks the role as not accepting
+ * new callbacks; does not cancel accepted operations. */
+void XaveriusModuleRoleAdmissionClose(XaveriusModuleRole *role)
+{
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
+
+    if (r == NULL)
+        return;
+
+    r->callback_admission_open = 0;
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wreturn-type"
 XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *role)
@@ -377,15 +447,46 @@ XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *rol
         return XAVERIUS_MODULE_QUIESCE_FAILURE;
 
     /* Returns PENDING/SUCCESS/FAILURE. */
-    return r->quiesce_module_role(r);
+    XaveriusModuleQuiescenceResult qr = r->quiesce_module_role(r);
+
+    if (qr == XAVERIUS_MODULE_QUIESCE_SUCCESS)
+        r->quiesce_state = XAVERIUS_MODULE_QUIESCE_SUCCESS;
+    else if (qr == XAVERIUS_MODULE_QUIESCE_FAILURE)
+        r->quiesce_state = XAVERIUS_MODULE_QUIESCE_FAILURE;
+    /* PENDING/ACTIVE: leave state unchanged — role is retained. */
+
+    return qr;
 }
 #pragma GCC diagnostic pop
+
+/* Quarantine the role. A quarantined role cannot be unloaded; its code and
+ * references are retained until server shutdown or a later proven-safe
+ * retirement. */
+void XaveriusModuleRoleQuarantine(XaveriusModuleRole *role)
+{
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
+
+    if (r == NULL)
+        return;
+
+    r->quarantined = 1;
+}
 
 void XaveriusModuleRoleFinalize(XaveriusModuleRole *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
     if (r == NULL)
+        return;
+
+    /* A quarantined role cannot be finalized; it is retained until server
+     * shutdown or a later proven-safe retirement. */
+    if (r->quarantined)
+        return;
+
+    /* A role with active callback-execution references cannot be finalized;
+     * DDX backend code may still be executing. */
+    if (r->exec_ref > 0)
         return;
 
     /* Finalization releases the module owner's original role reference via
@@ -687,17 +788,21 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     if (registration == NULL || out_device == NULL || registration->ops == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    /* Validate descriptor header before reading later fields. */
-    if (registration->struct_size < sizeof(*registration) ||
-        registration->abi_version != XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION)
+    /* Validate descriptor header before reading later fields.
+     * Normative: any v1 size mismatch (undersized OR oversized) is
+     * INVALID_ARGUMENT; unknown ABI version is UNSUPPORTED. */
+    if (registration->struct_size != sizeof(*registration))
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+    if (registration->abi_version != XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION)
+        return XAVERIUS_REGISTRY_UNSUPPORTED;
 
     /* Validate the top-level ops descriptor header before reading callback
      * fields and before any Hook/Lease side effect. Invalid descriptors
      * must cause neither callback invocation nor lease retention. */
-    if (registration->ops->struct_size < sizeof(*registration->ops) ||
-        registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
+    if (registration->ops->struct_size != sizeof(*registration->ops))
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+    if (registration->ops->abi_version != XAVERIUS_DEVICE_BACKEND_OPS_ABI_VERSION)
+        return XAVERIUS_REGISTRY_UNSUPPORTED;
 
     /* query_physical_snapshot is required for registration. Validate before
      * allocating/retaining binding-side resources. */
@@ -783,9 +888,11 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
                      * rank → ambiguous). New binding not selected. */
                     return XAVERIUS_REGISTRY_AMBIGUOUS;
                 }
-                /* New binding wins: replace existing binding. */
-                xaverius_binding_free(existing->binding);
-                existing->binding = NULL;
+                /* New binding wins: defer replacement until after the
+                 * provisional binding is fully validated. Never replace a
+                 * published binding (dev->xid != 0). */
+                if (existing->xid != 0)
+                    return XAVERIUS_REGISTRY_AMBIGUOUS;
                 is_replacement = 1;
             }
         }
@@ -854,10 +961,13 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
      * until after snapshot validation succeeds (failure-atomic installation). */
 
     /* Query the physical snapshot through the exact provisional binding's
-     * query_physical_snapshot callback. */
-    snap_result = registration->ops->query_physical_snapshot(
-        binding, &dev->snapshot);
+     * query_physical_snapshot callback. Write into a temporary snapshot so
+     * the callback-owned memory is never freed before being deep-copied
+     * into server-owned storage (avoids use-after-free). */
+    XaveriusPhysicalDeviceSnapshot snap = { 0 };
+    snap_result = registration->ops->query_physical_snapshot(binding, &snap);
     if (snap_result != XAVERIUS_BACKEND_SUCCESS) {
+        free(snap.data);
         xaverius_binding_free(binding);
         if (existing == NULL) {
             free(dev->identity_evidence);
@@ -873,7 +983,8 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
      * - UUID-Validierung
      * - Queue/Memory-Konsistenz prüfen
      * - timelineSemaphore = 1 ist verpflichtend */
-    if (dev->snapshot.data == NULL || dev->snapshot.size == 0) {
+    if (snap.data == NULL || snap.size == 0) {
+        free(snap.data);
         xaverius_binding_free(binding);
         if (existing == NULL) {
             free(dev->identity_evidence);
@@ -884,8 +995,9 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
 
     /* Deep copy snapshot data into server-owned immutable storage */
     {
-        void *snapshot_copy = calloc(1, dev->snapshot.size);
+        void *snapshot_copy = calloc(1, snap.size);
         if (snapshot_copy == NULL) {
+            free(snap.data);
             xaverius_binding_free(binding);
             if (existing == NULL) {
                 free(dev->identity_evidence);
@@ -893,11 +1005,10 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
             }
             return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
         }
-        if (dev->snapshot.data != NULL) {
-            free(dev->snapshot.data);
-        }
-        memcpy(snapshot_copy, dev->snapshot.data, dev->snapshot.size);
+        memcpy(snapshot_copy, snap.data, snap.size);
+        free(snap.data);
         dev->snapshot.data = snapshot_copy;
+        dev->snapshot.size = snap.size;
     }
 
     /* Install binding into device BEFORE registry insertion - the device
@@ -911,16 +1022,20 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     } else {
         /* Re-registration: mutate existing device atomically now that all
          * validation has succeeded. No partial state is visible on failure.
-         * For a preference-driven binding replacement (is_replacement), set a
-         * fresh caller reference instead of incrementing, since this is a new
-         * selection through a different role, not a replay. */
+         * For a preference-driven binding replacement (is_replacement), free
+         * the old binding (kept intact during validation), set a fresh caller
+         * reference instead of incrementing, since this is a new selection
+         * through a different role, not a replay. */
         if (is_replacement) {
+            xaverius_binding_free(dev->binding);
+            dev->binding = NULL;
             dev->caller_refcount = 1;
         } else {
             dev->caller_refcount++;
         }
         dev->device_generation = xaverius_next_generation_id();
         binding->binding_generation = dev->device_generation;
+        dev->binding = binding;
     }
 
     *out_device = dev;
@@ -1294,31 +1409,52 @@ XaveriusRegistryResult XaveriusRegistryConfirmDeviceRemoved(
 /* XaveriusPhysicalDevicePublish — separate server-internal publication operation
  * Allocates a server-private XID, prepares the DIX wrapper, and
  * atomically exposes it once AddResource() succeeds. */
-bool XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev)
+XaveriusRegistryResult XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev,
+                                                     uint64_t device_generation,
+                                                     XID *out_xid)
 {
     XID xid;
 
     if (dev == NULL || XaveriusPhysicalDeviceType == 0)
-        return false;
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
     /* Publication is separate from registration and must happen at most once.
      * A published (or tombstoned) device retains its XID for the server lifetime. */
     if (dev->xid != 0)
-        return false;
+        return XAVERIUS_REGISTRY_ALREADY_EXISTS;
+
+    /* Validate device_generation matches the current incarnation. */
+    if (dev->device_generation != device_generation)
+        return XAVERIUS_REGISTRY_STALE_GENERATION;
 
     /* Allocate/reserve the XID using the established Xorg resource/XID rules.
      * Publication is separate from registration: no XID is allocated during
      * registration itself. */
     xid = dixAllocServerXID();
     if (xid == 0)
-        return false;
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+
+    /* Allocate DIX wrapper — separate server-private object referenced by the
+     * DIX resource DB. The registry retains ownership of the PhysicalDevice
+     * record itself; the wrapper only holds a back-reference. */
+    XaveriusPhysicalDeviceDIXWrapper *wrapper =
+        calloc(1, sizeof(*wrapper));
+    if (wrapper == NULL) {
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+    }
+    wrapper->dev = dev;
 
     /* Register the resource exactly once with the PhysicalDevice resource
      * type and its canonical destructor. Only persist the XID after
      * successful resource registration so registry and DIX stay consistent. */
-    if (!AddResource(xid, XaveriusPhysicalDeviceType, dev))
-        return false;
+    if (!AddResource(xid, XaveriusPhysicalDeviceType, wrapper)) {
+        free(wrapper);
+        return XAVERIUS_REGISTRY_INTERNAL_ERROR;
+    }
 
     dev->xid = xid;
-    return true;
+    if (out_xid != NULL)
+        *out_xid = xid;
+
+    return XAVERIUS_REGISTRY_SUCCESS;
 }

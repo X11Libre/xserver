@@ -348,7 +348,8 @@ xaverius_registry_registration_paths(void)
 
     setup_min_reg(&reg, &id, &ops, role);
     reg.abi_version = XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION + 1;
-    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_INVALID_ARGUMENT);
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_UNSUPPORTED);
     assert(test_retain_calls == 0 && test_release_calls == 0);
 
     reg.abi_version = XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION;
@@ -479,23 +480,27 @@ xaverius_registry_publish_dix(void)
     assert(XaveriusRegistryObserveDevice(NULL, source, 1, 1, &id,
                                          &dev, &dev_gen, &obs_id) == XAVERIUS_REGISTRY_SUCCESS);
 
-    assert(XaveriusPhysicalDevicePublish(dev) == true);
-    assert(dev->xid != 0);
-    res = NULL;
-    rc = dixLookupResourceByType(&res, dev->xid, XaveriusPhysicalDeviceType,
-                                 serverClient, DixReadAccess);
-    assert(rc == Success);
-    assert(res == dev);
+    {
+        XID pub_xid = 0;
+        assert(XaveriusPhysicalDevicePublish(dev, dev_gen, &pub_xid) == XAVERIUS_REGISTRY_SUCCESS);
+        assert(dev->xid != 0);
+        assert(pub_xid == dev->xid);
+        res = NULL;
+        rc = dixLookupResourceByType(&res, dev->xid, XaveriusPhysicalDeviceType,
+                                     serverClient, DixReadAccess);
+        assert(rc == Success);
+        assert(((XaveriusPhysicalDeviceDIXWrapper *)res)->dev == dev);
+    }
 
     {
         XID old = dev->xid;
-        assert(XaveriusPhysicalDevicePublish(dev) == false);
+        assert(XaveriusPhysicalDevicePublish(dev, dev_gen, &old) == XAVERIUS_REGISTRY_ALREADY_EXISTS);
         assert(dev->xid == old);
         res = NULL;
         rc = dixLookupResourceByType(&res, dev->xid, XaveriusPhysicalDeviceType,
                                      serverClient, DixReadAccess);
         assert(rc == Success);
-        assert(res == dev);
+        assert(((XaveriusPhysicalDeviceDIXWrapper *)res)->dev == dev);
     }
 
     reset_hook_counts();
@@ -576,7 +581,7 @@ xaverius_registry_registration_contract(void)
         XaveriusPhysicalDevice *deve = NULL;
         uint64_t dge = 0, bge = 0;
         uint32_t count_before = xaverius_physical_device_count;
-        assert(XaveriusRegistryRegisterDdxDevice(NULL, &bad, &deve, &dge, &bge) == XAVERIUS_REGISTRY_INVALID_ARGUMENT);
+        assert(XaveriusRegistryRegisterDdxDevice(NULL, &bad, &deve, &dge, &bge) == XAVERIUS_REGISTRY_UNSUPPORTED);
         assert(deve == NULL);
         assert(xaverius_physical_device_count == count_before);
     }

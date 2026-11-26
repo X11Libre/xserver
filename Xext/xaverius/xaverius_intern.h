@@ -338,6 +338,9 @@ struct _XaveriusModuleRole {
     uint64_t role_generation;
     uint32_t admission;                /* open / quiescing / closed */
     uint32_t quiesce_state;            /* PENDING / SUCCESS / FAILURE */
+    uint32_t exec_ref;                 /* active callback-execution references */
+    uint32_t callback_admission_open;  /* callback admission gate */
+    uint32_t quarantined;              /* role is quarantined */
     void (*retain_module_role)(XaveriusModuleRole *role);
     void (*release_module_role)(XaveriusModuleRole *role);
     XaveriusModuleQuiescenceResult (*quiesce_module_role)(XaveriusModuleRole *role);
@@ -371,21 +374,51 @@ typedef enum {
 
 /* Create / retain / release / quiesce / finalize a ModuleRole control record.
  * These are infallible, non-blocking lifetime primitives except XaveriusModuleRoleCreate
- * which may fail on allocation/validation before any retain. */
+ * which may fail on allocation/validation before any retain.
+ *
+ * Generation-checked callback admission: XaveriusModuleRoleAcquireCallbackRef()
+ * acquires an execution reference before entering DDX backend module code;
+ * XaveriusModuleRoleReleaseExecRef() releases it. Quiescence SUCCESS requires
+ * exec_ref == 0 (no callback executing). XaveriusModuleRoleQuarantine() marks
+ * the role as quarantined; a quarantined role cannot be unloaded.
+ */
 XaveriusRegistryResult XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
-                                      XaveriusModuleRole **out_role);
+                                       XaveriusModuleRole **out_role);
 void XaveriusModuleRoleRetain(XaveriusModuleRole *role);
 void XaveriusModuleRoleRelease(XaveriusModuleRole *role);
 XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *role);
 void XaveriusModuleRoleFinalize(XaveriusModuleRole *role);
 
-/* Is admission still open for this role? */
+/* Callback-execution reference management. Acquire before entering DDX backend
+ * module code; release after XaveriusBackendCompletionDispatch returns. */
+void XaveriusModuleRoleAcquireExecRef(XaveriusModuleRole *role);
+void XaveriusModuleRoleReleaseExecRef(XaveriusModuleRole *role);
+
+/* Admission gate for callbacks. XaveriusModuleRoleAdmissionClose() atomically
+ * marks the role as not accepting new callbacks; it does not cancel accepted
+ * operations. XaveriusModuleRoleAdmissionOpen() queries the current state. */
+void XaveriusModuleRoleAdmissionClose(XaveriusModuleRole *role);
 bool XaveriusModuleRoleAdmissionOpen(XaveriusModuleRole *role);
+
+/* Quarantine the role. A quarantined role cannot be unloaded and its code
+ * and references are retained until server shutdown or a later proven-safe
+ * retirement. */
+void XaveriusModuleRoleQuarantine(XaveriusModuleRole *role);
+
+/* ---- XaveriusPhysicalDeviceDIXWrapper — server-private DIX wrapper object.
+ * The DIX resource DB holds a wrapper; the registry retains ownership of the
+ * PhysicalDevice record itself. Freeing the wrapper (via XaveriusPhysicalDeviceDIXDestroy)
+ * releases only DIX-side ownership, never registry membership or tombstone state. */
+typedef struct _XaveriusPhysicalDeviceDIXWrapper {
+    XaveriusPhysicalDevice *dev;
+} XaveriusPhysicalDeviceDIXWrapper;
 
 /* ---- XaveriusPhysicalDevicePublish — separate server-internal publication operation.
  * Allocates a server-private XID, prepares the DIX wrapper, and atomically
  * exposes it once AddResource() succeeds. */
-bool XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev);
+XaveriusRegistryResult XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev,
+                                                     uint64_t device_generation,
+                                                     XID *out_xid);
 
 /* DIX resource destructor — canonical path, runs exactly once per published record. */
 int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid);

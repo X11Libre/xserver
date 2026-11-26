@@ -20,7 +20,7 @@
 | **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link against installed headers) | ✅ PASS |
 | **Build/CI** | N/A | Meson option `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
 
-**Overall Verdict:** **ACCEPTED** — All four stages fully implemented, ABI-v1 conformant, unit-tested, builds cleanly.
+**Overall Verdict:** **PENDING / NOT ACCEPTED** — All four stages implemented but review blockers 1–8 remain open; exact-head CI not yet run; fixes applied but not yet independently verified at origin HEAD.
 
 ---
 
@@ -266,14 +266,14 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `51982623f308653c189b1d9c6376028f27a75516` (origin) + W0-153 item 6 fixes |
+| **HEAD** | `7491d8c1d49eedd41be10abf5984f64132e28c80` (local intermediate on top of origin `9cc27e103`) |
 | **Branch** | `wip/xaverius` |
-| **Build Status** | ✅ Clean (`ninja -C build-xaverius` with `-Dwerror=true`, all targets link) |
-| **Unit Tests** | ✅ All 28 xaverius test functions pass (21 registry + 7 protocol); pre-existing `signal_logging_test` FAIL unrelated to xaverius |
-| **ABI-v1** | ✅ Conformant — `XaveriusDeviceBackendOps` header reconciled (W0-153 item 6): uint32_t struct_size/abi_version, const-qualified nested ops pointers, typed callback signatures, two-argument query_physical_snapshot unchanged |
-| **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes |
-| **Blockers** | None |
+| **Build Status** | ✅ Clean (`ninja -C build-xaverius -Dwerror=true`, all targets link, exit 0) |
+| **Unit Tests** | ✅ All 21 registry tests + 7 QV tests pass; pre-existing `signal_logging_test` FAIL unrelated to xaverius |
+| **ABI-v1** | ✅ Conformant — header reconciled (uint32_t fields, const nested ops, typed callback signatures), fix verified by build + tests |
+| **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes. screen.c/dispatch.c untouched. |
+| **Blockers** | Fixed in local code but pending independent verification — all 8 review blockers addressed in local worktree (7491d8c1d4); fixes not yet committed to origin; exact-head CI not yet run |
 
 ---
 
-**Sign-off:** Defiant — audit complete, acceptance matrix delivered. Ready for Enterprise review.
+**Sign-off:** Defiant — acceptance matrix set to PENDING/NOT ACCEPTED until all blockers are fixed and independently verified.
