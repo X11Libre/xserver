@@ -1150,16 +1150,19 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
 
 #if XTRANS_SEND_FDS
 
-static void
+static int
 appendFd(struct _XtransConnFd **prev, int fd, int do_close)
 {
     struct _XtransConnFd *cf, *new;
 
     new = malloc (sizeof (struct _XtransConnFd));
     if (!new) {
-        /* XXX mark connection as broken */
-        ossock_close(fd);
-        return;
+        /*
+         * The caller still owns fd when queueing fails.  In particular,
+         * SendFd() callers close their fd on error.
+         */
+        errno = ENOMEM;
+        return -1;
     }
     new->next = 0;
     new->fd = fd;
@@ -1167,6 +1170,7 @@ appendFd(struct _XtransConnFd **prev, int fd, int do_close)
     /* search to end of list */
     for (; (cf = *prev); prev = &(cf->next));
     *prev = new;
+    return 0;
 }
 
 static int
@@ -1227,8 +1231,7 @@ static int _XSERVTransSocketRecvFd (XtransConnInfo ciptr)
 static int _XSERVTransSocketSendFd (
     XtransConnInfo ciptr, int fd, int do_close)
 {
-    appendFd(&ciptr->send_fds, fd, do_close);
-    return 0;
+    return appendFd(&ciptr->send_fds, fd, do_close);
 }
 
 static int _XSERVTransSocketRecvFdInvalid(XtransConnInfo ciptr)
@@ -1293,8 +1296,42 @@ static int _XSERVTransSocketRead (
                     int i;
                     int *fd = (int *) CMSG_DATA(hdr);
 
-                    for (i = 0; i < nfd; i++)
-                        appendFd(&ciptr->recv_fds, fd[i], 0);
+                    for (i = 0; i < nfd; i++) {
+                        if (appendFd(&ciptr->recv_fds, fd[i], 0) < 0) {
+                            struct cmsghdr *next_hdr;
+                            int j;
+                            int save_errno = errno;
+
+                            /*
+                             * The descriptors already queued are owned by
+                             * recv_fds.  Close them, the descriptor whose
+                             * allocation failed, and every remaining
+                             * descriptor delivered by this recvmsg().
+                             */
+                            for (j = i; j < nfd; j++)
+                                ossock_close(fd[j]);
+
+                            for (next_hdr = CMSG_NXTHDR(&msg, hdr);
+                                 next_hdr;
+                                 next_hdr = CMSG_NXTHDR(&msg, next_hdr)) {
+                                if (next_hdr->cmsg_level == SOL_SOCKET &&
+                                    next_hdr->cmsg_type == SCM_RIGHTS) {
+                                    int next_nfd =
+                                        (next_hdr->cmsg_len - CMSG_LEN(0)) /
+                                        sizeof(int);
+                                    int *next_fd =
+                                        (int *) CMSG_DATA(next_hdr);
+
+                                    for (j = 0; j < next_nfd; j++)
+                                        ossock_close(next_fd[j]);
+                                }
+                            }
+
+                            discardFd(&ciptr->recv_fds, NULL, 1);
+                            errno = save_errno;
+                            return -1;
+                        }
+                    }
                 }
             }
         }

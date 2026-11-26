@@ -203,6 +203,7 @@ if build_xorg
      'tests-common.c',
      'tests.c',
      'touch.c',
+     'xtrans-fd-alloc.c',
      'xfree86.c',
      'xtest.c',
      'ddc-tests.c',
@@ -243,6 +244,7 @@ if build_xorg
         '-Wl,-wrap,XISetEventMask',
         '-Wl,-wrap,AddResource',
         '-Wl,-wrap,GrabButton',
+        '-Wl,-wrap,malloc',
        ]
     else
        ldwraps = []

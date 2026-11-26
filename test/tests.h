@@ -35,6 +35,7 @@ const testfunc_t* signal_logging_test(void);
 const testfunc_t* string_test(void);
 const testfunc_t* touch_test(void);
 const testfunc_t* xfree86_test(void);
+const testfunc_t* xtrans_fd_alloc_test(void);
 const testfunc_t* xkb_test(void);
 const testfunc_t* xtest_test(void);
 const testfunc_t* protocol_xchangedevicecontrol_test(void);
