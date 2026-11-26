@@ -1112,6 +1112,8 @@ jobs:
 
     check-sign-off:
         name: Check Signed-Off-By
+        permissions:
+            pull-requests: write
         if: github.event_name == 'pull_request'
         runs-on: ubuntu-latest
         env:
