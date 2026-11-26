@@ -1369,11 +1369,11 @@ The module specified by
 will be loaded during setup of the GPU device.
 If loading of this module fails or there is no driver by that name, the
 modesetting driver will be used, which is the default behavior.
-If multiple output devices match an
+If more than one
 .B OutputClass
-section with the
+section matching the device sets the
 .B HotplugDriver
-option, the first one enumerated becomes the hotplug driver.
+option, the first of them is used.
 .RE
 .PP
 .TP 7
