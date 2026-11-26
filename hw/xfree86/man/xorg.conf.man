@@ -1180,22 +1180,21 @@ and
 directives. These NoMatch directives match if the subsequent match is not
 met by the device.
 .PP
-To apply more sophicticated conditions, an entire attribute can be matched
+To apply more sophisticated conditions, an entire attribute can be matched
 against an extended regular expression (see
 .BR regex (7)
 or
-.BR re_format (7)
-):
+.BR re_format (7)):
 .PP
 .RS 4
 .nf
-.B  "    # product string must start with Experimental
-.B  "    # and end with Device
-.B  "    MatchProduct \*q~_^Experimental.*Device$_\*q"
+.B  "    # product string must start with Experimental"
+.B  "    # and end with Device"
+.B  "    MatchProduct \*q\(ti_\(haExperimental.*Device$_\*q"
 .fi
 .RE
 .PP
-Such a pattern is prefixed with '~', and the next character, which
+Such a pattern is prefixed with '\(ti', and the next character, which
 may be arbitrary, is used as a two-side delimiter, i.e. the regular
 expression starts after it and lasts until its next occurrence, or to
 the end of the argument, if the delimiting character has not been found
@@ -1207,8 +1206,8 @@ in one line, e.g.,
 .RS 4
 .nf
 .B  "    # accept product names that either do not end with \*qMouse\*q"
-.B  "    # or contain \*qUSB\*q" and \*qReceiver\*q"
-.B  "    MatchProduct \*q!~@Mouse$@|USB&Receiver\*q"
+.B  "    # or contain \*qUSB\*q and \*qReceiver\*q"
+.B  "    MatchProduct \*q!\(ti@Mouse$@|USB&Receiver\*q"
 .fi
 .RE
 .PP
@@ -1298,13 +1297,11 @@ checked against all
 .B OutputClass
 sections.
 Each section can contain optional entries to narrow the match of the class.
-.RE
 .TP 7
 .BI "MatchDriver \*q" matchdriver \*q
 Check the case-sensitive string
 .RI \*q matchdriver \*q
 against the kernel driver of the device.
-.RE
 .TP 7
 .BI "MatchLayout \*q" matchlayout \*q
 Check the case-sensitive string
@@ -1312,9 +1309,9 @@ Check the case-sensitive string
 against the currently active
 .B ServerLayout
 section or against
-.RI \*q\*q
-, if no named
-.B ScreenLayout
+.RI \*q\*q ,
+if no named
+.B ServerLayout
 sections are present.
 .PP
 If none of the optional entries appear, the
@@ -1374,9 +1371,7 @@ If more than one
 section matching the device sets the
 .B HotplugDriver
 option, the first of them is used.
-.RE
 .PP
-.TP 7
 An
 .B OutputClass
 section may contain multiple
@@ -1400,7 +1395,7 @@ default set path, which can undergo changes, see below). If there is a single
 .PP
 .RS 11
 .nf
-.B "    ModulePath  \*q\*q
+.B "    ModulePath  \*q\*q"
 .fi
 .RE
 .PP
@@ -1408,10 +1403,10 @@ default set path, which can undergo changes, see below). If there is a single
 entry in an
 .B OutputClass
 for a
-.I driver
-, then only the
+.IR driver ,
+then only the
 .I standard
-path \(lq@modulepath@\(rq is searched from now on. It there no
+path \(lq@modulepath@\(rq is searched from now on. If there are no
 .B ModulePath
 entries at all, then the
 .I effective
@@ -1419,8 +1414,8 @@ default search path (set globally) becomes active. Note that each
 .B OutputClass
 .I overrides
 search path for a
-.I driver
-, not
+.IR driver ,
+not
 .I extends
 it.
 .PP
@@ -1443,6 +1438,7 @@ in the
 section for more info.
 .RE
 .PP
+An
 .B OutputClass
 section may contain an arbitrary number of
 .PP
