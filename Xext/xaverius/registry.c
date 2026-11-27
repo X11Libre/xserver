@@ -92,7 +92,12 @@ int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
      * PhysicalDevice record remains owned by the registry until explicit
      * removal via XaveriusRegistryFini() or removal path. */
     if (wrapper != NULL) {
-        free(wrapper);
+        if (wrapper->refcount > 0) {
+            wrapper->refcount--;
+            if (wrapper->refcount == 0) {
+                free(wrapper);
+            }
+        }
     }
     (void)xid;
     return 1;
@@ -190,41 +195,55 @@ void XaveriusRegistryFini(void)
 
     /* Step 4: Release devices/bindings only for successfully quiesced roles.
      * PENDING/FAILURE roles retain code and references. */
-    xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_physical_devices, list) {
-        if (dev->binding != NULL && dev->binding->module_role != NULL &&
-            dev->binding->module_role->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS) {
-            continue; /* Role not quiesced — retain/quarantine device. */
+    {
+        unsigned int freed_devices = 0;
+        xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_physical_devices, list) {
+            if (dev->binding != NULL && dev->binding->module_role != NULL &&
+                dev->binding->module_role->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS) {
+                continue; /* Role not quiesced — retain/quarantine device. */
+            }
+            xorg_list_del(&dev->list);
+            if (dev->xid != 0) {
+                FreeResource(dev->xid, RT_NONE);
+                dev->xid = 0;
+            }
+            free(dev->identity_evidence);
+            free(dev->snapshot.data);
+            xaverius_binding_free(dev->binding);
+            dev->binding = NULL;
+            free(dev);
+            freed_devices++;
         }
-        xorg_list_del(&dev->list);
-        if (dev->xid != 0) {
-            FreeResource(dev->xid, RT_NONE);
-            dev->xid = 0;
-        }
-        free(dev->identity_evidence);
-        free(dev->snapshot.data);
-        xaverius_binding_free(dev->binding);
-        dev->binding = NULL;
-        free(dev);
+        if (freed_devices >= xaverius_physical_device_count)
+            xaverius_physical_device_count = 0;
+        else
+            xaverius_physical_device_count -= freed_devices;
     }
-    xaverius_physical_device_count = 0;
 
-    xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_tombstones, list) {
-        if (dev->binding != NULL && dev->binding->module_role != NULL &&
-            dev->binding->module_role->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS) {
-            continue; /* Role not quiesced — retain/quarantine tombstone. */
+    {
+        unsigned int freed_tombstones = 0;
+        xorg_list_for_each_entry_safe(dev, next_dev, &xaverius_tombstones, list) {
+            if (dev->binding != NULL && dev->binding->module_role != NULL &&
+                dev->binding->module_role->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS) {
+                continue; /* Role not quiesced — retain/quarantine tombstone. */
+            }
+            xorg_list_del(&dev->list);
+            if (dev->xid != 0) {
+                FreeResource(dev->xid, RT_NONE);
+                dev->xid = 0;
+            }
+            free(dev->identity_evidence);
+            free(dev->snapshot.data);
+            xaverius_binding_free(dev->binding);
+            dev->binding = NULL;
+            free(dev);
+            freed_tombstones++;
         }
-        xorg_list_del(&dev->list);
-        if (dev->xid != 0) {
-            FreeResource(dev->xid, RT_NONE);
-            dev->xid = 0;
-        }
-        free(dev->identity_evidence);
-        free(dev->snapshot.data);
-        xaverius_binding_free(dev->binding);
-        dev->binding = NULL;
-        free(dev);
+        if (freed_tombstones >= xaverius_tombstone_count)
+            xaverius_tombstone_count = 0;
+        else
+            xaverius_tombstone_count -= freed_tombstones;
     }
-    xaverius_tombstone_count = 0;
 
     /* Step 5: Finalize only successfully quiesced roles. PENDING/FAILURE/
      * ACTIVE roles are retained/quarantined — their code and references stay. */
@@ -402,15 +421,18 @@ void XaveriusModuleRoleRelease(XaveriusModuleRole *role)
 }
 
 /* Acquire a callback-execution reference before entering DDX backend module
- * code. A quarantined role rejects new execution references. */
-void XaveriusModuleRoleAcquireExecRef(XaveriusModuleRole *role)
+ * code. A quarantined role or a role with closed admission rejects new
+ * execution references. Returns true on success, false if admission is closed
+ * or role is quarantined. */
+bool XaveriusModuleRoleAcquireExecRef(XaveriusModuleRole *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
-    if (r == NULL || r->quarantined)
-        return;
+    if (r == NULL || r->quarantined || r->callback_admission_open == 0)
+        return false;
 
     r->exec_ref++;
+    return true;
 }
 
 /* Release a callback-execution reference after XaveriusBackendCompletionDispatch
@@ -445,6 +467,11 @@ XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *rol
 
     if (r == NULL || r->quiesce_module_role == NULL)
         return XAVERIUS_MODULE_QUIESCE_FAILURE;
+
+    /* Quiescence SUCCESS requires no active callback executions.
+     * If exec_ref > 0, the role is still in use and cannot quiesce successfully. */
+    if (r->exec_ref > 0)
+        return XAVERIUS_MODULE_QUIESCE_PENDING;
 
     /* Returns PENDING/SUCCESS/FAILURE. */
     XaveriusModuleQuiescenceResult qr = r->quiesce_module_role(r);
@@ -1011,27 +1038,33 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         dev->snapshot.size = snap.size;
     }
 
-    /* Install binding into device BEFORE registry insertion - the device
-     * must reference its binding so later APIs can dereference it. */
-    dev->binding = binding;
-
+    /* The device's binding pointer will be set after the new/existing
+     * device logic, once we know which binding to install. */
     if (existing == NULL) {
         /* Install new device into internal (not yet published) registry. */
         xorg_list_append(&dev->list, &xaverius_physical_devices);
         xaverius_physical_device_count++;
+        dev->binding = binding;
     } else {
         /* Re-registration: mutate existing device atomically now that all
          * validation has succeeded. No partial state is visible on failure.
          * For a preference-driven binding replacement (is_replacement), free
          * the old binding (kept intact during validation), set a fresh caller
          * reference instead of incrementing, since this is a new selection
-         * through a different role, not a replay. */
+         * through a different role, not a replay.
+         * Also free the old snapshot data before installing the new one. */
         if (is_replacement) {
             xaverius_binding_free(dev->binding);
             dev->binding = NULL;
             dev->caller_refcount = 1;
         } else {
             dev->caller_refcount++;
+        }
+        /* Free old snapshot data before installing new snapshot. */
+        if (dev->snapshot.data != NULL) {
+            free(dev->snapshot.data);
+            dev->snapshot.data = NULL;
+            dev->snapshot.size = 0;
         }
         dev->device_generation = xaverius_next_generation_id();
         binding->binding_generation = dev->device_generation;
@@ -1436,13 +1469,15 @@ XaveriusRegistryResult XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev
 
     /* Allocate DIX wrapper — separate server-private object referenced by the
      * DIX resource DB. The registry retains ownership of the PhysicalDevice
-     * record itself; the wrapper only holds a back-reference. */
+     * record itself; the wrapper only holds a back-reference.
+     * Initialize wrapper refcount to 1 for DIX-side ownership. */
     XaveriusPhysicalDeviceDIXWrapper *wrapper =
         calloc(1, sizeof(*wrapper));
     if (wrapper == NULL) {
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
     }
     wrapper->dev = dev;
+    wrapper->refcount = 1;
 
     /* Register the resource exactly once with the PhysicalDevice resource
      * type and its canonical destructor. Only persist the XID after

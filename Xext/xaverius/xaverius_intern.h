@@ -391,7 +391,7 @@ void XaveriusModuleRoleFinalize(XaveriusModuleRole *role);
 
 /* Callback-execution reference management. Acquire before entering DDX backend
  * module code; release after XaveriusBackendCompletionDispatch returns. */
-void XaveriusModuleRoleAcquireExecRef(XaveriusModuleRole *role);
+bool XaveriusModuleRoleAcquireExecRef(XaveriusModuleRole *role);
 void XaveriusModuleRoleReleaseExecRef(XaveriusModuleRole *role);
 
 /* Admission gate for callbacks. XaveriusModuleRoleAdmissionClose() atomically
@@ -408,9 +408,11 @@ void XaveriusModuleRoleQuarantine(XaveriusModuleRole *role);
 /* ---- XaveriusPhysicalDeviceDIXWrapper — server-private DIX wrapper object.
  * The DIX resource DB holds a wrapper; the registry retains ownership of the
  * PhysicalDevice record itself. Freeing the wrapper (via XaveriusPhysicalDeviceDIXDestroy)
- * releases only DIX-side ownership, never registry membership or tombstone state. */
+ * releases only DIX-side ownership, never registry membership or tombstone state.
+ * The wrapper has its own reference count for DIX-side ownership tracking. */
 typedef struct _XaveriusPhysicalDeviceDIXWrapper {
     XaveriusPhysicalDevice *dev;
+    uint32_t refcount;  /* DIX-side ownership reference count */
 } XaveriusPhysicalDeviceDIXWrapper;
 
 /* ---- XaveriusPhysicalDevicePublish — separate server-internal publication operation.
