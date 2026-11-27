@@ -260,21 +260,25 @@ xaverius_module_role_ownership(void)
     XaveriusModuleRoleDescriptor desc;
     XaveriusModuleRole *role = NULL;
 
+    /* Successful creation acquires exactly one role-owned lease retain after
+     * all fallible validation/allocation. */
     make_valid_desc(&desc, "owner-a");
     reset_hook_counts();
     assert(XaveriusModuleRoleCreate(&desc, &role) == XAVERIUS_REGISTRY_SUCCESS);
     assert(role != NULL);
-    assert(test_retain_calls == 0);
+    assert(test_retain_calls == 1);  /* role-owned lease reference acquired */
     assert(test_release_calls == 0);
 
     XaveriusModuleRoleRetain(role);
-    assert(test_retain_calls == 1);
+    assert(test_retain_calls == 2);  /* binding-level retain added on top */
     XaveriusModuleRoleRelease(role);
     assert(test_release_calls == 1);
 
+    /* Finalize releases the role-owned lease reference exactly once. */
     XaveriusModuleRoleFinalize(role);
-    assert(test_release_calls == 2);
+    assert(test_release_calls == 2);  /* binding release + role-owned lease release */
 
+    /* Failed validation: no role hook invoked, no retain. */
     make_valid_desc(&desc, "owner-b");
     desc.abi_version = XAVERIUS_MODULE_ROLE_DESCRIPTOR_ABI_VERSION + 1;
     reset_hook_counts();
@@ -284,6 +288,7 @@ xaverius_module_role_ownership(void)
     assert(test_retain_calls == 0);
     assert(test_release_calls == 0);
 
+    /* Missing retain hook: creation fails, no retain. */
     make_valid_desc(&desc, "owner-c");
     desc.retain_module_role = NULL;
     reset_hook_counts();
@@ -340,19 +345,19 @@ xaverius_registry_registration_paths(void)
     ops.query_physical_snapshot = NULL;
     setup_min_reg(&reg, &id, &ops, role);
     assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_INVALID_ARGUMENT);
-    assert(test_retain_calls == 0 && test_release_calls == 0);
+    assert(test_retain_calls == 1 && test_release_calls == 0); /* role-owned lease retained by create */
 
     setup_min_ops(&ops, true);
     setup_min_reg(&reg, &id, &ops, role);
     reg.owner_role_generation = role->role_generation + 9999;
     assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen, &bind_gen) == XAVERIUS_REGISTRY_NOT_REGISTERED);
-    assert(test_retain_calls == 0 && test_release_calls == 0);
+    assert(test_retain_calls == 1 && test_release_calls == 0);
 
     setup_min_reg(&reg, &id, &ops, role);
     reg.abi_version = XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION + 1;
     assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev, &dev_gen,
                                              &bind_gen) == XAVERIUS_REGISTRY_UNSUPPORTED);
-    assert(test_retain_calls == 0 && test_release_calls == 0);
+    assert(test_retain_calls == 1 && test_release_calls == 0);
 
     reg.abi_version = XAVERIUS_DEVICE_BACKEND_REGISTRATION_ABI_VERSION;
     setup_min_ops(&ops, true);
@@ -1089,8 +1094,9 @@ xaverius_registry_registration_snapshot_failure(void)
     assert(dev == NULL);
     assert(snapshot_calls == 1);
     assert(xaverius_physical_device_count == 0);
-    /* binding_alloc retained role; binding_free released it on failure path. */
-    assert(test_retain_calls == 1);
+    /* binding_alloc retained role; binding_free released it on failure path.
+     * Role-owned lease retain from create + binding retain from alloc = 2. */
+    assert(test_retain_calls == 2);
     assert(test_release_calls == 1);
 
     XaveriusModuleRoleFinalize(role);

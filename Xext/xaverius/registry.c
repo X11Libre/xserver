@@ -454,6 +454,11 @@ XaveriusRegistryResult XaveriusModuleRoleCreate(
     xorg_list_append(&role->list, &xaverius_module_roles);
     xaverius_module_role_count++;
 
+    /* Role-owned module lease: acquire exactly once after all fallible
+     * validation/allocation succeeds. This is the role-owned lease reference
+     * separate from binding-level retain/release. */
+    role->retain_module_role(role);
+
     *out_role = role;
     return XAVERIUS_REGISTRY_SUCCESS;
 }
