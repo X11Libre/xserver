@@ -24,6 +24,9 @@ brew install \
 	libxrender \
 	libxt \
 	libxtst \
+	mesa \
+	xcb-util \
+	xcb-util-wm \
 	meson \
 	mkfontscale \
 	pkgconf \
