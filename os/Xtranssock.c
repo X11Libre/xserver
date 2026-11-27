@@ -1253,6 +1253,47 @@ union fd_pass {
 
 #endif /* XTRANS_SEND_FDS */
 
+#if XTRANS_SEND_FDS
+/*
+ * Close every descriptor delivered with a truncated ancillary-data buffer.
+ * recvmsg() has already consumed the stream data, so continuing would leave
+ * the FD queue incomplete and make later requests consume the wrong FDs.
+ */
+static void closeReceivedFds(struct msghdr *msg)
+{
+    struct cmsghdr *hdr;
+    char *control_end = (char *) msg->msg_control + msg->msg_controllen;
+
+    for (hdr = CMSG_FIRSTHDR(msg); hdr; hdr = CMSG_NXTHDR(msg, hdr)) {
+        size_t bytes;
+        size_t available;
+        int *fds;
+        size_t i;
+
+        if (hdr->cmsg_level != SOL_SOCKET || hdr->cmsg_type != SCM_RIGHTS ||
+            hdr->cmsg_len < CMSG_LEN(0)) {
+            continue;
+        }
+
+        if ((char *) CMSG_DATA(hdr) > control_end) {
+            continue;
+        }
+
+        bytes = hdr->cmsg_len - CMSG_LEN(0);
+        available = control_end - (char *) CMSG_DATA(hdr);
+        if (bytes > available) {
+            bytes = available;
+        }
+        bytes -= bytes % sizeof(int);
+        fds = (int *) CMSG_DATA(hdr);
+
+        for (i = 0; i < bytes / sizeof(int); i++) {
+            ossock_close(fds[i]);
+        }
+    }
+}
+#endif /* XTRANS_SEND_FDS */
+
 static int _XSERVTransSocketRead (
     XtransConnInfo ciptr, char *buf, int size)
 {
@@ -1284,6 +1325,13 @@ static int _XSERVTransSocketRead (
         };
 
         size = recvmsg(ciptr->fd, &msg, 0);
+        if (size >= 0 && (msg.msg_flags & MSG_CTRUNC)) {
+            closeReceivedFds(&msg);
+            /* The stream is no longer safe to parse; discard earlier FDs too. */
+            discardFd(&ciptr->recv_fds, NULL, 1);
+            errno = EMSGSIZE;
+            return -1;
+        }
         if (size >= 0) {
             struct cmsghdr *hdr;
 

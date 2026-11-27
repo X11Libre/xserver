@@ -205,6 +205,7 @@ if build_xorg
      'touch.c',
      'xfree86.c',
      'xtest.c',
+     'xtrans-fd-trunc.c',
      'ddc-tests.c',
     ]
     unit_c_args = ['-DXORG_TESTS']
