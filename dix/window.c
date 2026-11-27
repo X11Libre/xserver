@@ -225,7 +225,8 @@ get_window_name(WindowPtr pWin)
 static void
 log_window_info(WindowPtr pWin, int depth)
 {
-    const char *win_name, *visibility;
+    const char *win_name;
+    const char *visibility = "unknown";
     BoxPtr rects;
 
     for (int i = 0; i < (depth << 2); i++)
