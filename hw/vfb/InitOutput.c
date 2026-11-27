@@ -114,6 +114,7 @@ typedef struct {
     int ncolors;
     int numCrtcs;
     vfbCrtcInfoPtr crtcs;
+    Bool crtcSizeGiven;         /* -crtcs N@WxH, else the CRTCs follow -screen */
     char *pfbMemory;
     XWDColor *pXWDCmap;
     XWDFileHeader *pXWDHeader;
@@ -208,7 +209,18 @@ vfbSetCrtcInfo(vfbScreenInfoPtr screen, int numCrtcs, int crtcWidth,
 static vfbScreenInfoPtr
 vfbInitializeScreenInfo(vfbScreenInfoPtr screen)
 {
-    *screen = defaultScreenInfo;
+    if (screen != &defaultScreenInfo) {
+        *screen = defaultScreenInfo;
+        /* its own CRTCs: a later -crtcs or -screen for this screen must not
+           reallocate the array of the defaults or of another screen */
+        screen->crtcs = NULL;
+        screen->numCrtcs = 0;
+        if (defaultScreenInfo.numCrtcs > 0) {
+            vfbSetCrtcInfo(screen, defaultScreenInfo.numCrtcs, 0, 0);
+            memcpy(screen->crtcs, defaultScreenInfo.crtcs,
+                   defaultScreenInfo.numCrtcs * sizeof(*screen->crtcs));
+        }
+    }
 
     if (screen->numCrtcs == 0) {
         vfbSetCrtcInfo(screen, VFB_DEFAULT_NUM_CRTCS, screen->width,
@@ -386,6 +398,15 @@ ddxProcessArgument(int argc, char *argv[], int i)
                        argv[i + 2], screenNum);
         }
 
+        /* without an explicit -crtcs N@WxH the CRTCs cover the screen;
+           they were made with the default size (1280x1024), and a smaller
+           -screen then failed the CRTC size check */
+        if (!vfbScreens[screenNum].crtcSizeGiven)
+            vfbSetCrtcInfo(&vfbScreens[screenNum],
+                           vfbScreens[screenNum].numCrtcs,
+                           vfbScreens[screenNum].width,
+                           vfbScreens[screenNum].height);
+
         lastScreen = screenNum;
         return 3;
     }
@@ -513,6 +534,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
         }
 
         vfbSetCrtcInfo(currentScreen, numCrtcs, crtcWidth, crtcHeight);
+        currentScreen->crtcSizeGiven = strchr(argv[i + 1], '@') != NULL;
         return 2;
     }
 
