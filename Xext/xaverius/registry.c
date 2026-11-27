@@ -101,6 +101,13 @@ int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
                  * so the device knows its DIX resource is gone. */
                 if (dev != NULL) {
                     dev->dix_wrapper = NULL;
+                    /* Release the separate PhysicalDevice DIX-resource
+                     * ownership refcount. The PhysicalDevice record
+                     * persists while dix_resource_refcount > 0 OR
+                     * caller_refcount > 0 OR registry list membership. */
+                    if (dev->dix_resource_refcount > 0) {
+                        dev->dix_resource_refcount--;
+                    }
                 }
                 free(wrapper);
             }
@@ -1006,17 +1013,25 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
      * the callback-owned memory is never freed before being deep-copied
      * into server-owned storage (avoids use-after-free).
      * Protect with execution-ref protocol: acquire before callback, release
-     * after, regardless of success/failure. */
+     * after, regardless of success/failure.
+     * If execution ref cannot be acquired (admission closed/quarantined),
+     * reject the registration without invoking the callback. */
     XaveriusPhysicalDeviceSnapshot snap = { 0 };
     XaveriusModuleRole *role_for_exec = binding->module_role;
     bool exec_acquired = false;
     if (role_for_exec != NULL) {
         exec_acquired = XaveriusModuleRoleAcquireExecRef(role_for_exec);
     }
-    snap_result = registration->ops->query_physical_snapshot(binding, &snap);
-    if (exec_acquired) {
-        XaveriusModuleRoleReleaseExecRef(role_for_exec);
+    if (!exec_acquired) {
+        xaverius_binding_free(binding);
+        if (existing == NULL) {
+            free(dev->identity_evidence);
+            free(dev);
+        }
+        return XAVERIUS_REGISTRY_UNAVAILABLE;
     }
+    snap_result = registration->ops->query_physical_snapshot(binding, &snap);
+    XaveriusModuleRoleReleaseExecRef(role_for_exec);
     if (snap_result != XAVERIUS_BACKEND_SUCCESS) {
         free(snap.data);
         xaverius_binding_free(binding);
@@ -1518,9 +1533,11 @@ XaveriusRegistryResult XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev
 
     /* Acquire PhysicalDevice DIX-resource ownership reference.
      * This is a separate ref from caller_refcount and wrapper refcount.
-     * The PhysicalDevice tracks its DIX wrapper to manage lifetime correctly. */
+     * Acquired exactly once after successful AddResource/publication.
+     * Released exactly once in DIXDestroy when wrapper refcount reaches 0. */
     dev->xid = xid;
     dev->dix_wrapper = wrapper;
+    dev->dix_resource_refcount = 1;
 
     if (out_xid != NULL)
         *out_xid = xid;

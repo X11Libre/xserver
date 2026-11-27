@@ -326,6 +326,15 @@ struct _XaveriusPhysicalDevice {
      * resource and all registry references are gone. */
     XaveriusPhysicalDeviceDIXWrapper *dix_wrapper;
 
+    /* DIX-resource ownership reference count. Acquired exactly once after
+     * successful AddResource/publication in XaveriusPhysicalDevicePublish.
+     * Released exactly once in XaveriusPhysicalDeviceDIXDestroy when the
+     * wrapper refcount reaches 0. This is distinct from caller_refcount
+     * (DDX-owned caller references) and wrapper->refcount (DIX-side
+     * wrapper ownership). The PhysicalDevice record persists while this
+     * refcount > 0 OR caller_refcount > 0 OR registry list membership. */
+    uint32_t dix_resource_refcount;
+
     char ordering_key[128];
 
     /* Caller-owned reference count (from XaveriusRegistryRegisterDdxDevice).
