@@ -35,6 +35,12 @@
 #endif
 #include <pciaccess.h>
 
+#define BIOS_SCRATCH_OFF    0x449
+#define BIOS_SCRATCH_END    0x466
+#define BIOS_SCRATCH_LEN    (BIOS_SCRATCH_END - BIOS_SCRATCH_OFF + 1)
+
+#define SEG_ADR(type, seg, reg) type((seg << 4) + (X86_##reg))
+
 static int pciCfg1in(uint16_t addr, uint32_t *val);
 static int pciCfg1out(uint16_t addr, uint32_t val);
 static int pciCfg1inw(uint16_t addr, uint16_t *val);

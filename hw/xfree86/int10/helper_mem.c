@@ -14,6 +14,8 @@
 #include "xf86Pci.h"
 #include "xf86int10_priv.h"
 
+#define SYS_SIZE 0x100000
+
 typedef enum {
     OPT_NOINT10,
     OPT_INIT_PRIMARY,
