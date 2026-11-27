@@ -1652,6 +1652,25 @@ drmmode_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
 
 }
 
+/*
+ * The core decides whether the cursor is on a CRTC by the maximum cursor
+ * size, but the plane in use can be much smaller.  A plane that lies
+ * completely outside the CRTC shows nothing, so keep it off instead of
+ * moving it around; some kernels (vc4) oops on updates of such a plane.
+ */
+static Bool
+drmmode_cursor_is_offscreen(xf86CrtcPtr crtc, int width, int height)
+{
+    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+
+    return drmmode_crtc->cursor_x <= -width ||
+           drmmode_crtc->cursor_y <= -height ||
+           drmmode_crtc->cursor_x >= crtc->mode.HDisplay ||
+           drmmode_crtc->cursor_y >= crtc->mode.VDisplay;
+}
+
+static Bool drmmode_set_cursor(xf86CrtcPtr crtc, int width, int height);
+
 static void
 drmmode_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 {
@@ -1662,7 +1681,26 @@ drmmode_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
     x += drmmode_crtc->cursor_src_x;
     y += drmmode_crtc->cursor_src_y;
 
+    drmmode_crtc->cursor_x = x;
+    drmmode_crtc->cursor_y = y;
+
+    if (drmmode_cursor_is_offscreen(crtc, drmmode_crtc->cursor_width,
+                                    drmmode_crtc->cursor_height)) {
+        if (!drmmode_crtc->cursor_offscreen && drmmode_crtc->cursor_up)
+            drmModeSetCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                             0, 0, 0);
+        drmmode_crtc->cursor_offscreen = TRUE;
+        return;
+    }
+
     drmModeMoveCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, x, y);
+
+    if (drmmode_crtc->cursor_offscreen) {
+        drmmode_crtc->cursor_offscreen = FALSE;
+        if (drmmode_crtc->cursor_up)
+            drmmode_set_cursor(crtc, drmmode_crtc->cursor_width,
+                               drmmode_crtc->cursor_height);
+    }
 }
 
 static Bool
@@ -1676,6 +1714,21 @@ drmmode_set_cursor(xf86CrtcPtr crtc, int width, int height)
 
     if (cursor == NullCursor)
         return TRUE;
+
+    if (drmmode_cursor_is_offscreen(crtc, width, height)) {
+        if (!drmmode_crtc->cursor_offscreen)
+            drmModeSetCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                             0, 0, 0);
+        drmmode_crtc->cursor_offscreen = TRUE;
+        return TRUE;
+    }
+
+    if (drmmode_crtc->cursor_offscreen) {
+        /* the plane was kept off, so the kernel has a stale position */
+        drmModeMoveCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                          drmmode_crtc->cursor_x, drmmode_crtc->cursor_y);
+        drmmode_crtc->cursor_offscreen = FALSE;
+    }
 
     ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
                             handle, width, height,
@@ -4719,6 +4772,9 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
     min_width = max_width;
     min_height = max_height;
 
+    /* A tiny cursor at the current position may lie outside the CRTC */
+    drmModeMoveCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0, 0);
+
     /* probe square min first */
     for (size = 1; size <= max_width &&
              size <= max_height; size *= 2) {
@@ -4758,6 +4814,8 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
     }
 
     drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0, 0, 0, 0, 0);
+    /* The plane is off at the probe position; drmmode_set_cursor restores it. */
+    drmmode_crtc->cursor_offscreen = TRUE;
 
     if (min_width == max_width && min_height == max_height) {
         xf86DrvMsgVerb(crtc->scrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,

@@ -254,6 +254,13 @@ typedef struct {
     int cursor_src_x;
     int cursor_src_y;
 
+    /* Last cursor plane position, and whether the plane is held off
+       (it lies completely outside the CRTC, or the kernel has a stale
+       position) */
+    int cursor_x;
+    int cursor_y;
+    Bool cursor_offscreen;
+
     Bool cursor_probed;
     Bool cursor_dim_fallback_warned;
 
