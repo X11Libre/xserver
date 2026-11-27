@@ -77,6 +77,17 @@ typedef struct _XaveriusModuleRoleDescriptor {
     XaveriusModuleQuiescenceResult (*quiesce_module_role)(XaveriusModuleRole *role);
 } XaveriusModuleRoleDescriptor;
 
+/* ---- ModuleRole lease object (v1) ----
+ * Owned by module owner; retained once per role that binds to it.
+ * Freed when role count drops to zero.
+ */
+struct _XaveriusModuleLease {
+    uint32_t refcount;      /* reference count: 1 = owner, +1 per role */
+    const char *owner_key;  /* stable owner key across reloads */
+    void (*retain_lease)(XaveriusModuleLease *lease);   /* owner-provided retain hook */
+    void (*release_lease)(XaveriusModuleLease *lease);   /* owner-provided release hook */
+};
+
 /* ---- Canonical PhysicalDevice identity (shared with DDX-facing header) ----
  * Matches spec/device-registry-architecture.md §2.2 identity evidence classes.
  * This is defined here (not in xaverius_priv.h) so internal code and tests
@@ -419,6 +430,16 @@ void XaveriusModuleRoleRetain(XaveriusModuleRole *role);
 void XaveriusModuleRoleRelease(XaveriusModuleRole *role);
 XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *role);
 void XaveriusModuleRoleFinalize(XaveriusModuleRole *role);
+
+/* Module-lease ownership: the module owner holds an original lease reference.
+ * Each role retains its own lease reference via retain_module_role. The owner
+ * releases its original reference only after all roles finalize. Permanent
+ * roles have no loader lease but still run role-retain/release hooks. */
+XaveriusRegistryResult XaveriusModuleLeaseCreate(
+    const XaveriusModuleRoleDescriptor *desc,
+    XaveriusModuleLease **out_lease);
+void XaveriusModuleLeaseRetain(XaveriusModuleLease *lease);
+void XaveriusModuleLeaseRelease(XaveriusModuleLease *lease);
 
 /* Callback-execution reference management. Acquire before entering DDX backend
  * module code; release after XaveriusBackendCompletionDispatch returns. */

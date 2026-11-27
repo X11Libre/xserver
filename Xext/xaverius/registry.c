@@ -406,42 +406,74 @@ XaveriusRegistryResult xaverius_module_role_descriptor_validate(
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wreturn-type"
-XaveriusRegistryResult XaveriusModuleRoleCreate(
+XaveriusRegistryResult XaveriusModuleLeaseCreate(
     const XaveriusModuleRoleDescriptor *desc,
-    XaveriusModuleRole **out_role)
+    XaveriusModuleLease **out_lease)
 {
-    struct _XaveriusModuleRole *role;
+    struct _XaveriusModuleLease *lease;
 
-    if (desc == NULL || out_role == NULL)
+    if (desc == NULL || out_lease == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    /* Validate header before reading later fields. */
-    XaveriusRegistryResult valid_result = xaverius_module_role_descriptor_validate(desc);
-    if (valid_result != XAVERIUS_REGISTRY_SUCCESS)
-        return valid_result;
-
-    /* Failed registration calls no role hook. */
-    if (desc->retain_module_role == NULL ||
-        desc->release_module_role == NULL ||
-        desc->quiesce_module_role == NULL)
+if (desc->module_lease == NULL)
         return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
 
-    role = calloc(1, sizeof(*role));
+    lease = calloc(1, sizeof(*lease));
+    if (lease == NULL)
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+
+    /* owner-owned lease reference: acquire exactly once after all fallible
+     * validation/allocation succeeds. Multiple roles can share one owner lease;
+     * each role retains/releases its own reference, but the owner's original
+     * reference is released only after all roles finalize. */
+    lease->refcount = 1;
+    lease->owner_key = strdup(desc->owner_key ? desc->owner_key : "");
+    if (lease->owner_key == NULL) {
+        free(lease);
+        return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
+    }
+    lease->retain_lease = desc->module_lease->retain_lease;
+    lease->release_lease = desc->module_lease->release_lease;
+
+    /* Role acquires its own lease reference at creation time. */
+    XaveriusModuleLeaseRetain(lease);
+
+    *out_lease = lease;
+    return XAVERIUS_REGISTRY_SUCCESS;
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+XaveriusRegistryResult XaveriusModuleRoleCreate(const XaveriusModuleRoleDescriptor *desc,
+                                                 XaveriusModuleRole **out_role)
+{
+    struct _XaveriusModuleRole *role = calloc(1, sizeof(*role));
     if (role == NULL)
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
 
-    /* owner_key belongs to ModuleRole, NOT to registration or binding.
-     * Copy it here into server-owned storage. */
+    /* Validate descriptor header */
+    if (desc == NULL || desc->struct_size != sizeof(*desc)) {
+        free(role);
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+    }
+    if (desc->abi_version != XAVERIUS_MODULE_ROLE_DESCRIPTOR_ABI_VERSION) {
+        free(role);
+        return XAVERIUS_REGISTRY_UNSUPPORTED;
+    }
+    if (desc->retain_module_role == NULL || desc->release_module_role == NULL ||
+        desc->quiesce_module_role == NULL) {
+        free(role);
+        return XAVERIUS_REGISTRY_INVALID_ARGUMENT;
+    }
+
     role->owner_key = strdup(desc->owner_key ? desc->owner_key : "");
     if (role->owner_key == NULL) {
         free(role);
         return XAVERIUS_REGISTRY_OUT_OF_MEMORY;
     }
-
-    role->module_lease = desc->module_lease;  /* Lease from descriptor */
     role->role_generation = xaverius_next_generation_id();
     role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_OPEN;
-    role->quiesce_state = XAVERIUS_MODULE_QUIESCE_ACTIVE;
+    role->quiesce_state = XAVERIUS_MODULE_ROLE_ADMISSION_OPEN;
     role->exec_ref = 0;
     role->callback_admission_open = 1;
     role->quarantined = 0;
@@ -450,21 +482,20 @@ XaveriusRegistryResult XaveriusModuleRoleCreate(
     role->quiesce_module_role = desc->quiesce_module_role;
 
     xorg_list_init(&role->list);
-
     xorg_list_append(&role->list, &xaverius_module_roles);
     xaverius_module_role_count++;
 
-    /* Role-owned module lease: acquire exactly once after all fallible
-     * validation/allocation succeeds. This is the role-owned lease reference
-     * separate from binding-level retain/release. */
-    role->retain_module_role(role);
+    /* Role-owned module lease: acquire exactly once after successful
+     * allocation/validation. This is separate from binding-level
+     * retain/release and from role-retain/release. Multiple roles can
+     * share one owner lease; the owner releases its original reference
+     * only after all roles finalize. */
+    if (desc->module_lease != NULL)
+        XaveriusModuleLeaseRetain(role->module_lease);
 
     *out_role = role;
     return XAVERIUS_REGISTRY_SUCCESS;
 }
-#pragma GCC diagnostic pop
-
-void XaveriusModuleRoleRetain(XaveriusModuleRole *role)
 {
     struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
 
@@ -485,6 +516,45 @@ void XaveriusModuleRoleRelease(XaveriusModuleRole *role)
     /* Infallible, non-blocking lifetime primitive; does NOT initiate
      * quiescence. */
     r->release_module_role(r);
+}
+
+/* ---- Module-lease ownership path (Stage 2) ---- */
+
+/* Acquire the owner's module-lease reference exactly once after successful
+ * role creation. This is separate from binding-level retain/release and
+ * from role-retain/release. Multiple roles can share one owner lease;
+ * the owner releases its original reference only after all roles finalize. */
+void XaveriusModuleLeaseRetain(XaveriusModuleLease *lease)
+{
+    struct _XaveriusModuleLease *l = (struct _XaveriusModuleLease *)lease;
+
+    if (l == NULL || l->retain_lease == NULL)
+        return;
+
+    /* Infallible, non-blocking lifetime primitive. */
+    l->retain_lease(l);
+}
+
+void XaveriusModuleLeaseRelease(XaveriusModuleLease *lease)
+{
+    struct _XaveriusModuleLease *l = (struct _XaveriusModuleLease *)lease;
+
+    if (l == NULL || l->release_lease == NULL)
+        return;
+
+    /* Infallible, non-blocking lifetime primitive; does NOT initiate
+     * quiescence. */
+    l->release_lease(l);
+}
+
+const XaveriusModuleLease *XaveriusModuleRoleLease(XaveriusModuleRole *role)
+{
+    struct _XaveriusModuleRole *r = (struct _XaveriusModuleRole *)role;
+
+    if (r == NULL)
+        return NULL;
+
+    return r->module_lease;
 }
 
 /* Acquire a callback-execution reference before entering DDX backend module
@@ -585,12 +655,18 @@ void XaveriusModuleRoleFinalize(XaveriusModuleRole *role)
     if (r->exec_ref > 0)
         return;
 
-    /* Finalization releases the module owner's original role reference via
+/* Finalization releases the module owner's original role reference via
      * the role hook and frees server-owned role storage. The caller (module
      * owner/registry shutdown path) is responsible for invoking this exactly
      * once after all binding references have been released. */
     if (r->release_module_role != NULL)
         r->release_module_role(r);
+
+    /* Release the role's module-lease reference exactly once after role
+     * creation acquired it. The owner releases its original reference only
+     * after all roles finalize. */
+    if (r->module_lease != NULL)
+        XaveriusModuleLeaseRelease(r->module_lease);
 
     if (!xorg_list_is_empty(&r->list)) {
         xorg_list_del(&r->list);
