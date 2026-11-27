@@ -299,24 +299,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
     CloseDownDevices();
     CloseDownEvents();
-
-    if (screenInfo.numGPUScreens > 0) {
-        for (int walkScreenIdx = screenInfo.numGPUScreens - 1; walkScreenIdx >= 0; walkScreenIdx--) {
-            ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
-            dixFreeScreen(walkScreen);
-            screenInfo.numGPUScreens = walkScreenIdx;
-        }
-    }
-    memset(&screenInfo.gpuscreens, 0, sizeof(screenInfo.gpuscreens));
-
-    if (screenInfo.numScreens > 0) {
-        for (int walkScreenIdx = screenInfo.numScreens - 1; walkScreenIdx >= 0; walkScreenIdx--) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-            dixFreeScreen(walkScreen);
-            screenInfo.numScreens = walkScreenIdx;
-        }
-    }
-    memset(&screenInfo.screens, 0, sizeof(screenInfo.screens));
+    dixFreeAllScreens();
 
     ReleaseClientIds(serverClient);
     dixFreePrivates(serverClient->devPrivates, PRIVATE_CLIENT);

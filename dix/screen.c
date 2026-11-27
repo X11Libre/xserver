@@ -14,7 +14,7 @@
 CallbackListPtr ScreenSaverAccessCallback = NULL;
 CallbackListPtr ScreenAccessCallback = NULL;
 
-void dixFreeScreen(ScreenPtr pScreen)
+static void dixFreeScreen(ScreenPtr pScreen)
 {
     if (!pScreen)
         return;
@@ -31,4 +31,25 @@ void dixFreeScreen(ScreenPtr pScreen)
     DeleteCallbackList(&pScreen->hookPixmapDestroy);
     DeleteCallbackList(&pScreen->hookPostCreateResources);
     free(pScreen);
+}
+
+void dixFreeAllScreens(void)
+{
+    if (screenInfo.numGPUScreens > 0) {
+        for (int walkScreenIdx = screenInfo.numGPUScreens - 1; walkScreenIdx >= 0; walkScreenIdx--) {
+            ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+            dixFreeScreen(walkScreen);
+            screenInfo.numGPUScreens = walkScreenIdx;
+        }
+    }
+    memset(&screenInfo.gpuscreens, 0, sizeof(screenInfo.gpuscreens));
+
+    if (screenInfo.numScreens > 0) {
+        for (int walkScreenIdx = screenInfo.numScreens - 1; walkScreenIdx >= 0; walkScreenIdx--) {
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            dixFreeScreen(walkScreen);
+            screenInfo.numScreens = walkScreenIdx;
+        }
+    }
+    memset(&screenInfo.screens, 0, sizeof(screenInfo.screens));
 }
