@@ -1869,7 +1869,7 @@ xaverius_registry_quiesce_retry_retirement(void)
     assert(xaverius_physical_device_count == 2); /* both PENDING/FAILURE devices retained */
     assert(xaverius_module_role_count == 2);     /* both roles retained */
 
-    /* After Fini: both roles quarantined. */
+    /* After Fini: both roles quarantined (set during Fini, not during Quiesce). */
     assert(role_pend->quarantined == 1);
     assert(role_fail->quarantined == 1);
 
@@ -1877,13 +1877,16 @@ xaverius_registry_quiesce_retry_retirement(void)
     assert(xaverius_find_module_role_by_generation(role_pend_gen) == role_pend);
     assert(xaverius_find_module_role_by_generation(role_fail_gen) == role_fail);
 
-    /* Simulate retry: change hook to one that returns SUCCESS, then quiesce. */
+    /* Simulate retry: change hook to one that returns SUCCESS, then quiesce.
+     * Quarantine is NOT cleared by Quiesce() alone — only cleared during
+     * RegistryFini() when the role is actually finalized. */
     role_pend->quiesce_module_role = counting_quiesce;
     assert(XaveriusModuleRoleQuiesce(role_pend) == XAVERIUS_MODULE_QUIESCE_SUCCESS);
     assert(role_pend->quiesce_state == XAVERIUS_MODULE_QUIESCE_SUCCESS);
-    assert(role_pend->quarantined == 0); /* quarantine cleared on proven-safe quiesce */
+    assert(role_pend->quarantined == 1); /* quarantine NOT cleared by Quiesce() alone */
 
-    /* Now Fini again: SUCCESS role finalized (freed), FAILURE role retained. */
+    /* Now Fini again: SUCCESS role finalized (freed), FAILURE role retained.
+     * Quarantine is cleared during Fini() when SUCCESS role is finalized. */
     reset_hook_counts();
     XaveriusRegistryFini();
     assert(xaverius_physical_device_count == 1); /* only FAILURE device retained */
@@ -1893,6 +1896,10 @@ xaverius_registry_quiesce_retry_retirement(void)
     assert(xaverius_find_module_role_by_generation(role_pend_gen) == NULL);
     assert(xaverius_find_module_role_by_generation(role_fail_gen) == role_fail);
     assert(role_fail->quarantined == 1);
+
+    /* Retained role remains valid — verify binding still references it. */
+    assert(dev_fail->binding != NULL);
+    assert(dev_fail->binding->module_role == role_fail);
 
     /* Release remaining references. Role stays quarantined (FAILURE roles
      * are never retired). Device and role remain in lists — this is

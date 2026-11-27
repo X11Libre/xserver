@@ -274,9 +274,19 @@ void XaveriusRegistryFini(void)
     }
 
     /* Step 5: Finalize only successfully quiesced roles. PENDING/FAILURE/
-     * ACTIVE roles are retained/quarantined — their code and references stay. */
+     * ACTIVE roles are retained/quarantined — their code and references stay.
+     *
+     * By this point all bindings/devices for SUCCESS-quiesced roles have had
+     * their references released (Step 4 freed their bindings/devices), so it
+     * is safe to clear quarantine and finalize the role here — only now,
+     * after all dependent references are gone.
+     */
     xorg_list_for_each_entry_safe(role, next_role, &xaverius_module_roles, list) {
         if (role->quiesce_state == XAVERIUS_MODULE_QUIESCE_SUCCESS) {
+            /* Role reached proven-safe quiescence and all its dependent
+             * references (bindings/devices) have been released in Step 4.
+             * Clear quarantine so Finalize can safely free it. */
+            role->quarantined = 0;
             XaveriusModuleRoleFinalize(role);
             continue;
         }
@@ -528,16 +538,14 @@ XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *rol
     /* Returns PENDING/SUCCESS/FAILURE. */
     XaveriusModuleQuiescenceResult qr = r->quiesce_module_role(r);
 
-    if (qr == XAVERIUS_MODULE_QUIESCE_SUCCESS) {
+    if (qr == XAVERIUS_MODULE_QUIESCE_SUCCESS)
         r->quiesce_state = XAVERIUS_MODULE_QUIESCE_SUCCESS;
-        /* A later proven-safe quiesce clears quarantine so the role can be
-         * retired on a subsequent RegistryFini(). Safe because exec_ref == 0
-         * (checked above) — no active callback references remain. */
-        r->quarantined = 0;
-    } else if (qr == XAVERIUS_MODULE_QUIESCE_FAILURE)
+    else if (qr == XAVERIUS_MODULE_QUIESCE_FAILURE)
         r->quiesce_state = XAVERIUS_MODULE_QUIESCE_FAILURE;
-    /* PENDING/ACTIVE: leave state unchanged — role is retained. */
-
+    /* PENDING/ACTIVE: leave state unchanged — role is retained.
+     * Quarantine is NOT cleared here — it is cleared only in RegistryFini()
+     * when the role is actually being finalized and all dependent
+     * references (bindings, devices, callbacks) have been released. */
     return qr;
 }
 #pragma GCC diagnostic pop
