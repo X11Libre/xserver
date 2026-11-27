@@ -335,6 +335,11 @@ struct _XaveriusPhysicalDevice {
      * refcount > 0 OR caller_refcount > 0 OR registry list membership. */
     uint32_t dix_resource_refcount;
 
+    /* Publication flag: set to true after first successful Publish, never cleared.
+     * Ensures a device can only be published once per server lifetime (spec:
+     * "A published (or tombstoned) device retains its XID for the server lifetime"). */
+    bool published;
+
     char ordering_key[128];
 
     /* Caller-owned reference count (from XaveriusRegistryRegisterDdxDevice).
@@ -372,6 +377,8 @@ struct _XaveriusModuleRole {
  * exists per server process. */
 extern struct xorg_list xaverius_physical_devices;
 extern uint32_t xaverius_physical_device_count;
+extern struct xorg_list xaverius_module_roles;
+extern uint32_t xaverius_module_role_count;
 extern struct xorg_list xaverius_tombstones;
 extern uint32_t xaverius_tombstone_count;
 

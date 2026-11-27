@@ -102,12 +102,10 @@ int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
                 if (dev != NULL) {
                     dev->dix_wrapper = NULL;
                     /* Release the separate PhysicalDevice DIX-resource
-                     * ownership refcount. The PhysicalDevice record
-                     * persists while dix_resource_refcount > 0 OR
-                     * caller_refcount > 0 OR registry list membership. */
-                    if (dev->dix_resource_refcount > 0) {
-                        dev->dix_resource_refcount--;
-                    }
+                     * ownership refcount. Invariant: must be >0 here;
+                     * double-release is a logic error. */
+                    assert(dev->dix_resource_refcount > 0);
+                    dev->dix_resource_refcount--;
                 }
                 free(wrapper);
             }
@@ -133,10 +131,20 @@ bool XaveriusPhysicalDeviceTypeInit(void)
     return true;
 }
 
+/* Idempotent registry initialization.
+ * Repeated calls must not reset live lists, counts, roles, devices,
+ * tombstones, sources, or observations. The first call initializes
+ * empty state; subsequent calls are no-ops (return true without mutating).
+ */
+static bool xaverius_registry_initialized = false;
+
 bool XaveriusRegistryInit(void)
 {
     if (!XaveriusPhysicalDeviceTypeInit())
         return false;
+
+    if (xaverius_registry_initialized)
+        return true;
 
     xorg_list_init(&xaverius_physical_devices);
     xaverius_physical_device_count = 0;
@@ -148,6 +156,7 @@ bool XaveriusRegistryInit(void)
     xaverius_discovery_source_count = 0;
     xorg_list_init(&xaverius_observations);
     xaverius_observation_count = 0;
+    xaverius_registry_initialized = true;
     return true;
 }
 
@@ -281,6 +290,9 @@ void XaveriusRegistryFini(void)
         free(obs);
     }
     xaverius_observation_count = 0;
+
+    /* Reset initialization guard so a subsequent Init can start fresh. */
+    xaverius_registry_initialized = false;
 }
 
 /* ---- Canonical identity comparison ---- */
@@ -882,6 +894,12 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         return XAVERIUS_REGISTRY_SHUTTING_DOWN;
 
     if (role->quiesce_state == XAVERIUS_MODULE_QUIESCE_PENDING)
+        return XAVERIUS_REGISTRY_UNAVAILABLE;
+
+    /* Check callback_admission_open flag (checked by AcquireExecRef).
+     * This must be checked before allocating binding to avoid provisional
+     * binding/role reference leaks when admission is closed. */
+    if (!role->callback_admission_open)
         return XAVERIUS_REGISTRY_UNAVAILABLE;
 
     if (!XaveriusModuleRoleAdmissionOpen(role))
@@ -1497,7 +1515,7 @@ XaveriusRegistryResult XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev
 
     /* Publication is separate from registration and must happen at most once.
      * A published (or tombstoned) device retains its XID for the server lifetime. */
-    if (dev->xid != 0)
+    if (dev->published)
         return XAVERIUS_REGISTRY_ALREADY_EXISTS;
 
     /* Validate device_generation matches the current incarnation. */
@@ -1538,6 +1556,7 @@ XaveriusRegistryResult XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev
     dev->xid = xid;
     dev->dix_wrapper = wrapper;
     dev->dix_resource_refcount = 1;
+    dev->published = true;
 
     if (out_xid != NULL)
         *out_xid = xid;
