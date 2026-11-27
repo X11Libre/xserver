@@ -273,7 +273,7 @@ ms_drm_set_seq_msc(uint32_t seq, uint64_t msc)
     }
 }
 
-static void
+void
 ms_drm_set_seq_queued(uint32_t seq, uint64_t msc)
 {
     drmmode_crtc_private_ptr drmmode_crtc;
@@ -522,11 +522,18 @@ ms_drm_abort_one(struct ms_drm_queue *q)
 static void
 ms_drm_abort_scrn(ScrnInfoPtr scrn)
 {
-    struct ms_drm_queue *q, *tmp;
+    struct ms_drm_queue *q;
 
-    xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
-        if (q->scrn == scrn)
+    /* Restart traversal from the head when an entry is aborted, because
+     * ms_drm_abort_one() may trigger callbacks or re-entrant list modifications
+     * which invalidate cached list pointers.
+     */
+restart:
+    xorg_list_for_each_entry(q, &ms_drm_queue, list) {
+        if (q->scrn == scrn && !q->aborted) {
             ms_drm_abort_one(q);
+            goto restart;
+        }
     }
 }
 
@@ -536,9 +543,9 @@ ms_drm_abort_scrn(ScrnInfoPtr scrn)
 void
 ms_drm_abort_seq(ScrnInfoPtr scrn, uint32_t seq)
 {
-    struct ms_drm_queue *q, *tmp;
+    struct ms_drm_queue *q;
 
-    xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
+    xorg_list_for_each_entry(q, &ms_drm_queue, list) {
         if (q->seq == seq) {
             ms_drm_abort_one(q);
             break;
@@ -598,13 +605,20 @@ ms_drm_sequence_handler(int fd, uint64_t frame, uint64_t ns, Bool is64bit, uint6
     if (!crtc)
         return;
 
-    /* Now run all of the vblank events for this CRTC with an expired MSC */
-    xorg_list_for_each_entry_safe(q, tmp, &ms_drm_queue, list) {
+    /* Now run all of the vblank events for this CRTC with an expired MSC.
+     * Restart traversal from the head whenever a handler is executed, because
+     * q->handler() invokes external callbacks (e.g. Present, DRI2, TearFree)
+     * which can abort or modify other entries in ms_drm_queue, invalidating
+     * any cached next pointer and causing use-after-free.
+     */
+restart:
+    xorg_list_for_each_entry(q, &ms_drm_queue, list) {
         if (q->crtc == crtc && q->msc <= msc) {
             xorg_list_del(&q->list);
             if (!q->aborted)
                 q->handler(msc, ns / 1000, q->data);
             free(q);
+            goto restart;
         }
     }
 
