@@ -45,6 +45,9 @@
 #if defined(XSERVER_PLATFORM_BUS) && defined(XSERVER_LIBPCIACCESS)
 #include "xf86Bus.h"
 #endif
+#ifdef XSERVER_LIBPCIACCESS
+#include "xf86pciBus.h"
+#endif
 
 #include "tests-common.h"
 
@@ -425,6 +428,44 @@ xfree86_empty_configdir(void)
     free(dir);
 }
 
+/* Generic drivers are only added after every hardware specific driver, so a
+ * vendor's driver list must never name one. */
+static void
+xfree86_vendor_drivers_not_generic(void)
+{
+#ifdef XSERVER_LIBPCIACCESS
+    static const char *const generic[] = { "modesetting", "fbdev", "vesa" };
+    /* device IDs some vendors are matched on, plus both ends of the range */
+    static const uint16_t device_ids[] = {
+        0x0000, 0x0030, 0x0047, 0x0104, 0x2081, 0x3577, 0x7800, 0x8108, 0xffff
+    };
+    /* a domain no real device uses, so nothing is opened */
+    struct pci_device dev = { .domain = 0x7fff };
+    unsigned int vendor;
+    size_t d, g;
+    int i;
+
+    for (vendor = 0; vendor <= 0xffff; vendor++) {
+        for (d = 0; d < ARRAY_SIZE(device_ids); d++) {
+            XF86MatchedDrivers md = { 0 };
+
+            /* NVIDIA's list asks the kernel for the chipset, which is slow,
+             * and doesn't depend on the device ID */
+            if (d > 0 && (vendor == 0x10de || vendor == 0x12d2))
+                break;
+            dev.vendor_id = vendor;
+            dev.device_id = device_ids[d];
+            xf86VideoPtrToDriverList(&dev, &md);
+            for (i = 0; i < md.nmatches; i++) {
+                for (g = 0; g < ARRAY_SIZE(generic); g++)
+                    assert(strcmp(md.matches[i], generic[g]) != 0);
+                free(md.matches[i]);
+            }
+        }
+    }
+#endif
+}
+
 const testfunc_t*
 xfree86_test(void)
 {
@@ -437,6 +478,7 @@ xfree86_test(void)
         xfree86_platform_device_stable,
         xfree86_hotplug_driver_first_match,
         xfree86_empty_configdir,
+        xfree86_vendor_drivers_not_generic,
         NULL,
     };
     return testfuncs;
