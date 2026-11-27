@@ -137,7 +137,7 @@ miBuildRenderColormap(ColormapPtr pColormap, Pixel * pixels, int *nump)
         break;
     }
 
-    memset(used, '\0', pColormap->pVisual->ColormapEntries * sizeof(Bool));
+    memset(used, '\0', pColormap->pVisual->ColormapEntries * sizeof(*used));
     for (r = 0; r < cube; r++)
         for (g = 0; g < cube; g++)
             for (b = 0; b < cube; b++) {
