@@ -291,8 +291,25 @@ void XaveriusRegistryFini(void)
     }
     xaverius_observation_count = 0;
 
-    /* Reset initialization guard so a subsequent Init can start fresh. */
-    xaverius_registry_initialized = false;
+    /* Only reset the initialization guard if all registry state has been
+     * fully released. If PENDING/FAILURE roles, devices, tombstones,
+     * discovery sources, or observations remain, a subsequent Init must
+     * not clobber list heads or reset counts — the retained objects must
+     * stay reachable. */
+    bool all_empty =
+        xorg_list_is_empty(&xaverius_physical_devices) &&
+        xorg_list_is_empty(&xaverius_tombstones) &&
+        xorg_list_is_empty(&xaverius_module_roles) &&
+        xorg_list_is_empty(&xaverius_discovery_sources) &&
+        xorg_list_is_empty(&xaverius_observations) &&
+        xaverius_physical_device_count == 0 &&
+        xaverius_tombstone_count == 0 &&
+        xaverius_module_role_count == 0 &&
+        xaverius_discovery_source_count == 0 &&
+        xaverius_observation_count == 0;
+
+    if (all_empty)
+        xaverius_registry_initialized = false;
 }
 
 /* ---- Canonical identity comparison ---- */

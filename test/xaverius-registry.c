@@ -1749,11 +1749,29 @@ xaverius_registry_fini_quiesce_pending_failure(void)
     reset_hook_counts();
     XaveriusRegistryFini();
 
+    /* SUCCESS device freed (count decremented). PENDING/FAILURE devices
+     * retained — their roles stay alive because retained bindings still
+     * hold references via binding->module_role. */
     assert(xaverius_physical_device_count == 2);
     assert(xaverius_tombstone_count == 0);
 
-    XaveriusModuleRoleFinalize(role_pend);
-    XaveriusModuleRoleFinalize(role_fail);
+    /* PENDING/FAILURE roles remain alive; do NOT force-finalize — their
+     * bindings still reference them via dev->binding->module_role.
+     * A subsequent Init must not overwrite list heads or reset counts
+     * while retained objects exist — it must return without mutating. */
+    assert(XaveriusRegistryInit() == true);
+    assert(xaverius_physical_device_count == 2);
+    assert(xaverius_tombstone_count == 0);
+    assert(role_pend->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS);
+    assert(role_fail->quiesce_state == XAVERIUS_MODULE_QUIESCE_FAILURE);
+
+    /* Retained devices/roles remain valid — verify they are still
+     * accessible through their bindings and roles. */
+    assert(dev_pend->binding != NULL);
+    assert(dev_pend->binding->module_role == role_pend);
+    assert(dev_fail->binding != NULL);
+    assert(dev_fail->binding->module_role == role_fail);
+
     xaverius_binding_preference_set(NULL);
 }
 
