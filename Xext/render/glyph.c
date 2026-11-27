@@ -24,6 +24,7 @@
 
 #include <dix-config.h>
 
+#include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/mipict.h"
 #include "include/misc.h"
@@ -691,4 +692,16 @@ PicturePtr GetGlyphPicture(GlyphPtr glyph, ScreenPtr pScreen)
 void SetGlyphPicture(GlyphPtr glyph, ScreenPtr pScreen, PicturePtr picture)
 {
     GlyphPicture(glyph)[pScreen->myNum] = picture;
+}
+
+void
+dixTrimGlyphHash(void)
+{
+    int fdepth;
+
+    for (fdepth = 0; fdepth < GlyphFormatNum; fdepth++) {
+        if (globalGlyphs[fdepth].hashSet && globalGlyphs[fdepth].table) {
+            ResizeGlyphHash(&globalGlyphs[fdepth], 0, TRUE);
+        }
+    }
 }
