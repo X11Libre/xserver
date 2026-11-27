@@ -314,6 +314,52 @@ jobs:
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
 
+    xserver-unit-asan:
+        # Run the real XTEST request-path regression under ASan. The ordinary
+        # unit suite only observes BadValue; ASan catches the historical
+        # one-element stack write past valuators[MAX_VALUATORS].
+        env:
+            MESON_BUILDDIR: "__BUILD-asan"
+            MESON_ARGS: --buildtype=debug -Db_sanitize=address -Dprefix=/usr -Dwerror=true -Dxcsecurity=true -Dgbm=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxephyr=false -Dxfbdev=false -Dtest_xephyr_gles=false
+            ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
+            XLIBRE_TEST: xtest_test
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v6
+
+            - uses: ./.github/actions/ubuntu-install-pkg
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+
+            - name: X11 prereq cache
+              uses: actions/cache@v5
+              with:
+                  path: |
+                      ${{ env.X11_PREFIX }}
+                  key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
+                  restore-keys: ${{ runner.name }}-x11-deps-
+
+            - name: install X11 prerequisites
+              run: .github/scripts/ubuntu/install-prereq.sh
+
+            - name: build unit-test binary with AddressSanitizer
+              run: .github/scripts/meson-build.sh --skip-test
+
+            - name: run XTEST request-path test under AddressSanitizer
+              run: meson test -C "$MESON_BUILDDIR" unit --no-rebuild --print-errorlogs
+
+            - name: archive ASan build logs
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: unit-asan-logs
+                  path: ${{ env.MESON_BUILDDIR }}/meson-logs/*
+
     xserver-build-ubuntu-valgrind:
         # Dedicated lane for the pyxtest suite under valgrind memcheck
         # (out-of-bounds reads/writes, use-after-free, uninitialised-value
