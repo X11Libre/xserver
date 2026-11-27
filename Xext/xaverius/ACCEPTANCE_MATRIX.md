@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius-nautilus`  
-**HEAD:** `0b06771d0f` (9 commits ahead of `wip/xaverius` at `9cc27e103`)  
+**HEAD:** `dafdfbf228ae0dfa4d4555386ced03b58c43e682` (12 commits ahead of `wip/xaverius` at `9cc27e103`)  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-27  
 **Auditor:** Nautilus (fleet ship)
@@ -20,7 +20,7 @@
 | **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link) | ✅ PASS |
 | **Build/CI** | N/A | Meson `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
 
-**Overall Verdict:** **BLOCKED / NOT ACCEPTED** — All four Stages 1-4 implemented and tested. All 8 W0-153 review blockers resolved. Quarantine retry lifecycle fixed; retry/retirement regression test added. Build clean with `-Dwerror=true`. All 21 registry + 7 QV tests pass. Exact-head CI pending; pending owner review before ACCEPTED.
+**Overall Verdict:** **BLOCKED / NOT ACCEPTED** — All four Stages 1-4 implemented and tested. All 8 W0-153 review blockers resolved. Quarantine retry lifecycle fixed; retry/retirement regression test added with exact pointer identity assertions. Build clean with `-Dwerror=true`. All 27 registry tests + 7 QV tests pass. Exact-head CI pending; pending owner review before ACCEPTED.
 
 ---
 
@@ -215,13 +215,13 @@ All 7 test functions in `xaverius_qv_protocol_test()` pass.
 | Gap | Severity | Notes |
 |-----|----------|-------|
 | No integration test with real DDX driver (modesetting) | Medium | Unit tests use mock ops; DDX integration deferred per scope |
-| Exact-head CI not yet run | Low | Build/test verified locally; CI pending on `wip/xaverius-nautilus` |
+| Exact-head CI not yet fully run | Low | CI run 46021356890 for HEAD `dafdfbf228`: 24 of 25 jobs completed (all applicable build/ABI jobs succeeded); Hurd remained in progress; setup/release jobs skipped. Do not describe as fully green until Hurd concludes successfully. |
 
 ---
 
 ### Changed Files (from base `xorg/main` or prior `wip/xaverius` at `9cc27e103`)
 
-*Only files changed in this branch delta (8 commits ahead):*
+*Only files changed in this branch delta (12 commits ahead):*
 
 ```
 Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed uninitialized `dev` (CI blocker on 6 platforms) + failure-atomic re-registration + owner-key preference selection (W0-153 item 4) + const-cast fixes for const ops pointers (W0-153 item 6) + quarantine retry lifecycle + init idempotency guard + callback admission gate + DIX wrapper refcount
@@ -271,13 +271,13 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `52eca413ec` (8 commits ahead of `wip/xaverius` at `9cc27e103`) |
+| **HEAD** | `dafdfbf228ae0dfa4d4555386ced03b58c43e682` (12 commits ahead of `wip/xaverius` at `9cc27e103`) |
 | **Branch** | `wip/xaverius-nautilus` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius -Dwerror=true`, all targets link, exit 0) |
-| **Unit Tests** | ✅ All 21 registry tests + 7 QV tests pass; pre-existing `signal_logging_test` FAIL unrelated to xaverius |
+| **Unit Tests** | ✅ All 27 registry tests + 7 QV tests pass; pre-existing `signal_logging_test` FAIL unrelated to xaverius |
 | **ABI-v1** | ✅ Conformant — header reconciled (uint32_t fields, const nested ops, typed callback signatures), fix verified by build + tests |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes. screen.c/dispatch.c untouched. |
-| **Blockers** | All 8 W0-153 review blockers resolved. Quarantine retry lifecycle fixed; regression tests added. Fixes committed to `wip/xaverius-nautilus`; exact-head CI pending. |
+| **Blockers** | All 8 W0-153 review blockers resolved. Quarantine retry lifecycle fixed; retry/retirement regression test with exact pointer identity assertions added. Fixes committed to `wip/xaverius-nautilus`; exact-head CI pending. |
 
 ---
 

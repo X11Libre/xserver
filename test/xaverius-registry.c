@@ -1885,8 +1885,20 @@ xaverius_registry_quiesce_retry_retirement(void)
     assert(role_pend->quiesce_state == XAVERIUS_MODULE_QUIESCE_SUCCESS);
     assert(role_pend->quarantined == 1); /* quarantine NOT cleared by Quiesce() alone */
 
-    /* Now Fini again: SUCCESS role finalized (freed), FAILURE role retained.
-     * Quarantine is cleared during Fini() when SUCCESS role is finalized. */
+    /* Direct Finalize on quarantined SUCCESS role must be a NO-OP:
+     * role stays findable by generation, binding still points to it,
+     * role count unchanged, quarantine remains set. */
+    reset_hook_counts();
+    XaveriusModuleRoleFinalize(role_pend);
+    assert(xaverius_find_module_role_by_generation(role_pend_gen) == role_pend);
+    assert(role_pend->quarantined == 1);
+    assert(dev_pend->binding != NULL);
+    assert(dev_pend->binding->module_role == role_pend);
+    assert(test_retain_calls == 0);
+    assert(test_release_calls == 0);
+    assert(xaverius_module_role_count == 2);
+
+    /* Now Fini again: SUCCESS role finalized (freed), FAILURE role retained. */
     reset_hook_counts();
     XaveriusRegistryFini();
     assert(xaverius_physical_device_count == 1); /* only FAILURE device retained */
