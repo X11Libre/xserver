@@ -417,6 +417,7 @@ xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool complete)
     unsigned char *EDID_block = NULL;
     xf86MonPtr tmp = NULL;
     I2CDevPtr dev = NULL;
+    size_t edid_size = EDID1_LEN;
 
     /* Default DDC and DDC2 to enabled. */
     Bool noddc = FALSE, noddc2 = FALSE;
@@ -444,18 +445,31 @@ xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool complete)
         int i, n = EDID_block[0x7e];
 
         if (complete && n) {
-            EDID_block = reallocarray(EDID_block, 1 + n, EDID1_LEN);
+            unsigned char *new_edid = reallocarray(EDID_block, 1 + n,
+                                                   EDID1_LEN);
 
-            for (i = 0; i < n; i++)
-                DDC2Read(dev, i + 1, EDID_block + (EDID1_LEN * (1 + i)));
+            if (!new_edid) {
+                goto out;
+            }
+
+            EDID_block = new_edid;
+            for (i = 0; i < n; i++) {
+                if (!DDC2Read(dev, i + 1,
+                              EDID_block + (EDID1_LEN * (1 + i)))) {
+                    goto out;
+                }
+            }
+            edid_size = EDID1_LEN * (1 + n);
         }
 
-        tmp = xf86InterpretEEDID(pScrn->scrnIndex, EDID_block);
+        tmp = xf86ParseEDID(pScrn, EDID_block, edid_size);
+        if (tmp) {
+            xf86DoInterpretHDRMetadata(tmp);
+        }
     }
 
-    if (tmp && complete)
-        tmp->flags |= MONITOR_EDID_COMPLETE_RAWDATA;
-
+ out:
+    free(EDID_block);
     return tmp;
 }
 

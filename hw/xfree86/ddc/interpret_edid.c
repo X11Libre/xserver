@@ -240,16 +240,36 @@ encode_aspect_ratio(xf86MonPtr m)
     }
 }
 
+/**
+ * Parse an EDID buffer; copied buffers are padded to the advertised extension
+ * count so legacy xf86Monitor users can safely walk every advertised block.
+ */
 static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool copy)
 {
-    xf86MonPtr m = calloc(1, sizeof(xf86Monitor) + (copy ? size : 0));
+    xf86MonPtr m;
+    size_t copy_size = 0;
+    size_t alloc_size = 0;
+
+    if (!block || size < EDID1_LEN || size > EDID1_LEN * 256 ||
+        size > SIZE_MAX - sizeof(*m)) {
+        return NULL;
+    }
+
+    if (copy) {
+        alloc_size = EDID1_LEN * ((size_t) block[NO_EDID] + 1);
+        copy_size = size - (size % EDID1_LEN);
+        if (copy_size > alloc_size)
+            copy_size = alloc_size;
+    }
+
+    m = calloc(1, sizeof(xf86Monitor) + alloc_size);
     if (!m)
         return NULL;
 
-    /* make a copy of the EDID block for later reference */
+    /* Copy complete blocks only; missing advertised blocks remain zeroed. */
     if (copy) {
-        memcpy(&(m[1]), block, size);
-        block = (uint8_t*)&m[1];
+        memcpy(&(m[1]), block, copy_size);
+        block = (uint8_t *) &m[1];
     }
 
     m->scrnIndex = scrnIndex;
@@ -265,15 +285,15 @@ static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool cop
     get_std_timing_section(SECTION(STD_TIMING_SECTION, block), m->timings2,
                            &m->ver);
     get_dt_md_section(SECTION(DET_TIMING_SECTION, block), &m->ver, m->det_mon);
-    m->no_sections = (int) *(char *) SECTION(NO_EDID, block);
+    m->no_sections = block[NO_EDID];
 
     handle_edid_quirks(m);
     encode_aspect_ratio(m);
 
-    if (size > 128)
+    /* Only claim complete raw data when every advertised extension is present. */
+    if (size >= (size_t) EDID1_LEN * ((size_t) m->no_sections + 1)) {
         m->flags |= EDID_COMPLETE_RAWDATA;
-
-    /* possibly add more extended parsing here, eg. HDR information */
+    }
 
     return m;
 
@@ -285,8 +305,9 @@ static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool cop
 /* new entry point, should be used whenever possible */
 xf86MonPtr xf86ParseEDID(ScrnInfoPtr pScrn, uint8_t *block, size_t size)
 {
-    if (!pScrn || !block || !size)
+    if (!pScrn || !block || size < EDID1_LEN) {
         return NULL;
+    }
 
     return parseEDID(pScrn->scrnIndex, block, size, true);
 }
@@ -363,8 +384,10 @@ xf86ForEachDetailedBlock(xf86MonPtr mon, handle_detailed_fn fn, void *data)
     }
 }
 
-static struct cea_data_block *
-extract_cea_data_block(uint8_t * ext, int data_type)
+/**
+ * Find a CEA data block without stepping past its declared data collection.
+ */
+static struct cea_data_block *extract_cea_data_block(uint8_t * ext, int data_type)
 {
     struct cea_ext_body *cea;
     struct cea_data_block *data_collection;
@@ -372,19 +395,27 @@ extract_cea_data_block(uint8_t * ext, int data_type)
 
     cea = (struct cea_ext_body *) ext;
 
-    if (cea->dt_offset <= CEA_EXT_MIN_DATA_OFFSET)
+    if (cea->dt_offset < CEA_EXT_MIN_DATA_OFFSET ||
+        cea->dt_offset > CEA_EXT_MAX_DATA_OFFSET) {
         return NULL;
+    }
 
     data_collection = &cea->data_collection;
-    data_end = (struct cea_data_block *) (cea->dt_offset + ext);
+    data_end = (struct cea_data_block *) (ext + cea->dt_offset);
 
-    for (; data_collection < data_end;) {
+    while ((uint8_t *) data_collection < (uint8_t *) data_end) {
+        uint8_t *db = (uint8_t *) data_collection;
+        size_t block_len = data_collection->len;
+
+        if (block_len + 1 > (size_t) ((uint8_t *) data_end - db)) {
+            return NULL;
+        }
 
         if (data_type == data_collection->tag) {
             return data_collection;
         }
-        data_collection = (void *) ((unsigned char *) data_collection +
-                                    data_collection->len + 1);
+
+        data_collection = (void *) (db + block_len + 1);
     }
 
     return NULL;
@@ -491,8 +522,9 @@ cea_for_each_db(xf86MonPtr mon, handle_cea_db_fn fn, void *data)
 
         for (offset = start;
              offset < end && offset + cea_db_len(&ext[offset]) < end;
-             offset += cea_db_len(&ext[offset]) + 1)
-                fn(&ext[offset], data);
+             offset += cea_db_len(&ext[offset]) + 1) {
+            fn(&ext[offset], data);
+        }
     }
 }
 
@@ -882,6 +914,11 @@ bool xf86Monitor_gtf_supported(xf86MonPtr monitor)
 
 bool xf86DoInterpretHDRMetadata(xf86MonPtr monPtr)
 {
+    if (!monPtr || !(monPtr->flags & EDID_COMPLETE_RAWDATA) ||
+        !monPtr->rawData) {
+        return false;
+    }
+
     /* parse hdr metadata */
     cea_for_each_db(monPtr, find_hdr_colorimetry_blocks, monPtr);
 

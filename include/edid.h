@@ -241,8 +241,10 @@ struct monitor_hdr_data {
 /*
  * For DisplayID devices, only the scrnIndex, flags, and rawData fields
  * are meaningful.  For EDID, they all are.
+ *
+ * Keep this type named so ABI layout checks can track it across releases.
  */
-typedef struct {
+typedef struct xf86Monitor {
     int scrnIndex;
     struct vendor vendor;
     struct edid_version ver;
