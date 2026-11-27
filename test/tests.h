@@ -51,6 +51,7 @@ const testfunc_t* protocol_eventconvert_test(void);
 const testfunc_t* xi2_test(void);
 const testfunc_t* ddc_tests(void);
 const testfunc_t* xtrans_fd_trunc_test(void);
+const testfunc_t* xtrans_fd_alloc_test(void);
 
 #endif /* TESTS_H */
 

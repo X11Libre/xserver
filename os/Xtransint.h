@@ -100,6 +100,8 @@ from The Open Group.
 
 #define X_TCP_PORT	6000
 
+#define XTRANS_MAX_RECV_FDS 128
+
 #if XTRANS_SEND_FDS
 
 struct _XtransConnFd {
@@ -122,8 +124,11 @@ struct _XtransConnInfo {
     int		addrlen;
     char	*peeraddr;
     int		peeraddrlen;
-    struct _XtransConnFd        *recv_fds;
+    int recv_fds[XTRANS_MAX_RECV_FDS];
+    unsigned int recv_fd_head;
+    unsigned int recv_fd_count;
     struct _XtransConnFd        *send_fds;
+    int last_read_fd_count;
 };
 
 #define XTRANS_OPEN_COTS_CLIENT       1
