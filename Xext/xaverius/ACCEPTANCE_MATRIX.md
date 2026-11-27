@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius-nautilus`  
-**HEAD:** `a73e252d2e71e77a83e56143e020236c9e882c37` (16 commits ahead of `wip/xaverius` at `9cc27e103`)  
+**HEAD:** `aa5309dfa961cb4ae9d6115c4ae211efa2d24556` (17 commits ahead of `wip/xaverius` at `9cc27e103`)  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-27  
 **Auditor:** Nautilus (fleet ship)
@@ -20,7 +20,7 @@
 | **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link) | ✅ PASS |
 | **Build/CI** | N/A | Meson `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
 
-**Overall Verdict:** **BLOCKED / NOT ACCEPTED** — All four Stages 1-4 implemented and tested. All 8 W0-153 review blockers resolved. Quarantine retry lifecycle fixed; retry/retirement regression test added with exact pointer identity assertions. Build clean with `-Dwerror=true`. All 27 registry tests + 7 QV tests pass. Exact-head CI pending; pending owner review before ACCEPTED.
+**Overall Verdict:** **BLOCKED / NOT ACCEPTED** — All four Stages 1-4 implemented and tested. All 8 W0-153 review blockers resolved. Quarantine retry lifecycle fixed; retry/retirement regression test added with exact pointer identity assertions. Build clean with `-Dwerror=true`. All 27 registry + 7 QV tests pass. Exact-head CI pending; pending owner review before ACCEPTED.
 
 ---
 
@@ -31,10 +31,10 @@
 | Spec Requirement (source) | Implementation | Test Proof | Result |
 |---------------------------|----------------|------------|--------|
 | **ModuleRole descriptor v1** (addendum §2: size/versioned, owner_key, lease, hooks) | `xaverius_intern.h:66–74` `XaveriusModuleRoleDescriptor` with `struct_size`, `abi_version`, `owner_key`, `module_lease`, 3 hooks | `xaverius_module_role_descriptor_validation()` validates size, version, hook non-NULL | ✅ |
-| **ModuleRoleCreate** (addendum §2: alloc, register, no retain hook on create) | `registry.c:XaveriusModuleRoleCreate()` — validates descriptor, allocates role, sets `role_generation`, adds to global list | `xaverius_module_role_ownership()` — create succeeds, retain=0 release=0 | ✅ |
+| **ModuleRoleCreate** (addendum §2: alloc, register, role-owned lease retain on create) | `registry.c:XaveriusModuleRoleCreate()` — validates descriptor, allocates role, sets `role_generation`, adds to global list, retains role-owned lease (`XaveriusModuleLeaseRetain(role->module_lease)`) | `xaverius_module_role_ownership()` — create succeeds, retain=1 (role-owned lease) release=0 | ✅ |
 | **ModuleRoleRetain/Release** (addendum §2: hook primitives, infallible) | `registry.c:XaveriusModuleRoleRetain/Release()` — call hooks exactly once | `xaverius_module_role_ownership()` — retain/release increment counters exactly | ✅ |
 | **ModuleRoleQuiesce** (addendum §4: quiescence protocol) | `registry.c:XaveriusModuleRoleQuiesce()` — invokes `quiesce_module_role` hook | `xaverius_module_role_ownership()` — quiesce hook counted (returns SUCCESS) | ✅ |
-| **ModuleRoleFinalize** (addendum §2: releases original owner ref, frees server storage) | `registry.c:XaveriusModuleRoleFinalize()` — calls release hook once, removes from list, frees role | `xaverius_module_role_ownership()` — finalize increments release to 2 (owner + binding) | ✅ |
+| **ModuleRoleFinalize** (addendum §2: releases original owner ref + module-lease, frees server storage) | `registry.c:XaveriusModuleRoleFinalize()` — calls `XaveriusModuleLeaseRelease(role->module_lease)` then role hook, removes from list, frees role | `xaverius_module_role_ownership()` — finalize releases binding ref (release=1) then role-owned lease (release=2) | ✅ |
 | **ModuleRoleAdmissionOpen** (addendum §2: admission gate) | `registry.c:XaveriusModuleRoleAdmissionOpen()` — checks `admission == OPEN` | `xaverius_module_role_admission_gate()` — NULL→false, new→true, closed→false, closed+register→SHUTTING_DOWN no side effects | ✅ |
 | **RegisterDdxDevice role validation — STALE_GENERATION** (spec §1041: stale role generation returns STALE_GENERATION) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — checks `quiesce_state == QUIESCE_SUCCESS` before admission | `xaverius_registry_role_validation_errors()` — quiesce SUCCESS → `STALE_GENERATION`, no retain/release/snapshot | ✅ |
 | **RegisterDdxDevice role validation — SHUTTING_DOWN** (spec §1041: admission closed returns SHUTTING_DOWN) | `registry.c:XaveriusRegistryRegisterDdxDevice()` — checks `admission == CLOSED` → `SHUTTING_DOWN` | `xaverius_registry_role_validation_errors()` + `xaverius_module_role_admission_gate()` — CLOSED → `SHUTTING_DOWN`, no side effects | ✅ |
