@@ -1184,7 +1184,6 @@ xf86VideoPtrToDriverList(struct pci_device *dev, XF86MatchedDrivers *md)
 
         driverList[idx++] = "nouveau";
 #endif
-        driverList[idx++] = "modesetting";
         driverList[idx++] = "nvidia";
         driverList[idx++] = "nv";
         break;
