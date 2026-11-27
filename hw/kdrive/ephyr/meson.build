@@ -25,7 +25,7 @@ xephyr_dep = [
 xephyr_glamor = []
 if build_glamor
     srcs += 'ephyr_glamor.c'
-    xephyr_glamor += glamor
+    xephyr_glamor += [ glamor, glamor_ddxcomp_internal ]
     xephyr_dep += epoxy_dep
     xephyr_dep += dependency('xcb-glx')
 endif

@@ -1021,6 +1021,28 @@ Bool glamor_change_window_attributes(WindowPtr pWin, unsigned long mask);
 
 void glamor_copy_window(WindowPtr window, xPoint old_origin, RegionPtr src_region);
 
+/**
+ * \addtogroup glamor_ddxcomp
+ * Functions - DDX-dependent compatibility functions/callbacks
+ *
+ * These functions exist because glamor can be built either as a shared library or as
+ * a static library compiled into the DDX (KDrive). Because of that, there can be
+ * different logic notably when using other extensions.
+ * @{
+ */
+
+
+/**
+ * @brief glamor_ddxcomp_egl_screen_init ddx specific egl_screen_init part
+ *
+ * @param screen
+ * @param glamor_ctx
+ */
+void
+glamor_ddxcomp_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx);
+
+/** @} */
+
 /*
  * unref a glamor pixmap (specialized form of fbPixmap) and free
  * if refcnt already had reached 1
