@@ -204,6 +204,7 @@ if build_xorg
      'tests.c',
      'touch.c',
      'xfree86.c',
+     'xtrans-fd.c',
      'xtest.c',
      'ddc-tests.c',
     ]
