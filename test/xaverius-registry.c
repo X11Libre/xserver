@@ -19,6 +19,8 @@
 #include "os/client_priv.h"
 #include "tests-common.h"
 #include "xaverius_priv.h"
+#include "xaverius_intern.h"
+#include "xaverius_intern.h"
 
 static int test_retain_calls;
 static int test_release_calls;
@@ -1771,6 +1773,11 @@ xaverius_registry_fini_quiesce_pending_failure(void)
     assert(role_pend->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS);
     assert(role_fail->quiesce_state == XAVERIUS_MODULE_QUIESCE_FAILURE);
 
+    /* Save role generations before attempting Finalize — used to prove
+     * exact pointer identity after Finalize (no dereferencing freed roles). */
+    uint64_t role_pend_gen = role_pend->role_generation;
+    uint64_t role_fail_gen = role_fail->role_generation;
+
     /* Retained devices/roles remain valid — verify they are still
      * accessible through their bindings and roles. */
     assert(dev_pend->binding != NULL);
@@ -1780,13 +1787,119 @@ xaverius_registry_fini_quiesce_pending_failure(void)
 
     /* Attempted Finalize on a quarantined role must NOT unlink/free it
      * while retained bindings still point to it. Verify list membership
-     * and pointer identity remain intact. */
+     * count, exact pointer identity via role_generation lookup, and
+     * quarantined flag remain intact. */
     XaveriusModuleRoleFinalize(role_pend);
     XaveriusModuleRoleFinalize(role_fail);
-    assert(xorg_list_is_empty(&xaverius_module_roles) == false);
+    assert(xaverius_module_role_count == 2);
+    /* Look up by generation to prove exact pointer identity without
+     * dereferencing potentially freed roles. */
+    struct _XaveriusModuleRole *found_pend = xaverius_find_module_role_by_generation(role_pend_gen);
+    struct _XaveriusModuleRole *found_fail = xaverius_find_module_role_by_generation(role_fail_gen);
+    assert(found_pend == role_pend);
+    assert(found_fail == role_fail);
     assert(role_pend->quarantined == 1);
     assert(role_fail->quarantined == 1);
 
+    xaverius_binding_preference_set(NULL);
+}
+
+static void
+xaverius_registry_quiesce_retry_retirement(void)
+{
+    XaveriusModuleRoleDescriptor desc;
+    XaveriusModuleRole *role_pend = NULL;
+    XaveriusModuleRole *role_fail = NULL;
+    XaveriusDeviceIdentity id = { 0 };
+    struct XaveriusDeviceBackendOps ops;
+    XaveriusDeviceBackendRegistration reg;
+    XaveriusPhysicalDevice *dev_pend = NULL;
+    XaveriusPhysicalDevice *dev_fail = NULL;
+    uint64_t dev_gen = 0, bind_gen = 0;
+    uint64_t role_pend_gen = 0, role_fail_gen = 0;
+    static const char *prefs[] = { NULL };
+
+    assert(XaveriusRegistryInit());
+    xaverius_binding_preference_set(prefs);
+
+    /* Role that first quiesces PENDING, later retries SUCCESS. */
+    make_valid_desc(&desc, "role-pend-retry");
+    desc.quiesce_module_role = quiesce_pending;
+    assert(XaveriusModuleRoleCreate(&desc, &role_pend) == XAVERIUS_REGISTRY_SUCCESS);
+    role_pend_gen = role_pend->role_generation;
+
+    /* Role that permanently quiesces FAILURE (quarantine never cleared). */
+    make_valid_desc(&desc, "role-fail-retry");
+    desc.quiesce_module_role = quiesce_failure;
+    assert(XaveriusModuleRoleCreate(&desc, &role_fail) == XAVERIUS_REGISTRY_SUCCESS);
+    role_fail_gen = role_fail->role_generation;
+
+    id.bus = 80;
+    id.device = 1;
+    memset(id.driver_uuid, 0xaa, sizeof(id.driver_uuid));
+    setup_min_ops(&ops, true);
+    snapshot_result_mode = XAVERIUS_BACKEND_SUCCESS;
+
+    /* Register device bound to PENDING role. */
+    setup_min_reg(&reg, &id, &ops, role_pend);
+    id.device = 1;
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev_pend, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev_pend != NULL);
+
+    /* Register device bound to FAILURE role. */
+    id.device = 2;
+    setup_min_reg(&reg, &id, &ops, role_fail);
+    assert(XaveriusRegistryRegisterDdxDevice(NULL, &reg, &dev_fail, &dev_gen,
+                                             &bind_gen) == XAVERIUS_REGISTRY_SUCCESS);
+    assert(dev_fail != NULL);
+
+    /* First quiesce: PENDING → PENDING state (not yet quarantined). FAILURE → FAILURE. */
+    assert(XaveriusModuleRoleQuiesce(role_pend) == XAVERIUS_MODULE_QUIESCE_PENDING);
+    assert(role_pend->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS);
+    assert(role_pend->quarantined == 0); /* not quarantined until Fini */
+
+    assert(XaveriusModuleRoleQuiesce(role_fail) == XAVERIUS_MODULE_QUIESCE_FAILURE);
+    assert(role_fail->quiesce_state == XAVERIUS_MODULE_QUIESCE_FAILURE);
+    assert(role_fail->quarantined == 0); /* not quarantined until Fini */
+
+    /* RegistryFini: SUCCESS devices freed, PENDING/FAILURE retained + quarantined. */
+    reset_hook_counts();
+    XaveriusRegistryFini();
+    assert(xaverius_physical_device_count == 2); /* both PENDING/FAILURE devices retained */
+    assert(xaverius_module_role_count == 2);     /* both roles retained */
+
+    /* After Fini: both roles quarantined. */
+    assert(role_pend->quarantined == 1);
+    assert(role_fail->quarantined == 1);
+
+    /* Before retry: both roles still findable by generation. */
+    assert(xaverius_find_module_role_by_generation(role_pend_gen) == role_pend);
+    assert(xaverius_find_module_role_by_generation(role_fail_gen) == role_fail);
+
+    /* Simulate retry: change hook to one that returns SUCCESS, then quiesce. */
+    role_pend->quiesce_module_role = counting_quiesce;
+    assert(XaveriusModuleRoleQuiesce(role_pend) == XAVERIUS_MODULE_QUIESCE_SUCCESS);
+    assert(role_pend->quiesce_state == XAVERIUS_MODULE_QUIESCE_SUCCESS);
+    assert(role_pend->quarantined == 0); /* quarantine cleared on proven-safe quiesce */
+
+    /* Now Fini again: SUCCESS role finalized (freed), FAILURE role retained. */
+    reset_hook_counts();
+    XaveriusRegistryFini();
+    assert(xaverius_physical_device_count == 1); /* only FAILURE device retained */
+    assert(xaverius_module_role_count == 1);     /* only FAILURE role retained */
+
+    /* Only FAILURE role still findable; PENDING role was finalized. */
+    assert(xaverius_find_module_role_by_generation(role_pend_gen) == NULL);
+    assert(xaverius_find_module_role_by_generation(role_fail_gen) == role_fail);
+    assert(role_fail->quarantined == 1);
+
+    /* Release remaining references. Role stays quarantined (FAILURE roles
+     * are never retired). Device and role remain in lists — this is
+     * expected for permanently failed roles. */
+    XaveriusPhysicalDeviceRelease(dev_fail);
+    /* XaveriusModuleRoleFinalize(role_fail) would be a no-op — role is
+     * quarantined and stays retained until server shutdown. */
     xaverius_binding_preference_set(NULL);
 }
 
@@ -1950,6 +2063,7 @@ xaverius_registry_test(void)
         xaverius_registry_fini_quiesce_pending_failure,
         xaverius_registry_preference_cannot_replace_published,
         xaverius_registry_init_reentry,
+        xaverius_registry_quiesce_retry_retirement,
         NULL,
     };
 

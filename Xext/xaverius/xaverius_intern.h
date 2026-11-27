@@ -386,6 +386,9 @@ extern uint32_t xaverius_tombstone_count;
 extern uint64_t xaverius_next_observation_id;
 uint64_t xaverius_next_observation_id_fn(void);
 
+/* Find a ModuleRole by its exact generation (defined in xaverius_registry.c). */
+struct _XaveriusModuleRole *xaverius_find_module_role_by_generation(uint64_t role_generation);
+
 /* DIX resource type for published PhysicalDevices (server-private). */
 extern RESTYPE XaveriusPhysicalDeviceType;
 

@@ -25,8 +25,6 @@ xaverius_find_discovery_source(const char *source_key);
 
 uint64_t xaverius_next_generation_id(void);
 bool XaveriusPhysicalDeviceTypeInit(void);
-struct _XaveriusModuleRole *
-xaverius_find_module_role_by_generation(uint64_t role_generation);
 struct _XaveriusDeviceBackendBinding *
 xaverius_binding_alloc(const XaveriusDeviceBackendRegistration *registration,
                        struct _XaveriusModuleRole *role);
@@ -530,9 +528,13 @@ XaveriusModuleQuiescenceResult XaveriusModuleRoleQuiesce(XaveriusModuleRole *rol
     /* Returns PENDING/SUCCESS/FAILURE. */
     XaveriusModuleQuiescenceResult qr = r->quiesce_module_role(r);
 
-    if (qr == XAVERIUS_MODULE_QUIESCE_SUCCESS)
+    if (qr == XAVERIUS_MODULE_QUIESCE_SUCCESS) {
         r->quiesce_state = XAVERIUS_MODULE_QUIESCE_SUCCESS;
-    else if (qr == XAVERIUS_MODULE_QUIESCE_FAILURE)
+        /* A later proven-safe quiesce clears quarantine so the role can be
+         * retired on a subsequent RegistryFini(). Safe because exec_ref == 0
+         * (checked above) — no active callback references remain. */
+        r->quarantined = 0;
+    } else if (qr == XAVERIUS_MODULE_QUIESCE_FAILURE)
         r->quiesce_state = XAVERIUS_MODULE_QUIESCE_FAILURE;
     /* PENDING/ACTIVE: leave state unchanged — role is retained. */
 
