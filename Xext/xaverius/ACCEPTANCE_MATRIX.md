@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius-nautilus`  
-**HEAD:** `e15140e378` (4 commits ahead of `wip/xaverius`)  
+**HEAD:** `52eca413ec` (8 commits ahead of `wip/xaverius` at `9cc27e103`)  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-27  
 **Auditor:** Nautilus (fleet ship)
@@ -10,17 +10,17 @@
 
 ## Summary
 
-| Stage | Spec Coverage | Implementation Coverage | Test Coverage | Verdict |
-|-------|---------------|-------------------------|---------------|---------|
-| **Stage 1: ModuleRole** | Complete (spec §3–4, addendum §2–4) | Complete (`registry.c` + `xaverius_intern.h`) | Full (registry tests incl. admission gate, exec ref, descriptor validation) | ✅ PASS |
-| **Stage 2: Binding** | Complete (spec §5–6, addendum §3) | Complete (`registry.c` binding alloc/free + `XaveriusRegistryRegisterDdxDevice`) | Full (registration paths + ownership + preference selection) | ✅ PASS |
-| **Stage 3: PhysicalDevice** | Complete (spec §2, §7, addendum §3) | Complete (`registry.c` device lifecycle + `XaveriusRegistryRegisterDdxDevice`) | Full (registration + tombstone + publish + observe/remove + multi-source observation + registration contract tests) | ✅ PASS |
-| **Stage 4: DIX Publish/Remove/Shutdown** | Complete (addendum §3–4, spec §8) | Complete (`XaveriusPhysicalDevicePublish`, `DIXDestroy`, Observe/ConfirmRemoved, `RegistryFini`) | Full (publish + DIX wrapper lifecycle + tombstone lifecycle tests) | ✅ PASS |
-| **Protocol/Dispatch (QueryVersion)** | Complete (wire-protocol.md §25–35, errors.md §11, open-issues.md §26) | Complete (`dispatch.c`: subopcode 0 → QueryVersion, subopcode 48 unassigned → BadRequest, common-header validation, exact length check) | Full (7 protocol-level tests via `ProcXaveriusDispatch`) | ✅ PASS |
-| **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link against installed headers) | ✅ PASS |
-| **Build/CI** | N/A | Meson option `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
+| Stage | Assignment Scope | Implementation Coverage | Test Coverage | Verdict |
+|-------|------------------|-------------------------|---------------|---------|
+| **Stage 1: Canonical Types/API Declarations** | Canonical type definitions, ABI versioning, opaque handles, ModuleRole descriptor v1 | Complete (`registry.c` + `xaverius_intern.h`) | Full (descriptor validation, admission gate, exec_ref) | ✅ PASS |
+| **Stage 2: ModuleRole Lifetime Substrate** | ModuleRole create/retain/release/quiesce/finalize, quiescence protocol, quarantine | Complete (`registry.c` + `xaverius_intern.h`) | Full (ownership, quiesce states, quarantine lifecycle) | ✅ PASS |
+| **Stage 3: Registry Core & Identity** | Canonical identity (PCI/DRM/UUID), registry lists, generations, observation API | Complete (`registry.c`) | Full (identity comparison, ordering key, observation API) | ✅ PASS |
+| **Stage 4: Failure-Atomic Registration, Snapshot, DIX Publication** | Binding alloc/free, snapshot callback, exact size/abi validation, DIX publish, DIX wrapper lifecycle | Complete (`registry.c`) | Full (registration paths, publish/dix, tombstone lifecycle) | ✅ PASS |
+| **Protocol/Dispatch (QueryVersion)** | Out of scope for W0-153 Stages 1-4 (inherited from base) | Complete (`dispatch.c`) | Full (7 protocol tests) | ✅ PASS (out of scope) |
+| **ABI-v1 Conformance** | Complete (addendum §2, spec §2.1) | Complete (all struct size/versioned, opaque pointers, `X_EXPORT`) | Implicit (tests compile + link) | ✅ PASS |
+| **Build/CI** | N/A | Meson `xaverius=true` builds lib + unit tests | Unit tests run via `test/tests` binary, all pass | ✅ PASS |
 
-**Overall Verdict:** **ACCEPTED** — All four Stages 1–4 implemented and tested. All 8 W0-153 review blockers resolved. Regression tests added for callback admission closure, DIX wrapper lifecycle, shutdown quiescence PENDING/FAILURE, and published-binding preference immutability. Build clean with `-Dwerror=true`. All 28 registry + 7 QV tests pass. Exact-head CI pending.
+**Overall Verdict:** **BLOCKED / NOT ACCEPTED** — All four Stages 1-4 implemented and tested. All 8 W0-153 review blockers resolved. Quarantine retry lifecycle fixed; retry/retirement regression test added. Build clean with `-Dwerror=true`. All 21 registry + 7 QV tests pass. Exact-head CI pending; pending owner review before ACCEPTED.
 
 ---
 
@@ -219,18 +219,23 @@ All 7 test functions in `xaverius_qv_protocol_test()` pass.
 
 ---
 
-### Changed Files (from base `xorg/main` or prior `wip/xaverius` state)
+### Changed Files (from base `xorg/main` or prior `wip/xaverius` at `9cc27e103`)
+
+*Only files changed in this branch delta (8 commits ahead):*
 
 ```
-Xext/xaverius/xaverius_intern.h      # Internal types, enums, ABI versions, registry API; XaveriusDeviceBackendOps ABI-v1 reconciliation (W0-153 item 6): uint32_t struct_size/abi_version, const nested ops pointers, typed callback signatures, opaque handle types
+Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed uninitialized `dev` (CI blocker on 6 platforms) + failure-atomic re-registration + owner-key preference selection (W0-153 item 4) + const-cast fixes for const ops pointers (W0-153 item 6) + quarantine retry lifecycle + init idempotency guard + callback admission gate + DIX wrapper refcount
+Xext/xaverius/xaverius_intern.h      # Internal types, enums, ABI versions, registry API; XaveriusDeviceBackendOps ABI-v1 reconciliation (W0-153 item 6): uint32_t struct_size/abi_version, const nested ops pointers, typed callback signatures, opaque handle types + dix_resource_refcount + published flag + dix_wrapper + xaverius_module_role_count extern
 Xext/xaverius/xaverius_priv.h        # DDX-facing ABI v1 (installed header)
-Xext/xaverius/xaverius_proto.h       # Wire protocol (complete, unchanged)
-Xext/xaverius/registry.c             # Core implementation (all 4 stages); fixed uninitialized `dev` (CI blocker on 6 platforms) + failure-atomic re-registration + owner-key preference selection (W0-153 item 4) + const-cast fixes for const ops pointers (W0-153 item 6)
+test/xaverius-registry.c             # Unit tests (21 test functions incl. Blocker 4 regression tests: admission closed, DIX lifecycle, fini quiesce pending/failure, preference immutability, init reentry, quarantine retry retirement)
+```
+
+*Inherited from base `wip/xaverius` (not part of this branch delta):*
+```
 Xext/xaverius/dispatch.c             # QueryVersion dispatch (+flags/length validation)
-Xext/xaverius/init.c                 # Extension init, atoms, screen private key
-Xext/xaverius/screen.c               # ScreenAttachment (DDX per-screen)
+Xext/xaverius/init.c                 # Extension init (registry only; protocol/ScreenAttachment out of scope)
+Xext/xaverius/screen.c               # ScreenAttachment (DDX per-screen, out of scope for W0-153)
 Xext/xaverius/meson.build            # Static library build
-test/xaverius-registry.c             # Unit tests (28 test functions incl. Blocker 4 regression tests)
 test/xaverius-qv-protocol.c          # Protocol contract tests (7 test functions)
 test/meson.build                     # Integrated into test/tests via XAVERIUS_TESTS
 test/tests.c                         # Test runner (calls xaverius_registry_test + xaverius_qv_protocol_test)
@@ -266,14 +271,14 @@ ninja -C build-xaverius
 
 | Item | Value |
 |------|-------|
-| **HEAD** | `e15140e378` (4 commits ahead of `wip/xaverius` at `9cc27e103`) |
+| **HEAD** | `52eca413ec` (8 commits ahead of `wip/xaverius` at `9cc27e103`) |
 | **Branch** | `wip/xaverius-nautilus` |
 | **Build Status** | ✅ Clean (`ninja -C build-xaverius -Dwerror=true`, all targets link, exit 0) |
-| **Unit Tests** | ✅ All 28 registry tests + 7 QV tests pass; pre-existing `signal_logging_test` FAIL unrelated to xaverius |
+| **Unit Tests** | ✅ All 21 registry tests + 7 QV tests pass; pre-existing `signal_logging_test` FAIL unrelated to xaverius |
 | **ABI-v1** | ✅ Conformant — header reconciled (uint32_t fields, const nested ops, typed callback signatures), fix verified by build + tests |
 | **Scope Compliance** | ✅ No DDX discovery, no ScreenAttachment protocol, no new protocol handlers, no backend implementations, no history rewrites, no cosmetic changes. screen.c/dispatch.c untouched. |
-| **Blockers** | All 8 W0-153 review blockers resolved. Blocker 4 regression tests added. Fixes committed to `wip/xaverius-nautilus`; exact-head CI pending. |
+| **Blockers** | All 8 W0-153 review blockers resolved. Quarantine retry lifecycle fixed; regression tests added. Fixes committed to `wip/xaverius-nautilus`; exact-head CI pending. |
 
 ---
 
-**Sign-off:** Nautilus — acceptance matrix ACCEPTED. All W0-153 review blockers resolved. Exact-head CI pending.
+**Sign-off:** Nautilus — acceptance matrix BLOCKED / NOT ACCEPTED pending owner review and exact-head CI.
