@@ -92,9 +92,16 @@ int XaveriusPhysicalDeviceDIXDestroy(void *value, XID xid)
      * PhysicalDevice record remains owned by the registry until explicit
      * removal via XaveriusRegistryFini() or removal path. */
     if (wrapper != NULL) {
+        XaveriusPhysicalDevice *dev = wrapper->dev;
         if (wrapper->refcount > 0) {
             wrapper->refcount--;
             if (wrapper->refcount == 0) {
+                /* Release PhysicalDevice's DIX-resource ownership reference.
+                 * The PhysicalDevice tracks its wrapper; clear the pointer
+                 * so the device knows its DIX resource is gone. */
+                if (dev != NULL) {
+                    dev->dix_wrapper = NULL;
+                }
                 free(wrapper);
             }
         }
@@ -166,8 +173,11 @@ void XaveriusRegistryFini(void)
     struct _XaveriusDiscoverySource *src, *next_src;
     XaveriusObservation *obs, *next_obs;
 
-    /* Step 1: Close admission on all roles — stop new callbacks. */
+    /* Step 1: Close admission on all roles — stop new callbacks.
+     * Use the canonical XaveriusModuleRoleAdmissionClose() to ensure
+     * callback_admission_open is also cleared (checked by AcquireExecRef). */
     xorg_list_for_each_entry(role, &xaverius_module_roles, list) {
+        XaveriusModuleRoleAdmissionClose(role);
         role->admission = XAVERIUS_MODULE_ROLE_ADMISSION_CLOSED;
     }
 
@@ -207,6 +217,9 @@ void XaveriusRegistryFini(void)
                 FreeResource(dev->xid, RT_NONE);
                 dev->xid = 0;
             }
+            /* Clear DIX wrapper reference if present — the DIX resource
+             * was freed by FreeResource above, which calls DIXDestroy. */
+            dev->dix_wrapper = NULL;
             free(dev->identity_evidence);
             free(dev->snapshot.data);
             xaverius_binding_free(dev->binding);
@@ -232,6 +245,7 @@ void XaveriusRegistryFini(void)
                 FreeResource(dev->xid, RT_NONE);
                 dev->xid = 0;
             }
+            dev->dix_wrapper = NULL;
             free(dev->identity_evidence);
             free(dev->snapshot.data);
             xaverius_binding_free(dev->binding);
@@ -990,9 +1004,19 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
     /* Query the physical snapshot through the exact provisional binding's
      * query_physical_snapshot callback. Write into a temporary snapshot so
      * the callback-owned memory is never freed before being deep-copied
-     * into server-owned storage (avoids use-after-free). */
+     * into server-owned storage (avoids use-after-free).
+     * Protect with execution-ref protocol: acquire before callback, release
+     * after, regardless of success/failure. */
     XaveriusPhysicalDeviceSnapshot snap = { 0 };
+    XaveriusModuleRole *role_for_exec = binding->module_role;
+    bool exec_acquired = false;
+    if (role_for_exec != NULL) {
+        exec_acquired = XaveriusModuleRoleAcquireExecRef(role_for_exec);
+    }
     snap_result = registration->ops->query_physical_snapshot(binding, &snap);
+    if (exec_acquired) {
+        XaveriusModuleRoleReleaseExecRef(role_for_exec);
+    }
     if (snap_result != XAVERIUS_BACKEND_SUCCESS) {
         free(snap.data);
         xaverius_binding_free(binding);
@@ -1020,9 +1044,13 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         return XAVERIUS_REGISTRY_INVALID_EVIDENCE;
     }
 
-    /* Deep copy snapshot data into server-owned immutable storage */
+    /* Deep copy snapshot data into server-owned immutable storage.
+     * Keep snapshot_copy local until after if/else to ensure atomic swap
+     * and proper old-snapshot cleanup in re-registration path. */
+    void *snapshot_copy = NULL;
+    size_t snapshot_copy_size = 0;
     {
-        void *snapshot_copy = calloc(1, snap.size);
+        snapshot_copy = calloc(1, snap.size);
         if (snapshot_copy == NULL) {
             free(snap.data);
             xaverius_binding_free(binding);
@@ -1034,8 +1062,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         }
         memcpy(snapshot_copy, snap.data, snap.size);
         free(snap.data);
-        dev->snapshot.data = snapshot_copy;
-        dev->snapshot.size = snap.size;
+        snapshot_copy_size = snap.size;
     }
 
     /* The device's binding pointer will be set after the new/existing
@@ -1045,6 +1072,8 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         xorg_list_append(&dev->list, &xaverius_physical_devices);
         xaverius_physical_device_count++;
         dev->binding = binding;
+        dev->snapshot.data = snapshot_copy;
+        dev->snapshot.size = snapshot_copy_size;
     } else {
         /* Re-registration: mutate existing device atomically now that all
          * validation has succeeded. No partial state is visible on failure.
@@ -1052,7 +1081,7 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
          * the old binding (kept intact during validation), set a fresh caller
          * reference instead of incrementing, since this is a new selection
          * through a different role, not a replay.
-         * Also free the old snapshot data before installing the new one. */
+         * Free the OLD snapshot data before installing the new one. */
         if (is_replacement) {
             xaverius_binding_free(dev->binding);
             dev->binding = NULL;
@@ -1063,11 +1092,11 @@ XaveriusRegistryResult XaveriusRegistryRegisterDdxDevice(
         /* Free old snapshot data before installing new snapshot. */
         if (dev->snapshot.data != NULL) {
             free(dev->snapshot.data);
-            dev->snapshot.data = NULL;
-            dev->snapshot.size = 0;
         }
+        dev->snapshot.data = snapshot_copy;
+        dev->snapshot.size = snapshot_copy_size;
         dev->device_generation = xaverius_next_generation_id();
-        binding->binding_generation = dev->device_generation;
+        binding->binding_generation = xaverius_next_generation_id(); /* independent generation */
         dev->binding = binding;
     }
 
@@ -1487,7 +1516,12 @@ XaveriusRegistryResult XaveriusPhysicalDevicePublish(XaveriusPhysicalDevice *dev
         return XAVERIUS_REGISTRY_INTERNAL_ERROR;
     }
 
+    /* Acquire PhysicalDevice DIX-resource ownership reference.
+     * This is a separate ref from caller_refcount and wrapper refcount.
+     * The PhysicalDevice tracks its DIX wrapper to manage lifetime correctly. */
     dev->xid = xid;
+    dev->dix_wrapper = wrapper;
+
     if (out_xid != NULL)
         *out_xid = xid;
 

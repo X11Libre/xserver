@@ -25,6 +25,9 @@ typedef struct _XaveriusPhysicalDevice XaveriusPhysicalDevice;
 /* XaveriusPhysicalDevice is fully defined in xaverius_priv.h (DDX-facing).
  * Only forward declaration here to avoid duplicate typedef. */
 
+struct _XaveriusPhysicalDeviceDIXWrapper;
+typedef struct _XaveriusPhysicalDeviceDIXWrapper XaveriusPhysicalDeviceDIXWrapper;
+
 /* Matches spec/device-registry-architecture.md §7 (XaveriusRegistryResult). */
 typedef enum {
     XAVERIUS_REGISTRY_SUCCESS            = 0,
@@ -314,6 +317,15 @@ struct _XaveriusPhysicalDevice {
     /* Server-private DIX resource XID assigned on publication (0 if unpublished). */
     XID xid;
 
+    /* DIX wrapper pointer — tracks the wrapper owned by the DIX resource DB.
+     * The PhysicalDevice holds a DIX-resource ownership reference separate from
+     * wrapper refcount and caller_refcount. This ref is acquired exactly once
+     * after successful AddResource/publication and released exactly once in
+     * XaveriusPhysicalDeviceDIXDestroy when wrapper refcount reaches 0.
+     * This ensures the PhysicalDevice record persists until both the DIX
+     * resource and all registry references are gone. */
+    XaveriusPhysicalDeviceDIXWrapper *dix_wrapper;
+
     char ordering_key[128];
 
     /* Caller-owned reference count (from XaveriusRegistryRegisterDdxDevice).
@@ -410,10 +422,10 @@ void XaveriusModuleRoleQuarantine(XaveriusModuleRole *role);
  * PhysicalDevice record itself. Freeing the wrapper (via XaveriusPhysicalDeviceDIXDestroy)
  * releases only DIX-side ownership, never registry membership or tombstone state.
  * The wrapper has its own reference count for DIX-side ownership tracking. */
-typedef struct _XaveriusPhysicalDeviceDIXWrapper {
+struct _XaveriusPhysicalDeviceDIXWrapper {
     XaveriusPhysicalDevice *dev;
     uint32_t refcount;  /* DIX-side ownership reference count */
-} XaveriusPhysicalDeviceDIXWrapper;
+};
 
 /* ---- XaveriusPhysicalDevicePublish — separate server-internal publication operation.
  * Allocates a server-private XID, prepares the DIX wrapper, and atomically
