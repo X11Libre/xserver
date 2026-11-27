@@ -104,6 +104,7 @@ xf86parseModuleSubSection(XF86LoadPtr head, char *name)
             xf86parseError(UNEXPECTED_EOF_MSG);
             free(ptr);
             return NULL;
+            break;
         default:
             xf86parseError(INVALID_KEYWORD_MSG, xf86tokenString());
             free(ptr);
@@ -216,11 +217,8 @@ xf86printModuleSection(FILE * cf, XF86ConfModulePtr ptr)
             else
                 fputc('\n', cf);
             break;
-#if 0
         default:
-            fprintf(cf, "#\tUnknown type  \"%s\"\n", lptr->load_name);
             break;
-#endif
         }
     }
 }
