@@ -28,7 +28,6 @@
 
 #include <dix-config.h>
 
-#include <stdbool.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>
@@ -117,7 +116,10 @@ ProcXTestCompareCursor(ClientPtr client)
     CursorPtr pCursor;
     DeviceIntPtr ptr = PickPointer(client);
 
-    X_CALL_CHECK_ERR(dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess));
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    if (rc != Success) {
+        return rc;
+    }
 
     if (!ptr) {
         return BadAccess;
@@ -127,12 +129,13 @@ ProcXTestCompareCursor(ClientPtr client)
         pCursor = NullCursor;
     } else if (stuff->cursor == XTestCurrentCursor) {
         pCursor = InputDevGetSpriteCursor(ptr);
-    }
-    else {
-        X_CALL_CHECK_ERR_VAL(
-            dixLookupResourceByType((void **) &pCursor, stuff->cursor,
-                                     X11_RESTYPE_CURSOR, client, DixReadAccess),
-            stuff->cursor);
+    } else {
+        rc = dixLookupResourceByType((void **) &pCursor, stuff->cursor,
+                                     X11_RESTYPE_CURSOR, client, DixReadAccess);
+        if (rc != Success) {
+            client->errorValue = stuff->cursor;
+            return rc;
+        }
     }
 
     xXTestCompareCursorReply reply = {
@@ -187,7 +190,7 @@ ProcXTestFakeInput(ClientPtr client)
     xEvent *ev;
     DeviceIntPtr dev = NULL;
     WindowPtr root;
-    bool extension = FALSE;
+    Bool extension = FALSE;
     ValuatorMask mask;
     int valuators[MAX_VALUATORS] = { 0 };
     int numValuators = 0;
@@ -208,9 +211,12 @@ ProcXTestFakeInput(ClientPtr client)
         extension = TRUE;
 
         /* check device */
-        X_CALL_CHECK_ERR_VAL(
-            dixLookupDevice(&dev, stuff->deviceid & 0177, client, DixWriteAccess),
-            stuff->deviceid & 0177);
+        int rc = dixLookupDevice(&dev, stuff->deviceid & 0177, client,
+                             DixWriteAccess);
+        if (rc != Success) {
+            client->errorValue = stuff->deviceid & 0177;
+            return rc;
+        }
 
         /* check type */
         type -= DeviceValuator;
@@ -254,7 +260,7 @@ ProcXTestFakeInput(ClientPtr client)
 
         if (type == XI_DeviceMotionNotify) {
             firstValuator = ((deviceValuator *) (ev + 1))->first_valuator;
-            if (firstValuator >= dev->valuator->numAxes) {
+            if (firstValuator > dev->valuator->numAxes) {
                 client->errorValue = ev->u.u.type;
                 return BadValue;
             }
@@ -284,43 +290,32 @@ ProcXTestFakeInput(ClientPtr client)
                 client->errorValue = dv->first_valuator;
                 return BadValue;
             }
-            if (dv->num_valuators < 1 || dv->num_valuators > 6) {
+            switch (dv->num_valuators) {
+            case 6:
+                valuators[base + 5] = dv->valuator5;
+            case 5:
+                valuators[base + 4] = dv->valuator4;
+            case 4:
+                valuators[base + 3] = dv->valuator3;
+            case 3:
+                valuators[base + 2] = dv->valuator2;
+            case 2:
+                valuators[base + 1] = dv->valuator1;
+            case 1:
+                valuators[base] = dv->valuator0;
+                break;
+            default:
                 client->errorValue = dv->num_valuators;
                 return BadValue;
             }
 
-            /* Validate that the valuators stay within the device's axis
-             * count *before* writing them, otherwise an attacker-controlled
-             * first_valuator/num_valuators combination writes past the end of
-             * the fixed-size valuators[MAX_VALUATORS] stack array. */
+            base += dv->num_valuators;
             numValuators += dv->num_valuators;
+
             if (firstValuator + numValuators > dev->valuator->numAxes) {
                 client->errorValue = dv->num_valuators;
                 return BadValue;
             }
-
-            switch (dv->num_valuators) {
-            case 6:
-                valuators[base + 5] = dv->valuator5;
-                /* fallthrough */
-            case 5:
-                valuators[base + 4] = dv->valuator4;
-                /* fallthrough */
-            case 4:
-                valuators[base + 3] = dv->valuator3;
-                /* fallthrough */
-            case 3:
-                valuators[base + 2] = dv->valuator2;
-                /* fallthrough */
-            case 2:
-                valuators[base + 1] = dv->valuator1;
-                /* fallthrough */
-            case 1:
-                valuators[base] = dv->valuator0;
-                break;
-            }
-
-            base += dv->num_valuators;
         }
         type = type - XI_DeviceKeyPress + KeyPress;
 
@@ -415,8 +410,11 @@ ProcXTestFakeInput(ClientPtr client)
         }
 
         if (!(extension || ev->u.keyButtonPointer.root == None)) {
-            X_CALL_CHECK_ERR(dixLookupWindow(&root, ev->u.keyButtonPointer.root,
-                                 client, DixGetAttrAccess));
+            int rc = dixLookupWindow(&root, ev->u.keyButtonPointer.root,
+                                 client, DixGetAttrAccess);
+            if (rc != Success) {
+                return rc;
+            }
             if (root->parent) {
                 client->errorValue = ev->u.keyButtonPointer.root;
                 return BadValue;
