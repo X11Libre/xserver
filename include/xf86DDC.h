@@ -36,6 +36,11 @@ extern _X_EXPORT xf86MonPtr xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool)
 
 extern _X_EXPORT xf86MonPtr xf86PrintEDID(xf86MonPtr monPtr);
 
+/*
+ * Legacy pointer-only parsers: the caller must provide storage for all
+ * extension blocks advertised by the base block. Prefer xf86ParseEDID() when
+ * the actual buffer length is available.
+ */
 extern _X_EXPORT xf86MonPtr xf86InterpretEDID(int screenIndex, uint8_t * block);
 
 extern _X_EXPORT xf86MonPtr xf86InterpretEEDID(int screenIndex, uint8_t * block);
@@ -56,9 +61,11 @@ _X_EXPORT bool xf86DoInterpretHDRMetadata(xf86MonPtr monPtr);
  * the data block will be copied into the structure (actually right after the struct)
  * and thus automatically be freed when the returned struct is freed.
  *
- * @param screenIndex   index of the screen, will be recorded in the xf86Monitor
+ * @param pScreen       screen whose index will be recorded in the xf86Monitor
  * @param block         the EDID block to parse
- * @param size          size of the EDID block (128 or larger for extended types)
+ * @param size          number of available bytes (128 to 32768); only complete
+ *                       extension blocks are copied, missing advertised blocks
+ *                       are zero-filled, and completeness requires all blocks
  * @return              newly allocated xf86MonRec or NULL on failure
  */
 _X_EXPORT xf86MonPtr xf86ParseEDID(ScrnInfoPtr pScreen, uint8_t *block, size_t size);

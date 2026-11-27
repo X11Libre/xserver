@@ -6,11 +6,30 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "include/edid.h"
 #include "include/xf86DDC.h"
 
+#include "../hw/xfree86/ddc/xf86DDC_priv.h"
+
 #include "tests-common.h"
+
+static struct _ScrnInfoRec test_scrn;
+
+/** Ignore a detailed timing while exercising the EDID extension walker. */
+static void ignore_detailed_block(struct detailed_monitor_section *block, void *data)
+{
+    (void) block;
+    (void) data;
+}
+
+/** Ignore a video block while exercising the EDID extension walker. */
+static void ignore_video_block(struct cea_video_block *block, void *data)
+{
+    (void) block;
+    (void) data;
+}
 
 /* https://gitlab.freedesktop.org/emersion/libdisplay-info/-/commit/f7bd5275574e2f6918de48d466233285a1189394  */
 static unsigned char samsung_q800t_hdmi2_0_edid[] = {
@@ -174,12 +193,111 @@ default gamma: 2.20
 signal colorimetry: BT2020_cYCC BT2020_YCC BT2020_RGB
 */
 
+/** Exercise truncated, complete and malformed EDID extension buffers. */
+static void parse_edid_length_safety(void)
+{
+    uint8_t edid[383];
+    xf86MonPtr mon;
+
+    memset(edid, 0, sizeof(edid));
+    memcpy(edid, qemu_edid, sizeof(qemu_edid));
+
+    assert(xf86ParseEDID(&test_scrn, edid, 0) == NULL);
+    assert(xf86ParseEDID(&test_scrn, edid, 1) == NULL);
+    assert(xf86ParseEDID(&test_scrn, edid, 127) == NULL);
+    assert(xf86ParseEDID(&test_scrn, edid, 32769) == NULL);
+    assert(xf86ParseEDID(&test_scrn, edid, SIZE_MAX) == NULL);
+    assert(xf86DoInterpretHDRMetadata(NULL) == false);
+
+    edid[0x7e] = 0;
+    mon = xf86ParseEDID(&test_scrn, edid, 128);
+    assert(mon != NULL);
+    assert(mon->no_sections == 0);
+    assert(mon->flags & MONITOR_EDID_COMPLETE_RAWDATA);
+    free(mon);
+
+    edid[0x7e] = 1;
+    mon = xf86ParseEDID(&test_scrn, edid, 128);
+    assert(mon != NULL);
+    assert(mon->rawData[128] == 0);
+    assert(!(mon->flags & MONITOR_EDID_COMPLETE_RAWDATA));
+    assert(xf86DoInterpretHDRMetadata(mon) == false);
+    free(mon);
+
+    mon = xf86ParseEDID(&test_scrn, edid, 129);
+    assert(mon != NULL);
+    assert(mon->rawData[128] == 0);
+    assert(!(mon->flags & MONITOR_EDID_COMPLETE_RAWDATA));
+    assert(xf86DoInterpretHDRMetadata(mon) == false);
+    xf86ForEachDetailedBlock(mon, ignore_detailed_block, NULL);
+    xf86ForEachVideoBlock(mon, ignore_video_block, NULL);
+    free(mon);
+
+    mon = xf86ParseEDID(&test_scrn, edid, 255);
+    assert(mon != NULL);
+    assert(!(mon->flags & MONITOR_EDID_COMPLETE_RAWDATA));
+    assert(xf86DoInterpretHDRMetadata(mon) == false);
+    xf86ForEachDetailedBlock(mon, ignore_detailed_block, NULL);
+    xf86ForEachVideoBlock(mon, ignore_video_block, NULL);
+    free(mon);
+
+    edid[0x7e] = 2;
+    mon = xf86ParseEDID(&test_scrn, edid, 256);
+    assert(mon != NULL);
+    assert(mon->rawData[256] == 0);
+    assert(!(mon->flags & MONITOR_EDID_COMPLETE_RAWDATA));
+    xf86ForEachDetailedBlock(mon, ignore_detailed_block, NULL);
+    xf86ForEachVideoBlock(mon, ignore_video_block, NULL);
+    free(mon);
+
+    edid[0x7e] = 1;
+    mon = xf86ParseEDID(&test_scrn, edid, 256);
+    assert(mon != NULL);
+    assert(mon->flags & MONITOR_EDID_COMPLETE_RAWDATA);
+    assert(xf86DoInterpretHDRMetadata(mon) == false);
+    free(mon);
+
+    edid[0x7e] = 255;
+    mon = xf86ParseEDID(&test_scrn, edid, 256);
+    assert(mon != NULL);
+    assert(mon->no_sections == 255);
+    assert(!(mon->flags & MONITOR_EDID_COMPLETE_RAWDATA));
+    assert(xf86DoInterpretHDRMetadata(mon) == false);
+    xf86ForEachDetailedBlock(mon, ignore_detailed_block, NULL);
+    xf86ForEachVideoBlock(mon, ignore_video_block, NULL);
+    free(mon);
+
+    edid[0x7e] = 1;
+    memset(edid + 256, 0, sizeof(edid) - 256);
+    mon = xf86ParseEDID(&test_scrn, edid, sizeof(edid));
+    assert(mon != NULL);
+    assert(memcmp(mon->rawData, edid, 256) == 0);
+    assert(mon->flags & MONITOR_EDID_COMPLETE_RAWDATA);
+    assert(xf86DoInterpretHDRMetadata(mon) == false);
+    free(mon);
+
+    memcpy(edid, msi_mag321curv_dp_edid, sizeof(msi_mag321curv_dp_edid));
+    edid[128 + 2] = 255; /* Invalid CTA data-block offset. */
+    mon = xf86ParseEDID(&test_scrn, edid, sizeof(msi_mag321curv_dp_edid));
+    assert(mon != NULL);
+    assert(xf86DoInterpretHDRMetadata(mon) == false);
+    xf86ForEachVideoBlock(mon, ignore_video_block, NULL);
+    free(mon);
+
+    memcpy(edid, msi_mag321curv_dp_edid, sizeof(msi_mag321curv_dp_edid));
+    edid[128 + 2] = 6;
+    edid[128 + 4] = 0x3f; /* Truncated CEA video data block. */
+    mon = xf86ParseEDID(&test_scrn, edid, sizeof(msi_mag321curv_dp_edid));
+    assert(mon != NULL);
+    xf86ForEachVideoBlock(mon, ignore_video_block, NULL);
+    free(mon);
+}
+
 static void
 parse_simple(void)
 {
-    xf86MonPtr mon = xf86InterpretEDID(0, samsung_q800t_hdmi2_0_edid);
-
-    mon->flags |= MONITOR_EDID_COMPLETE_RAWDATA;
+    xf86MonPtr mon = xf86ParseEDID(&test_scrn, samsung_q800t_hdmi2_0_edid,
+                           sizeof(samsung_q800t_hdmi2_0_edid));
 
     xf86DoInterpretHDRMetadata(mon);
 
@@ -204,9 +322,8 @@ parse_simple(void)
     free(mon);
 
     // msi_mag321curv_dp_edid
-    mon = xf86InterpretEDID(0, msi_mag321curv_dp_edid);
-
-    mon->flags |= MONITOR_EDID_COMPLETE_RAWDATA;
+    mon = xf86ParseEDID(&test_scrn, msi_mag321curv_dp_edid,
+                           sizeof(msi_mag321curv_dp_edid));
 
     xf86DoInterpretHDRMetadata(mon);
 
@@ -236,17 +353,16 @@ parse_simple(void)
 
     free(mon);
 
-    mon = xf86InterpretEDID(0, qemu_edid);
+    mon = xf86ParseEDID(&test_scrn, qemu_edid,
+                           sizeof(qemu_edid));
 
-    mon->flags |= MONITOR_EDID_COMPLETE_RAWDATA;
     assert(xf86DoInterpretHDRMetadata(mon) == false);
 
     free(mon);
 
     // hp_5dq99aa_hdmi_edid
-    mon = xf86InterpretEDID(0, hp_5dq99aa_hdmi_edid);
-
-    mon->flags |= MONITOR_EDID_COMPLETE_RAWDATA;
+    mon = xf86ParseEDID(&test_scrn, hp_5dq99aa_hdmi_edid,
+                           sizeof(hp_5dq99aa_hdmi_edid));
 
     xf86DoInterpretHDRMetadata(mon);
 
@@ -281,6 +397,7 @@ const testfunc_t*
 ddc_tests(void)
 {
     static const testfunc_t testfuncs[] = {
+        parse_edid_length_safety,
         parse_simple,
         NULL,
     };

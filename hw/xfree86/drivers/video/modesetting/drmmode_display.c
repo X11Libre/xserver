@@ -3204,10 +3204,11 @@ drmmode_output_get_modes(xf86OutputPtr output)
         koutput_get_prop_blob(drmmode->fd, koutput, "EDID");
 
     if (drmmode_output->edid_blob) {
-        mon = xf86InterpretEDID(output->scrn->scrnIndex,
-                                drmmode_output->edid_blob->data);
-        if (mon && drmmode_output->edid_blob->length > 128)
-            mon->flags |= MONITOR_EDID_COMPLETE_RAWDATA;
+        mon = xf86ParseEDID(output->scrn, drmmode_output->edid_blob->data,
+                            drmmode_output->edid_blob->length);
+        if (mon) {
+            xf86DoInterpretHDRMetadata(mon);
+        }
     }
     xf86OutputSetEDID(output, mon);
 
