@@ -1,7 +1,7 @@
 # Xaverius PhysicalDevice Registry — Acceptance Matrix
 
 **Branch:** `wip/xaverius-nautilus`  
-**HEAD:** `dafdfbf228ae0dfa4d4555386ced03b58c43e682` (12 commits ahead of `wip/xaverius` at `9cc27e103`)  
+**HEAD:** `549a5f90542b531dcdb535ee889e2a5e0754ca47` (14 commits ahead of `wip/xaverius` at `9cc27e103`)  
 **Spec Authority:** `metux/xav-design` branch `docs/restructure-2026-10-21` (cloned at `_WORK_/xav-design`)  
 **Audit Date:** 2026-11-27  
 **Auditor:** Nautilus (fleet ship)
