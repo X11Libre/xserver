@@ -452,3 +452,81 @@ class TestXIChangeCursor:
         assert resp.error_code == x11.BadWindow, (
             "ChangeCursor didn't return BadWindow for Window 0"
         )
+
+
+class TestXIDevicePropertyNotifySwap:
+    """Regression test for a missing byte-swap handler for
+    DevicePropertyNotify events."""
+
+    def test_device_property_notify_swapped_client(
+        self, xserver, xi_xclient_swapped
+    ):
+        """
+        A byte-swapped (opposite-endian) client that selects
+        DevicePropertyNotify events and then triggers a device-property
+        change crashes the whole server.
+
+        When XInput initializes, it installs SEventIDispatch as the
+        byte-swap handler for every device event *except*
+        DevicePropertyNotify.  That slot keeps its default of
+        NotImplemented(), whose body is FatalError("Not implemented").
+
+        So when a swapped client has DevicePropertyNotifyMask selected
+        and a device property changes, WriteEventsToClient() looks up
+        EventSwapVector[DevicePropertyNotify], calls NotImplemented(),
+        and the server aborts -- a denial of service any swapped client
+        can trigger against every session on the server.
+
+        Fixed by wiring EventSwapVector[DevicePropertyNotify] to
+        SEventIDispatch in XInputExtensionInit() (Xext/xinput/extinit.c),
+        matching IResetProc() and the SEventIDispatch dispatch table.
+        """
+        c = xi_xclient_swapped
+        ext = c.query_extension(Extension.XI)
+        opcode = ext.opcode
+
+        # DevicePropertyNotify event type code, and the XEventClass that
+        # selects it for the virtual core keyboard (always present).
+        prop_notify_type = (
+            ext.first_event + xi.DevicePropertyNotify_offset
+        ) & 0xFF
+        event_class = (xi.VirtualCoreKeyboard << 8) | prop_notify_type
+
+        c.send_request(
+            xi.XSelectExtensionEventRequest(
+                opcode=opcode,
+                window=c.root_window,
+                event_classes=[event_class],
+            )
+        )
+
+        # Create/modify a device property so the server emits
+        # DevicePropertyNotify to the selecting (swapped) client.
+        prop = c.intern_atom("XLIBRE_TEST_DEVPROP")
+        XA_INTEGER = 19
+        c.send_request(
+            xi.XChangeDevicePropertyRequest(
+                opcode=opcode,
+                deviceid=xi.VirtualCoreKeyboard,
+                property_atom=prop,
+                type_atom=XA_INTEGER,
+                format=32,
+                data=struct.pack(">I", 1),
+            )
+        )
+
+        # Check for the event itself, not xserver.is_alive: when the server
+        # dies the socket closes before Xvfb has exited, so is_alive can
+        # still be true here.
+        events = [
+            r
+            for r in c.flush_responses(timeout=1.0)
+            if r.response_type & 0x7F == prop_notify_type
+        ]
+        assert events, (
+            "No DevicePropertyNotify received; server likely crashed "
+            "(missing EventSwapVector[DevicePropertyNotify] handler)"
+        )
+
+        atom = struct.unpack_from(f"{c._byte_order}I", events[0].data, 8)[0]
+        assert atom == prop, "DevicePropertyNotify atom not byte-swapped"
