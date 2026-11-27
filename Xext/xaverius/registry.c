@@ -278,10 +278,14 @@ void XaveriusRegistryFini(void)
     /* Step 5: Finalize only successfully quiesced roles. PENDING/FAILURE/
      * ACTIVE roles are retained/quarantined — their code and references stay. */
     xorg_list_for_each_entry_safe(role, next_role, &xaverius_module_roles, list) {
-        if (role->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS) {
-            continue; /* PENDING/FAILURE/ACTIVE — retain/quarantine role. */
+        if (role->quiesce_state == XAVERIUS_MODULE_QUIESCE_SUCCESS) {
+            XaveriusModuleRoleFinalize(role);
+            continue;
         }
-        XaveriusModuleRoleFinalize(role);
+        /* PENDING/FAILURE/ACTIVE — retain role but mark it quarantined so
+         * XaveriusModuleRoleFinalize() will refuse to free it while retained
+         * bindings/devices still reference it via binding->module_role. */
+        XaveriusModuleRoleQuarantine(role);
     }
 
     xorg_list_for_each_entry_safe(obs, next_obs, &xaverius_observations, list) {

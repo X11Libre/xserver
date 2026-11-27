@@ -1755,9 +1755,15 @@ xaverius_registry_fini_quiesce_pending_failure(void)
     assert(xaverius_physical_device_count == 2);
     assert(xaverius_tombstone_count == 0);
 
-    /* PENDING/FAILURE roles remain alive; do NOT force-finalize — their
-     * bindings still reference them via dev->binding->module_role.
-     * A subsequent Init must not overwrite list heads or reset counts
+    /* PENDING/FAILURE roles remain alive and MUST be quarantined so that
+     * XaveriusModuleRoleFinalize() will refuse to free them while retained
+     * bindings/devices still reference them via binding->module_role. */
+    assert(role_pend->quarantined == 1);
+    assert(role_fail->quarantined == 1);
+    assert(role_pend->quiesce_state != XAVERIUS_MODULE_QUIESCE_SUCCESS);
+    assert(role_fail->quiesce_state == XAVERIUS_MODULE_QUIESCE_FAILURE);
+
+    /* A subsequent Init must not overwrite list heads or reset counts
      * while retained objects exist — it must return without mutating. */
     assert(XaveriusRegistryInit() == true);
     assert(xaverius_physical_device_count == 2);
@@ -1771,6 +1777,15 @@ xaverius_registry_fini_quiesce_pending_failure(void)
     assert(dev_pend->binding->module_role == role_pend);
     assert(dev_fail->binding != NULL);
     assert(dev_fail->binding->module_role == role_fail);
+
+    /* Attempted Finalize on a quarantined role must NOT unlink/free it
+     * while retained bindings still point to it. Verify list membership
+     * and pointer identity remain intact. */
+    XaveriusModuleRoleFinalize(role_pend);
+    XaveriusModuleRoleFinalize(role_fail);
+    assert(xorg_list_is_empty(&xaverius_module_roles) == false);
+    assert(role_pend->quarantined == 1);
+    assert(role_fail->quarantined == 1);
 
     xaverius_binding_preference_set(NULL);
 }
