@@ -808,6 +808,7 @@ if build_xserver
         libxserver_miext_damage,
         libxserver_render,
         libxserver_present,
+        libxserver_xaverius,
         libxserver_xres,
         libxserver_xext,
         libxserver_xcmisc,
