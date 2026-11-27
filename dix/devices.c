@@ -165,10 +165,15 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
             return BadAccess;
 
         if (!checkonly) {
+            Bool ok = TRUE;
+
             if ((*((CARD8 *) prop->data)) && !dev->enabled)
-                EnableDevice(dev, TRUE);
+                ok = EnableDevice(dev, TRUE);
             else if (!(*((CARD8 *) prop->data)) && dev->enabled)
-                DisableDevice(dev, TRUE);
+                ok = DisableDevice(dev, TRUE);
+            /* the only commit-pass error XIChangeDeviceProperty() honors */
+            if (!ok)
+                return BadImplementation;
         }
     }
     else if (property == XIGetKnownProperty(XI_PROP_TRANSFORM)) {

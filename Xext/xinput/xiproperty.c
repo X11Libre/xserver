@@ -738,7 +738,8 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
 
             /* run through all handlers with checkonly TRUE, then again with
              * checkonly FALSE. Handlers MUST return error codes on the
-             * checkonly run, errors on the second run are ignored */
+             * checkonly run, errors on the second run are ignored except
+             * BadImplementation (sole handler only), which drops the change */
             do {
                 handler = dev->properties.handlers;
                 while (handler) {
@@ -747,7 +748,8 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
                         rc = handler->SetProperty(dev, prop->propertyName,
                                                   &new_value, checkonly);
                         input_unlock();
-                        if (checkonly && rc != Success) {
+                        if (rc != Success &&
+                            (checkonly || rc == BadImplementation)) {
                             free(new_value.data);
                             if (add)
                                 XIDestroyDeviceProperty(prop);
