@@ -1794,7 +1794,8 @@ xaverius_registry_fini_quiesce_pending_failure(void)
     /* Attempted Finalize on a quarantined role must NOT unlink/free it
      * while retained bindings still point to it. Verify list membership
      * count, exact pointer identity via role_generation lookup, and
-     * quarantined flag remain intact. */
+     * quarantined flag remain intact. Owner release count unchanged. */
+    reset_hook_counts();
     XaveriusModuleRoleFinalize(role_pend);
     XaveriusModuleRoleFinalize(role_fail);
     assert(xaverius_module_role_count == 2);
@@ -1806,6 +1807,9 @@ xaverius_registry_fini_quiesce_pending_failure(void)
     assert(found_fail == role_fail);
     assert(role_pend->quarantined == 1);
     assert(role_fail->quarantined == 1);
+    /* Owner release count unchanged (Finalize on quarantined is no-op). */
+    assert(test_retain_calls == 0);
+    assert(test_release_calls == 0);
 
     xaverius_binding_preference_set(NULL);
 }
@@ -1904,9 +1908,13 @@ xaverius_registry_quiesce_retry_retirement(void)
     assert(test_release_calls == 0);
     assert(xaverius_module_role_count == 2);
 
-    /* Now Fini again: SUCCESS role finalized (freed), FAILURE role retained. */
+    /* Now Fini again: SUCCESS role finalized (freed), FAILURE role retained.
+     * Quarantine is cleared during Fini() when SUCCESS role is finalized. */
     reset_hook_counts();
     XaveriusRegistryFini();
+    /* Device/binding released (1), role finalized releasing role-owned lease (1). */
+    assert(test_release_calls == 2);  /* binding release + role-owned lease release */
+    assert(test_retain_calls == 0);
     assert(xaverius_physical_device_count == 1); /* only FAILURE device retained */
     assert(xaverius_module_role_count == 1);     /* only FAILURE role retained */
 
