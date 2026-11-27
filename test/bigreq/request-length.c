@@ -22,6 +22,7 @@
  */
 
 #include <unistd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <poll.h>
 #include <xcb/xcb.h>
@@ -62,8 +63,15 @@ int main(int argc, char **argv)
     free(xcb_big_requests_enable_reply(c, xcb_big_requests_enable(c), NULL));
 
     /* Manually write out the bad request.  XCB can't help us here.*/
-    if (write(fd, &xise_req, sizeof(xise_req)) != sizeof(xise_req))
+    ssize_t written = write(fd, &xise_req, sizeof(xise_req));
+    if (written != (ssize_t)sizeof(xise_req)) {
+        if (written < 0)
+            perror("write failed");
+        else
+            fprintf(stderr, "short write: wrote %zd of %zu bytes\n",
+                    written, sizeof(xise_req));
         return 2;
+    }
 
     /* Block until the server has processed our mess and throws an
      * error. If we get disconnected, then the server has noticed what we're
