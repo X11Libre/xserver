@@ -102,6 +102,8 @@ from The Open Group.
 
 #if XTRANS_SEND_FDS
 
+#define XTRANS_MAX_RECV_FDS 128
+
 struct _XtransConnFd {
     struct _XtransConnFd   *next;
     int                    fd;
@@ -122,7 +124,12 @@ struct _XtransConnInfo {
     int		addrlen;
     char	*peeraddr;
     int		peeraddrlen;
-    struct _XtransConnFd        *recv_fds;
+#if XTRANS_SEND_FDS
+    int recv_fds[XTRANS_MAX_RECV_FDS];
+    unsigned int recv_fd_head;
+    unsigned int recv_fd_count;
+    int last_read_fd_count;
+#endif
     struct _XtransConnFd        *send_fds;
 };
 

@@ -692,6 +692,11 @@ int _XSERVTransRecvFd (XtransConnInfo ciptr)
 {
     return ciptr->transptr->RecvFd(ciptr);
 }
+
+int _XSERVTransGetLastReadFdCount (XtransConnInfo ciptr)
+{
+    return ciptr->last_read_fd_count;
+}
 #endif
 
 int _XSERVTransDisconnect (XtransConnInfo ciptr)

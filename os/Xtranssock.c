@@ -1169,19 +1169,18 @@ appendFd(struct _XtransConnFd **prev, int fd, int do_close)
     *prev = new;
 }
 
-static int
-removeFd(struct _XtransConnFd **prev)
+static void
+discardRecvFds(XtransConnInfo ciptr)
 {
-    struct _XtransConnFd *cf;
-    int fd;
+    unsigned int i;
 
-    if ((cf = *prev)) {
-        *prev = cf->next;
-        fd = cf->fd;
-        free(cf);
-    } else
-        fd = -1;
-    return fd;
+    for (i = 0; i < ciptr->recv_fd_count; i++) {
+        unsigned int slot =
+            (ciptr->recv_fd_head + i) % XTRANS_MAX_RECV_FDS;
+        ossock_close(ciptr->recv_fds[slot]);
+    }
+    ciptr->recv_fd_head = 0;
+    ciptr->recv_fd_count = 0;
 }
 
 static void
@@ -1203,8 +1202,8 @@ cleanupFds(XtransConnInfo ciptr)
 {
     /* Clean up the send list but don't close the fds */
     discardFd(&ciptr->send_fds, NULL, 0);
-    /* Clean up the recv list and *do* close the fds */
-    discardFd(&ciptr->recv_fds, NULL, 1);
+    /* Clean up the preallocated recv queue and *do* close the fds */
+    discardRecvFds(ciptr);
 }
 
 static int
@@ -1220,8 +1219,20 @@ nFd(struct _XtransConnFd **prev)
 
 static int _XSERVTransSocketRecvFd (XtransConnInfo ciptr)
 {
+    int fd;
+
     prmsg (2, "SocketRecvFd(%d)\n", ciptr->fd);
-    return removeFd(&ciptr->recv_fds);
+    if (ciptr->recv_fd_count == 0)
+        return -1;
+
+    fd = ciptr->recv_fds[ciptr->recv_fd_head];
+    ciptr->recv_fd_head =
+        (ciptr->recv_fd_head + 1) % XTRANS_MAX_RECV_FDS;
+    ciptr->recv_fd_count--;
+    if (ciptr->recv_fd_count == 0)
+        ciptr->recv_fd_head = 0;
+
+    return fd;
 }
 
 static int _XSERVTransSocketSendFd (
@@ -1244,7 +1255,7 @@ static int _XSERVTransSocketSendFdInvalid(
     return -1;
 }
 
-#define MAX_FDS		128
+#define MAX_FDS		XTRANS_MAX_RECV_FDS
 
 union fd_pass {
 	struct cmsghdr	cmsghdr;
@@ -1299,6 +1310,10 @@ static int _XSERVTransSocketRead (
 {
     prmsg (2,"SocketRead(%d,%p,%d)\n", ciptr->fd, (void *) buf, size);
 
+#if XTRANS_SEND_FDS
+    ciptr->last_read_fd_count = 0;
+#endif
+
 #if defined(WIN32)
     {
 	int ret = recv ((SOCKET)ciptr->fd, buf, size, 0);
@@ -1328,21 +1343,68 @@ static int _XSERVTransSocketRead (
         if (size >= 0 && (msg.msg_flags & MSG_CTRUNC)) {
             closeReceivedFds(&msg);
             /* The stream is no longer safe to parse; discard earlier FDs too. */
-            discardFd(&ciptr->recv_fds, NULL, 1);
+            discardRecvFds(ciptr);
+            ciptr->last_read_fd_count = 0;
             errno = EMSGSIZE;
             return -1;
         }
         if (size >= 0) {
             struct cmsghdr *hdr;
+            size_t received_fd_count = 0;
+
+            /*
+             * Count this read's descriptors before changing the queue, so
+             * the complete recvmsg batch is either accepted or rejected.
+             */
+            for (hdr = CMSG_FIRSTHDR(&msg); hdr; hdr = CMSG_NXTHDR(&msg, hdr)) {
+                if (hdr->cmsg_level == SOL_SOCKET && hdr->cmsg_type == SCM_RIGHTS) {
+                    if (hdr->cmsg_len < CMSG_LEN(0)) {
+                        discardRecvFds(ciptr);
+                        ciptr->last_read_fd_count = 0;
+                        errno = EPROTO;
+                        return -1;
+                    }
+                    received_fd_count +=
+                        (hdr->cmsg_len - CMSG_LEN(0)) / sizeof(int);
+                }
+            }
+
+            if (received_fd_count >
+                XTRANS_MAX_RECV_FDS - ciptr->recv_fd_count) {
+                /* Do not accept a partial batch or leave stale descriptors. */
+                for (hdr = CMSG_FIRSTHDR(&msg); hdr;
+                     hdr = CMSG_NXTHDR(&msg, hdr)) {
+                    if (hdr->cmsg_level == SOL_SOCKET &&
+                        hdr->cmsg_type == SCM_RIGHTS) {
+                        int nfd =
+                            (hdr->cmsg_len - CMSG_LEN(0)) / sizeof(int);
+                        int i;
+                        int *fd = (int *) CMSG_DATA(hdr);
+
+                        for (i = 0; i < nfd; i++)
+                            ossock_close(fd[i]);
+                    }
+                }
+                discardRecvFds(ciptr);
+                ciptr->last_read_fd_count = 0;
+                errno = ENOBUFS;
+                return -1;
+            }
 
             for (hdr = CMSG_FIRSTHDR(&msg); hdr; hdr = CMSG_NXTHDR(&msg, hdr)) {
                 if (hdr->cmsg_level == SOL_SOCKET && hdr->cmsg_type == SCM_RIGHTS) {
-                    int nfd = (hdr->cmsg_len - CMSG_LEN(0)) / sizeof (int);
+                    int nfd = (hdr->cmsg_len - CMSG_LEN(0)) / sizeof(int);
                     int i;
                     int *fd = (int *) CMSG_DATA(hdr);
 
-                    for (i = 0; i < nfd; i++)
-                        appendFd(&ciptr->recv_fds, fd[i], 0);
+                    for (i = 0; i < nfd; i++) {
+                        unsigned int slot =
+                            (ciptr->recv_fd_head + ciptr->recv_fd_count) %
+                            XTRANS_MAX_RECV_FDS;
+                        ciptr->recv_fds[slot] = fd[i];
+                        ciptr->recv_fd_count++;
+                        ciptr->last_read_fd_count++;
+                    }
                 }
             }
         }
