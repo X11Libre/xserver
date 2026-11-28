@@ -18,14 +18,18 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(ExtensionAccessCallbackParam);
 
-    /* root NS has super powers */
+    /* only the builtin root namespace may access the X-NAMESPACE management
+       extension; granting ADMIN (superPower) to a sandbox disables its X11
+       isolation without letting it manage namespaces */
+    if (streq(param->ext->name, XNS_EXTENSION_NAME)) {
+        if (subj->ns == &ns_root)
+            goto pass;
+        goto reject;
+    }
+
+    /* root NS or ADMIN bypass has super powers */
     if (subj->ns->superPower)
         goto pass;
-
-    /* the namespace management extension is invisible to non-superPower
-       clients - they must not even learn it exists */
-    if (streq(param->ext->name, XNS_EXTENSION_NAME))
-        goto reject;
 
     switch (param->ext->index + EXTENSION_BASE) {
         /* unrestricted access */
@@ -42,28 +46,22 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
             goto pass;
 
         /* really blacklisted */
+        case EXTENSION_MAJOR_COMPOSITE:
         case EXTENSION_MAJOR_MIT_SCREEN_SAVER:
         case EXTENSION_MAJOR_RECORD:
         case EXTENSION_MAJOR_SECURITY:
         case EXTENSION_MAJOR_XTEST:
-        case EXTENSION_MAJOR_XVIDEO:
             goto reject;
 
-        /* only allowed if namespace has flag set */
+        /* allow QueryExtension for SHAPE and XINPUT so client libraries do not
+           permanently cache extension absence; actual requests are gated live
+           in hookExtDispatch */
         case EXTENSION_MAJOR_SHAPE:
-            if (subj->ns->allowShape)
-                goto pass;
-            goto reject;
-
-        /* only allowed if namespace has flag set */
         case EXTENSION_MAJOR_XINPUT:
-            if (subj->ns->allowXInput)
-                goto pass;
-            goto reject;
+            goto pass;
     }
 
-    XNS_HOOK_LOG("unhandled extension query: %s (%d)\n", param->ext->name, param->ext->index);
-    return;
+    goto pass;
 
 reject:
     param->status = BadAccess;

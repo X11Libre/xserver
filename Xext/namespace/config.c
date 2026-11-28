@@ -5,11 +5,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xdefs.h>
+#include <X11/keysym.h>
+#include <X11/extensions/XI2proto.h>
 
 #include "os/auth.h"
 #include "include/os.h"
 #include "include/dix.h"
+#include "include/inputstr.h"
+#include "include/propertyst.h"
+#include "include/xkbsrv.h"
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
+#include "dix/property_priv.h"
+#include "dix/resource_priv.h"
+#include "dix/selection_priv.h"
 
 #include "namespace.h"
 #include "namespaceproto.h"
@@ -20,6 +29,7 @@ struct Xnamespace ns_root = {
     .allowTransparency = TRUE,
     .allowXInput = TRUE,
     .allowXKeyboard = TRUE,
+    .allowClipboard = TRUE,
     .builtin = TRUE,
     .name = NS_NAME_ROOT,
     .refcnt = 1,
@@ -34,7 +44,33 @@ struct Xnamespace ns_anon = {
 
 struct xorg_list ns_list = { 0 };
 
+struct Xnamespace ns_cgroup_tmpl = { 0 };
+
 char *namespaceConfigFile = NULL;
+Bool namespaceDefaultRoot = FALSE;
+char *namespaceCgroupPrefix = NULL;
+
+static void setCgroupPrefix(const char *raw)
+{
+    if (!raw || !*raw)
+        return;
+    while (*raw == '/')
+        raw++;
+    size_t len = strlen(raw);
+    while (len > 0 && raw[len - 1] == '/')
+        len--;
+    if (len == 0)
+        return;
+    char *norm = calloc(1, len + 3);
+    if (!norm)
+        FatalError("Xnamespace: failed allocating cgroup prefix\n");
+    norm[0] = '/';
+    memcpy(norm + 1, raw, len);
+    norm[len + 1] = '/';
+    norm[len + 2] = '\0';
+    free(namespaceCgroupPrefix);
+    namespaceCgroupPrefix = norm;
+}
 
 static struct Xnamespace* select_ns(const char* name)
 {
@@ -155,6 +191,10 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
                 curr->allowXInput = TRUE;
             else if (strcmp(token, "xkeyboard") == 0)
                 curr->allowXKeyboard = TRUE;
+            else if (strcmp(token, "clipboard") == 0)
+                curr->allowClipboard = TRUE;
+            else if (strcmp(token, "clipboard-auto") == 0)
+                curr->allowClipboardAuto = TRUE;
             else
                 XNS_LOG("unknown allow: %s\n", token);
         }
@@ -167,8 +207,38 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         return;
     }
 
+    if (strcmp(token, "default") == 0)
+    {
+        char *def = strtok(NULL, " \t");
+        if (!def) {
+            XNS_LOG("default missing namespace name\n");
+            return;
+        }
+        if (strcmp(def, "root") == 0)
+            namespaceDefaultRoot = TRUE;
+        else if (strcmp(def, "anon") == 0)
+            namespaceDefaultRoot = FALSE;
+        else
+            XNS_LOG("unknown default namespace \"%s\" (expected root or anon)\n", def);
+        return;
+    }
+
+    if (strcmp(token, "cgroup") == 0 || strcmp(token, "cgroup-prefix") == 0)
+    {
+        char *pfx = strtok(NULL, " \t");
+        if (!pfx) {
+            XNS_LOG("cgroup missing path prefix\n");
+            return;
+        }
+        setCgroupPrefix(pfx);
+        *walk_ns = &ns_cgroup_tmpl;
+        return;
+    }
+
     XNS_LOG("unknown token \"%s\"\n", token);
 }
+
+#define XNS_DEFAULT_CONFIG_FILE "/etc/X11/xnamespace.conf"
 
 Bool XnsLoadConfig(void)
 {
@@ -177,14 +247,16 @@ Bool XnsLoadConfig(void)
     xorg_list_init(&ns_root.auth_tokens);
     xorg_list_init(&ns_anon.auth_tokens);
 
-    if (!namespaceConfigFile) {
-        XNS_LOG("no namespace config given - Xnamespace disabled\n");
-        return FALSE;
-    }
+    const char *cfg = namespaceConfigFile ? namespaceConfigFile
+                                          : XNS_DEFAULT_CONFIG_FILE;
 
-    FILE *fp = fopen(namespaceConfigFile, "r");
+    FILE *fp = fopen(cfg, "r");
     if (fp == NULL) {
-        FatalError("failed loading namespace config: %s\n", namespaceConfigFile);
+        if (!namespaceConfigFile) {
+            XNS_LOG("no namespace config given - Xnamespace disabled\n");
+            return FALSE;
+        }
+        FatalError("failed loading namespace config: %s\n", cfg);
         return FALSE;
     }
 
@@ -195,7 +267,7 @@ Bool XnsLoadConfig(void)
 
     fclose(fp);
 
-    XNS_LOG("loaded namespace config file: %s\n", namespaceConfigFile);
+    XNS_LOG("loaded namespace config file: %s\n", cfg);
 
     struct Xnamespace *ns;
     xorg_list_for_each_entry(ns, &ns_list, entry) {
@@ -321,12 +393,21 @@ static int validateName(const char *name, size_t len)
  */
 static void capsToFields(struct Xnamespace *ns, CARD32 caps)
 {
-    ns->allowMouseMotion  = !!(caps & XNS_CAPABILITY_MOUSE_MOTION);
-    ns->allowShape        = !!(caps & XNS_CAPABILITY_SHAPE);
-    ns->allowTransparency = !!(caps & XNS_CAPABILITY_TRANSPARENCY);
-    ns->allowXInput       = !!(caps & XNS_CAPABILITY_INPUT);
-    ns->allowXKeyboard    = !!(caps & XNS_CAPABILITY_KEYBOARD);
-    ns->superPower        = !!(caps & XNS_CAPABILITY_ADMIN);
+    ns->allowMouseMotion   = !!(caps & XNS_CAPABILITY_MOUSE_MOTION);
+    ns->allowShape         = !!(caps & XNS_CAPABILITY_SHAPE);
+    ns->allowTransparency  = !!(caps & XNS_CAPABILITY_TRANSPARENCY);
+    ns->allowXInput        = !!(caps & XNS_CAPABILITY_INPUT);
+    ns->allowXKeyboard     = !!(caps & XNS_CAPABILITY_KEYBOARD);
+    ns->superPower         = !!(caps & XNS_CAPABILITY_ADMIN);
+    ns->allowClipboard     = !!(caps & XNS_CAPABILITY_CLIPBOARD);
+    ns->allowClipboardAuto = !!(caps & XNS_CAPABILITY_CLIPBOARD_AUTO);
+    if (!ns->allowClipboard && !ns->allowClipboardAuto) {
+        ns->pasteAllowed = FALSE;
+        ns->pendingSelAtom = None;
+        ns->pendingSelRequestor = None;
+        ns->pendingSelProperty = None;
+        ns->xdndSourceWin = None;
+    }
 }
 
 /**
@@ -336,12 +417,284 @@ static void capsToFields(struct Xnamespace *ns, CARD32 caps)
  */
 CARD32 XnsCaps(const struct Xnamespace *ns)
 {
-    return (ns->allowMouseMotion  ? XNS_CAPABILITY_MOUSE_MOTION : 0)
-         | (ns->allowShape        ? XNS_CAPABILITY_SHAPE        : 0)
-         | (ns->allowTransparency ? XNS_CAPABILITY_TRANSPARENCY : 0)
-         | (ns->allowXInput       ? XNS_CAPABILITY_INPUT        : 0)
-         | (ns->allowXKeyboard    ? XNS_CAPABILITY_KEYBOARD     : 0)
-         | (ns->superPower        ? XNS_CAPABILITY_ADMIN        : 0);
+    return (ns->allowMouseMotion   ? XNS_CAPABILITY_MOUSE_MOTION   : 0)
+         | (ns->allowShape         ? XNS_CAPABILITY_SHAPE          : 0)
+         | (ns->allowTransparency  ? XNS_CAPABILITY_TRANSPARENCY   : 0)
+         | (ns->allowXInput        ? XNS_CAPABILITY_INPUT          : 0)
+         | (ns->allowXKeyboard     ? XNS_CAPABILITY_KEYBOARD       : 0)
+         | (ns->superPower         ? XNS_CAPABILITY_ADMIN          : 0)
+         | (ns->allowClipboard     ? XNS_CAPABILITY_CLIPBOARD      : 0)
+         | (ns->allowClipboardAuto ? XNS_CAPABILITY_CLIPBOARD_AUTO : 0);
+}
+
+Bool XnsNamespaceHasFocus(const struct Xnamespace *ns)
+{
+    if (!ns)
+        return FALSE;
+    if (ns->superPower)
+        return TRUE;
+    if (ns->inputFocusUntil &&
+        (int32_t)(ns->inputFocusUntil - GetTimeInMillis()) > 0)
+        return TRUE;
+
+    DeviceIntPtr kbd = inputInfo.keyboard;
+    DeviceIntPtr ptr = inputInfo.pointer;
+
+    WindowPtr win = (kbd && kbd->focus) ? kbd->focus->win : NullWindow;
+    if (!win || win == NoneWin || win == PointerRootWin || win == FollowKeyboardWin) {
+        if (ptr && ptr->spriteInfo && ptr->spriteInfo->sprite)
+            win = ptr->spriteInfo->sprite->win;
+    }
+    if (!win || win == NoneWin || win == PointerRootWin || win == FollowKeyboardWin)
+        return FALSE;
+    struct XnamespaceClientPriv *ownerPriv = XnsClientPriv(dixClientForWindow(win));
+    return (ownerPriv && ownerPriv->ns == ns);
+}
+
+void XnsGrantInputFocusTicket(struct Xnamespace *ns)
+{
+    if (!ns)
+        return;
+    CARD32 until = GetTimeInMillis() + 1000;
+    if (!until)
+        until = 1;
+    ns->inputFocusUntil = until;
+}
+
+Bool XnsIsInputEvent(const xEvent *ev)
+{
+    int type = ev->u.u.type & 0x7f;
+    if (type == ButtonPress || type == ButtonRelease ||
+        type == KeyPress || type == KeyRelease)
+        return TRUE;
+    if (type == GenericEvent) {
+        const xGenericEvent *gev = (const xGenericEvent *)&ev->u;
+        if (gev->extension == EXTENSION_MAJOR_XINPUT &&
+            (gev->evtype == XI_ButtonPress || gev->evtype == XI_ButtonRelease ||
+             gev->evtype == XI_KeyPress || gev->evtype == XI_KeyRelease))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+Bool XnsIsSensitiveRootProperty(const struct Xnamespace *ns, Atom prop)
+{
+    const char *name = NameForAtom(prop);
+    if (!name)
+        return FALSE;
+    if (streq(name, "_NET_CLIENT_LIST") ||
+        streq(name, "_NET_CLIENT_LIST_STACKING") ||
+        streq(name, "_NET_ACTIVE_WINDOW") ||
+        streq(name, "_NET_SUPPORTING_WM_CHECK") ||
+        streq(name, "_WIN_CLIENT_LIST"))
+        return TRUE;
+    if (ns && !ns->allowClipboard && strncmp(name, "CUT_BUFFER", 10) == 0)
+        return TRUE;
+    return FALSE;
+}
+
+Bool XnsIsDesktopSelection(Atom selection)
+{
+    const char *name = NameForAtom(selection);
+    if (!name)
+        return FALSE;
+    if (strncmp(name, "_NET_SYSTEM_TRAY_S", 18) == 0 ||
+        strncmp(name, "_NET_WM_CM_S", 12) == 0 ||
+        strncmp(name, "WM_S", 4) == 0)
+        return TRUE;
+    return FALSE;
+}
+
+Bool XnsIsSystemTrayWindow(WindowPtr pWin)
+{
+    if (!pWin)
+        return FALSE;
+    for (Selection *s = CurrentSelections; s; s = s->next) {
+        if (s->window != pWin->drawable.id || !s->client)
+            continue;
+        struct XnamespaceClientPriv *priv = XnsClientPriv(s->client);
+        if (!priv || !priv->ns || !priv->ns->superPower)
+            continue;
+        const char *name = NameForAtom(s->selection);
+        if (name && strncmp(name, "_NET_SYSTEM_TRAY_S", 18) == 0)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+Bool XnsIsXdndProperty(Atom prop)
+{
+    const char *name = NameForAtom(prop);
+    if (!name)
+        return FALSE;
+    return (streq(name, "XdndTypeList") || streq(name, "XdndActionList"));
+}
+
+Bool XnsIsXdndSelection(Atom selection)
+{
+    const char *name = NameForAtom(selection);
+    return (name && streq(name, "XdndSelection"));
+}
+
+Bool XnsIsInternalSelection(Atom selection)
+{
+    const char *name = NameForAtom(selection);
+    return (name && strncmp(name, "_XNS_", 5) == 0);
+}
+
+Bool XnsHasActiveXdndSource(struct Xnamespace *ns, Window win)
+{
+    if (!ns || ns->xdndSourceWin == None)
+        return FALSE;
+    ClientPtr owner = dixLookupXIDOwner(ns->xdndSourceWin);
+    struct XnamespaceClientPriv *priv = XnsClientPriv(owner);
+    if (!owner || owner->clientGone || !priv || !priv->ns || !priv->ns->superPower) {
+        ns->xdndSourceWin = None;
+        return FALSE;
+    }
+    return (win == None || ns->xdndSourceWin == win);
+}
+
+void XnsClearXdndSource(Window sourceWin)
+{
+    struct Xnamespace *walk;
+    xorg_list_for_each_entry(walk, &ns_list, entry) {
+        if (sourceWin == None || walk->xdndSourceWin == sourceWin)
+            walk->xdndSourceWin = None;
+    }
+}
+
+ClientPtr XnsFindSelectionHelperClient(const struct Xnamespace *ns, Atom target)
+{
+    if (!ns || !ns->name || !ns->name[0] || target == None)
+        return NULL;
+    char selname[256];
+    snprintf(selname, sizeof(selname), "_XNS_SELECTION_HELPER_%s", ns->name);
+    Atom helperAtom = MakeAtom(selname, strlen(selname), FALSE);
+    Atom targetsAtom = MakeAtom("_XNS_SELECTION_TARGETS", 22, FALSE);
+    if (helperAtom == BAD_RESOURCE || helperAtom == None ||
+        targetsAtom == BAD_RESOURCE || targetsAtom == None)
+        return NULL;
+    for (Selection *s = CurrentSelections; s; s = s->next) {
+        if (s->selection != helperAtom || !s->client || s->client->clientGone || !s->pWin)
+            continue;
+        struct XnamespaceClientPriv *priv = XnsClientPriv(s->client);
+        if (!priv || !priv->ns || !priv->ns->superPower)
+            continue;
+        PropertyPtr pProp = NULL;
+        if (dixLookupProperty(&pProp, s->pWin, targetsAtom, serverClient, DixReadAccess) != Success ||
+            !pProp || pProp->format != 32 || !pProp->data || pProp->size <= 0)
+            continue;
+        const CARD32 *atoms = (const CARD32 *)pProp->data;
+        for (uint32_t i = 0; i < (uint32_t)pProp->size; i++) {
+            if ((Atom)atoms[i] == target)
+                return s->client;
+        }
+    }
+    return NULL;
+}
+
+Bool XnsOwnsGlobalSelection(const struct Xnamespace *ns, Atom selection)
+{
+    if (!ns)
+        return FALSE;
+    for (Selection *s = CurrentSelections; s; s = s->next) {
+        if (!s->client || !s->window)
+            continue;
+        if (selection != None && s->selection != selection)
+            continue;
+        const char *name = NameForAtom(s->selection);
+        if (name && name[0] == '<')
+            continue;
+        struct XnamespaceClientPriv *priv = XnsClientPriv(s->client);
+        if (priv && priv->ns == ns)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+Bool XnsHasPasteTicket(struct Xnamespace *ns)
+{
+    if (!ns || !ns->allowClipboardAuto || !ns->pasteAllowed)
+        return FALSE;
+    if (!XnsNamespaceHasFocus(ns)) {
+        ns->pasteAllowed = FALSE;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+Bool XnsClipboardAllowed(struct Xnamespace *ns)
+{
+    if (!ns)
+        return FALSE;
+    if (ns->superPower || ns->allowClipboard)
+        return TRUE;
+    if (ns->allowClipboardAuto) {
+        if (XnsOwnsGlobalSelection(ns, None) || XnsHasPasteTicket(ns))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+Bool XnsClipboardTargetAllowed(const struct Xnamespace *ns)
+{
+    if (!ns)
+        return FALSE;
+    return (ns->superPower || ns->allowClipboard || ns->allowClipboardAuto);
+}
+
+void XnsGrantPasteTicket(struct Xnamespace *ns)
+{
+    if (!ns || !ns->allowClipboardAuto || !XnsNamespaceHasFocus(ns))
+        return;
+    ns->pasteAllowed = TRUE;
+}
+
+void XnsRevokeAllPasteTickets(const struct Xnamespace *exceptNs)
+{
+    struct Xnamespace *walk;
+    xorg_list_for_each_entry(walk, &ns_list, entry) {
+        if (walk != exceptNs)
+            walk->pasteAllowed = FALSE;
+    }
+}
+
+void XnsGrantSelectionTransfer(struct Xnamespace *ownerNs, Atom selection, Window requestor, Atom prop)
+{
+    if (!ownerNs || selection == None || requestor == None || prop == None)
+        return;
+    ownerNs->pendingSelAtom = selection;
+    ownerNs->pendingSelRequestor = requestor;
+    ownerNs->pendingSelProperty = prop;
+}
+
+Bool XnsSelectionTransferAllowed(struct Xnamespace *ownerNs, Window requestor, Atom prop)
+{
+    if (!ownerNs || !XnsClipboardAllowed(ownerNs))
+        return FALSE;
+    if (requestor == None || ownerNs->pendingSelRequestor != requestor)
+        return FALSE;
+    if (ownerNs->pendingSelAtom == None ||
+        !XnsOwnsGlobalSelection(ownerNs, ownerNs->pendingSelAtom))
+        return FALSE;
+    if (prop != None && ownerNs->pendingSelProperty != prop)
+        return FALSE;
+    return TRUE;
+}
+
+Bool XnsIsPressEvent(const xEvent *ev)
+{
+    int type = ev->u.u.type & 0x7f;
+    if (type == ButtonPress || type == KeyPress)
+        return TRUE;
+    if (type == GenericEvent) {
+        const xGenericEvent *gev = (const xGenericEvent *)&ev->u;
+        if (gev->extension == EXTENSION_MAJOR_XINPUT &&
+            (gev->evtype == XI_ButtonPress || gev->evtype == XI_KeyPress))
+            return TRUE;
+    }
+    return FALSE;
 }
 
 /**

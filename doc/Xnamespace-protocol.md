@@ -30,7 +30,7 @@ Goals:
  * Create and delete namespaces at runtime.
  * Query and modify per-namespace capability flags
    (`mouse-motion`, `shape`, `transparency`, `xinput`, `xkeyboard`,
-   `superpower`).
+   `superpower`, `clipboard`, `clipboard-auto`).
  * Add, list and remove authentication tokens that map clients into a
    namespace (the `auth` lines in the config file today).
  * Auto-remove a namespace when its last client exits (transient
@@ -129,14 +129,16 @@ Two `CARD32` words describe a namespace.
 
 **Capabilities** — access permissions (the `allow*` / `superPower` fields):
 
- | Bit     | Name                           |
- | ------- | ------------------------------ |
- | 1 << 0  | `XNS_CAPABILITY_MOUSE_MOTION`  |
- | 1 << 1  | `XNS_CAPABILITY_SHAPE`         |
- | 1 << 2  | `XNS_CAPABILITY_TRANSPARENCY`  |
- | 1 << 3  | `XNS_CAPABILITY_INPUT`         |
- | 1 << 4  | `XNS_CAPABILITY_KEYBOARD`      |
- | 1 << 5  | `XNS_CAPABILITY_ADMIN`         |
+ | Bit     | Name                            |
+ | ------- | ------------------------------- |
+ | 1 << 0  | `XNS_CAPABILITY_MOUSE_MOTION`   |
+ | 1 << 1  | `XNS_CAPABILITY_SHAPE`          |
+ | 1 << 2  | `XNS_CAPABILITY_TRANSPARENCY`   |
+ | 1 << 3  | `XNS_CAPABILITY_INPUT`          |
+ | 1 << 4  | `XNS_CAPABILITY_KEYBOARD`       |
+ | 1 << 5  | `XNS_CAPABILITY_ADMIN`          |
+ | 1 << 6  | `XNS_CAPABILITY_CLIPBOARD`      |
+ | 1 << 7  | `XNS_CAPABILITY_CLIPBOARD_AUTO` |
 
 **Attributes** — lifecycle/status (new fields on `struct Xnamespace`):
 

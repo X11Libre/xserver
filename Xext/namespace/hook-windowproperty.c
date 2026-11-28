@@ -5,11 +5,13 @@
 #include <dix-config.h>
 
 #include <inttypes.h>
+#include <string.h>
 #include <X11/Xmd.h>
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
 #include "dix/window_priv.h"
+#include "include/propertyst.h"
 
 #include "namespace.h"
 #include "hooks.h"
@@ -41,6 +43,17 @@ void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     // redirect root window access to namespace's virtual root
     if (dixWindowIsRoot(param->window)) {
+        /* Allow read-only access to non-sensitive global root properties
+           (RESOURCE_MANAGER, _XKB_RULES_NAMES, _NET_SUPPORTED, _NET_WORKAREA,
+           etc.) unless overridden on the namespace's virtual root window. */
+        if (param->access_mode == DixReadAccess && !param->delete &&
+            !XnsIsSensitiveRootProperty(subj->ns, param->property)) {
+            PropertyPtr pProp = NULL;
+            if (dixLookupProperty(&pProp, subj->ns->rootWindow,
+                                  param->property, serverClient,
+                                  DixReadAccess) != Success)
+                return;
+        }
         param->window = subj->ns->rootWindow->drawable.id;
         return;
     }

@@ -163,9 +163,17 @@ class RawX11Connection:
     Set swapped=True for testing byte-swap code paths (SProcXxx).
     """
 
-    def __init__(self, display_num, swapped=False):
+    def __init__(
+        self,
+        display_num,
+        swapped=False,
+        auth_proto: bytes = b"",
+        auth_data: bytes = b"",
+    ):
         self.display_num = display_num
         self.swapped = swapped
+        self.auth_proto = auth_proto
+        self.auth_data = auth_data
         self._byte_order = ">" if swapped else "<"
         self.sock = None
         self.seq = 0
@@ -210,7 +218,28 @@ class RawX11Connection:
     def _handshake(self):
         byte_order = 0x42 if self.swapped else 0x6C
         bo = self._byte_order
-        setup = struct.pack(f"{bo}BxHHHHxx", byte_order, 11, 0, 0, 0)
+        pad_proto = (
+            self.auth_proto + b"\x00" * ((4 - len(self.auth_proto) % 4) % 4)
+            if self.auth_proto
+            else b""
+        )
+        pad_data = (
+            self.auth_data + b"\x00" * ((4 - len(self.auth_data) % 4) % 4)
+            if self.auth_data
+            else b""
+        )
+        setup = (
+            struct.pack(
+                f"{bo}BxHHHHxx",
+                byte_order,
+                11,
+                0,
+                len(self.auth_proto),
+                len(self.auth_data),
+            )
+            + pad_proto
+            + pad_data
+        )
         assert self.sock
         self.sock.sendall(setup)
 
