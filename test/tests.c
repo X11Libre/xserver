@@ -24,6 +24,7 @@ main(int argc, char **argv)
     run_test(xtest_test);
     run_test(ddc_tests);
     run_test(xtrans_fd_trunc_test);
+    run_test(xtrans_fd_alloc_test);
 #ifdef RES_TESTS
     run_test(hashtabletest_test);
 #endif

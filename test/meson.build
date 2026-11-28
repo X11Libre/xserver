@@ -206,6 +206,7 @@ if build_xorg
      'xfree86.c',
      'xtest.c',
      'xtrans-fd-trunc.c',
+     'xtrans-fd-alloc.c',
      'ddc-tests.c',
     ]
     unit_c_args = ['-DXORG_TESTS']

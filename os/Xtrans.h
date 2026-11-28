@@ -200,6 +200,12 @@ ssize_t _XSERVTransWrite (
 int _XSERVTransSendFd (XtransConnInfo ciptr, int fd, int do_close);
 
 int _XSERVTransRecvFd (XtransConnInfo ciptr);
+/**
+ * Return the number of SCM_RIGHTS descriptors received by the immediately
+ * preceding _XSERVTransRead() call. The count is reset for every read and is
+ * zero after a failed read.
+ */
+int _XSERVTransGetLastReadFdCount (XtransConnInfo ciptr);
 
 int _XSERVTransDisconnect (
     XtransConnInfo	/* ciptr */
